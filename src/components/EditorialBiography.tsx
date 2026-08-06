@@ -751,16 +751,17 @@ function FullWidthImageBlock({ url, designerName, index, overrideCaption }: { ur
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={transition}
-      className="my-4 md:my-6"
+      className="my-5 clear-both"
     >
-      <div className="rounded-xl overflow-hidden bg-muted/10 aspect-square max-w-[480px] mx-auto">
+      <div className="rounded-xl overflow-hidden bg-muted/10 max-w-[480px] mx-auto">
         <img
           src={optimizeImageUrl(url)}
           alt={caption || `${designerName} — editorial`}
-          className="w-full h-full object-contain"
+          className="w-full h-auto max-h-[380px] object-contain"
           loading="lazy"
         />
       </div>
+
       {caption && (
         <figcaption className="mt-2 text-center font-body text-[13px] tracking-wide text-muted-foreground italic">
           {caption}
