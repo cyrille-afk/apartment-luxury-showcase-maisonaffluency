@@ -1047,7 +1047,7 @@ const PublicDesignerProfile = () => {
 
       </div>
 
-      {/* ── MOBILE: existing stacked header ── */}
+      {/* ── MOBILE: mirrors the desktop cinematic stack ── */}
       <div className="grid grid-cols-1 gap-6 items-start pt-4 md:hidden">
 
         <motion.div
@@ -1055,19 +1055,17 @@ const PublicDesignerProfile = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="aspect-[4/3] overflow-hidden rounded-none bg-muted relative">
-            {heroImage && (
+          {/* Full-bleed, untruncated hero — natural aspect ratio */}
+          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted">
+            {(wideHeroImage || heroImage) && (
               <img
-                src={heroImage}
-                alt={`${name} portrait`}
-                className="absolute inset-0 w-full h-full object-cover"
+                src={wideHeroImage || heroImage}
+                alt={`${name} interior`}
+                className="block w-full h-auto"
                 loading="eager"
               />
             )}
           </div>
-          <p className="mt-1 font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground/80 text-left">
-            Respect for Tradition
-          </p>
           {designer.hero_photo_credit && (
             <p className="mt-2 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
               Photo: {designer.hero_photo_credit}
@@ -1086,7 +1084,11 @@ const PublicDesignerProfile = () => {
             <h1 className="font-display text-3xl leading-[1.1] tracking-[-0.01em] text-foreground">
               {name}
             </h1>
+            <p className="mt-2 font-body text-[10px] uppercase tracking-[0.32em] text-foreground/60">
+              {designer.specialty || "Timeless Scandinavian Design"}
+            </p>
           </div>
+
 
 
           {heroParagraphs.length > 0 && (
