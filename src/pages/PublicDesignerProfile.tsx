@@ -969,44 +969,66 @@ const PublicDesignerProfile = () => {
 
   const newInSection = (
     <div className="flex flex-col gap-0">
-      {/* ── EXPANDED: full-bleed interior hero with floating right-side text (desktop) ── */}
-      {newInExpanded && wideHeroImage && (
-        <div className="hidden md:block relative w-screen left-1/2 -ml-[50vw] mb-10">
-          <img
-            src={wideHeroImage}
-            alt={`${name} interior`}
-            className="block w-full h-auto"
-            loading="eager"
-          />
+      {/* ── DESKTOP: cinematic architectural stack — clean photo, then narrative ── */}
+      <div className="hidden md:block">
+        {wideHeroImage && (
+          <div className="relative w-screen left-1/2 -ml-[50vw] h-[75vh] lg:h-[80vh] overflow-hidden bg-muted">
+            <img
+              src={wideHeroImage}
+              alt={`${name} interior`}
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="eager"
+            />
+          </div>
+        )}
 
-          <div className="absolute inset-0 flex items-start justify-end pr-[19vw] pl-[6vw] pt-[7%]">
-            <div className="w-full max-w-[360px] text-[#1c1a17]">
-              <h1 className="font-display text-4xl lg:text-5xl leading-[1.05] tracking-[-0.01em]">
-                {name}
-              </h1>
-              {heroParagraphs.length > 0 && (
-                <p className="mt-5 font-body text-[15px] leading-[1.75]">
-                  {renderParagraph(heroParagraphs[0])}
+        <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted/50">
+          <div className="mx-auto max-w-[1400px] px-[6vw] py-16 lg:py-24">
+            <div className="grid grid-cols-12 gap-8 lg:gap-16 items-start">
+              <div className="col-span-4 lg:col-span-3">
+                <p className="font-body text-[10px] lg:text-[11px] uppercase tracking-[0.28em] text-foreground/55">
+                  Respect for Tradition
                 </p>
-              )}
-              <div className="mt-6">{portraitToggle}</div>
+                {designer.hero_photo_credit && (
+                  <p className="mt-4 font-body text-[10px] uppercase tracking-[0.15em] text-foreground/40">
+                    Photo: {designer.hero_photo_credit}
+                  </p>
+                )}
+              </div>
+
+              <div className="col-span-8 lg:col-span-8 lg:col-start-5">
+                <h1 className="font-display text-4xl lg:text-[3.25rem] leading-[1.05] tracking-[-0.01em] text-foreground">
+                  {name}
+                </h1>
+
+                {heroParagraphs.length > 0 && (
+                  <div className="mt-6 max-w-[62ch] font-body text-[15px] lg:text-base leading-[1.8] text-foreground">
+                    {(newInExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
+                      <p key={i} className={i > 0 ? "mt-5" : ""}>{renderParagraph(p)}</p>
+                    ))}
+                  </div>
+                )}
+
+                {thinContentFallback && (
+                  <p className="mt-5 max-w-[62ch] font-body text-[15px] lg:text-base leading-[1.8] text-foreground">
+                    {thinContentFallback}
+                  </p>
+                )}
+
+                <div className="mt-8 text-foreground">{portraitToggle}</div>
+              </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* ── TOP PROFILE ROW — asymmetric header (image left, narrative right) ── */}
-      <div className={cn(
-        "grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-0 items-start pt-4 md:pt-8",
-        newInExpanded && "md:hidden"
-      )}>
+      {/* ── MOBILE: existing stacked header ── */}
+      <div className="grid grid-cols-1 gap-6 items-start pt-4 md:hidden">
 
-        {/* Profile image frame — crisp landscape, 4 cols */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          className="md:col-span-4 lg:col-span-3"
         >
           <div className="aspect-[4/3] overflow-hidden rounded-none bg-muted relative">
             {heroImage && (
@@ -1018,7 +1040,7 @@ const PublicDesignerProfile = () => {
               />
             )}
           </div>
-          <p className="mt-1 md:mt-2 font-body text-[10px] md:text-[11px] uppercase tracking-[0.22em] text-muted-foreground/80 text-left">
+          <p className="mt-1 font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground/80 text-left">
             Respect for Tradition
           </p>
           {designer.hero_photo_credit && (
@@ -1033,17 +1055,17 @@ const PublicDesignerProfile = () => {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...transition, delay: 0.2 }}
-          className={cn("md:col-span-8 lg:col-span-9 flex flex-col justify-start w-full", rightColPad)}
+          className="flex flex-col justify-start w-full"
         >
-          <div className="mb-4 md:mb-5">
-            <h1 className="font-display text-3xl md:text-4xl lg:text-[2.6rem] leading-[1.1] tracking-[-0.01em] text-foreground">
+          <div className="mb-4">
+            <h1 className="font-display text-3xl leading-[1.1] tracking-[-0.01em] text-foreground">
               {name}
             </h1>
           </div>
 
 
           {heroParagraphs.length > 0 && (
-            <div className="font-body text-[15px] md:text-base leading-[1.75] text-foreground/85 text-left">
+            <div className="font-body text-[15px] leading-[1.75] text-foreground/85 text-left">
               {(newInExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
                 <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
               ))}
@@ -1051,17 +1073,18 @@ const PublicDesignerProfile = () => {
           )}
 
           {thinContentFallback && (
-            <p className="font-body text-[15px] md:text-base leading-[1.75] text-foreground/85 mt-4">
+            <p className="font-body text-[15px] leading-[1.75] text-foreground/85 mt-4">
               {thinContentFallback}
             </p>
           )}
 
           {/* Full-portrait CTA — minimal text link with a fine horizontal arrow */}
-          <div className="mt-5 md:mt-6 flex flex-wrap items-center gap-x-8 gap-y-3">
+          <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3">
             {portraitToggle}
           </div>
         </motion.div>
       </div>
+
 
       {/* Full biography */}
       <div
