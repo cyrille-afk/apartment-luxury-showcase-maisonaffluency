@@ -81,7 +81,7 @@ const DesignerInstagramSection = memo(({ posts, designerName, compact }: Props) 
               key={post.id}
               post={post}
               designerName={designerName}
-              hiddenOnMobile={!compact && index >= 3}
+              hiddenOnMobile={index >= 3}
             />
           ))}
       </div>
