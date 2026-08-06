@@ -949,6 +949,9 @@ const PublicDesignerProfile = () => {
               />
             )}
           </div>
+          <p className="mt-5 md:mt-6 font-display text-lg md:text-xl tracking-[0.02em] text-foreground text-left">
+            Respect for Tradition
+          </p>
           {designer.hero_photo_credit && (
             <p className="mt-2 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
               Photo: {designer.hero_photo_credit}
@@ -1632,7 +1635,7 @@ const PublicDesignerProfile = () => {
                           const tags: string[] = pick.tags || [];
                           const micro: string[] = [];
                           if (tags.some((t) => /available[-\s]?now|in[-\s]?stock/i.test(t))) micro.push("Available Now");
-                          if (pick.edition || tags.some((t) => /re-?edition/i.test(t))) micro.push("Reedition");
+                          
                           if (!micro.length) return null;
                           return (
                             <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1.5">
@@ -1694,6 +1697,12 @@ const PublicDesignerProfile = () => {
                           </Link>
                         ) : null}
 
+
+                        {(pick.edition || (pick.tags || []).some((t: string) => /re-?edition/i.test(t))) && (
+                          <span className="block font-body text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-foreground/45 leading-tight mt-1">
+                            * Reedition
+                          </span>
+                        )}
 
                         {/* Product name — primary (deep link so the URL is shareable/copyable) */}
                         <h3 className="font-display text-[13px] md:text-[13px] tracking-wide leading-snug mt-2 line-clamp-2">
