@@ -963,24 +963,12 @@ const PublicDesignerProfile = () => {
           transition={{ ...transition, delay: 0.2 }}
           className={cn("md:col-span-8 lg:col-span-9 flex flex-col justify-start w-full", rightColPad)}
         >
-          <div className="flex items-start justify-between gap-3 mb-4 md:mb-5">
+          <div className="mb-4 md:mb-5">
             <h1 className="font-display text-3xl md:text-4xl lg:text-[2.6rem] leading-[1.1] tracking-[-0.01em] text-foreground">
               {name}
             </h1>
-            <ShareMenu
-              url={designerOgUrl}
-              message={`${designer.name} — Maison Affluency: ${designerOgUrl}`}
-              className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
-              iconSize="w-4 h-4 md:w-5 md:h-5"
-              showLabel={false}
-            />
           </div>
 
-          {designer.specialty && (
-            <p className="font-body text-xs md:text-sm text-muted-foreground -mt-2 mb-4 tracking-wide">
-              {designer.specialty}
-            </p>
-          )}
 
           {heroParagraphs.length > 0 && (
             <div className="font-body text-[15px] md:text-base leading-[1.75] text-foreground/85 text-left">
