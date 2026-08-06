@@ -1729,7 +1729,7 @@ const PublicDesignerProfile = () => {
                           <p className="font-body text-[10px] md:text-xs text-muted-foreground md:text-foreground tracking-wide">
                             {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
                           </p>
-                          {editionNote && (
+                          {editionNote && !/^re-?edition$/i.test(editionNote) && (
                             <p className="font-body italic text-[10px] md:text-[11px] text-muted-foreground/70 tracking-wide mt-1">
                               *{editionNote}
                             </p>
