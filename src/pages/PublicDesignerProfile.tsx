@@ -1117,22 +1117,6 @@ const PublicDesignerProfile = () => {
 
 
 
-      {newInExpanded && (
-        <div className="mt-6 pt-6 border-t border-border/30 flex justify-center md:hidden">
-          <button
-            type="button"
-            onClick={() => {
-              setNewInExpanded(false);
-              const el = newInBioRef.current;
-              const top = el ? el.getBoundingClientRect().top + window.scrollY - 240 : 0;
-              window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-            }}
-            className="inline-flex items-center gap-2 font-body text-xs uppercase tracking-[0.25em] text-foreground/70 hover:text-foreground transition-colors"
-          >
-            Close The Full Portrait
-          </button>
-        </div>
-      )}
     </div>
   );
 
