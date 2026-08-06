@@ -951,11 +951,19 @@ const PublicDesignerProfile = () => {
       aria-expanded={newInExpanded}
       className="group inline-flex items-center gap-4 font-body text-[11px] md:text-xs uppercase tracking-[0.18em] text-current hover:opacity-70 transition-opacity duration-300"
     >
+      {newInExpanded && (
+        <span aria-hidden="true" className="relative inline-flex items-center">
+          <span className="block h-px w-10 bg-current transition-all duration-300 group-hover:w-12" />
+          <ArrowLeft className="absolute -left-[3px] h-3 w-3 -translate-y-[0.5px]" strokeWidth={1} />
+        </span>
+      )}
       <span>{newInExpanded ? "Close The Full Portrait" : "View The Full Portrait"}</span>
-      <span aria-hidden="true" className="relative inline-flex items-center">
-        <span className="block h-px w-10 bg-current transition-all duration-300 group-hover:w-12" />
-        <ArrowRight className="absolute -right-[3px] h-3 w-3 -translate-y-[0.5px]" strokeWidth={1} />
-      </span>
+      {!newInExpanded && (
+        <span aria-hidden="true" className="relative inline-flex items-center">
+          <span className="block h-px w-10 bg-current transition-all duration-300 group-hover:w-12" />
+          <ArrowRight className="absolute -right-[3px] h-3 w-3 -translate-y-[0.5px]" strokeWidth={1} />
+        </span>
+      )}
     </button>
   );
 
@@ -971,8 +979,8 @@ const PublicDesignerProfile = () => {
             loading="eager"
           />
 
-          <div className="absolute inset-0 flex items-center justify-end pr-[13vw] pl-[6vw]">
-            <div className="w-full max-w-[450px] text-[#1c1a17]">
+          <div className="absolute inset-0 flex items-start justify-end pr-[19vw] pl-[6vw] pt-[7%]">
+            <div className="w-full max-w-[360px] text-[#1c1a17]">
               <h1 className="font-display text-4xl lg:text-5xl leading-[1.05] tracking-[-0.01em]">
                 {name}
               </h1>

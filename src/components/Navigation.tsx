@@ -741,9 +741,13 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
 
           {/* ROW 2 — centered brand lockup */}
           <div className="flex flex-col items-center w-full">
-            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap py-6">
+            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap py-6 inline-flex items-baseline">
               <span className="font-brand text-xl lg:text-2xl tracking-[0.3em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
                 MAISON AFFLUENCY
+              </span>
+              <span aria-hidden="true" className="ml-6 lg:ml-8 h-3 w-px self-center bg-foreground/25" />
+              <span className="ml-3 font-body text-[8px] uppercase tracking-[0.28em] font-light text-foreground/55">
+                Est. 2017
               </span>
             </button>
 
