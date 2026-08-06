@@ -852,7 +852,7 @@ function CollapsibleBiographyWrapper({
     const hidden = childArray.slice(collapseAfterIndex + 1);
 
     return (
-      <div>
+      <div className={clearfix}>
         {visible}
         {!expanded && (
           <div className="mt-5 flex justify-center">
@@ -883,7 +883,7 @@ function CollapsibleBiographyWrapper({
   }
 
   return (
-    <div className="relative">
+    <div className={`relative ${clearfix}`}>
       <div
         className={expanded ? "" : "max-h-[420px] md:max-h-[600px] overflow-hidden"}
       >
