@@ -2407,6 +2407,7 @@ export type Database = {
           subtitle_is_designer: boolean
           trade_only: boolean
           updated_at: string
+          wide_hero_image_url: string | null
         }
         Insert: {
           additional_founders?: string[]
@@ -2441,6 +2442,7 @@ export type Database = {
           subtitle_is_designer?: boolean
           trade_only?: boolean
           updated_at?: string
+          wide_hero_image_url?: string | null
         }
         Update: {
           additional_founders?: string[]
@@ -2475,6 +2477,7 @@ export type Database = {
           subtitle_is_designer?: boolean
           trade_only?: boolean
           updated_at?: string
+          wide_hero_image_url?: string | null
         }
         Relationships: []
       }

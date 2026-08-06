@@ -1,0 +1,2 @@
+ALTER TABLE public.designers ADD COLUMN IF NOT EXISTS wide_hero_image_url TEXT;
+UPDATE public.designers SET wide_hero_image_url = 'https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/designers%2Fdagmar-interior-hero.png' WHERE slug = 'dagmar-london';

@@ -630,6 +630,8 @@ const PublicDesignerProfile = () => {
   const instagramLink = designer.links.find((l) => l.type === "Instagram")?.url;
   const websiteLink = designer.links.find((l) => l.type === "Website")?.url;
   const heroImage = designer.hero_image_url || designer.image_url;
+  const wideHeroImage = (designer as any).wide_hero_image_url || heroImage;
+
   const designerOgUrl = buildDesignerOgUrl(designer.name);
 
   const buildDesignerBridgePath = (_kind: "og" | "card") => {
@@ -928,10 +930,69 @@ const PublicDesignerProfile = () => {
 
   /* ── "New In" editorial format (portrait left, name + bio right) ── */
   const rightColPad = "md:pl-14 lg:pl-20 xl:pl-24";
+  const portraitToggle = (
+    <button
+      type="button"
+      onClick={() => {
+        const next = !newInExpanded;
+        setNewInExpanded(next);
+        if (next) {
+          const land = () => {
+            const el = newInBioRef.current;
+            if (!el) return;
+            const top = el.getBoundingClientRect().top + window.scrollY - 84;
+            window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+          };
+          window.setTimeout(land, 120);
+          if (isMobile) window.setTimeout(land, 560);
+          window.setTimeout(() => flashBioHighlight(), 600);
+        }
+      }}
+      aria-expanded={newInExpanded}
+      className="group inline-flex items-center gap-4 font-body text-[11px] md:text-xs uppercase tracking-[0.18em] text-current hover:opacity-70 transition-opacity duration-300"
+    >
+      <span>{newInExpanded ? "Close The Full Portrait" : "View The Full Portrait"}</span>
+      <span aria-hidden="true" className="relative inline-flex items-center">
+        <span className="block h-px w-10 bg-current transition-all duration-300 group-hover:w-12" />
+        <ArrowRight className="absolute -right-[3px] h-3 w-3 -translate-y-[0.5px]" strokeWidth={1} />
+      </span>
+    </button>
+  );
+
   const newInSection = (
     <div className="flex flex-col gap-0">
+      {/* ── EXPANDED: full-bleed interior hero with floating right-side text (desktop) ── */}
+      {newInExpanded && wideHeroImage && (
+        <div className="hidden md:block relative w-screen left-1/2 -ml-[50vw] mb-10">
+          <img
+            src={wideHeroImage}
+            alt={`${name} interior`}
+            className="block w-full h-auto"
+            loading="eager"
+          />
+
+          <div className="absolute inset-0 flex items-center justify-end pr-[13vw] pl-[6vw]">
+            <div className="w-full max-w-[450px] text-[#1c1a17]">
+              <h1 className="font-display text-4xl lg:text-5xl leading-[1.05] tracking-[-0.01em]">
+                {name}
+              </h1>
+              {heroParagraphs.length > 0 && (
+                <p className="mt-5 font-body text-[15px] leading-[1.75]">
+                  {renderParagraph(heroParagraphs[0])}
+                </p>
+              )}
+              <div className="mt-6">{portraitToggle}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── TOP PROFILE ROW — asymmetric header (image left, narrative right) ── */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-0 items-start pt-4 md:pt-8">
+      <div className={cn(
+        "grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-0 items-start pt-4 md:pt-8",
+        newInExpanded && "md:hidden"
+      )}>
+
         {/* Profile image frame — crisp landscape, 4 cols */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -989,68 +1050,42 @@ const PublicDesignerProfile = () => {
 
           {/* Full-portrait CTA — minimal text link with a fine horizontal arrow */}
           <div className="mt-5 md:mt-6 flex flex-wrap items-center gap-x-8 gap-y-3">
-            <button
-              type="button"
-              onClick={() => {
-                const next = !newInExpanded;
-                setNewInExpanded(next);
-                if (next) {
-                  const land = () => {
-                    const el = newInBioRef.current;
-                    if (!el) return;
-                    const top = el.getBoundingClientRect().top + window.scrollY - 84;
-                    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-                  };
-                  window.setTimeout(land, 120);
-                  if (isMobile) window.setTimeout(land, 560);
-                  window.setTimeout(() => flashBioHighlight(), 600);
-                }
-              }}
-              aria-expanded={newInExpanded}
-              className="group inline-flex items-center gap-4 font-body text-[11px] md:text-xs uppercase tracking-[0.18em] text-foreground hover:text-foreground/70 transition-colors duration-300"
-            >
-              <span>{newInExpanded ? "Close The Full Portrait" : "View The Full Portrait"}</span>
-              <span aria-hidden="true" className="relative inline-flex items-center">
-                <span className="block h-px w-10 bg-current transition-all duration-300 group-hover:w-12" />
-                <ArrowRight className="absolute -right-[3px] h-3 w-3 -translate-y-[0.5px]" strokeWidth={1} />
-              </span>
-            </button>
+            {portraitToggle}
           </div>
-
-
-          {/* Full biography */}
-          <div
-            ref={newInBioRef}
-            className={cn(
-              "transition-all duration-700",
-              newInExpanded && "mt-2 md:mt-6",
-              bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
-            )}
-          >
-            {bioExtras}
-          </div>
-
-          {newInExpanded && (
-            <div className="mt-6 pt-6 border-t border-border/30 flex justify-center md:hidden">
-              <button
-                type="button"
-                onClick={() => {
-                  setNewInExpanded(false);
-                  const el = newInBioRef.current;
-                  const top = el ? el.getBoundingClientRect().top + window.scrollY - 240 : 0;
-                  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-                }}
-                className="inline-flex items-center gap-2 font-body text-xs uppercase tracking-[0.25em] text-foreground/70 hover:text-foreground transition-colors"
-              >
-                Close The Full Portrait
-              </button>
-            </div>
-          )}
         </motion.div>
       </div>
 
+      {/* Full biography */}
+      <div
+        ref={newInBioRef}
+        className={cn(
+          "transition-all duration-700",
+          newInExpanded && "mt-2 md:mt-6",
+          bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
+        )}
+      >
+        {bioExtras}
+      </div>
+
+      {newInExpanded && (
+        <div className="mt-6 pt-6 border-t border-border/30 flex justify-center md:hidden">
+          <button
+            type="button"
+            onClick={() => {
+              setNewInExpanded(false);
+              const el = newInBioRef.current;
+              const top = el ? el.getBoundingClientRect().top + window.scrollY - 240 : 0;
+              window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+            }}
+            className="inline-flex items-center gap-2 font-body text-xs uppercase tracking-[0.25em] text-foreground/70 hover:text-foreground transition-colors"
+          >
+            Close The Full Portrait
+          </button>
+        </div>
+      )}
     </div>
   );
+
 
 
 
