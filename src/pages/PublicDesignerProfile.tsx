@@ -986,7 +986,7 @@ const PublicDesignerProfile = () => {
       {/* ── DESKTOP: cinematic architectural stack — clean photo, then narrative ── */}
       <div className="hidden md:block">
         {wideHeroImage && (
-          <div className="relative w-screen left-1/2 -ml-[50vw] h-[65vh] max-h-[65vh] overflow-hidden bg-muted">
+          <div className="relative w-screen left-1/2 -ml-[50vw] h-[65vh] max-h-[calc(100vh-25rem)] min-h-[320px] overflow-hidden bg-muted">
             <img
               src={wideHeroImage}
               alt={`${name} interior`}
