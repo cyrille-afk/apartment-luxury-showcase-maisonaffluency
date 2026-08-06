@@ -64,14 +64,14 @@ const DesignerInstagramSection = memo(({ posts, designerName, compact }: Props) 
     >
       {/* Section header */}
       <div className={compact ? "flex items-center gap-3 mb-4" : "flex items-center justify-center gap-3 mb-8 md:mb-10 px-4 md:px-12"}>
-        <div className={compact ? "h-px flex-1 bg-foreground/15" : "h-px flex-1 bg-foreground/20"} />
+        <div className={compact ? "h-px flex-1 bg-foreground/35" : "h-px flex-1 bg-foreground/35"} />
         <div className="flex items-center gap-2 shrink-0">
-          <Instagram className={compact ? "w-3.5 h-3.5 text-foreground/60" : "w-4 h-4 text-foreground"} />
-          <h2 className={compact ? "font-display text-[10px] md:text-[11px] tracking-[0.2em] uppercase text-foreground/60 font-semibold" : "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold"}>
+          <Instagram className={compact ? "w-3.5 h-3.5 text-foreground/70" : "w-4 h-4 text-foreground"} />
+          <h2 className={compact ? "font-display text-[10px] md:text-[11px] tracking-[0.2em] uppercase text-foreground/70 font-semibold" : "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold"}>
             From the Studio
           </h2>
         </div>
-        <div className={compact ? "h-px flex-1 bg-foreground/15" : "h-px flex-1 bg-foreground/20"} />
+        <div className={compact ? "h-px flex-1 bg-foreground/35" : "h-px flex-1 bg-foreground/35"} />
       </div>
 
       {/* Grid — matches homepage Instagram feed layout */}
