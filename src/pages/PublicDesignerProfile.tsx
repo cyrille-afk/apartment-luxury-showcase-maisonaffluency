@@ -807,6 +807,17 @@ const PublicDesignerProfile = () => {
   const introEditorialBio = "";
   const editorialBlocks = remainingBlocks;
   const editorialBio = editorialBlocks.join("\n\n");
+  /* Desktop: pull still images out of the prose so text never wraps around
+     them; they are re-laid as a dedicated 2-up track beneath the columns. */
+  const editorialImageTrack = editorialBlocks
+    .filter((b) => isMediaBlock(b) && !isVideoBlock(b))
+    .map((b) => {
+      const parts = b.split(/\s*\|\s*/);
+      return { url: parts[0].trim(), caption: (parts[1] || "").trim() };
+    });
+  const editorialBioTextOnly = editorialBlocks
+    .filter((b) => !(isMediaBlock(b) && !isVideoBlock(b)))
+    .join("\n\n");
   const editorialStartImageIndex = 0;
   void startsWithInlineImage;
 
