@@ -986,8 +986,8 @@ const PublicDesignerProfile = () => {
             </p>
           )}
 
-          {/* Full-portrait CTA — mirrors the New In spotlight text link */}
-          <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
+          {/* Full-portrait CTA — mobile/PWA only; desktop shows the full bio inline */}
+          <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3 md:hidden">
             <button
               type="button"
               onClick={() => {
@@ -1020,41 +1020,43 @@ const PublicDesignerProfile = () => {
 
           </div>
 
-          {/* From the Studio — hidden while the full portrait is open */}
-          {!newInExpanded && instagramPosts.filter((p) => p.image_url).length > 0 && (
+          {/* Full biography — flows in the right column (desktop) / below the CTA (mobile) */}
+          <div
+            ref={newInBioRef}
+            className={cn(
+              "mt-2 md:mt-8 transition-all duration-700",
+              bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
+            )}
+          >
+            {bioExtras}
+          </div>
+
+          {/* From the Studio — hidden on mobile while the full portrait is open */}
+          {(!newInExpanded || !isMobile) && instagramPosts.filter((p) => p.image_url).length > 0 && (
             <div className="mt-10 pt-8 border-t border-border/30">
               <DesignerInstagramSection posts={instagramPosts} designerName={designer.name} compact />
+            </div>
+          )}
+
+          {newInExpanded && (
+            <div className="mt-6 pt-6 border-t border-border/30 flex justify-center md:hidden">
+              <button
+                type="button"
+                onClick={() => {
+                  setNewInExpanded(false);
+                  const el = newInBioRef.current;
+                  const top = el ? el.getBoundingClientRect().top + window.scrollY - 240 : 0;
+                  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+                }}
+                className="inline-flex items-center gap-2 font-body text-xs uppercase tracking-[0.25em] text-foreground/70 hover:text-foreground transition-colors"
+              >
+                Close The Full Portrait
+              </button>
             </div>
           )}
         </motion.div>
       </div>
 
-      <div
-        ref={newInBioRef}
-        className={cn(
-          "mt-1 transition-all duration-700",
-          bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
-        )}
-      >
-        {bioExtras}
-      </div>
-
-      {newInExpanded && (
-        <div className="mt-6 md:mt-8 pt-6 border-t border-border/30 flex justify-center">
-          <button
-            type="button"
-            onClick={() => {
-              setNewInExpanded(false);
-              const el = newInBioRef.current;
-              const top = el ? el.getBoundingClientRect().top + window.scrollY - 240 : 0;
-              window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-            }}
-            className="inline-flex items-center gap-2 font-body text-xs uppercase tracking-[0.25em] text-foreground/70 hover:text-foreground transition-colors"
-          >
-            Close The Full Portrait
-          </button>
-        </div>
-      )}
 
     </div>
   );
