@@ -1698,6 +1698,12 @@ const PublicDesignerProfile = () => {
                         ) : null}
 
 
+                        {(pick.edition || (pick.tags || []).some((t: string) => /re-?edition/i.test(t))) && (
+                          <span className="block font-body text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-foreground/45 leading-tight mt-1">
+                            * Reedition
+                          </span>
+                        )}
+
                         {/* Product name — primary (deep link so the URL is shareable/copyable) */}
                         <h3 className="font-display text-[13px] md:text-[13px] tracking-wide leading-snug mt-2 line-clamp-2">
                           <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground/70 transition-colors">
