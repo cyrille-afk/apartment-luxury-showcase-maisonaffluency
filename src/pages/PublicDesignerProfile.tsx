@@ -1647,8 +1647,27 @@ const PublicDesignerProfile = () => {
                             />
                           </>
                         )}
-                        {/* Edition / provenance badges removed from the image —
-                            surfaced as a muted note under the price instead. */}
+                        {/* Micro-tags — sharp rectangles, top-left of the frame */}
+                        {(() => {
+                          const tags: string[] = pick.tags || [];
+                          const micro: string[] = [];
+                          if (tags.some((t) => /available[-\s]?now|in[-\s]?stock/i.test(t))) micro.push("Available Now");
+                          if (pick.edition || tags.some((t) => /re-?edition/i.test(t))) micro.push("Reedition");
+                          if (!micro.length) return null;
+                          return (
+                            <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1.5">
+                              {micro.map((m) => (
+                                <span
+                                  key={m}
+                                  className="inline-flex items-center border border-foreground/80 bg-background/90 px-1.5 py-[3px] font-body text-[9px] uppercase tracking-[0.12em] text-foreground leading-none"
+                                >
+                                  {m}
+                                </span>
+                              ))}
+                            </div>
+                          );
+                        })()}
+
 
                         <div className="hidden md:block absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
