@@ -949,6 +949,9 @@ const PublicDesignerProfile = () => {
               />
             )}
           </div>
+          <p className="mt-5 md:mt-6 font-display text-lg md:text-xl tracking-[0.02em] text-foreground text-left">
+            Respect for Tradition
+          </p>
           {designer.hero_photo_credit && (
             <p className="mt-2 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
               Photo: {designer.hero_photo_credit}
