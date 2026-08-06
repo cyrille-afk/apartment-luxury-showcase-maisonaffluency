@@ -143,7 +143,7 @@ function DesignerGridCard({
   onNavigate?: () => void;
   priority?: boolean;
 }) {
-  const baseRaw = designer.first_pick_image_url || designer.hero_image_url || designer.image_url || null;
+  const baseRaw = pickGridImage(designer);
   const url = gridImageTransform(baseRaw);
   const srcSet = gridImageSrcSet(baseRaw);
   const lqip = gridImageLqip(baseRaw);
