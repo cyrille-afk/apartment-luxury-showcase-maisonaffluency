@@ -146,6 +146,12 @@ const ShareMenu = ({ url, message, imageUrl, imageName }: ShareMenuProps) => {
           <button onClick={copyLink} className="flex items-center gap-2 px-3 py-1.5 text-white/90 hover:text-white hover:bg-white/10 rounded text-[11px] font-body tracking-wide transition-colors">
             <Copy className="w-3.5 h-3.5" /> Copy Link
           </button>
+          <button onClick={openPinterest} className="flex items-center gap-2 px-3 py-1.5 text-white/90 hover:text-white hover:bg-white/10 rounded text-[11px] font-body tracking-wide transition-colors">
+            <PinterestIcon className="w-3.5 h-3.5" /> Pinterest
+          </button>
+          <button onClick={openFacebook} className="flex items-center gap-2 px-3 py-1.5 text-white/90 hover:text-white hover:bg-white/10 rounded text-[11px] font-body tracking-wide transition-colors">
+            <FacebookIcon className="w-3.5 h-3.5" /> Facebook
+          </button>
           <button onClick={openWhatsApp} className="flex items-center gap-2 px-3 py-1.5 text-white/90 hover:text-white hover:bg-white/10 rounded text-[11px] font-body tracking-wide transition-colors">
             <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
           </button>
