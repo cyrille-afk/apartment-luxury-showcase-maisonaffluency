@@ -1102,35 +1102,44 @@ const DesignersHoverHero = () => {
   }, [searchOpen, groupedResults.length]);
 
 
-  // Desktop accordion: when a letter opens, move the sheet viewport so the
-  // expanded designer list is visible instead of being cut off at the bottom.
+  // Desktop accordion: when a letter opens, pin that letter row to the top of
+  // the sheet viewport so the expanded designer list reads from its heading.
   useEffect(() => {
     if (!searchOpen || !isDesktopViewport || !activeAccordionLetter) return;
     if (!expandedLetters.has(activeAccordionLetter)) return;
 
-    const frame = window.requestAnimationFrame(() => {
+    const align = () => {
       const scroller = searchScrollRef.current;
       const row = scroller?.querySelector<HTMLElement>(
         `[data-designer-letter="${activeAccordionLetter}"]`
       );
       if (!scroller || !row) return;
-
-      const scrollerRect = scroller.getBoundingClientRect();
-      const rowRect = row.getBoundingClientRect();
-      const topOffset = rowRect.top - scrollerRect.top;
-      const bottomOverflow = rowRect.bottom - scrollerRect.bottom;
-
-      if (rowRect.height >= scrollerRect.height) {
-        scroller.scrollTo({ top: scroller.scrollTop + topOffset, behavior: "smooth" });
-      } else if (bottomOverflow > 0) {
-        scroller.scrollBy({ top: bottomOverflow + 12, behavior: "smooth" });
-      } else if (topOffset < 0) {
-        scroller.scrollBy({ top: topOffset - 12, behavior: "smooth" });
+      const target = Math.max(
+        0,
+        Math.min(
+          row.getBoundingClientRect().top -
+            scroller.getBoundingClientRect().top +
+            scroller.scrollTop,
+          scroller.scrollHeight - scroller.clientHeight
+        )
+      );
+      if (Math.abs(scroller.scrollTop - target) > 1) {
+        scroller.scrollTo({ top: target, behavior: "smooth" });
       }
-    });
+    };
 
-    return () => window.cancelAnimationFrame(frame);
+    const frame = window.requestAnimationFrame(align);
+    // Re-settle after the accordion expansion finishes animating / images load.
+    const t1 = window.setTimeout(align, 200);
+    const t2 = window.setTimeout(align, 450);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+    };
   }, [activeAccordionLetter, expandedLetters, isDesktopViewport, searchOpen]);
+
 
   // Track which letter row is currently topmost in the mobile scroller so
   // the right-edge A–Z strip can highlight it (IntersectionObserver-style).
