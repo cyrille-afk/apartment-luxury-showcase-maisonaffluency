@@ -1536,68 +1536,9 @@ const PublicDesignerProfile = () => {
                             />
                           </>
                         )}
-                        {(() => {
-                          // "Editions houses" publish original designs commissioned by them
-                          // (not historic re-editions). Use "Edited by" wording with the
-                          // short abbreviation, e.g. "Edited by MSE".
-                          const EDITION_HOUSE_LABELS: Record<string, string> = {
-                            "Marta Sala Éditions": "Edited by MSE",
-                            "Théorème Editions": "Edition by Théorème Editions",
-                            "Théorème Éditions": "Edition by Théorème Éditions",
-                            "Ecart Paris": "Re-edition by Ecart Paris",
-                            "Ecart": "Re-edition by Ecart",
-                            "Man of Parts": "",
-                          };
-                          const manualBadge = (designer as any).parent_badge_label?.trim();
-                          const editionHouseLabel = parentBrandName
-                            ? EDITION_HOUSE_LABELS[parentBrandName]
-                            : undefined;
-                          const parentBadgeText = manualBadge
-                            ?? editionHouseLabel
-                            ?? (parentBrandName ? `Edition by ${parentBrandName}` : "");
-                          const showParentBadge = !!parentBadgeText.trim();
+                        {/* Edition / provenance badges removed from the image —
+                            surfaced as a muted note under the price instead. */}
 
-
-
-                          const tags: string[] = pick.tags || [];
-                          // When a specific edition string exists, drop the generic "limited-edition" tag
-                          let filtered = pick.edition
-                            ? tags.filter(t => !/^limited-edition$/i.test(t))
-                            : tags;
-                          // Avoid duplicating edition tags when the parent-brand badge already covers it
-                          if (showParentBadge) {
-                            filtered = filtered.filter(t => !/re-?edition|^edition$/i.test(t));
-                          }
-                          const specialTags = filtered.filter((t) =>
-                            /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t)
-                          );
-                          if (pick.edition && !showParentBadge && !specialTags.some(t => t.toLowerCase() === pick.edition!.toLowerCase())) {
-                            specialTags.unshift(pick.edition);
-                          }
-                          return (
-                            <>
-                              {specialTags.length > 0 && (
-                                <div className="absolute top-2 right-2 flex flex-wrap gap-1 justify-end">
-                                  {specialTags.map((tag, i) => (
-                                    <span
-                                      key={i}
-                                      className="inline-block px-2 py-0.5 text-[8px] md:text-[9px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm"
-                                    >
-                                      {tag}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                              {showParentBadge && (
-                                <div className="absolute top-2 right-2">
-                                  <span className="inline-block px-2 py-0.5 text-[8px] md:text-[9px] uppercase tracking-wider font-body bg-white/85 text-foreground rounded-full border border-black/10 backdrop-blur-sm">
-                                    {parentBadgeText}
-                                  </span>
-                                </div>
-                              )}
-                            </>
-                          );
-                        })()}
                         <div className="hidden md:block absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
                             <Maximize2 className="h-3 w-3" />
