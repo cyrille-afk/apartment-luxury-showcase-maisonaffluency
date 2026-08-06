@@ -86,6 +86,18 @@ const ShareMenu = ({ url, message, imageUrl, imageName }: ShareMenuProps) => {
     setOpen(false);
   };
 
+  const openPinterest = () => {
+    const pinUrl = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(cleanUrl)}&description=${encodeURIComponent(bodyText)}`;
+    window.open(pinUrl, "_blank", "noopener,noreferrer");
+    setOpen(false);
+  };
+
+  const openFacebook = () => {
+    const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(cleanUrl)}`;
+    window.open(fbUrl, "_blank", "noopener,noreferrer");
+    setOpen(false);
+  };
+
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isMobile && navigator.share) {
