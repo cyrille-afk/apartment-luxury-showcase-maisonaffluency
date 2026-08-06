@@ -962,14 +962,15 @@ const PublicDesignerProfile = () => {
   const newInSection = (
     <div className="flex flex-col gap-0">
       {/* ── EXPANDED: full-bleed interior hero with floating right-side text (desktop) ── */}
-      {newInExpanded && heroImage && (
+      {newInExpanded && wideHeroImage && (
         <div className="hidden md:block relative w-screen left-1/2 -ml-[50vw] mb-10">
           <img
-            src={heroImage}
+            src={wideHeroImage}
             alt={`${name} interior`}
             className="block w-full h-auto"
             loading="eager"
           />
+
           <div className="absolute inset-0 flex items-center justify-end px-[6vw]">
             <div className="w-full max-w-[450px] text-[#1c1a17]">
               <h1 className="font-display text-4xl lg:text-5xl leading-[1.05] tracking-[-0.01em]">
