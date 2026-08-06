@@ -434,6 +434,8 @@ const PublicDesignerProfile = () => {
   );
   const { data: designer, isLoading } = useDesigner(slug, { includeTradeOnly: isTradeUser });
   const [pickCols, setPickCols] = useState<"auto" | "two">("auto");
+  const [sortMode, setSortMode] = useState<"default" | "price-asc" | "price-desc" | "name">("default");
+  const [activeCategories, setActiveCategories] = useState<string[]>([]);
   const isParentBrand = isParentBrandDesigner(designer);
   const isChildDesigner = isChildBrandDesigner(designer);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
