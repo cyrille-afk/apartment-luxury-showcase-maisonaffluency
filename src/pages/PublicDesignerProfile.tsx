@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, LayoutGrid, Columns2, SlidersHorizontal } from "lucide-react";
+import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -963,24 +963,12 @@ const PublicDesignerProfile = () => {
           transition={{ ...transition, delay: 0.2 }}
           className={cn("md:col-span-8 lg:col-span-9 flex flex-col justify-start w-full", rightColPad)}
         >
-          <div className="flex items-start justify-between gap-3 mb-4 md:mb-5">
+          <div className="mb-4 md:mb-5">
             <h1 className="font-display text-3xl md:text-4xl lg:text-[2.6rem] leading-[1.1] tracking-[-0.01em] text-foreground">
               {name}
             </h1>
-            <ShareMenu
-              url={designerOgUrl}
-              message={`${designer.name} — Maison Affluency: ${designerOgUrl}`}
-              className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
-              iconSize="w-4 h-4 md:w-5 md:h-5"
-              showLabel={false}
-            />
           </div>
 
-          {designer.specialty && (
-            <p className="font-body text-xs md:text-sm text-muted-foreground -mt-2 mb-4 tracking-wide">
-              {designer.specialty}
-            </p>
-          )}
 
           {heroParagraphs.length > 0 && (
             <div className="font-body text-[15px] md:text-base leading-[1.75] text-foreground/85 text-left">
@@ -1058,16 +1046,9 @@ const PublicDesignerProfile = () => {
         </motion.div>
       </div>
 
-      {/* ── MIDDLE 'FROM THE STUDIO' BLOCK — own row, aligned to the right column ── */}
-      {(!newInExpanded || !isMobile) && instagramPosts.filter((p) => p.image_url).length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-12 mt-8 md:mt-12">
-          <div className={cn("md:col-start-5 md:col-span-8 lg:col-start-4 lg:col-span-9", rightColPad)}>
-            <DesignerInstagramSection posts={instagramPosts} designerName={designer.name} compact />
-          </div>
-        </div>
-      )}
     </div>
   );
+
 
 
 
@@ -1345,9 +1326,8 @@ const PublicDesignerProfile = () => {
               transition={{ ...transition, delay: 0.25 }}
               className="mt-8 md:mt-10 pt-6 md:pt-8 border-t border-border/40"
             >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-body text-[10px] md:text-[11px] tracking-[0.28em] uppercase text-foreground leading-none">Curators' Picks</h2>
-              </div>
+
+
 
               {(() => {
                 const categories = Array.from(
@@ -1420,7 +1400,7 @@ const PublicDesignerProfile = () => {
                               pickCols === "auto" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                             )}
                           >
-                            <LayoutGrid className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
+                            <Columns3 className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
                           </button>
                           <button
                             type="button"
