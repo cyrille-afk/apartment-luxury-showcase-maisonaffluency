@@ -1029,7 +1029,7 @@ const PublicDesignerProfile = () => {
                   </p>
                 )}
 
-                <div className="mt-8 text-foreground">{portraitToggle}</div>
+                {!newInExpanded && <div className="mt-8 text-foreground">{portraitToggle}</div>}
 
                 {!isMobile && (
                   <div
@@ -1040,9 +1040,34 @@ const PublicDesignerProfile = () => {
                       bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
                     )}
                   >
-                    {bioExtras}
+                    {renderBioExtras(
+                      editorialBioTextOnly,
+                      editorialImageTrack.length > 0 ? (
+                        <div className="mt-12 grid grid-cols-2 gap-10 lg:gap-16">
+                          {editorialImageTrack.map((m, i) => (
+                            <figure key={i} className="m-0">
+                              <div className="aspect-[4/3] overflow-hidden bg-muted">
+                                <img
+                                  src={m.url}
+                                  alt={m.caption || `${name} atelier`}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                />
+                              </div>
+                              {m.caption && (
+                                <figcaption className="mt-2 font-body text-[10px] uppercase tracking-[0.18em] text-foreground/50">
+                                  {m.caption}
+                                </figcaption>
+                              )}
+                            </figure>
+                          ))}
+                        </div>
+                      ) : null
+                    )}
                   </div>
                 )}
+
+                {newInExpanded && <div className="mt-10 text-foreground">{portraitToggle}</div>}
               </div>
             </div>
           </div>
