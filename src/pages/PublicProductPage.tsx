@@ -2059,6 +2059,15 @@ const PublicProductPage: React.FC = () => {
                           )}
                       </h1>
 
+                      {(() => {
+                        const editionLabel = formatEditionLabel(product as any);
+                        return editionLabel ? (
+                          <p className="mt-2 font-body text-[10px] uppercase tracking-[0.22em] text-foreground/60">
+                            * {editionLabel}
+                          </p>
+                        ) : null;
+                      })()}
+
                       {publicRrpLabel && (
                         <div className="mt-6">
                           <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
@@ -2275,6 +2284,15 @@ const PublicProductPage: React.FC = () => {
                           <span className="block mt-1 text-[0.8em] text-muted-foreground">{`by ${product.subtitle}`}</span>
                         )}
                     </h1>
+
+                    {(() => {
+                      const editionLabel = formatEditionLabel(product as any);
+                      return editionLabel ? (
+                        <p className="mt-2 font-body text-[10px] uppercase tracking-[0.22em] text-foreground/60">
+                          * {editionLabel}
+                        </p>
+                      ) : null;
+                    })()}
 
                     {publicRrpLabel && (
                       <div className="mt-6">
