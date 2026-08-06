@@ -986,7 +986,7 @@ const PublicDesignerProfile = () => {
       {/* ── DESKTOP: cinematic architectural stack — clean photo, then narrative ── */}
       <div className="hidden md:block">
         {wideHeroImage && (
-          <div className="relative w-screen left-1/2 -ml-[50vw] h-[65vh] max-h-[calc(100vh-25rem)] min-h-[320px] overflow-hidden bg-muted">
+          <div className="relative w-screen left-1/2 -ml-[50vw] h-[72vh] max-h-[calc(100vh-22rem)] min-h-[320px] overflow-hidden bg-muted">
             <img
               src={wideHeroImage}
               alt={`${name} interior`}
@@ -997,7 +997,7 @@ const PublicDesignerProfile = () => {
         )}
 
         <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted/50">
-          <div className="mx-auto max-w-[1400px] px-[6vw] pt-8 lg:pt-10 pb-12 lg:pb-16">
+          <div className="mx-auto max-w-[1400px] px-[6vw] pt-4 lg:pt-6 pb-12 lg:pb-16">
             {/* Asymmetrical introductory row */}
             <div className="grid grid-cols-12 gap-x-10 lg:gap-x-16 gap-y-6 items-start">
               {/* Left — identity */}
