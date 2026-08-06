@@ -951,7 +951,7 @@ const PublicDesignerProfile = () => {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...transition, delay: 0.2 }}
-          className="flex-1 flex flex-col justify-start w-full md:pl-16 lg:pl-24 xl:pl-28 md:min-h-[calc(100vh-var(--header-h)-4rem)]"
+          className="flex-1 flex flex-col justify-start w-full md:pl-16 lg:pl-24 xl:pl-28"
         >
           <div className="flex items-center gap-3 mb-6 md:mb-8">
             <h1 className="font-display text-2xl md:text-3xl lg:text-[2.1rem] text-foreground tracking-[0.12em] uppercase">
