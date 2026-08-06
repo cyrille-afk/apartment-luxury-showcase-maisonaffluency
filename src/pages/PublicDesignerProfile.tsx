@@ -1337,20 +1337,20 @@ const PublicDesignerProfile = () => {
                   <h2 className="font-body text-[10px] md:text-[11px] tracking-[0.28em] uppercase text-muted-foreground">Curators' Picks</h2>
                 </div>
 
-                <div className="flex items-center gap-1" role="group" aria-label="Grid density">
+                <div className="flex items-center gap-5" role="group" aria-label="Grid density">
                   <button
                     type="button"
                     onClick={() => setPickCols("auto")}
                     aria-pressed={pickCols === "auto"}
                     aria-label="Default grid"
                     className={cn(
-                      "p-1.5 rounded-full border transition-colors",
+                      "p-1 transition-colors duration-300",
                       pickCols === "auto"
-                        ? "border-foreground/40 text-foreground bg-foreground/5"
-                        : "border-border/50 text-muted-foreground hover:text-foreground"
+                        ? "text-foreground"
+                        : "text-muted-foreground/60 hover:text-foreground"
                     )}
                   >
-                    <LayoutGrid className="w-3.5 h-3.5" aria-hidden="true" />
+                    <LayoutGrid className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
                   </button>
                   <button
                     type="button"
@@ -1358,13 +1358,13 @@ const PublicDesignerProfile = () => {
                     aria-pressed={pickCols === "two"}
                     aria-label="Two column grid"
                     className={cn(
-                      "p-1.5 rounded-full border transition-colors",
+                      "p-1 transition-colors duration-300",
                       pickCols === "two"
-                        ? "border-foreground/40 text-foreground bg-foreground/5"
-                        : "border-border/50 text-muted-foreground hover:text-foreground"
+                        ? "text-foreground"
+                        : "text-muted-foreground/60 hover:text-foreground"
                     )}
                   >
-                    <Columns2 className="w-3.5 h-3.5" aria-hidden="true" />
+                    <Columns2 className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
                   </button>
                 </div>
               </div>
