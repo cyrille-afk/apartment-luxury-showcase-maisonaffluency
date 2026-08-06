@@ -997,7 +997,7 @@ const PublicDesignerProfile = () => {
         )}
 
         <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted/50">
-          <div className="mx-auto max-w-[1400px] px-[6vw] pt-8 pb-14 lg:pb-16">
+          <div className="mx-auto max-w-[1400px] px-[6vw] pt-6 pb-14 lg:pb-16">
             {/* Centered introductory stack */}
             <div className="mx-auto max-w-[70ch] text-center">
               <h1 className="font-display text-5xl lg:text-[3.75rem] leading-[1.05] tracking-[-0.01em] text-foreground">
