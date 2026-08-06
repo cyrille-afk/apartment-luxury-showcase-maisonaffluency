@@ -1429,6 +1429,38 @@ const PublicDesignerProfile = () => {
                   const parentBrandName = showParentBrand ? designer.founder! : undefined;
                   const parentBrandSlug = showParentBrand ? parentDesigner!.slug : undefined;
 
+                  // Edition / provenance note — rendered as quiet italic text under
+                  // the price rather than as a floating capsule over the image.
+                  const editionNote = (() => {
+                    const EDITION_HOUSE_LABELS: Record<string, string> = {
+                      "Marta Sala Éditions": "Edited by MSE",
+                      "Théorème Editions": "Edition by Théorème Editions",
+                      "Théorème Éditions": "Edition by Théorème Éditions",
+                      "Ecart Paris": "Re-edition by Ecart Paris",
+                      "Ecart": "Re-edition by Ecart",
+                      "Man of Parts": "",
+                    };
+                    const manualBadge = (designer as any).parent_badge_label?.trim();
+                    const editionHouseLabel = parentBrandName ? EDITION_HOUSE_LABELS[parentBrandName] : undefined;
+                    const parentBadgeText = (manualBadge
+                      ?? editionHouseLabel
+                      ?? (parentBrandName ? `Edition by ${parentBrandName}` : "")).trim();
+                    if (parentBadgeText) return parentBadgeText;
+
+                    const tags: string[] = pick.tags || [];
+                    const filtered = pick.edition
+                      ? tags.filter((t) => !/^limited-edition$/i.test(t))
+                      : tags;
+                    const specialTags = filtered.filter((t) =>
+                      /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t)
+                    );
+                    if (pick.edition && !specialTags.some((t) => t.toLowerCase() === pick.edition!.toLowerCase())) {
+                      specialTags.unshift(pick.edition);
+                    }
+                    return specialTags.length ? specialTags.join(" · ") : "";
+                  })();
+
+
 
                   const targetDesignerSlug = designerSlug || designer.slug;
                   const productSlug = slugifyProduct(
