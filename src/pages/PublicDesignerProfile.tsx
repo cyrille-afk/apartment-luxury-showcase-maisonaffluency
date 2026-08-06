@@ -630,6 +630,8 @@ const PublicDesignerProfile = () => {
   const instagramLink = designer.links.find((l) => l.type === "Instagram")?.url;
   const websiteLink = designer.links.find((l) => l.type === "Website")?.url;
   const heroImage = designer.hero_image_url || designer.image_url;
+  const wideHeroImage = (designer as any).wide_hero_image_url || heroImage;
+
   const designerOgUrl = buildDesignerOgUrl(designer.name);
 
   const buildDesignerBridgePath = (_kind: "og" | "card") => {
