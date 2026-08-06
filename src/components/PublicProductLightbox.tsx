@@ -870,7 +870,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               <div className="pt-4 border-t border-border">
                 <div className="flex items-center justify-between mb-3">
                   <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                    More from {designerDisplay}
+                    More from {product.designer_slug === "dagmar-london" && product.subtitle?.trim() === "Arnold Madsen" ? "Dagmar" : designerDisplay}
                   </p>
                   {relatedProducts.length > 4 && (
                     <div className="flex items-center gap-1">
