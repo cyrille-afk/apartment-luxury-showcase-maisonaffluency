@@ -807,7 +807,9 @@ const PublicDesignerProfile = () => {
     : "";
 
   /* "New In" editorial format (portrait left, name + bio right) */
-  const newInFormat = NEW_IN_FORMAT_SLUGS.has(designer.slug);
+  // Unified: every designer profile uses the "New In" editorial format.
+  const newInFormat = true;
+  void NEW_IN_FORMAT_SLUGS;
 
   /* Shared tail of the biography: heritage slider + expandable editorial bio */
   const bioExtras = (
