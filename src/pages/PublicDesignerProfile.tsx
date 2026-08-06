@@ -971,7 +971,7 @@ const PublicDesignerProfile = () => {
             loading="eager"
           />
 
-          <div className="absolute inset-0 flex items-center justify-end px-[6vw]">
+          <div className="absolute inset-0 flex items-center justify-end pr-[13vw] pl-[6vw]">
             <div className="w-full max-w-[450px] text-[#1c1a17]">
               <h1 className="font-display text-4xl lg:text-5xl leading-[1.05] tracking-[-0.01em]">
                 {name}
