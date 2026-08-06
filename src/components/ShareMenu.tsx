@@ -53,16 +53,49 @@ const ShareMenu = ({ url, message, imageUrl, imageName }: ShareMenuProps) => {
   const Icon: LucideIcon = ShareIos;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  // Position the portal menu against the trigger, flipping above when the
+  // viewport bottom is tight (matches the 1stdibs behaviour).
+  const reposition = useCallback(() => {
+    const btn = ref.current;
+    const menu = menuRef.current;
+    if (!btn) return;
+    const r = btn.getBoundingClientRect();
+    const menuH = menu?.offsetHeight ?? 168;
+    const menuW = menu?.offsetWidth ?? 160;
+    const spaceBelow = window.innerHeight - r.bottom;
+    const top = spaceBelow < menuH + 16 ? r.top - menuH - 8 : r.bottom + 8;
+    let left = r.left + r.width / 2 - menuW / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - menuW - 8));
+    setCoords({ top: Math.max(8, top), left });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    reposition();
+  }, [open, reposition]);
 
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (ref.current?.contains(target) || menuRef.current?.contains(target)) return;
+      setOpen(false);
     };
+    const onScrollOrResize = () => reposition();
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
+    window.addEventListener("scroll", onScrollOrResize, true);
+    window.addEventListener("resize", onScrollOrResize);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      window.removeEventListener("scroll", onScrollOrResize, true);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+  }, [open, reposition]);
+
 
   // Strip cache-busting query params for the human-readable share text.
   // The full cache-busted url is still used for copy/link previews.
