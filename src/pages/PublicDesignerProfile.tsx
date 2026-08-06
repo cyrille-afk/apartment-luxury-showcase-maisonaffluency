@@ -986,7 +986,7 @@ const PublicDesignerProfile = () => {
       {/* ── DESKTOP: cinematic architectural stack — clean photo, then narrative ── */}
       <div className="hidden md:block">
         {wideHeroImage && (
-          <div className="relative w-screen left-1/2 -ml-[50vw] h-[70vh] overflow-hidden bg-muted">
+          <div className="relative w-screen left-1/2 -ml-[50vw] h-[65vh] max-h-[calc(100vh-25rem)] min-h-[320px] overflow-hidden bg-muted">
             <img
               src={wideHeroImage}
               alt={`${name} interior`}
@@ -997,15 +997,15 @@ const PublicDesignerProfile = () => {
         )}
 
         <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted/50">
-          <div className="mx-auto max-w-[1400px] px-[6vw] py-16 lg:py-24">
+          <div className="mx-auto max-w-[1400px] px-[6vw] pt-8 lg:pt-10 pb-12 lg:pb-16">
             {/* Asymmetrical introductory row */}
-            <div className="grid grid-cols-12 gap-x-10 lg:gap-x-16 gap-y-8 items-start">
+            <div className="grid grid-cols-12 gap-x-10 lg:gap-x-16 gap-y-6 items-start">
               {/* Left — identity */}
               <div className="col-span-12 lg:col-span-4">
-                <h1 className="font-display text-5xl lg:text-[3.5rem] leading-[1.05] tracking-[-0.01em] text-foreground">
+                <h1 className="font-display text-4xl lg:text-[3rem] leading-[1.05] tracking-[-0.01em] text-foreground">
                   {name}
                 </h1>
-                <p className="mt-4 font-body text-[10px] lg:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
+                <p className="mt-3 font-body text-[10px] lg:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
                   {designer.specialty || "Timeless Scandinavian Design"}
                 </p>
               </div>
@@ -1014,107 +1014,33 @@ const PublicDesignerProfile = () => {
               <div className="col-span-12 lg:col-span-8">
                 <div className="max-w-[600px] text-foreground">
                   {heroParagraphs.length > 0 && (
-                    <p className="font-body text-[15px] lg:text-base leading-[1.85]">
+                    <p className="font-body text-[15px] lg:text-base leading-[1.8]">
                       {renderParagraph(heroParagraphs[0])}
                     </p>
                   )}
 
                   {heroParagraphs.length === 0 && thinContentFallback && (
-                    <p className="font-body text-[15px] lg:text-base leading-[1.85]">
+                    <p className="font-body text-[15px] lg:text-base leading-[1.8]">
                       {thinContentFallback}
                     </p>
                   )}
 
-                  {/* Expanded remainder */}
-                  <div
-                    className={cn(
-                      "grid transition-all duration-700 ease-out",
-                      newInExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-                    )}
-                  >
-                    <div className="overflow-hidden">
-                      <div
-                        ref={newInBioRef}
-                        className={cn(
-                          "pt-5",
-                          bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
-                        )}
-                      >
-                        {heroParagraphs.length > 1 && (
-                          <div className="font-body text-[15px] lg:text-base leading-[1.85] text-foreground">
-                            {heroParagraphs.slice(1).map((p: string, i: number) => (
-                              <p key={i} className={i > 0 ? "mt-5" : ""}>{renderParagraph(p)}</p>
-                            ))}
-                          </div>
-                        )}
-
-                        {heroParagraphs.length > 0 && thinContentFallback && (
-                          <p className="mt-5 font-body text-[15px] lg:text-base leading-[1.85] text-foreground">
-                            {thinContentFallback}
-                          </p>
-                        )}
-
-                        {!isMobile &&
-                          renderBioExtras(
-                            editorialBioTextOnly,
-                            editorialImageTrack.length > 0 ? (
-                              <div className="mt-12 grid grid-cols-2 gap-10 lg:gap-16">
-                                {editorialImageTrack.map((m, i) => (
-                                  <figure key={i} className="m-0">
-                                    <div className="aspect-[4/3] overflow-hidden bg-muted">
-                                      <img
-                                        src={m.url}
-                                        alt={m.caption || `${name} atelier`}
-                                        className="w-full h-full object-cover"
-                                        loading="lazy"
-                                      />
-                                    </div>
-                                    {m.caption && (
-                                      <figcaption className="mt-2 font-body text-[10px] uppercase tracking-[0.18em] text-foreground/50">
-                                        {m.caption}
-                                      </figcaption>
-                                    )}
-                                  </figure>
-                                ))}
-                              </div>
-                            ) : null
-                          )}
-
-                        {designer.hero_photo_credit && (
-                          <p className="mt-10 font-body text-[10px] uppercase tracking-[0.15em] text-foreground/40">
-                            Photo: {designer.hero_photo_credit}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Toggle — sits under the first paragraph when collapsed,
-                      and at the very bottom of the stream when expanded. */}
-                  <div className="mt-8 flex text-foreground">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const next = !newInExpanded;
-                        setNewInExpanded(next);
-                        if (next) window.setTimeout(() => flashBioHighlight(), 600);
-                      }}
-                      aria-expanded={newInExpanded}
+                  {/* True page navigation to the standalone editorial monograph */}
+                  <div className="mt-6 flex text-foreground">
+                    <Link
+                      to={`/designers/${designer.slug}/biography`}
                       className="group inline-flex items-center gap-3 font-body text-[11px] lg:text-xs uppercase tracking-[0.22em] text-current hover:opacity-70 transition-opacity duration-300"
                     >
-                      {newInExpanded && (
-                        <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.25} />
-                      )}
-                      <span>{newInExpanded ? "Close The Full Portrait" : "View The Full Portrait"}</span>
-                      {!newInExpanded && (
-                        <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" strokeWidth={1.25} />
-                      )}
-                    </button>
+                      <span>View The Full Portrait</span>
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" strokeWidth={1.25} />
+                    </Link>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
+
 
         </div>
 
