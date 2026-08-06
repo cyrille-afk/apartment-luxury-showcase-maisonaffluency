@@ -826,7 +826,7 @@ const PublicDesignerProfile = () => {
           <div className="md:col-span-12">
             <ProfileCollapsible
               shouldCollapse={shouldCollapse}
-              expandedProp={newInFormat ? newInExpanded : undefined}
+              expandedProp={newInFormat ? (isMobile ? newInExpanded : true) : undefined}
               onToggle={newInFormat ? setNewInExpanded : undefined}
               hideTrigger={newInFormat}
               highlight={bioHighlighted}
