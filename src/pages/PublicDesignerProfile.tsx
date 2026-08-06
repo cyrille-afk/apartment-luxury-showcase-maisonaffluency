@@ -1099,17 +1099,19 @@ const PublicDesignerProfile = () => {
       </div>
 
 
-      {/* Full biography */}
-      <div
-        ref={newInBioRef}
-        className={cn(
-          "transition-all duration-700",
-          newInExpanded && "mt-2 md:mt-6",
-          bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
-        )}
-      >
-        {bioExtras}
-      </div>
+      {/* Full biography (mobile — desktop renders it inline in the narrative column) */}
+      {isMobile && (
+        <div
+          ref={newInBioRef}
+          className={cn(
+            "transition-all duration-700",
+            newInExpanded && "mt-2",
+            bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
+          )}
+        >
+          {bioExtras}
+        </div>
+      )}
 
       {newInExpanded && (
         <div className="mt-6 pt-6 border-t border-border/30 flex justify-center md:hidden">
