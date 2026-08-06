@@ -949,7 +949,7 @@ const PublicDesignerProfile = () => {
               />
             )}
           </div>
-          <p className="mt-5 md:mt-6 font-display text-lg md:text-xl tracking-[0.02em] text-foreground text-left">
+          <p className="mt-1 md:mt-2 font-body text-[10px] md:text-[11px] uppercase tracking-[0.22em] text-muted-foreground/80 text-left">
             Respect for Tradition
           </p>
           {designer.hero_photo_credit && (
@@ -1745,13 +1745,15 @@ const PublicDesignerProfile = () => {
 
         </div>
 
-        <div className="text-center py-8">
-          <p className="font-body text-sm text-muted-foreground mb-4">Interested in pieces from this collection?</p>
+        <div className="py-10 md:py-14 text-left md:text-center">
+          <p className="font-body text-xs md:text-sm font-light text-muted-foreground">
+            Interested in pieces from this collection?
+          </p>
           <Link
             to="/trade-program"
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-xs tracking-[0.15em] uppercase rounded-full hover:bg-foreground/90 transition-colors"
+            className="inline-block mt-2 font-body text-xs md:text-sm font-medium uppercase tracking-[0.18em] text-foreground underline underline-offset-4 decoration-foreground/30 hover:opacity-60 transition-opacity"
           >
-            Join Our Trade Program
+            Join Our Trade Program →
           </Link>
         </div>
 
