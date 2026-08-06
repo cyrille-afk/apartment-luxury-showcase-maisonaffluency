@@ -80,7 +80,7 @@ import TradePendingReviewCard from "@/components/product/TradePendingReviewCard"
 
 import QuoteRequestDialog from "@/components/QuoteRequestDialog";
 import { addToCart } from "@/lib/cart";
-import { usePublicRrp, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
+import { usePublicRrp, usePublicRrpMap, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
@@ -1098,6 +1098,7 @@ const PublicProductPage: React.FC = () => {
   }, [stateFrom, storedFrom]);
   const { data, isLoading } = useProductBySlug(designerSlug, productSlug);
   const { data: publicRrpRow } = usePublicRrp(data?.product?.id);
+  const { data: relatedRrpMap = {} } = usePublicRrpMap((data?.relatedPicks || []).map((p: any) => p.id));
   const catalogueRrpLabel = formatPublicRrp(publicRrpRow);
   // Price of the size/finish combination the visitor has currently selected.
   // `exact` = a single variant matched, so we drop the "From" prefix.
@@ -2683,9 +2684,19 @@ const PublicProductPage: React.FC = () => {
                               loading="lazy"
                             />
                           </div>
-                          <p className="font-body text-xs text-muted-foreground mt-2 text-center truncate">
-                            {rp.title}
-                          </p>
+                          <div className="mt-2 text-center">
+                            {rp.subtitle && (
+                              <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground leading-tight line-clamp-1">
+                                {rp.subtitle}
+                              </p>
+                            )}
+                            <p className="font-body text-xs text-foreground mt-1 truncate">
+                              {rp.title}
+                            </p>
+                            <p className="font-body text-[10px] text-muted-foreground tracking-wide mt-1">
+                              {formatPublicRrp((relatedRrpMap as any)[rp.id]) || "Price upon request"}
+                            </p>
+                          </div>
                         </Link>
                       ))}
                     </div>
@@ -2719,9 +2730,19 @@ const PublicProductPage: React.FC = () => {
                             />
                           )}
                         </div>
-                        <p className="font-body text-xs text-muted-foreground mt-2 text-center group-hover:text-foreground transition-colors truncate">
-                          {rp.title}
-                        </p>
+                        <div className="mt-3 text-center">
+                          {rp.subtitle && (
+                            <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground leading-tight line-clamp-1">
+                              {rp.subtitle}
+                            </p>
+                          )}
+                          <p className="font-body text-[13px] text-foreground mt-1 truncate group-hover:text-foreground/70 transition-colors">
+                            {rp.title}
+                          </p>
+                          <p className="font-body text-xs text-muted-foreground tracking-wide mt-1">
+                            {formatPublicRrp((relatedRrpMap as any)[rp.id]) || "Price upon request"}
+                          </p>
+                        </div>
                       </Link>
                     ))}
                   </div>
