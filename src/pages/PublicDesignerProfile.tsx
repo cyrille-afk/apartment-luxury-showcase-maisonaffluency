@@ -1326,9 +1326,8 @@ const PublicDesignerProfile = () => {
               transition={{ ...transition, delay: 0.25 }}
               className="mt-8 md:mt-10 pt-6 md:pt-8 border-t border-border/40"
             >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-body text-[10px] md:text-[11px] tracking-[0.28em] uppercase text-foreground leading-none">Curators' Picks</h2>
-              </div>
+
+
 
               {(() => {
                 const categories = Array.from(
