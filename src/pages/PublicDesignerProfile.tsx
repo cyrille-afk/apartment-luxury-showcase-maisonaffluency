@@ -807,6 +807,17 @@ const PublicDesignerProfile = () => {
   const introEditorialBio = "";
   const editorialBlocks = remainingBlocks;
   const editorialBio = editorialBlocks.join("\n\n");
+  /* Desktop: pull still images out of the prose so text never wraps around
+     them; they are re-laid as a dedicated 2-up track beneath the columns. */
+  const editorialImageTrack = editorialBlocks
+    .filter((b) => isMediaBlock(b) && !isVideoBlock(b))
+    .map((b) => {
+      const parts = b.split(/\s*\|\s*/);
+      return { url: parts[0].trim(), caption: (parts[1] || "").trim() };
+    });
+  const editorialBioTextOnly = editorialBlocks
+    .filter((b) => !(isMediaBlock(b) && !isVideoBlock(b)))
+    .join("\n\n");
   const editorialStartImageIndex = 0;
   void startsWithInlineImage;
 
@@ -822,7 +833,7 @@ const PublicDesignerProfile = () => {
   void NEW_IN_FORMAT_SLUGS;
 
   /* Shared tail of the biography: heritage slider + expandable editorial bio */
-  const bioExtras = (
+  const renderBioExtras = (bioText: string, trailing?: React.ReactNode) => (
     <>
       {heritageSlides.length > 0 && (
         <div className="md:col-span-12">
@@ -830,7 +841,7 @@ const PublicDesignerProfile = () => {
         </div>
       )}
 
-      {editorialBio && (() => {
+      {bioText && (() => {
         const shouldCollapse = editorialBlocks.length > 3;
         return (
           <div className="md:col-span-12">
@@ -845,7 +856,7 @@ const PublicDesignerProfile = () => {
 
               <div className="mt-4 md:mt-6">
                 <EditorialBiography
-                  biography={editorialBio}
+                  biography={bioText}
                   biographyImages={[]}
                   pickImages={[]}
                   designerName={designer.name}
@@ -853,12 +864,15 @@ const PublicDesignerProfile = () => {
                   startImageIndex={editorialStartImageIndex}
                 />
               </div>
+              {trailing}
             </ProfileCollapsible>
           </div>
         );
       })()}
     </>
   );
+
+  const bioExtras = renderBioExtras(editorialBio);
 
 
   const biographySection = (displayBiography || thinContentFallback) ? (
@@ -1015,7 +1029,7 @@ const PublicDesignerProfile = () => {
                   </p>
                 )}
 
-                <div className="mt-8 text-foreground">{portraitToggle}</div>
+                {!newInExpanded && <div className="mt-8 text-foreground">{portraitToggle}</div>}
 
                 {!isMobile && (
                   <div
@@ -1026,9 +1040,34 @@ const PublicDesignerProfile = () => {
                       bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
                     )}
                   >
-                    {bioExtras}
+                    {renderBioExtras(
+                      editorialBioTextOnly,
+                      editorialImageTrack.length > 0 ? (
+                        <div className="mt-12 grid grid-cols-2 gap-10 lg:gap-16">
+                          {editorialImageTrack.map((m, i) => (
+                            <figure key={i} className="m-0">
+                              <div className="aspect-[4/3] overflow-hidden bg-muted">
+                                <img
+                                  src={m.url}
+                                  alt={m.caption || `${name} atelier`}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                />
+                              </div>
+                              {m.caption && (
+                                <figcaption className="mt-2 font-body text-[10px] uppercase tracking-[0.18em] text-foreground/50">
+                                  {m.caption}
+                                </figcaption>
+                              )}
+                            </figure>
+                          ))}
+                        </div>
+                      ) : null
+                    )}
                   </div>
                 )}
+
+                {newInExpanded && <div className="mt-10 text-foreground">{portraitToggle}</div>}
               </div>
             </div>
           </div>
