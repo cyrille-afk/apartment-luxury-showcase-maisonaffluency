@@ -921,7 +921,7 @@ const PublicDesignerProfile = () => {
   /* ── "New In" editorial format (portrait left, name + bio right) ── */
   const newInSection = (
     <div className="flex flex-col gap-0">
-      <div className="flex flex-col md:flex-row gap-8 md:gap-14 items-start pt-4 md:pt-8">
+      <div className="flex flex-col md:flex-row gap-8 md:gap-0 items-stretch pt-4 md:pt-8">
         {/* Portrait */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
