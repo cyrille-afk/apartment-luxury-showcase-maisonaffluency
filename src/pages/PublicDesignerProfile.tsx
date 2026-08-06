@@ -1334,7 +1334,7 @@ const PublicDesignerProfile = () => {
             >
           <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <h2 className="font-body text-[10px] md:text-[11px] tracking-[0.28em] uppercase text-muted-foreground">Curators' Picks</h2>
+                  <h2 className="font-body text-[10px] md:text-[11px] tracking-[0.28em] uppercase text-foreground leading-none">Curators' Picks</h2>
                 </div>
 
                 <div className="flex items-center gap-5" role="group" aria-label="Grid density">
@@ -1347,7 +1347,7 @@ const PublicDesignerProfile = () => {
                       "p-1 transition-colors duration-300",
                       pickCols === "auto"
                         ? "text-foreground"
-                        : "text-muted-foreground/60 hover:text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     <LayoutGrid className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
@@ -1361,7 +1361,7 @@ const PublicDesignerProfile = () => {
                       "p-1 transition-colors duration-300",
                       pickCols === "two"
                         ? "text-foreground"
-                        : "text-muted-foreground/60 hover:text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     <Columns2 className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
