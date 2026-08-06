@@ -1432,7 +1432,10 @@ const DesignersHoverHero = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/30 md:from-black/60 md:via-black/30 md:to-black/5" />
         {/* Vignette overlay — deepens edges behind text so headings and
             names stay legible over dark, textured furniture imagery. */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.55)_100%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(0,0,0,0.28)_100%)] pointer-events-none" />
+        {/* Bottom edge — kept clean so the hero meets the directory runway
+            below without a heavy black mask. */}
+        <div className="hidden md:block absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/25 to-transparent pointer-events-none" />
         {/* Desktop left column backdrop — dedicates the left portion of the hero to
             a solid dark panel so the designer list never overlaps furniture
             imagery on the right. */}
