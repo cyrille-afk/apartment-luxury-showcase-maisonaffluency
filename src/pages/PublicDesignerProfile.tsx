@@ -972,7 +972,7 @@ const PublicDesignerProfile = () => {
       {/* ── DESKTOP: cinematic architectural stack — clean photo, then narrative ── */}
       <div className="hidden md:block">
         {wideHeroImage && (
-          <div className="relative w-screen left-1/2 -ml-[50vw] h-[75vh] lg:h-[80vh] overflow-hidden bg-muted">
+          <div className="relative w-screen left-1/2 -ml-[50vw] h-[80vh] overflow-hidden bg-muted">
             <img
               src={wideHeroImage}
               alt={`${name} interior`}
@@ -985,7 +985,7 @@ const PublicDesignerProfile = () => {
         <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted/50">
           <div className="mx-auto max-w-[1400px] px-[6vw] py-16 lg:py-24">
             <div className="grid grid-cols-12 gap-8 lg:gap-16 items-start">
-              <div className="col-span-4 lg:col-span-3">
+              <div className="col-span-4">
                 <p className="font-body text-[10px] lg:text-[11px] uppercase tracking-[0.28em] text-foreground/55">
                   Respect for Tradition
                 </p>
@@ -996,7 +996,7 @@ const PublicDesignerProfile = () => {
                 )}
               </div>
 
-              <div className="col-span-8 lg:col-span-8 lg:col-start-5">
+              <div className="col-span-8">
                 <h1 className="font-display text-4xl lg:text-[3.25rem] leading-[1.05] tracking-[-0.01em] text-foreground">
                   {name}
                 </h1>
@@ -1016,6 +1016,19 @@ const PublicDesignerProfile = () => {
                 )}
 
                 <div className="mt-8 text-foreground">{portraitToggle}</div>
+
+                {!isMobile && (
+                  <div
+                    ref={newInBioRef}
+                    className={cn(
+                      "transition-all duration-700",
+                      newInExpanded && "mt-8",
+                      bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
+                    )}
+                  >
+                    {bioExtras}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -1086,17 +1099,19 @@ const PublicDesignerProfile = () => {
       </div>
 
 
-      {/* Full biography */}
-      <div
-        ref={newInBioRef}
-        className={cn(
-          "transition-all duration-700",
-          newInExpanded && "mt-2 md:mt-6",
-          bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
-        )}
-      >
-        {bioExtras}
-      </div>
+      {/* Full biography (mobile — desktop renders it inline in the narrative column) */}
+      {isMobile && (
+        <div
+          ref={newInBioRef}
+          className={cn(
+            "transition-all duration-700",
+            newInExpanded && "mt-2",
+            bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
+          )}
+        >
+          {bioExtras}
+        </div>
+      )}
 
       {newInExpanded && (
         <div className="mt-6 pt-6 border-t border-border/30 flex justify-center md:hidden">
