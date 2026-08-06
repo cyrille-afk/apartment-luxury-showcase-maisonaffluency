@@ -826,7 +826,7 @@ const PublicDesignerProfile = () => {
           <div className="md:col-span-12">
             <ProfileCollapsible
               shouldCollapse={shouldCollapse}
-              expandedProp={newInFormat ? (isMobile ? newInExpanded : true) : undefined}
+              expandedProp={newInFormat ? newInExpanded : undefined}
               onToggle={newInFormat ? setNewInExpanded : undefined}
               hideTrigger={newInFormat}
               highlight={bioHighlighted}
@@ -974,7 +974,7 @@ const PublicDesignerProfile = () => {
 
           {heroParagraphs.length > 0 && (
             <div className="font-body text-sm md:text-base leading-relaxed text-foreground/85 text-left max-w-[650px]">
-              {heroParagraphs.map((p: string, i: number) => (
+              {(newInExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
                 <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
               ))}
             </div>
@@ -986,8 +986,8 @@ const PublicDesignerProfile = () => {
             </p>
           )}
 
-          {/* Full-portrait CTA — mobile/PWA only; desktop shows the full bio inline */}
-          <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3 md:hidden">
+          {/* Full-portrait CTA — inline expand on every viewport */}
+          <div className="mt-5 md:mt-6 flex flex-wrap items-center gap-x-8 gap-y-3">
             <button
               type="button"
               onClick={() => {
@@ -1001,21 +1001,20 @@ const PublicDesignerProfile = () => {
                     window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
                   };
                   window.setTimeout(land, 120);
-                  window.setTimeout(land, 560);
+                  if (isMobile) window.setTimeout(land, 560);
                   window.setTimeout(() => flashBioHighlight(), 600);
                 }
               }}
               aria-expanded={newInExpanded}
-              className="group relative inline-flex items-center font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
+              className="group inline-flex items-center gap-2 font-body text-[11px] md:text-xs uppercase tracking-[0.25em] text-foreground/80 hover:text-foreground transition-colors duration-300"
             >
-              <span className="relative inline-flex items-center whitespace-nowrap pr-14 transition-[padding] duration-300 group-hover:pl-20 group-hover:pr-0">
-                <span className="pointer-events-none absolute left-0 top-1/2 h-px w-12 -translate-y-1/2 translate-x-2 bg-current opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
-                <span className="relative z-10">
-                  {newInExpanded ? "Close The Full Portrait" : "View The Full Portrait"}
-                </span>
-                <span className="pointer-events-none absolute right-5 top-1/2 h-px w-8 -translate-y-1/2 bg-current opacity-100 transition-all duration-300 group-hover:translate-x-6 group-hover:opacity-0" />
-                <ArrowRight className="pointer-events-none absolute right-0 top-1/2 h-3.5 w-3.5 -translate-y-1/2 transition-all duration-300 group-hover:-translate-x-1 group-hover:opacity-0" />
-              </span>
+              <span>{newInExpanded ? "Show Less" : "Read The Full Portrait"}</span>
+              <ChevronDown
+                className={cn(
+                  "h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-y-0.5",
+                  newInExpanded && "rotate-180 group-hover:-translate-y-0.5"
+                )}
+              />
             </button>
 
           </div>
@@ -1024,7 +1023,8 @@ const PublicDesignerProfile = () => {
           <div
             ref={newInBioRef}
             className={cn(
-              "mt-2 md:mt-8 transition-all duration-700",
+              "transition-all duration-700",
+              newInExpanded && "mt-2 md:mt-6",
               bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
             )}
           >
@@ -1033,7 +1033,7 @@ const PublicDesignerProfile = () => {
 
           {/* From the Studio — hidden on mobile while the full portrait is open */}
           {(!newInExpanded || !isMobile) && instagramPosts.filter((p) => p.image_url).length > 0 && (
-            <div className="mt-10 pt-8 border-t border-border/30">
+            <div className="mt-8 md:mt-10 pt-6 md:pt-8 border-t border-border/30">
               <DesignerInstagramSection posts={instagramPosts} designerName={designer.name} compact />
             </div>
           )}
