@@ -152,6 +152,7 @@ const ProductPage = lazy(() => import("./pages/ProductPage"));
 const DesignerProfile = lazy(() => import("./pages/DesignerProfile"));
 const PublicDesigners = lazy(() => import("./pages/PublicDesigners"));
 const PublicDesignerProfile = lazy(() => import("./pages/PublicDesignerProfile"));
+const PublicDesignerBiography = lazy(() => import("./pages/PublicDesignerBiography"));
 const PublicFavorites = lazy(() => import("./pages/PublicFavorites"));
 const TradeSpecSheet = lazy(() => import("./pages/TradeSpecSheet"));
 const ApartmentTour = lazy(() => import("./pages/ApartmentTour"));
