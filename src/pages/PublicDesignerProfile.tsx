@@ -1011,22 +1011,22 @@ const PublicDesignerProfile = () => {
               </div>
 
               {/* Right — narrative */}
-              <div className="col-span-12 lg:col-span-8">
-                <div className="max-w-[600px] text-foreground">
+              <div className="col-span-12 lg:col-span-8 h-auto min-h-0">
+                <div className="max-w-[650px] h-auto text-foreground">
                   {heroParagraphs.length > 0 && (
-                    <p className="font-body text-[15px] lg:text-base leading-[1.8]">
+                    <p className="font-body text-[15px] lg:text-base leading-[1.8] [text-wrap:pretty]">
                       {renderParagraph(heroParagraphs[0])}
                     </p>
                   )}
 
                   {heroParagraphs.length === 0 && thinContentFallback && (
-                    <p className="font-body text-[15px] lg:text-base leading-[1.8]">
+                    <p className="font-body text-[15px] lg:text-base leading-[1.8] [text-wrap:pretty]">
                       {thinContentFallback}
                     </p>
                   )}
 
                   {/* True page navigation to the standalone editorial monograph */}
-                  <div className="mt-6 flex text-foreground">
+                  <div className="mt-8 flex text-foreground">
                     <Link
                       to={`/designers/${designer.slug}/biography`}
                       className="group inline-flex items-center gap-3 font-body text-[11px] lg:text-xs uppercase tracking-[0.22em] text-current hover:opacity-70 transition-opacity duration-300"
@@ -1037,6 +1037,7 @@ const PublicDesignerProfile = () => {
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
 
