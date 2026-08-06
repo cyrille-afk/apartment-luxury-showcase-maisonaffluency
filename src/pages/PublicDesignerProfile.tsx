@@ -831,7 +831,7 @@ const PublicDesignerProfile = () => {
               onExpandFlash={flashBioHighlight}
             >
 
-              <div className="mt-8 md:mt-10">
+              <div className="mt-4 md:mt-6">
                 <EditorialBiography
                   biography={editorialBio}
                   biographyImages={[]}
