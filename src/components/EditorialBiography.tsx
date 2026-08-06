@@ -679,60 +679,66 @@ function SplitImageBlock({
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={transition}
-      className="shrink-0 w-full"
+      className="w-full"
     >
       <div className={`rounded-xl overflow-hidden bg-muted/10 ${isSmall ? "max-w-[200px] mx-auto md:mx-0" : ""}`}>
         <img
           src={optimizeImageUrl(url)}
           alt={caption || `${designerName} — editorial`}
-          className={`w-full h-auto object-contain ${isSmall ? "max-h-[180px]" : "max-h-[260px]"}`}
+          className={`w-full h-auto object-contain ${isSmall ? "max-h-[180px]" : "max-h-[240px]"}`}
           loading="lazy"
         />
       </div>
       {caption && (
-        <figcaption className={`mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left ${isSmall ? "max-w-[200px] mx-auto md:mx-0" : ""}`}>
+        <figcaption className={`mt-1.5 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left ${isSmall ? "max-w-[200px] mx-auto md:mx-0" : ""}`}>
           {caption}
         </figcaption>
       )}
     </motion.figure>
   );
 
-  const textEl = paragraphs.length > 0 ? (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ ...transition, delay: 0.1 }}
-      className="flex-1 min-w-0 flex flex-col justify-start"
-    >
-      {paragraphs.map((p, i) => (
-        <p key={i} className={i > 0 ? "mt-4" : ""}>
-          {renderParagraph(p)}
-        </p>
-      ))}
-    </motion.div>
-  ) : null;
-
   const isMobile = useIsMobile();
-  const imageWidthClass = isSmall ? "md:w-[22%]" : isPercent ? "" : "md:w-[26%]";
+  const hasText = paragraphs.length > 0;
+  const imageWidthClass = isSmall ? "md:w-[24%]" : isPercent ? "" : "md:w-[30%]";
 
+  // No paired text → stretch the image to fill the column instead of leaving
+  // an empty two-thirds of the row.
+  if (!hasText) {
+    return (
+      <div className={`${index === 0 ? "mt-2" : "mt-4"} mb-0 clear-both`}>
+        <div
+          className={`w-full ${isPercent ? "" : "md:w-1/2"} ${imageOnRight ? "md:ml-auto" : ""}`}
+          style={isPercent && !isMobile ? { width: size! } : undefined}
+        >
+          {imageEl}
+        </div>
+      </div>
+    );
+  }
+
+  // Paired text → float the image so copy wraps tightly around it (magazine
+  // flow), eliminating the vertical dead space a fixed two-column row leaves.
   return (
-    <div className={`${index === 0 ? "mt-2 md:mt-3" : "mt-2 md:mt-4"} mb-0 flex flex-col md:flex-row gap-3 md:gap-6 items-start`}>
-      {/* Mobile: image always first (order-1); Desktop: controlled by imageOnRight */}
+    <div className={`${index === 0 ? "mt-2" : "mt-4"} mb-0`}>
       <div
-        className={`shrink-0 w-full ${imageWidthClass} order-1 ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}
+        className={`w-full ${imageWidthClass} mb-3 md:mb-2 ${
+          imageOnRight ? "md:float-right md:ml-6" : "md:float-left md:mr-6"
+        }`}
         style={isPercent && !isMobile ? { width: size! } : undefined}
       >
         {imageEl}
       </div>
-      {textEl && (
-        <div className={`flex-1 min-w-0 order-2 ${imageOnRight ? 'md:order-1' : 'md:order-2'}`}>
-          {textEl}
-        </div>
-      )}
+      <div className="min-w-0">
+        {paragraphs.map((p, i) => (
+          <p key={i} className={i > 0 ? "mt-4" : ""}>
+            {renderParagraph(p)}
+          </p>
+        ))}
+      </div>
     </div>
   );
 }
+
 
 /* ------------------------------------------------------------------ */
 /*  Full-width Image Block — used on mobile or when no paired text    */
@@ -745,16 +751,17 @@ function FullWidthImageBlock({ url, designerName, index, overrideCaption }: { ur
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={transition}
-      className="my-4 md:my-6"
+      className="my-5 clear-both"
     >
-      <div className="rounded-xl overflow-hidden bg-muted/10 aspect-square max-w-[480px] mx-auto">
+      <div className="rounded-xl overflow-hidden bg-muted/10 max-w-[480px] mx-auto">
         <img
           src={optimizeImageUrl(url)}
           alt={caption || `${designerName} — editorial`}
-          className="w-full h-full object-contain"
+          className="w-full h-auto max-h-[380px] object-contain"
           loading="lazy"
         />
       </div>
+
       {caption && (
         <figcaption className="mt-2 text-center font-body text-[13px] tracking-wide text-muted-foreground italic">
           {caption}
@@ -831,9 +838,11 @@ function CollapsibleBiographyWrapper({
   collapseAfterIndex?: number;
 }) {
   const [expanded, setExpanded] = useState(false);
-  if (!allowCollapse) return <>{children}</>;
+  const clearfix = "after:content-[''] after:block after:clear-both";
+  if (!allowCollapse) return <div className={clearfix}>{children}</div>;
   // When collapseAfterIndex is set, always allow collapsing regardless of element count
-  if (collapseAfterIndex === undefined && elementCount <= 3) return <>{children}</>;
+  if (collapseAfterIndex === undefined && elementCount <= 3) return <div className={clearfix}>{children}</div>;
+
 
   const childArray = Array.isArray(children) ? children : [children];
 
@@ -843,7 +852,7 @@ function CollapsibleBiographyWrapper({
     const hidden = childArray.slice(collapseAfterIndex + 1);
 
     return (
-      <div>
+      <div className={clearfix}>
         {visible}
         {!expanded && (
           <div className="mt-5 flex justify-center">
@@ -874,7 +883,7 @@ function CollapsibleBiographyWrapper({
   }
 
   return (
-    <div className="relative">
+    <div className={`relative ${clearfix}`}>
       <div
         className={expanded ? "" : "max-h-[420px] md:max-h-[600px] overflow-hidden"}
       >
