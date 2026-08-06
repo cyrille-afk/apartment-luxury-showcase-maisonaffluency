@@ -919,22 +919,24 @@ const PublicDesignerProfile = () => {
   ) : null;
 
   /* ── "New In" editorial format (portrait left, name + bio right) ── */
+  const rightColPad = "md:pl-14 lg:pl-20 xl:pl-24";
   const newInSection = (
     <div className="flex flex-col gap-0">
-      <div className="flex flex-col md:flex-row gap-8 md:gap-0 items-stretch pt-4 md:pt-8">
-        {/* Portrait */}
+      {/* ── TOP PROFILE BLOCK — asymmetric 12-col row ── */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-0 items-start pt-4 md:pt-8">
+        {/* Hero image — 5 cols */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full md:w-[38%] flex-shrink-0 md:sticky md:top-[calc(var(--header-h)+1.5rem)] md:self-start"
+          className="md:col-span-5"
         >
           <div className="aspect-[3/2] md:aspect-auto overflow-hidden rounded-none bg-muted relative">
             {heroImage && (
               <img
                 src={heroImage}
                 alt={`${name} portrait`}
-                className="w-full h-full md:h-auto object-cover md:object-contain md:max-h-[calc(100vh-var(--header-h)-4rem)]"
+                className="w-full h-full md:h-auto object-cover md:object-contain md:max-h-[calc(100vh-var(--header-h)-6rem)]"
                 loading="eager"
               />
             )}
@@ -946,12 +948,12 @@ const PublicDesignerProfile = () => {
           )}
         </motion.div>
 
-        {/* Name + Bio + actions */}
+        {/* Content — 7 cols */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...transition, delay: 0.2 }}
-          className="flex-1 flex flex-col justify-start w-full md:pl-16 lg:pl-24 xl:pl-28"
+          className={cn("md:col-span-7 flex flex-col justify-start w-full", rightColPad)}
         >
           <div className="flex items-center gap-3 mb-6 md:mb-8">
             <h1 className="font-display text-2xl md:text-3xl lg:text-[2.1rem] text-foreground tracking-[0.12em] uppercase">
@@ -1016,10 +1018,9 @@ const PublicDesignerProfile = () => {
                 )}
               />
             </button>
-
           </div>
 
-          {/* Full biography — flows in the right column (desktop) / below the CTA (mobile) */}
+          {/* Full biography */}
           <div
             ref={newInBioRef}
             className={cn(
@@ -1030,17 +1031,6 @@ const PublicDesignerProfile = () => {
           >
             {bioExtras}
           </div>
-
-          {/* From the Studio — hidden on mobile while the full portrait is open */}
-          {(!newInExpanded || !isMobile) && instagramPosts.filter((p) => p.image_url).length > 0 && (
-            <div className={cn(
-              "mt-8 pt-6 md:pt-8 border-t border-border/30",
-              newInExpanded ? "md:mt-10" : "md:mt-auto"
-            )}>
-              <DesignerInstagramSection posts={instagramPosts} designerName={designer.name} compact />
-            </div>
-          )}
-
 
           {newInExpanded && (
             <div className="mt-6 pt-6 border-t border-border/30 flex justify-center md:hidden">
@@ -1061,9 +1051,17 @@ const PublicDesignerProfile = () => {
         </motion.div>
       </div>
 
-
+      {/* ── MIDDLE 'FROM THE STUDIO' BLOCK — own row, aligned to the right column ── */}
+      {(!newInExpanded || !isMobile) && instagramPosts.filter((p) => p.image_url).length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-12 mt-8 md:mt-12">
+          <div className={cn("md:col-start-6 md:col-span-7", rightColPad)}>
+            <DesignerInstagramSection posts={instagramPosts} designerName={designer.name} compact />
+          </div>
+        </div>
+      )}
     </div>
   );
+
 
 
 
