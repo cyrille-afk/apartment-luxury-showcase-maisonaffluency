@@ -719,7 +719,7 @@ function SplitImageBlock({
   // Paired text → float the image so copy wraps tightly around it (magazine
   // flow), eliminating the vertical dead space a fixed two-column row leaves.
   return (
-    <div className={`${index === 0 ? "mt-2" : "mt-4"} mb-0 clear-both after:content-[''] after:block after:clear-both`}>
+    <div className={`${index === 0 ? "mt-2" : "mt-4"} mb-0`}>
       <div
         className={`w-full ${imageWidthClass} mb-3 md:mb-2 ${
           imageOnRight ? "md:float-right md:ml-6" : "md:float-left md:mr-6"
