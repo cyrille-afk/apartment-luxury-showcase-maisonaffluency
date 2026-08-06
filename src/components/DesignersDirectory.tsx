@@ -1393,6 +1393,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   showHeader = true,
   showTradeCTA = true,
   showAlphabetBar = true,
+  showRunway = false,
   mode = "designers",
 }) => {
   const location = useLocation();
