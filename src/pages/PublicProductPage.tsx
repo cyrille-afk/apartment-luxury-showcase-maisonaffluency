@@ -1924,17 +1924,6 @@ const PublicProductPage: React.FC = () => {
                 compact={galleryCompact}
                 pickId={product.id}
 
-                firstImageBadge={
-                  (() => {
-                    const editionLabel = formatEditionLabel(product as any);
-                    // Mobile/PWA: hide the edition pill (matches 1stdibs layout).
-                    return editionLabel ? (
-                      <span className="hidden md:inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
-                        {editionLabel}
-                      </span>
-                    ) : null;
-                  })()
-                }
 
                 overlay={
                   /* Favorite / studio save stays top-right. */
