@@ -2684,9 +2684,19 @@ const PublicProductPage: React.FC = () => {
                               loading="lazy"
                             />
                           </div>
-                          <p className="font-body text-xs text-muted-foreground mt-2 text-center truncate">
-                            {rp.title}
-                          </p>
+                          <div className="mt-2 text-center">
+                            {rp.subtitle && (
+                              <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground leading-tight line-clamp-1">
+                                {rp.subtitle}
+                              </p>
+                            )}
+                            <p className="font-body text-xs text-foreground mt-1 truncate">
+                              {rp.title}
+                            </p>
+                            <p className="font-body text-[10px] text-muted-foreground tracking-wide mt-1">
+                              {formatPublicRrp((relatedRrpMap as any)[rp.id]) || "Price upon request"}
+                            </p>
+                          </div>
                         </Link>
                       ))}
                     </div>
