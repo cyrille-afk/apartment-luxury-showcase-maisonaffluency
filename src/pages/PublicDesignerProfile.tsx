@@ -927,14 +927,14 @@ const PublicDesignerProfile = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full md:w-[38%] flex-shrink-0"
+          className="w-full md:w-[38%] flex-shrink-0 md:sticky md:top-[calc(var(--header-h)+1.5rem)] md:self-start"
         >
-          <div className="aspect-[3/2] md:aspect-[4/5] overflow-hidden rounded-none bg-muted relative">
+          <div className="aspect-[3/2] md:aspect-auto overflow-hidden rounded-none bg-muted relative">
             {heroImage && (
               <img
                 src={heroImage}
                 alt={`${name} portrait`}
-                className="w-full h-full object-cover"
+                className="w-full h-full md:h-auto object-cover md:object-contain md:max-h-[calc(100vh-var(--header-h)-4rem)]"
                 loading="eager"
               />
             )}
