@@ -1023,7 +1023,8 @@ const PublicDesignerProfile = () => {
           <div
             ref={newInBioRef}
             className={cn(
-              "mt-2 md:mt-8 transition-all duration-700",
+              "transition-all duration-700",
+              newInExpanded && "mt-2 md:mt-6",
               bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
             )}
           >
