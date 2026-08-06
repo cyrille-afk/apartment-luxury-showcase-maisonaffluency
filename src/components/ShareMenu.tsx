@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback, useLayoutEffect } from "react";
+import { createPortal } from "react-dom";
 import { Copy, MessageCircle, Share as ShareIos, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 
@@ -52,16 +53,49 @@ const ShareMenu = ({ url, message, imageUrl, imageName }: ShareMenuProps) => {
   const Icon: LucideIcon = ShareIos;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  // Position the portal menu against the trigger, flipping above when the
+  // viewport bottom is tight (matches the 1stdibs behaviour).
+  const reposition = useCallback(() => {
+    const btn = ref.current;
+    const menu = menuRef.current;
+    if (!btn) return;
+    const r = btn.getBoundingClientRect();
+    const menuH = menu?.offsetHeight ?? 168;
+    const menuW = menu?.offsetWidth ?? 160;
+    const spaceBelow = window.innerHeight - r.bottom;
+    const top = spaceBelow < menuH + 16 ? r.top - menuH - 8 : r.bottom + 8;
+    let left = r.left + r.width / 2 - menuW / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - menuW - 8));
+    setCoords({ top: Math.max(8, top), left });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    reposition();
+  }, [open, reposition]);
 
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (ref.current?.contains(target) || menuRef.current?.contains(target)) return;
+      setOpen(false);
     };
+    const onScrollOrResize = () => reposition();
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
+    window.addEventListener("scroll", onScrollOrResize, true);
+    window.addEventListener("resize", onScrollOrResize);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      window.removeEventListener("scroll", onScrollOrResize, true);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+  }, [open, reposition]);
+
 
   // Strip cache-busting query params for the human-readable share text.
   // The full cache-busted url is still used for copy/link previews.
@@ -138,9 +172,11 @@ const ShareMenu = ({ url, message, imageUrl, imageName }: ShareMenuProps) => {
       >
         <Icon className="w-[18px] h-[18px]" strokeWidth={1.5} />
       </button>
-      {open && !isMobile && (
+      {open && !isMobile && typeof document !== "undefined" && createPortal(
         <div
-          className="absolute top-full left-0 mt-2 flex flex-col gap-1 bg-black/80 backdrop-blur-md rounded-lg p-1.5 shadow-xl border border-white/10 z-50 min-w-[140px]"
+          ref={menuRef}
+          style={{ top: coords?.top ?? -9999, left: coords?.left ?? -9999 }}
+          className="fixed flex flex-col gap-1 bg-black/85 backdrop-blur-md rounded-lg p-1.5 shadow-xl border border-white/10 z-[9999] min-w-[150px]"
           onClick={(e) => e.stopPropagation()}
         >
           <button onClick={copyLink} className="flex items-center gap-2 px-3 py-1.5 text-white/90 hover:text-white hover:bg-white/10 rounded text-[11px] font-body tracking-wide transition-colors">
@@ -155,8 +191,10 @@ const ShareMenu = ({ url, message, imageUrl, imageName }: ShareMenuProps) => {
           <button onClick={openWhatsApp} className="flex items-center gap-2 px-3 py-1.5 text-white/90 hover:text-white hover:bg-white/10 rounded text-[11px] font-body tracking-wide transition-colors">
             <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
           </button>
-        </div>
+        </div>,
+        document.body
       )}
+
     </div>
   );
 };
