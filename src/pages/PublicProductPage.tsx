@@ -2730,9 +2730,19 @@ const PublicProductPage: React.FC = () => {
                             />
                           )}
                         </div>
-                        <p className="font-body text-xs text-muted-foreground mt-2 text-center group-hover:text-foreground transition-colors truncate">
-                          {rp.title}
-                        </p>
+                        <div className="mt-3 text-center">
+                          {rp.subtitle && (
+                            <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground leading-tight line-clamp-1">
+                              {rp.subtitle}
+                            </p>
+                          )}
+                          <p className="font-body text-[13px] text-foreground mt-1 truncate group-hover:text-foreground/70 transition-colors">
+                            {rp.title}
+                          </p>
+                          <p className="font-body text-xs text-muted-foreground tracking-wide mt-1">
+                            {formatPublicRrp((relatedRrpMap as any)[rp.id]) || "Price upon request"}
+                          </p>
+                        </div>
                       </Link>
                     ))}
                   </div>
