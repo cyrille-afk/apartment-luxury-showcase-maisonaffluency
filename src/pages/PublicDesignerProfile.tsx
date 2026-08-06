@@ -1334,10 +1334,9 @@ const PublicDesignerProfile = () => {
             >
           <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5">
-                    <h2 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h2>
-                  </div>
+                  <h2 className="font-body text-[10px] md:text-[11px] tracking-[0.28em] uppercase text-muted-foreground">Curators' Picks</h2>
                 </div>
+
                 <div className="flex items-center gap-1" role="group" aria-label="Grid density">
                   <button
                     type="button"
