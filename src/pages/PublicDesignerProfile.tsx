@@ -833,7 +833,7 @@ const PublicDesignerProfile = () => {
   void NEW_IN_FORMAT_SLUGS;
 
   /* Shared tail of the biography: heritage slider + expandable editorial bio */
-  const bioExtras = (
+  const renderBioExtras = (bioText: string, trailing?: React.ReactNode) => (
     <>
       {heritageSlides.length > 0 && (
         <div className="md:col-span-12">
@@ -841,7 +841,7 @@ const PublicDesignerProfile = () => {
         </div>
       )}
 
-      {editorialBio && (() => {
+      {bioText && (() => {
         const shouldCollapse = editorialBlocks.length > 3;
         return (
           <div className="md:col-span-12">
@@ -856,7 +856,7 @@ const PublicDesignerProfile = () => {
 
               <div className="mt-4 md:mt-6">
                 <EditorialBiography
-                  biography={editorialBio}
+                  biography={bioText}
                   biographyImages={[]}
                   pickImages={[]}
                   designerName={designer.name}
@@ -864,12 +864,15 @@ const PublicDesignerProfile = () => {
                   startImageIndex={editorialStartImageIndex}
                 />
               </div>
+              {trailing}
             </ProfileCollapsible>
           </div>
         );
       })()}
     </>
   );
+
+  const bioExtras = renderBioExtras(editorialBio);
 
 
   const biographySection = (displayBiography || thinContentFallback) ? (
