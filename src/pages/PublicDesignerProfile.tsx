@@ -1102,44 +1102,21 @@ const PublicDesignerProfile = () => {
             </p>
           )}
 
-          {/* Full-portrait CTA — minimal text link with a fine horizontal arrow */}
+          {/* Full-portrait CTA — same dedicated monograph page as desktop */}
           <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3">
-            {portraitToggle}
+            <Link
+              to={`/designers/${designer.slug}/biography`}
+              className="group inline-flex items-center gap-3 font-body text-[11px] uppercase tracking-[0.22em] text-foreground hover:opacity-70 transition-opacity duration-300"
+            >
+              <span>View The Full Portrait</span>
+              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" strokeWidth={1.25} />
+            </Link>
           </div>
         </motion.div>
       </div>
 
 
-      {/* Full biography (mobile — desktop renders it inline in the narrative column) */}
-      {isMobile && (
-        <div
-          ref={newInBioRef}
-          className={cn(
-            "transition-all duration-700",
-            newInExpanded && "mt-2",
-            bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
-          )}
-        >
-          {bioExtras}
-        </div>
-      )}
 
-      {newInExpanded && (
-        <div className="mt-6 pt-6 border-t border-border/30 flex justify-center md:hidden">
-          <button
-            type="button"
-            onClick={() => {
-              setNewInExpanded(false);
-              const el = newInBioRef.current;
-              const top = el ? el.getBoundingClientRect().top + window.scrollY - 240 : 0;
-              window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-            }}
-            className="inline-flex items-center gap-2 font-body text-xs uppercase tracking-[0.25em] text-foreground/70 hover:text-foreground transition-colors"
-          >
-            Close The Full Portrait
-          </button>
-        </div>
-      )}
     </div>
   );
 

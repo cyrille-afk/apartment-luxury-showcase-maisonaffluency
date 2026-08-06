@@ -557,10 +557,9 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
   return (
     <div ref={cardRef} data-card-kind="parent" data-designer-slug={item.slug} className="col-span-2 group self-start flex flex-col rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
       <div className="aspect-[5/4] md:aspect-[17/10] bg-muted/20 overflow-hidden relative">
-        {item.name === 'Apparatus' ? (
-          <div className="w-full h-full bg-black" />
-        ) : cardImageUrl ? (
+        {cardImageUrl ? (
           <img {...cldResponsiveImg(cardImageUrl, { widths: [480, 720, 960, 1280], sizes: "(max-width: 640px) 100vw, (max-width: 1024px) 66vw, 720px" })} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading="eager" decoding="async" />
+
 
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
@@ -652,10 +651,9 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
 
 
       <div className="aspect-[4/5] bg-muted/20 overflow-hidden relative">
-        {item.name === 'Apparatus' ? (
-          <div className="w-full h-full bg-black" />
-        ) : cardImageUrl ? (
+        {cardImageUrl ? (
           <img {...cldResponsiveImg(cardImageUrl, { widths: [320, 480, 640, 960], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px" })} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading="eager" decoding="async" />
+
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
             <span className="font-display text-3xl text-muted-foreground/20">{item.name.charAt(0)}</span>
