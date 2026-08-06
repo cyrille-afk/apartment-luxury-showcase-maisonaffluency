@@ -2617,14 +2617,15 @@ const PublicProductPage: React.FC = () => {
                   <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
                     {(product.subtitle || / by /i.test(product.title) || relatedPicks.some((rp) => rp.subtitle || / by /i.test(rp.title))) ? "From the Same Maker" : "From the Same Designer"}
                   </p>
-                  <h2 className="font-display text-2xl leading-tight">
+                  <h2 className="flex flex-col items-start">
                     <Link
                       to={`/designers/${designer.slug}`}
                       onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                      className="hover:text-primary transition-colors"
+                      className="font-display text-[14px] md:text-[16px] uppercase tracking-[0.14em] text-foreground hover:text-foreground/80 transition-colors"
                     >
                       {designerDisplay}
                     </Link>
+                    <span className="mt-2 w-8 md:w-10 h-px bg-foreground/20" aria-hidden="true" />
                   </h2>
                   {brandSummary && (() => {
                     const PREVIEW_LEN = 240;
@@ -2773,14 +2774,15 @@ const PublicProductPage: React.FC = () => {
                     <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
                       {(product.subtitle || / by /i.test(product.title) || relatedPicks.some((rp) => rp.subtitle || / by /i.test(rp.title))) ? "From the Same Maker" : "From the Same Designer"}
                     </p>
-                    <h2 className="font-display text-2xl md:text-3xl leading-tight mb-5">
+                    <h2 className="flex flex-col items-start mb-5">
                       <Link
                         to={`/designers/${designer.slug}`}
                         onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                        className="hover:text-primary transition-colors"
+                        className="font-display text-[14px] md:text-[16px] uppercase tracking-[0.14em] text-foreground hover:text-foreground/80 transition-colors"
                       >
                         {designerDisplay}
                       </Link>
+                      <span className="mt-2 w-8 md:w-10 h-px bg-foreground/20" aria-hidden="true" />
                     </h2>
                   </div>
                   {brandSummary && (() => {
