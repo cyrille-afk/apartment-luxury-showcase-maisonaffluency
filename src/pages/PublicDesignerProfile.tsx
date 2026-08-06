@@ -1635,7 +1635,7 @@ const PublicDesignerProfile = () => {
                           const tags: string[] = pick.tags || [];
                           const micro: string[] = [];
                           if (tags.some((t) => /available[-\s]?now|in[-\s]?stock/i.test(t))) micro.push("Available Now");
-                          if (pick.edition || tags.some((t) => /re-?edition/i.test(t))) micro.push("Reedition");
+                          
                           if (!micro.length) return null;
                           return (
                             <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1.5">
