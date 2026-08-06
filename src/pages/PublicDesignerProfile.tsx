@@ -930,21 +930,21 @@ const PublicDesignerProfile = () => {
   const rightColPad = "md:pl-14 lg:pl-20 xl:pl-24";
   const newInSection = (
     <div className="flex flex-col gap-0">
-      {/* ── TOP PROFILE BLOCK — asymmetric 12-col row ── */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-0 items-start pt-4 md:pt-8">
-        {/* Hero image — 5 cols */}
+      {/* ── TOP PROFILE ROW — asymmetric header (image left, narrative right) ── */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-0 items-start pt-4 md:pt-8">
+        {/* Profile image frame — crisp landscape, 4 cols */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          className="md:col-span-5"
+          className="md:col-span-4 lg:col-span-3"
         >
-          <div className="aspect-[3/2] md:aspect-auto overflow-hidden rounded-none bg-muted relative">
+          <div className="aspect-[4/3] overflow-hidden rounded-none bg-muted relative">
             {heroImage && (
               <img
                 src={heroImage}
                 alt={`${name} portrait`}
-                className="w-full h-full md:h-auto object-cover md:object-contain md:max-h-[calc(100vh-var(--header-h)-6rem)]"
+                className="absolute inset-0 w-full h-full object-cover"
                 loading="eager"
               />
             )}
@@ -956,15 +956,15 @@ const PublicDesignerProfile = () => {
           )}
         </motion.div>
 
-        {/* Content — 7 cols */}
+        {/* Narrative column */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...transition, delay: 0.2 }}
-          className={cn("md:col-span-7 flex flex-col justify-start w-full", rightColPad)}
+          className={cn("md:col-span-8 lg:col-span-9 flex flex-col justify-start w-full", rightColPad)}
         >
-          <div className="flex items-center gap-3 mb-6 md:mb-8">
-            <h1 className="font-display text-2xl md:text-3xl lg:text-[2.1rem] text-foreground tracking-[0.12em] uppercase">
+          <div className="flex items-start justify-between gap-3 mb-4 md:mb-5">
+            <h1 className="font-display text-3xl md:text-4xl lg:text-[2.6rem] leading-[1.1] tracking-[-0.01em] text-foreground">
               {name}
             </h1>
             <ShareMenu
@@ -977,13 +977,13 @@ const PublicDesignerProfile = () => {
           </div>
 
           {designer.specialty && (
-            <p className="font-body text-xs md:text-sm text-muted-foreground -mt-4 mb-6 tracking-wide">
+            <p className="font-body text-xs md:text-sm text-muted-foreground -mt-2 mb-4 tracking-wide">
               {designer.specialty}
             </p>
           )}
 
           {heroParagraphs.length > 0 && (
-            <div className="font-body text-sm md:text-base leading-relaxed text-foreground/85 text-left max-w-[650px]">
+            <div className="font-body text-[15px] md:text-base leading-[1.75] text-foreground/85 text-left">
               {(newInExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
                 <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
               ))}
@@ -991,12 +991,12 @@ const PublicDesignerProfile = () => {
           )}
 
           {thinContentFallback && (
-            <p className="font-body text-sm md:text-base leading-relaxed text-foreground/85 mt-4 max-w-[650px]">
+            <p className="font-body text-[15px] md:text-base leading-[1.75] text-foreground/85 mt-4">
               {thinContentFallback}
             </p>
           )}
 
-          {/* Full-portrait CTA — inline expand on every viewport */}
+          {/* Full-portrait CTA — minimal text link with a fine horizontal arrow */}
           <div className="mt-5 md:mt-6 flex flex-wrap items-center gap-x-8 gap-y-3">
             <button
               type="button"
@@ -1016,17 +1016,16 @@ const PublicDesignerProfile = () => {
                 }
               }}
               aria-expanded={newInExpanded}
-              className="group inline-flex items-center gap-2 font-body text-[11px] md:text-xs uppercase tracking-[0.25em] text-foreground/80 hover:text-foreground transition-colors duration-300"
+              className="group inline-flex items-center gap-4 font-body text-[11px] md:text-xs uppercase tracking-[0.18em] text-foreground hover:text-foreground/70 transition-colors duration-300"
             >
-              <span>{newInExpanded ? "Show Less" : "Read The Full Portrait"}</span>
-              <ChevronDown
-                className={cn(
-                  "h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-y-0.5",
-                  newInExpanded && "rotate-180 group-hover:-translate-y-0.5"
-                )}
-              />
+              <span>{newInExpanded ? "Close The Full Portrait" : "View The Full Portrait"}</span>
+              <span aria-hidden="true" className="relative inline-flex items-center">
+                <span className="block h-px w-10 bg-current transition-all duration-300 group-hover:w-12" />
+                <ArrowRight className="absolute -right-[3px] h-3 w-3 -translate-y-[0.5px]" strokeWidth={1} />
+              </span>
             </button>
           </div>
+
 
           {/* Full biography */}
           <div
