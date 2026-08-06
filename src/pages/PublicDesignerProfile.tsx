@@ -986,7 +986,7 @@ const PublicDesignerProfile = () => {
       {/* ── DESKTOP: cinematic architectural stack — clean photo, then narrative ── */}
       <div className="hidden md:block">
         {wideHeroImage && (
-          <div className="relative w-screen left-1/2 -ml-[50vw] h-[80vh] overflow-hidden bg-muted">
+          <div className="relative w-screen left-1/2 -ml-[50vw] h-[70vh] overflow-hidden bg-muted">
             <img
               src={wideHeroImage}
               alt={`${name} interior`}
@@ -997,7 +997,7 @@ const PublicDesignerProfile = () => {
         )}
 
         <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted/50">
-          <div className="mx-auto max-w-[1400px] px-[6vw] py-20 lg:py-28">
+          <div className="mx-auto max-w-[1400px] px-[6vw] pt-6 pb-14 lg:pb-16">
             {/* Centered introductory stack */}
             <div className="mx-auto max-w-[70ch] text-center">
               <h1 className="font-display text-5xl lg:text-[3.75rem] leading-[1.05] tracking-[-0.01em] text-foreground">
