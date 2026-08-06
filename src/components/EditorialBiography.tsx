@@ -838,9 +838,11 @@ function CollapsibleBiographyWrapper({
   collapseAfterIndex?: number;
 }) {
   const [expanded, setExpanded] = useState(false);
-  if (!allowCollapse) return <>{children}</>;
+  const clearfix = "after:content-[''] after:block after:clear-both";
+  if (!allowCollapse) return <div className={clearfix}>{children}</div>;
   // When collapseAfterIndex is set, always allow collapsing regardless of element count
-  if (collapseAfterIndex === undefined && elementCount <= 3) return <>{children}</>;
+  if (collapseAfterIndex === undefined && elementCount <= 3) return <div className={clearfix}>{children}</div>;
+
 
   const childArray = Array.isArray(children) ? children : [children];
 
