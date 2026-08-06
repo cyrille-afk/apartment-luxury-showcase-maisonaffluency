@@ -2272,14 +2272,17 @@ const PublicProductPage: React.FC = () => {
                 <>
                   {/* Desktop: restored classic layout. */}
                   <div className="min-w-0">
-                    <Link
-                      to={`/designers/${designer.slug}`}
-                      onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                      className="font-body font-light text-[10px] uppercase tracking-[0.28em] text-[hsl(var(--gold))] hover:text-primary transition-colors"
-                    >
-                      {designerDisplay}
-                    </Link>
-                    <h1 className="font-display font-normal text-[1.75rem] md:text-[2.15rem] mt-3 leading-[1.15] tracking-[-0.01em]">
+                    <div className="flex flex-col items-start">
+                      <Link
+                        to={`/designers/${designer.slug}`}
+                        onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
+                        className="font-display text-[16px] md:text-[18px] uppercase tracking-[0.14em] text-foreground hover:text-foreground/80 transition-colors"
+                      >
+                        {designerDisplay}
+                      </Link>
+                      <div className="mt-2.5 w-10 md:w-12 h-px bg-foreground/20" aria-hidden="true" />
+                    </div>
+                    <h1 className="font-display font-normal text-[1.75rem] md:text-[2.15rem] mt-5 leading-[1.15] tracking-[-0.01em]">
                       {product.title}
                       {product.subtitle &&
                         !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
