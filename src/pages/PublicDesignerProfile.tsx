@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, LayoutGrid, Columns2, SlidersHorizontal } from "lucide-react";
+import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1400,7 +1400,7 @@ const PublicDesignerProfile = () => {
                               pickCols === "auto" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                             )}
                           >
-                            <LayoutGrid className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
+                            <Columns3 className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
                           </button>
                           <button
                             type="button"
