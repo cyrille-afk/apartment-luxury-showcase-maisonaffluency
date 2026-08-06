@@ -644,10 +644,13 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 {designerDisplay}
               </button>
               <h2 className="font-display text-base md:text-xl text-foreground mt-1 leading-tight">
-                {product.subtitle
-                  ? `${product.title} ${product.subtitle}`
-                  : product.title}
+                {product.title}
               </h2>
+              {product.subtitle && product.subtitle.trim() !== designerDisplay?.trim() && (
+                <p className="font-body text-[11px] md:text-xs text-muted-foreground mt-1">
+                  {product.subtitle}
+                </p>
+              )}
               {publicPriceLabel && (
                 <p className="font-display text-base md:text-lg text-foreground mt-2 leading-none">
                   {publicPriceLabel}
