@@ -1,0 +1,1 @@
+update public.designers set hero_image_url = 'https://res.cloudinary.com/dif1oamtj/image/upload/v1779757886/Screenshot_2026-05-26_at_9.10.08_AM_j4nsq6.png' where slug = 'dagmar-london';
