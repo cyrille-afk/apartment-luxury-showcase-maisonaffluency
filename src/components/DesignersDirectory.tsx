@@ -1377,6 +1377,8 @@ interface DesignersDirectoryProps {
   showHeader?: boolean;
   showTradeCTA?: boolean;
   showAlphabetBar?: boolean;
+  /** Desktop typographic runway row (title + inline A–Z) above the filter row. */
+  showRunway?: boolean;
   /**
    * "designers" → filters narrow the alphabetical designer cards (no product grid).
    * "products"  → filters switch the view to a product grid (PickCard).
@@ -1391,6 +1393,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   showHeader = true,
   showTradeCTA = true,
   showAlphabetBar = true,
+  showRunway = false,
   mode = "designers",
 }) => {
   const location = useLocation();
@@ -1958,6 +1961,46 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 {selectedSubcategory && <span> · {selectedSubcategory}</span>}
               </p>
             )
+          )}
+
+          {/* Desktop: typographic runway — bridges the hero and the card grid.
+              Left track carries the section identity, right track carries the
+              A–Z index inline so no floating letter bar is needed. */}
+          {showRunway && !(selectedCategory || selectedSubcategory) && (
+            <div className="hidden md:block bg-background pt-10 lg:pt-14 pb-6 lg:pb-8">
+              <div className="grid grid-cols-12 gap-8 items-end">
+                <div className="col-span-4">
+                  <h2 className="font-serif text-3xl lg:text-[2.6rem] leading-[1.05] text-foreground">
+                    The Designers
+                  </h2>
+                  <p className="mt-2 text-[10px] lg:text-[11px] font-body uppercase tracking-[0.32em] text-muted-foreground">
+                    Maison Affluency Index
+                  </p>
+                </div>
+                <div className="col-span-8">
+                  <div ref={letterBarRef} className="flex items-center justify-between">
+                    {LETTERS.map((letter) => {
+                      const isActive = activeLetters.has(letter);
+                      return (
+                        <button
+                          key={letter}
+                          data-azbar-letter={letter}
+                          onClick={() => isActive && jumpToLetter(letter)}
+                          className={`font-body text-[11px] lg:text-xs uppercase tracking-[0.18em] leading-none transition-colors duration-200 ${
+                            isActive
+                              ? "text-foreground font-semibold hover:text-primary cursor-pointer"
+                              : "text-muted-foreground/50 cursor-default"
+                          }`}
+                        >
+                          {letter}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-px bg-border/50 mt-4" />
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Desktop: A-Z jump bar — hidden when a category/subcategory filter is active */}
