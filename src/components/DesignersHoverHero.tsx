@@ -120,7 +120,8 @@ function gridImageLqip(src: string | null | undefined): string | undefined {
  * photo when it is hosted on Cloudinary; otherwise fall back to a Cloudinary
  * image_url so we avoid broken external hotlinks on large cards.
  */
-function pickGridImage(d: { first_pick_image_url?: string | null; hero_image_url: string | null; image_url: string | null }): string | null {
+function pickGridImage(d: { slug?: string; first_pick_image_url?: string | null; hero_image_url: string | null; image_url: string | null }): string | null {
+  if (d.slug && MOBILE_BG_OVERRIDES[d.slug]) return MOBILE_BG_OVERRIDES[d.slug];
   if (isCloudinaryUpload(d.first_pick_image_url)) return d.first_pick_image_url!;
   if (d.first_pick_image_url) return d.first_pick_image_url;
   if (isCloudinaryUpload(d.hero_image_url)) return d.hero_image_url;
@@ -142,7 +143,7 @@ function DesignerGridCard({
   onNavigate?: () => void;
   priority?: boolean;
 }) {
-  const baseRaw = designer.first_pick_image_url || designer.hero_image_url || designer.image_url || null;
+  const baseRaw = pickGridImage(designer);
   const url = gridImageTransform(baseRaw);
   const srcSet = gridImageSrcSet(baseRaw);
   const lqip = gridImageLqip(baseRaw);
@@ -259,6 +260,9 @@ const MOBILE_BG_OVERRIDES: Record<string, string> = {
     "https://res.cloudinary.com/dif1oamtj/image/upload/v1777428180/JMF_1935_Round_Table__02_Portrait_BD_1_aozicg.jpg",
   "hamrei":
     "https://res.cloudinary.com/dif1oamtj/image/upload/v1784262044/Screenshot_2026-07-17_at_12.19.46_PM_fzvmvb.png",
+  // First curator pick images are near-black product shots — use the studio interior instead.
+  "apparatus-studio":
+    "https://res.cloudinary.com/dif1oamtj/image/upload/apparatus-studio-bg_wzakjr",
 };
 
 function mobileHeroBackgroundSrc(d: Pick<FeaturedDesigner, "slug" | "first_pick_image_url" | "hero_image_url" | "image_url">) {
