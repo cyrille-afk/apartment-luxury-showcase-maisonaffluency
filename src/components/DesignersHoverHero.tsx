@@ -120,7 +120,8 @@ function gridImageLqip(src: string | null | undefined): string | undefined {
  * photo when it is hosted on Cloudinary; otherwise fall back to a Cloudinary
  * image_url so we avoid broken external hotlinks on large cards.
  */
-function pickGridImage(d: { first_pick_image_url?: string | null; hero_image_url: string | null; image_url: string | null }): string | null {
+function pickGridImage(d: { slug?: string; first_pick_image_url?: string | null; hero_image_url: string | null; image_url: string | null }): string | null {
+  if (d.slug && MOBILE_BG_OVERRIDES[d.slug]) return MOBILE_BG_OVERRIDES[d.slug];
   if (isCloudinaryUpload(d.first_pick_image_url)) return d.first_pick_image_url!;
   if (d.first_pick_image_url) return d.first_pick_image_url;
   if (isCloudinaryUpload(d.hero_image_url)) return d.hero_image_url;
