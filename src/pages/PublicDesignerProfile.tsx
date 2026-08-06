@@ -921,7 +921,7 @@ const PublicDesignerProfile = () => {
   /* ── "New In" editorial format (portrait left, name + bio right) ── */
   const newInSection = (
     <div className="flex flex-col gap-0">
-      <div className="flex flex-col md:flex-row gap-8 md:gap-14 items-start pt-4 md:pt-8">
+      <div className="flex flex-col md:flex-row gap-8 md:gap-0 items-stretch pt-4 md:pt-8">
         {/* Portrait */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -951,7 +951,7 @@ const PublicDesignerProfile = () => {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...transition, delay: 0.2 }}
-          className="flex-1 flex flex-col justify-start w-full"
+          className="flex-1 flex flex-col justify-start w-full md:pl-16 lg:pl-24 xl:pl-28"
         >
           <div className="flex items-center gap-3 mb-6 md:mb-8">
             <h1 className="font-display text-2xl md:text-3xl lg:text-[2.1rem] text-foreground tracking-[0.12em] uppercase">
@@ -1033,10 +1033,14 @@ const PublicDesignerProfile = () => {
 
           {/* From the Studio — hidden on mobile while the full portrait is open */}
           {(!newInExpanded || !isMobile) && instagramPosts.filter((p) => p.image_url).length > 0 && (
-            <div className="mt-8 md:mt-10 pt-6 md:pt-8 border-t border-border/30">
+            <div className={cn(
+              "mt-8 pt-6 md:pt-8 border-t border-border/30",
+              newInExpanded ? "md:mt-10" : "md:mt-auto"
+            )}>
               <DesignerInstagramSection posts={instagramPosts} designerName={designer.name} compact />
             </div>
           )}
+
 
           {newInExpanded && (
             <div className="mt-6 pt-6 border-t border-border/30 flex justify-center md:hidden">
