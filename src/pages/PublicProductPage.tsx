@@ -2043,14 +2043,17 @@ const PublicProductPage: React.FC = () => {
                     </div>
 
                     <div className="min-w-0 pt-0 pb-1 md:py-5 order-1">
-                      <Link
-                        to={`/designers/${designer.slug}`}
-                        onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                        className="font-body font-light text-[12px] uppercase tracking-[0.22em] text-[hsl(var(--gold))] hover:text-primary transition-colors"
-                      >
-                        {designerDisplay}
-                      </Link>
-                      <h1 className="font-display font-normal text-[1.5rem] md:text-[1.85rem] mt-2 leading-[1.15] tracking-[-0.01em]">
+                      <div className="flex flex-col items-start">
+                        <Link
+                          to={`/designers/${designer.slug}`}
+                          onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
+                          className="font-display text-[14px] md:text-[16px] uppercase tracking-[0.14em] text-foreground hover:text-foreground/80 transition-colors"
+                        >
+                          {designerDisplay}
+                        </Link>
+                        <div className="mt-2 w-8 md:w-10 h-px bg-foreground/20" aria-hidden="true" />
+                      </div>
+                      <h1 className="font-display font-normal text-[1.5rem] md:text-[1.85rem] mt-4 leading-[1.15] tracking-[-0.01em]">
                         {product.title}
                         {product.subtitle &&
                           !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
