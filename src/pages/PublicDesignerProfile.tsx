@@ -1033,10 +1033,14 @@ const PublicDesignerProfile = () => {
 
           {/* From the Studio — hidden on mobile while the full portrait is open */}
           {(!newInExpanded || !isMobile) && instagramPosts.filter((p) => p.image_url).length > 0 && (
-            <div className="mt-8 md:mt-10 pt-6 md:pt-8 border-t border-border/30">
+            <div className={cn(
+              "mt-8 pt-6 md:pt-8 border-t border-border/30",
+              newInExpanded ? "md:mt-10" : "md:mt-auto"
+            )}>
               <DesignerInstagramSection posts={instagramPosts} designerName={designer.name} compact />
             </div>
           )}
+
 
           {newInExpanded && (
             <div className="mt-6 pt-6 border-t border-border/30 flex justify-center md:hidden">
