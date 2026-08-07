@@ -652,11 +652,21 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
 
         {/* Desktop: single-row symmetrical luxury header */}
         <div className="hidden md:flex flex-col items-stretch w-full">
-          {/* ROW 1 — slim utility ribbon */}
-          <div className="flex items-center justify-between h-9 border-b border-neutral-100">
+          {/* ROW 1 — slim utility ribbon with imposing centered brand lockup */}
+          <div className="flex items-center justify-between h-11 border-b border-neutral-100">
             <div className="flex items-center">
               <ShippingDestinationSwitcher compact showIso className="min-h-8 justify-center" />
             </div>
+
+            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap inline-flex items-baseline">
+              <span className="font-brand text-2xl lg:text-3xl font-normal tracking-[0.18em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
+                MAISON AFFLUENCY
+              </span>
+              <span aria-hidden="true" className="mx-5 lg:mx-6 h-3 w-px self-center bg-foreground/20" />
+              <span className="font-body text-[7px] uppercase tracking-[0.3em] font-light text-foreground/50">
+                Est. 2017
+              </span>
+            </button>
 
             <div className="flex items-center gap-5">
               <button
@@ -667,57 +677,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </button>
 
               <DropdownMenu>
-                <DropdownMenuTrigger className="relative group p-1 outline-none">
-                  <User className="w-[16px] h-[16px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" sideOffset={122} className="bg-background border border-border shadow-lg z-50 min-w-[200px] translate-x-[44px]">
-                  {user ? (
-                    <>
-                      <div className="px-4 py-2.5 border-b border-border">
-                        <p className="font-body text-xs text-muted-foreground truncate">{user.email}</p>
-                      </div>
-                      <DropdownMenuItem
-                        onClick={() => navigate("/trade")}
-                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                      >
-                        <User className="h-4 w-4 text-primary" />
-                        <span className="font-body text-sm">My Account</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }}
-                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors text-destructive"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        <span className="font-body text-sm">Sign Out</span>
-                      </DropdownMenuItem>
-                    </>
-                  ) : (
-                    <>
-                      <DropdownMenuItem
-                        onClick={() => { setAuthGateMode("signup"); setAuthGateOpen(true); }}
-                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                      >
-                        <UserPlus className="h-4 w-4 text-primary" />
-                        <span className="font-body text-sm">Sign Up</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => { setAuthGateMode("login"); setAuthGateOpen(true); }}
-                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                      >
-                        <LogIn className="h-4 w-4 text-primary" />
-                        <span className="font-body text-sm">Log In</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => navigate("/trade-program#apply")}
-                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                      >
-                        <Briefcase className="h-4 w-4 text-[hsl(var(--gold))]" />
-                        <span className="font-body text-sm">Trade Program</span>
-                      </DropdownMenuItem>
-                    </>
+...
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
