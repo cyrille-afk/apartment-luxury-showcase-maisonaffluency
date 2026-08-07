@@ -824,7 +824,6 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 </button>
               )}
             </nav>
-          </div>
         </div>
 
 
