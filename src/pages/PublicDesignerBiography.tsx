@@ -79,7 +79,7 @@ export default function PublicDesignerBiography() {
         </header>
 
         {heroImage && (
-          <div className="relative w-full h-[28vh] md:h-[36vh] overflow-hidden bg-muted">
+          <div className="relative w-full h-[26vh] md:h-[32vh] overflow-hidden bg-muted">
             <img
               src={heroImage}
               alt={`${name} atelier`}
