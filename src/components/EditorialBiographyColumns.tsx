@@ -69,7 +69,7 @@ function Caption({ label, above = false }: { label: string; above?: boolean }) {
   if (!label) return null;
   return (
     <p
-      className={`${above ? "mb-3" : "mt-3"} font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.8]`}
+      className={`${above ? "mb-2" : "mt-2"} font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.8]`}
     >
       {label}
     </p>
@@ -94,7 +94,7 @@ function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
     return (
       <div className="h-auto">
         {eyebrow && (
-          <p className="mb-4 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45">
+          <p className="mb-2 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45">
             {eyebrow}
           </p>
         )}
@@ -110,7 +110,7 @@ function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
   return (
     <div className="h-auto">
       {eyebrow && (
-        <p className="mb-4 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45">
+        <p className="mb-2 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45">
           {eyebrow}
         </p>
       )}
@@ -139,7 +139,7 @@ function MediaCell({
     return (
       <figure className="h-auto m-0">
         <Caption label={label} above />
-        <div className="max-h-[450px] overflow-hidden [&_*]:rounded-none">
+        <div className="max-h-[280px] overflow-hidden [&_*]:rounded-none">
           <VideoBlock
             url={block.url}
             designerName={designerName}
@@ -158,7 +158,7 @@ function MediaCell({
       <img
         src={optimizeImageUrl(block.url)}
         alt={block.caption || `${designerName} — editorial`}
-        className="w-full h-auto max-h-[450px] object-cover bg-muted/20 rounded-none"
+        className="w-full h-auto max-h-[280px] object-cover bg-muted/20 rounded-none"
         loading="lazy"
         decoding="async"
       />
@@ -294,12 +294,12 @@ export default function EditorialBiographyColumns({
 
   return (
     <div className="bg-cream">
-      <div className="mx-auto max-w-5xl px-6 md:px-12 pt-16 md:pt-24 pb-14 md:pb-20">
+      <div className="mx-auto max-w-5xl px-6 md:px-12 pt-4 md:pt-6 pb-10 md:pb-14">
         <div className="flex flex-col">
           {rows.map((row, i) => (
-            <div key={`row-${i}`} className="h-auto py-8 md:py-10 first:pt-0 last:pb-0">
+            <div key={`row-${i}`} className="h-auto py-2 md:py-3 first:pt-0 last:pb-0">
               {/* Ultra-fine horizontal baseline rule — locks left→right reading flow */}
-              <div className="w-full h-px bg-foreground/10 mb-8 md:mb-10" />
+              <div className="w-full h-px bg-foreground/10 mb-2 md:mb-3" />
 
               <FadeInRow row={row} delay={Math.min(i * 80, 300)} />
             </div>
@@ -308,7 +308,7 @@ export default function EditorialBiographyColumns({
 
 
         {footer && (
-          <div className="pt-12 md:pt-20 transition-all duration-700 ease-out opacity-100 translate-y-0">
+          <div className="pt-5 md:pt-6 transition-all duration-700 ease-out opacity-100 translate-y-0">
             {footer}
           </div>
         )}
