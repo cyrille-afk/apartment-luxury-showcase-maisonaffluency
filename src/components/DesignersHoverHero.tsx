@@ -991,6 +991,45 @@ const DesignersHoverHero = () => {
 
   const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
 
+  // Scroll a letter row (and its expanded card grid) into view inside the
+  // directory scroller. First pins the letter header to the top, then after the
+  // accordion grid has expanded it nudges the scroller so the cards are fully
+  // visible rather than trailing below the fold.
+  const scrollLetterIntoView = (letter: string) => {
+    requestAnimationFrame(() => {
+      const scroller = searchScrollRef.current;
+      if (!scroller) return;
+      // The scroller contains both the mobile block (md:hidden) and the desktop
+      // block (hidden md:block). Pick the currently visible row so we don't
+      // measure a hidden mobile row on desktop or vice-versa.
+      const rows = Array.from(
+        scroller.querySelectorAll<HTMLElement>(`[data-designer-letter="${letter}"]`)
+      );
+      const row = rows.find((r) => r.offsetParent !== null);
+      if (!row) return;
+
+      const scrollerRect = scroller.getBoundingClientRect();
+      const rowRect = row.getBoundingClientRect();
+      const headerTop = Math.max(
+        0,
+        rowRect.top - scrollerRect.top + scroller.scrollTop - 4
+      );
+      scroller.scrollTo({ top: headerTop, behavior: "smooth" });
+
+      // After the grid expands, ensure the cards are not clipped at the bottom.
+      window.setTimeout(() => {
+        const grid = row.querySelector<HTMLElement>(".grid");
+        if (!grid) return;
+        const gridRect = grid.getBoundingClientRect();
+        const visibleBottom = scroller.getBoundingClientRect().bottom - 8;
+        if (gridRect.bottom > visibleBottom) {
+          const overflow = gridRect.bottom - visibleBottom + 12;
+          scroller.scrollTo({ top: scroller.scrollTop + overflow, behavior: "smooth" });
+        }
+      }, 220);
+    });
+  };
+
   // Lock body scroll + ESC-to-close + autofocus while the search sheet is open.
   // The mobile sheet uses a standard <input type="text">, so the native
   // keyboard opens as usual — no custom keyboard.
@@ -1150,29 +1189,47 @@ const DesignersHoverHero = () => {
 
 
   // Desktop accordion: when a letter opens, pin that letter row to the top of
-  // the sheet viewport so the expanded designer list reads from its heading.
+  // the sheet viewport so the expanded designer cards are visible. The scroller
+  // contains both the mobile and desktop blocks, so we must measure the
+  // visible row (offsetParent != null) rather than the hidden one.
   useEffect(() => {
     if (!searchOpen || !isDesktopViewport || !activeAccordionLetter) return;
     if (!expandedLetters.has(activeAccordionLetter)) return;
 
     const align = () => {
       const scroller = searchScrollRef.current;
-      const row = scroller?.querySelector<HTMLElement>(
-        `[data-designer-letter="${activeAccordionLetter}"]`
+      if (!scroller) return;
+      const rows = Array.from(
+        scroller.querySelectorAll<HTMLElement>(`[data-designer-letter="${activeAccordionLetter}"]`)
       );
-      if (!scroller || !row) return;
+      const row = rows.find((r) => r.offsetParent !== null);
+      if (!row) return;
+
+      const scrollerRect = scroller.getBoundingClientRect();
+      const rowRect = row.getBoundingClientRect();
       const target = Math.max(
         0,
         Math.min(
-          row.getBoundingClientRect().top -
-            scroller.getBoundingClientRect().top +
-            scroller.scrollTop,
+          rowRect.top - scrollerRect.top + scroller.scrollTop - 4,
           scroller.scrollHeight - scroller.clientHeight
         )
       );
       if (Math.abs(scroller.scrollTop - target) > 1) {
         scroller.scrollTo({ top: target, behavior: "smooth" });
       }
+
+      // After the grid expands, nudge the scroller so the cards are not clipped
+      // at the bottom of the dropdown.
+      window.setTimeout(() => {
+        const grid = row.querySelector<HTMLElement>(".grid");
+        if (!grid) return;
+        const gridRect = grid.getBoundingClientRect();
+        const visibleBottom = scroller.getBoundingClientRect().bottom - 8;
+        if (gridRect.bottom > visibleBottom) {
+          const overflow = gridRect.bottom - visibleBottom + 12;
+          scroller.scrollTo({ top: scroller.scrollTop + overflow, behavior: "smooth" });
+        }
+      }, 220);
     };
 
     const frame = window.requestAnimationFrame(align);
@@ -2033,16 +2090,7 @@ const DesignersHoverHero = () => {
                           setRestoredOnlyLetter(null);
                           setExpandedLetters(new Set([letter]));
                           setActiveAccordionLetter(letter);
-                          requestAnimationFrame(() => {
-                            const row = searchScrollRef.current?.querySelector<HTMLElement>(
-                              `[data-designer-letter="${letter}"]`
-                            );
-                            const scroller = searchScrollRef.current;
-                            if (row && scroller) {
-                              const top = row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 4;
-                              scroller.scrollTo({ top, behavior: "smooth" });
-                            }
-                          });
+                          scrollLetterIntoView(letter);
                         }}
                         className={cn(
                           "shrink-0 w-7 h-7 flex items-center justify-center rounded-full font-serif text-[13px] transition-colors",
@@ -2226,18 +2274,9 @@ const DesignersHoverHero = () => {
                                     willOpen = true;
                                     return new Set([letter]);
                                   });
-                                  if (willOpen) {
-                                    requestAnimationFrame(() => {
-                                      const scroller = searchScrollRef.current;
-                                      const row = scroller?.querySelector<HTMLElement>(
-                                        `[data-designer-letter="${letter}"]`
-                                      );
-                                      if (row && scroller) {
-                                        const top = row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 4;
-                                        scroller.scrollTo({ top, behavior: "smooth" });
-                                      }
-                                    });
-                                  }
+                                  // Scroll is handled by the desktop accordion
+                                  // effect so the cards are revealed after the
+                                  // grid has expanded.
                                 }}
                                 aria-expanded={isOpen}
                                 className="w-full flex items-center justify-between px-4 py-1.5 text-left hover:bg-white/[0.04] transition-colors"
