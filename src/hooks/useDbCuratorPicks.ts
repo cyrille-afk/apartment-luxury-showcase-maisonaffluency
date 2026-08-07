@@ -52,6 +52,9 @@ export function useDbCuratorPicks() {
       for (const row of picks as any[]) {
         const designer = designerMap.get(row.designer_id);
         if (!designer) continue;
+        // Profile-only picks (e.g. per-wood Clam Chair splits on Arnold Madsen)
+        // live on the designer page but must never enter the browsing grids.
+        if ((row.tags || []).includes("profile-only")) continue;
 
         const pick: CuratorPick = {
           id: row.id,
