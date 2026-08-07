@@ -179,30 +179,32 @@ const Hero = () => {
                 </div>
 
 
-                {/* Desktop — inline editorial links */}
-                <div className="mt-3 hidden flex-col items-start gap-0.5 hero-fade-in-delayed-5 md:flex">
-                  <div className="flex items-center gap-2 [text-shadow:0_1px_3px_rgba(0,0,0,0.15)]">
+                {/* Desktop — inline editorial links, raised above the CTA over the darker
+                    left-hand section of the image, with a soft scrim for legibility */}
+                <div className="hidden hero-fade-in-delayed-5 md:order-1 md:mb-2 md:flex md:flex-col md:items-start">
+                  <div className="relative inline-flex items-center gap-3 before:content-[''] before:absolute before:-inset-x-4 before:-inset-y-2.5 before:-z-10 before:rounded-sm before:bg-black/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)] [text-shadow:0_1px_4px_rgba(0,0,0,0.6)]">
                     <button
                       type="button"
                       onClick={() => {
                         trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
                         scrollToSection("apartment-tour-heading");
                       }}
-                      className="font-body text-xs font-medium uppercase tracking-[0.18em] text-white transition-colors hover:text-white/80"
+                      className="font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70"
                     >
                       Singapore Gallery Preview
                     </button>
-                    <span className="font-body text-xs font-medium text-white/50" aria-hidden="true">|</span>
+                    <span className="h-3 w-px bg-white/40" aria-hidden="true" />
                     <button
                       type="button"
                       onClick={openTour}
-                      className="group font-body text-xs font-medium uppercase tracking-[0.18em] text-white transition-colors hover:text-white/80"
+                      className="group font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70"
                     >
-                      <span className="underline decoration-white/70 underline-offset-4 decoration-1 transition-colors group-hover:decoration-white">Book Private Appointment</span>
-                      <span className="ml-1 font-light italic normal-case text-white/70 transition-colors group-hover:text-white">(Trade Only)</span>
+                      <span>Book Private Appointment</span>
+                      <span className="ml-2 tracking-[0.2em] text-white/70">(Trade Only)</span>
                     </button>
                   </div>
                 </div>
+
 
 
               </div>
