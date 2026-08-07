@@ -653,7 +653,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
         {/* Desktop: single-row symmetrical luxury header */}
         <div className="hidden md:flex flex-col items-stretch w-full">
           {/* ROW 1 — slim utility ribbon with imposing centered brand lockup */}
-          <div className="flex items-center justify-between py-6 border-b border-neutral-100">
+          <div className="flex items-center justify-between pt-6 pb-2 border-b border-neutral-100">
             <div className="flex items-center">
               <ShippingDestinationSwitcher compact showIso className="min-h-8 justify-center" />
             </div>
