@@ -13,13 +13,10 @@ import {
  * Premium 2-column asymmetrical editorial layout for the expanded
  * ("full portrait") biography page.
  *
- * 12-column grid:
- *  - col-span-4 (left)  → typographic anchors, metadata + media captions
- *  - col-span-8 (right) → running narrative (max 600px) and rich media
- *
- * Media never centers or wraps: it sits in the right track with its caption
- * note perfectly aligned on the left track. Everything is h-auto so blocks of
- * any length push the page down fluidly.
+ * Tightly bound, strictly editorial golden box:
+ *  - max-w-5xl centered container
+ *  - 12-column grid: text spans 5, media spans 6, 1 clean whitespace track
+ *  - ultra-fine horizontal baseline rule above every row
  */
 
 type Block =
@@ -142,7 +139,7 @@ function MediaCell({
     return (
       <figure className="h-auto m-0">
         <Caption label={label} above />
-        <div className="[&_*]:rounded-none overflow-hidden">
+        <div className="max-h-[450px] overflow-hidden [&_*]:rounded-none">
           <VideoBlock
             url={block.url}
             designerName={designerName}
@@ -161,7 +158,7 @@ function MediaCell({
       <img
         src={optimizeImageUrl(block.url)}
         alt={block.caption || `${designerName} — editorial`}
-        className="w-full h-auto object-cover bg-muted/20 rounded-none"
+        className="w-full h-auto max-h-[450px] object-cover bg-muted/20 rounded-none"
         loading="lazy"
         decoding="async"
       />
@@ -169,13 +166,14 @@ function MediaCell({
   );
 }
 
-type Row = { left: React.ReactNode; right: React.ReactNode };
+type Cell = { node: React.ReactNode; isMedia: boolean };
+type Row = { left: Cell; right: Cell | null };
 
 function FadeInRow({
-  children,
+  row,
   delay = 0,
 }: {
-  children: React.ReactNode;
+  row: Row;
   delay?: number;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -207,17 +205,25 @@ function FadeInRow({
     return () => observer.disconnect();
   }, []);
 
+  const spanClass = (isMedia: boolean) =>
+    isMedia ? "lg:col-span-6" : "lg:col-span-5";
+
   return (
     <div
       ref={ref}
       className={`
-        grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-14 lg:gap-x-16
+        grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12
         transition-all duration-700 ease-out will-change-transform
         ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}
       `}
       style={{ transitionDelay: `${delay}ms` }}
     >
-      {children}
+      <div className={`h-auto ${spanClass(row.left.isMedia)}`}>{row.left.node}</div>
+      {row.right ? (
+        <div className={`h-auto ${spanClass(row.right.isMedia)}`}>{row.right.node}</div>
+      ) : (
+        <div className="hidden lg:block lg:col-span-6" />
+      )}
     </div>
   );
 }
@@ -258,8 +264,8 @@ export default function EditorialBiographyColumns({
     );
     rows.push(
       rowIndex % 2 === 0
-        ? { left: textCell, right: mediaCell }
-        : { left: mediaCell, right: textCell },
+        ? { left: { node: textCell, isMedia: false }, right: { node: mediaCell, isMedia: true } }
+        : { left: { node: mediaCell, isMedia: true }, right: { node: textCell, isMedia: false } },
     );
     ti += 1;
     mi += 1;
@@ -268,36 +274,34 @@ export default function EditorialBiographyColumns({
 
   // Leftovers keep both columns filled: pair remaining items two per row.
   while (ti < texts.length) {
-    const left = <TextCell content={texts[ti].content} eyebrow={ti === 0 ? eyebrow : undefined} />;
+    const left = { node: <TextCell content={texts[ti].content} eyebrow={ti === 0 ? eyebrow : undefined} />, isMedia: false };
     ti += 1;
-    const right = ti < texts.length ? <TextCell content={texts[ti].content} /> : null;
+    const right = ti < texts.length
+      ? { node: <TextCell content={texts[ti].content} />, isMedia: false }
+      : null;
     if (right) ti += 1;
     rows.push({ left, right });
   }
   while (mi < media.length) {
-    const left = <MediaCell block={media[mi]} designerName={designerName} index={mi} />;
+    const left = { node: <MediaCell block={media[mi]} designerName={designerName} index={mi} />, isMedia: true };
     mi += 1;
-    const right =
-      mi < media.length ? (
-        <MediaCell block={media[mi]} designerName={designerName} index={mi} />
-      ) : null;
+    const right = mi < media.length
+      ? { node: <MediaCell block={media[mi]} designerName={designerName} index={mi} />, isMedia: true }
+      : null;
     if (right) mi += 1;
     rows.push({ left, right });
   }
 
   return (
     <div className="bg-cream">
-      <div className="mx-auto max-w-[1400px] px-6 md:px-[6vw] pt-16 md:pt-24 pb-14 md:pb-20">
-        <div className="flex flex-col gap-10 md:gap-14 lg:gap-y-20">
+      <div className="mx-auto max-w-5xl px-6 md:px-12 pt-16 md:pt-24 pb-14 md:pb-20">
+        <div className="flex flex-col">
           {rows.map((row, i) => (
-            <div key={`row-${i}`} className="h-auto">
-              {/* Horizontal editorial baseline — anchors the left→right reading flow */}
-              {i > 0 && <div className="w-full h-px bg-foreground/10 mb-8 md:mb-10" />}
+            <div key={`row-${i}`} className="h-auto py-8 md:py-10 first:pt-0 last:pb-0">
+              {/* Ultra-fine horizontal baseline rule — locks left→right reading flow */}
+              <div className="w-full h-px bg-foreground/10 mb-8 md:mb-10" />
 
-              <FadeInRow delay={Math.min(i * 80, 300)}>
-                <div className="h-auto">{row.left}</div>
-                <div className="h-auto">{row.right}</div>
-              </FadeInRow>
+              <FadeInRow row={row} delay={Math.min(i * 80, 300)} />
             </div>
           ))}
         </div>
@@ -312,4 +316,3 @@ export default function EditorialBiographyColumns({
     </div>
   );
 }
-
