@@ -1492,7 +1492,7 @@ const DesignersHoverHero = () => {
         >
 
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
-            <div className="relative w-full">
+            <div className={cn("relative", isMobileOrPwa ? "inline-block" : "block w-full")}>
               {/* Desktop: Directory sits directly above the designer list to
                   group navigation (list) with its utility (search) — Proximity.
                   All items share the same left edge as the designer names. */}
@@ -1511,7 +1511,8 @@ const DesignersHoverHero = () => {
                   suppressNavClickRef.current = false;
                 }}
                 className={cn(
-                  "relative block w-full select-none",
+                  "relative select-none",
+                  isMobileOrPwa ? "inline-block" : "block w-full",
                   isMobileBrowser ? "touch-none" : isMobileOrPwa ? "touch-pan-y" : "touch-none"
                 )}
               >
