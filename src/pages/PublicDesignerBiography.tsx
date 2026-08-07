@@ -61,7 +61,7 @@ export default function PublicDesignerBiography() {
 
       <main className="pt-[70px]">
         {/* Editorial masthead */}
-        <header className="mx-auto max-w-[1400px] px-[6vw] pt-8 pb-6 md:pt-10 md:pb-8">
+        <header className="mx-auto max-w-[1400px] px-[6vw] pt-6 pb-4 md:pt-8 md:pb-6">
           <Link
             to={`/designers/${designer.slug}`}
             className="group inline-flex items-center gap-3 font-body text-[10px] md:text-[11px] uppercase tracking-[0.22em] text-foreground/60 hover:text-foreground transition-colors duration-300"
@@ -70,16 +70,16 @@ export default function PublicDesignerBiography() {
             <span>Back to {name}</span>
           </Link>
 
-          <h1 className="mt-5 font-display text-4xl md:text-6xl leading-[1.05] tracking-[-0.01em] text-foreground">
+          <h1 className="mt-4 font-display text-4xl md:text-6xl leading-[1.05] tracking-[-0.01em] text-foreground">
             {name}
           </h1>
-          <p className="mt-2 font-body text-[10px] md:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
+          <p className="mt-1 font-body text-[10px] md:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
             {designer.specialty || "The Full Portrait"}
           </p>
         </header>
 
         {heroImage && (
-          <div className="relative w-full h-[38vh] md:h-[50vh] overflow-hidden bg-muted">
+          <div className="relative w-full h-[30vh] md:h-[40vh] overflow-hidden bg-muted">
             <img
               src={heroImage}
               alt={`${name} atelier`}
