@@ -1992,109 +1992,99 @@ const DesignersHoverHero = () => {
                     </div>
                   </div>
 
-                  {/* Desktop: A–Z accordion with counts, expandable per letter */}
-                  <ul className="hidden md:flex flex-col pt-0 pb-1">
-                    {isSearching ? (
-                      flatResults.length === 0 ? (
-                        <li className="px-4 py-8 text-center text-sm font-body text-white/50">
-                          No designers match “{searchQuery}”.
-                        </li>
+                  {/* Desktop: same grouped card grid as mobile, using the designer's card photo */}
+                  <div className="hidden md:block">
+                    <div className="flex flex-col pb-2">
+                      {isSearching ? (
+                        flatResults.length === 0 ? (
+                          <p className="px-4 py-8 text-center text-sm font-body text-white/50">
+                            No designers match “{searchQuery}”.
+                          </p>
+                        ) : (
+                          <div className="grid grid-cols-2 gap-x-3 gap-y-4 px-0 pt-2 pb-4">
+                            {flatResults.map((d: any) => (
+                              <DesignerGridCard
+                                key={d.slug}
+                                designer={d}
+                                useCardPhoto
+                                onNavigate={() => setSearchOpen(false)}
+                              />
+                            ))}
+                          </div>
+                        )
                       ) : (
-                        flatResults.map((d) => (
-                          <li key={d.slug}>
-                            <Link
-                              to={`/designers/${d.slug}`}
-                              state={{ fromDesignersHero: true, fromDesignersAZ: true }}
-                              data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
-                              onClick={() => {
-                                rememberDesignersAzLetter(lastNameInitial(d.name));
-                                setSearchOpen(false);
-                              }}
-                              className="block px-5 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
+                        groupedResults.map(([letter, items]) => {
+                          const isOpen = expandedLetters.has(letter);
+                          return (
+                            <div
+                              key={letter}
+                              data-designer-letter={letter}
+                              className="border-b border-white/[0.06] last:border-b-0 scroll-mt-2"
                             >
-                              {displayDesignerName(d.name)}
-                            </Link>
-                          </li>
-                        ))
-                      )
-                    ) : (
-                      groupedResults.map(([letter, items]) => {
-                        const isOpen = expandedLetters.has(letter);
-                        return (
-                          <li
-                            key={letter}
-                            data-designer-letter={letter}
-                            className="border-b border-white/[0.06] last:border-b-0 scroll-mt-2"
-                          >
-                            <button
-                              type="button"
-                              onClick={() => {
-                                let willOpen = false;
-                                setExpandedLetters((prev) => {
-                                  if (prev.has(letter)) {
-                                    if (activeAccordionLetter === letter) setActiveAccordionLetter(null);
-                                    return new Set();
-                                  }
-                                  setActiveAccordionLetter(letter);
-                                  rememberDesignersAzLetter(letter);
-                                  willOpen = true;
-                                  return new Set([letter]);
-                                });
-                                if (willOpen) {
-                                  requestAnimationFrame(() => {
-                                    const scroller = searchScrollRef.current;
-                                    const row = scroller?.querySelector<HTMLElement>(
-                                      `[data-designer-letter="${letter}"]`
-                                    );
-                                    if (row && scroller) {
-                                      const top = row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 4;
-                                      scroller.scrollTo({ top, behavior: "smooth" });
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  let willOpen = false;
+                                  setExpandedLetters((prev) => {
+                                    if (prev.has(letter)) {
+                                      if (activeAccordionLetter === letter) setActiveAccordionLetter(null);
+                                      return new Set();
                                     }
+                                    setActiveAccordionLetter(letter);
+                                    rememberDesignersAzLetter(letter);
+                                    willOpen = true;
+                                    return new Set([letter]);
                                   });
-                                }
-                              }}
-                              aria-expanded={isOpen}
-                              className="w-full flex items-center justify-between px-5 py-2 text-left hover:bg-white/[0.04] transition-colors"
-                            >
-                              <span className="flex items-center gap-3">
-                                <span
-                                  className={cn(
-                                    "text-white/50 text-xs transition-transform",
-                                    isOpen && "rotate-90"
-                                  )}
-                                  aria-hidden="true"
-                                >
-                                  ›
+                                  if (willOpen) {
+                                    requestAnimationFrame(() => {
+                                      const scroller = searchScrollRef.current;
+                                      const row = scroller?.querySelector<HTMLElement>(
+                                        `[data-designer-letter="${letter}"]`
+                                      );
+                                      if (row && scroller) {
+                                        const top = row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 4;
+                                        scroller.scrollTo({ top, behavior: "smooth" });
+                                      }
+                                    });
+                                  }
+                                }}
+                                aria-expanded={isOpen}
+                                className="w-full flex items-center justify-between px-4 py-1.5 text-left hover:bg-white/[0.04] transition-colors"
+                              >
+                                <span className="flex items-center gap-2.5">
+                                  <span
+                                    className={cn(
+                                      "text-white/50 text-xs transition-transform",
+                                      isOpen && "rotate-90"
+                                    )}
+                                    aria-hidden="true"
+                                  >
+                                    ›
+                                  </span>
+                                  <span className="font-serif text-base text-white">{letter}</span>
                                 </span>
-                                <span className="font-serif text-lg text-white">{letter}</span>
-                              </span>
-                              <span className="font-body text-xs text-white/50">{items.length}</span>
-                            </button>
-                            {isOpen && (
-                              <ul className="flex flex-col pb-2">
-                                {items.map((d) => (
-                                  <li key={d.slug}>
-                                    <Link
-                                      to={`/designers/${d.slug}`}
-                                      state={{ fromDesignersHero: true, fromDesignersAZ: true }}
-                                      data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
-                                      onClick={() => {
-                                        rememberDesignersAzLetter(lastNameInitial(d.name));
-                                        setSearchOpen(false);
-                                      }}
-                                      className="block pl-12 pr-5 py-1.5 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
-                                    >
-                                      {displayDesignerName(d.name)}
-                                    </Link>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </li>
-                        );
-                      })
-                    )}
-                  </ul>
+                                <span className="font-body text-[11px] tracking-wide text-white/45 pl-3">{items.length}</span>
+                              </button>
+                              {isOpen && (
+                                <div className="grid grid-cols-2 gap-x-3 gap-y-4 px-0 pt-2 pb-4">
+                                  {items.map((d: any, i: number) => (
+                                    <DesignerGridCard
+                                      key={d.slug}
+                                      designer={d}
+                                      useCardPhoto
+                                      priority={i < 4}
+                                      onNavigate={() => setSearchOpen(false)}
+                                    />
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+
                 </>
               )}
             </div>
