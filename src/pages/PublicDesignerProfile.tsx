@@ -1816,7 +1816,7 @@ const PublicDesignerProfile = () => {
                       </div>
 
                       {/* Editorial text block — quiet, uniform, line-clamped */}
-                      <div className="flex flex-col flex-1 px-0.5 md:px-0 text-center">
+                      <div className="flex flex-col flex-1 px-0.5 md:px-0 text-left md:text-center">
                         {/* Designer / brand label — small caps, muted (mobile only shows when grouped, like competitor) */}
                         {designerLabel && designerSlug ? (
                           <Link
