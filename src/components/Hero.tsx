@@ -44,7 +44,7 @@ const scrollToMeetDesigners = () => {
 };
 
 const heroPrimaryCtaClass =
-  "inline-flex min-h-12 items-center justify-center rounded-full border-2 border-white bg-white px-8 py-3.5 text-center text-[#1A1A1A] text-sm md:text-base font-body font-extrabold tracking-[0.14em] uppercase shadow-[0_14px_40px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.4)] md:shadow-[0_12px_36px_rgba(0,0,0,0.4)] ring-1 ring-black/20 transition-[background-color,color,border-color,transform] duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:bg-[#1A1A1A] hover:text-white hover:border-white focus:outline-none focus:ring-2 focus:ring-white/60 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4";
+  "group inline-flex min-h-12 items-center justify-center gap-3 rounded-none border border-white/80 bg-transparent px-9 py-3.5 text-center text-white text-[11px] md:text-xs font-body font-light tracking-[0.3em] uppercase [text-shadow:0_1px_6px_rgba(0,0,0,0.45)] transition-[background-color,border-color,color,opacity] duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:border-white hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent hero-fade-in-delayed-4";
 
 
 const Hero = () => {
@@ -141,13 +141,14 @@ const Hero = () => {
               A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
             <div className="hero-mobile-cta-stack w-screen -translate-x-6 items-center md:w-full md:translate-x-0 md:items-start mt-[5.5rem] md:mt-20 flex flex-col gap-6">
-              <div className="flex flex-col items-center gap-6 md:inline-flex">
+              <div className="flex flex-col items-center gap-6 md:inline-flex md:items-start">
                 <button
                   type="button"
                   onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-                  className={heroPrimaryCtaClass}
+                  className={`${heroPrimaryCtaClass} md:order-2`}
                 >
-                  EXPLORE THE COLLECTION
+                  <span>EXPLORE THE COLLECTION</span>
+                  <span aria-hidden="true" className="transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:translate-x-1">&#8594;</span>
                 </button>
 
                 {/* Inline editorial links — vertical stack on mobile/PWA, horizontal on desktop */}
@@ -178,30 +179,32 @@ const Hero = () => {
                 </div>
 
 
-                {/* Desktop — inline editorial links */}
-                <div className="mt-3 hidden flex-col items-start gap-0.5 hero-fade-in-delayed-5 md:flex">
-                  <div className="flex items-center gap-2 [text-shadow:0_1px_3px_rgba(0,0,0,0.15)]">
+                {/* Desktop — inline editorial links, raised above the CTA over the darker
+                    left-hand section of the image, with a soft scrim for legibility */}
+                <div className="hidden hero-fade-in-delayed-5 md:order-1 md:mb-2 md:flex md:flex-col md:items-start">
+                  <div className="relative inline-flex items-center gap-3 before:content-[''] before:absolute before:-inset-x-4 before:-inset-y-2.5 before:-z-10 before:rounded-sm before:bg-black/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)] [text-shadow:0_1px_4px_rgba(0,0,0,0.6)]">
                     <button
                       type="button"
                       onClick={() => {
                         trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
                         scrollToSection("apartment-tour-heading");
                       }}
-                      className="font-body text-xs font-medium uppercase tracking-[0.18em] text-white transition-colors hover:text-white/80"
+                      className="font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70"
                     >
                       Singapore Gallery Preview
                     </button>
-                    <span className="font-body text-xs font-medium text-white/50" aria-hidden="true">|</span>
+                    <span className="h-3 w-px bg-white/40" aria-hidden="true" />
                     <button
                       type="button"
                       onClick={openTour}
-                      className="group font-body text-xs font-medium uppercase tracking-[0.18em] text-white transition-colors hover:text-white/80"
+                      className="group font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70"
                     >
-                      <span className="underline decoration-white/70 underline-offset-4 decoration-1 transition-colors group-hover:decoration-white">Book Private Appointment</span>
-                      <span className="ml-1 font-light italic normal-case text-white/70 transition-colors group-hover:text-white">(Trade Only)</span>
+                      <span>Book Private Appointment</span>
+                      <span className="ml-2 tracking-[0.2em] text-white/70">(Trade Only)</span>
                     </button>
                   </div>
                 </div>
+
 
 
               </div>
