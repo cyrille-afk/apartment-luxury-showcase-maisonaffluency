@@ -69,7 +69,7 @@ function Caption({ label, above = false }: { label: string; above?: boolean }) {
   if (!label) return null;
   return (
     <p
-      className={`${above ? "mb-3" : "mt-3"} font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.8]`}
+      className={`${above ? "mb-2" : "mt-2"} font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.8]`}
     >
       {label}
     </p>
