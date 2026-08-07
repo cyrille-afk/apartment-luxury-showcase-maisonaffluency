@@ -24,6 +24,7 @@ export default function PublicDesignerBiography() {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isTradeUser = !!user;
   const { data: designer, isLoading } = useDesigner(slug, { includeTradeOnly: isTradeUser });
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
 
