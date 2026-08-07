@@ -1776,7 +1776,7 @@ const PublicDesignerProfile = () => {
                     setLightboxItem({
                       id: pick.id,
                       title: displayTitle,
-                      subtitle: isArnoldClamChair ? "Arnold Madsen" : pick.subtitle,
+                      subtitle: isArnoldClamChair ? undefined : pick.subtitle,
                       image_url: pick.image_url,
                       hover_image_url: pick.hover_image_url,
                       brand_name: isArnoldClamChair ? "Dagmar" : designerLabel || designer.name,
