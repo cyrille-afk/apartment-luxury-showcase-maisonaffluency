@@ -1388,28 +1388,31 @@ const DesignersHoverHero = () => {
       aria-label="Featured designers"
       onMouseLeave={() => {}}
       className={cn(
-        "relative w-full bg-black text-foreground overflow-hidden",
-        isMobileBrowser ? "touch-none" : "touch-pan-y",
+        "relative w-full bg-black text-foreground overflow-hidden md:overflow-visible",
         isStandalone
-          ? "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))] md:h-[calc(100svh-var(--header-h))] md:min-h-[640px]"
+          ? "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))] md:h-auto md:min-h-[calc(100svh-var(--header-h))]"
           : // Background frame uses 100lvh so dark hero always covers Safari's
             // toolbar-collapse zone (no white strip). Content frame inside is
             // constrained to 100svh so the Directory clears the iOS toolbar
-            // when it is visible.
-            "h-[calc(var(--designers-landing-vh,100lvh)-var(--header-h))] md:h-[calc(100svh-var(--header-h))]"
+            // when it is visible. Desktop: height is natural so the whole page
+            // scrolls as one track (no nested scroller).
+            "h-[calc(var(--designers-landing-vh,100lvh)-var(--header-h))] md:h-auto md:min-h-[calc(100svh-var(--header-h))]"
       )}
     >
       {/* Cross-fading background images — on mobile the photo stops at the
           visible viewport (svh) / above the home indicator so iOS bottom
-          chrome always sits on solid black instead of the image. */}
+          chrome always sits on solid black instead of the image.
+          Desktop: sticky so the imagery stays locked while the list scrolls. */}
       <div
         className={cn(
           "absolute inset-x-0 top-0 z-0 overflow-hidden",
+          "md:sticky md:inset-auto md:top-[var(--header-h)] md:w-full md:h-[calc(100svh-var(--header-h))]",
           isStandalone
-            ? "bottom-[env(safe-area-inset-bottom,0px)] md:bottom-0"
-            : "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))] md:h-auto md:bottom-0"
+            ? "bottom-[env(safe-area-inset-bottom,0px)] md:bottom-auto"
+            : "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))] md:bottom-auto"
         )}
       >
+
         {items.map((d, i) => {
           const src = isMobileOrPwa
             ? mobileHeroBackgroundSrc(d)
