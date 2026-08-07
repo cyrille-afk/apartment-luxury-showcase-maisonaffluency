@@ -826,7 +826,7 @@ function MobileLetterRow({
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
                     const isParentBrand = item.founder === item.name && designerCount > 0;
                     // Only the first visible card (+ its peek neighbour) loads eagerly.
-                    const priority = cardIndex < FIRST_ROW_CARDS_MOBILE;
+                    const priority = eagerFirstRow && cardIndex < FIRST_ROW_CARDS_MOBILE;
                     return (
                       <div key={item.slug} className={cn("flex-none snap-start", isParentBrand ? "w-[88vw] max-w-[420px]" : "w-[78%] max-w-[320px]")}>
                         {isParentBrand ? (
@@ -883,6 +883,7 @@ function LetterGroupBody({
   fallbackGalleryIndexByDesigner,
   initialExpand,
   designersWithIgPosts,
+  eagerFirstRow = false,
 }: {
   letter: string;
   designers: Designer[];
@@ -890,6 +891,8 @@ function LetterGroupBody({
   fallbackGalleryIndexByDesigner: Record<string, number[]>;
   initialExpand?: string;
   designersWithIgPosts?: Set<string>;
+  /** True only for the first alphabetical group — its first row loads eagerly. */
+  eagerFirstRow?: boolean;
 }) {
   const matchesExpand = initialExpand && designers.some((d) => d.name === initialExpand || d.founder === initialExpand);
   const [openParent, setOpenParent] = useState<string | null>(matchesExpand ? initialExpand! : null);
@@ -908,6 +911,7 @@ function LetterGroupBody({
           fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
           designersWithIgPosts={designersWithIgPosts}
           initialExpand={initialExpand}
+          eagerFirstRow={eagerFirstRow}
         />
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 grid-flow-dense items-start gap-4 md:gap-6 lg:gap-8">
@@ -915,7 +919,7 @@ function LetterGroupBody({
             const designerCount = parentDesignerCountByName[item.name] ?? 0;
             const isParentBrand = item.founder === item.name && designerCount > 0;
             // Eager-load only the first grid row (4 columns at the widest breakpoint).
-            const priority = cardIndex < FIRST_ROW_CARDS;
+            const priority = eagerFirstRow && cardIndex < FIRST_ROW_CARDS;
             if (isParentBrand) {
               const isOpen = openParent === item.name;
               return (
@@ -949,6 +953,7 @@ function LetterGroup({
   fallbackGalleryIndexByDesigner,
   initialExpand,
   designersWithIgPosts,
+  eagerFirstRow = false,
 }: {
   letter: string;
   anchorId: string;
@@ -958,6 +963,8 @@ function LetterGroup({
   fallbackGalleryIndexByDesigner: Record<string, number[]>;
   initialExpand?: string;
   designersWithIgPosts?: Set<string>;
+  /** True only for the first alphabetical group — its first row loads eagerly. */
+  eagerFirstRow?: boolean;
 }) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   // Lazy-mount each letter group's heavy child cards + images. Once revealed,
@@ -1053,6 +1060,7 @@ function LetterGroup({
           fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
           initialExpand={initialExpand}
           designersWithIgPosts={designersWithIgPosts}
+          eagerFirstRow={eagerFirstRow}
         />
       ) : (
         <div
@@ -1070,7 +1078,7 @@ function LetterGroup({
 }
 
 // ─── Letter Carousel ─────────────────────────────────────────────────────────
-function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDesignerCountByName, fallbackGalleryIndexByDesigner, designersWithIgPosts, initialExpand }: { letter: string; designers: Designer[]; openParent: string | null; setOpenParent: (name: string | null) => void; parentDesignerCountByName: Record<string, number>; fallbackGalleryIndexByDesigner: Record<string, number[]>; designersWithIgPosts?: Set<string>; initialExpand?: string }) {
+function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDesignerCountByName, fallbackGalleryIndexByDesigner, designersWithIgPosts, initialExpand, eagerFirstRow = false }: { letter: string; designers: Designer[]; openParent: string | null; setOpenParent: (name: string | null) => void; parentDesignerCountByName: Record<string, number>; fallbackGalleryIndexByDesigner: Record<string, number[]>; designersWithIgPosts?: Set<string>; initialExpand?: string; /** True only for the first alphabetical group — its first row loads eagerly. */ eagerFirstRow?: boolean }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [activePage, setActivePage] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -1206,7 +1214,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
                     const isParentBrand = item.founder === item.name && designerCount > 0;
                     // Only the first row of the first page is above the fold.
-                    const priority = pageIndex === 0 && cardIndex < FIRST_ROW_CARDS;
+                    const priority = eagerFirstRow && pageIndex === 0 && cardIndex < FIRST_ROW_CARDS;
                     if (isParentBrand) {
                       const isOpen = openParent === item.name;
                       return <ParentBrandCard key={item.slug} item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} hasIgPosts={designersWithIgPosts?.has(item.id)} priority={priority} />;
@@ -2134,10 +2142,11 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                   )}
                   {!isLoading && alphaGroups.length > 0 && (
                     <div>
-                      {alphaGroups.map(([letter, designers]) => (
+                      {alphaGroups.map(([letter, designers], groupIndex) => (
                         <LetterGroup
                           key={letter}
                           letter={letter}
+                          eagerFirstRow={groupIndex === 0}
                           anchorId={getDesignersDirectoryAnchorId(letter, "desktop")}
                           designers={designers}
                           forceOpen={forcedLetters.has(letter)}
