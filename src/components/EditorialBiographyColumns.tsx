@@ -138,6 +138,7 @@ function MediaCell({
   if (block.kind === "video") {
     return (
       <figure className="h-auto m-0">
+        <Caption label={label} above />
         <div className="[&_*]:rounded-none overflow-hidden">
           <VideoBlock
             url={block.url}
@@ -147,13 +148,13 @@ function MediaCell({
             posterUrl={block.poster || undefined}
           />
         </div>
-        <Caption label={label} />
       </figure>
     );
   }
 
   return (
     <figure className="h-auto m-0">
+      <Caption label={label} above />
       <img
         src={optimizeImageUrl(block.url)}
         alt={block.caption || `${designerName} — editorial`}
@@ -161,7 +162,6 @@ function MediaCell({
         loading="lazy"
         decoding="async"
       />
-      <Caption label={label} />
     </figure>
   );
 }
