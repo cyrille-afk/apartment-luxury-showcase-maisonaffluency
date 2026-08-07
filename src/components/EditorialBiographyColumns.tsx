@@ -138,6 +138,53 @@ function MediaCell({
 
 type Row = { left: React.ReactNode; right: React.ReactNode };
 
+function FadeInRow({
+  children,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setInView(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -60px 0px" }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={`
+        grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-14 lg:gap-x-16
+        transition-all duration-700 ease-out will-change-transform
+        ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}
+      `}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function EditorialBiographyColumns({
   biography,
   biographyImages = [],
