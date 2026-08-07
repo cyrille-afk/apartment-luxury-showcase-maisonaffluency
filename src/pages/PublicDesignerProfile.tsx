@@ -1937,7 +1937,15 @@ const PublicDesignerProfile = () => {
                           </Link>
                         </h3>
 
-                        {/* Subtitle, materials & dimensions hidden on grid — shown in lightbox detail view */}
+                        {/* Variant/finish subtitle — only when it isn't a designer attribution */}
+                        {pick.subtitle &&
+                          pick.subtitle.trim().toLowerCase() !== (designerLabel || "").trim().toLowerCase() &&
+                          !subtitleDesignerLabel && (
+                            <p className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.14em] text-muted-foreground leading-tight mt-1 line-clamp-1">
+                              {pick.subtitle}
+                            </p>
+                          )}
+
 
                         {/* Price slot — pushed to bottom so cards align across the row */}
                         <div className="mt-1 md:mt-2">
