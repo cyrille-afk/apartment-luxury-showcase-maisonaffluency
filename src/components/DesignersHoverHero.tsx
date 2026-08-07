@@ -1388,16 +1388,16 @@ const DesignersHoverHero = () => {
       aria-label="Featured designers"
       onMouseLeave={() => {}}
       className={cn(
-        "relative w-full bg-black text-foreground overflow-hidden md:overflow-visible",
+        "relative w-full bg-black text-foreground overflow-hidden",
         isMobileBrowser ? "touch-none" : "touch-pan-y",
         isStandalone
-          ? "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))] md:h-auto md:min-h-[calc(100svh-var(--header-h))]"
+          ? "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))] md:h-[calc(100svh-var(--header-h))]"
           : // Background frame uses 100lvh so dark hero always covers Safari's
             // toolbar-collapse zone (no white strip). Content frame inside is
             // constrained to 100svh so the Directory clears the iOS toolbar
             // when it is visible. Desktop: height is natural so the whole page
             // scrolls as one track (no nested scroller).
-            "h-[calc(var(--designers-landing-vh,100lvh)-var(--header-h))] md:h-auto md:min-h-[calc(100svh-var(--header-h))]"
+            "h-[calc(var(--designers-landing-vh,100lvh)-var(--header-h))] md:h-[calc(100svh-var(--header-h))]"
       )}
     >
       {/* Cross-fading background images — on mobile the photo stops at the
@@ -1407,7 +1407,7 @@ const DesignersHoverHero = () => {
       <div
         className={cn(
           "absolute inset-x-0 top-0 z-0 overflow-hidden",
-          "md:sticky md:inset-auto md:top-[var(--header-h)] md:w-full md:h-[calc(100svh-var(--header-h))]",
+          "md:inset-0 md:h-full md:w-full",
           isStandalone
             ? "bottom-[env(safe-area-inset-bottom,0px)] md:bottom-auto"
             : "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))] md:bottom-auto"
@@ -1476,7 +1476,7 @@ const DesignersHoverHero = () => {
           "absolute inset-x-0 top-0 z-20 pointer-events-none",
           // Desktop: pulled back over the sticky imagery with a negative margin
           // so the column contributes its natural height to the page scroll.
-          "md:static md:-mt-[calc(100svh-var(--header-h))] md:h-auto",
+          "md:h-full",
           isStandalone ? "h-full" : "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))]"
         )}
       >
@@ -1485,13 +1485,13 @@ const DesignersHoverHero = () => {
         <div
           ref={contentScrollRef}
           className={cn(
-          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto md:overflow-visible md:h-auto",
+          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto md:overflow-hidden md:h-full",
             isStandalone
-              ? "overflow-y-auto justify-start overscroll-contain touch-pan-y pt-12 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pt-8 md:pb-16 md:justify-start md:overflow-visible [-webkit-overflow-scrolling:touch]"
+              ? "overflow-y-auto justify-start overscroll-contain touch-pan-y pt-12 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pt-6 md:pb-8 md:justify-start md:overflow-hidden [-webkit-overflow-scrolling:touch]"
               : // Mobile browser: the section already starts below the fixed
                 // header, so do not add var(--header-h) again here. Keep the
                 // designer list high while leaving room for the Directory link.
-                "overflow-y-hidden justify-start overscroll-contain touch-none pt-[4.25rem] short:pt-[3.5rem] pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pt-8 md:justify-start md:pb-16 md:overflow-visible"
+                "overflow-y-hidden justify-start overscroll-contain touch-none pt-[4.25rem] short:pt-[3.5rem] pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pt-6 md:justify-start md:pb-8 md:overflow-hidden"
           )}
         >
 
@@ -1531,12 +1531,12 @@ const DesignersHoverHero = () => {
                       key={group.label}
                       className={cn(
                         "flex flex-col text-left",
-                        groupIdx > 0 && "mt-2 short:mt-1 md:mt-6"
+                        groupIdx > 0 && "mt-2 short:mt-1 md:mt-3"
                       )}
                     >
                       <span
                         ref={groupIdx === 0 ? mastersRef : undefined}
-                        className="inline-flex items-center gap-1.5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-body font-bold text-gold drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mb-1 md:mb-3"
+                        className="inline-flex items-center gap-1.5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-body font-bold text-gold drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mb-1 md:mb-1.5"
                       >
                         {group.label}
                       </span>
@@ -1555,11 +1555,12 @@ const DesignersHoverHero = () => {
                           .map(({ letter, items: letterItems }, letterIdx, lettersArr) => {
                             const isLastLetter = letterIdx === lettersArr.length - 1;
                             return (
-                              <li key={letter} className="flex flex-col text-left">
-                                <span className="text-[10px] uppercase tracking-[0.3em] font-body text-white/45 mt-1.5 mb-1">
+                              <li key={letter} className="flex flex-row items-start text-left gap-3">
+                                <span className="w-4 shrink-0 pt-[5px] text-[9px] uppercase tracking-[0.28em] font-body text-white/35">
                                   {letter}
                                 </span>
-                                <ul className="flex flex-col gap-[2px] short:gap-0 md:gap-1 text-left">
+                                <ul className="flex flex-col gap-[2px] short:gap-0 md:gap-0 text-left">
+
                                   {letterItems.map((d, dIdx) => {
                                     const [first, last] = splitName(d.name);
                                     const isActive = d.slug === activeSlug;
@@ -1589,8 +1590,8 @@ const DesignersHoverHero = () => {
                                           className={cn(
                                             "cursor-pointer appearance-none bg-transparent border-0 p-0 m-0 text-left",
                                             "inline-flex items-center whitespace-nowrap relative",
-                                            "text-[15px] short:text-[14px] sm:text-base md:text-[18px] leading-[1.25] short:leading-[1.15] sm:leading-[1.55]",
-                                            "font-display font-light tracking-normal",
+                                            "text-[15px] short:text-[14px] sm:text-base md:text-[14px] leading-[1.25] short:leading-[1.15] sm:leading-[1.3]",
+                                            "font-display font-light tracking-tight",
                                             "transition-colors duration-500 ease-out",
                                             "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
                                             isActive
@@ -1648,12 +1649,12 @@ const DesignersHoverHero = () => {
                       key={group.label}
                       className={cn(
                         "flex flex-col text-left",
-                        groupIdx > 0 && "mt-2 short:mt-1 md:mt-6"
+                        groupIdx > 0 && "mt-2 short:mt-1 md:mt-3"
                       )}
                     >
                       <span
                         ref={groupIdx === 0 ? mastersRef : undefined}
-                        className="inline-flex items-center gap-1.5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-body font-bold text-gold drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mb-1 md:mb-3"
+                        className="inline-flex items-center gap-1.5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-body font-bold text-gold drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mb-1 md:mb-1.5"
                       >
                         {group.label}
                       </span>
