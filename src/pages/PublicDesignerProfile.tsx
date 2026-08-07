@@ -1742,14 +1742,18 @@ const PublicDesignerProfile = () => {
 
 
 
-                  // The pick physically belongs to THIS designer, so the product
-                  // page must live under this profile's slug. The attribution
-                  // slug (e.g. Arnold Madsen under Dagmar) is only for the name
-                  // link above the title — using it here 404s the product page.
-                  const targetDesignerSlug = designer.slug;
-                  const productSlug = slugifyProduct(
-                    pick.title + (pick.subtitle ? `-${pick.subtitle}` : "")
-                  );
+                  // Arnold Madsen's three Clam Chair cards are finish-specific
+                  // editorial entries, not separate products. Keep all three
+                  // cards on his portrait, but route them to Dagmar's canonical
+                  // full product page where the finish selector and complete
+                  // product data live.
+                  const isArnoldClamChair =
+                    designer.slug === "arnold-madsen" &&
+                    /^clam chair(?:,|\s|$)/i.test(pick.title);
+                  const targetDesignerSlug = isArnoldClamChair ? "dagmar-london" : designer.slug;
+                  const productSlug = isArnoldClamChair
+                    ? "clam-chair"
+                    : slugifyProduct(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""));
                   const productHref = `/designers/${targetDesignerSlug}/${productSlug}`;
                   const isMobilePickRevealed = mobileRevealedPickId === pick.id;
                   const handleCardClick = (e: React.MouseEvent) => {

@@ -427,8 +427,15 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
   /* ── Linked product page URL (only when designer slug resolves) ───── */
   const productPageDesignerSlug = product.designer_slug || linkedDesigner?.slug;
+  const isDagmarClamChairFinishCard =
+    productPageDesignerSlug === "dagmar-london" &&
+    /^clam chair(?:,|\s|$)/i.test(product.title) &&
+    /^(?:oiled|fumed)\s+/i.test(product.subtitle || "");
+  const productPageSlug = isDagmarClamChairFinishCard
+    ? "clam-chair"
+    : slugifyProduct(product.title + (product.subtitle ? `-${product.subtitle}` : ""));
   const productPageHref = productPageDesignerSlug
-    ? `/designers/${productPageDesignerSlug}/${slugifyProduct(product.title + (product.subtitle ? `-${product.subtitle}` : ""))}`
+    ? `/designers/${productPageDesignerSlug}/${productPageSlug}`
     : null;
 
   const compareItem: CompareItem = {
