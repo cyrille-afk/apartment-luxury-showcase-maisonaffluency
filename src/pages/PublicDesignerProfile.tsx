@@ -1034,7 +1034,8 @@ const PublicDesignerProfile = () => {
   const newInSection = (
     <div className="flex flex-col gap-0">
       {/* ── DESKTOP: cinematic architectural stack — clean photo, then narrative ── */}
-      <div className="hidden md:block">
+      <div className={portraitOpen ? "hidden" : "hidden md:block"} aria-hidden={portraitOpen}>
+
         {wideHeroImage && (
           <div className="relative w-screen left-1/2 -ml-[50vw] h-[72vh] max-h-[calc(100vh-22rem)] min-h-[320px] overflow-hidden bg-muted">
             <img
@@ -1094,7 +1095,7 @@ const PublicDesignerProfile = () => {
       </div>
 
       {/* ── MOBILE: mirrors the desktop cinematic stack ── */}
-      <div className="grid grid-cols-1 gap-6 items-start pt-4 md:hidden">
+      <div className={portraitOpen ? "hidden" : "grid grid-cols-1 gap-6 items-start pt-4 md:hidden"} aria-hidden={portraitOpen}>
 
         <motion.div
           initial={{ opacity: 0, x: -20 }}

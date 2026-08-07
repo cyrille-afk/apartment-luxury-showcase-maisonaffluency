@@ -287,12 +287,13 @@ export default function EditorialBiographyColumns({
 
   return (
     <div className="bg-cream">
-      <div className="mx-auto max-w-[1400px] px-6 md:px-[6vw] py-14 md:py-20">
+      <div className="mx-auto max-w-[1400px] px-6 md:px-[6vw] pt-16 md:pt-24 pb-14 md:pb-20">
         <div className="flex flex-col gap-10 md:gap-14 lg:gap-y-20">
           {rows.map((row, i) => (
             <div key={`row-${i}`} className="h-auto">
               {/* Horizontal editorial baseline — anchors the left→right reading flow */}
-              <div className="w-full h-px bg-foreground/10 mb-8 md:mb-10" />
+              {i > 0 && <div className="w-full h-px bg-foreground/10 mb-8 md:mb-10" />}
+
               <FadeInRow delay={Math.min(i * 80, 300)}>
                 <div className="h-auto">{row.left}</div>
                 <div className="h-auto">{row.right}</div>
