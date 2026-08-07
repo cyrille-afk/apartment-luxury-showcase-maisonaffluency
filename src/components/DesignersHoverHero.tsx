@@ -232,6 +232,7 @@ const FEATURED_GROUPS = [
     label: "Masters",
     slugs: [
       "alexander-lamont",
+      "arnold-madsen",
       "dagmar-london",
       "emmanuel-babled",
       "felix-agostini",
