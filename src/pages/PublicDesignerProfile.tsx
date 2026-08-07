@@ -3,11 +3,13 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal } from "lucide-react";
+import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal, Square, Grid2X2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
@@ -433,7 +435,7 @@ const PublicDesignerProfile = () => {
     [searchParams, slug]
   );
   const { data: designer, isLoading } = useDesigner(slug, { includeTradeOnly: isTradeUser });
-  const [pickCols, setPickCols] = useState<"auto" | "two">("auto");
+  const [pickCols, setPickCols] = useState<"auto" | "two" | "one">("auto");
   const [sortMode, setSortMode] = useState<"default" | "price-asc" | "price-desc" | "new">("default");
   const [activeCategories, setActiveCategories] = useState<string[]>([]);
   const isParentBrand = isParentBrandDesigner(designer);
@@ -1435,14 +1437,113 @@ const PublicDesignerProfile = () => {
                       });
 
                 const forceTwoCol = designer.slug === "adrien-messie" || pickCols === "two";
-                const gridClass = forceTwoCol
-                  ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-2"
-                  : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
+                const gridClass =
+                  pickCols === "one"
+                    ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5"
+                    : forceTwoCol
+                      ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-2"
+                      : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
+
+                const filterItems = categories.map((c) => (
+                  <DropdownMenuCheckboxItem
+                    key={c}
+                    checked={activeCategories.includes(c)}
+                    onCheckedChange={(on) =>
+                      setActiveCategories((prev) =>
+                        on ? [...prev, c] : prev.filter((x) => x !== c)
+                      )
+                    }
+                    className="font-body text-[11px] uppercase tracking-[0.14em]"
+                  >
+                    {c}
+                  </DropdownMenuCheckboxItem>
+                ));
+
+                const sortOptions = (
+                  <>
+                    <option value="default">Default Sorting</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="new">New Launch</option>
+                  </>
+                );
 
                 return (
                   <>
-                    {/* ── CONTROLS BAR ── */}
-                    <div className="flex items-center justify-between gap-4 pb-4 mb-6 border-b border-border/60">
+                    {/* ── CONTROLS BAR — MOBILE / PWA ── */}
+                    <div className="md:hidden flex items-center justify-between border-b border-border/60 py-3 mb-6">
+                      <div className="flex items-center space-x-4">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            disabled={categories.length === 0}
+                            className="flex items-center space-x-1.5 font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground disabled:opacity-40"
+                          >
+                            <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1} aria-hidden="true" />
+                            <span>Filter</span>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start" className="rounded-none">
+                            {filterItems}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <div className="h-4 w-px bg-border/70" />
+
+                        <div className="flex items-center space-x-2.5 text-muted-foreground" role="group" aria-label="Grid density">
+                          <button
+                            type="button"
+                            onClick={() => setPickCols("one")}
+                            aria-pressed={pickCols === "one"}
+                            aria-label="Single column"
+                            className={cn("transition-colors", pickCols === "one" && "text-foreground")}
+                          >
+                            <Square className="h-4 w-4" strokeWidth={1} aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPickCols("two")}
+                            aria-pressed={pickCols !== "one"}
+                            aria-label="Two column grid"
+                            className={cn("transition-colors", pickCols !== "one" && "text-foreground")}
+                          >
+                            <Grid2X2 className="h-4 w-4" strokeWidth={1} aria-hidden="true" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          aria-label="Sort products"
+                          className="inline-flex items-center gap-1.5 font-body uppercase tracking-[0.14em] text-foreground focus:outline-none"
+                          style={{ fontSize: "11px", lineHeight: "1.2" }}
+                        >
+                          <span className="max-w-[42vw] truncate">
+                            {sortMode === "price-asc"
+                              ? "Price: Low to High"
+                              : sortMode === "price-desc"
+                                ? "Price: High to Low"
+                                : sortMode === "new"
+                                  ? "New Launch"
+                                  : "Default Sorting"}
+                          </span>
+                          <ChevronDown className="h-3 w-3 text-muted-foreground" strokeWidth={1} aria-hidden="true" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="rounded-none">
+                          <DropdownMenuRadioGroup
+                            value={sortMode}
+                            onValueChange={(v) => setSortMode(v as typeof sortMode)}
+                          >
+                            <DropdownMenuRadioItem value="default" className="font-body text-[11px] uppercase tracking-[0.14em]">Default Sorting</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="price-asc" className="font-body text-[11px] uppercase tracking-[0.14em]">Price: Low to High</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="price-desc" className="font-body text-[11px] uppercase tracking-[0.14em]">Price: High to Low</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="new" className="font-body text-[11px] uppercase tracking-[0.14em]">New Launch</DropdownMenuRadioItem>
+                          </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+
+                    {/* ── CONTROLS BAR — DESKTOP ── */}
+                    <div className="hidden md:flex items-center justify-between gap-4 pb-4 mb-6 border-b border-border/60">
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           disabled={categories.length === 0}
@@ -1452,20 +1553,7 @@ const PublicDesignerProfile = () => {
                           <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1} aria-hidden="true" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" className="rounded-none">
-                          {categories.map((c) => (
-                            <DropdownMenuCheckboxItem
-                              key={c}
-                              checked={activeCategories.includes(c)}
-                              onCheckedChange={(on) =>
-                                setActiveCategories((prev) =>
-                                  on ? [...prev, c] : prev.filter((x) => x !== c)
-                                )
-                              }
-                              className="font-body text-[11px] uppercase tracking-[0.14em]"
-                            >
-                              {c}
-                            </DropdownMenuCheckboxItem>
-                          ))}
+                          {filterItems}
                         </DropdownMenuContent>
                       </DropdownMenu>
 
@@ -1509,13 +1597,11 @@ const PublicDesignerProfile = () => {
                             backgroundPosition: "right 10px center",
                           }}
                         >
-                          <option value="default">Default Sorting</option>
-                          <option value="price-asc">Price: Low to High</option>
-                          <option value="price-desc">Price: High to Low</option>
-                          <option value="new">New Launch</option>
+                          {sortOptions}
                         </select>
                       </div>
                     </div>
+
 
                     <div className={cn("grid gap-x-4 gap-y-8 md:gap-x-5 md:gap-y-10", gridClass)}>
                 {visiblePicks.map((pick) => {
@@ -1673,7 +1759,7 @@ const PublicDesignerProfile = () => {
                           }
                         }}
                         aria-label={`${displayTitle}${pick.subtitle ? ` — ${pick.subtitle}` : ""}`}
-                        className="aspect-square md:aspect-[4/5] bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer"
+                        className="aspect-[4/5] bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer"
                       >
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
@@ -1751,7 +1837,7 @@ const PublicDesignerProfile = () => {
                       </div>
 
                       {/* Editorial text block — quiet, uniform, line-clamped */}
-                      <div className="flex flex-col flex-1 px-0.5 md:px-0 text-center">
+                      <div className="flex flex-col flex-1 px-0.5 md:px-0 text-left md:text-center">
                         {/* Designer / brand label — small caps, muted (mobile only shows when grouped, like competitor) */}
                         {designerLabel && designerSlug ? (
                           <Link
@@ -1783,7 +1869,7 @@ const PublicDesignerProfile = () => {
                         )}
 
                         {/* Product name — primary (deep link so the URL is shareable/copyable) */}
-                        <h3 className="font-display text-[13px] md:text-[13px] tracking-wide leading-snug mt-2 line-clamp-2">
+                        <h3 className="font-display text-[13px] md:text-[13px] font-light tracking-tight md:tracking-wide leading-snug mt-1 md:mt-2 line-clamp-2">
                           <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground/70 transition-colors">
                             {displayTitle}
                           </Link>
@@ -1792,8 +1878,9 @@ const PublicDesignerProfile = () => {
                         {/* Subtitle, materials & dimensions hidden on grid — shown in lightbox detail view */}
 
                         {/* Price slot — pushed to bottom so cards align across the row */}
-                        <div className="mt-2">
-                          <p className="font-body text-[10px] md:text-xs text-muted-foreground md:text-foreground tracking-wide">
+                        <div className="mt-1 md:mt-2">
+                          <p className="font-body text-[11px] md:text-xs font-medium text-foreground/80 md:text-foreground md:font-normal tracking-wide">
+
                             {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
                           </p>
                           {editionNote && !/^re-?edition$/i.test(editionNote) && (
