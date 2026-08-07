@@ -1484,7 +1484,7 @@ const DesignersHoverHero = () => {
                   group navigation (list) with its utility (search) — Proximity.
                   All items share the same left edge as the designer names. */}
               <div className={cn("mb-5 lg:mb-6", isMobileBrowser ? "hidden" : "hidden md:block")}>
-                {directoryLabels("w-fit", directoryRef, "left")}
+                {directoryLabels("w-full", directoryRef, "left")}
               </div>
 
 
