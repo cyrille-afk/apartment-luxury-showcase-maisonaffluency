@@ -1670,7 +1670,11 @@ const DesignersHoverHero = () => {
                                     const [first, last] = splitName(d.name);
                                     const isActive = d.slug === activeSlug;
                                     const HIDE_FOUNDER_SUFFIX = new Set(["Man of Parts", "Pouenat", "Ozone"]);
-                                    const childBrand = d.founder && d.founder !== d.name && !HIDE_FOUNDER_SUFFIX.has(d.founder);
+                                    const brandSuffix =
+                                      DIRECTORY_BRAND_SUFFIX[d.slug] ??
+                                      (d.founder && d.founder !== d.name && !HIDE_FOUNDER_SUFFIX.has(d.founder)
+                                        ? d.founder
+                                        : null);
                                     const isLastItem =
                                       groupIdx === groupedItems.length - 1 &&
                                       isLastLetter &&
@@ -1718,8 +1722,8 @@ const DesignersHoverHero = () => {
                                                 {last}
                                               </span>
                                             )}
-                                            {childBrand && (
-                                              <span className="opacity-80"> - {d.founder}</span>
+                                            {brandSuffix && (
+                                              <span className="opacity-80"> - {brandSuffix}</span>
                                             )}
                                           </span>
                                           {/* Discovery cue: tiny aperture glyph hinting each name has a photo.
@@ -1769,7 +1773,11 @@ const DesignersHoverHero = () => {
                           const isActive = d.slug === activeSlug;
                           const isDimmed = activeSlug !== null && !isActive;
                           const HIDE_FOUNDER_SUFFIX = new Set(["Man of Parts", "Pouenat", "Ozone"]);
-                          const childBrand = d.founder && d.founder !== d.name && !HIDE_FOUNDER_SUFFIX.has(d.founder);
+                          const brandSuffix =
+                                      DIRECTORY_BRAND_SUFFIX[d.slug] ??
+                                      (d.founder && d.founder !== d.name && !HIDE_FOUNDER_SUFFIX.has(d.founder)
+                                        ? d.founder
+                                        : null);
                           const isLastItem =
                             groupIdx === groupedItems.length - 1 &&
                             dIdx === group.designers.length - 1;
@@ -1810,8 +1818,8 @@ const DesignersHoverHero = () => {
                                       {last}
                                     </span>
                                   )}
-                                  {childBrand && (
-                                    <span className="opacity-80"> - {d.founder}</span>
+                                  {brandSuffix && (
+                                    <span className="opacity-80"> - {brandSuffix}</span>
                                   )}
                                   {/* Discovery cue: tiny aperture glyph hinting each name has a photo.
                                       Shown on every viewport; faint by default, brightens when active. */}
