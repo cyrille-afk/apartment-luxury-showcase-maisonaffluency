@@ -1060,7 +1060,13 @@ const DesignersHoverHero = () => {
   const prevSearchOpenRef = useRef(searchOpen);
   useEffect(() => {
     if (prevSearchOpenRef.current && !searchOpen) {
-      setExpandedLetters(new Set(["A"]));
+      // Desktop: collapse the A-Z entirely when the directory closes so the
+      // next open feels like a fresh reveal. Mobile/PWA: reset to A.
+      if (isDesktopViewport) {
+        setExpandedLetters(new Set());
+      } else {
+        setExpandedLetters(new Set(["A"]));
+      }
       setActiveAccordionLetter(null);
     }
     prevSearchOpenRef.current = searchOpen;
