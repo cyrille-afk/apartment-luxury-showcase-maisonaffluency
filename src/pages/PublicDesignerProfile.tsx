@@ -434,7 +434,7 @@ const PublicDesignerProfile = () => {
   );
   const { data: designer, isLoading } = useDesigner(slug, { includeTradeOnly: isTradeUser });
   const [pickCols, setPickCols] = useState<"auto" | "two">("auto");
-  const [sortMode, setSortMode] = useState<"default" | "price-asc" | "price-desc" | "name">("default");
+  const [sortMode, setSortMode] = useState<"default" | "price-asc" | "price-desc" | "new">("default");
   const [activeCategories, setActiveCategories] = useState<string[]>([]);
   const isParentBrand = isParentBrandDesigner(designer);
   const isChildDesigner = isChildBrandDesigner(designer);
@@ -1423,7 +1423,13 @@ const PublicDesignerProfile = () => {
                   sortMode === "default"
                     ? filtered
                     : [...filtered].sort((a, b) => {
-                        if (sortMode === "name") return a.title.localeCompare(b.title);
+                        if (sortMode === "new") {
+                          const t = (p: any) => {
+                            const v = Date.parse(p?.created_at ?? "");
+                            return Number.isFinite(v) ? v : 0;
+                          };
+                          return t(b) - t(a);
+                        }
                         const d = priceOf(a) - priceOf(b);
                         return sortMode === "price-asc" ? d : -d;
                       });
@@ -1506,7 +1512,7 @@ const PublicDesignerProfile = () => {
                           <option value="default">Default Sorting</option>
                           <option value="price-asc">Price: Low to High</option>
                           <option value="price-desc">Price: High to Low</option>
-                          <option value="name">Alphabetical</option>
+                          <option value="new">New Launch</option>
                         </select>
                       </div>
                     </div>
