@@ -1103,16 +1103,17 @@ const PublicDesignerProfile = () => {
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
           {/* Full-bleed, untruncated hero — natural aspect ratio */}
-          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted">
+          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted max-h-[250px] overflow-hidden">
             {(wideHeroImage || heroImage) && (
               <img
                 src={wideHeroImage || heroImage}
                 alt={`${name} interior`}
-                className="block w-full h-auto"
+                className="block w-full h-auto max-h-[250px] object-cover"
                 loading="eager"
               />
             )}
           </div>
+
           {designer.hero_photo_credit && (
             <p className="mt-2 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
               Photo: {designer.hero_photo_credit}
