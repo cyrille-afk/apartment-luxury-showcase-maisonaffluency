@@ -16,6 +16,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import SilentLink from "@/components/SilentLink";
 import { Search, X, ImageIcon } from "lucide-react";
 
 import { useQuery } from "@tanstack/react-query";
@@ -158,7 +159,7 @@ function DesignerGridCard({
     rememberDesignersAzLetter(lastNameInitial(designer.name));
   };
   return (
-    <Link
+    <SilentLink
       to={`/designers/${designer.slug}`}
       state={{ fromDesignersHero: true, fromDesignersAZ: true }}
       data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
@@ -222,7 +223,7 @@ function DesignerGridCard({
           {displayName}
         </span>
       </div>
-    </Link>
+    </SilentLink>
   );
 }
 
@@ -1929,7 +1930,7 @@ const DesignersHoverHero = () => {
           <>
             {/* Profile portal — the right-half image area shows a kinetic
                 "View Profile" cursor and links to the active designer. */}
-            <Link
+            <SilentLink
               key={`${active.slug}-portal`}
               ref={portalRef}
               to={`/designers/${active.slug}`}
@@ -1960,12 +1961,12 @@ const DesignersHoverHero = () => {
                   <span className="text-white/40 text-[7px] uppercase tracking-[0.3em] font-body">Profile</span>
                 </div>
               </div>
-            </Link>
+            </SilentLink>
 
             {/* Caption / CTA — rendered as a separate, higher-stacked link so
                 hovering the bottom-right CTA shows the normal cursor and can be
                 clicked independently of the profile portal. */}
-            <Link
+            <SilentLink
               key={`${active.slug}-cta`}
               to={`/designers/${active.slug}`}
               state={{ fromDesignersHero: true }}
@@ -1997,7 +1998,7 @@ const DesignersHoverHero = () => {
                   </span>
                 </span>
               </div>
-            </Link>
+            </SilentLink>
           </>
         );
       })()}
