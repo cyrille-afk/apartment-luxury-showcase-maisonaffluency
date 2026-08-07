@@ -23,6 +23,7 @@ import ShareMenu from "@/components/ShareMenu";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import { shareProfileOnWhatsApp, sharePageOnWhatsApp, buildDesignerOgUrl } from "@/lib/whatsapp-share";
 import EditorialBiography, { renderParagraph } from "@/components/EditorialBiography";
+import EditorialBiographyColumns from "@/components/EditorialBiographyColumns";
 
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
