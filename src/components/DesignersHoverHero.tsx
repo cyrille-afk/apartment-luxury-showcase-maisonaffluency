@@ -417,14 +417,35 @@ const DesignersHoverHero = () => {
         const l = sessionStorage.getItem(DESIGNERS_AZ_LAST_LETTER_KEY);
         if (l) {
           restoredLetterRef.current = l;
-          return new Set([l]);
+          // Mobile/PWA restores the previous letter so the list lands where the
+          // user left it. Desktop keeps the A-Z closed on entry so the user is
+          // surprised by the card grid opening up.
+          const isMobileRestore =
+            window.matchMedia("(max-width: 767px)").matches ||
+            isPwaStandaloneDisplay();
+          if (isMobileRestore) {
+            return new Set([l]);
+          }
         }
       } catch {}
     }
-    return new Set(["A"]);
+    return new Set();
   });
   const [activeAccordionLetter, setActiveAccordionLetter] = useState<string | null>(
-    () => restoredLetterRef.current
+    () => {
+      if (typeof window !== "undefined") {
+        try {
+          const l = sessionStorage.getItem(DESIGNERS_AZ_LAST_LETTER_KEY);
+          if (l) {
+            const isMobileRestore =
+              window.matchMedia("(max-width: 767px)").matches ||
+              isPwaStandaloneDisplay();
+            if (isMobileRestore) return l;
+          }
+        } catch {}
+      }
+      return null;
+    }
   );
   const [activeMobileLetter, setActiveMobileLetter] = useState<string | null>(() => restoredLetterRef.current);
   const [azDragging, setAzDragging] = useState(false);
@@ -1039,7 +1060,13 @@ const DesignersHoverHero = () => {
   const prevSearchOpenRef = useRef(searchOpen);
   useEffect(() => {
     if (prevSearchOpenRef.current && !searchOpen) {
-      setExpandedLetters(new Set(["A"]));
+      // Desktop: collapse the A-Z entirely when the directory closes so the
+      // next open feels like a fresh reveal. Mobile/PWA: reset to A.
+      if (isDesktopViewport) {
+        setExpandedLetters(new Set());
+      } else {
+        setExpandedLetters(new Set(["A"]));
+      }
       setActiveAccordionLetter(null);
     }
     prevSearchOpenRef.current = searchOpen;
@@ -1053,7 +1080,9 @@ const DesignersHoverHero = () => {
       // The A-Z grid can render after the sheet opens, so retry until the row
       // exists instead of clearing the saved letter too early.
       const restored = restoredLetterRef.current;
-      if (restored) {
+      // On desktop the A-Z opens collapsed; only mobile/PWA jump back to the
+      // previously viewed letter so the list lands where the user left it.
+      if (restored && !isDesktopViewport) {
         let cancelled = false;
         setRestoredOnlyLetter(restored);
         setActiveMobileLetter(restored);
@@ -1106,7 +1135,7 @@ const DesignersHoverHero = () => {
         };
       }
     }
-  }, [searchOpen, groupedResults.length]);
+  }, [searchOpen, groupedResults.length, isDesktopViewport]);
 
 
   // Desktop accordion: when a letter opens, pin that letter row to the top of
