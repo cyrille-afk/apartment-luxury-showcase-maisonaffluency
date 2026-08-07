@@ -1315,18 +1315,29 @@ const DesignersHoverHero = () => {
   ) => (
     <div ref={ref} className={className}>
       <div className={cn(
-        "flex flex-col w-full",
+        "flex flex-col",
+        !isMobileOrPwa && "w-full",
         align === "center" && "items-center text-center",
         align === "right" && "items-end"
       )}>
         <span
           className={cn(
-            "text-[9px] uppercase tracking-[0.32em] mb-2 font-body font-medium text-white/95",
+            isMobileOrPwa
+              ? "text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white"
+              : "text-[9px] uppercase tracking-[0.32em] mb-2 font-body font-medium text-white/95",
             align === "center" && "text-center",
             align === "right" && "text-right"
           )}
         >
-          Directory <span className="text-white/55 normal-case tracking-normal font-light">({designerCount || 95})</span>
+          Directory{" "}
+          <span
+            className={cn(
+              "normal-case tracking-normal",
+              isMobileOrPwa ? "text-white/70" : "text-white/55 font-light"
+            )}
+          >
+            ({designerCount || 95})
+          </span>
         </span>
 
         <button
@@ -1354,14 +1365,16 @@ const DesignersHoverHero = () => {
           aria-expanded={searchOpen}
           aria-controls="designers-search-sheet"
           className={cn(
-            "w-full inline-flex items-center gap-2 pb-2.5 border-b border-white/15",
-            "text-xs font-body font-light italic text-white/80 hover:text-white transition-colors",
+            "inline-flex items-center gap-2 text-xs font-body font-light italic transition-colors",
+            isMobileOrPwa
+              ? "text-white/85 hover:text-white underline-offset-4 hover:underline"
+              : "w-full pb-2.5 border-b border-white/15 text-white/80 hover:text-white",
             align === "left" && "text-left justify-start",
             align === "center" && "text-center justify-center",
             align === "right" && "text-right flex-row-reverse justify-start"
           )}
         >
-          <Search className="h-3.5 w-3.5 not-italic opacity-90" aria-hidden="true" />
+          <Search className={cn("h-3.5 w-3.5 not-italic", !isMobileOrPwa && "opacity-90")} aria-hidden="true" />
           Find A Designer
         </button>
       </div>
