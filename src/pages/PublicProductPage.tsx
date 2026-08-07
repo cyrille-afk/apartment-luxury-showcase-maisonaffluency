@@ -2285,11 +2285,11 @@ const PublicProductPage: React.FC = () => {
                     </div>
                     <h1 className="font-display font-normal text-[1.75rem] md:text-[2.15rem] mt-5 leading-[1.15] tracking-[-0.01em]">
                       {product.title}
-                      {product.subtitle &&
-                        !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
-                        !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) && (
-                          <span className="block mt-1 text-[0.8em] text-muted-foreground">{`by ${product.subtitle}`}</span>
-                        )}
+                      {formatProductSubtitleLine(product.title, product.subtitle) && (
+                        <span className="block mt-1 text-[0.8em] text-muted-foreground">
+                          {formatProductSubtitleLine(product.title, product.subtitle)}
+                        </span>
+                      )}
                     </h1>
 
                     {(() => {
