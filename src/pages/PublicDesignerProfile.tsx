@@ -1510,19 +1510,37 @@ const PublicDesignerProfile = () => {
                         </div>
                       </div>
 
-                      <div className="relative inline-block text-left">
-                        <select
-                          value={sortMode}
-                          onChange={(e) => setSortMode(e.target.value as typeof sortMode)}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
                           aria-label="Sort products"
-                          className="appearance-none bg-transparent pr-4 pl-1 py-1 max-w-[52vw] truncate font-body uppercase tracking-[0.14em] text-foreground focus:outline-none cursor-pointer border-b border-transparent transition"
-                          style={{ fontSize: "11px", lineHeight: "1.2", textSizeAdjust: "100%", WebkitTextSizeAdjust: "100%" } as React.CSSProperties}
+                          className="inline-flex items-center gap-1.5 font-body uppercase tracking-[0.14em] text-foreground focus:outline-none"
+                          style={{ fontSize: "11px", lineHeight: "1.2" }}
                         >
-                          {sortOptions}
-                        </select>
-                        <span className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[9px] text-muted-foreground">▼</span>
-                      </div>
+                          <span className="max-w-[42vw] truncate">
+                            {sortMode === "price-asc"
+                              ? "Price: Low to High"
+                              : sortMode === "price-desc"
+                                ? "Price: High to Low"
+                                : sortMode === "new"
+                                  ? "New Launch"
+                                  : "Default Sorting"}
+                          </span>
+                          <ChevronDown className="h-3 w-3 text-muted-foreground" strokeWidth={1} aria-hidden="true" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="rounded-none">
+                          <DropdownMenuRadioGroup
+                            value={sortMode}
+                            onValueChange={(v) => setSortMode(v as typeof sortMode)}
+                          >
+                            <DropdownMenuRadioItem value="default" className="font-body text-[11px] uppercase tracking-[0.14em]">Default Sorting</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="price-asc" className="font-body text-[11px] uppercase tracking-[0.14em]">Price: Low to High</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="price-desc" className="font-body text-[11px] uppercase tracking-[0.14em]">Price: High to Low</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="new" className="font-body text-[11px] uppercase tracking-[0.14em]">New Launch</DropdownMenuRadioItem>
+                          </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
+
 
                     {/* ── CONTROLS BAR — DESKTOP ── */}
                     <div className="hidden md:flex items-center justify-between gap-4 pb-4 mb-6 border-b border-border/60">
