@@ -141,13 +141,14 @@ const Hero = () => {
               A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
             <div className="hero-mobile-cta-stack w-screen -translate-x-6 items-center md:w-full md:translate-x-0 md:items-start mt-[5.5rem] md:mt-20 flex flex-col gap-6">
-              <div className="flex flex-col items-center gap-6 md:inline-flex">
+              <div className="flex flex-col items-center gap-6 md:inline-flex md:items-start">
                 <button
                   type="button"
                   onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-                  className={heroPrimaryCtaClass}
+                  className={`${heroPrimaryCtaClass} md:order-2`}
                 >
-                  EXPLORE THE COLLECTION
+                  <span>EXPLORE THE COLLECTION</span>
+                  <span aria-hidden="true" className="transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:translate-x-1">&#8594;</span>
                 </button>
 
                 {/* Inline editorial links — vertical stack on mobile/PWA, horizontal on desktop */}
