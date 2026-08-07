@@ -233,7 +233,7 @@ const FEATURED_GROUPS = [
     slugs: [
       "alexander-lamont",
       "arnold-madsen",
-      "dagmar-london",
+      
       "emmanuel-babled",
       "felix-agostini",
       "jean-michel-frank",
@@ -250,6 +250,7 @@ const FEATURED_GROUPS = [
     label: "Contemporary Talents",
     slugs: [
       "apparatus-studio",
+      "dagmar-london",
       "atelier-demichelis",
       "christopher-boots",
       "delcourt-collection",
