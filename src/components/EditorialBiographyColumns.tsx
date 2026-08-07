@@ -155,6 +155,10 @@ function FadeInRow({
       setInView(true);
       return;
     }
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
