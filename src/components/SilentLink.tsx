@@ -9,9 +9,9 @@ interface SilentLinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 
 
 /**
  * Anchor that navigates via react-router but hides its destination from the
- * browser's status bar on hover. On pointer enter we swap `href` to "#" and
- * restore it only on click, so Chrome/Safari/Firefox never render the URL
- * preview in the bottom-left. Right-click "Copy link" still works because
+ * browser's status bar on hover. The anchor carries NO href at all (an href
+ * of "#" still renders "site.com/path#" in the status bar), so Chrome/Safari/
+ * Firefox never show a URL preview in the bottom-left. Right-click "Copy link" still works because
  * the real href is present on contextmenu.
  */
 const SilentLink = forwardRef<HTMLAnchorElement, SilentLinkProps>(
@@ -24,14 +24,21 @@ const SilentLink = forwardRef<HTMLAnchorElement, SilentLinkProps>(
       <a
         {...rest}
         ref={ref}
-        href="#"
+        role="link"
+        tabIndex={0}
         onMouseEnter={(e) => {
-          e.currentTarget.setAttribute("href", "#");
+          e.currentTarget.removeAttribute("href");
           onMouseEnter?.(e);
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.setAttribute("href", "#");
+          e.currentTarget.removeAttribute("href");
           onMouseLeave?.(e);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            navigate(realHref.current, { state: state as any, replace });
+          }
         }}
         onContextMenu={(e) => {
           // Temporarily restore real href so "Copy link address" gives the true URL.
@@ -39,7 +46,7 @@ const SilentLink = forwardRef<HTMLAnchorElement, SilentLinkProps>(
           onContextMenu?.(e);
           // Clear again on next tick so status bar doesn't flash.
           const el = e.currentTarget;
-          window.setTimeout(() => el.setAttribute("href", "#"), 0);
+          window.setTimeout(() => el.removeAttribute("href"), 0);
         }}
         onClick={(e: MouseEvent<HTMLAnchorElement>) => {
           onClick?.(e);
