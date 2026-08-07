@@ -977,14 +977,19 @@ const PublicDesignerProfile = () => {
      No parent re-render, no second hero, no route change. */
   const openPortrait = () => {
     setPortraitOpen(true);
-    const land = () => {
+    const land = (behavior: ScrollBehavior) => {
       const el = portraitRef.current;
       if (!el) return;
       const top = el.getBoundingClientRect().top + window.scrollY - 76;
-      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+      window.scrollTo({ top: Math.max(0, top), behavior });
     };
-    window.requestAnimationFrame(() => window.setTimeout(land, 60));
+    // The landing blocks above unmount when the portrait opens, so the first
+    // measurement is stale. Land smoothly, then re-measure once the layout
+    // has settled to correct any overshoot.
+    window.requestAnimationFrame(() => window.setTimeout(() => land("smooth"), 60));
+    window.setTimeout(() => land("auto"), 520);
   };
+
 
   const closePortrait = () => {
     setPortraitOpen(false);
@@ -1009,7 +1014,9 @@ const PublicDesignerProfile = () => {
       {portraitOpen && (displayBiography || "") && (
         <div className="relative w-screen left-1/2 -ml-[50vw] bg-cream">
           <EditorialBiographyColumns
-            biography={editorialBio || displayBiography || ""}
+            /* Full text: the landing intro paragraphs unmount when the portrait
+               opens, so the expansion must carry the biography from its start. */
+            biography={displayBiography || editorialBio || ""}
             biographyImages={displayBiographyImages || []}
             designerName={designer.name}
             eyebrow={designer.specialty || "The Full Portrait"}
