@@ -15,8 +15,7 @@
  * the rest of the hero remains free for page scrolling.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import SilentLink from "@/components/SilentLink";
+import { Link, useNavigate } from "react-router-dom";
 import { Search, X, ImageIcon } from "lucide-react";
 
 import { useQuery } from "@tanstack/react-query";
