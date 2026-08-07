@@ -182,22 +182,43 @@ export function toResponsiveCloudinary(url: string, opts: ResponsiveOptions = {}
 }
 
 /**
- * Build responsive `<img>` props for any Cloudinary URL, safe for
- * arbitrary DB-stored values. Falls back to the raw URL when the
- * source isn't a Cloudinary URL.
+ * Re-host an arbitrary remote image through Cloudinary's fetch delivery so it
+ * can carry the same `w_/q_auto/f_auto` transforms as our native uploads.
+ * (Same mechanism the `og-rehost` edge function uses server-side.)
+ *
+ * Returns the URL unchanged when it can't/shouldn't be proxied:
+ * already-Cloudinary URLs, non-http sources, data URIs, local paths, videos.
+ */
+export function toCloudinaryFetch(url: string): string {
+  if (!url) return url;
+  if (CLD_RE.test(url)) return url;
+  if (!/^https:\/\//i.test(url)) return url; // fetch requires a public https origin
+  if (/\.(mp4|webm|mov)(\?|$)/i.test(url)) return url;
+  if (/youtube|youtu\.be|vimeo/i.test(url)) return url;
+  if (/res\.cloudinary\.com/i.test(url)) return url;
+  return `https://res.cloudinary.com/${CLOUD_NAME}/image/fetch/${encodeURIComponent(url)}`;
+}
+
+/**
+ * Build responsive `<img>` props for any image URL, safe for arbitrary
+ * DB-stored values. Native Cloudinary URLs are rewritten in place; remote
+ * third-party originals are re-hosted through Cloudinary fetch so they also
+ * get width-scaled, `q_auto,f_auto` variants plus a srcSet.
  */
 export function cldResponsiveImg(
   url: string | undefined | null,
   opts: { widths?: number[]; sizes?: string; quality?: CloudinaryTransform["quality"] } = {}
 ): { src: string; srcSet?: string; sizes?: string } {
   if (!url) return { src: "" };
-  if (!CLD_RE.test(url)) return { src: url };
+  const target = CLD_RE.test(url) ? url : toCloudinaryFetch(url);
+  if (!CLD_RE.test(target)) return { src: url };
   const widths = opts.widths ?? [320, 480, 640, 960, 1280];
   const quality = opts.quality ?? "auto:eco";
-  const src = toResponsiveCloudinary(url, { width: widths[Math.min(2, widths.length - 1)], quality });
+  const src = toResponsiveCloudinary(target, { width: widths[Math.min(2, widths.length - 1)], quality });
   const srcSet = widths
-    .map((w) => `${toResponsiveCloudinary(url, { width: w, quality })} ${w}w`)
+    .map((w) => `${toResponsiveCloudinary(target, { width: w, quality })} ${w}w`)
     .join(", ");
   return { src, srcSet, sizes: opts.sizes };
 }
+
 
