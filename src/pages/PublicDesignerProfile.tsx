@@ -1152,12 +1152,8 @@ const PublicDesignerProfile = () => {
             </p>
           )}
 
-          {/* Full-portrait CTA — inline expansion, identical to desktop */}
-          {!portraitOpen && (
-            <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3 text-foreground">
-              {portraitLink}
-            </div>
-          )}
+          {/* Full-portrait CTA moved into the mobile controls bar below */}
+
         </motion.div>
       </div>
 
@@ -1511,23 +1507,29 @@ const PublicDesignerProfile = () => {
 
                 return (
                   <>
+                    {/* ── PORTRAIT CTA + FILTER ROW — MOBILE / PWA ── */}
+                    <div className="md:hidden flex items-center justify-between gap-3 py-2">
+                      <div className="min-w-0 text-foreground">{portraitLink}</div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          disabled={categories.length === 0}
+                          className="flex shrink-0 items-center space-x-1.5 font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground disabled:opacity-40"
+                        >
+                          <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1} aria-hidden="true" />
+                          <span>Filter</span>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="rounded-none">
+                          {filterItems}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
                     {/* ── CONTROLS BAR — MOBILE / PWA ── */}
                     <div className="md:hidden flex items-center justify-between border-b border-border/60 py-3 mb-6">
-                      <div className="flex items-center space-x-4">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger
-                            disabled={categories.length === 0}
-                            className="flex items-center space-x-1.5 font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground disabled:opacity-40"
-                          >
-                            <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1} aria-hidden="true" />
-                            <span>Filter</span>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="start" className="rounded-none">
-                            {filterItems}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
 
-                        <div className="h-4 w-px bg-border/70" />
+                      <div className="flex items-center space-x-4">
+
+
 
                         <div className="flex items-center space-x-2.5 text-muted-foreground" role="group" aria-label="Grid density">
                           <button
