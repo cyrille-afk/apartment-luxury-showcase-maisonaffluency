@@ -1083,6 +1083,9 @@ const PublicProductPage: React.FC = () => {
   const { slug: designerSlug, productSlug } = useParams<{ slug: string; productSlug: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const isLegacyArnoldClamChairRoute =
+    designerSlug === "arnold-madsen" &&
+    /^clam-chair-(?:oiled-walnut|oiled-oak|fumed-oak)$/.test(productSlug || "");
   const { user, isTradeUser, tradeStatus, loading: authLoading } = useAuth();
   const stateFrom = (location.state as { from?: string } | null)?.from;
   const isGridUrl = (p?: string | null) => !!p && /[?&](category|subcategory)=/.test(p);
@@ -1090,13 +1093,17 @@ const PublicProductPage: React.FC = () => {
   const fromPath = stateFrom || (isGridUrl(storedFrom) ? storedFrom! : undefined);
 
   useEffect(() => {
+    if (isLegacyArnoldClamChairRoute) {
+      navigate("/designers/dagmar-london/clam-chair", { replace: true });
+      return;
+    }
     if (stateFrom) {
       try { sessionStorage.setItem("product_from_path", stateFrom); } catch {}
     } else if (storedFrom && !isGridUrl(storedFrom)) {
       // Discard stale non-grid path
       try { sessionStorage.removeItem("product_from_path"); } catch {}
     }
-  }, [stateFrom, storedFrom]);
+  }, [isLegacyArnoldClamChairRoute, navigate, stateFrom, storedFrom]);
   const { data, isLoading } = useProductBySlug(designerSlug, productSlug);
   const { data: publicRrpRow } = usePublicRrp(data?.product?.id);
   const { data: relatedRrpMap = {} } = usePublicRrpMap((data?.relatedPicks || []).map((p: any) => p.id));
