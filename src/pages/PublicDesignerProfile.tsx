@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
@@ -950,8 +951,10 @@ const PublicDesignerProfile = () => {
   /* ── "New In" editorial format (portrait left, name + bio right) ── */
   const rightColPad = "md:pl-14 lg:pl-20 xl:pl-24";
   const portraitToggle = (
-    <button
-      type="button"
+    <PortraitCtaLink
+      label={newInExpanded ? "Close The Full Portrait" : "View The Full Portrait"}
+      reversed={newInExpanded}
+      expanded={newInExpanded}
       onClick={() => {
         const next = !newInExpanded;
         setNewInExpanded(next);
@@ -967,23 +970,7 @@ const PublicDesignerProfile = () => {
           window.setTimeout(() => flashBioHighlight(), 600);
         }
       }}
-      aria-expanded={newInExpanded}
-      className="group inline-flex items-center gap-4 font-body text-[11px] md:text-xs uppercase tracking-[0.18em] text-current hover:opacity-70 transition-opacity duration-300"
-    >
-      {newInExpanded && (
-        <span aria-hidden="true" className="relative inline-flex items-center">
-          <span className="block h-px w-10 bg-current transition-all duration-300 group-hover:w-12" />
-          <ArrowLeft className="absolute -left-[3px] h-3 w-3 -translate-y-[0.5px]" strokeWidth={1} />
-        </span>
-      )}
-      <span>{newInExpanded ? "Close The Full Portrait" : "View The Full Portrait"}</span>
-      {!newInExpanded && (
-        <span aria-hidden="true" className="relative inline-flex items-center">
-          <span className="block h-px w-10 bg-current transition-all duration-300 group-hover:w-12" />
-          <ArrowRight className="absolute -right-[3px] h-3 w-3 -translate-y-[0.5px]" strokeWidth={1} />
-        </span>
-      )}
-    </button>
+    />
   );
 
   /* Inline "full portrait" expansion — mounts the staggered magazine rows only.
@@ -1009,19 +996,12 @@ const PublicDesignerProfile = () => {
   };
 
   const portraitLink = (
-    <button
-      type="button"
+    <PortraitCtaLink
+      label={portraitOpen ? "Close The Full Portrait" : "View The Full Portrait"}
       onClick={portraitOpen ? closePortrait : openPortrait}
-      aria-expanded={portraitOpen}
-      className="group inline-flex items-center gap-3 font-body text-[11px] lg:text-xs uppercase tracking-[0.22em] text-current hover:opacity-70 transition-opacity duration-300"
-    >
-      <span>{portraitOpen ? "Close The Full Portrait" : "View The Full Portrait"}</span>
-      {portraitOpen ? (
-        <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-1" strokeWidth={1.25} />
-      ) : (
-        <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" strokeWidth={1.25} />
-      )}
-    </button>
+      reversed={portraitOpen}
+      expanded={portraitOpen}
+    />
   );
 
   const portraitExpansion = (
