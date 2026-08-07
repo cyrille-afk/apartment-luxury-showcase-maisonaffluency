@@ -1076,9 +1076,11 @@ const PublicDesignerProfile = () => {
                   )}
 
                   {/* Inline expansion — mounts the magazine rows below, no route change */}
-                  <div className="mt-8 flex text-foreground">
-                    {portraitLink}
-                  </div>
+                  {!portraitOpen && (
+                    <div className="mt-8 flex text-foreground">
+                      {portraitLink}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1150,9 +1152,11 @@ const PublicDesignerProfile = () => {
           )}
 
           {/* Full-portrait CTA — inline expansion, identical to desktop */}
-          <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3 text-foreground">
-            {portraitLink}
-          </div>
+          {!portraitOpen && (
+            <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3 text-foreground">
+              {portraitLink}
+            </div>
+          )}
         </motion.div>
       </div>
 

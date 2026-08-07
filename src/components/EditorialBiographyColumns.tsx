@@ -68,16 +68,48 @@ function toBlocks(biography: string, extraMedia: string[]): Block[] {
   return blocks;
 }
 
-function Caption({ label }: { label: string }) {
+function Caption({ label, above = false }: { label: string; above?: boolean }) {
   if (!label) return null;
   return (
-    <p className="mt-3 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.8]">
+    <p
+      className={`${above ? "mb-3" : "mt-3"} font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.8]`}
+    >
       {label}
     </p>
   );
 }
 
+/** A quoted paragraph, e.g. "I want the pieces that I create…" */
+function isQuote(content: string) {
+  const t = content.replace(/<[^>]+>/g, "").trim();
+  return /^["“'‘«]/.test(t) && /["”'’»][.!?]?$/.test(t) && t.length < 420;
+}
+
+function stripQuotes(content: string) {
+  return content
+    .trim()
+    .replace(/^((?:<[^>]+>\s*)*)["“'‘«]\s*/, "$1")
+    .replace(/\s*["”'’»]([.!?]?)((?:\s*<\/[^>]+>)*)$/, "$1$2");
+}
+
 function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
+  if (isQuote(content)) {
+    return (
+      <div className="h-auto">
+        {eyebrow && (
+          <p className="mb-4 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45">
+            {eyebrow}
+          </p>
+        )}
+        <blockquote className="border-l border-foreground/40 pl-8 pr-8 md:pl-10 md:pr-12 py-1 m-0">
+          <p className="max-w-[520px] font-display text-[20px] md:text-[24px] lg:text-[26px] leading-[1.55] tracking-[-0.005em] text-foreground/90">
+            {renderParagraph(stripQuotes(content))}
+          </p>
+        </blockquote>
+      </div>
+    );
+  }
+
   return (
     <div className="h-auto">
       {eyebrow && (
@@ -91,6 +123,7 @@ function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
     </div>
   );
 }
+
 
 function MediaCell({
   block,
@@ -108,6 +141,7 @@ function MediaCell({
   if (block.kind === "video") {
     return (
       <figure className="h-auto m-0">
+        <Caption label={label} above />
         <div className="[&_*]:rounded-none overflow-hidden">
           <VideoBlock
             url={block.url}
@@ -117,13 +151,13 @@ function MediaCell({
             posterUrl={block.poster || undefined}
           />
         </div>
-        <Caption label={label} />
       </figure>
     );
   }
 
   return (
     <figure className="h-auto m-0">
+      <Caption label={label} above />
       <img
         src={optimizeImageUrl(block.url)}
         alt={block.caption || `${designerName} — editorial`}
@@ -131,7 +165,6 @@ function MediaCell({
         loading="lazy"
         decoding="async"
       />
-      <Caption label={label} />
     </figure>
   );
 }
@@ -257,12 +290,17 @@ export default function EditorialBiographyColumns({
       <div className="mx-auto max-w-[1400px] px-6 md:px-[6vw] py-14 md:py-20">
         <div className="flex flex-col gap-10 md:gap-14 lg:gap-y-20">
           {rows.map((row, i) => (
-            <FadeInRow key={`row-${i}`} delay={Math.min(i * 80, 300)}>
-              <div className="h-auto">{row.left}</div>
-              <div className="h-auto">{row.right}</div>
-            </FadeInRow>
+            <div key={`row-${i}`} className="h-auto">
+              {/* Horizontal editorial baseline — anchors the left→right reading flow */}
+              <div className="w-full h-px bg-foreground/10 mb-8 md:mb-10" />
+              <FadeInRow delay={Math.min(i * 80, 300)}>
+                <div className="h-auto">{row.left}</div>
+                <div className="h-auto">{row.right}</div>
+              </FadeInRow>
+            </div>
           ))}
         </div>
+
 
         {footer && (
           <div className="pt-12 md:pt-20 transition-all duration-700 ease-out opacity-100 translate-y-0">
