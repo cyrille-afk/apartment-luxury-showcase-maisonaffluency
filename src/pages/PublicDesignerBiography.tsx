@@ -100,13 +100,11 @@ export default function PublicDesignerBiography() {
                     Photo: {designer.hero_photo_credit}
                   </p>
                 )}
-                <Link
-                  to={`/designers/${designer.slug}`}
-                  className="group inline-flex items-center gap-3 font-body text-[11px] uppercase tracking-[0.22em] text-foreground hover:opacity-70 transition-opacity duration-300"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-1" strokeWidth={1.25} />
-                  <span>Close The Full Portrait</span>
-                </Link>
+                <PortraitCtaLink
+                  label="Close The Full Portrait"
+                  reversed
+                  onClick={() => navigate(`/designers/${designer.slug}`)}
+                />
               </div>
             }
           />
