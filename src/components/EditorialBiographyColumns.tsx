@@ -294,12 +294,12 @@ export default function EditorialBiographyColumns({
 
   return (
     <div className="bg-cream">
-      <div className="mx-auto max-w-5xl px-6 md:px-12 pt-16 md:pt-24 pb-14 md:pb-20">
+      <div className="mx-auto max-w-5xl px-6 md:px-12 pt-8 md:pt-12 pb-10 md:pb-14">
         <div className="flex flex-col">
           {rows.map((row, i) => (
-            <div key={`row-${i}`} className="h-auto py-8 md:py-10 first:pt-0 last:pb-0">
+            <div key={`row-${i}`} className="h-auto py-5 md:py-6 first:pt-0 last:pb-0">
               {/* Ultra-fine horizontal baseline rule — locks left→right reading flow */}
-              <div className="w-full h-px bg-foreground/10 mb-8 md:mb-10" />
+              <div className="w-full h-px bg-foreground/10 mb-5 md:mb-6" />
 
               <FadeInRow row={row} delay={Math.min(i * 80, 300)} />
             </div>
@@ -308,7 +308,7 @@ export default function EditorialBiographyColumns({
 
 
         {footer && (
-          <div className="pt-12 md:pt-20 transition-all duration-700 ease-out opacity-100 translate-y-0">
+          <div className="pt-8 md:pt-12 transition-all duration-700 ease-out opacity-100 translate-y-0">
             {footer}
           </div>
         )}
