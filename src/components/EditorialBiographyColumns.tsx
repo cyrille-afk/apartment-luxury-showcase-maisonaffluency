@@ -1,5 +1,5 @@
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
-import { optimizeImageUrl } from "@/lib/cloudinary";
+import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import {
   renderParagraph,
   parseMediaLine,
