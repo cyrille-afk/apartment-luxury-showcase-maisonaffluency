@@ -23,6 +23,7 @@ import ShareMenu from "@/components/ShareMenu";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import { shareProfileOnWhatsApp, sharePageOnWhatsApp, buildDesignerOgUrl } from "@/lib/whatsapp-share";
 import EditorialBiography, { renderParagraph } from "@/components/EditorialBiography";
+import EditorialBiographyColumns from "@/components/EditorialBiographyColumns";
 
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -445,6 +446,8 @@ const PublicDesignerProfile = () => {
   const [mobileRevealedPickId, setMobileRevealedPickId] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const newInBioRef = useRef<HTMLDivElement>(null);
+  const portraitRef = useRef<HTMLDivElement>(null);
+  const [portraitOpen, setPortraitOpen] = useState(false);
   const [newInExpanded, setNewInExpanded] = useState(() =>
     typeof window !== "undefined" && new URLSearchParams(window.location.search).get("expanded") === "true"
   );
@@ -983,6 +986,71 @@ const PublicDesignerProfile = () => {
     </button>
   );
 
+  /* Inline "full portrait" expansion — mounts the staggered magazine rows only.
+     No parent re-render, no second hero, no route change. */
+  const openPortrait = () => {
+    setPortraitOpen(true);
+    const land = () => {
+      const el = portraitRef.current;
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY - 76;
+      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    };
+    window.requestAnimationFrame(() => window.setTimeout(land, 60));
+  };
+
+  const closePortrait = () => {
+    setPortraitOpen(false);
+    const el = portraitRef.current;
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.scrollY - 200;
+      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    }
+  };
+
+  const portraitLink = (
+    <button
+      type="button"
+      onClick={portraitOpen ? closePortrait : openPortrait}
+      aria-expanded={portraitOpen}
+      className="group inline-flex items-center gap-3 font-body text-[11px] lg:text-xs uppercase tracking-[0.22em] text-current hover:opacity-70 transition-opacity duration-300"
+    >
+      <span>{portraitOpen ? "Close The Full Portrait" : "View The Full Portrait"}</span>
+      {portraitOpen ? (
+        <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-1" strokeWidth={1.25} />
+      ) : (
+        <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" strokeWidth={1.25} />
+      )}
+    </button>
+  );
+
+  const portraitExpansion = (
+    <div ref={portraitRef} className="scroll-mt-24">
+      {portraitOpen && (displayBiography || "") && (
+        <div className="relative w-screen left-1/2 -ml-[50vw] bg-cream">
+          <EditorialBiographyColumns
+            biography={editorialBio || displayBiography || ""}
+            biographyImages={displayBiographyImages || []}
+            designerName={designer.name}
+            eyebrow={designer.specialty || "The Full Portrait"}
+            footer={
+              <div className="h-auto text-foreground">
+                {designer.hero_photo_credit && (
+                  <p className="mb-8 font-body text-[10px] uppercase tracking-[0.15em] text-foreground/40">
+                    Photo: {designer.hero_photo_credit}
+                  </p>
+                )}
+                {portraitLink}
+              </div>
+            }
+          />
+        </div>
+      )}
+    </div>
+  );
+
+
+
   const newInSection = (
     <div className="flex flex-col gap-0">
       {/* ── DESKTOP: cinematic architectural stack — clean photo, then narrative ── */}
@@ -1027,15 +1095,9 @@ const PublicDesignerProfile = () => {
                     </p>
                   )}
 
-                  {/* True page navigation to the standalone editorial monograph */}
+                  {/* Inline expansion — mounts the magazine rows below, no route change */}
                   <div className="mt-8 flex text-foreground">
-                    <Link
-                      to={`/designers/${designer.slug}/biography`}
-                      className="group inline-flex items-center gap-3 font-body text-[11px] lg:text-xs uppercase tracking-[0.22em] text-current hover:opacity-70 transition-opacity duration-300"
-                    >
-                      <span>View The Full Portrait</span>
-                      <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" strokeWidth={1.25} />
-                    </Link>
+                    {portraitLink}
                   </div>
                 </div>
               </div>
@@ -1107,20 +1169,14 @@ const PublicDesignerProfile = () => {
             </p>
           )}
 
-          {/* Full-portrait CTA — same dedicated monograph page as desktop */}
-          <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3">
-            <Link
-              to={`/designers/${designer.slug}/biography`}
-              className="group inline-flex items-center gap-3 font-body text-[11px] uppercase tracking-[0.22em] text-foreground hover:opacity-70 transition-opacity duration-300"
-            >
-              <span>View The Full Portrait</span>
-              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" strokeWidth={1.25} />
-            </Link>
+          {/* Full-portrait CTA — inline expansion, identical to desktop */}
+          <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3 text-foreground">
+            {portraitLink}
           </div>
         </motion.div>
       </div>
 
-
+      {portraitExpansion}
 
     </div>
   );
