@@ -139,7 +139,7 @@ function MediaCell({
     return (
       <figure className="h-auto m-0">
         <Caption label={label} above />
-        <div className="max-h-[320px] overflow-hidden [&_*]:rounded-none">
+        <div className="max-h-[280px] overflow-hidden [&_*]:rounded-none">
           <VideoBlock
             url={block.url}
             designerName={designerName}
@@ -158,7 +158,7 @@ function MediaCell({
       <img
         src={optimizeImageUrl(block.url)}
         alt={block.caption || `${designerName} — editorial`}
-        className="w-full h-auto max-h-[320px] object-cover bg-muted/20 rounded-none"
+        className="w-full h-auto max-h-[280px] object-cover bg-muted/20 rounded-none"
         loading="lazy"
         decoding="async"
       />
