@@ -4,7 +4,7 @@ import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal, Square, Grid2X2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal, Square, Grid2X2, Filter } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1508,15 +1508,21 @@ const PublicDesignerProfile = () => {
                 return (
                   <>
                     {/* ── PORTRAIT CTA + FILTER ROW — MOBILE / PWA ── */}
-                    <div className="md:hidden flex items-center justify-between gap-3 py-2">
-                      <div className="min-w-0 text-foreground">{portraitLink}</div>
+                    <div className="md:hidden flex items-center justify-between w-full px-4 py-2 border-b border-border/40">
+                      <button
+                        type="button"
+                        onClick={portraitOpen ? closePortrait : openPortrait}
+                        className="text-sm font-medium text-foreground underline underline-offset-4 decoration-foreground/30"
+                      >
+                        {portraitOpen ? "Close The Full Portrait" : "View Full Portrait"}
+                      </button>
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           disabled={categories.length === 0}
-                          className="flex shrink-0 items-center space-x-1.5 font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground disabled:opacity-40"
+                          className="flex items-center justify-center p-2 text-muted-foreground hover:bg-muted/40 rounded-full transition-colors disabled:opacity-40"
+                          aria-label="Filter products"
                         >
-                          <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1} aria-hidden="true" />
-                          <span>Filter</span>
+                          <Filter className="w-5 h-5" strokeWidth={1.5} aria-hidden="true" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="rounded-none">
                           {filterItems}
