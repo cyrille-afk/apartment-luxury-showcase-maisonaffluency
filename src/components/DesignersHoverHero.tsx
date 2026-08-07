@@ -1080,7 +1080,9 @@ const DesignersHoverHero = () => {
       // The A-Z grid can render after the sheet opens, so retry until the row
       // exists instead of clearing the saved letter too early.
       const restored = restoredLetterRef.current;
-      if (restored) {
+      // On desktop the A-Z opens collapsed; only mobile/PWA jump back to the
+      // previously viewed letter so the list lands where the user left it.
+      if (restored && !isDesktopViewport) {
         let cancelled = false;
         setRestoredOnlyLetter(restored);
         setActiveMobileLetter(restored);
