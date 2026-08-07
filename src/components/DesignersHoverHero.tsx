@@ -15,8 +15,7 @@
  * the rest of the hero remains free for page scrolling.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import SilentLink from "@/components/SilentLink";
+import { Link, useNavigate } from "react-router-dom";
 import { Search, X, ImageIcon } from "lucide-react";
 
 import { useQuery } from "@tanstack/react-query";
@@ -397,6 +396,7 @@ const IMAGE_TRANSITION_MS = 3500;
 const LOCK_MS = 1200;
 
 const DesignersHoverHero = () => {
+  const navigate = useNavigate();
   const { data: designers } = useFeaturedDesigners();
   const { data: allDesigners = [] } = useAllDesigners();
   const { data: firstPickMap } = useAllFirstPickImages();
@@ -1570,16 +1570,19 @@ const DesignersHoverHero = () => {
                                         ref={isLastItem ? lastItemRef : undefined}
                                         className="text-left leading-[1.25] short:leading-[1.15] sm:leading-[1.55]"
                                       >
-                                        <SilentLink
-                                          to={`/designers/${d.slug}`}
+                                        <button
+                                          type="button"
                                           data-featured-designer-slug={d.slug}
-                                          state={{ fromDesignersHero: true }}
                                           data-nav-state={JSON.stringify({ fromDesignersHero: true })}
+                                          onClick={() =>
+                                            navigate(`/designers/${d.slug}`, { state: { fromDesignersHero: true } })
+                                          }
                                           onMouseEnter={() => {
                                             setActiveSlug(d.slug);
                                           }}
                                           onFocus={() => setActiveSlug(d.slug)}
                                           className={cn(
+                                            "cursor-pointer appearance-none bg-transparent border-0 p-0 m-0 text-left",
                                             "inline-flex items-center whitespace-nowrap relative",
                                             "text-[15px] short:text-[14px] sm:text-base md:text-[18px] leading-[1.25] short:leading-[1.15] sm:leading-[1.55]",
                                             "font-display font-light tracking-normal",
@@ -1621,7 +1624,7 @@ const DesignersHoverHero = () => {
                                                 : "opacity-30 text-white/80 md:group-hover:opacity-70"
                                             )}
                                           />
-                                        </SilentLink>
+                                        </button>
                                       </li>
                                     );
                                   })}
@@ -1665,16 +1668,19 @@ const DesignersHoverHero = () => {
                               ref={isLastItem ? lastItemRef : undefined}
                               className="text-left leading-[1.25] short:leading-[1.15] sm:leading-[1.55]"
                             >
-                              <SilentLink
-                                to={`/designers/${d.slug}`}
+                              <button
+                                type="button"
                                 data-featured-designer-slug={d.slug}
-                                state={{ fromDesignersHero: true }}
                                 data-nav-state={JSON.stringify({ fromDesignersHero: true })}
+                                onClick={() =>
+                                  navigate(`/designers/${d.slug}`, { state: { fromDesignersHero: true } })
+                                }
                                 onMouseEnter={() => {
                                   setActiveSlug(d.slug);
                                 }}
                                 onFocus={() => setActiveSlug(d.slug)}
                                 className={cn(
+                                  "cursor-pointer appearance-none bg-transparent border-0 p-0 m-0 text-left",
                                   "inline-block whitespace-nowrap relative",
                                   "text-[15px] short:text-[14px] sm:text-base md:text-[18px] leading-[1.25] short:leading-[1.15] sm:leading-[1.55]",
                                   "font-display font-light tracking-normal",
@@ -1710,7 +1716,7 @@ const DesignersHoverHero = () => {
                                     )}
                                   />
                                 </span>
-                              </SilentLink>
+                              </button>
                             </li>
                           );
                         })}
