@@ -1513,7 +1513,8 @@ const PublicDesignerProfile = () => {
                           value={sortMode}
                           onChange={(e) => setSortMode(e.target.value as typeof sortMode)}
                           aria-label="Sort products"
-                          className="appearance-none bg-transparent pr-4 pl-1 py-1 font-body text-[11px] uppercase tracking-[0.14em] text-foreground focus:outline-none cursor-pointer border-b border-transparent transition"
+                          className="appearance-none bg-transparent pr-4 pl-1 py-1 max-w-[52vw] truncate font-body uppercase tracking-[0.14em] text-foreground focus:outline-none cursor-pointer border-b border-transparent transition"
+                          style={{ fontSize: "11px", lineHeight: "1.2", textSizeAdjust: "100%", WebkitTextSizeAdjust: "100%" } as React.CSSProperties}
                         >
                           {sortOptions}
                         </select>
