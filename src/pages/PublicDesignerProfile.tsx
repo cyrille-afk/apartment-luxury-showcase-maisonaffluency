@@ -1857,8 +1857,9 @@ const PublicDesignerProfile = () => {
                         {/* Subtitle, materials & dimensions hidden on grid — shown in lightbox detail view */}
 
                         {/* Price slot — pushed to bottom so cards align across the row */}
-                        <div className="mt-2">
-                          <p className="font-body text-[10px] md:text-xs text-muted-foreground md:text-foreground tracking-wide">
+                        <div className="mt-1 md:mt-2">
+                          <p className="font-body text-[11px] md:text-xs font-medium text-foreground/80 md:text-foreground md:font-normal tracking-wide">
+
                             {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
                           </p>
                           {editionNote && !/^re-?edition$/i.test(editionNote) && (
