@@ -1389,6 +1389,7 @@ const DesignersHoverHero = () => {
       onMouseLeave={() => {}}
       className={cn(
         "relative w-full bg-black text-foreground overflow-hidden md:overflow-visible",
+        isMobileBrowser ? "touch-none" : "touch-pan-y",
         isStandalone
           ? "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))] md:h-auto md:min-h-[calc(100svh-var(--header-h))]"
           : // Background frame uses 100lvh so dark hero always covers Safari's
