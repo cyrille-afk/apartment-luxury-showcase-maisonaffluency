@@ -396,6 +396,7 @@ const IMAGE_TRANSITION_MS = 3500;
 const LOCK_MS = 1200;
 
 const DesignersHoverHero = () => {
+  const navigate = useNavigate();
   const { data: designers } = useFeaturedDesigners();
   const { data: allDesigners = [] } = useAllDesigners();
   const { data: firstPickMap } = useAllFirstPickImages();
