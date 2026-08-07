@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { ArrowLeft } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import EditorialBiography from "@/components/EditorialBiography";
+import EditorialBiographyColumns from "@/components/EditorialBiographyColumns";
 import HeritageSlider from "@/components/HeritageSlider";
 import { useHeritageSlides } from "@/hooks/useHeritageSlides";
 import { useDesigner } from "@/hooks/useDesigner";
@@ -87,43 +87,45 @@ export default function PublicDesignerBiography() {
           </div>
         )}
 
-        <article className="mx-auto max-w-[820px] px-6 md:px-8 pt-12 md:pt-16 pb-16">
-          {biography ? (
-            <EditorialBiography
-              biography={biography}
-              biographyImages={designer.biography_images || []}
-              pickImages={[]}
-              designerName={designer.name}
-              allowCollapse={false}
-            />
-          ) : (
-            <p className="font-body text-[15px] leading-[1.85] text-foreground/70">
-              The full portrait for {name} is being written.
-            </p>
-          )}
-
-          {designer.hero_photo_credit && (
-            <p className="mt-12 font-body text-[10px] uppercase tracking-[0.15em] text-foreground/40">
-              Photo: {designer.hero_photo_credit}
-            </p>
-          )}
-        </article>
+        {biography ? (
+          <EditorialBiographyColumns
+            biography={biography}
+            biographyImages={designer.biography_images || []}
+            designerName={designer.name}
+            eyebrow={designer.specialty || "The Full Portrait"}
+            footer={
+              <div className="h-auto">
+                {designer.hero_photo_credit && (
+                  <p className="mb-8 font-body text-[10px] uppercase tracking-[0.15em] text-foreground/40">
+                    Photo: {designer.hero_photo_credit}
+                  </p>
+                )}
+                <Link
+                  to={`/designers/${designer.slug}`}
+                  className="group inline-flex items-center gap-3 font-body text-[11px] uppercase tracking-[0.22em] text-foreground hover:opacity-70 transition-opacity duration-300"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-1" strokeWidth={1.25} />
+                  <span>Close The Full Portrait</span>
+                </Link>
+              </div>
+            }
+          />
+        ) : (
+          <div className="bg-cream">
+            <div className="mx-auto max-w-[1400px] px-6 md:px-[6vw] py-16">
+              <p className="max-w-[600px] font-body text-[15px] leading-[1.85] text-foreground/70">
+                The full portrait for {name} is being written.
+              </p>
+            </div>
+          </div>
+        )}
 
         {heritageSlides.length > 0 && (
-          <section className="mx-auto max-w-[1400px] px-[6vw] pb-16">
+          <section className="mx-auto max-w-[1400px] px-[6vw] py-16">
             <HeritageSlider slides={heritageSlides} />
           </section>
         )}
 
-        <div className="mx-auto max-w-[1400px] px-[6vw] pb-24">
-          <Link
-            to={`/designers/${designer.slug}`}
-            className="group inline-flex items-center gap-3 font-body text-[11px] uppercase tracking-[0.22em] text-foreground hover:opacity-70 transition-opacity duration-300"
-          >
-            <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-1" strokeWidth={1.25} />
-            <span>Return to the collection</span>
-          </Link>
-        </div>
       </main>
 
       <Footer />
