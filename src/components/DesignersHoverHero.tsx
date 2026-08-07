@@ -293,6 +293,8 @@ const featuredInitial = (name: string) => lastNameInitial(featuredPersonPart(nam
 // for designers whose house label isn't captured by `founder`.
 const DIRECTORY_BRAND_SUFFIX: Record<string, string> = {
   "arnold-madsen": "Dagmar",
+  // Dagmar shows as the house name only — no founder suffix.
+  "dagmar-london": "",
 };
 
 // Build-time seed so the first hero image URL is available synchronously on
