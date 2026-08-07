@@ -15,6 +15,7 @@ import React, { useState, useEffect, useLayoutEffect, useCallback, useRef } from
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { formatProductSubtitleLine } from "@/lib/subtitleDisplay";
 import {
   Heart, Scale, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box, MessageCircle,
 } from "lucide-react";
