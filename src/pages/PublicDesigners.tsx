@@ -225,6 +225,17 @@ function ScrollLockedDesigners({
     };
   }, [directoryReady, isMobileOrPwa, locked]);
 
+  // Desktop: warm the directory chunk while the hero is still on screen so the
+  // Suspense fallback never paints (which used to flash the black page canvas).
+  useEffect(() => {
+    if (isMobileOrPwa) return;
+    const warm = () => { void import("@/components/DesignersDirectory"); };
+    const idle = (window as any).requestIdleCallback as undefined | ((cb: () => void) => number);
+    if (idle) { const id = idle(warm); return () => (window as any).cancelIdleCallback?.(id); }
+    const t = window.setTimeout(warm, 400);
+    return () => window.clearTimeout(t);
+  }, [isMobileOrPwa]);
+
   useEffect(() => {
     if (hasDeepLink) setDirectoryReady(true);
   }, [hasDeepLink]);
@@ -245,9 +256,11 @@ function ScrollLockedDesigners({
             
           </div>
           {!isMobileOrPwa && !locked && directoryReady && (
-            <Suspense fallback={<div className="min-h-[40vh]" aria-hidden="true" />}>
-              <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} showRunway />
-            </Suspense>
+            <div className="bg-background">
+              <Suspense fallback={<div className="min-h-[60vh] bg-background" aria-hidden="true" />}>
+                <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} showRunway />
+              </Suspense>
+            </div>
           )}
         </div>
       </div>
