@@ -1135,7 +1135,7 @@ const DesignersHoverHero = () => {
         };
       }
     }
-  }, [searchOpen, groupedResults.length]);
+  }, [searchOpen, groupedResults.length, isDesktopViewport]);
 
 
   // Desktop accordion: when a letter opens, pin that letter row to the top of
