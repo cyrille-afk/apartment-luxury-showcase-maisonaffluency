@@ -9,6 +9,7 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/component
 import ShareMenu from "@/components/ShareMenu";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import { cloudinaryUrl } from "@/lib/cloudinary";
+import { formatProductSubtitleLine, isFinishSubtitle } from "@/lib/subtitleDisplay";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -2056,11 +2057,11 @@ const PublicProductPage: React.FC = () => {
                       </div>
                       <h1 className="font-display font-normal text-[1.5rem] md:text-[1.85rem] mt-4 leading-[1.15] tracking-[-0.01em]">
                         {product.title}
-                        {product.subtitle &&
-                          !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
-                          !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) && (
-                            <span className="block mt-1 text-[0.8em] text-muted-foreground">{`by ${product.subtitle}`}</span>
-                          )}
+                        {formatProductSubtitleLine(product.title, product.subtitle) && (
+                          <span className="block mt-1 text-[0.8em] text-muted-foreground">
+                            {formatProductSubtitleLine(product.title, product.subtitle)}
+                          </span>
+                        )}
                       </h1>
 
                       {(() => {
@@ -2285,11 +2286,11 @@ const PublicProductPage: React.FC = () => {
                     </div>
                     <h1 className="font-display font-normal text-[1.75rem] md:text-[2.15rem] mt-5 leading-[1.15] tracking-[-0.01em]">
                       {product.title}
-                      {product.subtitle &&
-                        !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
-                        !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) && (
-                          <span className="block mt-1 text-[0.8em] text-muted-foreground">{`by ${product.subtitle}`}</span>
-                        )}
+                      {formatProductSubtitleLine(product.title, product.subtitle) && (
+                        <span className="block mt-1 text-[0.8em] text-muted-foreground">
+                          {formatProductSubtitleLine(product.title, product.subtitle)}
+                        </span>
+                      )}
                     </h1>
 
                     {(() => {
