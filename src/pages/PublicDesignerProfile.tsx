@@ -446,6 +446,8 @@ const PublicDesignerProfile = () => {
   const [mobileRevealedPickId, setMobileRevealedPickId] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const newInBioRef = useRef<HTMLDivElement>(null);
+  const portraitRef = useRef<HTMLDivElement>(null);
+  const [portraitOpen, setPortraitOpen] = useState(false);
   const [newInExpanded, setNewInExpanded] = useState(() =>
     typeof window !== "undefined" && new URLSearchParams(window.location.search).get("expanded") === "true"
   );
