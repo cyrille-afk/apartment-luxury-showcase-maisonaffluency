@@ -33,7 +33,7 @@ function normalizeMediaInput(value: string): string {
 }
 
 /** Detect if a URL is a video */
-function isVideoUrl(url: string): boolean {
+export function isVideoUrl(url: string): boolean {
   const normalized = normalizeMediaInput(url);
   if (/\.(mp4|webm|mov)(\?|$)/i.test(normalized)) return true;
   if (/res\.cloudinary\.com\/.+\/video\/upload/i.test(normalized)) return true;
@@ -236,7 +236,7 @@ function renderQuotedText(text: string): React.ReactNode[] {
 }
 
 /** Parse a media line — supports `URL | Caption` pipe separator */
-function parseMediaLine(text: string): { url: string; caption: string | null; poster: string | null; align: "left" | "right" | null; size: string | null } | null {
+export function parseMediaLine(text: string): { url: string; caption: string | null; poster: string | null; align: "left" | "right" | null; size: string | null } | null {
   const value = text.trim();
   // Try pipe separator: "https://...jpg | My Caption | poster:https://..." | left/right | small|28%
   const pipes = value.split(/\s*\|\s*/);
@@ -278,7 +278,7 @@ function isStandaloneMediaUrl(text: string): boolean {
 }
 
 /** Extract a human-readable caption from a URL's filename */
-function captionFromUrl(url: string): string | null {
+export function captionFromUrl(url: string): string | null {
   try {
     const pathname = new URL(url).pathname;
     let filename = pathname.split("/").pop() || "";
@@ -327,7 +327,7 @@ function getPosterFallbackForVideo(url: string): string | undefined {
 /* ------------------------------------------------------------------ */
 /*  Video Block — always full-width to stand out                      */
 /* ------------------------------------------------------------------ */
-function VideoBlock({
+export function VideoBlock({
   url,
   designerName,
   index,
