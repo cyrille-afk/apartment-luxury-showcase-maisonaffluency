@@ -1506,7 +1506,7 @@ const PublicDesignerProfile = () => {
                           <option value="default">Default Sorting</option>
                           <option value="price-asc">Price: Low to High</option>
                           <option value="price-desc">Price: High to Low</option>
-                          <option value="name">Alphabetical</option>
+                          <option value="new">New Launch</option>
                         </select>
                       </div>
                     </div>
