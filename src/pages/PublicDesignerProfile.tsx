@@ -1749,12 +1749,15 @@ const PublicDesignerProfile = () => {
                   // product data live.
                   const isArnoldClamChair =
                     designer.slug === "arnold-madsen" &&
-                    /^clam chair(?:,|\s|$)/i.test(pick.title);
+                    /^clam (chair|stool)(?:,|\s|$)/i.test(pick.title);
+                  const isArnoldClamStool =
+                    isArnoldClamChair && /^clam stool/i.test(pick.title);
                   const targetDesignerSlug = isArnoldClamChair ? "dagmar-london" : designer.slug;
                   const productSlug = isArnoldClamChair
-                    ? "clam-chair"
+                    ? (isArnoldClamStool ? "clam-stool" : "clam-chair")
                     : slugifyProduct(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""));
                   const productHref = `/designers/${targetDesignerSlug}/${productSlug}`;
+
                   const cardBrandLabel = isArnoldClamChair ? "Dagmar" : designerLabel;
                   const cardBrandSlug = isArnoldClamChair ? "dagmar-london" : designerSlug;
                   // We're already on Madsen's own portrait — no "by Arnold Madsen" needed.
