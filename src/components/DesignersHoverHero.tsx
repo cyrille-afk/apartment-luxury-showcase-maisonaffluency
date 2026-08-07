@@ -545,7 +545,9 @@ const DesignersHoverHero = () => {
         })
         .filter((d): d is FeaturedDesigner => Boolean(d))
         .sort((a, b) =>
-          a.name.localeCompare(b.name, "en", { sensitivity: "base" })
+          featuredSortKey(a.name).localeCompare(featuredSortKey(b.name), "en", {
+            sensitivity: "base",
+          })
         ) as FeaturedDesigner[],
     }));
   }, [designers]);
