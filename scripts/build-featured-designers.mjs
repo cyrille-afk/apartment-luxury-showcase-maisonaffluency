@@ -22,6 +22,8 @@ const OUT = path.join(ROOT, "src/data/featuredDesigners.json");
 const FEATURED_SLUGS = [
   // Masters
   "alexander-lamont",
+  "arnold-madsen",
+  "dagmar-london",
   "emmanuel-babled",
   "felix-agostini",
   "jean-michel-frank",
