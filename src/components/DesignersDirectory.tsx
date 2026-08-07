@@ -46,6 +46,16 @@ import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
 
 const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
 
+// ─── Image loading budget ────────────────────────────────────────────────────
+// The directory renders hundreds of designer cards, many of them hot-linked from
+// third-party origins at full resolution. Only the cards that can actually be in
+// the first visible row load eagerly; everything else is lazy + low priority so
+// the browser's connection pool isn't saturated by off-screen images.
+/** Widest desktop grid is `lg:grid-cols-4`, so 4 cards can sit in the first row. */
+const FIRST_ROW_CARDS = 4;
+/** Mobile A–Z carousel shows one full card plus a peek of the next. */
+const FIRST_ROW_CARDS_MOBILE = 2;
+
 
 const normalizeDesignerKey = (value: string) =>
   value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
