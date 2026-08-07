@@ -658,12 +658,12 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               <ShippingDestinationSwitcher compact showIso className="min-h-8 justify-center" />
             </div>
 
-            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap inline-flex items-baseline">
+            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap inline-flex items-center">
               <span className="font-brand text-2xl lg:text-3xl font-normal tracking-[0.18em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
                 MAISON AFFLUENCY
               </span>
-              <span aria-hidden="true" className="mx-5 lg:mx-6 h-3 w-px self-center bg-foreground/20" />
-              <span className="font-body text-[7px] uppercase tracking-[0.3em] font-light text-foreground/50">
+              <span aria-hidden="true" className="mx-5 lg:mx-6 h-3.5 w-px bg-foreground/25" />
+              <span className="font-body text-[7px] uppercase tracking-[0.3em] font-light text-foreground">
                 Est. 2017
               </span>
             </button>
