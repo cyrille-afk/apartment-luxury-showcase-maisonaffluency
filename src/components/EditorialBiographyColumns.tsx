@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import {
@@ -138,6 +138,57 @@ function MediaCell({
 
 type Row = { left: React.ReactNode; right: React.ReactNode };
 
+function FadeInRow({
+  children,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setInView(true);
+      return;
+    }
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -60px 0px" }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={`
+        grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-14 lg:gap-x-16
+        transition-all duration-700 ease-out will-change-transform
+        ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}
+      `}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function EditorialBiographyColumns({
   biography,
   biographyImages = [],
@@ -204,16 +255,20 @@ export default function EditorialBiographyColumns({
   return (
     <div className="bg-cream">
       <div className="mx-auto max-w-[1400px] px-6 md:px-[6vw] py-14 md:py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-14 lg:gap-x-16 lg:gap-y-20 items-start">
+        <div className="flex flex-col gap-10 md:gap-14 lg:gap-y-20">
           {rows.map((row, i) => (
-            <React.Fragment key={`row-${i}`}>
+            <FadeInRow key={`row-${i}`} delay={Math.min(i * 80, 300)}>
               <div className="h-auto">{row.left}</div>
               <div className="h-auto">{row.right}</div>
-            </React.Fragment>
+            </FadeInRow>
           ))}
         </div>
 
-        {footer && <div className="pt-12 md:pt-20">{footer}</div>}
+        {footer && (
+          <div className="pt-12 md:pt-20 transition-all duration-700 ease-out opacity-100 translate-y-0">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );
