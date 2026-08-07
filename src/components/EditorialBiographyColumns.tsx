@@ -67,16 +67,75 @@ function toBlocks(biography: string, extraMedia: string[]): Block[] {
   return blocks;
 }
 
-function MediaNote({ label }: { label: string }) {
+function Caption({ label }: { label: string }) {
+  if (!label) return null;
   return (
-    <div className="lg:col-span-4 lg:pt-1">
-      <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.9]">
-        {label}
+    <p className="mt-3 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.8]">
+      {label}
+    </p>
+  );
+}
+
+function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
+  return (
+    <div className="h-auto">
+      {eyebrow && (
+        <p className="mb-4 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45">
+          {eyebrow}
+        </p>
+      )}
+      <p className="max-w-[500px] font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80">
+        {renderParagraph(content)}
       </p>
-      <span className="mt-3 hidden lg:block h-px w-10 bg-foreground/20" aria-hidden />
     </div>
   );
 }
+
+function MediaCell({
+  block,
+  designerName,
+  index,
+}: {
+  block: Extract<Block, { kind: "image" } | { kind: "video" }>;
+  designerName: string;
+  index: number;
+}) {
+  const rawCaption =
+    block.caption || captionFromUrl(block.url) || (block.kind === "video" ? "" : "");
+  const label = rawCaption ? rawCaption.toUpperCase() : "";
+
+  if (block.kind === "video") {
+    return (
+      <figure className="h-auto m-0">
+        <div className="[&_*]:rounded-none overflow-hidden">
+          <VideoBlock
+            url={block.url}
+            designerName={designerName}
+            index={index}
+            overrideCaption={null}
+            posterUrl={block.poster || undefined}
+          />
+        </div>
+        <Caption label={label} />
+      </figure>
+    );
+  }
+
+  return (
+    <figure className="h-auto m-0">
+      <img
+        src={optimizeImageUrl(block.url)}
+        alt={block.caption || `${designerName} — editorial`}
+        className="w-full h-auto object-cover bg-muted/20 rounded-none"
+        loading="lazy"
+        decoding="async"
+      />
+      <Caption label={label} />
+    </figure>
+  );
+}
+
+type Row = { left: React.ReactNode; right: React.ReactNode };
 
 export default function EditorialBiographyColumns({
   biography,
@@ -88,83 +147,74 @@ export default function EditorialBiographyColumns({
   biography: string;
   biographyImages?: string[];
   designerName: string;
-  /** Small left-track anchor shown beside the opening narrative. */
+  /** Small anchor shown above the opening narrative. */
   eyebrow?: string;
-  /** Rendered at the absolute bottom, aligned with the right text track. */
+  /** Rendered at the absolute bottom of the stream. */
   footer?: React.ReactNode;
 }) {
   const blocks = toBlocks(biography, biographyImages);
-  let firstTextRendered = false;
+  const texts = blocks.filter((b): b is Extract<Block, { kind: "text" }> => b.kind === "text");
+  const media = blocks.filter(
+    (b): b is Extract<Block, { kind: "image" } | { kind: "video" }> => b.kind !== "text",
+  );
+
+  const rows: Row[] = [];
+  let ti = 0;
+  let mi = 0;
+  let rowIndex = 0;
+
+  // Alternate: text/media, media/text, text/media …
+  while (ti < texts.length && mi < media.length) {
+    const textCell = (
+      <TextCell content={texts[ti].content} eyebrow={ti === 0 ? eyebrow : undefined} />
+    );
+    const mediaCell = (
+      <MediaCell block={media[mi]} designerName={designerName} index={mi} />
+    );
+    rows.push(
+      rowIndex % 2 === 0
+        ? { left: textCell, right: mediaCell }
+        : { left: mediaCell, right: textCell },
+    );
+    ti += 1;
+    mi += 1;
+    rowIndex += 1;
+  }
+
+  // Leftovers keep both columns filled: pair remaining items two per row.
+  while (ti < texts.length) {
+    const left = <TextCell content={texts[ti].content} eyebrow={ti === 0 ? eyebrow : undefined} />;
+    ti += 1;
+    const right = ti < texts.length ? <TextCell content={texts[ti].content} /> : null;
+    if (right) ti += 1;
+    rows.push({ left, right });
+  }
+  while (mi < media.length) {
+    const left = <MediaCell block={media[mi]} designerName={designerName} index={mi} />;
+    mi += 1;
+    const right =
+      mi < media.length ? (
+        <MediaCell block={media[mi]} designerName={designerName} index={mi} />
+      ) : null;
+    if (right) mi += 1;
+    rows.push({ left, right });
+  }
 
   return (
     <div className="bg-cream">
       <div className="mx-auto max-w-[1400px] px-6 md:px-[6vw] py-14 md:py-20">
-        <div className="flex flex-col gap-10 md:gap-14">
-          {blocks.map((block, i) => {
-            if (block.kind === "text") {
-              const isFirst = !firstTextRendered;
-              firstTextRendered = true;
-              return (
-                <div key={`t-${i}`} className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 h-auto">
-                  <div className="lg:col-span-4">
-                    {isFirst && eyebrow && (
-                      <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45">
-                        {eyebrow}
-                      </p>
-                    )}
-                  </div>
-                  <div className="lg:col-span-8 h-auto">
-                    <p className="max-w-[600px] font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80">
-                      {renderParagraph(block.content)}
-                    </p>
-                  </div>
-                </div>
-              );
-            }
-
-            if (block.kind === "video") {
-              const note = (block.caption || "The Craftsmanship Video").toUpperCase();
-              return (
-                <div key={`v-${i}`} className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 h-auto">
-                  <MediaNote label={note} />
-                  <div className="lg:col-span-8 h-auto">
-                    <VideoBlock
-                      url={block.url}
-                      designerName={designerName}
-                      index={i}
-                      overrideCaption={null}
-                      posterUrl={block.poster || undefined}
-                    />
-                  </div>
-                </div>
-              );
-            }
-
-            const note = (block.caption || captionFromUrl(block.url) || "From the Archive").toUpperCase();
-            return (
-              <div key={`i-${i}`} className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 h-auto">
-                <MediaNote label={note} />
-                <div className="lg:col-span-8 h-auto">
-                  <img
-                    src={optimizeImageUrl(block.url)}
-                    alt={block.caption || `${designerName} — editorial`}
-                    className="w-full h-auto object-cover bg-muted/20"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              </div>
-            );
-          })}
-
-          {footer && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 pt-4 md:pt-8">
-              <div className="hidden lg:block lg:col-span-4" />
-              <div className="lg:col-span-8">{footer}</div>
-            </div>
-          )}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-14 lg:gap-x-16 lg:gap-y-20 items-start">
+          {rows.map((row, i) => (
+            <React.Fragment key={`row-${i}`}>
+              <div className="h-auto">{row.left}</div>
+              <div className="h-auto">{row.right}</div>
+            </React.Fragment>
+          ))}
         </div>
+
+        {footer && <div className="pt-12 md:pt-20">{footer}</div>}
       </div>
     </div>
   );
 }
+
