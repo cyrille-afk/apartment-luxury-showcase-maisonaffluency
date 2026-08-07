@@ -289,7 +289,7 @@ export default function EditorialBiographyColumns({
           {rows.map((row, i) => (
             <div key={`row-${i}`} className="h-auto">
               {/* Horizontal editorial baseline — anchors the left→right reading flow */}
-              <div className="w-full h-px bg-foreground/12 mb-8 md:mb-10" />
+              <div className="w-full h-px bg-foreground/10 mb-8 md:mb-10" />
               <FadeInRow delay={Math.min(i * 80, 300)}>
                 <div className="h-auto">{row.left}</div>
                 <div className="h-auto">{row.right}</div>
