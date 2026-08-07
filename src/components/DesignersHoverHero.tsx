@@ -1583,7 +1583,7 @@ const DesignersHoverHero = () => {
                       <ul className="flex flex-col text-left">
                         {group.designers
                           .reduce<{ letter: string; items: FeaturedDesigner[] }[]>((acc, d) => {
-                            const letter = d.name.trim().charAt(0).toUpperCase();
+                            const letter = featuredInitial(d.name);
                             const last = acc[acc.length - 1];
                             if (last && last.letter === letter) {
                               last.items.push(d);
