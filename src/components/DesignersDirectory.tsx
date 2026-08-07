@@ -459,7 +459,7 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
                 >
                   <div className="aspect-[4/5] relative bg-muted/10 overflow-hidden">
                     {d.image ? (
-                      <img {...cldResponsiveImg(d.image, { widths: [160, 240, 320, 480], sizes: "(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 14vw" })} alt={d.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110" loading="eager" decoding="async" />
+                      <img {...cldResponsiveImg(d.image, { widths: [160, 240, 320, 480], sizes: "(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 14vw" })} alt={d.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110" loading="lazy" decoding="async" fetchPriority="low" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-muted/5">
                         <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
@@ -515,7 +515,7 @@ function handleDesignerShare(e: React.MouseEvent, item: Designer, displayName: s
 }
 
 // ─── Parent Brand Card ───────────────────────────────────────────────────────
-function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: { item: Designer; isOpen: boolean; onToggle: () => void; designerCount: number; hasIgPosts?: boolean }) {
+function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts, priority = false }: { item: Designer; isOpen: boolean; onToggle: () => void; designerCount: number; hasIgPosts?: boolean; /** Above-the-fold (first grid row) — load eagerly. */ priority?: boolean }) {
   const displayName = item.display_name || item.name;
   const cardImageUrl = item.image_url || item.hero_image_url;
   const instagramLink = hasIgPosts ? undefined : (INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url);
@@ -558,7 +558,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
     <div ref={cardRef} data-card-kind="parent" data-designer-slug={item.slug} className="col-span-2 group self-start flex flex-col rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
       <div className="aspect-[5/4] md:aspect-[17/10] bg-muted/20 overflow-hidden relative">
         {cardImageUrl ? (
-          <img {...cldResponsiveImg(cardImageUrl, { widths: [480, 720, 960, 1280], sizes: "(max-width: 640px) 100vw, (max-width: 1024px) 66vw, 720px" })} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading="eager" decoding="async" />
+          <img {...cldResponsiveImg(cardImageUrl, { widths: [480, 720, 960, 1280], sizes: "(max-width: 640px) 100vw, (max-width: 1024px) 66vw, 720px" })} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : "low"} />
 
 
         ) : (
@@ -618,7 +618,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
 }
 
 // ─── Single Designer Card ────────────────────────────────────────────────────
-function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number[]>; hasIgPosts?: boolean }) {
+function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, priority = false }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number[]>; hasIgPosts?: boolean; /** Above-the-fold (first grid row) — load eagerly. */ priority?: boolean }) {
   const { displayName, parentLabel } = parseDesignerDisplayName(item);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -652,7 +652,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
 
       <div className="aspect-[4/5] bg-muted/20 overflow-hidden relative">
         {cardImageUrl ? (
-          <img {...cldResponsiveImg(cardImageUrl, { widths: [320, 480, 640, 960], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px" })} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading="eager" decoding="async" />
+          <img {...cldResponsiveImg(cardImageUrl, { widths: [320, 480, 640, 960], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px" })} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : "low"} />
 
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
@@ -668,6 +668,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
             draggable={false}
             loading="lazy"
             decoding="async"
+            fetchPriority="low"
             className={`pointer-events-none absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out md:opacity-0 md:group-hover:opacity-100 ${mobileRevealed ? 'opacity-100' : 'opacity-0'}`}
           />
         )}
@@ -811,9 +812,11 @@ function MobileLetterRow({
               <div className="overflow-x-auto snap-x snap-mandatory scrollbar-hide scroll-pl-4">
                 <div className="flex gap-4 pl-4 pr-8">
 
-                  {designers.map((item) => {
+                  {designers.map((item, cardIndex) => {
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
                     const isParentBrand = item.founder === item.name && designerCount > 0;
+                    // Only the first visible card (+ its peek neighbour) loads eagerly.
+                    const priority = cardIndex < FIRST_ROW_CARDS_MOBILE;
                     return (
                       <div key={item.slug} className={cn("flex-none snap-start", isParentBrand ? "w-[88vw] max-w-[420px]" : "w-[78%] max-w-[320px]")}>
                         {isParentBrand ? (
@@ -823,9 +826,10 @@ function MobileLetterRow({
                             onToggle={() => setOpenParent(openParent === item.name ? null : item.name)}
                             designerCount={designerCount}
                             hasIgPosts={designersWithIgPosts?.has(item.id)}
+                            priority={priority}
                           />
                         ) : (
-                          <SingleDesignerCard item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} hasIgPosts={designersWithIgPosts?.has(item.id)} />
+                          <SingleDesignerCard item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} hasIgPosts={designersWithIgPosts?.has(item.id)} priority={priority} />
                         )}
                       </div>
                     );
@@ -897,14 +901,16 @@ function LetterGroupBody({
         />
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 grid-flow-dense items-start gap-4 md:gap-6 lg:gap-8">
-          {designers.map((item) => {
+          {designers.map((item, cardIndex) => {
             const designerCount = parentDesignerCountByName[item.name] ?? 0;
             const isParentBrand = item.founder === item.name && designerCount > 0;
+            // Eager-load only the first grid row (4 columns at the widest breakpoint).
+            const priority = cardIndex < FIRST_ROW_CARDS;
             if (isParentBrand) {
               const isOpen = openParent === item.name;
               return (
                 <React.Fragment key={item.slug}>
-                  <ParentBrandCard item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} hasIgPosts={designersWithIgPosts?.has(item.id)} />
+                  <ParentBrandCard item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} hasIgPosts={designersWithIgPosts?.has(item.id)} priority={priority} />
                   <AnimatePresence>
                     {isOpen && (
                       <div className="col-span-full">
@@ -915,7 +921,7 @@ function LetterGroupBody({
                 </React.Fragment>
               );
             }
-            return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} hasIgPosts={designersWithIgPosts?.has(item.id)} />;
+            return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} hasIgPosts={designersWithIgPosts?.has(item.id)} priority={priority} />;
           })}
         </div>
       )}
@@ -1186,14 +1192,16 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
             {pages.map((page, pageIndex) => (
               <div key={`page-${pageIndex}`} className="flex-none w-full snap-start">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 grid-flow-dense items-start gap-4 md:gap-6 lg:gap-8">
-                  {page.map((item) => {
+                  {page.map((item, cardIndex) => {
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
                     const isParentBrand = item.founder === item.name && designerCount > 0;
+                    // Only the first row of the first page is above the fold.
+                    const priority = pageIndex === 0 && cardIndex < FIRST_ROW_CARDS;
                     if (isParentBrand) {
                       const isOpen = openParent === item.name;
-                      return <ParentBrandCard key={item.slug} item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} hasIgPosts={designersWithIgPosts?.has(item.id)} />;
+                      return <ParentBrandCard key={item.slug} item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} hasIgPosts={designersWithIgPosts?.has(item.id)} priority={priority} />;
                     }
-                    return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} hasIgPosts={designersWithIgPosts?.has(item.id)} />;
+                    return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} hasIgPosts={designersWithIgPosts?.has(item.id)} priority={priority} />;
                   })}
                 </div>
               </div>
