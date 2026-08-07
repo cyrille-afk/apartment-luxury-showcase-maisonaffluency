@@ -1440,7 +1440,7 @@ const PublicDesignerProfile = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...transition, delay: 0.25 }}
-              className="mt-8 md:mt-10 pt-6 md:pt-8 border-t border-border/40"
+              className="mt-[10px] md:mt-10 pt-3 md:pt-8 border-t border-border/40"
             >
 
 
