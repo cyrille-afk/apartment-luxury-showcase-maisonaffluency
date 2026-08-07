@@ -15,6 +15,7 @@ import React, { useState, useEffect, useLayoutEffect, useCallback, useRef } from
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { formatProductSubtitleLine } from "@/lib/subtitleDisplay";
 import {
   Heart, Scale, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box, MessageCircle,
 } from "lucide-react";
@@ -1948,11 +1949,11 @@ const TradeProductPage: React.FC = () => {
                 </Link>
                 <h1 className="font-display text-[1.5rem] md:text-[1.85rem] mt-1 leading-tight">
                   {product.title}
-                  {product.subtitle &&
-                    !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
-                    !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) && (
-                      <span className="block mt-1 text-[0.8em] text-muted-foreground">{`by ${product.subtitle}`}</span>
-                    )}
+                  {formatProductSubtitleLine(product.title, product.subtitle) && (
+                    <span className="block mt-1 text-[0.8em] text-muted-foreground">
+                      {formatProductSubtitleLine(product.title, product.subtitle)}
+                    </span>
+                  )}
                 </h1>
               </div>
               <div className="shrink-0 mt-1 flex items-center gap-2">
