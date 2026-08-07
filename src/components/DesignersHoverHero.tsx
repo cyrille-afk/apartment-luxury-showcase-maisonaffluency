@@ -288,6 +288,12 @@ const featuredPersonPart = (name: string) =>
 const featuredSortKey = (name: string) => sortNameKey(featuredPersonPart(name));
 const featuredInitial = (name: string) => lastNameInitial(featuredPersonPart(name));
 
+// Directory-only brand suffix shown after a designer's name ("Name - Brand"),
+// for designers whose house label isn't captured by `founder`.
+const DIRECTORY_BRAND_SUFFIX: Record<string, string> = {
+  "arnold-madsen": "Dagmar",
+};
+
 // Build-time seed so the first hero image URL is available synchronously on
 // module parse — avoids the Supabase round-trip blocking LCP on Slow-4G.
 const FEATURED_SEED = (featuredDesignersSeed as FeaturedDesigner[]) || [];
@@ -1664,7 +1670,11 @@ const DesignersHoverHero = () => {
                                     const [first, last] = splitName(d.name);
                                     const isActive = d.slug === activeSlug;
                                     const HIDE_FOUNDER_SUFFIX = new Set(["Man of Parts", "Pouenat", "Ozone"]);
-                                    const childBrand = d.founder && d.founder !== d.name && !HIDE_FOUNDER_SUFFIX.has(d.founder);
+                                    const brandSuffix =
+                                      DIRECTORY_BRAND_SUFFIX[d.slug] ??
+                                      (d.founder && d.founder !== d.name && !HIDE_FOUNDER_SUFFIX.has(d.founder)
+                                        ? d.founder
+                                        : null);
                                     const isLastItem =
                                       groupIdx === groupedItems.length - 1 &&
                                       isLastLetter &&
@@ -1712,8 +1722,8 @@ const DesignersHoverHero = () => {
                                                 {last}
                                               </span>
                                             )}
-                                            {childBrand && (
-                                              <span className="opacity-80"> - {d.founder}</span>
+                                            {brandSuffix && (
+                                              <span className="opacity-80"> - {brandSuffix}</span>
                                             )}
                                           </span>
                                           {/* Discovery cue: tiny aperture glyph hinting each name has a photo.
@@ -1763,7 +1773,11 @@ const DesignersHoverHero = () => {
                           const isActive = d.slug === activeSlug;
                           const isDimmed = activeSlug !== null && !isActive;
                           const HIDE_FOUNDER_SUFFIX = new Set(["Man of Parts", "Pouenat", "Ozone"]);
-                          const childBrand = d.founder && d.founder !== d.name && !HIDE_FOUNDER_SUFFIX.has(d.founder);
+                          const brandSuffix =
+                                      DIRECTORY_BRAND_SUFFIX[d.slug] ??
+                                      (d.founder && d.founder !== d.name && !HIDE_FOUNDER_SUFFIX.has(d.founder)
+                                        ? d.founder
+                                        : null);
                           const isLastItem =
                             groupIdx === groupedItems.length - 1 &&
                             dIdx === group.designers.length - 1;
@@ -1804,8 +1818,8 @@ const DesignersHoverHero = () => {
                                       {last}
                                     </span>
                                   )}
-                                  {childBrand && (
-                                    <span className="opacity-80"> - {d.founder}</span>
+                                  {brandSuffix && (
+                                    <span className="opacity-80"> - {brandSuffix}</span>
                                   )}
                                   {/* Discovery cue: tiny aperture glyph hinting each name has a photo.
                                       Shown on every viewport; faint by default, brightens when active. */}
