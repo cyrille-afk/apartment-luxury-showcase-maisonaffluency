@@ -1590,7 +1590,7 @@ const DesignersHoverHero = () => {
                                           className={cn(
                                             "cursor-pointer appearance-none bg-transparent border-0 p-0 m-0 text-left",
                                             "inline-flex items-center whitespace-nowrap relative",
-                                            "text-[15px] short:text-[14px] sm:text-base md:text-[15px] leading-[1.25] short:leading-[1.15] sm:leading-[1.35]",
+                                            "text-[15px] short:text-[14px] sm:text-base md:text-[14px] leading-[1.25] short:leading-[1.15] sm:leading-[1.3]",
                                             "font-display font-light tracking-tight",
                                             "transition-colors duration-500 ease-out",
                                             "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
