@@ -234,7 +234,9 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       return;
     }
     const max = el.scrollHeight - el.clientHeight;
-    let next = el.scrollTop + dir * 1.6; // slow, fluid drift
+    // Very gentle drift so users can deliberately land on any thumb,
+    // especially the first one, without the strip racing past it.
+    let next = el.scrollTop + dir * 0.55;
     // Loop the column: drifting past the last thumb wraps back to the first,
     // and drifting above the first wraps to the last.
     if (max > 0) {
