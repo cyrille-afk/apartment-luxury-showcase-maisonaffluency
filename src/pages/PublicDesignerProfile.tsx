@@ -1103,16 +1103,17 @@ const PublicDesignerProfile = () => {
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
           {/* Full-bleed, untruncated hero — natural aspect ratio */}
-          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted">
+          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted max-h-[250px] overflow-hidden">
             {(wideHeroImage || heroImage) && (
               <img
                 src={wideHeroImage || heroImage}
                 alt={`${name} interior`}
-                className="block w-full h-auto"
+                className="block w-full h-auto max-h-[250px] object-cover"
                 loading="eager"
               />
             )}
           </div>
+
           {designer.hero_photo_credit && (
             <p className="mt-2 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
               Photo: {designer.hero_photo_credit}
@@ -1141,16 +1142,17 @@ const PublicDesignerProfile = () => {
           {heroParagraphs.length > 0 && (
             <div className="font-body text-[15px] leading-[1.75] text-foreground/85 text-left">
               {(newInExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
-                <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
+                <p key={i} className={`${i > 0 ? "mt-4 " : ""}${!newInExpanded && i === 0 ? "line-clamp-2" : ""}`}>{renderParagraph(p)}</p>
               ))}
             </div>
           )}
 
           {thinContentFallback && (
-            <p className="font-body text-[15px] leading-[1.75] text-foreground/85 mt-4">
+            <p className={`font-body text-[15px] leading-[1.75] text-foreground/85 mt-4 ${newInExpanded ? "" : "line-clamp-2"}`}>
               {thinContentFallback}
             </p>
           )}
+
 
           {/* Full-portrait CTA moved into the mobile controls bar below */}
 
@@ -1438,7 +1440,7 @@ const PublicDesignerProfile = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...transition, delay: 0.25 }}
-              className="mt-8 md:mt-10 pt-6 md:pt-8 border-t border-border/40"
+              className="mt-[10px] md:mt-10 pt-3 md:pt-8 border-t border-border/40"
             >
 
 
