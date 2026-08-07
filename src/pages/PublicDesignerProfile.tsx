@@ -1095,15 +1095,9 @@ const PublicDesignerProfile = () => {
                     </p>
                   )}
 
-                  {/* True page navigation to the standalone editorial monograph */}
+                  {/* Inline expansion — mounts the magazine rows below, no route change */}
                   <div className="mt-8 flex text-foreground">
-                    <Link
-                      to={`/designers/${designer.slug}/biography`}
-                      className="group inline-flex items-center gap-3 font-body text-[11px] lg:text-xs uppercase tracking-[0.22em] text-current hover:opacity-70 transition-opacity duration-300"
-                    >
-                      <span>View The Full Portrait</span>
-                      <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" strokeWidth={1.25} />
-                    </Link>
+                    {portraitLink}
                   </div>
                 </div>
               </div>
