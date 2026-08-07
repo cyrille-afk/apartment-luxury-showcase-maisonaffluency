@@ -417,14 +417,35 @@ const DesignersHoverHero = () => {
         const l = sessionStorage.getItem(DESIGNERS_AZ_LAST_LETTER_KEY);
         if (l) {
           restoredLetterRef.current = l;
-          return new Set([l]);
+          // Mobile/PWA restores the previous letter so the list lands where the
+          // user left it. Desktop keeps the A-Z closed on entry so the user is
+          // surprised by the card grid opening up.
+          const isMobileRestore =
+            window.matchMedia("(max-width: 767px)").matches ||
+            isPwaStandaloneDisplay();
+          if (isMobileRestore) {
+            return new Set([l]);
+          }
         }
       } catch {}
     }
-    return new Set(["A"]);
+    return new Set();
   });
   const [activeAccordionLetter, setActiveAccordionLetter] = useState<string | null>(
-    () => restoredLetterRef.current
+    () => {
+      if (typeof window !== "undefined") {
+        try {
+          const l = sessionStorage.getItem(DESIGNERS_AZ_LAST_LETTER_KEY);
+          if (l) {
+            const isMobileRestore =
+              window.matchMedia("(max-width: 767px)").matches ||
+              isPwaStandaloneDisplay();
+            if (isMobileRestore) return l;
+          }
+        } catch {}
+      }
+      return null;
+    }
   );
   const [activeMobileLetter, setActiveMobileLetter] = useState<string | null>(() => restoredLetterRef.current);
   const [azDragging, setAzDragging] = useState(false);
