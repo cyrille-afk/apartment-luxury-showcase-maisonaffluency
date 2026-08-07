@@ -1757,7 +1757,8 @@ const PublicDesignerProfile = () => {
                   const productHref = `/designers/${targetDesignerSlug}/${productSlug}`;
                   const cardBrandLabel = isArnoldClamChair ? "Dagmar" : designerLabel;
                   const cardBrandSlug = isArnoldClamChair ? "dagmar-london" : designerSlug;
-                  const cardSubtitle = isArnoldClamChair ? "by Arnold Madsen" : pick.subtitle;
+                  // We're already on Madsen's own portrait — no "by Arnold Madsen" needed.
+                  const cardSubtitle = isArnoldClamChair ? undefined : pick.subtitle;
                   const isMobilePickRevealed = mobileRevealedPickId === pick.id;
                   const handleCardClick = (e: React.MouseEvent) => {
                     if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || (e as any).button === 1) {
@@ -1775,7 +1776,7 @@ const PublicDesignerProfile = () => {
                     setLightboxItem({
                       id: pick.id,
                       title: displayTitle,
-                      subtitle: isArnoldClamChair ? "Arnold Madsen" : pick.subtitle,
+                      subtitle: isArnoldClamChair ? undefined : pick.subtitle,
                       image_url: pick.image_url,
                       hover_image_url: pick.hover_image_url,
                       brand_name: isArnoldClamChair ? "Dagmar" : designerLabel || designer.name,
