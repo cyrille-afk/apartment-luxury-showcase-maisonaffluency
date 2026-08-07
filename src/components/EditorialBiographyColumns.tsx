@@ -68,16 +68,45 @@ function toBlocks(biography: string, extraMedia: string[]): Block[] {
   return blocks;
 }
 
-function Caption({ label }: { label: string }) {
+function Caption({ label, above = false }: { label: string; above?: boolean }) {
   if (!label) return null;
   return (
-    <p className="mt-3 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.8]">
+    <p
+      className={`${above ? "mb-3" : "mt-3"} font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.8]`}
+    >
       {label}
     </p>
   );
 }
 
+/** A quoted paragraph, e.g. "I want the pieces that I create…" */
+function isQuote(content: string) {
+  const t = content.trim();
+  return /^["“'‘«]/.test(t) && /["”'’»]\s*[.!?]?$/.test(t) && t.length < 420;
+}
+
+function stripQuotes(content: string) {
+  return content.trim().replace(/^["“'‘«]\s*/, "").replace(/\s*["”'’»]([.!?]?)$/, "$1");
+}
+
 function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
+  if (isQuote(content)) {
+    return (
+      <div className="h-auto">
+        {eyebrow && (
+          <p className="mb-4 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45">
+            {eyebrow}
+          </p>
+        )}
+        <blockquote className="border-l border-foreground/40 pl-8 pr-8 md:pl-10 md:pr-12 py-1 m-0">
+          <p className="max-w-[520px] font-display text-[20px] md:text-[24px] lg:text-[26px] leading-[1.55] tracking-[-0.005em] text-foreground/90">
+            {renderParagraph(stripQuotes(content))}
+          </p>
+        </blockquote>
+      </div>
+    );
+  }
+
   return (
     <div className="h-auto">
       {eyebrow && (
@@ -91,6 +120,7 @@ function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
     </div>
   );
 }
+
 
 function MediaCell({
   block,
