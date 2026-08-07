@@ -950,8 +950,10 @@ const PublicDesignerProfile = () => {
   /* ── "New In" editorial format (portrait left, name + bio right) ── */
   const rightColPad = "md:pl-14 lg:pl-20 xl:pl-24";
   const portraitToggle = (
-    <button
-      type="button"
+    <PortraitCtaLink
+      label={newInExpanded ? "Close The Full Portrait" : "View The Full Portrait"}
+      reversed={newInExpanded}
+      expanded={newInExpanded}
       onClick={() => {
         const next = !newInExpanded;
         setNewInExpanded(next);
@@ -967,23 +969,7 @@ const PublicDesignerProfile = () => {
           window.setTimeout(() => flashBioHighlight(), 600);
         }
       }}
-      aria-expanded={newInExpanded}
-      className="group inline-flex items-center gap-4 font-body text-[11px] md:text-xs uppercase tracking-[0.18em] text-current hover:opacity-70 transition-opacity duration-300"
-    >
-      {newInExpanded && (
-        <span aria-hidden="true" className="relative inline-flex items-center">
-          <span className="block h-px w-10 bg-current transition-all duration-300 group-hover:w-12" />
-          <ArrowLeft className="absolute -left-[3px] h-3 w-3 -translate-y-[0.5px]" strokeWidth={1} />
-        </span>
-      )}
-      <span>{newInExpanded ? "Close The Full Portrait" : "View The Full Portrait"}</span>
-      {!newInExpanded && (
-        <span aria-hidden="true" className="relative inline-flex items-center">
-          <span className="block h-px w-10 bg-current transition-all duration-300 group-hover:w-12" />
-          <ArrowRight className="absolute -right-[3px] h-3 w-3 -translate-y-[0.5px]" strokeWidth={1} />
-        </span>
-      )}
-    </button>
+    />
   );
 
   /* Inline "full portrait" expansion — mounts the staggered magazine rows only.
