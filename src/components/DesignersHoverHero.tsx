@@ -1555,11 +1555,12 @@ const DesignersHoverHero = () => {
                           .map(({ letter, items: letterItems }, letterIdx, lettersArr) => {
                             const isLastLetter = letterIdx === lettersArr.length - 1;
                             return (
-                              <li key={letter} className="flex flex-col text-left">
-                                <span className="text-[10px] uppercase tracking-[0.3em] font-body text-white/40 mt-1 md:mt-1.5 mb-0 md:mb-0.5">
+                              <li key={letter} className="flex flex-row items-start text-left gap-3">
+                                <span className="w-4 shrink-0 pt-[5px] text-[9px] uppercase tracking-[0.28em] font-body text-white/35">
                                   {letter}
                                 </span>
                                 <ul className="flex flex-col gap-[2px] short:gap-0 md:gap-0 text-left">
+
                                   {letterItems.map((d, dIdx) => {
                                     const [first, last] = splitName(d.name);
                                     const isActive = d.slug === activeSlug;
