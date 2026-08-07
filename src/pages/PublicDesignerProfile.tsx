@@ -1507,8 +1507,14 @@ const PublicDesignerProfile = () => {
 
                 return (
                   <>
+                    {/* ── PORTRAIT CTA ROW — MOBILE / PWA ── */}
+                    <div className="md:hidden flex items-center justify-between gap-3 py-2">
+                      <div className="min-w-0 text-foreground">{portraitLink}</div>
+                    </div>
+
                     {/* ── CONTROLS BAR — MOBILE / PWA ── */}
                     <div className="md:hidden flex items-center justify-between border-b border-border/60 py-3 mb-6">
+
                       <div className="flex items-center space-x-4">
                         <DropdownMenu>
                           <DropdownMenuTrigger
