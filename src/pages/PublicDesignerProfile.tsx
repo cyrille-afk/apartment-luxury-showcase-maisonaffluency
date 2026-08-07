@@ -1009,19 +1009,12 @@ const PublicDesignerProfile = () => {
   };
 
   const portraitLink = (
-    <button
-      type="button"
+    <PortraitCtaLink
+      label={portraitOpen ? "Close The Full Portrait" : "View The Full Portrait"}
       onClick={portraitOpen ? closePortrait : openPortrait}
-      aria-expanded={portraitOpen}
-      className="group inline-flex items-center gap-3 font-body text-[11px] lg:text-xs uppercase tracking-[0.22em] text-current hover:opacity-70 transition-opacity duration-300"
-    >
-      <span>{portraitOpen ? "Close The Full Portrait" : "View The Full Portrait"}</span>
-      {portraitOpen ? (
-        <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-1" strokeWidth={1.25} />
-      ) : (
-        <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" strokeWidth={1.25} />
-      )}
-    </button>
+      reversed={portraitOpen}
+      expanded={portraitOpen}
+    />
   );
 
   const portraitExpansion = (
