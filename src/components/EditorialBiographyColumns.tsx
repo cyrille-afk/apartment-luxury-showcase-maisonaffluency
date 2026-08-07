@@ -94,7 +94,7 @@ function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
     return (
       <div className="h-auto">
         {eyebrow && (
-          <p className="mb-4 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45">
+          <p className="mb-2 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45">
             {eyebrow}
           </p>
         )}
@@ -110,7 +110,7 @@ function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
   return (
     <div className="h-auto">
       {eyebrow && (
-        <p className="mb-4 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45">
+        <p className="mb-2 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45">
           {eyebrow}
         </p>
       )}
