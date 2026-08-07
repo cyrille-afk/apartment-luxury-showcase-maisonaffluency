@@ -81,12 +81,15 @@ function Caption({ label, above = false }: { label: string; above?: boolean }) {
 
 /** A quoted paragraph, e.g. "I want the pieces that I create…" */
 function isQuote(content: string) {
-  const t = content.trim();
-  return /^["“'‘«]/.test(t) && /["”'’»]\s*[.!?]?$/.test(t) && t.length < 420;
+  const t = content.replace(/<[^>]+>/g, "").trim();
+  return /^["“'‘«]/.test(t) && /["”'’»][.!?]?$/.test(t) && t.length < 420;
 }
 
 function stripQuotes(content: string) {
-  return content.trim().replace(/^["“'‘«]\s*/, "").replace(/\s*["”'’»]([.!?]?)$/, "$1");
+  return content
+    .trim()
+    .replace(/^((?:<[^>]+>\s*)*)["“'‘«]\s*/, "$1")
+    .replace(/\s*["”'’»]([.!?]?)((?:\s*<\/[^>]+>)*)$/, "$1$2");
 }
 
 function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
