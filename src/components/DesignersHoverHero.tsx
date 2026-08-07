@@ -277,6 +277,15 @@ const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
 
 const ALL_FEATURED_SLUGS = FEATURED_GROUPS.flatMap((g) => g.slugs);
 
+/**
+ * Hero directory entries read "Person - Brand" (e.g. "Felix Agostini - Maison
+ * Charles"), so sort/group on the person's LAST name from the first segment.
+ */
+const featuredPersonPart = (name: string) =>
+  (name.includes(" - ") ? name.split(" - ")[0] : name).trim();
+const featuredSortKey = (name: string) => sortNameKey(featuredPersonPart(name));
+const featuredInitial = (name: string) => lastNameInitial(featuredPersonPart(name));
+
 // Build-time seed so the first hero image URL is available synchronously on
 // module parse — avoids the Supabase round-trip blocking LCP on Slow-4G.
 const FEATURED_SEED = (featuredDesignersSeed as FeaturedDesigner[]) || [];
