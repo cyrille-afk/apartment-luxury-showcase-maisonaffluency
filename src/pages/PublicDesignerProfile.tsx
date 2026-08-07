@@ -1755,6 +1755,9 @@ const PublicDesignerProfile = () => {
                     ? "clam-chair"
                     : slugifyProduct(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""));
                   const productHref = `/designers/${targetDesignerSlug}/${productSlug}`;
+                  const cardBrandLabel = isArnoldClamChair ? "Dagmar" : designerLabel;
+                  const cardBrandSlug = isArnoldClamChair ? "dagmar-london" : designerSlug;
+                  const cardSubtitle = isArnoldClamChair ? "by Arnold Madsen" : pick.subtitle;
                   const isMobilePickRevealed = mobileRevealedPickId === pick.id;
                   const handleCardClick = (e: React.MouseEvent) => {
                     if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || (e as any).button === 1) {
@@ -1772,10 +1775,10 @@ const PublicDesignerProfile = () => {
                     setLightboxItem({
                       id: pick.id,
                       title: displayTitle,
-                      subtitle: pick.subtitle,
+                      subtitle: isArnoldClamChair ? "Arnold Madsen" : pick.subtitle,
                       image_url: pick.image_url,
                       hover_image_url: pick.hover_image_url,
-                      brand_name: designerLabel || designer.name,
+                      brand_name: isArnoldClamChair ? "Dagmar" : designerLabel || designer.name,
                       materials: pick.materials,
                       materials_description: (pick as any).materials_description ?? null,
                       dimensions: pick.dimensions,
@@ -1820,7 +1823,7 @@ const PublicDesignerProfile = () => {
                             handleCardClick(e as unknown as React.MouseEvent);
                           }
                         }}
-                        aria-label={`${displayTitle}${pick.subtitle ? ` — ${pick.subtitle}` : ""}`}
+                        aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
                         className="aspect-[4/5] bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer"
                       >
                         <img
@@ -1901,17 +1904,17 @@ const PublicDesignerProfile = () => {
                       {/* Editorial text block — quiet, uniform, line-clamped */}
                       <div className="flex flex-col flex-1 px-0.5 md:px-0 text-left md:text-center">
                         {/* Designer / brand label — small caps, muted (mobile only shows when grouped, like competitor) */}
-                        {designerLabel && designerSlug ? (
+                        {cardBrandLabel && cardBrandSlug ? (
                           <Link
-                            to={`/designers/${designerSlug}`}
+                            to={`/designers/${cardBrandSlug}`}
                             onClick={(e) => e.stopPropagation()}
                             className="block font-body text-[10px] md:text-[11px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors leading-tight line-clamp-1"
                           >
-                            {designerLabel}
+                            {cardBrandLabel}
                           </Link>
-                        ) : designerLabel ? (
+                        ) : cardBrandLabel ? (
                           <span className="block font-body text-[10px] md:text-[11px] uppercase tracking-[0.15em] text-muted-foreground leading-tight line-clamp-1">
-                            {designerLabel}
+                            {cardBrandLabel}
                           </span>
                         ) : parentBrandName ? (
                           <Link
@@ -1938,11 +1941,14 @@ const PublicDesignerProfile = () => {
                         </h3>
 
                         {/* Variant/finish subtitle — only when it isn't a designer attribution */}
-                        {pick.subtitle &&
-                          pick.subtitle.trim().toLowerCase() !== (designerLabel || "").trim().toLowerCase() &&
+                        {cardSubtitle &&
+                          cardSubtitle.trim().toLowerCase() !== (cardBrandLabel || "").trim().toLowerCase() &&
                           !subtitleDesignerLabel && (
-                            <p className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.14em] text-muted-foreground leading-tight mt-1 line-clamp-1">
-                              {pick.subtitle}
+                            <p className={cn(
+                              "font-body text-[10px] md:text-[11px] tracking-[0.14em] text-muted-foreground leading-tight mt-1 line-clamp-1",
+                              !isArnoldClamChair && "uppercase"
+                            )}>
+                              {cardSubtitle}
                             </p>
                           )}
 
