@@ -255,7 +255,9 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       if (rect.height === 0) return;
       const scrollable = el.scrollHeight - el.clientHeight > 1;
       const y = e.clientY - rect.top;
-      const zone = rect.height * 0.2;
+      // Narrower edge zones leave more calm hover area in the middle
+      // and only auto-scroll when the user clearly intends to traverse.
+      const zone = rect.height * 0.12;
       let dir = 0;
       if (scrollable && y <= zone) dir = -1;
       else if (scrollable && y >= rect.height - zone) dir = 1;
