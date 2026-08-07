@@ -1142,16 +1142,17 @@ const PublicDesignerProfile = () => {
           {heroParagraphs.length > 0 && (
             <div className="font-body text-[15px] leading-[1.75] text-foreground/85 text-left">
               {(newInExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
-                <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
+                <p key={i} className={`${i > 0 ? "mt-4 " : ""}${!newInExpanded && i === 0 ? "line-clamp-2" : ""}`}>{renderParagraph(p)}</p>
               ))}
             </div>
           )}
 
           {thinContentFallback && (
-            <p className="font-body text-[15px] leading-[1.75] text-foreground/85 mt-4">
+            <p className={`font-body text-[15px] leading-[1.75] text-foreground/85 mt-4 ${newInExpanded ? "" : "line-clamp-2"}`}>
               {thinContentFallback}
             </p>
           )}
+
 
           {/* Full-portrait CTA moved into the mobile controls bar below */}
 
