@@ -1315,18 +1315,29 @@ const DesignersHoverHero = () => {
   ) => (
     <div ref={ref} className={className}>
       <div className={cn(
-        "flex flex-col w-full",
+        "flex flex-col",
+        !isMobileOrPwa && "w-full",
         align === "center" && "items-center text-center",
         align === "right" && "items-end"
       )}>
         <span
           className={cn(
-            "text-[9px] uppercase tracking-[0.32em] mb-2 font-body font-medium text-white/95",
+            isMobileOrPwa
+              ? "text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white"
+              : "text-[9px] uppercase tracking-[0.32em] mb-2 font-body font-medium text-white/95",
             align === "center" && "text-center",
             align === "right" && "text-right"
           )}
         >
-          Directory <span className="text-white/55 normal-case tracking-normal font-light">({designerCount || 95})</span>
+          Directory{" "}
+          <span
+            className={cn(
+              "normal-case tracking-normal",
+              isMobileOrPwa ? "text-white/70" : "text-white/55 font-light"
+            )}
+          >
+            ({designerCount || 95})
+          </span>
         </span>
 
         <button
@@ -1354,14 +1365,16 @@ const DesignersHoverHero = () => {
           aria-expanded={searchOpen}
           aria-controls="designers-search-sheet"
           className={cn(
-            "w-full inline-flex items-center gap-2 pb-2.5 border-b border-white/15",
-            "text-xs font-body font-light italic text-white/80 hover:text-white transition-colors",
+            "inline-flex items-center gap-2 text-xs font-body font-light italic transition-colors",
+            isMobileOrPwa
+              ? "text-white/85 hover:text-white underline-offset-4 hover:underline"
+              : "w-full pb-2.5 border-b border-white/15 text-white/80 hover:text-white",
             align === "left" && "text-left justify-start",
             align === "center" && "text-center justify-center",
             align === "right" && "text-right flex-row-reverse justify-start"
           )}
         >
-          <Search className="h-3.5 w-3.5 not-italic opacity-90" aria-hidden="true" />
+          <Search className={cn("h-3.5 w-3.5 not-italic", !isMobileOrPwa && "opacity-90")} aria-hidden="true" />
           Find A Designer
         </button>
       </div>
@@ -1479,7 +1492,7 @@ const DesignersHoverHero = () => {
         >
 
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
-            <div className="relative w-full">
+            <div className={cn("relative", isMobileOrPwa ? "inline-block" : "block w-full")}>
               {/* Desktop: Directory sits directly above the designer list to
                   group navigation (list) with its utility (search) — Proximity.
                   All items share the same left edge as the designer names. */}
@@ -1498,123 +1511,211 @@ const DesignersHoverHero = () => {
                   suppressNavClickRef.current = false;
                 }}
                 className={cn(
-                  "relative block w-full select-none",
+                  "relative select-none",
+                  isMobileOrPwa ? "inline-block" : "block w-full",
                   isMobileBrowser ? "touch-none" : isMobileOrPwa ? "touch-pan-y" : "touch-none"
                 )}
               >
-              <ul className="flex flex-col text-left">
-                {groupedItems.map((group, groupIdx) => (
-                  <li
-                    key={group.label}
-                    className={cn(
-                      "flex flex-col text-left",
-                      groupIdx > 0 && "mt-2 short:mt-1 md:mt-6"
-                    )}
-                  >
-                    <span
-                      ref={groupIdx === 0 ? mastersRef : undefined}
-                      className="inline-flex items-center gap-1.5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-body font-bold text-gold drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mb-1 md:mb-3"
+              {!isMobileOrPwa ? (
+                <ul className="flex flex-col text-left">
+                  {groupedItems.map((group, groupIdx) => (
+                    <li
+                      key={group.label}
+                      className={cn(
+                        "flex flex-col text-left",
+                        groupIdx > 0 && "mt-2 short:mt-1 md:mt-6"
+                      )}
                     >
-                      {group.label}
-                    </span>
-                    <ul className="flex flex-col text-left">
-                      {group.designers
-                        .reduce<{ letter: string; items: FeaturedDesigner[] }[]>((acc, d) => {
-                          const letter = d.name.trim().charAt(0).toUpperCase();
-                          const last = acc[acc.length - 1];
-                          if (last && last.letter === letter) {
-                            last.items.push(d);
-                          } else {
-                            acc.push({ letter, items: [d] });
-                          }
-                          return acc;
-                        }, [])
-                        .map(({ letter, items: letterItems }, letterIdx, lettersArr) => {
-                          const isLastLetter = letterIdx === lettersArr.length - 1;
-                          return (
-                            <li key={letter} className="flex flex-col text-left">
-                              <span className="text-[10px] uppercase tracking-[0.3em] font-body text-white/45 mt-1.5 mb-1">
-                                {letter}
-                              </span>
-                              <ul className="flex flex-col gap-[2px] short:gap-0 md:gap-1 text-left">
-                                {letterItems.map((d, dIdx) => {
-                                  const [first, last] = splitName(d.name);
-                                  const isActive = d.slug === activeSlug;
-                                  const HIDE_FOUNDER_SUFFIX = new Set(["Man of Parts", "Pouenat", "Ozone"]);
-                                  const childBrand = d.founder && d.founder !== d.name && !HIDE_FOUNDER_SUFFIX.has(d.founder);
-                                  const isLastItem =
-                                    groupIdx === groupedItems.length - 1 &&
-                                    isLastLetter &&
-                                    dIdx === letterItems.length - 1;
-                                  return (
-                                    <li
-                                      key={d.slug}
-                                      ref={isLastItem ? lastItemRef : undefined}
-                                      className="text-left leading-[1.25] short:leading-[1.15] sm:leading-[1.55]"
-                                    >
-                                      <SilentLink
-                                        to={`/designers/${d.slug}`}
-                                        data-featured-designer-slug={d.slug}
-                                        state={{ fromDesignersHero: true }}
-                                        data-nav-state={JSON.stringify({ fromDesignersHero: true })}
-                                        onMouseEnter={() => {
-                                          setActiveSlug(d.slug);
-                                        }}
-                                        onFocus={() => setActiveSlug(d.slug)}
-                                        className={cn(
-                                          "inline-flex items-center whitespace-nowrap relative",
-                                          "text-[15px] short:text-[14px] sm:text-base md:text-[18px] leading-[1.25] short:leading-[1.15] sm:leading-[1.55]",
-                                          "font-display font-light tracking-normal",
-                                          "transition-colors duration-500 ease-out",
-                                          "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
-                                          isActive
-                                            ? "text-white font-medium"
-                                            : "text-white/60 hover:text-white"
-                                        )}
+                      <span
+                        ref={groupIdx === 0 ? mastersRef : undefined}
+                        className="inline-flex items-center gap-1.5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-body font-bold text-gold drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mb-1 md:mb-3"
+                      >
+                        {group.label}
+                      </span>
+                      <ul className="flex flex-col text-left">
+                        {group.designers
+                          .reduce<{ letter: string; items: FeaturedDesigner[] }[]>((acc, d) => {
+                            const letter = d.name.trim().charAt(0).toUpperCase();
+                            const last = acc[acc.length - 1];
+                            if (last && last.letter === letter) {
+                              last.items.push(d);
+                            } else {
+                              acc.push({ letter, items: [d] });
+                            }
+                            return acc;
+                          }, [])
+                          .map(({ letter, items: letterItems }, letterIdx, lettersArr) => {
+                            const isLastLetter = letterIdx === lettersArr.length - 1;
+                            return (
+                              <li key={letter} className="flex flex-col text-left">
+                                <span className="text-[10px] uppercase tracking-[0.3em] font-body text-white/45 mt-1.5 mb-1">
+                                  {letter}
+                                </span>
+                                <ul className="flex flex-col gap-[2px] short:gap-0 md:gap-1 text-left">
+                                  {letterItems.map((d, dIdx) => {
+                                    const [first, last] = splitName(d.name);
+                                    const isActive = d.slug === activeSlug;
+                                    const HIDE_FOUNDER_SUFFIX = new Set(["Man of Parts", "Pouenat", "Ozone"]);
+                                    const childBrand = d.founder && d.founder !== d.name && !HIDE_FOUNDER_SUFFIX.has(d.founder);
+                                    const isLastItem =
+                                      groupIdx === groupedItems.length - 1 &&
+                                      isLastLetter &&
+                                      dIdx === letterItems.length - 1;
+                                    return (
+                                      <li
+                                        key={d.slug}
+                                        ref={isLastItem ? lastItemRef : undefined}
+                                        className="text-left leading-[1.25] short:leading-[1.15] sm:leading-[1.55]"
                                       >
-                                        {isActive && (
-                                          <span
-                                            aria-hidden="true"
-                                            className="inline-block w-4 h-[1px] bg-white align-middle mr-2"
-                                          />
-                                        )}
-                                        <span>
-                                          {first}
-                                          {last && (
-                                            <span>
-                                              {" "}
-                                              {last}
-                                            </span>
-                                          )}
-                                          {childBrand && (
-                                            <span className="opacity-80"> - {d.founder}</span>
-                                          )}
-                                        </span>
-                                        {/* Discovery cue: tiny aperture glyph hinting each name has a photo.
-                                            Shown on every viewport; faint by default, brightens when active. */}
-                                        <ImageIcon
-                                          aria-hidden="true"
-                                          strokeWidth={1.25}
+                                        <SilentLink
+                                          to={`/designers/${d.slug}`}
+                                          data-featured-designer-slug={d.slug}
+                                          state={{ fromDesignersHero: true }}
+                                          data-nav-state={JSON.stringify({ fromDesignersHero: true })}
+                                          onMouseEnter={() => {
+                                            setActiveSlug(d.slug);
+                                          }}
+                                          onFocus={() => setActiveSlug(d.slug)}
                                           className={cn(
-                                            "inline-block align-middle ml-2 -translate-y-[1px]",
-                                            "h-[10px] w-[10px] transition-all duration-500",
+                                            "inline-flex items-center whitespace-nowrap relative",
+                                            "text-[15px] short:text-[14px] sm:text-base md:text-[18px] leading-[1.25] short:leading-[1.15] sm:leading-[1.55]",
+                                            "font-display font-light tracking-normal",
+                                            "transition-colors duration-500 ease-out",
+                                            "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
                                             isActive
-                                              ? "opacity-90 text-gold"
-                                              : "opacity-30 text-white/80 md:group-hover:opacity-70"
+                                              ? "text-white font-medium"
+                                              : "text-white/60 hover:text-white"
                                           )}
-                                        />
-                                      </SilentLink>
-                                    </li>
-                                  );
-                                })}
-                              </ul>
+                                        >
+                                          {isActive && (
+                                            <span
+                                              aria-hidden="true"
+                                              className="inline-block w-4 h-[1px] bg-white align-middle mr-2"
+                                            />
+                                          )}
+                                          <span>
+                                            {first}
+                                            {last && (
+                                              <span>
+                                                {" "}
+                                                {last}
+                                              </span>
+                                            )}
+                                            {childBrand && (
+                                              <span className="opacity-80"> - {d.founder}</span>
+                                            )}
+                                          </span>
+                                          {/* Discovery cue: tiny aperture glyph hinting each name has a photo.
+                                              Shown on every viewport; faint by default, brightens when active. */}
+                                          <ImageIcon
+                                            aria-hidden="true"
+                                            strokeWidth={1.25}
+                                            className={cn(
+                                              "inline-block align-middle ml-2 -translate-y-[1px]",
+                                              "h-[10px] w-[10px] transition-all duration-500",
+                                              isActive
+                                                ? "opacity-90 text-gold"
+                                                : "opacity-30 text-white/80 md:group-hover:opacity-70"
+                                            )}
+                                          />
+                                        </SilentLink>
+                                      </li>
+                                    );
+                                  })}
+                                </ul>
+                              </li>
+                            );
+                          })}
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <ul className="flex flex-col text-left">
+                  {groupedItems.map((group, groupIdx) => (
+                    <li
+                      key={group.label}
+                      className={cn(
+                        "flex flex-col text-left",
+                        groupIdx > 0 && "mt-2 short:mt-1 md:mt-6"
+                      )}
+                    >
+                      <span
+                        ref={groupIdx === 0 ? mastersRef : undefined}
+                        className="inline-flex items-center gap-1.5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-body font-bold text-gold drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mb-1 md:mb-3"
+                      >
+                        {group.label}
+                      </span>
+                      <ul className="flex flex-col gap-[2px] short:gap-0 md:gap-1 text-left">
+                        {group.designers.map((d, dIdx) => {
+                          const [first, last] = splitName(d.name);
+                          const isActive = d.slug === activeSlug;
+                          const isDimmed = activeSlug !== null && !isActive;
+                          const HIDE_FOUNDER_SUFFIX = new Set(["Man of Parts", "Pouenat", "Ozone"]);
+                          const childBrand = d.founder && d.founder !== d.name && !HIDE_FOUNDER_SUFFIX.has(d.founder);
+                          const isLastItem =
+                            groupIdx === groupedItems.length - 1 &&
+                            dIdx === group.designers.length - 1;
+                          return (
+                            <li
+                              key={d.slug}
+                              ref={isLastItem ? lastItemRef : undefined}
+                              className="text-left leading-[1.25] short:leading-[1.15] sm:leading-[1.55]"
+                            >
+                              <SilentLink
+                                to={`/designers/${d.slug}`}
+                                data-featured-designer-slug={d.slug}
+                                state={{ fromDesignersHero: true }}
+                                data-nav-state={JSON.stringify({ fromDesignersHero: true })}
+                                onMouseEnter={() => {
+                                  setActiveSlug(d.slug);
+                                }}
+                                onFocus={() => setActiveSlug(d.slug)}
+                                className={cn(
+                                  "inline-block whitespace-nowrap relative",
+                                  "text-[15px] short:text-[14px] sm:text-base md:text-[18px] leading-[1.25] short:leading-[1.15] sm:leading-[1.55]",
+                                  "font-display font-light tracking-normal",
+                                  "transition-all duration-[1200ms] ease-out",
+                                  "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
+                                  isDimmed
+                                    ? "text-cream/90"
+                                    : "font-bold text-cream after:content-[''] after:absolute after:left-0 after:bottom-[-5px] after:h-[1px] after:w-8 after:bg-cream/40"
+                                )}
+                              >
+                                <span>
+                                  {first}
+                                  {last && (
+                                    <span>
+                                      {" "}
+                                      {last}
+                                    </span>
+                                  )}
+                                  {childBrand && (
+                                    <span className="opacity-80"> - {d.founder}</span>
+                                  )}
+                                  {/* Discovery cue: tiny aperture glyph hinting each name has a photo.
+                                      Shown on every viewport; faint by default, brightens when active. */}
+                                  <ImageIcon
+                                    aria-hidden="true"
+                                    strokeWidth={1.25}
+                                    className={cn(
+                                      "inline-block align-middle ml-2 -translate-y-[1px]",
+                                      "h-[10px] w-[10px] transition-all duration-500",
+                                      isActive
+                                        ? "opacity-90 text-gold"
+                                        : "opacity-30 text-cream/80 md:group-hover:opacity-70"
+                                    )}
+                                  />
+                                </span>
+                              </SilentLink>
                             </li>
                           );
                         })}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </nav>
             </div>
           </div>
