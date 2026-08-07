@@ -233,7 +233,7 @@ const FEATURED_GROUPS = [
     slugs: [
       "alexander-lamont",
       "arnold-madsen",
-      "dagmar-london",
+      
       "emmanuel-babled",
       "felix-agostini",
       "jean-michel-frank",
