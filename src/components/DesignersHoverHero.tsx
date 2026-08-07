@@ -250,6 +250,7 @@ const FEATURED_GROUPS = [
     label: "Contemporary Talents",
     slugs: [
       "apparatus-studio",
+      "dagmar-london",
       "atelier-demichelis",
       "christopher-boots",
       "delcourt-collection",
