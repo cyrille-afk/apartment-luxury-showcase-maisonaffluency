@@ -652,11 +652,21 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
 
         {/* Desktop: single-row symmetrical luxury header */}
         <div className="hidden md:flex flex-col items-stretch w-full">
-          {/* ROW 1 — slim utility ribbon */}
-          <div className="flex items-center justify-between h-9 border-b border-neutral-100">
+          {/* ROW 1 — slim utility ribbon with imposing centered brand lockup */}
+          <div className="flex items-center justify-between h-11 border-b border-neutral-100">
             <div className="flex items-center">
               <ShippingDestinationSwitcher compact showIso className="min-h-8 justify-center" />
             </div>
+
+            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap inline-flex items-baseline">
+              <span className="font-brand text-2xl lg:text-3xl font-normal tracking-[0.18em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
+                MAISON AFFLUENCY
+              </span>
+              <span aria-hidden="true" className="mx-5 lg:mx-6 h-3 w-px self-center bg-foreground/20" />
+              <span className="font-body text-[7px] uppercase tracking-[0.3em] font-light text-foreground/50">
+                Est. 2017
+              </span>
+            </button>
 
             <div className="flex items-center gap-5">
               <button
@@ -739,20 +749,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             </div>
           </div>
 
-          {/* ROW 2 — centered brand lockup */}
-          <div className="flex flex-col items-center w-full">
-            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap py-6 inline-flex items-baseline">
-              <span className="font-brand text-xl lg:text-2xl tracking-[0.3em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
-                MAISON AFFLUENCY
-              </span>
-              <span aria-hidden="true" className="ml-6 lg:ml-8 h-3 w-px self-center bg-foreground/25" />
-              <span className="ml-3 font-body text-[8px] uppercase tracking-[0.28em] font-light text-foreground/55">
-                Est. 2017
-              </span>
-            </button>
-
-            {/* Primary navigation bar */}
-            <nav className="flex items-center justify-center flex-wrap gap-8 lg:gap-10 pb-4">
+          {/* ROW 2 — primary navigation bar */}
+          <nav className="flex items-center justify-center flex-wrap gap-8 lg:gap-10 py-4">
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
                 className={cn(
@@ -826,7 +824,6 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 </button>
               )}
             </nav>
-          </div>
         </div>
 
 
