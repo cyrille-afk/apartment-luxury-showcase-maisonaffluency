@@ -1474,10 +1474,10 @@ const DesignersHoverHero = () => {
       <div
         className={cn(
           "absolute inset-x-0 top-0 z-20 pointer-events-none",
-          // Mobile browser: frame height = visible viewport minus the fixed
-          // header, so its bottom aligns with the iOS toolbar top (svh excludes
-          // the toolbar). Desktop/PWA: full section height.
-          isStandalone ? "h-full" : "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))] md:h-full"
+          // Desktop: pulled back over the sticky imagery with a negative margin
+          // so the column contributes its natural height to the page scroll.
+          "md:static md:-mt-[calc(100svh-var(--header-h))] md:h-auto",
+          isStandalone ? "h-full" : "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))]"
         )}
       >
 
@@ -1485,13 +1485,13 @@ const DesignersHoverHero = () => {
         <div
           ref={contentScrollRef}
           className={cn(
-          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto md:overflow-visible",
+          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto md:overflow-visible md:h-auto",
             isStandalone
-              ? "overflow-y-auto justify-start overscroll-contain touch-pan-y pt-12 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pt-8 md:pb-0 md:justify-center [-webkit-overflow-scrolling:touch]"
+              ? "overflow-y-auto justify-start overscroll-contain touch-pan-y pt-12 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pt-8 md:pb-16 md:justify-start md:overflow-visible [-webkit-overflow-scrolling:touch]"
               : // Mobile browser: the section already starts below the fixed
                 // header, so do not add var(--header-h) again here. Keep the
                 // designer list high while leaving room for the Directory link.
-                "overflow-y-hidden justify-start overscroll-contain touch-none pt-[4.25rem] short:pt-[3.5rem] pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pt-8 md:justify-center md:pb-0"
+                "overflow-y-hidden justify-start overscroll-contain touch-none pt-[4.25rem] short:pt-[3.5rem] pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pt-8 md:justify-start md:pb-16 md:overflow-visible"
           )}
         >
 
@@ -1518,10 +1518,11 @@ const DesignersHoverHero = () => {
                   "relative select-none",
                   isMobileOrPwa ? "inline-block" : "block w-full",
                   isMobileBrowser ? "touch-none" : isMobileOrPwa ? "touch-pan-y" : "touch-none",
-                  // Desktop: the alphabetical index adds vertical height, so the
-                  // list must become scrollable rather than bleed past the frame.
-                  !isMobileOrPwa && "md:max-h-[calc(100svh-var(--header-h)-9.5rem)] md:overflow-y-auto md:pr-3 md:[scrollbar-width:thin] md:[&::-webkit-scrollbar]:w-1 md:[&::-webkit-scrollbar-track]:bg-transparent md:[&::-webkit-scrollbar-thumb]:bg-white/20 md:[&::-webkit-scrollbar-thumb]:rounded-full"
+                  // Desktop: no nested scroller — the column stretches to its
+                  // full natural height and the page scrolls as one track.
+                  !isMobileOrPwa && "md:h-auto md:max-h-none md:overflow-visible"
                 )}
+
               >
               {!isMobileOrPwa ? (
                 <ul className="flex flex-col text-left">
