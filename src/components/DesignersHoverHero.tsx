@@ -288,6 +288,12 @@ const featuredPersonPart = (name: string) =>
 const featuredSortKey = (name: string) => sortNameKey(featuredPersonPart(name));
 const featuredInitial = (name: string) => lastNameInitial(featuredPersonPart(name));
 
+// Directory-only brand suffix shown after a designer's name ("Name - Brand"),
+// for designers whose house label isn't captured by `founder`.
+const DIRECTORY_BRAND_SUFFIX: Record<string, string> = {
+  "arnold-madsen": "Dagmar",
+};
+
 // Build-time seed so the first hero image URL is available synchronously on
 // module parse — avoids the Supabase round-trip blocking LCP on Slow-4G.
 const FEATURED_SEED = (featuredDesignersSeed as FeaturedDesigner[]) || [];
