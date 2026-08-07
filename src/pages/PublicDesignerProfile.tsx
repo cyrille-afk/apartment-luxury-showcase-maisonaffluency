@@ -977,18 +977,14 @@ const PublicDesignerProfile = () => {
      No parent re-render, no second hero, no route change. */
   const openPortrait = () => {
     setPortraitOpen(true);
-    const land = (behavior: ScrollBehavior) => {
-      const el = portraitRef.current;
-      if (!el) return;
-      const top = el.getBoundingClientRect().top + window.scrollY - 76;
-      window.scrollTo({ top: Math.max(0, top), behavior });
-    };
-    // The landing blocks above unmount when the portrait opens, so the first
-    // measurement is stale. Land smoothly, then re-measure once the layout
-    // has settled to correct any overshoot.
+    // The landing blocks above unmount when the portrait opens, so the portrait
+    // becomes the top of the page. Anchoring to its bounding box overshoots and
+    // clips the back-link + first row eyebrow captions — land at the very top.
+    const land = (behavior: ScrollBehavior) => window.scrollTo({ top: 0, behavior });
     window.requestAnimationFrame(() => window.setTimeout(() => land("smooth"), 60));
     window.setTimeout(() => land("auto"), 520);
   };
+
 
 
   const closePortrait = () => {
