@@ -1513,7 +1513,10 @@ const DesignersHoverHero = () => {
                 className={cn(
                   "relative select-none",
                   isMobileOrPwa ? "inline-block" : "block w-full",
-                  isMobileBrowser ? "touch-none" : isMobileOrPwa ? "touch-pan-y" : "touch-none"
+                  isMobileBrowser ? "touch-none" : isMobileOrPwa ? "touch-pan-y" : "touch-none",
+                  // Desktop: the alphabetical index adds vertical height, so the
+                  // list must become scrollable rather than bleed past the frame.
+                  !isMobileOrPwa && "md:max-h-[calc(100svh-var(--header-h)-9.5rem)] md:overflow-y-auto md:pr-3 md:[scrollbar-width:thin] md:[&::-webkit-scrollbar]:w-1 md:[&::-webkit-scrollbar-track]:bg-transparent md:[&::-webkit-scrollbar-thumb]:bg-white/20 md:[&::-webkit-scrollbar-thumb]:rounded-full"
                 )}
               >
               {!isMobileOrPwa ? (
