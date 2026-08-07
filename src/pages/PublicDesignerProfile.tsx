@@ -1423,7 +1423,13 @@ const PublicDesignerProfile = () => {
                   sortMode === "default"
                     ? filtered
                     : [...filtered].sort((a, b) => {
-                        if (sortMode === "name") return a.title.localeCompare(b.title);
+                        if (sortMode === "new") {
+                          const t = (p: any) => {
+                            const v = Date.parse(p?.created_at ?? "");
+                            return Number.isFinite(v) ? v : 0;
+                          };
+                          return t(b) - t(a);
+                        }
                         const d = priceOf(a) - priceOf(b);
                         return sortMode === "price-asc" ? d : -d;
                       });
