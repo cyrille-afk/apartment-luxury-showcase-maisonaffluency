@@ -825,8 +825,9 @@ function MobileLetterRow({
                   {designers.map((item, cardIndex) => {
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
                     const isParentBrand = item.founder === item.name && designerCount > 0;
-                    // Only the first visible card (+ its peek neighbour) loads eagerly.
-                    const priority = eagerFirstRow && cardIndex < FIRST_ROW_CARDS_MOBILE;
+                    // This accordion only renders once the user opens the letter, so the
+                    // first visible card (+ its peek neighbour) may load eagerly.
+                    const priority = cardIndex < FIRST_ROW_CARDS_MOBILE;
                     return (
                       <div key={item.slug} className={cn("flex-none snap-start", isParentBrand ? "w-[88vw] max-w-[420px]" : "w-[78%] max-w-[320px]")}>
                         {isParentBrand ? (
