@@ -138,13 +138,19 @@ function DesignerGridCard({
   designer,
   onNavigate,
   priority = false,
+  useCardPhoto = false,
 }: {
   designer: { slug: string; name: string; first_pick_image_url?: string | null; hero_image_url: string | null; image_url: string | null };
   onNavigate?: () => void;
   priority?: boolean;
+  /** Use the designer's own card photo (studio/portrait) instead of the first curator pick. */
+  useCardPhoto?: boolean;
 }) {
-  const baseRaw = pickGridImage(designer);
+  const baseRaw = useCardPhoto
+    ? (designer.hero_image_url || designer.image_url || pickGridImage(designer))
+    : pickGridImage(designer);
   const url = gridImageTransform(baseRaw);
+
   const srcSet = gridImageSrcSet(baseRaw);
   const lqip = gridImageLqip(baseRaw);
   const displayName = displayDesignerName(designer.name);
