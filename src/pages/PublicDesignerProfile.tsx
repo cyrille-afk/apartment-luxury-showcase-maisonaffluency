@@ -1746,7 +1746,11 @@ const PublicDesignerProfile = () => {
 
 
 
-                  const targetDesignerSlug = designerSlug || designer.slug;
+                  // The pick physically belongs to THIS designer, so the product
+                  // page must live under this profile's slug. The attribution
+                  // slug (e.g. Arnold Madsen under Dagmar) is only for the name
+                  // link above the title — using it here 404s the product page.
+                  const targetDesignerSlug = designer.slug;
                   const productSlug = slugifyProduct(
                     pick.title + (pick.subtitle ? `-${pick.subtitle}` : "")
                   );
