@@ -1152,12 +1152,8 @@ const PublicDesignerProfile = () => {
             </p>
           )}
 
-          {/* Full-portrait CTA — inline expansion, identical to desktop */}
-          {!portraitOpen && (
-            <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3 text-foreground">
-              {portraitLink}
-            </div>
-          )}
+          {/* Full-portrait CTA moved into the mobile controls bar below */}
+
         </motion.div>
       </div>
 
