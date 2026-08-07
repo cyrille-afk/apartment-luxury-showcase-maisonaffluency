@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { useParams, Link, Navigate } from "react-router-dom";
+import { useParams, Link, Navigate, useNavigate } from "react-router-dom";
+import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft } from "lucide-react";
 import Navigation from "@/components/Navigation";
@@ -22,7 +23,7 @@ function displayName(name: string): string {
 export default function PublicDesignerBiography() {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
-  const isTradeUser = !!user;
+  const navigate = useNavigate();
   const { data: designer, isLoading } = useDesigner(slug, { includeTradeOnly: isTradeUser });
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
 
