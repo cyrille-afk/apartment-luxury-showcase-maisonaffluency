@@ -1435,14 +1435,94 @@ const PublicDesignerProfile = () => {
                       });
 
                 const forceTwoCol = designer.slug === "adrien-messie" || pickCols === "two";
-                const gridClass = forceTwoCol
-                  ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-2"
-                  : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
+                const gridClass =
+                  pickCols === "one"
+                    ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5"
+                    : forceTwoCol
+                      ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-2"
+                      : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
+
+                const filterItems = categories.map((c) => (
+                  <DropdownMenuCheckboxItem
+                    key={c}
+                    checked={activeCategories.includes(c)}
+                    onCheckedChange={(on) =>
+                      setActiveCategories((prev) =>
+                        on ? [...prev, c] : prev.filter((x) => x !== c)
+                      )
+                    }
+                    className="font-body text-[11px] uppercase tracking-[0.14em]"
+                  >
+                    {c}
+                  </DropdownMenuCheckboxItem>
+                ));
+
+                const sortOptions = (
+                  <>
+                    <option value="default">Default Sorting</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="new">New Launch</option>
+                  </>
+                );
 
                 return (
                   <>
-                    {/* ── CONTROLS BAR ── */}
-                    <div className="flex items-center justify-between gap-4 pb-4 mb-6 border-b border-border/60">
+                    {/* ── CONTROLS BAR — MOBILE / PWA ── */}
+                    <div className="md:hidden flex items-center justify-between border-b border-border/60 py-3 mb-6">
+                      <div className="flex items-center space-x-4">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            disabled={categories.length === 0}
+                            className="flex items-center space-x-1.5 font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground disabled:opacity-40"
+                          >
+                            <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1} aria-hidden="true" />
+                            <span>Filter</span>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start" className="rounded-none">
+                            {filterItems}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <div className="h-4 w-px bg-border/70" />
+
+                        <div className="flex items-center space-x-2.5 text-muted-foreground" role="group" aria-label="Grid density">
+                          <button
+                            type="button"
+                            onClick={() => setPickCols("one")}
+                            aria-pressed={pickCols === "one"}
+                            aria-label="Single column"
+                            className={cn("transition-colors", pickCols === "one" && "text-foreground")}
+                          >
+                            <Square className="h-4 w-4" strokeWidth={1} aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPickCols("two")}
+                            aria-pressed={pickCols !== "one"}
+                            aria-label="Two column grid"
+                            className={cn("transition-colors", pickCols !== "one" && "text-foreground")}
+                          >
+                            <Grid2X2 className="h-4 w-4" strokeWidth={1} aria-hidden="true" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="relative inline-block text-left">
+                        <select
+                          value={sortMode}
+                          onChange={(e) => setSortMode(e.target.value as typeof sortMode)}
+                          aria-label="Sort products"
+                          className="appearance-none bg-transparent pr-4 pl-1 py-1 font-body text-[11px] uppercase tracking-[0.14em] text-foreground focus:outline-none cursor-pointer border-b border-transparent transition"
+                        >
+                          {sortOptions}
+                        </select>
+                        <span className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[9px] text-muted-foreground">▼</span>
+                      </div>
+                    </div>
+
+                    {/* ── CONTROLS BAR — DESKTOP ── */}
+                    <div className="hidden md:flex items-center justify-between gap-4 pb-4 mb-6 border-b border-border/60">
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           disabled={categories.length === 0}
@@ -1452,20 +1532,7 @@ const PublicDesignerProfile = () => {
                           <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1} aria-hidden="true" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" className="rounded-none">
-                          {categories.map((c) => (
-                            <DropdownMenuCheckboxItem
-                              key={c}
-                              checked={activeCategories.includes(c)}
-                              onCheckedChange={(on) =>
-                                setActiveCategories((prev) =>
-                                  on ? [...prev, c] : prev.filter((x) => x !== c)
-                                )
-                              }
-                              className="font-body text-[11px] uppercase tracking-[0.14em]"
-                            >
-                              {c}
-                            </DropdownMenuCheckboxItem>
-                          ))}
+                          {filterItems}
                         </DropdownMenuContent>
                       </DropdownMenu>
 
@@ -1509,13 +1576,11 @@ const PublicDesignerProfile = () => {
                             backgroundPosition: "right 10px center",
                           }}
                         >
-                          <option value="default">Default Sorting</option>
-                          <option value="price-asc">Price: Low to High</option>
-                          <option value="price-desc">Price: High to Low</option>
-                          <option value="new">New Launch</option>
+                          {sortOptions}
                         </select>
                       </div>
                     </div>
+
 
                     <div className={cn("grid gap-x-4 gap-y-8 md:gap-x-5 md:gap-y-10", gridClass)}>
                 {visiblePicks.map((pick) => {
