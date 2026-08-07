@@ -2274,9 +2274,9 @@ const DesignersHoverHero = () => {
                                     willOpen = true;
                                     return new Set([letter]);
                                   });
-                                  if (willOpen) {
-                                    scrollLetterIntoView(letter);
-                                  }
+                                  // Scroll is handled by the desktop accordion
+                                  // effect so the cards are revealed after the
+                                  // grid has expanded.
                                 }}
                                 aria-expanded={isOpen}
                                 className="w-full flex items-center justify-between px-4 py-1.5 text-left hover:bg-white/[0.04] transition-colors"
