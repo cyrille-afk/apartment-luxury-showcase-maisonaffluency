@@ -1131,34 +1131,56 @@ const PublicDesignerProfile = () => {
           transition={{ ...transition, delay: 0.2 }}
           className="flex flex-col justify-start w-full"
         >
-          <div className="mb-3">
+          <div className="mb-2">
             <h1 className="font-display text-3xl leading-[1.1] tracking-[-0.01em] text-foreground">
               {name}
             </h1>
-            <p className="mt-2 font-body text-[10px] uppercase tracking-[0.32em] text-foreground/60">
+            <p className="mt-1 font-body text-[10px] uppercase tracking-[0.32em] text-foreground/60">
               {designer.specialty || "Timeless Scandinavian Design"}
             </p>
           </div>
 
-
-
           {heroParagraphs.length > 0 && (
             <div className="font-body text-[15px] leading-[1.75] text-foreground/85 text-left">
               {(newInExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
-                <p key={i} className={`${i > 0 ? "mt-4 " : ""}${!newInExpanded && i === 0 ? "line-clamp-2" : ""}`}>{renderParagraph(p)}</p>
+                <p key={i} className={i > 0 ? "mt-4" : ""}>
+                  {!newInExpanded && i === 0 ? (
+                    <>
+                      <span className="line-clamp-2">{renderParagraph(p)}</span>
+                      <button
+                        type="button"
+                        onClick={openPortrait}
+                        className="inline ml-1 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
+                      >
+                        Read More
+                      </button>
+                    </>
+                  ) : (
+                    renderParagraph(p)
+                  )}
+                </p>
               ))}
             </div>
           )}
 
           {thinContentFallback && (
-            <p className={`font-body text-[15px] leading-[1.75] text-foreground/85 mt-4 ${newInExpanded ? "" : "line-clamp-2"}`}>
-              {thinContentFallback}
+            <p className="font-body text-[15px] leading-[1.75] text-foreground/85 mt-2">
+              {!newInExpanded ? (
+                <>
+                  <span className="line-clamp-2">{thinContentFallback}</span>
+                  <button
+                    type="button"
+                    onClick={openPortrait}
+                    className="inline ml-1 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
+                  >
+                    Read More
+                  </button>
+                </>
+              ) : (
+                thinContentFallback
+              )}
             </p>
           )}
-
-
-          {/* Full-portrait CTA moved into the mobile controls bar below */}
-
         </motion.div>
       </div>
 
@@ -1512,65 +1534,49 @@ const PublicDesignerProfile = () => {
 
                 return (
                   <>
-                    {/* ── PORTRAIT CTA + FILTER ROW — MOBILE / PWA ── */}
-                    <div className="md:hidden flex items-center justify-between w-full px-4 py-2 border-b border-border/40">
-                      <button
-                        type="button"
-                        onClick={portraitOpen ? closePortrait : openPortrait}
-                        className="text-sm font-medium text-foreground underline underline-offset-4 decoration-foreground/30"
-                      >
-                        {portraitOpen ? "Close The Full Portrait" : "View Full Portrait"}
-                      </button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          disabled={categories.length === 0}
-                          className="flex items-center justify-center p-2 text-muted-foreground hover:bg-muted/40 rounded-full transition-colors disabled:opacity-40"
-                          aria-label="Filter products"
-                        >
-                          <Filter className="w-5 h-5" strokeWidth={1.5} aria-hidden="true" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-none">
-                          {filterItems}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-
                     {/* ── CONTROLS BAR — MOBILE / PWA ── */}
-                    <div className="md:hidden flex items-center justify-between border-b border-border/60 py-2.5 mb-4">
-
-                      <div className="flex items-center space-x-4">
-
-
-
-                        <div className="flex items-center space-x-2.5 text-muted-foreground" role="group" aria-label="Grid density">
-                          <button
-                            type="button"
-                            onClick={() => setPickCols("one")}
-                            aria-pressed={pickCols === "one"}
-                            aria-label="Single column"
-                            className={cn("transition-colors", pickCols === "one" && "text-foreground")}
-                          >
-                            <Square className="h-4 w-4" strokeWidth={1} aria-hidden="true" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setPickCols("two")}
-                            aria-pressed={pickCols !== "one"}
-                            aria-label="Two column grid"
-                            className={cn("transition-colors", pickCols !== "one" && "text-foreground")}
-                          >
-                            <Grid2X2 className="h-4 w-4" strokeWidth={1} aria-hidden="true" />
-                          </button>
-                        </div>
+                    <div className="md:hidden flex items-center justify-between border-y border-border/40 py-2 mb-3">
+                      <div className="flex items-center gap-3 text-muted-foreground" role="group" aria-label="Grid density">
+                        <button
+                          type="button"
+                          onClick={() => setPickCols("one")}
+                          aria-pressed={pickCols === "one"}
+                          aria-label="Single column"
+                          className={cn("transition-colors", pickCols === "one" && "text-foreground")}
+                        >
+                          <Square className="h-4 w-4" strokeWidth={1} aria-hidden="true" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPickCols("two")}
+                          aria-pressed={pickCols !== "one"}
+                          aria-label="Two column grid"
+                          className={cn("transition-colors", pickCols !== "one" && "text-foreground")}
+                        >
+                          <Grid2X2 className="h-4 w-4" strokeWidth={1} aria-hidden="true" />
+                        </button>
                       </div>
 
                       <DropdownMenu>
                         <DropdownMenuTrigger
+                          disabled={categories.length === 0}
+                          className="flex items-center justify-center p-1.5 text-muted-foreground hover:bg-muted/40 rounded-full transition-colors disabled:opacity-40"
+                          aria-label="Filter products"
+                        >
+                          <Filter className="w-4 h-4" strokeWidth={1.5} aria-hidden="true" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="center" className="rounded-none">
+                          {filterItems}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
                           aria-label="Sort products"
-                          className="inline-flex items-center gap-1.5 font-body uppercase tracking-[0.14em] text-foreground focus:outline-none"
+                          className="inline-flex items-center gap-1 font-body uppercase tracking-[0.14em] text-foreground focus:outline-none"
                           style={{ fontSize: "11px", lineHeight: "1.2" }}
                         >
-                          <span className="max-w-[42vw] truncate">
+                          <span className="max-w-[38vw] truncate">
                             {sortMode === "price-asc"
                               ? "Price: Low to High"
                               : sortMode === "price-desc"
@@ -1657,7 +1663,7 @@ const PublicDesignerProfile = () => {
                     </div>
 
 
-                    <div className={cn("grid gap-x-4 gap-y-8 md:gap-x-5 md:gap-y-10", gridClass)}>
+                    <div className={cn("grid gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10", gridClass)}>
                 {visiblePicks.map((pick) => {
 
                   const ap = pick as AttributedCuratorPick;
