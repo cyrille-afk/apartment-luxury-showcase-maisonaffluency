@@ -1098,7 +1098,7 @@ const PublicDesignerProfile = () => {
       </div>
 
       {/* ── MOBILE: mirrors the desktop cinematic stack ── */}
-      <div className={portraitOpen ? "hidden" : "grid grid-cols-1 gap-6 items-start pt-4 md:hidden"} aria-hidden={portraitOpen}>
+      <div className={portraitOpen ? "hidden" : "grid grid-cols-1 gap-4 items-start pt-2 md:hidden"} aria-hidden={portraitOpen}>
 
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -1106,12 +1106,12 @@ const PublicDesignerProfile = () => {
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
           {/* Full-bleed, untruncated hero — natural aspect ratio */}
-          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted max-h-[250px] overflow-hidden">
+          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted max-h-[35vh] overflow-hidden">
             {(wideHeroImage || heroImage) && (
               <img
                 src={wideHeroImage || heroImage}
                 alt={`${name} interior`}
-                className="block w-full h-auto max-h-[250px] object-cover"
+                className="block w-full h-auto max-h-[35vh] object-cover"
                 loading="eager"
               />
             )}
@@ -1131,7 +1131,7 @@ const PublicDesignerProfile = () => {
           transition={{ ...transition, delay: 0.2 }}
           className="flex flex-col justify-start w-full"
         >
-          <div className="mb-4">
+          <div className="mb-3">
             <h1 className="font-display text-3xl leading-[1.1] tracking-[-0.01em] text-foreground">
               {name}
             </h1>
