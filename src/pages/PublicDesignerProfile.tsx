@@ -1663,7 +1663,7 @@ const PublicDesignerProfile = () => {
                     </div>
 
 
-                    <div className={cn("grid gap-x-4 gap-y-8 md:gap-x-5 md:gap-y-10", gridClass)}>
+                    <div className={cn("grid gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10", gridClass)}>
                 {visiblePicks.map((pick) => {
 
                   const ap = pick as AttributedCuratorPick;
