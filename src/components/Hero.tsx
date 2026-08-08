@@ -51,6 +51,7 @@ const heroPrimaryCtaClass =
 const Hero = () => {
   const navigate = useNavigate();
   const [tourOpen, setTourOpen] = useState(false);
+  const [isBookingLoading, setIsBookingLoading] = useState(false);
   const [isPWA, setIsPWA] = useState(false);
   const [showImageFallback, setShowImageFallback] = useState(false);
 
