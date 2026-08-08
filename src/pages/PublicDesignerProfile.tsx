@@ -1536,7 +1536,7 @@ const PublicDesignerProfile = () => {
                     </div>
 
                     {/* ── CONTROLS BAR — MOBILE / PWA ── */}
-                    <div className="md:hidden flex items-center justify-between border-b border-border/60 py-3 mb-6">
+                    <div className="md:hidden flex items-center justify-between border-b border-border/60 py-2.5 mb-4">
 
                       <div className="flex items-center space-x-4">
 
