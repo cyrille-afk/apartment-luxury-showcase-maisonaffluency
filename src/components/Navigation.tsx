@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { trackCTA } from "@/lib/analytics";
 import { deferHashScrollUntilSheetClosed } from "@/lib/mobileHashNavigation";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { useProgrammaticScrollActive } from "@/lib/programmaticScroll";
 import { useStickyProductBarActive } from "@/lib/stickyProductBar";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
@@ -168,8 +169,10 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   // reveal it again as soon as the user scrolls up.
   const { direction: scrollDirection, scrollY: navScrollY } = useScrollDirection();
   const stickyProductBarActive = useStickyProductBarActive();
+  const programmaticScrollActive = useProgrammaticScrollActive();
   const navHidden =
-    ((scrollDirection === "down" && navScrollY > 240) || stickyProductBarActive) &&
+    ((scrollDirection === "down" && navScrollY > 240 && !programmaticScrollActive) ||
+      stickyProductBarActive) &&
     !isOpen &&
     !megaMenuOpen;
 

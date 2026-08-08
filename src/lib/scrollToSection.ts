@@ -9,6 +9,8 @@
  * glimpse parallax interludes and other content along the way.
  */
 
+import { beginProgrammaticScroll, endProgrammaticScroll } from "./programmaticScroll";
+
 /** Custom eased scroll with controllable duration */
 let activeScrollSequence = 0;
 
@@ -35,6 +37,10 @@ function animateScroll(from: number, to: number, duration: number, shouldContinu
 
 export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth", retryUntil = performance.now() + 2500) {
   const scrollSequence = ++activeScrollSequence;
+  // Keep the global nav pinned while we drive the page programmatically —
+  // otherwise the synthetic downward scroll triggers hide-on-scroll and the
+  // target heading lands under a hidden header.
+  beginProgrammaticScroll();
   let cancelledByUser = false;
   let cleanupUserCancel = () => {};
   const shouldContinue = () => scrollSequence === activeScrollSequence && !cancelledByUser;
@@ -43,6 +49,7 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth",
     const cancel = () => {
       cancelledByUser = true;
       activeScrollSequence += 1;
+      endProgrammaticScroll();
       cleanupUserCancel();
     };
     const opts: AddEventListenerOptions = { once: true, passive: true };
@@ -51,6 +58,7 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth",
     window.addEventListener("pointerdown", cancel, opts);
     window.addEventListener("keydown", cancel, { once: true });
     cleanupUserCancel = () => {
+      endProgrammaticScroll();
       window.removeEventListener("wheel", cancel);
       window.removeEventListener("touchstart", cancel);
       window.removeEventListener("pointerdown", cancel);
@@ -97,6 +105,7 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth",
 
   const firstTop = getTargetTop();
   if (firstTop === null) {
+    if (performance.now() >= retryUntil) endProgrammaticScroll();
     if (performance.now() < retryUntil) {
       window.setTimeout(() => scrollToSection(id, behavior, retryUntil), 80);
     }
@@ -196,6 +205,7 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth",
       }
     } else {
       window.scrollTo({ top: nextTop, behavior });
+      endProgrammaticScroll();
       cleanupUserCancel();
     }
   };
