@@ -177,15 +177,41 @@ const Hero = () => {
 
                   <div className="h-px w-10 bg-white/30" aria-hidden="true" />
 
-                  <button
+                  <motion.button
                     type="button"
-                    onClick={openTour}
-                    className="group relative font-body text-[13px] font-light uppercase tracking-[0.2em] text-white py-1 transition-colors hover:text-white/80"
+                    onClick={() => {
+                      trackCTA.bookAppointment("Hero Mobile Frosted Card");
+                      setIsBookingLoading(true);
+                      window.setTimeout(() => {
+                        setTourOpen(true);
+                        setIsBookingLoading(false);
+                      }, 500);
+                    }}
+                    disabled={isBookingLoading}
+                    className="group relative flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-white/5 px-4 py-2 font-body text-[13px] font-light uppercase tracking-[0.2em] text-white transition-colors hover:text-white/80 backdrop-blur-md touch-manipulation"
+                    whileTap={{ scale: 0.98, backdropFilter: "blur(24px)" }}
+                    transition={{ duration: 0.2 }}
                   >
-                    <span>Book Private Appointment</span>
-                    <span className="text-[10px] font-normal italic lowercase text-white/60 ml-1">(trade only)</span>
-                    <span className="absolute bottom-0 left-1/2 h-[1px] w-0 bg-white transition-all duration-300 group-hover:left-0 group-hover:w-full" />
-                  </button>
+                    {isBookingLoading ? (
+                      <motion.span
+                        className="inline-block h-4 w-4 rounded-full border border-white/30 border-t-white"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+                      />
+                    ) : (
+                      <>
+                        <span>Book Private Appointment</span>
+                        <span className="text-[10px] font-normal italic lowercase text-white/60">(trade only)</span>
+                      </>
+                    )}
+                    <motion.span
+                      className="absolute bottom-1 left-0 h-[1px] w-full bg-white"
+                      initial={{ scaleX: 0 }}
+                      whileTap={{ scaleX: 1 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      style={{ transformOrigin: "center" }}
+                    />
+                  </motion.button>
                 </div>
 
 
