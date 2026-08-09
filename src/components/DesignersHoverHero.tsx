@@ -440,8 +440,7 @@ const DesignersHoverHero = () => {
         if (l) {
           restoredLetterRef.current = l;
           // Mobile/PWA restores the previous letter so the list lands where the
-          // user left it. Desktop keeps the A-Z closed on entry so the user is
-          // surprised by the card grid opening up.
+          // user left it. Desktop defaults to "A" opened for immediate discovery.
           const isMobileRestore =
             window.matchMedia("(max-width: 767px)").matches ||
             isPwaStandaloneDisplay();
@@ -451,7 +450,7 @@ const DesignersHoverHero = () => {
         }
       } catch {}
     }
-    return new Set();
+    return new Set(["A"]);
   });
   const [activeAccordionLetter, setActiveAccordionLetter] = useState<string | null>(
     () => {
@@ -466,7 +465,7 @@ const DesignersHoverHero = () => {
           }
         } catch {}
       }
-      return null;
+      return "A";
     }
   );
   const [activeMobileLetter, setActiveMobileLetter] = useState<string | null>(() => restoredLetterRef.current);
