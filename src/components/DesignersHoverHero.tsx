@@ -1532,7 +1532,7 @@ const DesignersHoverHero = () => {
         {items.map((d, i) => {
           const src = isMobileOrPwa
             ? mobileHeroBackgroundSrc(d)
-            : d.hero_image_url || d.image_url;
+            : DESKTOP_HERO_BG_OVERRIDES[d.slug] || d.hero_image_url || d.image_url;
           if (!src) return null;
           const isActive = d.slug === activeSlug;
           const isFirst = i === 0;
