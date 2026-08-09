@@ -1028,12 +1028,17 @@ const DesignersHoverHero = () => {
       );
       scroller.scrollTo({ top: headerTop, behavior: "smooth" });
 
-      // After the grid expands, ensure the cards are not clipped at the bottom.
+      // After the grid expands, ensure the cards are not clipped at the bottom —
+      // but never scroll past the letter header itself (that would hide the very
+      // first designers in the section).
       window.setTimeout(() => {
         const grid = row.querySelector<HTMLElement>(".grid");
         if (!grid) return;
+        const sRect = scroller.getBoundingClientRect();
         const gridRect = grid.getBoundingClientRect();
-        const visibleBottom = scroller.getBoundingClientRect().bottom - 8;
+        const visibleBottom = sRect.bottom - 8;
+        // Only nudge when the whole grid can fit in the viewport.
+        if (gridRect.height + 24 > sRect.height) return;
         if (gridRect.bottom > visibleBottom) {
           const overflow = gridRect.bottom - visibleBottom + 12;
           scroller.scrollTo({ top: scroller.scrollTop + overflow, behavior: "smooth" });
