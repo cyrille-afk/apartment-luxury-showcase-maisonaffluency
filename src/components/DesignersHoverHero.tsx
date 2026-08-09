@@ -440,8 +440,7 @@ const DesignersHoverHero = () => {
         if (l) {
           restoredLetterRef.current = l;
           // Mobile/PWA restores the previous letter so the list lands where the
-          // user left it. Desktop keeps the A-Z closed on entry so the user is
-          // surprised by the card grid opening up.
+          // user left it. Desktop defaults to "A" opened for immediate discovery.
           const isMobileRestore =
             window.matchMedia("(max-width: 767px)").matches ||
             isPwaStandaloneDisplay();
@@ -451,7 +450,7 @@ const DesignersHoverHero = () => {
         }
       } catch {}
     }
-    return new Set();
+    return new Set(["A"]);
   });
   const [activeAccordionLetter, setActiveAccordionLetter] = useState<string | null>(
     () => {
@@ -466,7 +465,7 @@ const DesignersHoverHero = () => {
           }
         } catch {}
       }
-      return null;
+      return "A";
     }
   );
   const [activeMobileLetter, setActiveMobileLetter] = useState<string | null>(() => restoredLetterRef.current);
@@ -488,9 +487,9 @@ const DesignersHoverHero = () => {
   const [directoryTop, setDirectoryTop] = useState<number | null>(null);
   const [activeTitleTop, setActiveTitleTop] = useState<number | null>(null);
 
-  // Auto-open "Find A Designer" sheet when arriving with ?find=1 (e.g. the
-  // floating burger on a designer profile returns users to the search list
-  // they came from rather than the landing hero).
+  // Auto-open "Search 150+ Designers" sheet when arriving with ?find=1 (e.g.
+  // the floating burger on a designer profile returns users to the search
+  // list they came from rather than the landing hero).
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
@@ -1123,14 +1122,10 @@ const DesignersHoverHero = () => {
   const prevSearchOpenRef = useRef(searchOpen);
   useEffect(() => {
     if (prevSearchOpenRef.current && !searchOpen) {
-      // Desktop: collapse the A-Z entirely when the directory closes so the
-      // next open feels like a fresh reveal. Mobile/PWA: reset to A.
-      if (isDesktopViewport) {
-        setExpandedLetters(new Set());
-      } else {
-        setExpandedLetters(new Set(["A"]));
-      }
-      setActiveAccordionLetter(null);
+      // Reset the A-Z to letter A opened so every reopen feels like the
+      // same fresh discovery, regardless of viewport.
+      setExpandedLetters(new Set(["A"]));
+      setActiveAccordionLetter("A");
     }
     prevSearchOpenRef.current = searchOpen;
     if (!searchOpen) return;
@@ -1485,7 +1480,7 @@ const DesignersHoverHero = () => {
           )}
         >
           <Search className={cn("h-3.5 w-3.5 not-italic", isMobileOrPwa ? "text-white/70" : "text-white/45")} aria-hidden="true" />
-          Find A Designer
+          Search 150+ Designers
         </button>
 
         {/* Subtle divider separating the search utility from the Masters list */}
