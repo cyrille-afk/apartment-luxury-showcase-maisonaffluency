@@ -1434,15 +1434,7 @@ const DesignersHoverHero = () => {
             align === "right" && "text-right"
           )}
         >
-          Directory{" "}
-          <span
-            className={cn(
-              "normal-case tracking-normal",
-              isMobileOrPwa ? "text-white/70" : "text-white/55 font-light"
-            )}
-          >
-            ({designerCount || 95})
-          </span>
+          Directory
         </span>
 
         <button
