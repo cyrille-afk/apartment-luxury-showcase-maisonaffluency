@@ -2025,7 +2025,7 @@ const DesignersHoverHero = () => {
                   autoCorrect="off"
                   autoCapitalize="none"
                   spellCheck={false}
-                  className="w-full rounded-lg border border-white/10 bg-white/[0.03] py-2.5 pl-9 pr-9 font-body text-sm text-white outline-none placeholder:text-white/60 focus:border-white/25 focus:bg-white/[0.05]"
+                  className="w-full rounded-lg border border-gold/10 bg-white/[0.03] py-2.5 pl-9 pr-9 font-body text-sm text-white outline-none placeholder:text-white/60 focus:border-gold/25 focus:bg-white/[0.05]"
                   aria-label="Search designers"
                 />
                 <button
