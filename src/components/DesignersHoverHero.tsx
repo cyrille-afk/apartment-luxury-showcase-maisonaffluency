@@ -147,7 +147,7 @@ function DesignerGridCard({
   useCardPhoto?: boolean;
 }) {
   const baseRaw = useCardPhoto
-    ? (designer.image_url || designer.hero_image_url || pickGridImage(designer))
+    ? (MOBILE_BG_OVERRIDES[designer.slug] || designer.image_url || designer.hero_image_url || pickGridImage(designer))
     : pickGridImage(designer);
   const url = gridImageTransform(baseRaw);
 
