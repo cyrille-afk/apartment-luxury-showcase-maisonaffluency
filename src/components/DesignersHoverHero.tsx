@@ -1232,12 +1232,15 @@ const DesignersHoverHero = () => {
       }
 
       // After the grid expands, nudge the scroller so the cards are not clipped
-      // at the bottom of the dropdown.
+      // at the bottom — but only when the grid fully fits, otherwise the top of
+      // the section (first designers) would scroll out of view.
       window.setTimeout(() => {
         const grid = row.querySelector<HTMLElement>(".grid");
         if (!grid) return;
+        const sRect = scroller.getBoundingClientRect();
         const gridRect = grid.getBoundingClientRect();
-        const visibleBottom = scroller.getBoundingClientRect().bottom - 8;
+        const visibleBottom = sRect.bottom - 8;
+        if (gridRect.height + 24 > sRect.height) return;
         if (gridRect.bottom > visibleBottom) {
           const overflow = gridRect.bottom - visibleBottom + 12;
           scroller.scrollTo({ top: scroller.scrollTop + overflow, behavior: "smooth" });
