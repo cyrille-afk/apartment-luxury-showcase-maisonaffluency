@@ -487,9 +487,9 @@ const DesignersHoverHero = () => {
   const [directoryTop, setDirectoryTop] = useState<number | null>(null);
   const [activeTitleTop, setActiveTitleTop] = useState<number | null>(null);
 
-  // Auto-open "Find A Designer" sheet when arriving with ?find=1 (e.g. the
-  // floating burger on a designer profile returns users to the search list
-  // they came from rather than the landing hero).
+  // Auto-open "Search 150+ Designers" sheet when arriving with ?find=1 (e.g.
+  // the floating burger on a designer profile returns users to the search
+  // list they came from rather than the landing hero).
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
