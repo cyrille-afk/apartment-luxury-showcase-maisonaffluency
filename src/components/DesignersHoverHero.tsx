@@ -1650,109 +1650,65 @@ const DesignersHoverHero = () => {
                       >
                         {group.label}
                       </span>
-                      <ul className="flex flex-col text-left">
-                        {group.designers
-                          .reduce<{ letter: string; items: FeaturedDesigner[] }[]>((acc, d) => {
-                            const letter = featuredInitial(d.name);
-                            const last = acc[acc.length - 1];
-                            if (last && last.letter === letter) {
-                              last.items.push(d);
-                            } else {
-                              acc.push({ letter, items: [d] });
-                            }
-                            return acc;
-                          }, [])
-                          .map(({ letter, items: letterItems }, letterIdx, lettersArr) => {
-                            const isLastLetter = letterIdx === lettersArr.length - 1;
-                            return (
-                              <li key={letter} className="flex flex-row items-start text-left gap-3">
-                                <span className="w-4 shrink-0 pt-[5px] text-[9px] uppercase tracking-[0.28em] font-body text-white/35">
-                                  {letter}
-                                </span>
-                                <ul className="flex flex-col gap-[2px] short:gap-0 md:gap-0 text-left">
-
-                                  {letterItems.map((d, dIdx) => {
-                                    const [first, last] = splitName(d.name);
-                                    const isActive = d.slug === activeSlug;
-                                    const HIDE_FOUNDER_SUFFIX = new Set(["Man of Parts", "Pouenat", "Ozone"]);
-                                    const brandSuffix =
-                                      DIRECTORY_BRAND_SUFFIX[d.slug] ??
-                                      (d.founder && d.founder !== d.name && !HIDE_FOUNDER_SUFFIX.has(d.founder)
-                                        ? d.founder
-                                        : null);
-                                    const isLastItem =
-                                      groupIdx === groupedItems.length - 1 &&
-                                      isLastLetter &&
-                                      dIdx === letterItems.length - 1;
-                                    return (
-                                      <li
-                                        key={d.slug}
-                                        ref={isLastItem ? lastItemRef : undefined}
-                                        className="text-left leading-[1.25] short:leading-[1.15] sm:leading-[1.55]"
-                                      >
-                                        <button
-                                          type="button"
-                                          data-featured-designer-slug={d.slug}
-                                          data-nav-state={JSON.stringify({ fromDesignersHero: true })}
-                                          onClick={() =>
-                                            navigate(`/designers/${d.slug}`, { state: { fromDesignersHero: true } })
-                                          }
-                                          onMouseEnter={() => {
-                                            setActiveSlug(d.slug);
-                                          }}
-                                          onFocus={() => setActiveSlug(d.slug)}
-                                          className={cn(
-                                            "cursor-pointer appearance-none bg-transparent border-0 p-0 m-0 text-left",
-                                            "inline-flex items-center whitespace-nowrap relative",
-                                            "text-[15px] short:text-[14px] sm:text-base md:text-[14px] leading-[1.25] short:leading-[1.15] sm:leading-[1.3]",
-                                            "font-display font-light tracking-tight",
-                                            "transition-colors duration-500 ease-out",
-                                            "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
-                                            isActive
-                                              ? "text-white font-medium"
-                                              : "text-white/60 hover:text-white"
-                                          )}
-                                        >
-                                          {isActive && (
-                                            <span
-                                              aria-hidden="true"
-                                              className="inline-block w-4 h-[1px] bg-white align-middle mr-2"
-                                            />
-                                          )}
-                                          <span>
-                                            {first}
-                                            {last && (
-                                              <span>
-                                                {" "}
-                                                {last}
-                                              </span>
-                                            )}
-                                            {brandSuffix && (
-                                              <span className="opacity-80"> - {brandSuffix}</span>
-                                            )}
-                                          </span>
-                                          {/* Discovery cue: tiny aperture glyph hinting each name has a photo.
-                                              Shown on every viewport; faint by default, brightens when active. */}
-                                          <ImageIcon
-                                            aria-hidden="true"
-                                            strokeWidth={1.25}
-                                            className={cn(
-                                              "inline-block align-middle ml-2 -translate-y-[1px]",
-                                              "h-[10px] w-[10px] transition-all duration-500",
-                                              isActive
-                                                ? "opacity-90 text-gold"
-                                                : "opacity-30 text-white/80 md:group-hover:opacity-70"
-                                            )}
-                                          />
-                                        </button>
-                                      </li>
-                                    );
-                                  })}
-                                </ul>
-                              </li>
-                            );
-                          })}
-                      </ul>
+                       <ul className="flex flex-col gap-[2px] short:gap-0 md:gap-0 text-left">
+                         {group.designers.map((d, dIdx) => {
+                           const [first, last] = splitName(d.name);
+                           const isActive = d.slug === activeSlug;
+                           const HIDE_FOUNDER_SUFFIX = new Set(["Man of Parts", "Pouenat", "Ozone"]);
+                           const brandSuffix =
+                             DIRECTORY_BRAND_SUFFIX[d.slug] ??
+                             (d.founder && d.founder !== d.name && !HIDE_FOUNDER_SUFFIX.has(d.founder)
+                               ? d.founder
+                               : null);
+                           const isLastItem =
+                             groupIdx === groupedItems.length - 1 &&
+                             dIdx === group.designers.length - 1;
+                           return (
+                             <li
+                               key={d.slug}
+                               ref={isLastItem ? lastItemRef : undefined}
+                               className="text-left leading-[1.25] short:leading-[1.15] sm:leading-[1.55]"
+                             >
+                               <button
+                                 type="button"
+                                 data-featured-designer-slug={d.slug}
+                                 data-nav-state={JSON.stringify({ fromDesignersHero: true })}
+                                 onClick={() =>
+                                   navigate(`/designers/${d.slug}`, { state: { fromDesignersHero: true } })
+                                 }
+                                 onMouseEnter={() => {
+                                   setActiveSlug(d.slug);
+                                 }}
+                                 onFocus={() => setActiveSlug(d.slug)}
+                                 className={cn(
+                                   "cursor-pointer appearance-none bg-transparent border-0 p-0 m-0 text-left",
+                                   "inline-flex items-center whitespace-nowrap relative",
+                                   "text-[15px] short:text-[14px] sm:text-base md:text-[14px] leading-[1.25] short:leading-[1.15] sm:leading-[1.3]",
+                                   "font-display font-light tracking-tight",
+                                   "transition-colors duration-500 ease-out",
+                                   "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
+                                   isActive
+                                     ? "text-white font-medium"
+                                     : "text-white/60 hover:text-white"
+                                 )}
+                               >
+                                 <span>
+                                   {first}
+                                   {last && (
+                                     <span>
+                                       {" "}
+                                       {last}
+                                     </span>
+                                   )}
+                                   {brandSuffix && (
+                                     <span className="opacity-80"> - {brandSuffix}</span>
+                                   )}
+                                 </span>
+                               </button>
+                             </li>
+                           );
+                         })}
+                       </ul>
                     </li>
                   ))}
                 </ul>
