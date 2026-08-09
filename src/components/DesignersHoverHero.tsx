@@ -147,7 +147,7 @@ function DesignerGridCard({
   useCardPhoto?: boolean;
 }) {
   const baseRaw = useCardPhoto
-    ? (designer.image_url || designer.hero_image_url || pickGridImage(designer))
+    ? (MOBILE_BG_OVERRIDES[designer.slug] || designer.image_url || designer.hero_image_url || pickGridImage(designer))
     : pickGridImage(designer);
   const url = gridImageTransform(baseRaw);
 
@@ -269,7 +269,7 @@ const MOBILE_BG_OVERRIDES: Record<string, string> = {
   "hamrei":
     "https://res.cloudinary.com/dif1oamtj/image/upload/v1784262044/Screenshot_2026-07-17_at_12.19.46_PM_fzvmvb.png",
   "arnold-madsen":
-    "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/designers%2Farnold-madsen%2Fportrait-2026.jpg",
+    "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/dagmar-london/the-clam-chair-moonlight-0.jpg",
 };
 
 function mobileHeroBackgroundSrc(d: Pick<FeaturedDesigner, "slug" | "first_pick_image_url" | "hero_image_url" | "image_url">) {
@@ -1434,15 +1434,7 @@ const DesignersHoverHero = () => {
             align === "right" && "text-right"
           )}
         >
-          Directory{" "}
-          <span
-            className={cn(
-              "normal-case tracking-normal",
-              isMobileOrPwa ? "text-white/70" : "text-white/55 font-light"
-            )}
-          >
-            ({designerCount || 95})
-          </span>
+          Directory
         </span>
 
         <button
