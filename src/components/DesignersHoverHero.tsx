@@ -1434,7 +1434,7 @@ const DesignersHoverHero = () => {
           className={cn(
             isMobileOrPwa
               ? "text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white"
-              : "text-[9px] uppercase tracking-[0.32em] mb-2 font-body font-medium text-white/95",
+              : "text-[10px] uppercase tracking-[0.32em] mb-3 font-body font-medium text-white",
             align === "center" && "text-center",
             align === "right" && "text-right"
           )}
@@ -1478,15 +1478,20 @@ const DesignersHoverHero = () => {
             "inline-flex items-center gap-2 text-xs font-body font-light italic transition-colors",
             isMobileOrPwa
               ? "text-white/85 hover:text-white underline-offset-4 hover:underline"
-              : "w-full pb-2.5 border-b border-white/15 text-white/80 hover:text-white",
+              : "w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2.5 text-[13px] text-white/75 hover:text-white hover:bg-white/[0.07] hover:border-white/20",
             align === "left" && "text-left justify-start",
             align === "center" && "text-center justify-center",
             align === "right" && "text-right flex-row-reverse justify-start"
           )}
         >
-          <Search className={cn("h-3.5 w-3.5 not-italic", !isMobileOrPwa && "opacity-90")} aria-hidden="true" />
+          <Search className={cn("h-3.5 w-3.5 not-italic", isMobileOrPwa ? "text-white/70" : "text-white/45")} aria-hidden="true" />
           Find A Designer
         </button>
+
+        {/* Subtle divider separating the search utility from the Masters list */}
+        {!isMobileOrPwa && (
+          <div className="w-full h-px bg-white/[0.06] mt-5" aria-hidden="true" />
+        )}
       </div>
     </div>
   );
