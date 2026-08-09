@@ -1434,7 +1434,7 @@ const DesignersHoverHero = () => {
           className={cn(
             isMobileOrPwa
               ? "text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white"
-              : "text-[9px] uppercase tracking-[0.32em] mb-2 font-body font-medium text-white/95",
+              : "text-[10px] uppercase tracking-[0.32em] mb-3 font-body font-medium text-white",
             align === "center" && "text-center",
             align === "right" && "text-right"
           )}
@@ -1478,15 +1478,20 @@ const DesignersHoverHero = () => {
             "inline-flex items-center gap-2 text-xs font-body font-light italic transition-colors",
             isMobileOrPwa
               ? "text-white/85 hover:text-white underline-offset-4 hover:underline"
-              : "w-full pb-2.5 border-b border-white/15 text-white/80 hover:text-white",
+              : "w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2.5 text-[13px] text-white/75 hover:text-white hover:bg-white/[0.07] hover:border-white/20",
             align === "left" && "text-left justify-start",
             align === "center" && "text-center justify-center",
             align === "right" && "text-right flex-row-reverse justify-start"
           )}
         >
-          <Search className={cn("h-3.5 w-3.5 not-italic", !isMobileOrPwa && "opacity-90")} aria-hidden="true" />
+          <Search className={cn("h-3.5 w-3.5 not-italic", isMobileOrPwa ? "text-white/70" : "text-white/45")} aria-hidden="true" />
           Find A Designer
         </button>
+
+        {/* Subtle divider separating the search utility from the Masters list */}
+        {!isMobileOrPwa && (
+          <div className="w-full h-px bg-white/[0.06] mt-5" aria-hidden="true" />
+        )}
       </div>
     </div>
   );
@@ -1610,7 +1615,7 @@ const DesignersHoverHero = () => {
               {/* Desktop: Directory sits directly above the designer list to
                   group navigation (list) with its utility (search) — Proximity.
                   All items share the same left edge as the designer names. */}
-              <div className={cn("mb-5 lg:mb-6", isMobileBrowser ? "hidden" : "hidden md:block")}>
+              <div className={cn("mb-7 lg:mb-9", isMobileBrowser ? "hidden" : "hidden md:block")}>
                 {directoryLabels("w-full", directoryRef, "left")}
               </div>
 
@@ -2067,28 +2072,33 @@ const DesignersHoverHero = () => {
             }
           >
             <div className="mx-auto mt-1.5 h-1 w-9 rounded-full bg-white/25 shrink-0" aria-hidden="true" />
-            <div className="flex items-center gap-2.5 px-4 pt-2 pb-3 border-b border-white/10 shrink-0 mb-2">
-              <Search className="h-4 w-4 text-white/60 shrink-0" aria-hidden="true" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={`Search ${designerCount || totalResults} designers…`}
-                autoCorrect="off"
-                autoCapitalize="none"
-                spellCheck={false}
-                className="flex-1 bg-transparent border-0 outline-none font-body text-sm text-white placeholder:text-white/40"
-                aria-label="Search designers"
-              />
-              <button
-                type="button"
-                onClick={() => setSearchOpen(false)}
-                aria-label="Close search"
-                className="p-1 text-white/60 hover:text-white transition-colors"
-              >
-                <X className="h-4 w-4" />
-              </button>
+            <div className="px-4 pt-3 pb-3 border-b border-white/[0.06] shrink-0 mb-2">
+              <div className="relative flex items-center">
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50 pointer-events-none"
+                  aria-hidden="true"
+                />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search 150+ designers…"
+                  autoCorrect="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  className="w-full rounded-lg border border-white/10 bg-white/[0.03] py-2.5 pl-9 pr-9 font-body text-sm text-white outline-none placeholder:text-white/60 focus:border-white/25 focus:bg-white/[0.05]"
+                  aria-label="Search designers"
+                />
+                <button
+                  type="button"
+                  onClick={() => setSearchOpen(false)}
+                  aria-label="Close search"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/50 hover:text-white transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
             {/* Sticky horizontal A–Z quick-jump (mobile only, hidden while searching) */}
             {!isSearching && (
