@@ -1437,7 +1437,7 @@ const DesignersHoverHero = () => {
           className={cn(
             isMobileOrPwa
               ? "text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white"
-              : "text-[10px] uppercase tracking-[0.32em] mb-3 font-body font-medium text-white",
+              : "text-[10px] uppercase tracking-[0.32em] mb-3 font-body font-semibold text-white",
             align === "center" && "text-center",
             align === "right" && "text-right"
           )}
