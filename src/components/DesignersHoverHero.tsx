@@ -272,6 +272,11 @@ const MOBILE_BG_OVERRIDES: Record<string, string> = {
     "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/dagmar-london/the-clam-chair-moonlight-0.jpg",
 };
 
+const DESKTOP_HERO_BG_OVERRIDES: Record<string, string> = {
+  "arnold-madsen":
+    "https://res.cloudinary.com/dif1oamtj/image/fetch/v1786092048/https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/designers/arnold-madsen/advert-1946.jpg",
+};
+
 function mobileHeroBackgroundSrc(d: Pick<FeaturedDesigner, "slug" | "first_pick_image_url" | "hero_image_url" | "image_url">) {
   return MOBILE_BG_OVERRIDES[d.slug] || d.first_pick_image_url || d.hero_image_url || d.image_url;
 }
