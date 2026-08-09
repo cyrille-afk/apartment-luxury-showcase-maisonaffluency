@@ -1480,7 +1480,7 @@ const DesignersHoverHero = () => {
           )}
         >
           <Search className={cn("h-3.5 w-3.5 not-italic", isMobileOrPwa ? "text-white/70" : "text-white/45")} aria-hidden="true" />
-          Find A Designer
+          Search 150+ Designers
         </button>
 
         {/* Subtle divider separating the search utility from the Masters list */}
