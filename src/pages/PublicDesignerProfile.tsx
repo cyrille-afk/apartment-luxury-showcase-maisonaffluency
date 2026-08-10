@@ -580,6 +580,15 @@ const PublicDesignerProfile = () => {
     }
     return m;
   }, [allDesignersForLookup]);
+  // designer id -> slug, so grouped parent-brand picks route to the child
+  // designer that actually owns the product (e.g. Ozone → Michel Boyer).
+  const designerSlugById = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const d of allDesignersForLookup as any[]) {
+      if (d?.id && d?.slug) m.set(d.id, d.slug);
+    }
+    return m;
+  }, [allDesignersForLookup]);
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
   const isGrouped = isParentBrand && groupedPicks.length > 0;
@@ -1776,10 +1785,15 @@ const PublicDesignerProfile = () => {
                     /^clam (chair|stool)(?:,|\s|$)/i.test(pick.title);
                   const isArnoldClamStool =
                     isArnoldClamChair && /^clam stool/i.test(pick.title);
-                  const targetDesignerSlug = isArnoldClamChair ? "dagmar-london" : designer.slug;
+                  // Parent-brand pages (Ozone, Sé, …) aggregate their child
+                  // designers' picks — route to the owning designer's slug,
+                  // otherwise the product page looks it up under the parent
+                  // (which owns no picks) and renders "Product not found".
+                  const owningSlug = (pick as any).designer_slug || designerSlugById.get((pick as any).designer_id) || designer.slug;
+                  const targetDesignerSlug = isArnoldClamChair ? "dagmar-london" : owningSlug;
                   const productSlug = isArnoldClamChair
                     ? (isArnoldClamStool ? "clam-stool" : "clam-chair")
-                    : slugifyProduct(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""));
+                    : ((pick as any).slug || slugifyProduct(pick.title + (pick.subtitle ? `-${pick.subtitle}` : "")));
                   const productHref = `/designers/${targetDesignerSlug}/${productSlug}`;
 
                   const cardBrandLabel = isArnoldClamChair ? "Dagmar" : designerLabel;
