@@ -330,7 +330,17 @@ function useFeaturedDesigners() {
     select: (data) => {
       if (!data || !FEATURED_SEED.length) return data;
       const seedBySlug = new Map(FEATURED_SEED.map((d) => [d.slug, d]));
-      return data.map((d, i) => {
+      // Persisted query caches can predate a curated-group change. Merge any
+      // missing seeded designer back in immediately so a newly assigned Master
+      // never disappears while the background refresh is still in flight.
+      const merged = [...data];
+      for (const slug of ALL_FEATURED_SLUGS) {
+        if (merged.some((d) => d.slug === slug)) continue;
+        const seed = seedBySlug.get(slug);
+        if (seed) merged.push(seed);
+      }
+
+      return merged.map((d, i) => {
         const seed = seedBySlug.get(d.slug);
         if (!seed) return d;
         // Only pin the visible hero URLs for the first seeded designer — the

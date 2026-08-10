@@ -48,7 +48,7 @@ export const queryKeys = {
 
   // ── Hero (featured designers) ────────────────────────────────────────────
   designersHeroFeatured: (slugs: readonly string[]) =>
-    ["designers-hero-featured-v3", slugs] as const,
+    ["designers-hero-featured-v4", slugs] as const,
   designersAllFirstPickImages: () =>
     ["designers-all-first-pick-images-v1"] as const,
 
