@@ -4,7 +4,7 @@ import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal, Square, Grid2X2, Filter } from "lucide-react";
+import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal, Square, Grid2X2, Heart, ShoppingBag } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +16,7 @@ import {
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
+import StudioSaveButton from "@/components/product/StudioSaveButton";
 import { useDesigner, useDesignerByName, useDesignerPicks, useGroupedDesignerPicks, useAllDesigners } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
 import { cn } from "@/lib/utils";
@@ -420,7 +421,7 @@ const SLUG_ALIASES: Record<string, string> = {
 
 const PublicDesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { isTradeUser, loading: authLoading } = useAuth();
+  const { isTradeUser, loading: authLoading, user } = useAuth();
   if (slug && SLUG_ALIASES[slug]) {
     return <Navigate to={`/designers/${SLUG_ALIASES[slug]}`} replace />;
   }
@@ -453,6 +454,7 @@ const PublicDesignerProfile = () => {
     typeof window !== "undefined" && new URLSearchParams(window.location.search).get("expanded") === "true"
   );
   const [bioHighlighted, setBioHighlighted] = useState(false);
+  const [isMobileBioExpanded, setIsMobileBioExpanded] = useState(false);
   const flashBioHighlight = () => {
     setBioHighlighted(true);
     window.setTimeout(() => setBioHighlighted(false), 1800);
@@ -925,15 +927,37 @@ const PublicDesignerProfile = () => {
                   />
                 ) : heroParagraphs.length > 0 ? (
                   <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
-                    {heroParagraphs.map((p: string, i: number) => (
-                      <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
-                    ))}
+                    <div className={cn("md:hidden", !isMobileBioExpanded && "line-clamp-2")}>
+                      {(isMobileBioExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
+                        <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
+                      ))}
+                    </div>
+                    <div className="hidden md:block">
+                      {heroParagraphs.map((p: string, i: number) => (
+                        <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsMobileBioExpanded((v) => !v)}
+                      className="md:hidden mt-2 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
+                    >
+                      {isMobileBioExpanded ? "Read Less" : "Read More"}
+                    </button>
                   </div>
                 ) : null}
 
                 {thinContentFallback && (
                   <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85 mt-4">
-                    <p>{thinContentFallback}</p>
+                    <p className={cn("md:hidden", !isMobileBioExpanded && "line-clamp-2")}>{thinContentFallback}</p>
+                    <p className="hidden md:block">{thinContentFallback}</p>
+                    <button
+                      type="button"
+                      onClick={() => setIsMobileBioExpanded((v) => !v)}
+                      className="md:hidden mt-2 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
+                    >
+                      {isMobileBioExpanded ? "Read Less" : "Read More"}
+                    </button>
                   </div>
                 )}
 
@@ -1105,15 +1129,18 @@ const PublicDesignerProfile = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
-          {/* Full-bleed, untruncated hero — natural aspect ratio */}
-          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted max-h-[35vh] overflow-hidden">
+          {/* Compact mobile hero — keeps product grid above the fold */}
+          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted h-48 overflow-hidden">
             {(wideHeroImage || heroImage) && (
-              <img
-                src={wideHeroImage || heroImage}
-                alt={`${name} interior`}
-                className="block w-full h-auto max-h-[35vh] object-cover"
-                loading="eager"
-              />
+              <>
+                <img
+                  src={wideHeroImage || heroImage}
+                  alt={`${name} interior`}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="eager"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+              </>
             )}
           </div>
 
@@ -1142,44 +1169,47 @@ const PublicDesignerProfile = () => {
 
           {heroParagraphs.length > 0 && (
             <div className="font-body text-[15px] leading-[1.75] text-foreground/85 text-left">
-              {(newInExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
-                <p key={i} className={i > 0 ? "mt-4" : ""}>
-                  {!newInExpanded && i === 0 ? (
-                    <>
-                      <span className="line-clamp-2">{renderParagraph(p)}</span>
-                      <button
-                        type="button"
-                        onClick={openPortrait}
-                        className="inline ml-1 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
-                      >
-                        Read More
-                      </button>
-                    </>
-                  ) : (
-                    renderParagraph(p)
-                  )}
-                </p>
-              ))}
+              <div className={cn("md:hidden", !isMobileBioExpanded && "line-clamp-2")}>
+                {(isMobileBioExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
+                  <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
+                ))}
+              </div>
+              <div className="hidden md:block">
+                {heroParagraphs.map((p: string, i: number) => (
+                  <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileBioExpanded((v) => !v)}
+                className="md:hidden mt-2 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
+              >
+                {isMobileBioExpanded ? "Read Less" : "Read More"}
+              </button>
+              {isMobileBioExpanded && (
+                <button
+                  type="button"
+                  onClick={openPortrait}
+                  className="md:hidden block mt-3 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  View full portrait
+                </button>
+              )}
             </div>
           )}
 
-          {thinContentFallback && (
-            <p className="font-body text-[15px] leading-[1.75] text-foreground/85 mt-2">
-              {!newInExpanded ? (
-                <>
-                  <span className="line-clamp-2">{thinContentFallback}</span>
-                  <button
-                    type="button"
-                    onClick={openPortrait}
-                    className="inline ml-1 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
-                  >
-                    Read More
-                  </button>
-                </>
-              ) : (
-                thinContentFallback
-              )}
-            </p>
+          {!heroParagraphs.length && thinContentFallback && (
+            <div className="font-body text-[15px] leading-[1.75] text-foreground/85 mt-2">
+              <p className={cn("md:hidden", !isMobileBioExpanded && "line-clamp-2")}>{thinContentFallback}</p>
+              <p className="hidden md:block">{thinContentFallback}</p>
+              <button
+                type="button"
+                onClick={() => setIsMobileBioExpanded((v) => !v)}
+                className="md:hidden mt-2 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
+              >
+                {isMobileBioExpanded ? "Read Less" : "Read More"}
+              </button>
+            </div>
           )}
         </motion.div>
       </div>
@@ -1534,38 +1564,17 @@ const PublicDesignerProfile = () => {
 
                 return (
                   <>
-                    {/* ── CONTROLS BAR — MOBILE / PWA ── */}
-                    <div className="md:hidden flex items-center justify-between border-y border-border/40 py-2 mb-3">
-                      <div className="flex items-center gap-3 text-muted-foreground" role="group" aria-label="Grid density">
-                        <button
-                          type="button"
-                          onClick={() => setPickCols("one")}
-                          aria-pressed={pickCols === "one"}
-                          aria-label="Single column"
-                          className={cn("transition-colors", pickCols === "one" && "text-foreground")}
-                        >
-                          <Square className="h-4 w-4" strokeWidth={1} aria-hidden="true" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setPickCols("two")}
-                          aria-pressed={pickCols !== "one"}
-                          aria-label="Two column grid"
-                          className={cn("transition-colors", pickCols !== "one" && "text-foreground")}
-                        >
-                          <Grid2X2 className="h-4 w-4" strokeWidth={1} aria-hidden="true" />
-                        </button>
-                      </div>
-
+                    {/* ── STICKY MOBILE / PWA UTILITY BAR ── */}
+                    <div className="md:hidden sticky top-[var(--header-h)] z-40 flex items-center justify-between border-y border-border/40 bg-background/95 backdrop-blur-md py-2.5 px-4 -mx-4 mb-3">
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           disabled={categories.length === 0}
-                          className="flex items-center justify-center p-1.5 text-muted-foreground hover:bg-muted/40 rounded-full transition-colors disabled:opacity-40"
-                          aria-label="Filter products"
+                          className="inline-flex items-center gap-2 font-body text-[11px] uppercase tracking-[0.14em] text-foreground focus:outline-none disabled:opacity-40"
                         >
-                          <Filter className="w-4 h-4" strokeWidth={1.5} aria-hidden="true" />
+                          <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
+                          Filter
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="center" className="rounded-none">
+                        <DropdownMenuContent align="start" className="rounded-none">
                           {filterItems}
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -1890,6 +1899,21 @@ const PublicDesignerProfile = () => {
                           );
                         })()}
 
+                        {/* Mobile save / bookmark */}
+                        <div className="absolute top-2 right-2 z-10 md:hidden">
+                          {user ? (
+                            <StudioSaveButton pickId={pick.id} productTitle={displayTitle} className="w-8 h-8" />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); }}
+                              aria-label="Save to favorites"
+                              className="flex items-center justify-center w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm border border-border shadow-sm text-foreground active:scale-95 transition-transform"
+                            >
+                              <Heart className="h-3.5 w-3.5" strokeWidth={1.5} />
+                            </button>
+                          )}
+                        </div>
 
                         <div className="hidden md:block absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
@@ -1964,16 +1988,25 @@ const PublicDesignerProfile = () => {
 
 
                         {/* Price slot — pushed to bottom so cards align across the row */}
-                        <div className="mt-1 md:mt-2">
-                          <p className="font-body text-[11px] md:text-xs font-medium text-foreground/80 md:text-foreground md:font-normal tracking-wide">
-
-                            {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
-                          </p>
-                          {editionNote && !/^re-?edition$/i.test(editionNote) && (
-                            <p className="font-body italic text-[10px] md:text-[11px] text-muted-foreground/70 tracking-wide mt-1">
-                              *{editionNote}
+                        <div className="mt-1 md:mt-2 flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-body text-[11px] md:text-xs font-medium text-foreground/80 md:text-foreground md:font-normal tracking-wide">
+                              {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
                             </p>
-                          )}
+                            {editionNote && !/^re-?edition$/i.test(editionNote) && (
+                              <p className="font-body italic text-[10px] md:text-[11px] text-muted-foreground/70 tracking-wide mt-1">
+                                *{editionNote}
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); navigate(productHref); }}
+                            aria-label={`View ${displayTitle}`}
+                            className="md:hidden -mt-1 p-1.5 rounded-full text-foreground/70 hover:text-foreground hover:bg-muted/40 transition-colors"
+                          >
+                            <ShoppingBag className="h-4 w-4" strokeWidth={1.5} />
+                          </button>
                         </div>
 
                       </div>
