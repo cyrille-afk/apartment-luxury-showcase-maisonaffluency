@@ -100,7 +100,7 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative h-screen md:h-[85vh] w-full overflow-hidden">
+    <section className="relative h-screen w-full overflow-hidden">
       {/* Hero image is rendered by the static <picture id="static-hero"> in
           index.html (fixed, z-index:0, painted from the preloaded bytes
           before React boots). We intentionally do NOT re-render the image
@@ -248,16 +248,6 @@ const Hero = () => {
                     />
                   </motion.button>
                 </div>
-
-      {/* Luxury scroll indicator — desktop only */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute bottom-6 left-1/2 hidden -translate-x-1/2 md:block"
-      >
-        <div className="relative h-14 w-px overflow-hidden bg-white/20">
-          <span className="absolute left-0 top-0 block h-6 w-px bg-white/80 animate-scroll-cue" />
-        </div>
-      </div>
 
       <PrivateTourDialog open={tourOpen} onOpenChange={setTourOpen} />
     </section>

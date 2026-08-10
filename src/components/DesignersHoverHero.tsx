@@ -1604,6 +1604,16 @@ const DesignersHoverHero = () => {
         <div className="hidden md:block absolute inset-y-0 left-0 w-[38%] bg-gradient-to-r from-black via-black/90 to-transparent pointer-events-none" />
       </div>
 
+      {/* Luxury scroll indicator — desktop only */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-6 left-1/2 z-40 hidden -translate-x-1/2 md:block"
+      >
+        <div className="relative h-14 w-px overflow-hidden bg-white/20">
+          <span className="absolute left-0 top-0 block h-6 w-px bg-white/80 animate-scroll-cue" />
+        </div>
+      </div>
+
 
       {/* Safe content frame — on mobile browser it tracks 100svh (toolbar-visible
           viewport) so list + directory always sit above iOS bottom chrome.
