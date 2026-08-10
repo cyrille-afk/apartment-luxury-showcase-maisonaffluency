@@ -48,6 +48,24 @@ import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
 
+// Mobile product grid stagger animation
+const gridVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08 },
+  },
+  exit: { opacity: 0, transition: { duration: 0.15 } },
+};
+const cardVariants = {
+  hidden: { opacity: 0, y: 15 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring" as const, stiffness: 300, damping: 24 },
+  },
+};
+
 /* Designers rendered with the "New In" editorial format (portrait left, bio right) */
 const NEW_IN_FORMAT_SLUGS = new Set<string>(["dagmar", "dagmar-london"]);
 const APPARATUS_SHARE_BRIDGE = "/apparatus-studio-share-v6.html";
@@ -1130,7 +1148,7 @@ const PublicDesignerProfile = () => {
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
           {/* Compact mobile hero — keeps product grid above the fold */}
-          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted h-48 overflow-hidden">
+          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted h-44 overflow-hidden">
             {(wideHeroImage || heroImage) && (
               <>
                 <img
@@ -1582,39 +1600,34 @@ const PublicDesignerProfile = () => {
                         </DropdownMenu>
                       </div>
 
-                      {/* Scrollable horizontal pill track */}
+                      {/* Scrollable horizontal pill track with fluid active indicator */}
                       <div className="flex gap-2 overflow-x-auto no-scrollbar px-3 scroll-smooth w-full">
-                        <button
-                          type="button"
-                          onClick={() => setActiveCategories([])}
-                          className={cn(
-                            "shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] uppercase tracking-[0.12em] font-medium transition-all duration-200 border",
-                            activeCategories.length === 0
-                              ? "bg-foreground text-background border-foreground"
-                              : "bg-muted/30 text-foreground/80 border-border hover:bg-muted/50"
-                          )}
-                        >
-                          All
-                        </button>
-                        {categories.map((c) => {
-                          const isActive = activeCategories.includes(c);
+                        {["All", ...categories].map((c) => {
+                          const isActive = c === "All" ? activeCategories.length === 0 : activeCategories.includes(c);
                           return (
                             <button
                               key={c}
                               type="button"
                               onClick={() =>
                                 setActiveCategories((prev) =>
-                                  isActive ? prev.filter((x) => x !== c) : [...prev, c]
+                                  c === "All" ? [] : isActive ? prev.filter((x) => x !== c) : [...prev, c]
                                 )
                               }
                               className={cn(
-                                "shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] uppercase tracking-[0.12em] font-medium transition-all duration-200 border",
+                                "relative shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] uppercase tracking-[0.12em] font-medium transition-colors duration-200 border",
                                 isActive
-                                  ? "bg-foreground text-background border-foreground"
-                                  : "bg-muted/30 text-foreground/80 border-border hover:bg-muted/50"
+                                  ? "border-foreground text-background"
+                                  : "border-border bg-muted/30 text-foreground/80 hover:bg-muted/50"
                               )}
                             >
-                              {c}
+                              <span className="relative z-10">{c}</span>
+                              {isActive && (
+                                <motion.div
+                                  layoutId="activeFilterPill"
+                                  className="absolute inset-0 rounded-full bg-foreground z-0"
+                                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                                />
+                              )}
                             </button>
                           );
                         })}
@@ -1683,7 +1696,15 @@ const PublicDesignerProfile = () => {
                     </div>
 
 
-                    <div className={cn("grid gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10", gridClass)}>
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={activeCategories.sort().join(",") + sortMode}
+                        variants={gridVariants}
+                        initial="hidden"
+                        animate="show"
+                        exit="exit"
+                        className={cn("grid gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10", gridClass)}
+                      >
                 {visiblePicks.map((pick) => {
 
                   const ap = pick as AttributedCuratorPick;
@@ -1831,14 +1852,16 @@ const PublicDesignerProfile = () => {
                   };
 
                   return (
-                    <div
+                    <motion.div
                       key={pick.id}
                       id={`pick-${pick.id}`}
                       ref={(el) => {
                         if (el && highlightId === pick.id) {
-                          el.scrollIntoView({ behavior: "smooth", block: "center" });
+                          (el as HTMLDivElement).scrollIntoView({ behavior: "smooth", block: "center" });
                         }
                       }}
+                      variants={cardVariants}
+                      layout
                       className={cn(
                         "group flex flex-col transition-all duration-700",
                         highlightId === pick.id && "ring-2 ring-primary rounded-luxury-sharp ring-offset-2 ring-offset-background animate-pulse"
@@ -2021,10 +2044,11 @@ const PublicDesignerProfile = () => {
                         </div>
 
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })}
-                    </div>
+                      </motion.div>
+                    </AnimatePresence>
                   </>
                 );
               })()}
