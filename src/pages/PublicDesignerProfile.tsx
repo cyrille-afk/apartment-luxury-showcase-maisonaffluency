@@ -1812,45 +1812,47 @@ const PublicDesignerProfile = () => {
                   // We're already on Madsen's own portrait — no "by Arnold Madsen" needed.
                   const cardSubtitle = isArnoldClamChair ? undefined : pick.subtitle;
                   const isMobilePickRevealed = mobileRevealedPickId === pick.id;
+                  const quickViewProduct: PublicLightboxItem = {
+                    id: pick.id,
+                    title: displayTitle,
+                    subtitle: isArnoldClamChair ? undefined : pick.subtitle,
+                    image_url: pick.image_url,
+                    hover_image_url: pick.hover_image_url,
+                    brand_name: isArnoldClamChair ? "Dagmar" : designerLabel || designer.name,
+                    materials: pick.materials,
+                    materials_description: (pick as any).materials_description ?? null,
+                    dimensions: pick.dimensions,
+                    lead_time: (pick as any).lead_time ?? null,
+                    origin: (pick as any).origin ?? null,
+                    description: pick.description,
+                    category: pick.category,
+                    subcategory: pick.subcategory,
+                    pdf_url: pick.pdf_url || ((pick.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
+                    pdf_urls: pick.pdf_urls as PdfEntry[] | undefined,
+                    designer_slug: targetDesignerSlug,
+                    size_variants: (pick as any).size_variants ?? null,
+                    variant_placeholder: (pick as any).variant_placeholder ?? null,
+                    base_axis_label: (pick as any).base_axis_label ?? null,
+                    top_axis_label: (pick as any).top_axis_label ?? null,
+                    gallery_images: (pick as any).gallery_images ?? null,
+                    variant_image_map: (pick as any).variant_image_map ?? null,
+                    gallery_captions: (pick as any).gallery_captions ?? null,
+                  };
+
                   const handleCardClick = (e: React.MouseEvent) => {
                     if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || (e as any).button === 1) {
                       return;
                     }
                     if (isMobileProductPickMode) {
-                      // Mobile + PWA: go straight to the product page on first tap.
+                      // Mobile + PWA: open the quick-view drawer on first tap.
                       e.preventDefault();
                       e.stopPropagation();
-                      navigate(productHref);
+                      setQuickViewItem(quickViewProduct);
                       return;
                     }
                     // Desktop: intercept the deep link and open the lightbox instead.
                     e.preventDefault();
-                    setLightboxItem({
-                      id: pick.id,
-                      title: displayTitle,
-                      subtitle: isArnoldClamChair ? undefined : pick.subtitle,
-                      image_url: pick.image_url,
-                      hover_image_url: pick.hover_image_url,
-                      brand_name: isArnoldClamChair ? "Dagmar" : designerLabel || designer.name,
-                      materials: pick.materials,
-                      materials_description: (pick as any).materials_description ?? null,
-                      dimensions: pick.dimensions,
-                      lead_time: (pick as any).lead_time ?? null,
-                      origin: (pick as any).origin ?? null,
-                      description: pick.description,
-                      category: pick.category,
-                      subcategory: pick.subcategory,
-                      pdf_url: pick.pdf_url || ((pick.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
-                      pdf_urls: pick.pdf_urls as PdfEntry[] | undefined,
-                      designer_slug: targetDesignerSlug,
-                      size_variants: (pick as any).size_variants ?? null,
-                      variant_placeholder: (pick as any).variant_placeholder ?? null,
-                      base_axis_label: (pick as any).base_axis_label ?? null,
-                      top_axis_label: (pick as any).top_axis_label ?? null,
-                      gallery_images: (pick as any).gallery_images ?? null,
-                      variant_image_map: (pick as any).variant_image_map ?? null,
-                      gallery_captions: (pick as any).gallery_captions ?? null,
-                    });
+                    setLightboxItem(quickViewProduct);
                   };
 
                   return (
