@@ -546,6 +546,24 @@ const PublicDesignerProfile = () => {
     };
   }, [slug]);
 
+  // Restore the pre-portrait scroll position after the portrait closes and the
+  // landing blocks have re-mounted, so the user lands exactly where they were.
+  const wasPortraitOpenRef = useRef(portraitOpen);
+  const wasNewInExpandedRef = useRef(newInExpanded);
+  useEffect(() => {
+    const wasPortraitOpen = wasPortraitOpenRef.current;
+    const wasNewInExpanded = wasNewInExpandedRef.current;
+    wasPortraitOpenRef.current = portraitOpen;
+    wasNewInExpandedRef.current = newInExpanded;
+
+    if ((wasPortraitOpen && !portraitOpen) || (wasNewInExpanded && !newInExpanded)) {
+      const saved = prePortraitScrollY.current;
+      const restore = (behavior: ScrollBehavior) => window.scrollTo({ top: saved, behavior });
+      window.requestAnimationFrame(() => window.setTimeout(() => restore("smooth"), 60));
+      window.setTimeout(() => restore("auto"), 520);
+    }
+  }, [portraitOpen, newInExpanded]);
+
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
     isParentBrand ? designer : undefined,
     { publicOnly: true }
