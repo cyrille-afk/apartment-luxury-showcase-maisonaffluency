@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, Heart, ShoppingBag, Share2, Bookmark, ShieldCheck } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Heart, ShoppingBag, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PublicLightboxItem } from "@/components/PublicProductLightbox";
-import { formatPublicRrp } from "@/hooks/usePublicRrp";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import StudioSaveButton from "@/components/product/StudioSaveButton";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Props {
   pick: PublicLightboxItem | null;
+  price?: string;
   onClose: () => void;
   onViewFull: () => void;
   onShare?: () => void;
