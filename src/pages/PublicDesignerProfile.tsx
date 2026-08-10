@@ -1564,50 +1564,61 @@ const PublicDesignerProfile = () => {
 
                 return (
                   <>
-                    {/* ── STICKY MOBILE / PWA UTILITY BAR ── */}
-                    <div className="md:hidden sticky top-[var(--header-h)] z-40 flex items-center justify-between border-y border-border/40 bg-background/95 backdrop-blur-md py-2.5 px-4 -mx-4 mb-3">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          disabled={categories.length === 0}
-                          className="inline-flex items-center gap-2 font-body text-[11px] uppercase tracking-[0.14em] text-foreground focus:outline-none disabled:opacity-40"
-                        >
-                          <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
-                          Filter
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="rounded-none">
-                          {filterItems}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          aria-label="Sort products"
-                          className="inline-flex items-center gap-1 font-body uppercase tracking-[0.14em] text-foreground focus:outline-none"
-                          style={{ fontSize: "11px", lineHeight: "1.2" }}
-                        >
-                          <span className="max-w-[38vw] truncate">
-                            {sortMode === "price-asc"
-                              ? "Price: Low to High"
-                              : sortMode === "price-desc"
-                                ? "Price: High to Low"
-                                : sortMode === "new"
-                                  ? "New Launch"
-                                  : "Default Sorting"}
-                          </span>
-                          <ChevronDown className="h-3 w-3 text-muted-foreground" strokeWidth={1} aria-hidden="true" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-none">
-                          <DropdownMenuRadioGroup
-                            value={sortMode}
-                            onValueChange={(v) => setSortMode(v as typeof sortMode)}
+                    {/* ── STICKY MOBILE / PWA HORIZONTAL FILTER BAR ── */}
+                    <div className="md:hidden sticky top-[var(--header-h)] z-40 flex items-center border-y border-border/40 bg-background/95 backdrop-blur-md py-2.5 -mx-4 mb-3">
+                      {/* Fixed master filter trigger */}
+                      <div className="pl-4 pr-3 border-r border-border/40 flex items-center bg-background/95 z-10 shrink-0">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            disabled={categories.length === 0}
+                            className="p-1 text-foreground/70 hover:text-foreground focus:outline-none disabled:opacity-40"
+                            aria-label="Filter"
                           >
-                            <DropdownMenuRadioItem value="default" className="font-body text-[11px] uppercase tracking-[0.14em]">Default Sorting</DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="price-asc" className="font-body text-[11px] uppercase tracking-[0.14em]">Price: Low to High</DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="price-desc" className="font-body text-[11px] uppercase tracking-[0.14em]">Price: High to Low</DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="new" className="font-body text-[11px] uppercase tracking-[0.14em]">New Launch</DropdownMenuRadioItem>
-                          </DropdownMenuRadioGroup>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                            <SlidersHorizontal className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start" className="rounded-none">
+                            {filterItems}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
+                      {/* Scrollable horizontal pill track */}
+                      <div className="flex gap-2 overflow-x-auto scrollbar-hide px-3 scroll-smooth w-full">
+                        <button
+                          type="button"
+                          onClick={() => setActiveCategories([])}
+                          className={cn(
+                            "shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] uppercase tracking-[0.12em] font-medium transition-all duration-200 border",
+                            activeCategories.length === 0
+                              ? "bg-foreground text-background border-foreground"
+                              : "bg-muted/30 text-foreground/80 border-border hover:bg-muted/50"
+                          )}
+                        >
+                          All
+                        </button>
+                        {categories.map((c) => {
+                          const isActive = activeCategories.includes(c);
+                          return (
+                            <button
+                              key={c}
+                              type="button"
+                              onClick={() =>
+                                setActiveCategories((prev) =>
+                                  isActive ? prev.filter((x) => x !== c) : [...prev, c]
+                                )
+                              }
+                              className={cn(
+                                "shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] uppercase tracking-[0.12em] font-medium transition-all duration-200 border",
+                                isActive
+                                  ? "bg-foreground text-background border-foreground"
+                                  : "bg-muted/30 text-foreground/80 border-border hover:bg-muted/50"
+                              )}
+                            >
+                              {c}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
 
 
