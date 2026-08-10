@@ -323,18 +323,25 @@ const TITLE_SUBCATEGORY_HINTS: [RegExp, string][] = [
   [/\blamp\b/i, "Table Lights"],  // generic "lamp" → table light
   // Storage
   [/\bbookcase\b/i, "Bookcases"],
-  [/\bcredenza\b/i, "Cabinets"],
-  [/\bsideboard\b/i, "Cabinets"],
-  [/\bcabinet\b/i, "Cabinets"],
+  [/\bbar\s*cabinet\b/i, "Bars"],
+  [/\bcredenza\b/i, "Buffets, Cabinets And Sideboards"],
+  [/\bsideboard\b/i, "Buffets, Cabinets And Sideboards"],
+  [/\bbuffet\b/i, "Buffets, Cabinets And Sideboards"],
+  [/\bcabinet\b/i, "Buffets, Cabinets And Sideboards"],
   [/\bnightstand\b/i, "Bedside Tables"],
   [/\bbedside\s*table\b/i, "Bedside Tables"],
-  // Bedroom Furniture
-  [/\bheadboard\b/i, "Headboards"],
+  // Bedroom
+  [/\bheadboard\b/i, "Beds"],
+  [/\bsofa[- ]?bed\b/i, "Sofa-Beds"],
+  [/\bbedding\b/i, "Bedding"],
   // Décor
   [/\bmirror\b/i, "Mirrors"],
   [/\bvase\b/i, "Vases & Vessels"],
   [/\bvessel\b/i, "Vases & Vessels"],
   [/\bcandle\s*holder\b/i, "Candle Holders"],
+  [/\bfolding\s*screen\b/i, "Folding Screens & Window Décor"],
+  [/\bcushion\b|\bthrow\b/i, "Cushions & Throws"],
+  [/\btray\b/i, "Trays & Change Trays"],
   [/\bsculptur/i, "Decorative Objects"],
   // Rugs
   [/\brug\b/i, "Hand-Knotted Rugs"],
@@ -345,12 +352,13 @@ const TITLE_SUBCATEGORY_HINTS: [RegExp, string][] = [
 const CATEGORY_DEFAULT_SUBCATEGORY: Record<string, string> = {
   Rugs: "Hand-Knotted Rugs",
   Lighting: "Table Lights",
-  Storage: "Cabinets",
-  "Bedroom Furniture": "Headboards",
+  Storage: "Buffets, Cabinets And Sideboards",
+  Bedroom: "Beds",
   Décor: "Decorative Objects",
   Seating: "Chairs",
   Tables: "Side Tables",
 };
+
 
 function inferSubcategoryFromTitle(title: string): string | undefined {
   for (const [pattern, sub] of TITLE_SUBCATEGORY_HINTS) {
