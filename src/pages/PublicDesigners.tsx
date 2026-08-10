@@ -254,11 +254,13 @@ function ScrollLockedDesigners({
 
         <div className={locked ? "h-[calc(var(--designers-landing-vh,100lvh)-var(--header-h))] overflow-hidden" : "pb-20"}>
           <div
-            className={locked ? "relative md:h-full" : "relative min-h-[calc(100lvh-var(--header-h))] bg-[#0a0a0a]"}
+            className={
+              locked
+                ? "relative md:h-full"
+                : "relative min-h-[calc(100lvh-var(--header-h))] md:min-h-0 md:h-auto bg-[#0a0a0a]"
+            }
           >
-
             <DesignersHoverHero />
-            
           </div>
           {!isMobileOrPwa && !locked && directoryReady && (
             <div className="bg-background">
