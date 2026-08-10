@@ -1027,6 +1027,7 @@ const PublicDesignerProfile = () => {
   /* Inline "full portrait" expansion — mounts the staggered magazine rows only.
      No parent re-render, no second hero, no route change. */
   const openPortrait = () => {
+    console.log("[openPortrait] capturing scrollY:", window.scrollY);
     prePortraitScrollY.current = window.scrollY;
     setPortraitOpen(true);
     // The landing blocks above unmount when the portrait opens, so the portrait
