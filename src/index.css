@@ -166,6 +166,14 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
+  /* Hide scrollbar for horizontal swipe strips and pill tracks */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
   .text-gradient-jade {
     @apply bg-gradient-to-r from-[hsl(var(--jade))] to-[hsl(var(--jade-light))] bg-clip-text text-transparent;
   }

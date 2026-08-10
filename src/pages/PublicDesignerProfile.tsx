@@ -1583,7 +1583,7 @@ const PublicDesignerProfile = () => {
                       </div>
 
                       {/* Scrollable horizontal pill track */}
-                      <div className="flex gap-2 overflow-x-auto scrollbar-hide px-3 scroll-smooth w-full">
+                      <div className="flex gap-2 overflow-x-auto no-scrollbar px-3 scroll-smooth w-full">
                         <button
                           type="button"
                           onClick={() => setActiveCategories([])}
