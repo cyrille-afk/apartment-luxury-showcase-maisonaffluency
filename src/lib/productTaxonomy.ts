@@ -86,7 +86,7 @@ function resolveFurniture(subcategory?: string): string {
   if (TABLES_SUBCATEGORIES.has(normalized)) return "Tables";
   if (LIGHTING_SUBCATEGORIES.has(normalized)) return "Lighting";
   if (STORAGE_SUBCATEGORIES.has(normalized)) return "Storage";
-  if (BEDROOM_SUBCATEGORIES.has(normalized)) return "Bedroom Furniture";
+  if (BEDROOM_SUBCATEGORIES.has(normalized)) return "Bedroom";
   return findParentCategory(normalized) || "Tables";
 }
 
@@ -96,10 +96,44 @@ const SUBCATEGORY_NORMALIZE: Record<string, string> = {
   "Coffee Table": "Coffee Tables",
   "Dining Table": "Dining Tables",
   "Side Table": "Side Tables",
+  "Nesting Tables": "Side Tables",
+  "Writing Desks": "Desks",
+  "Writing Desk": "Desks",
   Desk: "Desks",
-  Cabinet: "Cabinets",
+  Cabinet: "Buffets, Cabinets And Sideboards",
+  Cabinets: "Buffets, Cabinets And Sideboards",
+  Credenza: "Buffets, Cabinets And Sideboards",
+  Credenzas: "Buffets, Cabinets And Sideboards",
+  Buffet: "Buffets, Cabinets And Sideboards",
+  Buffets: "Buffets, Cabinets And Sideboards",
+  Bar: "Bars",
+  "Bar Cabinet": "Bars",
+  "Bar Cabinets": "Bars",
+  "Bar Stool": "Ottomans & Stools",
+  "Bar Stools": "Ottomans & Stools",
+  Bed: "Beds",
+  Headboard: "Beds",
+  Headboards: "Beds",
+  "Sofa-Bed": "Sofa-Beds",
+  "Sofa Bed": "Sofa-Beds",
+  "Sofa Beds": "Sofa-Beds",
+  "Statement Piece": "Decorative Objects",
+  "Statement Pieces": "Decorative Objects",
+  Box: "Boxes",
+  Cushion: "Cushions & Throws",
+  Cushions: "Cushions & Throws",
+  Throw: "Cushions & Throws",
+  Throws: "Cushions & Throws",
+  Tray: "Trays & Change Trays",
+  Trays: "Trays & Change Trays",
+  "Folding Screen": "Folding Screens & Window Décor",
+  "Folding Screens": "Folding Screens & Window Décor",
+  "Magazine Holder": "Magazine Holders",
+  "Desk Accessory": "Desk Accessories",
+  "Wall Art": "Wall Décor",
   Bookcase: "Bookcases",
   "Bookcases & Credenzas": "Bookcases",
+
   Sofa: "Sofas",
   Armchair: "Armchairs",
   Chair: "Chairs",
