@@ -161,59 +161,6 @@ const Hero = () => {
                   </motion.span>
                 </motion.button>
 
-                {/* Inline editorial links — vertical stack on mobile/PWA, horizontal on desktop */}
-                {/* Mobile / PWA — frosted glass editorial links */}
-                <div className="hero-mobile-links-inner mt-6 flex w-full max-w-md flex-col items-center space-y-3 rounded-2xl bg-white/10 px-6 py-5 text-center shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-md hero-fade-in-delayed-5 md:hidden">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-                      scrollToSection("apartment-tour-heading");
-                    }}
-                    className="font-body text-[11px] font-light uppercase tracking-[0.25em] text-white/80"
-                  >
-                    Singapore Gallery Preview
-                  </button>
-
-                  <div className="h-px w-10 bg-white/30" aria-hidden="true" />
-
-                  <motion.button
-                    type="button"
-                    onClick={() => {
-                      trackCTA.bookAppointment("Hero Mobile Frosted Card");
-                      setIsBookingLoading(true);
-                      window.setTimeout(() => {
-                        setTourOpen(true);
-                        setIsBookingLoading(false);
-                      }, 500);
-                    }}
-                    disabled={isBookingLoading}
-                    className="group relative flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-white/5 px-4 py-2 font-body text-[13px] font-light uppercase tracking-[0.2em] text-white transition-colors hover:text-white/80 backdrop-blur-md touch-manipulation"
-                    whileTap={{ scale: 0.98, backdropFilter: "blur(24px)" }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {isBookingLoading ? (
-                      <motion.span
-                        className="inline-block h-4 w-4 rounded-full border border-white/30 border-t-white"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-                      />
-                    ) : (
-                      <>
-                        <span>Book Private Appointment</span>
-                        <span className="text-[10px] font-normal italic lowercase text-white/60">(trade only)</span>
-                      </>
-                    )}
-                    <motion.span
-                      className="absolute bottom-1 left-0 h-[1px] w-full bg-white"
-                      initial={{ scaleX: 0 }}
-                      whileTap={{ scaleX: 1 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                      style={{ transformOrigin: "center" }}
-                    />
-                  </motion.button>
-                </div>
-
 
                 {/* Desktop — inline editorial links, raised above the CTA over the darker
                     left-hand section of the image, with a soft scrim for legibility */}
@@ -248,6 +195,59 @@ const Hero = () => {
           </div>
         </div>
       </div>
+
+                {/* Inline editorial links — vertical stack on mobile/PWA, horizontal on desktop */}
+                {/* Mobile / PWA — frosted glass editorial links */}
+                <div className="hero-mobile-links-inner mt-4 flex w-full max-w-md flex-col items-center space-y-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-center shadow-[0_8px_28px_rgba(0,0,0,0.28)] backdrop-blur-[12px] hero-fade-in-delayed-5 md:hidden">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
+                      scrollToSection("apartment-tour-heading");
+                    }}
+                    className="font-body text-[12.5px] font-light uppercase tracking-[0.32em] text-white/85"
+                  >
+                    Singapore Gallery Preview
+                  </button>
+
+                  <div className="h-px w-10 bg-white/30" aria-hidden="true" />
+
+                  <motion.button
+                    type="button"
+                    onClick={() => {
+                      trackCTA.bookAppointment("Hero Mobile Frosted Card");
+                      setIsBookingLoading(true);
+                      window.setTimeout(() => {
+                        setTourOpen(true);
+                        setIsBookingLoading(false);
+                      }, 500);
+                    }}
+                    disabled={isBookingLoading}
+                    className="group relative flex min-h-[38px] w-full items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 font-body text-[10px] font-light uppercase tracking-[0.22em] whitespace-nowrap text-white transition-colors hover:text-white/80 backdrop-blur-[12px] touch-manipulation"
+                    whileTap={{ scale: 0.98, backdropFilter: "blur(24px)" }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {isBookingLoading ? (
+                      <motion.span
+                        className="inline-block h-4 w-4 rounded-full border border-white/30 border-t-white"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+                      />
+                    ) : (
+                      <>
+                        <span>Book Private Appointment</span>
+                        <span className="text-[9px] font-normal italic lowercase tracking-normal text-white/60">(trade only)</span>
+                      </>
+                    )}
+                    <motion.span
+                      className="absolute bottom-1 left-0 h-[1px] w-full bg-white"
+                      initial={{ scaleX: 0 }}
+                      whileTap={{ scaleX: 1 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      style={{ transformOrigin: "center" }}
+                    />
+                  </motion.button>
+                </div>
 
       <PrivateTourDialog open={tourOpen} onOpenChange={setTourOpen} />
     </section>

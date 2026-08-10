@@ -258,6 +258,21 @@ All colors MUST be HSL.
     margin-top: 18svh;
   }
 
+  /* Pin the frosted "Singapore Gallery Preview" panel to the bottom of the hero */
+  .hero-mobile-links-inner {
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+    bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
+    width: auto;
+    max-width: 26rem;
+    margin-top: 0 !important;
+    z-index: 20;
+  }
+
+
   .hero-fade-in,
   .hero-fade-in-delayed-1,
   .hero-fade-in-delayed-2,
