@@ -161,6 +161,41 @@ const Hero = () => {
                   </motion.span>
                 </motion.button>
 
+
+                {/* Desktop — inline editorial links, raised above the CTA over the darker
+                    left-hand section of the image, with a soft scrim for legibility */}
+                <div className="hidden hero-fade-in-delayed-5 md:order-1 md:mb-2 md:flex md:flex-col md:items-start">
+                  <div className="relative inline-flex items-center gap-3 before:content-[''] before:absolute before:-inset-x-4 before:-inset-y-2.5 before:-z-10 before:rounded-sm before:bg-black/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)] [text-shadow:0_1px_4px_rgba(0,0,0,0.6)]">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
+                        scrollToSection("apartment-tour-heading");
+                      }}
+                      className="font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70"
+                    >
+                      Singapore Gallery Preview
+                    </button>
+                    <span className="h-3 w-px bg-white/40" aria-hidden="true" />
+                    <button
+                      type="button"
+                      onClick={openTour}
+                      className="group font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70"
+                    >
+                      <span>Book Private Appointment</span>
+                      <span className="ml-2 tracking-[0.2em] text-white/70">(Trade Only)</span>
+                    </button>
+                  </div>
+                </div>
+
+
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
                 {/* Inline editorial links — vertical stack on mobile/PWA, horizontal on desktop */}
                 {/* Mobile / PWA — frosted glass editorial links */}
                 <div className="hero-mobile-links-inner mt-4 flex w-full max-w-md flex-col items-center space-y-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-center shadow-[0_8px_28px_rgba(0,0,0,0.28)] backdrop-blur-[12px] hero-fade-in-delayed-5 md:hidden">
@@ -213,41 +248,6 @@ const Hero = () => {
                     />
                   </motion.button>
                 </div>
-
-
-                {/* Desktop — inline editorial links, raised above the CTA over the darker
-                    left-hand section of the image, with a soft scrim for legibility */}
-                <div className="hidden hero-fade-in-delayed-5 md:order-1 md:mb-2 md:flex md:flex-col md:items-start">
-                  <div className="relative inline-flex items-center gap-3 before:content-[''] before:absolute before:-inset-x-4 before:-inset-y-2.5 before:-z-10 before:rounded-sm before:bg-black/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)] [text-shadow:0_1px_4px_rgba(0,0,0,0.6)]">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-                        scrollToSection("apartment-tour-heading");
-                      }}
-                      className="font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70"
-                    >
-                      Singapore Gallery Preview
-                    </button>
-                    <span className="h-3 w-px bg-white/40" aria-hidden="true" />
-                    <button
-                      type="button"
-                      onClick={openTour}
-                      className="group font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70"
-                    >
-                      <span>Book Private Appointment</span>
-                      <span className="ml-2 tracking-[0.2em] text-white/70">(Trade Only)</span>
-                    </button>
-                  </div>
-                </div>
-
-
-
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <PrivateTourDialog open={tourOpen} onOpenChange={setTourOpen} />
     </section>
