@@ -1995,7 +1995,7 @@ const PublicDesignerProfile = () => {
                         )}
 
                         {/* Product name — primary (deep link so the URL is shareable/copyable) */}
-                        <h3 className="font-display text-[13px] md:text-[13px] font-light tracking-tight md:tracking-wide leading-snug mt-1 md:mt-2 line-clamp-2">
+                        <h3 className="font-display text-[13px] md:text-[13px] font-light tracking-tight md:tracking-wide leading-snug mt-0.5 md:mt-2 line-clamp-2">
                           <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground/70 transition-colors">
                             {displayTitle}
                           </Link>
@@ -2006,7 +2006,7 @@ const PublicDesignerProfile = () => {
                           cardSubtitle.trim().toLowerCase() !== (cardBrandLabel || "").trim().toLowerCase() &&
                           !subtitleDesignerLabel && (
                             <p className={cn(
-                              "font-body text-[10px] md:text-[11px] tracking-[0.14em] text-muted-foreground leading-tight mt-1 line-clamp-1",
+                              "font-body text-[10px] md:text-[11px] tracking-[0.14em] text-muted-foreground leading-tight mt-0.5 md:mt-1 line-clamp-1",
                               !isArnoldClamChair && "uppercase"
                             )}>
                               {cardSubtitle}
@@ -2014,27 +2014,18 @@ const PublicDesignerProfile = () => {
                           )}
 
 
-                        {/* Price slot — pushed to bottom so cards align across the row */}
-                        <div className="mt-1 md:mt-2 flex items-start justify-between gap-2">
-                          <div>
-                            <p className="font-body text-[11px] md:text-xs font-medium text-foreground/80 md:text-foreground md:font-normal tracking-wide">
-                              {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
+                        {/* Price slot — tight under the title block */}
+                        <div className="mt-0.5 md:mt-2">
+                          <p className="font-body text-[11px] md:text-xs font-medium text-foreground/80 md:text-foreground md:font-normal tracking-wide">
+                            {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
+                          </p>
+                          {editionNote && !/^re-?edition$/i.test(editionNote) && (
+                            <p className="font-body italic text-[10px] md:text-[11px] text-muted-foreground/70 tracking-wide mt-0.5">
+                              *{editionNote}
                             </p>
-                            {editionNote && !/^re-?edition$/i.test(editionNote) && (
-                              <p className="font-body italic text-[10px] md:text-[11px] text-muted-foreground/70 tracking-wide mt-1">
-                                *{editionNote}
-                              </p>
-                            )}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); navigate(productHref); }}
-                            aria-label={`View ${displayTitle}`}
-                            className="md:hidden -mt-1 p-1.5 rounded-full text-foreground/70 hover:text-foreground hover:bg-muted/40 transition-colors"
-                          >
-                            <ShoppingBag className="h-4 w-4" strokeWidth={1.5} />
-                          </button>
+                          )}
                         </div>
+
 
                       </div>
                     </div>
