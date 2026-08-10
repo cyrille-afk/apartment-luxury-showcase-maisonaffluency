@@ -365,14 +365,14 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           }
         }}
         className={cn(
-          "font-display text-[13px] uppercase tracking-[0.22em] font-light transition-colors duration-300 text-left w-full pb-4 border-b border-border/20 mb-5",
+          "font-display text-[13px] uppercase tracking-[0.22em] font-light transition-colors duration-300 text-left w-full pb-3 border-b border-border/20 mb-3",
           activeMegaCat === cat && !activeMegaSub ? "text-foreground" : "text-foreground/90 hover:text-foreground"
         )}
       >
         {cat}
       </button>
       {SUBCATEGORY_MAP[cat] && (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col space-y-1.5">
           {SUBCATEGORY_MAP[cat].map(sub => (
             <button
               key={sub}
@@ -392,8 +392,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 }
               }}
               className={cn(
-                "text-left text-[11px] tracking-[0.12em] font-body font-light transition-colors py-1.5",
-                activeMegaSub === sub && activeMegaCat === cat ? "text-foreground font-normal" : "text-foreground/70 hover:text-foreground"
+                "text-left text-xs font-body font-light tracking-[0.06em] leading-snug transition-colors text-muted-foreground hover:text-foreground",
+                activeMegaSub === sub && activeMegaCat === cat ? "text-foreground font-normal" : ""
               )}
             >
               {sub}
