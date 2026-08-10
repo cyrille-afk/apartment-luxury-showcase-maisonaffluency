@@ -4,7 +4,7 @@ import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal, Square, Grid2X2, Heart, ShoppingBag } from "lucide-react";
+import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal, Square, Grid2X2, Heart, SquareArrowUpRight } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -454,7 +454,7 @@ const PublicDesignerProfile = () => {
     typeof window !== "undefined" && new URLSearchParams(window.location.search).get("expanded") === "true"
   );
   const [bioHighlighted, setBioHighlighted] = useState(false);
-  const [isMobileBioExpanded, setIsMobileBioExpanded] = useState(false);
+  
   const flashBioHighlight = () => {
     setBioHighlighted(true);
     window.setTimeout(() => setBioHighlighted(false), 1800);
@@ -927,8 +927,14 @@ const PublicDesignerProfile = () => {
                   />
                 ) : heroParagraphs.length > 0 ? (
                   <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
-                    <div className={cn("md:hidden", !isMobileBioExpanded && "line-clamp-2")}>
-                      {(isMobileBioExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
+                    <div
+                      className="md:hidden line-clamp-2"
+                      style={{
+                        WebkitMaskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                        maskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                      }}
+                    >
+                      {heroParagraphs.slice(0, 1).map((p: string, i: number) => (
                         <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
                       ))}
                     </div>
@@ -937,27 +943,21 @@ const PublicDesignerProfile = () => {
                         <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
                       ))}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setIsMobileBioExpanded((v) => !v)}
-                      className="md:hidden mt-2 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
-                    >
-                      {isMobileBioExpanded ? "Read Less" : "Read More"}
-                    </button>
                   </div>
                 ) : null}
 
                 {thinContentFallback && (
                   <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85 mt-4">
-                    <p className={cn("md:hidden", !isMobileBioExpanded && "line-clamp-2")}>{thinContentFallback}</p>
-                    <p className="hidden md:block">{thinContentFallback}</p>
-                    <button
-                      type="button"
-                      onClick={() => setIsMobileBioExpanded((v) => !v)}
-                      className="md:hidden mt-2 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
+                    <p
+                      className="md:hidden line-clamp-2"
+                      style={{
+                        WebkitMaskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                        maskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                      }}
                     >
-                      {isMobileBioExpanded ? "Read Less" : "Read More"}
-                    </button>
+                      {thinContentFallback}
+                    </p>
+                    <p className="hidden md:block">{thinContentFallback}</p>
                   </div>
                 )}
 
@@ -1165,64 +1165,44 @@ const PublicDesignerProfile = () => {
           {heroParagraphs.length > 0 && (
             <div className="font-body text-[14px] leading-[1.6] text-foreground/85 text-left">
               <div className="md:hidden relative">
-                <div className={cn(!isMobileBioExpanded && "line-clamp-2")}>
-                  {(isMobileBioExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
+                <div
+                  className="line-clamp-2"
+                  style={{
+                    WebkitMaskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                    maskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                  }}
+                >
+                  {heroParagraphs.slice(0, 1).map((p: string, i: number) => (
                     <p key={i} className={i > 0 ? "mt-3" : ""}>{renderParagraph(p)}</p>
                   ))}
                 </div>
-                {!isMobileBioExpanded && (
-                  <button
-                    type="button"
-                    onClick={() => setIsMobileBioExpanded(true)}
-                    className="absolute bottom-0 right-0 pl-10 bg-gradient-to-r from-transparent via-background to-background font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30"
-                  >
-                    Read More
-                  </button>
-                )}
-                {isMobileBioExpanded && (
-                  <button
-                    type="button"
-                    onClick={() => setIsMobileBioExpanded(false)}
-                    className="mt-1 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30"
-                  >
-                    Read Less
-                  </button>
-                )}
               </div>
               <div className="hidden md:block">
                 {heroParagraphs.map((p: string, i: number) => (
                   <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
                 ))}
               </div>
-              {isMobileBioExpanded && (
-                <button
-                  type="button"
-                  onClick={openPortrait}
-                  className="md:hidden block mt-2 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  View full portrait
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={openPortrait}
+                className="md:hidden block mt-2 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
+              >
+                View full portrait
+              </button>
             </div>
           )}
 
           {!heroParagraphs.length && thinContentFallback && (
             <div className="font-body text-[14px] leading-[1.6] text-foreground/85 mt-1">
-              <div className="md:hidden relative">
-                <p className={cn(!isMobileBioExpanded && "line-clamp-2")}>{thinContentFallback}</p>
-                <button
-                  type="button"
-                  onClick={() => setIsMobileBioExpanded((v) => !v)}
-                  className={cn(
-                    "font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30",
-                    !isMobileBioExpanded
-                      ? "absolute bottom-0 right-0 pl-10 bg-gradient-to-r from-transparent via-background to-background"
-                      : "mt-1",
-                  )}
-                >
-                  {isMobileBioExpanded ? "Read Less" : "Read More"}
-                </button>
-              </div>
+              <p
+                className="md:hidden line-clamp-2"
+                style={{
+                  WebkitMaskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                  maskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                }}
+              >
+                {thinContentFallback}
+              </p>
               <p className="hidden md:block">{thinContentFallback}</p>
             </div>
           )}
@@ -1957,7 +1937,7 @@ const PublicDesignerProfile = () => {
                           aria-label={`View ${displayTitle}`}
                           className="md:hidden absolute bottom-2 right-2 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-background/95 shadow-md text-foreground active:scale-95 transition-transform"
                         >
-                          <ShoppingBag className="h-3.5 w-3.5" strokeWidth={1.5} />
+                          <SquareArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.5} />
                         </button>
                       </div>
 
