@@ -129,6 +129,7 @@ const CATEGORY_SUBCATS: Record<string, string[]> = {
   "Lighting": ["Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights"],
   "Rugs": ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
   "Décor": ["Vases & Vessels", "Mirrors", "Books", "Boxes", "Candle Holders", "Cushions & Throws", "Decorative Objects", "Desk Accessories", "Folding Screens & Window Décor", "Magazine Holders", "Tableware & Linens", "Trays & Change Trays", "Wall Décor"],
+};
 
 
 function pickMatchesFilter(pick: CuratorPick, category: string | null, subcategory: string | null): boolean {
