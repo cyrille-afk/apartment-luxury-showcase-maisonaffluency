@@ -1520,13 +1520,13 @@ const DesignersHoverHero = () => {
         "relative w-full bg-black text-foreground overflow-hidden",
         isMobileBrowser ? "touch-none" : "touch-pan-y",
         isStandalone
-          ? "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))] md:h-[calc(100svh-var(--header-h))]"
+          ? "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))] md:h-[85vh]"
           : // Background frame uses 100lvh so dark hero always covers Safari's
             // toolbar-collapse zone (no white strip). Content frame inside is
             // constrained to 100svh so the Directory clears the iOS toolbar
-            // when it is visible. Desktop: height is natural so the whole page
-            // scrolls as one track (no nested scroller).
-            "h-[calc(var(--designers-landing-vh,100lvh)-var(--header-h))] md:h-[calc(100svh-var(--header-h))]"
+            // when it is visible. Desktop: 85vh lets the clean white section
+            // below peek in, inviting the user to scroll.
+            "h-[calc(var(--designers-landing-vh,100lvh)-var(--header-h))] md:h-[85vh]"
       )}
     >
       {/* Cross-fading background images — on mobile the photo stops at the
