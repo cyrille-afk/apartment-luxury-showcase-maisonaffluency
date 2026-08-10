@@ -223,19 +223,34 @@ export default function MobileQuickViewDrawer({ pick, price, onClose, onViewFull
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 25, stiffness: 220 }}
         drag="y"
+        dragListener={false}
+        dragControls={dragControls}
         dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={0.15}
+        dragElastic={{ top: 0, bottom: 0.4 }}
         onDragEnd={(_, info) => {
-          if (info.offset.y > 140 || (info.velocity.y > 600 && info.offset.y > 40)) {
+          if (info.offset.y > 120 || (info.velocity.y > 500 && info.offset.y > 30)) {
             onClose();
           }
         }}
         className="fixed bottom-0 left-0 right-0 z-[70] bg-background rounded-t-2xl shadow-2xl flex flex-col max-h-[92vh] font-sans"
       >
-        {/* Drag handle */}
-        <div className="w-full pt-3 pb-1 flex justify-center shrink-0" onClick={onClose}>
+        {/* Drag handle — swipe down to close */}
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Swipe down to close"
+          onPointerDown={(e) => dragControls.start(e)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onClose();
+            }
+          }}
+          className="w-full pt-3 pb-2 flex justify-center shrink-0 cursor-grab active:cursor-grabbing touch-none"
+        >
           <div className="w-12 h-1 bg-muted-foreground/25 rounded-full" />
         </div>
+
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 pb-3 border-b border-border/40 shrink-0">
