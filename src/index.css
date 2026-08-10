@@ -258,8 +258,9 @@ All colors MUST be HSL.
     margin-top: 18svh;
   }
 
-  /* Pin the frosted "Singapore Gallery Preview" panel to the bottom of the hero */
-  .hero-mobile-links-inner {
+  /* Pin the frosted "Singapore Gallery Preview" panel to the bottom of the hero.
+     PWA (installed app) only — mobile Safari keeps the original inline flow. */
+  .hero-mobile-links-inner.is-pwa {
     position: absolute;
     left: 1rem;
     right: 1rem;
