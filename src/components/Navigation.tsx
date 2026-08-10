@@ -365,14 +365,14 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           }
         }}
         className={cn(
-          "font-display text-[13px] uppercase tracking-[0.22em] font-light transition-colors duration-300 text-left w-full pb-4 border-b border-border/20 mb-5",
+          "font-display text-[13px] uppercase tracking-[0.22em] font-light transition-colors duration-300 text-left w-full pb-3 border-b border-border/20 mb-3",
           activeMegaCat === cat && !activeMegaSub ? "text-foreground" : "text-foreground/90 hover:text-foreground"
         )}
       >
         {cat}
       </button>
       {SUBCATEGORY_MAP[cat] && (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col space-y-1.5">
           {SUBCATEGORY_MAP[cat].map(sub => (
             <button
               key={sub}
@@ -392,8 +392,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 }
               }}
               className={cn(
-                "text-left text-[11px] tracking-[0.12em] font-body font-light transition-colors py-1.5",
-                activeMegaSub === sub && activeMegaCat === cat ? "text-foreground font-normal" : "text-foreground/70 hover:text-foreground"
+                "text-left text-xs font-body font-light tracking-[0.06em] leading-snug transition-colors text-muted-foreground hover:text-foreground",
+                activeMegaSub === sub && activeMegaCat === cat ? "text-foreground font-normal" : ""
               )}
             >
               {sub}
@@ -892,7 +892,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
         {megaMenuOpen && (
           <div
             ref={megaMenuRef}
-            className="w-full border-t border-border/20 bg-background/95 backdrop-blur-md shadow-[0_24px_70px_rgba(0,0,0,0.1)] py-12 lg:py-16"
+            className="w-[50vw] max-w-3xl mx-auto border-t border-border/20 bg-background/95 backdrop-blur-xl shadow-[0_20px_60px_-15px_hsl(var(--foreground)/0.12)] py-10 px-8 lg:px-12"
             style={{ animation: "megaMenuReveal 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
           >
             <style>{`
@@ -901,7 +901,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 to { opacity: 1; filter: blur(0); transform: translateY(0); }
               }
             `}</style>
-            <div className="w-full max-w-[1400px] mx-auto flex flex-row justify-between items-start gap-x-12 lg:gap-x-16 xl:gap-x-20 px-6 lg:px-10">
+            <div className="w-full flex flex-row justify-between items-start gap-x-8 lg:gap-x-10">
               {/* Column 1 — SEATING */}
               <div className="flex flex-col flex-1 min-w-0">
                 {renderCategoryBlock("Seating")}
@@ -910,7 +910,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               {/* Column 2 — TABLES & LIGHTING */}
               <div className="flex flex-col flex-1 min-w-0">
                 {renderCategoryBlock("Tables")}
-                <div className="mt-10">
+                <div className="mt-8">
                   {renderCategoryBlock("Lighting")}
                 </div>
               </div>
@@ -918,7 +918,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               {/* Column 3 — STORAGE & BEDROOM FURNITURE */}
               <div className="flex flex-col flex-1 min-w-0">
                 {renderCategoryBlock("Storage")}
-                <div className="mt-10">
+                <div className="mt-8">
                   {renderCategoryBlock("Bedroom Furniture")}
                 </div>
               </div>
@@ -926,7 +926,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               {/* Column 4 — RUGS & DÉCOR */}
               <div className="flex flex-col flex-1 min-w-0">
                 {renderCategoryBlock("Rugs")}
-                <div className="mt-10">
+                <div className="mt-8">
                   {renderCategoryBlock("Décor")}
                 </div>
               </div>
