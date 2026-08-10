@@ -7,6 +7,7 @@ import type { PublicLightboxItem } from "@/components/PublicProductLightbox";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import StudioSaveButton from "@/components/product/StudioSaveButton";
 import { useAuth } from "@/hooks/useAuth";
+import { stripOriginFromMaterials } from "@/lib/designerOrigin";
 
 type Unit = "cm" | "in";
 
