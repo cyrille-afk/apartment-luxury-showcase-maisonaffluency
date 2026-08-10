@@ -642,6 +642,9 @@ const PublicDesignerProfile = () => {
   // Force full-width hero layout for ALL designer profiles (parent or child)
   const useChildHeroLayout = false;
 
+  // Installed PWA has no iOS Safari chrome, so we can afford a taller hero.
+  const [isPwaStandalone] = useState(() => isPwaStandaloneDisplay());
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
