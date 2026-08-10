@@ -1106,11 +1106,16 @@ const PublicDesignerProfile = () => {
             {/* Asymmetrical introductory row */}
             <div className="grid grid-cols-12 gap-x-10 lg:gap-x-16 gap-y-6 items-start">
               {/* Left — identity */}
-              <div className="col-span-12 lg:col-span-4">
+              <div className="col-span-12 lg:col-span-4 lg:pr-6">
                 <h1 className="font-display text-4xl lg:text-[3rem] leading-[1.05] tracking-[-0.01em] text-foreground">
                   {name}
                 </h1>
-                <p className="mt-3 font-body text-[10px] lg:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
+                {originSubtitle && (
+                  <p className="mt-2.5 font-body text-[9px] lg:text-[10px] uppercase tracking-[0.34em] text-foreground/60">
+                    {originSubtitle}
+                  </p>
+                )}
+                <p className="mt-4 font-body text-[10px] lg:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
                   {designer.specialty || "Timeless Scandinavian Design"}
                 </p>
               </div>
