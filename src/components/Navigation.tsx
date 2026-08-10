@@ -901,31 +901,20 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 to { opacity: 1; filter: blur(0); transform: translateY(0); }
               }
             `}</style>
-            <div className="w-full grid grid-cols-4 gap-x-12 gap-y-16 items-start">
-              {/* Column 1 — TABLES / BEDROOM */}
-              <div className="flex flex-col min-w-0 self-start">
-                {renderCategoryBlock("Tables")}
-                <div className="mt-12">{renderCategoryBlock("Bedroom")}</div>
-              </div>
+            <div className="w-full grid grid-cols-4 grid-rows-[auto_auto] gap-x-12 gap-y-12 items-start">
+              {/* Row 1 */}
+              <div className="min-w-0 self-start">{renderCategoryBlock("Tables")}</div>
+              <div className="min-w-0 self-start">{renderCategoryBlock("Seating")}</div>
+              <div className="min-w-0 self-start">{renderCategoryBlock("Lighting")}</div>
+              {/* DÉCOR spans both rows */}
+              <div className="min-w-0 self-start row-span-2">{renderCategoryBlock("Décor")}</div>
 
-              {/* Column 2 — SEATING / STORAGE */}
-              <div className="flex flex-col min-w-0 self-start">
-                {renderCategoryBlock("Seating")}
-                <div className="mt-12">{renderCategoryBlock("Storage")}</div>
-              </div>
-
-              {/* Column 3 — LIGHTING / RUGS */}
-              <div className="flex flex-col min-w-0 self-start">
-                {renderCategoryBlock("Lighting")}
-                <div className="mt-12">{renderCategoryBlock("Rugs")}</div>
-              </div>
-
-              {/* Column 4 — DÉCOR */}
-              <div className="flex flex-col min-w-0 self-start">
-                {renderCategoryBlock("Décor")}
-              </div>
-
+              {/* Row 2 */}
+              <div className="min-w-0 self-start">{renderCategoryBlock("Bedroom")}</div>
+              <div className="min-w-0 self-start">{renderCategoryBlock("Storage")}</div>
+              <div className="min-w-0 self-start">{renderCategoryBlock("Rugs")}</div>
             </div>
+
           </div>
         )}
       </div>
