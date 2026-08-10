@@ -1130,7 +1130,7 @@ const PublicDesignerProfile = () => {
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
           {/* Compact mobile hero — keeps product grid above the fold */}
-          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted h-48 overflow-hidden">
+          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted h-44 overflow-hidden">
             {(wideHeroImage || heroImage) && (
               <>
                 <img
