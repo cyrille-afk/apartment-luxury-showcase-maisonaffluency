@@ -454,7 +454,7 @@ const PublicDesignerProfile = () => {
     typeof window !== "undefined" && new URLSearchParams(window.location.search).get("expanded") === "true"
   );
   const [bioHighlighted, setBioHighlighted] = useState(false);
-  const [isMobileBioExpanded, setIsMobileBioExpanded] = useState(false);
+  
   const flashBioHighlight = () => {
     setBioHighlighted(true);
     window.setTimeout(() => setBioHighlighted(false), 1800);
