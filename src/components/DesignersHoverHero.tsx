@@ -277,6 +277,8 @@ const DESKTOP_HERO_BG_OVERRIDES: Record<string, string> = {
   // reserved for mobile/PWA (see MOBILE_BG_OVERRIDES).
   "arnold-madsen":
     "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/designers/arnold-madsen/advert-1946.jpg",
+  "dagmar-london":
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1786274677/Screen_Shot_2026-08-09_at_7.22.06_PM_wldg1a.png",
 };
 
 
