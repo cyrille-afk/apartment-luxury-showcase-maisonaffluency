@@ -179,6 +179,12 @@ export default {
           "0%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(100%)" },
         },
+        "scroll-cue": {
+          "0%": { transform: "translateY(-100%)", opacity: "0" },
+          "20%": { opacity: "1" },
+          "80%": { opacity: "1" },
+          "100%": { transform: "translateY(340%)", opacity: "0" },
+        },
         // Slow, low-contrast sweep for the curatorial skeleton canvas.
         "curator-sweep": {
           "0%": { transform: "translateX(-120%)" },
@@ -197,6 +203,7 @@ export default {
         "card-shimmer": "card-shimmer 1.6s ease-in-out infinite",
         "cta-shimmer": "cta-shimmer 1.2s ease-in-out both",
         "curator-sweep": "curator-sweep 2.2s ease-in-out infinite",
+        "scroll-cue": "scroll-cue 3.2s cubic-bezier(0.4,0,0.2,1) infinite",
       },
     },
   },
