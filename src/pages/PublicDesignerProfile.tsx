@@ -1582,39 +1582,34 @@ const PublicDesignerProfile = () => {
                         </DropdownMenu>
                       </div>
 
-                      {/* Scrollable horizontal pill track */}
+                      {/* Scrollable horizontal pill track with fluid active indicator */}
                       <div className="flex gap-2 overflow-x-auto no-scrollbar px-3 scroll-smooth w-full">
-                        <button
-                          type="button"
-                          onClick={() => setActiveCategories([])}
-                          className={cn(
-                            "shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] uppercase tracking-[0.12em] font-medium transition-all duration-200 border",
-                            activeCategories.length === 0
-                              ? "bg-foreground text-background border-foreground"
-                              : "bg-muted/30 text-foreground/80 border-border hover:bg-muted/50"
-                          )}
-                        >
-                          All
-                        </button>
-                        {categories.map((c) => {
-                          const isActive = activeCategories.includes(c);
+                        {["All", ...categories].map((c) => {
+                          const isActive = c === "All" ? activeCategories.length === 0 : activeCategories.includes(c);
                           return (
                             <button
                               key={c}
                               type="button"
                               onClick={() =>
                                 setActiveCategories((prev) =>
-                                  isActive ? prev.filter((x) => x !== c) : [...prev, c]
+                                  c === "All" ? [] : isActive ? prev.filter((x) => x !== c) : [...prev, c]
                                 )
                               }
                               className={cn(
-                                "shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] uppercase tracking-[0.12em] font-medium transition-all duration-200 border",
+                                "relative shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] uppercase tracking-[0.12em] font-medium transition-colors duration-200 border",
                                 isActive
-                                  ? "bg-foreground text-background border-foreground"
-                                  : "bg-muted/30 text-foreground/80 border-border hover:bg-muted/50"
+                                  ? "border-foreground text-background"
+                                  : "border-border bg-muted/30 text-foreground/80 hover:bg-muted/50"
                               )}
                             >
-                              {c}
+                              <span className="relative z-10">{c}</span>
+                              {isActive && (
+                                <motion.div
+                                  layoutId="activeFilterPill"
+                                  className="absolute inset-0 rounded-full bg-foreground z-0"
+                                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                                />
+                              )}
                             </button>
                           );
                         })}
