@@ -573,10 +573,11 @@ body {
    ───────────────────────────────────────────── */
 @media (max-width: 768px) {
   .portrait-link-container {
-    margin-bottom: 12px !important;
+    margin-bottom: 6px !important;
   }
   .mobile-filter-bar {
-    padding-top: 12px !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
     margin-top: 0px !important;
   }
   .bio-description-mobile {

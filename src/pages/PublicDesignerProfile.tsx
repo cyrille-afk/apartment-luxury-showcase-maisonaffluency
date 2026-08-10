@@ -1179,7 +1179,7 @@ const PublicDesignerProfile = () => {
               <button
                 type="button"
                 onClick={openPortrait}
-                className="md:hidden block mt-2 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
+                className="md:hidden block mt-1 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
               >
                 View full portrait
               </button>
@@ -1555,7 +1555,7 @@ const PublicDesignerProfile = () => {
                 return (
                   <>
                     {/* ── STICKY MOBILE / PWA UTILITY BAR ── */}
-                    <div className="mobile-filter-bar md:hidden sticky top-[var(--header-h)] z-40 flex h-10 max-h-10 items-center justify-between border-y border-border bg-background/95 backdrop-blur-md py-0 px-4 -mx-4 mb-2">
+                    <div className="mobile-filter-bar md:hidden sticky top-[var(--header-h)] z-40 flex h-10 max-h-10 items-center justify-between border-y border-border bg-background/95 backdrop-blur-md py-0 px-4 -mx-4 mb-0">
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           disabled={categories.length === 0}
