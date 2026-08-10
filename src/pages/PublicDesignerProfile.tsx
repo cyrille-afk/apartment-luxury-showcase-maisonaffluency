@@ -948,15 +948,16 @@ const PublicDesignerProfile = () => {
 
                 {thinContentFallback && (
                   <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85 mt-4">
-                    <p className={cn("md:hidden", !isMobileBioExpanded && "line-clamp-2")}>{thinContentFallback}</p>
-                    <p className="hidden md:block">{thinContentFallback}</p>
-                    <button
-                      type="button"
-                      onClick={() => setIsMobileBioExpanded((v) => !v)}
-                      className="md:hidden mt-2 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
+                    <p
+                      className="md:hidden line-clamp-2"
+                      style={{
+                        WebkitMaskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                        maskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                      }}
                     >
-                      {isMobileBioExpanded ? "Read Less" : "Read More"}
-                    </button>
+                      {thinContentFallback}
+                    </p>
+                    <p className="hidden md:block">{thinContentFallback}</p>
                   </div>
                 )}
 
