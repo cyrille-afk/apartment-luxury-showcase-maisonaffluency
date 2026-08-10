@@ -108,7 +108,12 @@ function ScrollLockedDesigners({
   // Directory only mounts after the landing handoff completes — a deep-link,
   // an explicit unlock event, or the user scrolling past the hero. This
   // eliminates the spinner/cards flash under the hero on first paint.
-  const [directoryReady, setDirectoryReady] = useState(hasDeepLink);
+  const [directoryReady, setDirectoryReady] = useState(() => {
+    if (typeof window === "undefined") return false;
+    // Desktop: mount the directory immediately so the white runway section
+    // peeks below the 85vh hero on first paint.
+    return hasDeepLink || !(window.matchMedia("(max-width: 767px)").matches || isPwaStandaloneDisplay());
+  });
 
   useEffect(() => {
     const mql = window.matchMedia("(max-width: 767px)");
