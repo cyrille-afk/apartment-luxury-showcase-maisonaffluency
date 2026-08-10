@@ -426,7 +426,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             {/* Brand — centered horizontally */}
             <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center">
             <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
-              <span className="font-brand text-[2.25rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+              <span className="font-brand text-[1.9rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                 <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
               </span>
             </button>

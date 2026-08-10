@@ -163,7 +163,7 @@ const Hero = () => {
 
                 {/* Inline editorial links — vertical stack on mobile/PWA, horizontal on desktop */}
                 {/* Mobile / PWA — frosted glass editorial links */}
-                <div className="hero-mobile-links-inner mt-6 flex w-full max-w-md flex-col items-center space-y-3 rounded-2xl bg-white/10 px-6 py-5 text-center shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-md hero-fade-in-delayed-5 md:hidden">
+                <div className="hero-mobile-links-inner mt-4 flex w-full max-w-md flex-col items-center space-y-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-center shadow-[0_8px_28px_rgba(0,0,0,0.28)] backdrop-blur-[12px] hero-fade-in-delayed-5 md:hidden">
                   <button
                     type="button"
                     onClick={() => {
