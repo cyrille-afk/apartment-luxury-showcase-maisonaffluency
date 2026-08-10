@@ -628,6 +628,8 @@ const DesignersHoverHero = () => {
   const suppressNavClickRef = useRef(false);
   const portalRef = useRef<HTMLAnchorElement>(null);
   const portalCursorRef = useRef<HTMLDivElement>(null);
+  const parallaxBgRef = useRef<HTMLDivElement>(null);
+  const parallaxFgRef = useRef<HTMLDivElement>(null);
   const activeSlugRef = useRef<string | null>(null);
   useEffect(() => {
     activeSlugRef.current = activeSlug;
