@@ -1194,21 +1194,15 @@ const PublicDesignerProfile = () => {
 
           {!heroParagraphs.length && thinContentFallback && (
             <div className="font-body text-[14px] leading-[1.6] text-foreground/85 mt-1">
-              <div className="md:hidden relative">
-                <p className={cn(!isMobileBioExpanded && "line-clamp-2")}>{thinContentFallback}</p>
-                <button
-                  type="button"
-                  onClick={() => setIsMobileBioExpanded((v) => !v)}
-                  className={cn(
-                    "font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30",
-                    !isMobileBioExpanded
-                      ? "absolute bottom-0 right-0 pl-10 bg-gradient-to-r from-transparent via-background to-background"
-                      : "mt-1",
-                  )}
-                >
-                  {isMobileBioExpanded ? "Read Less" : "Read More"}
-                </button>
-              </div>
+              <p
+                className="md:hidden line-clamp-2"
+                style={{
+                  WebkitMaskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                  maskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                }}
+              >
+                {thinContentFallback}
+              </p>
               <p className="hidden md:block">{thinContentFallback}</p>
             </div>
           )}
