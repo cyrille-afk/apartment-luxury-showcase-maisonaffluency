@@ -450,6 +450,7 @@ const PublicDesignerProfile = () => {
   const newInBioRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLDivElement>(null);
   const [portraitOpen, setPortraitOpen] = useState(false);
+  const prePortraitScrollY = useRef<number>(0);
   const [newInExpanded, setNewInExpanded] = useState(() =>
     typeof window !== "undefined" && new URLSearchParams(window.location.search).get("expanded") === "true"
   );
