@@ -1683,7 +1683,7 @@ const DesignersHoverHero = () => {
                     >
                       <span
                         ref={groupIdx === 0 ? mastersRef : undefined}
-                        className="inline-flex items-center gap-1.5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-body font-black text-gold drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mb-1 md:mb-1.5"
+                        className="inline-flex items-center gap-1.5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-body font-black text-gold-bright drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mb-1 md:mb-1.5"
                       >
                         {group.label}
                       </span>
@@ -1725,8 +1725,8 @@ const DesignersHoverHero = () => {
                                    "transition-[color,opacity,transform] duration-500 ease-out",
                                    "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
                                    isActive
-                                     ? "text-white font-medium"
-                                     : "text-white/60 hover:text-white"
+                                     ? "text-gold-bright font-medium"
+                                     : "text-gold-bright/70 hover:text-gold-bright"
                                  )}
                                >
                                  <span>
