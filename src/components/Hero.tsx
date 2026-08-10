@@ -170,7 +170,7 @@ const Hero = () => {
                       trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
                       scrollToSection("apartment-tour-heading");
                     }}
-                    className="font-body text-[11px] font-light uppercase tracking-[0.25em] text-white/80"
+                    className="font-body text-[12.5px] font-light uppercase tracking-[0.32em] text-white/85"
                   >
                     Singapore Gallery Preview
                   </button>
@@ -188,7 +188,7 @@ const Hero = () => {
                       }, 500);
                     }}
                     disabled={isBookingLoading}
-                    className="group relative flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-white/5 px-4 py-2 font-body text-[13px] font-light uppercase tracking-[0.2em] text-white transition-colors hover:text-white/80 backdrop-blur-md touch-manipulation"
+                    className="group relative flex min-h-[38px] w-full items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/5 px-4 py-1.5 font-body text-[11.5px] font-light uppercase tracking-[0.28em] text-white transition-colors hover:text-white/80 backdrop-blur-[12px] touch-manipulation"
                     whileTap={{ scale: 0.98, backdropFilter: "blur(24px)" }}
                     transition={{ duration: 0.2 }}
                   >
