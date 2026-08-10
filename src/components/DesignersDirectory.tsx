@@ -311,7 +311,13 @@ function useFullCuratorPicks(enabled: boolean) {
       // Picks whose designer isn't in the public list belong to trade-only/unpublished
       // designers. We keep them in the grid but mark them so the UI can render a
       // "Trade Only" placeholder instead of broken brand info.
-      return sortCuratorPicks(picks as any[]).map((p): PickItem => {
+      // Finish-specific duplicates (e.g. Clam Chair "Oiled Walnut") are tagged
+      // "profile-only": they belong on the designer profile, never in category grids.
+      const visiblePicks = (picks as any[]).filter(
+        (p) => !((p.tags as string[] | null) || []).includes("profile-only"),
+      );
+      return sortCuratorPicks(visiblePicks).map((p): PickItem => {
+
         const d = designerMap.get(p.designer_id);
         return {
           ...p,
