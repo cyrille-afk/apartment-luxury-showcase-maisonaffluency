@@ -439,6 +439,76 @@ const IMAGE_TRANSITION_MS = 3500;
 const DESKTOP_IMAGE_TRANSITION_MS = 900;
 const LOCK_MS = 1200;
 
+/**
+ * Reusable cross-fading image layer for the hero background.
+ * On desktop it is used twice — once for the full background and once as a
+ * masked foreground plane — so a subtle multi-plane parallax can be applied
+ * without duplicating the render logic.
+ */
+function ParallaxImageLayer({
+  items,
+  activeSlug,
+  isStandalone,
+  mode,
+  suffix = "",
+  className,
+}: {
+  items: FeaturedDesigner[];
+  activeSlug: string | null;
+  isStandalone: boolean;
+  mode: "mobile" | "desktop";
+  suffix?: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "absolute inset-0 overflow-hidden",
+        mode === "desktop" && "-top-[15%] -bottom-[15%] h-[130%]",
+        className
+      )}
+    >
+      {items.map((d, i) => {
+        const src =
+          mode === "mobile"
+            ? mobileHeroBackgroundSrc(d)
+            : DESKTOP_HERO_BG_OVERRIDES[d.slug] || d.hero_image_url || d.image_url;
+        if (!src) return null;
+        const isActive = d.slug === activeSlug;
+        const isFirst = i === 0;
+        const heroImgProps = cldResponsiveImg(src, {
+          widths: mode === "mobile" ? [480, 720, 960, 1280] : [960, 1280, 1600, 1920],
+          sizes: "100vw",
+        });
+        return (
+          <img
+            key={`${d.slug}-${mode}${suffix ? `-${suffix}` : ""}`}
+            {...heroImgProps}
+            alt=""
+            aria-hidden="true"
+            loading={isFirst ? "eager" : "lazy"}
+            decoding={isFirst ? "sync" : "async"}
+            {...(isFirst ? { fetchPriority: "high" as const } : {})}
+            className={cn(
+              "absolute left-0 w-full object-cover transition-[opacity,transform] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform]",
+              mode === "mobile"
+                ? isStandalone
+                  ? "top-[-7rem] left-0 h-[calc(118%+7rem)] object-top md:top-0 md:h-full md:object-center"
+                  : "top-[-7rem] left-0 h-[calc(118%+7rem)] object-top md:top-0 md:h-full md:object-center"
+                : "inset-0 h-full",
+              isActive ? "opacity-100" : "opacity-0",
+              mode === "desktop" && (isActive ? "scale-100" : "scale-[1.035]")
+            )}
+            style={{
+              transitionDuration: `${mode === "mobile" ? IMAGE_TRANSITION_MS : DESKTOP_IMAGE_TRANSITION_MS}ms`,
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
 const DesignersHoverHero = () => {
   const navigate = useNavigate();
   const { data: designers } = useFeaturedDesigners();
