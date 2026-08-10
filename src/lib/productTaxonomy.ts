@@ -1,14 +1,29 @@
-export const CATEGORY_ORDER = ["Seating", "Tables", "Lighting", "Storage", "Bedroom Furniture", "Rugs", "Décor"];
+export const CATEGORY_ORDER = ["Tables", "Seating", "Lighting", "Bedroom", "Storage", "Rugs", "Décor"];
 
 export const SUBCATEGORY_MAP: Record<string, string[]> = {
-  Seating: ["Armchairs", "Bar Stools", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Sofas"],
   Tables: ["Coffee Tables", "Consoles", "Desks", "Dining Tables", "Side Tables"],
+  Seating: ["Armchairs", "Daybeds & Benches", "Chairs", "Ottomans & Stools", "Sofas"],
   Lighting: ["Ceiling Lights", "Floor Lights", "Table Lights", "Wall Lights"],
-  Storage: ["Bookcases", "Cabinets", "Sideboards"],
-  "Bedroom Furniture": ["Bedside Tables", "Headboards"],
+  Bedroom: ["Bedding", "Beds", "Bedside Tables", "Sofa-Beds"],
+  Storage: ["Bars", "Bookcases", "Buffets, Cabinets And Sideboards"],
   Rugs: ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
-  Décor: ["Books", "Candle Holders", "Decorative Objects", "Mirrors", "Statement Pieces", "Vases & Vessels"],
+  Décor: [
+    "Books",
+    "Boxes",
+    "Candle Holders",
+    "Cushions & Throws",
+    "Decorative Objects",
+    "Desk Accessories",
+    "Folding Screens & Window Décor",
+    "Magazine Holders",
+    "Mirrors",
+    "Tableware & Linens",
+    "Trays & Change Trays",
+    "Vases & Vessels",
+    "Wall Décor",
+  ],
 };
+
 
 // Map non-canonical category values to canonical taxonomy labels
 const CATEGORY_NORMALIZE: Record<string, string> = {
@@ -22,8 +37,11 @@ const CATEGORY_NORMALIZE: Record<string, string> = {
   Linens: "Décor",
   Screens: "Décor",
   Sculpture: "Décor",
-  Bedroom: "Bedroom Furniture",
-  "Bed Furniture": "Bedroom Furniture",
+  "Bedroom Furniture": "Bedroom",
+  "Bed Furniture": "Bedroom",
+  Deco: "Décor",
+  Decor: "Décor",
+
 };
 
 // Subcategories that belong to Seating (used to resolve "Furniture" → correct parent)
@@ -48,13 +66,15 @@ const LIGHTING_SUBCATEGORIES = new Set([
 ]);
 
 const STORAGE_SUBCATEGORIES = new Set([
-  "Bookcases", "Bookcase", "Cabinets", "Cabinet",
-  "Bookcases & Credenzas", "Sideboards", "Sideboard",
+  "Bookcases", "Bookcase", "Cabinets", "Cabinet", "Bars", "Bar",
+  "Bookcases & Credenzas", "Sideboards", "Sideboard", "Buffets, Cabinets And Sideboards",
 ]);
 
 const BEDROOM_SUBCATEGORIES = new Set([
-  "Headboards", "Headboard", "Bedside Tables", "Bedside Table", "Nightstand", "Nightstands",
+  "Beds", "Bed", "Headboards", "Headboard", "Bedding", "Sofa-Beds", "Sofa-Bed",
+  "Bedside Tables", "Bedside Table", "Nightstand", "Nightstands",
 ]);
+
 
 /**
  * Resolve ambiguous "Furniture" category using subcategory hint.
@@ -66,7 +86,7 @@ function resolveFurniture(subcategory?: string): string {
   if (TABLES_SUBCATEGORIES.has(normalized)) return "Tables";
   if (LIGHTING_SUBCATEGORIES.has(normalized)) return "Lighting";
   if (STORAGE_SUBCATEGORIES.has(normalized)) return "Storage";
-  if (BEDROOM_SUBCATEGORIES.has(normalized)) return "Bedroom Furniture";
+  if (BEDROOM_SUBCATEGORIES.has(normalized)) return "Bedroom";
   return findParentCategory(normalized) || "Tables";
 }
 
@@ -76,14 +96,48 @@ const SUBCATEGORY_NORMALIZE: Record<string, string> = {
   "Coffee Table": "Coffee Tables",
   "Dining Table": "Dining Tables",
   "Side Table": "Side Tables",
+  "Nesting Tables": "Side Tables",
+  "Writing Desks": "Desks",
+  "Writing Desk": "Desks",
   Desk: "Desks",
-  Cabinet: "Cabinets",
+  Cabinet: "Buffets, Cabinets And Sideboards",
+  Cabinets: "Buffets, Cabinets And Sideboards",
+  Credenza: "Buffets, Cabinets And Sideboards",
+  Credenzas: "Buffets, Cabinets And Sideboards",
+  Buffet: "Buffets, Cabinets And Sideboards",
+  Buffets: "Buffets, Cabinets And Sideboards",
+  Bar: "Bars",
+  "Bar Cabinet": "Bars",
+  "Bar Cabinets": "Bars",
+  "Bar Stool": "Ottomans & Stools",
+  "Bar Stools": "Ottomans & Stools",
+  Bed: "Beds",
+  Headboard: "Beds",
+  Headboards: "Beds",
+  "Sofa-Bed": "Sofa-Beds",
+  "Sofa Bed": "Sofa-Beds",
+  "Sofa Beds": "Sofa-Beds",
+  "Statement Piece": "Decorative Objects",
+  "Statement Pieces": "Decorative Objects",
+  Box: "Boxes",
+  Cushion: "Cushions & Throws",
+  Cushions: "Cushions & Throws",
+  Throw: "Cushions & Throws",
+  Throws: "Cushions & Throws",
+  Tray: "Trays & Change Trays",
+  Trays: "Trays & Change Trays",
+  "Folding Screen": "Folding Screens & Window Décor",
+  "Folding Screens": "Folding Screens & Window Décor",
+  "Magazine Holder": "Magazine Holders",
+  "Desk Accessory": "Desk Accessories",
+  "Wall Art": "Wall Décor",
   Bookcase: "Bookcases",
   "Bookcases & Credenzas": "Bookcases",
+
   Sofa: "Sofas",
   Armchair: "Armchairs",
   Chair: "Chairs",
-  "Bar Stool": "Bar Stools",
+  Sectionals: "Sofas",
   Ottoman: "Ottomans & Stools",
   Stool: "Ottomans & Stools",
   Stools: "Ottomans & Stools",
@@ -136,7 +190,9 @@ const SUBCATEGORY_NORMALIZE: Record<string, string> = {
   "Decorative Object": "Decorative Objects",
   "Sculptural Object": "Decorative Objects",
   Tableware: "Decorative Objects",
-  Sideboard: "Sideboards",
+  Sideboard: "Buffets, Cabinets And Sideboards",
+  Sideboards: "Buffets, Cabinets And Sideboards",
+
   "Hand-Knotted Rug": "Hand-Knotted Rugs",
   "Hand-Tufted Rug": "Hand-Tufted Rugs",
   "Hand-Woven Rug": "Hand-Woven Rugs",
@@ -169,10 +225,10 @@ const SUBCATEGORY_NORMALIZE: Record<string, string> = {
   "Tables & Sculpture": "Side Tables",
   "Tables & Seating": "Side Tables",
   // Display Cabinet → Cabinets
-  "Display Cabinet": "Cabinets",
+  "Display Cabinet": "Buffets, Cabinets And Sideboards",
   "High Table": "Side Tables",
-  Headboard: "Headboards",
   "Bedside Table": "Bedside Tables",
+
   Nightstand: "Bedside Tables",
   Nightstands: "Bedside Tables",
   Table: "Side Tables",
@@ -267,18 +323,25 @@ const TITLE_SUBCATEGORY_HINTS: [RegExp, string][] = [
   [/\blamp\b/i, "Table Lights"],  // generic "lamp" → table light
   // Storage
   [/\bbookcase\b/i, "Bookcases"],
-  [/\bcredenza\b/i, "Cabinets"],
-  [/\bsideboard\b/i, "Cabinets"],
-  [/\bcabinet\b/i, "Cabinets"],
+  [/\bbar\s*cabinet\b/i, "Bars"],
+  [/\bcredenza\b/i, "Buffets, Cabinets And Sideboards"],
+  [/\bsideboard\b/i, "Buffets, Cabinets And Sideboards"],
+  [/\bbuffet\b/i, "Buffets, Cabinets And Sideboards"],
+  [/\bcabinet\b/i, "Buffets, Cabinets And Sideboards"],
   [/\bnightstand\b/i, "Bedside Tables"],
   [/\bbedside\s*table\b/i, "Bedside Tables"],
-  // Bedroom Furniture
-  [/\bheadboard\b/i, "Headboards"],
+  // Bedroom
+  [/\bheadboard\b/i, "Beds"],
+  [/\bsofa[- ]?bed\b/i, "Sofa-Beds"],
+  [/\bbedding\b/i, "Bedding"],
   // Décor
   [/\bmirror\b/i, "Mirrors"],
   [/\bvase\b/i, "Vases & Vessels"],
   [/\bvessel\b/i, "Vases & Vessels"],
   [/\bcandle\s*holder\b/i, "Candle Holders"],
+  [/\bfolding\s*screen\b/i, "Folding Screens & Window Décor"],
+  [/\bcushion\b|\bthrow\b/i, "Cushions & Throws"],
+  [/\btray\b/i, "Trays & Change Trays"],
   [/\bsculptur/i, "Decorative Objects"],
   // Rugs
   [/\brug\b/i, "Hand-Knotted Rugs"],
@@ -289,12 +352,13 @@ const TITLE_SUBCATEGORY_HINTS: [RegExp, string][] = [
 const CATEGORY_DEFAULT_SUBCATEGORY: Record<string, string> = {
   Rugs: "Hand-Knotted Rugs",
   Lighting: "Table Lights",
-  Storage: "Cabinets",
-  "Bedroom Furniture": "Headboards",
+  Storage: "Buffets, Cabinets And Sideboards",
+  Bedroom: "Beds",
   Décor: "Decorative Objects",
   Seating: "Chairs",
   Tables: "Side Tables",
 };
+
 
 function inferSubcategoryFromTitle(title: string): string | undefined {
   for (const [pattern, sub] of TITLE_SUBCATEGORY_HINTS) {

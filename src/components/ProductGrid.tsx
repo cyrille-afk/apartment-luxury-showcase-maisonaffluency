@@ -122,13 +122,15 @@ function categoryMatch(pickValue?: string, category?: string): boolean {
 /** Map top-level categories to the set of subcategory tags they contain,
  *  so "Tables" only matches Table-related subs, not "Table Lamp". */
 const CATEGORY_SUBCATS: Record<string, string[]> = {
-  "Seating": ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Bar Stools"],
+  "Seating": ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools"],
   "Tables": ["Consoles", "Coffee Tables", "Desks", "Dining Tables", "Side Tables", "Centre Tables"],
-  "Storage": ["Bookcases", "Cabinets"],
+  "Storage": ["Bookcases", "Bars", "Buffets, Cabinets And Sideboards"],
+  "Bedroom": ["Bedding", "Beds", "Bedside Tables", "Sofa-Beds"],
   "Lighting": ["Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights"],
   "Rugs": ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
-  "Décor": ["Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"],
+  "Décor": ["Vases & Vessels", "Mirrors", "Books", "Boxes", "Candle Holders", "Cushions & Throws", "Decorative Objects", "Desk Accessories", "Folding Screens & Window Décor", "Magazine Holders", "Tableware & Linens", "Trays & Change Trays", "Wall Décor"],
 };
+
 
 function pickMatchesFilter(pick: CuratorPick, category: string | null, subcategory: string | null): boolean {
   if (!category && !subcategory) return true;

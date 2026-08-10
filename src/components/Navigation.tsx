@@ -902,28 +902,29 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               }
             `}</style>
             <div className="w-full grid grid-cols-4 gap-x-12 gap-y-16 items-start">
-              {/* Column 1 — SEATING / LIGHTING */}
-              <div className="flex flex-col min-w-0 self-start">
-                {renderCategoryBlock("Seating")}
-                <div className="mt-12">{renderCategoryBlock("Lighting")}</div>
-              </div>
-
-              {/* Column 2 — TABLES */}
+              {/* Column 1 — TABLES / BEDROOM */}
               <div className="flex flex-col min-w-0 self-start">
                 {renderCategoryBlock("Tables")}
+                <div className="mt-12">{renderCategoryBlock("Bedroom")}</div>
               </div>
 
-              {/* Column 3 — STORAGE / BEDROOM FURNITURE */}
+              {/* Column 2 — SEATING / STORAGE */}
               <div className="flex flex-col min-w-0 self-start">
-                {renderCategoryBlock("Storage")}
-                <div className="mt-12">{renderCategoryBlock("Bedroom Furniture")}</div>
+                {renderCategoryBlock("Seating")}
+                <div className="mt-12">{renderCategoryBlock("Storage")}</div>
               </div>
 
-              {/* Column 4 — RUGS / DÉCOR */}
+              {/* Column 3 — LIGHTING / RUGS */}
               <div className="flex flex-col min-w-0 self-start">
-                {renderCategoryBlock("Rugs")}
-                <div className="mt-12">{renderCategoryBlock("Décor")}</div>
+                {renderCategoryBlock("Lighting")}
+                <div className="mt-12">{renderCategoryBlock("Rugs")}</div>
               </div>
+
+              {/* Column 4 — DÉCOR */}
+              <div className="flex flex-col min-w-0 self-start">
+                {renderCategoryBlock("Décor")}
+              </div>
+
             </div>
           </div>
         )}
