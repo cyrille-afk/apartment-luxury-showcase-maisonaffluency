@@ -2002,7 +2002,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               Left track carries the section identity, right track carries the
               A–Z index inline so no floating letter bar is needed. */}
           {showRunway && !(selectedCategory || selectedSubcategory) && (
-            <div className="hidden md:block bg-background pt-10 lg:pt-14 pb-6 lg:pb-8">
+            <div className="hidden md:block bg-background pt-3 lg:pt-4 pb-4 lg:pb-5">
               <div className="grid grid-cols-12 gap-8 items-end">
                 <div className="col-span-4">
                   <h2 className="font-serif text-3xl lg:text-[2.6rem] leading-[1.05] text-foreground">
