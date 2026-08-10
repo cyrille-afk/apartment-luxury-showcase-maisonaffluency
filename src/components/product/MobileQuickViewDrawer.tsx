@@ -219,7 +219,7 @@ export default function MobileQuickViewDrawer({ pick, price, onClose, onViewFull
           {/* Product details */}
           <div className="px-5 py-5 flex flex-col gap-4">
             <div className="flex items-baseline justify-between">
-              <span className="text-xl font-display tracking-tight text-foreground">{price}</span>
+              <span className="text-xl font-display tracking-tight text-foreground">{displayPrice}</span>
               <span className="text-[10px] uppercase tracking-wider text-emerald-600 px-2 py-0.5 bg-emerald-50 rounded-sm">
                 In Stock
               </span>
