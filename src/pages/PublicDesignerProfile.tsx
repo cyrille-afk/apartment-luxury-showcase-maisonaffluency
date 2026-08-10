@@ -1485,7 +1485,7 @@ const PublicDesignerProfile = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...transition, delay: 0.25 }}
-              className="mt-[10px] md:mt-10 pt-3 md:pt-8 border-t border-border/40"
+              className="mt-[2px] md:mt-10 pt-1 md:pt-8 border-t border-border/40"
             >
 
 
@@ -1555,7 +1555,7 @@ const PublicDesignerProfile = () => {
                 return (
                   <>
                     {/* ── STICKY MOBILE / PWA UTILITY BAR ── */}
-                    <div className="mobile-filter-bar md:hidden sticky top-[var(--header-h)] z-40 flex h-10 max-h-10 items-center justify-between border-y border-border bg-background/95 backdrop-blur-md py-0 px-4 -mx-4 mb-0">
+                    <div className="mobile-filter-bar md:hidden sticky top-0 z-40 flex h-10 max-h-10 items-center justify-between border-y border-border bg-background/95 backdrop-blur-md py-0 px-4 -mx-4 mb-0">
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           disabled={categories.length === 0}
