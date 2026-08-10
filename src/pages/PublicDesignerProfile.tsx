@@ -38,6 +38,7 @@ import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { consumeProductBackRef } from "@/lib/designerBackRef";
 import { isChildBrandDesigner, isParentBrandDesigner } from "@/lib/designerHierarchy";
 import { toOgImage } from "@/lib/ogImage";
+import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { sortCuratorPicks, interleaveBySubcategory } from "@/lib/curatorPickSort";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { useAuth } from "@/hooks/useAuth";
