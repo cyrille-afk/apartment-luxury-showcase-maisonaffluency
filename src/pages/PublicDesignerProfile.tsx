@@ -30,6 +30,7 @@ import EditorialBiographyColumns from "@/components/EditorialBiographyColumns";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
+import MobileQuickViewDrawer from "@/components/product/MobileQuickViewDrawer";
 import HeritageSlider from "@/components/HeritageSlider";
 import { useHeritageSlides } from "@/hooks/useHeritageSlides";
 import DesignerInstagramSection from "@/components/DesignerInstagramSection";
