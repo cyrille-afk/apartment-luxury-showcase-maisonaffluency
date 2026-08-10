@@ -5,7 +5,7 @@ import { X, ChevronLeft, ChevronRight, Heart, ShoppingBag, Share2, Bookmark, Shi
 import { cn } from "@/lib/utils";
 import type { PublicLightboxItem } from "@/components/PublicProductLightbox";
 import { formatPublicRrp } from "@/hooks/usePublicRrp";
-import { responsiveCloudinaryUrl } from "@/pages/PublicDesignerProfile";
+import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import StudioSaveButton from "@/components/product/StudioSaveButton";
 import { useAuth } from "@/hooks/useAuth";
 
