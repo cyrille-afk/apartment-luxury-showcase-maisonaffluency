@@ -141,6 +141,8 @@ export default function MobileQuickViewDrawer({ pick, price, onClose, onViewFull
     return list.length ? list : [pick.image_url];
   }, [pick]);
 
+  const parsedDims = useMemo(() => parseDimensions(pick?.dimensions), [pick?.dimensions]);
+
   useEffect(() => {
     setIndex(0);
   }, [pick?.id]);
