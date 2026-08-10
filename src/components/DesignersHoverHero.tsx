@@ -273,13 +273,12 @@ const MOBILE_BG_OVERRIDES: Record<string, string> = {
 };
 
 const DESKTOP_HERO_BG_OVERRIDES: Record<string, string> = {
+  // Desktop keeps the 1946 archival advert; the Clam Chair interior shot is
+  // reserved for mobile/PWA (see MOBILE_BG_OVERRIDES).
   "arnold-madsen":
-    "https://res.cloudinary.com/dif1oamtj/image/upload/v1786274677/Screen_Shot_2026-08-09_at_7.22.06_PM_wldg1a.png",
-  // The stored hero_image_url is a tight screenshot crop that reads as a blur
-  // at full-bleed; use the signature Clam Chair shot instead.
-  "dagmar-london":
-    "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/dagmar-london/the-clam-chair-moonlight-0.jpg",
+    "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/designers/arnold-madsen/advert-1946.jpg",
 };
+
 
 function mobileHeroBackgroundSrc(d: Pick<FeaturedDesigner, "slug" | "first_pick_image_url" | "hero_image_url" | "image_url">) {
   return MOBILE_BG_OVERRIDES[d.slug] || d.first_pick_image_url || d.hero_image_url || d.image_url;
