@@ -1163,7 +1163,7 @@ const PublicDesignerProfile = () => {
           </h1>
 
           {heroParagraphs.length > 0 && (
-            <div className="font-body text-[14px] leading-[1.6] text-foreground/85 text-left">
+            <div className="portrait-link-container font-body text-[14px] leading-[1.6] text-foreground/85 text-left">
               <div className="md:hidden relative">
                 <div
                   className="line-clamp-2"
