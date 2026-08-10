@@ -621,6 +621,9 @@ const PublicDesignerProfile = () => {
     return interleaveBySubcategory(sortCuratorPicks(filtered));
   }, [rawPicks, displayBiographyImages, displayBiography, isGrouped]);
 
+  const designerOrigin = computeDesignerOrigin(picks);
+  const originSubtitle = formatOriginSubtitle(designerOrigin);
+
   const { data: publicRrpMap = {} } = usePublicRrpMap(picks.map((p: any) => p.id));
 
   useEffect(() => {
