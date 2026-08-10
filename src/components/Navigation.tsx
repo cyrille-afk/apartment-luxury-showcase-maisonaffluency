@@ -843,9 +843,9 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 to { opacity: 1; filter: blur(0); transform: translateY(0); }
               }
             `}</style>
-            <div className="flex justify-center gap-16 lg:gap-24 xl:gap-32 relative px-8">
+            <div className="flex justify-center gap-10 lg:gap-14 xl:gap-20 relative px-6 lg:px-10">
               {CATEGORY_ORDER.map(cat => (
-                <div key={cat} className="flex flex-col min-w-[150px]">
+                <div key={cat} className="flex flex-col min-w-[128px] lg:min-w-[135px] xl:min-w-[145px]">
                   <button
                     onClick={() => {
                       setActiveMegaCat(cat);
