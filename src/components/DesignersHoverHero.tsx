@@ -1663,50 +1663,51 @@ const DesignersHoverHero = () => {
         )}
       >
 
-        {items.map((d, i) => {
-          const src = isMobileOrPwa
-            ? mobileHeroBackgroundSrc(d)
-            : DESKTOP_HERO_BG_OVERRIDES[d.slug] || d.hero_image_url || d.image_url;
-          if (!src) return null;
-          const isActive = d.slug === activeSlug;
-          const isFirst = i === 0;
-          const heroImgProps = cldResponsiveImg(src, {
-            widths: isMobileOrPwa ? [480, 720, 960, 1280] : [960, 1280, 1600, 1920],
-            sizes: "100vw",
-          });
-          return (
-            <img
-              key={`${d.slug}-${isMobileOrPwa ? "cur" : "hero"}`}
-              {...heroImgProps}
-              alt=""
-              aria-hidden="true"
-              loading={isFirst ? "eager" : "lazy"}
-              decoding={isFirst ? "sync" : "async"}
-              {...(isFirst ? { fetchPriority: "high" as const } : {})}
-              className={cn(
-                "absolute left-0 w-full object-cover transition-[opacity,transform] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform]",
-                // Mobile/PWA sources are typically square. With `h-full` and a
-                // portrait container, object-cover produces horizontal overflow
-                // only, so `object-position` cannot lift the subject vertically.
-                // Give the image ~18% extra height (top-anchored) so cover-fit
-                // creates real vertical overflow at the bottom and the subject
-                // is lifted up into the visible frame without heavy zoom.
-                isMobileOrPwa
-                  ? isStandalone
-                    ? "top-[-7rem] left-0 h-[calc(118%+7rem)] object-top md:top-0 md:h-full md:object-center"
-                    : "top-[-7rem] left-0 h-[calc(118%+7rem)] object-top md:top-0 md:h-full md:object-center"
-                  : "inset-0 h-full",
-                isActive ? "opacity-100" : "opacity-0",
-                // Desktop hover swap: a whisper of scale so the new image
-                // settles in rather than hard-cutting.
-                !isMobileOrPwa && (isActive ? "scale-100" : "scale-[1.035]")
-              )}
+        {isMobileOrPwa ? (
+          <ParallaxImageLayer
+            items={items}
+            activeSlug={activeSlug}
+            isStandalone={isStandalone}
+            mode="mobile"
+            className="inset-0 h-full w-full"
+          />
+        ) : (
+          <>
+            {/* Background plane — the full scene, moves slower on scroll */}
+            <div
+              ref={parallaxBgRef}
+              className="absolute inset-0 z-0 pointer-events-none"
+            >
+              <ParallaxImageLayer
+                items={items}
+                activeSlug={activeSlug}
+                isStandalone={isStandalone}
+                mode="desktop"
+                suffix="bg"
+              />
+            </div>
+            {/* Foreground plane — masked to the lower third so the console
+                and objects feel closer; moves faster on scroll */}
+            <div
+              ref={parallaxFgRef}
+              className="absolute inset-0 z-10 pointer-events-none"
               style={{
-                transitionDuration: `${isMobileOrPwa ? IMAGE_TRANSITION_MS : DESKTOP_IMAGE_TRANSITION_MS}ms`,
+                WebkitMaskImage:
+                  "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 28%, rgba(0,0,0,0) 62%)",
+                maskImage:
+                  "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 28%, rgba(0,0,0,0) 62%)",
               }}
-            />
-          );
-        })}
+            >
+              <ParallaxImageLayer
+                items={items}
+                activeSlug={activeSlug}
+                isStandalone={isStandalone}
+                mode="desktop"
+                suffix="fg"
+              />
+            </div>
+          </>
+        )}
         {/* Readability overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/30 md:from-black/60 md:via-black/30 md:to-black/5" />
         {/* Vignette overlay — deepens edges behind text so headings and
