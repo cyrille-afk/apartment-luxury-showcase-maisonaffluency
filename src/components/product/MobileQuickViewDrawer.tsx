@@ -16,7 +16,7 @@ interface Props {
   onShare?: () => void;
 }
 
-export default function MobileQuickViewDrawer({ pick, onClose, onViewFull, onShare }: Props) {
+export default function MobileQuickViewDrawer({ pick, price, onClose, onViewFull, onShare }: Props) {
   const { user } = useAuth();
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
