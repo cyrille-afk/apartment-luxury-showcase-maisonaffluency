@@ -346,6 +346,84 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
     scrollToSection(id);
   };
 
+  const renderCategoryBlock = (cat: string) => (
+    <div key={cat} className="flex flex-col">
+      <button
+        onClick={() => {
+          setActiveMegaCat(cat);
+          setActiveMegaSub(null);
+          setMegaMenuOpen(false);
+          const target = categoryUrl(cat, null);
+          if (window.location.pathname === target) {
+            window.dispatchEvent(new CustomEvent("syncCategoryFilter", {
+              detail: { category: cat, subcategory: null, source: "designers" },
+            }));
+            const el = document.getElementById("designers") || document.getElementById("featured-designers");
+            if (el instanceof HTMLElement) el.scrollIntoView({ behavior: "smooth", block: "start" });
+          } else {
+            navigate(target);
+          }
+        }}
+        className={cn(
+          "font-display text-[13px] uppercase tracking-[0.22em] font-light transition-all duration-300 text-left w-full pb-5 border-b border-border/20 mb-6",
+          activeMegaCat === cat && !activeMegaSub ? "text-[hsl(var(--accent))]" : "text-foreground hover:text-primary"
+        )}
+      >
+        {cat}
+      </button>
+      {SUBCATEGORY_MAP[cat] && (
+        <div className="flex flex-col gap-3.5">
+          <button
+            onClick={() => {
+              setActiveMegaCat(cat);
+              setActiveMegaSub(null);
+              setMegaMenuOpen(false);
+              const target = categoryUrl(cat, null);
+              if (window.location.pathname === target) {
+                window.dispatchEvent(new CustomEvent("syncCategoryFilter", {
+                  detail: { category: cat, subcategory: null, source: "designers" },
+                }));
+                const el = document.getElementById("product-grid") || document.getElementById("designers");
+                if (el instanceof HTMLElement) el.scrollIntoView({ behavior: "smooth", block: "start" });
+              } else {
+                navigate(target);
+              }
+            }}
+            className="text-left text-[11px] tracking-[0.15em] font-body italic transition-colors py-1 text-[hsl(var(--gold))] hover:text-primary"
+          >
+            View all {cat}
+          </button>
+          {SUBCATEGORY_MAP[cat].map(sub => (
+            <button
+              key={sub}
+              onClick={() => {
+                setActiveMegaCat(cat);
+                setActiveMegaSub(sub);
+                setMegaMenuOpen(false);
+                const target = categoryUrl(cat, sub);
+                if (window.location.pathname === target) {
+                  window.dispatchEvent(new CustomEvent("syncCategoryFilter", {
+                    detail: { category: cat, subcategory: sub, source: "designers" },
+                  }));
+                  const el = document.getElementById("product-grid") || document.getElementById("designers") || document.getElementById("featured-designers");
+                  if (el instanceof HTMLElement) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                } else {
+                  navigate(target);
+                }
+              }}
+              className={cn(
+                "text-left text-[11px] tracking-[0.12em] font-body font-light transition-colors py-1.5",
+                activeMegaSub === sub && activeMegaCat === cat ? "text-[hsl(var(--accent))] font-normal" : "text-foreground/80 hover:text-foreground"
+              )}
+            >
+              {sub}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   return <><nav className={cn(
       "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
       navHidden ? "-translate-y-full" : "translate-y-0",
@@ -843,87 +921,42 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 to { opacity: 1; filter: blur(0); transform: translateY(0); }
               }
             `}</style>
-            <div className="w-full max-w-[1400px] mx-auto flex justify-between relative px-6 lg:px-10">
-              {CATEGORY_ORDER.map(cat => (
-                <div key={cat} className="flex flex-col flex-1 min-w-[110px] lg:min-w-[125px] xl:min-w-[135px] max-w-[190px] px-2">
-                  <button
-                    onClick={() => {
-                      setActiveMegaCat(cat);
-                      setActiveMegaSub(null);
-                      setMegaMenuOpen(false);
-                      const target = categoryUrl(cat, null);
-                      // Always re-broadcast — handles the case where user clicks
-                      // the same category again (navigate is a no-op so the
-                      // CategoryRoute effect doesn't re-fire).
-                      if (window.location.pathname === target) {
-                        window.dispatchEvent(new CustomEvent("syncCategoryFilter", {
-                          detail: { category: cat, subcategory: null, source: "designers" },
-                        }));
-                        const el = document.getElementById("designers") || document.getElementById("featured-designers");
-                        if (el instanceof HTMLElement) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                      } else {
-                        navigate(target);
-                      }
-                    }}
-                    className={cn(
-                      "font-display text-[13px] uppercase tracking-[0.22em] font-light transition-all duration-300 text-left w-full pb-5 border-b border-border/20 mb-6",
-                      activeMegaCat === cat && !activeMegaSub ? "text-[hsl(var(--accent))]" : "text-foreground hover:text-primary"
-                    )}
-                  >
-                    {cat}
-                  </button>
-                  {SUBCATEGORY_MAP[cat] && (
-                    <div className="flex flex-col gap-3.5">
-                      <button
-                        onClick={() => {
-                          setActiveMegaCat(cat);
-                          setActiveMegaSub(null);
-                          setMegaMenuOpen(false);
-                          const target = categoryUrl(cat, null);
-                          if (window.location.pathname === target) {
-                            window.dispatchEvent(new CustomEvent("syncCategoryFilter", {
-                              detail: { category: cat, subcategory: null, source: "designers" },
-                            }));
-                            const el = document.getElementById("product-grid") || document.getElementById("designers");
-                            if (el instanceof HTMLElement) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                          } else {
-                            navigate(target);
-                          }
-                        }}
-                        className="text-left text-[11px] tracking-[0.15em] font-body italic transition-colors py-1 text-[hsl(var(--gold))] hover:text-primary"
-                      >
-                        View all {cat}
-                      </button>
-                      {SUBCATEGORY_MAP[cat].map(sub => (
-                        <button
-                          key={sub}
-                          onClick={() => {
-                            setActiveMegaCat(cat);
-                            setActiveMegaSub(sub);
-                            setMegaMenuOpen(false);
-                            const target = categoryUrl(cat, sub);
-                            if (window.location.pathname === target) {
-                              window.dispatchEvent(new CustomEvent("syncCategoryFilter", {
-                                detail: { category: cat, subcategory: sub, source: "designers" },
-                              }));
-                              const el = document.getElementById("product-grid") || document.getElementById("designers") || document.getElementById("featured-designers");
-                              if (el instanceof HTMLElement) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                            } else {
-                              navigate(target);
-                            }
-                          }}
-                          className={cn(
-                            "text-left text-[11px] tracking-[0.12em] font-body font-light transition-colors py-1.5",
-                            activeMegaSub === sub && activeMegaCat === cat ? "text-[hsl(var(--accent))] font-normal" : "text-foreground/80 hover:text-foreground"
-                          )}
-                        >
-                          {sub}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+            <div className="w-full max-w-[1400px] mx-auto grid grid-cols-4 gap-x-10 lg:gap-x-14 xl:gap-x-16 relative px-6 lg:px-10">
+              {/* Editorial category columns */}
+              <div className="flex flex-col gap-12 lg:gap-16">
+                {renderCategoryBlock("Seating")}
+                {renderCategoryBlock("Tables")}
+                {renderCategoryBlock("Lighting")}
+              </div>
+              <div className="flex flex-col gap-12 lg:gap-16">
+                {renderCategoryBlock("Storage")}
+                {renderCategoryBlock("Bedroom Furniture")}
+              </div>
+              <div className="flex flex-col gap-12 lg:gap-16">
+                {renderCategoryBlock("Rugs")}
+                {renderCategoryBlock("Décor")}
+              </div>
+
+              {/* Featured Showcase */}
+              <button
+                onClick={() => { setMegaMenuOpen(false); navigate("/designers/felix-agostini"); }}
+                className="group relative h-full min-h-[420px] flex flex-col overflow-hidden bg-muted/20 border border-border/20 text-left transition-colors hover:border-border/40 focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <div className="relative flex-1 min-h-0 overflow-hidden">
+                  <img
+                    src="https://res.cloudinary.com/dif1oamtj/image/upload/w_600,q_auto:good,c_fill,f_auto/v1780758735/A-033-02-cover_ovz8na.jpg"
+                    alt="Felix Agostini bronze floor lamp vignette"
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-foreground/0 transition-colors duration-500 group-hover:bg-foreground/10" />
                 </div>
-              ))}
+                <div className="p-5 lg:p-6 border-t border-border/20">
+                  <span className="font-body text-[12px] lg:text-[13px] italic tracking-[0.06em] lowercase text-foreground/80 group-hover:text-foreground transition-colors">
+                    explore the agostini collection →
+                  </span>
+                </div>
+              </button>
             </div>
           </div>
         )}
