@@ -1001,6 +1001,7 @@ const PublicDesignerProfile = () => {
   /* Inline "full portrait" expansion — mounts the staggered magazine rows only.
      No parent re-render, no second hero, no route change. */
   const openPortrait = () => {
+    prePortraitScrollY.current = window.scrollY;
     setPortraitOpen(true);
     // The landing blocks above unmount when the portrait opens, so the portrait
     // becomes the top of the page. Anchoring to its bounding box overshoots and
@@ -1014,11 +1015,10 @@ const PublicDesignerProfile = () => {
 
   const closePortrait = () => {
     setPortraitOpen(false);
-    const el = portraitRef.current;
-    if (el) {
-      const top = el.getBoundingClientRect().top + window.scrollY - 200;
-      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-    }
+    const saved = prePortraitScrollY.current;
+    const restore = (behavior: ScrollBehavior) => window.scrollTo({ top: saved, behavior });
+    window.requestAnimationFrame(() => window.setTimeout(() => restore("smooth"), 60));
+    window.setTimeout(() => restore("auto"), 520);
   };
 
   const portraitLink = (
