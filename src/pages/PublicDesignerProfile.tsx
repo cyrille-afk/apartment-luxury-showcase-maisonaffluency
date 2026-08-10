@@ -580,6 +580,15 @@ const PublicDesignerProfile = () => {
     }
     return m;
   }, [allDesignersForLookup]);
+  // designer id -> slug, so grouped parent-brand picks route to the child
+  // designer that actually owns the product (e.g. Ozone → Michel Boyer).
+  const designerSlugById = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const d of allDesignersForLookup as any[]) {
+      if (d?.id && d?.slug) m.set(d.id, d.slug);
+    }
+    return m;
+  }, [allDesignersForLookup]);
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
   const isGrouped = isParentBrand && groupedPicks.length > 0;
