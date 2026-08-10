@@ -1937,7 +1937,7 @@ const PublicDesignerProfile = () => {
                           aria-label={`View ${displayTitle}`}
                           className="md:hidden absolute bottom-2 right-2 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-background/95 shadow-md text-foreground active:scale-95 transition-transform"
                         >
-                          <ShoppingBag className="h-3.5 w-3.5" strokeWidth={1.5} />
+                          <SquareArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.5} />
                         </button>
                       </div>
 
