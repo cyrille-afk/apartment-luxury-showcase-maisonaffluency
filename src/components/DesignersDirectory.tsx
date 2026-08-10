@@ -1593,6 +1593,9 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     }
   }, [location.search, broadcastFilter]);
 
+  // Publicly visible RRPs for the current product grid.
+  const { data: publicRrpMap } = usePublicRrpMap(filteredPicks?.map((p) => p.id) ?? []);
+
   // Listen for external filter sync
   useEffect(() => {
     // Hydrate on mount from URL/global pending filter.
