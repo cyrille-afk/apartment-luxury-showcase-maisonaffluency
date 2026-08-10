@@ -921,7 +921,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 to { opacity: 1; filter: blur(0); transform: translateY(0); }
               }
             `}</style>
-            <div className="w-full max-w-[1400px] mx-auto grid grid-cols-4 gap-x-10 lg:gap-x-14 xl:gap-x-16 relative px-6 lg:px-10 items-start">
+            <div className="w-full max-w-[1400px] mx-auto grid grid-cols-4 gap-x-10 lg:gap-x-14 xl:gap-x-16 relative px-6 lg:px-10">
               {/* Editorial category columns */}
               <div className="flex flex-col gap-12 lg:gap-16">
                 {renderCategoryBlock("Seating")}
@@ -940,11 +940,11 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               {/* Featured Showcase */}
               <button
                 onClick={() => { setMegaMenuOpen(false); navigate("/designers/felix-agostini"); }}
-                className="group relative flex flex-col overflow-hidden bg-muted/20 border border-border/20 text-left transition-colors hover:border-border/40 focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="group relative h-full min-h-[420px] flex flex-col overflow-hidden bg-muted/20 border border-border/20 text-left transition-colors hover:border-border/40 focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
-                <div className="relative aspect-[4/5] overflow-hidden">
+                <div className="relative flex-1 min-h-0 overflow-hidden">
                   <img
-                    src="https://res.cloudinary.com/dif1oamtj/image/upload/w_600,q_auto:good,c_fill,f_auto/felix-agostini_oe5jxg"
+                    src="https://res.cloudinary.com/dif1oamtj/image/upload/w_600,q_auto:good,c_fill,f_auto/v1781586995/image-047_x662rl.jpg"
                     alt="Felix Agostini bronze sculpture vignette"
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     loading="lazy"
