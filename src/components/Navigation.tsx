@@ -921,42 +921,50 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 to { opacity: 1; filter: blur(0); transform: translateY(0); }
               }
             `}</style>
-            <div className="w-full max-w-[1400px] mx-auto grid grid-cols-4 gap-x-10 lg:gap-x-14 xl:gap-x-16 relative px-6 lg:px-10">
-              {/* Editorial category columns */}
-              <div className="flex flex-col gap-12 lg:gap-16">
+            <div className="w-full max-w-[1400px] mx-auto grid grid-cols-4 gap-x-12 lg:gap-x-16 xl:gap-x-20 relative px-6 lg:px-10">
+              {/* Column 1 — SEATING */}
+              <div className="flex flex-col">
                 {renderCategoryBlock("Seating")}
+              </div>
+
+              {/* Column 2 — TABLES & LIGHTING */}
+              <div className="flex flex-col gap-12 lg:gap-16">
                 {renderCategoryBlock("Tables")}
                 {renderCategoryBlock("Lighting")}
               </div>
+
+              {/* Column 3 — STORAGE & BEDROOM FURNITURE */}
               <div className="flex flex-col gap-12 lg:gap-16">
                 {renderCategoryBlock("Storage")}
                 {renderCategoryBlock("Bedroom Furniture")}
               </div>
-              <div className="flex flex-col gap-12 lg:gap-16">
+
+              {/* Column 4 — Featured Showcase, RUGS & DÉCOR */}
+              <div className="flex flex-col gap-10 lg:gap-12">
+                {/* Featured Showcase — scaled down with breathing room */}
+                <button
+                  onClick={() => { setMegaMenuOpen(false); navigate("/designers/felix-agostini"); }}
+                  className="group relative w-full max-w-[240px] aspect-[4/5] overflow-hidden bg-muted/20 border border-border/20 text-left transition-colors hover:border-border/40 focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <div className="relative w-full h-full overflow-hidden">
+                    <img
+                      src="https://res.cloudinary.com/dif1oamtj/image/upload/w_500,h_625,q_auto:good,c_fill,f_auto/v1780758735/A-033-02-cover_ovz8na.jpg"
+                      alt="Felix Agostini bronze floor lamp vignette"
+                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-foreground/0 transition-colors duration-500 group-hover:bg-foreground/10" />
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background/90 to-transparent">
+                    <span className="font-body text-[11px] lg:text-[12px] italic tracking-[0.06em] lowercase text-foreground/90 group-hover:text-foreground transition-colors">
+                      explore the agostini collection →
+                    </span>
+                  </div>
+                </button>
+
                 {renderCategoryBlock("Rugs")}
                 {renderCategoryBlock("Décor")}
               </div>
-
-              {/* Featured Showcase */}
-              <button
-                onClick={() => { setMegaMenuOpen(false); navigate("/designers/felix-agostini"); }}
-                className="group relative h-full min-h-[420px] flex flex-col overflow-hidden bg-muted/20 border border-border/20 text-left transition-colors hover:border-border/40 focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
-                <div className="relative flex-1 min-h-0 overflow-hidden">
-                  <img
-                    src="https://res.cloudinary.com/dif1oamtj/image/upload/w_600,q_auto:good,c_fill,f_auto/v1780758735/A-033-02-cover_ovz8na.jpg"
-                    alt="Felix Agostini bronze floor lamp vignette"
-                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-foreground/0 transition-colors duration-500 group-hover:bg-foreground/10" />
-                </div>
-                <div className="p-5 lg:p-6 border-t border-border/20">
-                  <span className="font-body text-[12px] lg:text-[13px] italic tracking-[0.06em] lowercase text-foreground/80 group-hover:text-foreground transition-colors">
-                    explore the agostini collection →
-                  </span>
-                </div>
-              </button>
             </div>
           </div>
         )}
