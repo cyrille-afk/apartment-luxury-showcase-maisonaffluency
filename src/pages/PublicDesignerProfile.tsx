@@ -1041,10 +1041,6 @@ const PublicDesignerProfile = () => {
 
   const closePortrait = () => {
     setPortraitOpen(false);
-    const saved = prePortraitScrollY.current;
-    const restore = (behavior: ScrollBehavior) => window.scrollTo({ top: saved, behavior });
-    window.requestAnimationFrame(() => window.setTimeout(() => restore("smooth"), 60));
-    window.setTimeout(() => restore("auto"), 520);
   };
 
   const portraitLink = (
