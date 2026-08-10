@@ -1819,7 +1819,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   return (
     <FirstPickImageContext.Provider value={firstPickImageByDesigner}>
     <>
-    <div ref={sectionRef} data-testid="designers-directory" className={`relative px-4 md:px-8 lg:px-12 xl:px-20 bg-background scroll-header-offset ${showHeader ? 'py-12 md:py-20 lg:py-24' : 'pt-2 pb-12 md:pt-4 md:pb-20 lg:pb-24'}`}>
+    <div ref={sectionRef} data-testid="designers-directory" className={`relative px-4 md:px-8 lg:px-12 xl:px-20 bg-background scroll-header-offset ${showHeader ? 'py-12 md:py-20 lg:py-24' : showRunway ? 'pt-0 pb-12 md:pt-0 md:pb-16 lg:pb-20' : 'pt-2 pb-12 md:pt-4 md:pb-20 lg:pb-24'}`}>
 
 
 
@@ -2002,7 +2002,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               Left track carries the section identity, right track carries the
               A–Z index inline so no floating letter bar is needed. */}
           {showRunway && !(selectedCategory || selectedSubcategory) && (
-            <div className="hidden md:block bg-background pt-10 lg:pt-14 pb-6 lg:pb-8">
+            <div className="hidden md:block bg-background pt-3 lg:pt-4 pb-4 lg:pb-5">
               <div className="grid grid-cols-12 gap-8 items-end">
                 <div className="col-span-4">
                   <h2 className="font-serif text-3xl lg:text-[2.6rem] leading-[1.05] text-foreground">

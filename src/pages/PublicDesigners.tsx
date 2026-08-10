@@ -108,7 +108,12 @@ function ScrollLockedDesigners({
   // Directory only mounts after the landing handoff completes — a deep-link,
   // an explicit unlock event, or the user scrolling past the hero. This
   // eliminates the spinner/cards flash under the hero on first paint.
-  const [directoryReady, setDirectoryReady] = useState(hasDeepLink);
+  const [directoryReady, setDirectoryReady] = useState(() => {
+    if (typeof window === "undefined") return false;
+    // Desktop: mount the directory immediately so the white runway section
+    // peeks below the 85vh hero on first paint.
+    return hasDeepLink || !(window.matchMedia("(max-width: 767px)").matches || isPwaStandaloneDisplay());
+  });
 
   useEffect(() => {
     const mql = window.matchMedia("(max-width: 767px)");
@@ -249,11 +254,13 @@ function ScrollLockedDesigners({
 
         <div className={locked ? "h-[calc(var(--designers-landing-vh,100lvh)-var(--header-h))] overflow-hidden" : "pb-20"}>
           <div
-            className={locked ? "relative md:h-full" : "relative min-h-[calc(100lvh-var(--header-h))] bg-[#0a0a0a]"}
+            className={
+              locked
+                ? "relative md:h-full"
+                : "relative min-h-[calc(100lvh-var(--header-h))] md:min-h-0 md:h-auto bg-[#0a0a0a]"
+            }
           >
-
             <DesignersHoverHero />
-            
           </div>
           {!isMobileOrPwa && !locked && directoryReady && (
             <div className="bg-background">
