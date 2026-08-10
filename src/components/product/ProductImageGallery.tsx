@@ -405,9 +405,9 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
           {/* Hover-to-navigate now lives on the vertical thumbnail strip (see above). */}
 
-          {/* Fractional gallery counter — clean numerals in the lower-right corner. */}
+          {/* Fractional gallery counter — clean numerals in the lower-left corner. */}
           {images.length > 1 && (
-            <div className="absolute bottom-4 right-4 z-20 pointer-events-none">
+            <div className="absolute bottom-4 left-4 z-20 pointer-events-none">
               <span className="inline-block px-2 py-1 rounded-luxury-micro bg-background/45 backdrop-blur-md font-body text-[11px] font-light tracking-[0.14em] text-foreground/80 tabular-nums">
                 {activeIndex + 1} / {images.length}
               </span>

@@ -30,7 +30,6 @@ import EditorialBiographyColumns from "@/components/EditorialBiographyColumns";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
-import MobileQuickViewDrawer from "@/components/product/MobileQuickViewDrawer";
 import HeritageSlider from "@/components/HeritageSlider";
 import { useHeritageSlides } from "@/hooks/useHeritageSlides";
 import DesignerInstagramSection from "@/components/DesignerInstagramSection";
@@ -44,32 +43,10 @@ import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { useAuth } from "@/hooks/useAuth";
 import { lastNameInitial } from "@/lib/nameFormat";
 import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
-import {
-  computeDesignerOrigin,
-  formatOriginSubtitle,
-} from "@/lib/designerOrigin";
 // Collectible profiles are public; product-page gating lives in PublicProductPage.
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
-
-// Mobile product grid stagger animation
-const gridVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08 },
-  },
-  exit: { opacity: 0, transition: { duration: 0.15 } },
-};
-const cardVariants = {
-  hidden: { opacity: 0, y: 15 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { type: "spring" as const, stiffness: 300, damping: 24 },
-  },
-};
 
 /* Designers rendered with the "New In" editorial format (portrait left, bio right) */
 const NEW_IN_FORMAT_SLUGS = new Set<string>(["dagmar", "dagmar-london"]);
@@ -468,7 +445,6 @@ const PublicDesignerProfile = () => {
   const isChildDesigner = isChildBrandDesigner(designer);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
-  const [quickViewItem, setQuickViewItem] = useState<PublicLightboxItem | null>(null);
   const [mobileRevealedPickId, setMobileRevealedPickId] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const newInBioRef = useRef<HTMLDivElement>(null);
@@ -620,9 +596,6 @@ const PublicDesignerProfile = () => {
 
     return interleaveBySubcategory(sortCuratorPicks(filtered));
   }, [rawPicks, displayBiographyImages, displayBiography, isGrouped]);
-
-  const designerOrigin = computeDesignerOrigin(picks);
-  const originSubtitle = formatOriginSubtitle(designerOrigin);
 
   const { data: publicRrpMap = {} } = usePublicRrpMap(picks.map((p: any) => p.id));
 
@@ -1102,20 +1075,15 @@ const PublicDesignerProfile = () => {
         )}
 
         <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted/50">
-          <div className="mx-auto max-w-[1400px] px-[6vw] pt-10 lg:pt-14 pb-14 lg:pb-20">
+          <div className="mx-auto max-w-[1400px] px-[6vw] pt-4 lg:pt-6 pb-12 lg:pb-16">
             {/* Asymmetrical introductory row */}
             <div className="grid grid-cols-12 gap-x-10 lg:gap-x-16 gap-y-6 items-start">
               {/* Left — identity */}
-              <div className="col-span-12 lg:col-span-4 lg:pr-6">
+              <div className="col-span-12 lg:col-span-4">
                 <h1 className="font-display text-4xl lg:text-[3rem] leading-[1.05] tracking-[-0.01em] text-foreground">
                   {name}
                 </h1>
-                {originSubtitle && (
-                  <p className="mt-2.5 font-body text-[9px] lg:text-[10px] uppercase tracking-[0.34em] text-foreground/60">
-                    {originSubtitle}
-                  </p>
-                )}
-                <p className="mt-4 font-body text-[10px] lg:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
+                <p className="mt-3 font-body text-[10px] lg:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
                   {designer.specialty || "Timeless Scandinavian Design"}
                 </p>
               </div>
@@ -1162,7 +1130,7 @@ const PublicDesignerProfile = () => {
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
           {/* Compact mobile hero — keeps product grid above the fold */}
-          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted h-44 overflow-hidden">
+          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted h-48 overflow-hidden">
             {(wideHeroImage || heroImage) && (
               <>
                 <img
@@ -1190,16 +1158,11 @@ const PublicDesignerProfile = () => {
           transition={{ ...transition, delay: 0.2 }}
           className="flex flex-col justify-start w-full"
         >
-          <div className="mb-5">
+          <div className="mb-2">
             <h1 className="font-display text-3xl leading-[1.1] tracking-[-0.01em] text-foreground">
               {name}
             </h1>
-            {originSubtitle && (
-              <p className="mt-1.5 font-body text-[9px] uppercase tracking-[0.34em] text-foreground/60">
-                {originSubtitle}
-              </p>
-            )}
-            <p className="mt-3 font-body text-[10px] uppercase tracking-[0.32em] text-foreground/60">
+            <p className="mt-1 font-body text-[10px] uppercase tracking-[0.32em] text-foreground/60">
               {designer.specialty || "Timeless Scandinavian Design"}
             </p>
           </div>
@@ -1601,56 +1564,50 @@ const PublicDesignerProfile = () => {
 
                 return (
                   <>
-                    {/* ── STICKY MOBILE / PWA HORIZONTAL FILTER BAR ── */}
-                    <div className="md:hidden sticky top-[var(--header-h)] z-40 flex items-center border-y border-border/40 bg-background/95 backdrop-blur-md py-2.5 -mx-4 mb-3">
-                      {/* Fixed master filter trigger */}
-                      <div className="pl-4 pr-3 border-r border-border/40 flex items-center bg-background/95 z-10 shrink-0">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger
-                            disabled={categories.length === 0}
-                            className="p-1 text-foreground/70 hover:text-foreground focus:outline-none disabled:opacity-40"
-                            aria-label="Filter"
-                          >
-                            <SlidersHorizontal className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="start" className="rounded-none">
-                            {filterItems}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                    {/* ── STICKY MOBILE / PWA UTILITY BAR ── */}
+                    <div className="md:hidden sticky top-[var(--header-h)] z-40 flex items-center justify-between border-y border-border/40 bg-background/95 backdrop-blur-md py-2.5 px-4 -mx-4 mb-3">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          disabled={categories.length === 0}
+                          className="inline-flex items-center gap-2 font-body text-[11px] uppercase tracking-[0.14em] text-foreground focus:outline-none disabled:opacity-40"
+                        >
+                          <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
+                          Filter
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="rounded-none">
+                          {filterItems}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
 
-                      {/* Scrollable horizontal pill track with fluid active indicator */}
-                      <div className="flex gap-2 overflow-x-auto no-scrollbar px-3 scroll-smooth w-full">
-                        {["All", ...categories].map((c) => {
-                          const isActive = c === "All" ? activeCategories.length === 0 : activeCategories.includes(c);
-                          return (
-                            <button
-                              key={c}
-                              type="button"
-                              onClick={() =>
-                                setActiveCategories((prev) =>
-                                  c === "All" ? [] : isActive ? prev.filter((x) => x !== c) : [...prev, c]
-                                )
-                              }
-                              className={cn(
-                                "relative shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] uppercase tracking-[0.12em] font-medium transition-colors duration-200 border",
-                                isActive
-                                  ? "border-foreground text-background"
-                                  : "border-border bg-muted/30 text-foreground/80 hover:bg-muted/50"
-                              )}
-                            >
-                              <span className="relative z-10">{c}</span>
-                              {isActive && (
-                                <motion.div
-                                  layoutId="activeFilterPill"
-                                  className="absolute inset-0 rounded-full bg-foreground z-0"
-                                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                                />
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          aria-label="Sort products"
+                          className="inline-flex items-center gap-1 font-body uppercase tracking-[0.14em] text-foreground focus:outline-none"
+                          style={{ fontSize: "11px", lineHeight: "1.2" }}
+                        >
+                          <span className="max-w-[38vw] truncate">
+                            {sortMode === "price-asc"
+                              ? "Price: Low to High"
+                              : sortMode === "price-desc"
+                                ? "Price: High to Low"
+                                : sortMode === "new"
+                                  ? "New Launch"
+                                  : "Default Sorting"}
+                          </span>
+                          <ChevronDown className="h-3 w-3 text-muted-foreground" strokeWidth={1} aria-hidden="true" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="rounded-none">
+                          <DropdownMenuRadioGroup
+                            value={sortMode}
+                            onValueChange={(v) => setSortMode(v as typeof sortMode)}
+                          >
+                            <DropdownMenuRadioItem value="default" className="font-body text-[11px] uppercase tracking-[0.14em]">Default Sorting</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="price-asc" className="font-body text-[11px] uppercase tracking-[0.14em]">Price: Low to High</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="price-desc" className="font-body text-[11px] uppercase tracking-[0.14em]">Price: High to Low</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="new" className="font-body text-[11px] uppercase tracking-[0.14em]">New Launch</DropdownMenuRadioItem>
+                          </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
 
 
@@ -1715,15 +1672,7 @@ const PublicDesignerProfile = () => {
                     </div>
 
 
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={activeCategories.sort().join(",") + sortMode}
-                        variants={gridVariants}
-                        initial="hidden"
-                        animate="show"
-                        exit="exit"
-                        className={cn("grid gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10", gridClass)}
-                      >
+                    <div className={cn("grid gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10", gridClass)}>
                 {visiblePicks.map((pick) => {
 
                   const ap = pick as AttributedCuratorPick;
@@ -1829,60 +1778,56 @@ const PublicDesignerProfile = () => {
                   // We're already on Madsen's own portrait — no "by Arnold Madsen" needed.
                   const cardSubtitle = isArnoldClamChair ? undefined : pick.subtitle;
                   const isMobilePickRevealed = mobileRevealedPickId === pick.id;
-                  const quickViewProduct: PublicLightboxItem = {
-                    id: pick.id,
-                    title: displayTitle,
-                    subtitle: isArnoldClamChair ? undefined : pick.subtitle,
-                    image_url: pick.image_url,
-                    hover_image_url: pick.hover_image_url,
-                    brand_name: isArnoldClamChair ? "Dagmar" : designerLabel || designer.name,
-                    materials: pick.materials,
-                    materials_description: (pick as any).materials_description ?? null,
-                    dimensions: pick.dimensions,
-                    lead_time: (pick as any).lead_time ?? null,
-                    origin: (pick as any).origin ?? null,
-                    description: pick.description,
-                    category: pick.category,
-                    subcategory: pick.subcategory,
-                    pdf_url: pick.pdf_url || ((pick.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
-                    pdf_urls: pick.pdf_urls as PdfEntry[] | undefined,
-                    designer_slug: targetDesignerSlug,
-                    size_variants: (pick as any).size_variants ?? null,
-                    variant_placeholder: (pick as any).variant_placeholder ?? null,
-                    base_axis_label: (pick as any).base_axis_label ?? null,
-                    top_axis_label: (pick as any).top_axis_label ?? null,
-                    gallery_images: (pick as any).gallery_images ?? null,
-                    variant_image_map: (pick as any).variant_image_map ?? null,
-                    gallery_captions: (pick as any).gallery_captions ?? null,
-                  };
-
                   const handleCardClick = (e: React.MouseEvent) => {
                     if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || (e as any).button === 1) {
                       return;
                     }
                     if (isMobileProductPickMode) {
-                      // Mobile + PWA: open the quick-view drawer on first tap.
+                      // Mobile + PWA: go straight to the product page on first tap.
                       e.preventDefault();
                       e.stopPropagation();
-                      setQuickViewItem(quickViewProduct);
+                      navigate(productHref);
                       return;
                     }
                     // Desktop: intercept the deep link and open the lightbox instead.
                     e.preventDefault();
-                    setLightboxItem(quickViewProduct);
+                    setLightboxItem({
+                      id: pick.id,
+                      title: displayTitle,
+                      subtitle: isArnoldClamChair ? undefined : pick.subtitle,
+                      image_url: pick.image_url,
+                      hover_image_url: pick.hover_image_url,
+                      brand_name: isArnoldClamChair ? "Dagmar" : designerLabel || designer.name,
+                      materials: pick.materials,
+                      materials_description: (pick as any).materials_description ?? null,
+                      dimensions: pick.dimensions,
+                      lead_time: (pick as any).lead_time ?? null,
+                      origin: (pick as any).origin ?? null,
+                      description: pick.description,
+                      category: pick.category,
+                      subcategory: pick.subcategory,
+                      pdf_url: pick.pdf_url || ((pick.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
+                      pdf_urls: pick.pdf_urls as PdfEntry[] | undefined,
+                      designer_slug: targetDesignerSlug,
+                      size_variants: (pick as any).size_variants ?? null,
+                      variant_placeholder: (pick as any).variant_placeholder ?? null,
+                      base_axis_label: (pick as any).base_axis_label ?? null,
+                      top_axis_label: (pick as any).top_axis_label ?? null,
+                      gallery_images: (pick as any).gallery_images ?? null,
+                      variant_image_map: (pick as any).variant_image_map ?? null,
+                      gallery_captions: (pick as any).gallery_captions ?? null,
+                    });
                   };
 
                   return (
-                    <motion.div
+                    <div
                       key={pick.id}
                       id={`pick-${pick.id}`}
                       ref={(el) => {
                         if (el && highlightId === pick.id) {
-                          (el as HTMLDivElement).scrollIntoView({ behavior: "smooth", block: "center" });
+                          el.scrollIntoView({ behavior: "smooth", block: "center" });
                         }
                       }}
-                      variants={cardVariants}
-                      layout
                       className={cn(
                         "group flex flex-col transition-all duration-700",
                         highlightId === pick.id && "ring-2 ring-primary rounded-luxury-sharp ring-offset-2 ring-offset-background animate-pulse"
@@ -2022,20 +1967,11 @@ const PublicDesignerProfile = () => {
                           </span>
                         )}
 
-                        {/* Product name — primary */}
+                        {/* Product name — primary (deep link so the URL is shareable/copyable) */}
                         <h3 className="font-display text-[13px] md:text-[13px] font-light tracking-tight md:tracking-wide leading-snug mt-1 md:mt-2 line-clamp-2">
-                          {isMobileProductPickMode ? (
-                            <span
-                              onClick={handleCardClick}
-                              className="hover:text-foreground/70 transition-colors cursor-pointer"
-                            >
-                              {displayTitle}
-                            </span>
-                          ) : (
-                            <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground/70 transition-colors">
-                              {displayTitle}
-                            </Link>
-                          )}
+                          <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground/70 transition-colors">
+                            {displayTitle}
+                          </Link>
                         </h3>
 
                         {/* Variant/finish subtitle — only when it isn't a designer attribution */}
@@ -2074,11 +2010,10 @@ const PublicDesignerProfile = () => {
                         </div>
 
                       </div>
-                    </motion.div>
+                    </div>
                   );
                 })}
-                      </motion.div>
-                    </AnimatePresence>
+                    </div>
                   </>
                 );
               })()}
@@ -2140,32 +2075,6 @@ const PublicDesignerProfile = () => {
         }))}
         onClose={closeLightbox}
         onSelectRelated={(item) => setLightboxItem(item)}
-      />
-
-      <MobileQuickViewDrawer
-        pick={quickViewItem}
-        price={quickViewItem ? formatPublicRrp(publicRrpMap[quickViewItem.id]) : undefined}
-        onClose={() => setQuickViewItem(null)}
-        onViewFull={() => {
-          if (!quickViewItem) return;
-          navigate(`/designers/${quickViewItem.designer_slug}/${slugifyProduct(quickViewItem.title + (quickViewItem.subtitle ? `-${quickViewItem.subtitle}` : ""))}`);
-          setQuickViewItem(null);
-        }}
-        onShare={async () => {
-          if (!quickViewItem) return;
-          const url = `${window.location.origin}/designers/${quickViewItem.designer_slug}/${slugifyProduct(quickViewItem.title + (quickViewItem.subtitle ? `-${quickViewItem.subtitle}` : ""))}`;
-          if (navigator.share) {
-            try {
-              await navigator.share({ title: quickViewItem.title, url });
-            } catch {}
-          } else {
-            try {
-              await navigator.clipboard.writeText(url);
-              setShareCopied(true);
-              window.setTimeout(() => setShareCopied(false), 2000);
-            } catch {}
-          }
-        }}
       />
     </>
   );
