@@ -63,12 +63,12 @@
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1785829394/Screenshot_2026-08-04_at_3.42.07_PM_idzhya.png"
   },
   {
-    "id": "334658d1-59cb-47e9-ac6c-a5e6dc2bab8d",
-    "slug": "ozone",
-    "name": "Ozone",
+    "id": "d3b4c761-2ee2-4e0d-9fbb-db965ef33a78",
+    "slug": "michel-boyer",
+    "name": "Michel Boyer",
     "founder": "Ozone",
-    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1784046893/Ozone_MonsieurBleu_Galerie_2_T-HERO_qfilj0.webp",
-    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/ozone-light-bg_v2zneb",
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1782584423/Herocover_hukbdj.webp",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1782584423/Herocover_hukbdj.webp",
     "first_pick_image_url": null
   },
   {
