@@ -565,6 +565,17 @@ body {
     font-size: max(16px, 1rem) !important;
   }
 }
+
+/* ─────────────────────────────────────────────
+   Mobile/PWA designer profile: tighten the gap
+   between the truncated bio / "View full portrait"
+   link and the product grid below it.
+   ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .portrait-link-container {
+    margin-bottom: 12px !important;
+  }
+}
 /* Always-on (desktop + mobile) baseline so JS-driven focus calls don't zoom. */
 input, select, textarea {
   font-size: max(16px, 1rem);
