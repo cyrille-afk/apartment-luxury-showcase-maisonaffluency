@@ -1852,14 +1852,16 @@ const PublicDesignerProfile = () => {
                   };
 
                   return (
-                    <div
+                    <motion.div
                       key={pick.id}
                       id={`pick-${pick.id}`}
                       ref={(el) => {
                         if (el && highlightId === pick.id) {
-                          el.scrollIntoView({ behavior: "smooth", block: "center" });
+                          (el as HTMLDivElement).scrollIntoView({ behavior: "smooth", block: "center" });
                         }
                       }}
+                      variants={cardVariants}
+                      layout
                       className={cn(
                         "group flex flex-col transition-all duration-700",
                         highlightId === pick.id && "ring-2 ring-primary rounded-luxury-sharp ring-offset-2 ring-offset-background animate-pulse"
