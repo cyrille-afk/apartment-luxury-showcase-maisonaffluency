@@ -435,6 +435,8 @@ function splitName(name: string): [string, string] {
 
 const SWIPE_THRESHOLD = 50;
 const IMAGE_TRANSITION_MS = 3500;
+// Desktop hover swap needs to feel responsive but still cinematic.
+const DESKTOP_IMAGE_TRANSITION_MS = 900;
 const LOCK_MS = 1200;
 
 const DesignersHoverHero = () => {
@@ -1565,7 +1567,7 @@ const DesignersHoverHero = () => {
               decoding={isFirst ? "sync" : "async"}
               {...(isFirst ? { fetchPriority: "high" as const } : {})}
               className={cn(
-                "absolute left-0 w-full object-cover transition-opacity ease-out",
+                "absolute left-0 w-full object-cover transition-[opacity,transform] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform]",
                 // Mobile/PWA sources are typically square. With `h-full` and a
                 // portrait container, object-cover produces horizontal overflow
                 // only, so `object-position` cannot lift the subject vertically.
@@ -1577,9 +1579,14 @@ const DesignersHoverHero = () => {
                     ? "top-[-7rem] left-0 h-[calc(118%+7rem)] object-top md:top-0 md:h-full md:object-center"
                     : "top-[-7rem] left-0 h-[calc(118%+7rem)] object-top md:top-0 md:h-full md:object-center"
                   : "inset-0 h-full",
-                isActive ? "opacity-100" : "opacity-0"
+                isActive ? "opacity-100" : "opacity-0",
+                // Desktop hover swap: a whisper of scale so the new image
+                // settles in rather than hard-cutting.
+                !isMobileOrPwa && (isActive ? "scale-100" : "scale-[1.035]")
               )}
-              style={{ transitionDuration: `${IMAGE_TRANSITION_MS}ms` }}
+              style={{
+                transitionDuration: `${isMobileOrPwa ? IMAGE_TRANSITION_MS : DESKTOP_IMAGE_TRANSITION_MS}ms`,
+              }}
             />
           );
         })}
@@ -1666,7 +1673,7 @@ const DesignersHoverHero = () => {
                     >
                       <span
                         ref={groupIdx === 0 ? mastersRef : undefined}
-                        className="inline-flex items-center gap-1.5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-body font-black text-gold drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mb-1 md:mb-1.5"
+                        className="inline-flex items-center gap-1.5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-body font-black text-gold-bright drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mb-1 md:mb-1.5"
                       >
                         {group.label}
                       </span>
@@ -1705,11 +1712,11 @@ const DesignersHoverHero = () => {
                                    "inline-flex items-center whitespace-nowrap relative",
                                    "text-[15px] short:text-[14px] sm:text-base md:text-[14px] leading-[1.25] short:leading-[1.15] sm:leading-[1.3]",
                                    "font-display font-light tracking-tight",
-                                   "transition-colors duration-500 ease-out",
+                                   "transition-[color,opacity,transform] duration-500 ease-out",
                                    "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
                                    isActive
-                                     ? "text-white font-medium"
-                                     : "text-white/60 hover:text-white"
+                                     ? "text-gold-bright font-medium"
+                                     : "text-gold-bright/70 hover:text-gold-bright"
                                  )}
                                >
                                  <span>
