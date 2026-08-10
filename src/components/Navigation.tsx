@@ -901,28 +901,28 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 to { opacity: 1; filter: blur(0); transform: translateY(0); }
               }
             `}</style>
-            <div className="w-full flex flex-row justify-between items-stretch gap-x-8 lg:gap-x-10 h-full">
-              {/* Column 1 — SEATING */}
-              <div className="flex flex-col flex-1 min-w-0 h-full">
+            <div className="w-full grid grid-cols-4 gap-x-12 gap-y-16 items-start">
+              {/* Column 1 — SEATING / LIGHTING */}
+              <div className="flex flex-col min-w-0 self-start">
                 {renderCategoryBlock("Seating")}
+                <div className="mt-12">{renderCategoryBlock("Lighting")}</div>
               </div>
 
-              {/* Column 2 — TABLES & LIGHTING */}
-              <div className="flex flex-col flex-1 min-w-0 h-full">
-                <div className="flex-1">{renderCategoryBlock("Tables")}</div>
-                <div className="pt-8">{renderCategoryBlock("Lighting")}</div>
+              {/* Column 2 — TABLES */}
+              <div className="flex flex-col min-w-0 self-start">
+                {renderCategoryBlock("Tables")}
               </div>
 
-              {/* Column 3 — STORAGE & BEDROOM FURNITURE */}
-              <div className="flex flex-col flex-1 min-w-0 h-full">
-                <div className="flex-1">{renderCategoryBlock("Storage")}</div>
-                <div className="pt-8">{renderCategoryBlock("Bedroom Furniture")}</div>
+              {/* Column 3 — STORAGE / BEDROOM FURNITURE */}
+              <div className="flex flex-col min-w-0 self-start">
+                {renderCategoryBlock("Storage")}
+                <div className="mt-12">{renderCategoryBlock("Bedroom Furniture")}</div>
               </div>
 
-              {/* Column 4 — RUGS & DÉCOR */}
-              <div className="flex flex-col flex-1 min-w-0 h-full">
-                <div className="flex-1">{renderCategoryBlock("Rugs")}</div>
-                <div className="pt-8">{renderCategoryBlock("Décor")}</div>
+              {/* Column 4 — RUGS / DÉCOR */}
+              <div className="flex flex-col min-w-0 self-start">
+                {renderCategoryBlock("Rugs")}
+                <div className="mt-12">{renderCategoryBlock("Décor")}</div>
               </div>
             </div>
           </div>
