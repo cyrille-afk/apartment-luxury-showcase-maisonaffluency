@@ -944,8 +944,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               >
                 <div className="relative flex-1 min-h-0 overflow-hidden">
                   <img
-                    src="https://res.cloudinary.com/dif1oamtj/image/upload/w_600,q_auto:good,c_fill,f_auto/v1781586995/image-047_x662rl.jpg"
-                    alt="Felix Agostini bronze sculpture vignette"
+                    src="https://res.cloudinary.com/dif1oamtj/image/upload/w_600,q_auto:good,c_fill,f_auto/v1780758735/A-033-02-cover_ovz8na.jpg"
+                    alt="Felix Agostini bronze floor lamp vignette"
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     loading="lazy"
                   />
