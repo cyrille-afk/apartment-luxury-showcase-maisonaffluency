@@ -44,6 +44,10 @@ import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { useAuth } from "@/hooks/useAuth";
 import { lastNameInitial } from "@/lib/nameFormat";
 import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
+import {
+  computeDesignerOrigin,
+  formatOriginSubtitle,
+} from "@/lib/designerOrigin";
 // Collectible profiles are public; product-page gating lives in PublicProductPage.
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
@@ -617,6 +621,9 @@ const PublicDesignerProfile = () => {
     return interleaveBySubcategory(sortCuratorPicks(filtered));
   }, [rawPicks, displayBiographyImages, displayBiography, isGrouped]);
 
+  const designerOrigin = computeDesignerOrigin(picks);
+  const originSubtitle = formatOriginSubtitle(designerOrigin);
+
   const { data: publicRrpMap = {} } = usePublicRrpMap(picks.map((p: any) => p.id));
 
   useEffect(() => {
@@ -1095,15 +1102,20 @@ const PublicDesignerProfile = () => {
         )}
 
         <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted/50">
-          <div className="mx-auto max-w-[1400px] px-[6vw] pt-4 lg:pt-6 pb-12 lg:pb-16">
+          <div className="mx-auto max-w-[1400px] px-[6vw] pt-10 lg:pt-14 pb-14 lg:pb-20">
             {/* Asymmetrical introductory row */}
             <div className="grid grid-cols-12 gap-x-10 lg:gap-x-16 gap-y-6 items-start">
               {/* Left — identity */}
-              <div className="col-span-12 lg:col-span-4">
+              <div className="col-span-12 lg:col-span-4 lg:pr-6">
                 <h1 className="font-display text-4xl lg:text-[3rem] leading-[1.05] tracking-[-0.01em] text-foreground">
                   {name}
                 </h1>
-                <p className="mt-3 font-body text-[10px] lg:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
+                {originSubtitle && (
+                  <p className="mt-2.5 font-body text-[9px] lg:text-[10px] uppercase tracking-[0.34em] text-foreground/60">
+                    {originSubtitle}
+                  </p>
+                )}
+                <p className="mt-4 font-body text-[10px] lg:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
                   {designer.specialty || "Timeless Scandinavian Design"}
                 </p>
               </div>
@@ -1178,11 +1190,16 @@ const PublicDesignerProfile = () => {
           transition={{ ...transition, delay: 0.2 }}
           className="flex flex-col justify-start w-full"
         >
-          <div className="mb-2">
+          <div className="mb-5">
             <h1 className="font-display text-3xl leading-[1.1] tracking-[-0.01em] text-foreground">
               {name}
             </h1>
-            <p className="mt-1 font-body text-[10px] uppercase tracking-[0.32em] text-foreground/60">
+            {originSubtitle && (
+              <p className="mt-1.5 font-body text-[9px] uppercase tracking-[0.34em] text-foreground/60">
+                {originSubtitle}
+              </p>
+            )}
+            <p className="mt-3 font-body text-[10px] uppercase tracking-[0.32em] text-foreground/60">
               {designer.specialty || "Timeless Scandinavian Design"}
             </p>
           </div>

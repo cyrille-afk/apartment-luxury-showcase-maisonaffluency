@@ -7,6 +7,7 @@ import type { PublicLightboxItem } from "@/components/PublicProductLightbox";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import StudioSaveButton from "@/components/product/StudioSaveButton";
 import { useAuth } from "@/hooks/useAuth";
+import { stripOriginFromMaterials } from "@/lib/designerOrigin";
 
 type Unit = "cm" | "in";
 
@@ -407,16 +408,20 @@ export default function MobileQuickViewDrawer({ pick, price, onClose, onViewFull
               </div>
             )}
 
-            {pick.materials && (
-              <div>
-                <h4 className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">
-                  Materials
-                </h4>
-                <p className="text-sm text-foreground/80 leading-relaxed">
-                  {pick.materials}
-                </p>
-              </div>
-            )}
+            {(() => {
+              const cleanMaterials = stripOriginFromMaterials(pick.materials);
+              if (!cleanMaterials) return null;
+              return (
+                <div>
+                  <h4 className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">
+                    Materials
+                  </h4>
+                  <p className="text-sm text-foreground/80 leading-relaxed">
+                    {cleanMaterials}
+                  </p>
+                </div>
+              );
+            })()}
           </div>
         </div>
 
