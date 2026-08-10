@@ -137,7 +137,7 @@ const SUBCATEGORY_NORMALIZE: Record<string, string> = {
   Sofa: "Sofas",
   Armchair: "Armchairs",
   Chair: "Chairs",
-  "Bar Stool": "Bar Stools",
+  Sectionals: "Sofas",
   Ottoman: "Ottomans & Stools",
   Stool: "Ottomans & Stools",
   Stools: "Ottomans & Stools",
@@ -190,7 +190,9 @@ const SUBCATEGORY_NORMALIZE: Record<string, string> = {
   "Decorative Object": "Decorative Objects",
   "Sculptural Object": "Decorative Objects",
   Tableware: "Decorative Objects",
-  Sideboard: "Sideboards",
+  Sideboard: "Buffets, Cabinets And Sideboards",
+  Sideboards: "Buffets, Cabinets And Sideboards",
+
   "Hand-Knotted Rug": "Hand-Knotted Rugs",
   "Hand-Tufted Rug": "Hand-Tufted Rugs",
   "Hand-Woven Rug": "Hand-Woven Rugs",
@@ -223,10 +225,10 @@ const SUBCATEGORY_NORMALIZE: Record<string, string> = {
   "Tables & Sculpture": "Side Tables",
   "Tables & Seating": "Side Tables",
   // Display Cabinet → Cabinets
-  "Display Cabinet": "Cabinets",
+  "Display Cabinet": "Buffets, Cabinets And Sideboards",
   "High Table": "Side Tables",
-  Headboard: "Headboards",
   "Bedside Table": "Bedside Tables",
+
   Nightstand: "Bedside Tables",
   Nightstands: "Bedside Tables",
   Table: "Side Tables",
