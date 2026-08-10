@@ -982,6 +982,9 @@ const PublicDesignerProfile = () => {
       expanded={newInExpanded}
       onClick={() => {
         const next = !newInExpanded;
+        if (next) {
+          prePortraitScrollY.current = window.scrollY;
+        }
         setNewInExpanded(next);
         if (next) {
           const land = () => {
@@ -993,6 +996,11 @@ const PublicDesignerProfile = () => {
           window.setTimeout(land, 120);
           if (isMobile) window.setTimeout(land, 560);
           window.setTimeout(() => flashBioHighlight(), 600);
+        } else {
+          const saved = prePortraitScrollY.current;
+          const restore = (behavior: ScrollBehavior) => window.scrollTo({ top: saved, behavior });
+          window.requestAnimationFrame(() => window.setTimeout(() => restore("smooth"), 60));
+          window.setTimeout(() => restore("auto"), 520);
         }
       }}
     />
