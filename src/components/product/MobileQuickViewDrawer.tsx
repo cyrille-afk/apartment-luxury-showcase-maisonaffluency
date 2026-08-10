@@ -44,9 +44,6 @@ function formatDim(value: number | null, unit: Unit): string {
 }
 
 function ChairDimensionSvg({ dims, unit }: { dims: ParsedDims; unit: Unit }) {
-  const w = dims.w ?? 0;
-  const d = dims.d ?? 0;
-  const h = dims.h ?? 0;
   const hasW = dims.w != null;
   const hasD = dims.d != null;
   const hasH = dims.h != null;
