@@ -37,8 +37,11 @@ const CATEGORY_NORMALIZE: Record<string, string> = {
   Linens: "Décor",
   Screens: "Décor",
   Sculpture: "Décor",
-  Bedroom: "Bedroom Furniture",
-  "Bed Furniture": "Bedroom Furniture",
+  "Bedroom Furniture": "Bedroom",
+  "Bed Furniture": "Bedroom",
+  Deco: "Décor",
+  Decor: "Décor",
+
 };
 
 // Subcategories that belong to Seating (used to resolve "Furniture" → correct parent)
@@ -63,13 +66,15 @@ const LIGHTING_SUBCATEGORIES = new Set([
 ]);
 
 const STORAGE_SUBCATEGORIES = new Set([
-  "Bookcases", "Bookcase", "Cabinets", "Cabinet",
-  "Bookcases & Credenzas", "Sideboards", "Sideboard",
+  "Bookcases", "Bookcase", "Cabinets", "Cabinet", "Bars", "Bar",
+  "Bookcases & Credenzas", "Sideboards", "Sideboard", "Buffets, Cabinets And Sideboards",
 ]);
 
 const BEDROOM_SUBCATEGORIES = new Set([
-  "Headboards", "Headboard", "Bedside Tables", "Bedside Table", "Nightstand", "Nightstands",
+  "Beds", "Bed", "Headboards", "Headboard", "Bedding", "Sofa-Beds", "Sofa-Bed",
+  "Bedside Tables", "Bedside Table", "Nightstand", "Nightstands",
 ]);
+
 
 /**
  * Resolve ambiguous "Furniture" category using subcategory hint.
