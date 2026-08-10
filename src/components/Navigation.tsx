@@ -365,34 +365,14 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           }
         }}
         className={cn(
-          "font-display text-[13px] uppercase tracking-[0.22em] font-light transition-all duration-300 text-left w-full pb-5 border-b border-border/20 mb-6",
-          activeMegaCat === cat && !activeMegaSub ? "text-[hsl(var(--accent))]" : "text-foreground hover:text-primary"
+          "font-display text-[13px] uppercase tracking-[0.22em] font-light transition-colors duration-300 text-left w-full pb-4 border-b border-border/20 mb-5",
+          activeMegaCat === cat && !activeMegaSub ? "text-foreground" : "text-foreground/90 hover:text-foreground"
         )}
       >
         {cat}
       </button>
       {SUBCATEGORY_MAP[cat] && (
-        <div className="flex flex-col gap-3.5">
-          <button
-            onClick={() => {
-              setActiveMegaCat(cat);
-              setActiveMegaSub(null);
-              setMegaMenuOpen(false);
-              const target = categoryUrl(cat, null);
-              if (window.location.pathname === target) {
-                window.dispatchEvent(new CustomEvent("syncCategoryFilter", {
-                  detail: { category: cat, subcategory: null, source: "designers" },
-                }));
-                const el = document.getElementById("product-grid") || document.getElementById("designers");
-                if (el instanceof HTMLElement) el.scrollIntoView({ behavior: "smooth", block: "start" });
-              } else {
-                navigate(target);
-              }
-            }}
-            className="text-left text-[11px] tracking-[0.15em] font-body italic transition-colors py-1 text-[hsl(var(--gold))] hover:text-primary"
-          >
-            View all {cat}
-          </button>
+        <div className="flex flex-col gap-3">
           {SUBCATEGORY_MAP[cat].map(sub => (
             <button
               key={sub}
@@ -413,7 +393,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               }}
               className={cn(
                 "text-left text-[11px] tracking-[0.12em] font-body font-light transition-colors py-1.5",
-                activeMegaSub === sub && activeMegaCat === cat ? "text-[hsl(var(--accent))] font-normal" : "text-foreground/80 hover:text-foreground"
+                activeMegaSub === sub && activeMegaCat === cat ? "text-foreground font-normal" : "text-foreground/70 hover:text-foreground"
               )}
             >
               {sub}
