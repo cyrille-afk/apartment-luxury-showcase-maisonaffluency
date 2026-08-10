@@ -167,7 +167,7 @@ export default function MobileQuickViewDrawer({ pick, onClose, onViewFull, onSha
               {images.map((url, i) => (
                 <div key={`${url}-${i}`} className="relative w-full h-full shrink-0 select-none">
                   <img
-                    src={responsiveCloudinaryUrl(url, 900)}
+                    src={optimizeImageUrl(url)}
                     alt={`${pick.title} view ${i + 1}`}
                     className="w-full h-full object-cover pointer-events-none"
                     draggable={false}
