@@ -59,7 +59,10 @@ export default {
           DEFAULT: "hsl(var(--terracotta))",
           light: "hsl(var(--terracotta-light))",
         },
-        gold: "hsl(var(--gold))",
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          bright: "hsl(var(--gold-bright))",
+        },
         cream: "hsl(var(--cream))",
         whatsapp: "hsl(var(--whatsapp))",
         "pdf-red": "hsl(var(--pdf-red))",
