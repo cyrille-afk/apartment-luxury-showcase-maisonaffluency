@@ -450,6 +450,7 @@ const PublicDesignerProfile = () => {
   const newInBioRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLDivElement>(null);
   const [portraitOpen, setPortraitOpen] = useState(false);
+  const prePortraitScrollY = useRef<number>(0);
   const [newInExpanded, setNewInExpanded] = useState(() =>
     typeof window !== "undefined" && new URLSearchParams(window.location.search).get("expanded") === "true"
   );
@@ -544,6 +545,25 @@ const PublicDesignerProfile = () => {
       window.clearTimeout(t3);
     };
   }, [slug]);
+
+  // Restore the pre-portrait scroll position after the portrait closes and the
+  // landing blocks have re-mounted, so the user lands exactly where they were.
+  const wasPortraitOpenRef = useRef(portraitOpen);
+  const wasNewInExpandedRef = useRef(newInExpanded);
+  useEffect(() => {
+    const wasPortraitOpen = wasPortraitOpenRef.current;
+    const wasNewInExpanded = wasNewInExpandedRef.current;
+    wasPortraitOpenRef.current = portraitOpen;
+    wasNewInExpandedRef.current = newInExpanded;
+
+    if ((wasPortraitOpen && !portraitOpen) || (wasNewInExpanded && !newInExpanded)) {
+      const saved = prePortraitScrollY.current;
+      const restore = (behavior: ScrollBehavior) => window.scrollTo({ top: saved, behavior });
+      window.requestAnimationFrame(() => window.setTimeout(() => restore("smooth"), 60));
+      window.setTimeout(() => restore("auto"), 520);
+      window.setTimeout(() => restore("auto"), 900);
+    }
+  }, [portraitOpen, newInExpanded]);
 
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
     isParentBrand ? designer : undefined,
@@ -981,6 +1001,9 @@ const PublicDesignerProfile = () => {
       expanded={newInExpanded}
       onClick={() => {
         const next = !newInExpanded;
+        if (next) {
+          prePortraitScrollY.current = window.scrollY;
+        }
         setNewInExpanded(next);
         if (next) {
           const land = () => {
@@ -1000,6 +1023,7 @@ const PublicDesignerProfile = () => {
   /* Inline "full portrait" expansion — mounts the staggered magazine rows only.
      No parent re-render, no second hero, no route change. */
   const openPortrait = () => {
+    prePortraitScrollY.current = window.scrollY;
     setPortraitOpen(true);
     // The landing blocks above unmount when the portrait opens, so the portrait
     // becomes the top of the page. Anchoring to its bounding box overshoots and
@@ -1013,11 +1037,6 @@ const PublicDesignerProfile = () => {
 
   const closePortrait = () => {
     setPortraitOpen(false);
-    const el = portraitRef.current;
-    if (el) {
-      const top = el.getBoundingClientRect().top + window.scrollY - 200;
-      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-    }
   };
 
   const portraitLink = (
