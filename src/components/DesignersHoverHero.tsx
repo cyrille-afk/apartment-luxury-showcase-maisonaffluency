@@ -1474,6 +1474,51 @@ const DesignersHoverHero = () => {
     };
   }, [hasItems, items.length]);
 
+  // Luxury desktop parallax: the paneled wall (background plane) scrolls
+  // slightly slower than the page, while the console/objects (foreground
+  // plane, masked to the lower portion of the image) scroll slightly faster,
+  // creating a subtle editorial depth effect. Uses direct DOM transforms
+  // inside requestAnimationFrame to avoid React re-renders on scroll.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (isMobileOrPwa) return;
+    const section = sectionRef.current;
+    const bg = parallaxBgRef.current;
+    const fg = parallaxFgRef.current;
+    if (!section || !bg || !fg) return;
+
+    let rafId = 0;
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const range = vh + rect.height;
+      const progress = Math.max(0, Math.min(1, (vh - rect.top) / range));
+      // Subtle 12% of section-height shift keeps the effect elegant and
+      // avoids revealing the oversized image edges.
+      const maxShift = rect.height * 0.12;
+      const bgShift = progress * maxShift;
+      const fgShift = -progress * maxShift;
+      bg.style.transform = `translateY(${bgShift}px)`;
+      fg.style.transform = `translateY(${fgShift}px)`;
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        rafId = requestAnimationFrame(update);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+    update();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", update);
+      cancelAnimationFrame(rafId);
+    };
+  }, [isMobileOrPwa]);
+
   // Desktop dropdown opens to the RIGHT of the Directory button so it never
   // overlaps or truncates the featured-designers list underneath.
   useEffect(() => {
