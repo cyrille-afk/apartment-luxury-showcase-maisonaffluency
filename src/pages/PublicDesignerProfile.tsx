@@ -421,7 +421,7 @@ const SLUG_ALIASES: Record<string, string> = {
 
 const PublicDesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { isTradeUser, loading: authLoading } = useAuth();
+  const { isTradeUser, loading: authLoading, user } = useAuth();
   if (slug && SLUG_ALIASES[slug]) {
     return <Navigate to={`/designers/${SLUG_ALIASES[slug]}`} replace />;
   }
