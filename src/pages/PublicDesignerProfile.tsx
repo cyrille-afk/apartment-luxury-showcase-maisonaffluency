@@ -1785,10 +1785,15 @@ const PublicDesignerProfile = () => {
                     /^clam (chair|stool)(?:,|\s|$)/i.test(pick.title);
                   const isArnoldClamStool =
                     isArnoldClamChair && /^clam stool/i.test(pick.title);
-                  const targetDesignerSlug = isArnoldClamChair ? "dagmar-london" : designer.slug;
+                  // Parent-brand pages (Ozone, Sé, …) aggregate their child
+                  // designers' picks — route to the owning designer's slug,
+                  // otherwise the product page looks it up under the parent
+                  // (which owns no picks) and renders "Product not found".
+                  const owningSlug = designerSlugById.get((pick as any).designer_id) || designer.slug;
+                  const targetDesignerSlug = isArnoldClamChair ? "dagmar-london" : owningSlug;
                   const productSlug = isArnoldClamChair
                     ? (isArnoldClamStool ? "clam-stool" : "clam-chair")
-                    : slugifyProduct(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""));
+                    : ((pick as any).slug || slugifyProduct(pick.title + (pick.subtitle ? `-${pick.subtitle}` : "")));
                   const productHref = `/designers/${targetDesignerSlug}/${productSlug}`;
 
                   const cardBrandLabel = isArnoldClamChair ? "Dagmar" : designerLabel;
