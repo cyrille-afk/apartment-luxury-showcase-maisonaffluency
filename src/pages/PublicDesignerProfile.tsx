@@ -2045,7 +2045,8 @@ const PublicDesignerProfile = () => {
                     </div>
                   );
                 })}
-                    </div>
+                      </motion.div>
+                    </AnimatePresence>
                   </>
                 );
               })()}
