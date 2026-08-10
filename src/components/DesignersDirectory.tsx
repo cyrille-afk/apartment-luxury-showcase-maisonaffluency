@@ -25,6 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP, normalizeCategory, normalizeSubcategory } from "@/lib/productTaxonomy";
 import { pickMatchesCategoryFilter } from "@/lib/pickCategoryFilter";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
+import { usePublicRrpMap, formatPublicRrp, type PublicRrpRow } from "@/hooks/usePublicRrp";
 import { withOgCacheBust } from "@/lib/whatsapp-share";
 import { cldResponsiveImg } from "@/lib/cloudinary";
 
@@ -1267,7 +1268,7 @@ function pickSlugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorite?: (id: string) => void; isFavorited?: boolean }) => {
+const PickCard = ({ pick, onFavorite, isFavorited, rrp }: { pick: PickItem; onFavorite?: (id: string) => void; isFavorited?: boolean; rrp?: PublicRrpRow | null }) => {
   const navigate = useNavigate();
   const productSlug = pickSlugify(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""));
   return (
@@ -1393,7 +1394,7 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
           );
         })()}
         <p className="font-display text-sm mt-1 text-foreground/70">
-          Price on request
+          {formatPublicRrp(rrp) || "Price on request"}
         </p>
       </div>
 
@@ -1591,6 +1592,9 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       broadcastFilter(cat || null, sub || null);
     }
   }, [location.search, broadcastFilter]);
+
+  // Publicly visible RRPs for the current product grid.
+  const { data: publicRrpMap } = usePublicRrpMap(filteredPicks?.map((p) => p.id) ?? []);
 
   // Listen for external filter sync
   useEffect(() => {
@@ -2134,7 +2138,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 ) : (
                   <div className={`grid gap-4 md:gap-6 lg:gap-8 grid-cols-2 ${sidebarOpen ? 'md:grid-cols-3 lg:grid-cols-4' : 'md:grid-cols-3'}`}>
                     {filteredPicks.map((pick) => (
-                      <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} />
+                      <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} rrp={publicRrpMap?.[pick.id]} />
                     ))}
                   </div>
                 )
@@ -2190,7 +2194,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               ) : (
                   <div data-category-results className="grid gap-4 md:gap-6 lg:gap-8 grid-cols-2 scroll-header-offset">
                   {filteredPicks.map((pick) => (
-                    <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} />
+                    <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} rrp={publicRrpMap?.[pick.id]} />
                   ))}
                 </div>
               )
