@@ -2118,6 +2118,7 @@ const PublicDesignerProfile = () => {
 
       <MobileQuickViewDrawer
         pick={quickViewItem}
+        price={quickViewItem ? formatPublicRrp(publicRrpMap[quickViewItem.id]) : undefined}
         onClose={() => setQuickViewItem(null)}
         onViewFull={() => {
           if (!quickViewItem) return;
