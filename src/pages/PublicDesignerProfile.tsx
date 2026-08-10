@@ -927,15 +927,37 @@ const PublicDesignerProfile = () => {
                   />
                 ) : heroParagraphs.length > 0 ? (
                   <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
-                    {heroParagraphs.map((p: string, i: number) => (
-                      <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
-                    ))}
+                    <div className={cn("md:hidden", !isMobileBioExpanded && "line-clamp-2")}>
+                      {(isMobileBioExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
+                        <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
+                      ))}
+                    </div>
+                    <div className="hidden md:block">
+                      {heroParagraphs.map((p: string, i: number) => (
+                        <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsMobileBioExpanded((v) => !v)}
+                      className="md:hidden mt-2 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
+                    >
+                      {isMobileBioExpanded ? "Read Less" : "Read More"}
+                    </button>
                   </div>
                 ) : null}
 
                 {thinContentFallback && (
                   <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85 mt-4">
-                    <p>{thinContentFallback}</p>
+                    <p className={cn("md:hidden", !isMobileBioExpanded && "line-clamp-2")}>{thinContentFallback}</p>
+                    <p className="hidden md:block">{thinContentFallback}</p>
+                    <button
+                      type="button"
+                      onClick={() => setIsMobileBioExpanded((v) => !v)}
+                      className="md:hidden mt-2 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
+                    >
+                      {isMobileBioExpanded ? "Read Less" : "Read More"}
+                    </button>
                   </div>
                 )}
 
@@ -1107,15 +1129,18 @@ const PublicDesignerProfile = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
-          {/* Full-bleed, untruncated hero — natural aspect ratio */}
-          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted max-h-[35vh] overflow-hidden">
+          {/* Compact mobile hero — keeps product grid above the fold */}
+          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted h-48 overflow-hidden">
             {(wideHeroImage || heroImage) && (
-              <img
-                src={wideHeroImage || heroImage}
-                alt={`${name} interior`}
-                className="block w-full h-auto max-h-[35vh] object-cover"
-                loading="eager"
-              />
+              <>
+                <img
+                  src={wideHeroImage || heroImage}
+                  alt={`${name} interior`}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="eager"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+              </>
             )}
           </div>
 
@@ -1144,44 +1169,47 @@ const PublicDesignerProfile = () => {
 
           {heroParagraphs.length > 0 && (
             <div className="font-body text-[15px] leading-[1.75] text-foreground/85 text-left">
-              {(newInExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
-                <p key={i} className={i > 0 ? "mt-4" : ""}>
-                  {!newInExpanded && i === 0 ? (
-                    <>
-                      <span className="line-clamp-2">{renderParagraph(p)}</span>
-                      <button
-                        type="button"
-                        onClick={openPortrait}
-                        className="inline ml-1 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
-                      >
-                        Read More
-                      </button>
-                    </>
-                  ) : (
-                    renderParagraph(p)
-                  )}
-                </p>
-              ))}
+              <div className={cn("md:hidden", !isMobileBioExpanded && "line-clamp-2")}>
+                {(isMobileBioExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
+                  <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
+                ))}
+              </div>
+              <div className="hidden md:block">
+                {heroParagraphs.map((p: string, i: number) => (
+                  <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileBioExpanded((v) => !v)}
+                className="md:hidden mt-2 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
+              >
+                {isMobileBioExpanded ? "Read Less" : "Read More"}
+              </button>
+              {isMobileBioExpanded && (
+                <button
+                  type="button"
+                  onClick={openPortrait}
+                  className="md:hidden block mt-3 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  View full portrait
+                </button>
+              )}
             </div>
           )}
 
-          {thinContentFallback && (
-            <p className="font-body text-[15px] leading-[1.75] text-foreground/85 mt-2">
-              {!newInExpanded ? (
-                <>
-                  <span className="line-clamp-2">{thinContentFallback}</span>
-                  <button
-                    type="button"
-                    onClick={openPortrait}
-                    className="inline ml-1 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
-                  >
-                    Read More
-                  </button>
-                </>
-              ) : (
-                thinContentFallback
-              )}
-            </p>
+          {!heroParagraphs.length && thinContentFallback && (
+            <div className="font-body text-[15px] leading-[1.75] text-foreground/85 mt-2">
+              <p className={cn("md:hidden", !isMobileBioExpanded && "line-clamp-2")}>{thinContentFallback}</p>
+              <p className="hidden md:block">{thinContentFallback}</p>
+              <button
+                type="button"
+                onClick={() => setIsMobileBioExpanded((v) => !v)}
+                className="md:hidden mt-2 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
+              >
+                {isMobileBioExpanded ? "Read Less" : "Read More"}
+              </button>
+            </div>
           )}
         </motion.div>
       </div>
