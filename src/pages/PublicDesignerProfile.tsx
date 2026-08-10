@@ -2115,6 +2115,31 @@ const PublicDesignerProfile = () => {
         onClose={closeLightbox}
         onSelectRelated={(item) => setLightboxItem(item)}
       />
+
+      <MobileQuickViewDrawer
+        pick={quickViewItem}
+        onClose={() => setQuickViewItem(null)}
+        onViewFull={() => {
+          if (!quickViewItem) return;
+          navigate(`/designers/${quickViewItem.designer_slug}/${slugifyProduct(quickViewItem.title + (quickViewItem.subtitle ? `-${quickViewItem.subtitle}` : ""))}`);
+          setQuickViewItem(null);
+        }}
+        onShare={async () => {
+          if (!quickViewItem) return;
+          const url = `${window.location.origin}/designers/${quickViewItem.designer_slug}/${slugifyProduct(quickViewItem.title + (quickViewItem.subtitle ? `-${quickViewItem.subtitle}` : ""))}`;
+          if (navigator.share) {
+            try {
+              await navigator.share({ title: quickViewItem.title, url });
+            } catch {}
+          } else {
+            try {
+              await navigator.clipboard.writeText(url);
+              setShareCopied(true);
+              window.setTimeout(() => setShareCopied(false), 2000);
+            } catch {}
+          }
+        }}
+      />
     </>
   );
 };
