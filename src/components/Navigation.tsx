@@ -372,7 +372,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
         {cat}
       </button>
       {SUBCATEGORY_MAP[cat] && (
-        <div className="flex flex-col space-y-1.5">
+        <div className="flex flex-col space-y-1.5 group/list">
           {SUBCATEGORY_MAP[cat].map(sub => (
             <button
               key={sub}
@@ -392,8 +392,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 }
               }}
               className={cn(
-                "text-left text-xs font-body font-light tracking-[0.06em] leading-snug transition-colors text-muted-foreground hover:text-foreground",
-                activeMegaSub === sub && activeMegaCat === cat ? "text-foreground font-normal" : ""
+                "text-left text-[13px] font-serif font-normal tracking-[0.02em] leading-relaxed text-neutral-500 transition-all duration-300 group-hover/list:text-neutral-900 group-hover/list:opacity-60 hover:opacity-100",
+                activeMegaSub === sub && activeMegaCat === cat ? "text-foreground opacity-100" : ""
               )}
             >
               {sub}
@@ -901,34 +901,28 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 to { opacity: 1; filter: blur(0); transform: translateY(0); }
               }
             `}</style>
-            <div className="w-full flex flex-row justify-between items-start gap-x-8 lg:gap-x-10">
+            <div className="w-full flex flex-row justify-between items-stretch gap-x-8 lg:gap-x-10 h-full">
               {/* Column 1 — SEATING */}
-              <div className="flex flex-col flex-1 min-w-0">
+              <div className="flex flex-col flex-1 min-w-0 h-full">
                 {renderCategoryBlock("Seating")}
               </div>
 
               {/* Column 2 — TABLES & LIGHTING */}
-              <div className="flex flex-col flex-1 min-w-0">
-                {renderCategoryBlock("Tables")}
-                <div className="mt-8">
-                  {renderCategoryBlock("Lighting")}
-                </div>
+              <div className="flex flex-col flex-1 min-w-0 h-full">
+                <div className="flex-1">{renderCategoryBlock("Tables")}</div>
+                <div className="pt-8">{renderCategoryBlock("Lighting")}</div>
               </div>
 
               {/* Column 3 — STORAGE & BEDROOM FURNITURE */}
-              <div className="flex flex-col flex-1 min-w-0">
-                {renderCategoryBlock("Storage")}
-                <div className="mt-8">
-                  {renderCategoryBlock("Bedroom Furniture")}
-                </div>
+              <div className="flex flex-col flex-1 min-w-0 h-full">
+                <div className="flex-1">{renderCategoryBlock("Storage")}</div>
+                <div className="pt-8">{renderCategoryBlock("Bedroom Furniture")}</div>
               </div>
 
               {/* Column 4 — RUGS & DÉCOR */}
-              <div className="flex flex-col flex-1 min-w-0">
-                {renderCategoryBlock("Rugs")}
-                <div className="mt-8">
-                  {renderCategoryBlock("Décor")}
-                </div>
+              <div className="flex flex-col flex-1 min-w-0 h-full">
+                <div className="flex-1">{renderCategoryBlock("Rugs")}</div>
+                <div className="pt-8">{renderCategoryBlock("Décor")}</div>
               </div>
             </div>
           </div>
