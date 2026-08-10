@@ -1102,7 +1102,7 @@ const PublicDesignerProfile = () => {
         )}
 
         <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted/50">
-          <div className="mx-auto max-w-[1400px] px-[6vw] pt-4 lg:pt-6 pb-12 lg:pb-16">
+          <div className="mx-auto max-w-[1400px] px-[6vw] pt-10 lg:pt-14 pb-14 lg:pb-20">
             {/* Asymmetrical introductory row */}
             <div className="grid grid-cols-12 gap-x-10 lg:gap-x-16 gap-y-6 items-start">
               {/* Left — identity */}
