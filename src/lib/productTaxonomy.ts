@@ -1,14 +1,29 @@
-export const CATEGORY_ORDER = ["Seating", "Tables", "Lighting", "Storage", "Bedroom Furniture", "Rugs", "Décor"];
+export const CATEGORY_ORDER = ["Tables", "Seating", "Lighting", "Bedroom", "Storage", "Rugs", "Décor"];
 
 export const SUBCATEGORY_MAP: Record<string, string[]> = {
-  Seating: ["Armchairs", "Bar Stools", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Sofas"],
   Tables: ["Coffee Tables", "Consoles", "Desks", "Dining Tables", "Side Tables"],
+  Seating: ["Armchairs", "Daybeds & Benches", "Chairs", "Ottomans & Stools", "Sofas"],
   Lighting: ["Ceiling Lights", "Floor Lights", "Table Lights", "Wall Lights"],
-  Storage: ["Bookcases", "Cabinets", "Sideboards"],
-  "Bedroom Furniture": ["Bedside Tables", "Headboards"],
+  Bedroom: ["Bedding", "Beds", "Bedside Tables", "Sofa-Beds"],
+  Storage: ["Bars", "Bookcases", "Buffets, Cabinets And Sideboards"],
   Rugs: ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
-  Décor: ["Books", "Candle Holders", "Decorative Objects", "Mirrors", "Statement Pieces", "Vases & Vessels"],
+  Décor: [
+    "Books",
+    "Boxes",
+    "Candle Holders",
+    "Cushions & Throws",
+    "Decorative Objects",
+    "Desk Accessories",
+    "Folding Screens & Window Décor",
+    "Magazine Holders",
+    "Mirrors",
+    "Tableware & Linens",
+    "Trays & Change Trays",
+    "Vases & Vessels",
+    "Wall Décor",
+  ],
 };
+
 
 // Map non-canonical category values to canonical taxonomy labels
 const CATEGORY_NORMALIZE: Record<string, string> = {
