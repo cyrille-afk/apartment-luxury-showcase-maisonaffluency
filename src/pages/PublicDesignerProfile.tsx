@@ -558,11 +558,7 @@ const PublicDesignerProfile = () => {
 
     if ((wasPortraitOpen && !portraitOpen) || (wasNewInExpanded && !newInExpanded)) {
       const saved = prePortraitScrollY.current;
-      console.log("[portrait restore] saved:", saved, "current:", window.scrollY);
-      const restore = (behavior: ScrollBehavior) => {
-        console.log("[portrait restore] restoring to:", saved, "behavior:", behavior);
-        window.scrollTo({ top: saved, behavior });
-      };
+      const restore = (behavior: ScrollBehavior) => window.scrollTo({ top: saved, behavior });
       window.requestAnimationFrame(() => window.setTimeout(() => restore("smooth"), 60));
       window.setTimeout(() => restore("auto"), 520);
       window.setTimeout(() => restore("auto"), 900);
