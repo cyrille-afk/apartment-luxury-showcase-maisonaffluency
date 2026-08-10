@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform, useDragControls, PanInfo } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Heart, ShoppingBag, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PublicLightboxItem } from "@/components/PublicProductLightbox";
@@ -125,6 +125,8 @@ export default function MobileQuickViewDrawer({ pick, price, onClose, onViewFull
   const x = useMotionValue(0);
   const [trackWidth, setTrackWidth] = useState(0);
   const [dimUnit, setDimUnit] = useState<Unit>("cm");
+  const [historyExpanded, setHistoryExpanded] = useState(false);
+  const dragControls = useDragControls();
 
   const images = useMemo(() => {
     if (!pick) return [];
@@ -143,6 +145,7 @@ export default function MobileQuickViewDrawer({ pick, price, onClose, onViewFull
 
   useEffect(() => {
     setIndex(0);
+    setHistoryExpanded(false);
   }, [pick?.id]);
 
   useEffect(() => {
@@ -220,19 +223,34 @@ export default function MobileQuickViewDrawer({ pick, price, onClose, onViewFull
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 25, stiffness: 220 }}
         drag="y"
+        dragListener={false}
+        dragControls={dragControls}
         dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={0.15}
+        dragElastic={{ top: 0, bottom: 0.4 }}
         onDragEnd={(_, info) => {
-          if (info.offset.y > 140 || (info.velocity.y > 600 && info.offset.y > 40)) {
+          if (info.offset.y > 120 || (info.velocity.y > 500 && info.offset.y > 30)) {
             onClose();
           }
         }}
         className="fixed bottom-0 left-0 right-0 z-[70] bg-background rounded-t-2xl shadow-2xl flex flex-col max-h-[92vh] font-sans"
       >
-        {/* Drag handle */}
-        <div className="w-full pt-3 pb-1 flex justify-center shrink-0" onClick={onClose}>
+        {/* Drag handle — swipe down to close */}
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Swipe down to close"
+          onPointerDown={(e) => dragControls.start(e)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onClose();
+            }
+          }}
+          className="w-full pt-3 pb-2 flex justify-center shrink-0 cursor-grab active:cursor-grabbing touch-none"
+        >
           <div className="w-12 h-1 bg-muted-foreground/25 rounded-full" />
         </div>
+
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 pb-3 border-b border-border/40 shrink-0">
@@ -339,11 +357,34 @@ export default function MobileQuickViewDrawer({ pick, price, onClose, onViewFull
                 <h4 className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">
                   Product History
                 </h4>
-                <p className="text-sm text-foreground/80 leading-relaxed line-clamp-4">
-                  {pick.description}
-                </p>
+                <motion.div
+                  initial={false}
+                  animate={{ height: "auto" }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  className="overflow-hidden"
+                >
+                  <p
+                    className={cn(
+                      "text-sm text-foreground/80 leading-relaxed transition-all",
+                      !historyExpanded && "line-clamp-4"
+                    )}
+                  >
+                    {pick.description}
+                  </p>
+                </motion.div>
+                {pick.description.length > 180 && (
+                  <button
+                    type="button"
+                    onClick={() => setHistoryExpanded((v) => !v)}
+                    aria-expanded={historyExpanded}
+                    className="mt-1.5 text-[11px] uppercase tracking-[0.14em] text-foreground/70 underline underline-offset-4 decoration-foreground/30 hover:text-foreground hover:decoration-foreground/60 transition-colors"
+                  >
+                    {historyExpanded ? "Hide history" : "Read history"}
+                  </button>
+                )}
               </div>
             )}
+
 
             {pick.dimensions && (
               <div className="bg-muted/40 p-3 rounded-sm">
