@@ -126,6 +126,7 @@ export default function MobileQuickViewDrawer({ pick, price, onClose, onViewFull
   const [isDragging, setIsDragging] = useState(false);
   const x = useMotionValue(0);
   const [trackWidth, setTrackWidth] = useState(0);
+  const [dimUnit, setDimUnit] = useState<Unit>("cm");
 
   const images = useMemo(() => {
     if (!pick) return [];
