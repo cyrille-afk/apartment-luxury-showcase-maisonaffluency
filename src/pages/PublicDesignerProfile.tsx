@@ -1165,44 +1165,30 @@ const PublicDesignerProfile = () => {
           {heroParagraphs.length > 0 && (
             <div className="font-body text-[14px] leading-[1.6] text-foreground/85 text-left">
               <div className="md:hidden relative">
-                <div className={cn(!isMobileBioExpanded && "line-clamp-2")}>
-                  {(isMobileBioExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
+                <div
+                  className="line-clamp-2"
+                  style={{
+                    WebkitMaskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                    maskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                  }}
+                >
+                  {heroParagraphs.slice(0, 1).map((p: string, i: number) => (
                     <p key={i} className={i > 0 ? "mt-3" : ""}>{renderParagraph(p)}</p>
                   ))}
                 </div>
-                {!isMobileBioExpanded && (
-                  <button
-                    type="button"
-                    onClick={() => setIsMobileBioExpanded(true)}
-                    className="absolute bottom-0 right-0 pl-10 bg-gradient-to-r from-transparent via-background to-background font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30"
-                  >
-                    Read More
-                  </button>
-                )}
-                {isMobileBioExpanded && (
-                  <button
-                    type="button"
-                    onClick={() => setIsMobileBioExpanded(false)}
-                    className="mt-1 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30"
-                  >
-                    Read Less
-                  </button>
-                )}
               </div>
               <div className="hidden md:block">
                 {heroParagraphs.map((p: string, i: number) => (
                   <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
                 ))}
               </div>
-              {isMobileBioExpanded && (
-                <button
-                  type="button"
-                  onClick={openPortrait}
-                  className="md:hidden block mt-2 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  View full portrait
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={openPortrait}
+                className="md:hidden block mt-2 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
+              >
+                View full portrait
+              </button>
             </div>
           )}
 
