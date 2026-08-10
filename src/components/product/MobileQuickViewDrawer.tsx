@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform, useDragControls, PanInfo } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Heart, ShoppingBag, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PublicLightboxItem } from "@/components/PublicProductLightbox";
@@ -125,6 +125,8 @@ export default function MobileQuickViewDrawer({ pick, price, onClose, onViewFull
   const x = useMotionValue(0);
   const [trackWidth, setTrackWidth] = useState(0);
   const [dimUnit, setDimUnit] = useState<Unit>("cm");
+  const [historyExpanded, setHistoryExpanded] = useState(false);
+  const dragControls = useDragControls();
 
   const images = useMemo(() => {
     if (!pick) return [];
@@ -143,6 +145,7 @@ export default function MobileQuickViewDrawer({ pick, price, onClose, onViewFull
 
   useEffect(() => {
     setIndex(0);
+    setHistoryExpanded(false);
   }, [pick?.id]);
 
   useEffect(() => {
