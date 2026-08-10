@@ -1924,12 +1924,27 @@ const PublicDesignerProfile = () => {
                           </div>
                         )}
 
-                        {/* Mobile quick-view — overlaid inside the image frame */}
+                        {/* Mobile / PWA quick-view — always opens the full product page */}
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); navigate(productHref); }}
+                          onPointerDown={(e) => { e.stopPropagation(); }}
+                          onTouchStart={(e) => { e.stopPropagation(); }}
+                          onTouchEnd={(e) => {
+                            // iOS/PWA: commit navigation on touchend so no parent
+                            // handler or synthetic click can swallow the tap.
+                            e.preventDefault();
+                            e.stopPropagation();
+                            window.scrollTo({ top: 0 });
+                            navigate(productHref);
+                          }}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            window.scrollTo({ top: 0 });
+                            navigate(productHref);
+                          }}
                           aria-label={`View ${displayTitle}`}
-                          className="md:hidden absolute bottom-2 right-2 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-background/95 shadow-md text-foreground active:scale-95 transition-transform"
+                          className="md:hidden absolute bottom-2 right-2 z-20 flex items-center justify-center w-8 h-8 rounded-full bg-background/95 shadow-md text-foreground active:scale-95 transition-transform touch-manipulation"
                         >
                           <SquareArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.5} />
                         </button>
