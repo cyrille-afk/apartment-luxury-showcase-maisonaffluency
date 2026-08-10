@@ -1581,7 +1581,7 @@ const PublicDesignerProfile = () => {
                 return (
                   <>
                     {/* ── STICKY MOBILE / PWA UTILITY BAR ── */}
-                    <div className="md:hidden sticky top-[var(--header-h)] z-40 flex items-center justify-between border-y border-border/40 bg-background/95 backdrop-blur-md py-2.5 px-4 -mx-4 mb-3">
+                    <div className="md:hidden sticky top-[var(--header-h)] z-40 flex h-10 max-h-10 items-center justify-between border-y border-border bg-background/95 backdrop-blur-md py-0 px-4 -mx-4 mb-2">
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           disabled={categories.length === 0}
