@@ -464,6 +464,7 @@ const PublicDesignerProfile = () => {
   const isChildDesigner = isChildBrandDesigner(designer);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
+  const [quickViewItem, setQuickViewItem] = useState<PublicLightboxItem | null>(null);
   const [mobileRevealedPickId, setMobileRevealedPickId] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const newInBioRef = useRef<HTMLDivElement>(null);
