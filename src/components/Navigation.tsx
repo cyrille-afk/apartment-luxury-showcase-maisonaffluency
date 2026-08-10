@@ -365,14 +365,14 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           }
         }}
         className={cn(
-          "font-display text-[13px] uppercase tracking-[0.22em] font-light transition-colors duration-300 text-left w-full pb-3 border-b border-border/20 mb-3",
+          "font-display text-[13px] uppercase tracking-[0.22em] font-light transition-colors duration-300 text-left w-full pb-2 border-b border-border/20 mb-2",
           activeMegaCat === cat && !activeMegaSub ? "text-foreground" : "text-foreground/90 hover:text-foreground"
         )}
       >
         {cat}
       </button>
       {SUBCATEGORY_MAP[cat] && (
-        <div className="flex flex-col space-y-1.5 group/list">
+        <div className="flex flex-col space-y-1 group/list">
           {SUBCATEGORY_MAP[cat].map(sub => (
             <button
               key={sub}
@@ -892,7 +892,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
         {megaMenuOpen && (
           <div
             ref={megaMenuRef}
-            className="w-[50vw] max-w-3xl mx-auto border-t border-border/20 bg-background/95 backdrop-blur-xl shadow-[0_20px_60px_-15px_hsl(var(--foreground)/0.12)] py-10 px-8 lg:px-12"
+            className="w-[68vw] max-w-5xl mx-auto border-t border-border/20 bg-background/95 backdrop-blur-xl shadow-[0_20px_60px_-15px_hsl(var(--foreground)/0.12)] py-10 px-8 lg:px-12"
             style={{ animation: "megaMenuReveal 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
           >
             <style>{`
@@ -901,18 +901,26 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 to { opacity: 1; filter: blur(0); transform: translateY(0); }
               }
             `}</style>
-            <div className="w-full grid grid-cols-4 grid-rows-[auto_auto] gap-x-12 gap-y-12 items-start">
-              {/* Row 1 */}
-              <div className="min-w-0 self-start">{renderCategoryBlock("Tables")}</div>
-              <div className="min-w-0 self-start">{renderCategoryBlock("Seating")}</div>
-              <div className="min-w-0 self-start">{renderCategoryBlock("Lighting")}</div>
-              {/* DÉCOR spans both rows */}
-              <div className="min-w-0 self-start row-span-2">{renderCategoryBlock("Décor")}</div>
-
-              {/* Row 2 */}
-              <div className="min-w-0 self-start">{renderCategoryBlock("Bedroom")}</div>
-              <div className="min-w-0 self-start">{renderCategoryBlock("Storage")}</div>
-              <div className="min-w-0 self-start">{renderCategoryBlock("Rugs")}</div>
+            <div className="w-full grid grid-cols-4 gap-x-12 items-start">
+              {/* Column 1 */}
+              <div className="min-w-0">
+                {renderCategoryBlock("Seating")}
+                <div className="mt-6">{renderCategoryBlock("Lighting")}</div>
+              </div>
+              {/* Column 2 */}
+              <div className="min-w-0">
+                {renderCategoryBlock("Tables")}
+                <div className="mt-6">{renderCategoryBlock("Bedroom")}</div>
+              </div>
+              {/* Column 3 */}
+              <div className="min-w-0">
+                {renderCategoryBlock("Storage")}
+              </div>
+              {/* Column 4 */}
+              <div className="min-w-0">
+                {renderCategoryBlock("Rugs")}
+                <div className="mt-6">{renderCategoryBlock("Décor")}</div>
+              </div>
             </div>
 
           </div>
