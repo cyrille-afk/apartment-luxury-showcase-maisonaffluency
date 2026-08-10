@@ -347,12 +347,64 @@ export default function MobileQuickViewDrawer({ pick, price, onClose, onViewFull
 
             {pick.dimensions && (
               <div className="bg-muted/40 p-3 rounded-sm">
-                <h4 className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">
-                  Dimensions
-                </h4>
-                <p className="text-sm font-medium text-foreground/90 whitespace-pre-line">
-                  {pick.dimensions}
-                </p>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                    Dimensions
+                  </h4>
+                  <div
+                    role="group"
+                    aria-label="Switch dimension unit"
+                    className="inline-flex border border-border rounded-sm overflow-hidden"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setDimUnit("cm")}
+                      aria-pressed={dimUnit === "cm"}
+                      className={cn(
+                        "px-2 py-0.5 text-[10px] font-medium transition-colors",
+                        dimUnit === "cm" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      cm
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDimUnit("in")}
+                      aria-pressed={dimUnit === "in"}
+                      className={cn(
+                        "px-2 py-0.5 text-[10px] font-medium transition-colors",
+                        dimUnit === "in" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      in
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 text-sm font-medium text-foreground/90 mb-3">
+                  {parsedDims.w != null && (
+                    <div className="flex flex-col">
+                      <span className="text-[9px] uppercase tracking-wider text-muted-foreground">W</span>
+                      <span>{formatDim(parsedDims.w, dimUnit)}</span>
+                    </div>
+                  )}
+                  {parsedDims.d != null && (
+                    <div className="flex flex-col">
+                      <span className="text-[9px] uppercase tracking-wider text-muted-foreground">D</span>
+                      <span>{formatDim(parsedDims.d, dimUnit)}</span>
+                    </div>
+                  )}
+                  {parsedDims.h != null && (
+                    <div className="flex flex-col">
+                      <span className="text-[9px] uppercase tracking-wider text-muted-foreground">H</span>
+                      <span>{formatDim(parsedDims.h, dimUnit)}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="text-muted-foreground">
+                  <ChairDimensionSvg dims={parsedDims} unit={dimUnit} />
+                </div>
               </div>
             )}
 
