@@ -365,34 +365,14 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           }
         }}
         className={cn(
-          "font-display text-[13px] uppercase tracking-[0.22em] font-light transition-all duration-300 text-left w-full pb-5 border-b border-border/20 mb-6",
-          activeMegaCat === cat && !activeMegaSub ? "text-[hsl(var(--accent))]" : "text-foreground hover:text-primary"
+          "font-display text-[13px] uppercase tracking-[0.22em] font-light transition-colors duration-300 text-left w-full pb-4 border-b border-border/20 mb-5",
+          activeMegaCat === cat && !activeMegaSub ? "text-foreground" : "text-foreground/90 hover:text-foreground"
         )}
       >
         {cat}
       </button>
       {SUBCATEGORY_MAP[cat] && (
-        <div className="flex flex-col gap-3.5">
-          <button
-            onClick={() => {
-              setActiveMegaCat(cat);
-              setActiveMegaSub(null);
-              setMegaMenuOpen(false);
-              const target = categoryUrl(cat, null);
-              if (window.location.pathname === target) {
-                window.dispatchEvent(new CustomEvent("syncCategoryFilter", {
-                  detail: { category: cat, subcategory: null, source: "designers" },
-                }));
-                const el = document.getElementById("product-grid") || document.getElementById("designers");
-                if (el instanceof HTMLElement) el.scrollIntoView({ behavior: "smooth", block: "start" });
-              } else {
-                navigate(target);
-              }
-            }}
-            className="text-left text-[11px] tracking-[0.15em] font-body italic transition-colors py-1 text-[hsl(var(--gold))] hover:text-primary"
-          >
-            View all {cat}
-          </button>
+        <div className="flex flex-col gap-3">
           {SUBCATEGORY_MAP[cat].map(sub => (
             <button
               key={sub}
@@ -413,7 +393,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               }}
               className={cn(
                 "text-left text-[11px] tracking-[0.12em] font-body font-light transition-colors py-1.5",
-                activeMegaSub === sub && activeMegaCat === cat ? "text-[hsl(var(--accent))] font-normal" : "text-foreground/80 hover:text-foreground"
+                activeMegaSub === sub && activeMegaCat === cat ? "text-foreground font-normal" : "text-foreground/70 hover:text-foreground"
               )}
             >
               {sub}
@@ -921,49 +901,34 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 to { opacity: 1; filter: blur(0); transform: translateY(0); }
               }
             `}</style>
-            <div className="w-full max-w-[1400px] mx-auto grid grid-cols-4 gap-x-12 lg:gap-x-16 xl:gap-x-20 relative px-6 lg:px-10">
+            <div className="w-full max-w-[1400px] mx-auto flex flex-row justify-between items-start gap-x-12 lg:gap-x-16 xl:gap-x-20 px-6 lg:px-10">
               {/* Column 1 — SEATING */}
-              <div className="flex flex-col">
+              <div className="flex flex-col flex-1 min-w-0">
                 {renderCategoryBlock("Seating")}
               </div>
 
               {/* Column 2 — TABLES & LIGHTING */}
-              <div className="flex flex-col gap-12 lg:gap-16">
+              <div className="flex flex-col flex-1 min-w-0">
                 {renderCategoryBlock("Tables")}
-                {renderCategoryBlock("Lighting")}
+                <div className="mt-10">
+                  {renderCategoryBlock("Lighting")}
+                </div>
               </div>
 
               {/* Column 3 — STORAGE & BEDROOM FURNITURE */}
-              <div className="flex flex-col gap-12 lg:gap-16">
+              <div className="flex flex-col flex-1 min-w-0">
                 {renderCategoryBlock("Storage")}
-                {renderCategoryBlock("Bedroom Furniture")}
+                <div className="mt-10">
+                  {renderCategoryBlock("Bedroom Furniture")}
+                </div>
               </div>
 
-              {/* Column 4 — Featured Showcase, RUGS & DÉCOR */}
-              <div className="flex flex-col gap-10 lg:gap-12">
-                {/* Featured Showcase — scaled down with breathing room */}
-                <button
-                  onClick={() => { setMegaMenuOpen(false); navigate("/designers/felix-agostini"); }}
-                  className="group relative w-full max-w-[240px] aspect-[4/5] overflow-hidden bg-muted/20 border border-border/20 text-left transition-colors hover:border-border/40 focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                >
-                  <div className="relative w-full h-full overflow-hidden">
-                    <img
-                      src="https://res.cloudinary.com/dif1oamtj/image/upload/w_500,h_625,q_auto:good,c_fill,f_auto/v1780758735/A-033-02-cover_ovz8na.jpg"
-                      alt="Felix Agostini bronze floor lamp vignette"
-                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-foreground/0 transition-colors duration-500 group-hover:bg-foreground/10" />
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background/90 to-transparent">
-                    <span className="font-body text-[11px] lg:text-[12px] italic tracking-[0.06em] lowercase text-foreground/90 group-hover:text-foreground transition-colors">
-                      explore the agostini collection →
-                    </span>
-                  </div>
-                </button>
-
+              {/* Column 4 — RUGS & DÉCOR */}
+              <div className="flex flex-col flex-1 min-w-0">
                 {renderCategoryBlock("Rugs")}
-                {renderCategoryBlock("Décor")}
+                <div className="mt-10">
+                  {renderCategoryBlock("Décor")}
+                </div>
               </div>
             </div>
           </div>
