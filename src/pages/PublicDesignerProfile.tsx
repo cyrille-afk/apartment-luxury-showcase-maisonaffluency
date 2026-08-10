@@ -1564,38 +1564,17 @@ const PublicDesignerProfile = () => {
 
                 return (
                   <>
-                    {/* ── CONTROLS BAR — MOBILE / PWA ── */}
-                    <div className="md:hidden flex items-center justify-between border-y border-border/40 py-2 mb-3">
-                      <div className="flex items-center gap-3 text-muted-foreground" role="group" aria-label="Grid density">
-                        <button
-                          type="button"
-                          onClick={() => setPickCols("one")}
-                          aria-pressed={pickCols === "one"}
-                          aria-label="Single column"
-                          className={cn("transition-colors", pickCols === "one" && "text-foreground")}
-                        >
-                          <Square className="h-4 w-4" strokeWidth={1} aria-hidden="true" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setPickCols("two")}
-                          aria-pressed={pickCols !== "one"}
-                          aria-label="Two column grid"
-                          className={cn("transition-colors", pickCols !== "one" && "text-foreground")}
-                        >
-                          <Grid2X2 className="h-4 w-4" strokeWidth={1} aria-hidden="true" />
-                        </button>
-                      </div>
-
+                    {/* ── STICKY MOBILE / PWA UTILITY BAR ── */}
+                    <div className="md:hidden sticky top-[var(--header-h)] z-40 flex items-center justify-between border-y border-border/40 bg-background/95 backdrop-blur-md py-2.5 px-4 -mx-4 mb-3">
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           disabled={categories.length === 0}
-                          className="flex items-center justify-center p-1.5 text-muted-foreground hover:bg-muted/40 rounded-full transition-colors disabled:opacity-40"
-                          aria-label="Filter products"
+                          className="inline-flex items-center gap-2 font-body text-[11px] uppercase tracking-[0.14em] text-foreground focus:outline-none disabled:opacity-40"
                         >
-                          <Filter className="w-4 h-4" strokeWidth={1.5} aria-hidden="true" />
+                          <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
+                          Filter
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="center" className="rounded-none">
+                        <DropdownMenuContent align="start" className="rounded-none">
                           {filterItems}
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -1920,6 +1899,21 @@ const PublicDesignerProfile = () => {
                           );
                         })()}
 
+                        {/* Mobile save / bookmark */}
+                        <div className="absolute top-2 right-2 z-10 md:hidden">
+                          {user ? (
+                            <StudioSaveButton pickId={pick.id} productTitle={displayTitle} className="w-8 h-8" />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); }}
+                              aria-label="Save to favorites"
+                              className="flex items-center justify-center w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm border border-border shadow-sm text-foreground active:scale-95 transition-transform"
+                            >
+                              <Heart className="h-3.5 w-3.5" strokeWidth={1.5} />
+                            </button>
+                          )}
+                        </div>
 
                         <div className="hidden md:block absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
@@ -1994,16 +1988,25 @@ const PublicDesignerProfile = () => {
 
 
                         {/* Price slot — pushed to bottom so cards align across the row */}
-                        <div className="mt-1 md:mt-2">
-                          <p className="font-body text-[11px] md:text-xs font-medium text-foreground/80 md:text-foreground md:font-normal tracking-wide">
-
-                            {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
-                          </p>
-                          {editionNote && !/^re-?edition$/i.test(editionNote) && (
-                            <p className="font-body italic text-[10px] md:text-[11px] text-muted-foreground/70 tracking-wide mt-1">
-                              *{editionNote}
+                        <div className="mt-1 md:mt-2 flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-body text-[11px] md:text-xs font-medium text-foreground/80 md:text-foreground md:font-normal tracking-wide">
+                              {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
                             </p>
-                          )}
+                            {editionNote && !/^re-?edition$/i.test(editionNote) && (
+                              <p className="font-body italic text-[10px] md:text-[11px] text-muted-foreground/70 tracking-wide mt-1">
+                                *{editionNote}
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); navigate(productHref); }}
+                            aria-label={`View ${displayTitle}`}
+                            className="md:hidden -mt-1 p-1.5 rounded-full text-foreground/70 hover:text-foreground hover:bg-muted/40 transition-colors"
+                          >
+                            <ShoppingBag className="h-4 w-4" strokeWidth={1.5} />
+                          </button>
                         </div>
 
                       </div>
