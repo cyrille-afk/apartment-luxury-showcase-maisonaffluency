@@ -1696,7 +1696,15 @@ const PublicDesignerProfile = () => {
                     </div>
 
 
-                    <div className={cn("grid gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10", gridClass)}>
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={activeCategories.sort().join(",") + sortMode}
+                        variants={gridVariants}
+                        initial="hidden"
+                        animate="show"
+                        exit="exit"
+                        className={cn("grid gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10", gridClass)}
+                      >
                 {visiblePicks.map((pick) => {
 
                   const ap = pick as AttributedCuratorPick;
