@@ -372,7 +372,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
         {cat}
       </button>
       {SUBCATEGORY_MAP[cat] && (
-        <div className="flex flex-col space-y-1.5">
+        <div className="flex flex-col space-y-1.5 group/list">
           {SUBCATEGORY_MAP[cat].map(sub => (
             <button
               key={sub}
@@ -392,8 +392,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 }
               }}
               className={cn(
-                "text-left text-xs font-body font-light tracking-[0.06em] leading-snug transition-colors text-muted-foreground hover:text-foreground",
-                activeMegaSub === sub && activeMegaCat === cat ? "text-foreground font-normal" : ""
+                "text-left text-[13px] font-serif font-normal tracking-[0.02em] leading-relaxed text-neutral-500 transition-all duration-300 group-hover/list:text-neutral-900 group-hover/list:opacity-60 hover:opacity-100",
+                activeMegaSub === sub && activeMegaCat === cat ? "text-foreground opacity-100" : ""
               )}
             >
               {sub}
