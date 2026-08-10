@@ -357,11 +357,34 @@ export default function MobileQuickViewDrawer({ pick, price, onClose, onViewFull
                 <h4 className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">
                   Product History
                 </h4>
-                <p className="text-sm text-foreground/80 leading-relaxed line-clamp-4">
-                  {pick.description}
-                </p>
+                <motion.div
+                  initial={false}
+                  animate={{ height: "auto" }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  className="overflow-hidden"
+                >
+                  <p
+                    className={cn(
+                      "text-sm text-foreground/80 leading-relaxed transition-all",
+                      !historyExpanded && "line-clamp-4"
+                    )}
+                  >
+                    {pick.description}
+                  </p>
+                </motion.div>
+                {pick.description.length > 180 && (
+                  <button
+                    type="button"
+                    onClick={() => setHistoryExpanded((v) => !v)}
+                    aria-expanded={historyExpanded}
+                    className="mt-1.5 text-[11px] uppercase tracking-[0.14em] text-foreground/70 underline underline-offset-4 decoration-foreground/30 hover:text-foreground hover:decoration-foreground/60 transition-colors"
+                  >
+                    {historyExpanded ? "Hide history" : "Read history"}
+                  </button>
+                )}
               </div>
             )}
+
 
             {pick.dimensions && (
               <div className="bg-muted/40 p-3 rounded-sm">
