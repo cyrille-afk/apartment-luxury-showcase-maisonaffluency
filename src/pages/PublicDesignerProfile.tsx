@@ -38,6 +38,7 @@ import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { consumeProductBackRef } from "@/lib/designerBackRef";
 import { isChildBrandDesigner, isParentBrandDesigner } from "@/lib/designerHierarchy";
 import { toOgImage } from "@/lib/ogImage";
+import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { sortCuratorPicks, interleaveBySubcategory } from "@/lib/curatorPickSort";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { useAuth } from "@/hooks/useAuth";
@@ -642,6 +643,9 @@ const PublicDesignerProfile = () => {
   // Force full-width hero layout for ALL designer profiles (parent or child)
   const useChildHeroLayout = false;
 
+  // Installed PWA has no iOS Safari chrome, so we can afford a taller hero.
+  const [isPwaStandalone] = useState(() => isPwaStandaloneDisplay());
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -1157,8 +1161,8 @@ const PublicDesignerProfile = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
-          {/* Compact mobile hero — keeps product grid above the fold */}
-          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted h-36 overflow-hidden">
+          {/* Compact mobile hero — taller in the installed PWA (no Safari chrome) */}
+          <div className={cn("relative w-screen left-1/2 -ml-[50vw] bg-muted overflow-hidden", isPwaStandalone ? "h-56" : "h-36")}>
             {(wideHeroImage || heroImage) && (
               <>
                 <img

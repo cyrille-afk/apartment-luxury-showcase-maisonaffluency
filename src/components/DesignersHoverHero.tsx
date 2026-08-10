@@ -239,7 +239,7 @@ const FEATURED_GROUPS = [
       "jean-michel-frank",
       "kiko-lopez",
       "lazzarini-pickering",
-      "ozone",
+      "michel-boyer",
       "pierre-bonnefille",
       "pierre-chareau",
       "thierry-lemaire",
@@ -286,7 +286,7 @@ function mobileHeroBackgroundSrc(d: Pick<FeaturedDesigner, "slug" | "first_pick_
 }
 
 const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
-  ozone: "Michel Boyer - Ozone",
+  "michel-boyer": "Michel Boyer - Ozone",
 };
 
 const ALL_FEATURED_SLUGS = FEATURED_GROUPS.flatMap((g) => g.slugs);
