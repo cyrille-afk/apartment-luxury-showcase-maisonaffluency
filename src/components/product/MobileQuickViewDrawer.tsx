@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence, useMotionValue, useTransform, useDragControls, PanInfo } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useDragControls, PanInfo } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Heart, ShoppingBag, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PublicLightboxItem } from "@/components/PublicProductLightbox";
@@ -199,8 +199,6 @@ export default function MobileQuickViewDrawer({ pick, price, onClose, onViewFull
   const handlePrev = () => setIndex((i) => Math.max(0, i - 1));
   const handleNext = () => setIndex((i) => Math.min(images.length - 1, i + 1));
 
-  const dotProgress = useTransform(x, [maxDrag, 0], [1, 0]);
-
   if (!pick) return null;
 
   const displayPrice = price || "Price upon request";
@@ -318,20 +316,14 @@ export default function MobileQuickViewDrawer({ pick, price, onClose, onViewFull
                   <ChevronRight className="w-4 h-4" />
                 </button>
 
-                {/* Paginated progress dots */}
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/20 backdrop-blur-md px-2.5 py-1.5 rounded-full">
-                  {images.map((_, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => setIndex(i)}
-                      aria-label={`Go to image ${i + 1}`}
-                      className={cn(
-                        "h-1.5 rounded-full transition-all duration-200",
-                        index === i ? "w-4 bg-white" : "w-1.5 bg-white/50"
-                      )}
-                    />
-                  ))}
+                {/* Fractional image counter */}
+                <div
+                  aria-live="polite"
+                  className="absolute bottom-3 right-3 bg-black/30 backdrop-blur-md px-2 py-1 rounded-sm"
+                >
+                  <span className="text-[11px] font-medium tracking-wider text-white tabular-nums">
+                    {String(index + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
+                  </span>
                 </div>
               </>
             )}
