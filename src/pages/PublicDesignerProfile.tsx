@@ -48,6 +48,24 @@ import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
 
+// Mobile product grid stagger animation
+const gridVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08 },
+  },
+  exit: { opacity: 0, transition: { duration: 0.15 } },
+};
+const cardVariants = {
+  hidden: { opacity: 0, y: 15 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 24 },
+  },
+};
+
 /* Designers rendered with the "New In" editorial format (portrait left, bio right) */
 const NEW_IN_FORMAT_SLUGS = new Set<string>(["dagmar", "dagmar-london"]);
 const APPARATUS_SHARE_BRIDGE = "/apparatus-studio-share-v6.html";
