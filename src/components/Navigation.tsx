@@ -939,11 +939,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 {renderCategoryBlock("Bedroom Furniture")}
               </div>
 
-              {/* Column 4 — RUGS, DÉCOR & Featured Showcase */}
-              <div className="flex flex-col gap-12 lg:gap-16">
-                {renderCategoryBlock("Rugs")}
-                {renderCategoryBlock("Décor")}
-
+              {/* Column 4 — Featured Showcase, RUGS & DÉCOR */}
+              <div className="flex flex-col gap-10 lg:gap-12">
                 {/* Featured Showcase — scaled down with breathing room */}
                 <button
                   onClick={() => { setMegaMenuOpen(false); navigate("/designers/felix-agostini"); }}
@@ -964,6 +961,9 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                     </span>
                   </div>
                 </button>
+
+                {renderCategoryBlock("Rugs")}
+                {renderCategoryBlock("Décor")}
               </div>
             </div>
           </div>
