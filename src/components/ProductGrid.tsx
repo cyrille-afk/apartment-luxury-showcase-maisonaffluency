@@ -128,7 +128,7 @@ const CATEGORY_SUBCATS: Record<string, string[]> = {
   "Bedroom": ["Bedding", "Beds", "Bedside Tables", "Sofa-Beds"],
   "Lighting": ["Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights"],
   "Rugs": ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
-  "Décor": ["Vases & Vessels", "Mirrors", "Books", "Boxes", "Candle Holders", "Cushions & Throws", "Decorative Objects", "Desk Accessories", "Folding Screens & Window Décor", "Magazine Holders", "Tableware & Linens", "Trays & Change Trays", "Wall Décor"],
+  "Décor": ["Vases & Vessels", "Mirrors", "Books", "Boxes", "Candle Holders", "Cushions & Throws", "Decorative Objects", "Desk Accessories", "Tableware & Linens", "Wall Décor"],
 };
 
 
