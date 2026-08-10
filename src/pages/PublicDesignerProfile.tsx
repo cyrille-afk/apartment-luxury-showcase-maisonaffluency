@@ -1190,11 +1190,16 @@ const PublicDesignerProfile = () => {
           transition={{ ...transition, delay: 0.2 }}
           className="flex flex-col justify-start w-full"
         >
-          <div className="mb-2">
+          <div className="mb-5">
             <h1 className="font-display text-3xl leading-[1.1] tracking-[-0.01em] text-foreground">
               {name}
             </h1>
-            <p className="mt-1 font-body text-[10px] uppercase tracking-[0.32em] text-foreground/60">
+            {originSubtitle && (
+              <p className="mt-1.5 font-body text-[9px] uppercase tracking-[0.34em] text-foreground/60">
+                {originSubtitle}
+              </p>
+            )}
+            <p className="mt-3 font-body text-[10px] uppercase tracking-[0.32em] text-foreground/60">
               {designer.specialty || "Timeless Scandinavian Design"}
             </p>
           </div>
