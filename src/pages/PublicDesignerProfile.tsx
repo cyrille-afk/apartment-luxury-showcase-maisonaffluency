@@ -1179,7 +1179,7 @@ const PublicDesignerProfile = () => {
               <button
                 type="button"
                 onClick={openPortrait}
-                className="md:hidden block mt-2 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
+                className="md:hidden block mt-1 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
               >
                 View full portrait
               </button>
