@@ -1165,13 +1165,7 @@ const PublicDesignerProfile = () => {
           {heroParagraphs.length > 0 && (
             <div className="portrait-link-container font-body text-[14px] leading-[1.6] text-foreground/85 text-left">
               <div className="md:hidden relative">
-                <div
-                  className="line-clamp-2"
-                  style={{
-                    WebkitMaskImage: "linear-gradient(to right, black 75%, transparent 100%)",
-                    maskImage: "linear-gradient(to right, black 75%, transparent 100%)",
-                  }}
-                >
+                <div className="bio-description-mobile">
                   {heroParagraphs.slice(0, 1).map((p: string, i: number) => (
                     <p key={i} className={i > 0 ? "mt-3" : ""}>{renderParagraph(p)}</p>
                   ))}
