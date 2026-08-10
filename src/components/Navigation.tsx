@@ -834,11 +834,18 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
         {megaMenuOpen && (
           <div
             ref={megaMenuRef}
-            className="w-full border-t border-border/30 bg-background shadow-[0_8px_30px_rgba(0,0,0,0.08)] py-4 animate-in slide-in-from-top-1 duration-200"
+            className="w-full border-t border-border/20 bg-background/95 backdrop-blur-md shadow-[0_24px_70px_rgba(0,0,0,0.1)] py-12 lg:py-16"
+            style={{ animation: "megaMenuReveal 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
           >
-            <div className="flex justify-center gap-8 lg:gap-12 relative">
+            <style>{`
+              @keyframes megaMenuReveal {
+                from { opacity: 0; filter: blur(10px); transform: translateY(-10px); }
+                to { opacity: 1; filter: blur(0); transform: translateY(0); }
+              }
+            `}</style>
+            <div className="w-full max-w-[1400px] mx-auto flex justify-between relative px-6 lg:px-10">
               {CATEGORY_ORDER.map(cat => (
-                <div key={cat} className="flex flex-col">
+                <div key={cat} className="flex flex-col flex-1 min-w-[110px] lg:min-w-[125px] xl:min-w-[135px] max-w-[190px] px-2">
                   <button
                     onClick={() => {
                       setActiveMegaCat(cat);
@@ -858,12 +865,15 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                         navigate(target);
                       }
                     }}
-                    className={cn("font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 text-left w-full", activeMegaCat === cat && !activeMegaSub ? "text-[hsl(var(--accent))] font-bold" : "text-foreground font-semibold hover:text-primary")}
+                    className={cn(
+                      "font-display text-[13px] uppercase tracking-[0.22em] font-light transition-all duration-300 text-left w-full pb-5 border-b border-border/20 mb-6",
+                      activeMegaCat === cat && !activeMegaSub ? "text-[hsl(var(--accent))]" : "text-foreground hover:text-primary"
+                    )}
                   >
                     {cat}
                   </button>
                   {SUBCATEGORY_MAP[cat] && (
-                    <div className="flex flex-col gap-1 mt-1.5 ml-0">
+                    <div className="flex flex-col gap-3.5">
                       <button
                         onClick={() => {
                           setActiveMegaCat(cat);
@@ -880,7 +890,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                             navigate(target);
                           }
                         }}
-                        className="text-left text-[10px] tracking-[0.15em] font-body italic transition-colors py-1 text-[hsl(var(--gold))] hover:text-primary"
+                        className="text-left text-[11px] tracking-[0.15em] font-body italic transition-colors py-1 text-[hsl(var(--gold))] hover:text-primary"
                       >
                         View all {cat}
                       </button>
@@ -902,7 +912,10 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                               navigate(target);
                             }
                           }}
-                          className={cn("text-left text-[10px] tracking-[0.15em] font-body transition-colors py-1", activeMegaSub === sub && activeMegaCat === cat ? "text-[hsl(var(--accent))] font-semibold" : "text-foreground hover:text-primary")}
+                          className={cn(
+                            "text-left text-[11px] tracking-[0.12em] font-body font-light transition-colors py-1.5",
+                            activeMegaSub === sub && activeMegaCat === cat ? "text-[hsl(var(--accent))] font-normal" : "text-foreground/80 hover:text-foreground"
+                          )}
                         >
                           {sub}
                         </button>
@@ -911,22 +924,6 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   )}
                 </div>
               ))}
-              <div className="flex flex-col justify-start">
-                <button
-                  onClick={() => {
-                    window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
-                    setActiveMegaCat(null);
-                    setActiveMegaSub(null);
-                    setMegaMenuOpen(false);
-                    if (window.location.pathname.startsWith("/products-category/")) {
-                      navigate("/");
-                    }
-                  }}
-                  className="font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 px-5 py-1.5 rounded-full bg-white border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] text-foreground"
-                >
-                  Clear All
-                </button>
-              </div>
             </div>
           </div>
         )}
