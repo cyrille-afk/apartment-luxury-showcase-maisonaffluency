@@ -97,7 +97,7 @@ export default function MobileQuickViewDrawer({ pick, price, onClose, onViewFull
 
   if (!pick) return null;
 
-  const price = formatPublicRrp((pick as any).publicPrice ?? null) || "Price upon request";
+  const displayPrice = price || "Price upon request";
 
   return createPortal(
     <AnimatePresence>
