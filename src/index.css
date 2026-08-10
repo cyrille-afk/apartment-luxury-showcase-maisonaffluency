@@ -573,7 +573,7 @@ body {
    ───────────────────────────────────────────── */
 @media (max-width: 768px) {
   .portrait-link-container {
-    margin-bottom: 6px !important;
+    margin-bottom: 2px !important;
   }
   .mobile-filter-bar {
     padding-top: 6px !important;
@@ -586,8 +586,17 @@ body {
     -webkit-box-orient: vertical;
     overflow: hidden;
     position: relative;
-    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
-    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    /* First line fully solid; only the tail of the 2nd line fades. */
+    -webkit-mask-image: linear-gradient(black, black),
+      linear-gradient(to right, black 78%, transparent 100%);
+    mask-image: linear-gradient(black, black),
+      linear-gradient(to right, black 78%, transparent 100%);
+    -webkit-mask-size: 100% 1.6em, 100% 100%;
+    mask-size: 100% 1.6em, 100% 100%;
+    -webkit-mask-position: left top, left bottom;
+    mask-position: left top, left bottom;
+    -webkit-mask-repeat: no-repeat, no-repeat;
+    mask-repeat: no-repeat, no-repeat;
   }
 }
 /* Always-on (desktop + mobile) baseline so JS-driven focus calls don't zoom. */
