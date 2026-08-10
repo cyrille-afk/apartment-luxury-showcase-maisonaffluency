@@ -8,6 +8,108 @@ import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import StudioSaveButton from "@/components/product/StudioSaveButton";
 import { useAuth } from "@/hooks/useAuth";
 
+type Unit = "cm" | "in";
+
+interface ParsedDims {
+  w: number | null;
+  d: number | null;
+  h: number | null;
+}
+
+function parseDimensions(text: string | null | undefined): ParsedDims {
+  if (!text) return { w: null, d: null, h: null };
+  const normalized = text.replace(/\s+/g, " ").toLowerCase();
+  const isMm = /\bmm\b/.test(normalized) && !/\bcm\b/.test(normalized);
+  const grab = (letter: string): number | null => {
+    const re = new RegExp(`${letter.toLowerCase()}\\s*([0-9]+(?:\\.[0-9]+)?)`, "i");
+    const m = text.match(re);
+    if (!m) return null;
+    const n = parseFloat(m[1]);
+    if (!isFinite(n)) return null;
+    return isMm ? n / 10 : n;
+  };
+  return { w: grab("W"), d: grab("D"), h: grab("H") };
+}
+
+function toInches(cm: number | null): number | null {
+  if (cm == null) return null;
+  return Math.round(cm * 0.393701 * 10) / 10;
+}
+
+function formatDim(value: number | null, unit: Unit): string {
+  if (value == null) return "—";
+  const display = unit === "cm" ? value : toInches(value);
+  if (display == null) return "—";
+  return `${display}${unit === "cm" ? " cm" : '"'}`;
+}
+
+function ChairDimensionSvg({ dims, unit }: { dims: ParsedDims; unit: Unit }) {
+  const w = dims.w ?? 0;
+  const d = dims.d ?? 0;
+  const h = dims.h ?? 0;
+  const hasW = dims.w != null;
+  const hasD = dims.d != null;
+  const hasH = dims.h != null;
+
+  return (
+    <svg viewBox="0 0 240 160" className="w-full h-auto" aria-hidden="true">
+      {/* Subtle baseline */}
+      <line x1="20" y1="140" x2="220" y2="140" stroke="currentColor" strokeOpacity="0.15" strokeWidth="1" />
+
+      {/* Chair silhouette — side/profile view */}
+      <g fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.7">
+        {/* Back legs */}
+        <path d="M62 140 L62 78 L78 78 L78 140" />
+        {/* Front legs */}
+        <path d="M148 140 L148 78 L168 78 L168 140" />
+        {/* Seat */}
+        <path d="M58 78 L172 78 L180 92 L50 92 Z" />
+        {/* Backrest */}
+        <path d="M58 78 C58 30, 58 30, 58 30 L78 30 C78 30, 78 30, 78 78" />
+        {/* Backrest crossbar */}
+        <path d="M62 42 L74 42" />
+        <path d="M62 54 L74 54" />
+      </g>
+
+      {/* Width dimension line (top of seat) */}
+      {hasW && (
+        <g>
+          <line x1="50" y1="24" x2="180" y2="24" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
+          <line x1="50" y1="20" x2="50" y2="28" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
+          <line x1="180" y1="20" x2="180" y2="28" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
+          <text x="115" y="18" textAnchor="middle" className="text-[8px] fill-current opacity-70" style={{ fontSize: 8 }}>
+            W {formatDim(dims.w, unit)}
+          </text>
+        </g>
+      )}
+
+      {/* Depth dimension line (seat side) */}
+      {hasD && (
+        <g>
+          <line x1="190" y1="78" x2="190" y2="92" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
+          <line x1="186" y1="78" x2="194" y2="78" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
+          <line x1="186" y1="92" x2="194" y2="92" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
+          <text x="204" y="86" textAnchor="start" className="text-[8px] fill-current opacity-70" style={{ fontSize: 8 }}>
+            D {formatDim(dims.d, unit)}
+          </text>
+        </g>
+      )}
+
+      {/* Height dimension line (overall) */}
+      {hasH && (
+        <g>
+          <line x1="38" y1="30" x2="38" y2="140" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
+          <line x1="34" y1="30" x2="42" y2="30" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
+          <line x1="34" y1="140" x2="42" y2="140" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
+          <text x="28" y="86" textAnchor="middle" className="text-[8px] fill-current opacity-70" style={{ fontSize: 8 }} transform="rotate(-90 28 86)">
+            H {formatDim(dims.h, unit)}
+          </text>
+        </g>
+      )}
+    </svg>
+  );
+}
+
 interface Props {
   pick: PublicLightboxItem | null;
   price?: string;
