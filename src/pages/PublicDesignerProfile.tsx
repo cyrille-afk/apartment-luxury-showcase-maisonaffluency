@@ -1122,7 +1122,7 @@ const PublicDesignerProfile = () => {
       </div>
 
       {/* ── MOBILE: mirrors the desktop cinematic stack ── */}
-      <div className={portraitOpen ? "hidden" : "grid grid-cols-1 gap-4 items-start pt-2 md:hidden"} aria-hidden={portraitOpen}>
+      <div className={portraitOpen ? "hidden" : "grid grid-cols-1 gap-2 items-start pt-0 md:hidden"} aria-hidden={portraitOpen}>
 
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -1130,7 +1130,7 @@ const PublicDesignerProfile = () => {
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
           {/* Compact mobile hero — keeps product grid above the fold */}
-          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted h-48 overflow-hidden">
+          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted h-36 overflow-hidden">
             {(wideHeroImage || heroImage) && (
               <>
                 <img
@@ -1145,7 +1145,7 @@ const PublicDesignerProfile = () => {
           </div>
 
           {designer.hero_photo_credit && (
-            <p className="mt-2 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
+            <p className="mt-1 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
               Photo: {designer.hero_photo_credit}
             </p>
           )}
@@ -1158,39 +1158,47 @@ const PublicDesignerProfile = () => {
           transition={{ ...transition, delay: 0.2 }}
           className="flex flex-col justify-start w-full"
         >
-          <div className="mb-2">
-            <h1 className="font-display text-3xl leading-[1.1] tracking-[-0.01em] text-foreground">
-              {name}
-            </h1>
-            <p className="mt-1 font-body text-[10px] uppercase tracking-[0.32em] text-foreground/60">
-              {designer.specialty || "Timeless Scandinavian Design"}
-            </p>
-          </div>
+          <h1 className="font-display text-[26px] leading-[1.1] tracking-[-0.01em] text-foreground mb-1">
+            {name}
+          </h1>
 
           {heroParagraphs.length > 0 && (
-            <div className="font-body text-[15px] leading-[1.75] text-foreground/85 text-left">
-              <div className={cn("md:hidden", !isMobileBioExpanded && "line-clamp-2")}>
-                {(isMobileBioExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
-                  <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
-                ))}
+            <div className="font-body text-[14px] leading-[1.6] text-foreground/85 text-left">
+              <div className="md:hidden relative">
+                <div className={cn(!isMobileBioExpanded && "line-clamp-2")}>
+                  {(isMobileBioExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
+                    <p key={i} className={i > 0 ? "mt-3" : ""}>{renderParagraph(p)}</p>
+                  ))}
+                </div>
+                {!isMobileBioExpanded && (
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileBioExpanded(true)}
+                    className="absolute bottom-0 right-0 pl-10 bg-gradient-to-r from-transparent via-background to-background font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30"
+                  >
+                    Read More
+                  </button>
+                )}
+                {isMobileBioExpanded && (
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileBioExpanded(false)}
+                    className="mt-1 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30"
+                  >
+                    Read Less
+                  </button>
+                )}
               </div>
               <div className="hidden md:block">
                 {heroParagraphs.map((p: string, i: number) => (
                   <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
                 ))}
               </div>
-              <button
-                type="button"
-                onClick={() => setIsMobileBioExpanded((v) => !v)}
-                className="md:hidden mt-2 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
-              >
-                {isMobileBioExpanded ? "Read Less" : "Read More"}
-              </button>
               {isMobileBioExpanded && (
                 <button
                   type="button"
                   onClick={openPortrait}
-                  className="md:hidden block mt-3 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
+                  className="md:hidden block mt-2 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
                 >
                   View full portrait
                 </button>
@@ -1199,20 +1207,28 @@ const PublicDesignerProfile = () => {
           )}
 
           {!heroParagraphs.length && thinContentFallback && (
-            <div className="font-body text-[15px] leading-[1.75] text-foreground/85 mt-2">
-              <p className={cn("md:hidden", !isMobileBioExpanded && "line-clamp-2")}>{thinContentFallback}</p>
+            <div className="font-body text-[14px] leading-[1.6] text-foreground/85 mt-1">
+              <div className="md:hidden relative">
+                <p className={cn(!isMobileBioExpanded && "line-clamp-2")}>{thinContentFallback}</p>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileBioExpanded((v) => !v)}
+                  className={cn(
+                    "font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30",
+                    !isMobileBioExpanded
+                      ? "absolute bottom-0 right-0 pl-10 bg-gradient-to-r from-transparent via-background to-background"
+                      : "mt-1",
+                  )}
+                >
+                  {isMobileBioExpanded ? "Read Less" : "Read More"}
+                </button>
+              </div>
               <p className="hidden md:block">{thinContentFallback}</p>
-              <button
-                type="button"
-                onClick={() => setIsMobileBioExpanded((v) => !v)}
-                className="md:hidden mt-2 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
-              >
-                {isMobileBioExpanded ? "Read Less" : "Read More"}
-              </button>
             </div>
           )}
         </motion.div>
       </div>
+
 
       {portraitExpansion}
 
