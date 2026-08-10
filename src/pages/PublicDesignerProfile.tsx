@@ -1122,7 +1122,7 @@ const PublicDesignerProfile = () => {
       </div>
 
       {/* ── MOBILE: mirrors the desktop cinematic stack ── */}
-      <div className={portraitOpen ? "hidden" : "grid grid-cols-1 gap-4 items-start pt-2 md:hidden"} aria-hidden={portraitOpen}>
+      <div className={portraitOpen ? "hidden" : "grid grid-cols-1 gap-2 items-start pt-0 md:hidden"} aria-hidden={portraitOpen}>
 
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -1130,7 +1130,7 @@ const PublicDesignerProfile = () => {
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
           {/* Compact mobile hero — keeps product grid above the fold */}
-          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted h-48 overflow-hidden">
+          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted h-36 overflow-hidden">
             {(wideHeroImage || heroImage) && (
               <>
                 <img
@@ -1145,7 +1145,7 @@ const PublicDesignerProfile = () => {
           </div>
 
           {designer.hero_photo_credit && (
-            <p className="mt-2 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
+            <p className="mt-1 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
               Photo: {designer.hero_photo_credit}
             </p>
           )}
@@ -1158,39 +1158,47 @@ const PublicDesignerProfile = () => {
           transition={{ ...transition, delay: 0.2 }}
           className="flex flex-col justify-start w-full"
         >
-          <div className="mb-2">
-            <h1 className="font-display text-3xl leading-[1.1] tracking-[-0.01em] text-foreground">
-              {name}
-            </h1>
-            <p className="mt-1 font-body text-[10px] uppercase tracking-[0.32em] text-foreground/60">
-              {designer.specialty || "Timeless Scandinavian Design"}
-            </p>
-          </div>
+          <h1 className="font-display text-[26px] leading-[1.1] tracking-[-0.01em] text-foreground mb-1">
+            {name}
+          </h1>
 
           {heroParagraphs.length > 0 && (
-            <div className="font-body text-[15px] leading-[1.75] text-foreground/85 text-left">
-              <div className={cn("md:hidden", !isMobileBioExpanded && "line-clamp-2")}>
-                {(isMobileBioExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
-                  <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
-                ))}
+            <div className="font-body text-[14px] leading-[1.6] text-foreground/85 text-left">
+              <div className="md:hidden relative">
+                <div className={cn(!isMobileBioExpanded && "line-clamp-2")}>
+                  {(isMobileBioExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
+                    <p key={i} className={i > 0 ? "mt-3" : ""}>{renderParagraph(p)}</p>
+                  ))}
+                </div>
+                {!isMobileBioExpanded && (
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileBioExpanded(true)}
+                    className="absolute bottom-0 right-0 pl-10 bg-gradient-to-r from-transparent via-background to-background font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30"
+                  >
+                    Read More
+                  </button>
+                )}
+                {isMobileBioExpanded && (
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileBioExpanded(false)}
+                    className="mt-1 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30"
+                  >
+                    Read Less
+                  </button>
+                )}
               </div>
               <div className="hidden md:block">
                 {heroParagraphs.map((p: string, i: number) => (
                   <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
                 ))}
               </div>
-              <button
-                type="button"
-                onClick={() => setIsMobileBioExpanded((v) => !v)}
-                className="md:hidden mt-2 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
-              >
-                {isMobileBioExpanded ? "Read Less" : "Read More"}
-              </button>
               {isMobileBioExpanded && (
                 <button
                   type="button"
                   onClick={openPortrait}
-                  className="md:hidden block mt-3 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
+                  className="md:hidden block mt-2 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
                 >
                   View full portrait
                 </button>
@@ -1199,20 +1207,28 @@ const PublicDesignerProfile = () => {
           )}
 
           {!heroParagraphs.length && thinContentFallback && (
-            <div className="font-body text-[15px] leading-[1.75] text-foreground/85 mt-2">
-              <p className={cn("md:hidden", !isMobileBioExpanded && "line-clamp-2")}>{thinContentFallback}</p>
+            <div className="font-body text-[14px] leading-[1.6] text-foreground/85 mt-1">
+              <div className="md:hidden relative">
+                <p className={cn(!isMobileBioExpanded && "line-clamp-2")}>{thinContentFallback}</p>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileBioExpanded((v) => !v)}
+                  className={cn(
+                    "font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30",
+                    !isMobileBioExpanded
+                      ? "absolute bottom-0 right-0 pl-10 bg-gradient-to-r from-transparent via-background to-background"
+                      : "mt-1",
+                  )}
+                >
+                  {isMobileBioExpanded ? "Read Less" : "Read More"}
+                </button>
+              </div>
               <p className="hidden md:block">{thinContentFallback}</p>
-              <button
-                type="button"
-                onClick={() => setIsMobileBioExpanded((v) => !v)}
-                className="md:hidden mt-2 font-body text-[13px] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground/60 transition-colors"
-              >
-                {isMobileBioExpanded ? "Read Less" : "Read More"}
-              </button>
             </div>
           )}
         </motion.div>
       </div>
+
 
       {portraitExpansion}
 
@@ -1565,7 +1581,7 @@ const PublicDesignerProfile = () => {
                 return (
                   <>
                     {/* ── STICKY MOBILE / PWA UTILITY BAR ── */}
-                    <div className="md:hidden sticky top-[var(--header-h)] z-40 flex items-center justify-between border-y border-border/40 bg-background/95 backdrop-blur-md py-2.5 px-4 -mx-4 mb-3">
+                    <div className="md:hidden sticky top-[var(--header-h)] z-40 flex h-10 max-h-10 items-center justify-between border-y border-border bg-background/95 backdrop-blur-md py-0 px-4 -mx-4 mb-2">
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           disabled={categories.length === 0}
@@ -1933,7 +1949,18 @@ const PublicDesignerProfile = () => {
                             />
                           </div>
                         )}
+
+                        {/* Mobile quick-view — overlaid inside the image frame */}
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); navigate(productHref); }}
+                          aria-label={`View ${displayTitle}`}
+                          className="md:hidden absolute bottom-2 right-2 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-background/95 shadow-md text-foreground active:scale-95 transition-transform"
+                        >
+                          <ShoppingBag className="h-3.5 w-3.5" strokeWidth={1.5} />
+                        </button>
                       </div>
+
 
                       {/* Editorial text block — quiet, uniform, line-clamped */}
                       <div className="flex flex-col flex-1 px-0.5 md:px-0 text-left md:text-center">
@@ -1968,7 +1995,7 @@ const PublicDesignerProfile = () => {
                         )}
 
                         {/* Product name — primary (deep link so the URL is shareable/copyable) */}
-                        <h3 className="font-display text-[13px] md:text-[13px] font-light tracking-tight md:tracking-wide leading-snug mt-1 md:mt-2 line-clamp-2">
+                        <h3 className="font-display text-[13px] md:text-[13px] font-light tracking-tight md:tracking-wide leading-snug mt-0.5 md:mt-2 line-clamp-2">
                           <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground/70 transition-colors">
                             {displayTitle}
                           </Link>
@@ -1979,7 +2006,7 @@ const PublicDesignerProfile = () => {
                           cardSubtitle.trim().toLowerCase() !== (cardBrandLabel || "").trim().toLowerCase() &&
                           !subtitleDesignerLabel && (
                             <p className={cn(
-                              "font-body text-[10px] md:text-[11px] tracking-[0.14em] text-muted-foreground leading-tight mt-1 line-clamp-1",
+                              "font-body text-[10px] md:text-[11px] tracking-[0.14em] text-muted-foreground leading-tight mt-0.5 md:mt-1 line-clamp-1",
                               !isArnoldClamChair && "uppercase"
                             )}>
                               {cardSubtitle}
@@ -1987,27 +2014,18 @@ const PublicDesignerProfile = () => {
                           )}
 
 
-                        {/* Price slot — pushed to bottom so cards align across the row */}
-                        <div className="mt-1 md:mt-2 flex items-start justify-between gap-2">
-                          <div>
-                            <p className="font-body text-[11px] md:text-xs font-medium text-foreground/80 md:text-foreground md:font-normal tracking-wide">
-                              {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
+                        {/* Price slot — tight under the title block */}
+                        <div className="mt-0.5 md:mt-2">
+                          <p className="font-body text-[11px] md:text-xs font-medium text-foreground/80 md:text-foreground md:font-normal tracking-wide">
+                            {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
+                          </p>
+                          {editionNote && !/^re-?edition$/i.test(editionNote) && (
+                            <p className="font-body italic text-[10px] md:text-[11px] text-muted-foreground/70 tracking-wide mt-0.5">
+                              *{editionNote}
                             </p>
-                            {editionNote && !/^re-?edition$/i.test(editionNote) && (
-                              <p className="font-body italic text-[10px] md:text-[11px] text-muted-foreground/70 tracking-wide mt-1">
-                                *{editionNote}
-                              </p>
-                            )}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); navigate(productHref); }}
-                            aria-label={`View ${displayTitle}`}
-                            className="md:hidden -mt-1 p-1.5 rounded-full text-foreground/70 hover:text-foreground hover:bg-muted/40 transition-colors"
-                          >
-                            <ShoppingBag className="h-4 w-4" strokeWidth={1.5} />
-                          </button>
+                          )}
                         </div>
+
 
                       </div>
                     </div>
