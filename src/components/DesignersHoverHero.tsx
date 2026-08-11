@@ -504,13 +504,7 @@ function HeroBgLayer({
   }, [sources]);
 
   return (
-    <div
-      className={cn(
-        "absolute inset-0 overflow-hidden",
-        mode === "desktop" && "-top-[15%] -bottom-[15%] h-[130%]",
-        className
-      )}
-    >
+    <div className={cn("absolute inset-0 overflow-hidden", className)}>
       {sources.map(({ slug, src: imgSrc }) => {
         const isActive = slug === activeSlug;
         const duration = mode === "mobile" ? IMAGE_TRANSITION_MS : DESKTOP_IMAGE_TRANSITION_MS;
@@ -519,9 +513,8 @@ function HeroBgLayer({
             key={`${slug}-${mode}${suffix ? `-${suffix}` : ""}`}
             aria-hidden="true"
             className={cn(
-              "absolute inset-0 bg-no-repeat bg-cover bg-center transition-[opacity,transform] will-change-[opacity,transform]",
-              isActive ? "opacity-100" : "opacity-0",
-              mode === "desktop" && (isActive ? "scale-100" : "scale-[1.035]")
+              "absolute inset-0 bg-no-repeat bg-cover bg-center transition-opacity",
+              isActive ? "opacity-100" : "opacity-0"
             )}
             style={{
               backgroundImage: `url(${imgSrc})`,
