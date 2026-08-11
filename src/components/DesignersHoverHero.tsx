@@ -16,6 +16,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import SilentLink from "@/components/SilentLink";
 import { Search, X, ImageIcon } from "lucide-react";
 
@@ -2064,19 +2065,29 @@ const DesignersHoverHero = () => {
                   {first}
                   {last && <span className="italic"> {last}</span>}
                 </span>
-                <span
+                <motion.button
                   key={`${active.slug}-cta`}
-                  className="mt-3 inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.35em] font-body font-medium text-white/70 group-hover:text-white transition-colors animate-in fade-in duration-1000 delay-200 fill-mode-both"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/designers/${active.slug}`, { state: { fromDesignersHero: true } });
+                  }}
+                  initial={{ backgroundColor: "rgba(255, 255, 255, 0)" }}
+                  whileTap={{ scale: 0.98, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+                  transition={{ duration: 0.2 }}
+                  className="mt-3 inline-flex items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-[0.35em] font-body font-medium text-white/70 group-hover:text-white transition-colors animate-in fade-in duration-1000 delay-200 fill-mode-both touch-manipulation"
                 >
                   <span className="w-8 h-px bg-white/40 group-hover:bg-white/70 transition-colors" aria-hidden="true" />
                   <span>Discover the Collection</span>
-                  <span
+                  <motion.span
                     aria-hidden="true"
-                    className="inline-block translate-x-[-2px] opacity-60 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500 ease-out"
+                    animate={{ x: [0, 4] }}
+                    transition={{ repeat: Infinity, repeatType: "reverse", duration: 0.8, ease: "easeInOut" }}
+                    className="inline-block opacity-60 group-hover:opacity-100 transition-opacity duration-500 ease-out"
                   >
                     →
-                  </span>
-                </span>
+                  </motion.span>
+                </motion.button>
               </div>
             </SilentLink>
           </>
