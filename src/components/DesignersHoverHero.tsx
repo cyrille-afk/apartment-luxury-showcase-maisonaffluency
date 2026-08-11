@@ -1671,17 +1671,17 @@ const DesignersHoverHero = () => {
           />
         )}
         {/* Readability overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/30 md:from-black/60 md:via-black/30 md:to-black/5" />
+        <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/80 via-black/55 to-black/30 md:from-black/60 md:via-black/30 md:to-black/5 pointer-events-none" />
         {/* Vignette overlay — deepens edges behind text so headings and
             names stay legible over dark, textured furniture imagery. */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(0,0,0,0.28)_100%)] pointer-events-none" />
+        <div className="absolute inset-0 z-10 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(0,0,0,0.28)_100%)] pointer-events-none" />
         {/* Bottom edge — kept clean so the hero meets the directory runway
             below without a heavy black mask. */}
-        <div className="hidden md:block absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/25 to-transparent pointer-events-none" />
+        <div className="hidden md:block absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t from-black/25 to-transparent pointer-events-none" />
         {/* Desktop left column backdrop — dedicates the left portion of the hero to
             a solid dark panel so the designer list never overlaps furniture
             imagery on the right. */}
-        <div className="hidden md:block absolute inset-y-0 left-0 w-[38%] bg-gradient-to-r from-black via-black/90 to-transparent pointer-events-none" />
+        <div className="hidden md:block absolute inset-y-0 left-0 z-10 w-[38%] bg-gradient-to-r from-black via-black/90 to-transparent pointer-events-none" />
       </div>
 
       {/* Luxury scroll indicator — desktop only */}
