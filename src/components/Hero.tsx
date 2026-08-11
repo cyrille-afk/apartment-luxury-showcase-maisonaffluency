@@ -90,7 +90,7 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative h-screen w-full overflow-hidden">
+    <section className="relative flex min-h-screen w-full flex-col justify-between md:h-screen md:overflow-hidden">
       {/* Hero image is rendered by the static <picture id="static-hero"> in
           index.html (fixed, z-index:0, painted from the preloaded bytes
           before React boots). We intentionally do NOT re-render the image
@@ -110,15 +110,16 @@ const Hero = () => {
         </picture>
       )}
 
-      {/* Legibility scrim: subtle bottom-35% lift on mobile/PWA, subtler on desktop */}
+      {/* Legibility scrim: strong bottom fade on mobile/PWA, subtler on desktop */}
       <div
-        className="absolute inset-x-0 bottom-0 h-[35%] pointer-events-none bg-gradient-to-t from-black/45 via-black/15 to-transparent md:from-black/40 md:to-transparent md:via-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/90 via-black/55 to-transparent md:h-[35%] md:from-black/40 md:via-transparent md:to-transparent"
         aria-hidden="true"
       />
 
+
       {/* Text overlay — desktop keeps the previous anchored-top editorial layout;
           mobile/PWA uses a bottom-anchored simplified CTA stack. */}
-      <div className="ma-home-hero-copy relative z-10 flex h-full flex-col items-start justify-between px-6 pb-[calc(env(safe-area-inset-bottom)+4.5rem)] pt-[var(--home-hero-mobile-pad-top)] md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48">
+      <div className="ma-home-hero-copy relative z-10 flex min-h-screen flex-1 flex-col items-start justify-between px-6 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-[var(--home-hero-mobile-pad-top)] md:h-full md:min-h-0 md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48">
         <div className="max-w-4xl md:text-left">
           <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
             Modern Masters.<br />
@@ -178,12 +179,15 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* Mobile / PWA — simplified bottom-anchored CTA stack */}
-        <div className="flex flex-col items-start gap-6 hero-fade-in-delayed-5 md:hidden">
+        {/* Mobile / PWA — bottom-anchored CTA container */}
+        <nav
+          aria-label="Hero actions"
+          className="hero-fade-in-delayed-5 mt-10 flex w-full flex-col items-stretch divide-y divide-white/15 border-t border-white/15 pt-1 md:hidden"
+        >
           <motion.button
             type="button"
             onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-            className="group inline-flex items-center gap-3 font-body text-[11px] font-medium uppercase tracking-[0.3em] text-white transition-opacity duration-300 hover:opacity-70 touch-manipulation [text-shadow:0_1px_8px_rgba(0,0,0,0.6)]"
+            className="group inline-flex min-h-[52px] w-full items-center justify-between gap-3 py-3.5 font-body text-[11px] font-medium uppercase tracking-[0.3em] text-white transition-opacity duration-300 hover:opacity-70 touch-manipulation"
             whileTap={{ scale: 0.98, opacity: 0.75 }}
             transition={{ duration: 0.2 }}
           >
@@ -203,7 +207,7 @@ const Hero = () => {
               trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
               scrollToSection("apartment-tour-heading");
             }}
-            className="font-body text-[10px] font-light uppercase tracking-[0.34em] text-white/90 transition-opacity duration-300 hover:opacity-70 [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] touch-manipulation"
+            className="inline-flex min-h-[52px] w-full items-center py-3.5 text-left font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70 touch-manipulation"
           >
             Singapore Gallery Preview
           </button>
@@ -211,12 +215,13 @@ const Hero = () => {
           <button
             type="button"
             onClick={openTour}
-            className="group font-body text-[10px] font-light uppercase tracking-[0.34em] text-white/90 transition-opacity duration-300 hover:opacity-70 [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] touch-manipulation"
+            className="group inline-flex min-h-[52px] w-full items-center py-3.5 text-left font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70 touch-manipulation"
           >
             <span>Book Private Appointment</span>
-            <span className="ml-2 tracking-[0.2em] text-white/75">(Trade Only)</span>
+            <span className="ml-2 tracking-[0.2em] text-white/70">(Trade Only)</span>
           </button>
-        </div>
+        </nav>
+
       </div>
 
       <PrivateTourDialog open={tourOpen} onOpenChange={setTourOpen} />
