@@ -1944,10 +1944,10 @@ const PublicDesignerProfile = () => {
                           </div>
                         )}
 
-                        {/* Editorial page-corner fold — replaces the circular arrow on mobile/PWA */}
+                        {/* Lifted corner shadow — tactile paper-lift effect on white cards */}
                         <div
                           aria-hidden="true"
-                          className="md:hidden pointer-events-none absolute bottom-0 right-0 z-20 h-8 w-8 origin-bottom-right [clip-path:polygon(100%_0,100%_100%,0_100%)] bg-gradient-to-tl from-white/25 via-white/10 to-transparent opacity-60 shadow-[-2px_-2px_10px_rgba(255,255,255,0.08)] transition-all duration-300 group-hover:h-10 group-hover:w-10 group-hover:opacity-90 group-hover:shadow-[-3px_-3px_14px_rgba(255,255,255,0.12)]"
+                          className="md:hidden pointer-events-none absolute bottom-0 right-0 z-20 h-10 w-10 bg-gradient-to-tl from-black/[0.05] via-black/[0.02] to-transparent opacity-80 transition-all duration-300 group-hover:h-12 group-hover:w-12 group-hover:from-black/[0.09] group-hover:via-black/[0.04]"
                         />
                       </div>
 
