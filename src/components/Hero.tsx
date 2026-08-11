@@ -179,12 +179,15 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* Mobile / PWA — simplified bottom-anchored CTA stack */}
-        <div className="flex flex-col items-start gap-6 hero-fade-in-delayed-5 md:hidden">
+        {/* Mobile / PWA — bottom-anchored CTA container */}
+        <nav
+          aria-label="Hero actions"
+          className="hero-fade-in-delayed-5 mt-10 flex w-full flex-col items-stretch divide-y divide-white/15 border-t border-white/15 pt-1 md:hidden"
+        >
           <motion.button
             type="button"
             onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-            className="group inline-flex items-center gap-3 font-body text-[11px] font-medium uppercase tracking-[0.3em] text-white transition-opacity duration-300 hover:opacity-70 touch-manipulation [text-shadow:0_1px_8px_rgba(0,0,0,0.6)]"
+            className="group inline-flex min-h-[52px] w-full items-center justify-between gap-3 py-3.5 font-body text-[11px] font-medium uppercase tracking-[0.3em] text-white transition-opacity duration-300 hover:opacity-70 touch-manipulation"
             whileTap={{ scale: 0.98, opacity: 0.75 }}
             transition={{ duration: 0.2 }}
           >
@@ -204,7 +207,7 @@ const Hero = () => {
               trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
               scrollToSection("apartment-tour-heading");
             }}
-            className="font-body text-[10px] font-light uppercase tracking-[0.34em] text-white/90 transition-opacity duration-300 hover:opacity-70 [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] touch-manipulation"
+            className="inline-flex min-h-[52px] w-full items-center py-3.5 text-left font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70 touch-manipulation"
           >
             Singapore Gallery Preview
           </button>
@@ -212,12 +215,13 @@ const Hero = () => {
           <button
             type="button"
             onClick={openTour}
-            className="group font-body text-[10px] font-light uppercase tracking-[0.34em] text-white/90 transition-opacity duration-300 hover:opacity-70 [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] touch-manipulation"
+            className="group inline-flex min-h-[52px] w-full items-center py-3.5 text-left font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70 touch-manipulation"
           >
             <span>Book Private Appointment</span>
-            <span className="ml-2 tracking-[0.2em] text-white/75">(Trade Only)</span>
+            <span className="ml-2 tracking-[0.2em] text-white/70">(Trade Only)</span>
           </button>
-        </div>
+        </nav>
+
       </div>
 
       <PrivateTourDialog open={tourOpen} onOpenChange={setTourOpen} />
