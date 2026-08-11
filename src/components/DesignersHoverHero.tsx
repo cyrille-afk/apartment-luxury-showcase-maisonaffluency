@@ -1662,17 +1662,13 @@ const DesignersHoverHero = () => {
             className="inset-0 h-full w-full"
           />
         ) : (
-          <div
-            ref={parallaxBgRef}
-            className="absolute inset-0 z-0 pointer-events-none"
-          >
-            <HeroBgLayer
-              items={items}
-              activeSlug={activeSlug}
-              mode="desktop"
-              suffix="bg"
-            />
-          </div>
+          <HeroBgLayer
+            items={items}
+            activeSlug={activeSlug}
+            mode="desktop"
+            suffix="bg"
+            className="inset-0 h-full w-full"
+          />
         )}
         {/* Readability overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/30 md:from-black/60 md:via-black/30 md:to-black/5" />
