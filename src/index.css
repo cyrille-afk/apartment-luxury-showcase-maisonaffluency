@@ -257,8 +257,15 @@ All colors MUST be HSL.
     --home-hero-mobile-pad-top: 16rem;
   }
 
+  .hero-mobile-micro-block.is-pwa {
+    margin-top: 18svh;
+  }
 
-
+  /* Frosted "Singapore Gallery Preview" panel flows inline beneath the CTA
+     (no absolute bottom pinning) with safe-area breathing room. */
+  .hero-mobile-links-inner {
+    margin-bottom: env(safe-area-inset-bottom);
+  }
 
   .hero-fade-in,
   .hero-fade-in-delayed-1,
