@@ -1353,7 +1353,7 @@ const PublicDesignerProfile = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={transition}
-                className="relative mx-auto w-full max-w-none md:max-w-[720px] rounded-none md:rounded-xl overflow-hidden shrink-0"
+                className="relative -mx-4 md:mx-auto w-full max-w-none md:max-w-[720px] rounded-none md:rounded-xl overflow-hidden shrink-0"
               >
                 <div className="aspect-[4/3] sm:aspect-[3/2] md:aspect-[16/10] lg:aspect-[16/9] max-h-[75vh]">
                   {heroImage && (

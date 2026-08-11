@@ -1920,7 +1920,7 @@ const PublicProductPage: React.FC = () => {
 
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-8 lg:gap-16">
-            <div id="main-product-image-container" className="relative md:sticky md:top-[calc(var(--header-h)+1rem)] h-fit self-start z-30 bg-background" ref={galleryScrollRef}>
+            <div id="main-product-image-container" className="relative -mx-4 md:mx-0 md:sticky md:top-[calc(var(--header-h)+1rem)] h-fit self-start z-30 bg-background" ref={galleryScrollRef}>
               <ProductImageGallery
                 images={visibleImages}
                 alt={product.title}
