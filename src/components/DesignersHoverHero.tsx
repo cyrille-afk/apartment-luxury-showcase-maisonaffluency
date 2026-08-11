@@ -282,7 +282,7 @@ const DESKTOP_HERO_BG_OVERRIDES: Record<string, string> = {
   "dagmar-london":
     "https://res.cloudinary.com/dif1oamtj/image/upload/v1786274677/Screen_Shot_2026-08-09_at_7.22.06_PM_wldg1a.png",
   "michel-boyer":
-    "https://res.cloudinary.com/dif1oamtj/image/upload/v1786416028/Screenshot_2026-08-11_at_10.39.31_AM_ud52xm.png",
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1786416846/Screenshot_2026-08-11_at_10.53.43_AM_zmnyos.png",
 };
 
 
