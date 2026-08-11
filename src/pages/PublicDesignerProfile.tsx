@@ -4,7 +4,7 @@ import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal, Square, Grid2X2, Heart, SquareArrowUpRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal, Square, Grid2X2, SquareArrowUpRight } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,6 @@ import {
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
-import StudioSaveButton from "@/components/product/StudioSaveButton";
 import { useDesigner, useDesignerByName, useDesignerPicks, useGroupedDesignerPicks, useAllDesigners } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
 import { cn } from "@/lib/utils";
@@ -1925,22 +1924,6 @@ const PublicDesignerProfile = () => {
                             </div>
                           );
                         })()}
-
-                        {/* Mobile save / bookmark */}
-                        <div className="absolute top-2 right-2 z-10 md:hidden">
-                          {user ? (
-                            <StudioSaveButton pickId={pick.id} productTitle={displayTitle} className="w-8 h-8" />
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); }}
-                              aria-label="Save to favorites"
-                              className="flex items-center justify-center w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm border border-border shadow-sm text-foreground active:scale-95 transition-transform"
-                            >
-                              <Heart className="h-3.5 w-3.5" strokeWidth={1.5} />
-                            </button>
-                          )}
-                        </div>
 
                         <div className="hidden md:block absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
