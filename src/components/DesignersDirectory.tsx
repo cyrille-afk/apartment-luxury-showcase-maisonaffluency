@@ -1911,11 +1911,11 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                   if (!open && selectedCategory) broadcastFilter(selectedCategory, selectedSubcategory);
                 }}>
                   <SheetTrigger asChild>
-                    <button className="flex items-center gap-1.5 px-3 h-8 rounded-full border border-[hsl(var(--gold))] bg-background shadow-sm hover:shadow-md text-foreground transition-all duration-300 relative" aria-label="Filter">
-                      <SlidersHorizontal className="h-3.5 w-3.5" />
-                      <span className="text-[10px] font-body uppercase tracking-[0.15em] font-semibold">Filter</span>
+                    <button className="group flex items-center gap-1.5 text-foreground/70 hover:text-foreground transition-colors duration-200 relative" aria-label="Filter">
+                      <span className="text-[11px] font-body uppercase tracking-[0.22em] font-medium">Filter</span>
+                      <ChevronDown className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-y-0.5" />
                       {selectedCategory && (
-                        <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">1</span>
+                        <span className="absolute -top-1 -right-2 h-1.5 w-1.5 bg-primary rounded-full" aria-hidden="true" />
                       )}
                     </button>
                   </SheetTrigger>
