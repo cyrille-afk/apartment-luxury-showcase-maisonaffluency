@@ -121,12 +121,12 @@ const Hero = () => {
         </picture>
       )}
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/20" />
-      {/* Mobile/PWA only: soft dark radial gradient across bottom half for text contrast */}
+      {/* Mobile/PWA only: subtle linear scrim across the bottom third for legibility */}
       <div
-        className="absolute inset-x-0 bottom-0 h-1/2 pointer-events-none md:hidden"
+        className="absolute inset-x-0 bottom-0 h-1/3 pointer-events-none md:hidden"
         style={{
           background:
-            "radial-gradient(ellipse 120% 100% at 50% 100%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0) 100%)",
+            "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.12) 55%, rgba(0,0,0,0.3) 100%)",
         }}
         aria-hidden="true"
       />
