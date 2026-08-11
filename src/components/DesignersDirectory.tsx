@@ -472,7 +472,7 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
                 <Link
                   key={d.slug}
                   to={`/designers/${d.slug}`}
-                  className="group/sub rounded-lg overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all"
+                  className="group/sub rounded-none overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all"
                 >
                   <div className="aspect-[4/5] relative bg-muted/10 overflow-hidden">
                     {d.image ? (
