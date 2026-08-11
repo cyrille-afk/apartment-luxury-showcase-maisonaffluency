@@ -41,7 +41,7 @@ const PublicGallery = () => {
         <meta name="twitter:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg" />
       </Helmet>
 
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-screen bg-white text-foreground">
         <Navigation />
         <h1 className="sr-only">Maison Affluency Gallery</h1>
 
