@@ -90,7 +90,7 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative h-screen w-full overflow-hidden">
+    <section className="relative flex min-h-screen w-full flex-col justify-between md:h-screen md:overflow-hidden">
       {/* Hero image is rendered by the static <picture id="static-hero"> in
           index.html (fixed, z-index:0, painted from the preloaded bytes
           before React boots). We intentionally do NOT re-render the image
