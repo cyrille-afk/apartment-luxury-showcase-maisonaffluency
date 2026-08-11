@@ -1270,7 +1270,7 @@ function pickSlugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-const PickCard = ({ pick, onFavorite, isFavorited, rrp }: { pick: PickItem; onFavorite?: (id: string) => void; isFavorited?: boolean; rrp?: PublicRrpRow | null }) => {
+const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: PickItem; onFavorite?: (id: string) => void; isFavorited?: boolean; rrp?: PublicRrpRow | null; hideFavorite?: boolean }) => {
   const navigate = useNavigate();
   const productSlug = pickSlugify(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""));
   return (
