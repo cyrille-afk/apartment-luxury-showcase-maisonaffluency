@@ -1468,17 +1468,20 @@ const DesignersHoverHero = () => {
     };
   }, [hasItems, items.length]);
 
-  // Luxury desktop parallax: the hero background scrolls slightly slower than
-  // the page content, creating a subtle editorial depth effect. A single
-  // background plane is used so the image never duplicates at the bottom edge.
-  // Uses direct DOM transforms inside requestAnimationFrame to avoid React
-  // re-renders on scroll.
+  // Luxury desktop parallax: split the hero into two planes.
+  //   - Background plane (wall/paneling): moves at ~0.7x page speed.
+  //   - Foreground plane (console table, lamp, sculptures): moves with the
+  //     section at normal page speed (no extra transform).
+  // A soft mask seam sits in the upper wall area so the split is hidden in
+  // the relatively uniform paneling. Uses direct DOM transforms inside
+  // requestAnimationFrame to avoid React re-renders on scroll.
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (isMobileOrPwa) return;
     const section = sectionRef.current;
     const bg = parallaxBgRef.current;
-    if (!section || !bg) return;
+    const fg = parallaxFgRef.current;
+    if (!section || !bg || !fg) return;
 
     let rafId = 0;
     let ticking = false;
@@ -1488,11 +1491,14 @@ const DesignersHoverHero = () => {
       const vh = window.innerHeight;
       const range = vh + rect.height;
       const progress = Math.max(0, Math.min(1, (vh - rect.top) / range));
-      // Subtle 12% of section-height shift keeps the effect elegant and
-      // avoids revealing the oversized image edges.
-      const maxShift = rect.height * 0.12;
-      const bgShift = progress * maxShift;
+      // Background plane lags behind the page scroll (0.7 speed factor).
+      // Counteract 30% of the section's upward movement so it rises slower.
+      const maxShift = rect.height * 0.18;
+      const bgShift = progress * maxShift * 0.7;
       bg.style.transform = `translateY(${bgShift}px)`;
+      // Foreground plane is absolutely positioned inside the section, so it
+      // naturally travels at normal page speed. No transform needed.
+      fg.style.transform = "translateY(0px)";
     };
     const onScroll = () => {
       if (!ticking) {
