@@ -1470,6 +1470,22 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const [filterOpen, setFilterOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // ─── Mobile/PWA detection ───
+  const isMobile = useIsMobile();
+  const [isStandalone, setIsStandalone] = useState(() => isPwaStandaloneDisplay());
+  useEffect(() => {
+    const update = () => setIsStandalone(isPwaStandaloneDisplay());
+    const media = window.matchMedia?.("(display-mode: standalone)");
+    media?.addEventListener("change", update);
+    window.addEventListener("pwa-mode-changed", update);
+    update();
+    return () => {
+      media?.removeEventListener("change", update);
+      window.removeEventListener("pwa-mode-changed", update);
+    };
+  }, []);
+  const hideCuratorPickFavorite = isMobile || isStandalone;
+
   // ─── Public favorites (localStorage-backed) with auth gate ───
   const { user } = useAuth();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
