@@ -36,6 +36,8 @@ import { getDesignersDirectoryLayout } from "@/lib/designersDirectoryAnchors";
 import { jumpToDesignerLetter } from "@/lib/jumpToDesignerLetter";
 import { getCategoryHero } from "@/constants/categoryHeroes";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 
 import { categoryUrl } from "@/lib/categorySlugs";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
@@ -1268,7 +1270,7 @@ function pickSlugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-const PickCard = ({ pick, onFavorite, isFavorited, rrp }: { pick: PickItem; onFavorite?: (id: string) => void; isFavorited?: boolean; rrp?: PublicRrpRow | null }) => {
+const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: PickItem; onFavorite?: (id: string) => void; isFavorited?: boolean; rrp?: PublicRrpRow | null; hideFavorite?: boolean }) => {
   const navigate = useNavigate();
   const productSlug = pickSlugify(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""));
   return (
@@ -1333,25 +1335,28 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp }: { pick: PickItem; onFa
             grid stays clean on mobile (mirrors PublicDesignerProfile).
             Mobile users see the description inside the product sheet only. */}
         <ProductCardDescriptionOverlay description={pick.description} />
-        {/* Hover action icons */}
-        <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-          <FavoriteFolderPicker pickId={pick.id}>
-            <span
-              role="button"
-              tabIndex={0}
-              onClick={(e) => e.stopPropagation()}
-              className={cn(
-                "p-1.5 rounded-full backdrop-blur-sm transition-colors cursor-pointer",
-                isFavorited
-                  ? "bg-white text-red-500"
-                  : "bg-black/40 text-white hover:bg-black/60"
-              )}
-              title={isFavorited ? "Manage folders" : "Save to favorites"}
-            >
-              <Heart className={cn("w-3.5 h-3.5", isFavorited && "fill-current")} />
-            </span>
-          </FavoriteFolderPicker>
-        </div>
+        {/* Hover action icons — hidden on mobile/PWA so the curator-pick grid
+            stays clean; favorites remain available on the product page photos. */}
+        {!hideFavorite && (
+          <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+            <FavoriteFolderPicker pickId={pick.id}>
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={(e) => e.stopPropagation()}
+                className={cn(
+                  "p-1.5 rounded-full backdrop-blur-sm transition-colors cursor-pointer",
+                  isFavorited
+                    ? "bg-white text-red-500"
+                    : "bg-black/40 text-white hover:bg-black/60"
+                )}
+                title={isFavorited ? "Manage folders" : "Save to favorites"}
+              >
+                <Heart className={cn("w-3.5 h-3.5", isFavorited && "fill-current")} />
+              </span>
+            </FavoriteFolderPicker>
+          </div>
+        )}
 
 
       </div>
@@ -1464,6 +1469,22 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   });
   const [filterOpen, setFilterOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // ─── Mobile/PWA detection ───
+  const isMobile = useIsMobile();
+  const [isStandalone, setIsStandalone] = useState(() => isPwaStandaloneDisplay());
+  useEffect(() => {
+    const update = () => setIsStandalone(isPwaStandaloneDisplay());
+    const media = window.matchMedia?.("(display-mode: standalone)");
+    media?.addEventListener("change", update);
+    window.addEventListener("pwa-mode-changed", update);
+    update();
+    return () => {
+      media?.removeEventListener("change", update);
+      window.removeEventListener("pwa-mode-changed", update);
+    };
+  }, []);
+  const hideCuratorPickFavorite = isMobile || isStandalone;
 
   // ─── Public favorites (localStorage-backed) with auth gate ───
   const { user } = useAuth();
@@ -2138,7 +2159,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 ) : (
                   <div className={`grid gap-4 md:gap-6 lg:gap-8 grid-cols-2 ${sidebarOpen ? 'md:grid-cols-3 lg:grid-cols-4' : 'md:grid-cols-3'}`}>
                     {filteredPicks.map((pick) => (
-                      <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} rrp={publicRrpMap?.[pick.id]} />
+                      <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} rrp={publicRrpMap?.[pick.id]} hideFavorite={hideCuratorPickFavorite} />
                     ))}
                   </div>
                 )
@@ -2194,7 +2215,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               ) : (
                   <div data-category-results className="grid gap-4 md:gap-6 lg:gap-8 grid-cols-2 scroll-header-offset">
                   {filteredPicks.map((pick) => (
-                    <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} rrp={publicRrpMap?.[pick.id]} />
+                    <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} rrp={publicRrpMap?.[pick.id]} hideFavorite={hideCuratorPickFavorite} />
                   ))}
                 </div>
               )
