@@ -119,7 +119,7 @@ const Hero = () => {
 
       {/* Text overlay — desktop keeps the previous anchored-top editorial layout;
           mobile/PWA uses a bottom-anchored simplified CTA stack. */}
-      <div className="ma-home-hero-copy relative z-10 flex h-full flex-col items-start justify-between px-6 pb-[calc(env(safe-area-inset-bottom)+4.5rem)] pt-[var(--home-hero-mobile-pad-top)] md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48">
+      <div className="ma-home-hero-copy relative z-10 flex min-h-screen flex-1 flex-col items-start justify-between px-6 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-[var(--home-hero-mobile-pad-top)] md:h-full md:min-h-0 md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48">
         <div className="max-w-4xl md:text-left">
           <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
             Modern Masters.<br />
