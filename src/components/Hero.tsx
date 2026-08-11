@@ -26,34 +26,9 @@ const HERO_MOBILE_SRCSET = [
 const HERO_SAFARI_FALLBACK = `${HERO_BASE}/w_780,h_1688,c_fill,g_auto,q_auto:good,f_jpg/${HERO_ID}`;
 const HERO_SAFARI_FALLBACK_DESKTOP = `${HERO_BASE}/w_1920,c_fill,q_auto:good,f_jpg/${HERO_ID}`;
 
-const revealBelowFold = () => {
-  window.dispatchEvent(new CustomEvent("ma:reveal-below-fold"));
-};
-
-const scrollToMeetDesigners = () => {
-  revealBelowFold();
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      const el = document.getElementById("meet-designers-headline");
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      } else {
-        scrollToSection("meet-designers");
-      }
-    });
-  });
-};
-
-const heroPrimaryCtaClass =
-  "group inline-flex min-h-12 items-center justify-center gap-3 rounded-none border border-white/80 bg-transparent px-9 py-3.5 text-center text-white text-[11px] md:text-xs font-body font-light tracking-[0.3em] uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] drop-shadow-[0_1px_4px_rgba(0,0,0,0.45)] transition-[background-color,border-color,color,opacity] duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:border-white hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent hero-fade-in-delayed-4";
-
-
-
 const Hero = () => {
   const navigate = useNavigate();
   const [tourOpen, setTourOpen] = useState(false);
-  const [isBookingLoading, setIsBookingLoading] = useState(false);
-  const [isPWA, setIsPWA] = useState(false);
   const [showImageFallback, setShowImageFallback] = useState(false);
 
   useEffect(() => {
@@ -82,16 +57,9 @@ const Hero = () => {
     if (staticImage?.complete) verifyImage();
     const verificationTimer = window.setTimeout(verifyImage, 1800);
 
-    // Detect PWA standalone mode (installed app)
-    const mql = window.matchMedia("(display-mode: standalone)");
-    const check = () =>
-      setIsPWA(mql.matches || (window.navigator as any).standalone === true);
-    check();
-    mql.addEventListener?.("change", check);
     return () => {
       window.clearTimeout(verificationTimer);
       staticImage?.removeEventListener("error", recoverImage);
-      mql.removeEventListener?.("change", check);
     };
   }, []);
 
@@ -120,124 +88,69 @@ const Hero = () => {
           />
         </picture>
       )}
-      {/* Subtle legibility scrim across the bottom 40% of the hero */}
+
+      {/* Global rear gradient: single continuous scrim across the bottom 40% */}
       <div
-        className="absolute inset-x-0 bottom-0 h-[40%] pointer-events-none bg-gradient-to-t from-black/40 to-transparent"
+        className="absolute inset-x-0 bottom-0 h-[40%] pointer-events-none bg-gradient-to-t from-black/60 via-black/20 to-transparent"
         aria-hidden="true"
       />
 
-      {/* Text overlay — CSS-only animations, no framer-motion needed */}
-      <div className="ma-home-hero-copy relative z-10 h-full px-6 pb-[calc(env(safe-area-inset-bottom)+4.5rem)] pt-[var(--home-hero-mobile-pad-top)] md:px-32 md:pb-20 md:pt-[24rem] lg:px-48 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
+      {/* Text overlay — anchored lower-left for a cohesive gallery-directory read */}
+      <div className="ma-home-hero-copy relative z-10 flex h-full flex-col items-start justify-between px-6 pb-[calc(env(safe-area-inset-bottom)+4.5rem)] pt-[var(--home-hero-mobile-pad-top)] md:px-32 md:pb-20 md:pt-[24rem] lg:px-48">
         <div className="max-w-4xl md:text-left">
           <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
             Modern Masters.<br />
             Iconic Design.
           </h1>
 
-          <div className="mt-8 md:mt-10 flex w-full max-w-3xl flex-col items-start">
-            <p className="relative inline-block text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium [text-shadow:0_1px_10px_rgba(0,0,0,0.55)] hero-fade-in-delayed-3 before:content-[''] before:absolute before:-inset-x-3 before:-inset-y-2 before:-z-10 before:rounded-sm before:bg-black/30 before:backdrop-blur-[1px] before:[mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)]">
-              A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
-            </p>
-            <div className="hero-mobile-cta-stack w-screen -translate-x-6 items-center md:w-full md:translate-x-0 md:items-start mt-12 md:mt-20 flex flex-col gap-5 md:gap-6">
-              <div className="flex flex-col items-center gap-6 md:inline-flex md:items-start">
-                <motion.button
-                  type="button"
-                  onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-                  className={`${heroPrimaryCtaClass} touch-manipulation md:order-2`}
-                  whileTap={{ scale: 0.98, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <span>EXPLORE THE COLLECTION</span>
-                  <motion.span
-                    aria-hidden="true"
-                    animate={{ x: [0, 4] }}
-                    transition={{ duration: 1.2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-                  >
-                    &#8594;
-                  </motion.span>
-                </motion.button>
+          <p className="relative mt-8 md:mt-10 inline-block text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium [text-shadow:0_1px_10px_rgba(0,0,0,0.55)] hero-fade-in-delayed-3">
+            A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
+          </p>
+        </div>
 
+        <div className="flex flex-col items-start gap-6 hero-fade-in-delayed-5">
+          <motion.button
+            type="button"
+            onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
+            className="group inline-flex items-center gap-3 font-body text-[11px] md:text-xs font-medium uppercase tracking-[0.3em] text-white transition-opacity duration-300 hover:opacity-70 touch-manipulation [text-shadow:0_1px_8px_rgba(0,0,0,0.6)]"
+            whileTap={{ scale: 0.98, opacity: 0.75 }}
+            transition={{ duration: 0.2 }}
+          >
+            <span>EXPLORE THE COLLECTION</span>
+            <motion.span
+              aria-hidden="true"
+              animate={{ x: [0, 4] }}
+              transition={{ duration: 1.2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+            >
+              →
+            </motion.span>
+          </motion.button>
 
-                {/* Desktop — inline editorial links, raised above the CTA over the darker
-                    left-hand section of the image, with a soft scrim for legibility */}
-                <div className="hidden hero-fade-in-delayed-5 md:order-1 md:mb-2 md:flex md:flex-col md:items-start">
-                  <div className="relative inline-flex items-center gap-3 before:content-[''] before:absolute before:-inset-x-4 before:-inset-y-2.5 before:-z-10 before:rounded-sm before:bg-black/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)] [text-shadow:0_1px_4px_rgba(0,0,0,0.6)]">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-                        scrollToSection("apartment-tour-heading");
-                      }}
-                      className="font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70"
-                    >
-                      Singapore Gallery Preview
-                    </button>
-                    <span className="h-3 w-px bg-white/40" aria-hidden="true" />
-                    <button
-                      type="button"
-                      onClick={openTour}
-                      className="group font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70"
-                    >
-                      <span>Book Private Appointment</span>
-                      <span className="ml-2 tracking-[0.2em] text-white/70">(Trade Only)</span>
-                    </button>
-                  </div>
-                </div>
+          <button
+            type="button"
+            onClick={() => {
+              trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
+              scrollToSection("apartment-tour-heading");
+            }}
+            className="font-body text-[10px] md:text-[11px] font-light uppercase tracking-[0.34em] text-white/80 transition-opacity duration-300 hover:opacity-70 [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] touch-manipulation"
+          >
+            Singapore Gallery Preview
+          </button>
 
-              </div>
-
-              {/* Mobile / PWA — borderless editorial actions directly over the image */}
-              <div className={`hero-mobile-links-inner${isPWA ? " is-pwa" : ""} mt-8 flex w-[calc(100%-3rem)] max-w-md flex-col items-center gap-4 text-center hero-fade-in-delayed-5 md:hidden`}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-                    scrollToSection("apartment-tour-heading");
-                  }}
-                  className="bg-transparent font-body text-[11px] font-light uppercase tracking-[0.34em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] touch-manipulation"
-                >
-                  Singapore Gallery Preview
-                </button>
-
-                <div className="h-px w-full bg-white/70" aria-hidden="true" />
-
-                <motion.button
-                  type="button"
-                  onClick={() => {
-                    trackCTA.bookAppointment("Hero Mobile Links");
-                    setIsBookingLoading(true);
-                    window.setTimeout(() => {
-                      setTourOpen(true);
-                      setIsBookingLoading(false);
-                    }, 500);
-                  }}
-                  disabled={isBookingLoading}
-                  className="flex min-h-[36px] w-full items-center justify-center gap-2 bg-transparent px-0 py-1 font-body text-[11px] font-light uppercase tracking-[0.34em] whitespace-nowrap text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] touch-manipulation"
-                  whileTap={{ scale: 0.98, opacity: 0.75 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {isBookingLoading ? (
-                    <motion.span
-                      className="inline-block h-4 w-4 rounded-full border border-white/30 border-t-white"
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-                    />
-                  ) : (
-                    <>
-                      <span>Book Private Appointment</span>
-                      <span className="text-[9px] font-normal italic lowercase tracking-normal text-white/70">(trade only)</span>
-                    </>
-                  )}
-                </motion.button>
-              </div>
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={openTour}
+            className="group font-body text-[10px] md:text-[11px] font-light uppercase tracking-[0.34em] text-white/80 transition-opacity duration-300 hover:opacity-70 [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] touch-manipulation"
+          >
+            <span>Book Private Appointment</span>
+            <span className="ml-2 tracking-[0.2em] text-white/60">(Trade Only)</span>
+          </button>
         </div>
       </div>
-
 
       <PrivateTourDialog open={tourOpen} onOpenChange={setTourOpen} />
     </section>
   );
 };
+
 export default Hero;

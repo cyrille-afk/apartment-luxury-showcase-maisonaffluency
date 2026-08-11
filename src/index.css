@@ -257,15 +257,6 @@ All colors MUST be HSL.
     --home-hero-mobile-pad-top: 16rem;
   }
 
-  .hero-mobile-micro-block.is-pwa {
-    margin-top: 18svh;
-  }
-
-  /* Frosted "Singapore Gallery Preview" panel flows inline beneath the CTA
-     (no absolute bottom pinning) with safe-area breathing room. */
-  .hero-mobile-links-inner {
-    margin-bottom: env(safe-area-inset-bottom);
-  }
 
 
 
@@ -286,30 +277,6 @@ All colors MUST be HSL.
     --home-hero-mobile-pad-top: 12.5rem;
   }
 
-  .hero-mobile-cta-stack {
-    margin-top: 3rem !important;
-    gap: 1rem !important;
-  }
-
-  .hero-mobile-links-inner {
-    gap: 0.5rem !important;
-  }
-
-  .hero-mobile-links-inner button {
-    padding-top: 0.25rem !important;
-    padding-bottom: 0.25rem !important;
-  }
-
-  .hero-mobile-micro-block {
-    gap: 0.375rem !important;
-    margin-bottom: calc(env(safe-area-inset-bottom) + 0.25rem) !important;
-    padding-top: 0.625rem !important;
-    padding-bottom: 0.625rem !important;
-  }
-
-  .hero-mobile-micro-block.is-pwa {
-    margin-top: 1svh !important;
-  }
 }
 
 @media (min-width: 768px) {
