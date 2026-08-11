@@ -26,6 +26,27 @@ const HERO_MOBILE_SRCSET = [
 const HERO_SAFARI_FALLBACK = `${HERO_BASE}/w_780,h_1688,c_fill,g_auto,q_auto:good,f_jpg/${HERO_ID}`;
 const HERO_SAFARI_FALLBACK_DESKTOP = `${HERO_BASE}/w_1920,c_fill,q_auto:good,f_jpg/${HERO_ID}`;
 
+const revealBelowFold = () => {
+  window.dispatchEvent(new CustomEvent("ma:reveal-below-fold"));
+};
+
+const scrollToMeetDesigners = () => {
+  revealBelowFold();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const el = document.getElementById("meet-designers-headline");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        scrollToSection("meet-designers");
+      }
+    });
+  });
+};
+
+const heroPrimaryCtaClass =
+  "group inline-flex min-h-12 items-center justify-center gap-3 rounded-none border border-white/80 bg-transparent px-9 py-3.5 text-center text-white text-[11px] md:text-xs font-body font-light tracking-[0.3em] uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] drop-shadow-[0_1px_4px_rgba(0,0,0,0.45)] transition-[background-color,border-color,color,opacity] duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:border-white hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent hero-fade-in-delayed-4";
+
 const Hero = () => {
   const navigate = useNavigate();
   const [tourOpen, setTourOpen] = useState(false);
@@ -89,30 +110,80 @@ const Hero = () => {
         </picture>
       )}
 
-      {/* Global rear gradient: single continuous scrim across the bottom 40% */}
+      {/* Legibility scrim: stronger on mobile/PWA, subtler on desktop */}
       <div
-        className="absolute inset-x-0 bottom-0 h-[40%] pointer-events-none bg-gradient-to-t from-black/60 via-black/20 to-transparent"
+        className="absolute inset-x-0 bottom-0 h-[40%] pointer-events-none bg-gradient-to-t from-black/60 via-black/20 to-transparent md:from-black/40 md:to-transparent md:via-transparent"
         aria-hidden="true"
       />
 
-      {/* Text overlay — anchored lower-left for a cohesive gallery-directory read */}
-      <div className="ma-home-hero-copy relative z-10 flex h-full flex-col items-start justify-between px-6 pb-[calc(env(safe-area-inset-bottom)+4.5rem)] pt-[var(--home-hero-mobile-pad-top)] md:px-32 md:pb-20 md:pt-[24rem] lg:px-48">
+      {/* Text overlay — desktop keeps the previous anchored-top editorial layout;
+          mobile/PWA uses a bottom-anchored simplified CTA stack. */}
+      <div className="ma-home-hero-copy relative z-10 flex h-full flex-col items-start justify-between px-6 pb-[calc(env(safe-area-inset-bottom)+4.5rem)] pt-[var(--home-hero-mobile-pad-top)] md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48">
         <div className="max-w-4xl md:text-left">
           <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
             Modern Masters.<br />
             Iconic Design.
           </h1>
 
-          <p className="relative mt-8 md:mt-10 inline-block text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium [text-shadow:0_1px_10px_rgba(0,0,0,0.55)] hero-fade-in-delayed-3">
-            A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
-          </p>
+          <div className="mt-8 md:mt-10 flex w-full max-w-3xl flex-col items-start">
+            <p className="relative inline-block text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium [text-shadow:0_1px_10px_rgba(0,0,0,0.55)] hero-fade-in-delayed-3 before:content-[''] before:absolute before:-inset-x-3 before:-inset-y-2 before:-z-10 before:rounded-sm before:bg-black/30 before:backdrop-blur-[1px] before:[mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)]">
+              A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
+            </p>
+
+            {/* Desktop — previous display: primary CTA + inline editorial links with scrim */}
+            <div className="hidden hero-mobile-cta-stack md:order-2 md:mt-20 md:flex md:w-full md:translate-x-0 md:flex-col md:items-start md:gap-6">
+              <div className="flex flex-col items-center gap-6 md:inline-flex md:items-start">
+                <motion.button
+                  type="button"
+                  onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
+                  className={`${heroPrimaryCtaClass} touch-manipulation`}
+                  whileTap={{ scale: 0.98, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <span>EXPLORE THE COLLECTION</span>
+                  <motion.span
+                    aria-hidden="true"
+                    animate={{ x: [0, 4] }}
+                    transition={{ duration: 1.2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+                  >
+                    &#8594;
+                  </motion.span>
+                </motion.button>
+
+                <div className="hero-fade-in-delayed-5 md:mb-2 md:flex md:flex-col md:items-start">
+                  <div className="relative inline-flex items-center gap-3 before:content-[''] before:absolute before:-inset-x-4 before:-inset-y-2.5 before:-z-10 before:rounded-sm before:bg-black/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)] [text-shadow:0_1px_4px_rgba(0,0,0,0.6)]">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
+                        scrollToSection("apartment-tour-heading");
+                      }}
+                      className="font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70"
+                    >
+                      Singapore Gallery Preview
+                    </button>
+                    <span className="h-3 w-px bg-white/40" aria-hidden="true" />
+                    <button
+                      type="button"
+                      onClick={openTour}
+                      className="group font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70"
+                    >
+                      <span>Book Private Appointment</span>
+                      <span className="ml-2 tracking-[0.2em] text-white/70">(Trade Only)</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-col items-start gap-6 hero-fade-in-delayed-5">
+        {/* Mobile / PWA — simplified bottom-anchored CTA stack */}
+        <div className="flex flex-col items-start gap-6 hero-fade-in-delayed-5 md:hidden">
           <motion.button
             type="button"
             onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-            className="group inline-flex items-center gap-3 font-body text-[11px] md:text-xs font-medium uppercase tracking-[0.3em] text-white transition-opacity duration-300 hover:opacity-70 touch-manipulation [text-shadow:0_1px_8px_rgba(0,0,0,0.6)]"
+            className="group inline-flex items-center gap-3 font-body text-[11px] font-medium uppercase tracking-[0.3em] text-white transition-opacity duration-300 hover:opacity-70 touch-manipulation [text-shadow:0_1px_8px_rgba(0,0,0,0.6)]"
             whileTap={{ scale: 0.98, opacity: 0.75 }}
             transition={{ duration: 0.2 }}
           >
@@ -132,7 +203,7 @@ const Hero = () => {
               trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
               scrollToSection("apartment-tour-heading");
             }}
-            className="font-body text-[10px] md:text-[11px] font-light uppercase tracking-[0.34em] text-white/80 transition-opacity duration-300 hover:opacity-70 [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] touch-manipulation"
+            className="font-body text-[10px] font-light uppercase tracking-[0.34em] text-white/80 transition-opacity duration-300 hover:opacity-70 [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] touch-manipulation"
           >
             Singapore Gallery Preview
           </button>
@@ -140,7 +211,7 @@ const Hero = () => {
           <button
             type="button"
             onClick={openTour}
-            className="group font-body text-[10px] md:text-[11px] font-light uppercase tracking-[0.34em] text-white/80 transition-opacity duration-300 hover:opacity-70 [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] touch-manipulation"
+            className="group font-body text-[10px] font-light uppercase tracking-[0.34em] text-white/80 transition-opacity duration-300 hover:opacity-70 [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] touch-manipulation"
           >
             <span>Book Private Appointment</span>
             <span className="ml-2 tracking-[0.2em] text-white/60">(Trade Only)</span>
