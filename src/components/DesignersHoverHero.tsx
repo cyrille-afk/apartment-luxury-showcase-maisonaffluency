@@ -215,8 +215,9 @@ function DesignerGridCard({
           <ImageIcon className="h-8 w-8" aria-hidden />
         </span>
       )}
-      {/* Bottom gradient for text legibility — strong enough to hold white serif over light imagery */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/95 via-black/60 to-transparent" />
+      {/* Bottom gradient for text legibility — subtle darkening that lifts the
+          name without turning the card into a black box. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/75 via-black/35 to-transparent" />
       {/* Name overlay */}
       <div className="absolute inset-x-0 bottom-0 p-4 z-20">
         <span className="block font-serif text-sm leading-tight text-white drop-shadow-[0_1px_4px_rgba(0,0,0,1)]">
@@ -1918,13 +1919,13 @@ const DesignersHoverHero = () => {
         </div>
 
         {/* Directory label — pinned to the svh frame bottom on mobile only.
-            Desktop version now lives at the top of the featured list. */}
+            Lowered slightly so it sits closer to the bottom edge. */}
         {isMobileBrowser && directoryLabels(cn(
-          "absolute flex items-center gap-10 text-white w-fit pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center px-6 bottom-[calc(2.75rem+env(safe-area-inset-bottom))]"
+          "absolute flex items-center gap-10 text-white w-fit pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center px-6 bottom-[calc(1.5rem+env(safe-area-inset-bottom))]"
         ), directoryRef, "center")}
 
         {isStandalone && directoryLabels(cn(
-          "absolute flex items-center gap-10 text-white w-fit pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center px-6 bottom-[calc(2rem+env(safe-area-inset-bottom))]"
+          "absolute flex items-center gap-10 text-white w-fit pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center px-6 bottom-[calc(1rem+env(safe-area-inset-bottom))]"
         ), directoryRef, "center")}
 
 
