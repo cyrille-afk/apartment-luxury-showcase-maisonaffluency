@@ -1467,18 +1467,17 @@ const DesignersHoverHero = () => {
     };
   }, [hasItems, items.length]);
 
-  // Luxury desktop parallax: the paneled wall (background plane) scrolls
-  // slightly slower than the page, while the console/objects (foreground
-  // plane, masked to the lower portion of the image) scroll slightly faster,
-  // creating a subtle editorial depth effect. Uses direct DOM transforms
-  // inside requestAnimationFrame to avoid React re-renders on scroll.
+  // Luxury desktop parallax: the hero background scrolls slightly slower than
+  // the page content, creating a subtle editorial depth effect. A single
+  // background plane is used so the image never duplicates at the bottom edge.
+  // Uses direct DOM transforms inside requestAnimationFrame to avoid React
+  // re-renders on scroll.
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (isMobileOrPwa) return;
     const section = sectionRef.current;
     const bg = parallaxBgRef.current;
-    const fg = parallaxFgRef.current;
-    if (!section || !bg || !fg) return;
+    if (!section || !bg) return;
 
     let rafId = 0;
     let ticking = false;
@@ -1492,9 +1491,7 @@ const DesignersHoverHero = () => {
       // avoids revealing the oversized image edges.
       const maxShift = rect.height * 0.12;
       const bgShift = progress * maxShift;
-      const fgShift = -progress * maxShift;
       bg.style.transform = `translateY(${bgShift}px)`;
-      fg.style.transform = `translateY(${fgShift}px)`;
     };
     const onScroll = () => {
       if (!ticking) {
@@ -1657,49 +1654,24 @@ const DesignersHoverHero = () => {
       >
 
         {isMobileOrPwa ? (
-          <ParallaxImageLayer
+          <HeroBgLayer
             items={items}
             activeSlug={activeSlug}
-            isStandalone={isStandalone}
             mode="mobile"
             className="inset-0 h-full w-full"
           />
         ) : (
-          <>
-            {/* Background plane — the full scene, moves slower on scroll */}
-            <div
-              ref={parallaxBgRef}
-              className="absolute inset-0 z-0 pointer-events-none"
-            >
-              <ParallaxImageLayer
-                items={items}
-                activeSlug={activeSlug}
-                isStandalone={isStandalone}
-                mode="desktop"
-                suffix="bg"
-              />
-            </div>
-            {/* Foreground plane — masked to the lower third so the console
-                and objects feel closer; moves faster on scroll */}
-            <div
-              ref={parallaxFgRef}
-              className="absolute inset-0 z-10 pointer-events-none"
-              style={{
-                WebkitMaskImage:
-                  "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 28%, rgba(0,0,0,0) 62%)",
-                maskImage:
-                  "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 28%, rgba(0,0,0,0) 62%)",
-              }}
-            >
-              <ParallaxImageLayer
-                items={items}
-                activeSlug={activeSlug}
-                isStandalone={isStandalone}
-                mode="desktop"
-                suffix="fg"
-              />
-            </div>
-          </>
+          <div
+            ref={parallaxBgRef}
+            className="absolute inset-0 z-0 pointer-events-none"
+          >
+            <HeroBgLayer
+              items={items}
+              activeSlug={activeSlug}
+              mode="desktop"
+              suffix="bg"
+            />
+          </div>
         )}
         {/* Readability overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/30 md:from-black/60 md:via-black/30 md:to-black/5" />
