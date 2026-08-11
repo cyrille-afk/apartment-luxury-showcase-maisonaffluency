@@ -187,7 +187,7 @@ const Hero = () => {
               </div>
 
               {/* Mobile / PWA — borderless editorial actions directly over the image */}
-              <div className={`hero-mobile-links-inner${isPWA ? " is-pwa" : ""} mt-4 flex w-[calc(100%-3rem)] max-w-md flex-col items-center gap-4 text-center hero-fade-in-delayed-5 md:hidden`}>
+              <div className={`hero-mobile-links-inner${isPWA ? " is-pwa" : ""} mt-8 flex w-[calc(100%-3rem)] max-w-md flex-col items-center gap-4 text-center hero-fade-in-delayed-5 md:hidden`}>
                 <button
                   type="button"
                   onClick={() => {
