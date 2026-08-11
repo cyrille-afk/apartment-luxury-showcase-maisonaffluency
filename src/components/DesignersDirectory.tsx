@@ -2215,7 +2215,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               ) : (
                   <div data-category-results className="grid gap-4 md:gap-6 lg:gap-8 grid-cols-2 scroll-header-offset">
                   {filteredPicks.map((pick) => (
-                    <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} rrp={publicRrpMap?.[pick.id]} />
+                    <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} rrp={publicRrpMap?.[pick.id]} hideFavorite={hideCuratorPickFavorite} />
                   ))}
                 </div>
               )
