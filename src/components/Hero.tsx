@@ -119,7 +119,7 @@ const Hero = () => {
 
       {/* Text overlay — desktop keeps the previous anchored-top editorial layout;
           mobile/PWA uses a bottom-anchored simplified CTA stack. */}
-      <div className="ma-home-hero-copy relative z-10 flex min-h-screen flex-1 flex-col items-start justify-between px-6 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-[var(--home-hero-mobile-pad-top)] md:h-full md:min-h-0 md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48">
+      <div className="ma-home-hero-copy relative z-10 flex min-h-screen flex-1 flex-col items-start justify-start px-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] pt-[var(--home-hero-mobile-pad-top)] md:h-full md:min-h-0 md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48">
         <div className="max-w-4xl md:text-left">
           <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
             Modern Masters.<br />
@@ -130,6 +130,58 @@ const Hero = () => {
             <p className="relative inline-block text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium [text-shadow:0_1px_10px_rgba(0,0,0,0.55)] hero-fade-in-delayed-3 before:content-[''] before:absolute before:-inset-x-3 before:-inset-y-2 before:-z-10 before:rounded-sm before:bg-black/30 before:backdrop-blur-[1px] before:[mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)]">
               A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
+
+            {/* Mobile / PWA — stackable premium action cards directly beneath the paragraph */}
+            <nav
+              aria-label="Hero actions"
+              className="mt-6 flex w-full max-w-sm flex-col gap-2 md:hidden"
+            >
+              <motion.button
+                type="button"
+                onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
+                className="group flex w-full items-center justify-between rounded-sm border border-white/20 bg-black/30 px-4 py-3.5 backdrop-blur-md transition-all duration-300 hover:border-white/30 hover:bg-black/40 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/50 touch-manipulation"
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.2 }}
+              >
+                <span className="font-body text-[10px] font-medium uppercase tracking-[0.3em] text-white">
+                  Explore the Collection
+                </span>
+                <motion.span
+                  aria-hidden="true"
+                  className="text-white/70 group-hover:text-white"
+                  animate={{ x: [0, 4] }}
+                  transition={{ duration: 1.2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+                >
+                  →
+                </motion.span>
+              </motion.button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
+                  scrollToSection("apartment-tour-heading");
+                }}
+                className="group flex w-full items-center justify-between rounded-sm border border-white/20 bg-black/30 px-4 py-3.5 text-left backdrop-blur-md transition-all duration-300 hover:border-white/30 hover:bg-black/40 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/50 touch-manipulation"
+              >
+                <span className="font-body text-[10px] font-light uppercase tracking-[0.34em] text-white">
+                  Singapore Gallery Preview
+                </span>
+                <span aria-hidden="true" className="text-white/50 transition-colors duration-300 group-hover:text-white/80">→</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={openTour}
+                className="group flex w-full items-center justify-between rounded-sm border border-white/20 bg-black/30 px-4 py-3.5 text-left backdrop-blur-md transition-all duration-300 hover:border-white/30 hover:bg-black/40 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/50 touch-manipulation"
+              >
+                <span className="font-body text-[10px] font-light uppercase tracking-[0.34em] text-white">
+                  Book Private Appointment
+                  <span className="ml-2 tracking-[0.2em] text-white/60">(Trade Only)</span>
+                </span>
+                <span aria-hidden="true" className="text-white/50 transition-colors duration-300 group-hover:text-white/80">→</span>
+              </button>
+            </nav>
 
             {/* Desktop — previous display: primary CTA + inline editorial links with scrim */}
             <div className="hidden hero-mobile-cta-stack md:order-2 md:mt-20 md:flex md:w-full md:translate-x-0 md:flex-col md:items-start md:gap-6">
@@ -178,49 +230,6 @@ const Hero = () => {
             </div>
           </div>
         </div>
-
-        {/* Mobile / PWA — bottom-anchored CTA container */}
-        <nav
-          aria-label="Hero actions"
-          className="hero-fade-in-delayed-5 mt-10 flex w-full flex-col items-stretch divide-y divide-white/15 border-t border-white/15 pt-1 md:hidden"
-        >
-          <motion.button
-            type="button"
-            onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-            className="group inline-flex min-h-[52px] w-full items-center justify-between gap-3 py-3.5 font-body text-[11px] font-medium uppercase tracking-[0.3em] text-white transition-opacity duration-300 hover:opacity-70 touch-manipulation"
-            whileTap={{ scale: 0.98, opacity: 0.75 }}
-            transition={{ duration: 0.2 }}
-          >
-            <span>EXPLORE THE COLLECTION</span>
-            <motion.span
-              aria-hidden="true"
-              animate={{ x: [0, 4] }}
-              transition={{ duration: 1.2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-            >
-              →
-            </motion.span>
-          </motion.button>
-
-          <button
-            type="button"
-            onClick={() => {
-              trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-              scrollToSection("apartment-tour-heading");
-            }}
-            className="inline-flex min-h-[52px] w-full items-center py-3.5 text-left font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70 touch-manipulation"
-          >
-            Singapore Gallery Preview
-          </button>
-
-          <button
-            type="button"
-            onClick={openTour}
-            className="group inline-flex min-h-[52px] w-full items-center py-3.5 text-left font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70 touch-manipulation"
-          >
-            <span>Book Private Appointment</span>
-            <span className="ml-2 tracking-[0.2em] text-white/70">(Trade Only)</span>
-          </button>
-        </nav>
 
       </div>
 
