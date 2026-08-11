@@ -442,22 +442,23 @@ const DESKTOP_IMAGE_TRANSITION_MS = 900;
 const LOCK_MS = 1200;
 
 /**
- * Reusable cross-fading image layer for the hero background.
- * On desktop it is used twice — once for the full background and once as a
- * masked foreground plane — so a subtle multi-plane parallax can be applied
- * without duplicating the render logic.
+ * Cross-fading hero background layer.
+ *
+ * Uses CSS background-image with `background-repeat: no-repeat` and
+ * `background-size: cover` so the asset never tiles or duplicates at the
+ * edges. Each designer gets an absolutely positioned plane; only the active
+ * one is opaque, producing the same cinematic cross-fade as before without
+ * the duplicated foreground plane that was visible at the bottom of the hero.
  */
-function ParallaxImageLayer({
+function HeroBgLayer({
   items,
   activeSlug,
-  isStandalone,
   mode,
   suffix = "",
   className,
 }: {
   items: FeaturedDesigner[];
   activeSlug: string | null;
-  isStandalone: boolean;
   mode: "mobile" | "desktop";
   suffix?: string;
   className?: string;
@@ -478,30 +479,21 @@ function ParallaxImageLayer({
         if (!src) return null;
         const isActive = d.slug === activeSlug;
         const isFirst = i === 0;
-        const heroImgProps = cldResponsiveImg(src, {
+        const { src: imgSrc } = cldResponsiveImg(src, {
           widths: mode === "mobile" ? [480, 720, 960, 1280] : [960, 1280, 1600, 1920],
           sizes: "100vw",
         });
         return (
-          <img
+          <div
             key={`${d.slug}-${mode}${suffix ? `-${suffix}` : ""}`}
-            {...heroImgProps}
-            alt=""
             aria-hidden="true"
-            loading={isFirst ? "eager" : "lazy"}
-            decoding={isFirst ? "sync" : "async"}
-            {...(isFirst ? { fetchPriority: "high" as const } : {})}
             className={cn(
-              "absolute left-0 w-full object-cover transition-[opacity,transform] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform]",
-              mode === "mobile"
-                ? isStandalone
-                  ? "top-[-7rem] left-0 h-[calc(118%+7rem)] object-top md:top-0 md:h-full md:object-center"
-                  : "top-[-7rem] left-0 h-[calc(118%+7rem)] object-top md:top-0 md:h-full md:object-center"
-                : "inset-0 h-full",
+              "absolute inset-0 bg-no-repeat bg-cover bg-center transition-opacity ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform]",
               isActive ? "opacity-100" : "opacity-0",
               mode === "desktop" && (isActive ? "scale-100" : "scale-[1.035]")
             )}
             style={{
+              backgroundImage: `url(${imgSrc})`,
               transitionDuration: `${mode === "mobile" ? IMAGE_TRANSITION_MS : DESKTOP_IMAGE_TRANSITION_MS}ms`,
             }}
           />
