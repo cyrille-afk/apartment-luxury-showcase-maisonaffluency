@@ -121,12 +121,12 @@ const Hero = () => {
         </picture>
       )}
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/20" />
-      {/* Mobile/PWA only: soft dark radial gradient across bottom half for text contrast */}
+      {/* Mobile/PWA only: subtle linear scrim across the bottom third for legibility */}
       <div
-        className="absolute inset-x-0 bottom-0 h-1/2 pointer-events-none md:hidden"
+        className="absolute inset-x-0 bottom-0 h-1/3 pointer-events-none md:hidden"
         style={{
           background:
-            "radial-gradient(ellipse 120% 100% at 50% 100%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0) 100%)",
+            "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.12) 55%, rgba(0,0,0,0.3) 100%)",
         }}
         aria-hidden="true"
       />
@@ -140,7 +140,7 @@ const Hero = () => {
           </h1>
 
           <div className="mt-8 md:mt-10 flex w-full max-w-3xl flex-col items-start">
-            <p className="relative inline-block text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3 before:content-[''] before:absolute before:-inset-x-3 before:-inset-y-2 before:-z-10 before:rounded-sm before:bg-black/30 before:backdrop-blur-[1px] before:[mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)]">
+            <p className="relative inline-block text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium [text-shadow:0_1px_10px_rgba(0,0,0,0.55)] hero-fade-in-delayed-3 md:[text-shadow:none] md:before:content-[''] md:before:absolute md:before:-inset-x-3 md:before:-inset-y-2 md:before:-z-10 md:before:rounded-sm md:before:bg-black/30 md:before:backdrop-blur-[1px] md:before:[mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)]">
               A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
             <div className="hero-mobile-cta-stack w-screen -translate-x-6 items-center md:w-full md:translate-x-0 md:items-start mt-12 md:mt-20 flex flex-col gap-5 md:gap-6">
@@ -191,25 +191,25 @@ const Hero = () => {
 
               </div>
 
-              {/* Mobile / PWA — frosted glass editorial links, in normal flow */}
-              <div className={`hero-mobile-links-inner${isPWA ? " is-pwa" : ""} mt-2 flex w-[calc(100%-2rem)] max-w-md flex-col items-center space-y-2 rounded-2xl border border-white/25 bg-white/[0.08] px-5 py-3 text-center shadow-[0_8px_28px_rgba(0,0,0,0.28)] backdrop-blur-[10px] hero-fade-in-delayed-5 md:hidden`}>
+              {/* Mobile / PWA — borderless editorial actions directly over the image */}
+              <div className={`hero-mobile-links-inner${isPWA ? " is-pwa" : ""} mt-4 flex w-[calc(100%-3rem)] max-w-md flex-col items-center gap-4 text-center hero-fade-in-delayed-5 md:hidden`}>
                 <button
                   type="button"
                   onClick={() => {
                     trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
                     scrollToSection("apartment-tour-heading");
                   }}
-                  className="font-body text-[12.5px] font-light uppercase tracking-[0.32em] text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]"
+                  className="bg-transparent font-body text-[11px] font-light uppercase tracking-[0.34em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] touch-manipulation"
                 >
                   Singapore Gallery Preview
                 </button>
 
-                <div className="h-px w-10 bg-white/30" aria-hidden="true" />
+                <div className="h-px w-full bg-white/70" aria-hidden="true" />
 
                 <motion.button
                   type="button"
                   onClick={() => {
-                    trackCTA.bookAppointment("Hero Mobile Frosted Card");
+                    trackCTA.bookAppointment("Hero Mobile Links");
                     setIsBookingLoading(true);
                     window.setTimeout(() => {
                       setTourOpen(true);
@@ -217,8 +217,8 @@ const Hero = () => {
                     }, 500);
                   }}
                   disabled={isBookingLoading}
-                  className="group relative flex min-h-[38px] w-full items-center justify-center gap-2 rounded-lg border border-white/25 bg-white/[0.06] px-3 py-1.5 font-body text-[10px] font-light uppercase tracking-[0.22em] whitespace-nowrap text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.5)] transition-colors hover:text-white/80 backdrop-blur-[8px] touch-manipulation"
-                  whileTap={{ scale: 0.98, backdropFilter: "blur(24px)" }}
+                  className="flex min-h-[36px] w-full items-center justify-center gap-2 bg-transparent px-0 py-1 font-body text-[11px] font-light uppercase tracking-[0.34em] whitespace-nowrap text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] touch-manipulation"
+                  whileTap={{ scale: 0.98, opacity: 0.75 }}
                   transition={{ duration: 0.2 }}
                 >
                   {isBookingLoading ? (
@@ -233,13 +233,6 @@ const Hero = () => {
                       <span className="text-[9px] font-normal italic lowercase tracking-normal text-white/70">(trade only)</span>
                     </>
                   )}
-                  <motion.span
-                    className="absolute bottom-1 left-0 h-[1px] w-full bg-white"
-                    initial={{ scaleX: 0 }}
-                    whileTap={{ scaleX: 1 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                    style={{ transformOrigin: "center" }}
-                  />
                 </motion.button>
               </div>
             </div>
