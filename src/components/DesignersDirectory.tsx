@@ -36,6 +36,8 @@ import { getDesignersDirectoryLayout } from "@/lib/designersDirectoryAnchors";
 import { jumpToDesignerLetter } from "@/lib/jumpToDesignerLetter";
 import { getCategoryHero } from "@/constants/categoryHeroes";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 
 import { categoryUrl } from "@/lib/categorySlugs";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
