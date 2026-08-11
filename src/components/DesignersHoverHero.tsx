@@ -504,7 +504,7 @@ function HeroBgLayer({
   }, [sources]);
 
   return (
-    <div className={cn("absolute inset-0 overflow-hidden", className)}>
+    <div className={cn("absolute inset-0 overflow-hidden isolate z-0", className)}>
       {sources.map(({ slug, src: imgSrc }) => {
         const isActive = slug === activeSlug;
         const duration = mode === "mobile" ? IMAGE_TRANSITION_MS : DESKTOP_IMAGE_TRANSITION_MS;
