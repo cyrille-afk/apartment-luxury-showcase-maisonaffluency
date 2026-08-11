@@ -110,9 +110,9 @@ const Hero = () => {
         </picture>
       )}
 
-      {/* Legibility scrim: stronger on mobile/PWA, subtler on desktop */}
+      {/* Legibility scrim: subtle bottom-35% lift on mobile/PWA, subtler on desktop */}
       <div
-        className="absolute inset-x-0 bottom-0 h-[40%] pointer-events-none bg-gradient-to-t from-black/60 via-black/20 to-transparent md:from-black/40 md:to-transparent md:via-transparent"
+        className="absolute inset-x-0 bottom-0 h-[35%] pointer-events-none bg-gradient-to-t from-black/45 via-black/15 to-transparent md:from-black/40 md:to-transparent md:via-transparent"
         aria-hidden="true"
       />
 
