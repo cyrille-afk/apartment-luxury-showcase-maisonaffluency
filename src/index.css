@@ -665,14 +665,13 @@ input, select, textarea {
 }
 
 /* iOS Safari browser chrome backing.
-   Safari may source its toolbar/overscroll canvas from either html or body.
-   Keep both canvases black and move the normal page surface onto #root. This
-   creates no fixed overlay, consumes no viewport space, and cannot cover text.
-   The pre-paint class is absent in standalone mode, so PWA stays full-bleed. */
+   Safari may source its translucent bottom toolbar canvas from either html or
+   body. Match that canvas to the page surface so it cannot create a dark band
+   behind the native navigation panel. */
 @media (max-width: 767px) {
   html.ios-safari-browser,
   html.ios-safari-browser body {
-    background-color: hsl(0 0% 0%);
+    background-color: hsl(var(--background));
   }
 
   html.ios-safari-browser #root {

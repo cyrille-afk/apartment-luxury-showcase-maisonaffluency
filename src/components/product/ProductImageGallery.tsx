@@ -54,7 +54,7 @@ const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: b
   src,
   alt,
   pointerEventsNone,
-  backdropClass = "bg-gradient-to-t from-muted/70 via-background to-background",
+  backdropClass = "bg-foreground/95",
 }) => {
   // The outgoing frame stays fully opaque underneath; only the incoming frame
   // fades in on top. Cross-dissolving *both* layers made the dark backdrop
@@ -369,7 +369,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       <div className="flex-1 flex flex-col gap-3 min-w-0">
         <div className="relative group" ref={inlineSwipeRef}>
         <div
-          className={cn("product-image-frame md:aspect-square md:h-auto bg-gradient-to-t from-muted/70 via-background to-background rounded-luxury-sharp overflow-hidden relative touch-pan-y md:transition-[height,aspect-ratio] md:duration-300 md:ease-out", compact && "product-image-frame--compact")}
+          className={cn("product-image-frame md:aspect-square md:h-auto bg-foreground/95 rounded-luxury-sharp overflow-hidden relative touch-pan-y md:transition-[height,aspect-ratio] md:duration-300 md:ease-out", compact && "product-image-frame--compact")}
           onDoubleClick={() => setPresentOpen(true)}
           onTouchEnd={handleTouchEndForDoubleTap}
         >
