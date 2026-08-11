@@ -169,7 +169,7 @@ function DesignerGridCard({
       }}
       onTouchStart={() => { import("../pages/PublicDesignerProfile").catch(() => {}); }}
       onMouseEnter={() => { import("../pages/PublicDesignerProfile").catch(() => {}); }}
-      className="group relative block w-full aspect-[4/5] rounded-xl overflow-hidden bg-neutral-800 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-gold/60"
+      className="group relative block w-full aspect-[4/5] rounded-none overflow-hidden bg-neutral-800 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-gold/60"
       aria-label={`View ${displayName}`}
       style={
         lqip
@@ -2242,7 +2242,7 @@ const DesignersHoverHero = () => {
                   <p className="text-xs font-body text-white/50 uppercase tracking-[0.2em]">Loading directory…</p>
                   <div className="grid grid-cols-2 gap-3 w-full mt-4 md:hidden">
                     {Array.from({ length: 6 }).map((_, i) => (
-                      <div key={i} className="aspect-[4/5] rounded-xl bg-white/[0.04] animate-pulse" />
+                      <div key={i} className="aspect-[4/5] rounded-none bg-white/[0.04] animate-pulse" />
                     ))}
                   </div>
                 </div>
