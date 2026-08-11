@@ -110,11 +110,12 @@ const Hero = () => {
         </picture>
       )}
 
-      {/* Legibility scrim: subtle bottom-35% lift on mobile/PWA, subtler on desktop */}
+      {/* Legibility scrim: strong bottom fade on mobile/PWA, subtler on desktop */}
       <div
-        className="absolute inset-x-0 bottom-0 h-[35%] pointer-events-none bg-gradient-to-t from-black/45 via-black/15 to-transparent md:from-black/40 md:to-transparent md:via-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-black/85 via-black/45 to-transparent md:h-[35%] md:from-black/40 md:via-transparent md:to-transparent"
         aria-hidden="true"
       />
+
 
       {/* Text overlay — desktop keeps the previous anchored-top editorial layout;
           mobile/PWA uses a bottom-anchored simplified CTA stack. */}
