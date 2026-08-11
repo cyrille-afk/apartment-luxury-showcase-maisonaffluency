@@ -623,7 +623,6 @@ const DesignersHoverHero = () => {
   const portalRef = useRef<HTMLAnchorElement>(null);
   const portalCursorRef = useRef<HTMLDivElement>(null);
   const parallaxBgRef = useRef<HTMLDivElement>(null);
-  const parallaxFgRef = useRef<HTMLDivElement>(null);
   const activeSlugRef = useRef<string | null>(null);
   useEffect(() => {
     activeSlugRef.current = activeSlug;
@@ -1468,20 +1467,17 @@ const DesignersHoverHero = () => {
     };
   }, [hasItems, items.length]);
 
-  // Luxury desktop parallax: split the hero into two planes.
-  //   - Background plane (wall/paneling): moves at ~0.7x page speed.
-  //   - Foreground plane (console table, lamp, sculptures): moves with the
-  //     section at normal page speed (no extra transform).
-  // A soft mask seam sits in the upper wall area so the split is hidden in
-  // the relatively uniform paneling. Uses direct DOM transforms inside
-  // requestAnimationFrame to avoid React re-renders on scroll.
+  // Luxury desktop parallax: the hero background scrolls slightly slower than
+  // the page content, creating a subtle editorial depth effect. A single
+  // background plane is used so the image never duplicates at the bottom edge.
+  // Uses direct DOM transforms inside requestAnimationFrame to avoid React
+  // re-renders on scroll.
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (isMobileOrPwa) return;
     const section = sectionRef.current;
     const bg = parallaxBgRef.current;
-    const fg = parallaxFgRef.current;
-    if (!section || !bg || !fg) return;
+    if (!section || !bg) return;
 
     let rafId = 0;
     let ticking = false;
@@ -1491,14 +1487,11 @@ const DesignersHoverHero = () => {
       const vh = window.innerHeight;
       const range = vh + rect.height;
       const progress = Math.max(0, Math.min(1, (vh - rect.top) / range));
-      // Background plane lags behind the page scroll (0.7 speed factor).
-      // Counteract 30% of the section's upward movement so it rises slower.
-      const maxShift = rect.height * 0.18;
-      const bgShift = progress * maxShift * 0.7;
+      // Subtle 12% of section-height shift keeps the effect elegant and
+      // avoids revealing the oversized image edges.
+      const maxShift = rect.height * 0.12;
+      const bgShift = progress * maxShift;
       bg.style.transform = `translateY(${bgShift}px)`;
-      // Foreground plane is absolutely positioned inside the section, so it
-      // naturally travels at normal page speed. No transform needed.
-      fg.style.transform = "translateY(0px)";
     };
     const onScroll = () => {
       if (!ticking) {
@@ -1668,47 +1661,17 @@ const DesignersHoverHero = () => {
             className="inset-0 h-full w-full"
           />
         ) : (
-          <>
-            {/* Background plane — wall/paneling only. Masked to the upper ~60%
-                of the image; the seam sits in the dark wall area so the split
-                is hidden. Scrolls slower than the page (0.7x). */}
-            <div
-              ref={parallaxBgRef}
-              className="absolute inset-0 z-0 pointer-events-none"
-              style={{
-                WebkitMaskImage:
-                  "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 70%)",
-                maskImage:
-                  "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 70%)",
-              }}
-            >
-              <HeroBgLayer
-                items={items}
-                activeSlug={activeSlug}
-                mode="desktop"
-                suffix="bg"
-              />
-            </div>
-            {/* Foreground plane — console table, lamp, sculptures. Masked to
-                the lower ~45% and moving at normal page speed with the section. */}
-            <div
-              ref={parallaxFgRef}
-              className="absolute inset-0 z-10 pointer-events-none"
-              style={{
-                WebkitMaskImage:
-                  "linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,1) 65%, rgba(0,0,0,1) 100%)",
-                maskImage:
-                  "linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,1) 65%, rgba(0,0,0,1) 100%)",
-              }}
-            >
-              <HeroBgLayer
-                items={items}
-                activeSlug={activeSlug}
-                mode="desktop"
-                suffix="fg"
-              />
-            </div>
-          </>
+          <div
+            ref={parallaxBgRef}
+            className="absolute inset-0 z-0 pointer-events-none"
+          >
+            <HeroBgLayer
+              items={items}
+              activeSlug={activeSlug}
+              mode="desktop"
+              suffix="bg"
+            />
+          </div>
         )}
         {/* Readability overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/30 md:from-black/60 md:via-black/30 md:to-black/5" />
