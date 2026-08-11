@@ -112,7 +112,7 @@ const Hero = () => {
 
       {/* Legibility scrim: strong bottom fade on mobile/PWA, subtler on desktop */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-black/85 via-black/45 to-transparent md:h-[35%] md:from-black/40 md:via-transparent md:to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/90 via-black/55 to-transparent md:h-[35%] md:from-black/40 md:via-transparent md:to-transparent"
         aria-hidden="true"
       />
 
