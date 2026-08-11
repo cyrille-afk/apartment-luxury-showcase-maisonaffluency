@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Smartphone, Share, Plus, MoreVertical } from "lucide-react";
+import { Share, Plus, MoreVertical } from "lucide-react";
 import {
   Dialog,
   DialogContent,
