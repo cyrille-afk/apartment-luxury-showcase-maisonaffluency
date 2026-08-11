@@ -1063,7 +1063,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     pinElementBelowHeader(btn);
                   }
                 }}
-                className="md:hidden w-full flex items-center justify-between gap-3 py-4 border-b border-border/60 text-left"
+                className="md:hidden w-full flex items-center justify-between gap-3 py-5 text-left"
                 aria-expanded={isMobilePillActive}
                 aria-controls={`gallery-section-${originalSectionIndex}`}
               >
@@ -1376,7 +1376,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
-            className="hidden md:block mt-10 md:mt-16 py-10 md:py-14 border-t border-border text-center"
+            className="hidden md:block mt-10 md:mt-16 py-10 md:py-14 text-center"
           >
             <p className="font-body text-xs uppercase tracking-[0.3em] text-primary mb-3">
               By Appointment
