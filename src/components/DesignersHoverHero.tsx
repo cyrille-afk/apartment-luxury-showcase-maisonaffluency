@@ -504,13 +504,7 @@ function HeroBgLayer({
   }, [sources]);
 
   return (
-    <div
-      className={cn(
-        "absolute inset-0 overflow-hidden",
-        mode === "desktop" && "-top-[15%] -bottom-[15%] h-[130%]",
-        className
-      )}
-    >
+    <div className={cn("absolute inset-0 overflow-hidden", className)}>
       {sources.map(({ slug, src: imgSrc }) => {
         const isActive = slug === activeSlug;
         const duration = mode === "mobile" ? IMAGE_TRANSITION_MS : DESKTOP_IMAGE_TRANSITION_MS;
@@ -519,9 +513,8 @@ function HeroBgLayer({
             key={`${slug}-${mode}${suffix ? `-${suffix}` : ""}`}
             aria-hidden="true"
             className={cn(
-              "absolute inset-0 bg-no-repeat bg-cover bg-center transition-[opacity,transform] will-change-[opacity,transform]",
-              isActive ? "opacity-100" : "opacity-0",
-              mode === "desktop" && (isActive ? "scale-100" : "scale-[1.035]")
+              "absolute inset-0 bg-no-repeat bg-cover bg-center transition-opacity",
+              isActive ? "opacity-100" : "opacity-0"
             )}
             style={{
               backgroundImage: `url(${imgSrc})`,
@@ -662,7 +655,7 @@ const DesignersHoverHero = () => {
   const suppressNavClickRef = useRef(false);
   const portalRef = useRef<HTMLAnchorElement>(null);
   const portalCursorRef = useRef<HTMLDivElement>(null);
-  const parallaxBgRef = useRef<HTMLDivElement>(null);
+  
   const activeSlugRef = useRef<string | null>(null);
   useEffect(() => {
     activeSlugRef.current = activeSlug;
@@ -1512,42 +1505,10 @@ const DesignersHoverHero = () => {
   // background plane is used so the image never duplicates at the bottom edge.
   // Uses direct DOM transforms inside requestAnimationFrame to avoid React
   // re-renders on scroll.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (isMobileOrPwa) return;
-    const section = sectionRef.current;
-    const bg = parallaxBgRef.current;
-    if (!section || !bg) return;
+  // Parallax removed: the scroll-driven transform promoted several stacked
+  // background planes to their own compositing layers, which made images and
+  // the fixed header flicker in/out on hover. Static background instead.
 
-    let rafId = 0;
-    let ticking = false;
-    const update = () => {
-      ticking = false;
-      const rect = section.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const range = vh + rect.height;
-      const progress = Math.max(0, Math.min(1, (vh - rect.top) / range));
-      // Subtle 12% of section-height shift keeps the effect elegant and
-      // avoids revealing the oversized image edges.
-      const maxShift = rect.height * 0.12;
-      const bgShift = progress * maxShift;
-      bg.style.transform = `translateY(${bgShift}px)`;
-    };
-    const onScroll = () => {
-      if (!ticking) {
-        ticking = true;
-        rafId = requestAnimationFrame(update);
-      }
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", update, { passive: true });
-    update();
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", update);
-      cancelAnimationFrame(rafId);
-    };
-  }, [isMobileOrPwa]);
 
   // Desktop dropdown opens to the RIGHT of the Directory button so it never
   // overlaps or truncates the featured-designers list underneath.
@@ -1701,17 +1662,13 @@ const DesignersHoverHero = () => {
             className="inset-0 h-full w-full"
           />
         ) : (
-          <div
-            ref={parallaxBgRef}
-            className="absolute inset-0 z-0 pointer-events-none"
-          >
-            <HeroBgLayer
-              items={items}
-              activeSlug={activeSlug}
-              mode="desktop"
-              suffix="bg"
-            />
-          </div>
+          <HeroBgLayer
+            items={items}
+            activeSlug={activeSlug}
+            mode="desktop"
+            suffix="bg"
+            className="inset-0 h-full w-full"
+          />
         )}
         {/* Readability overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/30 md:from-black/60 md:via-black/30 md:to-black/5" />
