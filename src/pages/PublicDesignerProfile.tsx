@@ -4,7 +4,7 @@ import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal, Square, Grid2X2, SquareArrowUpRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal, Square, Grid2X2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
