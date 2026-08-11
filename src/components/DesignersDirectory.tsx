@@ -472,7 +472,7 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
                 <Link
                   key={d.slug}
                   to={`/designers/${d.slug}`}
-                  className="group/sub rounded-lg overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all"
+                  className="group/sub rounded-none overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all"
                 >
                   <div className="aspect-[4/5] relative bg-muted/10 overflow-hidden">
                     {d.image ? (
@@ -572,7 +572,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts, pr
   }, [isOpen]);
 
   return (
-    <div ref={cardRef} data-card-kind="parent" data-designer-slug={item.slug} className="col-span-2 group self-start flex flex-col rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
+    <div ref={cardRef} data-card-kind="parent" data-designer-slug={item.slug} className="col-span-2 group self-start flex flex-col rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
       <div className="aspect-[5/4] md:aspect-[17/10] bg-muted/20 overflow-hidden relative">
         {cardImageUrl ? (
           <img {...cldResponsiveImg(cardImageUrl, { widths: [480, 720, 960, 1280], sizes: "(max-width: 640px) 100vw, (max-width: 1024px) 66vw, 720px" })} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : "low"} />
@@ -663,7 +663,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
       id={`designer-card-${item.slug}`}
       data-card-kind="designer"
       data-designer-slug={item.slug}
-      className={`group self-start flex flex-col rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer ${isLetterA ? 'relative' : ''}`}
+      className={`group self-start flex flex-col rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer ${isLetterA ? 'relative' : ''}`}
     >
 
 
@@ -1204,12 +1204,12 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
     <div>
       <div className="relative group/carousel">
         {pages.length > 1 && activePage > 0 && (
-          <button onClick={goPrev} className="hidden lg:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-full bg-background/90 border border-border shadow-md hover:bg-accent transition-colors" aria-label="Previous page">
+          <button onClick={goPrev} className="hidden lg:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-none bg-background/90 border border-border shadow-md hover:bg-accent transition-colors" aria-label="Previous page">
             <ChevronLeft className="h-4 w-4 text-foreground" />
           </button>
         )}
         {pages.length > 1 && activePage < pages.length - 1 && (
-          <button onClick={goNext} className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-full bg-background/90 border border-border shadow-md hover:bg-accent transition-colors" aria-label="Next page">
+          <button onClick={goNext} className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-none bg-background/90 border border-border shadow-md hover:bg-accent transition-colors" aria-label="Next page">
             <ChevronRight className="h-4 w-4 text-foreground" />
           </button>
         )}
@@ -1285,7 +1285,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp }: { pick: PickItem; onFa
           });
         }
       }}
-      className="group flex flex-col w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
+      className="group flex flex-col w-full text-left rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
     >
 
       <div className="aspect-[4/5] bg-muted/20 overflow-hidden relative">
