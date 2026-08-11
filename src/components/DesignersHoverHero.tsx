@@ -1668,17 +1668,47 @@ const DesignersHoverHero = () => {
             className="inset-0 h-full w-full"
           />
         ) : (
-          <div
-            ref={parallaxBgRef}
-            className="absolute inset-0 z-0 pointer-events-none"
-          >
-            <HeroBgLayer
-              items={items}
-              activeSlug={activeSlug}
-              mode="desktop"
-              suffix="bg"
-            />
-          </div>
+          <>
+            {/* Background plane — wall/paneling only. Masked to the upper ~60%
+                of the image; the seam sits in the dark wall area so the split
+                is hidden. Scrolls slower than the page (0.7x). */}
+            <div
+              ref={parallaxBgRef}
+              className="absolute inset-0 z-0 pointer-events-none"
+              style={{
+                WebkitMaskImage:
+                  "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 70%)",
+                maskImage:
+                  "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 70%)",
+              }}
+            >
+              <HeroBgLayer
+                items={items}
+                activeSlug={activeSlug}
+                mode="desktop"
+                suffix="bg"
+              />
+            </div>
+            {/* Foreground plane — console table, lamp, sculptures. Masked to
+                the lower ~45% and moving at normal page speed with the section. */}
+            <div
+              ref={parallaxFgRef}
+              className="absolute inset-0 z-10 pointer-events-none"
+              style={{
+                WebkitMaskImage:
+                  "linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,1) 65%, rgba(0,0,0,1) 100%)",
+                maskImage:
+                  "linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,1) 65%, rgba(0,0,0,1) 100%)",
+              }}
+            >
+              <HeroBgLayer
+                items={items}
+                activeSlug={activeSlug}
+                mode="desktop"
+                suffix="fg"
+              />
+            </div>
+          </>
         )}
         {/* Readability overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/30 md:from-black/60 md:via-black/30 md:to-black/5" />
