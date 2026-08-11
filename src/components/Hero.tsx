@@ -45,7 +45,8 @@ const scrollToMeetDesigners = () => {
 };
 
 const heroPrimaryCtaClass =
-  "group inline-flex min-h-12 items-center justify-center gap-3 rounded-none border border-white/80 bg-transparent px-9 py-3.5 text-center text-white text-[11px] md:text-xs font-body font-light tracking-[0.3em] uppercase [text-shadow:0_1px_6px_rgba(0,0,0,0.45)] transition-[background-color,border-color,color,opacity] duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:border-white hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent hero-fade-in-delayed-4";
+  "group inline-flex min-h-12 items-center justify-center gap-3 rounded-none border border-white/80 bg-transparent px-9 py-3.5 text-center text-white text-[11px] md:text-xs font-body font-light tracking-[0.3em] uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] drop-shadow-[0_1px_4px_rgba(0,0,0,0.45)] transition-[background-color,border-color,color,opacity] duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:border-white hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent hero-fade-in-delayed-4";
+
 
 
 const Hero = () => {
@@ -131,7 +132,7 @@ const Hero = () => {
       />
 
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
-      <div className="ma-home-hero-copy relative z-10 h-full px-6 pb-32 pt-[var(--home-hero-mobile-pad-top)] md:px-32 md:pb-20 md:pt-[24rem] lg:px-48 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
+      <div className="ma-home-hero-copy relative z-10 h-full px-6 pb-[calc(env(safe-area-inset-bottom)+4.5rem)] pt-[var(--home-hero-mobile-pad-top)] md:px-32 md:pb-20 md:pt-[24rem] lg:px-48 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
         <div className="max-w-4xl md:text-left">
           <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
             Modern Masters.<br />
@@ -142,7 +143,7 @@ const Hero = () => {
             <p className="relative inline-block text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3 before:content-[''] before:absolute before:-inset-x-3 before:-inset-y-2 before:-z-10 before:rounded-sm before:bg-black/30 before:backdrop-blur-[1px] before:[mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)]">
               A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
-            <div className="hero-mobile-cta-stack w-screen -translate-x-6 items-center md:w-full md:translate-x-0 md:items-start mt-[5.5rem] md:mt-20 flex flex-col gap-6">
+            <div className="hero-mobile-cta-stack w-screen -translate-x-6 items-center md:w-full md:translate-x-0 md:items-start mt-12 md:mt-20 flex flex-col gap-5 md:gap-6">
               <div className="flex flex-col items-center gap-6 md:inline-flex md:items-start">
                 <motion.button
                   type="button"
@@ -188,66 +189,64 @@ const Hero = () => {
                   </div>
                 </div>
 
+              </div>
 
+              {/* Mobile / PWA — frosted glass editorial links, in normal flow */}
+              <div className={`hero-mobile-links-inner${isPWA ? " is-pwa" : ""} mt-2 flex w-[calc(100%-2rem)] max-w-md flex-col items-center space-y-2 rounded-2xl border border-white/25 bg-white/[0.08] px-5 py-3 text-center shadow-[0_8px_28px_rgba(0,0,0,0.28)] backdrop-blur-[10px] hero-fade-in-delayed-5 md:hidden`}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
+                    scrollToSection("apartment-tour-heading");
+                  }}
+                  className="font-body text-[12.5px] font-light uppercase tracking-[0.32em] text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]"
+                >
+                  Singapore Gallery Preview
+                </button>
 
+                <div className="h-px w-10 bg-white/30" aria-hidden="true" />
+
+                <motion.button
+                  type="button"
+                  onClick={() => {
+                    trackCTA.bookAppointment("Hero Mobile Frosted Card");
+                    setIsBookingLoading(true);
+                    window.setTimeout(() => {
+                      setTourOpen(true);
+                      setIsBookingLoading(false);
+                    }, 500);
+                  }}
+                  disabled={isBookingLoading}
+                  className="group relative flex min-h-[38px] w-full items-center justify-center gap-2 rounded-lg border border-white/25 bg-white/[0.06] px-3 py-1.5 font-body text-[10px] font-light uppercase tracking-[0.22em] whitespace-nowrap text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.5)] transition-colors hover:text-white/80 backdrop-blur-[8px] touch-manipulation"
+                  whileTap={{ scale: 0.98, backdropFilter: "blur(24px)" }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {isBookingLoading ? (
+                    <motion.span
+                      className="inline-block h-4 w-4 rounded-full border border-white/30 border-t-white"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+                    />
+                  ) : (
+                    <>
+                      <span>Book Private Appointment</span>
+                      <span className="text-[9px] font-normal italic lowercase tracking-normal text-white/70">(trade only)</span>
+                    </>
+                  )}
+                  <motion.span
+                    className="absolute bottom-1 left-0 h-[1px] w-full bg-white"
+                    initial={{ scaleX: 0 }}
+                    whileTap={{ scaleX: 1 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    style={{ transformOrigin: "center" }}
+                  />
+                </motion.button>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-                {/* Inline editorial links — vertical stack on mobile/PWA, horizontal on desktop */}
-                {/* Mobile / PWA — frosted glass editorial links */}
-                <div className={`hero-mobile-links-inner${isPWA ? " is-pwa" : ""} mt-4 flex w-full max-w-md flex-col items-center space-y-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-center shadow-[0_8px_28px_rgba(0,0,0,0.28)] backdrop-blur-[12px] hero-fade-in-delayed-5 md:hidden`}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-                      scrollToSection("apartment-tour-heading");
-                    }}
-                    className="font-body text-[12.5px] font-light uppercase tracking-[0.32em] text-white/85"
-                  >
-                    Singapore Gallery Preview
-                  </button>
-
-                  <div className="h-px w-10 bg-white/30" aria-hidden="true" />
-
-                  <motion.button
-                    type="button"
-                    onClick={() => {
-                      trackCTA.bookAppointment("Hero Mobile Frosted Card");
-                      setIsBookingLoading(true);
-                      window.setTimeout(() => {
-                        setTourOpen(true);
-                        setIsBookingLoading(false);
-                      }, 500);
-                    }}
-                    disabled={isBookingLoading}
-                    className="group relative flex min-h-[38px] w-full items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 font-body text-[10px] font-light uppercase tracking-[0.22em] whitespace-nowrap text-white transition-colors hover:text-white/80 backdrop-blur-[12px] touch-manipulation"
-                    whileTap={{ scale: 0.98, backdropFilter: "blur(24px)" }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {isBookingLoading ? (
-                      <motion.span
-                        className="inline-block h-4 w-4 rounded-full border border-white/30 border-t-white"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-                      />
-                    ) : (
-                      <>
-                        <span>Book Private Appointment</span>
-                        <span className="text-[9px] font-normal italic lowercase tracking-normal text-white/60">(trade only)</span>
-                      </>
-                    )}
-                    <motion.span
-                      className="absolute bottom-1 left-0 h-[1px] w-full bg-white"
-                      initial={{ scaleX: 0 }}
-                      whileTap={{ scaleX: 1 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                      style={{ transformOrigin: "center" }}
-                    />
-                  </motion.button>
-                </div>
 
       <PrivateTourDialog open={tourOpen} onOpenChange={setTourOpen} />
     </section>

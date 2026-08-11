@@ -261,20 +261,12 @@ All colors MUST be HSL.
     margin-top: 18svh;
   }
 
-  /* Pin the frosted "Singapore Gallery Preview" panel to the bottom of the hero.
-     PWA (installed app) only — mobile Safari keeps the original inline flow. */
-  .hero-mobile-links-inner.is-pwa {
-    position: absolute;
-    left: 1rem;
-    right: 1rem;
-    margin-left: auto;
-    margin-right: auto;
-    bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
-    width: auto;
-    max-width: 26rem;
-    margin-top: 0 !important;
-    z-index: 20;
+  /* Frosted "Singapore Gallery Preview" panel flows inline beneath the CTA
+     (no absolute bottom pinning) with safe-area breathing room. */
+  .hero-mobile-links-inner {
+    margin-bottom: env(safe-area-inset-bottom);
   }
+
 
 
   .hero-fade-in,
