@@ -1944,30 +1944,11 @@ const PublicDesignerProfile = () => {
                           </div>
                         )}
 
-                        {/* Mobile / PWA quick-view — always opens the full product page */}
-                        <button
-                          type="button"
-                          onPointerDown={(e) => { e.stopPropagation(); }}
-                          onTouchStart={(e) => { e.stopPropagation(); }}
-                          onTouchEnd={(e) => {
-                            // iOS/PWA: commit navigation on touchend so no parent
-                            // handler or synthetic click can swallow the tap.
-                            e.preventDefault();
-                            e.stopPropagation();
-                            window.scrollTo({ top: 0 });
-                            navigate(productHref);
-                          }}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            window.scrollTo({ top: 0 });
-                            navigate(productHref);
-                          }}
-                          aria-label={`View ${displayTitle}`}
-                          className="md:hidden absolute bottom-4 right-4 z-20 text-white/50 transition-all duration-300 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 touch-manipulation"
-                        >
-                          <ArrowUpRight className="h-3 w-3" strokeWidth={1.5} />
-                        </button>
+                        {/* Editorial page-corner fold — replaces the circular arrow on mobile/PWA */}
+                        <div
+                          aria-hidden="true"
+                          className="md:hidden pointer-events-none absolute bottom-0 right-0 z-20 h-8 w-8 origin-bottom-right [clip-path:polygon(100%_0,100%_100%,0_100%)] bg-gradient-to-tl from-white/25 via-white/10 to-transparent opacity-60 shadow-[-2px_-2px_10px_rgba(255,255,255,0.08)] transition-all duration-300 group-hover:h-10 group-hover:w-10 group-hover:opacity-90 group-hover:shadow-[-3px_-3px_14px_rgba(255,255,255,0.12)]"
+                        />
                       </div>
 
 
