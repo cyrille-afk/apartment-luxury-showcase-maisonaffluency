@@ -1964,9 +1964,9 @@ const PublicDesignerProfile = () => {
                             navigate(productHref);
                           }}
                           aria-label={`View ${displayTitle}`}
-                          className="md:hidden absolute bottom-2 right-2 z-20 flex items-center justify-center w-8 h-8 rounded-full bg-background/95 shadow-md text-foreground active:scale-95 transition-transform touch-manipulation"
+                          className="md:hidden absolute bottom-4 right-4 z-20 text-white/50 transition-all duration-300 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 touch-manipulation"
                         >
-                          <SquareArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.5} />
+                          <SquareArrowUpRight className="h-3 w-3" strokeWidth={1.5} />
                         </button>
                       </div>
 
