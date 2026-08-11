@@ -21,13 +21,7 @@ const InstallAppDialog = ({ trigger, className }: InstallAppDialogProps) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <button
-            className={
-              className ??
-              "inline-flex items-center gap-2 font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
-            }
-          >
-            <Smartphone className="h-4 w-4" />
+          <button className={className ?? "font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"}>
             Install App
           </button>
         )}
