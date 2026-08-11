@@ -488,7 +488,7 @@ function HeroBgLayer({
             key={`${d.slug}-${mode}${suffix ? `-${suffix}` : ""}`}
             aria-hidden="true"
             className={cn(
-              "absolute inset-0 bg-no-repeat bg-cover bg-center transition-opacity ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform]",
+              "absolute inset-0 bg-no-repeat bg-cover bg-center transition-[opacity,transform] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform]",
               isActive ? "opacity-100" : "opacity-0",
               mode === "desktop" && (isActive ? "scale-100" : "scale-[1.035]")
             )}
