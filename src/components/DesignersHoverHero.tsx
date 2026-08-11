@@ -464,6 +464,45 @@ function HeroBgLayer({
   suffix?: string;
   className?: string;
 }) {
+  const sources = useMemo(
+    () =>
+      items
+        .map((d) => {
+          const raw =
+            mode === "mobile"
+              ? mobileHeroBackgroundSrc(d)
+              : DESKTOP_HERO_BG_OVERRIDES[d.slug] || d.hero_image_url || d.image_url;
+          if (!raw) return null;
+          const { src } = cldResponsiveImg(raw, {
+            widths: mode === "mobile" ? [480, 720, 960, 1280] : [960, 1280, 1600, 1920],
+            sizes: "100vw",
+          });
+          return { slug: d.slug, src };
+        })
+        .filter((x): x is { slug: string; src: string } => Boolean(x)),
+    [items, mode]
+  );
+
+  // Warm the cache for every hero image up front. Without this the first hover
+  // on a designer further down the list (Contemporary Talents) fades in an
+  // undecoded layer, which reads as a black flash between the two photos.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const w = window as any;
+    const idle = (cb: () => void) =>
+      typeof w.requestIdleCallback === "function"
+        ? w.requestIdleCallback(cb, { timeout: 2500 })
+        : w.setTimeout(cb, 400);
+
+    idle(() => {
+      sources.forEach(({ src }) => {
+        const img = new Image();
+        img.decoding = "async";
+        img.src = src;
+      });
+    });
+  }, [sources]);
+
   return (
     <div
       className={cn(
@@ -472,30 +511,29 @@ function HeroBgLayer({
         className
       )}
     >
-      {items.map((d, i) => {
-        const src =
-          mode === "mobile"
-            ? mobileHeroBackgroundSrc(d)
-            : DESKTOP_HERO_BG_OVERRIDES[d.slug] || d.hero_image_url || d.image_url;
-        if (!src) return null;
-        const isActive = d.slug === activeSlug;
-        const isFirst = i === 0;
-        const { src: imgSrc } = cldResponsiveImg(src, {
-          widths: mode === "mobile" ? [480, 720, 960, 1280] : [960, 1280, 1600, 1920],
-          sizes: "100vw",
-        });
+      {sources.map(({ slug, src: imgSrc }) => {
+        const isActive = slug === activeSlug;
+        const duration = mode === "mobile" ? IMAGE_TRANSITION_MS : DESKTOP_IMAGE_TRANSITION_MS;
         return (
           <div
-            key={`${d.slug}-${mode}${suffix ? `-${suffix}` : ""}`}
+            key={`${slug}-${mode}${suffix ? `-${suffix}` : ""}`}
             aria-hidden="true"
             className={cn(
-              "absolute inset-0 bg-no-repeat bg-cover bg-center transition-[opacity,transform] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform]",
+              "absolute inset-0 bg-no-repeat bg-cover bg-center transition-[opacity,transform] will-change-[opacity,transform]",
               isActive ? "opacity-100" : "opacity-0",
               mode === "desktop" && (isActive ? "scale-100" : "scale-[1.035]")
             )}
             style={{
               backgroundImage: `url(${imgSrc})`,
-              transitionDuration: `${mode === "mobile" ? IMAGE_TRANSITION_MS : DESKTOP_IMAGE_TRANSITION_MS}ms`,
+              // The incoming plane sits above the outgoing one and fades in
+              // quickly, while the outgoing plane lingers underneath. That
+              // overlap removes the mid-transition dip to black.
+              zIndex: isActive ? 2 : 1,
+              transitionTimingFunction: isActive
+                ? "cubic-bezier(0.22, 1, 0.36, 1)"
+                : "linear",
+              transitionDuration: `${isActive ? duration * 0.7 : duration}ms`,
+              transitionDelay: isActive ? "0ms" : `${Math.round(duration * 0.3)}ms`,
             }}
           />
         );
@@ -503,6 +541,7 @@ function HeroBgLayer({
     </div>
   );
 }
+
 
 const DesignersHoverHero = () => {
   const navigate = useNavigate();
