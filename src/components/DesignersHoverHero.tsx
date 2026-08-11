@@ -488,10 +488,12 @@ function HeroBgLayer({
   // undecoded layer, which reads as a black flash between the two photos.
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const w = window as any;
     const idle = (cb: () => void) =>
-      "requestIdleCallback" in window
-        ? (window as any).requestIdleCallback(cb, { timeout: 2500 })
-        : window.setTimeout(cb, 400);
+      typeof w.requestIdleCallback === "function"
+        ? w.requestIdleCallback(cb, { timeout: 2500 })
+        : w.setTimeout(cb, 400);
+
     idle(() => {
       sources.forEach(({ src }) => {
         const img = new Image();
