@@ -120,14 +120,9 @@ const Hero = () => {
           />
         </picture>
       )}
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/20" />
-      {/* Mobile/PWA only: subtle linear scrim across the bottom third for legibility */}
+      {/* Subtle legibility scrim across the bottom 40% of the hero */}
       <div
-        className="absolute inset-x-0 bottom-0 h-1/3 pointer-events-none md:hidden"
-        style={{
-          background:
-            "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.12) 55%, rgba(0,0,0,0.3) 100%)",
-        }}
+        className="absolute inset-x-0 bottom-0 h-[40%] pointer-events-none bg-gradient-to-t from-black/40 to-transparent"
         aria-hidden="true"
       />
 
