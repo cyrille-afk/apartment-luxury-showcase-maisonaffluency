@@ -157,7 +157,7 @@ const Hero = () => {
                     trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
                     scrollToSection("apartment-tour-heading");
                   }}
-                  className="py-1 text-left font-body text-xs font-light uppercase tracking-[0.3em] text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.55)] transition-opacity duration-300 hover:opacity-80 focus:outline-none focus-visible:underline touch-manipulation"
+                  className="py-1 text-left font-body text-[11px] font-light uppercase tracking-[0.22em] text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.55)] transition-opacity duration-300 hover:opacity-80 focus:outline-none focus-visible:underline touch-manipulation"
                 >
                   Singapore Gallery Preview
                 </button>
@@ -165,10 +165,10 @@ const Hero = () => {
                 <button
                   type="button"
                   onClick={openTour}
-                  className="border-b border-white/30 pb-0.5 text-left font-body text-xs font-light uppercase tracking-[0.3em] text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.55)] transition-opacity duration-300 hover:opacity-80 focus:outline-none focus-visible:underline touch-manipulation"
+                  className="text-left font-body text-[11px] font-light uppercase tracking-[0.22em] text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.55)] transition-opacity duration-300 hover:opacity-80 focus:outline-none focus-visible:underline touch-manipulation"
                 >
-                  <span>Book Private Appointment</span>
-                  <span className="ml-2 tracking-[0.2em] text-white/70">(Trade Only)</span>
+                  <span className="border-b border-white/30 pb-0.5">Book Private Appointment</span>
+                  <span className="mt-1 block text-[10px] font-light uppercase tracking-[0.2em] text-white/70">(Trade Only)</span>
                 </button>
               </div>
             </nav>
