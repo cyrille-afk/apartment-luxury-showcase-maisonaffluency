@@ -1883,7 +1883,7 @@ const PublicProductPage: React.FC = () => {
 
 
 
-        <div className="pt-[var(--header-h)] pb-[calc(env(safe-area-inset-bottom,0px)+5rem)] md:pb-20 max-w-7xl mx-auto px-0 md:px-5 lg:px-8">
+        <div className="pt-[var(--header-h)] pb-[calc(env(safe-area-inset-bottom,0px)+5rem)] md:pb-20 max-w-7xl mx-auto px-4 md:px-5 lg:px-8">
           <button
             type="button"
             onClick={() => navigate(fromPath || fallbackGridPath)}
