@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackEvent, trackCTA } from "@/lib/analytics";
+import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import PrivateTourDialog from "@/components/PrivateTourDialog";
 
 const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
@@ -51,6 +52,7 @@ const Hero = () => {
   const navigate = useNavigate();
   const [tourOpen, setTourOpen] = useState(false);
   const [showImageFallback, setShowImageFallback] = useState(false);
+  const isPwa = isPwaStandaloneDisplay();
 
   useEffect(() => {
     const isAppleWebKit = /AppleWebKit/i.test(navigator.userAgent) && !/(CriOS|FxiOS|EdgiOS)/i.test(navigator.userAgent);
@@ -197,7 +199,11 @@ const Hero = () => {
         {/* Mobile / PWA — secondary CTAs centered at the bottom */}
         <nav
           aria-label="Hero secondary actions"
-          className="mt-auto flex w-full flex-col items-center gap-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-8 md:hidden"
+          className={`mt-auto flex w-full flex-col items-center gap-4 pt-8 md:hidden ${
+            isPwa
+              ? "pb-[calc(env(safe-area-inset-bottom)+1rem)]"
+              : "pb-[calc(env(safe-area-inset-bottom)+3.5rem)]"
+          }`}
         >
           <button
             type="button"
