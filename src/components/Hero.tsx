@@ -110,7 +110,7 @@ const Hero = () => {
         </picture>
       )}
 
-      {/* Legibility scrim: single continuous bottom fade on mobile/PWA, subtler on desktop */}
+      {/* Legibility scrim: bottom-45% fade on mobile/PWA, subtler 35% fade on desktop */}
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-black/60 via-black/15 to-transparent md:h-[35%] md:from-black/40 md:via-transparent md:to-transparent"
         aria-hidden="true"
@@ -118,20 +118,20 @@ const Hero = () => {
 
 
       {/* Text overlay — desktop keeps the previous anchored-top editorial layout;
-          mobile/PWA uses a borderless, backgroundless CTA stack over the wallpaper. */}
-      <div className="ma-home-hero-copy relative z-10 flex min-h-screen flex-1 flex-col items-start justify-start px-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] pt-[var(--home-hero-mobile-pad-top)] md:h-full md:min-h-0 md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48">
-        <div className="max-w-4xl md:text-left">
+          mobile/PWA uses a bottom-aligned editorial link stack over the wallpaper. */}
+      <div className="ma-home-hero-copy relative z-10 flex min-h-screen flex-1 flex-col items-start justify-end px-6 pb-[calc(env(safe-area-inset-bottom)+2rem)] md:h-full md:min-h-0 md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48">
+        <div className="w-full max-w-xl md:max-w-4xl md:text-left">
           <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
             Modern Masters.<br />
             Iconic Design.
           </h1>
 
-          <div className="mt-8 md:mt-10 flex w-full max-w-3xl flex-col items-start">
-            <p className="relative inline-block text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium [text-shadow:0_1px_10px_rgba(0,0,0,0.55)] hero-fade-in-delayed-3 before:content-[''] before:absolute before:-inset-x-3 before:-inset-y-2 before:-z-10 before:rounded-sm before:bg-black/30 before:backdrop-blur-[1px] before:[mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)]">
+          <div className="mt-6 md:mt-10 flex w-full max-w-3xl flex-col items-start">
+            <p className="relative inline-block text-sm leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium [text-shadow:0_1px_10px_rgba(0,0,0,0.55)] hero-fade-in-delayed-3 before:content-[''] before:absolute before:-inset-x-3 before:-inset-y-2 before:-z-10 before:rounded-sm before:bg-transparent before:backdrop-blur-[1px] before:[mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)] md:before:bg-black/30">
               A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
 
-            {/* Mobile / PWA — floating, borderless editorial link stack anchored near the lower-third */}
+            {/* Mobile / PWA — bottom-aligned editorial link stack with full-width rule lines */}
             <nav
               aria-label="Hero actions"
               className="mt-auto flex w-full flex-col items-start pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-8 md:hidden"
@@ -139,7 +139,7 @@ const Hero = () => {
               <button
                 type="button"
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-                className="group flex items-center gap-2 py-2 text-left font-display text-[13px] uppercase tracking-[0.2em] text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.55)] transition-opacity duration-300 hover:opacity-80 focus:outline-none focus-visible:underline touch-manipulation"
+                className="group flex w-full items-center justify-between border-b border-white/20 py-3 text-left font-body text-[13px] font-medium uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:border-white/50 focus:outline-none focus-visible:underline touch-manipulation"
               >
                 <span>Explore the Collection</span>
                 <span
@@ -150,31 +150,43 @@ const Hero = () => {
                 </span>
               </button>
 
-              <div className="flex flex-col items-start space-y-3 pt-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-                    scrollToSection("apartment-tour-heading");
-                  }}
-                  className="py-1 text-left font-body text-[11px] font-light uppercase tracking-[0.22em] text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.55)] transition-opacity duration-300 hover:opacity-80 focus:outline-none focus-visible:underline touch-manipulation"
+              <button
+                type="button"
+                onClick={() => {
+                  trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
+                  scrollToSection("apartment-tour-heading");
+                }}
+                className="group flex w-full items-center justify-between border-b border-white/20 py-3 text-left font-body text-[11px] font-medium uppercase tracking-[0.15em] text-white transition-colors duration-300 hover:border-white/50 focus:outline-none focus-visible:underline touch-manipulation"
+              >
+                <span>Singapore Gallery Preview</span>
+                <span
+                  aria-hidden="true"
+                  className="transition-transform duration-300 group-hover:translate-x-1"
                 >
-                  Singapore Gallery Preview
-                </button>
+                  →
+                </span>
+              </button>
 
-                <button
-                  type="button"
-                  onClick={openTour}
-                  className="text-left font-body text-[11px] font-light uppercase tracking-[0.22em] text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.55)] transition-opacity duration-300 hover:opacity-80 focus:outline-none focus-visible:underline touch-manipulation"
+              <button
+                type="button"
+                onClick={openTour}
+                className="group flex w-full items-center justify-between border-b border-white/20 py-3 text-left font-body text-[11px] font-medium uppercase tracking-[0.15em] text-white transition-colors duration-300 hover:border-white/50 focus:outline-none focus-visible:underline touch-manipulation"
+              >
+                <div className="flex flex-col">
+                  <span>Book Private Appointment</span>
+                  <span className="text-[9px] font-normal normal-case italic tracking-widest text-white/60">(trade only)</span>
+                </div>
+                <span
+                  aria-hidden="true"
+                  className="transition-transform duration-300 group-hover:translate-x-1"
                 >
-                  <span className="border-b border-white/30 pb-0.5">Book Private Appointment</span>
-                  <span className="mt-1 block text-[10px] font-light uppercase tracking-[0.2em] text-white/70">(Trade Only)</span>
-                </button>
-              </div>
+                  →
+                </span>
+              </button>
             </nav>
 
             {/* Desktop — previous display: primary CTA + inline editorial links with scrim */}
-            <div className="hidden hero-mobile-cta-stack md:order-2 md:mt-20 md:flex md:w-full md:translate-x-0 md:flex-col md:items-start md:gap-6">
+            <div className="hidden md:order-2 md:mt-20 md:flex md:w-full md:flex-col md:items-start md:gap-6">
               <div className="flex flex-col items-center gap-6 md:inline-flex md:items-start">
                 <motion.button
                   type="button"
