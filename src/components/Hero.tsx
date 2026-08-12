@@ -139,7 +139,7 @@ const Hero = () => {
               <button
                 type="button"
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-                className="group flex w-full items-center justify-between border-b border-white/20 py-3 text-left font-body text-[11px] font-medium uppercase tracking-[0.15em] text-white transition-colors duration-300 hover:border-white/50 focus:outline-none focus-visible:underline touch-manipulation"
+                className="group flex w-full items-center justify-between border-b border-white/20 py-3 text-left font-body text-[13px] font-medium uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:border-white/50 focus:outline-none focus-visible:underline touch-manipulation"
               >
                 <span>Explore the Collection</span>
                 <span
