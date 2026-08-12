@@ -199,7 +199,11 @@ const Hero = () => {
         {/* Mobile / PWA — secondary CTAs centered at the bottom */}
         <nav
           aria-label="Hero secondary actions"
-          className="mt-auto flex w-full flex-col items-center gap-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-8 md:hidden"
+          className={`mt-auto flex w-full flex-col items-center gap-4 pt-8 md:hidden ${
+            isPwa
+              ? "pb-[calc(env(safe-area-inset-bottom)+1rem)]"
+              : "pb-[calc(env(safe-area-inset-bottom)+3.5rem)]"
+          }`}
         >
           <button
             type="button"
