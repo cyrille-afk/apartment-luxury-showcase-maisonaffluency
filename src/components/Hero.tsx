@@ -221,6 +221,7 @@ const Hero = () => {
           >
             Singapore Gallery Preview
           </button>
+          <span className="h-px w-20 bg-white/30" aria-hidden="true" />
           <button
             type="button"
             onClick={openTour}
