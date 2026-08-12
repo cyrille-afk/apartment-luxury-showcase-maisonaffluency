@@ -276,10 +276,6 @@ All colors MUST be HSL.
 }
 
 @media (max-width: 767px) and (max-height: 740px) {
-  :root {
-    --home-hero-mobile-pad-top: 5rem;
-  }
-
   .hero-mobile-cta-stack {
     margin-top: 3rem !important;
     gap: 1rem !important;
