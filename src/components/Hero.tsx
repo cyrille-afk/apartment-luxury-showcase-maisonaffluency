@@ -92,7 +92,11 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative flex min-h-screen w-full flex-col justify-between md:h-screen md:overflow-hidden">
+    <section
+      className={`relative flex w-full flex-col justify-between md:h-screen md:overflow-hidden ${
+        isPwa ? "min-h-screen" : "h-[100svh] min-h-[100svh] overflow-hidden"
+      }`}
+    >
       {/* Hero image is rendered by the static <picture id="static-hero"> in
           index.html (fixed, z-index:0, painted from the preloaded bytes
           before React boots). We intentionally do NOT re-render the image
@@ -121,7 +125,9 @@ const Hero = () => {
 
       {/* Text overlay — desktop keeps the previous anchored-top editorial layout;
           mobile/PWA uses a bottom-aligned editorial link stack over the wallpaper. */}
-      <div className="ma-home-hero-copy relative z-10 flex min-h-screen flex-1 flex-col items-start justify-start px-6 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-[calc(env(safe-area-inset-top)+14rem)] md:h-full md:min-h-0 md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48">
+      <div className={`ma-home-hero-copy relative z-10 flex flex-1 flex-col items-start justify-start px-6 pt-[calc(env(safe-area-inset-top)+14rem)] md:h-full md:min-h-0 md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48 ${
+        isPwa ? "min-h-screen pb-[calc(env(safe-area-inset-bottom)+2rem)]" : "h-full min-h-0 pb-0"
+      }`}>
         <div className="w-full max-w-xl md:max-w-4xl md:text-left">
           <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
             Modern Masters.<br />
@@ -199,10 +205,10 @@ const Hero = () => {
         {/* Mobile / PWA — secondary CTAs centered above the iOS navigation bar */}
         <nav
           aria-label="Hero secondary actions"
-          className={`mt-auto flex w-full flex-col items-center gap-5 pt-8 md:hidden ${
+          className={`flex w-full flex-col items-center gap-5 md:hidden ${
             isPwa
-              ? "pb-[calc(env(safe-area-inset-bottom)+2.5rem)]"
-              : "pb-[calc(env(safe-area-inset-bottom)+6.5rem)]"
+              ? "mt-auto pb-[calc(env(safe-area-inset-bottom)+2.5rem)] pt-8"
+              : "absolute inset-x-6 bottom-[calc(env(safe-area-inset-bottom)+5rem)]"
           }`}
         >
           <button
