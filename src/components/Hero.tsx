@@ -127,7 +127,7 @@ const Hero = () => {
           </h1>
 
           <div className="mt-6 md:mt-10 flex w-full max-w-3xl flex-col items-start">
-            <p className="relative inline-block text-sm leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium [text-shadow:0_1px_10px_rgba(0,0,0,0.55)] hero-fade-in-delayed-3 before:content-[''] before:absolute before:-inset-x-3 before:-inset-y-2 before:-z-10 before:rounded-sm before:bg-transparent before:backdrop-blur-[1px] before:[mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)] md:before:bg-black/30">
+            <p className="relative inline-block text-sm leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium [text-shadow:0_1px_10px_rgba(0,0,0,0.55)] hero-fade-in-delayed-3 before:content-[''] before:absolute before:-inset-x-3 before:-inset-y-2 before:-z-10 before:rounded-sm before:bg-black/35 before:backdrop-blur-[1px] before:[mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)]">
               A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
 
