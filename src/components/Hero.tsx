@@ -208,7 +208,7 @@ const Hero = () => {
           className={`flex w-full flex-col items-center gap-5 md:hidden ${
             isPwa
               ? "mt-auto pb-[calc(env(safe-area-inset-bottom)+2.5rem)] pt-8"
-              : "absolute inset-x-6 bottom-[calc(env(safe-area-inset-bottom)+5rem)]"
+              : "absolute inset-x-6 bottom-[calc(env(safe-area-inset-bottom)+7rem)] w-auto"
           }`}
         >
           <button
