@@ -253,10 +253,6 @@ All colors MUST be HSL.
 
 /* Mobile LCP optimization: paint hero text immediately */
 @media (max-width: 767px) {
-  :root {
-    --home-hero-mobile-pad-top: 7rem;
-  }
-
   .hero-mobile-micro-block.is-pwa {
     margin-top: 18svh;
   }
