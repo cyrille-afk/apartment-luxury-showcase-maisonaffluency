@@ -302,12 +302,6 @@ All colors MUST be HSL.
   }
 }
 
-@media (min-width: 768px) {
-  :root {
-    --home-hero-mobile-pad-top: 24svh;
-  }
-}
-
 /* Print styles for quote PDF export */
 @media print {
   /* Hide all navigation, sidebar, and UI chrome */
