@@ -194,6 +194,31 @@ const Hero = () => {
           </div>
         </div>
 
+        {/* Mobile / PWA — secondary CTAs centered at the bottom */}
+        <nav
+          aria-label="Hero secondary actions"
+          className="mt-auto flex w-full flex-col items-center gap-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-8 md:hidden"
+        >
+          <button
+            type="button"
+            onClick={() => {
+              trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
+              scrollToSection("apartment-tour-heading");
+            }}
+            className="font-body text-[11px] font-light uppercase tracking-[0.25em] text-white transition-opacity duration-300 hover:opacity-70"
+          >
+            Singapore Gallery Preview
+          </button>
+          <button
+            type="button"
+            onClick={openTour}
+            className="group flex flex-col items-center font-body text-[11px] font-light uppercase tracking-[0.25em] text-white transition-opacity duration-300 hover:opacity-70"
+          >
+            <span>Book Private Appointment</span>
+            <span className="text-[9px] font-normal normal-case italic tracking-widest text-white/60">(trade only)</span>
+          </button>
+        </nav>
+
       </div>
 
       <PrivateTourDialog open={tourOpen} onOpenChange={setTourOpen} />
