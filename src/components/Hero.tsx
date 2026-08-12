@@ -131,59 +131,20 @@ const Hero = () => {
               A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
 
-            {/* Mobile / PWA — bottom-aligned editorial link stack with full-width rule lines */}
-            <nav
-              aria-label="Hero actions"
-              className="mt-auto flex w-full flex-col items-start pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-8 md:hidden"
+            {/* Mobile / PWA — primary CTA directly below paragraph, left-justified */}
+            <button
+              type="button"
+              onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
+              className="group mt-6 flex items-center gap-3 font-body text-[12px] font-medium uppercase tracking-[0.25em] text-white transition-opacity duration-300 hover:opacity-70 md:hidden"
             >
-              <button
-                type="button"
-                onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-                className="group flex w-full items-center justify-between border-b border-white/20 py-3 text-left font-body text-[13px] font-medium uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:border-white/50 focus:outline-none focus-visible:underline touch-manipulation"
+              <span>Explore the Collection</span>
+              <span
+                aria-hidden="true"
+                className="transition-transform duration-300 group-hover:translate-x-1"
               >
-                <span>Explore the Collection</span>
-                <span
-                  aria-hidden="true"
-                  className="transition-transform duration-300 group-hover:translate-x-1"
-                >
-                  →
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-                  scrollToSection("apartment-tour-heading");
-                }}
-                className="group flex w-full items-center justify-between border-b border-white/20 py-3 text-left font-body text-[11px] font-medium uppercase tracking-[0.15em] text-white transition-colors duration-300 hover:border-white/50 focus:outline-none focus-visible:underline touch-manipulation"
-              >
-                <span>Singapore Gallery Preview</span>
-                <span
-                  aria-hidden="true"
-                  className="transition-transform duration-300 group-hover:translate-x-1"
-                >
-                  →
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={openTour}
-                className="group flex w-full items-center justify-between border-b border-white/20 py-3 text-left font-body text-[11px] font-medium uppercase tracking-[0.15em] text-white transition-colors duration-300 hover:border-white/50 focus:outline-none focus-visible:underline touch-manipulation"
-              >
-                <div className="flex flex-col">
-                  <span>Book Private Appointment</span>
-                  <span className="text-[9px] font-normal normal-case italic tracking-widest text-white/60">(trade only)</span>
-                </div>
-                <span
-                  aria-hidden="true"
-                  className="transition-transform duration-300 group-hover:translate-x-1"
-                >
-                  →
-                </span>
-              </button>
-            </nav>
+                →
+              </span>
+            </button>
 
             {/* Desktop — previous display: primary CTA + inline editorial links with scrim */}
             <div className="hidden md:order-2 md:mt-20 md:flex md:w-full md:flex-col md:items-start md:gap-6">
