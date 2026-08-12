@@ -186,7 +186,7 @@ const Hero = () => {
             </nav>
 
             {/* Desktop — previous display: primary CTA + inline editorial links with scrim */}
-            <div className="hidden hero-mobile-cta-stack md:order-2 md:mt-20 md:flex md:w-full md:translate-x-0 md:flex-col md:items-start md:gap-6">
+            <div className="hidden md:order-2 md:mt-20 md:flex md:w-full md:flex-col md:items-start md:gap-6">
               <div className="flex flex-col items-center gap-6 md:inline-flex md:items-start">
                 <motion.button
                   type="button"
