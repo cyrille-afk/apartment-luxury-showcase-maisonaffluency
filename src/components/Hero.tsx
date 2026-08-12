@@ -110,9 +110,9 @@ const Hero = () => {
         </picture>
       )}
 
-      {/* Legibility scrim: full-height bottom fade on mobile/PWA, subtler on desktop */}
+      {/* Legibility scrim: bottom-45% fade on mobile/PWA, subtler 35% fade on desktop */}
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent md:inset-x-0 md:bottom-0 md:top-auto md:h-[35%] md:bg-gradient-to-t md:from-black/40 md:via-transparent md:to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-black/60 via-black/15 to-transparent md:h-[35%] md:from-black/40 md:via-transparent md:to-transparent"
         aria-hidden="true"
       />
 
