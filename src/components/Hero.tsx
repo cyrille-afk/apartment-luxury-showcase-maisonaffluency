@@ -52,6 +52,7 @@ const Hero = () => {
   const navigate = useNavigate();
   const [tourOpen, setTourOpen] = useState(false);
   const [showImageFallback, setShowImageFallback] = useState(false);
+  const isPwa = isPwaStandaloneDisplay();
 
   useEffect(() => {
     const isAppleWebKit = /AppleWebKit/i.test(navigator.userAgent) && !/(CriOS|FxiOS|EdgiOS)/i.test(navigator.userAgent);
