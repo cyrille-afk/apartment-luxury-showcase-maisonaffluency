@@ -162,7 +162,8 @@ function ScrollLockedDesigners({
     body.style.minHeight = "var(--designers-landing-vh, 100lvh)";
     // Keep only a fallback color; the fixed body now extends far enough for the
     // hero image itself to paint behind the iOS toolbar.
-    body.style.backgroundColor = "#000000";
+    html.style.setProperty("--ios-chrome-base", "#000000");
+    body.style.backgroundColor = "transparent";
     // Force scroll to top: on back-navigation the browser restores the previous
     // window.scrollY, but with body overflow locked the hero can't be scrolled
     // back — leaving the top half cut off and the bottom half empty.
