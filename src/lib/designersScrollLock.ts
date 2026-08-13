@@ -5,6 +5,8 @@ function removeInlineScrollPin(html: HTMLElement, body: HTMLElement) {
   html.style.removeProperty("overscroll-behavior");
   html.style.removeProperty("height");
   html.style.removeProperty("--designers-landing-vh");
+  html.style.removeProperty("--ios-chrome-base");
+
 
   body.style.removeProperty("overflow");
   body.style.removeProperty("overscroll-behavior");

@@ -769,13 +769,13 @@ const DesignersHoverHero = () => {
     const previousBodyBgImage = body.style.backgroundImage;
     const previousBodyBgColor = body.style.backgroundColor;
 
-    // No full-bleed image behind the browser chrome: the iOS navigation panel
-    // (URL bar / bottom toolbar) sits on a solid black backdrop instead of a
-    // stretched copy of the hero photo.
-    html.style.backgroundImage = "none";
-    html.style.backgroundColor = "#000000";
+    // No full-bleed image behind the browser chrome. The canvas base is set via
+    // --ios-chrome-base so the shared gradient treatment (index.css) fades it
+    // out at the bottom instead of a hard black block.
+    html.style.backgroundImage = "";
+    html.style.setProperty("--ios-chrome-base", "#000000");
     body.style.backgroundImage = "none";
-    body.style.backgroundColor = "#000000";
+    body.style.backgroundColor = "transparent";
 
     return () => {
       html.style.backgroundImage = previousHtmlBgImage;
@@ -783,9 +783,11 @@ const DesignersHoverHero = () => {
       html.style.backgroundPosition = previousHtmlBgPosition;
       html.style.backgroundRepeat = previousHtmlBgRepeat;
       html.style.backgroundColor = previousHtmlBgColor;
+      html.style.removeProperty("--ios-chrome-base");
       body.style.backgroundImage = previousBodyBgImage;
       body.style.backgroundColor = previousBodyBgColor;
     };
+
 
   }, [isMobileOrPwa]);
 
