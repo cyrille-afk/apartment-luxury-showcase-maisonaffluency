@@ -611,30 +611,44 @@ input, select, textarea {
   }
 }
 
-/* iOS Safari browser chrome backing.
-   Safari may source its translucent bottom toolbar canvas from either html or
-   body. Match that canvas to the page surface so it cannot create a dark band
-   behind the native navigation panel. */
+/* Mobile / iOS chrome backing — unified gradient treatment.
+   The canvas behind the iOS navigation panel is never a flat white or flat
+   black block: it starts from the page surface (--ios-chrome-base, overridable
+   per route) and fades into deep black at the very bottom, mirroring the
+   gradient used at the bottom of the product page. */
 @media (max-width: 767px) {
-  html.ios-safari-browser,
-  html.ios-safari-browser body {
-    background-color: hsl(var(--background));
+  html {
+    background-color: var(--ios-chrome-base, hsl(var(--background)));
+    background-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 62%,
+      rgba(0, 0, 0, 0.28) 84%,
+      rgba(0, 0, 0, 0.62) 100%
+    );
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: 100% 100%;
+  }
+
+  html.ios-safari-browser body,
+  html.ios-safari-browser #root {
+    background-color: transparent;
   }
 
   html.ios-safari-browser #root {
     min-height: 100vh;
     min-height: 100dvh;
-    background-color: hsl(var(--background));
   }
 }
 
 @media (max-width: 767px) and (display-mode: standalone) {
-  html,
   body,
   #root {
-    background-color: hsl(var(--background));
+    background-color: transparent;
   }
 }
+
 
 /* Respect users who request reduced motion — but never disable zoom. */
 @media (prefers-reduced-motion: reduce) {
