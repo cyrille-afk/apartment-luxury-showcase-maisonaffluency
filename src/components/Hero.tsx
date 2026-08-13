@@ -143,12 +143,12 @@ const Hero = () => {
             <button
               type="button"
               onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-              className="group mt-10 flex items-center gap-3 font-body text-[13px] font-bold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70 md:hidden"
+              className="group mt-12 flex items-center gap-3 font-body text-[13px] font-bold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70 md:hidden"
             >
               <span>Explore the Collection</span>
               <span
                 aria-hidden="true"
-                className="transition-transform duration-300 group-hover:translate-x-1"
+                className="text-[22px] leading-none transition-transform duration-300 group-hover:translate-x-3"
               >
                 →
               </span>
@@ -207,8 +207,8 @@ const Hero = () => {
           aria-label="Hero secondary actions"
           className={`flex w-full flex-col items-center gap-5 md:hidden ${
             isPwa
-              ? "mt-auto pb-[calc(env(safe-area-inset-bottom)+1.5rem)] pt-8"
-              : "absolute inset-x-6 bottom-[calc(env(safe-area-inset-bottom)+6rem)] w-auto"
+              ? "mt-auto pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-8"
+              : "absolute inset-x-6 bottom-[calc(env(safe-area-inset-bottom)+4rem)] w-auto"
           }`}
         >
           <button
