@@ -148,7 +148,7 @@ const Hero = () => {
               <span>Explore the Collection</span>
               <span
                 aria-hidden="true"
-                className="text-lg leading-none transition-transform duration-300 group-hover:translate-x-2"
+                className="text-[22px] leading-none transition-transform duration-300 group-hover:translate-x-3"
               >
                 →
               </span>
