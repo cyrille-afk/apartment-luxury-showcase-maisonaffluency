@@ -1136,8 +1136,8 @@ const PublicDesignerProfile = () => {
             <PortraitCtaLink
               label="View the full portrait"
               onClick={openPortrait}
-              longArrow
             />
+
           </div>
         </div>
       </div>
