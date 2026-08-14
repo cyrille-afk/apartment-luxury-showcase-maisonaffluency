@@ -1091,8 +1091,9 @@ const PublicDesignerProfile = () => {
 
 
   const babledIntroSection = (
-    // Hero image + floating translucent overlay panel
-    <section className="relative w-full max-w-[1440px] mx-auto px-6 md:px-12">
+    // Hero image + floating translucent overlay panel (desktop only)
+    <section className="relative w-full max-w-[1440px] mx-auto px-6 md:px-12 hidden md:block">
+
       <div className="relative w-full h-[60vh] md:h-[75vh] overflow-hidden bg-muted">
         {(wideHeroImage || heroImage) && (
           <img
