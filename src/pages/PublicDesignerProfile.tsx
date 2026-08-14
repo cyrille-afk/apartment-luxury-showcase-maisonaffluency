@@ -1093,17 +1093,19 @@ const PublicDesignerProfile = () => {
   const babledIntroSection = (
     // Editorial split header — 25% uncropped landscape image / 75% typography (desktop only)
     <section className="hidden md:block pt-2 pb-10">
-      <div className="grid grid-cols-12 gap-x-12 gap-y-10 items-start">
+      <div className="grid grid-cols-12 gap-x-12 gap-y-10 items-center">
         {/* Left — uncropped landscape lifestyle image (matches one product-card column = 1/3) */}
         <div className="col-span-4">
-          {(wideHeroImage || heroImage) && (
-            <img
-              src={wideHeroImage || heroImage}
-              alt={`${name} interior`}
-              className="w-full h-auto object-contain"
-              loading="eager"
-            />
-          )}
+          <div className="aspect-[4/3] overflow-hidden">
+            {(wideHeroImage || heroImage) && (
+              <img
+                src={wideHeroImage || heroImage}
+                alt={`${name} interior`}
+                className="w-full h-full object-cover"
+                loading="eager"
+              />
+            )}
+          </div>
           {designer?.hero_photo_credit && (
             <p className="mt-2 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
               Photo: {designer.hero_photo_credit}
