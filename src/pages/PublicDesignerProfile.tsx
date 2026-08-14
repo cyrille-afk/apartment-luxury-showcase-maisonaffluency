@@ -1091,64 +1091,57 @@ const PublicDesignerProfile = () => {
 
 
   const babledIntroSection = (
-    // Hero image + floating translucent overlay panel (desktop only)
-    <section className="relative w-screen left-1/2 -ml-[50vw] hidden md:block">
+    // Editorial split header — 25% uncropped landscape image / 75% typography (desktop only)
+    <section className="hidden md:block pt-2 pb-10">
+      <div className="grid grid-cols-12 gap-10 lg:gap-16 items-start">
+        {/* Left — uncropped landscape lifestyle image (25%) */}
+        <div className="col-span-3">
+          {(wideHeroImage || heroImage) && (
+            <img
+              src={wideHeroImage || heroImage}
+              alt={`${name} interior`}
+              className="w-full h-auto object-contain"
+              loading="eager"
+            />
+          )}
+          {designer?.hero_photo_credit && (
+            <p className="mt-2 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
+              Photo: {designer.hero_photo_credit}
+            </p>
+          )}
+        </div>
 
-      <div className="relative w-full h-[60vh] md:h-[75vh] overflow-hidden bg-muted">
-        {(wideHeroImage || heroImage) && (
-          <img
-            src={wideHeroImage || heroImage}
-            alt={`${name} interior`}
-            className="w-full h-full object-cover"
-            loading="eager"
-          />
-        )}
+        {/* Right — name, biography, CTA */}
+        <div className="col-span-9">
+          <h1 className="font-display text-4xl lg:text-[3.25rem] leading-[1.05] tracking-[-0.01em] text-foreground">
+            {name}
+          </h1>
+          {designer?.specialty && (
+            <p className="mt-3 font-body text-[10px] lg:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
+              {designer.specialty}
+            </p>
+          )}
 
-        {/* Bottom scrim — same soft gradient used behind the hero CTAs */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/70 via-black/35 to-transparent" />
+          <p className="mt-6 max-w-[720px] font-body text-[15px] lg:text-base leading-[1.8] text-foreground/85 [text-wrap:pretty]">
+            Emmanuel Babled is a French-Italian designer whose practice sits at the rare
+            intersection of contemporary design, sculpture, and the master ateliers of Murano and
+            Carrara. Born in France in 1967 and trained at the Scuola Politecnica di Design in Milan,
+            he settled in Italy in the late 1980s and has spent the past three decades pushing glass,
+            marble, ceramic and bronze into forms that feel at once primordial and futuristic.
+          </p>
 
-        {/* Text overlay */}
-        <div className="absolute bottom-0 left-0 right-0 text-white py-10 px-[6vw]">
-          <div className="mx-auto max-w-[1400px] grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-
-            {/* Left Column: Name */}
-            <div className="md:col-span-4">
-              <h2 className="font-display text-2xl tracking-wide text-white font-normal">
-                {name}
-              </h2>
-              {designer?.specialty && (
-                <p className="text-[10px] uppercase tracking-[0.2em] text-white/70 mt-2 font-light leading-relaxed">
-                  {designer.specialty}
-                </p>
-              )}
-            </div>
-
-            {/* Center Column: Paragraph */}
-            <div className="md:col-span-5">
-              <p className="text-xs md:text-sm text-white/90 leading-relaxed font-light text-justify">
-                Emmanuel Babled is a French-Italian designer whose practice sits at the rare
-                intersection of contemporary design, sculpture, and the master ateliers of Murano and
-                Carrara. Born in France in 1967 and trained at the Scuola Politecnica di Design in Milan,
-                he settled in Italy in the late 1980s and has spent the past three decades pushing glass,
-                marble, ceramic and bronze into forms that feel at once primordial and futuristic.
-              </p>
-            </div>
-
-            {/* Right Column: View Profile Link */}
-            <div className="md:col-span-3 flex justify-end md:pt-1">
-              <PortraitCtaLink
-                label="View the full portrait"
-                onClick={openPortrait}
-                longArrow
-                className="text-white hover:text-white/70"
-              />
-
-            </div>
+          <div className="mt-8 flex text-foreground">
+            <PortraitCtaLink
+              label="View the full portrait"
+              onClick={openPortrait}
+              longArrow
+            />
           </div>
         </div>
       </div>
     </section>
   );
+
 
   const newInSection = (
     <div className="flex flex-col gap-0">
