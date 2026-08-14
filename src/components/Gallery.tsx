@@ -4,7 +4,7 @@ import { useInView } from "framer-motion";
 import React, { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, ChevronDown, X, Maximize2, Minimize2, Expand, Shrink, Instagram, Copy, Plus, Minus, Share2, CalendarDays } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, X, Maximize2, Minimize2, Expand, Shrink, Instagram, Copy, Plus, Minus, CalendarDays } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import PinchHint from "./PinchHint";
 import GalleryHotspots from "./GalleryHotspots";
@@ -1098,32 +1098,12 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         </span>
                       </span>
                     </div>
-                    {/* Row 2: Title + Share centred */}
+                    {/* Row 2: Title centred */}
                     <div className="hidden md:flex flex-col items-center text-center mb-3">
                       <div className="flex items-center gap-3">
                         <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-primary">
                           {section.experience}
                         </h3>
-                        <button
-                          onClick={() => {
-                            const firstItem = galleryExperiences[originalSectionIndex].items[0];
-                            const titleSlug = slugify(firstItem?.title || '');
-                            const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                            const url = `https://www.maisonaffluency.com/gallery/${titleSlug}.html`;
-                            const text = `${section.experience} — Maison Affluency`;
-                            if (isMobileDevice) {
-                              window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
-                            } else {
-                              navigator.clipboard.writeText(`${text} — ${url}`);
-                              import('sonner').then(({ toast }) => toast.success('Link copied'));
-                            }
-                          }}
-                          className="inline-flex flex-col items-center gap-0.5 text-foreground hover:text-primary transition-colors flex-shrink-0"
-                          aria-label={`Share ${section.experience}`}
-                        >
-                          <Share2 className="w-4 h-4" />
-                          <span className="text-[7px] uppercase tracking-[0.12em] font-body">Share</span>
-                        </button>
                       </div>
                       {/* Subtitle centred, grid icons right-aligned on same row */}
                       <div className="flex items-center w-full mt-1">
@@ -1156,33 +1136,11 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                   </>
                 ) : !isMobile ? (
                   <>
-                    {/* Desktop: centred title + share, centred subtitle */}
+                    {/* Desktop: centred title, centred subtitle */}
                     <div className="hidden md:flex flex-col items-center text-center mb-3">
-                      <div className="flex items-center gap-3">
-                        <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-primary">
-                          {section.experience}
-                        </h3>
-                        <button
-                          onClick={() => {
-                            const firstItem = galleryExperiences[originalSectionIndex].items[0];
-                            const titleSlug = slugify(firstItem?.title || '');
-                            const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                            const url = `https://www.maisonaffluency.com/gallery/${titleSlug}.html`;
-                            const text = `${section.experience} — Maison Affluency`;
-                            if (isMobileDevice) {
-                              window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
-                            } else {
-                              navigator.clipboard.writeText(`${text} — ${url}`);
-                              import('sonner').then(({ toast }) => toast.success('Link copied'));
-                            }
-                          }}
-                          className="inline-flex flex-col items-center gap-0.5 text-foreground hover:text-primary transition-colors flex-shrink-0"
-                          aria-label={`Share ${section.experience}`}
-                        >
-                          <Share2 className="w-4 h-4" />
-                          <span className="text-[7px] uppercase tracking-[0.12em] font-body">Share</span>
-                        </button>
-                      </div>
+                      <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-primary">
+                        {section.experience}
+                      </h3>
                       <p className="text-sm md:text-base text-muted-foreground font-body italic mt-1">
                         {section.subtitle}
                       </p>
