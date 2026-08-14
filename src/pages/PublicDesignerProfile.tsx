@@ -1093,7 +1093,7 @@ const PublicDesignerProfile = () => {
   const babledIntroSection = (
     // Editorial split header — 25% uncropped landscape image / 75% typography (desktop only)
     <section className="hidden md:block pt-2 pb-10">
-      <div className="grid grid-cols-12 gap-x-5 gap-y-10 items-start">
+      <div className="grid grid-cols-12 gap-x-12 gap-y-10 items-start">
         {/* Left — uncropped landscape lifestyle image (matches one product-card column = 1/3) */}
         <div className="col-span-4">
           {(wideHeroImage || heroImage) && (
@@ -1356,7 +1356,10 @@ const PublicDesignerProfile = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
 
-        <div className="max-w-6xl mx-auto px-4 md:px-12 pt-[var(--header-h)] pb-20 space-y-1 md:space-y-1.5">
+        <div className={cn(
+          "max-w-6xl mx-auto px-4 md:px-12 pt-[var(--header-h)] pb-20 space-y-1 md:space-y-1.5",
+          isEmmanuelBabled && "md:max-w-[1440px] md:px-8"
+        )}>
           <div className="flex items-center justify-between">
             {fromProduct ? (
               <Link
@@ -1755,7 +1758,11 @@ const PublicDesignerProfile = () => {
                     </div>
 
 
-                    <div className={cn("grid gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10", gridClass)}>
+                    <div className={cn(
+                      "grid gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10",
+                      gridClass,
+                      isEmmanuelBabled && "md:gap-x-12"
+                    )}>
                 {visiblePicks.map((pick) => {
 
                   const ap = pick as AttributedCuratorPick;
@@ -1931,7 +1938,10 @@ const PublicDesignerProfile = () => {
                           }
                         }}
                         aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
-                        className="aspect-[4/5] bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer"
+                        className={cn(
+                          "aspect-[4/5] bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer",
+                          isEmmanuelBabled && "md:aspect-[4/3]"
+                        )}
                       >
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
