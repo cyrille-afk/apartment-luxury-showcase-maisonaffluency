@@ -8,10 +8,14 @@ import { useToast } from "@/hooks/use-toast";
 const TradeLogin = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  // "Back to Maison Affluency" must never point at the gated page the visitor
+  // was just bounced from (that would redirect straight back to this login).
+  // Only an explicit `back` param is honoured; otherwise go home.
   const backHref = (() => {
-    const raw = searchParams.get("back") || searchParams.get("redirect") || "/";
+    const raw = searchParams.get("back") || "/";
     // Only permit same-origin absolute paths to prevent open-redirect.
-    return raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
+    const safe = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
+    return safe.startsWith("/trade") ? "/" : safe;
   })();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
