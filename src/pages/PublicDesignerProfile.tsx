@@ -1218,56 +1218,68 @@ const PublicDesignerProfile = () => {
           )}
         </motion.div>
 
-        {/* Narrative column */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ ...transition, delay: 0.2 }}
-          className="flex flex-col justify-start w-full"
-        >
-          <h1 className="font-display text-[26px] leading-[1.1] tracking-[-0.01em] text-foreground mb-1">
-            {name}
-          </h1>
+        {isEmmanuelBabled ? (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...transition, delay: 0.2 }}
+          >
+            {babledIntroSection}
+          </motion.div>
+        ) : (
+          <>
+            {/* Narrative column */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ ...transition, delay: 0.2 }}
+              className="flex flex-col justify-start w-full"
+            >
+              <h1 className="font-display text-[26px] leading-[1.1] tracking-[-0.01em] text-foreground mb-1">
+                {name}
+              </h1>
 
-          {heroParagraphs.length > 0 && (
-            <div className="portrait-link-container font-body text-[14px] leading-[1.6] text-foreground/85 text-left">
-              <div className="md:hidden relative">
-                <div className="bio-description-mobile">
-                  {heroParagraphs.slice(0, 1).map((p: string, i: number) => (
-                    <p key={i} className={i > 0 ? "mt-3" : ""}>{renderParagraph(p)}</p>
-                  ))}
+              {heroParagraphs.length > 0 && (
+                <div className="portrait-link-container font-body text-[14px] leading-[1.6] text-foreground/85 text-left">
+                  <div className="md:hidden relative">
+                    <div className="bio-description-mobile">
+                      {heroParagraphs.slice(0, 1).map((p: string, i: number) => (
+                        <p key={i} className={i > 0 ? "mt-3" : ""}>{renderParagraph(p)}</p>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="hidden md:block">
+                    {heroParagraphs.map((p: string, i: number) => (
+                      <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={openPortrait}
+                    className="md:hidden block mt-1 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    View full portrait
+                  </button>
                 </div>
-              </div>
-              <div className="hidden md:block">
-                {heroParagraphs.map((p: string, i: number) => (
-                  <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={openPortrait}
-                className="md:hidden block mt-1 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
-              >
-                View full portrait
-              </button>
-            </div>
-          )}
+              )}
 
-          {!heroParagraphs.length && thinContentFallback && (
-            <div className="font-body text-[14px] leading-[1.6] text-foreground/85 mt-1">
-              <p
-                className="md:hidden line-clamp-2"
-                style={{
-                  WebkitMaskImage: "linear-gradient(to right, black 75%, transparent 100%)",
-                  maskImage: "linear-gradient(to right, black 75%, transparent 100%)",
-                }}
-              >
-                {thinContentFallback}
-              </p>
-              <p className="hidden md:block">{thinContentFallback}</p>
-            </div>
-          )}
-        </motion.div>
+              {!heroParagraphs.length && thinContentFallback && (
+                <div className="font-body text-[14px] leading-[1.6] text-foreground/85 mt-1">
+                  <p
+                    className="md:hidden line-clamp-2"
+                    style={{
+                      WebkitMaskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                      maskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                    }}
+                  >
+                    {thinContentFallback}
+                  </p>
+                  <p className="hidden md:block">{thinContentFallback}</p>
+                </div>
+              )}
+            </motion.div>
+          </>
+        )}
       </div>
 
 
