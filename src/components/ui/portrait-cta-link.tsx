@@ -13,7 +13,7 @@ interface PortraitCtaLinkProps {
   /** Renders the mirrored (leftward) arrow for the "close" state. */
   reversed?: boolean;
   expanded?: boolean;
-  /** Renders a single continuous long arrow instead of a hairline + icon. */
+  /** Renders a single trailing/leading hairline instead of an arrow. */
   longArrow?: boolean;
   className?: string;
 }
@@ -45,11 +45,13 @@ export function PortraitCtaLink({
     >
       <span
         className={cn(
-          "relative inline-flex items-center whitespace-nowrap transition-[padding] duration-300",
+          "relative inline-flex items-center whitespace-nowrap duration-300",
           longArrow
-            ? reversed
-              ? ["pl-16 pr-0", "group-hover:pl-0 group-hover:pr-16", pressed && "pl-0 pr-16"]
-              : ["pl-0 pr-16", "group-hover:pl-16 group-hover:pr-0", pressed && "pl-16 pr-0"]
+            ? [
+                "gap-4 transition-transform",
+                reversed ? "group-hover:translate-x-2" : "group-hover:-translate-x-2",
+                pressed && (reversed ? "translate-x-2" : "-translate-x-2"),
+              ]
             : reversed
               ? ["pl-14 pr-0", "group-hover:pl-0 group-hover:pr-20", pressed && "pl-0 pr-20"]
               : ["pl-0 pr-14", "group-hover:pl-20 group-hover:pr-0", pressed && "pl-20 pr-0"]
@@ -68,6 +70,9 @@ export function PortraitCtaLink({
             />
           </>
         )}
+        {longArrow && reversed && (
+          <span aria-hidden="true" className="pointer-events-none h-px w-12 shrink-0 bg-current" />
+        )}
         <span className="relative z-10">{label}</span>
         {!longArrow && (
           /* outgoing rule */
@@ -81,31 +86,9 @@ export function PortraitCtaLink({
           />
         )}
         {longArrow ? (
-          // Single continuous arrow after the label; it stays visible and follows
-          // the text as the label shifts on hover/press.
-          <svg
-            viewBox="0 0 56 14"
-            preserveAspectRatio="none"
-            className={cn(
-              "pointer-events-none absolute top-1/2 h-3.5 w-12 -translate-y-1/2 transition-transform duration-300",
-              reversed ? "left-0" : "right-0"
-            )}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1}
-          >
-            {reversed ? (
-              <>
-                <line x1="56" y1="7" x2="2" y2="7" vectorEffect="non-scaling-stroke" />
-                <polyline points="10,1.5 2,7 10,12.5" vectorEffect="non-scaling-stroke" strokeLinecap="square" />
-              </>
-            ) : (
-              <>
-                <line x1="0" y1="7" x2="54" y2="7" vectorEffect="non-scaling-stroke" />
-                <polyline points="46,1.5 54,7 46,12.5" vectorEffect="non-scaling-stroke" strokeLinecap="square" />
-              </>
-            )}
-          </svg>
+          !reversed && (
+            <span aria-hidden="true" className="pointer-events-none h-px w-12 shrink-0 bg-current" />
+          )
         ) : (
 
           <Arrow
