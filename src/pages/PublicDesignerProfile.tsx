@@ -1114,11 +1114,13 @@ const PublicDesignerProfile = () => {
             {/* Left Column: Name */}
             <div className="md:col-span-4">
               <h2 className="font-display text-2xl tracking-wide text-white font-normal">
-                Emmanuel Babled
+                {name}
               </h2>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/70 mt-2 font-light leading-relaxed">
-                Sculptural Glass &<br />Marble Design
-              </p>
+              {designer?.specialty && (
+                <p className="text-[10px] uppercase tracking-[0.2em] text-white/70 mt-2 font-light leading-relaxed">
+                  {designer.specialty}
+                </p>
+              )}
             </div>
 
             {/* Center Column: Paragraph */}
