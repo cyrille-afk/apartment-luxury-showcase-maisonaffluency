@@ -81,60 +81,31 @@ export function PortraitCtaLink({
           />
         )}
         {longArrow ? (
-          <>
-            {/* resting arrow (trailing side) */}
-            <svg
-              viewBox="0 0 56 14"
-              preserveAspectRatio="none"
-              className={cn(
-                "pointer-events-none absolute top-1/2 h-3.5 w-12 -translate-y-1/2 opacity-100 transition-all duration-300 group-hover:opacity-0",
-                reversed
-                  ? ["left-0", "group-hover:-translate-x-3", pressed && "-translate-x-3 opacity-0"]
-                  : ["right-0", "group-hover:translate-x-3", pressed && "translate-x-3 opacity-0"]
-              )}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1}
-            >
-              {reversed ? (
-                <>
-                  <line x1="56" y1="7" x2="2" y2="7" vectorEffect="non-scaling-stroke" />
-                  <polyline points="10,1.5 2,7 10,12.5" vectorEffect="non-scaling-stroke" strokeLinecap="square" />
-                </>
-              ) : (
-                <>
-                  <line x1="0" y1="7" x2="54" y2="7" vectorEffect="non-scaling-stroke" />
-                  <polyline points="46,1.5 54,7 46,12.5" vectorEffect="non-scaling-stroke" strokeLinecap="square" />
-                </>
-              )}
-            </svg>
-            {/* incoming arrow (leading side) */}
-            <svg
-              viewBox="0 0 56 14"
-              preserveAspectRatio="none"
-              className={cn(
-                "pointer-events-none absolute top-1/2 h-3.5 w-12 -translate-y-1/2 opacity-0 transition-all duration-300 group-hover:opacity-100",
-                reversed
-                  ? ["right-0", "translate-x-3 group-hover:translate-x-0", pressed && "translate-x-0 opacity-100"]
-                  : ["left-0", "-translate-x-3 group-hover:translate-x-0", pressed && "translate-x-0 opacity-100"]
-              )}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1}
-            >
-              {reversed ? (
-                <>
-                  <line x1="56" y1="7" x2="2" y2="7" vectorEffect="non-scaling-stroke" />
-                  <polyline points="10,1.5 2,7 10,12.5" vectorEffect="non-scaling-stroke" strokeLinecap="square" />
-                </>
-              ) : (
-                <>
-                  <line x1="0" y1="7" x2="54" y2="7" vectorEffect="non-scaling-stroke" />
-                  <polyline points="46,1.5 54,7 46,12.5" vectorEffect="non-scaling-stroke" strokeLinecap="square" />
-                </>
-              )}
-            </svg>
-          </>
+          // Single continuous arrow after the label; it stays visible and follows
+          // the text as the label shifts on hover/press.
+          <svg
+            viewBox="0 0 56 14"
+            preserveAspectRatio="none"
+            className={cn(
+              "pointer-events-none absolute top-1/2 h-3.5 w-12 -translate-y-1/2 transition-transform duration-300",
+              reversed ? "left-0" : "right-0"
+            )}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1}
+          >
+            {reversed ? (
+              <>
+                <line x1="56" y1="7" x2="2" y2="7" vectorEffect="non-scaling-stroke" />
+                <polyline points="10,1.5 2,7 10,12.5" vectorEffect="non-scaling-stroke" strokeLinecap="square" />
+              </>
+            ) : (
+              <>
+                <line x1="0" y1="7" x2="54" y2="7" vectorEffect="non-scaling-stroke" />
+                <polyline points="46,1.5 54,7 46,12.5" vectorEffect="non-scaling-stroke" strokeLinecap="square" />
+              </>
+            )}
+          </svg>
         ) : (
 
           <Arrow
