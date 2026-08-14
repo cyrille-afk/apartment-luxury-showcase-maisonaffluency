@@ -89,7 +89,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                   className="inline-flex items-center text-foreground hover:text-primary transition-colors"
                   aria-label="Share apartment tour"
                 >
-                  <Share2 className="w-4 h-4" />
+                  <ShareIos className="w-4 h-4" />
                 </button>
               </div>
               <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mt-0.5">
@@ -215,7 +215,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                   className="flex flex-col items-center gap-1 text-xs font-body text-foreground hover:text-primary transition-colors md:mt-1"
                   aria-label="Share apartment tour"
                 >
-                  <Share2 className="w-5 h-5" />
+                  <ShareIos className="w-5 h-5" />
                   <span>Share</span>
                 </button>
               </div>
@@ -249,7 +249,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                 className="inline-flex items-center gap-1 text-[11px] font-body text-foreground hover:text-primary transition-colors"
                 aria-label="Share apartment tour"
               >
-                <Share2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                <ShareIos className="w-3.5 h-3.5 md:w-4 md:h-4" />
               </button>
             </div>
             <h3 className="font-serif text-lg md:text-xl text-muted-foreground font-light tracking-wide mt-1">
