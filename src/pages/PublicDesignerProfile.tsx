@@ -1091,7 +1091,7 @@ const PublicDesignerProfile = () => {
 
 
   const babledIntroSection = (
-    {/* Main layout container — matches the exact width and background behavior of the header */}
+    // Main layout container — matches the exact width and background behavior of the header
     <section className="w-full bg-white border-t border-zinc-100">
       <div className="max-w-[1440px] mx-auto px-6 md:px-12 py-16 flex flex-col md:flex-row md:items-start md:justify-between gap-12">
         {/* Left Block: Designer Name & Specialty */}
