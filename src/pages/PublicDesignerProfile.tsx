@@ -1092,7 +1092,7 @@ const PublicDesignerProfile = () => {
 
   const babledIntroSection = (
     // Hero image + floating translucent overlay panel (desktop only)
-    <section className="relative w-full max-w-[1440px] mx-auto px-6 md:px-12 hidden md:block">
+    <section className="relative w-screen left-1/2 -ml-[50vw] hidden md:block">
 
       <div className="relative w-full h-[60vh] md:h-[75vh] overflow-hidden bg-muted">
         {(wideHeroImage || heroImage) && (
@@ -1104,12 +1104,13 @@ const PublicDesignerProfile = () => {
           />
         )}
 
-        {/* Subtle darkening layer so white text stays legible over bright areas */}
-        <div className="absolute inset-0 bg-black/20" />
+        {/* Bottom scrim — same soft gradient used behind the hero CTAs */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/70 via-black/35 to-transparent" />
 
-        {/* Floating translucent overlay panel */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20 text-white py-10 px-8 md:px-12">
-          <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+        {/* Text overlay */}
+        <div className="absolute bottom-0 left-0 right-0 text-white py-10 px-[6vw]">
+          <div className="mx-auto max-w-[1400px] grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+
             {/* Left Column: Name */}
             <div className="md:col-span-4">
               <h2 className="font-display text-2xl tracking-wide text-white font-normal">
