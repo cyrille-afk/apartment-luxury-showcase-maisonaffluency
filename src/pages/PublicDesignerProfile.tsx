@@ -1091,41 +1091,60 @@ const PublicDesignerProfile = () => {
 
 
   const babledIntroSection = (
-    // Main layout container — matches the exact width and background behavior of the header
-    <section className="w-full bg-white border-t border-zinc-100">
-      <div className="max-w-[1440px] mx-auto px-6 md:px-12 py-16 flex flex-col md:flex-row md:items-start md:justify-between gap-12">
-        {/* Left Block: Designer Name & Specialty */}
-        <div className="md:w-1/4 shrink-0">
-          <h2 className="font-serif text-2xl tracking-wide text-zinc-900 font-normal">
-            Emmanuel Babled
-          </h2>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 mt-2 font-light leading-relaxed">
-            Sculptural Glass &<br />Marble Design
-          </p>
-        </div>
-        {/* Center Block: Main Biography Text */}
-        <div className="md:w-2/5 flex-grow">
-          <p className="text-xs md:text-sm text-zinc-600 leading-relaxed font-light text-justify">
-            Emmanuel Babled is a French-Italian designer whose practice sits at the rare
-            intersection of contemporary design, sculpture, and the master ateliers of Murano and
-            Carrara. Born in France in 1967 and trained at the Scuola Politecnica di Design in Milan,
-            he settled in Italy in the late 1980s and has spent the past three decades pushing glass,
-            marble, ceramic and bronze into forms that feel at once primordial and futuristic.
-          </p>
-        </div>
-        {/* Right Block: View Full Portrait Link */}
-        <div className="md:w-1/4 flex justify-end shrink-0 md:pt-1">
-          <a
-            href="#portrait"
-            onClick={(e) => {
-              e.preventDefault();
-              openPortrait();
-            }}
-            className="inline-flex items-center text-[10px] uppercase tracking-[0.25em] font-medium text-zinc-900 hover:text-zinc-500 transition-colors whitespace-nowrap cursor-pointer"
-          >
-            View the full portrait
-            <span className="ml-3 text-xs">→</span>
-          </a>
+    // Hero image + floating translucent overlay panel
+    <section className="relative w-full max-w-[1440px] mx-auto px-6 md:px-12">
+      <div className="relative w-full h-[60vh] md:h-[75vh] overflow-hidden bg-muted">
+        {(wideHeroImage || heroImage) && (
+          <img
+            src={wideHeroImage || heroImage}
+            alt={`${name} interior`}
+            className="w-full h-full object-cover"
+            loading="eager"
+          />
+        )}
+
+        {/* Subtle darkening layer so white text stays legible over bright areas */}
+        <div className="absolute inset-0 bg-black/20" />
+
+        {/* Floating translucent overlay panel */}
+        <div className="absolute bottom-0 left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20 text-white py-10 px-8 md:px-12">
+          <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+            {/* Left Column: Name */}
+            <div className="md:col-span-4">
+              <h2 className="font-display text-2xl tracking-wide text-white font-normal">
+                Emmanuel Babled
+              </h2>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-white/70 mt-2 font-light leading-relaxed">
+                Sculptural Glass &<br />Marble Design
+              </p>
+            </div>
+
+            {/* Center Column: Paragraph */}
+            <div className="md:col-span-5">
+              <p className="text-xs md:text-sm text-white/90 leading-relaxed font-light text-justify">
+                Emmanuel Babled is a French-Italian designer whose practice sits at the rare
+                intersection of contemporary design, sculpture, and the master ateliers of Murano and
+                Carrara. Born in France in 1967 and trained at the Scuola Politecnica di Design in Milan,
+                he settled in Italy in the late 1980s and has spent the past three decades pushing glass,
+                marble, ceramic and bronze into forms that feel at once primordial and futuristic.
+              </p>
+            </div>
+
+            {/* Right Column: View Profile Link */}
+            <div className="md:col-span-3 flex justify-end md:pt-1">
+              <a
+                href="#portrait"
+                onClick={(e) => {
+                  e.preventDefault();
+                  openPortrait();
+                }}
+                className="inline-flex items-center text-[10px] uppercase tracking-[0.25em] font-medium text-white hover:text-white/70 transition-colors whitespace-nowrap cursor-pointer"
+              >
+                View the full portrait
+                <span className="ml-3 text-xs">→</span>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -1136,64 +1155,63 @@ const PublicDesignerProfile = () => {
       {/* ── DESKTOP: cinematic architectural stack — clean photo, then narrative ── */}
       <div className={portraitOpen ? "hidden" : "hidden md:block"} aria-hidden={portraitOpen}>
 
-        {wideHeroImage && (
-          <div className="relative w-screen left-1/2 -ml-[50vw] h-[72vh] max-h-[calc(100vh-22rem)] min-h-[320px] overflow-hidden bg-muted">
-            <img
-              src={wideHeroImage}
-              alt={`${name} interior`}
-              className="absolute inset-0 w-full h-full object-cover"
-              loading="eager"
-            />
-          </div>
-        )}
-
         {isEmmanuelBabled ? (
           babledIntroSection
         ) : (
-          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted/50">
-            <div className="mx-auto max-w-[1400px] px-[6vw] pt-4 lg:pt-6 pb-12 lg:pb-16">
-              {/* Asymmetrical introductory row */}
-              <div className="grid grid-cols-12 gap-x-10 lg:gap-x-16 gap-y-6 items-start">
-                {/* Left — identity */}
-                <div className="col-span-12 lg:col-span-4">
-                  <h1 className="font-display text-4xl lg:text-[3rem] leading-[1.05] tracking-[-0.01em] text-foreground">
-                    {name}
-                  </h1>
-                  <p className="mt-3 font-body text-[10px] lg:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
-                    {designer.specialty || "Timeless Scandinavian Design"}
-                  </p>
-                </div>
+          <>
+            {wideHeroImage && (
+              <div className="relative w-screen left-1/2 -ml-[50vw] h-[72vh] max-h-[calc(100vh-22rem)] min-h-[320px] overflow-hidden bg-muted">
+                <img
+                  src={wideHeroImage}
+                  alt={`${name} interior`}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="eager"
+                />
+              </div>
+            )}
 
-                {/* Right — narrative */}
-                <div className="col-span-12 lg:col-span-8 h-auto min-h-0">
-                  <div className="max-w-[650px] h-auto text-foreground">
-                    {heroParagraphs.length > 0 && (
-                      <p className="font-body text-[15px] lg:text-base leading-[1.8] [text-wrap:pretty]">
-                        {renderParagraph(heroParagraphs[0])}
-                      </p>
-                    )}
-
-                    {heroParagraphs.length === 0 && thinContentFallback && (
-                      <p className="font-body text-[15px] lg:text-base leading-[1.8] [text-wrap:pretty]">
-                        {thinContentFallback}
-                      </p>
-                    )}
-
-                    {/* Inline expansion — mounts the magazine rows below, no route change */}
-                    {!portraitOpen && (
-                      <div className="mt-8 flex text-foreground">
-                        {portraitLink}
-                      </div>
-                    )}
+            <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted/50">
+              <div className="mx-auto max-w-[1400px] px-[6vw] pt-4 lg:pt-6 pb-12 lg:pb-16">
+                {/* Asymmetrical introductory row */}
+                <div className="grid grid-cols-12 gap-x-10 lg:gap-x-16 gap-y-6 items-start">
+                  {/* Left — identity */}
+                  <div className="col-span-12 lg:col-span-4">
+                    <h1 className="font-display text-4xl lg:text-[3rem] leading-[1.05] tracking-[-0.01em] text-foreground">
+                      {name}
+                    </h1>
+                    <p className="mt-3 font-body text-[10px] lg:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
+                      {designer.specialty || "Timeless Scandinavian Design"}
+                    </p>
                   </div>
-                </div>
 
+                  {/* Right — narrative */}
+                  <div className="col-span-12 lg:col-span-8 h-auto min-h-0">
+                    <div className="max-w-[650px] h-auto text-foreground">
+                      {heroParagraphs.length > 0 && (
+                        <p className="font-body text-[15px] lg:text-base leading-[1.8] [text-wrap:pretty]">
+                          {renderParagraph(heroParagraphs[0])}
+                        </p>
+                      )}
+
+                      {heroParagraphs.length === 0 && thinContentFallback && (
+                        <p className="font-body text-[15px] lg:text-base leading-[1.8] [text-wrap:pretty]">
+                          {thinContentFallback}
+                        </p>
+                      )}
+
+                      {/* Inline expansion — mounts the magazine rows below, no route change */}
+                      {!portraitOpen && (
+                        <div className="mt-8 flex text-foreground">
+                          {portraitLink}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
               </div>
             </div>
-
-
-
-          </div>
+          </>
         )}
 
       </div>
@@ -1201,32 +1219,34 @@ const PublicDesignerProfile = () => {
       {/* ── MOBILE: mirrors the desktop cinematic stack ── */}
       <div className={portraitOpen ? "hidden" : "grid grid-cols-1 gap-2 items-start pt-0 md:hidden"} aria-hidden={portraitOpen}>
 
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {/* Compact mobile hero — taller in the installed PWA (no Safari chrome) */}
-          <div className={cn("relative w-screen left-1/2 -ml-[50vw] bg-muted overflow-hidden", isPwaStandalone ? "h-56" : "h-36")}>
-            {(wideHeroImage || heroImage) && (
-              <>
-                <img
-                  src={wideHeroImage || heroImage}
-                  alt={`${name} interior`}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  loading="eager"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
-              </>
-            )}
-          </div>
+        {!isEmmanuelBabled && (
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* Compact mobile hero — taller in the installed PWA (no Safari chrome) */}
+            <div className={cn("relative w-screen left-1/2 -ml-[50vw] bg-muted overflow-hidden", isPwaStandalone ? "h-56" : "h-36")}>
+              {(wideHeroImage || heroImage) && (
+                <>
+                  <img
+                    src={wideHeroImage || heroImage}
+                    alt={`${name} interior`}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    loading="eager"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+                </>
+              )}
+            </div>
 
-          {designer.hero_photo_credit && (
-            <p className="mt-1 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
-              Photo: {designer.hero_photo_credit}
-            </p>
-          )}
-        </motion.div>
+            {designer.hero_photo_credit && (
+              <p className="mt-1 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
+                Photo: {designer.hero_photo_credit}
+              </p>
+            )}
+          </motion.div>
+        )}
 
         {isEmmanuelBabled ? (
           <motion.div
