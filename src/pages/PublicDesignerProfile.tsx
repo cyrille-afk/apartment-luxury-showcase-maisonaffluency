@@ -1298,9 +1298,8 @@ const PublicDesignerProfile = () => {
                 </div>
               )}
             </motion.div>
-          </>
-        )}
       </div>
+
 
 
       {portraitExpansion}
