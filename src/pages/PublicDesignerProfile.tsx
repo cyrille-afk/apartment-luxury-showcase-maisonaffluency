@@ -1091,11 +1091,11 @@ const PublicDesignerProfile = () => {
 
 
   const babledIntroSection = (
-    // Editorial split header — 25% uncropped landscape image / 75% typography (desktop only)
-    <section className="hidden md:block pt-2 pb-10">
-      <div className="grid grid-cols-12 gap-x-12 gap-y-10 items-center">
-        {/* Left — uncropped landscape lifestyle image (matches one product-card column = 1/3) */}
-        <div className="col-span-4">
+    // Editorial split header — compact emphasis so products dominate (desktop only)
+    <section className="hidden md:block pt-2 pb-8">
+      <div className="grid grid-cols-12 gap-x-10 gap-y-6 items-center">
+        {/* Left — reduced lifestyle image */}
+        <div className="col-span-3">
           <div className="aspect-[4/3] overflow-hidden">
             {(wideHeroImage || heroImage) && (
               <img
@@ -1114,17 +1114,17 @@ const PublicDesignerProfile = () => {
         </div>
 
         {/* Right — name, biography, CTA */}
-        <div className="col-span-8 pl-8 lg:pl-12">
-          <h1 className="font-display text-4xl lg:text-[3.25rem] leading-[1.05] tracking-[-0.01em] text-foreground">
+        <div className="col-span-9 pl-6 lg:pl-10">
+          <h1 className="font-display text-2xl lg:text-[1.75rem] leading-[1.1] tracking-[-0.01em] text-foreground">
             {name}
           </h1>
           {designer?.specialty && (
-            <p className="mt-3 font-body text-[10px] lg:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
+            <p className="mt-2 font-body text-[10px] uppercase tracking-[0.32em] text-foreground/60">
               {designer.specialty}
             </p>
           )}
 
-          <p className="mt-6 w-full font-body text-[15px] lg:text-base leading-[1.8] text-foreground/85 [text-wrap:pretty]">
+          <p className="mt-4 w-full font-body text-xs leading-[1.7] text-foreground/85 text-justify [text-wrap:pretty]">
             Emmanuel Babled is a French-Italian designer whose practice sits at the rare
             intersection of contemporary design, sculpture, and the master ateliers of Murano and
             Carrara. Born in France in 1967 and trained at the Scuola Politecnica di Design in Milan,
@@ -1132,7 +1132,7 @@ const PublicDesignerProfile = () => {
             marble, ceramic and bronze into forms that feel at once primordial and futuristic.
           </p>
 
-          <div className="mt-8 flex text-foreground">
+          <div className="mt-5 flex text-foreground">
             <PortraitCtaLink
               label="View the full portrait"
               onClick={openPortrait}
