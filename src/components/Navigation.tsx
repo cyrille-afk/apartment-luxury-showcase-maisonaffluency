@@ -408,11 +408,11 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
       "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
       navHidden ? "-translate-y-full" : "translate-y-0",
       borderless
-        ? "bg-[#FAFAFA] border-b border-transparent"
-        : "bg-[#FAFAFA] border-b border-border/30"
+        ? "bg-[#FAFAFA] border-b border-transparent md:bg-white md:border-b md:border-zinc-100"
+        : "bg-[#FAFAFA] border-b border-border/30 md:bg-white md:border-b md:border-zinc-100"
     )}>
 
-      <div className="mx-auto max-w-7xl px-5 md:px-14 lg:px-24">
+      <div className="mx-auto max-w-7xl px-6 md:px-12">
         {/* Mobile: single row */}
           <div className="flex h-24 items-center md:hidden relative justify-between">
            <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
@@ -711,37 +711,36 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           </Sheet>
         </div>
 
-        {/* Desktop: single-row symmetrical luxury header */}
-        <div className="hidden md:flex flex-col items-stretch w-full">
-          {/* ROW 1 — slim utility ribbon with imposing centered brand lockup */}
-          <div className="flex items-center justify-between pt-6 pb-2 border-b border-neutral-100">
-            <div className="flex items-center">
-              <ShippingDestinationSwitcher compact showIso className="min-h-8 justify-center" />
+        {/* Desktop: two-row editorial header */}
+        <div className="hidden md:block">
+          {/* ROW 1 — brand lockup, utilities */}
+          <div className="max-w-7xl mx-auto px-6 md:px-12 py-4 flex flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-zinc-600">
+              <ShippingDestinationSwitcher compact showIso />
             </div>
 
-            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap inline-flex items-center">
-              <span className="font-brand text-2xl lg:text-3xl font-normal tracking-[0.18em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
-                MAISON AFFLUENCY
-              </span>
-              <span aria-hidden="true" className="mx-5 lg:mx-6 h-3.5 w-px bg-foreground/25" />
-              <span className="font-body text-[7px] uppercase tracking-[0.3em] font-light text-foreground">
-                Est. 2017
-              </span>
-            </button>
+            <div className="text-center md:absolute md:left-1/2 md:-translate-x-1/2">
+              <button onClick={scrollToTop} className="group cursor-pointer">
+                <h1 className="font-serif text-2xl md:text-3xl tracking-[0.2em] text-zinc-900 uppercase">
+                  Maison Affluency
+                </h1>
+                <p className="text-[9px] tracking-[0.3em] text-zinc-400 uppercase mt-0.5">Est. 2011</p>
+              </button>
+            </div>
 
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-6 text-zinc-700">
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/contact"); }}
-                className="font-body text-[10px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+                className="text-xs uppercase tracking-widest hover:text-zinc-900 transition-colors"
               >
                 Contact Us
               </button>
 
               <DropdownMenu>
                 <DropdownMenuTrigger className="relative group p-1 outline-none">
-                  <User className="w-[16px] h-[16px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
+                  <User className="w-[16px] h-[16px] text-zinc-500 group-hover:text-zinc-900 transition-colors" strokeWidth={1.25} />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" sideOffset={122} className="bg-background border border-border shadow-lg z-50 min-w-[200px] translate-x-[44px]">
+                <DropdownMenuContent align="end" sideOffset={8} className="bg-background border border-border shadow-lg z-50 min-w-[200px]">
                   {user ? (
                     <>
                       <div className="px-4 py-2.5 border-b border-border">
@@ -797,9 +796,9 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 <button
                   onClick={() => navigate("/favorites")}
                   aria-label="Wishlist"
-                  className="relative group p-1 transition-colors hover:text-foreground"
+                  className="relative group p-1 transition-colors hover:text-zinc-900"
                 >
-                  <Heart className="w-[16px] h-[16px] text-muted-foreground" strokeWidth={1.25} />
+                  <Heart className="w-[16px] h-[16px] text-zinc-500" strokeWidth={1.25} />
                   {favCount > 0 && (
                     <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] leading-none px-1">
                       {favCount}
@@ -811,80 +810,82 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           </div>
 
           {/* ROW 2 — primary navigation bar */}
-          <nav className="flex items-center justify-center flex-wrap gap-8 lg:gap-10 pt-2 pb-2 mb-5">
+          <nav className="w-full border-t border-zinc-50 py-3">
+            <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-center gap-8 text-[11px] font-medium uppercase tracking-[0.2em] text-zinc-600">
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
                 className={cn(
-                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
-                  isRouteActive("/new-in") && "text-foreground"
+                  "hover:text-zinc-900 transition-colors whitespace-nowrap",
+                  isRouteActive("/new-in") && "text-zinc-900 border-b border-zinc-900"
                 )}
               >
-                <span className="link-underline-grow">New In</span>
+                New In
               </button>
 
               <button
                 onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
                 className={cn(
-                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1 outline-none",
-                  (megaMenuOpen || isOnCategoryRoute) && "text-foreground"
+                  "hover:text-zinc-900 transition-colors whitespace-nowrap flex items-center gap-1 outline-none",
+                  (megaMenuOpen || isOnCategoryRoute) && "text-zinc-900 border-b border-zinc-900"
                 )}
               >
-                <span className="link-underline-grow">Categories</span>
+                Categories
                 <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} strokeWidth={1.5} />
               </button>
 
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/designers"); }}
                 className={cn(
-                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
-                  (activeSection === "/designers" || isRouteActive("/designers")) && "text-foreground"
+                  "hover:text-zinc-900 transition-colors whitespace-nowrap",
+                  (activeSection === "/designers" || isRouteActive("/designers")) && "text-zinc-900 border-b border-zinc-900"
                 )}
               >
-                <span className="link-underline-grow">Designers</span>
+                Designers
               </button>
 
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/gallery"); }}
                 className={cn(
-                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
-                  (activeSection === "/gallery" || isRouteActive("/gallery")) && "text-foreground"
+                  "hover:text-zinc-900 transition-colors whitespace-nowrap",
+                  (activeSection === "/gallery" || isRouteActive("/gallery")) && "text-zinc-900 border-b border-zinc-900"
                 )}
               >
-                <span className="link-underline-grow">Interactive Gallery</span>
+                Interactive Gallery
               </button>
 
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/journal"); }}
                 className={cn(
-                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
-                  (activeSection === "/journal" || isRouteActive("/journal")) && "text-foreground"
+                  "hover:text-zinc-900 transition-colors whitespace-nowrap",
+                  (activeSection === "/journal" || isRouteActive("/journal")) && "text-zinc-900 border-b border-zinc-900"
                 )}
               >
-                <span className="link-underline-grow">Journal</span>
+                Journal
               </button>
 
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/trade-program"); }}
                 className={cn(
-                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
-                  (activeSection === "/trade-program" || isRouteActive("/trade-program")) && "text-foreground"
+                  "hover:text-zinc-900 transition-colors whitespace-nowrap",
+                  (activeSection === "/trade-program" || isRouteActive("/trade-program")) && "text-zinc-900 border-b border-zinc-900"
                 )}
               >
-                <span className="link-underline-grow">Trade Program</span>
+                Trade Program
               </button>
 
               {isTradeUser && (
                 <button
                   onClick={() => { setMegaMenuOpen(false); handleNavClick("/collectibles"); }}
                   className={cn(
-                    "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
-                    (activeSection === "/collectibles" || isRouteActive("/collectibles")) && "text-foreground"
+                    "hover:text-zinc-900 transition-colors whitespace-nowrap",
+                    (activeSection === "/collectibles" || isRouteActive("/collectibles")) && "text-zinc-900 border-b border-zinc-900"
                   )}
                 >
-                  <span className="link-underline-grow">Collectibles</span>
+                  Collectibles
                 </button>
               )}
-            </nav>
+            </div>
+          </nav>
         </div>
 
 
