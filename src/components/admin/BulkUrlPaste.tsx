@@ -124,7 +124,8 @@ export default function BulkUrlPaste({
               onClick={() => {
                 onAdd(parsed);
                 clear();
-                updateOpen(false);
+                persist("", false);
+                setOpen(false);
               }}
               className="text-[11px] px-2 py-1 border border-border rounded disabled:opacity-40 hover:bg-muted/40"
             >
@@ -136,6 +137,7 @@ export default function BulkUrlPaste({
               onClick={() => {
                 onAdd(parsed);
                 clear();
+                persist("", true);
                 // stay open + focused so you can paste the next batch immediately
                 requestAnimationFrame(() => taRef.current?.focus());
               }}
