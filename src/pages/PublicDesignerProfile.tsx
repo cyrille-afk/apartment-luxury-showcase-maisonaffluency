@@ -1093,7 +1093,7 @@ const PublicDesignerProfile = () => {
   const babledIntroSection = (
     // Editorial split header — 25% uncropped landscape image / 75% typography (desktop only)
     <section className="hidden md:block pt-2 pb-10">
-      <div className="grid grid-cols-12 gap-10 lg:gap-16 items-start">
+      <div className="grid grid-cols-12 gap-x-5 gap-y-10 items-start">
         {/* Left — uncropped landscape lifestyle image (matches one product-card column = 1/3) */}
         <div className="col-span-4">
           {(wideHeroImage || heroImage) && (
@@ -1112,7 +1112,7 @@ const PublicDesignerProfile = () => {
         </div>
 
         {/* Right — name, biography, CTA */}
-        <div className="col-span-8">
+        <div className="col-span-8 pl-8 lg:pl-12">
           <h1 className="font-display text-4xl lg:text-[3.25rem] leading-[1.05] tracking-[-0.01em] text-foreground">
             {name}
           </h1>
