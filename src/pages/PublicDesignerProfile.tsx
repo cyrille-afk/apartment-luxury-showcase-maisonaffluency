@@ -1061,7 +1061,7 @@ const PublicDesignerProfile = () => {
   );
 
   const portraitExpansion = (
-    <div ref={portraitRef} className="scroll-mt-24">
+    <div ref={portraitRef} id="portrait" className="scroll-mt-24">
       {portraitOpen && (displayBiography || "") && (
         <div className="relative w-screen left-1/2 -ml-[50vw] bg-cream">
           <EditorialBiographyColumns
