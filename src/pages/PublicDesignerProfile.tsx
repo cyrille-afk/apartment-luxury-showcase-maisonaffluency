@@ -1091,34 +1091,39 @@ const PublicDesignerProfile = () => {
 
 
   const babledIntroSection = (
-    <section className="px-4 md:px-8 py-8 md:py-12 max-w-7xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-start">
-        <div className="md:col-span-1">
-          <h2 className="text-3xl font-display tracking-wide text-foreground">
+    <section className="w-full bg-white px-12 py-16">
+      {/* Widescreen layout wrapper matching the header's maximum boundary precisely */}
+      <div className="max-w-[1440px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-start">
+        {/* Left Column: Designer Name (Takes up 4 out of 12 grid spaces to prevent any overlapping) */}
+        <div className="md:col-span-4 pr-4">
+          <h2 className="text-2xl font-serif tracking-wide text-zinc-900 leading-tight">
             Emmanuel Babled
           </h2>
-          <p className="text-xs uppercase tracking-widest text-muted-foreground mt-2">
-            Sculptural Glass & Marble Design
+          <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 mt-2.5 leading-relaxed">
+            Sculptural Glass &<br />Marble Design
           </p>
         </div>
-        <div className="md:col-span-2 flex flex-col md:flex-row md:items-start md:gap-12">
-          <p className="text-sm text-foreground/85 leading-relaxed max-w-xl">
+        {/* Right Column: Bio Paragraph & Portrait Link (Takes up 8 out of 12 grid spaces) */}
+        <div className="md:col-span-8 flex flex-col md:flex-row md:items-start justify-between gap-12 lg:gap-20">
+          {/* Paragraph text with room to breathe */}
+          <p className="text-xs md:text-sm text-zinc-600 leading-relaxed font-light max-w-xl md:max-w-2xl">
             Emmanuel Babled is a French-Italian designer whose practice sits at the rare
             intersection of contemporary design, sculpture, and the master ateliers of Murano and
             Carrara. Born in France in 1967 and trained at the Scuola Politecnica di Design in Milan,
             he settled in Italy in the late 1980s and has spent the past three decades pushing glass,
             marble, ceramic and bronze into forms that feel at once primordial and futuristic.
           </p>
+          {/* "View the full portrait" link pinned cleanly to the right edge */}
           <a
             href="#portrait"
             onClick={(e) => {
               e.preventDefault();
               openPortrait();
             }}
-            className="mt-4 md:mt-0 inline-flex items-center text-xs uppercase tracking-widest font-medium text-foreground hover:text-muted-foreground transition-colors whitespace-nowrap cursor-pointer"
+            className="inline-flex items-center text-[10px] uppercase tracking-[0.2em] font-medium text-zinc-900 hover:text-zinc-500 transition-colors whitespace-nowrap pt-1 md:shrink-0 cursor-pointer"
           >
             View the full portrait
-            <span className="ml-2 text-base">→</span>
+            <span className="ml-3 text-xs">→</span>
           </a>
         </div>
       </div>
