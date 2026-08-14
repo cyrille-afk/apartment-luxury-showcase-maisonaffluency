@@ -1090,6 +1090,36 @@ const PublicDesignerProfile = () => {
   );
 
 
+  const babledIntroSection = (
+    <section className="px-4 md:px-8 py-8 md:py-12 max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-start">
+        <div className="md:col-span-1">
+          <h2 className="text-3xl font-display tracking-wide text-foreground">
+            Emmanuel Babled
+          </h2>
+          <p className="text-xs uppercase tracking-widest text-muted-foreground mt-2">
+            Sculptural Glass & Marble Design
+          </p>
+        </div>
+        <div className="md:col-span-2 flex flex-col md:flex-row md:items-start md:gap-12">
+          <p className="text-sm text-foreground/85 leading-relaxed max-w-xl">
+            Emmanuel Babled is a French-Italian designer whose practice sits at the rare
+            intersection of contemporary design, sculpture, and the master ateliers of Murano and
+            Carrara. Born in France in 1967 and trained at the Scuola Politecnica di Design in Milan,
+            he settled in Italy in the late 1980s and has spent the past three decades pushing glass,
+            marble, ceramic and bronze into forms that feel at once primordial and futuristic.
+          </p>
+          <a
+            href="#portrait"
+            className="mt-4 md:mt-0 inline-flex items-center text-xs uppercase tracking-widest font-medium text-foreground hover:text-muted-foreground transition-colors whitespace-nowrap"
+          >
+            View the full portrait
+            <span className="ml-2 text-base">→</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  );
 
   const newInSection = (
     <div className="flex flex-col gap-0">
