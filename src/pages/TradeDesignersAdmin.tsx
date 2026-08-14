@@ -279,16 +279,9 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
   const scrollStorageKey = `designer_editor_scroll_v1::${designerId}`;
   useEffect(() => {
     if (!loaded || didRestorePickScrollRef.current) return;
-    // Priority 1: if a pick is expanded, scroll it into view (existing behavior).
-    if (expandedPickId) {
-      const el = document.querySelector(`[data-pick-row-id="${expandedPickId}"]`);
-      if (el) {
-        didRestorePickScrollRef.current = true;
-        requestAnimationFrame(() => el.scrollIntoView({ block: "center", behavior: "auto" }));
-        return;
-      }
-    }
-    // Priority 2: restore the saved window scroll position for this designer.
+    // Priority 1: restore the exact saved window scroll position for this
+    // designer. An expanded pick card is very tall, so centering it would
+    // dump you into the middle (variants) instead of where you were.
     let savedY: number | null = null;
     try {
       const raw = sessionStorage.getItem(scrollStorageKey);
@@ -304,8 +297,18 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
           window.scrollTo({ top: savedY!, behavior: "instant" as ScrollBehavior }),
         ),
       );
+      return;
+    }
+    // Priority 2: no saved position — align the expanded pick's top edge.
+    if (expandedPickId) {
+      const el = document.querySelector(`[data-pick-row-id="${expandedPickId}"]`);
+      if (el) {
+        didRestorePickScrollRef.current = true;
+        requestAnimationFrame(() => el.scrollIntoView({ block: "start", behavior: "auto" }));
+      }
     }
   }, [loaded, expandedPickId, picks.length, scrollStorageKey]);
+
 
   // Persist window scroll position per designer (throttled via rAF) so
   // switching designers and coming back lands you where you left off.
