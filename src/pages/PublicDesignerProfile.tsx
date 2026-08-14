@@ -1219,32 +1219,34 @@ const PublicDesignerProfile = () => {
       {/* ── MOBILE: mirrors the desktop cinematic stack ── */}
       <div className={portraitOpen ? "hidden" : "grid grid-cols-1 gap-2 items-start pt-0 md:hidden"} aria-hidden={portraitOpen}>
 
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {/* Compact mobile hero — taller in the installed PWA (no Safari chrome) */}
-          <div className={cn("relative w-screen left-1/2 -ml-[50vw] bg-muted overflow-hidden", isPwaStandalone ? "h-56" : "h-36")}>
-            {(wideHeroImage || heroImage) && (
-              <>
-                <img
-                  src={wideHeroImage || heroImage}
-                  alt={`${name} interior`}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  loading="eager"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
-              </>
-            )}
-          </div>
+        {!isEmmanuelBabled && (
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* Compact mobile hero — taller in the installed PWA (no Safari chrome) */}
+            <div className={cn("relative w-screen left-1/2 -ml-[50vw] bg-muted overflow-hidden", isPwaStandalone ? "h-56" : "h-36")}>
+              {(wideHeroImage || heroImage) && (
+                <>
+                  <img
+                    src={wideHeroImage || heroImage}
+                    alt={`${name} interior`}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    loading="eager"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+                </>
+              )}
+            </div>
 
-          {designer.hero_photo_credit && (
-            <p className="mt-1 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
-              Photo: {designer.hero_photo_credit}
-            </p>
-          )}
-        </motion.div>
+            {designer.hero_photo_credit && (
+              <p className="mt-1 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
+                Photo: {designer.hero_photo_credit}
+              </p>
+            )}
+          </motion.div>
+        )}
 
         {isEmmanuelBabled ? (
           <motion.div
