@@ -1122,7 +1122,7 @@ const PublicDesignerProfile = () => {
             </p>
           )}
 
-          <p className="mt-6 max-w-[720px] font-body text-[15px] lg:text-base leading-[1.8] text-foreground/85 [text-wrap:pretty]">
+          <p className="mt-6 w-full font-body text-[15px] lg:text-base leading-[1.8] text-foreground/85 [text-wrap:pretty]">
             Emmanuel Babled is a French-Italian designer whose practice sits at the rare
             intersection of contemporary design, sculpture, and the master ateliers of Murano and
             Carrara. Born in France in 1967 and trained at the Scuola Politecnica di Design in Milan,
