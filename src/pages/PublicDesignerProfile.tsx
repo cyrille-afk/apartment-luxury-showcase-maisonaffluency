@@ -597,6 +597,8 @@ const PublicDesignerProfile = () => {
   // the parent brand — parent bios embed inline image/video URLs that would leak.
   const displayBiography = designer?.biography;
   const displayBiographyImages = designer?.biography_images;
+  const isEmmanuelBabled = designer?.slug === "emmanuel-babled";
+
   const displayPhilosophy = designer?.philosophy;
 
   const picks = useMemo(() => {
@@ -1061,7 +1063,7 @@ const PublicDesignerProfile = () => {
   );
 
   const portraitExpansion = (
-    <div ref={portraitRef} className="scroll-mt-24">
+    <div ref={portraitRef} id="portrait" className="scroll-mt-24">
       {portraitOpen && (displayBiography || "") && (
         <div className="relative w-screen left-1/2 -ml-[50vw] bg-cream">
           <EditorialBiographyColumns
@@ -1088,6 +1090,40 @@ const PublicDesignerProfile = () => {
   );
 
 
+  const babledIntroSection = (
+    <section className="px-4 md:px-8 py-8 md:py-12 max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-start">
+        <div className="md:col-span-1">
+          <h2 className="text-3xl font-display tracking-wide text-foreground">
+            Emmanuel Babled
+          </h2>
+          <p className="text-xs uppercase tracking-widest text-muted-foreground mt-2">
+            Sculptural Glass & Marble Design
+          </p>
+        </div>
+        <div className="md:col-span-2 flex flex-col md:flex-row md:items-start md:gap-12">
+          <p className="text-sm text-foreground/85 leading-relaxed max-w-xl">
+            Emmanuel Babled is a French-Italian designer whose practice sits at the rare
+            intersection of contemporary design, sculpture, and the master ateliers of Murano and
+            Carrara. Born in France in 1967 and trained at the Scuola Politecnica di Design in Milan,
+            he settled in Italy in the late 1980s and has spent the past three decades pushing glass,
+            marble, ceramic and bronze into forms that feel at once primordial and futuristic.
+          </p>
+          <a
+            href="#portrait"
+            onClick={(e) => {
+              e.preventDefault();
+              openPortrait();
+            }}
+            className="mt-4 md:mt-0 inline-flex items-center text-xs uppercase tracking-widest font-medium text-foreground hover:text-muted-foreground transition-colors whitespace-nowrap cursor-pointer"
+          >
+            View the full portrait
+            <span className="ml-2 text-base">→</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  );
 
   const newInSection = (
     <div className="flex flex-col gap-0">
@@ -1105,50 +1141,54 @@ const PublicDesignerProfile = () => {
           </div>
         )}
 
-        <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted/50">
-          <div className="mx-auto max-w-[1400px] px-[6vw] pt-4 lg:pt-6 pb-12 lg:pb-16">
-            {/* Asymmetrical introductory row */}
-            <div className="grid grid-cols-12 gap-x-10 lg:gap-x-16 gap-y-6 items-start">
-              {/* Left — identity */}
-              <div className="col-span-12 lg:col-span-4">
-                <h1 className="font-display text-4xl lg:text-[3rem] leading-[1.05] tracking-[-0.01em] text-foreground">
-                  {name}
-                </h1>
-                <p className="mt-3 font-body text-[10px] lg:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
-                  {designer.specialty || "Timeless Scandinavian Design"}
-                </p>
-              </div>
-
-              {/* Right — narrative */}
-              <div className="col-span-12 lg:col-span-8 h-auto min-h-0">
-                <div className="max-w-[650px] h-auto text-foreground">
-                  {heroParagraphs.length > 0 && (
-                    <p className="font-body text-[15px] lg:text-base leading-[1.8] [text-wrap:pretty]">
-                      {renderParagraph(heroParagraphs[0])}
-                    </p>
-                  )}
-
-                  {heroParagraphs.length === 0 && thinContentFallback && (
-                    <p className="font-body text-[15px] lg:text-base leading-[1.8] [text-wrap:pretty]">
-                      {thinContentFallback}
-                    </p>
-                  )}
-
-                  {/* Inline expansion — mounts the magazine rows below, no route change */}
-                  {!portraitOpen && (
-                    <div className="mt-8 flex text-foreground">
-                      {portraitLink}
-                    </div>
-                  )}
+        {isEmmanuelBabled ? (
+          babledIntroSection
+        ) : (
+          <div className="relative w-screen left-1/2 -ml-[50vw] bg-muted/50">
+            <div className="mx-auto max-w-[1400px] px-[6vw] pt-4 lg:pt-6 pb-12 lg:pb-16">
+              {/* Asymmetrical introductory row */}
+              <div className="grid grid-cols-12 gap-x-10 lg:gap-x-16 gap-y-6 items-start">
+                {/* Left — identity */}
+                <div className="col-span-12 lg:col-span-4">
+                  <h1 className="font-display text-4xl lg:text-[3rem] leading-[1.05] tracking-[-0.01em] text-foreground">
+                    {name}
+                  </h1>
+                  <p className="mt-3 font-body text-[10px] lg:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
+                    {designer.specialty || "Timeless Scandinavian Design"}
+                  </p>
                 </div>
+
+                {/* Right — narrative */}
+                <div className="col-span-12 lg:col-span-8 h-auto min-h-0">
+                  <div className="max-w-[650px] h-auto text-foreground">
+                    {heroParagraphs.length > 0 && (
+                      <p className="font-body text-[15px] lg:text-base leading-[1.8] [text-wrap:pretty]">
+                        {renderParagraph(heroParagraphs[0])}
+                      </p>
+                    )}
+
+                    {heroParagraphs.length === 0 && thinContentFallback && (
+                      <p className="font-body text-[15px] lg:text-base leading-[1.8] [text-wrap:pretty]">
+                        {thinContentFallback}
+                      </p>
+                    )}
+
+                    {/* Inline expansion — mounts the magazine rows below, no route change */}
+                    {!portraitOpen && (
+                      <div className="mt-8 flex text-foreground">
+                        {portraitLink}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
               </div>
-
             </div>
+
+
+
           </div>
-
-
-
-        </div>
+        )}
 
       </div>
 
@@ -1182,56 +1222,68 @@ const PublicDesignerProfile = () => {
           )}
         </motion.div>
 
-        {/* Narrative column */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ ...transition, delay: 0.2 }}
-          className="flex flex-col justify-start w-full"
-        >
-          <h1 className="font-display text-[26px] leading-[1.1] tracking-[-0.01em] text-foreground mb-1">
-            {name}
-          </h1>
+        {isEmmanuelBabled ? (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...transition, delay: 0.2 }}
+          >
+            {babledIntroSection}
+          </motion.div>
+        ) : (
+          <>
+            {/* Narrative column */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ ...transition, delay: 0.2 }}
+              className="flex flex-col justify-start w-full"
+            >
+              <h1 className="font-display text-[26px] leading-[1.1] tracking-[-0.01em] text-foreground mb-1">
+                {name}
+              </h1>
 
-          {heroParagraphs.length > 0 && (
-            <div className="portrait-link-container font-body text-[14px] leading-[1.6] text-foreground/85 text-left">
-              <div className="md:hidden relative">
-                <div className="bio-description-mobile">
-                  {heroParagraphs.slice(0, 1).map((p: string, i: number) => (
-                    <p key={i} className={i > 0 ? "mt-3" : ""}>{renderParagraph(p)}</p>
-                  ))}
+              {heroParagraphs.length > 0 && (
+                <div className="portrait-link-container font-body text-[14px] leading-[1.6] text-foreground/85 text-left">
+                  <div className="md:hidden relative">
+                    <div className="bio-description-mobile">
+                      {heroParagraphs.slice(0, 1).map((p: string, i: number) => (
+                        <p key={i} className={i > 0 ? "mt-3" : ""}>{renderParagraph(p)}</p>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="hidden md:block">
+                    {heroParagraphs.map((p: string, i: number) => (
+                      <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={openPortrait}
+                    className="md:hidden block mt-1 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    View full portrait
+                  </button>
                 </div>
-              </div>
-              <div className="hidden md:block">
-                {heroParagraphs.map((p: string, i: number) => (
-                  <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={openPortrait}
-                className="md:hidden block mt-1 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
-              >
-                View full portrait
-              </button>
-            </div>
-          )}
+              )}
 
-          {!heroParagraphs.length && thinContentFallback && (
-            <div className="font-body text-[14px] leading-[1.6] text-foreground/85 mt-1">
-              <p
-                className="md:hidden line-clamp-2"
-                style={{
-                  WebkitMaskImage: "linear-gradient(to right, black 75%, transparent 100%)",
-                  maskImage: "linear-gradient(to right, black 75%, transparent 100%)",
-                }}
-              >
-                {thinContentFallback}
-              </p>
-              <p className="hidden md:block">{thinContentFallback}</p>
-            </div>
-          )}
-        </motion.div>
+              {!heroParagraphs.length && thinContentFallback && (
+                <div className="font-body text-[14px] leading-[1.6] text-foreground/85 mt-1">
+                  <p
+                    className="md:hidden line-clamp-2"
+                    style={{
+                      WebkitMaskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                      maskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                    }}
+                  >
+                    {thinContentFallback}
+                  </p>
+                  <p className="hidden md:block">{thinContentFallback}</p>
+                </div>
+              )}
+            </motion.div>
+          </>
+        )}
       </div>
 
 
