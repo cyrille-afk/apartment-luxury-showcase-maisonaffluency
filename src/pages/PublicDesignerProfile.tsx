@@ -1094,8 +1094,8 @@ const PublicDesignerProfile = () => {
     // Editorial split header — 25% uncropped landscape image / 75% typography (desktop only)
     <section className="hidden md:block pt-2 pb-10">
       <div className="grid grid-cols-12 gap-10 lg:gap-16 items-start">
-        {/* Left — uncropped landscape lifestyle image (25%) */}
-        <div className="col-span-3">
+        {/* Left — uncropped landscape lifestyle image (matches one product-card column = 1/3) */}
+        <div className="col-span-4">
           {(wideHeroImage || heroImage) && (
             <img
               src={wideHeroImage || heroImage}
@@ -1112,7 +1112,7 @@ const PublicDesignerProfile = () => {
         </div>
 
         {/* Right — name, biography, CTA */}
-        <div className="col-span-9">
+        <div className="col-span-8">
           <h1 className="font-display text-4xl lg:text-[3.25rem] leading-[1.05] tracking-[-0.01em] text-foreground">
             {name}
           </h1>
