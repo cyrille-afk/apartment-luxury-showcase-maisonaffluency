@@ -1111,7 +1111,11 @@ const PublicDesignerProfile = () => {
           </p>
           <a
             href="#portrait"
-            className="mt-4 md:mt-0 inline-flex items-center text-xs uppercase tracking-widest font-medium text-foreground hover:text-muted-foreground transition-colors whitespace-nowrap"
+            onClick={(e) => {
+              e.preventDefault();
+              openPortrait();
+            }}
+            className="mt-4 md:mt-0 inline-flex items-center text-xs uppercase tracking-widest font-medium text-foreground hover:text-muted-foreground transition-colors whitespace-nowrap cursor-pointer"
           >
             View the full portrait
             <span className="ml-2 text-base">→</span>
