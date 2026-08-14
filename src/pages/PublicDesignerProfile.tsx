@@ -1091,18 +1091,21 @@ const PublicDesignerProfile = () => {
 
 
   const babledIntroSection = (
-    <section className="px-4 md:px-8 py-8 md:py-12 max-w-7xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-start">
+    <section className="w-full bg-white px-6 md:px-12 py-16">
+      {/* Matches the top header width constraint */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 items-start">
+        {/* Designer Name Block */}
         <div className="md:col-span-1">
-          <h2 className="text-3xl font-display tracking-wide text-foreground">
+          <h2 className="text-2xl md:text-3xl font-serif tracking-wide text-zinc-900 whitespace-nowrap">
             Emmanuel Babled
           </h2>
-          <p className="text-xs uppercase tracking-widest text-muted-foreground mt-2">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 mt-2">
             Sculptural Glass & Marble Design
           </p>
         </div>
-        <div className="md:col-span-2 flex flex-col md:flex-row md:items-start md:gap-12">
-          <p className="text-sm text-foreground/85 leading-relaxed max-w-xl">
+        {/* Bio Paragraph and Link Container */}
+        <div className="md:col-span-3 flex flex-col md:flex-row md:items-start justify-between gap-8 md:gap-12">
+          <p className="text-xs md:text-sm text-zinc-600 leading-relaxed max-w-xl">
             Emmanuel Babled is a French-Italian designer whose practice sits at the rare
             intersection of contemporary design, sculpture, and the master ateliers of Murano and
             Carrara. Born in France in 1967 and trained at the Scuola Politecnica di Design in Milan,
@@ -1115,10 +1118,10 @@ const PublicDesignerProfile = () => {
               e.preventDefault();
               openPortrait();
             }}
-            className="mt-4 md:mt-0 inline-flex items-center text-xs uppercase tracking-widest font-medium text-foreground hover:text-muted-foreground transition-colors whitespace-nowrap cursor-pointer"
+            className="inline-flex items-center text-[11px] uppercase tracking-[0.2em] font-medium text-zinc-900 hover:text-zinc-500 transition-colors whitespace-nowrap md:mt-1 cursor-pointer"
           >
             View the full portrait
-            <span className="ml-2 text-base">→</span>
+            <span className="ml-3 text-sm">→</span>
           </a>
         </div>
       </div>
