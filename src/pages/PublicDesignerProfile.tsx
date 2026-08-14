@@ -1978,7 +1978,7 @@ const PublicDesignerProfile = () => {
                         ) : null}
 
 
-                        {(pick.edition || (pick.tags || []).some((t: string) => /re-?edition/i.test(t))) && (
+                        {(/re-?edition/i.test(pick.edition || "") || (pick.tags || []).some((t: string) => /re-?edition/i.test(t))) && (
                           <span className="block font-body text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-foreground/45 leading-tight mt-1">
                             * Reedition
                           </span>
