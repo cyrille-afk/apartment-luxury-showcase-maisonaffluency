@@ -721,12 +721,16 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             </div>
 
             {/* Centered Brand Title */}
-            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap absolute left-1/2 -translate-x-1/2 text-center">
-              <h1 className="font-serif text-3xl lg:text-4xl tracking-[0.25em] text-zinc-900 uppercase font-medium transition-opacity duration-300 group-hover:opacity-70">
-                Maison Affluency
-              </h1>
-              <p className="text-[10px] tracking-[0.35em] text-zinc-400 uppercase mt-1">Est. 2011</p>
-            </button>
+            <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-4 whitespace-nowrap">
+              <button onClick={scrollToTop} className="group cursor-pointer">
+                <span className="font-brand text-[2rem] lg:text-[2.25rem] font-bold tracking-widest text-foreground uppercase transition-colors duration-300 group-hover:text-primary">
+                  MAISON <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
+                </span>
+              </button>
+              <span className="h-6 w-px bg-zinc-300" />
+              <span className="font-body text-[10px] tracking-[0.3em] text-zinc-500 uppercase">Est. 2017</span>
+            </div>
+
 
             {/* Right Side Icons */}
             <div className="flex items-center gap-6 text-zinc-700">
