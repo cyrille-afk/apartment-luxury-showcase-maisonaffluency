@@ -1091,41 +1091,60 @@ const PublicDesignerProfile = () => {
 
 
   const babledIntroSection = (
-    // Main layout container — matches the exact width and background behavior of the header
-    <section className="w-full bg-white border-t border-zinc-100">
-      <div className="max-w-[1440px] mx-auto px-6 md:px-12 py-16 flex flex-col md:flex-row md:items-start md:justify-between gap-12">
-        {/* Left Block: Designer Name & Specialty */}
-        <div className="md:w-1/4 shrink-0">
-          <h2 className="font-serif text-2xl tracking-wide text-zinc-900 font-normal">
-            Emmanuel Babled
-          </h2>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 mt-2 font-light leading-relaxed">
-            Sculptural Glass &<br />Marble Design
-          </p>
-        </div>
-        {/* Center Block: Main Biography Text */}
-        <div className="md:w-2/5 flex-grow">
-          <p className="text-xs md:text-sm text-zinc-600 leading-relaxed font-light text-justify">
-            Emmanuel Babled is a French-Italian designer whose practice sits at the rare
-            intersection of contemporary design, sculpture, and the master ateliers of Murano and
-            Carrara. Born in France in 1967 and trained at the Scuola Politecnica di Design in Milan,
-            he settled in Italy in the late 1980s and has spent the past three decades pushing glass,
-            marble, ceramic and bronze into forms that feel at once primordial and futuristic.
-          </p>
-        </div>
-        {/* Right Block: View Full Portrait Link */}
-        <div className="md:w-1/4 flex justify-end shrink-0 md:pt-1">
-          <a
-            href="#portrait"
-            onClick={(e) => {
-              e.preventDefault();
-              openPortrait();
-            }}
-            className="inline-flex items-center text-[10px] uppercase tracking-[0.25em] font-medium text-zinc-900 hover:text-zinc-500 transition-colors whitespace-nowrap cursor-pointer"
-          >
-            View the full portrait
-            <span className="ml-3 text-xs">→</span>
-          </a>
+    // Hero image + floating translucent overlay panel
+    <section className="relative w-full max-w-[1440px] mx-auto px-6 md:px-12">
+      <div className="relative w-full h-[60vh] md:h-[75vh] overflow-hidden bg-muted">
+        {(wideHeroImage || heroImage) && (
+          <img
+            src={wideHeroImage || heroImage}
+            alt={`${name} interior`}
+            className="w-full h-full object-cover"
+            loading="eager"
+          />
+        )}
+
+        {/* Subtle darkening layer so white text stays legible over bright areas */}
+        <div className="absolute inset-0 bg-black/20" />
+
+        {/* Floating translucent overlay panel */}
+        <div className="absolute bottom-0 left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20 text-white py-10 px-8 md:px-12">
+          <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+            {/* Left Column: Name */}
+            <div className="md:col-span-4">
+              <h2 className="font-display text-2xl tracking-wide text-white font-normal">
+                Emmanuel Babled
+              </h2>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-white/70 mt-2 font-light leading-relaxed">
+                Sculptural Glass &<br />Marble Design
+              </p>
+            </div>
+
+            {/* Center Column: Paragraph */}
+            <div className="md:col-span-5">
+              <p className="text-xs md:text-sm text-white/90 leading-relaxed font-light text-justify">
+                Emmanuel Babled is a French-Italian designer whose practice sits at the rare
+                intersection of contemporary design, sculpture, and the master ateliers of Murano and
+                Carrara. Born in France in 1967 and trained at the Scuola Politecnica di Design in Milan,
+                he settled in Italy in the late 1980s and has spent the past three decades pushing glass,
+                marble, ceramic and bronze into forms that feel at once primordial and futuristic.
+              </p>
+            </div>
+
+            {/* Right Column: View Profile Link */}
+            <div className="md:col-span-3 flex justify-end md:pt-1">
+              <a
+                href="#portrait"
+                onClick={(e) => {
+                  e.preventDefault();
+                  openPortrait();
+                }}
+                className="inline-flex items-center text-[10px] uppercase tracking-[0.25em] font-medium text-white hover:text-white/70 transition-colors whitespace-nowrap cursor-pointer"
+              >
+                View the full portrait
+                <span className="ml-3 text-xs">→</span>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </section>
