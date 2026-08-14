@@ -720,12 +720,13 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             </div>
 
             <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap inline-flex items-baseline gap-4">
-              <span className="font-serif text-[26px] tracking-[0.22em] text-zinc-900 uppercase font-normal leading-none transition-opacity duration-300 group-hover:opacity-70">
+              <span className="font-brand text-[1.9rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                 Maison Affluency
               </span>
-              <span aria-hidden="true" className="text-[9px] tracking-[0.2em] text-zinc-400 uppercase font-light border-l border-zinc-200 pl-4 py-0.5">
-                Est. 2011
+              <span aria-hidden="true" className="font-body text-[7px] uppercase tracking-[0.3em] text-foreground font-bold border-l border-zinc-200 pl-4">
+                Est. 2017
               </span>
+
             </button>
 
             <div className="flex items-center gap-6 text-zinc-700 text-[10px] tracking-[0.18em] uppercase font-light">
