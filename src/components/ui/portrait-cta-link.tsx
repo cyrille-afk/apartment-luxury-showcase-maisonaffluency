@@ -13,6 +13,8 @@ interface PortraitCtaLinkProps {
   /** Renders the mirrored (leftward) arrow for the "close" state. */
   reversed?: boolean;
   expanded?: boolean;
+  /** Renders a single continuous long arrow instead of a hairline + icon. */
+  longArrow?: boolean;
   className?: string;
 }
 
@@ -21,6 +23,7 @@ export function PortraitCtaLink({
   onClick,
   reversed = false,
   expanded,
+  longArrow = false,
   className,
 }: PortraitCtaLinkProps) {
   const [pressed, setPressed] = useState(false);
@@ -51,7 +54,8 @@ export function PortraitCtaLink({
         {/* incoming rule */}
         <span
           className={cn(
-            "pointer-events-none absolute top-1/2 h-px w-12 -translate-y-1/2 bg-current opacity-0 transition-all duration-300",
+            "pointer-events-none absolute top-1/2 h-px -translate-y-1/2 bg-current opacity-0 transition-all duration-300",
+            longArrow ? "w-20" : "w-12",
             reversed
               ? ["right-0", "-translate-x-2 group-hover:translate-x-0 group-hover:opacity-100", pressed && "translate-x-0 opacity-100"]
               : ["left-0", "translate-x-2 group-hover:translate-x-0 group-hover:opacity-100", pressed && "translate-x-0 opacity-100"]
@@ -61,21 +65,40 @@ export function PortraitCtaLink({
         {/* outgoing rule */}
         <span
           className={cn(
-            "pointer-events-none absolute top-1/2 h-px w-8 -translate-y-1/2 bg-current opacity-100 transition-all duration-300",
+            "pointer-events-none absolute top-1/2 h-px -translate-y-1/2 bg-current opacity-100 transition-all duration-300",
+            longArrow ? "w-16" : "w-8",
             reversed
               ? ["left-5", "translate-x-0 group-hover:-translate-x-6 group-hover:opacity-0", pressed && "-translate-x-6 opacity-0"]
               : ["right-5", "translate-x-0 group-hover:translate-x-6 group-hover:opacity-0", pressed && "translate-x-6 opacity-0"]
           )}
         />
-        <Arrow
-          className={cn(
-            "pointer-events-none absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 transition-all duration-300 group-hover:opacity-0",
-            reversed
-              ? ["left-0", "group-hover:translate-x-1", pressed && "translate-x-1 opacity-0"]
-              : ["right-0", "group-hover:-translate-x-1", pressed && "-translate-x-1 opacity-0"]
-          )}
-          strokeWidth={1.25}
-        />
+        {longArrow ? (
+          <svg
+            viewBox="0 0 120 14"
+            className={cn(
+              "pointer-events-none absolute top-1/2 h-3.5 w-20 -translate-y-1/2 transition-all duration-300",
+              reversed
+                ? ["left-0", "group-hover:translate-x-1 group-hover:opacity-0", pressed && "translate-x-1 opacity-0"]
+                : ["right-0", "group-hover:-translate-x-1 group-hover:opacity-0", pressed && "-translate-x-1 opacity-0"]
+            )}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1}
+          >
+            <line x1="0" y1="7" x2="108" y2="7" />
+            <polyline points="102,1 110,7 102,13" />
+          </svg>
+        ) : (
+          <Arrow
+            className={cn(
+              "pointer-events-none absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 transition-all duration-300 group-hover:opacity-0",
+              reversed
+                ? ["left-0", "group-hover:translate-x-1", pressed && "translate-x-1 opacity-0"]
+                : ["right-0", "group-hover:-translate-x-1", pressed && "-translate-x-1 opacity-0"]
+            )}
+            strokeWidth={1.25}
+          />
+        )}
       </span>
     </button>
   );
