@@ -1093,10 +1093,10 @@ const PublicDesignerProfile = () => {
   const babledIntroSection = (
     // Editorial split header — compact emphasis so products dominate (desktop only)
     <section className="hidden md:block pt-2 pb-8">
-      <div className="grid grid-cols-12 gap-x-10 gap-y-6 items-center">
+      <div className="grid grid-cols-12 gap-x-16 items-center w-full">
         {/* Left — reduced lifestyle image */}
         <div className="col-span-3">
-          <div className="aspect-[4/3] overflow-hidden">
+          <div className="aspect-[4/3] w-full overflow-hidden">
             {(wideHeroImage || heroImage) && (
               <img
                 src={wideHeroImage || heroImage}
@@ -1114,17 +1114,17 @@ const PublicDesignerProfile = () => {
         </div>
 
         {/* Right — name, biography, CTA */}
-        <div className="col-span-9 pl-6 lg:pl-10">
-          <h1 className="font-display text-2xl lg:text-[1.75rem] leading-[1.1] tracking-[-0.01em] text-foreground">
+        <div className="col-span-9 space-y-2.5">
+          <h1 className="text-lg font-serif font-normal tracking-wide text-foreground">
             {name}
           </h1>
           {designer?.specialty && (
-            <p className="mt-2 font-body text-[10px] uppercase tracking-[0.32em] text-foreground/60">
+            <p className="text-[10px] uppercase tracking-widest text-neutral-400 font-medium">
               {designer.specialty}
             </p>
           )}
 
-          <p className="mt-4 w-full font-body text-xs leading-[1.7] text-foreground/85 text-justify [text-wrap:pretty]">
+          <p className="text-[11px] leading-relaxed text-neutral-600 text-justify w-full">
             Emmanuel Babled is a French-Italian designer whose practice sits at the rare
             intersection of contemporary design, sculpture, and the master ateliers of Murano and
             Carrara. Born in France in 1967 and trained at the Scuola Politecnica di Design in Milan,
@@ -1132,12 +1132,12 @@ const PublicDesignerProfile = () => {
             marble, ceramic and bronze into forms that feel at once primordial and futuristic.
           </p>
 
-          <div className="mt-5 flex text-foreground">
+          <div className="!mt-1 flex">
             <PortraitCtaLink
               label="View the full portrait"
               onClick={openPortrait}
+              className="text-[10px] uppercase tracking-widest text-neutral-400 font-medium lg:text-[10px]"
             />
-
           </div>
         </div>
       </div>
