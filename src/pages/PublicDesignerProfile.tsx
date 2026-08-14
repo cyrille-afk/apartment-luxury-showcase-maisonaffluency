@@ -1134,17 +1134,12 @@ const PublicDesignerProfile = () => {
 
             {/* Right Column: View Profile Link */}
             <div className="md:col-span-3 flex justify-end md:pt-1">
-              <a
-                href="#portrait"
-                onClick={(e) => {
-                  e.preventDefault();
-                  openPortrait();
-                }}
-                className="inline-flex items-center text-[10px] uppercase tracking-[0.25em] font-medium text-white hover:text-white/70 transition-colors whitespace-nowrap cursor-pointer"
-              >
-                View the full portrait
-                <span className="ml-3 text-xs">→</span>
-              </a>
+              <PortraitCtaLink
+                label="View the full portrait"
+                onClick={openPortrait}
+                className="text-white hover:text-white/70"
+              />
+
             </div>
           </div>
         </div>
