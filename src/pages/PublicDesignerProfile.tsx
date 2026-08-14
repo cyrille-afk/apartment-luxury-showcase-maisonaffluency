@@ -597,6 +597,8 @@ const PublicDesignerProfile = () => {
   // the parent brand — parent bios embed inline image/video URLs that would leak.
   const displayBiography = designer?.biography;
   const displayBiographyImages = designer?.biography_images;
+  const isEmmanuelBabled = designer?.slug === "emmanuel-babled";
+
   const displayPhilosophy = designer?.philosophy;
 
   const picks = useMemo(() => {
