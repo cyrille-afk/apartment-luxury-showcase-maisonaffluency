@@ -18,21 +18,25 @@ interface PortraitCtaLinkProps {
   className?: string;
 }
 
-/** A single continuous hairline arrow that grows as its head travels outward. */
+/** Fixed track: the visible arrowhead travels outward while revealing its shaft. */
 function LongArrow({ reversed = false, pressed = false }: { reversed?: boolean; pressed?: boolean }) {
   return (
     <span
       aria-hidden="true"
-      className={cn(
-        "pointer-events-none relative inline-block h-[10px] w-5 shrink-0 overflow-hidden transition-[width] duration-500 ease-out",
-        "group-hover:w-16 group-focus-visible:w-16 group-active:w-16",
-        pressed && "w-16"
-      )}
+      className="pointer-events-none relative inline-block h-[10px] w-16 shrink-0"
     >
+      <span
+        className={cn(
+          "absolute top-1/2 h-px w-14 -translate-y-1/2 scale-x-0 bg-current transition-transform duration-500 ease-out",
+          reversed ? "right-1 origin-right" : "left-1 origin-left",
+          "group-hover:scale-x-100 group-focus-visible:scale-x-100 group-active:scale-x-100",
+          pressed && "scale-x-100"
+        )}
+      />
       <svg
-        width="64"
+        width="8"
         height="10"
-        viewBox="0 0 64 10"
+        viewBox="0 0 8 10"
         fill="none"
         stroke="currentColor"
         strokeWidth="1"
@@ -41,12 +45,11 @@ function LongArrow({ reversed = false, pressed = false }: { reversed?: boolean; 
         className={cn(
           "absolute top-0 transition-transform duration-500 ease-out",
           reversed
-            ? ["left-0 rotate-180 translate-x-11 group-hover:translate-x-0 group-focus-visible:translate-x-0 group-active:translate-x-0", pressed && "translate-x-0"]
-            : ["right-0 -translate-x-11 group-hover:translate-x-0 group-focus-visible:translate-x-0 group-active:translate-x-0", pressed && "translate-x-0"]
+            ? ["right-0 rotate-180 group-hover:-translate-x-14 group-focus-visible:-translate-x-14 group-active:-translate-x-14", pressed && "-translate-x-14"]
+            : ["left-0 group-hover:translate-x-14 group-focus-visible:translate-x-14 group-active:translate-x-14", pressed && "translate-x-14"]
         )}
       >
-        <line x1="0" y1="5" x2="63" y2="5" />
-        <polyline points="57.5,0.5 62.5,5 57.5,9.5" fill="none" />
+        <polyline points="1,0.5 7,5 1,9.5" fill="none" />
       </svg>
     </span>
   );
