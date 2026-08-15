@@ -1353,8 +1353,8 @@ const PublicDesignerProfile = () => {
         <Navigation />
 
         <div className={cn(
-          "max-w-6xl mx-auto px-4 md:px-12 pt-[var(--header-h)] pb-20 space-y-1 md:space-y-1.5",
-          isEmmanuelBabled && "md:max-w-[1440px] md:px-8"
+          "max-w-[1440px] mx-auto px-12 lg:px-16 pt-[var(--header-h)] pb-20 space-y-1 md:space-y-1.5",
+          !isEmmanuelBabled && "max-w-6xl px-4 md:px-12"
         )}>
           <div className="flex items-center justify-between">
             {fromProduct ? (
@@ -1616,7 +1616,7 @@ const PublicDesignerProfile = () => {
                     : forceTwoCol
                       ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-2"
                       : isEmmanuelBabled
-                        ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-3"
+                        ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
                         : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
 
 
@@ -1755,9 +1755,9 @@ const PublicDesignerProfile = () => {
 
 
                     <div className={cn(
-                      "grid gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10",
+                      "grid w-full",
                       gridClass,
-                      isEmmanuelBabled && "md:gap-x-12"
+                      isEmmanuelBabled ? "gap-x-6 gap-y-12" : "gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10"
                     )}>
                 {visiblePicks.map((pick) => {
 
@@ -2020,7 +2020,7 @@ const PublicDesignerProfile = () => {
 
 
                       {/* Editorial text block — quiet, uniform, line-clamped */}
-                      <div className="flex flex-col flex-1 px-0.5 md:px-0 text-left md:text-center">
+                      <div className="flex flex-col flex-1 text-left md:text-center">
                         {/* Designer / brand label — small caps, muted (mobile only shows when grouped, like competitor) */}
                         {cardBrandLabel && cardBrandSlug ? (
                           <Link
