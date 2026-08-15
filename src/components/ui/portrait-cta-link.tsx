@@ -53,7 +53,7 @@ export function PortraitCtaLink({
   onClick,
   reversed = false,
   expanded,
-  longArrow = false,
+  longArrow = true,
   className,
 }: PortraitCtaLinkProps) {
   const [pressed, setPressed] = useState(false);
