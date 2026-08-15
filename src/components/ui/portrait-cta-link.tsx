@@ -18,16 +18,15 @@ interface PortraitCtaLinkProps {
   className?: string;
 }
 
-/** A single continuous hairline arrow: long shaft + open arrowhead. */
+/** A single continuous hairline arrow that grows as its head travels outward. */
 function LongArrow({ reversed = false, pressed = false }: { reversed?: boolean; pressed?: boolean }) {
   return (
     <span
       aria-hidden="true"
       className={cn(
-        "pointer-events-none inline-block shrink-0 transition-transform duration-300 ease-out",
-        reversed
-          ? ["group-hover:-translate-x-4 group-focus-visible:-translate-x-4 group-active:-translate-x-4", pressed && "-translate-x-4"]
-          : ["group-hover:translate-x-4 group-focus-visible:translate-x-4 group-active:translate-x-4", pressed && "translate-x-4"]
+        "pointer-events-none relative inline-block h-[10px] w-5 shrink-0 overflow-hidden transition-[width] duration-500 ease-out",
+        "group-hover:w-16 group-focus-visible:w-16 group-active:w-16",
+        pressed && "w-16"
       )}
     >
       <svg
@@ -39,7 +38,12 @@ function LongArrow({ reversed = false, pressed = false }: { reversed?: boolean; 
         strokeWidth="1"
         strokeLinecap="square"
         strokeLinejoin="miter"
-        className={reversed ? "rotate-180" : undefined}
+        className={cn(
+          "absolute top-0 transition-transform duration-500 ease-out",
+          reversed
+            ? ["left-0 rotate-180 translate-x-11 group-hover:translate-x-0 group-focus-visible:translate-x-0 group-active:translate-x-0", pressed && "translate-x-0"]
+            : ["right-0 -translate-x-11 group-hover:translate-x-0 group-focus-visible:translate-x-0 group-active:translate-x-0", pressed && "translate-x-0"]
+        )}
       >
         <line x1="0" y1="5" x2="63" y2="5" />
         <polyline points="57.5,0.5 62.5,5 57.5,9.5" fill="none" />
