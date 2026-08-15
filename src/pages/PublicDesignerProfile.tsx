@@ -1353,8 +1353,8 @@ const PublicDesignerProfile = () => {
         <Navigation />
 
         <div className={cn(
-          "max-w-[1440px] mx-auto px-12 lg:px-16 pt-[var(--header-h)] pb-20 space-y-1 md:space-y-1.5",
-          !isEmmanuelBabled && "max-w-6xl px-4 md:px-12"
+          "max-w-[1440px] mx-auto px-4 md:px-12 lg:px-16 pt-[var(--header-h)] pb-20 space-y-1 md:space-y-1.5",
+          !isEmmanuelBabled && "max-w-6xl lg:px-12"
         )}>
           <div className="flex items-center justify-between">
             {fromProduct ? (
@@ -1757,7 +1757,7 @@ const PublicDesignerProfile = () => {
                     <div className={cn(
                       "grid w-full",
                       gridClass,
-                      isEmmanuelBabled ? "gap-x-6 gap-y-12" : "gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10"
+                      isEmmanuelBabled ? "gap-x-4 gap-y-4 md:gap-x-6 md:gap-y-12" : "gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10"
                     )}>
                 {visiblePicks.map((pick) => {
 
@@ -1935,7 +1935,8 @@ const PublicDesignerProfile = () => {
                         }}
                         aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
                         className={cn(
-                          "aspect-square w-full bg-neutral-50 flex items-center justify-center p-8 overflow-hidden mb-3 relative cursor-pointer"
+                          "aspect-[4/5] w-full bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer",
+                          isEmmanuelBabled && "md:aspect-square md:bg-neutral-50 md:p-8"
                         )}
                       >
                         <img
@@ -1944,7 +1945,8 @@ const PublicDesignerProfile = () => {
                           sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
                           className={cn(
-                            "max-h-full max-w-full object-contain transition-all duration-700",
+                            "absolute inset-0 w-full h-full object-cover rounded-luxury-sharp transition-all duration-700",
+                            isEmmanuelBabled && "md:relative md:inset-auto md:w-auto md:h-auto md:max-h-full md:max-w-full md:object-contain",
                             pick.hover_image_url
                               ? isMobilePickRevealed
                                 ? "opacity-0 scale-105 md:opacity-100 md:group-hover:opacity-0"
@@ -1961,7 +1963,8 @@ const PublicDesignerProfile = () => {
                           sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                               alt={`${pick.title} alternate finish`}
                               className={cn(
-                                "absolute inset-8 max-h-full max-w-full object-contain transition-all duration-700",
+                                "absolute inset-0 w-full h-full object-cover rounded-luxury-sharp transition-all duration-700",
+                                isEmmanuelBabled && "md:inset-8 md:w-auto md:h-auto md:max-h-full md:max-w-full md:object-contain",
                                 isMobilePickRevealed
                                   ? "opacity-100 scale-105 md:opacity-0 md:group-hover:opacity-100"
                                   : "opacity-0 group-hover:opacity-100 group-hover:scale-105"
