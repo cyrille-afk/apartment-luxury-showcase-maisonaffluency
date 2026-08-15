@@ -597,7 +597,9 @@ const PublicDesignerProfile = () => {
   // the parent brand — parent bios embed inline image/video URLs that would leak.
   const displayBiography = designer?.biography;
   const displayBiographyImages = designer?.biography_images;
-  const isEmmanuelBabled = designer?.slug === "emmanuel-babled";
+  // Babled now uses the standard New In format (same as Pierre Bonnefille).
+  // Kept as a flag so the bespoke layout can be re-enabled if needed.
+  const isEmmanuelBabled = false;
 
   const displayPhilosophy = designer?.philosophy;
 
