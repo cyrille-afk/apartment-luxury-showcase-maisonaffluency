@@ -1124,8 +1124,7 @@ const PublicDesignerProfile = () => {
             label="View The Full Portrait"
             onClick={openPortrait}
             expanded={portraitOpen}
-            
-            className="text-[11px] uppercase tracking-widest text-neutral-400 font-medium inline-flex items-center gap-2"
+            className="self-start"
           />
 
         </div>
