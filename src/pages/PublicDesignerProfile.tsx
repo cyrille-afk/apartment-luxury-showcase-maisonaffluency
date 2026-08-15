@@ -1353,8 +1353,8 @@ const PublicDesignerProfile = () => {
         <Navigation />
 
         <div className={cn(
-          "max-w-[1440px] mx-auto px-12 lg:px-16 pt-[var(--header-h)] pb-20 space-y-1 md:space-y-1.5",
-          !isEmmanuelBabled && "max-w-6xl px-4 md:px-12"
+          "max-w-[1440px] mx-auto px-4 md:px-12 lg:px-16 pt-[var(--header-h)] pb-20 space-y-1 md:space-y-1.5",
+          !isEmmanuelBabled && "max-w-6xl lg:px-12"
         )}>
           <div className="flex items-center justify-between">
             {fromProduct ? (
