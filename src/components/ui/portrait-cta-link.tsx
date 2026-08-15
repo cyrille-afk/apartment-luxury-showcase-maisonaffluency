@@ -82,8 +82,8 @@ export function PortraitCtaLink({
             </>
           ) : (
             <>
-              <LongArrow pressed={pressed} />
               <span className="relative z-10">{label}</span>
+              <LongArrow pressed={pressed} />
             </>
           )}
         </span>
