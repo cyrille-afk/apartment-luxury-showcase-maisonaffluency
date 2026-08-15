@@ -1934,10 +1934,7 @@ const PublicDesignerProfile = () => {
                           }
                         }}
                         aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
-                        className={cn(
-                          "aspect-[4/5] w-full bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer",
-                          isEmmanuelBabled && "md:aspect-square md:bg-neutral-50 md:p-8"
-                        )}
+                        className="aspect-[4/5] w-full bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer"
                       >
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
@@ -1946,7 +1943,6 @@ const PublicDesignerProfile = () => {
                           alt={pick.title}
                           className={cn(
                             "absolute inset-0 w-full h-full object-cover rounded-luxury-sharp transition-all duration-700",
-                            isEmmanuelBabled && "md:relative md:inset-auto md:w-auto md:h-auto md:max-h-full md:max-w-full md:object-contain",
                             pick.hover_image_url
                               ? isMobilePickRevealed
                                 ? "opacity-0 scale-105 md:opacity-100 md:group-hover:opacity-0"
@@ -1964,7 +1960,6 @@ const PublicDesignerProfile = () => {
                               alt={`${pick.title} alternate finish`}
                               className={cn(
                                 "absolute inset-0 w-full h-full object-cover rounded-luxury-sharp transition-all duration-700",
-                                isEmmanuelBabled && "md:inset-8 md:w-auto md:h-auto md:max-h-full md:max-w-full md:object-contain",
                                 isMobilePickRevealed
                                   ? "opacity-100 scale-105 md:opacity-0 md:group-hover:opacity-100"
                                   : "opacity-0 group-hover:opacity-100 group-hover:scale-105"
