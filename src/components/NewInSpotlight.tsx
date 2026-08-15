@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { composeTitle } from "@/lib/curatorPickLegend";
 import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
+import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 
 const transition: Transition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] };
 
