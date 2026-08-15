@@ -1406,7 +1406,9 @@ const PublicDesignerProfile = () => {
           </div>
 
           {useNewInSpotlightFormat ? (
-            <NewInSpotlight designer={designer} />
+            <div className="relative left-1/2 -translate-x-1/2 w-screen max-w-[100vw]">
+              <NewInSpotlight designer={designer} />
+            </div>
           ) : newInFormat ? (
             newInSection
           ) : useChildHeroLayout ? (
