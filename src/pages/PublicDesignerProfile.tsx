@@ -1944,7 +1944,7 @@ const PublicDesignerProfile = () => {
                           sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
                           className={cn(
-                            "absolute inset-0 w-full h-full transition-all duration-700 rounded-luxury-sharp object-cover",
+                            "max-h-full max-w-full object-contain transition-all duration-700",
                             pick.hover_image_url
                               ? isMobilePickRevealed
                                 ? "opacity-0 scale-105 md:opacity-100 md:group-hover:opacity-0"
