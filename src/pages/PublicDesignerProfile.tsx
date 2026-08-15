@@ -1935,8 +1935,7 @@ const PublicDesignerProfile = () => {
                         }}
                         aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
                         className={cn(
-                          "aspect-[4/5] bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer",
-                          isEmmanuelBabled && "md:aspect-[4/3]"
+                          "aspect-square w-full bg-neutral-50 flex items-center justify-center p-8 overflow-hidden mb-3 relative cursor-pointer"
                         )}
                       >
                         <img
