@@ -1092,39 +1092,27 @@ const PublicDesignerProfile = () => {
 
   const babledIntroSection = (
     // Editorial split header — compact emphasis so products dominate (desktop only)
-    <section className="hidden md:block pt-2 pb-8">
-      <div className="grid grid-cols-12 gap-x-16 items-center w-full">
+    <section className="hidden md:block mb-12">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-8 w-full">
         {/* Left — reduced lifestyle image */}
-        <div className="col-span-3">
-          <div className="aspect-[4/3] w-full overflow-hidden">
-            {(wideHeroImage || heroImage) && (
-              <img
-                src={wideHeroImage || heroImage}
-                alt={`${name} interior`}
-                className="w-full h-full object-cover"
-                loading="eager"
-              />
-            )}
-          </div>
-          {designer?.hero_photo_credit && (
-            <p className="mt-2 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
-              Photo: {designer.hero_photo_credit}
-            </p>
+        <div className="w-full md:w-[28%] aspect-[4/3] overflow-hidden bg-neutral-100">
+          {(wideHeroImage || heroImage) && (
+            <img
+              src={wideHeroImage || heroImage}
+              alt={`${name} interior`}
+              className="w-full h-full object-cover"
+              loading="eager"
+            />
           )}
         </div>
 
         {/* Right — name, biography, CTA */}
-        <div className="col-span-9 space-y-2.5">
-          <h1 className="text-lg font-serif font-normal tracking-wide text-foreground">
+        <div className="w-full md:w-[68%] flex flex-col justify-center space-y-3">
+          <h1 className="text-xl lg:text-2xl font-serif font-normal tracking-wide text-neutral-900">
             {name}
           </h1>
-          {designer?.specialty && (
-            <p className="text-[10px] uppercase tracking-widest text-neutral-400 font-medium">
-              {designer.specialty}
-            </p>
-          )}
 
-          <p className="text-[11px] leading-relaxed text-neutral-600 text-justify w-full">
+          <p className="text-xs lg:text-sm text-neutral-600 leading-relaxed font-light text-justify w-full">
             Emmanuel Babled is a French-Italian designer whose practice sits at the rare
             intersection of contemporary design, sculpture, and the master ateliers of Murano and
             Carrara. Born in France in 1967 and trained at the Scuola Politecnica di Design in Milan,
@@ -1132,15 +1120,21 @@ const PublicDesignerProfile = () => {
             marble, ceramic and bronze into forms that feel at once primordial and futuristic.
           </p>
 
-          <div className="!mt-1 flex">
-            <PortraitCtaLink
-              label="View the full portrait"
-              onClick={openPortrait}
-              className="text-[10px] uppercase tracking-widest text-neutral-400 font-medium lg:text-[10px]"
-            />
-          </div>
+          <button
+            type="button"
+            onClick={openPortrait}
+            className="text-[10px] uppercase tracking-widest text-neutral-500 font-medium inline-flex items-center gap-2 pt-1"
+          >
+            View the full portrait
+            <ArrowRight className="h-3 w-3" strokeWidth={1.5} />
+          </button>
         </div>
       </div>
+      {designer?.hero_photo_credit && (
+        <p className="mt-2 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
+          Photo: {designer.hero_photo_credit}
+        </p>
+      )}
     </section>
   );
 
