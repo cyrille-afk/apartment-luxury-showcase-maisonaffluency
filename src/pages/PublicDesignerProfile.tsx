@@ -43,6 +43,7 @@ import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { useAuth } from "@/hooks/useAuth";
 import { lastNameInitial } from "@/lib/nameFormat";
 import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
+import NewInSpotlight from "@/components/NewInSpotlight";
 // Collectible profiles are public; product-page gating lives in PublicProductPage.
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
