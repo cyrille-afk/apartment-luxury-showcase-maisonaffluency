@@ -1694,7 +1694,7 @@ const PublicDesignerProfile = () => {
 
 
                     {/* ── CONTROLS BAR — DESKTOP ── */}
-                    <div className="hidden md:flex items-center justify-between gap-4 pb-4 mb-6 border-b border-border/60">
+                    <div className="hidden md:flex justify-between items-center w-full border-t border-b border-neutral-200 py-3 mb-10 text-[11px] uppercase tracking-widest">
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           disabled={categories.length === 0}
