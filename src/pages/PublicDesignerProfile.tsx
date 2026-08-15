@@ -1093,9 +1093,9 @@ const PublicDesignerProfile = () => {
   const babledIntroSection = (
     // Editorial split header — compact emphasis so products dominate (desktop only)
     <section className="hidden md:block">
-      <div className="grid grid-cols-12 gap-x-12 items-start w-full mb-12">
+      <div className="grid grid-cols-12 gap-x-12 items-start w-full mb-6">
         {/* Left — reduced lifestyle image */}
-        <div className="col-span-3 aspect-[3/2] w-full overflow-hidden bg-neutral-50">
+        <div className="col-span-3 aspect-[4/3] w-full overflow-hidden bg-neutral-50">
           {(wideHeroImage || heroImage) && (
             <img
               src={wideHeroImage || heroImage}
@@ -1694,7 +1694,7 @@ const PublicDesignerProfile = () => {
 
 
                     {/* ── CONTROLS BAR — DESKTOP ── */}
-                    <div className="hidden md:flex items-center justify-between gap-4 pb-4 mb-6 border-b border-border/60">
+                    <div className="hidden md:flex justify-between items-center w-full border-t border-b border-neutral-200 py-3 mb-10 text-[11px] uppercase tracking-widest">
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           disabled={categories.length === 0}
@@ -1935,8 +1935,7 @@ const PublicDesignerProfile = () => {
                         }}
                         aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
                         className={cn(
-                          "aspect-[4/5] bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer",
-                          isEmmanuelBabled && "md:aspect-[4/3]"
+                          "aspect-square w-full bg-neutral-50 flex items-center justify-center p-8 overflow-hidden mb-3 relative cursor-pointer"
                         )}
                       >
                         <img
@@ -1945,7 +1944,7 @@ const PublicDesignerProfile = () => {
                           sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
                           className={cn(
-                            "absolute inset-0 w-full h-full transition-all duration-700 rounded-luxury-sharp object-cover",
+                            "max-h-full max-w-full object-contain transition-all duration-700",
                             pick.hover_image_url
                               ? isMobilePickRevealed
                                 ? "opacity-0 scale-105 md:opacity-100 md:group-hover:opacity-0"
@@ -1962,7 +1961,7 @@ const PublicDesignerProfile = () => {
                           sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                               alt={`${pick.title} alternate finish`}
                               className={cn(
-                                "absolute inset-0 w-full h-full object-cover rounded-luxury-sharp transition-all duration-700",
+                                "absolute inset-8 max-h-full max-w-full object-contain transition-all duration-700",
                                 isMobilePickRevealed
                                   ? "opacity-100 scale-105 md:opacity-0 md:group-hover:opacity-100"
                                   : "opacity-0 group-hover:opacity-100 group-hover:scale-105"
