@@ -1092,10 +1092,10 @@ const PublicDesignerProfile = () => {
 
   const babledIntroSection = (
     // Editorial split header — compact emphasis so products dominate (desktop only)
-    <section className="hidden md:block mb-12">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-8 w-full">
+    <section className="hidden md:block">
+      <div className="grid grid-cols-12 gap-x-12 items-start w-full mb-12">
         {/* Left — reduced lifestyle image */}
-        <div className="w-full md:w-[28%] aspect-[4/3] overflow-hidden bg-neutral-100">
+        <div className="col-span-3 aspect-[3/2] w-full overflow-hidden bg-neutral-50">
           {(wideHeroImage || heroImage) && (
             <img
               src={wideHeroImage || heroImage}
@@ -1107,12 +1107,12 @@ const PublicDesignerProfile = () => {
         </div>
 
         {/* Right — name, biography, CTA */}
-        <div className="w-full md:w-[68%] flex flex-col justify-center space-y-3">
-          <h1 className="text-xl lg:text-2xl font-serif font-normal tracking-wide text-neutral-900">
+        <div className="col-span-9 flex flex-col justify-start pt-0">
+          <h1 className="text-xl lg:text-2xl font-serif font-light tracking-wide text-neutral-900 mb-3">
             {name}
           </h1>
 
-          <p className="text-xs lg:text-sm text-neutral-600 leading-relaxed font-light text-justify w-full">
+          <p className="text-[11px] lg:text-[12px] text-neutral-600 leading-normal text-justify tracking-normal w-full mb-4">
             Emmanuel Babled is a French-Italian designer whose practice sits at the rare
             intersection of contemporary design, sculpture, and the master ateliers of Murano and
             Carrara. Born in France in 1967 and trained at the Scuola Politecnica di Design in Milan,
@@ -1124,7 +1124,7 @@ const PublicDesignerProfile = () => {
             label="View The Full Portrait"
             onClick={openPortrait}
             expanded={portraitOpen}
-            className="!text-[10px] !tracking-widest text-neutral-500 font-medium pt-1"
+            className="text-[10px] uppercase tracking-widest text-neutral-500 font-medium inline-flex items-center gap-2"
           />
         </div>
       </div>
