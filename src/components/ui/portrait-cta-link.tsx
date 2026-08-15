@@ -18,6 +18,36 @@ interface PortraitCtaLinkProps {
   className?: string;
 }
 
+/** A single continuous hairline arrow: long shaft + open arrowhead. */
+function LongArrow({ reversed = false, pressed = false }: { reversed?: boolean; pressed?: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none inline-block shrink-0 transition-transform duration-300",
+        reversed
+          ? ["group-hover:-translate-x-1.5", pressed && "-translate-x-1.5"]
+          : ["group-hover:translate-x-1.5", pressed && "translate-x-1.5"]
+      )}
+    >
+      <svg
+        width="64"
+        height="10"
+        viewBox="0 0 64 10"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+        className={reversed ? "rotate-180" : undefined}
+      >
+        <line x1="0" y1="5" x2="63" y2="5" />
+        <polyline points="57.5,0.5 62.5,5 57.5,9.5" fill="none" />
+      </svg>
+    </span>
+  );
+}
+
 export function PortraitCtaLink({
   label,
   onClick,
