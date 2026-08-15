@@ -601,6 +601,8 @@ const PublicDesignerProfile = () => {
   // Babled now uses the standard New In format (same as Pierre Bonnefille).
   // Kept as a flag so the bespoke layout can be re-enabled if needed.
   const isEmmanuelBabled = false;
+  // Designers rendered with the New In spotlight layout on their profile page.
+  const useNewInSpotlightFormat = designer?.slug === "emmanuel-babled";
 
   const displayPhilosophy = designer?.philosophy;
 
