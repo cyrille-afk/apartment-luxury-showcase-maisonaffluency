@@ -1609,14 +1609,15 @@ const PublicDesignerProfile = () => {
                       });
 
                 const forceTwoCol = designer.slug === "adrien-messie" || pickCols === "two";
-                const gridClass =
-                  pickCols === "one"
+                const gridClass = isEmmanuelBabled
+                  ? pickCols === "auto"
+                    ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-2"
+                    : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
+                  : pickCols === "one"
                     ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5"
                     : forceTwoCol
                       ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-2"
-                      : isEmmanuelBabled
-                        ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
-                        : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
+                      : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
 
 
                 const filterItems = categories.map((c) => (
