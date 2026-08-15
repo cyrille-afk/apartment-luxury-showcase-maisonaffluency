@@ -1124,8 +1124,10 @@ const PublicDesignerProfile = () => {
             label="View The Full Portrait"
             onClick={openPortrait}
             expanded={portraitOpen}
-            className="text-[10px] uppercase tracking-widest text-neutral-500 font-medium inline-flex items-center gap-2"
+            longArrow
+            className="!text-[10px] uppercase !tracking-widest text-neutral-500 font-medium"
           />
+
         </div>
       </div>
       {designer?.hero_photo_credit && (
