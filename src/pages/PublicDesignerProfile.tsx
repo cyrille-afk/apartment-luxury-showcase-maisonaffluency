@@ -1093,7 +1093,7 @@ const PublicDesignerProfile = () => {
   const babledIntroSection = (
     // Editorial split header — compact emphasis so products dominate (desktop only)
     <section className="hidden md:block">
-      <div className="grid grid-cols-12 gap-x-12 items-start w-full mb-6">
+      <div className="grid grid-cols-12 gap-x-12 items-stretch w-full mb-6">
         {/* Left — reduced lifestyle image */}
         <div className="col-span-3 aspect-[4/3] w-full overflow-hidden bg-neutral-50">
           {(wideHeroImage || heroImage) && (
@@ -1107,12 +1107,12 @@ const PublicDesignerProfile = () => {
         </div>
 
         {/* Right — name, biography, CTA */}
-        <div className="col-span-9 flex flex-col justify-start pt-0">
-          <h1 className="text-xl lg:text-2xl font-serif font-light tracking-wide text-neutral-900 mb-3">
+        <div className="col-span-9 flex flex-col justify-between h-full py-1">
+          <h1 className="text-2xl lg:text-3xl font-serif font-light tracking-wide text-neutral-900">
             {name}
           </h1>
 
-          <p className="text-[11px] lg:text-[12px] text-neutral-600 leading-normal text-justify tracking-normal w-full mb-4">
+          <p className="text-[13px] lg:text-sm text-neutral-600 leading-relaxed text-justify tracking-wide w-full">
             Emmanuel Babled is a French-Italian designer whose practice sits at the rare
             intersection of contemporary design, sculpture, and the master ateliers of Murano and
             Carrara. Born in France in 1967 and trained at the Scuola Politecnica di Design in Milan,
@@ -1125,7 +1125,7 @@ const PublicDesignerProfile = () => {
             onClick={openPortrait}
             expanded={portraitOpen}
             longArrow
-            className="!text-[10px] uppercase !tracking-widest text-neutral-500 font-medium"
+            className="text-[11px] uppercase tracking-widest text-neutral-400 font-medium inline-flex items-center gap-2"
           />
 
         </div>
