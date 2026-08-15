@@ -77,8 +77,8 @@ export function PortraitCtaLink({
         <span className="relative inline-flex items-center gap-5 whitespace-nowrap">
           {reversed ? (
             <>
-              <span className="relative z-10">{label}</span>
               <LongArrow reversed pressed={pressed} />
+              <span className="relative z-10">{label}</span>
             </>
           ) : (
             <>
