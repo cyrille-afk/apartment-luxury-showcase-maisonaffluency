@@ -1757,7 +1757,7 @@ const PublicDesignerProfile = () => {
                     <div className={cn(
                       "grid w-full",
                       gridClass,
-                      isEmmanuelBabled ? "gap-x-6 gap-y-12" : "gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10"
+                      isEmmanuelBabled ? "gap-x-4 gap-y-4 md:gap-x-6 md:gap-y-12" : "gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10"
                     )}>
                 {visiblePicks.map((pick) => {
 
