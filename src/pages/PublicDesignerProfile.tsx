@@ -1120,14 +1120,12 @@ const PublicDesignerProfile = () => {
             marble, ceramic and bronze into forms that feel at once primordial and futuristic.
           </p>
 
-          <button
-            type="button"
+          <PortraitCtaLink
+            label="View The Full Portrait"
             onClick={openPortrait}
-            className="text-[10px] uppercase tracking-widest text-neutral-500 font-medium inline-flex items-center gap-2 pt-1"
-          >
-            View the full portrait
-            <ArrowRight className="h-3 w-3" strokeWidth={1.5} />
-          </button>
+            expanded={portraitOpen}
+            className="!text-[10px] !tracking-widest text-neutral-500 font-medium pt-1"
+          />
         </div>
       </div>
       {designer?.hero_photo_credit && (
