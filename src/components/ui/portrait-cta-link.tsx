@@ -24,10 +24,10 @@ function LongArrow({ reversed = false, pressed = false }: { reversed?: boolean; 
     <span
       aria-hidden="true"
       className={cn(
-        "pointer-events-none inline-block shrink-0 transition-transform duration-300",
+        "pointer-events-none inline-block shrink-0 transition-transform duration-300 ease-out",
         reversed
-          ? ["group-hover:-translate-x-1.5", pressed && "-translate-x-1.5"]
-          : ["group-hover:translate-x-1.5", pressed && "translate-x-1.5"]
+          ? ["group-hover:-translate-x-4 group-focus-visible:-translate-x-4 group-active:-translate-x-4", pressed && "-translate-x-4"]
+          : ["group-hover:translate-x-4 group-focus-visible:translate-x-4 group-active:translate-x-4", pressed && "translate-x-4"]
       )}
     >
       <svg
