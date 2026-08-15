@@ -1093,9 +1093,9 @@ const PublicDesignerProfile = () => {
   const babledIntroSection = (
     // Editorial split header — compact emphasis so products dominate (desktop only)
     <section className="hidden md:block">
-      <div className="grid grid-cols-12 gap-x-12 items-start w-full mb-12">
+      <div className="grid grid-cols-12 gap-x-12 items-start w-full mb-6">
         {/* Left — reduced lifestyle image */}
-        <div className="col-span-3 aspect-[3/2] w-full overflow-hidden bg-neutral-50">
+        <div className="col-span-3 aspect-[4/3] w-full overflow-hidden bg-neutral-50">
           {(wideHeroImage || heroImage) && (
             <img
               src={wideHeroImage || heroImage}
