@@ -1405,7 +1405,9 @@ const PublicDesignerProfile = () => {
             )}
           </div>
 
-          {newInFormat ? (
+          {useNewInSpotlightFormat ? (
+            <NewInSpotlight designer={designer} />
+          ) : newInFormat ? (
             newInSection
           ) : useChildHeroLayout ? (
             /* Designer profile: portrait hero, then the same editorial biography flow as the parent */
