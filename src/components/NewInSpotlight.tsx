@@ -329,27 +329,34 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
               </div>
 
               {igWithImages.length > 0 && (
-                <div className="w-full border-t border-neutral-100 pt-4 mt-4 flex justify-between items-center gap-6">
-                  <span className="text-[11px] font-sans font-medium uppercase tracking-[0.15em] text-neutral-500 flex-shrink-0">
-                    From the Studio
-                  </span>
-                  <div className="flex gap-2.5 items-center h-14 overflow-hidden">
-                    {igWithImages.slice(0, 6).map((post) => (
-                      <a
-                        key={post.id}
-                        href={post.post_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group relative block h-full aspect-square flex-shrink-0 overflow-hidden bg-neutral-50"
-                      >
-                        <img
-                          src={post.image_url!}
-                          alt={post.caption || `${displayName} — From the Studio`}
-                          className="h-full aspect-square object-cover bg-neutral-50 flex-shrink-0 grayscale opacity-90 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
-                          loading="lazy"
-                        />
-                      </a>
-                    ))}
+                <div className="w-full border-t border-neutral-100 pt-4 mt-4 flex flex-col items-start">
+                  <div className="w-fit flex flex-col items-center gap-2">
+                    <div className="flex items-center gap-3 w-full">
+                      <div className="h-px flex-1 bg-neutral-200 min-w-[32px]" />
+                      <Instagram className="w-3 h-3 text-neutral-400 flex-shrink-0" />
+                      <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-medium flex-shrink-0">
+                        From the Studio
+                      </span>
+                      <div className="h-px flex-1 bg-neutral-200 min-w-[32px]" />
+                    </div>
+                    <div className="flex gap-2.5 items-center h-14 overflow-hidden">
+                      {igWithImages.slice(0, 6).map((post) => (
+                        <a
+                          key={post.id}
+                          href={post.post_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group relative block h-full aspect-square flex-shrink-0 overflow-hidden bg-neutral-50"
+                        >
+                          <img
+                            src={post.image_url!}
+                            alt={post.caption || `${displayName} — From the Studio`}
+                            className="h-full aspect-square object-cover bg-neutral-50 flex-shrink-0 transition-transform duration-300 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
