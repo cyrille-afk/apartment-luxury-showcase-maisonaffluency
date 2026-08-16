@@ -60,35 +60,37 @@ export function PortraitCtaLink({
           className={cn(
             "relative inline-flex items-center whitespace-nowrap transition-[padding] duration-700 ease-out",
             reversed
-              ? ["pl-8 pr-0", "group-hover/portrait-cta:pl-0 group-hover/portrait-cta:pr-20 group-focus-visible/portrait-cta:pl-0 group-focus-visible/portrait-cta:pr-20 group-active/portrait-cta:pl-0 group-active/portrait-cta:pr-20", pressed && "pl-0 pr-20"]
-              : ["pl-0 pr-8", "group-hover/portrait-cta:pl-20 group-hover/portrait-cta:pr-0 group-focus-visible/portrait-cta:pl-20 group-focus-visible/portrait-cta:pr-0 group-active/portrait-cta:pl-20 group-active/portrait-cta:pr-0", pressed && "pl-20 pr-0"]
+              ? ["pl-20 pr-0", "group-hover/portrait-cta:pl-0 group-hover/portrait-cta:pr-8 group-focus-visible/portrait-cta:pl-0 group-focus-visible/portrait-cta:pr-8 group-active/portrait-cta:pl-0 group-active/portrait-cta:pr-8", pressed && "pl-0 pr-8"]
+              : ["pl-0 pr-20", "group-hover/portrait-cta:pl-8 group-hover/portrait-cta:pr-0 group-focus-visible/portrait-cta:pl-8 group-focus-visible/portrait-cta:pr-0 group-active/portrait-cta:pl-8 group-active/portrait-cta:pr-0", pressed && "pl-8 pr-0"]
           )}
         >
           <span className="relative z-10">{label}</span>
 
-          {/* Short resting arrow exits as the label moves. */}
-          <Arrow
+          {/* Long resting hairline exits as the label moves. */}
+          <span
             aria-hidden="true"
-            strokeWidth={1}
             className={cn(
-              "pointer-events-none absolute top-1/2 h-3 w-3 -translate-y-1/2 opacity-100 transition-all duration-300",
+              "pointer-events-none absolute top-1/2 h-2 w-16 -translate-y-1/2 opacity-100 transition-all duration-300",
               reversed
                 ? ["left-0 group-hover/portrait-cta:-translate-x-3 group-hover/portrait-cta:opacity-0 group-focus-visible/portrait-cta:-translate-x-3 group-focus-visible/portrait-cta:opacity-0", pressed && "-translate-x-3 opacity-0"]
                 : ["right-0 group-hover/portrait-cta:translate-x-3 group-hover/portrait-cta:opacity-0 group-focus-visible/portrait-cta:translate-x-3 group-focus-visible/portrait-cta:opacity-0", pressed && "translate-x-3 opacity-0"]
             )}
-          />
+          >
+            <span className={cn("absolute top-1/2 h-px w-14 -translate-y-1/2 bg-current", reversed ? "right-0" : "left-0")} />
+            <span className={cn("absolute top-1/2 h-2 w-2 -translate-y-1/2 rotate-45 border-current", reversed ? "left-0 border-b border-l" : "right-0 border-r border-t")} />
+          </span>
 
-          {/* Long hairline arrow is revealed in the space created by the moving label. */}
+          {/* Only a short, fine arrow is revealed in the space created by the moving label. */}
           <span
             aria-hidden="true"
             className={cn(
-              "pointer-events-none absolute top-1/2 h-[10px] w-16 -translate-y-1/2 opacity-0 transition-all duration-500 delay-100",
+              "pointer-events-none absolute top-1/2 h-2 w-6 -translate-y-1/2 opacity-0 transition-all duration-500 delay-100",
               reversed
                 ? ["right-0 translate-x-3 group-hover/portrait-cta:translate-x-0 group-hover/portrait-cta:opacity-100 group-focus-visible/portrait-cta:translate-x-0 group-focus-visible/portrait-cta:opacity-100", pressed && "translate-x-0 opacity-100"]
                 : ["left-0 -translate-x-3 group-hover/portrait-cta:translate-x-0 group-hover/portrait-cta:opacity-100 group-focus-visible/portrait-cta:translate-x-0 group-focus-visible/portrait-cta:opacity-100", pressed && "translate-x-0 opacity-100"]
             )}
           >
-            <span className={cn("absolute top-1/2 h-px w-14 -translate-y-1/2 bg-current", reversed ? "right-0" : "left-0")} />
+            <span className={cn("absolute top-1/2 h-px w-4 -translate-y-1/2 bg-current", reversed ? "right-0" : "left-0")} />
             <span
               className={cn(
                 "absolute top-1/2 h-2 w-2 -translate-y-1/2 rotate-45 border-current",
