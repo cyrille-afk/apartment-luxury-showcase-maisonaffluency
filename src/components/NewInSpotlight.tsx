@@ -156,7 +156,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
               />
             </div>
 
-            <p className="font-body text-sm md:text-base leading-relaxed text-foreground/85 text-left">
+            <p className="font-body text-sm md:text-base leading-relaxed text-foreground/85 text-justify">
               {renderParagraph(firstBioParagraph)}
             </p>
 
