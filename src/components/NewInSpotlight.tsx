@@ -114,16 +114,21 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
 
   return (
     <>
-      {/* Desktop-only underlaid split canvas (Emmanuel Babled et al.) */}
+      {/* Desktop-only side-by-side split canvas (Emmanuel Babled et al.) */}
       {variant === "underlaid" && (
         <section className="hidden md:block w-full max-w-[1440px] mx-auto px-12 lg:px-16 pt-4">
-          <div className="relative w-full h-[280px] overflow-hidden mb-10">
-            <img
-              src={portraitImage}
-              alt={`${displayName} portrait`}
-              className="absolute inset-0 w-full h-full object-cover object-left"
-            />
-            <div className="absolute top-0 right-0 h-full w-[65%] bg-white pl-12 flex flex-col justify-between py-2 z-10">
+          <div className="grid grid-cols-12 gap-x-12 items-stretch w-full mb-10">
+            {/* Left Column — Horizontal Hero Window */}
+            <div className="col-span-4 aspect-[4/3] w-full overflow-hidden bg-neutral-50">
+              <img
+                src={portraitImage}
+                alt={`${displayName} portrait`}
+                className="w-full h-full object-cover object-center"
+              />
+            </div>
+
+            {/* Right Column — Typography Stamp */}
+            <div className="col-span-8 flex flex-col justify-between py-1 h-full w-full">
               <div className="flex items-center gap-3">
                 <h2 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
                   {displayName}
