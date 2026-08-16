@@ -166,7 +166,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             <div>
               <PortraitCtaLink
                 label="View The Full Portrait"
-                className="text-foreground"
+                className="text-[11px] uppercase tracking-widest text-neutral-400 font-medium inline-flex items-center gap-2"
                 onClick={() => {
                   if (ctaPressed) return;
                   setCtaPressed(true);
