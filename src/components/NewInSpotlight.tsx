@@ -49,8 +49,6 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
     : simplePicks;
   const { data: publicRrpMap = {} } = usePublicRrpMap(picks.map((p) => p.id));
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer.id);
-  const [gridCols, setGridCols] = useState<3 | 4>(4);
-  const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
   const [ctaPressed, setCtaPressed] = useState(false);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const igWithImages = instagramPosts.filter((p) => p.image_url);
@@ -113,24 +111,23 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
 
   return (
     <>
-      {/* Portrait + Biography — side by side */}
-      <section className="w-full px-6 md:px-12 lg:px-20 pt-2 md:pt-4 pb-4 md:pb-6">
-        <div className="w-full max-w-[1440px] mx-auto grid grid-cols-12 gap-x-12 items-stretch mb-10">
+      <div className="w-full max-w-[1440px] mx-auto px-12 lg:px-16 bg-white">
+        {/* Portrait + Biography — side by side */}
+        <section className="pt-2 md:pt-4">
+          <div className="grid grid-cols-12 gap-x-12 items-stretch w-full mb-12">
           {/* Portrait */}
           <motion.div
             key={`portrait-${designer.slug}`}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="col-span-3"
+            className="col-span-3 aspect-[4/3] w-full overflow-hidden"
           >
-            <div className="col-span-3 aspect-[4/3] w-full overflow-hidden bg-neutral-50">
-              <img
-                src={portraitImage}
-                alt={`${displayName} portrait`}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            <img
+              src={portraitImage}
+              alt={`${displayName} portrait`}
+              className="w-full h-full object-cover"
+            />
           </motion.div>
 
           {/* Name + Bio + CTA */}
@@ -139,7 +136,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transition, delay: 0.2 }}
-            className="col-span-9 flex flex-col justify-between py-1 h-full w-full"
+            className="col-span-9 flex flex-col justify-between py-1 w-full h-full"
           >
             {showEyebrow && (
               <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground mb-2 block">
@@ -204,64 +201,19 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
               </div>
             )}
           </motion.div>
-        </div>
-      </section>
+          </div>
+        </section>
 
-      {/* Separator */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
+        {/* Separator */}
         <div className="border-t border-border/40" />
-      </div>
 
-      {/* Curators' Picks */}
-      <section className="max-w-7xl mx-auto px-6 md:px-12 pt-4 md:pt-6 pb-6 md:pb-24">
+        {/* Curators' Picks */}
+        <section className="w-full pt-4 md:pt-6 pb-6 md:pb-24">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-[11px] font-sans font-medium uppercase tracking-[0.2em] text-neutral-800">Curators' Picks</h3>
-          <div className="flex items-center gap-2">
-            {/* Mobile toggle */}
-            <button
-              onClick={() => setMobileGridCols((prev) => (prev === 1 ? 2 : 1))}
-              className="md:hidden flex items-center p-1.5 rounded transition-all hover:opacity-70"
-              aria-label={`Switch to ${mobileGridCols === 1 ? 2 : 1} column grid`}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                {mobileGridCols === 2 ? (
-                  <rect x="4" y="3" width="16" height="18" rx="1" fill="currentColor" />
-                ) : (
-                  <>
-                    <rect x="2" y="3" width="9" height="18" rx="1" fill="currentColor" />
-                    <rect x="13" y="3" width="9" height="18" rx="1" fill="currentColor" />
-                  </>
-                )}
-              </svg>
-            </button>
-            {/* Desktop toggle */}
-            <button
-              onClick={() => setGridCols((prev) => (prev === 3 ? 4 : 3))}
-              className="hidden md:flex items-center p-1.5 rounded transition-all hover:opacity-70"
-              aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
-              title={gridCols === 3 ? "Display 4" : "Display 3"}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                {gridCols === 4 ? (
-                  <>
-                    <rect x="2" y="3" width="6" height="18" rx="1" fill="currentColor" />
-                    <rect x="10" y="3" width="6" height="18" rx="1" fill="currentColor" />
-                    <rect x="18" y="3" width="4" height="18" rx="1" fill="currentColor" />
-                  </>
-                ) : (
-                  <>
-                    <rect x="2" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
-                    <rect x="8" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
-                    <rect x="14" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
-                    <rect x="20" y="3" width="2" height="18" rx="1" fill="currentColor" />
-                  </>
-                )}
-              </svg>
-            </button>
-          </div>
         </div>
 
-        <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12 w-full">
           {picks.map((pick) => {
             const hasEdition = !!pick.edition;
             const tags: string[] = (pick as any).tags || [];
@@ -357,7 +309,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             );
           })}
         </div>
-      </section>
+        </section>
+      </div>
 
       <PublicProductLightbox
         product={lightboxItem}
