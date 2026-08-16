@@ -113,8 +113,80 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
 
   return (
     <>
+      {/* Desktop-only underlaid split canvas (Emmanuel Babled et al.) */}
+      {variant === "underlaid" && (
+        <section className="hidden md:block w-full max-w-[1440px] mx-auto px-12 lg:px-16 pt-4">
+          <div className="relative w-full h-[280px] overflow-hidden mb-10">
+            <img
+              src={portraitImage}
+              alt={`${displayName} portrait`}
+              className="absolute inset-0 w-full h-full object-cover object-left"
+            />
+            <div className="absolute top-0 right-0 h-full w-[65%] bg-white pl-12 flex flex-col justify-between py-2 z-10">
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
+                  {displayName}
+                </h2>
+                <ShareMenu
+                  url={shareUrl}
+                  message={`Maison Affluency · ${displayName}: ${shareUrl}`}
+                  className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
+                  iconSize="w-4 h-4 md:w-5 md:h-5"
+                  showLabel={false}
+                />
+              </div>
+
+              <p className="text-[13px] lg:text-sm text-neutral-600 leading-relaxed text-justify w-full">
+                {renderParagraph(firstBioParagraph)}
+              </p>
+
+              <PortraitCtaLink
+                label="View The Full Portrait"
+                className="text-[10px] uppercase tracking-widest font-medium text-neutral-800 inline-flex items-center gap-2"
+                onClick={() => {
+                  if (ctaPressed) return;
+                  setCtaPressed(true);
+                  window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
+                }}
+              />
+
+              {igWithImages.length > 0 && (
+                <div className="w-full">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Instagram className="w-3.5 h-3.5 text-neutral-400" />
+                    <span className="text-[10px] uppercase tracking-widest text-neutral-400">
+                      From the Studio
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 w-full h-12 overflow-hidden">
+                    {igWithImages.slice(0, 6).map((post) => (
+                      <a
+                        key={post.id}
+                        href={post.post_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block flex-shrink-0 h-full aspect-square overflow-hidden"
+                      >
+                        <img
+                          src={post.image_url!}
+                          alt="Studio insight"
+                          className="h-full w-full object-cover bg-neutral-50 transition-opacity duration-300 hover:opacity-80"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Portrait + Biography — side by side */}
-      <section className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 pt-10 md:pt-16 pb-4 md:pb-6">
+      <section className={cn(
+        "max-w-7xl mx-auto px-6 md:px-12 lg:px-20 pt-10 md:pt-16 pb-4 md:pb-6",
+        variant === "underlaid" && "md:hidden"
+      )}>
         <div className="flex flex-col md:flex-row gap-8 md:gap-14 items-start">
           {/* Portrait */}
           <motion.div
