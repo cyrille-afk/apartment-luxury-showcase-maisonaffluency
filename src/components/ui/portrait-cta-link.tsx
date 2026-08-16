@@ -80,7 +80,7 @@ export function PortraitCtaLink({
             <span className={cn("absolute top-1/2 h-2 w-2 -translate-y-1/2 rotate-45 border-current", reversed ? "left-0 border-b border-l" : "right-0 border-r border-t")} />
           </span>
 
-          {/* Only a short, fine arrow is revealed in the space created by the moving label. */}
+          {/* Only a short, fine hairline is revealed in the space created by the moving label. */}
           <span
             aria-hidden="true"
             className={cn(
@@ -91,12 +91,6 @@ export function PortraitCtaLink({
             )}
           >
             <span className={cn("absolute top-1/2 h-px w-4 -translate-y-1/2 bg-current", reversed ? "right-0" : "left-0")} />
-            <span
-              className={cn(
-                "absolute top-1/2 h-2 w-2 -translate-y-1/2 rotate-45 border-current",
-                reversed ? "left-0 border-b border-l" : "right-0 border-r border-t"
-              )}
-            />
           </span>
         </span>
       ) : (
