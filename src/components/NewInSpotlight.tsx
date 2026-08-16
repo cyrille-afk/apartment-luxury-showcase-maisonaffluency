@@ -339,14 +339,14 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                     </div>
                     <div className="h-px flex-1 bg-neutral-200" />
                   </div>
-                  <div className="grid grid-cols-6 gap-1.5 w-full">
+                  <div className="flex gap-2 items-center w-full h-16">
                     {igWithImages.slice(0, 6).map((post) => (
                       <a
                         key={post.id}
                         href={post.post_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group relative block aspect-square overflow-hidden bg-neutral-50"
+                        className="group relative block h-full aspect-square shrink-0 overflow-hidden bg-neutral-50"
                       >
                         <img
                           src={post.image_url!}
@@ -357,6 +357,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                       </a>
                     ))}
                   </div>
+
                 </div>
               )}
 
