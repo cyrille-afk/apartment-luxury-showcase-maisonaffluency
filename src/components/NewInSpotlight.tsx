@@ -221,11 +221,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
       {/* Curators' Picks */}
       <section className="max-w-7xl mx-auto px-6 md:px-12 pt-4 md:pt-6 pb-6 md:pb-24">
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5">
-              <h3 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h3>
-            </div>
-          </div>
+          <h3 className="text-[11px] font-sans font-medium uppercase tracking-[0.2em] text-neutral-800">Curators' Picks</h3>
           <div className="flex items-center gap-2">
             {/* Mobile toggle */}
             <button
@@ -315,11 +311,11 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
                     />
                   )}
                   {specialTags.length > 0 && (
-                    <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                    <div className="absolute top-3 left-3 bg-white/90 border border-neutral-100 px-2 py-0.5 rounded-none backdrop-blur-sm z-10 flex flex-wrap gap-1">
                       {specialTags.map((tag, i) => (
                         <span
                           key={i}
-                          className="inline-block px-2 py-0.5 text-[8px] md:text-[9px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm"
+                          className="text-[9px] font-sans font-medium uppercase tracking-widest text-neutral-500"
                         >
                           {tag}
                         </span>
