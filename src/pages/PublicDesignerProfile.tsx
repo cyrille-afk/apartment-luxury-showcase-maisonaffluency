@@ -1568,7 +1568,7 @@ const PublicDesignerProfile = () => {
           )}
 
 
-          {picks.length > 0 && !useNewInSpotlightFormat && (
+          {picks.length > 0 && (
             <motion.div
               id="curators-picks"
               ref={picksSectionRef}
