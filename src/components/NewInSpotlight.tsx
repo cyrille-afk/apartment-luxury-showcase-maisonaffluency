@@ -329,7 +329,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
               </div>
 
               {igWithImages.length > 0 && (
-                <div className="w-full border-t border-neutral-100 pt-4 mt-4 flex flex-col items-start">
+                <div className="w-full border-t border-neutral-100 pt-4 mt-4 flex flex-col items-end">
                   <div className="w-fit flex flex-col items-center gap-2">
                     <div className="flex items-center gap-3 w-full">
                       <div className="h-px flex-1 bg-neutral-200 min-w-[32px]" />
