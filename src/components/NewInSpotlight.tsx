@@ -317,27 +317,26 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                   {renderParagraph(firstBioParagraph)}
                 </p>
 
+              </div>
+
+              <div className="w-full border-t border-neutral-100 pt-4 mt-5 flex flex-row items-center justify-between gap-6">
                 <PortraitCtaLink
                   label="View The Full Portrait"
-                  className="mt-2 text-[10px] uppercase tracking-widest text-neutral-800 font-medium inline-flex items-center gap-4"
+                  className="text-[10px] uppercase tracking-widest text-neutral-800 font-medium inline-flex items-center gap-4"
                   onClick={() => {
                     if (ctaPressed) return;
                     setCtaPressed(true);
                     window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
                   }}
                 />
-              </div>
 
-              {igWithImages.length > 0 && (
-                <div className="w-full border-t border-neutral-100 pt-4 mt-4 flex flex-col items-end">
-                  <div className="w-fit flex flex-col items-center gap-2">
-                    <div className="flex items-center gap-3 w-full">
-                      <div className="h-px flex-1 bg-neutral-200 min-w-[32px]" />
+                {igWithImages.length > 0 && (
+                  <div className="flex flex-row items-center gap-3">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       <Instagram className="w-3 h-3 text-neutral-400 flex-shrink-0" />
                       <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-medium flex-shrink-0">
                         From the Studio
                       </span>
-                      <div className="h-px flex-1 bg-neutral-200 min-w-[32px]" />
                     </div>
                     <div className="flex gap-2.5 items-center h-14 overflow-hidden">
                       {igWithImages.slice(0, 6).map((post) => (
@@ -358,8 +357,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                       ))}
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
 
