@@ -185,12 +185,12 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
                         href={post.post_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block flex-shrink-0 h-full"
+                        className="block flex-shrink-0 h-full aspect-square overflow-hidden"
                       >
                         <img
                           src={post.image_url}
                           alt="Studio insight"
-                          className="h-full aspect-[4/3] md:aspect-[16/9] object-cover bg-neutral-50 flex-shrink-0 transition-all duration-300 hover:opacity-80"
+                          className="h-full w-full aspect-square object-cover bg-neutral-50 transition-all duration-300 hover:opacity-80"
                         />
                       </a>
                     ))}
@@ -200,9 +200,6 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             </motion.div>
           </div>
         </section>
-
-        {/* Separator */}
-        <div className="border-t border-border/40" />
 
         {/* Curators' Picks */}
         <section className="w-full pt-4 md:pt-6 pb-6 md:pb-24">
