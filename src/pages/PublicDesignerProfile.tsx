@@ -1357,10 +1357,13 @@ const PublicDesignerProfile = () => {
         <Navigation />
 
         <div className={cn(
-          "max-w-[1440px] mx-auto px-4 md:px-12 lg:px-16 pt-[var(--header-h)] pb-20 space-y-1 md:space-y-1.5",
-          !isEmmanuelBabled && "max-w-6xl lg:px-12"
+          "max-w-[1440px] mx-auto pt-[var(--header-h)] pb-20 space-y-1 md:space-y-1.5",
+          useNewInSpotlightFormat
+            ? "px-0 bg-transparent"
+            : "px-4 md:px-12 lg:px-16",
+          !useNewInSpotlightFormat && !isEmmanuelBabled && "max-w-6xl lg:px-12"
         )}>
-          <div className="flex items-center justify-between">
+          <div className={cn("flex items-center justify-between", useNewInSpotlightFormat && "px-12 lg:px-16")}>
             {fromProduct ? (
               <Link
                 to={fromProduct}
@@ -1406,7 +1409,7 @@ const PublicDesignerProfile = () => {
           </div>
 
           {useNewInSpotlightFormat ? (
-            <div className="relative left-1/2 -translate-x-1/2 w-screen max-w-[100vw]">
+            <div className="w-full">
               <NewInSpotlight designer={designer} showEyebrow={false} />
             </div>
           ) : newInFormat ? (

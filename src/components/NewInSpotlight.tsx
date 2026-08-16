@@ -111,17 +111,17 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
 
   return (
     <>
-      <div className="w-full max-w-[1440px] mx-auto px-12 lg:px-16 bg-white">
+      <div className="w-full max-w-[1440px] mx-auto px-12 lg:px-16 bg-transparent">
         {/* Portrait + Biography — side by side */}
         <section className="pt-2 md:pt-4">
-          <div className="grid grid-cols-12 gap-x-12 items-stretch w-full mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-6 items-stretch w-full mb-12">
           {/* Portrait */}
           <motion.div
             key={`portrait-${designer.slug}`}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="col-span-3 aspect-[4/3] w-full overflow-hidden"
+            className="col-span-1 aspect-[4/3] w-full overflow-hidden bg-neutral-50"
           >
             <img
               src={portraitImage}
@@ -136,7 +136,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transition, delay: 0.2 }}
-            className="col-span-9 flex flex-col justify-between py-1 w-full h-full"
+            className="col-span-3 flex flex-col justify-between py-1 w-full h-full"
           >
             {showEyebrow && (
               <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground mb-2 block">
