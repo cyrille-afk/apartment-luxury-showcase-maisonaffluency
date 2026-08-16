@@ -338,19 +338,19 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                       <Instagram className="w-3.5 h-3.5" strokeWidth={1.5} />
                       From the Studio
                     </span>
-                    <div className="flex gap-2 items-center h-12 overflow-hidden">
+                    <div className="flex gap-2.5 items-center h-16 overflow-hidden flex-shrink-0">
                       {igWithImages.slice(0, 6).map((post) => (
                         <a
                           key={post.id}
                           href={post.post_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block h-full aspect-square flex-shrink-0 bg-neutral-50"
+                          className="block h-full flex-shrink-0"
                         >
                           <img
                             src={post.image_url!}
                             alt={post.caption || `${displayName} — From the Studio`}
-                            className="h-full w-full object-cover"
+                            className="h-full aspect-square object-cover bg-neutral-50 flex-shrink-0 transition-all"
                             loading="lazy"
                           />
                         </a>
