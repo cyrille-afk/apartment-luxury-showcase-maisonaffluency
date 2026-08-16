@@ -156,11 +156,11 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
               />
             </div>
 
-            <p className="font-body text-sm md:text-base leading-relaxed text-foreground/85 text-justify">
+            <p className="font-body text-sm md:text-base leading-relaxed text-foreground/85 text-justify mb-3">
               {renderParagraph(firstBioParagraph)}
             </p>
 
-            <div className="mt-8">
+            <div className="mt-2 mb-4">
               <PortraitCtaLink
                 label="View The Full Portrait"
                 className="text-foreground"
