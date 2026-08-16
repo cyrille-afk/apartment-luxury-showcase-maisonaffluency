@@ -113,7 +113,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
   return (
     <>
       {/* Portrait + Biography — side by side */}
-      <section className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 pt-10 md:pt-16 pb-4 md:pb-6">
+      <section className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 pt-2 md:pt-4 pb-4 md:pb-6">
         <div className="flex flex-col md:flex-row gap-8 md:gap-14 items-start">
           {/* Portrait */}
           <motion.div
