@@ -333,9 +333,13 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
       <section className="max-w-7xl mx-auto px-6 md:px-12 pt-4 md:pt-6 pb-6 md:pb-24">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5">
-              <h3 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h3>
-            </div>
+            {isUnderlaid ? (
+              <h3 className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground">Curators' Picks</h3>
+            ) : (
+              <div className="px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5">
+                <h3 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h3>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {/* Mobile toggle */}
