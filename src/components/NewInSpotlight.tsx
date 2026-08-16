@@ -114,16 +114,16 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
     <>
       {/* Portrait + Biography — side by side */}
       <section className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 pt-2 md:pt-4 pb-4 md:pb-6">
-        <div className="flex flex-col md:flex-row gap-8 md:gap-14 items-start">
+        <div className="flex flex-col md:flex-row gap-8 md:gap-14 md:items-stretch">
           {/* Portrait */}
           <motion.div
             key={`portrait-${designer.slug}`}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full md:w-[38%] flex-shrink-0"
+            className="w-full md:w-[38%] flex-shrink-0 md:h-full"
           >
-            <div className="aspect-[3/2] md:aspect-[4/5] overflow-hidden rounded-none bg-muted relative">
+            <div className="aspect-[3/2] md:aspect-auto md:h-full overflow-hidden rounded-none bg-muted relative">
               <img
                 src={portraitImage}
                 alt={`${displayName} portrait`}
