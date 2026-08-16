@@ -311,43 +311,42 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                 {renderParagraph(firstBioParagraph)}
               </p>
 
-              <PortraitCtaLink
-                label="View The Full Portrait"
-                className="w-full text-[10px] uppercase tracking-widest font-medium text-neutral-800 inline-flex items-center gap-2"
-                onClick={() => {
-                  if (ctaPressed) return;
-                  setCtaPressed(true);
-                  window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
-                }}
-              />
+              <div className="w-full border-t border-neutral-200 pt-4 mt-6 flex flex-row items-center justify-between gap-6">
+                <PortraitCtaLink
+                  label="View The Full Portrait"
+                  className="text-[10px] uppercase tracking-widest font-medium text-neutral-800 inline-flex items-center gap-2"
+                  onClick={() => {
+                    if (ctaPressed) return;
+                    setCtaPressed(true);
+                    window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
+                  }}
+                />
 
-              {igWithImages.length > 0 && (
-                <div className="w-full">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Instagram className="w-3.5 h-3.5 text-neutral-400" />
-                    <span className="text-[10px] uppercase tracking-widest text-neutral-400">
+                {igWithImages.length > 0 && (
+                  <div className="flex flex-col items-start gap-1.5 flex-shrink-0">
+                    <p className="text-[10px] uppercase tracking-widest text-neutral-400 font-medium m-0">
                       From the Studio
-                    </span>
+                    </p>
+                    <div className="flex gap-1.5 items-center h-10">
+                      {igWithImages.slice(0, 3).map((post) => (
+                        <a
+                          key={post.id}
+                          href={post.post_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block h-full aspect-square overflow-hidden"
+                        >
+                          <img
+                            src={post.image_url!}
+                            alt="Studio insight"
+                            className="h-full aspect-square object-cover bg-neutral-50 rounded-none"
+                          />
+                        </a>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5 w-full h-12 overflow-hidden">
-                    {igWithImages.slice(0, 6).map((post) => (
-                      <a
-                        key={post.id}
-                        href={post.post_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block flex-shrink-0 h-full aspect-square overflow-hidden"
-                      >
-                        <img
-                          src={post.image_url!}
-                          alt="Studio insight"
-                          className="h-full w-full object-cover bg-neutral-50 transition-opacity duration-300 hover:opacity-80"
-                        />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
 
