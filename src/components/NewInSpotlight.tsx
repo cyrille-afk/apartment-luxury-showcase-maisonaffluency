@@ -123,7 +123,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             />
 
             {/* White overlay panel */}
-            <div className="absolute top-0 right-0 bottom-0 w-full md:w-[65%] bg-white pl-12 flex flex-col justify-between py-2 z-10">
+            <div className="absolute top-0 right-0 bottom-0 w-full md:w-[65%] bg-white pl-12 flex flex-col justify-between py-2 z-10 overflow-y-auto md:overflow-visible">
               {showEyebrow && (
                 <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground block mb-5">
                   New In
