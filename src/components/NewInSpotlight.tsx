@@ -186,14 +186,14 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
                   </div>
                   <div className="h-px flex-1 bg-foreground/15" />
                 </div>
-                <div className="grid grid-cols-3 md:grid-cols-6 gap-1">
-                  {igWithImages.slice(0, 6).map((post, index) => (
+                <div className="flex flex-wrap gap-1">
+                  {igWithImages.slice(0, 5).map((post, index) => (
                     <a
                       key={post.id}
                       href={post.post_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`group relative block aspect-square overflow-hidden bg-muted ${index >= 3 ? "hidden md:block" : ""}`}
+                      className={`group relative block h-12 md:h-14 aspect-[4/3] overflow-hidden bg-muted ${index >= 4 ? "hidden md:block" : ""}`}
                     >
                       <img
                         src={post.image_url!}
