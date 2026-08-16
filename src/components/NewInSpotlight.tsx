@@ -221,11 +221,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
       {/* Curators' Picks */}
       <section className="max-w-7xl mx-auto px-6 md:px-12 pt-4 md:pt-6 pb-6 md:pb-24">
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5">
-              <h3 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h3>
-            </div>
-          </div>
+          <h3 className="text-[11px] font-sans font-medium uppercase tracking-[0.2em] text-neutral-800">Curators' Picks</h3>
           <div className="flex items-center gap-2">
             {/* Mobile toggle */}
             <button
