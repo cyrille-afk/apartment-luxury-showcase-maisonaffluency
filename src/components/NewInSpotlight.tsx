@@ -333,13 +333,17 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
       <section className="max-w-7xl mx-auto px-6 md:px-12 pt-4 md:pt-6 pb-6 md:pb-24">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            {isUnderlaid ? (
-              <h3 className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground">Curators' Picks</h3>
-            ) : (
-              <div className="px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5">
-                <h3 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h3>
-              </div>
+            {isUnderlaid && (
+              <h3 className="hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground">
+                Curators' Picks
+              </h3>
             )}
+            <div className={cn(
+              "px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5",
+              isUnderlaid && "md:hidden"
+            )}>
+              <h3 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h3>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {/* Mobile toggle */}
@@ -436,9 +440,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                           key={i}
                           className={cn(
                             "inline-block uppercase",
-                            isUnderlaid
-                              ? "px-2 py-[3px] text-[9px] font-sans font-medium tracking-[0.2em] bg-white/90 text-neutral-900 rounded-none border-0"
-                              : "px-2 py-0.5 text-[8px] md:text-[9px] tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm"
+                            "px-2 py-0.5 text-[8px] md:text-[9px] tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm",
+                            isUnderlaid && "md:px-2 md:py-[3px] md:text-[9px] md:font-sans md:font-medium md:tracking-[0.2em] md:bg-background md:text-foreground md:rounded-none md:border-0 md:backdrop-blur-none"
                           )}
                         >
                           {tag}
