@@ -281,7 +281,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
       {isUnderlaid && (
         <section className="hidden md:block w-full bg-transparent">
           <div className="grid grid-cols-12 gap-x-12 items-stretch w-full mb-12">
-            {/* Left Column — Horizontal Hero Window */}
+            {/* Left Column — Hero Landscape Image */}
             <div className="col-span-4 aspect-[4/3] w-full overflow-hidden bg-neutral-50">
               <img
                 src={portraitImage}
@@ -290,10 +290,10 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
               />
             </div>
 
-            {/* Right Column — Unified Description & Studio Side-by-Side */}
-            <div className="col-span-8 grid grid-cols-12 gap-x-8 items-stretch w-full h-full py-1">
-              {/* [A] Text Stack */}
-              <div className="col-span-8 flex flex-col justify-between h-full">
+            {/* Right Column — Unified Typography & Landscape Studio Strip */}
+            <div className="col-span-8 flex flex-col justify-between py-1 h-full w-full">
+              {/* [A] Top Section (The Typography Stack) */}
+              <div className="w-full space-y-4">
                 <div className="flex items-center gap-3 w-full">
                   <h1 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
                     {displayName}
@@ -322,30 +322,28 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                 />
               </div>
 
-              {/* [B] From the Studio Gallery */}
+              {/* [B] Bottom Section (The Landscape 'FROM THE STUDIO' Gallery) */}
               {igWithImages.length > 0 && (
-                <div className="col-span-4 flex flex-col justify-between border-l border-neutral-100 pl-6 h-full">
-                  <div>
-                    <span className="text-[10px] uppercase tracking-widest text-neutral-400 block mb-2">
-                      From the Studio
-                    </span>
-                    <div className="grid grid-cols-3 gap-2 w-full h-24">
-                      {igWithImages.slice(0, 3).map((post) => (
-                        <a
-                          key={post.id}
-                          href={post.post_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block w-full h-full overflow-hidden"
-                        >
-                          <img
-                            src={post.image_url!}
-                            alt="Studio insight"
-                            className="w-full h-full object-cover bg-neutral-50"
-                          />
-                        </a>
-                      ))}
-                    </div>
+                <div className="w-full border-t border-neutral-200 pt-4 mt-6">
+                  <span className="text-[10px] uppercase tracking-widest text-neutral-400 block mb-3">
+                    From the Studio
+                  </span>
+                  <div className="grid grid-cols-3 gap-4 w-full">
+                    {igWithImages.slice(0, 3).map((post) => (
+                      <a
+                        key={post.id}
+                        href={post.post_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full overflow-hidden"
+                      >
+                        <img
+                          src={post.image_url!}
+                          alt="Studio insight"
+                          className="w-full aspect-[4/3] object-cover bg-neutral-50 grayscale opacity-90 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+                        />
+                      </a>
+                    ))}
                   </div>
                 </div>
               )}
