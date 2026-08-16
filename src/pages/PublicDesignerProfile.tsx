@@ -1409,7 +1409,7 @@ const PublicDesignerProfile = () => {
           </div>
 
           {useNewInSpotlightFormat ? (
-            <div className="relative left-1/2 -translate-x-1/2 w-screen max-w-[100vw]">
+            <div className="w-full">
               <NewInSpotlight designer={designer} showEyebrow={false} />
             </div>
           ) : newInFormat ? (
