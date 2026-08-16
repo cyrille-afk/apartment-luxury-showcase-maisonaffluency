@@ -598,11 +598,8 @@ const PublicDesignerProfile = () => {
   // the parent brand — parent bios embed inline image/video URLs that would leak.
   const displayBiography = designer?.biography;
   const displayBiographyImages = designer?.biography_images;
-  // Babled now uses the standard New In format (same as Pierre Bonnefille).
-  // Kept as a flag so the bespoke layout can be re-enabled if needed.
+  // Bespoke Babled layout removed; he now uses the standard designer profile.
   const isEmmanuelBabled = false;
-  // Designers rendered with the New In spotlight layout on their profile page.
-  const useNewInSpotlightFormat = designer?.slug === "emmanuel-babled";
 
   const displayPhilosophy = designer?.philosophy;
 
