@@ -136,7 +136,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transition, delay: 0.2 }}
-            className="col-span-9 flex flex-col justify-between py-1 w-full h-full"
+            className="col-span-3 flex flex-col justify-between py-1 w-full h-full"
           >
             {showEyebrow && (
               <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground mb-2 block">
