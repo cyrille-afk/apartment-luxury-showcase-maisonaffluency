@@ -114,14 +114,14 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
       <div className="w-full max-w-[1440px] mx-auto px-12 lg:px-16 bg-transparent">
         {/* Portrait + Biography — side by side */}
         <section className="pt-2 md:pt-4">
-          <div className="grid grid-cols-12 gap-x-8 items-start w-full mb-12">
+          <div className="flex flex-col md:flex-row justify-between items-start w-full gap-8 mb-12">
             {/* Portrait */}
             <motion.div
               key={`portrait-${designer.slug}`}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-              className="col-span-3 aspect-[4/3] w-full overflow-hidden"
+              className="w-full md:w-[25%] aspect-[4/3] overflow-hidden bg-neutral-50 flex-shrink-0"
             >
               <img
                 src={portraitImage}
@@ -136,7 +136,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...transition, delay: 0.2 }}
-              className="col-span-9 w-full flex flex-col justify-start"
+              className="w-full md:w-[71%] flex flex-col justify-between pt-0"
             >
               {showEyebrow && (
                 <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground block mb-5">
@@ -156,31 +156,44 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
                 />
               </div>
 
-              <p className="text-[13px] lg:text-sm text-neutral-600 leading-relaxed text-justify tracking-wide w-full mb-5">
+              <p className="text-[13px] lg:text-sm text-neutral-600 leading-relaxed text-justify w-full mb-4">
                 {renderParagraph(firstBioParagraph)}
               </p>
 
-              <div className="flex gap-8 items-center border-t border-neutral-100 pt-4 mt-6">
-                <PortraitCtaLink
-                  label="View The Full Portrait"
-                  className="text-[10px] uppercase tracking-widest font-medium text-neutral-800 border-b border-neutral-400 pb-0.5 inline-flex items-center gap-2"
-                  onClick={() => {
-                    if (ctaPressed) return;
-                    setCtaPressed(true);
-                    window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
-                  }}
-                />
-                {igWithImages.length > 0 && (
-                  <a
-                    href={igWithImages[0].post_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[10px] uppercase tracking-widest font-medium text-neutral-400 hover:text-neutral-800 transition-colors"
-                  >
-                    Explore Studio Insights ({igWithImages.length}) →
-                  </a>
-                )}
-              </div>
+              <PortraitCtaLink
+                label="View The Full Portrait"
+                className="text-[10px] uppercase tracking-widest font-medium text-neutral-800 border-b border-neutral-400 pb-0.5 inline-flex items-center gap-2 mb-4"
+                onClick={() => {
+                  if (ctaPressed) return;
+                  setCtaPressed(true);
+                  window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
+                }}
+              />
+
+              {igWithImages.length > 0 && (
+                <div className="w-full border-t border-neutral-200 pt-4 mt-4">
+                  <span className="text-[10px] uppercase tracking-widest text-neutral-400 block mb-3">
+                    From the Studio
+                  </span>
+                  <div className="flex items-center gap-1.5 w-full h-12 overflow-hidden">
+                    {igWithImages.slice(0, 6).map((post) => (
+                      <a
+                        key={post.id}
+                        href={post.post_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block flex-shrink-0 h-full"
+                      >
+                        <img
+                          src={post.image_url}
+                          alt="Studio insight"
+                          className="h-full aspect-[4/3] md:aspect-[16/9] object-cover bg-neutral-50 flex-shrink-0 grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
             </motion.div>
           </div>
         </section>
@@ -194,7 +207,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             <h3 className="text-[11px] font-sans font-medium uppercase tracking-[0.2em] text-neutral-800">Curators' Picks</h3>
           </div>
 
-          <div className="grid grid-cols-12 gap-x-8 gap-y-16 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-16 w-full">
           {picks.map((pick) => {
             const hasEdition = !!pick.edition;
             const tags: string[] = (pick as any).tags || [];
@@ -209,7 +222,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             return (
               <div
                 key={pick.id}
-                className="col-span-12 md:col-span-4 w-full group flex flex-col cursor-pointer"
+                className="w-full group flex flex-col cursor-pointer"
                 onClick={() => {
                   const item = lightboxItems.find((li) => li.id === pick.id);
                   if (item) setLightboxItem(item);
