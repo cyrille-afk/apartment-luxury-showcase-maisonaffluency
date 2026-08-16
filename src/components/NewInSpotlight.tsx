@@ -124,7 +124,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             className="col-span-3"
           >
-            <div className="col-span-3 w-full h-[220px] md:h-[240px] overflow-hidden bg-neutral-50 relative">
+            <div className="col-span-3 aspect-[4/3] w-full overflow-hidden bg-neutral-50">
               <img
                 src={portraitImage}
                 alt={`${displayName} portrait`}
@@ -139,14 +139,14 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transition, delay: 0.2 }}
-            className="col-span-9 h-[220px] md:h-[240px] flex flex-col justify-between pt-0"
+            className="col-span-9 flex flex-col justify-start space-y-4 pt-0 h-auto"
           >
             {showEyebrow && (
               <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground mb-2 block">
                 New In
               </span>
             )}
-            <div className="flex items-center gap-3 mb-8">
+            <div className="flex items-center gap-3">
               <h2 className="font-display text-2xl md:text-3xl lg:text-[2.1rem] text-foreground tracking-[0.12em] uppercase">
                 {displayName}
               </h2>
@@ -159,11 +159,11 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
               />
             </div>
 
-            <p className="font-body text-sm md:text-base leading-relaxed text-foreground/85 text-justify mb-2">
+            <p className="text-xs lg:text-sm text-neutral-600 leading-relaxed text-justify w-full mb-2">
               {renderParagraph(firstBioParagraph)}
             </p>
 
-            <div className="mt-2 mb-4">
+            <div>
               <PortraitCtaLink
                 label="View The Full Portrait"
                 className="text-foreground"
@@ -178,35 +178,26 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
 
             {/* From the Studio */}
             {igWithImages.length > 0 && (
-              <div className="mt-0 pt-3 border-t border-border/20">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="h-px flex-1 bg-foreground/15" />
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Instagram className="w-3.5 h-3.5 text-foreground/60" />
-                    <span className="font-display text-[10px] md:text-[11px] tracking-[0.2em] uppercase text-foreground/60 font-semibold">
-                      From the Studio
-                    </span>
-                  </div>
-                  <div className="h-px flex-1 bg-foreground/15" />
+              <div>
+                <div className="w-full border-t border-neutral-200 pt-3 mt-4 mb-2 flex items-center justify-between text-[10px] uppercase tracking-widest text-neutral-400">
+                  <span>From the Studio</span>
+                  <Instagram className="w-3.5 h-3.5" />
                 </div>
-                <div className="flex flex-wrap gap-1">
-                  {igWithImages.slice(0, 5).map((post, index) => (
+                <div className="flex gap-2 items-center w-full h-14 overflow-hidden">
+                  {igWithImages.slice(0, 6).map((post) => (
                     <a
                       key={post.id}
                       href={post.post_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`group relative block h-10 md:h-12 aspect-[4/3] overflow-hidden bg-muted ${index >= 4 ? "hidden md:block" : ""}`}
+                      className="group relative block h-full aspect-square overflow-hidden bg-neutral-50 shrink-0"
                     >
                       <img
                         src={post.image_url!}
                         alt={post.caption || `${displayName} — From the Studio`}
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                        className="h-full aspect-square object-cover bg-neutral-50 transition-transform duration-700 ease-out group-hover:scale-105"
                         loading="lazy"
                       />
-                      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
-                        <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      </div>
                     </a>
                   ))}
                 </div>
