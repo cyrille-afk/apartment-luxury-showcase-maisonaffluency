@@ -50,7 +50,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
     : simplePicks;
   const { data: publicRrpMap = {} } = usePublicRrpMap(picks.map((p) => p.id));
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer.id);
-  const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const isUnderlaid = variant === "underlaid";
+  const [gridCols, setGridCols] = useState<3 | 4>(isUnderlaid ? 3 : 4);
   const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
   const [ctaPressed, setCtaPressed] = useState(false);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
