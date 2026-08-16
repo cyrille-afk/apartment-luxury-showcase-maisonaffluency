@@ -117,14 +117,12 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
     <>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          {isUnderlaid && (
-            <h3 className="hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground">
-              Curators' Picks
-            </h3>
-          )}
+          <h3 className="hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground">
+            Curators' Picks
+          </h3>
           <div className={cn(
             "px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5",
-            isUnderlaid && "md:hidden"
+            "md:hidden"
           )}>
             <h3 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h3>
           </div>
@@ -225,7 +223,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                         className={cn(
                           "inline-block uppercase",
                           "px-2 py-0.5 text-[8px] md:text-[9px] tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm",
-                          isUnderlaid && "md:px-2 md:py-[3px] md:text-[9px] md:font-sans md:font-medium md:tracking-[0.2em] md:bg-background md:text-foreground md:rounded-none md:border-0 md:backdrop-blur-none"
+                          "md:px-2 md:py-[3px] md:text-[9px] md:font-sans md:font-medium md:tracking-[0.2em] md:bg-background md:text-foreground md:rounded-none md:border-0 md:backdrop-blur-none"
                         )}
                       >
                         {tag}
