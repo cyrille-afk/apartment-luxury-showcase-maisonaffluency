@@ -1410,7 +1410,7 @@ const PublicDesignerProfile = () => {
 
           {useNewInSpotlightFormat ? (
             <div className="w-full">
-              <NewInSpotlight designer={designer} showEyebrow={false} />
+              <NewInSpotlight designer={designer} showEyebrow={false} variant="underlaid" />
             </div>
           ) : newInFormat ? (
             newInSection

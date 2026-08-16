@@ -34,9 +34,10 @@ function pickSrcSet(url: string): string {
 interface NewInSpotlightProps {
   designer: Designer;
   showEyebrow?: boolean;
+  variant?: "default" | "underlaid";
 }
 
-const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) => {
+const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: NewInSpotlightProps) => {
   const navigate = useNavigate();
   const isParentBrand = isParentBrandDesigner(designer);
   const { data: simplePicks = [] } = useDesignerPicks(designer.id, { publicOnly: true });
@@ -109,81 +110,120 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
     return text;
   }, [designer.biography]);
 
+  const headerContent = (
+    <>
+      {showEyebrow && (
+        <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground block mb-5">
+          New In
+        </span>
+      )}
+      <div className="flex items-center gap-3 mb-5">
+        <h2 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
+          {displayName}
+        </h2>
+        <ShareMenu
+          url={shareUrl}
+          message={`Maison Affluency · New In · ${displayName}: ${shareUrl}`}
+          className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
+          iconSize="w-4 h-4 md:w-5 md:h-5"
+          showLabel={false}
+        />
+      </div>
+
+      <p className="text-[13px] lg:text-sm text-neutral-600 leading-relaxed text-justify w-full mb-4">
+        {renderParagraph(firstBioParagraph)}
+      </p>
+
+      <PortraitCtaLink
+        label="View The Full Portrait"
+        className="text-[10px] uppercase tracking-widest font-medium text-neutral-800 inline-flex items-center gap-2 mb-4"
+        onClick={() => {
+          if (ctaPressed) return;
+          setCtaPressed(true);
+          window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
+        }}
+      />
+
+      {igWithImages.length > 0 && (
+        <div className="w-full mt-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Instagram className="w-3.5 h-3.5 text-neutral-400" />
+            <span className="text-[10px] uppercase tracking-widest text-neutral-400">
+              From the Studio
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 w-full h-12 overflow-hidden">
+            {igWithImages.slice(0, 6).map((post) => (
+              <a
+                key={post.id}
+                href={post.post_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block flex-shrink-0 h-full aspect-square overflow-hidden"
+              >
+                <img
+                  src={post.image_url}
+                  alt="Studio insight"
+                  className="h-full w-full aspect-square object-cover bg-neutral-50 transition-all duration-300 hover:opacity-80"
+                />
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
+  );
+
   return (
     <>
       <div className="w-full max-w-[1440px] mx-auto px-12 lg:px-16 bg-transparent">
-        {/* Underlaid Split Canvas header */}
         <section className="pt-2 md:pt-4">
-          <div className="relative w-full h-[280px] overflow-hidden mb-10">
-            {/* Horizontal cinematic photo */}
-            <img
-              src={portraitImage}
-              alt={`${displayName} portrait`}
-              className="absolute inset-0 w-full h-full object-cover object-left"
-            />
-
-            {/* White overlay panel */}
-            <div className="absolute top-0 right-0 h-full w-[65%] bg-white pl-12 flex flex-col justify-between py-2 z-10 overflow-y-auto">
-              {showEyebrow && (
-                <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground block mb-5">
-                  New In
-                </span>
-              )}
-              <div className="flex items-center gap-3 mb-5">
-                <h2 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
-                  {displayName}
-                </h2>
-                <ShareMenu
-                  url={shareUrl}
-                  message={`Maison Affluency · New In · ${displayName}: ${shareUrl}`}
-                  className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
-                  iconSize="w-4 h-4 md:w-5 md:h-5"
-                  showLabel={false}
-                />
-              </div>
-
-              <p className="text-[13px] lg:text-sm text-neutral-600 leading-relaxed text-justify w-full mb-4">
-                {renderParagraph(firstBioParagraph)}
-              </p>
-
-              <PortraitCtaLink
-                label="View The Full Portrait"
-                className="text-[10px] uppercase tracking-widest font-medium text-neutral-800 inline-flex items-center gap-2 mb-4"
-                onClick={() => {
-                  if (ctaPressed) return;
-                  setCtaPressed(true);
-                  window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
-                }}
+          {/* Desktop-only underlaid split canvas (Babled et al.) */}
+          {variant === "underlaid" && (
+            <div className="hidden md:block relative w-full h-[280px] overflow-hidden mb-10">
+              <img
+                src={portraitImage}
+                alt={`${displayName} portrait`}
+                className="absolute inset-0 w-full h-full object-cover object-left"
               />
-
-              {igWithImages.length > 0 && (
-                <div className="w-full mt-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Instagram className="w-3.5 h-3.5 text-neutral-400" />
-                    <span className="text-[10px] uppercase tracking-widest text-neutral-400">
-                      From the Studio
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 w-full h-12 overflow-hidden">
-                    {igWithImages.slice(0, 6).map((post) => (
-                      <a
-                        key={post.id}
-                        href={post.post_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block flex-shrink-0 h-full aspect-square overflow-hidden"
-                      >
-                        <img
-                          src={post.image_url}
-                          alt="Studio insight"
-                          className="h-full w-full aspect-square object-cover bg-neutral-50 transition-all duration-300 hover:opacity-80"
-                        />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <div className="absolute top-0 right-0 h-full w-[65%] bg-white pl-12 flex flex-col justify-between py-2 z-10 overflow-y-auto">
+                {headerContent}
+              </div>
             </div>
+          )}
+
+          {/* Default portrait + biography layout (New In, mobile/PWA) */}
+          <div
+            className={cn(
+              "flex flex-col md:flex-row justify-between items-start w-full gap-8 mb-12",
+              variant === "underlaid" && "md:hidden"
+            )}
+          >
+            {/* Portrait */}
+            <motion.div
+              key={`portrait-${designer.slug}`}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              className="w-full md:w-[25%] aspect-[4/3] overflow-hidden bg-neutral-50 flex-shrink-0"
+            >
+              <img
+                src={portraitImage}
+                alt={`${displayName} portrait`}
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
+
+            {/* Name + Bio + CTA */}
+            <motion.div
+              key={`bio-${designer.slug}`}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ ...transition, delay: 0.2 }}
+              className="w-full md:w-[71%] flex flex-col justify-between pt-0"
+            >
+              {headerContent}
+            </motion.div>
           </div>
         </section>
 
