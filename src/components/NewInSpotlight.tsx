@@ -354,14 +354,14 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
             </div>
           </div>
 
-          {/* Separator */}
-          <div className="w-full">
-            <div className="border-t border-border/40" />
-          </div>
-
           {/* Curators' Picks */}
-          <div className="pt-4 md:pt-6 pb-6 md:pb-24">
-            {curatorsPicksSection}
+          <div className="w-full">
+            {renderCuratorsPicksSection({
+              barClassName: "flex justify-between items-center w-full border-t border-b border-neutral-100 py-2.5 my-4 text-[11px] uppercase tracking-widest text-neutral-800",
+              titleClassName: "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-800",
+              mobileBadgeClassName: "px-4 py-1.5 rounded-full border border-neutral-800/20 bg-neutral-800/5 md:hidden",
+              mobileTitleClassName: "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-neutral-800 font-semibold",
+            })}
           </div>
         </section>
       )}
@@ -514,7 +514,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
         "max-w-7xl mx-auto px-6 md:px-12 pt-4 md:pt-6 pb-6 md:pb-24",
         isUnderlaid && "md:hidden"
       )}>
-        {curatorsPicksSection}
+        {renderCuratorsPicksSection()}
       </section>
 
       <PublicProductLightbox
