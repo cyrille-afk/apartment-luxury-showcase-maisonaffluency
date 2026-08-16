@@ -114,93 +114,91 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
       <div className="w-full max-w-[1440px] mx-auto px-12 lg:px-16 bg-transparent">
         {/* Portrait + Biography — side by side */}
         <section className="pt-2 md:pt-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-6 items-stretch w-full mb-12">
-          {/* Portrait */}
-          <motion.div
-            key={`portrait-${designer.slug}`}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="col-span-1 aspect-[4/3] w-full overflow-hidden bg-neutral-50"
-          >
-            <img
-              src={portraitImage}
-              alt={`${displayName} portrait`}
-              className="w-full h-full object-cover"
-            />
-          </motion.div>
-
-          {/* Name + Bio + CTA */}
-          <motion.div
-            key={`bio-${designer.slug}`}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...transition, delay: 0.2 }}
-            className="col-span-3 flex flex-col justify-between py-1 w-full h-full"
-          >
-            {showEyebrow && (
-              <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground mb-2 block">
-                New In
-              </span>
-            )}
-            <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
-                {displayName}
-              </h2>
-              <ShareMenu
-                url={shareUrl}
-                message={`Maison Affluency · New In · ${displayName}: ${shareUrl}`}
-                className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
-                iconSize="w-4 h-4 md:w-5 md:h-5"
-                showLabel={false}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-x-12 items-start w-full mb-12">
+            {/* Portrait */}
+            <motion.div
+              key={`portrait-${designer.slug}`}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              className="col-span-3 aspect-[4/3] w-full overflow-hidden bg-neutral-50"
+            >
+              <img
+                src={portraitImage}
+                alt={`${displayName} portrait`}
+                className="w-full h-full object-cover"
               />
-            </div>
+            </motion.div>
 
-            <p className="text-[13px] lg:text-sm text-neutral-600 leading-relaxed text-justify tracking-wide w-full">
-              {renderParagraph(firstBioParagraph)}
-            </p>
-
-            <div>
-              <PortraitCtaLink
-                label="View The Full Portrait"
-                className="text-[11px] uppercase tracking-widest text-neutral-400 font-medium inline-flex items-center gap-2"
-                onClick={() => {
-                  if (ctaPressed) return;
-                  setCtaPressed(true);
-                  window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
-                }}
-              />
-            </div>
-
-
-            {/* From the Studio */}
-            {igWithImages.length > 0 && (
-              <div className="w-full border-t border-neutral-200 pt-3">
-                <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-neutral-400">
-                  <span>From the Studio</span>
-                  <Instagram className="w-3.5 h-3.5" />
-                </div>
-                <div className="flex gap-2 items-center w-full h-12 mt-2">
-                  {igWithImages.slice(0, 6).map((post) => (
-                    <a
-                      key={post.id}
-                      href={post.post_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group relative block h-full aspect-square overflow-hidden bg-neutral-50 shrink-0"
-                    >
-                      <img
-                        src={post.image_url!}
-                        alt={post.caption || `${displayName} — From the Studio`}
-                        className="h-full aspect-square object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                        loading="lazy"
-                      />
-                    </a>
-                  ))}
-                </div>
+            {/* Name + Bio + CTA */}
+            <motion.div
+              key={`bio-${designer.slug}`}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ ...transition, delay: 0.2 }}
+              className="col-span-9 flex flex-col justify-start space-y-5 w-full"
+            >
+              {showEyebrow && (
+                <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground block">
+                  New In
+                </span>
+              )}
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
+                  {displayName}
+                </h2>
+                <ShareMenu
+                  url={shareUrl}
+                  message={`Maison Affluency · New In · ${displayName}: ${shareUrl}`}
+                  className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
+                  iconSize="w-4 h-4 md:w-5 md:h-5"
+                  showLabel={false}
+                />
               </div>
-            )}
-          </motion.div>
+
+              <p className="text-[13px] lg:text-sm text-neutral-600 leading-relaxed text-justify tracking-wide w-full">
+                {renderParagraph(firstBioParagraph)}
+              </p>
+
+              <div>
+                <PortraitCtaLink
+                  label="View The Full Portrait"
+                  className="text-[11px] uppercase tracking-widest text-neutral-400 font-medium inline-flex items-center gap-2"
+                  onClick={() => {
+                    if (ctaPressed) return;
+                    setCtaPressed(true);
+                    window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
+                  }}
+                />
+              </div>
+
+              {/* From the Studio */}
+              {igWithImages.length > 0 && (
+                <div className="w-full border-t border-neutral-200 pt-3 mt-4">
+                  <span className="text-[10px] uppercase tracking-widest text-neutral-400 block mb-2">
+                    From the Studio
+                  </span>
+                  <div className="flex gap-2 items-center w-full overflow-x-auto">
+                    {igWithImages.slice(0, 6).map((post) => (
+                      <a
+                        key={post.id}
+                        href={post.post_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group relative block h-12 w-12 aspect-square overflow-hidden bg-neutral-50 flex-shrink-0"
+                      >
+                        <img
+                          src={post.image_url!}
+                          alt={post.caption || `${displayName} — From the Studio`}
+                          className="h-12 w-12 aspect-square object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </motion.div>
           </div>
         </section>
 
@@ -209,11 +207,11 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
 
         {/* Curators' Picks */}
         <section className="w-full pt-4 md:pt-6 pb-6 md:pb-24">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-[11px] font-sans font-medium uppercase tracking-[0.2em] text-neutral-800">Curators' Picks</h3>
-        </div>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-[11px] font-sans font-medium uppercase tracking-[0.2em] text-neutral-800">Curators' Picks</h3>
+          </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-12 gap-y-16 w-full">
           {picks.map((pick) => {
             const hasEdition = !!pick.edition;
             const tags: string[] = (pick as any).tags || [];
