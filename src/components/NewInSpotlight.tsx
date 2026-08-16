@@ -316,7 +316,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                 {renderParagraph(firstBioParagraph)}
               </p>
 
-              <div className="w-full flex justify-end">
+              {/* CTA + Studio Gallery */}
+              <div className="w-full border-t border-neutral-100 pt-4 mt-6 flex flex-row items-end justify-between gap-8">
                 <PortraitCtaLink
                   label="View The Full Portrait"
                   className="text-[10px] uppercase tracking-widest font-medium text-neutral-800 inline-flex items-center gap-2"
@@ -326,43 +327,33 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                     window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
                   }}
                 />
-              </div>
 
-              {/* From the Studio */}
-              {igWithImages.length > 0 && (
-                <div className="w-full border-t border-neutral-200 pt-4 mt-4">
-                  <div className="w-fit max-w-full">
-                    <div className="flex items-center gap-3 mb-3 w-full">
-                      <div className="h-px flex-1 bg-neutral-200" />
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Instagram className="w-3.5 h-3.5 text-neutral-500" />
-                        <span className="text-[10px] uppercase tracking-[0.2em] text-neutral-500 font-medium">
-                          From the Studio
-                        </span>
-                      </div>
-                      <div className="h-px flex-1 bg-neutral-200" />
-                    </div>
-                    <div className="flex gap-2 items-center h-16">
+                {igWithImages.length > 0 && (
+                  <div className="flex flex-col items-start gap-2 max-w-[50%]">
+                    <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-medium m-0">
+                      From the Studio
+                    </span>
+                    <div className="flex gap-2 items-center h-10 overflow-hidden">
                       {igWithImages.slice(0, 6).map((post) => (
                         <a
                           key={post.id}
                           href={post.post_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="group relative block h-full aspect-square shrink-0 overflow-hidden bg-neutral-50"
+                          className="group relative block h-full aspect-square flex-shrink-0 overflow-hidden bg-neutral-50"
                         >
                           <img
                             src={post.image_url!}
                             alt={post.caption || `${displayName} — From the Studio`}
-                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                            className="h-full aspect-square object-cover bg-neutral-50 flex-shrink-0 transition-transform duration-700 ease-out group-hover:scale-105"
                             loading="lazy"
                           />
                         </a>
                       ))}
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
             </div>
           </div>
