@@ -298,63 +298,61 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
             </div>
 
             {/* Right Column — Full Stacked Typography & Studio Row */}
-            <div className="col-span-8 flex flex-col justify-start space-y-3 w-full h-auto">
-              <div className="flex items-center gap-3 w-full">
-                <h1 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
-                  {displayName}
-                </h1>
-                <ShareMenu
-                  url={shareUrl}
-                  message={`Maison Affluency · ${displayName}: ${shareUrl}`}
-                  className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
-                  iconSize="w-4 h-4 md:w-5 md:h-5"
-                  showLabel={false}
-                />
-              </div>
+            <div className="col-span-8 flex flex-col justify-start space-y-6 pt-1 h-auto">
+              <div className="flex flex-col space-y-3 w-full">
+                <div className="flex items-center gap-3 w-full">
+                  <h1 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
+                    {displayName}
+                  </h1>
+                  <ShareMenu
+                    url={shareUrl}
+                    message={`Maison Affluency · ${displayName}: ${shareUrl}`}
+                    className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
+                    iconSize="w-4 h-4 md:w-5 md:h-5"
+                    showLabel={false}
+                  />
+                </div>
 
-              <p className="text-[13px] lg:text-sm text-neutral-600 leading-relaxed text-justify w-full">
-                {renderParagraph(firstBioParagraph)}
-              </p>
+                <p className="text-justify w-full text-xs lg:text-sm text-neutral-600">
+                  {renderParagraph(firstBioParagraph)}
+                </p>
 
-              {/* CTA + Studio Gallery */}
-              <div className="w-full border-t border-neutral-100 pt-4 mt-6 flex flex-row items-end justify-between gap-8">
                 <PortraitCtaLink
                   label="View The Full Portrait"
-                  className="text-[10px] uppercase tracking-widest font-medium text-neutral-800 inline-flex items-center gap-2"
+                  className="mt-2 text-[10px] uppercase tracking-widest text-neutral-800 font-medium inline-flex items-center gap-4"
                   onClick={() => {
                     if (ctaPressed) return;
                     setCtaPressed(true);
                     window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
                   }}
                 />
-
-                {igWithImages.length > 0 && (
-                  <div className="flex flex-col items-start gap-2 max-w-[50%]">
-                    <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-medium m-0">
-                      From the Studio
-                    </span>
-                    <div className="flex gap-2 items-center h-10 overflow-hidden">
-                      {igWithImages.slice(0, 6).map((post) => (
-                        <a
-                          key={post.id}
-                          href={post.post_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="group relative block h-full aspect-square flex-shrink-0 overflow-hidden bg-neutral-50"
-                        >
-                          <img
-                            src={post.image_url!}
-                            alt={post.caption || `${displayName} — From the Studio`}
-                            className="h-full aspect-square object-cover bg-neutral-50 flex-shrink-0 transition-transform duration-700 ease-out group-hover:scale-105"
-                            loading="lazy"
-                          />
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
 
+              {igWithImages.length > 0 && (
+                <div className="w-full border-t border-neutral-100 pt-4 mt-4 flex justify-between items-center gap-6">
+                  <span className="text-[11px] font-sans font-medium uppercase tracking-[0.15em] text-neutral-500 flex-shrink-0">
+                    From the Studio
+                  </span>
+                  <div className="flex gap-2.5 items-center h-14 overflow-hidden">
+                    {igWithImages.slice(0, 6).map((post) => (
+                      <a
+                        key={post.id}
+                        href={post.post_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group relative block h-full aspect-square flex-shrink-0 overflow-hidden bg-neutral-50"
+                      >
+                        <img
+                          src={post.image_url!}
+                          alt={post.caption || `${displayName} — From the Studio`}
+                          className="h-full aspect-square object-cover bg-neutral-50 flex-shrink-0 grayscale opacity-90 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+                          loading="lazy"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
