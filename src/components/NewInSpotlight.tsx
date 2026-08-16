@@ -113,18 +113,25 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
     return text;
   }, [designer.biography]);
 
-  const curatorsPicksSection = (
+  const renderCuratorsPicksSection = ({
+    barClassName = "flex items-center justify-between mb-6",
+    titleClassName = "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground",
+    mobileBadgeClassName = "px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5 md:hidden",
+    mobileTitleClassName = "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold",
+  }: {
+    barClassName?: string;
+    titleClassName?: string;
+    mobileBadgeClassName?: string;
+    mobileTitleClassName?: string;
+  }) => (
     <>
-      <div className="flex items-center justify-between mb-6">
+      <div className={barClassName}>
         <div className="flex items-center gap-3">
-          <h3 className="hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground">
+          <h3 className={titleClassName}>
             Curators' Picks
           </h3>
-          <div className={cn(
-            "px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5",
-            "md:hidden"
-          )}>
-            <h3 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h3>
+          <div className={cn(mobileBadgeClassName)}>
+            <h3 className={mobileTitleClassName}>Curators' Picks</h3>
           </div>
         </div>
         <div className="flex items-center gap-2">
