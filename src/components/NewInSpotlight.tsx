@@ -115,7 +115,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
     <>
       {/* Portrait + Biography — side by side */}
       <section className="w-full px-6 md:px-12 lg:px-20 pt-2 md:pt-4 pb-4 md:pb-6">
-        <div className="grid grid-cols-12 gap-x-12 items-start w-full mb-10">
+        <div className="grid grid-cols-12 gap-x-12 items-stretch w-full mb-10">
           {/* Portrait */}
           <motion.div
             key={`portrait-${designer.slug}`}
@@ -124,7 +124,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             className="col-span-3"
           >
-            <div className="col-span-3 aspect-[4/3] w-full overflow-hidden">
+            <div className="col-span-3 aspect-[4/3] w-full overflow-hidden bg-neutral-50">
               <img
                 src={portraitImage}
                 alt={`${displayName} portrait`}
@@ -139,7 +139,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transition, delay: 0.2 }}
-            className="col-span-9 flex flex-col justify-start space-y-4 pt-0 h-auto"
+            className="col-span-9 flex flex-col justify-between py-1 h-full"
           >
             {showEyebrow && (
               <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground mb-2 block">
@@ -147,7 +147,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
               </span>
             )}
             <div className="flex items-center gap-3">
-              <h2 className="font-display text-2xl md:text-3xl lg:text-[2.1rem] text-foreground tracking-[0.12em] uppercase">
+              <h2 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
                 {displayName}
               </h2>
               <ShareMenu
@@ -159,14 +159,14 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
               />
             </div>
 
-            <p className="text-xs lg:text-sm text-neutral-600 leading-relaxed text-justify max-w-[700px] w-full mb-2">
+            <p className="text-[13px] lg:text-sm text-neutral-600 leading-relaxed text-justify tracking-wide w-full max-w-[750px]">
               {renderParagraph(firstBioParagraph)}
             </p>
 
             <div>
               <PortraitCtaLink
                 label="View The Full Portrait"
-                className="text-foreground"
+                className="text-[11px] uppercase tracking-widest text-neutral-400 font-medium inline-flex items-center gap-2"
                 onClick={() => {
                   if (ctaPressed) return;
                   setCtaPressed(true);
@@ -178,7 +178,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
 
             {/* From the Studio */}
             {igWithImages.length > 0 && (
-              <div className="max-w-[700px] w-full border-t border-neutral-200 pt-3 mt-2">
+              <div className="w-full max-w-[750px] border-t border-neutral-200 pt-3">
                 <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-neutral-400">
                   <span>From the Studio</span>
                   <Instagram className="w-3.5 h-3.5" />
