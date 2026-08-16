@@ -147,7 +147,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
               </span>
             )}
             <div className="flex items-center gap-3">
-              <h2 className="font-display text-2xl md:text-3xl lg:text-[2.1rem] text-foreground tracking-[0.12em] uppercase">
+              <h2 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
                 {displayName}
               </h2>
               <ShareMenu
