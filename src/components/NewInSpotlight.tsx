@@ -115,7 +115,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
     <>
       {/* Portrait + Biography — side by side */}
       <section className="w-full px-6 md:px-12 lg:px-20 pt-2 md:pt-4 pb-4 md:pb-6">
-        <div className="grid grid-cols-12 gap-x-12 items-start w-full mb-10">
+        <div className="grid grid-cols-12 gap-x-12 items-stretch w-full mb-10">
           {/* Portrait */}
           <motion.div
             key={`portrait-${designer.slug}`}
