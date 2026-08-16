@@ -207,7 +207,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             <h3 className="text-[11px] font-sans font-medium uppercase tracking-[0.2em] text-neutral-800">Curators' Picks</h3>
           </div>
 
-          <div className="grid grid-cols-12 gap-x-8 gap-y-16 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-16 w-full">
           {picks.map((pick) => {
             const hasEdition = !!pick.edition;
             const tags: string[] = (pick as any).tags || [];
@@ -222,7 +222,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             return (
               <div
                 key={pick.id}
-                className="col-span-12 md:col-span-4 w-full group flex flex-col cursor-pointer"
+                className="w-full group flex flex-col cursor-pointer"
                 onClick={() => {
                   const item = lightboxItems.find((li) => li.id === pick.id);
                   if (item) setLightboxItem(item);
