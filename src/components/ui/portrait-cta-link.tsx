@@ -58,19 +58,28 @@ export function PortraitCtaLink({
       {longArrow ? (
         <span
           className={cn(
-            "relative inline-flex items-center whitespace-nowrap transition-[padding] duration-700 ease-out",
+            "relative inline-flex items-center whitespace-nowrap",
             reversed
-              ? ["pl-20 pr-0", "group-hover/portrait-cta:pl-0 group-hover/portrait-cta:pr-8 group-focus-visible/portrait-cta:pl-0 group-focus-visible/portrait-cta:pr-8 group-active/portrait-cta:pl-0 group-active/portrait-cta:pr-8", pressed && "pl-0 pr-8"]
-              : ["pl-0 pr-20", "group-hover/portrait-cta:pl-8 group-hover/portrait-cta:pr-0 group-focus-visible/portrait-cta:pl-8 group-focus-visible/portrait-cta:pr-0 group-active/portrait-cta:pl-8 group-active/portrait-cta:pr-0", pressed && "pl-8 pr-0"]
+              ? "pl-20"
+              : "pr-20"
           )}
         >
-          <span className="relative z-10">{label}</span>
+          <span
+            className={cn(
+              "relative z-10 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+              reversed
+                ? ["group-hover/portrait-cta:-translate-x-8 group-focus-visible/portrait-cta:-translate-x-8 group-active/portrait-cta:-translate-x-8", pressed && "-translate-x-8"]
+                : ["group-hover/portrait-cta:translate-x-8 group-focus-visible/portrait-cta:translate-x-8 group-active/portrait-cta:translate-x-8", pressed && "translate-x-8"]
+            )}
+          >
+            {label}
+          </span>
 
           {/* Long resting hairline exits as the label moves. */}
           <span
             aria-hidden="true"
             className={cn(
-              "pointer-events-none absolute top-1/2 h-2 w-16 -translate-y-1/2 opacity-100 transition-all duration-300",
+              "pointer-events-none absolute top-1/2 h-2 w-16 -translate-y-1/2 opacity-100 transition-[transform,opacity] duration-500 ease-out",
               reversed
                 ? ["left-0 group-hover/portrait-cta:-translate-x-3 group-hover/portrait-cta:opacity-0 group-focus-visible/portrait-cta:-translate-x-3 group-focus-visible/portrait-cta:opacity-0", pressed && "-translate-x-3 opacity-0"]
                 : ["right-0 group-hover/portrait-cta:translate-x-3 group-hover/portrait-cta:opacity-0 group-focus-visible/portrait-cta:translate-x-3 group-focus-visible/portrait-cta:opacity-0", pressed && "translate-x-3 opacity-0"]
@@ -84,7 +93,7 @@ export function PortraitCtaLink({
           <span
             aria-hidden="true"
             className={cn(
-              "pointer-events-none absolute top-1/2 h-2 w-6 -translate-y-1/2 opacity-0 transition-all duration-500 delay-100",
+              "pointer-events-none absolute top-1/2 h-2 w-6 -translate-y-1/2 opacity-0 transition-[transform,opacity] duration-500 delay-100 ease-out",
               reversed
                 ? ["right-0 translate-x-3 group-hover/portrait-cta:translate-x-0 group-hover/portrait-cta:opacity-100 group-focus-visible/portrait-cta:translate-x-0 group-focus-visible/portrait-cta:opacity-100", pressed && "translate-x-0 opacity-100"]
                 : ["left-0 -translate-x-3 group-hover/portrait-cta:translate-x-0 group-hover/portrait-cta:opacity-100 group-focus-visible/portrait-cta:translate-x-0 group-focus-visible/portrait-cta:opacity-100", pressed && "translate-x-0 opacity-100"]
