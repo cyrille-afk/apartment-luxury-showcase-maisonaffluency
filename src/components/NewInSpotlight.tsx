@@ -114,17 +114,17 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
   return (
     <>
       {/* Portrait + Biography — side by side */}
-      <section className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 pt-2 md:pt-4 pb-4 md:pb-6">
-        <div className="flex flex-col md:flex-row gap-8 md:gap-14 md:items-stretch">
+      <section className="w-full px-6 md:px-12 lg:px-20 pt-2 md:pt-4 pb-4 md:pb-6">
+        <div className="grid grid-cols-12 gap-x-12 items-start w-full mb-10">
           {/* Portrait */}
           <motion.div
             key={`portrait-${designer.slug}`}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full md:w-[38%] flex-shrink-0 md:h-full"
+            className="col-span-3"
           >
-            <div className="aspect-[3/2] md:aspect-auto md:h-full overflow-hidden rounded-none bg-muted relative">
+            <div className="col-span-3 w-full h-[220px] md:h-[240px] overflow-hidden bg-neutral-50 relative">
               <img
                 src={portraitImage}
                 alt={`${displayName} portrait`}
@@ -139,7 +139,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transition, delay: 0.2 }}
-            className="flex-1 flex flex-col justify-start"
+            className="col-span-9 h-[220px] md:h-[240px] flex flex-col justify-between pt-0"
           >
             {showEyebrow && (
               <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground mb-2 block">
@@ -159,7 +159,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
               />
             </div>
 
-            <p className="font-body text-sm md:text-base leading-relaxed text-foreground/85 text-justify mb-3">
+            <p className="font-body text-sm md:text-base leading-relaxed text-foreground/85 text-justify mb-2">
               {renderParagraph(firstBioParagraph)}
             </p>
 
@@ -178,8 +178,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
 
             {/* From the Studio */}
             {igWithImages.length > 0 && (
-              <div className="mt-10 pt-8 border-t border-border/30">
-                <div className="flex items-center gap-3 mb-4">
+              <div className="mt-0 pt-3 border-t border-border/20">
+                <div className="flex items-center gap-3 mb-2">
                   <div className="h-px flex-1 bg-foreground/15" />
                   <div className="flex items-center gap-2 shrink-0">
                     <Instagram className="w-3.5 h-3.5 text-foreground/60" />
@@ -196,7 +196,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
                       href={post.post_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`group relative block h-12 md:h-14 aspect-[4/3] overflow-hidden bg-muted ${index >= 4 ? "hidden md:block" : ""}`}
+                      className={`group relative block h-10 md:h-12 aspect-[4/3] overflow-hidden bg-muted ${index >= 4 ? "hidden md:block" : ""}`}
                     >
                       <img
                         src={post.image_url!}
