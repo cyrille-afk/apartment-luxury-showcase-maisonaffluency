@@ -118,11 +118,13 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
     titleClassName = "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground",
     mobileBadgeClassName = "px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5 md:hidden",
     mobileTitleClassName = "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold",
+    gridClassName,
   }: {
     barClassName?: string;
     titleClassName?: string;
     mobileBadgeClassName?: string;
     mobileTitleClassName?: string;
+    gridClassName?: string;
   } = {}) => (
     <>
       <div className={barClassName}>
@@ -179,7 +181,14 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
         </div>
       </div>
 
-      <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
+      <div className={cn(
+        "grid",
+        gridClassName || cn(
+          "gap-x-3 gap-y-5 md:gap-4",
+          mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2",
+          gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3"
+        )
+      )}>
         {picks.map((pick) => {
           const hasEdition = !!pick.edition;
           const tags: string[] = (pick as any).tags || [];
@@ -287,9 +296,9 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
       {/* Desktop-only underlaid split canvas (Emmanuel Babled et al.) */}
       {isUnderlaid && (
         <section className="hidden md:block w-full bg-transparent">
-          <div className="grid grid-cols-12 gap-x-8 items-stretch w-full mb-8">
-            {/* Left Column — Hero Landscape Image */}
-            <div className="col-span-4 aspect-[4/3] w-full overflow-hidden">
+          <div className="grid grid-cols-12 gap-x-8 items-start w-full mb-8">
+            {/* Left Column — Hero Window */}
+            <div className="col-span-4 aspect-[4/3] w-full overflow-hidden bg-neutral-50">
               <img
                 src={portraitImage}
                 alt={`${displayName} portrait`}
@@ -297,67 +306,59 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
               />
             </div>
 
-            {/* Right Column — Full Stacked Typography & Studio Row */}
-            <div className="col-span-8 flex flex-col justify-between pt-1 h-full">
-              <div className="flex flex-col space-y-4 w-full">
-                <div className="flex flex-col space-y-3 w-full">
-                  <div className="flex items-center gap-3 w-full">
-                    <h1 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
-                      {displayName}
-                    </h1>
-                    <ShareMenu
-                      url={shareUrl}
-                      message={`Maison Affluency · ${displayName}: ${shareUrl}`}
-                      className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
-                      iconSize="w-4 h-4 md:w-5 md:h-5"
-                      showLabel={false}
-                    />
-                  </div>
+            {/* Right Column — Editorial Typography Stack */}
+            <div className="col-span-8 flex flex-col justify-start space-y-4 pt-1 h-auto w-full">
+              <div className="flex items-center gap-3 w-full">
+                <h1 className="text-xl lg:text-2xl font-serif font-normal tracking-wide text-neutral-900">
+                  {displayName}
+                </h1>
+                <ShareMenu
+                  url={shareUrl}
+                  message={`Maison Affluency · ${displayName}: ${shareUrl}`}
+                  className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
+                  iconSize="w-4 h-4 md:w-5 md:h-5"
+                  showLabel={false}
+                />
+              </div>
 
-                  <p className="text-justify w-full text-xs lg:text-sm text-neutral-600">
-                    {renderParagraph(firstBioParagraph)}
-                  </p>
+              <p className="text-xs lg:text-sm text-neutral-600 leading-relaxed text-justify tracking-wide w-full mb-1">
+                {renderParagraph(firstBioParagraph)}
+              </p>
 
-                </div>
-
-                <div className="w-full">
-                  <PortraitCtaLink
-                    label="View The Full Portrait"
-                    className="text-[10px] uppercase tracking-widest text-neutral-800 font-medium inline-flex items-center gap-4"
-                    onClick={() => {
-                      if (ctaPressed) return;
-                      setCtaPressed(true);
-                      window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
-                    }}
-                  />
-                </div>
+              <div className="w-max mt-2">
+                <PortraitCtaLink
+                  label="View The Full Portrait"
+                  className="text-[10px] uppercase tracking-widest text-neutral-800 font-medium inline-flex items-center gap-4"
+                  onClick={() => {
+                    if (ctaPressed) return;
+                    setCtaPressed(true);
+                    window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
+                  }}
+                />
               </div>
 
               {igWithImages.length > 0 && (
-                <div className="w-full border-t border-neutral-100 pt-4 mt-4">
-                  <div className="w-fit mx-auto flex flex-col items-center gap-2">
-                    <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-neutral-400 font-normal">
-                      <Instagram className="w-3.5 h-3.5" strokeWidth={1.5} />
-                      From the Studio
-                    </span>
-                    <div className="flex gap-2.5 items-center h-16 overflow-hidden flex-shrink-0">
-                      {igWithImages.slice(0, 6).map((post) => (
-                        <a
-                          key={post.id}
-                          href={post.post_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block h-full flex-shrink-0"
-                        >
-                          <img
-                            src={post.image_url!}
-                            alt={post.caption || `${displayName} — From the Studio`}
-                            className="h-full aspect-square object-cover bg-neutral-50 flex-shrink-0 transition-all"
-                            loading="lazy"
-                          />
-                        </a>
-                      ))}
-                    </div>
+                <div className="w-full border-t border-neutral-100 pt-4 mt-4 flex flex-row items-center justify-between gap-6">
+                  <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-medium m-0 flex-shrink-0">
+                    From the Studio
+                  </span>
+                  <div className="flex gap-2.5 items-center h-16 overflow-hidden flex-shrink-0">
+                    {igWithImages.slice(0, 6).map((post) => (
+                      <a
+                        key={post.id}
+                        href={post.post_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block h-full flex-shrink-0"
+                      >
+                        <img
+                          src={post.image_url!}
+                          alt={post.caption || `${displayName} — From the Studio`}
+                          className="h-full aspect-square object-cover bg-neutral-50 flex-shrink-0 grayscale opacity-90 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+                          loading="lazy"
+                        />
+                      </a>
+                    ))}
                   </div>
                 </div>
               )}
@@ -372,6 +373,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
               titleClassName: "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-800",
               mobileBadgeClassName: "px-4 py-1.5 rounded-full border border-neutral-800/20 bg-neutral-800/5 md:hidden",
               mobileTitleClassName: "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-neutral-800 font-semibold",
+              gridClassName: "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-12 gap-y-16 w-full",
             })}
           </div>
         </section>
