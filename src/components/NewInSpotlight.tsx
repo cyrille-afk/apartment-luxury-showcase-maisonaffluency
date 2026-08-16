@@ -159,7 +159,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
               />
             </div>
 
-            <p className="text-xs lg:text-sm text-neutral-600 leading-relaxed text-justify w-full mb-2">
+            <p className="text-xs lg:text-sm text-neutral-600 leading-relaxed text-justify max-w-[700px] w-full mb-2">
               {renderParagraph(firstBioParagraph)}
             </p>
 
