@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -64,17 +64,29 @@ export function PortraitCtaLink({
   className,
 }: PortraitCtaLinkProps) {
   const [pressed, setPressed] = useState(false);
+  const actionTimer = useRef<ReturnType<typeof window.setTimeout>>();
   const Arrow = reversed ? ArrowLeft : ArrowRight;
+
+  useEffect(() => {
+    return () => {
+      if (actionTimer.current) window.clearTimeout(actionTimer.current);
+    };
+  }, []);
+
+  const handleClick = () => {
+    if (actionTimer.current) return;
+    setPressed(true);
+    actionTimer.current = window.setTimeout(() => {
+      actionTimer.current = undefined;
+      onClick();
+    }, 700);
+  };
 
   return (
     <button
       type="button"
       aria-expanded={expanded}
-      onClick={() => {
-        setPressed(true);
-        window.setTimeout(() => setPressed(false), 700);
-        onClick();
-      }}
+      onClick={handleClick}
       className={cn(
         "group relative inline-flex items-center font-body text-[11px] lg:text-xs uppercase tracking-[0.25em] text-current hover:text-primary transition-colors duration-300",
         className
