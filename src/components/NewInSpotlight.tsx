@@ -113,12 +113,176 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
     return text;
   }, [designer.biography]);
 
+  const curatorsPicksSection = (
+    <>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          {isUnderlaid && (
+            <h3 className="hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground">
+              Curators' Picks
+            </h3>
+          )}
+          <div className={cn(
+            "px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5",
+            isUnderlaid && "md:hidden"
+          )}>
+            <h3 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h3>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Mobile toggle */}
+          <button
+            onClick={() => setMobileGridCols((prev) => (prev === 1 ? 2 : 1))}
+            className="md:hidden flex items-center p-1.5 rounded transition-all hover:opacity-70"
+            aria-label={`Switch to ${mobileGridCols === 1 ? 2 : 1} column grid`}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              {mobileGridCols === 2 ? (
+                <rect x="4" y="3" width="16" height="18" rx="1" fill="currentColor" />
+              ) : (
+                <>
+                  <rect x="2" y="3" width="9" height="18" rx="1" fill="currentColor" />
+                  <rect x="13" y="3" width="9" height="18" rx="1" fill="currentColor" />
+                </>
+              )}
+            </svg>
+          </button>
+          {/* Desktop toggle */}
+          <button
+            onClick={() => setGridCols((prev) => (prev === 3 ? 4 : 3))}
+            className="hidden md:flex items-center p-1.5 rounded transition-all hover:opacity-70"
+            aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
+            title={gridCols === 3 ? "Display 4" : "Display 3"}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              {gridCols === 4 ? (
+                <>
+                  <rect x="2" y="3" width="6" height="18" rx="1" fill="currentColor" />
+                  <rect x="10" y="3" width="6" height="18" rx="1" fill="currentColor" />
+                  <rect x="18" y="3" width="4" height="18" rx="1" fill="currentColor" />
+                </>
+              ) : (
+                <>
+                  <rect x="2" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
+                  <rect x="8" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
+                  <rect x="14" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
+                  <rect x="20" y="3" width="2" height="18" rx="1" fill="currentColor" />
+                </>
+              )}
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
+        {picks.map((pick) => {
+          const hasEdition = !!pick.edition;
+          const tags: string[] = (pick as any).tags || [];
+          const filtered = hasEdition ? tags.filter(t => !/^limited-edition$/i.test(t)) : tags;
+          const specialTags = filtered.filter((t) =>
+            /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t)
+          );
+          if (pick.edition && !specialTags.some(t => t.toLowerCase() === pick.edition!.toLowerCase())) {
+            specialTags.unshift(pick.edition);
+          }
+
+          return (
+            <div
+              key={pick.id}
+              className="group flex flex-col cursor-pointer"
+              onClick={() => {
+                const item = lightboxItems.find((li) => li.id === pick.id);
+                if (item) setLightboxItem(item);
+              }}
+            >
+              <div className="aspect-[4/5] bg-muted/20 rounded-none overflow-hidden mb-2 relative flex items-center justify-center">
+                <img
+                  src={responsiveCloudinaryUrl(pick.image_url, 600)}
+                  srcSet={pickSrcSet(pick.image_url)}
+                  sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
+                  alt={pick.title}
+                  className={cn(
+                    "absolute inset-0 w-full h-full transition-all duration-700 object-cover",
+                    pick.hover_image_url ? "opacity-100 group-hover:opacity-0 group-hover:scale-105" : "group-hover:scale-105"
+                  )}
+                  loading="lazy"
+                />
+                {pick.hover_image_url && (
+                  <img
+                    src={responsiveCloudinaryUrl(pick.hover_image_url, 600)}
+                    srcSet={pickSrcSet(pick.hover_image_url)}
+                    sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
+                    alt={`${pick.title} alternate finish`}
+                    className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                    loading="lazy"
+                  />
+                )}
+                {specialTags.length > 0 && (
+                  <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                    {specialTags.map((tag, i) => (
+                      <span
+                        key={i}
+                        className={cn(
+                          "inline-block uppercase",
+                          "px-2 py-0.5 text-[8px] md:text-[9px] tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm",
+                          isUnderlaid && "md:px-2 md:py-[3px] md:text-[9px] md:font-sans md:font-medium md:tracking-[0.2em] md:bg-background md:text-foreground md:rounded-none md:border-0 md:backdrop-blur-none"
+                        )}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
+                    <Maximize2 className="h-3 w-3" />
+                  </div>
+                </div>
+                <ProductCardDescriptionOverlay description={(pick as any).description} />
+                {(pick.pdf_url || (pick.pdf_urls && pick.pdf_urls.length > 0)) && (
+                  <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <SpecSheetButton
+                      pdfUrl={pick.pdf_url}
+                      pdfUrls={pick.pdf_urls as any}
+                      brandName={designer.name}
+                      productName={pick.title}
+                      variant="icon"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col flex-1">
+                {(() => {
+                  const composed = composeTitle(pick.title, pick.subtitle);
+                  return (
+                    <>
+                      <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">{composed.title}</h3>
+                      {composed.remainingSubtitle && (
+                        <p className="font-body text-[10px] text-muted-foreground leading-tight">{composed.remainingSubtitle}</p>
+                      )}
+                    </>
+                  );
+                })()}
+                <div className="mt-auto pt-1">
+                  <p className="font-display text-[11px] md:text-xs text-foreground">
+                    {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+
   return (
     <>
-      {/* Desktop-only side-by-side split canvas (Emmanuel Babled et al.) */}
-      {variant === "underlaid" && (
-        <section className="hidden md:block w-full max-w-[1440px] mx-auto px-12 lg:px-16 pt-4">
-          <div className="grid grid-cols-12 gap-x-12 items-stretch w-full mb-10">
+      {/* Desktop-only underlaid split canvas (Emmanuel Babled et al.) */}
+      {isUnderlaid && (
+        <section className="hidden md:block w-full max-w-[1440px] mx-auto px-12 lg:px-16 bg-transparent pt-4">
+          <div className="grid grid-cols-12 gap-x-8 items-stretch w-full mb-12">
             {/* Left Column — Horizontal Hero Window */}
             <div className="col-span-4 aspect-[4/3] w-full overflow-hidden bg-neutral-50">
               <img
@@ -129,8 +293,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
             </div>
 
             {/* Right Column — Typography Stamp */}
-            <div className="col-span-8 flex flex-col justify-between py-1 h-full w-full">
-              <div className="flex items-center gap-3">
+            <div className="col-span-8 flex flex-col justify-between py-1 w-full h-full">
+              <div className="flex items-center gap-3 w-full">
                 <h2 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
                   {displayName}
                 </h2>
@@ -149,7 +313,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
 
               <PortraitCtaLink
                 label="View The Full Portrait"
-                className="text-[10px] uppercase tracking-widest font-medium text-neutral-800 inline-flex items-center gap-2"
+                className="w-full text-[10px] uppercase tracking-widest font-medium text-neutral-800 inline-flex items-center gap-2"
                 onClick={() => {
                   if (ctaPressed) return;
                   setCtaPressed(true);
@@ -186,13 +350,23 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
               )}
             </div>
           </div>
+
+          {/* Separator */}
+          <div className="w-full">
+            <div className="border-t border-border/40" />
+          </div>
+
+          {/* Curators' Picks */}
+          <div className="pt-4 md:pt-6 pb-6 md:pb-24">
+            {curatorsPicksSection}
+          </div>
         </section>
       )}
 
       {/* Portrait + Biography — side by side */}
       <section className={cn(
         "max-w-7xl mx-auto px-6 md:px-12 lg:px-20 pt-10 md:pt-16 pb-4 md:pb-6",
-        variant === "underlaid" && "md:hidden"
+        isUnderlaid && "md:hidden"
       )}>
         <div className="flex flex-col md:flex-row gap-8 md:gap-14 items-start">
           {/* Portrait */}
@@ -325,171 +499,19 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
       </section>
 
       {/* Separator */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
+      <div className={cn(
+        "max-w-7xl mx-auto px-6 md:px-12",
+        isUnderlaid && "md:hidden"
+      )}>
         <div className="border-t border-border/40" />
       </div>
 
       {/* Curators' Picks */}
-      <section className="max-w-7xl mx-auto px-6 md:px-12 pt-4 md:pt-6 pb-6 md:pb-24">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            {isUnderlaid && (
-              <h3 className="hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground">
-                Curators' Picks
-              </h3>
-            )}
-            <div className={cn(
-              "px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5",
-              isUnderlaid && "md:hidden"
-            )}>
-              <h3 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h3>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {/* Mobile toggle */}
-            <button
-              onClick={() => setMobileGridCols((prev) => (prev === 1 ? 2 : 1))}
-              className="md:hidden flex items-center p-1.5 rounded transition-all hover:opacity-70"
-              aria-label={`Switch to ${mobileGridCols === 1 ? 2 : 1} column grid`}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                {mobileGridCols === 2 ? (
-                  <rect x="4" y="3" width="16" height="18" rx="1" fill="currentColor" />
-                ) : (
-                  <>
-                    <rect x="2" y="3" width="9" height="18" rx="1" fill="currentColor" />
-                    <rect x="13" y="3" width="9" height="18" rx="1" fill="currentColor" />
-                  </>
-                )}
-              </svg>
-            </button>
-            {/* Desktop toggle */}
-            <button
-              onClick={() => setGridCols((prev) => (prev === 3 ? 4 : 3))}
-              className="hidden md:flex items-center p-1.5 rounded transition-all hover:opacity-70"
-              aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
-              title={gridCols === 3 ? "Display 4" : "Display 3"}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                {gridCols === 4 ? (
-                  <>
-                    <rect x="2" y="3" width="6" height="18" rx="1" fill="currentColor" />
-                    <rect x="10" y="3" width="6" height="18" rx="1" fill="currentColor" />
-                    <rect x="18" y="3" width="4" height="18" rx="1" fill="currentColor" />
-                  </>
-                ) : (
-                  <>
-                    <rect x="2" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
-                    <rect x="8" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
-                    <rect x="14" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
-                    <rect x="20" y="3" width="2" height="18" rx="1" fill="currentColor" />
-                  </>
-                )}
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
-          {picks.map((pick) => {
-            const hasEdition = !!pick.edition;
-            const tags: string[] = (pick as any).tags || [];
-            const filtered = hasEdition ? tags.filter(t => !/^limited-edition$/i.test(t)) : tags;
-            const specialTags = filtered.filter((t) =>
-              /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t)
-            );
-            if (pick.edition && !specialTags.some(t => t.toLowerCase() === pick.edition!.toLowerCase())) {
-              specialTags.unshift(pick.edition);
-            }
-
-            return (
-              <div
-                key={pick.id}
-                className="group flex flex-col cursor-pointer"
-                onClick={() => {
-                  const item = lightboxItems.find((li) => li.id === pick.id);
-                  if (item) setLightboxItem(item);
-                }}
-              >
-                <div className="aspect-[4/5] bg-muted/20 rounded-none overflow-hidden mb-2 relative flex items-center justify-center">
-                  <img
-                    src={responsiveCloudinaryUrl(pick.image_url, 600)}
-                    srcSet={pickSrcSet(pick.image_url)}
-                    sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
-                    alt={pick.title}
-                    className={cn(
-                      "absolute inset-0 w-full h-full transition-all duration-700 object-cover",
-                      pick.hover_image_url ? "opacity-100 group-hover:opacity-0 group-hover:scale-105" : "group-hover:scale-105"
-                    )}
-                    loading="lazy"
-                  />
-                  {pick.hover_image_url && (
-                    <img
-                      src={responsiveCloudinaryUrl(pick.hover_image_url, 600)}
-                      srcSet={pickSrcSet(pick.hover_image_url)}
-                      sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
-                      alt={`${pick.title} alternate finish`}
-                      className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
-                      loading="lazy"
-                    />
-                  )}
-                  {specialTags.length > 0 && (
-                    <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-                      {specialTags.map((tag, i) => (
-                        <span
-                          key={i}
-                          className={cn(
-                            "inline-block uppercase",
-                            "px-2 py-0.5 text-[8px] md:text-[9px] tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm",
-                            isUnderlaid && "md:px-2 md:py-[3px] md:text-[9px] md:font-sans md:font-medium md:tracking-[0.2em] md:bg-background md:text-foreground md:rounded-none md:border-0 md:backdrop-blur-none"
-                          )}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
-                      <Maximize2 className="h-3 w-3" />
-                    </div>
-                  </div>
-                  <ProductCardDescriptionOverlay description={(pick as any).description} />
-                  {(pick.pdf_url || (pick.pdf_urls && pick.pdf_urls.length > 0)) && (
-                    <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <SpecSheetButton
-                        pdfUrl={pick.pdf_url}
-                        pdfUrls={pick.pdf_urls as any}
-                        brandName={designer.name}
-                        productName={pick.title}
-                        variant="icon"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex flex-col flex-1">
-                  {(() => {
-                    const composed = composeTitle(pick.title, pick.subtitle);
-                    return (
-                      <>
-                        <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">{composed.title}</h3>
-                        {composed.remainingSubtitle && (
-                          <p className="font-body text-[10px] text-muted-foreground leading-tight">{composed.remainingSubtitle}</p>
-                        )}
-                      </>
-                    );
-                  })()}
-                  <div className="mt-auto pt-1">
-                    <p className="font-display text-[11px] md:text-xs text-foreground">
-                      {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      <section className={cn(
+        "max-w-7xl mx-auto px-6 md:px-12 pt-4 md:pt-6 pb-6 md:pb-24",
+        isUnderlaid && "md:hidden"
+      )}>
+        {curatorsPicksSection}
       </section>
 
       <PublicProductLightbox
