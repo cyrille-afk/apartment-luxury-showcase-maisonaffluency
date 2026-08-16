@@ -316,15 +316,17 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                 {renderParagraph(firstBioParagraph)}
               </p>
 
-              <PortraitCtaLink
-                label="View The Full Portrait"
-                className="text-[10px] uppercase tracking-widest font-medium text-neutral-800 inline-flex items-center gap-2"
-                onClick={() => {
-                  if (ctaPressed) return;
-                  setCtaPressed(true);
-                  window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
-                }}
-              />
+              <div className="w-full flex justify-end">
+                <PortraitCtaLink
+                  label="View The Full Portrait"
+                  className="text-[10px] uppercase tracking-widest font-medium text-neutral-800 inline-flex items-center gap-2"
+                  onClick={() => {
+                    if (ctaPressed) return;
+                    setCtaPressed(true);
+                    window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
+                  }}
+                />
+              </div>
 
               {/* From the Studio */}
               {igWithImages.length > 0 && (
