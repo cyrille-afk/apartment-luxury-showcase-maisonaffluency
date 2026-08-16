@@ -124,7 +124,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             className="col-span-3"
           >
-            <div className="col-span-3 aspect-[4/3] w-full overflow-hidden bg-neutral-50">
+            <div className="col-span-3 aspect-[4/3] w-full overflow-hidden">
               <img
                 src={portraitImage}
                 alt={`${displayName} portrait`}
@@ -159,7 +159,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
               />
             </div>
 
-            <p className="text-xs lg:text-sm text-neutral-600 leading-relaxed text-justify w-full mb-2">
+            <p className="text-xs lg:text-sm text-neutral-600 leading-relaxed text-justify max-w-[700px] w-full mb-2">
               {renderParagraph(firstBioParagraph)}
             </p>
 
@@ -178,12 +178,12 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
 
             {/* From the Studio */}
             {igWithImages.length > 0 && (
-              <div>
-                <div className="w-full border-t border-neutral-200 pt-3 mt-4 mb-2 flex items-center justify-between text-[10px] uppercase tracking-widest text-neutral-400">
+              <div className="max-w-[700px] w-full border-t border-neutral-200 pt-3 mt-2">
+                <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-neutral-400">
                   <span>From the Studio</span>
                   <Instagram className="w-3.5 h-3.5" />
                 </div>
-                <div className="flex gap-2 items-center w-full h-14 overflow-hidden">
+                <div className="flex gap-2 items-center w-full h-12 mt-2">
                   {igWithImages.slice(0, 6).map((post) => (
                     <a
                       key={post.id}
@@ -195,7 +195,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
                       <img
                         src={post.image_url!}
                         alt={post.caption || `${displayName} — From the Studio`}
-                        className="h-full aspect-square object-cover bg-neutral-50 transition-transform duration-700 ease-out group-hover:scale-105"
+                        className="h-full aspect-square object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                         loading="lazy"
                       />
                     </a>
