@@ -290,57 +290,54 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
               />
             </div>
 
-            {/* Right Column — Unified Typography & Landscape Studio Strip */}
-            <div className="col-span-8 flex flex-col justify-between py-1 h-full w-full">
-              {/* [A] Top Section (The Typography Stack) */}
-              <div className="w-full space-y-4">
-                <div className="flex items-center gap-3 w-full">
-                  <h1 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
-                    {displayName}
-                  </h1>
-                  <ShareMenu
-                    url={shareUrl}
-                    message={`Maison Affluency · ${displayName}: ${shareUrl}`}
-                    className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
-                    iconSize="w-4 h-4 md:w-5 md:h-5"
-                    showLabel={false}
-                  />
-                </div>
-
-                <p className="text-[13px] lg:text-sm text-neutral-600 leading-relaxed text-justify w-full">
-                  {renderParagraph(firstBioParagraph)}
-                </p>
-
-                <PortraitCtaLink
-                  label="View The Full Portrait"
-                  className="text-[10px] uppercase tracking-widest font-medium text-neutral-800 inline-flex items-center gap-2"
-                  onClick={() => {
-                    if (ctaPressed) return;
-                    setCtaPressed(true);
-                    window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
-                  }}
+            {/* Right Column — Full Stacked Typography & Studio Row */}
+            <div className="col-span-8 flex flex-col justify-start space-y-4 pt-0 h-auto">
+              <div className="flex items-center gap-3 w-full">
+                <h1 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
+                  {displayName}
+                </h1>
+                <ShareMenu
+                  url={shareUrl}
+                  message={`Maison Affluency · ${displayName}: ${shareUrl}`}
+                  className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
+                  iconSize="w-4 h-4 md:w-5 md:h-5"
+                  showLabel={false}
                 />
               </div>
 
-              {/* [B] Bottom Section (The Landscape 'FROM THE STUDIO' Gallery) */}
+              <p className="text-[13px] lg:text-sm text-neutral-600 leading-relaxed text-justify w-full">
+                {renderParagraph(firstBioParagraph)}
+              </p>
+
+              <PortraitCtaLink
+                label="View The Full Portrait"
+                className="text-[10px] uppercase tracking-widest font-medium text-neutral-800 inline-flex items-center gap-2"
+                onClick={() => {
+                  if (ctaPressed) return;
+                  setCtaPressed(true);
+                  window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
+                }}
+              />
+
+              {/* From the Studio */}
               {igWithImages.length > 0 && (
-                <div className="w-full border-t border-neutral-200 pt-4 mt-6">
-                  <span className="text-[10px] uppercase tracking-widest text-neutral-400 block mb-3">
+                <div className="w-full border-t border-neutral-200 pt-3 mt-4">
+                  <span className="text-[10px] uppercase tracking-widest text-neutral-400 block mb-2">
                     From the Studio
                   </span>
-                  <div className="grid grid-cols-3 gap-4 w-full">
-                    {igWithImages.slice(0, 3).map((post) => (
+                  <div className="flex gap-2 items-center w-full h-12 overflow-hidden">
+                    {igWithImages.slice(0, 6).map((post) => (
                       <a
                         key={post.id}
                         href={post.post_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block w-full overflow-hidden"
+                        className="block h-full flex-shrink-0 overflow-hidden"
                       >
                         <img
                           src={post.image_url!}
                           alt="Studio insight"
-                          className="w-full aspect-[4/3] object-cover bg-neutral-50 grayscale opacity-90 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+                          className="h-full aspect-square object-cover bg-neutral-50"
                         />
                       </a>
                     ))}
