@@ -18,7 +18,7 @@ interface PortraitCtaLinkProps {
   className?: string;
 }
 
-/** Fixed track: the visible arrowhead travels outward while revealing its shaft. */
+/** Fixed track: a short arrow is always visible, then extends across the track. */
 function LongArrow({ reversed = false, pressed = false }: { reversed?: boolean; pressed?: boolean }) {
   return (
     <span
@@ -27,7 +27,7 @@ function LongArrow({ reversed = false, pressed = false }: { reversed?: boolean; 
     >
       <span
         className={cn(
-          "absolute top-1/2 h-px w-14 -translate-y-1/2 scale-x-0 bg-current transition-transform duration-500 ease-out",
+          "absolute top-1/2 h-px w-14 -translate-y-1/2 scale-x-[0.18] bg-current transition-transform duration-700 ease-out",
           reversed ? "right-1 origin-right" : "left-1 origin-left",
           "group-hover:scale-x-100 group-focus-visible:scale-x-100 group-active:scale-x-100",
           pressed && "scale-x-100"
@@ -43,10 +43,10 @@ function LongArrow({ reversed = false, pressed = false }: { reversed?: boolean; 
         strokeLinecap="square"
         strokeLinejoin="miter"
         className={cn(
-          "absolute top-0 transition-transform duration-500 ease-out",
+          "absolute top-0 transition-transform duration-700 ease-out",
           reversed
-            ? ["right-0 rotate-180 group-hover:-translate-x-14 group-focus-visible:-translate-x-14 group-active:-translate-x-14", pressed && "-translate-x-14"]
-            : ["left-0 group-hover:translate-x-14 group-focus-visible:translate-x-14 group-active:translate-x-14", pressed && "translate-x-14"]
+            ? ["right-0 -translate-x-[10px] rotate-180 group-hover:-translate-x-14 group-focus-visible:-translate-x-14 group-active:-translate-x-14", pressed && "-translate-x-14"]
+            : ["left-0 translate-x-[10px] group-hover:translate-x-14 group-focus-visible:translate-x-14 group-active:translate-x-14", pressed && "translate-x-14"]
         )}
       >
         <polyline points="1,0.5 7,5 1,9.5" fill="none" />
