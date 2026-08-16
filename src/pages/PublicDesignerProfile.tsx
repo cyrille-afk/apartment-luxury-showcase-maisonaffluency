@@ -1402,11 +1402,7 @@ const PublicDesignerProfile = () => {
             )}
           </div>
 
-          {useNewInSpotlightFormat ? (
-            <div className="relative left-1/2 -translate-x-1/2 w-screen max-w-[100vw]">
-              <NewInSpotlight designer={designer} />
-            </div>
-          ) : newInFormat ? (
+          {newInFormat ? (
             newInSection
           ) : useChildHeroLayout ? (
             /* Designer profile: portrait hero, then the same editorial biography flow as the parent */
