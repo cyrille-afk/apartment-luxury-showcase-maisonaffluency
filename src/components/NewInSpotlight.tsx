@@ -178,7 +178,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
 
             {/* From the Studio */}
             {igWithImages.length > 0 && (
-              <div className="max-w-[700px] w-full border-t border-neutral-200 pt-3 mt-2">
+              <div className="w-full max-w-[750px] border-t border-neutral-200 pt-3">
                 <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-neutral-400">
                   <span>From the Studio</span>
                   <Instagram className="w-3.5 h-3.5" />
