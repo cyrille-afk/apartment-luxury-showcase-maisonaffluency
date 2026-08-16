@@ -114,7 +114,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
       <div className="w-full max-w-[1440px] mx-auto px-12 lg:px-16 bg-transparent">
         {/* Underlaid Split Canvas header */}
         <section className="pt-2 md:pt-4">
-          <div className="relative w-full aspect-[21/9] md:h-[280px] overflow-hidden mb-10">
+          <div className="relative w-full h-[280px] overflow-hidden mb-10">
             {/* Horizontal cinematic photo */}
             <img
               src={portraitImage}
@@ -123,7 +123,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             />
 
             {/* White overlay panel */}
-            <div className="absolute top-0 right-0 bottom-0 w-full md:w-[65%] bg-white pl-12 flex flex-col justify-between py-2 z-10 overflow-y-auto md:overflow-visible">
+            <div className="absolute top-0 right-0 h-full w-[65%] bg-white pl-12 flex flex-col justify-between py-2 z-10 overflow-y-auto">
               {showEyebrow && (
                 <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground block mb-5">
                   New In
