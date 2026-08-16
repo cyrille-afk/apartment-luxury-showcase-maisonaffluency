@@ -124,7 +124,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) =
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             className="col-span-3"
           >
-            <div className="col-span-3 aspect-[4/3] w-full overflow-hidden">
+            <div className="col-span-3 aspect-[4/3] w-full overflow-hidden bg-neutral-50">
               <img
                 src={portraitImage}
                 alt={`${displayName} portrait`}
