@@ -287,7 +287,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
       {/* Desktop-only underlaid split canvas (Emmanuel Babled et al.) */}
       {isUnderlaid && (
         <section className="hidden md:block w-full bg-transparent">
-          <div className="grid grid-cols-12 gap-x-8 items-start w-full mb-8">
+          <div className="grid grid-cols-12 gap-x-8 items-stretch w-full mb-8">
             {/* Left Column — Hero Landscape Image */}
             <div className="col-span-4 aspect-[4/3] w-full overflow-hidden">
               <img
@@ -298,37 +298,39 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
             </div>
 
             {/* Right Column — Full Stacked Typography & Studio Row */}
-            <div className="col-span-8 flex flex-col justify-start space-y-4 pt-1 h-auto">
-              <div className="flex flex-col space-y-3 w-full">
-                <div className="flex items-center gap-3 w-full">
-                  <h1 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
-                    {displayName}
-                  </h1>
-                  <ShareMenu
-                    url={shareUrl}
-                    message={`Maison Affluency · ${displayName}: ${shareUrl}`}
-                    className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
-                    iconSize="w-4 h-4 md:w-5 md:h-5"
-                    showLabel={false}
-                  />
+            <div className="col-span-8 flex flex-col justify-between pt-1 h-full">
+              <div className="flex flex-col space-y-4 w-full">
+                <div className="flex flex-col space-y-3 w-full">
+                  <div className="flex items-center gap-3 w-full">
+                    <h1 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
+                      {displayName}
+                    </h1>
+                    <ShareMenu
+                      url={shareUrl}
+                      message={`Maison Affluency · ${displayName}: ${shareUrl}`}
+                      className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
+                      iconSize="w-4 h-4 md:w-5 md:h-5"
+                      showLabel={false}
+                    />
+                  </div>
+
+                  <p className="text-justify w-full text-xs lg:text-sm text-neutral-600">
+                    {renderParagraph(firstBioParagraph)}
+                  </p>
+
                 </div>
 
-                <p className="text-justify w-full text-xs lg:text-sm text-neutral-600">
-                  {renderParagraph(firstBioParagraph)}
-                </p>
-
-              </div>
-
-              <div className="w-full">
-                <PortraitCtaLink
-                  label="View The Full Portrait"
-                  className="text-[10px] uppercase tracking-widest text-neutral-800 font-medium inline-flex items-center gap-4"
-                  onClick={() => {
-                    if (ctaPressed) return;
-                    setCtaPressed(true);
-                    window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
-                  }}
-                />
+                <div className="w-full">
+                  <PortraitCtaLink
+                    label="View The Full Portrait"
+                    className="text-[10px] uppercase tracking-widest text-neutral-800 font-medium inline-flex items-center gap-4"
+                    onClick={() => {
+                      if (ctaPressed) return;
+                      setCtaPressed(true);
+                      window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
+                    }}
+                  />
+                </div>
               </div>
 
               {igWithImages.length > 0 && (
