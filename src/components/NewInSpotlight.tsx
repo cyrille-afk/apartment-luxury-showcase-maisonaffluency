@@ -113,18 +113,25 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
     return text;
   }, [designer.biography]);
 
-  const curatorsPicksSection = (
+  const renderCuratorsPicksSection = ({
+    barClassName = "flex items-center justify-between mb-6",
+    titleClassName = "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground",
+    mobileBadgeClassName = "px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5 md:hidden",
+    mobileTitleClassName = "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold",
+  }: {
+    barClassName?: string;
+    titleClassName?: string;
+    mobileBadgeClassName?: string;
+    mobileTitleClassName?: string;
+  } = {}) => (
     <>
-      <div className="flex items-center justify-between mb-6">
+      <div className={barClassName}>
         <div className="flex items-center gap-3">
-          <h3 className="hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground">
+          <h3 className={titleClassName}>
             Curators' Picks
           </h3>
-          <div className={cn(
-            "px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5",
-            "md:hidden"
-          )}>
-            <h3 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h3>
+          <div className={cn(mobileBadgeClassName)}>
+            <h3 className={mobileTitleClassName}>Curators' Picks</h3>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -280,9 +287,9 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
       {/* Desktop-only underlaid split canvas (Emmanuel Babled et al.) */}
       {isUnderlaid && (
         <section className="hidden md:block w-full bg-transparent">
-          <div className="grid grid-cols-12 gap-x-12 items-stretch w-full mb-12">
+          <div className="grid grid-cols-12 gap-x-8 items-start w-full mb-8">
             {/* Left Column — Hero Landscape Image */}
-            <div className="col-span-4 aspect-[4/3] w-full overflow-hidden bg-neutral-50">
+            <div className="col-span-4 aspect-[4/3] w-full overflow-hidden">
               <img
                 src={portraitImage}
                 alt={`${displayName} portrait`}
@@ -291,7 +298,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
             </div>
 
             {/* Right Column — Full Stacked Typography & Studio Row */}
-            <div className="col-span-8 flex flex-col justify-start space-y-4 pt-0 h-auto">
+            <div className="col-span-8 flex flex-col justify-start space-y-3 w-full h-auto">
               <div className="flex items-center gap-3 w-full">
                 <h1 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
                   {displayName}
@@ -347,14 +354,14 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
             </div>
           </div>
 
-          {/* Separator */}
-          <div className="w-full">
-            <div className="border-t border-border/40" />
-          </div>
-
           {/* Curators' Picks */}
-          <div className="pt-4 md:pt-6 pb-6 md:pb-24">
-            {curatorsPicksSection}
+          <div className="w-full">
+            {renderCuratorsPicksSection({
+              barClassName: "flex justify-between items-center w-full border-t border-b border-neutral-100 py-2.5 my-4 text-[11px] uppercase tracking-widest text-neutral-800",
+              titleClassName: "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-800",
+              mobileBadgeClassName: "px-4 py-1.5 rounded-full border border-neutral-800/20 bg-neutral-800/5 md:hidden",
+              mobileTitleClassName: "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-neutral-800 font-semibold",
+            })}
           </div>
         </section>
       )}
@@ -507,7 +514,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
         "max-w-7xl mx-auto px-6 md:px-12 pt-4 md:pt-6 pb-6 md:pb-24",
         isUnderlaid && "md:hidden"
       )}>
-        {curatorsPicksSection}
+        {renderCuratorsPicksSection()}
       </section>
 
       <PublicProductLightbox
