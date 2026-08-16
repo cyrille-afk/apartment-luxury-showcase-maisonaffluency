@@ -32,9 +32,11 @@ function pickSrcSet(url: string): string {
 
 interface NewInSpotlightProps {
   designer: Designer;
+  showEyebrow?: boolean;
+  variant?: "default" | "underlaid";
 }
 
-const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
+const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: NewInSpotlightProps) => {
   const navigate = useNavigate();
   const isParentBrand = isParentBrandDesigner(designer);
   const { data: simplePicks = [] } = useDesignerPicks(designer.id, { publicOnly: true });
