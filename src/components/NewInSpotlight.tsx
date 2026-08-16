@@ -434,7 +434,12 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                       {specialTags.map((tag, i) => (
                         <span
                           key={i}
-                          className="inline-block px-2 py-0.5 text-[8px] md:text-[9px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm"
+                          className={cn(
+                            "inline-block uppercase",
+                            isUnderlaid
+                              ? "px-2 py-[3px] text-[9px] font-sans font-medium tracking-[0.2em] bg-white/90 text-neutral-900 rounded-none border-0"
+                              : "px-2 py-0.5 text-[8px] md:text-[9px] tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm"
+                          )}
                         >
                           {tag}
                         </span>
