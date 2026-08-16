@@ -123,7 +123,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
     titleClassName?: string;
     mobileBadgeClassName?: string;
     mobileTitleClassName?: string;
-  }) => (
+  } = {}) => (
     <>
       <div className={barClassName}>
         <div className="flex items-center gap-3">
