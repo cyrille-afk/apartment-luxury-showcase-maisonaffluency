@@ -50,7 +50,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
     : simplePicks;
   const { data: publicRrpMap = {} } = usePublicRrpMap(picks.map((p) => p.id));
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer.id);
-  const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const isUnderlaid = variant === "underlaid";
+  const [gridCols, setGridCols] = useState<3 | 4>(isUnderlaid ? 3 : 4);
   const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
   const [ctaPressed, setCtaPressed] = useState(false);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
@@ -332,9 +333,13 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
       <section className="max-w-7xl mx-auto px-6 md:px-12 pt-4 md:pt-6 pb-6 md:pb-24">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5">
-              <h3 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h3>
-            </div>
+            {isUnderlaid ? (
+              <h3 className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground">Curators' Picks</h3>
+            ) : (
+              <div className="px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5">
+                <h3 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h3>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {/* Mobile toggle */}
@@ -429,7 +434,12 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                       {specialTags.map((tag, i) => (
                         <span
                           key={i}
-                          className="inline-block px-2 py-0.5 text-[8px] md:text-[9px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm"
+                          className={cn(
+                            "inline-block uppercase",
+                            isUnderlaid
+                              ? "px-2 py-[3px] text-[9px] font-sans font-medium tracking-[0.2em] bg-white/90 text-neutral-900 rounded-none border-0"
+                              : "px-2 py-0.5 text-[8px] md:text-[9px] tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm"
+                          )}
                         >
                           {tag}
                         </span>
