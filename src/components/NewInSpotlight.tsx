@@ -118,11 +118,13 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
     titleClassName = "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground",
     mobileBadgeClassName = "px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5 md:hidden",
     mobileTitleClassName = "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold",
+    gridClassName,
   }: {
     barClassName?: string;
     titleClassName?: string;
     mobileBadgeClassName?: string;
     mobileTitleClassName?: string;
+    gridClassName?: string;
   } = {}) => (
     <>
       <div className={barClassName}>
@@ -179,7 +181,14 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
         </div>
       </div>
 
-      <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
+      <div className={cn(
+        "grid",
+        gridClassName || cn(
+          "gap-x-3 gap-y-5 md:gap-4",
+          mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2",
+          gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3"
+        )
+      )}>
         {picks.map((pick) => {
           const hasEdition = !!pick.edition;
           const tags: string[] = (pick as any).tags || [];
