@@ -279,8 +279,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
     <>
       {/* Desktop-only underlaid split canvas (Emmanuel Babled et al.) */}
       {isUnderlaid && (
-        <section className="hidden md:block w-full max-w-[1440px] mx-auto px-12 lg:px-16 bg-transparent pt-4">
-          <div className="grid grid-cols-12 gap-x-8 items-stretch w-full mb-12">
+        <section className="hidden md:block w-full bg-transparent">
+          <div className="grid grid-cols-12 gap-x-12 items-stretch w-full mb-12">
             {/* Left Column — Horizontal Hero Window */}
             <div className="col-span-4 aspect-[4/3] w-full overflow-hidden bg-neutral-50">
               <img
@@ -290,26 +290,27 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
               />
             </div>
 
-            {/* Right Column — Typography Stamp */}
-            <div className="col-span-8 flex flex-col justify-between py-1 w-full h-full">
-              <div className="flex items-center gap-3 w-full">
-                <h2 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
-                  {displayName}
-                </h2>
-                <ShareMenu
-                  url={shareUrl}
-                  message={`Maison Affluency · ${displayName}: ${shareUrl}`}
-                  className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
-                  iconSize="w-4 h-4 md:w-5 md:h-5"
-                  showLabel={false}
-                />
-              </div>
+            {/* Right Column — Unified Description & Studio Side-by-Side */}
+            <div className="col-span-8 grid grid-cols-12 gap-x-8 items-stretch w-full h-full py-1">
+              {/* [A] Text Stack */}
+              <div className="col-span-8 flex flex-col justify-between h-full">
+                <div className="flex items-center gap-3 w-full">
+                  <h1 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
+                    {displayName}
+                  </h1>
+                  <ShareMenu
+                    url={shareUrl}
+                    message={`Maison Affluency · ${displayName}: ${shareUrl}`}
+                    className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
+                    iconSize="w-4 h-4 md:w-5 md:h-5"
+                    showLabel={false}
+                  />
+                </div>
 
-              <p className="text-[13px] lg:text-sm text-neutral-600 leading-relaxed text-justify w-full">
-                {renderParagraph(firstBioParagraph)}
-              </p>
+                <p className="text-[13px] lg:text-sm text-neutral-600 leading-relaxed text-justify w-full">
+                  {renderParagraph(firstBioParagraph)}
+                </p>
 
-              <div className="w-full border-t border-neutral-200 pt-4 mt-6 flex flex-row items-center justify-between gap-6">
                 <PortraitCtaLink
                   label="View The Full Portrait"
                   className="text-[10px] uppercase tracking-widest font-medium text-neutral-800 inline-flex items-center gap-2"
@@ -319,32 +320,35 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                     window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
                   }}
                 />
+              </div>
 
-                {igWithImages.length > 0 && (
-                  <div className="flex flex-col items-start gap-1.5 flex-shrink-0">
-                    <p className="text-[10px] uppercase tracking-widest text-neutral-400 font-medium m-0">
+              {/* [B] From the Studio Gallery */}
+              {igWithImages.length > 0 && (
+                <div className="col-span-4 flex flex-col justify-between border-l border-neutral-100 pl-6 h-full">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-widest text-neutral-400 block mb-2">
                       From the Studio
-                    </p>
-                    <div className="flex gap-1.5 items-center h-10">
+                    </span>
+                    <div className="grid grid-cols-3 gap-2 w-full h-24">
                       {igWithImages.slice(0, 3).map((post) => (
                         <a
                           key={post.id}
                           href={post.post_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block h-full aspect-square overflow-hidden"
+                          className="block w-full h-full overflow-hidden"
                         >
                           <img
                             src={post.image_url!}
                             alt="Studio insight"
-                            className="h-full aspect-square object-cover bg-neutral-50 rounded-none"
+                            className="w-full h-full object-cover bg-neutral-50"
                           />
                         </a>
                       ))}
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
 
