@@ -287,9 +287,9 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
       {/* Desktop-only underlaid split canvas (Emmanuel Babled et al.) */}
       {isUnderlaid && (
         <section className="hidden md:block w-full bg-transparent">
-          <div className="grid grid-cols-12 gap-x-12 items-stretch w-full mb-12">
+          <div className="grid grid-cols-12 gap-x-8 items-start w-full mb-8">
             {/* Left Column — Hero Landscape Image */}
-            <div className="col-span-4 aspect-[4/3] w-full overflow-hidden bg-neutral-50">
+            <div className="col-span-4 aspect-[4/3] w-full overflow-hidden">
               <img
                 src={portraitImage}
                 alt={`${displayName} portrait`}
@@ -298,7 +298,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
             </div>
 
             {/* Right Column — Full Stacked Typography & Studio Row */}
-            <div className="col-span-8 flex flex-col justify-start space-y-4 pt-0 h-auto">
+            <div className="col-span-8 flex flex-col justify-start space-y-3 w-full h-auto">
               <div className="flex items-center gap-3 w-full">
                 <h1 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
                   {displayName}
