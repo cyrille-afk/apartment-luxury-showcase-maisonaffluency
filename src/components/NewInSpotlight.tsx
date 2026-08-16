@@ -33,9 +33,10 @@ function pickSrcSet(url: string): string {
 
 interface NewInSpotlightProps {
   designer: Designer;
+  showEyebrow?: boolean;
 }
 
-const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
+const NewInSpotlight = ({ designer, showEyebrow = true }: NewInSpotlightProps) => {
   const navigate = useNavigate();
   const isParentBrand = isParentBrandDesigner(designer);
   const { data: simplePicks = [] } = useDesignerPicks(designer.id, { publicOnly: true });
@@ -140,9 +141,11 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
             transition={{ ...transition, delay: 0.2 }}
             className="flex-1 flex flex-col justify-start"
           >
-            <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground mb-2 block">
-              New In
-            </span>
+            {showEyebrow && (
+              <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground mb-2 block">
+                New In
+              </span>
+            )}
             <div className="flex items-center gap-3 mb-8">
               <h2 className="font-display text-2xl md:text-3xl lg:text-[2.1rem] text-foreground tracking-[0.12em] uppercase">
                 {displayName}

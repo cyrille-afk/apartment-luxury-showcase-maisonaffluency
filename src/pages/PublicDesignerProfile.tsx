@@ -43,7 +43,7 @@ import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { useAuth } from "@/hooks/useAuth";
 import { lastNameInitial } from "@/lib/nameFormat";
 import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
-
+import NewInSpotlight from "@/components/NewInSpotlight";
 // Collectible profiles are public; product-page gating lives in PublicProductPage.
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
@@ -598,8 +598,11 @@ const PublicDesignerProfile = () => {
   // the parent brand — parent bios embed inline image/video URLs that would leak.
   const displayBiography = designer?.biography;
   const displayBiographyImages = designer?.biography_images;
-  // Bespoke Babled layout removed; he now uses the standard designer profile.
+  // Babled now uses the standard New In format (same as Pierre Bonnefille).
+  // Kept as a flag so the bespoke layout can be re-enabled if needed.
   const isEmmanuelBabled = false;
+  // Designers rendered with the New In spotlight layout on their profile page.
+  const useNewInSpotlightFormat = designer?.slug === "emmanuel-babled";
 
   const displayPhilosophy = designer?.philosophy;
 
@@ -1402,7 +1405,11 @@ const PublicDesignerProfile = () => {
             )}
           </div>
 
-          {newInFormat ? (
+          {useNewInSpotlightFormat ? (
+            <div className="relative left-1/2 -translate-x-1/2 w-screen max-w-[100vw]">
+              <NewInSpotlight designer={designer} showEyebrow={false} />
+            </div>
+          ) : newInFormat ? (
             newInSection
           ) : useChildHeroLayout ? (
             /* Designer profile: portrait hero, then the same editorial biography flow as the parent */
@@ -1568,7 +1575,7 @@ const PublicDesignerProfile = () => {
           )}
 
 
-          {picks.length > 0 && (
+          {picks.length > 0 && !useNewInSpotlightFormat && (
             <motion.div
               id="curators-picks"
               ref={picksSectionRef}
