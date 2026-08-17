@@ -1646,7 +1646,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         setTimeline((prev) => (detail?.replaceTimeline ? [welcomeMessage] : [...prev, welcomeMessage]));
       }
       if (detail?.stage) setStageOverride(detail.stage);
-      if (detail?.openPanel) setOpen(true);
+      if (detail?.openPanel) { clearDismissed(); setOpen(true); }
       if (detail?.closeBriefBuilder) setBriefBuilderOpen(false);
 
       // Prefill support — used by per-SKU "Swap" buttons on the concierge
@@ -1657,8 +1657,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       //     short human-readable displayMessage in the transcript so the
       //     user isn't confronted with the raw system prompt.
       if (typeof detail?.prefill === "string" && detail.prefill.trim().length > 0) {
-        setMinimized(false);
-        setOpen(true);
+        // A bare prefill (e.g. a product page seeding context on mount) must
+        // not force the panel open — only an explicit openPanel/autoSend does.
+        const mayOpen = !!detail.openPanel || !!detail.autoSend;
+        if (mayOpen && userDismissedRef.current) return;
+        if (mayOpen) {
+          setMinimized(false);
+          setOpen(true);
+        }
         if (detail.autoSend) {
           const display = detail.displayMessage?.trim() || "…";
           // Fire and forget — send() handles its own streaming state.
