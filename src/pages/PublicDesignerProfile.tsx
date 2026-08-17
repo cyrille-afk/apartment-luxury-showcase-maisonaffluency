@@ -1360,8 +1360,7 @@ const PublicDesignerProfile = () => {
           "mx-auto pt-[var(--header-h)] pb-20 space-y-1 md:space-y-1.5",
           useNewInSpotlightFormat
             ? "w-full max-w-7xl px-6 md:px-12 bg-transparent"
-            : "px-4 md:px-12 lg:px-16",
-          !useNewInSpotlightFormat && !isEmmanuelBabled && "max-w-6xl lg:px-12"
+            : "px-4 max-w-6xl md:max-w-7xl md:px-12 lg:px-12"
         )}>
           <div className={cn("flex items-center justify-between")}>
             {fromProduct ? (
