@@ -1407,6 +1407,13 @@ const PublicDesignerProfile = () => {
             )}
           </div>
 
+          {!useNewInSpotlightFormat && designer && (
+            <div className="hidden md:block w-full">
+              <NewInSpotlight designer={designer} showEyebrow={false} variant="underlaid" />
+            </div>
+          )}
+
+          <div className={cn(!useNewInSpotlightFormat && "md:hidden")}>
           {useNewInSpotlightFormat ? (
             <div className="w-full">
               <NewInSpotlight designer={designer} showEyebrow={false} variant="underlaid" />
