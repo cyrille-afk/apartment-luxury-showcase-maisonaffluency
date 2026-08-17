@@ -45,12 +45,14 @@ const PublicGallery = () => {
         <Navigation />
         <h1 className="sr-only">Maison Affluency Gallery</h1>
 
-        <div className="pt-[var(--header-h)]">
-          <ApartmentTourInterlude compact />
-        </div>
+        <div className="mx-auto max-w-7xl px-6 md:px-12">
+          <div className="pt-[var(--header-h)]">
+            <ApartmentTourInterlude compact />
+          </div>
 
-        <div className="pb-20">
-          <Gallery />
+          <div className="pb-20">
+            <Gallery />
+          </div>
         </div>
 
         <Footer />
