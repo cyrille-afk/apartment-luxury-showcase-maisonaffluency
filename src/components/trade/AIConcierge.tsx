@@ -1710,7 +1710,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // Auto-close Felix while the Quick Tour is running so its panel never
   // overlaps the page being highlighted (especially the Tools step).
   useEffect(() => {
-    const close = () => { setOpen(false); setMinimized(false); };
+    const close = () => { markDismissed(); setOpen(false); setMinimized(false); };
     window.addEventListener("trade-tour:start", close);
     window.addEventListener("concierge:close", close);
     return () => {
@@ -3298,7 +3298,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           Rendered on every trade page so Felix is always reachable from the header. */}
       {!open && (
         <button
-          onClick={() => setOpen(true)}
+          onClick={() => { clearDismissed(); setOpen(true); }}
           className="sr-only"
           aria-label="Open AI Concierge"
         />
@@ -3833,6 +3833,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                     closeWelcomeModal();
                     return;
                   }
+                  markDismissed();
                   setOpen(false);
                   try { localStorage.removeItem("ma:welcome-pending"); } catch {}
                   window.dispatchEvent(new CustomEvent("ma:welcome-dismissed"));
