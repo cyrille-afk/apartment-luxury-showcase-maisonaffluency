@@ -616,6 +616,20 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [minimized, setMinimized] = useState(() => {
     try { return sessionStorage.getItem("concierge:minimized") === "1"; } catch { return false; }
   });
+  // Set when the designer explicitly closes the panel. Proactive/ambient
+  // nudges must never re-open Felix after that — only an explicit user
+  // action (header button, "Ask Felix", quick actions) may re-open it.
+  const userDismissedRef = useRef<boolean>(
+    (() => { try { return sessionStorage.getItem("concierge:dismissed") === "1"; } catch { return false; } })(),
+  );
+  const markDismissed = useCallback(() => {
+    userDismissedRef.current = true;
+    try { sessionStorage.setItem("concierge:dismissed", "1"); } catch { /* ignore */ }
+  }, []);
+  const clearDismissed = useCallback(() => {
+    userDismissedRef.current = false;
+    try { sessionStorage.removeItem("concierge:dismissed"); } catch { /* ignore */ }
+  }, []);
   const [tone, setTone] = useState<Tone>(() => loadTone());
   const [lang, setLang] = useState<Lang>(() => loadLang());
   const [name, setName] = useState<string>(() => loadName());
