@@ -1360,8 +1360,7 @@ const PublicDesignerProfile = () => {
           "mx-auto pt-[var(--header-h)] pb-20 space-y-1 md:space-y-1.5",
           useNewInSpotlightFormat
             ? "w-full max-w-7xl px-6 md:px-12 bg-transparent"
-            : "px-4 md:px-12 lg:px-16",
-          !useNewInSpotlightFormat && !isEmmanuelBabled && "max-w-6xl lg:px-12"
+            : "px-4 max-w-6xl md:max-w-7xl md:px-12 lg:px-12"
         )}>
           <div className={cn("flex items-center justify-between")}>
             {fromProduct ? (
@@ -1408,6 +1407,13 @@ const PublicDesignerProfile = () => {
             )}
           </div>
 
+          {!useNewInSpotlightFormat && designer && (
+            <div className="hidden md:block w-full">
+              <NewInSpotlight designer={designer} showEyebrow={false} variant="underlaid" />
+            </div>
+          )}
+
+          <div className={cn(!useNewInSpotlightFormat && "md:hidden")}>
           {useNewInSpotlightFormat ? (
             <div className="w-full">
               <NewInSpotlight designer={designer} showEyebrow={false} variant="underlaid" />
@@ -1572,9 +1578,12 @@ const PublicDesignerProfile = () => {
               {biographySection}
             </div>
           )}
+          </div>
 
           {!newInFormat && (
-            <DesignerInstagramSection posts={instagramPosts} designerName={designer?.name || ""} />
+            <div className={cn(!useNewInSpotlightFormat && "md:hidden")}>
+              <DesignerInstagramSection posts={instagramPosts} designerName={designer?.name || ""} />
+            </div>
           )}
 
 
@@ -1585,7 +1594,7 @@ const PublicDesignerProfile = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...transition, delay: 0.25 }}
-              className="mt-[2px] md:mt-10 pt-1 md:pt-8 border-t border-border/40"
+              className="md:hidden mt-[2px] pt-1 border-t border-border/40"
             >
 
 
