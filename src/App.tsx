@@ -1,6 +1,4 @@
-import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
-
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation, useNavigate, useNavigationType } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // Index is the homepage. Lazy-loading it keeps ~200KB of homepage-only code
