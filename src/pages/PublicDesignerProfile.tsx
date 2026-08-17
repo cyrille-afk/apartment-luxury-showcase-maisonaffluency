@@ -1578,9 +1578,12 @@ const PublicDesignerProfile = () => {
               {biographySection}
             </div>
           )}
+          </div>
 
           {!newInFormat && (
-            <DesignerInstagramSection posts={instagramPosts} designerName={designer?.name || ""} />
+            <div className={cn(!useNewInSpotlightFormat && "md:hidden")}>
+              <DesignerInstagramSection posts={instagramPosts} designerName={designer?.name || ""} />
+            </div>
           )}
 
 
@@ -1591,7 +1594,7 @@ const PublicDesignerProfile = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...transition, delay: 0.25 }}
-              className="mt-[2px] md:mt-10 pt-1 md:pt-8 border-t border-border/40"
+              className="md:hidden mt-[2px] pt-1 border-t border-border/40"
             >
 
 
