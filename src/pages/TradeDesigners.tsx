@@ -509,7 +509,7 @@ const TradeDesigners = () => {
                     {entries.length} {entries.length === 1 ? "entry" : "entries"}
                   </span>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                   {entries.map((entry) => (
                     <DesignerCard key={entry.designer.id} brand={entry.designer} navigate={navigate} />
                   ))}
