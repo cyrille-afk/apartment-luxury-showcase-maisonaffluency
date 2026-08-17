@@ -49,10 +49,10 @@ const PublicGallery = () => {
           <div className="pt-[var(--header-h)]">
             <ApartmentTourInterlude compact />
           </div>
+        </div>
 
-          <div className="pb-20">
-            <Gallery />
-          </div>
+        <div className="pb-20">
+          <Gallery />
         </div>
 
         <Footer />
