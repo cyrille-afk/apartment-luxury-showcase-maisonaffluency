@@ -1689,6 +1689,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<ProactiveTearsheetData>).detail;
       if (!detail || !detail.productId) return;
+      // Respect an explicit close — never re-open on ambient nudges.
+      if (userDismissedRef.current) return;
       setMinimized(false);
       setOpen(true);
       setTimeline((prev) => {
