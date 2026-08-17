@@ -54,7 +54,7 @@ const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
 // third-party origins at full resolution. Only the cards that can actually be in
 // the first visible row load eagerly; everything else is lazy + low priority so
 // the browser's connection pool isn't saturated by off-screen images.
-/** Desktop grid defaults to 4 columns, so 4 cards can sit in the first row. */
+/** Widest desktop grid is `lg:grid-cols-4`, so 4 cards can sit in the first row. */
 const FIRST_ROW_CARDS = 4;
 /** Mobile A–Z carousel shows one full card plus a peek of the next. */
 const FIRST_ROW_CARDS_MOBILE = 2;
