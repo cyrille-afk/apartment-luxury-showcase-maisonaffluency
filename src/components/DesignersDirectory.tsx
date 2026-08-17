@@ -1219,7 +1219,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
           <div className="flex">
             {pages.map((page, pageIndex) => (
               <div key={`page-${pageIndex}`} className="flex-none w-full snap-start">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 grid-flow-dense items-start gap-4 md:gap-6 lg:gap-8">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 grid-flow-dense items-start gap-4 md:gap-6 lg:gap-8">
                   {page.map((item, cardIndex) => {
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
                     const isParentBrand = item.founder === item.name && designerCount > 0;
