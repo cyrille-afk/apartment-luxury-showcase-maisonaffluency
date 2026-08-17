@@ -616,6 +616,20 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [minimized, setMinimized] = useState(() => {
     try { return sessionStorage.getItem("concierge:minimized") === "1"; } catch { return false; }
   });
+  // Set when the designer explicitly closes the panel. Proactive/ambient
+  // nudges must never re-open Felix after that — only an explicit user
+  // action (header button, "Ask Felix", quick actions) may re-open it.
+  const userDismissedRef = useRef<boolean>(
+    (() => { try { return sessionStorage.getItem("concierge:dismissed") === "1"; } catch { return false; } })(),
+  );
+  const markDismissed = useCallback(() => {
+    userDismissedRef.current = true;
+    try { sessionStorage.setItem("concierge:dismissed", "1"); } catch { /* ignore */ }
+  }, []);
+  const clearDismissed = useCallback(() => {
+    userDismissedRef.current = false;
+    try { sessionStorage.removeItem("concierge:dismissed"); } catch { /* ignore */ }
+  }, []);
   const [tone, setTone] = useState<Tone>(() => loadTone());
   const [lang, setLang] = useState<Lang>(() => loadLang());
   const [name, setName] = useState<string>(() => loadName());
@@ -1632,7 +1646,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         setTimeline((prev) => (detail?.replaceTimeline ? [welcomeMessage] : [...prev, welcomeMessage]));
       }
       if (detail?.stage) setStageOverride(detail.stage);
-      if (detail?.openPanel) setOpen(true);
+      if (detail?.openPanel) { clearDismissed(); setOpen(true); }
       if (detail?.closeBriefBuilder) setBriefBuilderOpen(false);
 
       // Prefill support — used by per-SKU "Swap" buttons on the concierge
@@ -1643,8 +1657,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       //     short human-readable displayMessage in the transcript so the
       //     user isn't confronted with the raw system prompt.
       if (typeof detail?.prefill === "string" && detail.prefill.trim().length > 0) {
-        setMinimized(false);
-        setOpen(true);
+        // A bare prefill (e.g. a product page seeding context on mount) must
+        // not force the panel open — only an explicit openPanel/autoSend does.
+        const mayOpen = !!detail.openPanel || !!detail.autoSend;
+        if (mayOpen && userDismissedRef.current) return;
+        if (mayOpen) {
+          setMinimized(false);
+          setOpen(true);
+        }
         if (detail.autoSend) {
           const display = detail.displayMessage?.trim() || "…";
           // Fire and forget — send() handles its own streaming state.
@@ -1675,6 +1695,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<ProactiveTearsheetData>).detail;
       if (!detail || !detail.productId) return;
+      // Respect an explicit close — never re-open on ambient nudges.
+      if (userDismissedRef.current) return;
       setMinimized(false);
       setOpen(true);
       setTimeline((prev) => {
@@ -1694,7 +1716,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // Auto-close Felix while the Quick Tour is running so its panel never
   // overlaps the page being highlighted (especially the Tools step).
   useEffect(() => {
-    const close = () => { setOpen(false); setMinimized(false); };
+    const close = () => { markDismissed(); setOpen(false); setMinimized(false); };
     window.addEventListener("trade-tour:start", close);
     window.addEventListener("concierge:close", close);
     return () => {
@@ -3282,7 +3304,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           Rendered on every trade page so Felix is always reachable from the header. */}
       {!open && (
         <button
-          onClick={() => setOpen(true)}
+          onClick={() => { clearDismissed(); setOpen(true); }}
           className="sr-only"
           aria-label="Open AI Concierge"
         />
@@ -3817,6 +3839,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                     closeWelcomeModal();
                     return;
                   }
+                  markDismissed();
                   setOpen(false);
                   try { localStorage.removeItem("ma:welcome-pending"); } catch {}
                   window.dispatchEvent(new CustomEvent("ma:welcome-dismissed"));
