@@ -351,7 +351,7 @@ const TradeAtelierProfile = () => {
         </Helmet>
         <div className="relative w-full bg-cream">
           <EditorialBiographyColumns
-            containerClassName="w-full px-0 pt-4 md:pt-6 pb-4 md:pb-6"
+            containerClassName="w-auto max-w-none -mx-4 md:-mx-6 lg:-mx-8 px-3 md:px-4 pt-4 md:pt-6 pb-4 md:pb-6"
             biography={designer.biography}
             biographyImages={designer.biography_images || []}
             designerName={designer.name}
