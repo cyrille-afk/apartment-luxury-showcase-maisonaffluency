@@ -81,6 +81,7 @@ export default function PublicDesignerBiography() {
 
         {biography ? (
           <EditorialBiographyColumns
+            containerClassName="mx-auto w-full max-w-7xl px-6 md:px-12"
             biography={biography}
             biographyImages={designer.biography_images || []}
             designerName={designer.name}
