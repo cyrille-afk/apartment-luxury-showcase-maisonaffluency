@@ -98,8 +98,8 @@ function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
             {eyebrow}
           </p>
         )}
-        <blockquote className="border-l border-foreground/40 pl-6 pr-6 md:pl-8 md:pr-8 py-0.5 m-0">
-          <p className="max-w-[520px] font-display text-xl md:text-2xl leading-[1.5] tracking-[-0.005em] text-foreground/90">
+        <blockquote className="border-l border-foreground/25 pl-5 md:pl-7 py-0 m-0">
+          <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85">
             {renderParagraph(stripQuotes(content))}
           </p>
         </blockquote>
@@ -114,7 +114,7 @@ function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
           {eyebrow}
         </p>
       )}
-      <p className="max-w-[500px] font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80">
+      <p className="max-w-[560px] font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80">
         {renderParagraph(content)}
       </p>
     </div>
@@ -157,7 +157,7 @@ function MediaCell({
       <img
         src={optimizeImageUrl(block.url)}
         alt={block.caption || `${designerName} — editorial`}
-        className="w-full h-auto max-h-[280px] object-cover bg-muted/20 rounded-none"
+        className="w-full aspect-[4/3] object-cover rounded-none"
         loading="lazy"
         decoding="async"
       />
@@ -165,6 +165,7 @@ function MediaCell({
     </figure>
   );
 }
+
 
 type Cell = { node: React.ReactNode; isMedia: boolean };
 type Row = { left: Cell; right: Cell | null };
