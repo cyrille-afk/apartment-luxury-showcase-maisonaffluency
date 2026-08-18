@@ -489,6 +489,8 @@ export function VideoBlock({
   }, [playing, muteVisible, startUnmuted]);
 
   const currentPosterUrl = posterCandidates[posterIndex];
+  /** Cover state inside an editorial column: render the poster at its natural size, no frame. */
+  const showsBareCover = bare && !playing && !!currentPosterUrl;
 
   const handlePosterError = () => {
     setPosterIndex((prev) => {
