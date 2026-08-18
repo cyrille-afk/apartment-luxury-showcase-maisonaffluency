@@ -58,7 +58,7 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
 
       <div className="relative group">
         <div className="overflow-hidden rounded-xl" ref={emblaRef}>
-          <div className="flex">
+          <div className="flex items-start">
             {slides.map((slide) => (
               <div
                 key={slide.id}
