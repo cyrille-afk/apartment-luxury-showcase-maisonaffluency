@@ -74,6 +74,64 @@ function optimizeHtmlPlugin(buildId: string): Plugin {
 }
 
 /**
+ * Inlines the above-the-fold CSS into dist/index.html and turns the full
+ * stylesheet into a non-blocking preload+swap.
+ *
+ * Why: the Tailwind bundle is ~250KB raw (~38KB gz) and >90% unused on first
+ * paint. On throttled mobile it cost ~1.1s on the critical path, which
+ * delayed FCP/LCP. Beasties extracts only the rules whose selectors actually
+ * match the server-sent HTML (hero <picture>, static SEO copy, layout shell)
+ * and inlines them, so first paint needs zero CSS round-trips.
+ *
+ * Runs in closeBundle (after Vite has written dist/) so the emitted CSS file
+ * is on disk for Beasties to read.
+ */
+function inlineCriticalCssPlugin(): Plugin {
+  return {
+    name: "inline-critical-css",
+    apply: "build",
+    enforce: "post",
+    async closeBundle() {
+      const outDir = path.resolve(__dirname, "dist");
+      const htmlPath = path.join(outDir, "index.html");
+      if (!fs.existsSync(htmlPath)) return;
+
+      const { default: Beasties } = await import("beasties");
+      const beasties = new Beasties({
+        path: outDir,
+        publicPath: "/",
+        // Inline rules matching the static HTML; everything else is deferred.
+        pruneSource: false,
+        // Keep the full sheet as a swap-on-load preload (non render-blocking).
+        preload: "swap",
+        inlineFonts: false,
+        preloadFonts: false,
+        // @font-face + keyframes already live in the inline <style> in index.html
+        fonts: false,
+        keyframes: "critical",
+        compress: true,
+        logLevel: "silent",
+      });
+
+      const html = fs.readFileSync(htmlPath, "utf-8");
+      let out = await beasties.process(html);
+
+      // Beasties' swap handler replaces rel=preload with rel=stylesheet on
+      // load. Piggyback the app's `css-ready` flag onto the same handler so
+      // components gated on it un-gate as soon as the real sheet applies.
+      out = out.replace(
+        /this\.rel=['"]stylesheet['"]/g,
+        "this.rel='stylesheet';document.documentElement.classList.add('css-ready')"
+      );
+
+      fs.writeFileSync(htmlPath, out);
+    },
+  };
+}
+
+
+
+/**
  * Emits /version.json at the build root so the running app can poll it
  * and auto-reload when a fresh build is deployed.
  */
