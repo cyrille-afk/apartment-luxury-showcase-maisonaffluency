@@ -248,6 +248,8 @@ export default function EditorialBiographyColumns({
   eyebrow,
   footer,
   containerClassName,
+  collectionCtaHref,
+  collectionCtaLabel = "Discover the Collection",
 }: {
   biography: string;
   biographyImages?: string[];
@@ -258,6 +260,9 @@ export default function EditorialBiographyColumns({
   footer?: React.ReactNode;
   /** Override the width/padding container (e.g. full-bleed inside the trade shell). */
   containerClassName?: string;
+  /** Optional anchor link rendered after the first media row to surface the product gallery. */
+  collectionCtaHref?: string;
+  collectionCtaLabel?: string;
 }) {
   const blocks = toBlocks(biography, biographyImages);
   const texts = blocks.filter((b): b is Extract<Block, { kind: "text" }> => b.kind === "text");
