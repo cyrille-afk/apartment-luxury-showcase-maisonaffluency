@@ -508,7 +508,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       >
         <motion.div
           {...panelMotion}
-          className="relative w-full max-w-6xl h-dvh max-h-dvh md:h-[90vh] md:max-h-[900px] md:flex-row bg-background/85 backdrop-blur-xl md:rounded-xl rounded-none shadow-2xl overflow-hidden flex flex-col min-h-0"
+          className="relative w-full max-w-6xl h-dvh max-h-dvh md:h-[85vh] md:flex-row mx-auto bg-muted/50 backdrop-blur-xl md:rounded-xl rounded-none shadow-2xl overflow-hidden flex flex-col min-h-0"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Mobile header */}
@@ -546,11 +546,11 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </button>
 
           {/* Scrollable body */}
-          <div className="flex-1 min-h-0 overflow-y-auto md:flex md:flex-row md:overflow-hidden">
+          <div className="flex-1 min-h-0 overflow-y-auto md:flex md:flex-row md:items-start md:overflow-hidden">
 
           {/* Image + desktop description column */}
-          <div className="relative w-full md:w-3/5 shrink-0 bg-muted/30 md:flex md:flex-col md:h-full md:overflow-y-auto">
-          <div className="relative w-full flex items-center justify-center p-2 md:p-5 lg:p-6">
+          <div className="relative w-full md:w-3/5 shrink-0 bg-muted/30 flex flex-col gap-6 md:h-[80vh] md:overflow-y-auto scrollbar-none">
+          <div className="relative w-full flex shrink-0 items-start justify-center p-2 md:p-5 lg:p-6">
             {product.image_url ? (
               <>
                 {!imageLoaded && !imageFailed && (
@@ -644,9 +644,9 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             </div>
           </div>
 
-          {/* Desktop: description card — sits directly beneath the image and stays within the modal */}
+          {/* Desktop: naturally flowing description placard below the image */}
           {product.description && product.description.trim().length > 0 && (
-            <div className="hidden md:flex flex-col shrink-0 bg-background/95 border-t border-border/40 p-8">
+            <div className="hidden md:flex w-full flex-col shrink-0 bg-background/95 border-t border-border/40 p-8">
               <p className="font-body text-sm leading-relaxed text-foreground/75 text-left whitespace-pre-wrap max-w-md">
                 {product.description}
               </p>
@@ -655,7 +655,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Details */}
-          <div className="w-full md:w-2/5 min-h-0 md:h-full p-5 md:p-8 flex flex-col gap-3 md:gap-4 md:overflow-y-auto">
+          <div className="w-full md:w-2/5 min-h-0 md:h-[80vh] p-5 md:p-8 flex flex-col gap-3 md:gap-4 md:overflow-y-auto scrollbar-none">
             <div>
               <button
                 type="button"
