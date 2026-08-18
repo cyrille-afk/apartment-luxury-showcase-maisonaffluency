@@ -548,9 +548,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           {/* Scrollable body */}
           <div className="flex-1 min-h-0 overflow-y-auto md:flex md:flex-row md:items-stretch md:overflow-hidden">
 
-          {/* Image + desktop description column */}
-          <div className="relative w-full md:w-3/5 shrink-0 bg-muted/30 flex flex-col md:h-full md:min-h-0 md:overflow-hidden scrollbar-none">
-          <div className="relative w-full flex items-center justify-center p-2 md:p-5 lg:p-6 md:flex-1 md:min-h-0">
+          {/* Image + desktop description column — single scrollable unit */}
+          <div className="relative w-full md:w-3/5 shrink-0 bg-background flex flex-col md:h-full md:min-h-0 md:overflow-y-auto scrollbar-none">
+          <div className="relative w-full flex shrink-0 items-center justify-center p-2 md:p-5 lg:p-6">
+
 
             {product.image_url ? (
               <>
