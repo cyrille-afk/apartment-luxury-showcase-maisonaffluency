@@ -799,7 +799,7 @@ function MobileCollapsible({ paragraphs }: { paragraphs: string[] }) {
       ))}
       {shouldCollapse && !expanded && (
         <button
-          onClick={handleExpand}
+          onClick={() => setExpanded(true)}
           className="mt-4 flex items-center gap-1.5 font-display text-[11px] tracking-[0.15em] uppercase text-primary/70 hover:text-primary transition-colors"
         >
           Read more
