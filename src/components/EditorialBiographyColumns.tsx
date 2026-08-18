@@ -98,8 +98,8 @@ function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
             {eyebrow}
           </p>
         )}
-        <blockquote className="border-l border-foreground/40 pl-8 pr-8 md:pl-10 md:pr-12 py-1 m-0">
-          <p className="max-w-[520px] font-display text-[20px] md:text-[24px] lg:text-[26px] leading-[1.55] tracking-[-0.005em] text-foreground/90">
+        <blockquote className="border-l border-foreground/40 pl-6 pr-6 md:pl-8 md:pr-8 py-0.5 m-0">
+          <p className="max-w-[520px] font-display text-xl md:text-2xl leading-[1.5] tracking-[-0.005em] text-foreground/90">
             {renderParagraph(stripQuotes(content))}
           </p>
         </blockquote>
