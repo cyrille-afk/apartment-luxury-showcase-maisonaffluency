@@ -347,14 +347,17 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                           href={post.post_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block h-full flex-shrink-0"
+                          className="group relative block h-full flex-shrink-0 overflow-hidden"
                         >
                           <img
                             src={post.image_url!}
                             alt={post.caption || `${displayName} — From the Studio`}
-                            className="h-full aspect-square object-cover bg-neutral-50 flex-shrink-0 transition-all"
+                            className="h-full aspect-square object-cover bg-neutral-50 flex-shrink-0 transition-transform duration-700 ease-out group-hover:scale-105"
                             loading="lazy"
                           />
+                          <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
+                            <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          </div>
                         </a>
                       ))}
                     </div>
