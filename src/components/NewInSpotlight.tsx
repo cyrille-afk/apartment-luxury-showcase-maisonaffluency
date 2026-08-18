@@ -257,7 +257,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                 )}
               </div>
 
-              <div className="flex flex-col flex-1">
+              <div className="flex flex-col flex-1 text-center">
                 {(() => {
                   const composed = composeTitle(pick.title, pick.subtitle);
                   return (
