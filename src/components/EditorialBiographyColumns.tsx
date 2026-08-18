@@ -250,47 +250,72 @@ export default function EditorialBiographyColumns({
   );
 
   const rows: Row[] = [];
-  let ti = 0;
-  let mi = 0;
+
+  // Spread media evenly across the whole narrative instead of clustering it
+  // against the first paragraphs: assign each media item a target text index.
+  const mediaSlots = new Map<number, Extract<Block, { kind: "image" } | { kind: "video" }>[]>();
+  if (texts.length > 0 && media.length > 0) {
+    const step = texts.length / media.length;
+    media.forEach((m, j) => {
+      const idx = Math.min(texts.length - 1, Math.floor(j * step));
+      const list = mediaSlots.get(idx) || [];
+      list.push(m);
+      mediaSlots.set(idx, list);
+    });
+  }
+
+  const mediaIndexOf = (m: Block) => media.indexOf(m as never);
   let rowIndex = 0;
 
-  // Alternate: text/media, media/text, text/media …
-  while (ti < texts.length && mi < media.length) {
-    const textCell = (
-      <TextCell content={texts[ti].content} eyebrow={ti === 0 ? eyebrow : undefined} />
-    );
-    const mediaCell = (
-      <MediaCell block={media[mi]} designerName={designerName} index={mi} />
-    );
-    rows.push(
-      rowIndex % 2 === 0
-        ? { left: { node: textCell, isMedia: false }, right: { node: mediaCell, isMedia: true } }
-        : { left: { node: mediaCell, isMedia: true }, right: { node: textCell, isMedia: false } },
-    );
-    ti += 1;
-    mi += 1;
-    rowIndex += 1;
+  if (texts.length === 0) {
+    // Media only — two per row.
+    for (let i = 0; i < media.length; i += 2) {
+      rows.push({
+        left: { node: <MediaCell block={media[i]} designerName={designerName} index={i} />, isMedia: true },
+        right: media[i + 1]
+          ? { node: <MediaCell block={media[i + 1]} designerName={designerName} index={i + 1} />, isMedia: true }
+          : null,
+      });
+    }
+  } else {
+    texts.forEach((t, ti) => {
+      const textCell = (
+        <TextCell content={t.content} eyebrow={ti === 0 ? eyebrow : undefined} />
+      );
+      const slot = mediaSlots.get(ti) || [];
+
+      if (slot.length === 0) {
+        rows.push({ left: { node: textCell, isMedia: false }, right: null });
+        rowIndex += 1;
+        return;
+      }
+
+      const first = slot[0];
+      const firstCell = (
+        <MediaCell block={first} designerName={designerName} index={mediaIndexOf(first)} />
+      );
+      rows.push(
+        rowIndex % 2 === 0
+          ? { left: { node: textCell, isMedia: false }, right: { node: firstCell, isMedia: true } }
+          : { left: { node: firstCell, isMedia: true }, right: { node: textCell, isMedia: false } },
+      );
+      rowIndex += 1;
+
+      // Any extra media assigned to this slot pairs up on its own rows.
+      for (let k = 1; k < slot.length; k += 2) {
+        const a = slot[k];
+        const b = slot[k + 1];
+        rows.push({
+          left: { node: <MediaCell block={a} designerName={designerName} index={mediaIndexOf(a)} />, isMedia: true },
+          right: b
+            ? { node: <MediaCell block={b} designerName={designerName} index={mediaIndexOf(b)} />, isMedia: true }
+            : null,
+        });
+        rowIndex += 1;
+      }
+    });
   }
 
-  // Leftovers keep both columns filled: pair remaining items two per row.
-  while (ti < texts.length) {
-    const left = { node: <TextCell content={texts[ti].content} eyebrow={ti === 0 ? eyebrow : undefined} />, isMedia: false };
-    ti += 1;
-    const right = ti < texts.length
-      ? { node: <TextCell content={texts[ti].content} />, isMedia: false }
-      : null;
-    if (right) ti += 1;
-    rows.push({ left, right });
-  }
-  while (mi < media.length) {
-    const left = { node: <MediaCell block={media[mi]} designerName={designerName} index={mi} />, isMedia: true };
-    mi += 1;
-    const right = mi < media.length
-      ? { node: <MediaCell block={media[mi]} designerName={designerName} index={mi} />, isMedia: true }
-      : null;
-    if (right) mi += 1;
-    rows.push({ left, right });
-  }
 
   return (
     <div className="bg-cream">
