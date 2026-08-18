@@ -207,23 +207,23 @@ function FadeInRow({
     return () => observer.disconnect();
   }, []);
 
-  const spanClass = (isMedia: boolean) =>
-    isMedia ? "lg:col-span-7" : "lg:col-span-5";
+  const spanClass = (cell: Cell) =>
+    cell.full ? "lg:col-span-12" : cell.isMedia ? "lg:col-span-7" : "lg:col-span-5";
 
   return (
     <div
       ref={ref}
       className={`
-        grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12
+        grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center
         transition-all duration-700 ease-out will-change-transform
         ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}
       `}
       style={{ transitionDelay: `${delay}ms` }}
     >
-      <div className={`h-auto ${spanClass(row.left.isMedia)}`}>{row.left.node}</div>
+      <div className={`h-auto ${spanClass(row.left)}`}>{row.left.node}</div>
       {row.right ? (
-        <div className={`h-auto ${spanClass(row.right.isMedia)}`}>{row.right.node}</div>
-      ) : (
+        <div className={`h-auto ${spanClass(row.right)}`}>{row.right.node}</div>
+      ) : row.left.full ? null : (
         <div className="hidden lg:block lg:col-span-7" />
       )}
     </div>
