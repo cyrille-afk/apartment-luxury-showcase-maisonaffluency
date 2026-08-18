@@ -292,6 +292,8 @@ export function captionFromUrl(url: string): string | null {
     if (filename.length < 3) return null;
     // Never surface bare file-extension crumbs (e.g. "mp4", "jpeg") as captions.
     if (/^(mp4|mov|webm|m4v|jpeg|jpg|png|webp|avif|gif)$/i.test(filename)) return null;
+    // Never surface bare numeric IDs (e.g. Vimeo/YouTube IDs like "803009029").
+    if (/^\d+$/.test(filename)) return null;
     return filename
       .split(" ")
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
