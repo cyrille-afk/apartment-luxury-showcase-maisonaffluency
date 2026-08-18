@@ -234,6 +234,7 @@ export default function EditorialBiographyColumns({
   designerName,
   eyebrow,
   footer,
+  containerClassName,
 }: {
   biography: string;
   biographyImages?: string[];
@@ -242,6 +243,8 @@ export default function EditorialBiographyColumns({
   eyebrow?: string;
   /** Rendered at the absolute bottom of the stream. */
   footer?: React.ReactNode;
+  /** Override the width/padding container (e.g. full-bleed inside the trade shell). */
+  containerClassName?: string;
 }) {
   const blocks = toBlocks(biography, biographyImages);
   const texts = blocks.filter((b): b is Extract<Block, { kind: "text" }> => b.kind === "text");
