@@ -648,10 +648,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             </div>
           </div>
 
-          {/* Desktop: naturally flowing description placard below the image */}
+          {/* Desktop: description in natural document flow below the image */}
           {product.description && product.description.trim().length > 0 && (
-            <div className="hidden md:flex w-full flex-col shrink-0 max-h-[35%] overflow-y-auto scrollbar-none bg-background/95 border-t border-border/40 px-8 py-6">
-              <p className="font-body text-sm leading-relaxed text-foreground/75 text-left whitespace-pre-wrap">
+            <div className="hidden md:block w-full shrink-0 bg-background px-8 pb-8 pt-2">
+              <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
                 {product.description}
               </p>
             </div>
@@ -659,7 +659,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Details */}
-          <div className="w-full md:w-2/5 min-h-0 md:h-full p-5 md:p-8 flex flex-col gap-3 md:gap-4 md:overflow-y-auto scrollbar-none">
+          <div className="w-full md:w-2/5 min-h-0 md:h-full bg-background border-l border-border/40 p-5 md:p-8 flex flex-col gap-3 md:gap-4 md:overflow-y-auto scrollbar-none">
+
 
             <div>
               <button
