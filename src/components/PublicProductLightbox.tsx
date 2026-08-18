@@ -235,8 +235,6 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
         exit: { opacity: 0, y: 20, scale: 0.98 },
         transition: { duration: 0.3, type: "spring" as const, stiffness: 300, damping: 30 },
       };
-  const [showHoverImage, setShowHoverImage] = useState(false);
-  const [hoverImageLoaded, setHoverImageLoaded] = useState(false);
   const [variantPayload, setVariantPayload] = useState<Partial<PublicLightboxItem> | null>(null);
   const relatedScrollRef = useRef<HTMLDivElement>(null);
   const scrollRelated = (dir: 1 | -1) => {
@@ -318,8 +316,6 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   useEffect(() => {
     setImageLoaded(false);
     setImageFailed(false);
-    setHoverImageLoaded(false);
-    setShowHoverImage(false);
     setSelectedBaseIdx(null);
     setSelectedTopIdx(null);
     setSelectedMaterialIdx(null);
@@ -363,7 +359,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
   if (!product) return null;
 
-  const canShowHoverImage = Boolean(product.hover_image_url) && !isMobile;
+  
   const designerDisplay = product.brand_name.includes(" - ")
     ? product.brand_name.split(" - ")[0].trim()
     : product.brand_name;
@@ -461,7 +457,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   // than the curator-pick thumbnail, which is often a padded/portrait crop.
   const defaultImageUrl = galleryImages[0] || product.image_url;
   const currentImageUrl = finishImageIdx != null ? galleryImages[finishImageIdx] : defaultImageUrl;
-  const imageSwappedByFinish = currentImageUrl !== defaultImageUrl;
+  
   const isUpholsteredProduct = isProductUpholstered({
     category: product.category,
     subcategory: product.subcategory,
