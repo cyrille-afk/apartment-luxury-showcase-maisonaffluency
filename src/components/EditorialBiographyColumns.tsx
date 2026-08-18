@@ -69,7 +69,7 @@ function Caption({ label }: { label: string }) {
   if (!label) return null;
   return (
     <p
-      className="mt-2 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.8]"
+      className="mt-2 text-center font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.8]"
     >
       {label}
     </p>
