@@ -98,8 +98,8 @@ function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
             {eyebrow}
           </p>
         )}
-        <blockquote className="border-l border-foreground/40 pl-6 pr-6 md:pl-8 md:pr-8 py-0.5 m-0">
-          <p className="max-w-[520px] font-display text-xl md:text-2xl leading-[1.5] tracking-[-0.005em] text-foreground/90">
+        <blockquote className="border-l border-foreground/25 pl-5 md:pl-7 py-0 m-0">
+          <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85">
             {renderParagraph(stripQuotes(content))}
           </p>
         </blockquote>
@@ -114,7 +114,7 @@ function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
           {eyebrow}
         </p>
       )}
-      <p className="max-w-[500px] font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80">
+      <p className="max-w-[560px] font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80">
         {renderParagraph(content)}
       </p>
     </div>
@@ -157,7 +157,7 @@ function MediaCell({
       <img
         src={optimizeImageUrl(block.url)}
         alt={block.caption || `${designerName} — editorial`}
-        className="w-full h-auto max-h-[280px] object-cover bg-muted/20 rounded-none"
+        className="w-full aspect-[4/3] object-cover rounded-none"
         loading="lazy"
         decoding="async"
       />
@@ -166,8 +166,10 @@ function MediaCell({
   );
 }
 
-type Cell = { node: React.ReactNode; isMedia: boolean };
+
+type Cell = { node: React.ReactNode; isMedia: boolean; full?: boolean };
 type Row = { left: Cell; right: Cell | null };
+
 
 function FadeInRow({
   row,
@@ -205,23 +207,23 @@ function FadeInRow({
     return () => observer.disconnect();
   }, []);
 
-  const spanClass = (isMedia: boolean) =>
-    isMedia ? "lg:col-span-7" : "lg:col-span-5";
+  const spanClass = (cell: Cell) =>
+    cell.full ? "lg:col-span-12" : cell.isMedia ? "lg:col-span-7" : "lg:col-span-5";
 
   return (
     <div
       ref={ref}
       className={`
-        grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12
+        grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center
         transition-all duration-700 ease-out will-change-transform
         ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}
       `}
       style={{ transitionDelay: `${delay}ms` }}
     >
-      <div className={`h-auto ${spanClass(row.left.isMedia)}`}>{row.left.node}</div>
+      <div className={`h-auto ${spanClass(row.left)}`}>{row.left.node}</div>
       {row.right ? (
-        <div className={`h-auto ${spanClass(row.right.isMedia)}`}>{row.right.node}</div>
-      ) : (
+        <div className={`h-auto ${spanClass(row.right)}`}>{row.right.node}</div>
+      ) : row.left.full ? null : (
         <div className="hidden lg:block lg:col-span-7" />
       )}
     </div>
@@ -286,6 +288,25 @@ export default function EditorialBiographyColumns({
         <TextCell content={t.content} eyebrow={ti === 0 ? eyebrow : undefined} />
       );
       const slot = mediaSlots.get(ti) || [];
+      const quote = isQuote(t.content);
+
+      // Quotes stretch across the full row, underneath the narrative.
+      if (quote) {
+        rows.push({ left: { node: textCell, isMedia: false, full: true }, right: null });
+        rowIndex += 1;
+        for (let k = 0; k < slot.length; k += 2) {
+          const a = slot[k];
+          const b = slot[k + 1];
+          rows.push({
+            left: { node: <MediaCell block={a} designerName={designerName} index={mediaIndexOf(a)} />, isMedia: true },
+            right: b
+              ? { node: <MediaCell block={b} designerName={designerName} index={mediaIndexOf(b)} />, isMedia: true }
+              : null,
+          });
+          rowIndex += 1;
+        }
+        return;
+      }
 
       if (slot.length === 0) {
         rows.push({ left: { node: textCell, isMedia: false }, right: null });
@@ -303,6 +324,7 @@ export default function EditorialBiographyColumns({
           : { left: { node: firstCell, isMedia: true }, right: { node: textCell, isMedia: false } },
       );
       rowIndex += 1;
+
 
       // Any extra media assigned to this slot pairs up on its own rows.
       for (let k = 1; k < slot.length; k += 2) {
@@ -322,7 +344,7 @@ export default function EditorialBiographyColumns({
 
   return (
     <div className="bg-cream">
-      <div className={containerClassName ?? "mx-auto max-w-5xl px-6 md:px-12 pt-4 md:pt-6 pb-4 md:pb-6"}>
+      <div className={containerClassName ?? "mx-auto max-w-7xl px-6 md:px-12 pt-4 md:pt-6 pb-4 md:pb-6"}>
         <div className="flex flex-col">
           {rows.map((row, i) => (
             <div key={`row-${i}`} className="h-auto py-2 md:py-3 first:pt-0 last:pb-0">
