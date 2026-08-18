@@ -512,7 +512,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       >
         <motion.div
           {...panelMotion}
-          className="relative w-full max-w-7xl h-dvh max-h-dvh md:h-[90vh] md:max-h-[900px] md:flex-row bg-background/85 backdrop-blur-xl md:rounded-xl rounded-none shadow-2xl overflow-hidden flex flex-col min-h-0"
+          className="relative w-full max-w-6xl h-dvh max-h-dvh md:h-[90vh] md:max-h-[900px] md:flex-row bg-background/85 backdrop-blur-xl md:rounded-xl rounded-none shadow-2xl overflow-hidden flex flex-col min-h-0"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Mobile header */}
@@ -553,9 +553,9 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           <div className="flex-1 min-h-0 overflow-y-auto md:flex md:flex-row md:overflow-visible">
 
           {/* Image + desktop description column */}
-          <div className="relative w-full md:w-[60%] shrink-0 bg-muted/30 md:flex md:flex-col md:min-h-[400px] md:gap-8">
+          <div className="relative w-full md:w-3/5 shrink-0 bg-muted/30 md:flex md:flex-col md:min-h-[400px] md:gap-8">
           <div
-            className="relative w-full h-[42dvh] max-h-[340px] md:h-auto md:flex-1 shrink-0 flex items-center justify-center p-2 md:p-5 lg:p-6"
+            className="relative w-full h-[42dvh] max-h-[340px] md:h-auto md:min-h-0 shrink-0 flex items-center justify-center p-2 md:p-5 lg:p-6"
             onMouseEnter={() => { if (canShowHoverImage) setShowHoverImage(true); }}
             onMouseLeave={() => setShowHoverImage(false)}
           >
@@ -578,7 +578,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   onLoad={() => { setImageLoaded(true); setImageFailed(false); }}
                   onError={() => { setImageFailed(true); setImageLoaded(true); }}
                   className={cn(
-                    "w-full h-full object-contain transition-opacity duration-300",
+                    "w-full h-auto object-cover transition-opacity duration-300",
                     imageFailed ? "opacity-0"
                       : !imageLoaded ? "opacity-0"
                         : showHoverImage && canShowHoverImage && hoverImageLoaded && !imageSwappedByFinish ? "opacity-0"
@@ -678,7 +678,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Details */}
-          <div className="w-full md:w-[40%] min-h-0 p-5 md:p-8 flex flex-col gap-3 md:gap-4 md:overflow-y-auto">
+          <div className="w-full md:w-2/5 min-h-0 p-5 md:p-8 flex flex-col gap-3 md:gap-4 md:overflow-y-auto">
             <div>
               <button
                 type="button"
