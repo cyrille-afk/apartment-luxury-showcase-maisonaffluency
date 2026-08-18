@@ -36,12 +36,14 @@ const Footer = () => {
       >
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col items-center gap-6">
-          <button
-            onClick={() => setTourOpen(true)}
-            className="min-h-12 px-8 py-3.5 bg-background text-foreground font-body text-sm uppercase tracking-[0.2em] border border-[hsl(var(--accent))] rounded-full shadow-[0_0_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_0_14px_hsl(var(--accent)/0.5)] transition-all duration-300"
-          >
-            Request a Private Tour
-          </button>
+          {!isGallery && (
+            <button
+              onClick={() => setTourOpen(true)}
+              className="min-h-12 px-8 py-3.5 bg-background text-foreground font-body text-sm uppercase tracking-[0.2em] border border-[hsl(var(--accent))] rounded-full shadow-[0_0_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_0_14px_hsl(var(--accent)/0.5)] transition-all duration-300"
+            >
+              Request a Private Tour
+            </button>
+          )}
           <div className="flex flex-wrap justify-center gap-x-10 gap-y-4 items-center">
             <button onClick={() => scrollToSection("curating-team")} className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
               About Us
