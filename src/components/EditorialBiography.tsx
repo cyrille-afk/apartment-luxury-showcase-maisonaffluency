@@ -17,6 +17,8 @@ interface EditorialBiographyProps {
   debugMediaOrder?: boolean;
   /** When false, disables the internal collapsible wrapper (use when already wrapped externally) */
   allowCollapse?: boolean;
+  /** When set, the internal "View full profile" trigger calls this instead of expanding inline */
+  onExpandOverride?: () => void;
 }
 
 /** Number of biography paragraphs to show before "Read more" on mobile */
@@ -797,7 +799,7 @@ function MobileCollapsible({ paragraphs }: { paragraphs: string[] }) {
       ))}
       {shouldCollapse && !expanded && (
         <button
-          onClick={() => setExpanded(true)}
+          onClick={handleExpand}
           className="mt-4 flex items-center gap-1.5 font-display text-[11px] tracking-[0.15em] uppercase text-primary/70 hover:text-primary transition-colors"
         >
           Read more
@@ -832,14 +834,17 @@ function CollapsibleBiographyWrapper({
   elementCount,
   allowCollapse = true,
   collapseAfterIndex,
+  onExpandOverride,
 }: {
   children: React.ReactNode;
   elementCount: number;
   allowCollapse?: boolean;
+  onExpandOverride?: () => void;
   /** If set, collapse after this element index (0-based). Otherwise uses max-height. */
   collapseAfterIndex?: number;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const handleExpand = () => (onExpandOverride ? onExpandOverride() : setExpanded(true));
   const clearfix = "after:content-[''] after:block after:clear-both";
   if (!allowCollapse) return <div className={clearfix}>{children}</div>;
   // When collapseAfterIndex is set, always allow collapsing regardless of element count
@@ -859,7 +864,7 @@ function CollapsibleBiographyWrapper({
         {!expanded && (
           <div className="mt-5 flex justify-center">
             <button
-              onClick={() => setExpanded(true)}
+              onClick={handleExpand}
               className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-[12px] tracking-[0.18em] uppercase rounded-full hover:bg-foreground/85 transition-colors shadow-md"
             >
               <ChevronDown className="w-3.5 h-3.5" />
@@ -895,7 +900,7 @@ function CollapsibleBiographyWrapper({
         <div className="flex justify-center">
           <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none" />
           <button
-            onClick={() => setExpanded(true)}
+            onClick={handleExpand}
             className="relative z-10 mt-5 inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-[12px] tracking-[0.18em] uppercase rounded-full hover:bg-foreground/85 transition-colors shadow-md"
           >
             <ChevronDown className="w-3.5 h-3.5" />
@@ -924,6 +929,7 @@ export default function EditorialBiography({
   designerName,
   debugMediaOrder = false,
   allowCollapse: externalAllowCollapse = true,
+  onExpandOverride,
   startImageIndex = 0,
 }: EditorialBiographyProps & { startImageIndex?: number }) {
   const isMobile = useIsMobile();
@@ -1241,6 +1247,7 @@ export default function EditorialBiography({
         elementCount={wrapperChildren.length}
         collapseAfterIndex={firstImageWrapperIdx >= 0 ? firstImageWrapperIdx : undefined}
         allowCollapse={externalAllowCollapse}
+        onExpandOverride={onExpandOverride}
       >
         {wrapperChildren}
       </CollapsibleBiographyWrapper>
@@ -1399,7 +1406,7 @@ export default function EditorialBiography({
   const hasParsedVideo = parsedMedia.some((mediaItem) => mediaItem.isVideo);
 
   return (
-    <CollapsibleBiographyWrapper elementCount={elements.length} allowCollapse={externalAllowCollapse}>
+    <CollapsibleBiographyWrapper elementCount={elements.length} allowCollapse={externalAllowCollapse} onExpandOverride={onExpandOverride}>
       <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
         {debugMediaOrder && debugEvents.length > 0 && (
           <div className="mb-4 rounded-md border border-border bg-muted/30 p-3">
