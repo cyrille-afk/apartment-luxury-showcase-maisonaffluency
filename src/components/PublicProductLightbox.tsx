@@ -549,13 +549,13 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             <X size={18} />
           </button>
 
-          {/* Scrollable mobile body */}
-          <div className="flex-1 min-h-0 overflow-y-auto md:flex md:flex-row md:overflow-visible">
+          {/* Scrollable body */}
+          <div className="flex-1 min-h-0 overflow-y-auto md:flex md:flex-row md:overflow-hidden">
 
           {/* Image + desktop description column */}
-          <div className="relative w-full md:w-3/5 shrink-0 bg-muted/30 md:flex md:flex-col md:h-full md:max-h-full md:min-h-[400px] md:gap-2 md:overflow-hidden">
+          <div className="relative w-full md:w-3/5 shrink-0 bg-muted/30 md:flex md:flex-col md:h-full md:gap-2 md:overflow-y-auto">
           <div
-            className="relative w-full h-[42dvh] max-h-[340px] md:h-auto md:flex-1 md:max-h-none md:min-h-0 shrink-0 md:shrink flex items-center justify-center p-2 md:p-5 lg:p-6"
+            className="relative w-full flex items-center justify-center p-2 md:p-5 lg:p-6"
             onMouseEnter={() => { if (canShowHoverImage) setShowHoverImage(true); }}
             onMouseLeave={() => setShowHoverImage(false)}
           >
@@ -578,7 +578,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   onLoad={() => { setImageLoaded(true); setImageFailed(false); }}
                   onError={() => { setImageFailed(true); setImageLoaded(true); }}
                   className={cn(
-                    "w-full h-auto md:max-h-full md:w-auto md:object-contain object-cover transition-opacity duration-300",
+                    "w-full h-auto object-contain transition-opacity duration-300",
                     imageFailed ? "opacity-0"
                       : !imageLoaded ? "opacity-0"
                         : showHoverImage && canShowHoverImage && hoverImageLoaded && !imageSwappedByFinish ? "opacity-0"
@@ -678,7 +678,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Details */}
-          <div className="w-full md:w-2/5 min-h-0 p-5 md:p-8 flex flex-col gap-3 md:gap-4 md:overflow-y-auto">
+          <div className="w-full md:w-2/5 min-h-0 md:h-full p-5 md:p-8 flex flex-col gap-3 md:gap-4 md:overflow-y-auto">
             <div>
               <button
                 type="button"
