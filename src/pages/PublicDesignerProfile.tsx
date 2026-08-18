@@ -1072,6 +1072,7 @@ const PublicDesignerProfile = () => {
       {portraitOpen && (displayBiography || "") && (
         <div className="relative w-screen left-1/2 -ml-[50vw] bg-cream">
           <EditorialBiographyColumns
+            containerClassName="mx-auto w-full max-w-7xl px-6 md:px-12 pt-4 md:pt-6 pb-4 md:pb-6"
             /* Full text: the landing intro paragraphs unmount when the portrait
                opens, so the expansion must carry the biography from its start. */
             biography={displayBiography || editorialBio || ""}
