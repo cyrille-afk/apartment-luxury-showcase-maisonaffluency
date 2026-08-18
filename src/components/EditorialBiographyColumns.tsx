@@ -120,7 +120,7 @@ function TextCell({
           {eyebrow}
         </p>
       )}
-      <p className="font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80 max-w-3xl">
+      <p className="font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80 max-w-4xl">
         {renderParagraph(content)}
       </p>
     </div>
