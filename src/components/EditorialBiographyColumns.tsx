@@ -322,7 +322,7 @@ export default function EditorialBiographyColumns({
 
   return (
     <div className="bg-cream">
-      <div className="mx-auto max-w-5xl px-6 md:px-12 pt-4 md:pt-6 pb-4 md:pb-6">
+      <div className={containerClassName ?? "mx-auto max-w-5xl px-6 md:px-12 pt-4 md:pt-6 pb-4 md:pb-6"}>
         <div className="flex flex-col">
           {rows.map((row, i) => (
             <div key={`row-${i}`} className="h-auto py-2 md:py-3 first:pt-0 last:pb-0">
