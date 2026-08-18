@@ -105,7 +105,7 @@ function TextCell({
           </p>
         )}
         <blockquote className="border-l border-foreground/25 pl-5 md:pl-7 py-0 m-0">
-          <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85 max-w-3xl">
+          <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85 max-w-5xl">
             {renderParagraph(stripQuotes(content))}
           </p>
         </blockquote>
@@ -120,7 +120,7 @@ function TextCell({
           {eyebrow}
         </p>
       )}
-      <p className="font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80 max-w-3xl">
+      <p className="font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80 max-w-4xl">
         {renderParagraph(content)}
       </p>
     </div>
@@ -380,7 +380,7 @@ export default function EditorialBiographyColumns({
                 key={`text-group-${gi}`}
                 className="py-6 md:py-8 first:pt-0 last:pb-0"
               >
-                <div className="max-w-3xl space-y-6">
+                <div className="max-w-5xl space-y-6">
                   {group.rows.map((row, ri) => (
                     <div key={`text-${gi}-${ri}`}>{row.left.node}</div>
                   ))}
