@@ -61,7 +61,7 @@ export default function PublicDesignerBiography() {
 
       <main className="pt-[70px]">
         {/* Editorial masthead */}
-        <header className="mx-auto max-w-[1400px] px-[6vw] pt-5 pb-3 md:pt-6 md:pb-4">
+        <header className="mx-auto max-w-7xl px-6 md:px-12 pt-5 pb-3 md:pt-6 md:pb-4">
           <Link
             to={`/designers/${designer.slug}`}
             className="group inline-flex items-center gap-3 font-body text-[10px] md:text-[11px] uppercase tracking-[0.22em] text-foreground/60 hover:text-foreground transition-colors duration-300"
@@ -81,6 +81,7 @@ export default function PublicDesignerBiography() {
 
         {biography ? (
           <EditorialBiographyColumns
+            containerClassName="mx-auto w-full max-w-7xl px-6 md:px-12"
             biography={biography}
             biographyImages={designer.biography_images || []}
             designerName={designer.name}
