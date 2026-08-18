@@ -357,9 +357,8 @@ export default function EditorialBiographyColumns({
 
   // Group consecutive text-only rows into a single cohesive flow so paragraphs
   // read as one continuous column instead of isolated full-width blocks.
-  const grouped = rows.reduce<
-    { type: "text"; rows: Row[] } | { type: "media"; rows: Row[] }
-  >[]((acc, row) => {
+  type Group = { type: "text"; rows: Row[] } | { type: "media"; rows: Row[] };
+  const grouped = rows.reduce<Group[]>((acc, row) => {
     const isTextOnly =
       row.left.isMedia === false && row.left.full === true && row.right === null;
     const last = acc[acc.length - 1];
