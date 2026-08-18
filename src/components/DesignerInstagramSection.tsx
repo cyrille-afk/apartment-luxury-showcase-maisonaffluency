@@ -75,7 +75,7 @@ const DesignerInstagramSection = memo(({ posts, designerName, compact }: Props) 
       </div>
 
       {/* Grid — matches homepage Instagram feed layout */}
-      <div className={compact ? "grid grid-cols-3 md:grid-cols-5 gap-1 md:gap-1.5" : "grid grid-cols-3 md:grid-cols-5 gap-1 md:gap-1.5 px-4 md:px-12 lg:px-20"}>
+      <div className={compact ? "grid grid-cols-3 md:grid-cols-4 gap-1 md:gap-1.5" : "grid grid-cols-3 md:grid-cols-4 gap-1 md:gap-1.5 px-4 md:px-12 lg:px-20"}>
           {postsWithImages.slice(0, 6).map((post, index) => (
             <InstagramTile
               key={post.id}

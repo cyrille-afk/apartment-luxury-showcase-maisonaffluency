@@ -51,7 +51,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
   const { data: publicRrpMap = {} } = usePublicRrpMap(picks.map((p) => p.id));
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer.id);
   const isUnderlaid = variant === "underlaid";
-  const [gridCols, setGridCols] = useState<3 | 4>(isUnderlaid ? 3 : 4);
+  const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
   const [ctaPressed, setCtaPressed] = useState(false);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
@@ -340,7 +340,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                       <Instagram className="w-3.5 h-3.5" strokeWidth={1.5} />
                       From the Studio
                     </span>
-                    <div className="flex gap-2.5 items-center h-16 md:h-20 overflow-hidden flex-shrink-0">
+                    <div className="flex gap-2.5 items-center h-20 md:h-24 overflow-hidden flex-shrink-0">
                       {igWithImages.slice(0, 6).map((post) => (
                         <a
                           key={post.id}
