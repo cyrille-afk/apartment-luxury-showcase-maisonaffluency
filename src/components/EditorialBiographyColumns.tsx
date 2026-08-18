@@ -380,7 +380,7 @@ export default function EditorialBiographyColumns({
                 key={`text-group-${gi}`}
                 className="py-6 md:py-8 first:pt-0 last:pb-0"
               >
-                <div className="max-w-3xl space-y-6">
+                <div className="max-w-5xl space-y-6">
                   {group.rows.map((row, ri) => (
                     <div key={`text-${gi}-${ri}`}>{row.left.node}</div>
                   ))}
