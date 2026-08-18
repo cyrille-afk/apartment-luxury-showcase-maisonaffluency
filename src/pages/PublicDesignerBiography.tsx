@@ -113,6 +113,8 @@ export default function PublicDesignerBiography() {
             biographyImages={designer.biography_images || []}
             designerName={designer.name}
             eyebrow={designer.specialty || "The Full Portrait"}
+            collectionCtaHref={`/designers/${designer.slug}?section=picks`}
+            collectionCtaLabel="Discover the Collection"
             footer={
               <div className="h-auto">
                 {designer.hero_photo_credit && (
