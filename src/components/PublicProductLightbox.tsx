@@ -17,7 +17,7 @@ import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
 import { isProductUpholstered } from "@/lib/upholstery";
 
 import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel, isDimensionAxisLabel } from "@/lib/variantPlaceholders";
-import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
+import { formatDimensionsMultiline, formatImperialDimensions, splitDimensionQualifier, withImperialPerLine } from "@/lib/formatDimensions";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { looksLikeDimension } from "@/lib/rugPricing";
 import { useDesignerByName } from "@/hooks/useDesigner";
