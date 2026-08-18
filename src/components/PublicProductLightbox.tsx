@@ -769,13 +769,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   }
                 }
                 if (!dimText) return null;
-                return (
-                  <ExpandableSpec
-                    icon={specIcon("📐")}
-                    text={withImperialPerLine(dimText)}
-                    emphasized
-                  />
-                );
+                return <DimensionsList text={withImperialPerLine(dimText)} />;
               })()}
 
               {(() => {
