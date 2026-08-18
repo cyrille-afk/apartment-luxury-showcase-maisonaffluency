@@ -669,8 +669,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
           {/* Desktop: description rendered directly under the image (SEO-friendly) */}
           {product.description && product.description.trim().length > 0 && (
-            <div className="hidden md:flex flex-col mt-auto px-8 pb-8 pt-12">
-              <p className="font-body text-[13px] leading-[1.7] text-foreground/75 text-left whitespace-pre-wrap">
+            <div className="hidden md:flex flex-col mt-auto px-8 pb-10 pt-16">
+              <p className="font-body text-sm leading-relaxed text-foreground/75 text-left whitespace-pre-wrap max-w-md">
                 {product.description}
               </p>
             </div>
@@ -678,7 +678,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Details */}
-          <div className="flex-1 min-h-0 p-5 md:p-8 flex flex-col gap-3 md:gap-4 md:overflow-y-auto">
+          <div className="w-full md:w-[45%] min-h-0 p-5 md:p-8 flex flex-col gap-3 md:gap-4 md:overflow-y-auto">
             <div>
               <button
                 type="button"
