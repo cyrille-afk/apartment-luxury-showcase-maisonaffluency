@@ -546,11 +546,12 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </button>
 
           {/* Scrollable body */}
-          <div className="flex-1 min-h-0 overflow-y-auto md:flex md:flex-row md:items-start md:overflow-hidden">
+          <div className="flex-1 min-h-0 overflow-y-auto md:flex md:flex-row md:items-stretch md:overflow-hidden">
 
           {/* Image + desktop description column */}
-          <div className="relative w-full md:w-3/5 shrink-0 bg-muted/30 flex flex-col gap-6 md:h-[80vh] md:overflow-y-auto scrollbar-none">
-          <div className="relative w-full flex shrink-0 items-start justify-center p-2 md:p-5 lg:p-6">
+          <div className="relative w-full md:w-3/5 shrink-0 bg-muted/30 flex flex-col md:h-full md:min-h-0 md:overflow-hidden scrollbar-none">
+          <div className="relative w-full flex items-center justify-center p-2 md:p-5 lg:p-6 md:flex-1 md:min-h-0">
+
             {product.image_url ? (
               <>
                 {!imageLoaded && !imageFailed && (
@@ -570,9 +571,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   onLoad={() => { setImageLoaded(true); setImageFailed(false); }}
                   onError={() => { setImageFailed(true); setImageLoaded(true); }}
                   className={cn(
-                    "w-full h-auto object-contain transition-opacity duration-300",
+                    "w-full h-auto object-contain transition-opacity duration-300 md:max-h-full md:w-auto md:max-w-full",
                     imageFailed || !imageLoaded ? "opacity-0" : "opacity-100"
                   )}
+
                 />
               </>
             ) : (
@@ -646,8 +648,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
           {/* Desktop: naturally flowing description placard below the image */}
           {product.description && product.description.trim().length > 0 && (
-            <div className="hidden md:flex w-full flex-col shrink-0 bg-background/95 border-t border-border/40 p-8">
-              <p className="font-body text-sm leading-relaxed text-foreground/75 text-left whitespace-pre-wrap max-w-md">
+            <div className="hidden md:flex w-full flex-col shrink-0 max-h-[35%] overflow-y-auto scrollbar-none bg-background/95 border-t border-border/40 px-8 py-6">
+              <p className="font-body text-sm leading-relaxed text-foreground/75 text-left whitespace-pre-wrap">
                 {product.description}
               </p>
             </div>
@@ -655,7 +657,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Details */}
-          <div className="w-full md:w-2/5 min-h-0 md:h-[80vh] p-5 md:p-8 flex flex-col gap-3 md:gap-4 md:overflow-y-auto scrollbar-none">
+          <div className="w-full md:w-2/5 min-h-0 md:h-full p-5 md:p-8 flex flex-col gap-3 md:gap-4 md:overflow-y-auto scrollbar-none">
+
             <div>
               <button
                 type="button"
