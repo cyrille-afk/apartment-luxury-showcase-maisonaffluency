@@ -139,7 +139,7 @@ const TradeAtelierProfile = () => {
   const { isTradeUser, isAdmin, user } = useAuth();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const fromProduct = useMemo(
     () => searchParams.get("from_product") || consumeProductBackRef(slug),
     [searchParams, slug]
@@ -231,13 +231,11 @@ const TradeAtelierProfile = () => {
   const portraitOpen = searchParams.get("portrait") === "full";
 
   const openPortrait = useCallback(() => {
-    setSearchParams((current) => {
-      const next = new URLSearchParams(current);
-      next.set("portrait", "full");
-      return next;
-    }, { replace: true });
+    const next = new URLSearchParams(searchParams);
+    next.set("portrait", "full");
+    navigate({ search: `?${next.toString()}` }, { replace: true });
     window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
-  }, [setSearchParams]);
+  }, [navigate, searchParams]);
   const [gridColsTouched, setGridColsTouched] = useState(false);
   useEffect(() => {
     if (gridColsTouched) return;
@@ -367,11 +365,9 @@ const TradeAtelierProfile = () => {
                   reversed
                   expanded
                   onClick={() => {
-                    setSearchParams((current) => {
-                      const next = new URLSearchParams(current);
-                      next.delete("portrait");
-                      return next;
-                    }, { replace: true });
+                    const next = new URLSearchParams(searchParams);
+                    next.delete("portrait");
+                    navigate({ search: next.toString() ? `?${next.toString()}` : "" }, { replace: true });
                     window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
                   }}
                 />
