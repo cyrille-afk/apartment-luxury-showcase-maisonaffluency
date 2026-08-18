@@ -25,16 +25,16 @@ function optimizeHtmlPlugin(buildId: string): Plugin {
         `    <meta name="app-build-id" content="${buildId}" />`;
       html = html.replace('<meta charset="UTF-8" />', metaInject);
 
-      // 1. Convert render-blocking CSS to non-blocking load.
-      //    The media="print" → media="all" swap is the only pattern current
-      //    Lighthouse credits as "not render-blocking" (preload+onload still
-      //    shows up in the critical waterfall). An inline <style> block in
-      //    index.html covers above-the-fold styles so there's no FOUC.
+      // 1. Normalise the CSS <link> so the critical-CSS pass (Beasties, see
+      //    inlineCriticalCssPlugin below) can find it. Beasties inlines the
+      //    above-the-fold rules into a <style> block and rewrites this tag
+      //    into a non-blocking preload+swap, so no manual media="print"
+      //    hack is needed any more.
       html = html.replace(
         /<link rel="stylesheet" crossorigin href="(\/assets\/[^"]+\.css)">/g,
-        '<link rel="stylesheet" href="$1" media="print" onload="this.media=\'all\';this.onload=null;document.documentElement.classList.add(\'css-ready\')">' +
-        '<noscript><link rel="stylesheet" href="$1"></noscript>'
+        '<link rel="stylesheet" href="$1">'
       );
+
 
       // 2. Promote modulepreload hints to the <head> top (before any scripts)
       //    so the browser starts fetching vendor chunks immediately
