@@ -1556,13 +1556,12 @@ const PublicDesignerProfile = () => {
 
                 {/* Right: clean hero image, no overlays */}
                 <div className="col-span-12 lg:col-span-7">
-                  <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                  <div className="relative overflow-hidden bg-muted">
                     {heroImage && (
                       <img
                         src={heroImage}
                         alt={name}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        style={{ objectPosition: "center 30%" }}
+                        className="w-full h-auto object-contain"
                         loading="eager"
                       />
                     )}
