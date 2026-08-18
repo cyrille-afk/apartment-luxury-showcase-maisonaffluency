@@ -139,18 +139,18 @@ function MediaCell({
     return (
       <figure className="h-auto m-0">
         <Caption label={label} above />
-        <div className="max-h-[280px] overflow-hidden [&_*]:rounded-none">
-          <VideoBlock
-            url={block.url}
-            designerName={designerName}
-            index={index}
-            overrideCaption={null}
-            posterUrl={block.poster || undefined}
-          />
-        </div>
+        <VideoBlock
+          url={block.url}
+          designerName={designerName}
+          index={index}
+          overrideCaption={null}
+          posterUrl={block.poster || undefined}
+          bare
+        />
       </figure>
     );
   }
+
 
   return (
     <figure className="h-auto m-0">
@@ -234,6 +234,7 @@ export default function EditorialBiographyColumns({
   designerName,
   eyebrow,
   footer,
+  containerClassName,
 }: {
   biography: string;
   biographyImages?: string[];
@@ -242,6 +243,8 @@ export default function EditorialBiographyColumns({
   eyebrow?: string;
   /** Rendered at the absolute bottom of the stream. */
   footer?: React.ReactNode;
+  /** Override the width/padding container (e.g. full-bleed inside the trade shell). */
+  containerClassName?: string;
 }) {
   const blocks = toBlocks(biography, biographyImages);
   const texts = blocks.filter((b): b is Extract<Block, { kind: "text" }> => b.kind === "text");
@@ -319,7 +322,7 @@ export default function EditorialBiographyColumns({
 
   return (
     <div className="bg-cream">
-      <div className="mx-auto max-w-5xl px-6 md:px-12 pt-4 md:pt-6 pb-4 md:pb-6">
+      <div className={containerClassName ?? "mx-auto max-w-5xl px-6 md:px-12 pt-4 md:pt-6 pb-4 md:pb-6"}>
         <div className="flex flex-col">
           {rows.map((row, i) => (
             <div key={`row-${i}`} className="h-auto py-2 md:py-3 first:pt-0 last:pb-0">

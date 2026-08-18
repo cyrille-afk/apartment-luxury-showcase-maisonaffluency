@@ -337,12 +337,15 @@ export function VideoBlock({
   index,
   overrideCaption,
   posterUrl,
+  bare = false,
 }: {
   url: string;
   designerName: string;
   index: number;
   overrideCaption?: string | null;
   posterUrl?: string;
+  /** Strip the outer card framing (margins, shadow, rounding) for a clean native embed. */
+  bare?: boolean;
 }) {
   const caption = overrideCaption ?? captionFromUrl(url);
   const embedUrl = getEmbedUrl(url);
@@ -497,7 +500,10 @@ export function VideoBlock({
 
   const playOverlay = (
     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-      <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/90 group-hover:bg-white flex items-center justify-center transition-colors shadow-lg">
+      <div
+        className="w-16 h-16 md:w-20 md:h-20 bg-white/90 group-hover:bg-white flex items-center justify-center transition-colors shadow-lg"
+        style={{ borderRadius: "9999px" }}
+      >
         <Play className="w-7 h-7 md:w-9 md:h-9 text-foreground ml-1" fill="currentColor" />
       </div>
     </div>
@@ -509,9 +515,9 @@ export function VideoBlock({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={transition}
-      className="my-4 md:my-6 -mx-2 md:-mx-6"
+      className={bare ? "m-0" : "my-4 md:my-6 -mx-2 md:-mx-6"}
     >
-      <div className="aspect-video rounded-xl overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center">
+      <div className={`aspect-video overflow-hidden bg-black relative flex items-center justify-center ${bare ? "" : "rounded-xl shadow-lg"}`}>
         {isYouTube ? (
           !playing && currentPosterUrl ? (
             <button
