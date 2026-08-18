@@ -1393,7 +1393,10 @@ const PublicDesignerProfile = () => {
                   : (() => {
                       const isChild = designer?.founder && designer.founder !== designer.name;
                       const baseName = isChild ? designer.founder : designer?.name;
-                      const letter = encodeURIComponent(baseName?.[0]?.toUpperCase() || "A");
+                      // A–Z buckets are keyed on the LAST name, so derive the
+                      // letter with the same helper the directory groups with.
+                      const initial = baseName ? lastNameInitial(baseName) : "A";
+                      const letter = encodeURIComponent(/^[A-Z]$/.test(initial) ? initial : "A");
                       const expandParam = isChild ? `&expand=${encodeURIComponent(designer.founder)}` : "";
                       return `/designers?letter=${letter}${expandParam}`;
                     })()}
