@@ -2039,7 +2039,7 @@ const PublicDesignerProfile = () => {
 
 
                       {/* Editorial text block — quiet, uniform, line-clamped */}
-                      <div className="flex flex-col flex-1 text-left md:text-center">
+                      <div className="flex flex-col flex-1 text-center">
                         {/* Designer / brand label — small caps, muted (mobile only shows when grouped, like competitor) */}
                         {cardBrandLabel && cardBrandSlug ? (
                           <Link
