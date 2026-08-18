@@ -105,7 +105,7 @@ function TextCell({
           </p>
         )}
         <blockquote className="border-l border-foreground/25 pl-5 md:pl-7 py-0 m-0">
-          <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85 max-w-5xl">
+          <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85 max-w-4xl">
             {renderParagraph(stripQuotes(content))}
           </p>
         </blockquote>
