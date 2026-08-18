@@ -298,7 +298,6 @@ export default function EditorialBiographyColumns({
         <TextCell
           content={t.content}
           eyebrow={ti === 0 ? eyebrow : undefined}
-          wide={standalone}
         />
       );
 
