@@ -89,7 +89,15 @@ function stripQuotes(content: string) {
     .replace(/\s*["”'’»]([.!?]?)((?:\s*<\/[^>]+>)*)$/, "$1$2");
 }
 
-function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
+function TextCell({
+  content,
+  eyebrow,
+  wide,
+}: {
+  content: string;
+  eyebrow?: string;
+  wide?: boolean;
+}) {
   if (isQuote(content)) {
     return (
       <div className="h-auto">
@@ -99,7 +107,7 @@ function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
           </p>
         )}
         <blockquote className="border-l border-foreground/25 pl-5 md:pl-7 py-0 m-0">
-          <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85">
+          <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85 max-w-[85ch]">
             {renderParagraph(stripQuotes(content))}
           </p>
         </blockquote>
@@ -114,12 +122,17 @@ function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
           {eyebrow}
         </p>
       )}
-      <p className="max-w-[560px] font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80">
+      <p
+        className={`font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80 ${
+          wide ? "max-w-[80ch]" : "max-w-[560px]"
+        }`}
+      >
         {renderParagraph(content)}
       </p>
     </div>
   );
 }
+
 
 
 function MediaCell({
@@ -284,11 +297,16 @@ export default function EditorialBiographyColumns({
     }
   } else {
     texts.forEach((t, ti) => {
-      const textCell = (
-        <TextCell content={t.content} eyebrow={ti === 0 ? eyebrow : undefined} />
-      );
       const slot = mediaSlots.get(ti) || [];
       const quote = isQuote(t.content);
+      const standalone = slot.length === 0 || quote;
+      const textCell = (
+        <TextCell
+          content={t.content}
+          eyebrow={ti === 0 ? eyebrow : undefined}
+          wide={standalone}
+        />
+      );
 
       // Quotes stretch across the full row, underneath the narrative.
       if (quote) {
@@ -309,10 +327,12 @@ export default function EditorialBiographyColumns({
       }
 
       if (slot.length === 0) {
-        rows.push({ left: { node: textCell, isMedia: false }, right: null });
+        // Text-only row: span the full layout width.
+        rows.push({ left: { node: textCell, isMedia: false, full: true }, right: null });
         rowIndex += 1;
         return;
       }
+
 
       const first = slot[0];
       const firstCell = (
@@ -347,9 +367,10 @@ export default function EditorialBiographyColumns({
       <div className={containerClassName ?? "mx-auto max-w-7xl px-6 md:px-12 pt-4 md:pt-6 pb-4 md:pb-6"}>
         <div className="flex flex-col">
           {rows.map((row, i) => (
-            <div key={`row-${i}`} className="h-auto py-2 md:py-3 first:pt-0 last:pb-0">
+            <div key={`row-${i}`} className="h-auto py-6 md:py-8 first:pt-0 last:pb-0">
               {/* Ultra-fine horizontal baseline rule — locks left→right reading flow */}
-              <div className="w-full h-px bg-foreground/10 mb-2 md:mb-3" />
+              <div className="w-full h-px bg-foreground/10 mb-6 md:mb-8" />
+
 
               <FadeInRow row={row} delay={Math.min(i * 80, 300)} />
             </div>
