@@ -91,11 +91,13 @@ export default function PublicDesignerBiography() {
                     Photo: {designer.hero_photo_credit}
                   </p>
                 )}
-                <PortraitCtaLink
-                  label="Close The Full Portrait"
-                  reversed
-                  onClick={() => navigate(`/designers/${designer.slug}`)}
-                />
+                <div className="flex justify-center py-16 md:py-20">
+                  <PortraitCtaLink
+                    label="Close The Full Portrait"
+                    reversed
+                    onClick={() => navigate(`/designers/${designer.slug}`)}
+                  />
+                </div>
               </div>
             }
           />
