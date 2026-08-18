@@ -36,7 +36,7 @@ All colors MUST be HSL.
     --input: 32 15% 88%;
     --ring: 168 45% 30%;
 
-    --radius: 0.75rem;
+    --radius: 0px;
 
     /* Micro-radius for functional controls: enough to read as "tappable"
        without softening the editorial, sharp-cornered layout language. */
