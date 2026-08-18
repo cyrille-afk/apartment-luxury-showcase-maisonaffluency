@@ -44,8 +44,6 @@ export default function PublicDesignerBiography() {
 
   const name = displayName(designer.name);
   const biography = designer.biography || "";
-  const heroImage = (designer as any).wide_hero_image_url || designer.hero_image_url || designer.image_url;
-
   return (
     <div className="min-h-screen bg-background">
       <Helmet>

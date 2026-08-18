@@ -15,7 +15,7 @@ import {
  *
  * Tightly bound, strictly editorial golden box:
  *  - max-w-5xl centered container
- *  - 12-column grid: text spans 5, media spans 6, 1 clean whitespace track
+ *  - 12-column grid: text spans 5, media spans 7, filling the container edge to edge
  *  - ultra-fine horizontal baseline rule above every row
  */
 
@@ -65,11 +65,11 @@ function toBlocks(biography: string, extraMedia: string[]): Block[] {
   return blocks;
 }
 
-function Caption({ label, above = false }: { label: string; above?: boolean }) {
+function Caption({ label }: { label: string }) {
   if (!label) return null;
   return (
     <p
-      className={`${above ? "mb-2" : "mt-2"} font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.8]`}
+      className="mt-2 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.8]"
     >
       {label}
     </p>
@@ -138,7 +138,6 @@ function MediaCell({
   if (block.kind === "video") {
     return (
       <figure className="h-auto m-0">
-        <Caption label={label} above />
         <VideoBlock
           url={block.url}
           designerName={designerName}
@@ -147,6 +146,7 @@ function MediaCell({
           posterUrl={block.poster || undefined}
           bare
         />
+        <Caption label={label} />
       </figure>
     );
   }
@@ -154,7 +154,6 @@ function MediaCell({
 
   return (
     <figure className="h-auto m-0">
-      <Caption label={label} above />
       <img
         src={optimizeImageUrl(block.url)}
         alt={block.caption || `${designerName} — editorial`}
@@ -162,6 +161,7 @@ function MediaCell({
         loading="lazy"
         decoding="async"
       />
+      <Caption label={label} />
     </figure>
   );
 }
@@ -206,7 +206,7 @@ function FadeInRow({
   }, []);
 
   const spanClass = (isMedia: boolean) =>
-    isMedia ? "lg:col-span-6" : "lg:col-span-5";
+    isMedia ? "lg:col-span-7" : "lg:col-span-5";
 
   return (
     <div
@@ -222,7 +222,7 @@ function FadeInRow({
       {row.right ? (
         <div className={`h-auto ${spanClass(row.right.isMedia)}`}>{row.right.node}</div>
       ) : (
-        <div className="hidden lg:block lg:col-span-6" />
+        <div className="hidden lg:block lg:col-span-7" />
       )}
     </div>
   );
