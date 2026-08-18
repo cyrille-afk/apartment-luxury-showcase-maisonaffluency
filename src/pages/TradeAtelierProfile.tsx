@@ -512,15 +512,64 @@ const TradeAtelierProfile = () => {
                       </blockquote>
                     );
                   })()}
-                  <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
-                    About
-                  </h2>
-                  <EditorialBiography
-                    biography={designer.biography}
-                    biographyImages={designer.biography_images}
-                    pickImages={picks.slice(0, 3).map((p) => `${p.image_url} | ${p.title}`)}
-                    designerName={designer.name}
-                  />
+                  {!portraitOpen && (
+                    <>
+                      <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
+                        About
+                      </h2>
+                      <EditorialBiography
+                        biography={designer.biography}
+                        biographyImages={designer.biography_images}
+                        pickImages={picks.slice(0, 3).map((p) => `${p.image_url} | ${p.title}`)}
+                        designerName={designer.name}
+                      />
+                      <div className="mt-6">
+                        <PortraitCtaLink
+                          label="View The Full Portrait"
+                          onClick={() => {
+                            setPortraitOpen(true);
+                            requestAnimationFrame(() =>
+                              portraitRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+                            );
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div ref={portraitRef} id="portrait" className="scroll-mt-24">
+                    {portraitOpen && (
+                      <div className="relative w-screen left-1/2 -ml-[50vw] bg-cream">
+                        <EditorialBiographyColumns
+                          biography={designer.biography}
+                          biographyImages={designer.biography_images || []}
+                          designerName={designer.name}
+                          eyebrow={designer.specialty || "The Full Portrait"}
+                          footer={
+                            <div className="h-auto text-foreground">
+                              {(designer as any).hero_photo_credit && (
+                                <p className="mb-8 font-body text-[10px] uppercase tracking-[0.15em] text-foreground/40">
+                                  Photo: {(designer as any).hero_photo_credit}
+                                </p>
+                              )}
+                              <PortraitCtaLink
+                                label="Close The Full Portrait"
+                                reversed
+                                expanded
+                                onClick={() => {
+                                  setPortraitOpen(false);
+                                  requestAnimationFrame(() =>
+                                    portraitRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
+                                  );
+                                }}
+                              />
+                            </div>
+                          }
+                        />
+                      </div>
+                    )}
+                  </div>
+
                   {heritageSlides.length > 0 && (
                     <HeritageSlider slides={heritageSlides} />
                   )}
