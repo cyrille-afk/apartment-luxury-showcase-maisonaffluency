@@ -139,7 +139,7 @@ const TradeAtelierProfile = () => {
   const { isTradeUser, isAdmin, user } = useAuth();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const fromProduct = useMemo(
     () => searchParams.get("from_product") || consumeProductBackRef(slug),
     [searchParams, slug]
@@ -228,12 +228,16 @@ const TradeAtelierProfile = () => {
   const profileBadgeLabel = designer?.display_name || designer?.name;
   const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const [gridCols, setGridCols] = useState<3 | 4>(4);
-  const [portraitOpen, setPortraitOpen] = useState(false);
+  const portraitOpen = searchParams.get("portrait") === "full";
 
   const openPortrait = useCallback(() => {
-    setPortraitOpen(true);
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.set("portrait", "full");
+      return next;
+    }, { replace: true });
     window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
-  }, []);
+  }, [setSearchParams]);
   const [gridColsTouched, setGridColsTouched] = useState(false);
   useEffect(() => {
     if (gridColsTouched) return;
@@ -363,7 +367,11 @@ const TradeAtelierProfile = () => {
                   reversed
                   expanded
                   onClick={() => {
-                    setPortraitOpen(false);
+                    setSearchParams((current) => {
+                      const next = new URLSearchParams(current);
+                      next.delete("portrait");
+                      return next;
+                    }, { replace: true });
                     window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
                   }}
                 />
