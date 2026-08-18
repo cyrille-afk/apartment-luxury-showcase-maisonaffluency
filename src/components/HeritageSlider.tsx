@@ -50,7 +50,7 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={transition}
-      className="my-10 md:my-14"
+      className="mt-4 md:mt-6 mb-10 md:mb-14"
     >
       <h3 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-5">
         Archives
