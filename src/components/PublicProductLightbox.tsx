@@ -667,9 +667,9 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             </div>
           </div>
 
-          {/* Desktop: description rendered directly under the image (SEO-friendly) */}
+          {/* Desktop: description card — fills remaining left-column height to align with the right panel bottom */}
           {product.description && product.description.trim().length > 0 && (
-            <div className="hidden md:flex flex-col mt-auto px-8 pb-10 pt-16">
+            <div className="hidden md:flex flex-col flex-1 bg-background/95 border-t border-border/40 p-8 overflow-y-auto">
               <p className="font-body text-sm leading-relaxed text-foreground/75 text-left whitespace-pre-wrap max-w-md">
                 {product.description}
               </p>
