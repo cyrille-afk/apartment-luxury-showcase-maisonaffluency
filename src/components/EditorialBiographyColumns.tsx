@@ -13,10 +13,10 @@ import {
  * Premium 2-column asymmetrical editorial layout for the expanded
  * ("full portrait") biography page.
  *
- * Tightly bound, strictly editorial golden box:
- *  - max-w-5xl centered container
- *  - 12-column grid: text spans 5, media spans 7, filling the container edge to edge
- *  - ultra-fine horizontal baseline rule above every row
+ * Full-width editorial layout aligned to the site navigation:
+ *  - max-w-7xl centered container
+ *  - 12-column grid: mixed rows use 5/7; paired media rows use 6/6
+ *  - text-only rows span the grid while preserving a readable line length
  */
 
 type Block =
@@ -214,8 +214,12 @@ function FadeInRow({
     return () => observer.disconnect();
   }, []);
 
-  const spanClass = (cell: Cell) =>
-    cell.full ? "lg:col-span-12" : cell.isMedia ? "lg:col-span-7" : "lg:col-span-5";
+  const isPairedMedia = row.left.isMedia && row.right?.isMedia === true;
+  const spanClass = (cell: Cell) => {
+    if (cell.full) return "lg:col-span-12";
+    if (isPairedMedia) return "lg:col-span-6";
+    return cell.isMedia ? "lg:col-span-7" : "lg:col-span-5";
+  };
 
   return (
     <div
@@ -372,15 +376,15 @@ export default function EditorialBiographyColumns({
 
   return (
     <div className="bg-cream">
-      <div className={containerClassName ?? "mx-auto max-w-7xl px-6 md:px-12 pt-4 md:pt-6 pb-4 md:pb-6"}>
-        <div className="flex flex-col">
+      <div className={containerClassName ?? "mx-auto w-full max-w-7xl px-6 md:px-12 pt-4 md:pt-6 pb-4 md:pb-6"}>
+        <div className="flex w-full flex-col">
           {grouped.map((group, gi) =>
             group.type === "text" ? (
             <div
                 key={`text-group-${gi}`}
-                className="py-6 md:py-8 first:pt-0 last:pb-0"
+                className="w-full py-6 md:py-8 first:pt-0 last:pb-0"
               >
-                <div className="space-y-6">
+                <div className="w-full space-y-6">
                   {group.rows.map((row, ri) => (
                     <div key={`text-${gi}-${ri}`}>{row.left.node}</div>
                   ))}
