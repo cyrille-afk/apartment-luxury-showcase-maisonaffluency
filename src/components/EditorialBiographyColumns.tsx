@@ -294,7 +294,7 @@ export default function EditorialBiographyColumns({
 
   return (
     <div className="bg-cream">
-      <div className="mx-auto max-w-5xl px-6 md:px-12 pt-4 md:pt-6 pb-10 md:pb-14">
+      <div className="mx-auto max-w-5xl px-6 md:px-12 pt-4 md:pt-6 pb-4 md:pb-6">
         <div className="flex flex-col">
           {rows.map((row, i) => (
             <div key={`row-${i}`} className="h-auto py-2 md:py-3 first:pt-0 last:pb-0">
@@ -308,7 +308,7 @@ export default function EditorialBiographyColumns({
 
 
         {footer && (
-          <div className="pt-5 md:pt-6 transition-all duration-700 ease-out opacity-100 translate-y-0">
+          <div className="pt-4 md:pt-5 transition-all duration-700 ease-out opacity-100 translate-y-0">
             {footer}
           </div>
         )}
