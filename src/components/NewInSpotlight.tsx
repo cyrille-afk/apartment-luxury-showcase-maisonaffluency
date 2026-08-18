@@ -340,7 +340,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                       <Instagram className="w-3.5 h-3.5" strokeWidth={1.5} />
                       From the Studio
                     </span>
-                    <div className="flex gap-2.5 items-center h-16 md:h-20 overflow-hidden flex-shrink-0">
+                    <div className="flex gap-2.5 items-center h-16 overflow-hidden flex-shrink-0">
                       {igWithImages.slice(0, 6).map((post) => (
                         <a
                           key={post.id}
@@ -488,7 +488,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                   </div>
                   <div className="h-px flex-1 bg-foreground/15" />
                 </div>
-                <div className="grid grid-cols-3 md:grid-cols-5 gap-1 md:gap-1.5">
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-1">
                   {igWithImages.slice(0, 6).map((post, index) => (
                     <a
                       key={post.id}
