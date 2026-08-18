@@ -139,18 +139,18 @@ function MediaCell({
     return (
       <figure className="h-auto m-0">
         <Caption label={label} above />
-        <div className="max-h-[280px] overflow-hidden [&_*]:rounded-none">
-          <VideoBlock
-            url={block.url}
-            designerName={designerName}
-            index={index}
-            overrideCaption={null}
-            posterUrl={block.poster || undefined}
-          />
-        </div>
+        <VideoBlock
+          url={block.url}
+          designerName={designerName}
+          index={index}
+          overrideCaption={null}
+          posterUrl={block.poster || undefined}
+          bare
+        />
       </figure>
     );
   }
+
 
   return (
     <figure className="h-auto m-0">
