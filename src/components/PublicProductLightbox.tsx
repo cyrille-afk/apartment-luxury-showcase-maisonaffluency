@@ -678,7 +678,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Details */}
-          <div className="w-full md:w-2/5 min-h-0 p-5 md:p-8 flex flex-col gap-3 md:gap-4 md:overflow-y-auto">
+          <div className="w-full md:w-2/5 min-h-0 md:h-full p-5 md:p-8 flex flex-col gap-3 md:gap-4 md:overflow-y-auto">
             <div>
               <button
                 type="button"
