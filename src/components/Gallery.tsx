@@ -1347,7 +1347,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             </p>
             <button
               onClick={() => setTourDialogOpen(true)}
-              className="inline-flex min-h-12 items-center gap-2 px-8 py-3.5 bg-background text-foreground font-body text-sm uppercase tracking-[0.2em] border border-[hsl(var(--accent))] rounded-full shadow-[0_0_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_0_14px_hsl(var(--accent)/0.5)] transition-all duration-300"
+              className="inline-flex min-h-12 items-center gap-2.5 px-9 py-3.5 bg-foreground text-background font-body text-sm uppercase tracking-[0.2em] rounded-xl shadow-[0_4px_20px_-4px_hsl(var(--foreground)/0.25)] hover:bg-foreground/90 hover:shadow-[0_6px_26px_-4px_hsl(var(--foreground)/0.35)] transition-all duration-300"
             >
               <CalendarDays className="h-4 w-4" />
               Request a Private Tour
