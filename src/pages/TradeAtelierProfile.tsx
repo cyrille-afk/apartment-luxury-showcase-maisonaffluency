@@ -228,12 +228,16 @@ const TradeAtelierProfile = () => {
   const profileBadgeLabel = designer?.display_name || designer?.name;
   const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const [gridCols, setGridCols] = useState<3 | 4>(4);
-  const [portraitOpen, setPortraitOpen] = useState(false);
+  // Trade designer pages use the same editorial Full Portrait as their default
+  // view. The compact legacy profile is available only after explicitly closing it.
+  const portraitOpen = searchParams.get("portrait") !== "summary";
 
   const openPortrait = useCallback(() => {
-    setPortraitOpen(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete("portrait");
+    navigate({ search: `?${next.toString()}` }, { replace: true });
     window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
-  }, []);
+  }, [navigate, searchParams]);
   const [gridColsTouched, setGridColsTouched] = useState(false);
   useEffect(() => {
     if (gridColsTouched) return;
@@ -363,7 +367,9 @@ const TradeAtelierProfile = () => {
                   reversed
                   expanded
                   onClick={() => {
-                    setPortraitOpen(false);
+                    const next = new URLSearchParams(searchParams);
+                    next.set("portrait", "summary");
+                    navigate({ search: next.toString() ? `?${next.toString()}` : "" }, { replace: true });
                     window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
                   }}
                 />
