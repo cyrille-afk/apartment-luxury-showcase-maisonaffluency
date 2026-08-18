@@ -212,6 +212,8 @@ export default defineConfig(({ mode }) => {
       optimizeHtmlPlugin(buildId),
       emitVersionPlugin(buildId),
       emitOgManifestPlugin(),
+      inlineCriticalCssPlugin(),
+
     ].filter(Boolean),
   resolve: {
     alias: {
