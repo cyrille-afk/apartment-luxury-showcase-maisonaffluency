@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link, Navigate, useNavigate } from "react-router-dom";
 import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import { Helmet } from "react-helmet-async";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import EditorialBiographyColumns from "@/components/EditorialBiographyColumns";
@@ -27,10 +28,20 @@ export default function PublicDesignerBiography() {
   const isTradeUser = !!user;
   const { data: designer, isLoading } = useDesigner(slug, { includeTradeOnly: isTradeUser });
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
+  const [showStickyClose, setShowStickyClose] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [slug]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setShowStickyClose(window.scrollY > 180);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   if (isLoading) {
     return (
@@ -56,6 +67,24 @@ export default function PublicDesignerBiography() {
       </Helmet>
 
       <Navigation />
+
+      {/* Sticky close control — appears once the user scrolls past the masthead */}
+      <button
+        type="button"
+        onClick={() => navigate(`/designers/${designer.slug}`)}
+        className={cn(
+          "fixed top-4 right-4 md:top-6 md:right-6 z-50",
+          "inline-flex items-center gap-2 px-3.5 py-2 md:px-4 md:py-2.5",
+          "bg-background/85 backdrop-blur-md border border-border/40",
+          "font-body text-[10px] md:text-[11px] uppercase tracking-[0.22em] text-foreground/70 hover:text-foreground",
+          "shadow-sm hover:shadow transition-all duration-300",
+          "opacity-0 translate-y-[-12px] pointer-events-none",
+          showStickyClose && "opacity-100 translate-y-0 pointer-events-auto"
+        )}
+      >
+        <X className="h-3 w-3 md:h-3.5 md:w-3.5" strokeWidth={1.25} />
+        <span className="hidden md:inline">Close Portrait</span>
+      </button>
 
       <main className="pt-[70px]">
         {/* Editorial masthead */}
@@ -84,6 +113,8 @@ export default function PublicDesignerBiography() {
             biographyImages={designer.biography_images || []}
             designerName={designer.name}
             eyebrow={designer.specialty || "The Full Portrait"}
+            collectionCtaHref={`/designers/${designer.slug}?section=picks`}
+            collectionCtaLabel="Discover the Collection"
             footer={
               <div className="h-auto">
                 {designer.hero_photo_credit && (

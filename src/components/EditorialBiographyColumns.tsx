@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import {
@@ -248,6 +250,8 @@ export default function EditorialBiographyColumns({
   eyebrow,
   footer,
   containerClassName,
+  collectionCtaHref,
+  collectionCtaLabel = "Discover the Collection",
 }: {
   biography: string;
   biographyImages?: string[];
@@ -258,6 +262,9 @@ export default function EditorialBiographyColumns({
   footer?: React.ReactNode;
   /** Override the width/padding container (e.g. full-bleed inside the trade shell). */
   containerClassName?: string;
+  /** Optional anchor link rendered after the first media row to surface the product gallery. */
+  collectionCtaHref?: string;
+  collectionCtaLabel?: string;
 }) {
   const blocks = toBlocks(biography, biographyImages);
   const texts = blocks.filter((b): b is Extract<Block, { kind: "text" }> => b.kind === "text");
@@ -378,29 +385,50 @@ export default function EditorialBiographyColumns({
     <div className="bg-cream">
       <div className={containerClassName ?? "mx-auto w-full max-w-7xl px-6 md:px-12 pt-4 md:pt-6 pb-4 md:pb-6"}>
         <div className="flex w-full flex-col">
-          {grouped.map((group, gi) =>
-            group.type === "text" ? (
-            <div
-                key={`text-group-${gi}`}
-                className="w-full py-6 md:py-8 first:pt-0 last:pb-0"
-              >
-                <div className="w-full space-y-6">
-                  {group.rows.map((row, ri) => (
-                    <div key={`text-${gi}-${ri}`}>{row.left.node}</div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              group.rows.map((row, ri) => (
-                <div
-                  key={`row-${gi}-${ri}`}
-                  className="h-auto py-6 md:py-8 first:pt-0 last:pb-0"
-                >
-                  <FadeInRow row={row} delay={Math.min((gi + ri) * 80, 300)} />
-                </div>
-              ))
-            )
-          )}
+          {(() => {
+            let ctaInserted = false;
+            return grouped.map((group, gi) => {
+              const isFirstMediaGroup = group.type === "media" && !ctaInserted;
+              if (isFirstMediaGroup) ctaInserted = true;
+              return (
+                <React.Fragment key={`group-${gi}`}>
+                  {group.type === "text" ? (
+                    <div
+                      className="w-full py-6 md:py-8 first:pt-0 last:pb-0"
+                    >
+                      <div className="w-full space-y-6">
+                        {group.rows.map((row, ri) => (
+                          <div key={`text-${gi}-${ri}`}>{row.left.node}</div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    group.rows.map((row, ri) => (
+                      <div
+                        key={`row-${gi}-${ri}`}
+                        className="h-auto py-6 md:py-8 first:pt-0 last:pb-0"
+                      >
+                        <FadeInRow row={row} delay={Math.min((gi + ri) * 80, 300)} />
+                      </div>
+                    ))
+                  )}
+                  {isFirstMediaGroup && collectionCtaHref && (
+                    <div className="w-full flex justify-start py-2 md:py-4">
+                      <Link
+                        to={collectionCtaHref}
+                        className="group inline-flex items-center gap-3 px-5 py-3 md:px-6 md:py-3.5 border border-foreground/30 bg-background/40 hover:bg-background/80 hover:border-foreground/60 transition-all duration-300"
+                      >
+                        <span className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.28em] text-foreground/80 group-hover:text-foreground transition-colors">
+                          {collectionCtaLabel}
+                        </span>
+                        <ArrowRight className="h-3.5 w-3.5 text-foreground/60 group-hover:text-foreground group-hover:translate-x-1 transition-all duration-300" strokeWidth={1.25} />
+                      </Link>
+                    </div>
+                  )}
+                </React.Fragment>
+              );
+            });
+          })()}
         </div>
 
 
