@@ -512,7 +512,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       >
         <motion.div
           {...panelMotion}
-          className="relative w-full max-w-7xl h-dvh max-h-dvh md:h-[90vh] md:max-h-[900px] md:flex-row bg-background/85 backdrop-blur-xl md:rounded-xl rounded-none shadow-2xl overflow-hidden flex flex-col min-h-0"
+          className="relative w-full max-w-6xl h-dvh max-h-dvh md:h-[90vh] md:max-h-[900px] md:flex-row bg-background/85 backdrop-blur-xl md:rounded-xl rounded-none shadow-2xl overflow-hidden flex flex-col min-h-0"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Mobile header */}
