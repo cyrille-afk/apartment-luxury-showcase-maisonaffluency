@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState, useCallback } from "react";
+import { useMemo, useEffect, useState, useCallback, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import HeritageSlider from "@/components/HeritageSlider";
 import { useHeritageSlides } from "@/hooks/useHeritageSlides";
@@ -11,6 +11,8 @@ import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton from "@/components/trade/SpecSheetButton";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import EditorialBiography, { renderParagraph } from "@/components/EditorialBiography";
+import EditorialBiographyColumns from "@/components/EditorialBiographyColumns";
+import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import { cn } from "@/lib/utils";
 import { useDesigner, useDesignerPicks, useRelatedDesigners, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
@@ -226,6 +228,8 @@ const TradeAtelierProfile = () => {
   const profileBadgeLabel = designer?.display_name || designer?.name;
   const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const [portraitOpen, setPortraitOpen] = useState(false);
+  const portraitRef = useRef<HTMLDivElement>(null);
   const [gridColsTouched, setGridColsTouched] = useState(false);
   useEffect(() => {
     if (gridColsTouched) return;
