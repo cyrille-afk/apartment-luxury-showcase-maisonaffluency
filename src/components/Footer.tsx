@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { scrollToSection } from "@/lib/scrollToSection";
 import InstallAppDialog from "@/components/InstallAppDialog";
 import PrivateTourDialog from "@/components/PrivateTourDialog";
@@ -6,6 +7,8 @@ import PrivateTourDialog from "@/components/PrivateTourDialog";
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const [tourOpen, setTourOpen] = useState(false);
+  const location = useLocation();
+  const isGallery = location.pathname === "/gallery";
   return (
     <>
       <div className="border-t border-accent/20 bg-foreground/95 backdrop-blur-sm px-6 py-3 text-center">
