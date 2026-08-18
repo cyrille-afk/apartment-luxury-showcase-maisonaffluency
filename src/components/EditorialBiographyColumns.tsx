@@ -355,19 +355,49 @@ export default function EditorialBiographyColumns({
   }
 
 
+  // Group consecutive text-only rows into a single cohesive flow so paragraphs
+  // read as one continuous column instead of isolated full-width blocks.
+  const grouped = rows.reduce<
+    { type: "text"; rows: Row[] } | { type: "media"; rows: Row[] }
+  >[]((acc, row) => {
+    const isTextOnly =
+      row.left.isMedia === false && row.left.full === true && row.right === null;
+    const last = acc[acc.length - 1];
+    if (last && last.type === (isTextOnly ? "text" : "media")) {
+      last.rows.push(row);
+    } else {
+      acc.push(isTextOnly ? { type: "text", rows: [row] } : { type: "media", rows: [row] });
+    }
+    return acc;
+  }, []);
+
   return (
     <div className="bg-cream">
       <div className={containerClassName ?? "mx-auto max-w-7xl px-6 md:px-12 pt-4 md:pt-6 pb-4 md:pb-6"}>
         <div className="flex flex-col">
-          {rows.map((row, i) => (
-            <div key={`row-${i}`} className="h-auto py-6 md:py-8 first:pt-0 last:pb-0">
-              {/* Ultra-fine horizontal baseline rule — locks left→right reading flow */}
-              <div className="w-full h-px bg-foreground/10 mb-6 md:mb-8" />
-
-
-              <FadeInRow row={row} delay={Math.min(i * 80, 300)} />
-            </div>
-          ))}
+          {grouped.map((group, gi) =>
+            group.type === "text" ? (
+              <div
+                key={`text-group-${gi}`}
+                className="py-6 md:py-8 first:pt-0 last:pb-0"
+              >
+                <div className="max-w-3xl space-y-6">
+                  {group.rows.map((row, ri) => (
+                    <div key={`text-${gi}-${ri}`}>{row.left.node}</div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              group.rows.map((row, ri) => (
+                <div
+                  key={`row-${gi}-${ri}`}
+                  className="h-auto py-6 md:py-8 first:pt-0 last:pb-0"
+                >
+                  <FadeInRow row={row} delay={Math.min((gi + ri) * 80, 300)} />
+                </div>
+              ))
+            )
+          )}
         </div>
 
 
