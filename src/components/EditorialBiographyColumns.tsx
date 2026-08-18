@@ -288,6 +288,25 @@ export default function EditorialBiographyColumns({
         <TextCell content={t.content} eyebrow={ti === 0 ? eyebrow : undefined} />
       );
       const slot = mediaSlots.get(ti) || [];
+      const quote = isQuote(t.content);
+
+      // Quotes stretch across the full row, underneath the narrative.
+      if (quote) {
+        rows.push({ left: { node: textCell, isMedia: false, full: true }, right: null });
+        rowIndex += 1;
+        for (let k = 0; k < slot.length; k += 2) {
+          const a = slot[k];
+          const b = slot[k + 1];
+          rows.push({
+            left: { node: <MediaCell block={a} designerName={designerName} index={mediaIndexOf(a)} />, isMedia: true },
+            right: b
+              ? { node: <MediaCell block={b} designerName={designerName} index={mediaIndexOf(b)} />, isMedia: true }
+              : null,
+          });
+          rowIndex += 1;
+        }
+        return;
+      }
 
       if (slot.length === 0) {
         rows.push({ left: { node: textCell, isMedia: false }, right: null });
@@ -305,6 +324,7 @@ export default function EditorialBiographyColumns({
           : { left: { node: firstCell, isMedia: true }, right: { node: textCell, isMedia: false } },
       );
       rowIndex += 1;
+
 
       // Any extra media assigned to this slot pairs up on its own rows.
       for (let k = 1; k < slot.length; k += 2) {
