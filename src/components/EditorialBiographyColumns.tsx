@@ -89,7 +89,15 @@ function stripQuotes(content: string) {
     .replace(/\s*["”'’»]([.!?]?)((?:\s*<\/[^>]+>)*)$/, "$1$2");
 }
 
-function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
+function TextCell({
+  content,
+  eyebrow,
+  wide,
+}: {
+  content: string;
+  eyebrow?: string;
+  wide?: boolean;
+}) {
   if (isQuote(content)) {
     return (
       <div className="h-auto">
@@ -99,7 +107,7 @@ function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
           </p>
         )}
         <blockquote className="border-l border-foreground/25 pl-5 md:pl-7 py-0 m-0">
-          <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85">
+          <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85 max-w-[85ch]">
             {renderParagraph(stripQuotes(content))}
           </p>
         </blockquote>
@@ -114,12 +122,17 @@ function TextCell({ content, eyebrow }: { content: string; eyebrow?: string }) {
           {eyebrow}
         </p>
       )}
-      <p className="max-w-[560px] font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80">
+      <p
+        className={`font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80 ${
+          wide ? "max-w-[80ch]" : "max-w-[560px]"
+        }`}
+      >
         {renderParagraph(content)}
       </p>
     </div>
   );
 }
+
 
 
 function MediaCell({
