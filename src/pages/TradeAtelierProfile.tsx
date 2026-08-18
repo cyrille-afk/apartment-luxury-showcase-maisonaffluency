@@ -522,6 +522,12 @@ const TradeAtelierProfile = () => {
                         biographyImages={designer.biography_images}
                         pickImages={picks.slice(0, 3).map((p) => `${p.image_url} | ${p.title}`)}
                         designerName={designer.name}
+                        onExpandOverride={() => {
+                          setPortraitOpen(true);
+                          requestAnimationFrame(() =>
+                            portraitRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+                          );
+                        }}
                       />
                       <div className="mt-6">
                         <PortraitCtaLink
