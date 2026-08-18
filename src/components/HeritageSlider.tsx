@@ -64,11 +64,11 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
                 key={slide.id}
                 className="flex-[0_0_80%] md:flex-[0_0_45%] min-w-0 px-2"
               >
-              <div className="aspect-[4/3] rounded-lg overflow-hidden bg-muted/10 relative">
+              <div className="rounded-lg overflow-hidden bg-muted/10 relative">
                   <img
                     src={slide.image_url}
                     alt={slide.caption || "Heritage piece"}
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto object-contain"
                     loading="lazy"
                   />
                   {slide.caption && (
