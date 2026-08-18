@@ -549,8 +549,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           <div className="flex-1 min-h-0 overflow-y-auto md:flex md:flex-row md:overflow-hidden">
 
           {/* Image + desktop description column */}
-          <div className="relative w-full md:w-3/5 shrink-0 bg-muted/30 md:flex md:flex-col md:h-full md:gap-2 md:overflow-hidden">
-          <div className="relative w-full flex-1 min-h-0 flex items-center justify-center p-2 md:p-5 lg:p-6 overflow-hidden">
+          <div className="relative w-full md:w-3/5 shrink-0 bg-muted/30 md:flex md:flex-col md:h-full md:overflow-y-auto">
+          <div className="relative w-full flex items-center justify-center p-2 md:p-5 lg:p-6">
             {product.image_url ? (
               <>
                 {!imageLoaded && !imageFailed && (
@@ -570,7 +570,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   onLoad={() => { setImageLoaded(true); setImageFailed(false); }}
                   onError={() => { setImageFailed(true); setImageLoaded(true); }}
                   className={cn(
-                    "w-full h-auto md:max-w-full md:max-h-full object-contain transition-opacity duration-300",
+                    "w-full h-auto object-contain transition-opacity duration-300",
                     imageFailed || !imageLoaded ? "opacity-0" : "opacity-100"
                   )}
                 />
@@ -646,7 +646,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
           {/* Desktop: description card — sits directly beneath the image and stays within the modal */}
           {product.description && product.description.trim().length > 0 && (
-            <div className="hidden md:flex flex-col shrink-0 max-h-[38%] bg-background/95 border-t border-border/40 p-8 overflow-y-auto">
+            <div className="hidden md:flex flex-col shrink-0 bg-background/95 border-t border-border/40 p-8">
               <p className="font-body text-sm leading-relaxed text-foreground/75 text-left whitespace-pre-wrap max-w-md">
                 {product.description}
               </p>
