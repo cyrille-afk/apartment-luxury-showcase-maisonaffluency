@@ -92,11 +92,9 @@ function stripQuotes(content: string) {
 function TextCell({
   content,
   eyebrow,
-  wide,
 }: {
   content: string;
   eyebrow?: string;
-  wide?: boolean;
 }) {
   if (isQuote(content)) {
     return (
@@ -107,7 +105,7 @@ function TextCell({
           </p>
         )}
         <blockquote className="border-l border-foreground/25 pl-5 md:pl-7 py-0 m-0">
-          <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85 max-w-[85ch]">
+          <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85 max-w-3xl">
             {renderParagraph(stripQuotes(content))}
           </p>
         </blockquote>
@@ -122,11 +120,7 @@ function TextCell({
           {eyebrow}
         </p>
       )}
-      <p
-        className={`font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80 ${
-          wide ? "max-w-[80ch]" : "max-w-[560px]"
-        }`}
-      >
+      <p className="font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80 max-w-3xl">
         {renderParagraph(content)}
       </p>
     </div>
