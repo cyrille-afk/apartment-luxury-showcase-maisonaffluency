@@ -68,6 +68,24 @@ export default function PublicDesignerBiography() {
 
       <Navigation />
 
+      {/* Sticky close control — appears once the user scrolls past the masthead */}
+      <button
+        type="button"
+        onClick={() => navigate(`/designers/${designer.slug}`)}
+        className={cn(
+          "fixed top-4 right-4 md:top-6 md:right-6 z-50",
+          "inline-flex items-center gap-2 px-3.5 py-2 md:px-4 md:py-2.5",
+          "bg-background/85 backdrop-blur-md border border-border/40",
+          "font-body text-[10px] md:text-[11px] uppercase tracking-[0.22em] text-foreground/70 hover:text-foreground",
+          "shadow-sm hover:shadow transition-all duration-300",
+          "opacity-0 translate-y-[-12px] pointer-events-none",
+          showStickyClose && "opacity-100 translate-y-0 pointer-events-auto"
+        )}
+      >
+        <X className="h-3 w-3 md:h-3.5 md:w-3.5" strokeWidth={1.25} />
+        <span className="hidden md:inline">Close Portrait</span>
+      </button>
+
       <main className="pt-[70px]">
         {/* Editorial masthead */}
         <header className="mx-auto max-w-7xl px-6 md:px-12 pt-5 pb-3 md:pt-6 md:pb-4">
