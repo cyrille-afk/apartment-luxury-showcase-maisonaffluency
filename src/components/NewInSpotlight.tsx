@@ -340,7 +340,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                       <Instagram className="w-3.5 h-3.5" strokeWidth={1.5} />
                       From the Studio
                     </span>
-                    <div className="flex gap-2.5 items-center h-16 overflow-hidden flex-shrink-0">
+                    <div className="flex gap-2.5 items-center h-16 md:h-20 overflow-hidden flex-shrink-0">
                       {igWithImages.slice(0, 6).map((post) => (
                         <a
                           key={post.id}
