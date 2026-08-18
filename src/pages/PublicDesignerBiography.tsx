@@ -98,7 +98,7 @@ export default function PublicDesignerBiography() {
             footer={
               <div className="h-auto">
                 {designer.hero_photo_credit && (
-                  <p className="mb-8 font-body text-[10px] uppercase tracking-[0.15em] text-foreground/40">
+                  <p className="mb-4 font-body text-[10px] uppercase tracking-[0.15em] text-foreground/40">
                     Photo: {designer.hero_photo_credit}
                   </p>
                 )}
