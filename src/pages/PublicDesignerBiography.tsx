@@ -78,16 +78,6 @@ export default function PublicDesignerBiography() {
           </p>
         </header>
 
-        {heroImage && (
-          <div className="relative w-full h-[26vh] md:h-[32vh] overflow-hidden bg-muted">
-            <img
-              src={heroImage}
-              alt={`${name} atelier`}
-              className="absolute inset-0 w-full h-full object-cover"
-              loading="eager"
-            />
-          </div>
-        )}
 
         {biography ? (
           <EditorialBiographyColumns
