@@ -235,8 +235,6 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
         exit: { opacity: 0, y: 20, scale: 0.98 },
         transition: { duration: 0.3, type: "spring" as const, stiffness: 300, damping: 30 },
       };
-  const [showHoverImage, setShowHoverImage] = useState(false);
-  const [hoverImageLoaded, setHoverImageLoaded] = useState(false);
   const [variantPayload, setVariantPayload] = useState<Partial<PublicLightboxItem> | null>(null);
   const relatedScrollRef = useRef<HTMLDivElement>(null);
   const scrollRelated = (dir: 1 | -1) => {
@@ -318,8 +316,6 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   useEffect(() => {
     setImageLoaded(false);
     setImageFailed(false);
-    setHoverImageLoaded(false);
-    setShowHoverImage(false);
     setSelectedBaseIdx(null);
     setSelectedTopIdx(null);
     setSelectedMaterialIdx(null);
@@ -363,7 +359,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
   if (!product) return null;
 
-  const canShowHoverImage = Boolean(product.hover_image_url) && !isMobile;
+  
   const designerDisplay = product.brand_name.includes(" - ")
     ? product.brand_name.split(" - ")[0].trim()
     : product.brand_name;
@@ -461,7 +457,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   // than the curator-pick thumbnail, which is often a padded/portrait crop.
   const defaultImageUrl = galleryImages[0] || product.image_url;
   const currentImageUrl = finishImageIdx != null ? galleryImages[finishImageIdx] : defaultImageUrl;
-  const imageSwappedByFinish = currentImageUrl !== defaultImageUrl;
+  
   const isUpholsteredProduct = isProductUpholstered({
     category: product.category,
     subcategory: product.subcategory,
@@ -554,11 +550,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
           {/* Image + desktop description column */}
           <div className="relative w-full md:w-3/5 shrink-0 bg-muted/30 md:flex md:flex-col md:h-full md:gap-2 md:overflow-hidden">
-          <div
-            className="relative w-full flex-1 min-h-0 flex items-center justify-center p-2 md:p-5 lg:p-6 overflow-hidden"
-            onMouseEnter={() => { if (canShowHoverImage) setShowHoverImage(true); }}
-            onMouseLeave={() => setShowHoverImage(false)}
-          >
+          <div className="relative w-full flex-1 min-h-0 flex items-center justify-center p-2 md:p-5 lg:p-6 overflow-hidden">
             {product.image_url ? (
               <>
                 {!imageLoaded && !imageFailed && (
@@ -579,24 +571,9 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   onError={() => { setImageFailed(true); setImageLoaded(true); }}
                   className={cn(
                     "w-full h-auto md:max-w-full md:max-h-full object-contain transition-opacity duration-300",
-                    imageFailed ? "opacity-0"
-                      : !imageLoaded ? "opacity-0"
-                        : showHoverImage && canShowHoverImage && hoverImageLoaded && !imageSwappedByFinish ? "opacity-0"
-                          : "opacity-100"
+                    imageFailed || !imageLoaded ? "opacity-0" : "opacity-100"
                   )}
                 />
-                {canShowHoverImage && product.hover_image_url && !imageSwappedByFinish && (
-                  <img
-                    src={product.hover_image_url}
-                    alt={`${product.title} in context`}
-                    onLoad={() => setHoverImageLoaded(true)}
-                    onError={() => setHoverImageLoaded(false)}
-                    className={cn(
-                      "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-full max-h-full object-contain pointer-events-none transition-opacity duration-300",
-                      showHoverImage && hoverImageLoaded ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                )}
               </>
             ) : (
               <span className="font-body text-sm text-muted-foreground">No image</span>
