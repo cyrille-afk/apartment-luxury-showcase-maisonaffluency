@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState, useCallback } from "react";
+import { useMemo, useEffect, useState, useCallback, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import HeritageSlider from "@/components/HeritageSlider";
 import { useHeritageSlides } from "@/hooks/useHeritageSlides";
@@ -11,6 +11,8 @@ import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton from "@/components/trade/SpecSheetButton";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import EditorialBiography, { renderParagraph } from "@/components/EditorialBiography";
+import EditorialBiographyColumns from "@/components/EditorialBiographyColumns";
+import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import { cn } from "@/lib/utils";
 import { useDesigner, useDesignerPicks, useRelatedDesigners, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
@@ -226,6 +228,8 @@ const TradeAtelierProfile = () => {
   const profileBadgeLabel = designer?.display_name || designer?.name;
   const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const [portraitOpen, setPortraitOpen] = useState(false);
+  const portraitRef = useRef<HTMLDivElement>(null);
   const [gridColsTouched, setGridColsTouched] = useState(false);
   useEffect(() => {
     if (gridColsTouched) return;
@@ -508,15 +512,64 @@ const TradeAtelierProfile = () => {
                       </blockquote>
                     );
                   })()}
-                  <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
-                    About
-                  </h2>
-                  <EditorialBiography
-                    biography={designer.biography}
-                    biographyImages={designer.biography_images}
-                    pickImages={picks.slice(0, 3).map((p) => `${p.image_url} | ${p.title}`)}
-                    designerName={designer.name}
-                  />
+                  {!portraitOpen && (
+                    <>
+                      <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
+                        About
+                      </h2>
+                      <EditorialBiography
+                        biography={designer.biography}
+                        biographyImages={designer.biography_images}
+                        pickImages={picks.slice(0, 3).map((p) => `${p.image_url} | ${p.title}`)}
+                        designerName={designer.name}
+                      />
+                      <div className="mt-6">
+                        <PortraitCtaLink
+                          label="View The Full Portrait"
+                          onClick={() => {
+                            setPortraitOpen(true);
+                            requestAnimationFrame(() =>
+                              portraitRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+                            );
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div ref={portraitRef} id="portrait" className="scroll-mt-24">
+                    {portraitOpen && (
+                      <div className="relative w-screen left-1/2 -ml-[50vw] bg-cream">
+                        <EditorialBiographyColumns
+                          biography={designer.biography}
+                          biographyImages={designer.biography_images || []}
+                          designerName={designer.name}
+                          eyebrow={designer.specialty || "The Full Portrait"}
+                          footer={
+                            <div className="h-auto text-foreground">
+                              {(designer as any).hero_photo_credit && (
+                                <p className="mb-8 font-body text-[10px] uppercase tracking-[0.15em] text-foreground/40">
+                                  Photo: {(designer as any).hero_photo_credit}
+                                </p>
+                              )}
+                              <PortraitCtaLink
+                                label="Close The Full Portrait"
+                                reversed
+                                expanded
+                                onClick={() => {
+                                  setPortraitOpen(false);
+                                  requestAnimationFrame(() =>
+                                    portraitRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
+                                  );
+                                }}
+                              />
+                            </div>
+                          }
+                        />
+                      </div>
+                    )}
+                  </div>
+
                   {heritageSlides.length > 0 && (
                     <HeritageSlider slides={heritageSlides} />
                   )}
