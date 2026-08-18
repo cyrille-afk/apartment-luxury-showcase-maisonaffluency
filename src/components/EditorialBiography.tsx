@@ -519,18 +519,22 @@ export function VideoBlock({
       transition={transition}
       className={bare ? "m-0" : "my-4 md:my-6 -mx-2 md:-mx-6"}
     >
-      <div className={`aspect-video overflow-hidden bg-black relative flex items-center justify-center ${bare ? "" : "rounded-xl shadow-lg"}`}>
+      <div
+        className={`overflow-hidden relative flex items-center justify-center ${
+          showsBareCover ? "" : "aspect-video bg-black"
+        } ${bare ? "" : "rounded-xl shadow-lg"}`}
+      >
         {isYouTube ? (
           !playing && currentPosterUrl ? (
             <button
               onClick={() => setPlaying(true)}
-              className="w-full h-full relative group cursor-pointer"
+              className="w-full relative group cursor-pointer block"
               aria-label={`Play ${caption || "video"}`}
             >
               <img
                 src={optimizeImageUrl(currentPosterUrl)}
                 alt={caption || `${designerName} — video cover`}
-                className="w-full h-full object-cover"
+                className={showsBareCover ? "w-full h-auto object-contain block" : "w-full h-full object-cover"}
                 loading="eager"
                 fetchPriority="high"
                 decoding="async"
