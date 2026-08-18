@@ -865,20 +865,20 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               )}
             </div>
 
-            {/* Desktop secondary actions */}
-            <div className="hidden md:grid grid-cols-3 gap-2">
+            {/* Desktop secondary actions — uniform, minimal neutral row */}
+            <div className="hidden md:grid grid-cols-3 gap-2 items-stretch">
               <FavoriteFolderPicker pickId={product.id} align="start" side="top">
                 <button
                   onClick={(e) => e.stopPropagation()}
                   title={favorited ? "Manage folders" : "Favorite"}
                   className={cn(
-                    "w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border",
+                    "w-full h-10 flex items-center justify-center gap-1.5 px-3 font-body text-[10px] uppercase tracking-[0.14em] transition-colors border",
                     favorited
-                      ? "border-destructive/30 text-destructive bg-destructive/10"
+                      ? "border-foreground/40 text-foreground"
                       : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
                   )}
                 >
-                  <Heart size={13} className={cn(favorited && "fill-current")} />
+                  <Heart size={13} strokeWidth={1.5} className={cn(favorited && "fill-current")} />
                   {favorited ? "Saved" : "Favorite"}
                 </button>
               </FavoriteFolderPicker>
@@ -888,14 +888,14 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 onClick={() => togglePin(compareItem)}
                 title={pinned ? "Pinned" : "Pin to Selection"}
                 className={cn(
-                  "flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border",
+                  "w-full h-10 flex items-center justify-center gap-1.5 px-3 font-body text-[10px] uppercase tracking-[0.14em] transition-colors border",
                   pinned
-                    ? "bg-[hsl(var(--gold))]/10 border-[hsl(var(--gold))] text-[hsl(var(--gold))]"
+                    ? "border-foreground/40 text-foreground"
                     : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
                   compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
                 )}
               >
-                <Scale size={13} />
+                <Scale size={13} strokeWidth={1.5} />
                 {pinned ? "Pinned" : "Pin to Selection"}
               </button>
 
@@ -906,6 +906,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   brandName={designerDisplay}
                   productName={product.title}
                   variant="button"
+                  icon={<FileDown size={13} strokeWidth={1.5} />}
+                  className="w-full h-10 flex items-center justify-center gap-1.5 px-3 font-body text-[10px] uppercase tracking-[0.14em] transition-colors border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 cursor-pointer"
                   onBeforeOpen={() => { let allowed = false; requireAuth(() => { allowed = true; }, "download this spec sheet"); return allowed; }}
                 />
               )}
@@ -913,8 +915,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
             {/* More from this designer */}
             {relatedProducts.length > 0 && (
-              <div className="pt-4 border-t border-border">
-                <div className="flex items-center justify-between mb-3">
+              <div className="pt-6 border-t border-border">
+                <div className="flex items-center justify-between mb-4">
                   <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                     More from {product.designer_slug === "dagmar-london" && product.subtitle?.trim() === "Arnold Madsen" ? "Dagmar" : designerDisplay}
                   </p>
@@ -941,24 +943,30 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
                 <div
                   ref={relatedScrollRef}
-                  className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide snap-x snap-mandatory scroll-smooth"
+                  className="flex gap-4 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide snap-x snap-mandatory scroll-smooth"
                 >
                   {relatedProducts.map((rp) => (
                     <button
                       key={rp.id}
                       onClick={() => onSelectRelated?.(rp)}
+                      title={rp.title}
                       className="shrink-0 w-20 group snap-start"
                     >
-                      <FadeInImage
-                        wrapperClassName="aspect-square rounded-md bg-muted/30 border border-border group-hover:border-foreground/30 transition-colors"
-                        src={rp.image_url}
-                        alt={rp.title}
-                        className="object-cover"
-                        loading="lazy"
-                      />
-                      <p className="font-body text-[9px] text-muted-foreground mt-1 truncate group-hover:text-foreground transition-colors">
-                        {rp.title}
-                      </p>
+                      <div className="relative">
+                        <FadeInImage
+                          wrapperClassName="aspect-square bg-muted/30 border border-border group-hover:border-foreground/30 transition-colors"
+                          src={rp.image_url}
+                          alt={rp.title}
+                          className="object-cover"
+                          loading="lazy"
+                        />
+                        {/* Elegant fade-in label overlay on hover */}
+                        <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/95 to-background/0 px-1.5 pt-4 pb-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <span className="block font-body text-[9px] leading-tight text-foreground text-center">
+                            {rp.title}
+                          </span>
+                        </span>
+                      </div>
                     </button>
                   ))}
                 </div>
