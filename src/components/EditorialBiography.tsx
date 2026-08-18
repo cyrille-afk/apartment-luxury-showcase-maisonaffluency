@@ -619,14 +619,14 @@ export function VideoBlock({
         ) : !playing ? (
           <button
             onClick={() => setPlaying(true)}
-            className="absolute inset-0 w-full h-full group cursor-pointer"
+            className={`group cursor-pointer ${showsBareCover ? "relative block w-full" : "absolute inset-0 w-full h-full"}`}
             aria-label={`Play ${caption || "video"}`}
           >
             {currentPosterUrl ? (
               <img
                 src={optimizeImageUrl(currentPosterUrl)}
                 alt={caption || `${designerName} — video cover`}
-                className="w-full h-full object-cover"
+                className={showsBareCover ? "w-full h-auto object-contain block" : "w-full h-full object-cover"}
                 loading="lazy"
                 onError={handlePosterError}
               />
