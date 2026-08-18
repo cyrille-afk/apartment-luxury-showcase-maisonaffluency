@@ -167,8 +167,9 @@ function MediaCell({
 }
 
 
-type Cell = { node: React.ReactNode; isMedia: boolean };
+type Cell = { node: React.ReactNode; isMedia: boolean; full?: boolean };
 type Row = { left: Cell; right: Cell | null };
+
 
 function FadeInRow({
   row,
