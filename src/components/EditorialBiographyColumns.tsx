@@ -297,11 +297,16 @@ export default function EditorialBiographyColumns({
     }
   } else {
     texts.forEach((t, ti) => {
-      const textCell = (
-        <TextCell content={t.content} eyebrow={ti === 0 ? eyebrow : undefined} />
-      );
       const slot = mediaSlots.get(ti) || [];
       const quote = isQuote(t.content);
+      const standalone = slot.length === 0 || quote;
+      const textCell = (
+        <TextCell
+          content={t.content}
+          eyebrow={ti === 0 ? eyebrow : undefined}
+          wide={standalone}
+        />
+      );
 
       // Quotes stretch across the full row, underneath the narrative.
       if (quote) {
@@ -322,10 +327,12 @@ export default function EditorialBiographyColumns({
       }
 
       if (slot.length === 0) {
-        rows.push({ left: { node: textCell, isMedia: false }, right: null });
+        // Text-only row: span the full layout width.
+        rows.push({ left: { node: textCell, isMedia: false, full: true }, right: null });
         rowIndex += 1;
         return;
       }
+
 
       const first = slot[0];
       const firstCell = (
