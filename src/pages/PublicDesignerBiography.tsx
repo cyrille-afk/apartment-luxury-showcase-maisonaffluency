@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, Navigate, useNavigate } from "react-router-dom";
-import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -112,9 +111,10 @@ export default function PublicDesignerBiography() {
             biography={biography}
             biographyImages={designer.biography_images || []}
             designerName={designer.name}
-            
             collectionCtaHref={`/designers/${designer.slug}?section=picks`}
             collectionCtaLabel="Discover the Collection"
+            closePortraitLabel="Close Portrait"
+            onClosePortrait={() => navigate(`/designers/${designer.slug}`)}
             footer={
               <div className="h-auto">
                 {designer.hero_photo_credit && (
@@ -122,13 +122,6 @@ export default function PublicDesignerBiography() {
                     Photo: {designer.hero_photo_credit}
                   </p>
                 )}
-                <div className="flex justify-center py-16 md:py-20">
-                  <PortraitCtaLink
-                    label="Close The Full Portrait"
-                    reversed
-                    onClick={() => navigate(`/designers/${designer.slug}`)}
-                  />
-                </div>
               </div>
             }
           />
