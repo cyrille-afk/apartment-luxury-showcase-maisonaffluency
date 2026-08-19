@@ -25,16 +25,16 @@ function optimizeHtmlPlugin(buildId: string): Plugin {
         `    <meta name="app-build-id" content="${buildId}" />`;
       html = html.replace('<meta charset="UTF-8" />', metaInject);
 
-      // 1. Convert render-blocking CSS to non-blocking load.
-      //    The media="print" → media="all" swap is the only pattern current
-      //    Lighthouse credits as "not render-blocking" (preload+onload still
-      //    shows up in the critical waterfall). An inline <style> block in
-      //    index.html covers above-the-fold styles so there's no FOUC.
+      // 1. Normalise the CSS <link> so the critical-CSS pass (Beasties, see
+      //    inlineCriticalCssPlugin below) can find it. Beasties inlines the
+      //    above-the-fold rules into a <style> block and rewrites this tag
+      //    into a non-blocking preload+swap, so no manual media="print"
+      //    hack is needed any more.
       html = html.replace(
         /<link rel="stylesheet" crossorigin href="(\/assets\/[^"]+\.css)">/g,
-        '<link rel="stylesheet" href="$1" media="print" onload="this.media=\'all\';this.onload=null;document.documentElement.classList.add(\'css-ready\')">' +
-        '<noscript><link rel="stylesheet" href="$1"></noscript>'
+        '<link rel="stylesheet" href="$1">'
       );
+
 
       // 2. Promote modulepreload hints to the <head> top (before any scripts)
       //    so the browser starts fetching vendor chunks immediately
@@ -72,6 +72,64 @@ function optimizeHtmlPlugin(buildId: string): Plugin {
     },
   };
 }
+
+/**
+ * Inlines the above-the-fold CSS into dist/index.html and turns the full
+ * stylesheet into a non-blocking preload+swap.
+ *
+ * Why: the Tailwind bundle is ~250KB raw (~38KB gz) and >90% unused on first
+ * paint. On throttled mobile it cost ~1.1s on the critical path, which
+ * delayed FCP/LCP. Beasties extracts only the rules whose selectors actually
+ * match the server-sent HTML (hero <picture>, static SEO copy, layout shell)
+ * and inlines them, so first paint needs zero CSS round-trips.
+ *
+ * Runs in closeBundle (after Vite has written dist/) so the emitted CSS file
+ * is on disk for Beasties to read.
+ */
+function inlineCriticalCssPlugin(): Plugin {
+  return {
+    name: "inline-critical-css",
+    apply: "build",
+    enforce: "post",
+    async closeBundle() {
+      const outDir = path.resolve(__dirname, "dist");
+      const htmlPath = path.join(outDir, "index.html");
+      if (!fs.existsSync(htmlPath)) return;
+
+      const { default: Beasties } = await import("beasties");
+      const beasties = new Beasties({
+        path: outDir,
+        publicPath: "/",
+        // Inline rules matching the static HTML; everything else is deferred.
+        pruneSource: false,
+        // Keep the full sheet as a swap-on-load preload (non render-blocking).
+        preload: "swap",
+        inlineFonts: false,
+        preloadFonts: false,
+        // @font-face + keyframes already live in the inline <style> in index.html
+        fonts: false,
+        keyframes: "critical",
+        compress: true,
+        logLevel: "silent",
+      });
+
+      const html = fs.readFileSync(htmlPath, "utf-8");
+      let out = await beasties.process(html);
+
+      // Beasties' swap handler replaces rel=preload with rel=stylesheet on
+      // load. Piggyback the app's `css-ready` flag onto the same handler so
+      // components gated on it un-gate as soon as the real sheet applies.
+      out = out.replace(
+        /this\.rel=['"]stylesheet['"]/g,
+        "this.rel='stylesheet';document.documentElement.classList.add('css-ready')"
+      );
+
+      fs.writeFileSync(htmlPath, out);
+    },
+  };
+}
+
+
 
 /**
  * Emits /version.json at the build root so the running app can poll it
@@ -154,6 +212,8 @@ export default defineConfig(({ mode }) => {
       optimizeHtmlPlugin(buildId),
       emitVersionPlugin(buildId),
       emitOgManifestPlugin(),
+      inlineCriticalCssPlugin(),
+
     ].filter(Boolean),
   resolve: {
     alias: {
