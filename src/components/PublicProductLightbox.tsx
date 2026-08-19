@@ -957,7 +957,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   )}
                 </div>
 
-                <div className="pt-3 border-t border-border">
+                <div className="pt-2 border-t border-border">
                   <p className="font-body text-[11px] text-muted-foreground">
                     To unlock Your Trade pricing,{" "}
                     <a href="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
