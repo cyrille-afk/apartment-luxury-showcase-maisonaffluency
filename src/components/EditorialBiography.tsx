@@ -294,6 +294,9 @@ export function captionFromUrl(url: string): string | null {
     if (/^(mp4|mov|webm|m4v|jpeg|jpg|png|webp|avif|gif)$/i.test(filename)) return null;
     // Never surface bare numeric IDs (e.g. Vimeo/YouTube IDs like "803009029").
     if (/^\d+$/.test(filename)) return null;
+    // Never surface CDN hashes / UUID-like slugs (e.g. "e58fc53189ae4cb5a8bc5f5556ce77b8").
+    if (/^[0-9a-f]{16,}$/i.test(filename.replace(/\s/g, ""))) return null;
+    if (/^[0-9a-f]{8}\s?[0-9a-f]{4}\s?[0-9a-f]{4}\s?[0-9a-f]{4}\s?[0-9a-f]{12}$/i.test(filename)) return null;
     return filename
       .split(" ")
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
