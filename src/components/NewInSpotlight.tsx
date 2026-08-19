@@ -92,7 +92,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
         subcategory: (p as any).subcategory ?? null,
         pdf_url: p.pdf_url || ((p as any).pdf_urls as any[] | null)?.[0]?.url || null,
         pdf_urls: ((p as any).pdf_urls as any) ?? null,
-        designer_slug: designer.slug,
+        designer_slug: pickDesignerSlugOverride || designer.slug,
         size_variants: (p as any).size_variants ?? null,
         variant_placeholder: (p as any).variant_placeholder ?? null,
         base_axis_label: (p as any).base_axis_label ?? null,
@@ -100,7 +100,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
         gallery_images: (p as any).gallery_images ?? null,
         variant_image_map: (p as any).variant_image_map ?? null,
       })),
-    [picks, designer.name]
+    [picks, designer.name, designer.slug, brandLabelOverride, pickDesignerSlugOverride]
   );
 
   const displayName = designer.display_name || designer.name;
