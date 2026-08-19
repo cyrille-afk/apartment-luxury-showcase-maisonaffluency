@@ -738,7 +738,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </button>
 
               <DropdownMenu>
-                <DropdownMenuTrigger className="relative group p-1 outline-none">
+                <DropdownMenuTrigger aria-label="Account menu" title="Account" className="relative group p-1 outline-none">
+                  <span className="sr-only">Account menu</span>
                   <User className="w-[16px] h-[16px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" sideOffset={122} className="bg-background border border-border shadow-lg z-50 min-w-[200px] translate-x-[44px]">
