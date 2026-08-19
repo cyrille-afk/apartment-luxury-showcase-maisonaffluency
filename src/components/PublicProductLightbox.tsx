@@ -497,6 +497,68 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
   const pinned = isPinned(product.title, product.id);
 
+  const relatedStrip = (
+                relatedProducts.length > 0 ? (
+              <div className="pt-6 border-t border-border">
+                <div className="flex items-center justify-between mb-4">
+                  <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    More from {product.designer_slug === "dagmar-london" && product.subtitle?.trim() === "Arnold Madsen" ? "Dagmar" : designerDisplay}
+                  </p>
+                  {relatedProducts.length > 4 && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => scrollRelated(-1)}
+                        aria-label="Scroll left"
+                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => scrollRelated(1)}
+                        aria-label="Scroll right"
+                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div
+                  ref={relatedScrollRef}
+                  className="flex gap-4 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide snap-x snap-mandatory scroll-smooth"
+                >
+                  {relatedProducts.map((rp) => (
+                    <button
+                      key={rp.id}
+                      onClick={() => onSelectRelated?.(rp)}
+                      title={rp.title}
+                      className="shrink-0 w-20 group snap-start"
+                    >
+                      <div className="relative">
+                        <FadeInImage
+                          wrapperClassName="aspect-square bg-muted/30 border border-border group-hover:border-foreground/30 transition-colors"
+                          src={rp.image_url}
+                          alt={rp.title}
+                          className="object-cover"
+                          loading="lazy"
+                        />
+                        {/* Elegant fade-in label overlay on hover */}
+                        <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/95 to-background/0 px-1.5 pt-4 pb-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <span className="block font-body text-[9px] leading-tight text-foreground text-center">
+                            {rp.title}
+                          </span>
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null
+  );
+
+
   const content = (
     <AnimatePresence onExitComplete={finishClose}>
       {visible && (
@@ -656,6 +718,11 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               </p>
             </div>
           )}
+
+          {/* Desktop: related thumbnails sit under the main image */}
+          <div className="hidden md:block w-full shrink-0 bg-background px-6 pb-6">
+            {relatedStrip}
+          </div>
           </div>
 
           {/* Details */}
@@ -894,65 +961,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               )}
             </div>
 
-            {/* More from this designer */}
-            {relatedProducts.length > 0 && (
-              <div className="pt-6 border-t border-border">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                    More from {product.designer_slug === "dagmar-london" && product.subtitle?.trim() === "Arnold Madsen" ? "Dagmar" : designerDisplay}
-                  </p>
-                  {relatedProducts.length > 4 && (
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => scrollRelated(-1)}
-                        aria-label="Scroll left"
-                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => scrollRelated(1)}
-                        aria-label="Scroll right"
-                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-                <div
-                  ref={relatedScrollRef}
-                  className="flex gap-4 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide snap-x snap-mandatory scroll-smooth"
-                >
-                  {relatedProducts.map((rp) => (
-                    <button
-                      key={rp.id}
-                      onClick={() => onSelectRelated?.(rp)}
-                      title={rp.title}
-                      className="shrink-0 w-20 group snap-start"
-                    >
-                      <div className="relative">
-                        <FadeInImage
-                          wrapperClassName="aspect-square bg-muted/30 border border-border group-hover:border-foreground/30 transition-colors"
-                          src={rp.image_url}
-                          alt={rp.title}
-                          className="object-cover"
-                          loading="lazy"
-                        />
-                        {/* Elegant fade-in label overlay on hover */}
-                        <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/95 to-background/0 px-1.5 pt-4 pb-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <span className="block font-body text-[9px] leading-tight text-foreground text-center">
-                            {rp.title}
-                          </span>
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+
+            <div className="md:hidden">{relatedStrip}</div>
 
             <div className="mt-auto pt-4 border-t border-border">
               <p className="font-body text-[11px] text-muted-foreground">
