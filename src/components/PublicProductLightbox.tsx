@@ -832,7 +832,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
                     if (!hasFinishAxis) return null;
                     return (
-                      <div className="border-t border-border/60 py-3 flex items-center gap-4">
+                      <div className="border-t border-border/60 py-2 flex items-center gap-4">
                         <span className="shrink-0"><SpecGlyph symbol="⬗" /></span>
                         <span className="font-body text-sm text-muted-foreground">
                           Finish options — refer to the full product page for details.
