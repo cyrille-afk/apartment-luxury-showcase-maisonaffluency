@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import {
@@ -12,13 +13,13 @@ import {
 } from "@/components/EditorialBiography";
 
 /**
- * Premium 2-column asymmetrical editorial layout for the expanded
- * ("full portrait") biography page.
+ * Stacked-row editorial layout for the expanded ("full portrait") biography page.
  *
- * Full-width editorial layout aligned to the site navigation:
- *  - max-w-7xl centered container
- *  - 12-column grid: mixed rows use 5/7; paired media rows use 6/6
- *  - text-only rows span the grid while preserving a readable line length
+ * Architecture:
+ *  - Row 1: pinned utility controls (Discover Collection + Close Portrait)
+ *  - Row 2: opening blockquote, full width, bounded by max-w-4xl
+ *  - Row 3: 2-column split for the first narrative paragraph + first media
+ *  - Row 4: remaining narrative blocks, full width, max-w-4xl left-aligned
  */
 
 type Block =
@@ -49,7 +50,6 @@ function toBlocks(biography: string, extraMedia: string[]): Block[] {
     return { kind: "image" as const, url: media.url, caption: media.caption };
   });
 
-  // Manual biography_images that are not already referenced inline.
   const seen = new Set(
     blocks.filter((b) => b.kind !== "text").map((b) => (b as { url: string }).url),
   );
@@ -70,9 +70,7 @@ function toBlocks(biography: string, extraMedia: string[]): Block[] {
 function Caption({ label }: { label: string }) {
   if (!label) return null;
   return (
-    <p
-      className="mt-2 text-center font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.5]"
-    >
+    <p className="mt-2 text-center font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.5]">
       {label}
     </p>
   );
@@ -129,16 +127,16 @@ function TextCell({
   );
 }
 
-
-
 function MediaCell({
   block,
   designerName,
   index,
+  className,
 }: {
   block: Extract<Block, { kind: "image" } | { kind: "video" }>;
   designerName: string;
   index: number;
+  className?: string;
 }) {
   const rawCaption =
     block.caption || captionFromUrl(block.url) || (block.kind === "video" ? "" : "");
@@ -146,7 +144,7 @@ function MediaCell({
 
   if (block.kind === "video") {
     return (
-      <figure className="h-auto m-0">
+      <figure className={cn("h-auto m-0 max-w-2xl", className)}>
         <VideoBlock
           url={block.url}
           designerName={designerName}
@@ -160,9 +158,8 @@ function MediaCell({
     );
   }
 
-
   return (
-    <figure className="h-auto m-0 max-w-2xl">
+    <figure className={cn("h-auto m-0 max-w-2xl", className)}>
       <img
         src={optimizeImageUrl(block.url)}
         alt={block.caption || `${designerName} — editorial`}
@@ -175,18 +172,7 @@ function MediaCell({
   );
 }
 
-
-type Cell = { node: React.ReactNode; isMedia: boolean; full?: boolean };
-type Row = { left: Cell; right: Cell | null };
-
-
-function FadeInRow({
-  row,
-  delay = 0,
-}: {
-  row: Row;
-  delay?: number;
-}) {
+function FadeInRow({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [inView, setInView] = useState(false);
 
@@ -216,29 +202,16 @@ function FadeInRow({
     return () => observer.disconnect();
   }, []);
 
-  const isPairedMedia = row.left.isMedia && row.right?.isMedia === true;
-  const spanClass = (cell: Cell) => {
-    if (cell.full) return "lg:col-span-12";
-    if (isPairedMedia) return "lg:col-span-6";
-    return cell.isMedia ? "lg:col-span-6" : "lg:col-span-6";
-  };
-
   return (
     <div
       ref={ref}
       className={`
-        grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start
         transition-all duration-700 ease-out will-change-transform
         ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}
       `}
       style={{ transitionDelay: `${delay}ms` }}
     >
-      <div className={`h-auto ${spanClass(row.left)}`}>{row.left.node}</div>
-      {row.right ? (
-        <div className={`h-auto ${spanClass(row.right)}`}>{row.right.node}</div>
-      ) : row.left.full ? null : (
-        <div className="hidden lg:block lg:col-span-7" />
-      )}
+      {children}
     </div>
   );
 }
@@ -252,188 +225,153 @@ export default function EditorialBiographyColumns({
   containerClassName,
   collectionCtaHref,
   collectionCtaLabel = "Discover the Collection",
+  closePortraitLabel = "Close Portrait",
+  onClosePortrait,
 }: {
   biography: string;
   biographyImages?: string[];
   designerName: string;
-  /** Small anchor shown above the opening narrative. */
   eyebrow?: string;
-  /** Rendered at the absolute bottom of the stream. */
   footer?: React.ReactNode;
-  /** Override the width/padding container (e.g. full-bleed inside the trade shell). */
   containerClassName?: string;
-  /** Optional anchor link rendered after the first media row to surface the product gallery. */
   collectionCtaHref?: string;
   collectionCtaLabel?: string;
+  closePortraitLabel?: string;
+  onClosePortrait?: () => void;
 }) {
   const blocks = toBlocks(biography, biographyImages);
-  const texts = blocks.filter((b): b is Extract<Block, { kind: "text" }> => b.kind === "text");
-  const media = blocks.filter(
-    (b): b is Extract<Block, { kind: "image" } | { kind: "video" }> => b.kind !== "text",
-  );
 
-  const rows: Row[] = [];
+  const firstQuoteIndex = blocks.findIndex((b) => b.kind === "text" && isQuote(b.content));
 
-  // Spread media evenly across the whole narrative instead of clustering it
-  // against the first paragraphs: assign each media item a target text index.
-  const mediaSlots = new Map<number, Extract<Block, { kind: "image" } | { kind: "video" }>[]>();
-  if (texts.length > 0 && media.length > 0) {
-    const step = texts.length / media.length;
-    media.forEach((m, j) => {
-      const idx = Math.min(texts.length - 1, Math.floor(j * step));
-      const list = mediaSlots.get(idx) || [];
-      list.push(m);
-      mediaSlots.set(idx, list);
-    });
-  }
+  let firstSplitTextIndex = -1;
+  let firstSplitMediaIndex = -1;
 
-  const mediaIndexOf = (m: Block) => media.indexOf(m as never);
-  let rowIndex = 0;
-
-  if (texts.length === 0) {
-    // Media only — two per row.
-    for (let i = 0; i < media.length; i += 2) {
-      rows.push({
-        left: { node: <MediaCell block={media[i]} designerName={designerName} index={i} />, isMedia: true },
-        right: media[i + 1]
-          ? { node: <MediaCell block={media[i + 1]} designerName={designerName} index={i + 1} />, isMedia: true }
-          : null,
-      });
+  if (firstQuoteIndex >= 0) {
+    // Row 3 pairs the first narrative paragraph *after* the intro quote with
+    // the first image that follows it. Any lead-in text before the quote flows
+    // into the bottom narrative row along with everything else.
+    firstSplitTextIndex = blocks.findIndex(
+      (b, i) => i > firstQuoteIndex && b.kind === "text" && !isQuote(b.content),
+    );
+    firstSplitMediaIndex = blocks.findIndex((b, i) => i > firstQuoteIndex && b.kind === "image");
+    if (firstSplitMediaIndex < 0) {
+      firstSplitMediaIndex = blocks.findIndex((b, i) => i > firstQuoteIndex && b.kind !== "text");
     }
   } else {
-    texts.forEach((t, ti) => {
-      const slot = mediaSlots.get(ti) || [];
-      const quote = isQuote(t.content);
-      const standalone = slot.length === 0 || quote;
-      const textCell = (
-        <TextCell
-          content={t.content}
-          eyebrow={ti === 0 ? eyebrow : undefined}
-        />
-      );
-
-      // Quotes stretch across the full row, underneath the narrative.
-      if (quote) {
-        rows.push({ left: { node: textCell, isMedia: false, full: true }, right: null });
-        rowIndex += 1;
-        for (let k = 0; k < slot.length; k += 2) {
-          const a = slot[k];
-          const b = slot[k + 1];
-          rows.push({
-            left: { node: <MediaCell block={a} designerName={designerName} index={mediaIndexOf(a)} />, isMedia: true },
-            right: b
-              ? { node: <MediaCell block={b} designerName={designerName} index={mediaIndexOf(b)} />, isMedia: true }
-              : null,
-          });
-          rowIndex += 1;
-        }
-        return;
-      }
-
-      if (slot.length === 0) {
-        // Text-only row: span the full layout width.
-        rows.push({ left: { node: textCell, isMedia: false, full: true }, right: null });
-        rowIndex += 1;
-        return;
-      }
-
-
-      const first = slot[0];
-      const firstCell = (
-        <MediaCell block={first} designerName={designerName} index={mediaIndexOf(first)} />
-      );
-      rows.push(
-        rowIndex % 2 === 0
-          ? { left: { node: textCell, isMedia: false }, right: { node: firstCell, isMedia: true } }
-          : { left: { node: firstCell, isMedia: true }, right: { node: textCell, isMedia: false } },
-      );
-      rowIndex += 1;
-
-
-      // Any extra media assigned to this slot pairs up on its own rows.
-      for (let k = 1; k < slot.length; k += 2) {
-        const a = slot[k];
-        const b = slot[k + 1];
-        rows.push({
-          left: { node: <MediaCell block={a} designerName={designerName} index={mediaIndexOf(a)} />, isMedia: true },
-          right: b
-            ? { node: <MediaCell block={b} designerName={designerName} index={mediaIndexOf(b)} />, isMedia: true }
-            : null,
-        });
-        rowIndex += 1;
-      }
-    });
+    // No opening quote: fall back to the first narrative paragraph + first media.
+    firstSplitTextIndex = blocks.findIndex((b) => b.kind === "text" && !isQuote(b.content));
+    firstSplitMediaIndex = blocks.findIndex((b) => b.kind !== "text");
   }
 
+  const firstQuote = firstQuoteIndex >= 0 ? blocks[firstQuoteIndex] : null;
+  const firstSplitText = firstSplitTextIndex >= 0 ? blocks[firstSplitTextIndex] : null;
+  const firstSplitMedia = firstSplitMediaIndex >= 0 ? blocks[firstSplitMediaIndex] : null;
 
-  // Group consecutive text-only rows into a single cohesive flow so paragraphs
-  // read as one continuous column instead of isolated full-width blocks.
-  type Group = { type: "text"; rows: Row[] } | { type: "media"; rows: Row[] };
-  const grouped = rows.reduce<Group[]>((acc, row) => {
-    const isTextOnly =
-      row.left.isMedia === false && row.left.full === true && row.right === null;
-    const last = acc[acc.length - 1];
-    if (last && last.type === (isTextOnly ? "text" : "media")) {
-      last.rows.push(row);
-    } else {
-      acc.push(isTextOnly ? { type: "text", rows: [row] } : { type: "media", rows: [row] });
-    }
-    return acc;
-  }, []);
+  const usedIndices = new Set(
+    [firstQuoteIndex, firstSplitTextIndex, firstSplitMediaIndex].filter((i): i is number => i >= 0),
+  );
+  const remainingBlocks = blocks
+    .map((block, index) => ({ block, index }))
+    .filter(({ index }) => !usedIndices.has(index));
+
+  const hasHeaderControls = collectionCtaHref || onClosePortrait;
 
   return (
     <div className="bg-cream">
       <div className={containerClassName ?? "mx-auto w-full max-w-7xl px-6 md:px-12 pt-4 md:pt-6 pb-4 md:pb-6"}>
-        <div className="flex w-full flex-col gap-y-8">
-          {(() => {
-            let ctaInserted = false;
-            return grouped.map((group, gi) => {
-              const isFirstMediaGroup = group.type === "media" && !ctaInserted;
-              if (isFirstMediaGroup) ctaInserted = true;
-              return (
-                <React.Fragment key={`group-${gi}`}>
-                  {group.type === "text" ? (
-                    <div className="w-full">
-                      <div className="w-full space-y-5 md:space-y-6">
-                        {group.rows.map((row, ri) => (
-                          <div key={`text-${gi}-${ri}`}>{row.left.node}</div>
-                        ))}
-                      </div>
+        <div className="flex w-full flex-col gap-y-8 md:gap-y-10">
+          {/* Row 1: pinned utility controls */}
+          {hasHeaderControls && (
+            <FadeInRow delay={0}>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                {collectionCtaHref ? (
+                  <Link
+                    to={collectionCtaHref}
+                    className="group inline-flex items-center gap-3 px-5 py-3 md:px-6 md:py-3.5 border border-foreground/30 bg-background/40 hover:bg-background/80 hover:border-foreground/60 transition-all duration-300"
+                  >
+                    <span className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.28em] text-foreground/80 group-hover:text-foreground transition-colors">
+                      {collectionCtaLabel}
+                    </span>
+                    <ArrowRight className="h-3.5 w-3.5 text-foreground/60 group-hover:text-foreground group-hover:translate-x-1 transition-all duration-300" strokeWidth={1.25} />
+                  </Link>
+                ) : (
+                  <div />
+                )}
+                {onClosePortrait && (
+                  <button
+                    type="button"
+                    onClick={onClosePortrait}
+                    className="group inline-flex items-center gap-3 px-5 py-3 md:px-6 md:py-3.5 border border-foreground/30 bg-background/40 hover:bg-background/80 hover:border-foreground/60 transition-all duration-300"
+                  >
+                    <X className="h-3.5 w-3.5 text-foreground/60 group-hover:text-foreground transition-all duration-300" strokeWidth={1.25} />
+                    <span className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.28em] text-foreground/80 group-hover:text-foreground transition-colors">
+                      {closePortraitLabel}
+                    </span>
+                  </button>
+                )}
+              </div>
+            </FadeInRow>
+          )}
+
+          {/* Row 2: opening blockquote, full width */}
+          {firstQuote && firstQuote.kind === "text" && (
+            <FadeInRow delay={80}>
+              <div className="w-full">
+                <TextCell content={firstQuote.content} eyebrow={eyebrow} />
+              </div>
+            </FadeInRow>
+          )}
+
+          {/* Row 3: 2-column split for first narrative + first media */}
+          {firstSplitText && firstSplitText.kind === "text" && firstSplitMedia && firstSplitMedia.kind !== "text" && (
+            <FadeInRow delay={160}>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+                <div className="h-auto">
+                  <TextCell content={firstSplitText.content} eyebrow={firstQuote ? undefined : eyebrow} />
+                </div>
+                <div className="h-auto">
+                  <MediaCell
+                    block={firstSplitMedia}
+                    designerName={designerName}
+                    index={firstSplitMediaIndex}
+                    className="max-w-none"
+                  />
+                </div>
+              </div>
+            </FadeInRow>
+          )}
+
+          {/* Row 4: remaining narrative, full width */}
+          {remainingBlocks.length > 0 && (
+            <div className="flex w-full flex-col gap-y-6 md:gap-y-8">
+              {remainingBlocks.map(({ block, index }, i) => (
+                <FadeInRow key={`remaining-${index}`} delay={240 + i * 80}>
+                  {block.kind === "text" ? (
+                    <div className="w-full max-w-4xl">
+                      <TextCell content={block.content} />
                     </div>
                   ) : (
-                    <div className="flex w-full flex-col gap-y-8">
-                      {group.rows.map((row, ri) => (
-                        <div key={`row-${gi}-${ri}`} className="h-auto">
-                          <FadeInRow row={row} delay={Math.min((gi + ri) * 80, 300)} />
-                        </div>
-                      ))}
+                    <div className="w-full">
+                      <MediaCell
+                        block={block}
+                        designerName={designerName}
+                        index={index}
+                        className="max-w-3xl"
+                      />
                     </div>
                   )}
-                  {isFirstMediaGroup && collectionCtaHref && (
-                    <div className="w-full flex justify-start">
-                      <Link
-                        to={collectionCtaHref}
-                        className="group inline-flex items-center gap-3 px-5 py-3 md:px-6 md:py-3.5 border border-foreground/30 bg-background/40 hover:bg-background/80 hover:border-foreground/60 transition-all duration-300"
-                      >
-                        <span className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.28em] text-foreground/80 group-hover:text-foreground transition-colors">
-                          {collectionCtaLabel}
-                        </span>
-                        <ArrowRight className="h-3.5 w-3.5 text-foreground/60 group-hover:text-foreground group-hover:translate-x-1 transition-all duration-300" strokeWidth={1.25} />
-                      </Link>
-                    </div>
-                  )}
-                </React.Fragment>
-              );
-            });
-          })()}
+                </FadeInRow>
+              ))}
+            </div>
+          )}
+
+          {/* Footer */}
+          {footer && (
+            <div className="pt-4 md:pt-5 transition-all duration-700 ease-out opacity-100 translate-y-0">
+              {footer}
+            </div>
+          )}
         </div>
-
-
-        {footer && (
-          <div className="pt-4 md:pt-5 transition-all duration-700 ease-out opacity-100 translate-y-0">
-            {footer}
-          </div>
-        )}
       </div>
     </div>
   );
