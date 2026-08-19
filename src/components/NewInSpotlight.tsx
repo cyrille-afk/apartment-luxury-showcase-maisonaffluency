@@ -6,7 +6,7 @@ import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptio
 import ShareMenu from "@/components/ShareMenu";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import type { Designer, DesignerCuratorPick } from "@/hooks/useDesigner";
-import { useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
+import { useDesignerPicks, useGroupedDesignerPicks, useAllDesigners } from "@/hooks/useDesigner";
 import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton from "@/components/trade/SpecSheetButton";
@@ -102,6 +102,26 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
       })),
     [picks, designer.name, designer.slug, brandLabelOverride, pickDesignerSlugOverride]
   );
+
+  // Name → slug map so brand/designer attribution lines are navigable.
+  const { data: allDesigners = [] } = useAllDesigners();
+  const slugByName = useMemo(() => {
+    const map = new Map<string, string>();
+    const key = (s: string) => s.trim().toLowerCase();
+    for (const d of allDesigners) {
+      if (d.name) map.set(key(d.name), d.slug);
+      if ((d as any).display_name) map.set(key((d as any).display_name), d.slug);
+      if (d.name?.includes(" - ")) map.set(key(d.name.split(" - ")[0]), d.slug);
+    }
+    return map;
+  }, [allDesigners]);
+
+  const resolveSlug = (label: string): string | null => {
+    if (!label) return null;
+    const slug = slugByName.get(label.trim().toLowerCase());
+    if (!slug || slug === designer.slug) return null;
+    return slug;
+  };
 
   const displayName = designer.display_name || designer.name;
   const shareUrl = buildDesignerOgUrl(designer.name);
@@ -295,14 +315,28 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                     || designer.name
                     || ""
                   ).trim();
+                  const brandSlug = resolveSlug(brandLine);
 
                   return (
                     <>
                       {/* Designer / brand — top, prominent */}
                       {brandLine && (
-                        <span className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1">
-                          {brandLine}
-                        </span>
+                        brandSlug ? (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/designers/${brandSlug}`);
+                            }}
+                            className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1 hover:underline underline-offset-4 decoration-foreground/40 transition-colors"
+                          >
+                            {brandLine}
+                          </button>
+                        ) : (
+                          <span className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1">
+                            {brandLine}
+                          </span>
+                        )
                       )}
                       {/* Product name — secondary, elegant italic */}
                       <h3 className="mt-1 font-body italic text-[13px] md:text-[15px] font-normal text-foreground/80 leading-snug line-clamp-2">
