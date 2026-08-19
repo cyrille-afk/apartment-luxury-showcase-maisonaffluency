@@ -150,7 +150,8 @@ const galleryExperiences = [{
     title: "Design Tableau",
     description: ""
   }, {
-    image: "/gallery/calming-2.jpg",
+    image: g("calming-2"),
+    srcSet: gSet("calming-2"),
     title: "A Venitian Cocoon",
     description: ""
   }, {
