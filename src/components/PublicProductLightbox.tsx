@@ -881,9 +881,14 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               })()}
             </div>
 
+            {/* Mobile: related strip stays in flow */}
+            <div className="md:hidden">{relatedStrip}</div>
 
+            {/* Bottom action group — anchored to the column baseline */}
+            <div className="mt-auto flex flex-col gap-2.5 pt-4 md:pt-5">
             {/* Primary CTA — visit the full product page (more images, full spec, gallery) */}
-            <div className="mt-auto pt-4 md:pt-5 flex flex-col gap-2">
+            <div className="flex flex-col gap-2">
+
               {productPageHref ? (
                 <button
                   type="button"
