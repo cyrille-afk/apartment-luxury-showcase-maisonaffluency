@@ -620,7 +620,12 @@ const PublicDesignerProfile = () => {
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
   const isGrouped = isParentBrand && groupedPicks.length > 0;
-  const rawPicks = isGrouped ? groupedPicks : ownPicks;
+  const rawPicks = isGrouped
+    ? groupedPicks
+    : isArnoldMadsenProfile
+      ? (dagmarClamPicks as any[])
+      : ownPicks;
+
   // Child designers must never inherit biography text, philosophy, or media from
   // the parent brand — parent bios embed inline image/video URLs that would leak.
   const displayBiography = designer?.biography;
