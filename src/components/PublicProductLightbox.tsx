@@ -499,8 +499,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
   const relatedStrip = (
                 relatedProducts.length > 0 ? (
-              <div className="pt-6 border-t border-border">
-                <div className="flex items-center justify-between mb-4">
+              <div className="pt-4 border-t border-border/60">
+                <div className="flex items-center justify-between mb-3">
                   <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                     More from {product.designer_slug === "dagmar-london" && product.subtitle?.trim() === "Arnold Madsen" ? "Dagmar" : designerDisplay}
                   </p>
@@ -710,19 +710,20 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             </div>
           </div>
 
+          {/* Desktop: related thumbnails sit directly under the main image */}
+          <div className="hidden md:block w-full shrink-0 bg-background px-6 pb-2">
+            {relatedStrip}
+          </div>
+
           {/* Desktop: description in natural document flow below the image */}
           {product.description && product.description.trim().length > 0 && (
-            <div className="hidden md:block w-full shrink-0 bg-background px-6 pb-6 pt-0">
+            <div className="hidden md:block w-full shrink-0 md:mt-auto bg-background px-6 pb-6 pt-3">
               <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
                 {product.description}
               </p>
             </div>
           )}
 
-          {/* Desktop: related thumbnails sit under the main image */}
-          <div className="hidden md:block w-full shrink-0 bg-background px-6 pb-6">
-            {relatedStrip}
-          </div>
           </div>
 
           {/* Details */}
