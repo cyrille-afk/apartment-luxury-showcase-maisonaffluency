@@ -93,7 +93,7 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
                   <img
                     src={slide.image_url}
                     alt={slide.caption || "Heritage piece"}
-                    className="w-full h-full object-contain object-bottom"
+                    className="w-full h-full object-cover object-center"
                     loading="lazy"
                     onLoad={(e) => handleImageLoad(slide.id, e)}
                   />
