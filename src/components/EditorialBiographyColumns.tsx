@@ -105,7 +105,7 @@ function TextCell({
           </p>
         )}
         <blockquote className="border-l border-foreground/25 pl-5 md:pl-7 py-2 my-2 m-0">
-          <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85 max-w-4xl">
+          <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85 max-w-3xl">
             {renderParagraph(stripQuotes(content))}
           </p>
         </blockquote>
@@ -120,7 +120,7 @@ function TextCell({
           {eyebrow}
         </p>
       )}
-      <p className="font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80 max-w-4xl">
+      <p className="font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80 max-w-3xl">
         {renderParagraph(content)}
       </p>
     </div>
@@ -159,7 +159,7 @@ function MediaCell({
   }
 
   return (
-    <figure className={cn("h-auto m-0 max-w-2xl", className)}>
+    <figure className={cn("h-auto m-0 w-full max-w-3xl", className)}>
       <img
         src={optimizeImageUrl(block.url)}
         alt={block.caption || `${designerName} — editorial`}
@@ -278,7 +278,7 @@ export default function EditorialBiographyColumns({
 
   return (
     <div className="bg-cream">
-      <div className={containerClassName ?? "mx-auto w-full max-w-7xl px-6 md:px-12 pt-4 md:pt-6 pb-4 md:pb-6"}>
+      <div className={containerClassName ?? "mx-auto w-full max-w-6xl px-4 pt-4 md:pt-6 pb-4 md:pb-6"}>
         <div className="flex w-full flex-col gap-y-8 md:gap-y-10">
           {/* Row 1: pinned utility controls */}
           {hasHeaderControls && (
@@ -325,7 +325,7 @@ export default function EditorialBiographyColumns({
           {/* Row 3: 2-column split for first narrative + first media */}
           {firstSplitText && firstSplitText.kind === "text" && firstSplitMedia && firstSplitMedia.kind !== "text" && (
             <FadeInRow delay={160}>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
                 <div className="h-auto">
                   <TextCell content={firstSplitText.content} eyebrow={firstQuote ? undefined : eyebrow} />
                 </div>
@@ -347,7 +347,7 @@ export default function EditorialBiographyColumns({
               {remainingBlocks.map(({ block, index }, i) => (
                 <FadeInRow key={`remaining-${index}`} delay={240 + i * 80}>
                   {block.kind === "text" ? (
-                    <div className="w-full max-w-4xl">
+                    <div className="w-full max-w-3xl">
                       <TextCell content={block.content} />
                     </div>
                   ) : (
@@ -356,7 +356,7 @@ export default function EditorialBiographyColumns({
                         block={block}
                         designerName={designerName}
                         index={index}
-                        className="max-w-3xl"
+                        className=""
                       />
                     </div>
                   )}
