@@ -242,40 +242,19 @@ export default function EditorialBiographyColumns({
 }) {
   const blocks = toBlocks(biography, biographyImages);
 
-  const firstQuoteIndex = blocks.findIndex((b) => b.kind === "text" && isQuote(b.content));
-
-  let firstSplitTextIndex = -1;
-  let firstSplitMediaIndex = -1;
-
-  if (firstQuoteIndex >= 0) {
-    // Row 3 pairs the first narrative paragraph *after* the intro quote with
-    // the first image that follows it. Any lead-in text before the quote flows
-    // into the bottom narrative row along with everything else.
-    firstSplitTextIndex = blocks.findIndex(
-      (b, i) => i > firstQuoteIndex && b.kind === "text" && !isQuote(b.content),
-    );
-    firstSplitMediaIndex = blocks.findIndex((b, i) => i > firstQuoteIndex && b.kind === "image");
-    if (firstSplitMediaIndex < 0) {
-      firstSplitMediaIndex = blocks.findIndex((b, i) => i > firstQuoteIndex && b.kind !== "text");
-    }
-  } else {
-    // No opening quote: fall back to the first narrative paragraph + first media.
-    firstSplitTextIndex = blocks.findIndex((b) => b.kind === "text" && !isQuote(b.content));
-    firstSplitMediaIndex = blocks.findIndex((b) => b.kind !== "text");
-  }
-
-  const firstQuote = firstQuoteIndex >= 0 ? blocks[firstQuoteIndex] : null;
-  const firstSplitText = firstSplitTextIndex >= 0 ? blocks[firstSplitTextIndex] : null;
-  const firstSplitMedia = firstSplitMediaIndex >= 0 ? blocks[firstSplitMediaIndex] : null;
-
-  const usedIndices = new Set(
-    [firstQuoteIndex, firstSplitTextIndex, firstSplitMediaIndex].filter((i): i is number => i >= 0),
-  );
-  const remainingBlocks = blocks
+  const textBlocks = blocks
     .map((block, index) => ({ block, index }))
-    .filter(({ index }) => !usedIndices.has(index));
+    .filter((b): b is { block: Extract<Block, { kind: "text" }>; index: number } => b.block.kind === "text");
+
+  const mediaBlocks = blocks
+    .map((block, index) => ({ block, index }))
+    .filter(
+      (b): b is { block: Extract<Block, { kind: "image" } | { kind: "video" }>; index: number } =>
+        b.block.kind !== "text",
+    );
 
   const hasHeaderControls = collectionCtaHref || onClosePortrait;
+
 
   return (
     <div className="bg-cream">
