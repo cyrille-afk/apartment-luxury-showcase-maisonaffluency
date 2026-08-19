@@ -333,6 +333,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   // whose labels read as dimensions (e.g. Niko Sofa). Lets users preview the
   // chosen size without leaving for the full product page.
   const [selectedSizeLabel, setSelectedSizeLabel] = useState<string | null>(null);
+  const [selectedStaticDimIdx, setSelectedStaticDimIdx] = useState<number | null>(null);
 
   useEffect(() => {
     setImageLoaded(false);
@@ -343,6 +344,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
     setSelectedSingleSizeIdx(null);
     setSelectedSingleMaterialIdx(null);
     setSelectedSizeLabel(null);
+    setSelectedStaticDimIdx(null);
   }, [product?.id]);
 
   // Atomic clear for the dual-axis Base/Top dropdowns inside the lightbox.
