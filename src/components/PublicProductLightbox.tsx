@@ -963,7 +963,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
           {/* Lower full-width narrative description */}
           {product.description && product.description.trim().length > 0 && (
-            <div className="w-full border-t border-border/40 mt-12 pt-10 pb-12 px-5 md:px-8">
+            <div className="w-full border-t border-border/40 mt-12 pt-12 pb-12 px-5 md:px-8">
               <div className="max-w-3xl mx-auto">
                 <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
                   {product.description}
