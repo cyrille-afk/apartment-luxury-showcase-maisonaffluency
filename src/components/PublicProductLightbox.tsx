@@ -611,8 +611,9 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           <div className="flex-1 min-h-0 overflow-y-auto md:flex md:flex-row md:items-stretch md:overflow-hidden">
 
           {/* Image + desktop description column — single scrollable unit */}
-          <div className="relative w-full md:w-3/5 shrink-0 bg-background flex flex-col md:h-full md:min-h-0 md:overflow-y-auto scrollbar-none">
-          <div className="relative w-full flex shrink-0 items-center justify-center p-2 md:px-6 md:pt-6 md:pb-3">
+          <div className="relative w-full md:w-1/2 shrink-0 bg-background flex flex-col md:h-full md:min-h-0 md:overflow-y-auto scrollbar-none">
+          <div className="relative w-full flex md:flex-1 shrink-0 items-center justify-center p-2 md:px-7 md:pt-7 md:pb-3">
+
 
 
             {product.image_url ? (
@@ -711,13 +712,13 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Desktop: related thumbnails sit directly under the main image */}
-          <div className="hidden md:block w-full shrink-0 bg-background px-6 pb-2">
+          <div className="hidden md:block w-full shrink-0 bg-background px-7 pb-3">
             {relatedStrip}
           </div>
 
           {/* Desktop: description in natural document flow below the image */}
           {product.description && product.description.trim().length > 0 && (
-            <div className="hidden md:block w-full shrink-0 md:mt-auto bg-background px-6 pb-6 pt-3">
+            <div className="hidden md:block w-full shrink-0 bg-background px-7 pb-7 pt-3">
               <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
                 {product.description}
               </p>
@@ -727,7 +728,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Details */}
-          <div className="w-full md:w-2/5 min-h-0 md:h-full bg-background border-l border-border/40 p-5 md:px-7 md:py-6 flex flex-col gap-3 md:gap-2.5 md:overflow-y-auto scrollbar-none">
+          <div className="w-full md:w-1/2 min-h-0 md:h-full bg-background border-l border-border/40 p-5 md:px-7 md:py-7 flex flex-col gap-3 md:gap-2 md:overflow-y-auto scrollbar-none">
+
 
 
             <div>
@@ -879,9 +881,14 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               })()}
             </div>
 
+            {/* Mobile: related strip stays in flow */}
+            <div className="md:hidden">{relatedStrip}</div>
 
+            {/* Bottom action group — anchored to the column baseline */}
+            <div className="mt-auto flex flex-col gap-2.5 pt-4 md:pt-5">
             {/* Primary CTA — visit the full product page (more images, full spec, gallery) */}
-            <div className="mt-auto pt-4 md:pt-5 flex flex-col gap-2">
+            <div className="flex flex-col gap-2">
+
               {productPageHref ? (
                 <button
                   type="button"
@@ -962,10 +969,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               )}
             </div>
 
-
-            <div className="md:hidden">{relatedStrip}</div>
-
-            <div className="pt-4 mt-4 border-t border-border">
+            <div className="pt-3 border-t border-border">
               <p className="font-body text-[11px] text-muted-foreground">
                 To unlock Your Trade pricing,{" "}
                 <a href="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
@@ -973,7 +977,9 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </a>.
               </p>
             </div>
+            </div>
           </div>
+
           </div> {/* end scrollable mobile body */}
         </motion.div>
       </motion.div>
