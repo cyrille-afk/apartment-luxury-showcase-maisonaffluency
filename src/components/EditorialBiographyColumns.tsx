@@ -242,40 +242,19 @@ export default function EditorialBiographyColumns({
 }) {
   const blocks = toBlocks(biography, biographyImages);
 
-  const firstQuoteIndex = blocks.findIndex((b) => b.kind === "text" && isQuote(b.content));
-
-  let firstSplitTextIndex = -1;
-  let firstSplitMediaIndex = -1;
-
-  if (firstQuoteIndex >= 0) {
-    // Row 3 pairs the first narrative paragraph *after* the intro quote with
-    // the first image that follows it. Any lead-in text before the quote flows
-    // into the bottom narrative row along with everything else.
-    firstSplitTextIndex = blocks.findIndex(
-      (b, i) => i > firstQuoteIndex && b.kind === "text" && !isQuote(b.content),
-    );
-    firstSplitMediaIndex = blocks.findIndex((b, i) => i > firstQuoteIndex && b.kind === "image");
-    if (firstSplitMediaIndex < 0) {
-      firstSplitMediaIndex = blocks.findIndex((b, i) => i > firstQuoteIndex && b.kind !== "text");
-    }
-  } else {
-    // No opening quote: fall back to the first narrative paragraph + first media.
-    firstSplitTextIndex = blocks.findIndex((b) => b.kind === "text" && !isQuote(b.content));
-    firstSplitMediaIndex = blocks.findIndex((b) => b.kind !== "text");
-  }
-
-  const firstQuote = firstQuoteIndex >= 0 ? blocks[firstQuoteIndex] : null;
-  const firstSplitText = firstSplitTextIndex >= 0 ? blocks[firstSplitTextIndex] : null;
-  const firstSplitMedia = firstSplitMediaIndex >= 0 ? blocks[firstSplitMediaIndex] : null;
-
-  const usedIndices = new Set(
-    [firstQuoteIndex, firstSplitTextIndex, firstSplitMediaIndex].filter((i): i is number => i >= 0),
-  );
-  const remainingBlocks = blocks
+  const textBlocks = blocks
     .map((block, index) => ({ block, index }))
-    .filter(({ index }) => !usedIndices.has(index));
+    .filter((b): b is { block: Extract<Block, { kind: "text" }>; index: number } => b.block.kind === "text");
+
+  const mediaBlocks = blocks
+    .map((block, index) => ({ block, index }))
+    .filter(
+      (b): b is { block: Extract<Block, { kind: "image" } | { kind: "video" }>; index: number } =>
+        b.block.kind !== "text",
+    );
 
   const hasHeaderControls = collectionCtaHref || onClosePortrait;
+
 
   return (
     <div className="bg-cream">
@@ -314,58 +293,34 @@ export default function EditorialBiographyColumns({
             </FadeInRow>
           )}
 
-          {/* Row 2: opening blockquote, full width */}
-          {firstQuote && firstQuote.kind === "text" && (
-            <FadeInRow delay={80}>
-              <div className="w-full">
-                <TextCell content={firstQuote.content} eyebrow={eyebrow} />
-              </div>
-            </FadeInRow>
-          )}
-
-          {/* Row 3: 2-column split for first narrative + first media */}
-          {firstSplitText && firstSplitText.kind === "text" && firstSplitMedia && firstSplitMedia.kind !== "text" && (
-            <FadeInRow delay={160}>
-              <div className="grid grid-cols-1 md:grid-cols-[1.2fr_0.8fr] gap-12 items-start">
-                <div className="h-auto">
-                  <TextCell content={firstSplitText.content} eyebrow={firstQuote ? undefined : eyebrow} />
-                </div>
-                <div className="h-auto flex justify-end">
-                  <MediaCell
-                    block={firstSplitMedia}
-                    designerName={designerName}
-                    index={firstSplitMediaIndex}
-                    className="max-w-md ml-auto"
-                  />
-                </div>
-
-              </div>
-            </FadeInRow>
-          )}
-
-          {/* Row 4: remaining narrative, full width */}
-          {remainingBlocks.length > 0 && (
-            <div className="flex w-full flex-col gap-y-6 md:gap-y-8">
-              {remainingBlocks.map(({ block, index }, i) => (
-                <FadeInRow key={`remaining-${index}`} delay={240 + i * 80}>
-                  {block.kind === "text" ? (
-                    <div className="w-full max-w-3xl">
-                      <TextCell content={block.content} />
-                    </div>
-                  ) : (
-                    <div className="w-full">
-                      <MediaCell
-                        block={block}
-                        designerName={designerName}
-                        index={index}
-                        className=""
-                      />
-                    </div>
-                  )}
+          {/* Asymmetrical magazine split: narrative left, media gallery right */}
+          <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-12 items-start">
+            {/* Left: unbroken narrative flow */}
+            <div className="space-y-6">
+              {textBlocks.map(({ block, index }, i) => (
+                <FadeInRow key={`text-${index}`} delay={Math.min(i * 60, 240)}>
+                  <TextCell content={block.content} eyebrow={i === 0 ? eyebrow : undefined} />
                 </FadeInRow>
               ))}
             </div>
-          )}
+
+            {/* Right: stacked media gallery */}
+            {mediaBlocks.length > 0 && (
+              <div className="flex flex-col gap-8">
+                {mediaBlocks.map(({ block, index }, i) => (
+                  <FadeInRow key={`media-${index}`} delay={Math.min(i * 60, 240)}>
+                    <MediaCell
+                      block={block}
+                      designerName={designerName}
+                      index={index}
+                      className="w-full max-w-none mx-0"
+                    />
+                  </FadeInRow>
+                ))}
+              </div>
+            )}
+          </div>
+
 
           {/* Footer */}
           {footer && (
