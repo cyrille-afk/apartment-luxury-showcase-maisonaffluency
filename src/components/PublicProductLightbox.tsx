@@ -627,11 +627,11 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             <X size={18} />
           </button>
 
-          {/* Strict editorial grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch max-w-6xl mx-auto p-5 md:p-8 w-full h-full">
+          {/* Upper section: two columns */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl mx-auto p-5 md:p-8 w-full">
 
             {/* LEFT COLUMN — hero image + related thumbnails only */}
-            <div className="relative w-full flex flex-col md:h-full">
+            <div className="relative w-full flex flex-col">
               <div className="relative w-full shrink-0 flex items-start justify-center">
                 {product.image_url ? (
                   <>
