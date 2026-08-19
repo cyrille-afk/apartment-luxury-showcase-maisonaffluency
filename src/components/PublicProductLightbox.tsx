@@ -627,11 +627,11 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             <X size={18} />
           </button>
 
-          {/* Upper section: two columns */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl mx-auto p-5 md:p-8 w-full">
+          {/* Strict editorial grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch max-w-6xl mx-auto p-5 md:p-8 w-full h-full">
 
             {/* LEFT COLUMN — hero image + related thumbnails only */}
-            <div className="relative w-full flex flex-col">
+            <div className="relative w-full flex flex-col gap-6">
               <div className="relative w-full shrink-0 flex items-start justify-center">
                 {product.image_url ? (
                   <>
@@ -652,7 +652,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       onLoad={() => { setImageLoaded(true); setImageFailed(false); }}
                       onError={() => { setImageFailed(true); setImageLoaded(true); }}
                       className={cn(
-                        "w-full h-auto object-contain md:max-h-[68vh] transition-opacity duration-300",
+                        "w-full h-auto object-contain md:max-h-[58vh] transition-opacity duration-300",
                         imageFailed || !imageLoaded ? "opacity-0" : "opacity-100"
                       )}
                     />
@@ -728,8 +728,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             {/* RIGHT COLUMN — specs card, narrative description, CTAs */}
             <div className="w-full flex flex-col h-full md:pl-10 md:border-l md:border-border/40">
 
-              {/* Stone card — brand, dimensions, finishes, handcrafted details, narrative */}
-              <div className="bg-muted/40 border border-border/60 p-3.5 flex flex-col gap-2.5">
+              {/* Stone card — brand, dimensions, finishes, handcrafted details */}
+              <div className="bg-muted/40 border border-border/60 p-5 flex flex-col gap-4">
                 <div>
                   <button
                     type="button"
@@ -759,7 +759,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   )}
                 </div>
 
-                <div className="flex flex-col gap-2.5">
+                <div className="flex flex-col gap-1">
                   {(() => {
                     const sv = product.size_variants || [];
                     const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
@@ -832,7 +832,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
                     if (!hasFinishAxis) return null;
                     return (
-                      <div className="border-t border-border/60 py-2 flex items-center gap-4">
+                      <div className="border-t border-border/60 py-3 flex items-center gap-4">
                         <span className="shrink-0"><SpecGlyph symbol="⬗" /></span>
                         <span className="font-body text-sm text-muted-foreground">
                           Finish options — refer to the full product page for details.
@@ -858,7 +858,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       }
                     }
                     return (
-                      <div className="border-t border-border/60 py-2 flex items-start gap-4">
+                      <div className="border-t border-border/60 py-3 flex items-start gap-4">
                         {specIcon("✦", "mt-0.5")}
                         <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
                           <p>{originLine}</p>
@@ -867,12 +867,20 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       </div>
                     );
                   })()}
-
                 </div>
               </div>
 
-              {/* CTA block */}
-              <div className="mt-4 flex flex-col gap-2">
+              {/* Narrative description directly beneath the stone card */}
+              {product.description && product.description.trim().length > 0 && (
+                <div className="py-6">
+                  <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
+                    {product.description}
+                  </p>
+                </div>
+              )}
+
+              {/* CTA block pinned to the bottom of the right column */}
+              <div className="mt-auto flex flex-col gap-4">
                 {/* Primary CTA */}
                 <div className="flex flex-col gap-2">
                   {productPageHref ? (
@@ -950,7 +958,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   )}
                 </div>
 
-                <div className="pt-1 border-t border-border">
+                <div className="pt-3 border-t border-border">
                   <p className="font-body text-[11px] text-muted-foreground">
                     To unlock Your Trade pricing,{" "}
                     <a href="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
@@ -961,18 +969,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               </div>
             </div>
 
-          </div> {/* end upper section */}
-
-          {/* Lower section: full-width editorial narrative */}
-          {product.description && product.description.trim().length > 0 && (
-            <div className="w-full max-w-6xl mx-auto px-5 md:px-8 pb-8 md:pb-12">
-              <div className="w-full border-t border-border/40 pt-8 md:pt-12 mt-8 md:mt-12">
-                <p className="font-serif text-lg md:text-xl leading-[1.7] text-foreground/90 text-left md:text-center max-w-4xl mx-auto whitespace-pre-wrap">
-                  {product.description}
-                </p>
-              </div>
-            </div>
-          )}
+          </div> {/* end scrollable mobile body */}
         </motion.div>
       </motion.div>
       )}
