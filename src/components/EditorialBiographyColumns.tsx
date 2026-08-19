@@ -152,7 +152,7 @@ function MediaCell({
           url={block.url}
           designerName={designerName}
           index={index}
-          overrideCaption={null}
+          overrideCaption=""
           posterUrl={block.poster || undefined}
           bare
         />
