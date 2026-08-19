@@ -36,22 +36,31 @@ interface NewInSpotlightProps {
   designer: Designer;
   showEyebrow?: boolean;
   variant?: "default" | "underlaid";
+  /** Render these picks instead of the designer's own (e.g. Arnold Madsen → Dagmar's Clam pieces). */
+  picksOverride?: DesignerCuratorPick[];
+  /** Brand line + lightbox attribution used with picksOverride. */
+  brandLabelOverride?: string;
+  /** Designer slug used for lightbox links with picksOverride. */
+  pickDesignerSlugOverride?: string;
 }
 
-const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: NewInSpotlightProps) => {
+const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", picksOverride, brandLabelOverride, pickDesignerSlugOverride }: NewInSpotlightProps) => {
   const navigate = useNavigate();
-  const isParentBrand = isParentBrandDesigner(designer);
+  const hasOverride = Array.isArray(picksOverride);
+  const isParentBrand = !hasOverride && isParentBrandDesigner(designer);
   const { data: founderIsBrand = false } = useFounderIsBrand(
     isParentBrand ? undefined : designer.founder
   );
-  const { data: simplePicks = [] } = useDesignerPicks(designer.id, { publicOnly: true });
+  const { data: simplePicks = [] } = useDesignerPicks(hasOverride ? undefined : designer.id, { publicOnly: true });
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
     isParentBrand ? designer : undefined,
     { publicOnly: true }
   );
-  const picks: DesignerCuratorPick[] = isParentBrand
-    ? (groupedPicks as any as DesignerCuratorPick[])
-    : simplePicks;
+  const picks: DesignerCuratorPick[] = hasOverride
+    ? (picksOverride as DesignerCuratorPick[])
+    : isParentBrand
+      ? (groupedPicks as any as DesignerCuratorPick[])
+      : simplePicks;
 
   const { data: publicRrpMap = {} } = usePublicRrpMap(picks.map((p) => p.id));
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer.id);
