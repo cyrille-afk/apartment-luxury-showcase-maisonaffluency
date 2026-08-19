@@ -5,11 +5,11 @@ interface SliderDotsProps {
   count: number;
   activeIndex: number;
   onSelect: (index: number) => void;
-  /** Color theme — light works on dark backgrounds, dark on light backgrounds */
-  variant?: "dark" | "light";
+  /** Color theme — light works on dark backgrounds, dark on light backgrounds, archive is a crisp high-contrast editorial treatment */
+  variant?: "dark" | "light" | "archive";
   className?: string;
   ariaPrefix?: string;
-  size?: "sm" | "md";
+  size?: "xs" | "sm" | "md";
 }
 
 /**
