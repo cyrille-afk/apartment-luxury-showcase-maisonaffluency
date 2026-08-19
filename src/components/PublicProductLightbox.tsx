@@ -858,7 +858,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       }
                     }
                     return (
-                      <div className="border-t border-border/60 py-3 flex items-start gap-4">
+                      <div className="border-t border-border/60 py-2 flex items-start gap-4">
                         {specIcon("✦", "mt-0.5")}
                         <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
                           <p>{originLine}</p>
