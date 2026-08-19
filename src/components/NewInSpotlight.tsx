@@ -286,7 +286,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                     ? designer.founder.trim()
                     : "";
                   const brandLine = (
-                    attributedDesigner
+                    brandLabelOverride
+                    || attributedDesigner
                     || parentBrand
                     || composed.remainingSubtitle
                     || pick.subtitle
