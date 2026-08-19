@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 
 /**
  * Detect a "curated" slug — one that intentionally diverges from a naive
- * slugify(name/display_name). Example: designer "Alinea Design Objects" with
+ * slugify(name/display_name). Example: designer "Alinea" with
  * slug "leo-aerts-alinea" — the slug encodes the founder + atelier and must
  * NEVER be auto-overwritten, even if it would otherwise look "wrong".
  *
@@ -51,7 +51,7 @@ export interface SlugHealthDesigner {
 /*                                                                     */
 /*  We DO NOT flag mismatches against name/display_name — those are    */
 /*  intentional editorial choices (e.g. "leo-aerts-alinea" for         */
-/*  Alinea Design Objects) and must stay untouched.                    */
+/*  Alinea) and must stay untouched.                                   */
 /* ------------------------------------------------------------------ */
 function slugify(input: string): string {
   return input

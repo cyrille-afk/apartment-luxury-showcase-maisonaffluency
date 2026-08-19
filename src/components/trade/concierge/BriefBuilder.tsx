@@ -31,7 +31,7 @@ const TYPOLOGY_TO_CATEGORY: { re: RegExp; category: keyof typeof brandCategories
 const CATEGORY_ANCHOR_BRANDS: Record<string, string[]> = {
   lighting: ["Apparatus", "Serge Mouille"],
   seating: ["Man of Parts", "De La Espada"],
-  tables: ["Collection Particulière", "Alinea Design Objects"],
+  tables: ["Collection Particulière", "Alinea"],
   storage: ["De La Espada", "Alexander Lamont"],
   rugs: ["CC-Tapis", "Apparatus"],
   decor: ["Alexander Lamont", "L'Objet"],

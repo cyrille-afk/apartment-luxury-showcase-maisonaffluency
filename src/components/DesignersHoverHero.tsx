@@ -672,7 +672,7 @@ const DesignersHoverHero = () => {
   }, []);
 
   // Preserve the curated group membership but render each group alphabetically
-  // by display name so a brand like "Alinea Design Objects" (slug leo-aerts-alinea)
+  // by display name so a brand like "Alinea" (slug leo-aerts-alinea)
   // sits under A, not L.
   const groupedItems = useMemo(() => {
     const bySlug = new Map((designers || []).map((d) => [d.slug, d]));
