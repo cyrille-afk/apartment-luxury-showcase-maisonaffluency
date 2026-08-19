@@ -627,11 +627,11 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             <X size={18} />
           </button>
 
-          {/* Strict editorial grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch max-w-6xl mx-auto p-5 md:p-8 w-full h-full">
+          {/* Upper section: two columns */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl mx-auto p-5 md:p-8 w-full">
 
             {/* LEFT COLUMN — hero image + related thumbnails only */}
-            <div className="relative w-full flex flex-col md:h-full">
+            <div className="relative w-full flex flex-col">
               <div className="relative w-full shrink-0 flex items-start justify-center">
                 {product.image_url ? (
                   <>
@@ -720,7 +720,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               </div>
 
               {/* Related thumbnails sit directly under the main image */}
-              <div className="w-full shrink-0 md:mt-auto">
+              <div className="w-full shrink-0">
                 {relatedStrip}
               </div>
             </div>
@@ -868,18 +868,11 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     );
                   })()}
 
-                  {product.description && product.description.trim().length > 0 && (
-                    <div className="pt-1">
-                      <p className="font-body text-sm leading-snug text-foreground text-left whitespace-pre-wrap">
-                        {product.description}
-                      </p>
-                    </div>
-                  )}
                 </div>
               </div>
 
-              {/* CTA block pinned to the bottom of the right column */}
-              <div className="mt-auto flex flex-col gap-2">
+              {/* CTA block */}
+              <div className="mt-4 flex flex-col gap-2">
                 {/* Primary CTA */}
                 <div className="flex flex-col gap-2">
                   {productPageHref ? (
@@ -968,7 +961,18 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               </div>
             </div>
 
-          </div> {/* end scrollable mobile body */}
+          </div> {/* end upper section */}
+
+          {/* Lower section: full-width editorial narrative */}
+          {product.description && product.description.trim().length > 0 && (
+            <div className="w-full max-w-6xl mx-auto px-5 md:px-8 pb-8 md:pb-12">
+              <div className="w-full border-t border-border/40 pt-8 md:pt-12 mt-8 md:mt-12">
+                <p className="font-serif text-lg md:text-xl leading-[1.7] text-foreground/90 text-left md:text-center max-w-4xl mx-auto whitespace-pre-wrap">
+                  {product.description}
+                </p>
+              </div>
+            </div>
+          )}
         </motion.div>
       </motion.div>
       )}
