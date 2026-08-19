@@ -17,7 +17,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import SliderDots from "@/components/ui/SliderDots";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
+import { cloudinaryUrl, cloudinarySrcSet, cldResponsiveImg } from "@/lib/cloudinary";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
@@ -27,6 +27,13 @@ import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 
 const g = (id: string) => cloudinaryUrl(id, { width: 1200, quality: "auto:good", crop: "fill" });
 const gSet = (id: string) => cloudinarySrcSet(id, [400, 600, 800, 1200, 1600], { quality: "auto:good", crop: "fill" });
+
+/**
+ * Responsive <img> props (src + AVIF/WebP srcSet via f_auto) for any gallery image URL.
+ * Widths are tuned per render context so mobile never downloads a 1200px original.
+ */
+const galleryImg = (url: string, sizes: string, widths: number[] = [400, 600, 800, 1200, 1600]) =>
+  cldResponsiveImg(url, { widths, sizes, quality: "auto:good" });
 
 const bedroomImage = g("master-suite_y6jaix");
 const diningImage = g("dining-room_ey0bu5");
@@ -151,7 +158,6 @@ const galleryExperiences = [{
     description: ""
   }, {
     image: g("calming-2"),
-    srcSet: gSet("calming-2"),
     title: "A Venitian Cocoon",
     description: ""
   }, {
@@ -320,9 +326,7 @@ const DesktopCarouselStrip = ({
             onClick={() => openLightbox(originalSectionIndex, activeIdx)}
           >
             <img
-              src={item.image}
-              srcSet={(item as any).srcSet}
-              sizes="(max-width: 1024px) 100vw, 1200px"
+              {...galleryImg(item.image, "(max-width: 1024px) 100vw, 1200px")}
               alt={`${item.title} — ${section.experience}`}
               className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.92] rounded-sm"
               loading="lazy"
@@ -414,10 +418,8 @@ const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, onHotspotAct
       style={isHotspotSection ? { aspectRatio: naturalAspect } : undefined}
     >
       <img
-        src={item.image}
-        srcSet={(item as any).srcSet}
+        {...galleryImg(item.image, "100vw", [480, 640, 828, 1080, 1600])}
         alt={item.title}
-        sizes="100vw"
         className={`${isHotspotSection ? 'absolute inset-0 h-full w-full object-fill' : 'h-full w-full object-cover'} brightness-[1.05] contrast-[1.08] saturate-[1.05] ${item.image === bespokeSofaImage && !isHotspotSection ? "object-[center_35%]" : ""}`}
         loading="lazy"
         decoding="async"
@@ -1225,7 +1227,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                                   }`}
                                 >
                                   <img
-                                    src={item.image}
+                                    {...galleryImg(item.image, "64px", [64, 128, 192])}
                                     alt=""
                                     className="w-full h-full object-cover"
                                     loading="lazy"
@@ -1284,7 +1286,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         className={`relative mb-2 overflow-hidden rounded-sm shadow-[0_20px_50px_-10px_rgba(0,0,0,0.4)] transition-all duration-500 group-hover:shadow-[0_25px_60px_-10px_rgba(0,0,0,0.5)] aspect-[4/5]`}
                         onClick={() => openLightbox(originalSectionIndex, index)}
                       >
-                        <img src={item.image} srcSet={(item as any).srcSet} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} sizes={gridCols === 3 ? "(max-width: 1024px) 50vw, 33vw" : "(max-width: 1024px) 50vw, 25vw"} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.92]" loading="lazy" decoding="async" width={800} height={1000} />
+                        <img {...galleryImg(item.image, gridCols === 3 ? "(max-width: 1024px) 50vw, 33vw" : "(max-width: 1024px) 50vw, 25vw", [240, 320, 480, 640, 800])} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.92]" loading="lazy" decoding="async" width={800} height={1000} />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                         {/* Pulsating hotspot hint — first card of every section */}
                         {index === 0 && (
@@ -1394,9 +1396,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         <div key={i} className="flex-[0_0_100%] min-w-0 flex items-center justify-center">
                           <div className="relative w-full">
                            <img
-                             src={item.image}
+                             {...galleryImg(item.image, "100vw", [640, 828, 1080, 1440, 1920])}
                              alt={item.title}
-                             sizes="100vw"
                              className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[70dvh]"
                              loading={Math.abs(i - currentItemIndex) <= 1 ? "eager" : "lazy"}
                              decoding="async"
