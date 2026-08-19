@@ -490,8 +490,12 @@ export function VideoBlock({
   }, [playing, muteVisible, startUnmuted]);
 
   const currentPosterUrl = posterCandidates[posterIndex];
-  /** Cover state inside an editorial column: render the poster at its natural size, no frame. */
-  const showsBareCover = bare && !playing && !!currentPosterUrl;
+  /**
+   * The playing state always renders inside a 16:9 black frame with object-contain.
+   * Keep the pre-play cover in that exact same frame so clicking play doesn't
+   * visually resize/re-crop the video (vertical clips used to appear zoomed).
+   */
+  const showsBareCover = false;
 
   const handlePosterError = () => {
     setPosterIndex((prev) => {
@@ -599,7 +603,7 @@ export function VideoBlock({
               <img
                 src={optimizeImageUrl(currentPosterUrl)}
                 alt={caption || `${designerName} — video cover`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain bg-black"
                 loading="eager"
                 fetchPriority="high"
                 decoding="async"
@@ -627,7 +631,7 @@ export function VideoBlock({
               <img
                 src={optimizeImageUrl(currentPosterUrl)}
                 alt={caption || `${designerName} — video cover`}
-                className={showsBareCover ? "w-full h-auto object-contain block" : "w-full h-full object-cover"}
+                className={showsBareCover ? "w-full h-auto object-contain block" : "w-full h-full object-contain bg-black"}
                 loading="lazy"
                 onError={handlePosterError}
               />
