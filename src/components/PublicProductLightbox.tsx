@@ -1,7 +1,6 @@
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import { X, FileDown, Heart, Scale, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
@@ -11,7 +10,6 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
-import ExpandableSpec from "@/components/ExpandableSpec";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
 
 import { isProductUpholstered } from "@/lib/upholstery";
