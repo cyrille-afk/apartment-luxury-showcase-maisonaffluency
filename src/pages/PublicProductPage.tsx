@@ -308,7 +308,7 @@ type VariantSelectorsContextType = {
   handleResetDefault: () => void;
   onMaterialChange?: (label: string | null, opts?: { base?: string | null; top?: string | null; size?: string | null; fromSwatch?: boolean }) => void;
   galleryActiveIndex?: number;
-  onSwatchImagesChange?: (imageIndices: number[] | null) => void;
+  onSwatchImagesChange?: (imageIndices: number[] | null, meta?: { committed?: boolean; swatchName?: string; jumpOnly?: boolean }) => void;
   onFinishesMissingImagesChange?: (names: string[]) => void;
   onFinishGroupingResolved?: () => void;
 };
@@ -326,7 +326,7 @@ const VariantSelectorsProvider: React.FC<{
   onMaterialChange?: (label: string | null, opts?: { base?: string | null; top?: string | null; size?: string | null; fromSwatch?: boolean }) => void;
   galleryActiveIndex?: number;
   finishMap?: Record<string, number> | null;
-  onSwatchImagesChange?: (imageIndices: number[] | null) => void;
+  onSwatchImagesChange?: (imageIndices: number[] | null, meta?: { committed?: boolean; swatchName?: string; jumpOnly?: boolean }) => void;
   onFinishesMissingImagesChange?: (names: string[]) => void;
   onFinishGroupingResolved?: () => void;
   children: React.ReactNode;
@@ -1066,7 +1066,7 @@ const VariantSelectors: React.FC<{
   onMaterialChange?: (label: string | null, opts?: { base?: string | null; top?: string | null; size?: string | null; fromSwatch?: boolean }) => void;
   galleryActiveIndex?: number;
   finishMap?: Record<string, number> | null;
-  onSwatchImagesChange?: (imageIndices: number[] | null) => void;
+  onSwatchImagesChange?: (imageIndices: number[] | null, meta?: { committed?: boolean; swatchName?: string; jumpOnly?: boolean }) => void;
   onFinishesMissingImagesChange?: (names: string[]) => void;
 }> = (props) => (
   <VariantSelectorsProvider {...props}>
@@ -2035,12 +2035,14 @@ const PublicProductPage: React.FC = () => {
                     onMaterialChange={handleMaterialChange}
                     galleryActiveIndex={galleryActiveIndex}
                     finishMap={productFinishMap}
-                    onSwatchImagesChange={(indices) => {
+                    onSwatchImagesChange={(indices, meta) => {
                       if (!indices || indices.length === 0) {
                         setSwatchImageIndices(null);
                         return;
                       }
-                      setSwatchImageIndices(indices);
+                      // Rugs keep the full thumbnail rail visible; picking a
+                      // finish jumps to its photo instead of pruning the reel.
+                      setSwatchImageIndices(meta?.jumpOnly ? null : indices);
                       setGalleryActiveIndex(Math.max(0, indices[0] - 1));
                       setGalleryJumpNonce((n) => n + 1);
                     }}
@@ -2335,12 +2337,14 @@ const PublicProductPage: React.FC = () => {
                     onMaterialChange={handleMaterialChange}
                     galleryActiveIndex={galleryActiveIndex}
                     finishMap={productFinishMap}
-                    onSwatchImagesChange={(indices) => {
+                    onSwatchImagesChange={(indices, meta) => {
                       if (!indices || indices.length === 0) {
                         setSwatchImageIndices(null);
                         return;
                       }
-                      setSwatchImageIndices(indices);
+                      // Rugs keep the full thumbnail rail visible; picking a
+                      // finish jumps to its photo instead of pruning the reel.
+                      setSwatchImageIndices(meta?.jumpOnly ? null : indices);
                       setGalleryActiveIndex(Math.max(0, indices[0] - 1));
                       setGalleryJumpNonce((n) => n + 1);
                     }}
