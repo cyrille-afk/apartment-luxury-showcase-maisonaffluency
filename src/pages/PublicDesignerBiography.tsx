@@ -136,7 +136,7 @@ export default function PublicDesignerBiography() {
         )}
 
         {heritageSlides.length > 0 && (
-          <section className="mx-auto max-w-[1400px] px-[6vw] pt-0 pb-10 md:pb-14">
+          <section className="mx-auto w-full max-w-6xl px-6 pt-0 pb-10 md:pb-14">
             <HeritageSlider slides={heritageSlides} />
           </section>
         )}
