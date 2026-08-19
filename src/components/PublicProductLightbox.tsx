@@ -729,7 +729,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             <div className="w-full flex flex-col h-full md:pl-10 md:border-l md:border-border/40">
 
               {/* Stone card — brand, dimensions, finishes, handcrafted details, narrative */}
-              <div className="bg-muted/40 border border-border/60 p-4 flex flex-col gap-3">
+              <div className="bg-muted/40 border border-border/60 p-3.5 flex flex-col gap-2.5">
                 <div>
                   <button
                     type="button"
