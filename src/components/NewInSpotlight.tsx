@@ -103,6 +103,26 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
     [picks, designer.name, designer.slug, brandLabelOverride, pickDesignerSlugOverride]
   );
 
+  // Name → slug map so brand/designer attribution lines are navigable.
+  const { data: allDesigners = [] } = useAllDesigners();
+  const slugByName = useMemo(() => {
+    const map = new Map<string, string>();
+    const key = (s: string) => s.trim().toLowerCase();
+    for (const d of allDesigners) {
+      if (d.name) map.set(key(d.name), d.slug);
+      if ((d as any).display_name) map.set(key((d as any).display_name), d.slug);
+      if (d.name?.includes(" - ")) map.set(key(d.name.split(" - ")[0]), d.slug);
+    }
+    return map;
+  }, [allDesigners]);
+
+  const resolveSlug = (label: string): string | null => {
+    if (!label) return null;
+    const slug = slugByName.get(label.trim().toLowerCase());
+    if (!slug || slug === designer.slug) return null;
+    return slug;
+  };
+
   const displayName = designer.display_name || designer.name;
   const shareUrl = buildDesignerOgUrl(designer.name);
 
