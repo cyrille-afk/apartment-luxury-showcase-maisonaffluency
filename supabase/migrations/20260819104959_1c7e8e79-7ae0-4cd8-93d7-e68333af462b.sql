@@ -1,0 +1,1 @@
+update designers set biography_images = array_replace(biography_images, 'https://cdn.shopify.com/videos/c/o/v/e58fc53189ae4cb5a8bc5f5556ce77b8.mp4 | Our Process', 'https://cdn.shopify.com/videos/c/o/v/e58fc53189ae4cb5a8bc5f5556ce77b8.mp4 | Our Process | poster:/images/dagmar-process-poster.jpg') where slug = 'dagmar-london';
