@@ -37,7 +37,8 @@ export function optimizeImageUrl(
       // Already has transforms — skip
       return url;
     }
-    return `${prefix}${transforms}/${rest}`;
+    const versioned = /^v\d+\//.test(rest) ? rest : `v1/${rest}`;
+    return `${prefix}${transforms}/${versioned}`;
   }
 
   // External image URL → proxy via Cloudinary fetch
