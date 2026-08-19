@@ -759,7 +759,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   )}
                 </div>
 
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2.5">
                   {(() => {
                     const sv = product.size_variants || [];
                     const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
