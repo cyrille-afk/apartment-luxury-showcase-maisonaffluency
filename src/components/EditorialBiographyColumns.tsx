@@ -299,23 +299,6 @@ export default function EditorialBiographyColumns({
             </FadeInRow>
           )}
 
-          {/* Collection CTA sits beneath the video (or blockquote when no video) */}
-          {showCollectionCta && (
-            <FadeInRow delay={140}>
-              <div className="flex justify-center my-2">
-                <Link
-                  to={collectionCtaHref!}
-                  className="group inline-flex items-center gap-3 px-5 py-2.5 md:px-6 md:py-3 border border-foreground/25 bg-background/30 hover:bg-background/70 hover:border-foreground/50 transition-all duration-300"
-                >
-                  <span className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-foreground/75 group-hover:text-foreground transition-colors">
-                    {collectionCtaLabel}
-                  </span>
-                  <ArrowRight className="h-3 w-3 text-foreground/55 group-hover:text-foreground group-hover:translate-x-1 transition-all duration-300" strokeWidth={1.25} />
-                </Link>
-              </div>
-            </FadeInRow>
-          )}
-
           {/* Row 2: large blockquote */}
           {blockquoteText && (
             <FadeInRow delay={180}>
@@ -325,22 +308,23 @@ export default function EditorialBiographyColumns({
             </FadeInRow>
           )}
 
-          {/* Collection CTA fallback beneath the blockquote when no video is present */}
-          {showCollectionCta && !firstVideo && (
+          {/* Single collection CTA — beneath the video caption (or the blockquote when no video) */}
+          {showCollectionCta && (
             <FadeInRow delay={200}>
               <div className="flex justify-center my-2">
                 <Link
                   to={collectionCtaHref!}
-                  className="group inline-flex items-center gap-3 px-5 py-2.5 md:px-6 md:py-3 border border-foreground/25 bg-background/30 hover:bg-background/70 hover:border-foreground/50 transition-all duration-300"
+                  className="group inline-flex items-center gap-3 border border-foreground/20 px-7 py-3 md:px-9 md:py-3.5 hover:border-foreground/60 transition-colors duration-300"
                 >
-                  <span className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-foreground/75 group-hover:text-foreground transition-colors">
+                  <span className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.34em] text-foreground/70 group-hover:text-foreground transition-colors">
                     {collectionCtaLabel}
                   </span>
-                  <ArrowRight className="h-3 w-3 text-foreground/55 group-hover:text-foreground group-hover:translate-x-1 transition-all duration-300" strokeWidth={1.25} />
+                  <ArrowRight className="h-3 w-3 text-foreground/50 group-hover:text-foreground group-hover:translate-x-1 transition-all duration-300" strokeWidth={1.25} />
                 </Link>
               </div>
             </FadeInRow>
           )}
+
 
           {/* Row 3: first photo left, text right */}
           {(firstImage || row3Texts.length > 0) && (
