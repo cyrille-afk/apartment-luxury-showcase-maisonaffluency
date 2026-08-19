@@ -325,18 +325,19 @@ export default function EditorialBiographyColumns({
           {/* Row 3: 2-column split for first narrative + first media */}
           {firstSplitText && firstSplitText.kind === "text" && firstSplitMedia && firstSplitMedia.kind !== "text" && (
             <FadeInRow delay={160}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+              <div className="grid grid-cols-1 md:grid-cols-[1.2fr_0.8fr] gap-12 items-start">
                 <div className="h-auto">
                   <TextCell content={firstSplitText.content} eyebrow={firstQuote ? undefined : eyebrow} />
                 </div>
-                <div className="h-auto">
+                <div className="h-auto flex justify-end">
                   <MediaCell
                     block={firstSplitMedia}
                     designerName={designerName}
                     index={firstSplitMediaIndex}
-                    className="max-w-none"
+                    className="max-w-md ml-auto"
                   />
                 </div>
+
               </div>
             </FadeInRow>
           )}
