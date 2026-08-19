@@ -102,7 +102,7 @@ interface FinishSelectorProps {
    * mapped image indices. Receives the 1-based gallery indices the product
    * page should jump the hero gallery to. Null clears the override.
    */
-  onSwatchImagesChange?: (imageIndices: number[] | null, meta?: { committed?: boolean; swatchName?: string }) => void;
+  onSwatchImagesChange?: (imageIndices: number[] | null, meta?: { committed?: boolean; swatchName?: string; jumpOnly?: boolean }) => void;
   /**
    * Fires once the per-finish gallery grouping has been resolved for this
    * product (either a default finish group was applied, or the product has no
@@ -520,7 +520,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (!first) return;
     defaultGroupAppliedRef.current = true;
     lockedPreviewRef.current = { indices: first.image_indices!, name: first.name };
-    onSwatchImagesChange?.(first.image_indices!, { committed: true, swatchName: first.name });
+    onSwatchImagesChange?.(first.image_indices!, { committed: true, swatchName: first.name, jumpOnly: isRugProduct });
     onFinishGroupingResolved?.();
   }, [fabrics, selectedFabricId, selectedWoodId, selectedTopId, onSwatchImagesChange]);
 
@@ -658,7 +658,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       // index 0). Defer to the next tick to outrun the state updates queued
       // by the upstream handlers.
       if (indices) {
-        setTimeout(() => onSwatchImagesChange?.(indices, { committed: true, swatchName: f.name }), 0);
+        setTimeout(() => onSwatchImagesChange?.(indices, { committed: true, swatchName: f.name, jumpOnly: isRugProduct }), 0);
       } else {
         onSwatchImagesChange?.(null, { committed: true, swatchName: f.name });
       }
@@ -678,7 +678,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       // Hover is a preview only — never committed, so pricing never moves.
       if (indices) {
         hoverActiveRef.current = true;
-        onSwatchImagesChange?.(indices, { committed: false, swatchName: f.name });
+        onSwatchImagesChange?.(indices, { committed: false, swatchName: f.name, jumpOnly: isRugProduct });
       }
     };
 
