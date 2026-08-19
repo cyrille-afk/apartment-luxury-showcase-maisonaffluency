@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
@@ -571,6 +574,30 @@ const PublicDesignerProfile = () => {
     { publicOnly: true }
   );
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
+  // Arnold Madsen owns no products of his own: his portrait surfaces Dagmar's
+  // Clam Chair & Clam Stool, attributed to Dagmar (see isArnoldClamChair below).
+  const isArnoldMadsenProfile = designer?.slug === "arnold-madsen";
+  const { data: dagmarClamPicks = [] } = useQuery({
+    queryKey: ["arnold-madsen-dagmar-clam-picks"],
+    enabled: !!isArnoldMadsenProfile,
+    staleTime: 10 * 60_000,
+    queryFn: async () => {
+      const { data: dagmar } = await supabase
+        .from("designers")
+        .select("id")
+        .eq("slug", "dagmar-london")
+        .maybeSingle();
+      if (!dagmar?.id) return [];
+      const { data } = await supabase
+        .from("designer_curator_picks_public" as any)
+        .select("*")
+        .eq("designer_id", dagmar.id);
+      return ((data as any[]) || []).filter((p) =>
+        /^clam (chair|stool)(?:,|\s|$)/i.test(p.title || "")
+      );
+    },
+  });
+
   const { data: allDesignersForLookup = [] } = useAllDesigners();
   // name (lower-case, normalized) -> slug, for parsed "by X" attribution linking.
   const designerSlugByName = useMemo(() => {
@@ -593,7 +620,12 @@ const PublicDesignerProfile = () => {
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
   const isGrouped = isParentBrand && groupedPicks.length > 0;
-  const rawPicks = isGrouped ? groupedPicks : ownPicks;
+  const rawPicks = isGrouped
+    ? groupedPicks
+    : isArnoldMadsenProfile
+      ? (dagmarClamPicks as any[])
+      : ownPicks;
+
   // Child designers must never inherit biography text, philosophy, or media from
   // the parent brand — parent bios embed inline image/video URLs that would leak.
   const displayBiography = designer?.biography;
@@ -626,9 +658,10 @@ const PublicDesignerProfile = () => {
     }
 
     // Exclude picks whose image already appears in the biography
-    const filtered = bioUrls.size > 0 && !isGrouped
+    const filtered = bioUrls.size > 0 && !isGrouped && !isArnoldMadsenProfile
       ? rawPicks.filter((pick) => !bioUrls.has(pick.image_url))
       : rawPicks;
+
 
     return interleaveBySubcategory(sortCuratorPicks(filtered));
   }, [rawPicks, displayBiographyImages, displayBiography, isGrouped]);

@@ -1,0 +1,1 @@
+DELETE FROM public.designer_curator_picks WHERE designer_id = 'ddcc67ce-92cb-4e19-a07e-ce5e577c438c';
