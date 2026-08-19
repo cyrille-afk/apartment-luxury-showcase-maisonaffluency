@@ -12,6 +12,7 @@ import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton from "@/components/trade/SpecSheetButton";
 import { buildDesignerOgUrl } from "@/lib/whatsapp-share";
 import { isParentBrandDesigner } from "@/lib/designerHierarchy";
+import { useFounderIsBrand } from "@/hooks/useFounderIsBrand";
 import { cn } from "@/lib/utils";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { composeTitle } from "@/lib/curatorPickLegend";
@@ -40,6 +41,9 @@ interface NewInSpotlightProps {
 const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: NewInSpotlightProps) => {
   const navigate = useNavigate();
   const isParentBrand = isParentBrandDesigner(designer);
+  const { data: founderIsBrand = false } = useFounderIsBrand(
+    isParentBrand ? undefined : designer.founder
+  );
   const { data: simplePicks = [] } = useDesignerPicks(designer.id, { publicOnly: true });
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
     isParentBrand ? designer : undefined,
@@ -268,7 +272,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                   const attributedDesigner = isParentBrand
                     ? ((pick as any).designer_name || "").trim()
                     : "";
-                  const parentBrand = !isParentBrand && designer.founder
+                  const parentBrand = !isParentBrand && founderIsBrand && designer.founder
                     && ![designer.name, designer.display_name].includes(designer.founder)
                     ? designer.founder.trim()
                     : "";
