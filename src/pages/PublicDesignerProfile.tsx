@@ -571,6 +571,30 @@ const PublicDesignerProfile = () => {
     { publicOnly: true }
   );
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
+  // Arnold Madsen owns no products of his own: his portrait surfaces Dagmar's
+  // Clam Chair & Clam Stool, attributed to Dagmar (see isArnoldClamChair below).
+  const isArnoldMadsenProfile = designer?.slug === "arnold-madsen";
+  const { data: dagmarClamPicks = [] } = useQuery({
+    queryKey: ["arnold-madsen-dagmar-clam-picks"],
+    enabled: !!isArnoldMadsenProfile,
+    staleTime: 10 * 60_000,
+    queryFn: async () => {
+      const { data: dagmar } = await supabase
+        .from("designers")
+        .select("id")
+        .eq("slug", "dagmar-london")
+        .maybeSingle();
+      if (!dagmar?.id) return [];
+      const { data } = await supabase
+        .from("designer_curator_picks_public" as any)
+        .select("*")
+        .eq("designer_id", dagmar.id);
+      return ((data as any[]) || []).filter((p) =>
+        /^clam (chair|stool)(?:,|\s|$)/i.test(p.title || "")
+      );
+    },
+  });
+
   const { data: allDesignersForLookup = [] } = useAllDesigners();
   // name (lower-case, normalized) -> slug, for parsed "by X" attribution linking.
   const designerSlugByName = useMemo(() => {
