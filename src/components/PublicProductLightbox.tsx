@@ -879,7 +879,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               </div>
 
               {/* CTA block pinned to the bottom of the right column */}
-              <div className="mt-auto flex flex-col gap-3">
+              <div className="mt-auto flex flex-col gap-2">
                 {/* Primary CTA */}
                 <div className="flex flex-col gap-2">
                   {productPageHref ? (
