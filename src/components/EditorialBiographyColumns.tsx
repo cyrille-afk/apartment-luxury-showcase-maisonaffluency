@@ -293,58 +293,34 @@ export default function EditorialBiographyColumns({
             </FadeInRow>
           )}
 
-          {/* Row 2: opening blockquote, full width */}
-          {firstQuote && firstQuote.kind === "text" && (
-            <FadeInRow delay={80}>
-              <div className="w-full">
-                <TextCell content={firstQuote.content} eyebrow={eyebrow} />
-              </div>
-            </FadeInRow>
-          )}
-
-          {/* Row 3: 2-column split for first narrative + first media */}
-          {firstSplitText && firstSplitText.kind === "text" && firstSplitMedia && firstSplitMedia.kind !== "text" && (
-            <FadeInRow delay={160}>
-              <div className="grid grid-cols-1 md:grid-cols-[1.2fr_0.8fr] gap-12 items-start">
-                <div className="h-auto">
-                  <TextCell content={firstSplitText.content} eyebrow={firstQuote ? undefined : eyebrow} />
-                </div>
-                <div className="h-auto flex justify-end">
-                  <MediaCell
-                    block={firstSplitMedia}
-                    designerName={designerName}
-                    index={firstSplitMediaIndex}
-                    className="max-w-md ml-auto"
-                  />
-                </div>
-
-              </div>
-            </FadeInRow>
-          )}
-
-          {/* Row 4: remaining narrative, full width */}
-          {remainingBlocks.length > 0 && (
-            <div className="flex w-full flex-col gap-y-6 md:gap-y-8">
-              {remainingBlocks.map(({ block, index }, i) => (
-                <FadeInRow key={`remaining-${index}`} delay={240 + i * 80}>
-                  {block.kind === "text" ? (
-                    <div className="w-full max-w-3xl">
-                      <TextCell content={block.content} />
-                    </div>
-                  ) : (
-                    <div className="w-full">
-                      <MediaCell
-                        block={block}
-                        designerName={designerName}
-                        index={index}
-                        className=""
-                      />
-                    </div>
-                  )}
+          {/* Asymmetrical magazine split: narrative left, media gallery right */}
+          <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-12 items-start">
+            {/* Left: unbroken narrative flow */}
+            <div className="space-y-6">
+              {textBlocks.map(({ block, index }, i) => (
+                <FadeInRow key={`text-${index}`} delay={Math.min(i * 60, 240)}>
+                  <TextCell content={block.content} eyebrow={i === 0 ? eyebrow : undefined} />
                 </FadeInRow>
               ))}
             </div>
-          )}
+
+            {/* Right: stacked media gallery */}
+            {mediaBlocks.length > 0 && (
+              <div className="flex flex-col gap-8">
+                {mediaBlocks.map(({ block, index }, i) => (
+                  <FadeInRow key={`media-${index}`} delay={Math.min(i * 60, 240)}>
+                    <MediaCell
+                      block={block}
+                      designerName={designerName}
+                      index={index}
+                      className="w-full max-w-none mx-0"
+                    />
+                  </FadeInRow>
+                ))}
+              </div>
+            )}
+          </div>
+
 
           {/* Footer */}
           {footer && (
