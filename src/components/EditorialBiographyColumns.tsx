@@ -106,7 +106,7 @@ function TextCell({
             {eyebrow}
           </p>
         )}
-        <blockquote className="border-l border-foreground/25 pl-5 md:pl-7 py-0 my-0 m-0">
+        <blockquote className="border-l border-foreground/25 pl-5 md:pl-7 py-2 my-4 m-0">
           <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85 max-w-4xl">
             {renderParagraph(stripQuotes(content))}
           </p>
@@ -162,11 +162,11 @@ function MediaCell({
 
 
   return (
-    <figure className="h-auto m-0">
+    <figure className="h-auto m-0 max-w-2xl lg:max-w-3xl">
       <img
         src={optimizeImageUrl(block.url)}
         alt={block.caption || `${designerName} — editorial`}
-        className="w-full h-auto max-h-[420px] lg:max-h-[480px] object-cover object-center rounded-none"
+        className="w-full h-auto object-contain rounded-none"
         loading="lazy"
         decoding="async"
       />
@@ -227,7 +227,7 @@ function FadeInRow({
     <div
       ref={ref}
       className={`
-        grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start
+        grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start
         transition-all duration-700 ease-out will-change-transform
         ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}
       `}
@@ -384,7 +384,7 @@ export default function EditorialBiographyColumns({
   return (
     <div className="bg-cream">
       <div className={containerClassName ?? "mx-auto w-full max-w-7xl px-6 md:px-12 pt-4 md:pt-6 pb-4 md:pb-6"}>
-        <div className="flex w-full flex-col gap-y-10 md:gap-y-14">
+        <div className="flex w-full flex-col gap-y-8">
           {(() => {
             let ctaInserted = false;
             return grouped.map((group, gi) => {
@@ -401,7 +401,7 @@ export default function EditorialBiographyColumns({
                       </div>
                     </div>
                   ) : (
-                    <div className="flex w-full flex-col gap-y-10 md:gap-y-14">
+                    <div className="flex w-full flex-col gap-y-8">
                       {group.rows.map((row, ri) => (
                         <div key={`row-${gi}-${ri}`} className="h-auto">
                           <FadeInRow row={row} delay={Math.min((gi + ri) * 80, 300)} />
