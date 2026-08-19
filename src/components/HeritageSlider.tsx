@@ -81,15 +81,15 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
         Archives
       </h3>
 
-      <div className="relative group">
+      <div className="relative group h-auto">
         <div className="overflow-hidden" ref={emblaRef}>
-          <div className="flex items-start">
+          <div className="flex items-end">
             {slides.map((slide) => (
               <figure
                 key={slide.id}
-                className={`${slideWidth(slide)} min-w-0 px-2 md:px-3`}
+                className={`${slideWidth(slide)} min-w-0 px-2 md:px-3 flex flex-col`}
               >
-                <div className="overflow-hidden bg-muted/10">
+                <div className="overflow-hidden bg-muted/10 flex-1 flex items-end">
                   <img
                     src={slide.image_url}
                     alt={slide.caption || "Heritage piece"}
@@ -136,7 +136,7 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
         onSelect={(i) => emblaApi?.scrollTo(i)}
         variant="archive"
         size="xs"
-        className="mt-5 gap-3"
+        className="mt-8 gap-3"
         ariaPrefix="Go to slide"
       />
     </motion.section>
