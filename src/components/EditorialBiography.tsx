@@ -599,7 +599,7 @@ export function VideoBlock({
               <img
                 src={optimizeImageUrl(currentPosterUrl)}
                 alt={caption || `${designerName} — video cover`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain bg-black"
                 loading="eager"
                 fetchPriority="high"
                 decoding="async"
@@ -627,7 +627,7 @@ export function VideoBlock({
               <img
                 src={optimizeImageUrl(currentPosterUrl)}
                 alt={caption || `${designerName} — video cover`}
-                className={showsBareCover ? "w-full h-auto object-contain block" : "w-full h-full object-cover"}
+                className={showsBareCover ? "w-full h-auto object-contain block" : "w-full h-full object-contain bg-black"}
                 loading="lazy"
                 onError={handlePosterError}
               />
