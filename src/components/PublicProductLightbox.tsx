@@ -147,7 +147,7 @@ const DimensionsList = ({ text }: { text: string }) => {
   });
 
   return (
-    <div className="py-4 border-b border-border/60 first:border-t">
+    <div className="py-3 border-b border-border/60 first:border-t">
       <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2.5">
         {parsed.length > 1 ? "Dimensions available" : "Dimensions"}
       </p>
@@ -497,6 +497,68 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
   const pinned = isPinned(product.title, product.id);
 
+  const relatedStrip = (
+                relatedProducts.length > 0 ? (
+              <div className="pt-4 border-t border-border/60">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    More from {product.designer_slug === "dagmar-london" && product.subtitle?.trim() === "Arnold Madsen" ? "Dagmar" : designerDisplay}
+                  </p>
+                  {relatedProducts.length > 4 && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => scrollRelated(-1)}
+                        aria-label="Scroll left"
+                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => scrollRelated(1)}
+                        aria-label="Scroll right"
+                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div
+                  ref={relatedScrollRef}
+                  className="flex gap-4 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide snap-x snap-mandatory scroll-smooth"
+                >
+                  {relatedProducts.map((rp) => (
+                    <button
+                      key={rp.id}
+                      onClick={() => onSelectRelated?.(rp)}
+                      title={rp.title}
+                      className="shrink-0 w-20 group snap-start"
+                    >
+                      <div className="relative">
+                        <FadeInImage
+                          wrapperClassName="aspect-square bg-muted/30 border border-border group-hover:border-foreground/30 transition-colors"
+                          src={rp.image_url}
+                          alt={rp.title}
+                          className="object-cover"
+                          loading="lazy"
+                        />
+                        {/* Elegant fade-in label overlay on hover */}
+                        <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/95 to-background/0 px-1.5 pt-4 pb-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <span className="block font-body text-[9px] leading-tight text-foreground text-center">
+                            {rp.title}
+                          </span>
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null
+  );
+
+
   const content = (
     <AnimatePresence onExitComplete={finishClose}>
       {visible && (
@@ -550,7 +612,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
           {/* Image + desktop description column — single scrollable unit */}
           <div className="relative w-full md:w-3/5 shrink-0 bg-background flex flex-col md:h-full md:min-h-0 md:overflow-y-auto scrollbar-none">
-          <div className="relative w-full flex shrink-0 items-center justify-center p-2 md:p-5 lg:p-6">
+          <div className="relative w-full flex shrink-0 items-center justify-center p-2 md:px-6 md:pt-6 md:pb-3">
 
 
             {product.image_url ? (
@@ -572,7 +634,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   onLoad={() => { setImageLoaded(true); setImageFailed(false); }}
                   onError={() => { setImageFailed(true); setImageLoaded(true); }}
                   className={cn(
-                    "w-full h-auto object-contain md:max-h-[60vh] transition-opacity duration-300",
+                    "w-full h-auto object-contain md:max-h-[56vh] transition-opacity duration-300",
                     imageFailed || !imageLoaded ? "opacity-0" : "opacity-100"
                   )}
 
@@ -648,18 +710,24 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             </div>
           </div>
 
+          {/* Desktop: related thumbnails sit directly under the main image */}
+          <div className="hidden md:block w-full shrink-0 bg-background px-6 pb-2">
+            {relatedStrip}
+          </div>
+
           {/* Desktop: description in natural document flow below the image */}
           {product.description && product.description.trim().length > 0 && (
-            <div className="hidden md:block w-full shrink-0 bg-background px-8 pb-8 pt-2">
+            <div className="hidden md:block w-full shrink-0 md:mt-auto bg-background px-6 pb-6 pt-3">
               <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
                 {product.description}
               </p>
             </div>
           )}
+
           </div>
 
           {/* Details */}
-          <div className="w-full md:w-2/5 min-h-0 md:h-full bg-background border-l border-border/40 p-5 md:p-8 flex flex-col gap-3 md:gap-4 md:overflow-y-auto scrollbar-none">
+          <div className="w-full md:w-2/5 min-h-0 md:h-full bg-background border-l border-border/40 p-5 md:px-7 md:py-6 flex flex-col gap-3 md:gap-2.5 md:overflow-y-auto scrollbar-none">
 
 
             <div>
@@ -774,7 +842,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
                 if (!hasFinishAxis) return null;
                 return (
-                  <div className="border-t border-border/60 py-4 flex items-center gap-5">
+                  <div className="border-t border-border/60 py-3 flex items-center gap-4">
                     <span className="shrink-0"><SpecGlyph symbol="⬗" /></span>
                     <span className="font-body text-sm text-muted-foreground">
                       Finish options — refer to the full product page for details.
@@ -800,7 +868,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   }
                 }
                 return (
-                  <div className="mt-2 border-t border-b border-border/60 py-4 flex items-start gap-5">
+                  <div className="border-t border-b border-border/60 py-3 flex items-start gap-4">
                     {specIcon("✦", "mt-0.5")}
                     <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
                       <p>{originLine}</p>
@@ -813,7 +881,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
 
             {/* Primary CTA — visit the full product page (more images, full spec, gallery) */}
-            <div className="mt-auto pt-3 md:pt-4 flex flex-col gap-2">
+            <div className="mt-auto pt-4 md:pt-5 flex flex-col gap-2">
               {productPageHref ? (
                 <button
                   type="button"
@@ -894,67 +962,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               )}
             </div>
 
-            {/* More from this designer */}
-            {relatedProducts.length > 0 && (
-              <div className="pt-6 border-t border-border">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                    More from {product.designer_slug === "dagmar-london" && product.subtitle?.trim() === "Arnold Madsen" ? "Dagmar" : designerDisplay}
-                  </p>
-                  {relatedProducts.length > 4 && (
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => scrollRelated(-1)}
-                        aria-label="Scroll left"
-                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => scrollRelated(1)}
-                        aria-label="Scroll right"
-                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-                <div
-                  ref={relatedScrollRef}
-                  className="flex gap-4 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide snap-x snap-mandatory scroll-smooth"
-                >
-                  {relatedProducts.map((rp) => (
-                    <button
-                      key={rp.id}
-                      onClick={() => onSelectRelated?.(rp)}
-                      title={rp.title}
-                      className="shrink-0 w-20 group snap-start"
-                    >
-                      <div className="relative">
-                        <FadeInImage
-                          wrapperClassName="aspect-square bg-muted/30 border border-border group-hover:border-foreground/30 transition-colors"
-                          src={rp.image_url}
-                          alt={rp.title}
-                          className="object-cover"
-                          loading="lazy"
-                        />
-                        {/* Elegant fade-in label overlay on hover */}
-                        <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/95 to-background/0 px-1.5 pt-4 pb-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <span className="block font-body text-[9px] leading-tight text-foreground text-center">
-                            {rp.title}
-                          </span>
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            <div className="mt-auto pt-4 border-t border-border">
+            <div className="md:hidden">{relatedStrip}</div>
+
+            <div className="pt-4 mt-4 border-t border-border">
               <p className="font-body text-[11px] text-muted-foreground">
                 To unlock Your Trade pricing,{" "}
                 <a href="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
