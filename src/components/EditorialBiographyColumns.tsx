@@ -13,13 +13,14 @@ import {
 } from "@/components/EditorialBiography";
 
 /**
- * Stacked-row editorial layout for the expanded ("full portrait") biography page.
+ * Staggered editorial layout for the expanded ("full portrait") biography page.
  *
  * Architecture:
- *  - Row 1: pinned utility controls (Discover Collection + Close Portrait)
- *  - Row 2: opening blockquote, full width, bounded by max-w-4xl
- *  - Row 3: 2-column split for the first narrative paragraph + first media
- *  - Row 4: remaining narrative blocks, full width, max-w-4xl left-aligned
+ *  - Outer wrapper: max-w-6xl px-6
+ *  - Row 1: intro paragraph + centered horizontal video
+ *  - Row 2: large blockquote, centered
+ *  - Row 3: first vertical photo left, next narrative paragraphs right
+ *  - Row 4: remaining text left, second vertical photo right
  */
 
 type Block =
@@ -92,20 +93,22 @@ function stripQuotes(content: string) {
 function TextCell({
   content,
   eyebrow,
+  className,
 }: {
   content: string;
   eyebrow?: string;
+  className?: string;
 }) {
   if (isQuote(content)) {
     return (
-      <div className="h-auto">
+      <div className={cn("h-auto", className)}>
         {eyebrow && (
           <p className="mb-2 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45">
             {eyebrow}
           </p>
         )}
         <blockquote className="border-l border-foreground/25 pl-5 md:pl-7 py-2 my-2 m-0">
-          <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85 max-w-3xl">
+          <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85">
             {renderParagraph(stripQuotes(content))}
           </p>
         </blockquote>
@@ -114,13 +117,13 @@ function TextCell({
   }
 
   return (
-    <div className="h-auto">
+    <div className={cn("h-auto", className)}>
       {eyebrow && (
         <p className="mb-2 font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45">
           {eyebrow}
         </p>
       )}
-      <p className="font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80 max-w-3xl">
+      <p className="font-body text-[15px] md:text-[16px] leading-[1.9] text-foreground/80">
         {renderParagraph(content)}
       </p>
     </div>
@@ -145,7 +148,6 @@ function MediaCell({
   if (block.kind === "video") {
     return (
       <figure className={cn("h-auto m-0 block w-full max-w-4xl mx-auto", className)}>
-
         <VideoBlock
           url={block.url}
           designerName={designerName}
@@ -160,7 +162,7 @@ function MediaCell({
   }
 
   return (
-    <figure className={cn("h-auto m-0 w-full max-w-3xl", className)}>
+    <figure className={cn("h-auto m-0 w-full", className)}>
       <img
         src={optimizeImageUrl(block.url)}
         alt={block.caption || `${designerName} — editorial`}
@@ -253,8 +255,25 @@ export default function EditorialBiographyColumns({
         b.block.kind !== "text",
     );
 
-  const hasHeaderControls = collectionCtaHref || onClosePortrait;
+  const imageBlocks = mediaBlocks.filter((b) => b.block.kind === "image");
+  const videoBlocks = mediaBlocks.filter((b) => b.block.kind === "video");
 
+  const introText = textBlocks[0];
+  const blockquoteIndex = textBlocks.findIndex((t, i) => i > 0 && isQuote(t.block.content));
+  const blockquoteText = blockquoteIndex > 0 ? textBlocks[blockquoteIndex] : undefined;
+
+  const remainingTexts = blockquoteText
+    ? textBlocks.slice(blockquoteIndex + 1)
+    : textBlocks.slice(1);
+
+  const row3Texts = remainingTexts.slice(0, Math.ceil(remainingTexts.length / 2));
+  const row4Texts = remainingTexts.slice(Math.ceil(remainingTexts.length / 2));
+
+  const firstVideo = videoBlocks[0];
+  const firstImage = imageBlocks[0];
+  const secondImage = imageBlocks[1];
+
+  const hasHeaderControls = collectionCtaHref || onClosePortrait;
 
   return (
     <div className="bg-cream">
@@ -293,34 +312,78 @@ export default function EditorialBiographyColumns({
             </FadeInRow>
           )}
 
-          {/* Asymmetrical magazine split: narrative left, media gallery right */}
-          <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-12 items-start">
-            {/* Left: unbroken narrative flow */}
-            <div className="space-y-6">
-              {textBlocks.map(({ block, index }, i) => (
-                <FadeInRow key={`text-${index}`} delay={Math.min(i * 60, 240)}>
-                  <TextCell content={block.content} eyebrow={i === 0 ? eyebrow : undefined} />
-                </FadeInRow>
-              ))}
-            </div>
-
-            {/* Right: stacked media gallery */}
-            {mediaBlocks.length > 0 && (
-              <div className="flex flex-col gap-8">
-                {mediaBlocks.map(({ block, index }, i) => (
-                  <FadeInRow key={`media-${index}`} delay={Math.min(i * 60, 240)}>
-                    <MediaCell
-                      block={block}
-                      designerName={designerName}
-                      index={index}
-                      className="w-full max-w-none mx-0"
-                    />
-                  </FadeInRow>
-                ))}
+          {/* Row 1: intro paragraph + centered video */}
+          {introText && (
+            <FadeInRow delay={60}>
+              <div className="w-full max-w-3xl mx-auto">
+                <TextCell content={introText.block.content} eyebrow={eyebrow} />
               </div>
-            )}
-          </div>
+            </FadeInRow>
+          )}
 
+          {firstVideo && (
+            <FadeInRow delay={120}>
+              <MediaCell
+                block={firstVideo.block}
+                designerName={designerName}
+                index={firstVideo.index}
+                className="w-full max-w-4xl mx-auto my-12 block"
+              />
+            </FadeInRow>
+          )}
+
+          {/* Row 2: large blockquote */}
+          {blockquoteText && (
+            <FadeInRow delay={180}>
+              <div className="w-full max-w-3xl mx-auto my-8">
+                <TextCell content={blockquoteText.block.content} />
+              </div>
+            </FadeInRow>
+          )}
+
+          {/* Row 3: first photo left, text right */}
+          {(firstImage || row3Texts.length > 0) && (
+            <FadeInRow delay={240}>
+              <div className="grid grid-cols-1 md:grid-cols-[2fr_3fr] gap-12 items-center my-12">
+                {firstImage && (
+                  <MediaCell
+                    block={firstImage.block}
+                    designerName={designerName}
+                    index={firstImage.index}
+                  />
+                )}
+                {row3Texts.length > 0 && (
+                  <div className="flex flex-col gap-y-6">
+                    {row3Texts.map(({ block, index }, i) => (
+                      <TextCell key={`row3-text-${index}`} content={block.content} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </FadeInRow>
+          )}
+
+          {/* Row 4: text left, second photo right */}
+          {(row4Texts.length > 0 || secondImage) && (
+            <FadeInRow delay={300}>
+              <div className="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-12 items-center my-12">
+                {row4Texts.length > 0 && (
+                  <div className="flex flex-col gap-y-6">
+                    {row4Texts.map(({ block, index }, i) => (
+                      <TextCell key={`row4-text-${index}`} content={block.content} />
+                    ))}
+                  </div>
+                )}
+                {secondImage && (
+                  <MediaCell
+                    block={secondImage.block}
+                    designerName={designerName}
+                    index={secondImage.index}
+                  />
+                )}
+              </div>
+            </FadeInRow>
+          )}
 
           {/* Footer */}
           {footer && (
