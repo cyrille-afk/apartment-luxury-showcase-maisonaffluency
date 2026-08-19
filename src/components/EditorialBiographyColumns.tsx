@@ -162,7 +162,7 @@ function MediaCell({
 
 
   return (
-    <figure className="h-auto m-0 max-w-2xl lg:max-w-3xl">
+    <figure className="h-auto m-0 max-w-2xl">
       <img
         src={optimizeImageUrl(block.url)}
         alt={block.caption || `${designerName} — editorial`}
