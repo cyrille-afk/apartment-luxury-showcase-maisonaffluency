@@ -713,13 +713,13 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Desktop: related thumbnails sit directly under the main image */}
-          <div className="hidden md:block w-full shrink-0 bg-background px-7 pb-3">
+          <div className="hidden md:block w-full shrink-0 bg-background mb-6">
             {relatedStrip}
           </div>
 
-          {/* Desktop: description in natural document flow below the image */}
+          {/* Desktop: description in natural document flow below the thumbnails */}
           {product.description && product.description.trim().length > 0 && (
-            <div className="hidden md:block w-full shrink-0 bg-background px-7 pb-7 pt-3">
+            <div className="hidden md:block w-full shrink-0 bg-background">
               <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
                 {product.description}
               </p>
@@ -728,8 +728,12 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
           </div>
 
-          {/* Details */}
-          <div className="w-full md:w-1/2 min-h-0 md:h-full bg-background border-l border-border/40 p-5 md:px-7 md:py-7 flex flex-col gap-3 md:gap-2 md:overflow-y-auto scrollbar-none">
+          {/* RIGHT COLUMN — specs (top group) + conversion (bottom group) */}
+          <div className="w-full md:w-1/2 min-h-0 md:h-full bg-background border-l border-border/40 p-5 md:px-7 md:py-7 flex flex-col md:justify-between gap-3 md:gap-0 md:overflow-y-auto scrollbar-none">
+
+          {/* Group A — top content */}
+          <div className="flex flex-col gap-3 md:gap-3">
+
 
 
 
