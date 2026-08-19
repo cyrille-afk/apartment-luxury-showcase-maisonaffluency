@@ -166,7 +166,7 @@ function MediaCell({
       <img
         src={optimizeImageUrl(block.url)}
         alt={block.caption || `${designerName} — editorial`}
-        className="w-full h-auto max-h-[58vh] object-cover object-center rounded-none"
+        className="w-full h-auto max-h-[420px] lg:max-h-[480px] object-cover object-center rounded-none"
         loading="lazy"
         decoding="async"
       />
