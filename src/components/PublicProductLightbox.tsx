@@ -130,13 +130,20 @@ function useLocalFavorites() {
 }
 
 /**
- * Elegant editorial dimensions list.
+ * Elegant editorial dimensions grid.
  * Input lines come from `withImperialPerLine`, e.g.
  *   "Ø 90 × H 92 cm | Ø 35.4 × H 36.2 in — M/H 90"
- * and are rendered as
- *   • Ø 90 × H 92 cm (Ø 35.4 × H 36.2 in) — M/H 90
+ * and are rendered as clean selectable option buttons.
  */
-const DimensionsList = ({ text }: { text: string }) => {
+const DimensionsButtonGrid = ({
+  text,
+  selectedIndex,
+  onSelect,
+}: {
+  text: string;
+  selectedIndex?: number | null;
+  onSelect?: (idx: number) => void;
+}) => {
   const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
   if (lines.length === 0) return null;
 
@@ -147,28 +154,42 @@ const DimensionsList = ({ text }: { text: string }) => {
   });
 
   return (
-    <div className="py-3 border-b border-border/60 first:border-t">
+    <div>
       <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2.5">
         {parsed.length > 1 ? "Dimensions available" : "Dimensions"}
       </p>
-      <ul className="space-y-1.5">
-        {parsed.map((d, i) => (
-          <li key={i} className="flex items-baseline gap-2.5">
-            {parsed.length > 1 && (
-              <span className="text-muted-foreground/50 text-[10px] leading-[1.6] shrink-0">•</span>
-            )}
-            <p className="font-body text-sm leading-[1.6] text-foreground">
-              {d.metric}
+      <div className="grid grid-cols-2 gap-2">
+        {parsed.map((d, i) => {
+          const selected = selectedIndex === i;
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => onSelect?.(i)}
+              className={cn(
+                "text-left px-3 py-2.5 border transition-colors",
+                selected
+                  ? "border-foreground/60 bg-background"
+                  : "border-border/60 bg-transparent hover:border-foreground/40"
+              )}
+            >
+              <p className="font-body text-sm leading-snug text-foreground">
+                {d.metric}
+              </p>
               {d.imperial && (
-                <span className="text-muted-foreground"> ({d.imperial})</span>
+                <p className="font-body text-[11px] text-muted-foreground mt-0.5">
+                  {d.imperial}
+                </p>
               )}
               {d.qual && (
-                <span className="text-muted-foreground/70"> — {d.qual}</span>
+                <p className="font-body text-[10px] text-muted-foreground/70 mt-0.5">
+                  {d.qual}
+                </p>
               )}
-            </p>
-          </li>
-        ))}
-      </ul>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };
