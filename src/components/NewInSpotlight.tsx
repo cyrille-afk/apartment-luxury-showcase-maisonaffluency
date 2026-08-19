@@ -262,10 +262,25 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
               <div className="flex flex-col flex-1 text-center items-center">
                 {(() => {
                   const composed = composeTitle(pick.title, pick.subtitle);
-                  const childDesignerName = isParentBrand
+                  // Parent brand page: identify the individual designer behind each pick.
+                  // Individual designer page: identify the parent brand, not the designer
+                  // whose name is already the page heading (e.g. ECART on J.-M. Frank).
+                  const attributedDesigner = isParentBrand
                     ? ((pick as any).designer_name || "").trim()
                     : "";
-                  const brandLine = (childDesignerName || composed.remainingSubtitle || pick.subtitle || displayName || designer.name || "").trim();
+                  const parentBrand = !isParentBrand && designer.founder
+                    && ![designer.name, designer.display_name].includes(designer.founder)
+                    ? designer.founder.trim()
+                    : "";
+                  const brandLine = (
+                    attributedDesigner
+                    || parentBrand
+                    || composed.remainingSubtitle
+                    || pick.subtitle
+                    || displayName
+                    || designer.name
+                    || ""
+                  ).trim();
 
                   return (
                     <>
