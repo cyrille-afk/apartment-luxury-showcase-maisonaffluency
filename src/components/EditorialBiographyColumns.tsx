@@ -144,7 +144,7 @@ function MediaCell({
 
   if (block.kind === "video") {
     return (
-      <figure className={cn("h-auto m-0 max-w-2xl", className)}>
+      <figure className={cn("h-auto m-0 w-full max-w-4xl mx-auto", className)}>
         <VideoBlock
           url={block.url}
           designerName={designerName}
