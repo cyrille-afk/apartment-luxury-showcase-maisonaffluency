@@ -89,11 +89,11 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
                 key={slide.id}
                 className={`${slideWidth(slide)} min-w-0 px-2 md:px-3 flex flex-col`}
               >
-                <div className="overflow-hidden bg-muted/10 flex-1 flex items-end">
+                <div className="h-[300px] sm:h-[360px] md:h-[430px] lg:h-[500px] w-full overflow-hidden bg-muted/10 flex items-end justify-center">
                   <img
                     src={slide.image_url}
                     alt={slide.caption || "Heritage piece"}
-                    className="w-full h-auto object-contain"
+                    className="w-full h-full object-contain object-bottom"
                     loading="lazy"
                     onLoad={(e) => handleImageLoad(slide.id, e)}
                   />
