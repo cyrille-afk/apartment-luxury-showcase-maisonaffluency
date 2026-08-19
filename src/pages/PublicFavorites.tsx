@@ -50,6 +50,7 @@ interface FavPick {
   category: string | null;
   subcategory: string | null;
   pdf_url: string | null;
+  pdf_urls?: { label?: string; url: string; filename?: string }[] | null;
   designer_id: string;
   designer_name?: string;
   designer_slug?: string;
@@ -104,7 +105,7 @@ const PublicFavorites = () => {
       setLoading(true);
       const { data } = await supabase
         .from("designer_curator_picks_public")
-        .select("id, title, subtitle, image_url, hover_image_url, materials, materials_description, dimensions, lead_time, origin, description, category, subcategory, pdf_url, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map")
+        .select("id, title, subtitle, image_url, hover_image_url, materials, materials_description, dimensions, lead_time, origin, description, category, subcategory, pdf_url, pdf_urls, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map")
         .in("id", favIds);
 
       if (!data || data.length === 0) {
@@ -138,7 +139,8 @@ const PublicFavorites = () => {
           description: p.description,
           category: p.category,
           subcategory: p.subcategory,
-          pdf_url: p.pdf_url,
+          pdf_url: p.pdf_url || ((p as any).pdf_urls as any[] | null)?.[0]?.url || null,
+          pdf_urls: ((p as any).pdf_urls as any) ?? null,
           designer_id: p.designer_id,
           designer_name: d?.name || "",
           designer_slug: d?.slug || "",
@@ -191,6 +193,7 @@ const PublicFavorites = () => {
         category: p.category,
         subcategory: p.subcategory,
         pdf_url: p.pdf_url,
+        pdf_urls: (p.pdf_urls as any) ?? null,
         designer_slug: p.designer_slug || null,
         size_variants: (p as any).size_variants ?? null,
         variant_placeholder: (p as any).variant_placeholder ?? null,
