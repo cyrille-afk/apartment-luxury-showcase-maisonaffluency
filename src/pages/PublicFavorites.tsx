@@ -50,6 +50,7 @@ interface FavPick {
   category: string | null;
   subcategory: string | null;
   pdf_url: string | null;
+  pdf_urls?: { label?: string; url: string; filename?: string }[] | null;
   designer_id: string;
   designer_name?: string;
   designer_slug?: string;
