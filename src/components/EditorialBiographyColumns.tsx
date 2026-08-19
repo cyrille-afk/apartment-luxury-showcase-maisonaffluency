@@ -323,17 +323,17 @@ export default function EditorialBiographyColumns({
           )}
 
           {/* Row 3: 2-column split for first narrative + first media */}
-          {firstText && firstText.kind === "text" && firstMedia && firstMedia.kind !== "text" && (
+          {firstSplitText && firstSplitText.kind === "text" && firstSplitMedia && firstSplitMedia.kind !== "text" && (
             <FadeInRow delay={160}>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
                 <div className="h-auto">
-                  <TextCell content={firstText.content} eyebrow={firstQuote ? undefined : eyebrow} />
+                  <TextCell content={firstSplitText.content} eyebrow={firstQuote ? undefined : eyebrow} />
                 </div>
                 <div className="h-auto">
                   <MediaCell
-                    block={firstMedia}
+                    block={firstSplitMedia}
                     designerName={designerName}
-                    index={firstMediaIndex}
+                    index={firstSplitMediaIndex}
                     className="max-w-none"
                   />
                 </div>
