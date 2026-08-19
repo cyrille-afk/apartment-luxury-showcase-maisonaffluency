@@ -870,17 +870,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
               </div>
 
-              {/* Narrative description directly beneath the stone card */}
-              {product.description && product.description.trim().length > 0 && (
-                <div className="py-6">
-                  <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
-                    {product.description}
-                  </p>
-                </div>
-              )}
-
-              {/* CTA block pinned to the bottom of the right column */}
-              <div className="mt-auto flex flex-col gap-4">
+              {/* CTA block — placed directly beneath the stone card, above the narrative */}
+              <div className="flex flex-col gap-4">
                 {/* Primary CTA */}
                 <div className="flex flex-col gap-2">
                   {productPageHref ? (
@@ -967,6 +958,15 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   </p>
                 </div>
               </div>
+
+              {/* Narrative description follows the CTA block */}
+              {product.description && product.description.trim().length > 0 && (
+                <div className="py-6">
+                  <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
+                    {product.description}
+                  </p>
+                </div>
+              )}
             </div>
 
           </div> {/* end scrollable mobile body */}
