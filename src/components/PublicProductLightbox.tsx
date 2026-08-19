@@ -627,8 +627,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             <X size={18} />
           </button>
 
-          {/* Strict editorial grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch max-w-6xl mx-auto p-5 md:p-8 w-full h-full">
+          {/* Upper two-column editorial block */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch max-w-6xl mx-auto p-5 md:p-8 w-full">
 
             {/* LEFT COLUMN — hero image + related thumbnails only */}
             <div className="relative w-full flex flex-col gap-6">
@@ -725,7 +725,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               </div>
             </div>
 
-            {/* RIGHT COLUMN — specs card, narrative description, CTAs */}
+            {/* RIGHT COLUMN — specs card + CTAs */}
             <div className="w-full flex flex-col h-full md:pl-10 md:border-l md:border-border/40">
 
               {/* Stone card — brand, dimensions, finishes, handcrafted details */}
@@ -870,8 +870,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
               </div>
 
-              {/* CTA block — placed directly beneath the stone card, above the narrative */}
-              <div className="flex flex-col gap-4">
+              {/* CTA block — anchored at the bottom of the right column */}
+              <div className="flex flex-col gap-4 mt-auto">
                 {/* Primary CTA */}
                 <div className="flex flex-col gap-2">
                   {productPageHref ? (
@@ -958,18 +958,19 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   </p>
                 </div>
               </div>
-
-              {/* Narrative description follows the CTA block */}
-              {product.description && product.description.trim().length > 0 && (
-                <div className="py-6">
-                  <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
-                    {product.description}
-                  </p>
-                </div>
-              )}
             </div>
+          </div>
 
-          </div> {/* end scrollable mobile body */}
+          {/* Lower full-width narrative description */}
+          {product.description && product.description.trim().length > 0 && (
+            <div className="w-full border-t border-border/40 mt-12 pt-10 pb-12 px-5 md:px-8">
+              <div className="max-w-3xl mx-auto">
+                <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
+                  {product.description}
+                </p>
+              </div>
+            </div>
+          )}
         </motion.div>
       </motion.div>
       )}
