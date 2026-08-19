@@ -71,7 +71,7 @@ function Caption({ label }: { label: string }) {
   if (!label) return null;
   return (
     <p
-      className="mt-2 text-center font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.8]"
+      className="mt-2 text-center font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.5]"
     >
       {label}
     </p>
@@ -106,7 +106,7 @@ function TextCell({
             {eyebrow}
           </p>
         )}
-        <blockquote className="border-l border-foreground/25 pl-5 md:pl-7 py-0 m-0">
+        <blockquote className="border-l border-foreground/25 pl-5 md:pl-7 py-0 my-0 m-0">
           <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85 max-w-4xl">
             {renderParagraph(stripQuotes(content))}
           </p>
@@ -227,7 +227,7 @@ function FadeInRow({
     <div
       ref={ref}
       className={`
-        grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center
+        grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start
         transition-all duration-700 ease-out will-change-transform
         ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}
       `}
@@ -384,7 +384,7 @@ export default function EditorialBiographyColumns({
   return (
     <div className="bg-cream">
       <div className={containerClassName ?? "mx-auto w-full max-w-7xl px-6 md:px-12 pt-4 md:pt-6 pb-4 md:pb-6"}>
-        <div className="flex w-full flex-col">
+        <div className="flex w-full flex-col gap-y-10 md:gap-y-14">
           {(() => {
             let ctaInserted = false;
             return grouped.map((group, gi) => {
@@ -393,27 +393,24 @@ export default function EditorialBiographyColumns({
               return (
                 <React.Fragment key={`group-${gi}`}>
                   {group.type === "text" ? (
-                    <div
-                      className="w-full py-6 md:py-8 first:pt-0 last:pb-0"
-                    >
-                      <div className="w-full space-y-6">
+                    <div className="w-full">
+                      <div className="w-full space-y-5 md:space-y-6">
                         {group.rows.map((row, ri) => (
                           <div key={`text-${gi}-${ri}`}>{row.left.node}</div>
                         ))}
                       </div>
                     </div>
                   ) : (
-                    group.rows.map((row, ri) => (
-                      <div
-                        key={`row-${gi}-${ri}`}
-                        className="h-auto py-6 md:py-8 first:pt-0 last:pb-0"
-                      >
-                        <FadeInRow row={row} delay={Math.min((gi + ri) * 80, 300)} />
-                      </div>
-                    ))
+                    <div className="flex w-full flex-col gap-y-10 md:gap-y-14">
+                      {group.rows.map((row, ri) => (
+                        <div key={`row-${gi}-${ri}`} className="h-auto">
+                          <FadeInRow row={row} delay={Math.min((gi + ri) * 80, 300)} />
+                        </div>
+                      ))}
+                    </div>
                   )}
                   {isFirstMediaGroup && collectionCtaHref && (
-                    <div className="w-full flex justify-start py-2 md:py-4">
+                    <div className="w-full flex justify-start">
                       <Link
                         to={collectionCtaHref}
                         className="group inline-flex items-center gap-3 px-5 py-3 md:px-6 md:py-3.5 border border-foreground/30 bg-background/40 hover:bg-background/80 hover:border-foreground/60 transition-all duration-300"
