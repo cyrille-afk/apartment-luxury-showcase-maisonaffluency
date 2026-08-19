@@ -220,7 +220,7 @@ function FadeInRow({
   const spanClass = (cell: Cell) => {
     if (cell.full) return "lg:col-span-12";
     if (isPairedMedia) return "lg:col-span-6";
-    return cell.isMedia ? "lg:col-span-7" : "lg:col-span-5";
+    return cell.isMedia ? "lg:col-span-6" : "lg:col-span-6";
   };
 
   return (
