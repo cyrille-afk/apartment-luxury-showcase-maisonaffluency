@@ -1446,7 +1446,14 @@ const PublicDesignerProfile = () => {
 
           {!useNewInSpotlightFormat && designer && (
             <div className="hidden md:block w-full">
-              <NewInSpotlight designer={designer} showEyebrow={false} variant="underlaid" />
+              <NewInSpotlight
+                designer={designer}
+                showEyebrow={false}
+                variant="underlaid"
+                picksOverride={isArnoldMadsenProfile ? (picks as any) : undefined}
+                brandLabelOverride={isArnoldMadsenProfile ? "Dagmar" : undefined}
+                pickDesignerSlugOverride={isArnoldMadsenProfile ? "dagmar-london" : undefined}
+              />
             </div>
           )}
 
