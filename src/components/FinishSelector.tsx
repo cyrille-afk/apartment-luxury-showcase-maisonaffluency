@@ -520,7 +520,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (!first) return;
     defaultGroupAppliedRef.current = true;
     lockedPreviewRef.current = { indices: first.image_indices!, name: first.name };
-    onSwatchImagesChange?.(first.image_indices!, { committed: true, swatchName: first.name });
+    onSwatchImagesChange?.(first.image_indices!, { committed: true, swatchName: first.name, jumpOnly: isRugProduct });
     onFinishGroupingResolved?.();
   }, [fabrics, selectedFabricId, selectedWoodId, selectedTopId, onSwatchImagesChange]);
 
