@@ -386,6 +386,24 @@ export default function EditorialBiographyColumns({
             </FadeInRow>
           )}
 
+          {/* Closing navigation link at the end of the narrative track */}
+          {onClosePortrait && (
+            <FadeInRow delay={360}>
+              <div className="flex justify-center pt-2 pb-2">
+                <button
+                  type="button"
+                  onClick={onClosePortrait}
+                  className="group inline-flex items-center gap-3 font-body text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-foreground/60 hover:text-foreground transition-colors duration-300"
+                >
+                  <X className="h-3 w-3 transition-transform group-hover:rotate-90" strokeWidth={1.25} />
+                  <span className="underline-offset-4 group-hover:underline">
+                    {closePortraitLabel}
+                  </span>
+                </button>
+              </div>
+            </FadeInRow>
+          )}
+
           {/* Footer */}
           {footer && (
             <div className="pt-4 md:pt-5 transition-all duration-700 ease-out opacity-100 translate-y-0">
