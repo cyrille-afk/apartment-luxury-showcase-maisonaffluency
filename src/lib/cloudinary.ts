@@ -6,6 +6,19 @@
 const CLOUD_NAME = "dif1oamtj";
 const BASE_URL = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload`;
 
+/**
+ * Cloudinary only returns `Cache-Control: ..., immutable` when the delivery
+ * URL carries a version segment (`/v1/...`). Without it the CDN answers with
+ * a plain `max-age=2592000`, so browsers revalidate assets on repeat visits.
+ * Prefix a synthetic `v1` when the public ID has no version of its own.
+ */
+const VERSION_RE = /^v\d+\//;
+export function withVersion(publicId: string): string {
+  if (!publicId) return publicId;
+  const clean = publicId.replace(/^\/+/, "");
+  return VERSION_RE.test(clean) ? clean : `v1/${clean}`;
+}
+
 export interface CloudinaryTransform {
   width?: number;
   height?: number;
@@ -48,7 +61,7 @@ export function cloudinaryUrl(
 
   const transformStr = parts.join(",");
   const encodedTransformStr = transformStr.replace(/,/g, "%2C");
-  return `${BASE_URL}/${encodedTransformStr}/${publicId}`;
+  return `${BASE_URL}/${encodedTransformStr}/${withVersion(publicId)}`;
 }
 
 /**
@@ -173,12 +186,13 @@ export function toResponsiveCloudinary(url: string, opts: ResponsiveOptions = {}
     set("q", String(quality));
     if (!has("f")) tokens.push("f_auto");
     parts[0] = tokens.join(",");
-    return `${base}/${parts.join("/")}`;
+    const tail = parts.slice(1).join("/");
+    return `${base}/${parts[0]}/${withVersion(tail)}`;
   }
   // No transform segment — inject one.
   const injected = [`w_${width}`, `q_${quality}`, `f_auto`];
   if (opts.crop) injected.splice(1, 0, `c_${opts.crop}`);
-  return `${base}/${injected.join(",")}/${rest}`;
+  return `${base}/${injected.join(",")}/${withVersion(rest)}`;
 }
 
 /**
