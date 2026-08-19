@@ -658,9 +658,10 @@ const PublicDesignerProfile = () => {
     }
 
     // Exclude picks whose image already appears in the biography
-    const filtered = bioUrls.size > 0 && !isGrouped
+    const filtered = bioUrls.size > 0 && !isGrouped && !isArnoldMadsenProfile
       ? rawPicks.filter((pick) => !bioUrls.has(pick.image_url))
       : rawPicks;
+
 
     return interleaveBySubcategory(sortCuratorPicks(filtered));
   }, [rawPicks, displayBiographyImages, displayBiography, isGrouped]);
