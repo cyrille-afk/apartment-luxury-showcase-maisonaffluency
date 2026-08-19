@@ -885,12 +885,15 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 );
               })()}
             </div>
+            </div>
+            {/* end Group A */}
 
             {/* Mobile: related strip stays in flow */}
             <div className="md:hidden">{relatedStrip}</div>
 
-            {/* Bottom action group — anchored to the column baseline */}
-            <div className="mt-auto flex flex-col gap-2.5 pt-4 md:pt-5">
+            {/* Group B — bottom conversion block */}
+            <div className="mt-auto md:mt-0 flex flex-col gap-2.5 pt-4 md:pt-6">
+
             {/* Primary CTA — visit the full product page (more images, full spec, gallery) */}
             <div className="flex flex-col gap-2">
 
