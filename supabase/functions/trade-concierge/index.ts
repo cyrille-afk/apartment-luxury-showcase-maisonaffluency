@@ -629,7 +629,7 @@ const TOOLS = [
           brands: {
             type: "array",
             description:
-              "Specific ateliers, designers, or brands the user explicitly named to include (e.g. ['Saint-Louis', 'Alinea Design Objects']). Empty array if none. Do NOT infer brands the user didn't mention. Max 8.",
+              "Specific ateliers, designers, or brands the user explicitly named to include (e.g. ['Saint-Louis', 'Alinea']). Empty array if none. Do NOT infer brands the user didn't mention. Max 8.",
             items: { type: "string" },
             maxItems: 8,
           },
@@ -5280,7 +5280,7 @@ serve(async (req) => {
         mentionedDesigners.push(n);
         continue;
       }
-      // 2. Distinctive-token match — "alinea" should match "Alinea Design Objects",
+      // 2. Distinctive-token match — "alinea" should match "Alinea",
       //    "pouénat" should match "Pouénat", etc. Match whole normalized
       //    tokens only (not substrings: "interest" must not match "interested")
       //    and ignore tokens shared by multiple designer names (e.g. "louis").
@@ -6055,7 +6055,7 @@ serve(async (req) => {
         );
       }
       return sseTextResponse(
-        `I couldn't identify a designer in your request, so I have nothing to enumerate. Try the exact atelier name — e.g. "list all Alinea Design Objects pieces", "show every Pouénat item", or "what do you have by Alexander Lamont?". You can also ask by typology ("all consoles", "all sconces") and I'll propose a tear sheet across the Curation.`,
+        `I couldn't identify a designer in your request, so I have nothing to enumerate. Try the exact atelier name — e.g. "list all Alinea pieces", "show every Pouénat item", or "what do you have by Alexander Lamont?". You can also ask by typology ("all consoles", "all sconces") and I'll propose a tear sheet across the Curation.`,
       );
     }
 
