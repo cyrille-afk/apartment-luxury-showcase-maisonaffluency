@@ -14,7 +14,7 @@ const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const HeritageSlider = ({ slides }: HeritageSliderProps) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
-    align: "center",
+    align: "start",
     containScroll: false,
     slidesToScroll: 1,
     dragFree: false,
@@ -23,6 +23,7 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
+  const [aspectRatios, setAspectRatios] = useState<Record<string, number>>({});
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -42,6 +43,30 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
     };
   }, [emblaApi, onSelect]);
 
+  const handleImageLoad = useCallback(
+    (slideId: string, e: React.SyntheticEvent<HTMLImageElement>) => {
+      const img = e.currentTarget;
+      if (img.naturalWidth && img.naturalHeight) {
+        setAspectRatios((prev) => ({
+          ...prev,
+          [slideId]: img.naturalWidth / img.naturalHeight,
+        }));
+      }
+    },
+    []
+  );
+
+  const slideWidth = useCallback(
+    (slide: HeritageSlide) => {
+      const ratio = aspectRatios[slide.id];
+      if (!ratio) return "flex-[0_0_80%] md:flex-[0_0_45%]";
+      if (ratio >= 1.3) return "flex-[0_0_88%] md:flex-[0_0_58%]";
+      if (ratio <= 0.75) return "flex-[0_0_56%] md:flex-[0_0_34%]";
+      return "flex-[0_0_72%] md:flex-[0_0_44%]";
+    },
+    [aspectRatios]
+  );
+
   if (slides.length === 0) return null;
 
   return (
@@ -57,29 +82,28 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
       </h3>
 
       <div className="relative group">
-        <div className="overflow-hidden rounded-xl" ref={emblaRef}>
+        <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex items-start">
             {slides.map((slide) => (
-              <div
+              <figure
                 key={slide.id}
-                className="flex-[0_0_80%] md:flex-[0_0_45%] min-w-0 px-2"
+                className={`${slideWidth(slide)} min-w-0 px-2 md:px-3`}
               >
-              <div className="rounded-lg overflow-hidden bg-muted/10 relative">
+                <div className="overflow-hidden bg-muted/10">
                   <img
                     src={slide.image_url}
                     alt={slide.caption || "Heritage piece"}
                     className="w-full h-auto object-contain"
                     loading="lazy"
+                    onLoad={(e) => handleImageLoad(slide.id, e)}
                   />
-                  {slide.caption && (
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent pt-10 pb-3 px-4">
-                      <p className="font-body text-[9px] md:text-[10px] tracking-wide text-white/80 italic text-center leading-relaxed whitespace-pre-line">
-                        {slide.caption}
-                      </p>
-                    </div>
-                  )}
                 </div>
-              </div>
+                {slide.caption && (
+                  <figcaption className="mt-2.5 md:mt-3 text-[11px] text-muted-foreground/80 font-body leading-snug text-left whitespace-pre-line">
+                    {slide.caption}
+                  </figcaption>
+                )}
+              </figure>
             ))}
           </div>
         </div>
@@ -89,14 +113,14 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
           <>
             <button
               onClick={() => emblaApi?.scrollPrev()}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-background transition-all opacity-0 group-hover:opacity-100 z-10"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-background transition-all opacity-0 group-hover:opacity-100 z-10"
               aria-label="Previous slide"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => emblaApi?.scrollNext()}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-background transition-all opacity-0 group-hover:opacity-100 z-10"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-background transition-all opacity-0 group-hover:opacity-100 z-10"
               aria-label="Next slide"
             >
               <ChevronRight className="w-4 h-4" />
@@ -110,11 +134,11 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
         count={slides.length}
         activeIndex={selectedIndex}
         onSelect={(i) => emblaApi?.scrollTo(i)}
-        variant="dark"
-        className="mt-4"
+        variant="archive"
+        size="xs"
+        className="mt-5 gap-3"
         ariaPrefix="Go to slide"
       />
-
     </motion.section>
   );
 };
