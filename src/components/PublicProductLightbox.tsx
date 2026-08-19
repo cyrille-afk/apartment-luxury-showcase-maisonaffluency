@@ -961,7 +961,18 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               </div>
             </div>
 
-          </div> {/* end scrollable mobile body */}
+          </div> {/* end upper section */}
+
+          {/* Lower section: full-width editorial narrative */}
+          {product.description && product.description.trim().length > 0 && (
+            <div className="w-full max-w-6xl mx-auto px-5 md:px-8 pb-8 md:pb-12">
+              <div className="w-full border-t border-border/40 pt-8 md:pt-12 mt-8 md:mt-12">
+                <p className="font-serif text-lg md:text-xl leading-[1.7] text-foreground/90 text-left md:text-center max-w-4xl mx-auto whitespace-pre-wrap">
+                  {product.description}
+                </p>
+              </div>
+            </div>
+          )}
         </motion.div>
       </motion.div>
       )}
