@@ -628,7 +628,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </button>
 
           {/* Upper two-column editorial block */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch max-w-6xl mx-auto p-5 md:p-8 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start max-w-6xl mx-auto p-5 md:p-8 w-full">
 
             {/* LEFT COLUMN — hero image + related thumbnails only */}
             <div className="relative w-full flex flex-col gap-6">
@@ -726,7 +726,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             </div>
 
             {/* RIGHT COLUMN — specs card + CTAs */}
-            <div className="w-full flex flex-col h-full md:pl-10 md:border-l md:border-border/40">
+            <div className="w-full flex flex-col md:pl-10 md:border-l md:border-border/40">
 
               {/* Stone card — brand, dimensions, finishes, handcrafted details */}
               <div className="bg-muted/40 border border-border/60 p-5 flex flex-col gap-4">
@@ -870,8 +870,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
               </div>
 
-              {/* CTA block — anchored at the bottom of the right column */}
-              <div className="flex flex-col gap-4 mt-auto">
+              {/* CTA block */}
+              <div className="flex flex-col gap-4">
                 {/* Primary CTA */}
                 <div className="flex flex-col gap-2">
                   {productPageHref ? (
@@ -949,7 +949,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   )}
                 </div>
 
-                <div className="pt-3 border-t border-border">
+                <div className="pt-2 border-t border-border">
                   <p className="font-body text-[11px] text-muted-foreground">
                     To unlock Your Trade pricing,{" "}
                     <a href="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
@@ -963,7 +963,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
           {/* Lower full-width narrative description */}
           {product.description && product.description.trim().length > 0 && (
-            <div className="w-full border-t border-border/40 mt-12 pt-12 pb-12 px-5 md:px-8">
+            <div className="w-full border-t border-border/40 mt-8 pt-4 pb-12 px-5 md:px-8">
               <div className="max-w-3xl mx-auto">
                 <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
                   {product.description}
