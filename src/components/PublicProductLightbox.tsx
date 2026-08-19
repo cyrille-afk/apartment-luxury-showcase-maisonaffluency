@@ -634,7 +634,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   onLoad={() => { setImageLoaded(true); setImageFailed(false); }}
                   onError={() => { setImageFailed(true); setImageLoaded(true); }}
                   className={cn(
-                    "w-full h-auto object-contain md:max-h-[68vh] transition-opacity duration-300",
+                    "w-full h-auto object-contain md:max-h-[56vh] transition-opacity duration-300",
                     imageFailed || !imageLoaded ? "opacity-0" : "opacity-100"
                   )}
 
@@ -965,7 +965,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
             <div className="md:hidden">{relatedStrip}</div>
 
-            <div className="mt-auto pt-4 border-t border-border">
+            <div className="pt-4 mt-4 border-t border-border">
               <p className="font-body text-[11px] text-muted-foreground">
                 To unlock Your Trade pricing,{" "}
                 <a href="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
