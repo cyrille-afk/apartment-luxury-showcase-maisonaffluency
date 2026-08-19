@@ -712,13 +712,13 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Desktop: related thumbnails sit directly under the main image */}
-          <div className="hidden md:block w-full shrink-0 bg-background px-6 pb-2">
+          <div className="hidden md:block w-full shrink-0 bg-background px-7 pb-3">
             {relatedStrip}
           </div>
 
           {/* Desktop: description in natural document flow below the image */}
           {product.description && product.description.trim().length > 0 && (
-            <div className="hidden md:block w-full shrink-0 md:mt-auto bg-background px-6 pb-6 pt-3">
+            <div className="hidden md:block w-full shrink-0 bg-background px-7 pb-7 pt-3">
               <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
                 {product.description}
               </p>
@@ -728,7 +728,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Details */}
-          <div className="w-full md:w-2/5 min-h-0 md:h-full bg-background border-l border-border/40 p-5 md:px-7 md:py-6 flex flex-col gap-3 md:gap-2.5 md:overflow-y-auto scrollbar-none">
+          <div className="w-full md:w-1/2 min-h-0 md:h-full bg-background border-l border-border/40 p-5 md:px-7 md:py-7 flex flex-col gap-3 md:gap-2 md:overflow-y-auto scrollbar-none">
+
 
 
             <div>
