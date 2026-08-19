@@ -166,6 +166,8 @@ export function toResponsiveCloudinary(url: string, opts: ResponsiveOptions = {}
   const m = url.match(CLD_RE);
   if (!m) return url;
   const [, base, rest] = m;
+  // Only native `/upload/` delivery accepts a version segment; `/fetch/` 400s.
+  const ver = (id: string) => (/\/upload$/i.test(base) ? withVersion(id) : id);
   const width = opts.width ?? 640;
   const quality = opts.quality ?? "auto:eco";
   const parts = rest.split("/");
@@ -187,12 +189,12 @@ export function toResponsiveCloudinary(url: string, opts: ResponsiveOptions = {}
     if (!has("f")) tokens.push("f_auto");
     parts[0] = tokens.join(",");
     const tail = parts.slice(1).join("/");
-    return `${base}/${parts[0]}/${withVersion(tail)}`;
+    return `${base}/${parts[0]}/${ver(tail)}`;
   }
   // No transform segment — inject one.
   const injected = [`w_${width}`, `q_${quality}`, `f_auto`];
   if (opts.crop) injected.splice(1, 0, `c_${opts.crop}`);
-  return `${base}/${injected.join(",")}/${withVersion(rest)}`;
+  return `${base}/${injected.join(",")}/${ver(rest)}`;
 }
 
 /**
