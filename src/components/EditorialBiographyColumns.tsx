@@ -144,7 +144,8 @@ function MediaCell({
 
   if (block.kind === "video") {
     return (
-      <figure className={cn("h-auto m-0 w-full max-w-4xl mx-auto", className)}>
+      <figure className={cn("h-auto m-0 block w-full max-w-4xl mx-auto", className)}>
+
         <VideoBlock
           url={block.url}
           designerName={designerName}
@@ -278,7 +279,7 @@ export default function EditorialBiographyColumns({
 
   return (
     <div className="bg-cream">
-      <div className={containerClassName ?? "mx-auto w-full max-w-6xl px-4 pt-4 md:pt-6 pb-4 md:pb-6"}>
+      <div className={containerClassName ?? "mx-auto w-full max-w-6xl px-6 pt-4 md:pt-6 pb-4 md:pb-6"}>
         <div className="flex w-full flex-col gap-y-8 md:gap-y-10">
           {/* Row 1: pinned utility controls */}
           {hasHeaderControls && (
@@ -325,18 +326,19 @@ export default function EditorialBiographyColumns({
           {/* Row 3: 2-column split for first narrative + first media */}
           {firstSplitText && firstSplitText.kind === "text" && firstSplitMedia && firstSplitMedia.kind !== "text" && (
             <FadeInRow delay={160}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+              <div className="grid grid-cols-1 md:grid-cols-[1.2fr_0.8fr] gap-12 items-start">
                 <div className="h-auto">
                   <TextCell content={firstSplitText.content} eyebrow={firstQuote ? undefined : eyebrow} />
                 </div>
-                <div className="h-auto">
+                <div className="h-auto flex justify-end">
                   <MediaCell
                     block={firstSplitMedia}
                     designerName={designerName}
                     index={firstSplitMediaIndex}
-                    className="max-w-none"
+                    className="max-w-md ml-auto"
                   />
                 </div>
+
               </div>
             </FadeInRow>
           )}
