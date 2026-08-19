@@ -262,7 +262,11 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
               <div className="flex flex-col flex-1 text-center items-center">
                 {(() => {
                   const composed = composeTitle(pick.title, pick.subtitle);
-                  const brandLine = (composed.remainingSubtitle || pick.subtitle || displayName || designer.name || "").trim();
+                  const childDesignerName = isParentBrand
+                    ? ((pick as any).designer_name || "").trim()
+                    : "";
+                  const brandLine = (childDesignerName || composed.remainingSubtitle || pick.subtitle || displayName || designer.name || "").trim();
+
                   return (
                     <>
                       {/* Designer / brand — top, prominent */}
