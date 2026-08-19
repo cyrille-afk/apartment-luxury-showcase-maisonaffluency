@@ -258,20 +258,28 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                 )}
               </div>
 
-              <div className="flex flex-col flex-1 text-center">
+              <div className="flex flex-col flex-1 text-center items-center">
                 {(() => {
                   const composed = composeTitle(pick.title, pick.subtitle);
+                  const brandLine = (composed.remainingSubtitle || pick.subtitle || displayName || designer.name || "").trim();
                   return (
                     <>
-                      <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">{composed.title}</h3>
-                      {composed.remainingSubtitle && (
-                        <p className="font-body text-[10px] text-muted-foreground leading-tight">{composed.remainingSubtitle}</p>
+                      {/* Designer / brand — top, prominent */}
+                      {brandLine && (
+                        <span className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1">
+                          {brandLine}
+                        </span>
                       )}
+                      {/* Product name — secondary, elegant italic */}
+                      <h3 className="mt-1 font-body italic text-[13px] md:text-[15px] font-normal text-foreground/80 leading-snug line-clamp-2">
+                        {composed.title}
+                      </h3>
                     </>
                   );
                 })()}
-                <div className="mt-auto pt-1">
-                  <p className="font-display text-[11px] md:text-xs text-foreground">
+                {/* Price — muted, bottom */}
+                <div className="mt-1">
+                  <p className="font-body text-[11px] md:text-xs text-muted-foreground tracking-wide">
                     {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
                   </p>
                 </div>
