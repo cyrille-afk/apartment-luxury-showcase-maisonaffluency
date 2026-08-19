@@ -242,15 +242,33 @@ export default function EditorialBiographyColumns({
   const blocks = toBlocks(biography, biographyImages);
 
   const firstQuoteIndex = blocks.findIndex((b) => b.kind === "text" && isQuote(b.content));
-  const firstNonQuoteTextIndex = blocks.findIndex((b) => b.kind === "text" && !isQuote(b.content));
-  const firstMediaIndex = blocks.findIndex((b) => b.kind !== "text");
+
+  let firstSplitTextIndex = -1;
+  let firstSplitMediaIndex = -1;
+
+  if (firstQuoteIndex >= 0) {
+    // Row 3 pairs the first narrative paragraph *after* the intro quote with
+    // the first image that follows it. Any lead-in text before the quote flows
+    // into the bottom narrative row along with everything else.
+    firstSplitTextIndex = blocks.findIndex(
+      (b, i) => i > firstQuoteIndex && b.kind === "text" && !isQuote(b.content),
+    );
+    firstSplitMediaIndex = blocks.findIndex((b, i) => i > firstQuoteIndex && b.kind === "image");
+    if (firstSplitMediaIndex < 0) {
+      firstSplitMediaIndex = blocks.findIndex((b, i) => i > firstQuoteIndex && b.kind !== "text");
+    }
+  } else {
+    // No opening quote: fall back to the first narrative paragraph + first media.
+    firstSplitTextIndex = blocks.findIndex((b) => b.kind === "text" && !isQuote(b.content));
+    firstSplitMediaIndex = blocks.findIndex((b) => b.kind !== "text");
+  }
 
   const firstQuote = firstQuoteIndex >= 0 ? blocks[firstQuoteIndex] : null;
-  const firstText = firstNonQuoteTextIndex >= 0 ? blocks[firstNonQuoteTextIndex] : null;
-  const firstMedia = firstMediaIndex >= 0 ? blocks[firstMediaIndex] : null;
+  const firstSplitText = firstSplitTextIndex >= 0 ? blocks[firstSplitTextIndex] : null;
+  const firstSplitMedia = firstSplitMediaIndex >= 0 ? blocks[firstSplitMediaIndex] : null;
 
   const usedIndices = new Set(
-    [firstQuoteIndex, firstNonQuoteTextIndex, firstMediaIndex].filter((i): i is number => i >= 0),
+    [firstQuoteIndex, firstSplitTextIndex, firstSplitMediaIndex].filter((i): i is number => i >= 0),
   );
   const remainingBlocks = blocks
     .map((block, index) => ({ block, index }))
