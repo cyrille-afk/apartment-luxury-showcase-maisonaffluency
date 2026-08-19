@@ -71,7 +71,7 @@ function Caption({ label }: { label: string }) {
   if (!label) return null;
   return (
     <p
-      className="mt-2 text-center font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.8]"
+      className="mt-2 text-center font-body text-[9px] md:text-[10px] uppercase tracking-[0.34em] text-foreground/45 leading-[1.5]"
     >
       {label}
     </p>
@@ -106,7 +106,7 @@ function TextCell({
             {eyebrow}
           </p>
         )}
-        <blockquote className="border-l border-foreground/25 pl-5 md:pl-7 py-0 m-0">
+        <blockquote className="border-l border-foreground/25 pl-5 md:pl-7 py-0 my-0 m-0">
           <p className="font-display text-lg md:text-xl leading-[1.55] tracking-[-0.005em] text-foreground/85 max-w-4xl">
             {renderParagraph(stripQuotes(content))}
           </p>
@@ -227,7 +227,7 @@ function FadeInRow({
     <div
       ref={ref}
       className={`
-        grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center
+        grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start
         transition-all duration-700 ease-out will-change-transform
         ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}
       `}
