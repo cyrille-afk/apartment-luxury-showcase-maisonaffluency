@@ -273,45 +273,12 @@ export default function EditorialBiographyColumns({
   const firstImage = imageBlocks[0];
   const secondImage = imageBlocks[1];
 
-  const hasHeaderControls = collectionCtaHref || onClosePortrait;
+  const showCollectionCta = Boolean(collectionCtaHref);
 
   return (
     <div className="bg-cream">
       <div className={containerClassName ?? "mx-auto w-full max-w-6xl px-6 pt-4 md:pt-6 pb-4 md:pb-6"}>
         <div className="flex w-full flex-col gap-y-8 md:gap-y-10">
-          {/* Row 1: pinned utility controls */}
-          {hasHeaderControls && (
-            <FadeInRow delay={0}>
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                {collectionCtaHref ? (
-                  <Link
-                    to={collectionCtaHref}
-                    className="group inline-flex items-center gap-3 px-5 py-3 md:px-6 md:py-3.5 border border-foreground/30 bg-background/40 hover:bg-background/80 hover:border-foreground/60 transition-all duration-300"
-                  >
-                    <span className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.28em] text-foreground/80 group-hover:text-foreground transition-colors">
-                      {collectionCtaLabel}
-                    </span>
-                    <ArrowRight className="h-3.5 w-3.5 text-foreground/60 group-hover:text-foreground group-hover:translate-x-1 transition-all duration-300" strokeWidth={1.25} />
-                  </Link>
-                ) : (
-                  <div />
-                )}
-                {onClosePortrait && (
-                  <button
-                    type="button"
-                    onClick={onClosePortrait}
-                    className="group inline-flex items-center gap-3 px-5 py-3 md:px-6 md:py-3.5 border border-foreground/30 bg-background/40 hover:bg-background/80 hover:border-foreground/60 transition-all duration-300"
-                  >
-                    <X className="h-3.5 w-3.5 text-foreground/60 group-hover:text-foreground transition-all duration-300" strokeWidth={1.25} />
-                    <span className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.28em] text-foreground/80 group-hover:text-foreground transition-colors">
-                      {closePortraitLabel}
-                    </span>
-                  </button>
-                )}
-              </div>
-            </FadeInRow>
-          )}
-
           {/* Row 1: intro paragraph + centered video */}
           {introText && (
             <FadeInRow delay={60}>
@@ -332,11 +299,45 @@ export default function EditorialBiographyColumns({
             </FadeInRow>
           )}
 
+          {/* Collection CTA sits beneath the video (or blockquote when no video) */}
+          {showCollectionCta && (
+            <FadeInRow delay={140}>
+              <div className="flex justify-center my-2">
+                <Link
+                  to={collectionCtaHref!}
+                  className="group inline-flex items-center gap-3 px-5 py-2.5 md:px-6 md:py-3 border border-foreground/25 bg-background/30 hover:bg-background/70 hover:border-foreground/50 transition-all duration-300"
+                >
+                  <span className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-foreground/75 group-hover:text-foreground transition-colors">
+                    {collectionCtaLabel}
+                  </span>
+                  <ArrowRight className="h-3 w-3 text-foreground/55 group-hover:text-foreground group-hover:translate-x-1 transition-all duration-300" strokeWidth={1.25} />
+                </Link>
+              </div>
+            </FadeInRow>
+          )}
+
           {/* Row 2: large blockquote */}
           {blockquoteText && (
             <FadeInRow delay={180}>
               <div className="w-full max-w-3xl mx-auto my-8">
                 <TextCell content={blockquoteText.block.content} />
+              </div>
+            </FadeInRow>
+          )}
+
+          {/* Collection CTA fallback beneath the blockquote when no video is present */}
+          {showCollectionCta && !firstVideo && (
+            <FadeInRow delay={200}>
+              <div className="flex justify-center my-2">
+                <Link
+                  to={collectionCtaHref!}
+                  className="group inline-flex items-center gap-3 px-5 py-2.5 md:px-6 md:py-3 border border-foreground/25 bg-background/30 hover:bg-background/70 hover:border-foreground/50 transition-all duration-300"
+                >
+                  <span className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-foreground/75 group-hover:text-foreground transition-colors">
+                    {collectionCtaLabel}
+                  </span>
+                  <ArrowRight className="h-3 w-3 text-foreground/55 group-hover:text-foreground group-hover:translate-x-1 transition-all duration-300" strokeWidth={1.25} />
+                </Link>
               </div>
             </FadeInRow>
           )}
@@ -381,6 +382,24 @@ export default function EditorialBiographyColumns({
                     index={secondImage.index}
                   />
                 )}
+              </div>
+            </FadeInRow>
+          )}
+
+          {/* Closing navigation link at the end of the narrative track */}
+          {onClosePortrait && (
+            <FadeInRow delay={360}>
+              <div className="flex justify-center pt-2 pb-2">
+                <button
+                  type="button"
+                  onClick={onClosePortrait}
+                  className="group inline-flex items-center gap-3 font-body text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-foreground/60 hover:text-foreground transition-colors duration-300"
+                >
+                  <X className="h-3 w-3 transition-transform group-hover:rotate-90" strokeWidth={1.25} />
+                  <span className="underline-offset-4 group-hover:underline">
+                    {closePortraitLabel}
+                  </span>
+                </button>
               </div>
             </FadeInRow>
           )}
