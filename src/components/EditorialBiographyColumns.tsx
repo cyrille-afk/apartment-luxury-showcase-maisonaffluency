@@ -299,18 +299,9 @@ export default function EditorialBiographyColumns({
             </FadeInRow>
           )}
 
-          {/* Row 2: large blockquote */}
-          {blockquoteText && (
-            <FadeInRow delay={180}>
-              <div className="w-full max-w-3xl mx-auto my-8">
-                <TextCell content={blockquoteText.block.content} />
-              </div>
-            </FadeInRow>
-          )}
-
-          {/* Single collection CTA — beneath the video caption (or the blockquote when no video) */}
+          {/* Single collection CTA — beneath the video caption */}
           {showCollectionCta && (
-            <FadeInRow delay={200}>
+            <FadeInRow delay={140}>
               <div className="flex justify-center my-2">
                 <Link
                   to={collectionCtaHref!}
@@ -324,6 +315,16 @@ export default function EditorialBiographyColumns({
               </div>
             </FadeInRow>
           )}
+
+          {/* Row 2: large blockquote */}
+          {blockquoteText && (
+            <FadeInRow delay={180}>
+              <div className="w-full max-w-3xl mx-auto my-8">
+                <TextCell content={blockquoteText.block.content} />
+              </div>
+            </FadeInRow>
+          )}
+
 
 
           {/* Row 3: first photo left, text right */}
