@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useParams, Link, Navigate, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, X } from "lucide-react";
-import { cn } from "@/lib/utils";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import EditorialBiographyColumns from "@/components/EditorialBiographyColumns";
@@ -27,20 +26,10 @@ export default function PublicDesignerBiography() {
   const isTradeUser = !!user;
   const { data: designer, isLoading } = useDesigner(slug, { includeTradeOnly: isTradeUser });
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
-  const [showStickyClose, setShowStickyClose] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [slug]);
-
-  useEffect(() => {
-    const onScroll = () => {
-      setShowStickyClose(window.scrollY > 180);
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   if (isLoading) {
     return (
