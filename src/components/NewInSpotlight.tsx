@@ -315,14 +315,28 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                     || designer.name
                     || ""
                   ).trim();
+                  const brandSlug = resolveSlug(brandLine);
 
                   return (
                     <>
                       {/* Designer / brand — top, prominent */}
                       {brandLine && (
-                        <span className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1">
-                          {brandLine}
-                        </span>
+                        brandSlug ? (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/designers/${brandSlug}`);
+                            }}
+                            className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1 hover:underline underline-offset-4 decoration-foreground/40 transition-colors"
+                          >
+                            {brandLine}
+                          </button>
+                        ) : (
+                          <span className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1">
+                            {brandLine}
+                          </span>
+                        )
                       )}
                       {/* Product name — secondary, elegant italic */}
                       <h3 className="mt-1 font-body italic text-[13px] md:text-[15px] font-normal text-foreground/80 leading-snug line-clamp-2">
