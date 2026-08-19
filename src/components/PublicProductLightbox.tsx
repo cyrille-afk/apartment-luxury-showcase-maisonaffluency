@@ -631,385 +631,346 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </button>
 
           {/* Strict editorial grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start max-w-6xl mx-auto p-5 md:p-8 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch max-w-6xl mx-auto p-5 md:p-8 w-full h-full">
 
-          {/* LEFT COLUMN — hero image, related thumbnails, description */}
-          <div className="relative w-full bg-background flex flex-col gap-6">
-          <div className="relative w-full shrink-0 flex items-start justify-center">
-
-
-
-
-            {product.image_url ? (
-              <>
-                {!imageLoaded && !imageFailed && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-lg bg-muted animate-pulse" />
-                  </div>
-                )}
-                {imageFailed && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="font-body text-sm text-muted-foreground">Image unavailable</span>
-                  </div>
-                )}
-                <img
-                  key={currentImageUrl /* re-mount on finish swap so loader resets */}
-                  src={currentImageUrl}
-                  alt={product.title}
-                  onLoad={() => { setImageLoaded(true); setImageFailed(false); }}
-                  onError={() => { setImageFailed(true); setImageLoaded(true); }}
-                  className={cn(
-                    "w-full h-auto object-contain md:max-h-[58vh] transition-opacity duration-300",
-                    imageFailed || !imageLoaded ? "opacity-0" : "opacity-100"
-                  )}
-
-
-                />
-              </>
-            ) : (
-              <span className="font-body text-sm text-muted-foreground">No image</span>
-            )}
-
-            {/* Image caption */}
-            {(() => {
-              const idx = finishImageIdx ?? 0;
-              const cap = product.gallery_captions?.[String(idx)];
-              return cap ? (
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 max-w-[85%]">
-                  <span className="font-body text-[11px] text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full border border-border/30 block text-center whitespace-nowrap overflow-hidden text-ellipsis">
-                    {cap}
-                  </span>
-                </div>
-              ) : null;
-            })()}
-
-            {/* Description overlay on image — mobile only (desktop renders inline below) */}
-            <div className="md:hidden absolute top-3 right-3 z-20">
-              <LightboxDescriptionDropdown description={product.description} />
-            </div>
-
-
-            {/* Mobile: secondary action icons */}
-            <div className="md:hidden absolute bottom-3 left-3 z-10 flex gap-3.5">
-              <FavoriteFolderPicker pickId={product.id} align="start" side="top">
-                <button
-                  onClick={(e) => e.stopPropagation()}
-                  title={favorited ? "Manage folders" : "Favorite"}
-                  className={cn(
-                    "flex items-center justify-center w-9 h-9 rounded-full backdrop-blur-md transition-all shadow-md",
-                    favorited
-                      ? "bg-destructive/80 text-white"
-                      : "bg-background/70 text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <Heart size={15} className={cn(favorited && "fill-current")} />
-                </button>
-              </FavoriteFolderPicker>
-
-
-              <button
-                onClick={() => togglePin(compareItem)}
-                title={pinned ? "Pinned" : "Pin to Selection"}
-                className={cn(
-                  "flex items-center justify-center w-9 h-9 rounded-full backdrop-blur-md transition-all shadow-md",
-                  pinned
-                    ? "bg-[hsl(var(--gold))]/80 text-white"
-                    : "bg-background/70 text-muted-foreground hover:text-foreground",
-                  compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
-                )}
-              >
-                <Scale size={15} />
-              </button>
-
-              {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) && (
-                <SpecSheetButton
-                  pdfUrl={product.pdf_url}
-                  pdfUrls={product.pdf_urls}
-                  brandName={designerDisplay}
-                  productName={product.title}
-                  variant="icon"
-                  onBeforeOpen={() => { let allowed = false; requireAuth(() => { allowed = true; }, "download this spec sheet"); return allowed; }}
-                  className="flex items-center justify-center w-9 h-9 rounded-full bg-[hsl(var(--pdf-red))] backdrop-blur-md text-white transition-all shadow-md cursor-pointer"
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Desktop: related thumbnails sit directly under the main image */}
-          <div className="hidden md:block w-full shrink-0 bg-background">
-            {relatedStrip}
-          </div>
-
-          {/* Desktop: description in natural document flow below the thumbnails */}
-          {product.description && product.description.trim().length > 0 && (
-            <div className="hidden md:block w-full shrink-0 bg-background">
-              <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
-                {product.description}
-              </p>
-            </div>
-          )}
-
-          </div>
-
-          {/* RIGHT COLUMN — specs (top group) + conversion (bottom group) */}
-          <div className="w-full bg-background md:border-l md:border-border/40 md:pl-12 flex flex-col justify-between h-full min-h-[600px] md:self-stretch">
-
-          {/* Group A — top content */}
-          <div className="flex flex-col gap-4">
-
-
-
-
-            <div>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!linkedDesigner?.slug) return;
-                  rememberProductBackRef(linkedDesigner.slug, location.pathname + location.search);
-                  onClose();
-                  navigate(`/designers/${linkedDesigner.slug}`);
-                }}
-                disabled={!linkedDesigner?.slug}
-                className="font-body text-[11px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer text-left"
-              >
-                {designerDisplay}
-              </button>
-              <h2 className="font-display text-base md:text-xl text-foreground mt-1 leading-tight">
-                {product.title}
-              </h2>
-              {product.subtitle && product.subtitle.trim() !== designerDisplay?.trim() && (
-                <p className="font-body text-[11px] md:text-xs text-muted-foreground mt-1">
-                  {product.subtitle}
-                </p>
-              )}
-              {publicPriceLabel && (
-                <p className="font-display text-base md:text-lg text-foreground mt-2 leading-none">
-                  {publicPriceLabel}
-                </p>
-              )}
-            </div>
-
-
-            <div className="flex flex-col">
-              {(() => {
-                // Prefer a real Size dropdown when size_variants encode
-                // multiple distinct size labels. Falls back to a static list
-                // (curated dimensions or derived) otherwise.
-                const sv = product.size_variants || [];
-                const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
-
-                // Build the candidate size-label list. Works for single-axis,
-                // base-only AND dual-axis (e.g. Angelo M Side Table where
-                // each variant has size label + base/top finishes).
-                let sizeLabels: string[] = [];
-                if (sv.length > 0) {
-                  sizeLabels = Array.from(
-                    new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))
-                  );
-                }
-                // Base-only fallback when explicit labels are absent.
-                if (sizeLabels.length < 2 && !isDualAxis && baseOnlyIsDim && baseOnlyOptions.length >= 2) {
-                  sizeLabels = baseOnlyOptions;
-                }
-                const dimCount = sizeLabels.filter(looksLikeDimension).length;
-                const showSizePicker = sizeLabels.length >= 2 && dimCount >= 2 && dimCount >= Math.ceil(sizeLabels.length / 2);
-
-                if (showSizePicker) {
-                  return (
-                    <ExpandableSpec
-                      icon={specIcon("📐")}
-                      text={withImperialPerLine(sizeLabels.join("\n"))}
-                      emphasized
-                      placeholder="Select Your Size"
-                      value={selectedSizeLabel != null ? Math.max(0, sizeLabels.indexOf(selectedSizeLabel)) : null}
-                      onChange={(idx) => {
-                        setSelectedSizeLabel(idx < 0 ? null : sizeLabels[idx] ?? null);
-                      }}
+            {/* LEFT COLUMN — hero image + related thumbnails only */}
+            <div className="relative w-full flex flex-col gap-6">
+              <div className="relative w-full shrink-0 flex items-start justify-center">
+                {product.image_url ? (
+                  <>
+                    {!imageLoaded && !imageFailed && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-lg bg-muted animate-pulse" />
+                      </div>
+                    )}
+                    {imageFailed && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="font-body text-sm text-muted-foreground">Image unavailable</span>
+                      </div>
+                    )}
+                    <img
+                      key={currentImageUrl /* re-mount on finish swap so loader resets */}
+                      src={currentImageUrl}
+                      alt={product.title}
+                      onLoad={() => { setImageLoaded(true); setImageFailed(false); }}
+                      onError={() => { setImageFailed(true); setImageLoaded(true); }}
+                      className={cn(
+                        "w-full h-auto object-contain md:max-h-[58vh] transition-opacity duration-300",
+                        imageFailed || !imageLoaded ? "opacity-0" : "opacity-100"
+                      )}
                     />
-                  );
-                }
-
-                // Fallback: static dimension list (legacy preview behavior).
-                let dimText = (product.dimensions || "").trim();
-                if (!dimText) {
-                  if (isDualAxis) {
-                    const dualLabels = Array.from(new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))).filter(looksLikeDimension);
-                    if (dualLabels.length > 0) dimText = dualLabels.join("\n");
-                    else {
-                      const baseDims = Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean))).filter(looksLikeDimension);
-                      if (baseDims.length > 0) dimText = baseDims.join("\n");
-                    }
-                  } else if (sv.length > 0) {
-                    const labels = sizeLabels.filter(looksLikeDimension);
-                    if (labels.length > 0) dimText = labels.join("\n");
-                  }
-                  if (!dimText && baseOnlyIsDim && baseOnlyOptions.length > 0) {
-                    dimText = baseOnlyOptions.join("\n");
-                  }
-                }
-                if (!dimText) return null;
-                return <DimensionsList text={withImperialPerLine(dimText)} />;
-              })()}
-
-              {(() => {
-                // Finish/material axis — always render as a static "refer to
-                // the full product page" line in the lightbox so users land on
-                // the configurator on the real product page instead of
-                // interacting with a half-wired picker here.
-                const sv = product.size_variants || [];
-                const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
-                const baseIsDim = (baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) || isDimensionAxisLabel(product.base_axis_label);
-                const topOptions = isDualAxis
-                  ? Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)))
-                  : [];
-                const topIsDim = (topOptions.length > 0 && topOptions.every(looksLikeDimension)) || isDimensionAxisLabel(product.top_axis_label);
-
-                const hasFinishAxis =
-                  isUpholsteredProduct ||
-                  (isDualAxis && (!baseIsDim || !topIsDim)) ||
-                  (!isDualAxis && materialOptions.length > 0 && !(materialOptions.length === 1 && looksLikeDimension(materialOptions[0]))) ||
-                  (!!product.materials_description && product.materials_description.trim().length > 0);
-
-                if (!hasFinishAxis) return null;
-                return (
-                  <div className="border-t border-border/60 py-3 flex items-center gap-4">
-                    <span className="shrink-0"><SpecGlyph symbol="⬗" /></span>
-                    <span className="font-body text-sm text-muted-foreground">
-                      Finish options — refer to the full product page for details.
-                    </span>
-                  </div>
-                );
-              })()}
-
-              {(() => {
-                const handcrafted = formatHandcrafted(product.origin, product.lead_time);
-                if (!handcrafted) return null;
-                let originLine = handcrafted;
-                let leadLine: string | null = null;
-                const dotSplit = handcrafted.split(" · ");
-                if (dotSplit.length === 2) {
-                  originLine = dotSplit[0];
-                  leadLine = dotSplit[1];
-                } else {
-                  const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
-                  if (m) {
-                    originLine = m[1];
-                    leadLine = `Production lead time: ${m[2]}`;
-                  }
-                }
-                return (
-                  <div className="border-t border-b border-border/60 py-3 flex items-start gap-4">
-                    {specIcon("✦", "mt-0.5")}
-                    <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
-                      <p>{originLine}</p>
-                      {leadLine && <p className="mt-0.5">{leadLine}</p>}
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-            </div>
-            {/* end Group A */}
-
-            {/* Mobile: related strip stays in flow */}
-            <div className="md:hidden">{relatedStrip}</div>
-
-            {/* Group B — bottom conversion block */}
-            <div className="flex flex-col gap-4 mt-auto">
-
-            {/* Primary CTA — visit the full product page (more images, full spec, gallery) */}
-            <div className="flex flex-col gap-2">
-
-              {productPageHref ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    // Navigate directly — do NOT call onClose() first.
-                    // onClose() triggers history.back() (async), which would
-                    // pop the entry pushed by navigate() and bounce the user
-                    // right back to the designer profile.
-                    navigate(productPageHref, {
-                      state: { from: location.pathname + location.search },
-                    });
-                  }}
-                  className="group flex items-center justify-center gap-2 px-5 py-3 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
-                >
-                  View full product page
-                  <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
-                </button>
-              ) : (
-                <a
-                  href="/trade-program"
-                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
-                >
-                  {publicPriceLabel || "Price Upon Request"}
-                </a>
-              )}
-              {productPageHref && (
-                <p className="text-center font-body text-[10px] tracking-wide text-muted-foreground/80">
-                  See all photos, finishes & specifications
-                </p>
-              )}
-            </div>
-
-            {/* Desktop secondary actions — uniform, minimal neutral row */}
-            <div className="hidden md:grid grid-cols-3 gap-2 items-stretch">
-              <FavoriteFolderPicker pickId={product.id} align="start" side="top">
-                <button
-                  onClick={(e) => e.stopPropagation()}
-                  title={favorited ? "Manage folders" : "Favorite"}
-                  className={cn(
-                    "w-full h-10 flex items-center justify-center gap-1.5 px-3 font-body text-[10px] uppercase tracking-[0.14em] transition-colors border",
-                    favorited
-                      ? "border-foreground/40 text-foreground"
-                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
-                  )}
-                >
-                  <Heart size={13} strokeWidth={1.5} className={cn(favorited && "fill-current")} />
-                  {favorited ? "Saved" : "Favorite"}
-                </button>
-              </FavoriteFolderPicker>
-
-
-              <button
-                onClick={() => togglePin(compareItem)}
-                title={pinned ? "Pinned" : "Pin to Selection"}
-                className={cn(
-                  "w-full h-10 flex items-center justify-center gap-1.5 px-3 font-body text-[10px] uppercase tracking-[0.14em] transition-colors border",
-                  pinned
-                    ? "border-foreground/40 text-foreground"
-                    : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
-                  compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                  </>
+                ) : (
+                  <span className="font-body text-sm text-muted-foreground">No image</span>
                 )}
-              >
-                <Scale size={13} strokeWidth={1.5} />
-                {pinned ? "Pinned" : "Pin to Selection"}
-              </button>
 
-              {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) && (
-                <SpecSheetButton
-                  pdfUrl={product.pdf_url}
-                  pdfUrls={product.pdf_urls}
-                  brandName={designerDisplay}
-                  productName={product.title}
-                  variant="button"
-                  icon={<FileDown size={13} strokeWidth={1.5} />}
-                  className="w-full h-10 flex items-center justify-center gap-1.5 px-3 font-body text-[10px] uppercase tracking-[0.14em] transition-colors border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 cursor-pointer"
-                  onBeforeOpen={() => { let allowed = false; requireAuth(() => { allowed = true; }, "download this spec sheet"); return allowed; }}
-                />
+                {/* Image caption */}
+                {(() => {
+                  const idx = finishImageIdx ?? 0;
+                  const cap = product.gallery_captions?.[String(idx)];
+                  return cap ? (
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 max-w-[85%]">
+                      <span className="font-body text-[11px] text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full border border-border/30 block text-center whitespace-nowrap overflow-hidden text-ellipsis">
+                        {cap}
+                      </span>
+                    </div>
+                  ) : null;
+                })()}
+
+                {/* Mobile: secondary action icons */}
+                <div className="md:hidden absolute bottom-3 left-3 z-10 flex gap-3.5">
+                  <FavoriteFolderPicker pickId={product.id} align="start" side="top">
+                    <button
+                      onClick={(e) => e.stopPropagation()}
+                      title={favorited ? "Manage folders" : "Favorite"}
+                      className={cn(
+                        "flex items-center justify-center w-9 h-9 rounded-full backdrop-blur-md transition-all shadow-md",
+                        favorited
+                          ? "bg-destructive/80 text-white"
+                          : "bg-background/70 text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <Heart size={15} className={cn(favorited && "fill-current")} />
+                    </button>
+                  </FavoriteFolderPicker>
+
+                  <button
+                    onClick={() => togglePin(compareItem)}
+                    title={pinned ? "Pinned" : "Pin to Selection"}
+                    className={cn(
+                      "flex items-center justify-center w-9 h-9 rounded-full backdrop-blur-md transition-all shadow-md",
+                      pinned
+                        ? "bg-[hsl(var(--gold))]/80 text-white"
+                        : "bg-background/70 text-muted-foreground hover:text-foreground",
+                      compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                    )}
+                  >
+                    <Scale size={15} />
+                  </button>
+
+                  {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) && (
+                    <SpecSheetButton
+                      pdfUrl={product.pdf_url}
+                      pdfUrls={product.pdf_urls}
+                      brandName={designerDisplay}
+                      productName={product.title}
+                      variant="icon"
+                      onBeforeOpen={() => { let allowed = false; requireAuth(() => { allowed = true; }, "download this spec sheet"); return allowed; }}
+                      className="flex items-center justify-center w-9 h-9 rounded-full bg-[hsl(var(--pdf-red))] backdrop-blur-md text-white transition-all shadow-md cursor-pointer"
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Related thumbnails sit directly under the main image */}
+              <div className="w-full shrink-0">
+                {relatedStrip}
+              </div>
+            </div>
+
+            {/* RIGHT COLUMN — specs card, narrative description, CTAs */}
+            <div className="w-full flex flex-col h-full md:pl-10 md:border-l md:border-border/40">
+
+              {/* Stone card — brand, dimensions, finishes, handcrafted details */}
+              <div className="bg-muted/40 border border-border/60 p-5 flex flex-col gap-4">
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!linkedDesigner?.slug) return;
+                      rememberProductBackRef(linkedDesigner.slug, location.pathname + location.search);
+                      onClose();
+                      navigate(`/designers/${linkedDesigner.slug}`);
+                    }}
+                    disabled={!linkedDesigner?.slug}
+                    className="font-body text-[11px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer text-left"
+                  >
+                    {designerDisplay}
+                  </button>
+                  <h2 className="font-display text-base md:text-xl text-foreground mt-1 leading-tight">
+                    {product.title}
+                  </h2>
+                  {product.subtitle && product.subtitle.trim() !== designerDisplay?.trim() && (
+                    <p className="font-body text-[11px] md:text-xs text-muted-foreground mt-1">
+                      {product.subtitle}
+                    </p>
+                  )}
+                  {publicPriceLabel && (
+                    <p className="font-display text-base md:text-lg text-foreground mt-2 leading-none">
+                      {publicPriceLabel}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  {(() => {
+                    const sv = product.size_variants || [];
+                    const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
+
+                    let sizeLabels: string[] = [];
+                    if (sv.length > 0) {
+                      sizeLabels = Array.from(
+                        new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))
+                      );
+                    }
+                    if (sizeLabels.length < 2 && !isDualAxis && baseOnlyIsDim && baseOnlyOptions.length >= 2) {
+                      sizeLabels = baseOnlyOptions;
+                    }
+                    const dimCount = sizeLabels.filter(looksLikeDimension).length;
+                    const showSizePicker = sizeLabels.length >= 2 && dimCount >= 2 && dimCount >= Math.ceil(sizeLabels.length / 2);
+
+                    if (showSizePicker) {
+                      const selectedIdx = selectedSizeLabel != null ? Math.max(0, sizeLabels.indexOf(selectedSizeLabel)) : null;
+                      return (
+                        <DimensionsButtonGrid
+                          text={withImperialPerLine(sizeLabels.join("\n"))}
+                          selectedIndex={selectedIdx}
+                          onSelect={(idx) => setSelectedSizeLabel(sizeLabels[idx] ?? null)}
+                        />
+                      );
+                    }
+
+                    // Fallback: static dimensions.
+                    let dimText = (product.dimensions || "").trim();
+                    if (!dimText) {
+                      if (isDualAxis) {
+                        const dualLabels = Array.from(new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))).filter(looksLikeDimension);
+                        if (dualLabels.length > 0) dimText = dualLabels.join("\n");
+                        else {
+                          const baseDims = Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean))).filter(looksLikeDimension);
+                          if (baseDims.length > 0) dimText = baseDims.join("\n");
+                        }
+                      } else if (sv.length > 0) {
+                        const labels = sizeLabels.filter(looksLikeDimension);
+                        if (labels.length > 0) dimText = labels.join("\n");
+                      }
+                      if (!dimText && baseOnlyIsDim && baseOnlyOptions.length > 0) {
+                        dimText = baseOnlyOptions.join("\n");
+                      }
+                    }
+                    if (!dimText) return null;
+                    return (
+                      <DimensionsButtonGrid
+                        text={withImperialPerLine(dimText)}
+                        selectedIndex={selectedStaticDimIdx}
+                        onSelect={(idx) => setSelectedStaticDimIdx(idx)}
+                      />
+                    );
+                  })()}
+
+                  {(() => {
+                    const sv = product.size_variants || [];
+                    const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
+                    const baseIsDim = (baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) || isDimensionAxisLabel(product.base_axis_label);
+                    const topOptions = isDualAxis
+                      ? Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)))
+                      : [];
+                    const topIsDim = (topOptions.length > 0 && topOptions.every(looksLikeDimension)) || isDimensionAxisLabel(product.top_axis_label);
+
+                    const hasFinishAxis =
+                      isUpholsteredProduct ||
+                      (isDualAxis && (!baseIsDim || !topIsDim)) ||
+                      (!isDualAxis && materialOptions.length > 0 && !(materialOptions.length === 1 && looksLikeDimension(materialOptions[0]))) ||
+                      (!!product.materials_description && product.materials_description.trim().length > 0);
+
+                    if (!hasFinishAxis) return null;
+                    return (
+                      <div className="border-t border-border/60 py-3 flex items-center gap-4">
+                        <span className="shrink-0"><SpecGlyph symbol="⬗" /></span>
+                        <span className="font-body text-sm text-muted-foreground">
+                          Finish options — refer to the full product page for details.
+                        </span>
+                      </div>
+                    );
+                  })()}
+
+                  {(() => {
+                    const handcrafted = formatHandcrafted(product.origin, product.lead_time);
+                    if (!handcrafted) return null;
+                    let originLine = handcrafted;
+                    let leadLine: string | null = null;
+                    const dotSplit = handcrafted.split(" · ");
+                    if (dotSplit.length === 2) {
+                      originLine = dotSplit[0];
+                      leadLine = dotSplit[1];
+                    } else {
+                      const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
+                      if (m) {
+                        originLine = m[1];
+                        leadLine = `Production lead time: ${m[2]}`;
+                      }
+                    }
+                    return (
+                      <div className="border-t border-border/60 py-3 flex items-start gap-4">
+                        {specIcon("✦", "mt-0.5")}
+                        <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+                          <p>{originLine}</p>
+                          {leadLine && <p className="mt-0.5">{leadLine}</p>}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* Narrative description directly beneath the stone card */}
+              {product.description && product.description.trim().length > 0 && (
+                <div className="py-6">
+                  <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
+                    {product.description}
+                  </p>
+                </div>
               )}
-            </div>
 
-            <div className="pt-3 border-t border-border">
-              <p className="font-body text-[11px] text-muted-foreground">
-                To unlock Your Trade pricing,{" "}
-                <a href="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
-                  join our Trade Program
-                </a>.
-              </p>
+              {/* CTA block pinned to the bottom of the right column */}
+              <div className="mt-auto flex flex-col gap-4">
+                {/* Primary CTA */}
+                <div className="flex flex-col gap-2">
+                  {productPageHref ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigate(productPageHref, {
+                          state: { from: location.pathname + location.search },
+                        });
+                      }}
+                      className="group flex items-center justify-center gap-2 px-5 py-3 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
+                    >
+                      View full product page
+                      <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+                    </button>
+                  ) : (
+                    <a
+                      href="/trade-program"
+                      className="flex items-center justify-center gap-2 px-5 py-3 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
+                    >
+                      {publicPriceLabel || "Price Upon Request"}
+                    </a>
+                  )}
+                  {productPageHref && (
+                    <p className="text-center font-body text-[10px] tracking-wide text-muted-foreground/80">
+                      See all photos, finishes & specifications
+                    </p>
+                  )}
+                </div>
+
+                {/* Secondary actions */}
+                <div className="hidden md:grid grid-cols-3 gap-2 items-stretch">
+                  <FavoriteFolderPicker pickId={product.id} align="start" side="top">
+                    <button
+                      onClick={(e) => e.stopPropagation()}
+                      title={favorited ? "Manage folders" : "Favorite"}
+                      className={cn(
+                        "w-full h-10 flex items-center justify-center gap-1.5 px-3 font-body text-[10px] uppercase tracking-[0.14em] transition-colors border",
+                        favorited
+                          ? "border-foreground/40 text-foreground"
+                          : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                      )}
+                    >
+                      <Heart size={13} strokeWidth={1.5} className={cn(favorited && "fill-current")} />
+                      {favorited ? "Saved" : "Favorite"}
+                    </button>
+                  </FavoriteFolderPicker>
+
+                  <button
+                    onClick={() => togglePin(compareItem)}
+                    title={pinned ? "Pinned" : "Pin to Selection"}
+                    className={cn(
+                      "w-full h-10 flex items-center justify-center gap-1.5 px-3 font-body text-[10px] uppercase tracking-[0.14em] transition-colors border",
+                      pinned
+                        ? "border-foreground/40 text-foreground"
+                        : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
+                      compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                    )}
+                  >
+                    <Scale size={13} strokeWidth={1.5} />
+                    {pinned ? "Pinned" : "Pin to Selection"}
+                  </button>
+
+                  {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) && (
+                    <SpecSheetButton
+                      pdfUrl={product.pdf_url}
+                      pdfUrls={product.pdf_urls}
+                      brandName={designerDisplay}
+                      productName={product.title}
+                      variant="button"
+                      icon={<FileDown size={13} strokeWidth={1.5} />}
+                      className="w-full h-10 flex items-center justify-center gap-1.5 px-3 font-body text-[10px] uppercase tracking-[0.14em] transition-colors border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 cursor-pointer"
+                      onBeforeOpen={() => { let allowed = false; requireAuth(() => { allowed = true; }, "download this spec sheet"); return allowed; }}
+                    />
+                  )}
+                </div>
+
+                <div className="pt-3 border-t border-border">
+                  <p className="font-body text-[11px] text-muted-foreground">
+                    To unlock Your Trade pricing,{" "}
+                    <a href="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
+                      join our Trade Program
+                    </a>.
+                  </p>
+                </div>
+              </div>
             </div>
-            </div>
-          </div>
 
           </div> {/* end scrollable mobile body */}
         </motion.div>
