@@ -299,6 +299,23 @@ export default function EditorialBiographyColumns({
             </FadeInRow>
           )}
 
+          {/* Collection CTA sits beneath the video (or blockquote when no video) */}
+          {showCollectionCta && (
+            <FadeInRow delay={140}>
+              <div className="flex justify-center my-2">
+                <Link
+                  to={collectionCtaHref!}
+                  className="group inline-flex items-center gap-3 px-5 py-2.5 md:px-6 md:py-3 border border-foreground/25 bg-background/30 hover:bg-background/70 hover:border-foreground/50 transition-all duration-300"
+                >
+                  <span className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-foreground/75 group-hover:text-foreground transition-colors">
+                    {collectionCtaLabel}
+                  </span>
+                  <ArrowRight className="h-3 w-3 text-foreground/55 group-hover:text-foreground group-hover:translate-x-1 transition-all duration-300" strokeWidth={1.25} />
+                </Link>
+              </div>
+            </FadeInRow>
+          )}
+
           {/* Row 2: large blockquote */}
           {blockquoteText && (
             <FadeInRow delay={180}>
