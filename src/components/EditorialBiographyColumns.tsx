@@ -278,7 +278,7 @@ export default function EditorialBiographyColumns({
 
   return (
     <div className="bg-cream">
-      <div className={containerClassName ?? "mx-auto w-full max-w-6xl px-4 pt-4 md:pt-6 pb-4 md:pb-6"}>
+      <div className={containerClassName ?? "mx-auto w-full max-w-6xl px-6 pt-4 md:pt-6 pb-4 md:pb-6"}>
         <div className="flex w-full flex-col gap-y-8 md:gap-y-10">
           {/* Row 1: pinned utility controls */}
           {hasHeaderControls && (
