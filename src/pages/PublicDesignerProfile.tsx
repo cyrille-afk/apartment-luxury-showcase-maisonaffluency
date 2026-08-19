@@ -2041,61 +2041,45 @@ const PublicDesignerProfile = () => {
                       </div>
 
 
-                      {/* Editorial text block — quiet, uniform, line-clamped */}
-                      <div className="flex flex-col flex-1 text-center">
-                        {/* Designer / brand label — small caps, muted (mobile only shows when grouped, like competitor) */}
-                        {cardBrandLabel && cardBrandSlug ? (
+                      {/* Editorial text block — designer / product / price hierarchy */}
+                      <div className="flex flex-col flex-1 text-center items-center">
+                        {/* Designer / brand label — top, prominent */}
+                        {cardBrandSlug || parentBrandSlug ? (
                           <Link
-                            to={`/designers/${cardBrandSlug}`}
+                            to={`/designers/${cardBrandSlug || parentBrandSlug}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="block font-body text-[10px] md:text-[11px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors leading-tight line-clamp-1"
+                            className="block font-display text-sm font-medium uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1 hover:text-foreground/70 transition-colors"
                           >
-                            {cardBrandLabel}
+                            {cardBrandLabel || parentBrandName}
                           </Link>
-                        ) : cardBrandLabel ? (
-                          <span className="block font-body text-[10px] md:text-[11px] uppercase tracking-[0.15em] text-muted-foreground leading-tight line-clamp-1">
-                            {cardBrandLabel}
-                          </span>
-                        ) : parentBrandName ? (
-                          <Link
-                            to={`/designers/${parentBrandSlug}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="block font-body text-[10px] md:text-[11px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors leading-tight line-clamp-1"
-                          >
-                            {parentBrandName}
-                          </Link>
-                        ) : null}
-
-
-                        {(/re-?edition/i.test(pick.edition || "") || (pick.tags || []).some((t: string) => /re-?edition/i.test(t))) && (
-                          <span className="block font-body text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-foreground/45 leading-tight mt-1">
-                            * Reedition
+                        ) : (
+                          <span className="block font-display text-sm font-medium uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1">
+                            {cardBrandLabel || parentBrandName || designer.name}
                           </span>
                         )}
 
-                        {/* Product name — primary (deep link so the URL is shareable/copyable) */}
-                        <h3 className="font-display text-[13px] md:text-[13px] font-light tracking-tight md:tracking-wide leading-snug mt-0.5 md:mt-2 line-clamp-2">
-                          <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground/70 transition-colors">
+                        {/* Product name — secondary, elegant */}
+                        <h3 className="mt-1 font-body text-[15px] italic font-normal text-foreground/80 leading-snug line-clamp-2">
+                          <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground transition-colors">
                             {displayTitle}
                           </Link>
                         </h3>
 
-                        {/* Variant/finish subtitle — only when it isn't a designer attribution */}
+                        {/* Variant/finish subtitle */}
                         {cardSubtitle &&
                           cardSubtitle.trim().toLowerCase() !== (cardBrandLabel || "").trim().toLowerCase() &&
                           !subtitleDesignerLabel && (
                             <p className={cn(
-                              "font-body text-[10px] md:text-[11px] tracking-[0.14em] text-muted-foreground leading-tight mt-0.5 md:mt-1 line-clamp-1",
+                              "mt-0.5 font-body text-[10px] md:text-[11px] tracking-[0.14em] text-muted-foreground leading-tight line-clamp-1",
                               !isArnoldClamChair && "uppercase"
                             )}>
                               {cardSubtitle}
                             </p>
                           )}
 
-
-                        {/* Price slot — tight under the title block */}
-                        <div className="mt-0.5 md:mt-2">
-                          <p className="font-body text-[11px] md:text-xs font-medium text-foreground/80 md:text-foreground md:font-normal tracking-wide">
+                        {/* Price slot — bottom */}
+                        <div className="mt-1">
+                          <p className="font-body text-xs text-muted-foreground tracking-wide">
                             {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
                           </p>
                           {editionNote && !/^re-?edition$/i.test(editionNote) && (
@@ -2105,7 +2089,11 @@ const PublicDesignerProfile = () => {
                           )}
                         </div>
 
-
+                        {(/re-?edition/i.test(pick.edition || "") || (pick.tags || []).some((t: string) => /re-?edition/i.test(t))) && (
+                          <span className="block font-body text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-foreground/45 leading-tight mt-0.5">
+                            * Reedition
+                          </span>
+                        )}
                       </div>
                     </div>
                   );
