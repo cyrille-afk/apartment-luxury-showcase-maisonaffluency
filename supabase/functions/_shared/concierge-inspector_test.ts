@@ -73,7 +73,7 @@ function mixedBrandGT(): InspectorGroundTruth {
         category: "Lighting", materials: "Crystal",
       })),
       ...Array.from({ length: 8 }, (_, i) => ({
-        id: `id-al-${i}`, title: `Table ${i}`, designer_name: "Alinea Design Objects",
+        id: `id-al-${i}`, title: `Table ${i}`, designer_name: "Alinea",
         category: "Furniture", materials: "Oak",
       })),
     ],
@@ -86,9 +86,9 @@ function alineaTablesOnlyGT(): InspectorGroundTruth {
     tool: "propose_tearsheet",
     pickIds: ["t1", "t2", "t3"],
     previews: [
-      { id: "t1", title: "Astra Dining Table", designer_name: "Alinea Design Objects", category: "Table", materials: "Marble" },
-      { id: "t2", title: "Piero Console",      designer_name: "Alinea Design Objects", category: "Table", materials: "Walnut" },
-      { id: "t3", title: "Orbis Side Table",   designer_name: "Alinea Design Objects", category: "Table", materials: "Bronze" },
+      { id: "t1", title: "Astra Dining Table", designer_name: "Alinea", category: "Table", materials: "Marble" },
+      { id: "t2", title: "Piero Console",      designer_name: "Alinea", category: "Table", materials: "Walnut" },
+      { id: "t3", title: "Orbis Side Table",   designer_name: "Alinea", category: "Table", materials: "Bronze" },
     ],
   }]);
 }
@@ -100,7 +100,7 @@ Deno.test("buildInspectorGroundTruth aggregates per-brand counts + totals", () =
   assertEquals(gt.cards.length, 1);
   assertEquals(gt.cards[0].total, 12);
   assertEquals(gt.cards[0].brand_counts["Saint-Louis"], 4);
-  assertEquals(gt.cards[0].brand_counts["Alinea Design Objects"], 8);
+  assertEquals(gt.cards[0].brand_counts["Alinea"], 8);
 });
 
 Deno.test("buildInspectorGroundTruth treats missing designer as 'Unknown'", () => {
@@ -117,10 +117,10 @@ Deno.test("buildInspectorGroundTruth treats missing designer as 'Unknown'", () =
 Deno.test("Inspector — mixed-brand: rewrites 'all Saint-Louis' to real split", async () => {
   const stub = stubFetchWithReply({
     corrected_prose:
-      "Here's a first edit — 12 pieces (4 Saint-Louis, 8 Alinea Design Objects) drawn from the Maison Affluency Curation.",
+      "Here's a first edit — 12 pieces (4 Saint-Louis, 8 Alinea) drawn from the Maison Affluency Curation.",
     corrections: [{
       original: "13 pieces, all Saint-Louis",
-      replacement: "12 pieces (4 Saint-Louis, 8 Alinea Design Objects)",
+      replacement: "12 pieces (4 Saint-Louis, 8 Alinea)",
       reason: "Ground truth shows a mixed set of 4 Saint-Louis + 8 Alinea; original claim contradicted totals and brand attribution.",
     }],
   });
@@ -308,10 +308,10 @@ function captureConsoleLog(): { logs: CapturedLog[]; restore: () => void } {
 
 Deno.test("structured log — exactly one concierge_inspector JSON line per run", async () => {
   const stub = stubFetchWithReply({
-    corrected_prose: "Here's a first edit — 12 pieces (4 Saint-Louis, 8 Alinea Design Objects).",
+    corrected_prose: "Here's a first edit — 12 pieces (4 Saint-Louis, 8 Alinea).",
     corrections: [{
       original: "13 pieces, all Saint-Louis",
-      replacement: "12 pieces (4 Saint-Louis, 8 Alinea Design Objects)",
+      replacement: "12 pieces (4 Saint-Louis, 8 Alinea)",
       reason: "Mixed set; totals and brand attribution were wrong.",
     }],
   });
@@ -338,7 +338,7 @@ Deno.test("structured log — exactly one concierge_inspector JSON line per run"
     assertEquals(rec.card_types, ["propose_tearsheet"]);
     assertEquals(rec.card_totals, [12]);
     assertEquals(rec.brand_counts["Saint-Louis"], 4);
-    assertEquals(rec.brand_counts["Alinea Design Objects"], 8);
+    assertEquals(rec.brand_counts["Alinea"], 8);
     assertEquals(rec.prose_len, original.length);
     assertEquals(rec.corrections_count, 1);
     assertEquals(rec.changed, true);
@@ -465,7 +465,7 @@ const DISCOVERY_PROSE_HALLUCINATION =
   "and the 'Luminous Aura' chandelier by Lasvit. Alternatively the 'Helix' chandelier by Moooi could work. " +
   "We could also draw on Kelly Wearstler's approach to sculptural forms.";
 
-const ALLOWED_DESIGNERS_SAMPLE = ["Saint-Louis", "Alinea Design Objects", "Andrée Putman"];
+const ALLOWED_DESIGNERS_SAMPLE = ["Saint-Louis", "Alinea", "Andrée Putman"];
 const ALLOWED_TITLES_SAMPLE = ["Calliope Medium Chandelier", "Bronze MicMac Chandelier"];
 
 // 1. Inspector must NOT short-circuit on empty GT when allowlist is present.
