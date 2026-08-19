@@ -109,13 +109,13 @@ describe("isCuratedSlug", () => {
   });
 
   it("returns true for the Leo Aerts case (founder-atelier slug)", () => {
-    // Designer "Alinea Design Objects" with slug "leo-aerts-alinea" — slug is
+    // Designer "Alinea" with slug "leo-aerts-alinea" — slug is
     // founder-led and does NOT start with the slugified name. This is the
     // exact case the safeguard must protect.
     expect(
       isCuratedSlug({
-        name: "Alinea Design Objects",
-        display_name: "Alinea Design Objects",
+        name: "Alinea",
+        display_name: "Alinea",
         slug: "leo-aerts-alinea",
       }),
     ).toBe(true);

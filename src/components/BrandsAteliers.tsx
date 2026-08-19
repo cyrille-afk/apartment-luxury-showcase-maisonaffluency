@@ -676,7 +676,7 @@ const partnerBrands = [
   },
   {
     id: "alinea-design-objects",
-    name: "Alinea Design Objects",
+    name: "Alinea",
     category: "Tables",
     subcategory: "Tables",
     tableType: "Dining Tables",
@@ -688,7 +688,7 @@ const partnerBrands = [
   },
   {
     id: "alinea-design-objects-side",
-    name: "Alinea Design Objects",
+    name: "Alinea",
     category: "Tables",
     subcategory: "Tables",
     tableType: "Side Tables",
@@ -1693,7 +1693,7 @@ const partnerBrands = [
 // Background image map
 const brandBgMap: Record<string, string> = {
   "Alexander Lamont": alexanderLamontBg,
-  "Alinea Design Objects": leoAertsBg,
+  "Alinea": leoAertsBg,
   "Apparatus": apparatusBg,
   "Apparatus Studio": apparatusBg, // legacy alias
 
@@ -1797,7 +1797,7 @@ const brandBgMap: Record<string, string> = {
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
 const brandToDesignerMap: Record<string, string> = {
   "Alexander Lamont": "alexander-lamont",
-  "Alinea Design Objects": "leo-aerts-alinea",
+  "Alinea": "leo-aerts-alinea",
   "Apparatus": "apparatus-studio",
   "Apparatus Studio": "apparatus-studio", // legacy alias
 
@@ -1981,8 +1981,8 @@ const PARENT_BRAND_CONFIGS: ParentBrandConfig[] = [
     pillLabel: "Haymann",
   },
   {
-    brandName: "Alinea Design Objects",
-    dbParentName: "Alinea Design Objects",
+    brandName: "Alinea",
+    dbParentName: "Alinea",
     instagram: "https://instagram.com/alinea_design_objects",
     profileSlug: "leo-aerts-alinea",
     pillLabel: "Alinea",

@@ -8,7 +8,7 @@ export const ROSTER: readonly RosterEntry[] = [
   {"name": "Adrien Messié", "specialty": "Furniture Design"},
   {"name": "Alex Proba", "specialty": "Contemporary rugs, textiles"},
   {"name": "Alexander Lamont", "specialty": "Artisan Furniture & Luxury Craftsmanship"},
-  {"name": "Alinea Design Objects", "specialty": "Stone Furniture & Design Objects"},
+  {"name": "Alinea", "specialty": "Stone Furniture & Design Objects"},
   {"name": "Alpange", "specialty": "The Height of Acoustic Excellence"},
   {"name": "Andrea Claire Studio", "specialty": "Sculptural Lighting"},
   {"name": "Andrée Putman", "specialty": "Interior Design & Furniture"},
