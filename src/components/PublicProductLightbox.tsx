@@ -870,7 +870,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
                   {product.description && product.description.trim().length > 0 && (
                     <div className="pt-1">
-                      <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
+                      <p className="font-body text-sm leading-snug text-foreground text-left whitespace-pre-wrap">
                         {product.description}
                       </p>
                     </div>
