@@ -867,17 +867,16 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       </div>
                     );
                   })()}
+
+                  {product.description && product.description.trim().length > 0 && (
+                    <div className="pt-1">
+                      <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
+                        {product.description}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {/* Narrative description directly beneath the stone card */}
-              {product.description && product.description.trim().length > 0 && (
-                <div className="py-6">
-                  <p className="font-body text-sm leading-relaxed text-foreground text-left whitespace-pre-wrap">
-                    {product.description}
-                  </p>
-                </div>
-              )}
 
               {/* CTA block pinned to the bottom of the right column */}
               <div className="mt-auto flex flex-col gap-4">
