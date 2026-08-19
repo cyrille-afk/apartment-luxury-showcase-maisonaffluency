@@ -499,8 +499,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
   const relatedStrip = (
                 relatedProducts.length > 0 ? (
-              <div className="pt-4 border-t border-border/60">
-                <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
                   <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                     More from {product.designer_slug === "dagmar-london" && product.subtitle?.trim() === "Arnold Madsen" ? "Dagmar" : designerDisplay}
                   </p>
@@ -527,14 +527,14 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
                 <div
                   ref={relatedScrollRef}
-                  className="flex gap-4 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide snap-x snap-mandatory scroll-smooth"
+                  className="grid grid-cols-4 gap-3 overflow-x-auto pb-1 scrollbar-hide snap-x snap-mandatory scroll-smooth"
                 >
                   {relatedProducts.map((rp) => (
                     <button
                       key={rp.id}
                       onClick={() => onSelectRelated?.(rp)}
                       title={rp.title}
-                      className="shrink-0 w-20 group snap-start"
+                      className="min-w-0 w-full group snap-start"
                     >
                       <div className="relative">
                         <FadeInImage
@@ -570,7 +570,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       >
         <motion.div
           {...panelMotion}
-          className="relative w-full max-w-6xl h-dvh max-h-dvh md:h-[85vh] md:flex-row mx-auto bg-background md:rounded-xl rounded-none shadow-2xl overflow-hidden flex flex-col min-h-0"
+          className="relative w-full max-w-6xl h-dvh max-h-dvh md:h-auto md:max-h-[95vh] mx-auto bg-background shadow-2xl overflow-y-auto flex flex-col min-h-0"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Mobile header */}
@@ -607,12 +607,12 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             <X size={18} />
           </button>
 
-          {/* Scrollable body */}
-          <div className="flex-1 min-h-0 overflow-y-auto md:flex md:flex-row md:items-stretch md:overflow-hidden">
+          {/* Strict editorial grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start max-w-6xl mx-auto p-5 md:p-8 w-full">
 
           {/* LEFT COLUMN — hero image, related thumbnails, description */}
-          <div className="relative w-full md:w-1/2 shrink-0 bg-background flex flex-col md:h-full md:min-h-0 md:overflow-y-auto scrollbar-none md:px-7 md:py-7">
-          <div className="relative w-full shrink-0 flex items-start justify-center p-2 md:p-0 md:mb-6">
+          <div className="relative w-full bg-background flex flex-col gap-6">
+          <div className="relative w-full shrink-0 flex items-start justify-center">
 
 
 
@@ -636,7 +636,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   onLoad={() => { setImageLoaded(true); setImageFailed(false); }}
                   onError={() => { setImageFailed(true); setImageLoaded(true); }}
                   className={cn(
-                    "w-full h-auto object-contain md:max-h-[64vh] transition-opacity duration-300",
+                    "w-full h-auto object-contain md:max-h-[58vh] transition-opacity duration-300",
                     imageFailed || !imageLoaded ? "opacity-0" : "opacity-100"
                   )}
 
@@ -713,7 +713,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Desktop: related thumbnails sit directly under the main image */}
-          <div className="hidden md:block w-full shrink-0 bg-background mb-6">
+          <div className="hidden md:block w-full shrink-0 bg-background">
             {relatedStrip}
           </div>
 
@@ -729,10 +729,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* RIGHT COLUMN — specs (top group) + conversion (bottom group) */}
-          <div className="w-full md:w-1/2 min-h-0 md:h-full bg-background border-l border-border/40 p-5 md:px-7 md:py-7 flex flex-col md:justify-between gap-3 md:gap-0 md:overflow-y-auto scrollbar-none">
+          <div className="w-full bg-background md:border-l md:border-border/40 md:pl-12 flex flex-col justify-between h-full min-h-[600px] md:self-stretch">
 
           {/* Group A — top content */}
-          <div className="flex flex-col gap-3 md:gap-3">
+          <div className="flex flex-col gap-4">
 
 
 
@@ -892,7 +892,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             <div className="md:hidden">{relatedStrip}</div>
 
             {/* Group B — bottom conversion block */}
-            <div className="mt-auto md:mt-0 flex flex-col gap-2.5 pt-4 md:pt-6">
+            <div className="flex flex-col gap-4 mt-auto">
 
             {/* Primary CTA — visit the full product page (more images, full spec, gallery) */}
             <div className="flex flex-col gap-2">
