@@ -36,22 +36,31 @@ interface NewInSpotlightProps {
   designer: Designer;
   showEyebrow?: boolean;
   variant?: "default" | "underlaid";
+  /** Render these picks instead of the designer's own (e.g. Arnold Madsen → Dagmar's Clam pieces). */
+  picksOverride?: DesignerCuratorPick[];
+  /** Brand line + lightbox attribution used with picksOverride. */
+  brandLabelOverride?: string;
+  /** Designer slug used for lightbox links with picksOverride. */
+  pickDesignerSlugOverride?: string;
 }
 
-const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: NewInSpotlightProps) => {
+const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", picksOverride, brandLabelOverride, pickDesignerSlugOverride }: NewInSpotlightProps) => {
   const navigate = useNavigate();
-  const isParentBrand = isParentBrandDesigner(designer);
+  const hasOverride = Array.isArray(picksOverride);
+  const isParentBrand = !hasOverride && isParentBrandDesigner(designer);
   const { data: founderIsBrand = false } = useFounderIsBrand(
     isParentBrand ? undefined : designer.founder
   );
-  const { data: simplePicks = [] } = useDesignerPicks(designer.id, { publicOnly: true });
+  const { data: simplePicks = [] } = useDesignerPicks(hasOverride ? undefined : designer.id, { publicOnly: true });
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
     isParentBrand ? designer : undefined,
     { publicOnly: true }
   );
-  const picks: DesignerCuratorPick[] = isParentBrand
-    ? (groupedPicks as any as DesignerCuratorPick[])
-    : simplePicks;
+  const picks: DesignerCuratorPick[] = hasOverride
+    ? (picksOverride as DesignerCuratorPick[])
+    : isParentBrand
+      ? (groupedPicks as any as DesignerCuratorPick[])
+      : simplePicks;
 
   const { data: publicRrpMap = {} } = usePublicRrpMap(picks.map((p) => p.id));
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer.id);
@@ -72,7 +81,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
         subtitle: p.subtitle,
         image_url: p.image_url,
         hover_image_url: p.hover_image_url,
-        brand_name: designer.name,
+        brand_name: brandLabelOverride || designer.name,
         materials: p.materials,
         materials_description: (p as any).materials_description ?? null,
         dimensions: p.dimensions,
@@ -83,7 +92,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
         subcategory: (p as any).subcategory ?? null,
         pdf_url: p.pdf_url || ((p as any).pdf_urls as any[] | null)?.[0]?.url || null,
         pdf_urls: ((p as any).pdf_urls as any) ?? null,
-        designer_slug: designer.slug,
+        designer_slug: pickDesignerSlugOverride || designer.slug,
         size_variants: (p as any).size_variants ?? null,
         variant_placeholder: (p as any).variant_placeholder ?? null,
         base_axis_label: (p as any).base_axis_label ?? null,
@@ -91,7 +100,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
         gallery_images: (p as any).gallery_images ?? null,
         variant_image_map: (p as any).variant_image_map ?? null,
       })),
-    [picks, designer.name]
+    [picks, designer.name, designer.slug, brandLabelOverride, pickDesignerSlugOverride]
   );
 
   const displayName = designer.display_name || designer.name;
@@ -277,7 +286,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default" }: N
                     ? designer.founder.trim()
                     : "";
                   const brandLine = (
-                    attributedDesigner
+                    brandLabelOverride
+                    || attributedDesigner
                     || parentBrand
                     || composed.remainingSubtitle
                     || pick.subtitle
