@@ -327,21 +327,22 @@ export default function EditorialBiographyColumns({
 
 
 
-          {/* Row 3: first photo left, text right */}
+          {/* Row 3: first photo left, continuous text right */}
           {(firstImage || row3Texts.length > 0) && (
             <FadeInRow delay={240}>
-              <div className="grid grid-cols-1 md:grid-cols-[2fr_3fr] gap-12 items-center my-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 items-start my-12">
                 {firstImage && (
                   <MediaCell
                     block={firstImage.block}
                     designerName={designerName}
                     index={firstImage.index}
+                    className="md:sticky md:top-28"
                   />
                 )}
                 {row3Texts.length > 0 && (
-                  <div className="flex flex-col gap-y-6">
-                    {row3Texts.map(({ block, index }, i) => (
-                      <TextCell key={`row3-text-${index}`} content={block.content} />
+                  <div className="w-full text-left space-y-8">
+                    {row3Texts.map(({ block, index }) => (
+                      <TextCell key={`row3-text-${index}`} content={block.content} className="w-full text-left" />
                     ))}
                   </div>
                 )}
@@ -349,14 +350,14 @@ export default function EditorialBiographyColumns({
             </FadeInRow>
           )}
 
-          {/* Row 4: text left, second photo right */}
+          {/* Row 4: continuous text left, second photo right */}
           {(row4Texts.length > 0 || secondImage) && (
             <FadeInRow delay={300}>
-              <div className="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-12 items-center my-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 items-start my-12">
                 {row4Texts.length > 0 && (
-                  <div className="flex flex-col gap-y-6">
-                    {row4Texts.map(({ block, index }, i) => (
-                      <TextCell key={`row4-text-${index}`} content={block.content} />
+                  <div className="w-full text-left space-y-8">
+                    {row4Texts.map(({ block, index }) => (
+                      <TextCell key={`row4-text-${index}`} content={block.content} className="w-full text-left" />
                     ))}
                   </div>
                 )}
@@ -365,11 +366,13 @@ export default function EditorialBiographyColumns({
                     block={secondImage.block}
                     designerName={designerName}
                     index={secondImage.index}
+                    className="md:sticky md:top-28"
                   />
                 )}
               </div>
             </FadeInRow>
           )}
+
 
           {/* Closing navigation link at the end of the narrative track */}
           {onClosePortrait && (
