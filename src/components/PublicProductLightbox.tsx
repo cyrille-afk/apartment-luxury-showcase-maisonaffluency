@@ -628,7 +628,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </button>
 
           {/* Upper two-column editorial block */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch max-w-6xl mx-auto p-5 md:p-8 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start max-w-6xl mx-auto p-5 md:p-8 w-full">
 
             {/* LEFT COLUMN — hero image + related thumbnails only */}
             <div className="relative w-full flex flex-col gap-6">
