@@ -27,15 +27,20 @@ const SliderDots: React.FC<SliderDotsProps> = ({
 }) => {
   if (count <= 1) return null;
 
-  const dim = size === "sm" ? "h-2 w-2" : "h-2.5 w-2.5";
+  const dim =
+    size === "xs" ? "h-1.5 w-1.5" : size === "sm" ? "h-2 w-2" : "h-2.5 w-2.5";
   // Always visible regardless of underlying image: filled dots with contrasting ring + drop shadow.
   const activeColor =
     variant === "light"
       ? "bg-white border-black/40"
+      : variant === "archive"
+      ? "bg-foreground border-foreground"
       : "bg-foreground border-white/70";
   const inactiveColor =
     variant === "light"
       ? "bg-white/50 border-black/30 hover:bg-white/80"
+      : variant === "archive"
+      ? "bg-foreground/25 border-foreground/20 hover:bg-foreground/40"
       : "bg-foreground/40 border-white/60 hover:bg-foreground/70";
 
   return (
