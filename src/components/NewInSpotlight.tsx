@@ -311,17 +311,28 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                     ? designer.founder.trim()
                     : "";
 
+                  // "for X" / "by X" subtitles are editor attribution, not a brand line.
+                  // On an individual designer page they belong appended to the product name.
+                  const editorSuffix = !isParentBrand
+                    ? (composed.remainingSubtitle || pick.subtitle || "").trim().match(/^(for|by)\s+.+/i)?.[0] || ""
+                    : "";
+
                   const brandLine = (
                     brandLabelOverride
                     || attributedDesigner
                     || parentBrand
-                    || composed.remainingSubtitle
-                    || pick.subtitle
+                    || (editorSuffix ? "" : composed.remainingSubtitle)
+                    || (editorSuffix ? "" : pick.subtitle)
                     || displayName
                     || designer.name
                     || ""
                   ).trim();
+                  const productLine = editorSuffix
+                    && !attribution.title.toLowerCase().includes(editorSuffix.toLowerCase())
+                    ? `${attribution.title} ${editorSuffix}`
+                    : attribution.title;
                   const brandSlug = resolveSlug(brandLine);
+
 
                   return (
                     <>
@@ -346,7 +357,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                       )}
                       {/* Product name — secondary, elegant italic */}
                       <h3 className="mt-1 font-body italic text-[13px] md:text-[15px] font-normal text-foreground/80 leading-snug line-clamp-2">
-                        {attribution.title}
+                        {productLine}
                       </h3>
                     </>
                   );
