@@ -15,7 +15,7 @@ import { isParentBrandDesigner } from "@/lib/designerHierarchy";
 import { useFounderIsBrand } from "@/hooks/useFounderIsBrand";
 import { cn } from "@/lib/utils";
 import { renderParagraph } from "@/components/EditorialBiography";
-import { composeTitle } from "@/lib/curatorPickLegend";
+import { composeTitle, splitTitleAttribution } from "@/lib/curatorPickLegend";
 import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
 import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 
