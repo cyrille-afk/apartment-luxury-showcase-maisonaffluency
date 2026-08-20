@@ -1462,6 +1462,7 @@ const PublicDesignerProfile = () => {
                 picksOverride={isArnoldMadsenProfile ? (picks as any) : undefined}
                 brandLabelOverride={isArnoldMadsenProfile ? "Dagmar" : undefined}
                 pickDesignerSlugOverride={isArnoldMadsenProfile ? "dagmar-london" : undefined}
+                relatedPicksOverride={isArnoldMadsenProfile ? (dagmarAllPicks as any) : undefined}
               />
             </div>
           )}
@@ -2182,13 +2183,13 @@ const PublicDesignerProfile = () => {
 
       <PublicProductLightbox
         product={lightboxItem}
-        allPicks={picks.map((p) => ({
+        allPicks={(isArnoldMadsenProfile ? (dagmarAllPicks as any[]) : picks).map((p: any) => ({
           id: p.id,
           title: p.title,
           subtitle: p.subtitle,
           image_url: p.image_url,
           hover_image_url: p.hover_image_url,
-          brand_name: designer?.name || "",
+          brand_name: isArnoldMadsenProfile ? "Dagmar" : designer?.name || "",
           materials: p.materials,
           materials_description: (p as any).materials_description ?? null,
           dimensions: p.dimensions,
@@ -2199,7 +2200,7 @@ const PublicDesignerProfile = () => {
           subcategory: p.subcategory,
           pdf_url: p.pdf_url || ((p.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
           pdf_urls: p.pdf_urls as PdfEntry[] | undefined,
-          designer_slug: (p as AttributedCuratorPick).designer_slug || designer?.slug || null,
+          designer_slug: isArnoldMadsenProfile ? "dagmar-london" : (p as AttributedCuratorPick).designer_slug || designer?.slug || null,
           size_variants: (p as any).size_variants ?? null,
           variant_placeholder: (p as any).variant_placeholder ?? null,
           base_axis_label: (p as any).base_axis_label ?? null,
