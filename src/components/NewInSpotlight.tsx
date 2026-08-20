@@ -357,7 +357,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                       )}
                       {/* Product name — secondary, elegant italic */}
                       <h3 className="mt-1 font-body italic text-[13px] md:text-[15px] font-normal text-foreground/80 leading-snug line-clamp-2">
-                        {attribution.title}
+                        {productLine}
                       </h3>
                     </>
                   );
