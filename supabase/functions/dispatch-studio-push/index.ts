@@ -39,7 +39,6 @@ Deno.serve(async (req) => {
       .from('studio_alerts')
       .select('id, user_id, title, body, url')
       .is('pushed_at', null)
-      .is('dismissed_at', null)
       .order('created_at', { ascending: true })
       .limit(200)
 
