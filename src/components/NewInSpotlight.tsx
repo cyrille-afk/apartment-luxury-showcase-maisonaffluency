@@ -295,16 +295,22 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
               <div className="flex flex-col flex-1 text-center items-center">
                 {(() => {
                   const composed = composeTitle(pick.title, pick.subtitle);
+                  // Editor brands (e.g. De La Espada) embed the author in the title:
+                  // "Azores Sofa by Luca Nichetto" → brand line = Luca Nichetto.
+                  const attribution = isParentBrand
+                    ? splitTitleAttribution(composed.title, pick.subtitle)
+                    : { title: composed.title, designer: undefined as string | undefined };
                   // Parent brand page: identify the individual designer behind each pick.
                   // Individual designer page: identify the parent brand, not the designer
                   // whose name is already the page heading (e.g. ECART on J.-M. Frank).
                   const attributedDesigner = isParentBrand
-                    ? ((pick as any).designer_name || "").trim()
+                    ? (attribution.designer || (pick as any).designer_name || "").trim()
                     : "";
                   const parentBrand = !isParentBrand && founderIsBrand && designer.founder
                     && ![designer.name, designer.display_name].includes(designer.founder)
                     ? designer.founder.trim()
                     : "";
+
                   const brandLine = (
                     brandLabelOverride
                     || attributedDesigner
