@@ -42,9 +42,11 @@ interface NewInSpotlightProps {
   brandLabelOverride?: string;
   /** Designer slug used for lightbox links with picksOverride. */
   pickDesignerSlugOverride?: string;
+  /** Full sibling catalogue used only for the lightbox "More from" strip. */
+  relatedPicksOverride?: DesignerCuratorPick[];
 }
 
-const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", picksOverride, brandLabelOverride, pickDesignerSlugOverride }: NewInSpotlightProps) => {
+const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", picksOverride, brandLabelOverride, pickDesignerSlugOverride, relatedPicksOverride }: NewInSpotlightProps) => {
   const navigate = useNavigate();
   const hasOverride = Array.isArray(picksOverride);
   const isParentBrand = !hasOverride && isParentBrandDesigner(designer);
@@ -73,9 +75,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
 
   const portraitImage = designer.hero_image_url || designer.image_url;
 
-  const lightboxItems: PublicLightboxItem[] = useMemo(
-    () =>
-      picks.map((p) => ({
+  const toLightboxItem = (p: any): PublicLightboxItem => ({
         id: p.id,
         title: p.title,
         subtitle: p.subtitle,
@@ -98,9 +98,19 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
         base_axis_label: (p as any).base_axis_label ?? null,
         top_axis_label: (p as any).top_axis_label ?? null,
         gallery_images: (p as any).gallery_images ?? null,
-        variant_image_map: (p as any).variant_image_map ?? null,
-      })),
+    variant_image_map: (p as any).variant_image_map ?? null,
+  });
+
+  const lightboxItems: PublicLightboxItem[] = useMemo(
+    () => picks.map(toLightboxItem),
     [picks, designer.name, designer.slug, brandLabelOverride, pickDesignerSlugOverride]
+  );
+
+  // Sibling catalogue for the lightbox "More from" strip. Falls back to the
+  // displayed picks when no override is supplied.
+  const lightboxRelatedItems: PublicLightboxItem[] = useMemo(
+    () => (relatedPicksOverride ? relatedPicksOverride.map(toLightboxItem) : lightboxItems),
+    [relatedPicksOverride, lightboxItems]
   );
 
   // Name → slug map so brand/designer attribution lines are navigable.
@@ -627,7 +637,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
 
       <PublicProductLightbox
         product={lightboxItem}
-        allPicks={lightboxItems}
+        allPicks={lightboxRelatedItems}
         onClose={() => setLightboxItem(null)}
         onSelectRelated={(item) => setLightboxItem(item)}
       />
