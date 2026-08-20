@@ -44,6 +44,29 @@ export function cleanBrandLine(designerName: string | undefined | null): string 
 }
 
 /**
+ * Split an editor-style pick title such as "Azores Sofa by Luca Nichetto" into
+ * the product name and the attributed designer. Returns designer undefined when
+ * the title carries no "by <Name>" suffix.
+ */
+export function splitTitleAttribution(
+  title: string,
+  subtitle?: string | null
+): { title: string; designer?: string } {
+  const match = /^(.*\S)\s+by\s+([^,–—]+)$/i.exec((title || "").trim());
+  if (match) {
+    const product = match[1].trim();
+    const designer = match[2].trim();
+    if (product && designer && designer.split(/\s+/).length <= 4) {
+      return { title: product, designer };
+    }
+  }
+  const sub = (subtitle ?? "").trim();
+  const subMatch = /^by\s+(.+)$/i.exec(sub);
+  if (subMatch) return { title: (title || "").trim(), designer: subMatch[1].trim() };
+  return { title: (title || "").trim() };
+}
+
+/**
  * Merge generic-category subtitles into the title; suppress edition-like subtitles.
  * Returns the (possibly merged) title and the remaining subtitle (undefined when consumed).
  */
