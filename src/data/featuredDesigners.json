@@ -9,15 +9,6 @@
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772688897/Screen_Shot_2026-03-05_at_1.33.31_PM_srdpp4.png"
   },
   {
-    "id": "86483e10-0001-4000-8000-000000000001",
-    "slug": "leo-aerts-alinea",
-    "name": "Alinea",
-    "founder": null,
-    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1782089969/Side_tables_AngeloM_Workshop_1_pery0y.jpg",
-    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,f_auto/leo-aerts-alinea_f9oogs",
-    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780460960/stool-with-table-3_822x822_fjngmc.jpg"
-  },
-  {
     "id": "e637fe48-0001-4000-8000-000000000001",
     "slug": "apparatus-studio",
     "name": "Apparatus",
@@ -25,15 +16,6 @@
     "hero_image_url": "https://hips.hearstapps.com/hmg-prod/images/apparatus-studio-ed-skj-03-1650415302.jpg",
     "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,f_auto/gabriel-hendifar-apparatus-studio",
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779698535/Lantern_Cover_tikr2a.png"
-  },
-  {
-    "id": "274a57ec-d50f-471f-b549-754af6e335e8",
-    "slug": "dagmar-london",
-    "name": "Dagmar",
-    "founder": "Aaron Fitzgerald",
-    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779757886/Screenshot_2026-05-26_at_9.10.08_AM_j4nsq6.png",
-    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:good,f_auto/bernt-petersen-bg_t4rnoj",
-    "first_pick_image_url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/dagmar-london/the-clam-chair-moonlight-0.jpg"
   },
   {
     "id": "d3b4c761-2ee2-4e0d-9fbb-db965ef33a78",
@@ -69,7 +51,7 @@
     "founder": null,
     "hero_image_url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/designers%2Farnold-madsen%2Fportrait-2026.jpg",
     "image_url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/designers%2Farnold-madsen%2Fportrait-2026.jpg",
-    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1785829394/Screenshot_2026-08-04_at_3.42.07_PM_idzhya.png"
+    "first_pick_image_url": null
   },
   {
     "id": "e454bc02-a1e0-4e2a-93bc-4ba9fe8df00f",
@@ -88,6 +70,24 @@
     "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1782832726/Screen_Shot_2026-06-30_at_11.16.56_PM_a7cjar.png",
     "image_url": "https://www.veronese.fr/wp-content/uploads/2016/04/tristan-auer-portrait-veronese.jpg",
     "first_pick_image_url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/tristan-auer-ysa-wall-light-h.jpg"
+  },
+  {
+    "id": "274a57ec-d50f-471f-b549-754af6e335e8",
+    "slug": "dagmar-london",
+    "name": "Dagmar",
+    "founder": "Aaron Fitzgerald",
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779757886/Screenshot_2026-05-26_at_9.10.08_AM_j4nsq6.png",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:good,f_auto/bernt-petersen-bg_t4rnoj",
+    "first_pick_image_url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/dagmar-london/the-clam-chair-moonlight-0.jpg"
+  },
+  {
+    "id": "86483e10-0001-4000-8000-000000000001",
+    "slug": "leo-aerts-alinea",
+    "name": "Alinea",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1782089969/Side_tables_AngeloM_Workshop_1_pery0y.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,f_auto/leo-aerts-alinea_f9oogs",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780460960/stool-with-table-3_822x822_fjngmc.jpg"
   },
   {
     "id": "bb08e592-73ca-4abc-9c25-cd60dd7458dc",
