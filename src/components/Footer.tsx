@@ -29,7 +29,7 @@ const Footer = () => {
           </span>
         </div>
 
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between md:items-center">
           <button onClick={() => scrollToSection("curating-team")} className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
             About Us
           </button>
