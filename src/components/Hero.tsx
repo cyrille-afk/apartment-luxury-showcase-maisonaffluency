@@ -46,7 +46,7 @@ const scrollToMeetDesigners = () => {
 };
 
 const heroPrimaryCtaClass =
-  "group inline-flex min-h-12 items-center justify-center gap-3 rounded-none border border-white/80 bg-transparent px-9 py-3.5 text-center text-white text-[11px] md:text-xs font-body font-light tracking-[0.3em] uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] shadow-[0_10px_28px_rgba(0,0,0,0.45),0_2px_6px_rgba(0,0,0,0.35)] md:shadow-[0_8px_30px_rgba(0,0,0,0.22)] transition-[background-color,border-color,color,opacity] duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:border-white hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent hero-fade-in-delayed-4";
+  "group inline-flex min-h-12 items-center justify-start gap-3 bg-transparent p-0 text-left text-white text-[13px] font-body font-bold tracking-[0.25em] uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)] transition-opacity duration-300 hover:opacity-70 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70 hero-fade-in-delayed-4";
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -154,8 +154,8 @@ const Hero = () => {
               </span>
             </button>
 
-            {/* Desktop — previous display: primary CTA + inline editorial links with scrim */}
-            <div className="hidden md:order-2 md:mt-16 md:flex md:w-full md:flex-col md:items-start md:gap-10">
+            {/* Desktop — primary CTA remains anchored with the text block */}
+            <div className="hidden md:order-2 md:mt-16 md:flex md:w-full md:flex-col md:items-start">
               <motion.button
                 type="button"
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
@@ -174,30 +174,6 @@ const Hero = () => {
                 </motion.span>
               </motion.button>
 
-              <nav
-                aria-label="Hero secondary actions"
-                className="hero-fade-in-delayed-5 flex flex-col items-start gap-4"
-              >
-                <button
-                  type="button"
-                  onClick={() => {
-                    trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-                    scrollToSection("apartment-tour");
-                  }}
-                  className="font-body text-[11px] font-light uppercase tracking-[0.3em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] transition-opacity duration-300 hover:opacity-70"
-                >
-                  Singapore Gallery Preview
-                </button>
-                <span className="h-px w-20 bg-white/30" aria-hidden="true" />
-                <button
-                  type="button"
-                  onClick={openTour}
-                  className="group flex flex-col items-start font-body text-[11px] font-light uppercase tracking-[0.3em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] transition-opacity duration-300 hover:opacity-70"
-                >
-                  <span>Book Private Appointment</span>
-                  <span className="mt-1 text-[9px] normal-case italic tracking-widest text-white/80">(Trade Only)</span>
-                </button>
-              </nav>
             </div>
 
           </div>
@@ -231,6 +207,33 @@ const Hero = () => {
             <span>Book Private Appointment</span>
             <span className="text-[9px] font-bold normal-case italic tracking-widest text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]">(trade only)</span>
           </button>
+        </nav>
+
+        {/* Desktop — mobile-like secondary stack, centered at the bottom in a dark grid */}
+        <nav
+          aria-label="Hero secondary actions"
+          className="hero-fade-in-delayed-5 absolute inset-x-0 bottom-8 hidden items-center justify-center md:flex"
+        >
+          <div className="grid min-w-80 grid-cols-1 place-items-center bg-black/70 px-10 py-4 backdrop-blur-md">
+            <button
+              type="button"
+              onClick={() => {
+                trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
+                scrollToSection("apartment-tour");
+              }}
+              className="w-full border-b border-white/35 pb-3 text-center font-body text-[11px] font-light uppercase tracking-[0.3em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] transition-opacity duration-300 hover:opacity-70"
+            >
+              Singapore Gallery Preview
+            </button>
+            <button
+              type="button"
+              onClick={openTour}
+              className="group flex w-full flex-col items-center pt-3 font-body text-[11px] font-light uppercase tracking-[0.3em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] transition-opacity duration-300 hover:opacity-70"
+            >
+              <span>Book Private Appointment</span>
+              <span className="mt-1 text-[9px] normal-case italic tracking-widest text-white/80">(Trade Only)</span>
+            </button>
+          </div>
         </nav>
 
       </div>
