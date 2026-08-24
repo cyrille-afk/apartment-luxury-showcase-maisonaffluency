@@ -35,7 +35,7 @@ const TradeFloatingCTA = () => {
       role="banner"
     >
       <div className="mx-auto max-w-7xl px-5 md:px-14 lg:px-24 relative h-0">
-        <div className="absolute bottom-8 right-5 md:right-14 lg:right-24 pointer-events-auto">
+        <div className="absolute bottom-24 right-5 md:right-14 lg:right-24 pointer-events-auto">
           <div className="relative bg-foreground/95 backdrop-blur-sm text-background px-7 py-4 rounded-full shadow-lg border border-accent/20 max-w-[92vw]">
             <button
               onClick={dismiss}
