@@ -5,31 +5,34 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   return (
     <>
-      <div className="border-t border-accent/20 bg-foreground/95 backdrop-blur-sm px-6 py-4 text-center">
-        <span className="font-body text-xs uppercase tracking-[0.15em] text-background/80">
-          By using this site you agree to our{" "}
-           <a href="/privacy" className="text-background underline underline-offset-2 hover:text-accent transition-colors">Privacy Policy</a>
-           {" "}&{" "}
-           <a href="/terms" className="text-background underline underline-offset-2 hover:text-accent transition-colors">Terms of Service</a>
-           {" "}·{" "}
-           <button
-             onClick={() => {
-               localStorage.removeItem("cookie_consent");
-               localStorage.removeItem("ga_optout");
-               window.location.reload();
-             }}
-             className="text-background underline underline-offset-2 hover:text-accent transition-colors"
-           >
-             Cookie Settings
-           </button>
-        </span>
+      <div className="bg-background px-4 md:px-8">
+        <div className="mx-auto max-w-7xl py-4 md:py-6">
+          <div className="border-t border-accent/20 bg-foreground/95 backdrop-blur-sm px-6 py-4 rounded-none md:rounded-lg text-center">
+            <span className="font-body text-xs uppercase tracking-[0.15em] text-background/80">
+              By using this site you agree to our{" "}
+               <a href="/privacy" className="text-background underline underline-offset-2 hover:text-accent transition-colors">Privacy Policy</a>
+               {" "}&{" "}
+               <a href="/terms" className="text-background underline underline-offset-2 hover:text-accent transition-colors">Terms of Service</a>
+               {" "}·{" "}
+               <button
+                 onClick={() => {
+                   localStorage.removeItem("cookie_consent");
+                   localStorage.removeItem("ga_optout");
+                   window.location.reload();
+                 }}
+                 className="text-background underline underline-offset-2 hover:text-accent transition-colors"
+               >
+                 Cookie Settings
+               </button>
+            </span>
+          </div>
+        </div>
       </div>
       <footer
-        className="border-t border-border bg-background px-6 py-12 md:px-12 lg:px-20 pb-[env(safe-area-inset-bottom,2rem)]"
+        className="bg-background px-4 md:px-8 py-12 md:py-16 pb-[env(safe-area-inset-bottom,2rem)]"
       >
-      <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col items-center gap-4">
-          <div className="flex flex-col gap-4 items-center">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <button onClick={() => scrollToSection("curating-team")} className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
               About Us
             </button>
@@ -41,17 +44,16 @@ const Footer = () => {
             </button>
             <InstallAppDialog />
           </div>
+
+          <div className="mt-8 border-t border-border pt-8 flex flex-col items-center gap-3">
+            <p className="mb-8 font-body text-xs text-muted-foreground text-center">
+              <span className="block">© {currentYear} Affluency ETC Pte Ltd.</span>
+              <span className="block">All rights reserved.</span>
+              <span className="block">For professional use only.</span>
+            </p>
+          </div>
         </div>
-        
-        <div className="mt-8 border-t border-border pt-8 flex flex-col items-center gap-3">
-          <p className="mb-8 font-body text-xs text-muted-foreground text-center">
-            <span className="block">© {currentYear} Affluency ETC Pte Ltd.</span>
-            <span className="block">All rights reserved.</span>
-            <span className="block">For professional use only.</span>
-          </p>
-        </div>
-      </div>
-    </footer>
+      </footer>
     </>
   );
 };
