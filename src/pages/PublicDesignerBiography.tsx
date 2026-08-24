@@ -125,6 +125,21 @@ export default function PublicDesignerBiography() {
 
       </main>
 
+      {/* Trade program CTA */}
+      <section className="bg-background py-16 md:py-24 border-t border-border">
+        <div className="mx-auto max-w-6xl px-6 text-center">
+          <p className="font-display text-xl md:text-2xl text-foreground/80">
+            Interested in pieces from this collection?
+          </p>
+          <a
+            href="/trade"
+            className="mt-6 inline-block font-body text-xs md:text-sm uppercase tracking-wider text-foreground hover:text-accent transition-colors duration-300"
+          >
+            Join Our Trade Program →
+          </a>
+        </div>
+      </section>
+
       <Footer />
     </div>
   );
