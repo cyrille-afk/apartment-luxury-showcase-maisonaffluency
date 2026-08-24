@@ -235,32 +235,7 @@ const Hero = () => {
           </button>
         </nav>
 
-        {/* Desktop — mobile-like secondary stack, centered at the bottom in a dark grid */}
-        <nav
-          aria-label="Hero secondary actions"
-          className="hero-fade-in-delayed-5 absolute inset-x-0 bottom-8 hidden items-center justify-center md:flex"
-        >
-          <div className="grid min-w-80 grid-cols-1 place-items-center bg-black/70 px-10 py-4 backdrop-blur-md">
-            <button
-              type="button"
-              onClick={() => {
-                trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-                scrollToSection("apartment-tour");
-              }}
-              className="w-full border-b border-white/35 pb-3 text-center font-body text-[11px] font-light uppercase tracking-[0.3em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] transition-opacity duration-300 hover:opacity-70"
-            >
-              Singapore Gallery Preview
-            </button>
-            <button
-              type="button"
-              onClick={openTour}
-              className="group flex w-full flex-col items-center pt-3 font-body text-[11px] font-light uppercase tracking-[0.3em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] transition-opacity duration-300 hover:opacity-70"
-            >
-              <span>Book Private Appointment</span>
-              <span className="mt-1 text-[9px] normal-case italic tracking-widest text-white/80">(Trade Only)</span>
-            </button>
-          </div>
-        </nav>
+
 
       </div>
 
