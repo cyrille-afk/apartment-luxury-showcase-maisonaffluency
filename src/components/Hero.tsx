@@ -46,7 +46,7 @@ const scrollToMeetDesigners = () => {
 };
 
 const heroPrimaryCtaClass =
-  "group inline-flex min-h-12 items-center justify-start gap-3 bg-transparent p-0 text-left text-white text-[13px] font-body font-bold tracking-[0.25em] uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)] transition-opacity duration-300 hover:opacity-70 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70 hero-fade-in-delayed-4";
+  "group inline-flex min-h-12 items-center justify-center gap-3 rounded-none border border-white/80 bg-transparent px-9 py-3.5 text-center text-white text-[11px] md:text-xs font-body font-light tracking-[0.3em] uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] shadow-[0_10px_28px_rgba(0,0,0,0.45),0_2px_6px_rgba(0,0,0,0.35)] md:shadow-[0_8px_30px_rgba(0,0,0,0.22)] transition-[background-color,border-color,color,opacity] duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:border-white hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent hero-fade-in-delayed-4";
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -123,9 +123,8 @@ const Hero = () => {
       />
 
 
-      {/* Text overlay — desktop keeps the previous anchored-top editorial layout;
-          mobile/PWA uses a bottom-aligned editorial link stack over the wallpaper. */}
-      <div className={`ma-home-hero-copy relative z-10 flex flex-1 flex-col items-start justify-start px-6 pt-[calc(env(safe-area-inset-top)+14rem)] md:h-full md:min-h-0 md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48 ${
+      {/* Text overlay — anchored-top editorial layout on all breakpoints */}
+      <div className={`ma-home-hero-copy relative z-10 flex flex-1 flex-col items-start justify-start px-6 pt-[calc(env(safe-area-inset-top)+8rem)] md:h-full md:min-h-0 md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48 ${
         isPwa ? "min-h-screen pb-[calc(env(safe-area-inset-bottom)+2rem)]" : "h-full min-h-0 pb-0"
       }`}>
         <div className="w-full max-w-xl md:max-w-4xl md:text-left">
@@ -140,19 +139,23 @@ const Hero = () => {
             </p>
 
             {/* Mobile / PWA — primary CTA directly below paragraph, left-justified */}
-            <button
+            <motion.button
               type="button"
               onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-              className="group mt-12 flex items-center gap-3 font-body text-[13px] font-bold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70 md:hidden"
+              className={`${heroPrimaryCtaClass} touch-manipulation md:hidden mt-12`}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.2 }}
             >
-              <span>Explore the Collection</span>
-              <span
+              <span>EXPLORE THE COLLECTION</span>
+              <motion.span
                 aria-hidden="true"
-                className="text-[22px] leading-none transition-transform duration-300 group-hover:translate-x-3"
+                className="text-[22px] leading-none"
+                animate={{ x: [0, 4] }}
+                transition={{ duration: 1.2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
               >
-                →
-              </span>
-            </button>
+                &#8594;
+              </motion.span>
+            </motion.button>
 
             {/* Desktop — previous display: primary CTA + inline editorial links with scrim */}
             <div className="hidden md:order-2 md:mt-16 md:flex md:w-full md:flex-col md:items-start md:gap-10">
@@ -182,7 +185,7 @@ const Hero = () => {
                   type="button"
                   onClick={() => {
                     trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-                    scrollToSection("apartment-tour-heading");
+                    scrollToSection("apartment-tour");
                   }}
                   className="font-body text-[11px] font-light uppercase tracking-[0.3em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] transition-opacity duration-300 hover:opacity-70"
                 >
@@ -195,7 +198,7 @@ const Hero = () => {
                   className="group flex flex-col items-start font-body text-[11px] font-light uppercase tracking-[0.3em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] transition-opacity duration-300 hover:opacity-70"
                 >
                   <span>Book Private Appointment</span>
-                  <span className="mt-1 text-[9px] normal-case italic tracking-widest text-white/80">(trade only)</span>
+                  <span className="mt-1 text-[9px] normal-case italic tracking-widest text-white/80">(Trade Only)</span>
                 </button>
               </nav>
             </div>
@@ -203,34 +206,38 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* Mobile / PWA — secondary CTAs centered above the iOS navigation bar */}
+        {/* Mobile / PWA — secondary CTAs centered at the bottom inside a dark frosted grid */}
         <nav
           aria-label="Hero secondary actions"
-          className={`flex w-full flex-col items-center gap-5 md:hidden ${
+          className={`flex w-full flex-col items-center md:hidden ${
             isPwa
               ? "mt-auto pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-8"
               : "absolute inset-x-6 bottom-[calc(env(safe-area-inset-bottom)+4rem)] w-auto"
           }`}
         >
-          <button
-            type="button"
-            onClick={() => {
-              trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-              scrollToSection("apartment-tour-heading");
-            }}
-            className="font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
-          >
-            Singapore Gallery Preview
-          </button>
-          <span className="h-px w-20 bg-white/30" aria-hidden="true" />
-          <button
-            type="button"
-            onClick={openTour}
-            className="group flex flex-col items-center font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
-          >
-            <span>Book Private Appointment</span>
-            <span className="text-[9px] font-bold normal-case italic tracking-widest text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]">(trade only)</span>
-          </button>
+          <div className="flex flex-col items-center gap-3 rounded-full bg-black/70 px-6 py-3 backdrop-blur-md hero-fade-in-delayed-5">
+            <button
+              type="button"
+              onClick={() => {
+                trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
+                scrollToSection("apartment-tour");
+              }}
+              className="group py-1 text-center font-body text-[13px] font-semibold leading-relaxed tracking-[0.12em] text-white antialiased [text-shadow:0_1px_3px_rgba(0,0,0,0.55)] transition-colors hover:text-white/80"
+            >
+              <span className="link-underline-grow">Singapore Gallery Preview</span>
+            </button>
+            <span className="h-px w-16 bg-white/40" aria-hidden="true" />
+            <button
+              type="button"
+              onClick={openTour}
+              className="group py-1 text-center font-body text-[13px] font-semibold leading-relaxed tracking-[0.12em] text-white antialiased [text-shadow:0_1px_3px_rgba(0,0,0,0.55)] transition-colors hover:text-white/80"
+            >
+              <span className="link-underline-grow">
+                Book Private Appointment
+                <span className="font-light italic text-white/80">{" "}(Trade Only)</span>
+              </span>
+            </button>
+          </div>
         </nav>
 
       </div>
