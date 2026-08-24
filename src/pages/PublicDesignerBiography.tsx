@@ -67,7 +67,7 @@ export default function PublicDesignerBiography() {
         <span className="hidden md:inline">Close</span>
       </button>
 
-      <main className="pt-[70px]">
+      <main className="pt-[70px] mb-16 md:mb-24">
         {/* Editorial masthead */}
         <header className="mx-auto w-full max-w-6xl px-6 pt-5 pb-2 md:pt-6 md:pb-3">
           <Link
