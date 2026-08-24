@@ -2165,17 +2165,6 @@ const PublicDesignerProfile = () => {
 
         </div>
 
-        <div className="py-10 md:py-14 text-left md:text-center">
-          <p className="font-body text-xs md:text-sm font-light text-muted-foreground">
-            Interested in pieces from this collection?
-          </p>
-          <Link
-            to="/trade-program"
-            className="inline-block mt-2 font-body text-xs md:text-sm font-medium uppercase tracking-[0.18em] text-foreground underline underline-offset-4 decoration-foreground/30 hover:opacity-60 transition-opacity"
-          >
-            Join Our Trade Program →
-          </Link>
-        </div>
 
         <Footer />
       </div>
