@@ -123,9 +123,8 @@ const Hero = () => {
       />
 
 
-      {/* Text overlay — desktop keeps the previous anchored-top editorial layout;
-          mobile/PWA uses a bottom-aligned editorial link stack over the wallpaper. */}
-      <div className={`ma-home-hero-copy relative z-10 flex flex-1 flex-col items-start justify-start px-6 pt-[calc(env(safe-area-inset-top)+14rem)] md:h-full md:min-h-0 md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48 ${
+      {/* Text overlay — anchored-top editorial layout on all breakpoints */}
+      <div className={`ma-home-hero-copy relative z-10 flex flex-1 flex-col items-start justify-start px-6 pt-[calc(env(safe-area-inset-top)+8rem)] md:h-full md:min-h-0 md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48 ${
         isPwa ? "min-h-screen pb-[calc(env(safe-area-inset-bottom)+2rem)]" : "h-full min-h-0 pb-0"
       }`}>
         <div className="w-full max-w-xl md:max-w-4xl md:text-left">
