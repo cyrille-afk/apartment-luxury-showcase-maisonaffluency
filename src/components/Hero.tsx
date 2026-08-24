@@ -46,7 +46,7 @@ const scrollToMeetDesigners = () => {
 };
 
 const heroPrimaryCtaClass =
-  "group inline-flex min-h-12 items-center justify-start gap-3 bg-transparent p-0 text-left text-white text-[13px] font-body font-bold tracking-[0.25em] uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)] transition-opacity duration-300 hover:opacity-70 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70 hero-fade-in-delayed-4";
+  "group inline-flex min-h-12 items-center justify-center gap-3 rounded-none border border-white/80 bg-transparent px-9 py-3.5 text-center text-white text-[11px] md:text-xs font-body font-light tracking-[0.3em] uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] shadow-[0_10px_28px_rgba(0,0,0,0.45),0_2px_6px_rgba(0,0,0,0.35)] md:shadow-[0_8px_30px_rgba(0,0,0,0.22)] transition-[background-color,border-color,color,opacity] duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:border-white hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent hero-fade-in-delayed-4";
 
 const Hero = () => {
   const navigate = useNavigate();
