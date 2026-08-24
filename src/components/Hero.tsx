@@ -209,32 +209,29 @@ const Hero = () => {
           </button>
         </nav>
 
-        {/* Desktop — centered bottom secondary actions with the established dark treatment */}
+        {/* Desktop — centered bottom secondary actions over the existing dark gradient */}
         <nav
           aria-label="Hero secondary actions"
-          className="hero-fade-in-delayed-5 absolute inset-x-0 bottom-10 hidden flex-col items-center gap-3 md:flex"
+          className="hero-fade-in-delayed-5 absolute inset-x-0 bottom-8 hidden items-center justify-center md:flex"
         >
-          <div className="flex flex-col items-center gap-3 rounded-full bg-black/70 px-8 py-3 backdrop-blur-md">
-            <button
-              type="button"
-              onClick={() => {
-                trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-                scrollToSection("apartment-tour");
-              }}
-              className="font-body text-[11px] font-light uppercase tracking-[0.3em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] transition-opacity duration-300 hover:opacity-70"
-            >
-              Singapore Gallery Preview
-            </button>
-            <span className="h-px w-20 bg-white/30" aria-hidden="true" />
-            <button
-              type="button"
-              onClick={openTour}
-              className="group flex flex-col items-center font-body text-[11px] font-light uppercase tracking-[0.3em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] transition-opacity duration-300 hover:opacity-70"
-            >
-              <span>Book Private Appointment</span>
-              <span className="mt-1 text-[9px] normal-case italic tracking-widest text-white/80">(Trade Only)</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
+              scrollToSection("apartment-tour");
+            }}
+            className="min-w-72 border-r border-white/35 px-10 py-2 text-right font-body text-[11px] font-light uppercase tracking-[0.3em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] transition-opacity duration-300 hover:opacity-70"
+          >
+            Singapore Gallery Preview
+          </button>
+          <button
+            type="button"
+            onClick={openTour}
+            className="group flex min-w-72 flex-col items-start px-10 py-2 font-body text-[11px] font-light uppercase tracking-[0.3em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] transition-opacity duration-300 hover:opacity-70"
+          >
+            <span>Book Private Appointment</span>
+            <span className="mt-1 text-[9px] normal-case italic tracking-widest text-white/80">(Trade Only)</span>
+          </button>
         </nav>
 
       </div>
