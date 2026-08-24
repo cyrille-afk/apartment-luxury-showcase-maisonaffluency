@@ -643,7 +643,8 @@ const PublicDesignerProfile = () => {
   // Kept as a flag so the bespoke layout can be re-enabled if needed.
   const isEmmanuelBabled = false;
   // Designers rendered with the New In spotlight layout on their profile page.
-  const useNewInSpotlightFormat = designer?.slug === "emmanuel-babled";
+  // Desktop only — on mobile/PWA they fall back to the standard designer layout.
+  const useNewInSpotlightFormat = designer?.slug === "emmanuel-babled" && !isMobile;
 
   const displayPhilosophy = designer?.philosophy;
 
