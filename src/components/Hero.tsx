@@ -206,34 +206,38 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* Mobile / PWA — secondary CTAs centered above the iOS navigation bar */}
+        {/* Mobile / PWA — secondary CTAs centered at the bottom inside a dark frosted grid */}
         <nav
           aria-label="Hero secondary actions"
-          className={`flex w-full flex-col items-center gap-5 md:hidden ${
+          className={`flex w-full flex-col items-center md:hidden ${
             isPwa
               ? "mt-auto pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-8"
               : "absolute inset-x-6 bottom-[calc(env(safe-area-inset-bottom)+4rem)] w-auto"
           }`}
         >
-          <button
-            type="button"
-            onClick={() => {
-              trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-              scrollToSection("apartment-tour-heading");
-            }}
-            className="font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
-          >
-            Singapore Gallery Preview
-          </button>
-          <span className="h-px w-20 bg-white/30" aria-hidden="true" />
-          <button
-            type="button"
-            onClick={openTour}
-            className="group flex flex-col items-center font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
-          >
-            <span>Book Private Appointment</span>
-            <span className="text-[9px] font-bold normal-case italic tracking-widest text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]">(trade only)</span>
-          </button>
+          <div className="flex flex-col items-center gap-3 rounded-full bg-black/70 px-6 py-3 backdrop-blur-md hero-fade-in-delayed-5">
+            <button
+              type="button"
+              onClick={() => {
+                trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
+                scrollToSection("apartment-tour");
+              }}
+              className="group py-1 text-center font-body text-[13px] font-semibold leading-relaxed tracking-[0.12em] text-white antialiased [text-shadow:0_1px_3px_rgba(0,0,0,0.55)] transition-colors hover:text-white/80"
+            >
+              <span className="link-underline-grow">Singapore Gallery Preview</span>
+            </button>
+            <span className="h-px w-16 bg-white/40" aria-hidden="true" />
+            <button
+              type="button"
+              onClick={openTour}
+              className="group py-1 text-center font-body text-[13px] font-semibold leading-relaxed tracking-[0.12em] text-white antialiased [text-shadow:0_1px_3px_rgba(0,0,0,0.55)] transition-colors hover:text-white/80"
+            >
+              <span className="link-underline-grow">
+                Book Private Appointment
+                <span className="font-light italic text-white/80">{" "}(Trade Only)</span>
+              </span>
+            </button>
+          </div>
         </nav>
 
       </div>
