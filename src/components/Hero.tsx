@@ -174,7 +174,33 @@ const Hero = () => {
                 </motion.span>
               </motion.button>
 
+              {/* Desktop — inline ghost secondary links directly under the CTA */}
+              <nav
+                aria-label="Hero secondary actions"
+                className="hero-fade-in-delayed-5 mt-5 flex items-center gap-3 font-body text-[11px] font-light uppercase tracking-[0.3em] text-white/90 [text-shadow:0_1px_8px_rgba(0,0,0,0.75)]"
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
+                    scrollToSection("apartment-tour");
+                  }}
+                  className="transition-opacity duration-300 hover:opacity-70"
+                >
+                  Singapore Gallery Preview
+                </button>
+                <span aria-hidden="true" className="text-white/50">|</span>
+                <button
+                  type="button"
+                  onClick={openTour}
+                  className="transition-opacity duration-300 hover:opacity-70"
+                >
+                  Book Private Appointment{" "}
+                  <span className="normal-case italic tracking-widest text-white/80">(Trade Only)</span>
+                </button>
+              </nav>
             </div>
+
 
           </div>
         </div>
