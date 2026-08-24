@@ -418,8 +418,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
            <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
             {/* Burger — left edge, vertically centered with flag */}
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-11 w-11 -ml-2 text-primary" aria-label="Toggle menu">
-                {isOpen ? <X className="h-7 w-7" strokeWidth={3} /> : <Menu className="h-7 w-7" strokeWidth={3} />}
+              <Button variant="ghost" size="icon" className="h-12 w-12 -ml-2 text-primary" aria-label="Toggle menu">
+                {isOpen ? <X className="h-8 w-8" strokeWidth={3} /> : <Menu className="h-8 w-8" strokeWidth={3} />}
               </Button>
             </SheetTrigger>
 
