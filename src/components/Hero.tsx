@@ -46,7 +46,7 @@ const scrollToMeetDesigners = () => {
 };
 
 const heroPrimaryCtaClass =
-  "group inline-flex min-h-12 items-center justify-center gap-3 rounded-none border border-white/80 bg-transparent px-9 py-3.5 text-center text-white text-[11px] md:text-xs font-body font-light tracking-[0.3em] uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] drop-shadow-[0_1px_4px_rgba(0,0,0,0.45)] transition-[background-color,border-color,color,opacity] duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:border-white hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent hero-fade-in-delayed-4";
+  "group inline-flex min-h-12 items-center justify-start gap-3 bg-transparent p-0 text-left text-white text-[13px] font-body font-bold tracking-[0.25em] uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)] transition-opacity duration-300 hover:opacity-70 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70 hero-fade-in-delayed-4";
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -155,50 +155,51 @@ const Hero = () => {
             </button>
 
             {/* Desktop — previous display: primary CTA + inline editorial links with scrim */}
-            <div className="hidden md:order-2 md:mt-20 md:flex md:w-full md:flex-col md:items-start md:gap-6">
-              <div className="flex flex-col items-center gap-6 md:inline-flex md:items-start">
-                <motion.button
-                  type="button"
-                  onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-                  className={`${heroPrimaryCtaClass} touch-manipulation`}
-                  whileTap={{ scale: 0.98, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
-                  transition={{ duration: 0.2 }}
+            <div className="hidden md:order-2 md:mt-16 md:flex md:w-full md:flex-col md:items-start md:gap-10">
+              <motion.button
+                type="button"
+                onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
+                className={`${heroPrimaryCtaClass} touch-manipulation`}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.2 }}
+              >
+                <span>EXPLORE THE COLLECTION</span>
+                <motion.span
+                  aria-hidden="true"
+                  className="text-[22px] leading-none"
+                  animate={{ x: [0, 4] }}
+                  transition={{ duration: 1.2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
                 >
-                  <span>EXPLORE THE COLLECTION</span>
-                  <motion.span
-                    aria-hidden="true"
-                    animate={{ x: [0, 4] }}
-                    transition={{ duration: 1.2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-                  >
-                    &#8594;
-                  </motion.span>
-                </motion.button>
+                  &#8594;
+                </motion.span>
+              </motion.button>
 
-                <div className="hero-fade-in-delayed-5 md:mb-2 md:flex md:flex-col md:items-start">
-                  <div className="relative inline-flex items-center gap-3 before:content-[''] before:absolute before:-inset-x-4 before:-inset-y-2.5 before:-z-10 before:rounded-sm before:bg-black/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)] [text-shadow:0_1px_4px_rgba(0,0,0,0.6)]">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-                        scrollToSection("apartment-tour-heading");
-                      }}
-                      className="font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70"
-                    >
-                      Singapore Gallery Preview
-                    </button>
-                    <span className="h-3 w-px bg-white/40" aria-hidden="true" />
-                    <button
-                      type="button"
-                      onClick={openTour}
-                      className="group font-body text-[10px] font-light uppercase tracking-[0.34em] text-white transition-opacity duration-300 hover:opacity-70"
-                    >
-                      <span>Book Private Appointment</span>
-                      <span className="ml-2 tracking-[0.2em] text-white/70">(Trade Only)</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <nav
+                aria-label="Hero secondary actions"
+                className="hero-fade-in-delayed-5 flex flex-col items-start gap-4"
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
+                    scrollToSection("apartment-tour-heading");
+                  }}
+                  className="font-body text-[11px] font-light uppercase tracking-[0.3em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] transition-opacity duration-300 hover:opacity-70"
+                >
+                  Singapore Gallery Preview
+                </button>
+                <span className="h-px w-20 bg-white/30" aria-hidden="true" />
+                <button
+                  type="button"
+                  onClick={openTour}
+                  className="group flex flex-col items-start font-body text-[11px] font-light uppercase tracking-[0.3em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] transition-opacity duration-300 hover:opacity-70"
+                >
+                  <span>Book Private Appointment</span>
+                  <span className="mt-1 text-[9px] normal-case italic tracking-widest text-white/80">(trade only)</span>
+                </button>
+              </nav>
             </div>
+
           </div>
         </div>
 
