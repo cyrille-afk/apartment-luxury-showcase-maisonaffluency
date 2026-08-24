@@ -139,19 +139,23 @@ const Hero = () => {
             </p>
 
             {/* Mobile / PWA — primary CTA directly below paragraph, left-justified */}
-            <button
+            <motion.button
               type="button"
               onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-              className="group mt-12 flex items-center gap-3 font-body text-[13px] font-bold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70 md:hidden"
+              className={`${heroPrimaryCtaClass} touch-manipulation md:hidden mt-12`}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.2 }}
             >
-              <span>Explore the Collection</span>
-              <span
+              <span>EXPLORE THE COLLECTION</span>
+              <motion.span
                 aria-hidden="true"
-                className="text-[22px] leading-none transition-transform duration-300 group-hover:translate-x-3"
+                className="text-[22px] leading-none"
+                animate={{ x: [0, 4] }}
+                transition={{ duration: 1.2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
               >
-                →
-              </span>
-            </button>
+                &#8594;
+              </motion.span>
+            </motion.button>
 
             {/* Desktop — previous display: primary CTA + inline editorial links with scrim */}
             <div className="hidden md:order-2 md:mt-16 md:flex md:w-full md:flex-col md:items-start md:gap-10">
