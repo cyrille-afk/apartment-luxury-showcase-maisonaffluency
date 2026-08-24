@@ -43,7 +43,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-border pt-8 flex flex-col items-center gap-3">
-          <p className="font-body text-xs text-muted-foreground text-center">
+          <p className="mb-8 font-body text-xs text-muted-foreground text-center">
             <span className="block">© {currentYear} Affluency ETC Pte Ltd.</span>
             <span className="block">All rights reserved.</span>
             <span className="block">For professional use only.</span>
