@@ -159,19 +159,11 @@ const Hero = () => {
               <motion.button
                 type="button"
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-                className={`${heroPrimaryCtaClass} touch-manipulation`}
+                className="relative py-2 text-sm tracking-widest text-white uppercase after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:origin-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 hover:after:origin-left hover:after:scale-x-100"
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: 0.2 }}
               >
                 <span>EXPLORE THE COLLECTION</span>
-                <motion.span
-                  aria-hidden="true"
-                  className="text-[22px] leading-none"
-                  animate={{ x: [0, 4] }}
-                  transition={{ duration: 1.2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-                >
-                  &#8594;
-                </motion.span>
               </motion.button>
             </div>
 
