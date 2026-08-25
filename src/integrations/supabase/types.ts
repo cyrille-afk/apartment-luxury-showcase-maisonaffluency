@@ -3113,6 +3113,81 @@ export type Database = {
         }
         Relationships: []
       }
+      ingestion_job_state: {
+        Row: {
+          created_at: string
+          id: boolean
+          is_paused: boolean
+          last_error: string | null
+          last_run_at: string | null
+          lease_owner: string | null
+          lease_until: string | null
+          pause_reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: boolean
+          is_paused?: boolean
+          last_error?: string | null
+          last_run_at?: string | null
+          lease_owner?: string | null
+          lease_until?: string | null
+          pause_reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: boolean
+          is_paused?: boolean
+          last_error?: string | null
+          last_run_at?: string | null
+          lease_owner?: string | null
+          lease_until?: string | null
+          pause_reason?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ingestion_queue: {
+        Row: {
+          attempts: number
+          created_at: string
+          error_message: string | null
+          id: string
+          processed_at: string | null
+          product_id: string | null
+          raw_data: Json
+          source_url: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          processed_at?: string | null
+          product_id?: string | null
+          raw_data?: Json
+          source_url: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          processed_at?: string | null
+          product_id?: string | null
+          raw_data?: Json
+          source_url?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inquiries: {
         Row: {
           admin_notes: string | null
