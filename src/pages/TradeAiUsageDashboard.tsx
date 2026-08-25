@@ -794,6 +794,193 @@ export default function TradeAiUsageDashboard() {
           )}
         </section>
 
+        {/* Tier drilldown */}
+        <section className="bg-card border border-border rounded-lg overflow-hidden print-break-inside-avoid">
+          <div className="p-4 border-b border-border flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-medium">Tier drilldown</h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Flash vs Frontier broken down by feature and by day — calls, tokens and cost priced from the model
+                pricing table.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-muted-foreground mr-1">Tier</span>
+                {["all", ...drilldownTiers].map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTierFilter(t)}
+                    className={`px-2.5 py-1 text-xs border transition-colors ${
+                      tierFilter === t
+                        ? "bg-foreground text-background border-foreground"
+                        : "border-border hover:bg-muted/40"
+                    }`}
+                  >
+                    {t === "all" ? "All" : t}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-muted-foreground mr-1">Group</span>
+                {([
+                  ["both", "Feature × Day"],
+                  ["feature", "Feature"],
+                  ["day", "Day"],
+                ] as const).map(([v, label]) => (
+                  <button
+                    key={v}
+                    onClick={() => setGroupBy(v)}
+                    className={`px-2.5 py-1 text-xs border transition-colors ${
+                      groupBy === v
+                        ? "bg-foreground text-background border-foreground"
+                        : "border-border hover:bg-muted/40"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="overflow-x-auto max-h-[520px]">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/40 text-xs text-muted-foreground sticky top-0">
+                <tr>
+                  <th className="text-left px-4 py-2 font-medium">Tier</th>
+                  {groupBy !== "day" && <th className="text-left px-4 py-2 font-medium">Feature</th>}
+                  {groupBy !== "feature" && <th className="text-left px-4 py-2 font-medium">Day</th>}
+                  <th className="text-right px-4 py-2 font-medium">Calls</th>
+                  <th className="text-right px-4 py-2 font-medium">Prompt</th>
+                  <th className="text-right px-4 py-2 font-medium">Completion</th>
+                  <th className="text-right px-4 py-2 font-medium">Tokens</th>
+                  <th className="text-right px-4 py-2 font-medium">Errors</th>
+                  <th className="text-right px-4 py-2 font-medium">Est. cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                {drilldown.length === 0 && !isLoading && (
+                  <tr>
+                    <td colSpan={9} className="text-center px-4 py-8 text-muted-foreground text-xs">
+                      No tier-tagged usage in this window.
+                    </td>
+                  </tr>
+                )}
+                {drilldown.map((r) => (
+                  <tr key={r.key} className="border-t border-border hover:bg-muted/20">
+                    <td className="px-4 py-2">
+                      <span className="inline-flex items-center gap-2">
+                        <span
+                          className="inline-block h-2 w-2 rounded-full"
+                          style={{ background: TIER_COLORS[r.tier] || "hsl(var(--primary))" }}
+                        />
+                        {r.tier}
+                      </span>
+                    </td>
+                    {groupBy !== "day" && <td className="px-4 py-2 font-medium">{r.feature}</td>}
+                    {groupBy !== "feature" && (
+                      <td className="px-4 py-2 text-xs text-muted-foreground">
+                        {r.day ? format(new Date(r.day), "MMM d, yyyy") : "—"}
+                      </td>
+                    )}
+                    <td className="px-4 py-2 text-right">{fmtNum(r.requests)}</td>
+                    <td className="px-4 py-2 text-right">{fmtNum(r.prompt_tokens)}</td>
+                    <td className="px-4 py-2 text-right">{fmtNum(r.completion_tokens)}</td>
+                    <td className="px-4 py-2 text-right">{fmtNum(r.tokens)}</td>
+                    <td className={`px-4 py-2 text-right ${r.errors > 0 ? "text-destructive" : ""}`}>
+                      {fmtNum(r.errors)}
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      {fmtUSD(r.cost_usd)}
+                      {r.unpriced_events > 0 && (
+                        <span className="ml-1 text-[10px] text-muted-foreground" title="Some events use a model with no pricing row">
+                          *
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              {drilldown.length > 0 && (
+                <tfoot className="bg-muted/30 text-xs">
+                  <tr className="border-t border-border">
+                    <td className="px-4 py-2 font-medium" colSpan={groupBy === "both" ? 3 : 2}>
+                      Total
+                    </td>
+                    <td className="px-4 py-2 text-right font-medium">{fmtNum(drilldownTotals.requests)}</td>
+                    <td className="px-4 py-2" colSpan={2} />
+                    <td className="px-4 py-2 text-right font-medium">{fmtNum(drilldownTotals.tokens)}</td>
+                    <td className="px-4 py-2" />
+                    <td className="px-4 py-2 text-right font-medium">{fmtUSD(drilldownTotals.cost_usd)}</td>
+                  </tr>
+                </tfoot>
+              )}
+            </table>
+          </div>
+        </section>
+
+        {/* Pricing source */}
+        <section className="bg-card border border-border rounded-lg overflow-hidden print-break-inside-avoid">
+          <div className="p-4 border-b border-border">
+            <h2 className="text-sm font-medium">Pricing source</h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Costs are computed per event from the exact input / output rates below (or a flat per-image rate), not a
+              blended average. Cached responses are counted at zero.{" "}
+              {pricingMeta
+                ? `${fmtNum(pricingMeta.priced_events)} events priced from this table · ${fmtNum(
+                    pricingMeta.unpriced_events,
+                  )} fell back to the logged estimate · ${fmtNum(pricingMeta.cached_events)} cached.`
+                : ""}
+            </p>
+            {pricingMeta && pricingMeta.unpriced_models?.length > 0 && (
+              <p className="text-xs text-destructive mt-1">
+                Missing pricing rows: {pricingMeta.unpriced_models.filter(Boolean).join(", ")}
+              </p>
+            )}
+          </div>
+          <div className="overflow-x-auto max-h-80">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/40 text-xs text-muted-foreground sticky top-0">
+                <tr>
+                  <th className="text-left px-4 py-2 font-medium">Model</th>
+                  <th className="text-right px-4 py-2 font-medium">Input / 1M</th>
+                  <th className="text-right px-4 py-2 font-medium">Output / 1M</th>
+                  <th className="text-right px-4 py-2 font-medium">Flat / call</th>
+                  <th className="text-left px-4 py-2 font-medium">Source</th>
+                  <th className="text-right px-4 py-2 font-medium">Effective</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pricing.map((p) => (
+                  <tr key={p.model} className="border-t border-border hover:bg-muted/20">
+                    <td className="px-4 py-2 font-mono text-xs">{p.model}</td>
+                    <td className="px-4 py-2 text-right">
+                      {p.input_usd_per_mtok != null ? fmtUSD(Number(p.input_usd_per_mtok)) : "—"}
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      {p.output_usd_per_mtok != null ? fmtUSD(Number(p.output_usd_per_mtok)) : "—"}
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      {p.flat_per_call_usd != null ? fmtUSD(Number(p.flat_per_call_usd)) : "—"}
+                    </td>
+                    <td className="px-4 py-2 text-xs text-muted-foreground">
+                      {p.source_url ? (
+                        <a href={p.source_url} target="_blank" rel="noreferrer" className="underline">
+                          {p.source}
+                        </a>
+                      ) : (
+                        p.source
+                      )}
+                    </td>
+                    <td className="px-4 py-2 text-right text-xs text-muted-foreground">
+                      {p.effective_from ? format(new Date(p.effective_from), "MMM d, yyyy") : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
 
         {/* Daily cost line */}
