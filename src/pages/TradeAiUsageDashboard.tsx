@@ -39,12 +39,39 @@ interface FeatureRow {
   errors: number;
   last_call: string;
 }
+interface TierRow {
+  tier: string;
+  requests: number;
+  prompt_tokens: number;
+  completion_tokens: number;
+  tokens: number;
+  cost_usd: number;
+  avg_tokens: number;
+  avg_latency_ms: number | null;
+  errors: number;
+}
+interface DailyTierRow {
+  day: string;
+  tier: string;
+  requests: number;
+  tokens: number;
+  cost_usd: number;
+}
 interface Totals {
   requests: number;
   tokens: number;
   cost_usd: number;
   errors: number;
 }
+
+const TIER_ORDER = ["Flash", "Frontier", "Classifier", "Untagged"];
+const TIER_COLORS: Record<string, string> = {
+  Flash: "#7c9885",
+  Frontier: "#c9a84c",
+  Classifier: "hsl(var(--muted-foreground))",
+  Untagged: "#8b6f5e",
+};
+
 
 const PRESETS = [
   { label: "Last 7 days", days: 7 },
@@ -351,7 +378,13 @@ export default function TradeAiUsageDashboard() {
         _to: range.to,
       });
       if (error) throw error;
-      return data as unknown as { totals: Totals; daily: DailyRow[]; by_feature: FeatureRow[] };
+      return data as unknown as {
+        totals: Totals;
+        daily: DailyRow[];
+        by_feature: FeatureRow[];
+        by_tier?: TierRow[];
+        daily_tier?: DailyTierRow[];
+      };
     },
   });
 
@@ -375,6 +408,39 @@ export default function TradeAiUsageDashboard() {
       features: Array.from(featureSet),
     };
   }, [data]);
+
+  // Tier breakdown: Flash vs Frontier share + daily token trend per tier.
+  const { tierRows, tierTotals, dailyTier, tiers } = useMemo(() => {
+    const rows = (data?.by_tier || []).slice().sort(
+      (a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier),
+    );
+    const sum = (k: keyof TierRow) => rows.reduce((acc, r) => acc + Number(r[k] || 0), 0);
+    const totals = {
+      requests: sum("requests"),
+      tokens: sum("tokens"),
+      cost_usd: sum("cost_usd"),
+    };
+
+    const tierSet = new Set<string>();
+    const byDay = new Map<string, Record<string, number | string>>();
+    for (const r of data?.daily_tier || []) {
+      tierSet.add(r.tier);
+      const dKey = format(new Date(r.day), "MMM d");
+      if (!byDay.has(dKey)) byDay.set(dKey, { day: dKey });
+      const bucket = byDay.get(dKey)!;
+      bucket[r.tier] = (Number(bucket[r.tier]) || 0) + Number(r.tokens || 0);
+    }
+    // Recharts needs every key present per point for a clean line.
+    const orderedTiers = TIER_ORDER.filter((t) => tierSet.has(t));
+    const points = Array.from(byDay.values()).map((p) => {
+      const filled: Record<string, number | string> = { ...p };
+      for (const t of orderedTiers) filled[t] = Number(filled[t] || 0);
+      return filled;
+    });
+
+    return { tierRows: rows, tierTotals: totals, dailyTier: points, tiers: orderedTiers };
+  }, [data]);
+
 
   if (loading) return null;
   if (!user) return <Navigate to="/auth" replace />;
@@ -517,6 +583,100 @@ export default function TradeAiUsageDashboard() {
             </ResponsiveContainer>
           </div>
         </section>
+
+        {/* Tier breakdown — Flash vs Frontier */}
+        <section className="bg-card border border-border rounded-lg p-4 space-y-4 print-break-inside-avoid">
+          <div>
+            <h2 className="text-sm font-medium">Model tier — Flash vs Frontier</h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Share of calls, tokens and estimated cost by routing tier. “Untagged” covers calls logged before tier
+              tracking was added.
+            </p>
+          </div>
+
+          {tierRows.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No tier data in this window.</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {tierRows.map((r) => {
+                  const pct = (v: number, total: number) => (total > 0 ? (v / total) * 100 : 0);
+                  return (
+                    <div key={r.tier} className="border border-border rounded-md p-3 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="inline-block h-2 w-2 rounded-full"
+                          style={{ background: TIER_COLORS[r.tier] || "hsl(var(--primary))" }}
+                        />
+                        <span className="text-xs font-medium tracking-wide uppercase">{r.tier}</span>
+                      </div>
+                      <div className="text-lg font-light">{pct(Number(r.tokens), tierTotals.tokens).toFixed(1)}%</div>
+                      <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full"
+                          style={{
+                            width: `${pct(Number(r.tokens), tierTotals.tokens)}%`,
+                            background: TIER_COLORS[r.tier] || "hsl(var(--primary))",
+                          }}
+                        />
+                      </div>
+                      <dl className="text-xs text-muted-foreground space-y-0.5">
+                        <div className="flex justify-between">
+                          <dt>Calls</dt>
+                          <dd className="text-foreground">
+                            {fmtNum(r.requests)} · {pct(Number(r.requests), tierTotals.requests).toFixed(1)}%
+                          </dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt>Tokens</dt>
+                          <dd className="text-foreground">{fmtNum(r.tokens)}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt>Est. cost</dt>
+                          <dd className="text-foreground">
+                            {fmtUSD(Number(r.cost_usd || 0))} · {pct(Number(r.cost_usd), tierTotals.cost_usd).toFixed(1)}%
+                          </dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt>Avg tokens / call</dt>
+                          <dd className="text-foreground">{fmtNum(r.avg_tokens)}</dd>
+                        </div>
+                      </dl>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={dailyTier}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="day" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+                    <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+                    <Tooltip
+                      formatter={(v: any) => fmtNum(Number(v))}
+                      contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+                      labelStyle={{ color: "hsl(var(--foreground))" }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                    {tiers.map((t) => (
+                      <Line
+                        key={t}
+                        type="monotone"
+                        dataKey={t}
+                        stroke={TIER_COLORS[t] || "hsl(var(--primary))"}
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </>
+          )}
+        </section>
+
+
 
         {/* Daily cost line */}
         <section className="bg-card border border-border rounded-lg p-4 print-break-inside-avoid">
