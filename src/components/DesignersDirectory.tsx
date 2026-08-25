@@ -940,8 +940,8 @@ function LetterGroupBody({
   const initialVisible = getInitialVisibleDesignerCards(designers, parentDesignerCountByName, INITIAL_VISIBLE_SLOTS);
   const hasOverflow = totalDesignerCount > INITIAL_VISIBLE_SLOTS && designers.length > initialVisible.length;
   const [showAll, setShowAll] = useState<boolean>(!!matchesExpand);
-  const visible = hasOverflow && !showAll ? initialVisible : designers;
-  const hidden = hasOverflow && !showAll ? designers.slice(initialVisible.length) : [];
+  const visible = hasOverflow ? initialVisible : designers;
+  const hidden = hasOverflow ? designers.slice(initialVisible.length) : [];
 
   const renderCard = (item: Designer, cardIndex: number) => {
     const designerCount = parentDesignerCountByName[item.name] ?? 0;
@@ -985,7 +985,7 @@ function LetterGroupBody({
             className="overflow-hidden"
           >
             <div className={`${gridClass} mt-6 lg:mt-8`}>
-              {designers.slice(initialVisible.length).map((item, i) => renderCard(item, i + initialVisible.length))}
+              {hidden.map((item, i) => renderCard(item, i + initialVisible.length))}
             </div>
           </motion.div>
         )}
