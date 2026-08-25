@@ -477,6 +477,8 @@ export default function TradeAiUsageDashboard() {
   }, [data]);
 
   // Drilldown: tier × feature × day, filterable by tier and groupable.
+  const [tierFilter, setTierFilter] = useState<string>("all");
+  const [groupBy, setGroupBy] = useState<"feature" | "day" | "both">("both");
   const drilldownSource = (data?.tier_feature_day || []) as TierFeatureDayRow[];
   const drilldownTiers = useMemo(() => {
     const s = new Set(drilldownSource.map((r) => r.tier));
