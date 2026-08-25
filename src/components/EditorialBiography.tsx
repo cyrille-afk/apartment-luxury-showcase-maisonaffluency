@@ -281,37 +281,9 @@ function isStandaloneMediaUrl(text: string): boolean {
   return parseMediaLine(text) !== null;
 }
 
-/** Extract a human-readable caption from a URL's filename */
-export function captionFromUrl(url: string): string | null {
-  try {
-    const pathname = new URL(url).pathname;
-    let filename = pathname.split("/").pop() || "";
-    filename = filename.replace(/^\d{10,}-[a-z0-9]+\./, "");
-    filename = filename.replace(/\.[a-z0-9]+$/i, "");
-    filename = filename.replace(/_[a-z0-9]{4,8}$/i, "");
-    filename = filename.replace(/_\d+$/, "");
-    filename = filename.replace(/[-_]+/g, " ").trim();
-    if (filename.length < 3) return null;
-    // Never surface bare file-extension crumbs (e.g. "mp4", "jpeg") as captions.
-    if (/^(mp4|mov|webm|m4v|jpeg|jpg|png|webp|avif|gif)$/i.test(filename)) return null;
-    // Never surface bare numeric IDs (e.g. Vimeo/YouTube IDs like "803009029").
-    if (/^\d+$/.test(filename)) return null;
-    // Never surface raw camera/screenshot filenames (e.g. "Screen Shot 2026 08 25 At 12.25.36 PM",
-    // "IMG 1234", "DSC 0042", "Photo 2026 08 24").
-    if (/^(screen ?shot|screenshot|img|image|dsc|dscf|photo|capture|pxl|whatsapp)\b/i.test(filename)) return null;
-    // Never surface bare date-stamped names (e.g. "2026 08 25 12.25.36").
-    if (/^\d{4}[\s-]?\d{2}[\s-]?\d{2}/.test(filename)) return null;
-    // Never surface CDN hashes / UUID-like slugs (e.g. "e58fc53189ae4cb5a8bc5f5556ce77b8").
-    if (/^[0-9a-f]{16,}$/i.test(filename.replace(/\s/g, ""))) return null;
-    if (/^[0-9a-f]{8}\s?[0-9a-f]{4}\s?[0-9a-f]{4}\s?[0-9a-f]{4}\s?[0-9a-f]{12}$/i.test(filename)) return null;
-    return filename
-      .split(" ")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-      .join(" ");
-  } catch {
-    return null;
-  }
-}
+/** Extract a human-readable caption from a URL's filename (delegated to shared sanitizer). */
+export { captionFromUrl } from "@/lib/sanitizeFilenameCaption";
+
 
 const VIDEO_POSTER_FALLBACKS: Record<string, string> = {
   "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1774220339833-galr9d.mp4":
