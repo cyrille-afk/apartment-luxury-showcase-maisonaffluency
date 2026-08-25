@@ -736,7 +736,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
 
         {/* Desktop bottom name overlay — transparent background with text shadow */}
         <div className="hidden md:block absolute bottom-0 left-0 w-full p-4 bg-transparent z-10 pointer-events-none">
-          <p className="text-white text-sm tracking-wide uppercase transition-all duration-300" style={{ textShadow: '0px 2px 8px rgba(0, 0, 0, 0.65)' }}>
+          <p className="text-white text-sm tracking-wide uppercase transition-all duration-300" style={{ textShadow: '0px 2px 12px rgba(0, 0, 0, 0.85)' }}>
             {displayName}
           </p>
         </div>
