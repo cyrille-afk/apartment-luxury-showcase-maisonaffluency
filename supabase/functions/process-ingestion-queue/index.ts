@@ -167,7 +167,7 @@ Deno.serve(async (req) => {
   const now = new Date();
   const leaseUntil = new Date(now.getTime() + LEASE_MINUTES * 60_000).toISOString();
   const owner = crypto.randomUUID();
-  const { data: leased } = await supabase
+  const { data: leased, error: leaseError } = await supabase
     .from("ingestion_job_state")
     .update({ lease_until: leaseUntil, lease_owner: owner, last_run_at: now.toISOString() })
     .eq("id", true)
@@ -175,7 +175,11 @@ Deno.serve(async (req) => {
     .select("lease_owner")
     .maybeSingle();
 
-  if (!leased) return json({ skipped: "locked", message: "Another ingestion run is in progress" });
+  if (leaseError) console.error("lease error", leaseError);
+  if (!leased) {
+    console.log("lease not acquired", { leaseError, state });
+    return json({ skipped: "locked", message: "Another ingestion run is in progress", detail: leaseError?.message ?? null });
+  }
 
   try {
     const { data: rows, error } = await supabase
