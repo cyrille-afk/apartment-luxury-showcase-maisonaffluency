@@ -634,6 +634,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
   const cardImageUrl = item.image_url || item.hero_image_url;
   const firstPickMap = useContext(FirstPickImageContext);
   const firstPickImageUrl = firstPickMap[item.id] || null;
+  const hoverPickImageUrl = HOVER_PICK_OVERRIDES[item.slug] || firstPickImageUrl;
   const thumbs = CARD_THUMBNAILS[item.slug] || [];
   const instagramLinks: string[] = hasIgPosts ? [] : (() => {
     const hardcoded = INSTAGRAM_LINKS[item.slug];
@@ -645,7 +646,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
   const firstLetter = (displayName || item.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").charAt(0).toUpperCase();
 
   const isLetterA = true; // bottom-anchored vignette applied to every designer card
-  const hasHoverPick = !!firstPickImageUrl && firstPickImageUrl !== cardImageUrl;
+  const hasHoverPick = !!hoverPickImageUrl && hoverPickImageUrl !== cardImageUrl;
   // Mobile/PWA: first tap reveals the curator pick + "Discover the Product" pill; second tap navigates.
   const [mobileRevealed, setMobileRevealed] = React.useState(false);
 
