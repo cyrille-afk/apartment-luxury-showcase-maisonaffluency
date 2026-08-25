@@ -166,7 +166,7 @@ const Hero = () => {
                 <span>EXPLORE THE COLLECTION</span>
                 <span
                   aria-hidden="true"
-                  className="text-[22px] leading-none transition-transform duration-300 group-hover:translate-x-3"
+                  className="text-[22px] leading-none transition-transform duration-300 group-hover:translate-x-3 md:group-hover:translate-x-8 transform translate-x-3 md:translate-x-6"
                 >
                   →
                 </span>
