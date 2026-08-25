@@ -600,8 +600,8 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts, pr
         )}
 
         {/* Content Layer */}
-        <div className="absolute bottom-0 left-0 w-full p-6 flex justify-between items-end z-10 pointer-events-none">
-          <p className="text-white text-sm tracking-wide uppercase" style={{ textShadow: '0px 2px 12px rgba(0, 0, 0, 0.85)' }}>{displayName}</p>
+        <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/50 to-transparent z-10 pointer-events-none flex justify-between items-end">
+          <p className="text-white text-sm font-body tracking-widest uppercase">{displayName}</p>
 
           {/* Micro-Pill Tag for Multi-Designers */}
           <button
@@ -613,6 +613,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts, pr
             <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
           </button>
         </div>
+
       </div>
     </div>
   );
