@@ -566,6 +566,8 @@ export default function TradeAiUsageDashboard() {
 
   const totals = data?.totals;
   const byFeature = data?.by_feature || [];
+  const pricing = (data?.pricing || []) as PricingRow[];
+  const pricingMeta = data?.pricing_meta as PricingMeta | undefined;
   const errorRate = totals && totals.requests > 0 ? (totals.errors / totals.requests) * 100 : 0;
 
   return (
