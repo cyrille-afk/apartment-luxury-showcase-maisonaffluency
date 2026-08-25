@@ -129,7 +129,7 @@ const Hero = () => {
         isPwa
           ? // Standalone has no browser toolbar, so a fixed rem pad reads too high on
             // the taller viewport — anchor the copy proportionally instead.
-            "min-h-screen pt-[calc(env(safe-area-inset-top)+26vh)] md:pt-[24rem] pb-[calc(env(safe-area-inset-bottom)+2rem)]"
+            "min-h-screen pt-[calc(env(safe-area-inset-top)+29vh)] md:pt-[24rem] pb-[calc(env(safe-area-inset-bottom)+2rem)]"
           : "h-full min-h-0 pt-[calc(env(safe-area-inset-top)+14rem)] pb-0"
       }`}>
 
