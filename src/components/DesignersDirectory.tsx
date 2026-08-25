@@ -1193,15 +1193,16 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
     <div>
       <div className="relative group/carousel">
         {pages.length > 1 && activePage > 0 && (
-          <button onClick={goPrev} className="hidden lg:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-none bg-background/90 border border-border shadow-md hover:bg-accent transition-colors" aria-label="Previous page">
+          <button onClick={goPrev} className="hidden md:flex absolute left-2 lg:left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-none bg-background/90 border border-border shadow-md hover:bg-accent transition-colors" aria-label="Previous page">
             <ChevronLeft className="h-4 w-4 text-foreground" />
           </button>
         )}
         {pages.length > 1 && activePage < pages.length - 1 && (
-          <button onClick={goNext} className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-none bg-background/90 border border-border shadow-md hover:bg-accent transition-colors" aria-label="Next page">
+          <button onClick={goNext} className="hidden md:flex absolute right-2 lg:right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-none bg-background/90 border border-border shadow-md hover:bg-accent transition-colors" aria-label="Next page">
             <ChevronRight className="h-4 w-4 text-foreground" />
           </button>
         )}
+
         <div ref={viewportRef} onScroll={handleScroll} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={endDrag} onPointerCancel={endDrag} onPointerLeave={endDrag} onClickCapture={handleClickCapture} className={`overflow-x-auto snap-x snap-mandatory scrollbar-hide select-none touch-pan-x ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}>
           <div className="flex">
             {pages.map((page, pageIndex) => (
