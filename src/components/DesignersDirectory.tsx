@@ -601,7 +601,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts, pr
 
         {/* Content Layer */}
         <div className="absolute bottom-0 left-0 w-full p-6 flex justify-between items-end z-10 pointer-events-none">
-          <p className="text-white text-xs uppercase tracking-widest font-body">{displayName}</p>
+          <p className="text-white text-sm tracking-wide uppercase" style={{ textShadow: '0px 2px 12px rgba(0, 0, 0, 0.85)' }}>{displayName}</p>
 
           {/* Micro-Pill Tag for Multi-Designers */}
           <button
