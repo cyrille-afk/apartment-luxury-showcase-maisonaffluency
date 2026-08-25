@@ -600,8 +600,8 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts, pr
         )}
 
         {/* Content Layer */}
-        <div className="absolute bottom-0 left-0 w-full p-6 flex justify-between items-end z-10 pointer-events-none">
-          <p className="text-white text-sm tracking-wide uppercase" style={{ textShadow: '0px 2px 12px rgba(0, 0, 0, 0.85)' }}>{displayName}</p>
+        <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/50 to-transparent z-10 pointer-events-none flex justify-between items-end">
+          <p className="text-white text-sm font-body tracking-widest uppercase">{displayName}</p>
 
           {/* Micro-Pill Tag for Multi-Designers */}
           <button
@@ -613,6 +613,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts, pr
             <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
           </button>
         </div>
+
       </div>
     </div>
   );
@@ -716,12 +717,13 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
           </div>
         )}
 
-        {/* Desktop bottom name overlay — transparent background with text shadow */}
-        <div className="hidden md:block absolute bottom-0 left-0 w-full p-4 bg-transparent z-10 pointer-events-none">
-          <p className="text-white text-sm tracking-wide uppercase transition-all duration-300" style={{ textShadow: '0px 2px 12px rgba(0, 0, 0, 0.85)' }}>
+        {/* Desktop bottom name overlay — dark gradient for editorial luxury */}
+        <div className="hidden md:block absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/50 to-transparent z-10 pointer-events-none">
+          <p className="text-white text-sm font-body tracking-widest uppercase">
             {displayName}
           </p>
         </div>
+
       </div>
       {/* Editorial caption block — sits below the image like a monograph plate (mobile/PWA only) */}
       <Link
@@ -753,12 +755,13 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
 function CarouselDots({ count, selected, onSelect }: { count: number; selected: number; onSelect: (i: number) => void }) {
   if (count <= 1) return null;
   return (
-    <div className="flex justify-center gap-1.5 mt-3">
+    <div className="flex justify-center gap-1.5 mt-4">
       {Array.from({ length: count }).map((_, i) => (
         <button key={i} onClick={() => onSelect(i)} className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${i === selected ? "bg-foreground scale-125" : "bg-foreground/25 hover:bg-foreground/40"}`} aria-label={`Go to page ${i + 1}`} />
       ))}
     </div>
   );
+
 }
 
 // ─── Mobile Alphabet Accordion ───────────────────────────────────────────────
@@ -908,7 +911,7 @@ function LetterGroupBody({
           eagerFirstRow={eagerFirstRow}
         />
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 items-stretch gap-4 md:gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-stretch gap-6 lg:gap-8">
           {designers.map((item, cardIndex) => {
             const designerCount = parentDesignerCountByName[item.name] ?? 0;
             const isParentBrand = item.founder === item.name && designerCount > 0;
@@ -1041,11 +1044,10 @@ function LetterGroup({
   return (
     <div id={anchorId} data-alpha-letter={letter} className="scroll-header-offset mb-8 md:mb-10">
       <div ref={sentinelRef} />
-      <div className="flex items-center gap-3 mb-4 px-1">
-        <span className="font-serif text-2xl md:text-3xl text-foreground">{letter}</span>
-        <div className="flex-1 h-px bg-border/40" />
-        <span className="font-body text-[10px] text-muted-foreground/50 tracking-widest uppercase">{designers.reduce((sum, d) => sum + (d.founder === d.name && (parentDesignerCountByName[d.name] ?? 0) > 0 ? (parentDesignerCountByName[d.name] ?? 0) + 1 : 1), 0)}</span>
-      </div>
+      <h2 className="font-serif text-3xl tracking-wider uppercase text-foreground pt-8 pb-4">
+        {letter}
+      </h2>
+
       {isRevealed ? (
         <LetterGroupBody
           letter={letter}
@@ -1077,10 +1079,11 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
   const [activePage, setActivePage] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [slotsPerPage, setSlotsPerPage] = useState(() => {
-    if (typeof window === "undefined") return 5;
+    if (typeof window === "undefined") return 4;
     if (window.innerWidth >= 1024) return 4;
     if (window.innerWidth >= 768) return 3;
-    return 2;
+    if (window.innerWidth >= 640) return 2;
+    return 1;
   });
   const dragStartXRef = useRef(0);
   const dragStartScrollLeftRef = useRef(0);
@@ -1090,7 +1093,8 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
     const onResize = () => {
       if (window.innerWidth >= 1024) setSlotsPerPage(4);
       else if (window.innerWidth >= 768) setSlotsPerPage(3);
-      else setSlotsPerPage(2);
+      else if (window.innerWidth >= 640) setSlotsPerPage(2);
+      else setSlotsPerPage(1);
     };
     onResize();
     window.addEventListener("resize", onResize);
@@ -1190,20 +1194,21 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
     <div>
       <div className="relative group/carousel">
         {pages.length > 1 && activePage > 0 && (
-          <button onClick={goPrev} className="hidden lg:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-none bg-background/90 border border-border shadow-md hover:bg-accent transition-colors" aria-label="Previous page">
+          <button onClick={goPrev} className="hidden md:flex absolute left-2 lg:left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-none bg-background/90 border border-border shadow-md hover:bg-accent transition-colors" aria-label="Previous page">
             <ChevronLeft className="h-4 w-4 text-foreground" />
           </button>
         )}
         {pages.length > 1 && activePage < pages.length - 1 && (
-          <button onClick={goNext} className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-none bg-background/90 border border-border shadow-md hover:bg-accent transition-colors" aria-label="Next page">
+          <button onClick={goNext} className="hidden md:flex absolute right-2 lg:right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-none bg-background/90 border border-border shadow-md hover:bg-accent transition-colors" aria-label="Next page">
             <ChevronRight className="h-4 w-4 text-foreground" />
           </button>
         )}
+
         <div ref={viewportRef} onScroll={handleScroll} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={endDrag} onPointerCancel={endDrag} onPointerLeave={endDrag} onClickCapture={handleClickCapture} className={`overflow-x-auto snap-x snap-mandatory scrollbar-hide select-none touch-pan-x ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}>
           <div className="flex">
             {pages.map((page, pageIndex) => (
               <div key={`page-${pageIndex}`} className="flex-none w-full snap-start">
-                <div className="grid grid-cols-2 md:grid-cols-4 items-stretch gap-4 md:gap-6 lg:gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-stretch gap-6 lg:gap-8">
                   {page.map((item, cardIndex) => {
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
                     const isParentBrand = item.founder === item.name && designerCount > 0;
@@ -1824,11 +1829,12 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   return (
     <FirstPickImageContext.Provider value={firstPickImageByDesigner}>
     <>
-    <div ref={sectionRef} data-testid="designers-directory" className={`relative px-4 md:px-8 lg:px-12 xl:px-20 bg-background scroll-header-offset ${showHeader ? 'py-12 md:py-20 lg:py-24' : showRunway ? 'pt-0 pb-12 md:pt-0 md:pb-16 lg:pb-20' : 'pt-2 pb-12 md:pt-4 md:pb-20 lg:pb-24'}`}>
+    <div ref={sectionRef} data-testid="designers-directory" className={`relative max-w-7xl mx-auto px-6 lg:px-12 bg-background scroll-header-offset ${showHeader ? 'py-12 md:py-20 lg:py-24' : showRunway ? 'pt-0 pb-12 md:pt-0 md:pb-16 lg:pb-20' : 'pt-2 pb-12 md:pt-4 md:pb-20 lg:pb-24'}`}>
 
 
 
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto">
+
         {/* Section Header — default OR category-specific hero when a filter is active */}
         {showHeader && (() => {
           const filterActive = !!(selectedCategory || selectedSubcategory);
