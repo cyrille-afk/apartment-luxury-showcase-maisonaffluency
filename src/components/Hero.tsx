@@ -4,7 +4,6 @@ import { scrollToSection } from "@/lib/scrollToSection";
 import { trackEvent, trackCTA } from "@/lib/analytics";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import PrivateTourDialog from "@/components/PrivateTourDialog";
-import LuxuryCTA from "@/components/LuxuryCTA";
 
 const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
 const HERO_ID = "v1781920000/AffluencySG_194-22.jpg_macpwj";
@@ -139,13 +138,22 @@ const Hero = () => {
             Iconic Design.
           </h1>
 
-          <div className="hero-fade-in-delayed-3 mt-6 flex w-full max-w-3xl flex-col items-start md:mt-10">
-            <LuxuryCTA
-              onExplore={() => {
+          <div className="mt-6 flex w-full max-w-3xl flex-col items-start md:mt-10">
+            <p className="relative inline-block text-left font-serif text-sm font-medium leading-relaxed text-white [text-shadow:0_1px_10px_rgba(0,0,0,0.55)] hero-fade-in-delayed-3 before:absolute before:-inset-x-3 before:-inset-y-2 before:-z-10 before:rounded-sm before:bg-black/35 before:content-[''] before:backdrop-blur-[1px] before:[mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)] md:text-xl lg:text-2xl">
+              A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => {
                 trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" });
                 navigate("/designers");
               }}
-            />
+              className="group mt-12 flex translate-x-4 items-center gap-4 border border-white/20 bg-white/5 px-6 py-3.5 font-body text-[11px] font-medium uppercase tracking-[0.25em] text-white backdrop-blur-sm transition-all duration-500 ease-out hover:translate-x-12 hover:border-white hover:bg-white hover:text-black md:mt-20 md:translate-x-8"
+            >
+              <span>Explore the Collection</span>
+              <span aria-hidden="true" className="inline-block transition-transform duration-500 ease-out group-hover:translate-x-1.5">→</span>
+            </button>
           </div>
         </div>
 
