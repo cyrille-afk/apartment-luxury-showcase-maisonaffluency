@@ -118,7 +118,13 @@ export default function TradeIngestionQueue() {
       const { error, count } = await supabase
         .from("ingestion_queue")
         .upsert(
-          items.map((i) => ({ ...i, status: "pending", error_message: null, attempts: 0 })),
+          items.map((i) => ({
+            source_url: i.source_url,
+            raw_data: i.raw_data as never,
+            status: "pending",
+            error_message: null,
+            attempts: 0,
+          })),
           { onConflict: "source_url", count: "exact" },
         );
       if (error) throw error;
