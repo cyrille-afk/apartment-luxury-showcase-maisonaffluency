@@ -48,6 +48,7 @@ import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const INITIAL_DESIGNER_ROWS = 60;
 
 /** Small helper: type L × W × H in cm, auto-compute CBM (m³). */
 function DimsToCbm({ onCompute }: { onCompute: (cbm: number) => void }) {
@@ -1838,6 +1839,7 @@ const TradeDesignersAdmin = () => {
   const [previewId, setPreviewId] = useState<string | null>(initialDraft.previewId ?? null);
   const [previewMobile, setPreviewMobile] = useState(initialDraft.previewMobile ?? false);
   const [previewDebug, setPreviewDebug] = useState(initialDraft.previewDebug ?? false);
+  const [visibleRowCount, setVisibleRowCount] = useState(INITIAL_DESIGNER_ROWS);
 
   useEffect(() => {
     const hasUnsaved = Object.keys(editBuffer).length > 0;
@@ -2046,6 +2048,18 @@ const TradeDesignersAdmin = () => {
     }
     return list;
   }, [designers, search, activeLetter, pickSearchMap]);
+
+  const visibleDesigners = useMemo(() => {
+    // Searches and letter filters are already small. Limit only the unfiltered
+    // directory so the editor does not decode hundreds of portraits at once.
+    if (search || activeLetter) return filtered;
+    const visible = filtered.slice(0, visibleRowCount);
+    if (expandedId && !visible.some((designer) => designer.id === expandedId)) {
+      const expanded = filtered.find((designer) => designer.id === expandedId);
+      if (expanded) visible.push(expanded);
+    }
+    return visible;
+  }, [filtered, search, activeLetter, visibleRowCount, expandedId]);
 
   const letterCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -2348,7 +2362,7 @@ const TradeDesignersAdmin = () => {
           <p className="text-sm text-muted-foreground py-8 text-center">No designers match your search.</p>
         ) : (
           <div className="space-y-1">
-            {filtered.map((d) => {
+            {visibleDesigners.map((d) => {
               const isOpen = expandedId === d.id;
               const dirty = hasChanges(d.id);
 
@@ -2367,6 +2381,8 @@ const TradeDesignersAdmin = () => {
                       <img
                         src={d.image_url || d.hero_image_url || ""}
                         alt=""
+                        loading="lazy"
+                        decoding="async"
                         className="w-10 h-10 rounded-full object-cover shrink-0 bg-muted"
                         referrerPolicy="no-referrer"
                         onError={(e) => {
@@ -2793,6 +2809,17 @@ const TradeDesignersAdmin = () => {
                 </div>
               );
             })}
+            {!search && !activeLetter && visibleDesigners.length < filtered.length && (
+              <div className="flex justify-center py-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setVisibleRowCount((count) => count + INITIAL_DESIGNER_ROWS)}
+                >
+                  Load more designers ({filtered.length - visibleDesigners.length} remaining)
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>

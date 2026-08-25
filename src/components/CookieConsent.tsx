@@ -61,6 +61,9 @@ const CookieConsent = () => {
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("mobile_preview") === "1") return;
+    // Consent is a public-site concern. Never cover authenticated trade/admin
+    // workspaces, where the fixed banner can obstruct editor controls.
+    if (window.location.pathname.startsWith("/trade")) return;
     const isStandaloneHomeLaunch =
       window.location.pathname === "/" &&
       !window.location.hash &&
