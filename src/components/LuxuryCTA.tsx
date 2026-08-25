@@ -1,11 +1,16 @@
 import { ArrowRight } from "lucide-react";
 
-export default function LuxuryCTA() {
+interface LuxuryCTAProps {
+  onClick?: () => void;
+  className?: string;
+}
+
+export default function LuxuryCTA({ onClick, className = "" }: LuxuryCTAProps) {
   return (
-    <div className="flex flex-col items-start space-y-6">
+    <div className={`flex flex-col items-start space-y-6 ${className}`}>
       {/* Your Paragraph component with text-shadow stays here */}
       <p
-        className="text-white max-w-xl text-lg"
+        className="text-white max-w-xl md:max-w-3xl text-sm md:text-xl lg:text-2xl font-serif"
         style={{ textShadow: "0px 2px 8px rgba(0,0,0,0.6)" }}
       >
         A curated collection of masterworks reeditions and contemporary design
@@ -14,6 +19,8 @@ export default function LuxuryCTA() {
 
       {/* Asymmetric, Right-Shifted CTA Button */}
       <button
+        type="button"
+        onClick={onClick}
         className="group flex items-center gap-4 border border-white/30 bg-black/10 px-6 py-3.5
                    text-xs font-medium tracking-[0.25em] text-white uppercase backdrop-blur-sm
                    transform translate-x-4 md:translate-x-8
@@ -26,3 +33,4 @@ export default function LuxuryCTA() {
     </div>
   );
 }
+
