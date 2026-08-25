@@ -716,12 +716,13 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
           </div>
         )}
 
-        {/* Desktop bottom name overlay — transparent background with text shadow */}
-        <div className="hidden md:block absolute bottom-0 left-0 w-full p-4 bg-transparent z-10 pointer-events-none">
-          <p className="text-white text-sm tracking-wide uppercase transition-all duration-300" style={{ textShadow: '0px 2px 12px rgba(0, 0, 0, 0.85)' }}>
+        {/* Desktop bottom name overlay — dark gradient for editorial luxury */}
+        <div className="hidden md:block absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/50 to-transparent z-10 pointer-events-none">
+          <p className="text-white text-sm font-body tracking-widest uppercase">
             {displayName}
           </p>
         </div>
+
       </div>
       {/* Editorial caption block — sits below the image like a monograph plate (mobile/PWA only) */}
       <Link
