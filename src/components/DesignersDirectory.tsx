@@ -1824,11 +1824,12 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   return (
     <FirstPickImageContext.Provider value={firstPickImageByDesigner}>
     <>
-    <div ref={sectionRef} data-testid="designers-directory" className={`relative px-4 md:px-8 lg:px-12 xl:px-20 bg-background scroll-header-offset ${showHeader ? 'py-12 md:py-20 lg:py-24' : showRunway ? 'pt-0 pb-12 md:pt-0 md:pb-16 lg:pb-20' : 'pt-2 pb-12 md:pt-4 md:pb-20 lg:pb-24'}`}>
+    <div ref={sectionRef} data-testid="designers-directory" className={`relative max-w-7xl mx-auto px-6 lg:px-12 bg-background scroll-header-offset ${showHeader ? 'py-12 md:py-20 lg:py-24' : showRunway ? 'pt-0 pb-12 md:pt-0 md:pb-16 lg:pb-20' : 'pt-2 pb-12 md:pt-4 md:pb-20 lg:pb-24'}`}>
 
 
 
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto">
+
         {/* Section Header — default OR category-specific hero when a filter is active */}
         {showHeader && (() => {
           const filterActive = !!(selectedCategory || selectedSubcategory);
