@@ -3005,6 +3005,51 @@ export type Database = {
           },
         ]
       }
+      guardrail_logs: {
+        Row: {
+          action: string
+          created_at: string
+          feature: string
+          final_answer: string | null
+          id: string
+          invalid_names: string[]
+          model: string | null
+          query: string | null
+          raw_answer: string | null
+          tier: string | null
+          user_id: string | null
+          valid_names: string[]
+        }
+        Insert: {
+          action?: string
+          created_at?: string
+          feature?: string
+          final_answer?: string | null
+          id?: string
+          invalid_names?: string[]
+          model?: string | null
+          query?: string | null
+          raw_answer?: string | null
+          tier?: string | null
+          user_id?: string | null
+          valid_names?: string[]
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          feature?: string
+          final_answer?: string | null
+          id?: string
+          invalid_names?: string[]
+          model?: string | null
+          query?: string | null
+          raw_answer?: string | null
+          tier?: string | null
+          user_id?: string | null
+          valid_names?: string[]
+        }
+        Relationships: []
+      }
       guide_views: {
         Row: {
           created_at: string
