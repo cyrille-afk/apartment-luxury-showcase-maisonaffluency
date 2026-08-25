@@ -23,8 +23,9 @@ const EXTENSION_RE = new RegExp(
 /** Noise tokens that should never appear in a generated caption. */
 const NOISE_WORDS = [
   // Screenshots / captures
-  "screen shot", "screenshot", "screen capture", "screencapture", "screencap",
+  "screen", "shot", "screen shot", "screenshot", "screen capture", "screencapture", "screencap",
   "screen cap", "capture", "snip", "snipping",
+
   // Camera / phone roll
   "camera", "cam", "iphone", "samsung", "pixel", "gopro", "sony", "canon",
   "nikon", "fuji", "fujifilm", "leica", "olympus", "panasonic",
