@@ -324,6 +324,69 @@ export async function handleCuratorialQuery(
       messages,
       tokenBudget(isComplex ? "reasoning" : "chat"),
     );
+
+    // 5. Guardrail: never render a name that is not in Postgres.
+    let answer = text;
+    let guardrail: CuratorialQueryResult["guardrail"] = {
+      intercepted: false,
+      action: "none",
+      invalidNames: [],
+    };
+
+    if (!args.skipGuardrail) {
+      const check: ValidateAIResponseResult = await validateAIResponse(text, {
+        contextItems: products,
+      });
+
+      if (!check.valid) {
+        let finalAnswer = check.sanitized;
+        let action: "stripped" | "regenerated" | "regeneration_failed" = "stripped";
+
+        // Silent retry on the Flash model with the strict "do not invent profiles" variance.
+        try {
+          const retry = await callGateway(
+            args.apiKey,
+            FLASH_MODEL,
+            [
+              {
+                role: "system",
+                content: `${args.systemPrompt ?? BASE_SYSTEM_PROMPT}\n\n${FLASH_MODE_INSTRUCTION}\n${STRICT_NO_INVENT_SUFFIX}`,
+              },
+              messages[messages.length - 1],
+            ],
+            tokenBudget("chat"),
+          );
+          const recheck = await validateAIResponse(retry.text, { contextItems: products });
+          if (recheck.valid && retry.text.trim()) {
+            finalAnswer = retry.text;
+            action = "regenerated";
+          } else {
+            finalAnswer = recheck.sanitized || check.sanitized;
+            action = "regeneration_failed";
+          }
+        } catch (retryErr) {
+          console.error("guardrail retry failed", (retryErr as Error).message);
+          action = "regeneration_failed";
+        }
+
+        answer = finalAnswer;
+        guardrail = { intercepted: true, action, invalidNames: check.invalidNames };
+
+        logGuardrailViolation({
+          userId: args.userId ?? null,
+          feature,
+          model,
+          tier,
+          query: args.query,
+          invalidNames: check.invalidNames,
+          validNames: check.validNames,
+          action,
+          rawAnswer: text,
+          finalAnswer: answer,
+        });
+      }
+    }
+
     const latencyMs = Date.now() - started;
 
     logAiUsage({
@@ -336,7 +399,7 @@ export async function handleCuratorialQuery(
     });
 
     return {
-      answer: text,
+      answer,
       model,
       tier,
       classification,
@@ -344,7 +407,9 @@ export async function handleCuratorialQuery(
       products,
       usage,
       latencyMs,
+      guardrail,
     };
+
   } catch (e) {
     const err = e as Error & { status?: number };
     logAiUsage({
