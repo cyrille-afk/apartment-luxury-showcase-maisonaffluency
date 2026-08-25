@@ -188,6 +188,13 @@ const INSTAGRAM_LINKS: Record<string, string> = {
   "jean-michel-frank": "https://www.instagram.com/ecart.paris/",
 };
 
+// ─── Hover-pick image overrides (keyed by DB slug) ───────────────────────────
+// Used for the card hover/tap reveal that normally shows the first curator pick.
+const HOVER_PICK_OVERRIDES: Record<string, string> = {
+  "amelie-vermersch":
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1787568580/maison%20affluency/curators-picks/Amelie%20Vermersch/maj-stool-variants-01.jpg",
+};
+
 // ─── Hook: fetch designer→category mapping from curator picks ────────────────
 function useDesignerCategories() {
   return useQuery({
