@@ -985,7 +985,7 @@ function LetterGroupBody({
             className="overflow-hidden"
           >
             <div className={`${gridClass} mt-6 lg:mt-8`}>
-              {designers.slice(initialVisible.length).map((item, i) => renderCard(item, i + initialVisible.length))}
+              {hidden.map((item, i) => renderCard(item, i + initialVisible.length))}
             </div>
           </motion.div>
         )}
