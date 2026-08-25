@@ -378,7 +378,13 @@ export default function TradeAiUsageDashboard() {
         _to: range.to,
       });
       if (error) throw error;
-      return data as unknown as { totals: Totals; daily: DailyRow[]; by_feature: FeatureRow[] };
+      return data as unknown as {
+        totals: Totals;
+        daily: DailyRow[];
+        by_feature: FeatureRow[];
+        by_tier?: TierRow[];
+        daily_tier?: DailyTierRow[];
+      };
     },
   });
 
@@ -402,6 +408,39 @@ export default function TradeAiUsageDashboard() {
       features: Array.from(featureSet),
     };
   }, [data]);
+
+  // Tier breakdown: Flash vs Frontier share + daily token trend per tier.
+  const { tierRows, tierTotals, dailyTier, tiers } = useMemo(() => {
+    const rows = (data?.by_tier || []).slice().sort(
+      (a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier),
+    );
+    const sum = (k: keyof TierRow) => rows.reduce((acc, r) => acc + Number(r[k] || 0), 0);
+    const totals = {
+      requests: sum("requests"),
+      tokens: sum("tokens"),
+      cost_usd: sum("cost_usd"),
+    };
+
+    const tierSet = new Set<string>();
+    const byDay = new Map<string, Record<string, number | string>>();
+    for (const r of data?.daily_tier || []) {
+      tierSet.add(r.tier);
+      const dKey = format(new Date(r.day), "MMM d");
+      if (!byDay.has(dKey)) byDay.set(dKey, { day: dKey });
+      const bucket = byDay.get(dKey)!;
+      bucket[r.tier] = (Number(bucket[r.tier]) || 0) + Number(r.tokens || 0);
+    }
+    // Recharts needs every key present per point for a clean line.
+    const orderedTiers = TIER_ORDER.filter((t) => tierSet.has(t));
+    const points = Array.from(byDay.values()).map((p) => {
+      const filled: Record<string, number | string> = { ...p };
+      for (const t of orderedTiers) filled[t] = Number(filled[t] || 0);
+      return filled;
+    });
+
+    return { tierRows: rows, tierTotals: totals, dailyTier: points, tiers: orderedTiers };
+  }, [data]);
+
 
   if (loading) return null;
   if (!user) return <Navigate to="/auth" replace />;
