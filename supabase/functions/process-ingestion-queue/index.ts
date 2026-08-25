@@ -163,23 +163,21 @@ Deno.serve(async (req) => {
     return json({ skipped: "paused", reason: state.pause_reason ?? null });
   }
 
-  // Single-flight lease
-  const now = new Date();
-  const leaseUntil = new Date(now.getTime() + LEASE_MINUTES * 60_000).toISOString();
+  // Single-flight lease (atomic, via SECURITY DEFINER RPC)
   const owner = crypto.randomUUID();
-  const { data: leased, error: leaseError } = await supabase
-    .from("ingestion_job_state")
-    .update({ lease_until: leaseUntil, lease_owner: owner, last_run_at: now.toISOString() })
-    .eq("id", true)
-    .or(`lease_until.is.null,lease_until.lt."${now.toISOString()}"`)
-    .select("lease_owner")
-    .maybeSingle();
+  const { data: leased, error: leaseError } = await supabase.rpc("acquire_ingestion_lease", {
+    _owner: owner,
+    _minutes: LEASE_MINUTES,
+  });
 
-  if (leaseError) console.error("lease error", leaseError);
-  if (!leased) {
-    console.log("lease not acquired", { leaseError, state });
-    return json({ skipped: "locked", message: "Another ingestion run is in progress", detail: leaseError?.message ?? null });
+  if (leaseError) {
+    console.error("lease error", leaseError);
+    return json({ error: leaseError.message }, 500);
   }
+  if (!leased) {
+    return json({ skipped: "locked", message: "Another ingestion run is in progress" });
+  }
+
 
   try {
     const { data: rows, error } = await supabase
