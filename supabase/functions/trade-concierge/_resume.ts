@@ -51,7 +51,7 @@ async function broadcastRealtime(topic: string, event: string, payload: Record<s
         Authorization: `Bearer ${key}`,
       },
       body: JSON.stringify({
-        messages: [{ topic, event, payload, private: false }],
+        messages: [{ topic, event, payload, private: true }],
       }),
     });
   } catch (e) {

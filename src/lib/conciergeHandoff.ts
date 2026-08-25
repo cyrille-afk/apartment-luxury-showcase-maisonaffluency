@@ -71,7 +71,7 @@ export function openHandoffChannel(
   if (!streamId) return () => {};
   const topic = `concierge:${streamId}`;
   const channel: RealtimeChannel = supabase.channel(topic, {
-    config: { broadcast: { self: false, ack: false } },
+    config: { private: true, broadcast: { self: false, ack: false } },
   });
 
   channel.on("broadcast", { event: "*" }, ({ event, payload }) => {

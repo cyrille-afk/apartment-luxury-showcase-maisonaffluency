@@ -8267,6 +8267,7 @@ export type Database = {
         }[]
       }
       is_personal_email_domain: { Args: { _email: string }; Returns: boolean }
+      is_public_sitemap_product: { Args: { _id: string }; Returns: boolean }
       is_studio_owner: {
         Args: { _studio_id: string; _user_id: string }
         Returns: boolean
@@ -8428,6 +8429,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      realtime_topic_allowed: {
+        Args: { _topic: string; _uid: string }
+        Returns: boolean
       }
       recompute_trade_tier_suggestions: { Args: never; Returns: number }
       record_security_event: {
