@@ -7955,6 +7955,10 @@ export type Database = {
       }
       _norm_designer_name: { Args: { txt: string }; Returns: string }
       accept_studio_invite: { Args: { _invite_id: string }; Returns: Json }
+      acquire_ingestion_lease: {
+        Args: { _minutes?: number; _owner: string }
+        Returns: boolean
+      }
       add_board_comment_by_token: {
         Args: {
           _author_name?: string
@@ -8445,6 +8449,7 @@ export type Database = {
         }
         Returns: Json
       }
+      release_ingestion_lease: { Args: { _owner: string }; Returns: undefined }
       remap_product_descriptors: { Args: never; Returns: number }
       rotate_board_token: { Args: { _board_id: string }; Returns: string }
       sanitize_biography_citations: { Args: { input: string }; Returns: string }
