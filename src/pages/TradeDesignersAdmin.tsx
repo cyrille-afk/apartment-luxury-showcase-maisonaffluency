@@ -1832,13 +1832,15 @@ const TradeDesignersAdmin = () => {
   const queryClient = useQueryClient();
   const [initialDraft] = useState<Partial<DesignerEditorDraft>>(() => readDesignerEditorDraft());
 
-  const [search, setSearch] = useState(initialDraft.search ?? "");
-  const [activeLetter, setActiveLetter] = useState<string | null>(initialDraft.activeLetter ?? null);
-  const [expandedId, setExpandedId] = useState<string | null>(initialDraft.expandedId ?? null);
+  // Restore unsaved field values only. Reopening a saved accordion/preview can
+  // synchronously mount the heaviest editor subtree and trap the preview on it.
+  const [search, setSearch] = useState("");
+  const [activeLetter, setActiveLetter] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editBuffer, setEditBuffer] = useState<Record<string, Partial<DesignerRow>>>(initialDraft.editBuffer ?? {});
-  const [previewId, setPreviewId] = useState<string | null>(initialDraft.previewId ?? null);
-  const [previewMobile, setPreviewMobile] = useState(initialDraft.previewMobile ?? false);
-  const [previewDebug, setPreviewDebug] = useState(initialDraft.previewDebug ?? false);
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  const [previewMobile, setPreviewMobile] = useState(false);
+  const [previewDebug, setPreviewDebug] = useState(false);
   const [visibleRowCount, setVisibleRowCount] = useState(INITIAL_DESIGNER_ROWS);
 
   useEffect(() => {
