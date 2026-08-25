@@ -5,6 +5,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
+import { captionFromUrl } from "@/lib/sanitizeFilenameCaption";
+
 
 interface EditorialBiographyProps {
   biography: string;
