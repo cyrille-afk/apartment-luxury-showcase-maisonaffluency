@@ -1883,7 +1883,9 @@ const TradeDesignersAdmin = () => {
       }
     };
 
-    persistDraft();
+    // Browser storage writes are synchronous. Debounce them so editing a long
+    // biography never serializes the entire draft buffer on every keystroke.
+    const persistTimer = window.setTimeout(persistDraft, 500);
     window.addEventListener("pagehide", persistDraft);
 
     // Warn the user before any reload / tab close / navigation away while
@@ -1902,6 +1904,7 @@ const TradeDesignersAdmin = () => {
     }
 
     return () => {
+      window.clearTimeout(persistTimer);
       window.removeEventListener("pagehide", persistDraft);
       window.removeEventListener("beforeunload", onBeforeUnload);
     };
@@ -2050,16 +2053,13 @@ const TradeDesignersAdmin = () => {
   }, [designers, search, activeLetter, pickSearchMap]);
 
   const visibleDesigners = useMemo(() => {
-    // Searches and letter filters are already small. Limit only the unfiltered
-    // directory so the editor does not decode hundreds of portraits at once.
-    if (search || activeLetter) return filtered;
     const visible = filtered.slice(0, visibleRowCount);
     if (expandedId && !visible.some((designer) => designer.id === expandedId)) {
       const expanded = filtered.find((designer) => designer.id === expandedId);
       if (expanded) visible.push(expanded);
     }
     return visible;
-  }, [filtered, search, activeLetter, visibleRowCount, expandedId]);
+  }, [filtered, visibleRowCount, expandedId]);
 
   const letterCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -2073,11 +2073,16 @@ const TradeDesignersAdmin = () => {
   // Detect broken/missing/duplicate slugs (read-only audit, never auto-mutates)
   const slugHealthMap = useSlugHealthMap(designers);
 
+  const designersById = useMemo(
+    () => new Map(designers.map((designer) => [designer.id, designer])),
+    [designers]
+  );
+
   const getField = useCallback(
     (id: string, field: keyof DesignerRow) => {
-      return (editBuffer[id]?.[field] ?? designers.find((d) => d.id === id)?.[field]) as string;
+      return (editBuffer[id]?.[field] ?? designersById.get(id)?.[field]) as string;
     },
-    [editBuffer, designers]
+    [editBuffer, designersById]
   );
 
   const setField = useCallback(<K extends keyof DesignerRow>(id: string, field: K, value: DesignerRow[K]) => {
@@ -2809,7 +2814,7 @@ const TradeDesignersAdmin = () => {
                 </div>
               );
             })}
-            {!search && !activeLetter && visibleDesigners.length < filtered.length && (
+            {visibleDesigners.length < filtered.length && (
               <div className="flex justify-center py-4">
                 <Button
                   type="button"
