@@ -138,8 +138,12 @@ Deno.serve(async (req) => {
   const isServiceCall = authHeader === `Bearer ${serviceKey}`;
 
   if (!isServiceCall) {
-    const auth = await requireAdmin(req);
-    if (!auth.ok) return json(auth.body, auth.status);
+    try {
+      const auth = await requireAdmin(req);
+      if (!auth.ok) return json(auth.body, auth.status);
+    } catch (e) {
+      return json({ error: e instanceof Error ? e.message : "Unauthorized" }, 401);
+    }
   }
 
   const body = await req.json().catch(() => ({}));
