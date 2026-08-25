@@ -395,6 +395,10 @@
         .static-hero-desktop { display: none; }
         .static-hero-mobile { display: inline; }
       }
+      @media (max-width: 767px) and (display-mode: standalone) {
+        :root { --home-hero-mobile-pad-top: calc(env(safe-area-inset-top) + 26vh); }
+      }
+
     </style>
 
     <!--
