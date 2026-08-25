@@ -127,7 +127,9 @@ const Hero = () => {
         isPwa ? "min-h-screen pb-[calc(env(safe-area-inset-bottom)+2rem)]" : "h-full min-h-0 pb-0"
       }`}>
         {/* Hero Text Group Layer */}
-        <div className="absolute top-[25%] left-6 md:left-16 max-w-xl p-6 md:p-8 rounded-lg bg-gradient-to-br from-black/40 via-black/10 to-transparent backdrop-blur-[2px]">
+        <div className="absolute inset-x-0 top-[25%]">
+          <div className="mx-auto w-full max-w-7xl px-6 md:px-16">
+            <div className="max-w-xl rounded-lg bg-gradient-to-br from-black/40 via-black/10 to-transparent p-6 backdrop-blur-[2px] md:p-8">
           {/* Elegant Serif Header */}
           <h1 className="text-white font-serif text-4xl md:text-[52px] leading-[1.15] mb-6 tracking-normal">
             Modern Masters.<br />
@@ -153,7 +155,9 @@ const Hero = () => {
           >
             <span>Explore the Collection</span>
             <ArrowRight className="h-4 w-4 transition-transform duration-500 ease-out group-hover:translate-x-1" aria-hidden="true" />
-          </button>
+              </button>
+            </div>
+          </div>
         </div>
 
 
