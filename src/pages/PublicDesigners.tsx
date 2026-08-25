@@ -255,6 +255,7 @@ function ScrollLockedDesigners({
 
         <div className={locked ? "h-[calc(var(--designers-landing-vh,100lvh)-var(--header-h))] overflow-hidden" : "pb-20"}>
           <div
+            ref={collectionRef}
             className={
               locked
                 ? "relative md:h-full"
