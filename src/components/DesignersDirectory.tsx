@@ -669,7 +669,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
     >
 
 
-      <div className="aspect-[4/5] bg-muted/20 overflow-hidden relative">
+      <div className="relative overflow-hidden aspect-[4/5] md:aspect-[3/4] group bg-muted/20">
         {cardImageUrl ? (
           <img {...cldResponsiveImg(cardImageUrl, { widths: [320, 480, 640, 960], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px" })} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : "low"} />
 
@@ -734,15 +734,17 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
           </div>
         )}
 
-        {/* "View Profile" pill — desktop hover only */}
-        <div className="hidden md:flex pointer-events-none absolute inset-0 z-10 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">View Profile</span>
+        {/* Desktop bottom name overlay — transparent background with text shadow */}
+        <div className="hidden md:block absolute bottom-0 left-0 w-full p-4 bg-transparent z-10 pointer-events-none">
+          <p className="text-white text-sm tracking-wide uppercase transition-all duration-300" style={{ textShadow: '0px 2px 8px rgba(0, 0, 0, 0.65)' }}>
+            {displayName}
+          </p>
         </div>
       </div>
-      {/* Editorial caption block — sits below the image like a monograph plate */}
+      {/* Editorial caption block — sits below the image like a monograph plate (mobile/PWA only) */}
       <Link
         to={`/designers/${item.slug}`}
-        className="block relative p-4 pt-3 flex-1 group/link bg-gradient-to-b from-black/55 via-black/70 to-black/85 text-white"
+        className="block md:hidden relative p-4 pt-3 flex-1 group/link bg-gradient-to-b from-black/55 via-black/70 to-black/85 text-white"
       >
         <div className="flex items-baseline justify-between gap-3 mb-1.5 min-w-0">
           <h3 className="font-serif text-sm md:text-base lg:text-[1.05rem] leading-tight tracking-tight text-white group-hover/link:text-white/90 group-hover/link:translate-x-1 transition-all duration-500 ease-out truncate">
