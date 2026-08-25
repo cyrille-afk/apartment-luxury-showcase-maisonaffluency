@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 /**
  * Integration tests guarding the two security errors we fixed:
  *
