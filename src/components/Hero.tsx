@@ -185,7 +185,7 @@ const Hero = () => {
             onClick={openTour}
             className="group flex flex-col items-center font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
           >
-            <span>Book Private Appointment</span>
+            <span className="whitespace-nowrap">Book Private Appointment</span>
             <span className="text-[9px] font-bold normal-case italic tracking-widest text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]">(trade only)</span>
           </button>
         </nav>
