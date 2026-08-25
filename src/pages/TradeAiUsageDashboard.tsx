@@ -416,6 +416,9 @@ export default function TradeAiUsageDashboard() {
         by_feature: FeatureRow[];
         by_tier?: TierRow[];
         daily_tier?: DailyTierRow[];
+        tier_feature_day?: TierFeatureDayRow[];
+        pricing?: PricingRow[];
+        pricing_meta?: PricingMeta;
       };
     },
   });
