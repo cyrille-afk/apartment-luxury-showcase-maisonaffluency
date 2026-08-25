@@ -246,6 +246,28 @@ function ScrollLockedDesigners({
     if (hasDeepLink) setDirectoryReady(true);
   }, [hasDeepLink]);
 
+  // Hero CTA funnel: mark a conversion once the collection is actually visible.
+  const collectionRef = React.useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = collectionRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            trackHeroCta.conversion("designers_collection");
+            observer.disconnect();
+          }
+        }
+      },
+      { threshold: 0.4 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-foreground">
       <Navigation />
