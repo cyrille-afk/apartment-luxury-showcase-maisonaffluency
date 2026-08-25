@@ -672,7 +672,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
         {/* Hover/tap reveal — first curator pick fades in over the portrait (desktop: hover; mobile/PWA: tap) */}
         {hasHoverPick && (
           <img
-            {...cldResponsiveImg(firstPickImageUrl!, { widths: [320, 480, 640, 960], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px" })}
+            {...cldResponsiveImg(hoverPickImageUrl!, { widths: [320, 480, 640, 960], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px" })}
             alt=""
             aria-hidden="true"
             draggable={false}
