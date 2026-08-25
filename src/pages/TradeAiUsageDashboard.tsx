@@ -1056,8 +1056,11 @@ export default function TradeAiUsageDashboard() {
         </section>
 
         <p className="text-xs text-muted-foreground">
-          Cost figures are estimates calculated from a static per-model price map maintained in
-          <code className="mx-1">supabase/functions/_shared/aiUsage.ts</code>. Update that file when Lovable pricing changes.
+          Cost is recomputed per event at query time from the exact per-model rates in the pricing table above
+          (prompt tokens × input rate + completion tokens × output rate, or the flat per-image rate). Events whose model
+          has no pricing row fall back to the cost logged at write time by
+          <code className="mx-1">supabase/functions/_shared/aiUsage.ts</code>; keep both in sync when Lovable pricing
+          changes.
         </p>
       </div>
     </div>
