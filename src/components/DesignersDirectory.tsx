@@ -1046,6 +1046,9 @@ function LetterGroup({
       <div ref={sentinelRef} />
       <h2 className="font-serif text-3xl tracking-wider uppercase text-foreground pt-8 pb-4">
         {letter}
+        <span className="text-xs font-body tracking-widest text-muted-foreground ml-2 align-super">
+          ({designers.length})
+        </span>
       </h2>
 
       {isRevealed ? (
