@@ -584,6 +584,100 @@ export default function TradeAiUsageDashboard() {
           </div>
         </section>
 
+        {/* Tier breakdown — Flash vs Frontier */}
+        <section className="bg-card border border-border rounded-lg p-4 space-y-4 print-break-inside-avoid">
+          <div>
+            <h2 className="text-sm font-medium">Model tier — Flash vs Frontier</h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Share of calls, tokens and estimated cost by routing tier. “Untagged” covers calls logged before tier
+              tracking was added.
+            </p>
+          </div>
+
+          {tierRows.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No tier data in this window.</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {tierRows.map((r) => {
+                  const pct = (v: number, total: number) => (total > 0 ? (v / total) * 100 : 0);
+                  return (
+                    <div key={r.tier} className="border border-border rounded-md p-3 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="inline-block h-2 w-2 rounded-full"
+                          style={{ background: TIER_COLORS[r.tier] || "hsl(var(--primary))" }}
+                        />
+                        <span className="text-xs font-medium tracking-wide uppercase">{r.tier}</span>
+                      </div>
+                      <div className="text-lg font-light">{pct(Number(r.tokens), tierTotals.tokens).toFixed(1)}%</div>
+                      <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full"
+                          style={{
+                            width: `${pct(Number(r.tokens), tierTotals.tokens)}%`,
+                            background: TIER_COLORS[r.tier] || "hsl(var(--primary))",
+                          }}
+                        />
+                      </div>
+                      <dl className="text-xs text-muted-foreground space-y-0.5">
+                        <div className="flex justify-between">
+                          <dt>Calls</dt>
+                          <dd className="text-foreground">
+                            {fmtNum(r.requests)} · {pct(Number(r.requests), tierTotals.requests).toFixed(1)}%
+                          </dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt>Tokens</dt>
+                          <dd className="text-foreground">{fmtNum(r.tokens)}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt>Est. cost</dt>
+                          <dd className="text-foreground">
+                            {fmtUSD(Number(r.cost_usd || 0))} · {pct(Number(r.cost_usd), tierTotals.cost_usd).toFixed(1)}%
+                          </dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt>Avg tokens / call</dt>
+                          <dd className="text-foreground">{fmtNum(r.avg_tokens)}</dd>
+                        </div>
+                      </dl>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={dailyTier}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="day" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+                    <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+                    <Tooltip
+                      formatter={(v: any) => fmtNum(Number(v))}
+                      contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+                      labelStyle={{ color: "hsl(var(--foreground))" }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                    {tiers.map((t) => (
+                      <Line
+                        key={t}
+                        type="monotone"
+                        dataKey={t}
+                        stroke={TIER_COLORS[t] || "hsl(var(--primary))"}
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </>
+          )}
+        </section>
+
+
+
         {/* Daily cost line */}
         <section className="bg-card border border-border rounded-lg p-4 print-break-inside-avoid">
           <h2 className="text-sm font-medium mb-3">Estimated cost (USD) per day</h2>
