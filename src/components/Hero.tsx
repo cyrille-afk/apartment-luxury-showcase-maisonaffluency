@@ -124,26 +124,35 @@ const Hero = () => {
       />
 
 
-      {/* Text overlay — desktop keeps the previous anchored-top editorial layout;
-          mobile/PWA uses a bottom-aligned editorial link stack over the wallpaper. */}
-      <div className={`ma-home-hero-copy relative z-10 flex flex-1 flex-col items-start justify-start px-6 pt-[calc(env(safe-area-inset-top)+14rem)] md:h-full md:min-h-0 md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48 ${
-        isPwa ? "min-h-screen pb-[calc(env(safe-area-inset-bottom)+2rem)]" : "h-full min-h-0 pb-0"
-      }`}>
-        <div className="w-full max-w-xl md:max-w-4xl md:text-left">
-          <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
-            Modern Masters.<br />
-            Iconic Design.
-          </h1>
+      {/* Hero text wrapper — forces alignment to the left side of the screen */}
+      <div className="flex flex-col items-start text-left w-full max-w-xl md:max-w-2xl px-6 md:px-12 mt-20">
+        <h1 className="text-white font-serif text-4xl md:text-5xl leading-tight mb-4">
+          Modern Masters.<br />
+          Iconic Design.
+        </h1>
 
-          <LuxuryCTA
-            className="mt-6 md:mt-10 hero-fade-in-delayed-3"
-            onClick={() => {
-              trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" });
-              navigate("/designers");
-            }}
-          />
+        {/* Max-width constraint keeps this from spreading into the middle of the room */}
+        <p
+          className="text-white/90 text-sm md:text-base leading-relaxed mb-6 max-w-md"
+          style={{ textShadow: "0px 2px 8px rgba(0,0,0,0.65)" }}
+        >
+          A curated collection of masterworks reeditions and contemporary design for global architectural projects.
+        </p>
 
-        </div>
+        {/* Right-shifted CTA button */}
+        <button
+          type="button"
+          onClick={() => {
+            trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" });
+            navigate("/designers");
+          }}
+          className="group flex items-center gap-4 border border-white/30 bg-black/10 px-6 py-3.5 text-xs font-medium tracking-[0.25em] text-white uppercase backdrop-blur-sm transform translate-x-4 md:translate-x-8 transition-all duration-500 ease-out hover:border-white hover:bg-white hover:text-black hover:translate-x-12 hero-fade-in-delayed-3"
+        >
+          <span>Explore the Collection</span>
+          <span className="transition-transform duration-500 ease-out group-hover:translate-x-1">→</span>
+        </button>
+      </div>
+
 
         {/* Mobile / PWA — secondary CTAs centered above the iOS navigation bar */}
         <nav
