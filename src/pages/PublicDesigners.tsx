@@ -4,6 +4,7 @@ import { categoryUrl } from "@/lib/categorySlugs";
 import { Helmet } from "react-helmet-async";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { markDesignersLandingScrollLock, releaseDesignersLandingScrollLock } from "@/lib/designersScrollLock";
+import { trackHeroCta } from "@/lib/analytics";
 
 import { ChevronUp } from "lucide-react";
 import { useState, useEffect, useLayoutEffect } from "react";
@@ -246,6 +247,28 @@ function ScrollLockedDesigners({
     if (hasDeepLink) setDirectoryReady(true);
   }, [hasDeepLink]);
 
+  // Hero CTA funnel: mark a conversion once the collection is actually visible.
+  const collectionRef = React.useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = collectionRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            trackHeroCta.conversion("designers_collection");
+            observer.disconnect();
+          }
+        }
+      },
+      { threshold: 0.4 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-foreground">
       <Navigation />
@@ -255,6 +278,7 @@ function ScrollLockedDesigners({
 
         <div className={locked ? "h-[calc(var(--designers-landing-vh,100lvh)-var(--header-h))] overflow-hidden" : "pb-20"}>
           <div
+            ref={collectionRef}
             className={
               locked
                 ? "relative md:h-full"
