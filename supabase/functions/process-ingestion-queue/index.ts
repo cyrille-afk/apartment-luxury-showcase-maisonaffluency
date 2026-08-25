@@ -171,7 +171,7 @@ Deno.serve(async (req) => {
     .from("ingestion_job_state")
     .update({ lease_until: leaseUntil, lease_owner: owner, last_run_at: now.toISOString() })
     .eq("id", true)
-    .or(`lease_until.is.null,lease_until.lt.${now.toISOString()}`)
+    .or(`lease_until.is.null,lease_until.lt."${now.toISOString()}"`)
     .select("lease_owner")
     .maybeSingle();
 
