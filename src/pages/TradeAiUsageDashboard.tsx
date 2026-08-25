@@ -476,6 +476,87 @@ export default function TradeAiUsageDashboard() {
     return { tierRows: rows, tierTotals: totals, dailyTier: points, tiers: orderedTiers };
   }, [data]);
 
+  // Drilldown: tier × feature × day, filterable by tier and groupable.
+  const drilldownSource = (data?.tier_feature_day || []) as TierFeatureDayRow[];
+  const drilldownTiers = useMemo(() => {
+    const s = new Set(drilldownSource.map((r) => r.tier));
+    return TIER_ORDER.filter((t) => s.has(t));
+  }, [drilldownSource]);
+
+  const drilldown = useMemo(() => {
+    const rows = drilldownSource.filter((r) => tierFilter === "all" || r.tier === tierFilter);
+    const keyOf = (r: TierFeatureDayRow) =>
+      groupBy === "feature"
+        ? `${r.tier}||${r.feature}`
+        : groupBy === "day"
+          ? `${r.tier}||${r.day}`
+          : `${r.tier}||${r.feature}||${r.day}`;
+    const map = new Map<
+      string,
+      {
+        key: string;
+        tier: string;
+        feature: string | null;
+        day: string | null;
+        requests: number;
+        prompt_tokens: number;
+        completion_tokens: number;
+        tokens: number;
+        cost_usd: number;
+        errors: number;
+        unpriced_events: number;
+      }
+    >();
+    for (const r of rows) {
+      const k = keyOf(r);
+      if (!map.has(k)) {
+        map.set(k, {
+          key: k,
+          tier: r.tier,
+          feature: groupBy === "day" ? null : r.feature,
+          day: groupBy === "feature" ? null : r.day,
+          requests: 0,
+          prompt_tokens: 0,
+          completion_tokens: 0,
+          tokens: 0,
+          cost_usd: 0,
+          errors: 0,
+          unpriced_events: 0,
+        });
+      }
+      const b = map.get(k)!;
+      b.requests += Number(r.requests || 0);
+      b.prompt_tokens += Number(r.prompt_tokens || 0);
+      b.completion_tokens += Number(r.completion_tokens || 0);
+      b.tokens += Number(r.tokens || 0);
+      b.cost_usd += Number(r.cost_usd || 0);
+      b.errors += Number(r.errors || 0);
+      b.unpriced_events += Number(r.unpriced_events || 0);
+    }
+    const out = Array.from(map.values());
+    out.sort((a, b) => {
+      if (groupBy !== "feature") {
+        const d = (b.day || "").localeCompare(a.day || "");
+        if (d !== 0) return d;
+      }
+      return b.cost_usd - a.cost_usd;
+    });
+    return out;
+  }, [drilldownSource, tierFilter, groupBy]);
+
+  const drilldownTotals = useMemo(
+    () =>
+      drilldown.reduce(
+        (acc, r) => ({
+          requests: acc.requests + r.requests,
+          tokens: acc.tokens + r.tokens,
+          cost_usd: acc.cost_usd + r.cost_usd,
+        }),
+        { requests: 0, tokens: 0, cost_usd: 0 },
+      ),
+    [drilldown],
+  );
+
 
   if (loading) return null;
   if (!user) return <Navigate to="/auth" replace />;
