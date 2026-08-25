@@ -39,12 +39,39 @@ interface FeatureRow {
   errors: number;
   last_call: string;
 }
+interface TierRow {
+  tier: string;
+  requests: number;
+  prompt_tokens: number;
+  completion_tokens: number;
+  tokens: number;
+  cost_usd: number;
+  avg_tokens: number;
+  avg_latency_ms: number | null;
+  errors: number;
+}
+interface DailyTierRow {
+  day: string;
+  tier: string;
+  requests: number;
+  tokens: number;
+  cost_usd: number;
+}
 interface Totals {
   requests: number;
   tokens: number;
   cost_usd: number;
   errors: number;
 }
+
+const TIER_ORDER = ["Flash", "Frontier", "Classifier", "Untagged"];
+const TIER_COLORS: Record<string, string> = {
+  Flash: "#7c9885",
+  Frontier: "#c9a84c",
+  Classifier: "hsl(var(--muted-foreground))",
+  Untagged: "#8b6f5e",
+};
+
 
 const PRESETS = [
   { label: "Last 7 days", days: 7 },
