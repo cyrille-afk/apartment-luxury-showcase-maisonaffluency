@@ -64,11 +64,43 @@ interface Totals {
   errors: number;
 }
 
-const TIER_ORDER = ["Flash", "Frontier", "Classifier", "Untagged"];
+interface TierFeatureDayRow {
+  day: string;
+  tier: string;
+  feature: string;
+  requests: number;
+  prompt_tokens: number;
+  completion_tokens: number;
+  tokens: number;
+  cost_usd: number;
+  errors: number;
+  unpriced_events: number;
+  models: string | null;
+}
+interface PricingRow {
+  model: string;
+  input_usd_per_mtok: number | null;
+  output_usd_per_mtok: number | null;
+  flat_per_call_usd: number | null;
+  currency: string;
+  source: string;
+  source_url: string | null;
+  effective_from: string;
+  updated_at: string;
+}
+interface PricingMeta {
+  priced_events: number;
+  unpriced_events: number;
+  unpriced_models: string[];
+  cached_events: number;
+}
+
+const TIER_ORDER = ["Flash", "Frontier", "Classifier", "Image", "Untagged"];
 const TIER_COLORS: Record<string, string> = {
   Flash: "#7c9885",
   Frontier: "#c9a84c",
   Classifier: "hsl(var(--muted-foreground))",
+  Image: "#4a6741",
   Untagged: "#8b6f5e",
 };
 
