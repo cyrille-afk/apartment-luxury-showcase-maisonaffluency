@@ -126,7 +126,7 @@ const Hero = () => {
         isPwa ? "min-h-screen pb-[calc(env(safe-area-inset-bottom)+2rem)]" : "h-full min-h-0 pb-0"
       }`}>
         {/* Hero Text Group Layer */}
-        <div className="absolute top-[25%] left-6 md:left-16 max-w-xl p-8 rounded-lg bg-gradient-to-br from-black/40 via-black/10 to-transparent backdrop-blur-[2px]">
+        <div className="absolute top-[25%] left-6 md:left-16 max-w-xl p-6 md:p-8 rounded-lg bg-gradient-to-br from-black/40 via-black/10 to-transparent backdrop-blur-[2px]">
           {/* Elegant Serif Header */}
           <h1 className="text-white font-serif text-4xl md:text-[52px] leading-[1.15] mb-6 tracking-normal">
             Modern Masters.<br />
@@ -148,7 +148,7 @@ const Hero = () => {
               trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" });
               navigate("/designers");
             }}
-            className="flex items-center gap-4 text-white uppercase tracking-[0.25em] text-xs font-medium transform translate-x-4 md:translate-x-8 group transition-all duration-300"
+            className="inline-flex items-center gap-4 text-white uppercase tracking-[0.25em] text-xs font-medium transform translate-x-4 md:translate-x-8 group transition-all duration-300 whitespace-nowrap"
           >
             <span className="relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:bg-white/40 group-hover:after:bg-white transition-colors">
               Explore the Collection
@@ -175,7 +175,7 @@ const Hero = () => {
               trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
               scrollToSection("apartment-tour-heading");
             }}
-            className="font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
+            className="font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70 whitespace-nowrap"
           >
             Singapore Gallery Preview
           </button>
@@ -185,7 +185,7 @@ const Hero = () => {
             onClick={openTour}
             className="group flex flex-col items-center font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
           >
-            <span>Book Private Appointment</span>
+            <span className="whitespace-nowrap">Book Private Appointment</span>
             <span className="text-[9px] font-bold normal-case italic tracking-widest text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]">(trade only)</span>
           </button>
         </nav>
