@@ -168,13 +168,8 @@ export function sanitizeFilenameCaption(url: string): string | null {
     if (/^\d+$/.test(filename)) return null;
     if (/^(mp4|mov|webm|m4v|jpeg|jpg|png|webp|avif|gif|heic|tiff|raw)$/i.test(filename)) return null;
 
-    // If the original was noise and all that remains is a short, lowercase,
-    // single-word crumb, treat it as a leftover hash and suppress it.
-    if (originalLooksLikeNoise && /^[a-z0-9]{1,8}$/.test(filename)) {
-      return null;
-    }
-
     // Title-case the remaining words.
+
     return filename
       .split(" ")
       .filter((w) => w.length > 0)
