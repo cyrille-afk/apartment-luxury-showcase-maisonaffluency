@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackEvent, trackCTA } from "@/lib/analytics";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import PrivateTourDialog from "@/components/PrivateTourDialog";
-
 
 const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
 const HERO_ID = "v1781920000/AffluencySG_194-22.jpg_macpwj";
@@ -46,6 +45,8 @@ const scrollToMeetDesigners = () => {
   });
 };
 
+const heroPrimaryCtaClass =
+  "group inline-flex min-h-12 items-center justify-between gap-6 px-2 py-4 text-left text-white text-[13px] font-body font-bold tracking-[0.25em] uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] transition-opacity duration-300 hover:opacity-70 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70 hero-fade-in-delayed-4";
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -122,44 +123,60 @@ const Hero = () => {
       />
 
 
-      {/* Text overlay — outer wrapper keeps flex positioning; inner wrapper forces alignment to the left side of the screen */}
+      {/* Text overlay — desktop keeps the previous anchored-top editorial layout;
+          mobile/PWA uses a bottom-aligned editorial link stack over the wallpaper. */}
       <div className={`ma-home-hero-copy relative z-10 flex flex-1 flex-col items-start justify-start px-6 pt-[calc(env(safe-area-inset-top)+14rem)] md:h-full md:min-h-0 md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48 ${
         isPwa ? "min-h-screen pb-[calc(env(safe-area-inset-bottom)+2rem)]" : "h-full min-h-0 pb-0"
       }`}>
-        {/* Hero Text Group Layer */}
-        <div className="absolute inset-x-0 top-[25%]">
-          <div className="mx-auto w-full max-w-7xl px-6 md:px-16">
-            <div className="max-w-xl rounded-lg bg-gradient-to-br from-black/40 via-black/10 to-transparent p-6 backdrop-blur-[2px] md:p-8">
-          {/* Elegant Serif Header */}
-          <h1 className="text-white font-serif text-4xl md:text-[52px] leading-[1.15] mb-6 tracking-normal">
+        <div className="w-full max-w-xl md:max-w-4xl md:text-left">
+          <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
             Modern Masters.<br />
             Iconic Design.
           </h1>
 
-          {/* Body Paragraph */}
-          <p
-            className="text-white/95 text-base md:text-[17px] font-light leading-relaxed md:leading-[1.75] mb-8 max-w-md"
-            style={{ textShadow: "0px 2px 10px rgba(0,0,0,0.5)" }}
-          >
-            A curated collection of masterworks reeditions and contemporary design for global architectural projects.
-          </p>
+          <div className="mt-6 md:mt-10 flex w-full max-w-3xl flex-col items-start">
+            <p className="relative inline-block text-sm leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium [text-shadow:0_1px_10px_rgba(0,0,0,0.55)] hero-fade-in-delayed-3 before:content-[''] before:absolute before:-inset-x-3 before:-inset-y-2 before:-z-10 before:rounded-sm before:bg-black/35 before:backdrop-blur-[1px] before:[mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)]">
+              A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
+            </p>
 
-          {/* Asymmetric outlined CTA with the original full hover treatment */}
-          <button
-            type="button"
-            onClick={() => {
-              trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" });
-              navigate("/designers");
-            }}
-            className="group flex translate-x-4 items-center gap-4 whitespace-nowrap border border-white/30 bg-black/10 px-6 py-3.5 text-xs font-medium uppercase tracking-[0.25em] text-white backdrop-blur-sm transition-all duration-500 ease-out hover:translate-x-12 hover:border-white hover:bg-white hover:text-black md:translate-x-8"
-          >
-            <span>Explore the Collection</span>
-            <ArrowRight className="h-4 w-4 transition-transform duration-500 ease-out group-hover:translate-x-1" aria-hidden="true" />
-              </button>
+            {/* Mobile / PWA — primary CTA directly below paragraph, left-justified */}
+            <button
+              type="button"
+              onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
+              className="group mt-12 flex items-center gap-3 font-body text-[13px] font-bold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70 md:hidden"
+            >
+              <span>Explore the Collection</span>
+              <span
+                aria-hidden="true"
+                className="text-[22px] leading-none transition-transform duration-300 group-hover:translate-x-3"
+              >
+                →
+              </span>
+            </button>
+
+            {/* Desktop — primary CTA remains anchored with the text block */}
+            <div className="hidden md:order-2 md:mt-20 md:flex md:w-full md:flex-col md:items-start">
+              <motion.button
+                type="button"
+                onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
+                className="group relative inline-flex items-center gap-3 py-2 text-sm tracking-widest text-white uppercase after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:origin-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 hover:after:origin-left hover:after:scale-x-100"
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.2 }}
+              >
+                <span>EXPLORE THE COLLECTION</span>
+                <span
+                  aria-hidden="true"
+                  className="text-[22px] leading-none transition-transform duration-300 group-hover:translate-x-3 md:group-hover:translate-x-8 transform translate-x-3 md:translate-x-6"
+                >
+                  →
+                </span>
+              </motion.button>
             </div>
+
+
+
           </div>
         </div>
-
 
         {/* Mobile / PWA — secondary CTAs centered above the iOS navigation bar */}
         <nav
@@ -176,7 +193,7 @@ const Hero = () => {
               trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
               scrollToSection("apartment-tour-heading");
             }}
-            className="font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70 whitespace-nowrap"
+            className="font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
           >
             Singapore Gallery Preview
           </button>
@@ -186,13 +203,14 @@ const Hero = () => {
             onClick={openTour}
             className="group flex flex-col items-center font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
           >
-            <span className="whitespace-nowrap">Book Private Appointment</span>
+            <span>Book Private Appointment</span>
             <span className="text-[9px] font-bold normal-case italic tracking-widest text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]">(trade only)</span>
           </button>
         </nav>
 
-      </div>
 
+
+      </div>
 
       {/* Desktop — secondary CTAs lowered to the bottom, centred, same ghost UI */}
       <nav
