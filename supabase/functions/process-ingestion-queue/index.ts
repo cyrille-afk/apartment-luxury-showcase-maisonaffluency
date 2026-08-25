@@ -86,12 +86,36 @@ async function processRow(
 ): Promise<{ ok: boolean; error?: string }> {
   try {
     const payload = mapProduct(row);
-    const { data, error } = await supabase
+    // trade_products has a PARTIAL unique index on sku, which ON CONFLICT (sku)
+    // cannot target, so emulate the upsert: update by sku, else insert.
+    const { data: existing, error: findError } = await supabase
       .from("trade_products")
-      .upsert(payload, { onConflict: "sku" })
       .select("id")
+      .eq("sku", payload.sku)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (findError) throw new Error(findError.message);
+
+    let data: { id: string } | null = null;
+    if (existing) {
+      const { is_active: _ia, is_hidden: _ih, ...updatable } = payload;
+      const { data: upd, error } = await supabase
+        .from("trade_products")
+        .update(updatable)
+        .eq("id", existing.id)
+        .select("id")
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      data = upd as { id: string } | null;
+    } else {
+      const { data: ins, error } = await supabase
+        .from("trade_products")
+        .insert(payload)
+        .select("id")
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      data = ins as { id: string } | null;
+    }
+
 
     await supabase
       .from("ingestion_queue")
