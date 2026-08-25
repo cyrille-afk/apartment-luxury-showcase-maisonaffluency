@@ -574,19 +574,18 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts, pr
   }, [isOpen]);
 
   return (
-    <div ref={cardRef} data-card-kind="parent" data-designer-slug={item.slug} className="col-span-2 group self-start flex flex-col rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
-      <div className="aspect-[5/4] md:aspect-[17/10] bg-muted/20 overflow-hidden relative">
+    <div ref={cardRef} data-card-kind="parent" data-designer-slug={item.slug} className="col-span-2 group self-start rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
+      <div className="relative overflow-hidden aspect-[4/3] group">
         {cardImageUrl ? (
           <img {...cldResponsiveImg(cardImageUrl, { widths: [480, 720, 960, 1280], sizes: "(max-width: 640px) 100vw, (max-width: 1024px) 66vw, 720px" })} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : "low"} />
-
-
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
             <span className="font-display text-3xl text-muted-foreground/20">{item.name.charAt(0)}</span>
           </div>
         )}
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+        {/* Smooth luxury scrim overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
 
         <Link
           to={`/designers/${item.slug}`}
@@ -600,36 +599,19 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts, pr
           </a>
         )}
 
-        <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">View Portrait</span>
-        </div>
-      </div>
+        {/* Content Layer */}
+        <div className="absolute bottom-0 left-0 w-full p-6 flex justify-between items-end z-10 pointer-events-none">
+          <p className="text-white text-xs uppercase tracking-widest font-body">{displayName}</p>
 
-      {/* Editorial caption block — sits below the image like a monograph plate */}
-      <div className="block relative p-4 pt-3 flex-1 group/link bg-gradient-to-b from-black/55 via-black/70 to-black/85 text-white">
-        <div className="flex items-center justify-between gap-3 mb-1.5 min-w-0">
-          <Link
-            to={`/designers/${item.slug}`}
-            className="font-serif text-sm md:text-base lg:text-[1.05rem] leading-tight tracking-tight text-white group-hover/link:text-white/90 group-hover/link:translate-x-1 transition-all duration-500 ease-out truncate"
-          >
-            {displayName}
-          </Link>
+          {/* Micro-Pill Tag for Multi-Designers */}
           <button
             onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggle(); }}
-            className="flex items-center gap-1 px-2 py-1 rounded-full border border-white/30 bg-white/10 hover:bg-white/20 text-white font-body text-[9px] uppercase tracking-[0.12em] flex-shrink-0 transition-colors whitespace-nowrap"
+            className="pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/20 bg-white/10 text-[10px] tracking-wider text-white uppercase backdrop-blur-md transition-all duration-300 hover:bg-white hover:text-black"
             aria-label={`Show ${designerCount} designers for ${displayName}`}
           >
-            <Layers className="h-3 w-3" />
             <span>Designers{designerCount > 0 ? ` (${designerCount})` : ""}</span>
-            <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+            <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
           </button>
-
-
-        </div>
-
-        <div className="flex items-center justify-between gap-3">
-          <span />
-          <div className="h-px w-0 group-hover:w-10 transition-all duration-700 ease-out flex-shrink-0 bg-white" />
         </div>
       </div>
     </div>
