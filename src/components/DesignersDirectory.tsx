@@ -647,11 +647,11 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
       id={`designer-card-${item.slug}`}
       data-card-kind="designer"
       data-designer-slug={item.slug}
-      className={`group self-start flex flex-col rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer ${isLetterA ? 'relative' : ''}`}
+      className={`group self-stretch flex flex-col rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer ${isLetterA ? 'relative' : ''}`}
     >
 
 
-      <div className="relative overflow-hidden aspect-[4/5] md:aspect-[3/4] group bg-muted/20">
+      <div className="relative overflow-hidden aspect-[4/5] md:aspect-auto md:h-[400px] group bg-muted/20">
         {cardImageUrl ? (
           <img {...cldResponsiveImg(cardImageUrl, { widths: [320, 480, 640, 960], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px" })} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : "low"} />
 
