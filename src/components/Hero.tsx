@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackEvent, trackCTA } from "@/lib/analytics";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
@@ -141,21 +142,17 @@ const Hero = () => {
             A curated collection of masterworks reeditions and contemporary design for global architectural projects.
           </p>
 
-          {/* Elegant Right-Shifted CTA Button */}
+          {/* Asymmetric outlined CTA with the original full hover treatment */}
           <button
             type="button"
             onClick={() => {
               trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" });
               navigate("/designers");
             }}
-            className="inline-flex items-center gap-4 text-white uppercase tracking-[0.25em] text-xs font-medium transform translate-x-4 md:translate-x-8 group transition-all duration-300 whitespace-nowrap"
+            className="group flex translate-x-4 items-center gap-4 whitespace-nowrap border border-white/30 bg-black/10 px-6 py-3.5 text-xs font-medium uppercase tracking-[0.25em] text-white backdrop-blur-sm transition-all duration-500 ease-out hover:translate-x-12 hover:border-white hover:bg-white hover:text-black md:translate-x-8"
           >
-            <span className="relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:bg-white/40 group-hover:after:bg-white transition-colors">
-              Explore the Collection
-            </span>
-            <span className="transform group-hover:translate-x-1.5 transition-transform duration-300">
-              →
-            </span>
+            <span>Explore the Collection</span>
+            <ArrowRight className="h-4 w-4 transition-transform duration-500 ease-out group-hover:translate-x-1" aria-hidden="true" />
           </button>
         </div>
 
