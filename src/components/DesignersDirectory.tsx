@@ -54,8 +54,8 @@ const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
 // third-party origins at full resolution. Only the cards that can actually be in
 // the first visible row load eagerly; everything else is lazy + low priority so
 // the browser's connection pool isn't saturated by off-screen images.
-/** Widest desktop grid is `lg:grid-cols-4`, so 4 cards can sit in the first row. */
-const FIRST_ROW_CARDS = 4;
+/** Desktop grid is `md:grid-cols-3`, so 3 cards can sit in the first row. */
+const FIRST_ROW_CARDS = 3;
 /** Mobile A–Z carousel shows one full card plus a peek of the next. */
 const FIRST_ROW_CARDS_MOBILE = 2;
 
@@ -574,8 +574,8 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts, pr
   }, [isOpen]);
 
   return (
-    <div ref={cardRef} data-card-kind="parent" data-designer-slug={item.slug} className="col-span-2 group self-start rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
-      <div className="relative overflow-hidden aspect-[4/3] group">
+    <div ref={cardRef} data-card-kind="parent" data-designer-slug={item.slug} className="col-span-2 group self-stretch rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
+      <div className="relative overflow-hidden aspect-[4/3] md:aspect-auto md:h-[400px] group">
         {cardImageUrl ? (
           <img {...cldResponsiveImg(cardImageUrl, { widths: [480, 720, 960, 1280], sizes: "(max-width: 640px) 100vw, (max-width: 1024px) 66vw, 720px" })} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : "low"} />
         ) : (
@@ -647,11 +647,11 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
       id={`designer-card-${item.slug}`}
       data-card-kind="designer"
       data-designer-slug={item.slug}
-      className={`group self-start flex flex-col rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer ${isLetterA ? 'relative' : ''}`}
+      className={`group self-stretch flex flex-col rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer ${isLetterA ? 'relative' : ''}`}
     >
 
 
-      <div className="relative overflow-hidden aspect-[4/5] md:aspect-[3/4] group bg-muted/20">
+      <div className="relative overflow-hidden aspect-[4/5] md:aspect-auto md:h-[400px] group bg-muted/20">
         {cardImageUrl ? (
           <img {...cldResponsiveImg(cardImageUrl, { widths: [320, 480, 640, 960], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px" })} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : "low"} />
 
@@ -908,7 +908,7 @@ function LetterGroupBody({
           eagerFirstRow={eagerFirstRow}
         />
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 grid-flow-dense items-start gap-4 md:gap-6 lg:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 items-stretch gap-4 md:gap-6 lg:gap-8">
           {designers.map((item, cardIndex) => {
             const designerCount = parentDesignerCountByName[item.name] ?? 0;
             const isParentBrand = item.founder === item.name && designerCount > 0;
@@ -1203,7 +1203,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
           <div className="flex">
             {pages.map((page, pageIndex) => (
               <div key={`page-${pageIndex}`} className="flex-none w-full snap-start">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 grid-flow-dense items-start gap-4 md:gap-6 lg:gap-8">
+                <div className="grid grid-cols-2 md:grid-cols-3 items-stretch gap-4 md:gap-6 lg:gap-8">
                   {page.map((item, cardIndex) => {
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
                     const isParentBrand = item.founder === item.name && designerCount > 0;
