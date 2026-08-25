@@ -64,11 +64,43 @@ interface Totals {
   errors: number;
 }
 
-const TIER_ORDER = ["Flash", "Frontier", "Classifier", "Untagged"];
+interface TierFeatureDayRow {
+  day: string;
+  tier: string;
+  feature: string;
+  requests: number;
+  prompt_tokens: number;
+  completion_tokens: number;
+  tokens: number;
+  cost_usd: number;
+  errors: number;
+  unpriced_events: number;
+  models: string | null;
+}
+interface PricingRow {
+  model: string;
+  input_usd_per_mtok: number | null;
+  output_usd_per_mtok: number | null;
+  flat_per_call_usd: number | null;
+  currency: string;
+  source: string;
+  source_url: string | null;
+  effective_from: string;
+  updated_at: string;
+}
+interface PricingMeta {
+  priced_events: number;
+  unpriced_events: number;
+  unpriced_models: string[];
+  cached_events: number;
+}
+
+const TIER_ORDER = ["Flash", "Frontier", "Classifier", "Image", "Untagged"];
 const TIER_COLORS: Record<string, string> = {
   Flash: "#7c9885",
   Frontier: "#c9a84c",
   Classifier: "hsl(var(--muted-foreground))",
+  Image: "#4a6741",
   Untagged: "#8b6f5e",
 };
 
@@ -384,6 +416,9 @@ export default function TradeAiUsageDashboard() {
         by_feature: FeatureRow[];
         by_tier?: TierRow[];
         daily_tier?: DailyTierRow[];
+        tier_feature_day?: TierFeatureDayRow[];
+        pricing?: PricingRow[];
+        pricing_meta?: PricingMeta;
       };
     },
   });
@@ -441,6 +476,89 @@ export default function TradeAiUsageDashboard() {
     return { tierRows: rows, tierTotals: totals, dailyTier: points, tiers: orderedTiers };
   }, [data]);
 
+  // Drilldown: tier × feature × day, filterable by tier and groupable.
+  const [tierFilter, setTierFilter] = useState<string>("all");
+  const [groupBy, setGroupBy] = useState<"feature" | "day" | "both">("both");
+  const drilldownSource = (data?.tier_feature_day || []) as TierFeatureDayRow[];
+  const drilldownTiers = useMemo(() => {
+    const s = new Set(drilldownSource.map((r) => r.tier));
+    return TIER_ORDER.filter((t) => s.has(t));
+  }, [drilldownSource]);
+
+  const drilldown = useMemo(() => {
+    const rows = drilldownSource.filter((r) => tierFilter === "all" || r.tier === tierFilter);
+    const keyOf = (r: TierFeatureDayRow) =>
+      groupBy === "feature"
+        ? `${r.tier}||${r.feature}`
+        : groupBy === "day"
+          ? `${r.tier}||${r.day}`
+          : `${r.tier}||${r.feature}||${r.day}`;
+    const map = new Map<
+      string,
+      {
+        key: string;
+        tier: string;
+        feature: string | null;
+        day: string | null;
+        requests: number;
+        prompt_tokens: number;
+        completion_tokens: number;
+        tokens: number;
+        cost_usd: number;
+        errors: number;
+        unpriced_events: number;
+      }
+    >();
+    for (const r of rows) {
+      const k = keyOf(r);
+      if (!map.has(k)) {
+        map.set(k, {
+          key: k,
+          tier: r.tier,
+          feature: groupBy === "day" ? null : r.feature,
+          day: groupBy === "feature" ? null : r.day,
+          requests: 0,
+          prompt_tokens: 0,
+          completion_tokens: 0,
+          tokens: 0,
+          cost_usd: 0,
+          errors: 0,
+          unpriced_events: 0,
+        });
+      }
+      const b = map.get(k)!;
+      b.requests += Number(r.requests || 0);
+      b.prompt_tokens += Number(r.prompt_tokens || 0);
+      b.completion_tokens += Number(r.completion_tokens || 0);
+      b.tokens += Number(r.tokens || 0);
+      b.cost_usd += Number(r.cost_usd || 0);
+      b.errors += Number(r.errors || 0);
+      b.unpriced_events += Number(r.unpriced_events || 0);
+    }
+    const out = Array.from(map.values());
+    out.sort((a, b) => {
+      if (groupBy !== "feature") {
+        const d = (b.day || "").localeCompare(a.day || "");
+        if (d !== 0) return d;
+      }
+      return b.cost_usd - a.cost_usd;
+    });
+    return out;
+  }, [drilldownSource, tierFilter, groupBy]);
+
+  const drilldownTotals = useMemo(
+    () =>
+      drilldown.reduce(
+        (acc, r) => ({
+          requests: acc.requests + r.requests,
+          tokens: acc.tokens + r.tokens,
+          cost_usd: acc.cost_usd + r.cost_usd,
+        }),
+        { requests: 0, tokens: 0, cost_usd: 0 },
+      ),
+    [drilldown],
+  );
+
 
   if (loading) return null;
   if (!user) return <Navigate to="/auth" replace />;
@@ -448,6 +566,8 @@ export default function TradeAiUsageDashboard() {
 
   const totals = data?.totals;
   const byFeature = data?.by_feature || [];
+  const pricing = (data?.pricing || []) as PricingRow[];
+  const pricingMeta = data?.pricing_meta as PricingMeta | undefined;
   const errorRate = totals && totals.requests > 0 ? (totals.errors / totals.requests) * 100 : 0;
 
   return (
@@ -676,6 +796,193 @@ export default function TradeAiUsageDashboard() {
           )}
         </section>
 
+        {/* Tier drilldown */}
+        <section className="bg-card border border-border rounded-lg overflow-hidden print-break-inside-avoid">
+          <div className="p-4 border-b border-border flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-medium">Tier drilldown</h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Flash vs Frontier broken down by feature and by day — calls, tokens and cost priced from the model
+                pricing table.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-muted-foreground mr-1">Tier</span>
+                {["all", ...drilldownTiers].map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTierFilter(t)}
+                    className={`px-2.5 py-1 text-xs border transition-colors ${
+                      tierFilter === t
+                        ? "bg-foreground text-background border-foreground"
+                        : "border-border hover:bg-muted/40"
+                    }`}
+                  >
+                    {t === "all" ? "All" : t}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-muted-foreground mr-1">Group</span>
+                {([
+                  ["both", "Feature × Day"],
+                  ["feature", "Feature"],
+                  ["day", "Day"],
+                ] as const).map(([v, label]) => (
+                  <button
+                    key={v}
+                    onClick={() => setGroupBy(v)}
+                    className={`px-2.5 py-1 text-xs border transition-colors ${
+                      groupBy === v
+                        ? "bg-foreground text-background border-foreground"
+                        : "border-border hover:bg-muted/40"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="overflow-x-auto max-h-[520px]">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/40 text-xs text-muted-foreground sticky top-0">
+                <tr>
+                  <th className="text-left px-4 py-2 font-medium">Tier</th>
+                  {groupBy !== "day" && <th className="text-left px-4 py-2 font-medium">Feature</th>}
+                  {groupBy !== "feature" && <th className="text-left px-4 py-2 font-medium">Day</th>}
+                  <th className="text-right px-4 py-2 font-medium">Calls</th>
+                  <th className="text-right px-4 py-2 font-medium">Prompt</th>
+                  <th className="text-right px-4 py-2 font-medium">Completion</th>
+                  <th className="text-right px-4 py-2 font-medium">Tokens</th>
+                  <th className="text-right px-4 py-2 font-medium">Errors</th>
+                  <th className="text-right px-4 py-2 font-medium">Est. cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                {drilldown.length === 0 && !isLoading && (
+                  <tr>
+                    <td colSpan={9} className="text-center px-4 py-8 text-muted-foreground text-xs">
+                      No tier-tagged usage in this window.
+                    </td>
+                  </tr>
+                )}
+                {drilldown.map((r) => (
+                  <tr key={r.key} className="border-t border-border hover:bg-muted/20">
+                    <td className="px-4 py-2">
+                      <span className="inline-flex items-center gap-2">
+                        <span
+                          className="inline-block h-2 w-2 rounded-full"
+                          style={{ background: TIER_COLORS[r.tier] || "hsl(var(--primary))" }}
+                        />
+                        {r.tier}
+                      </span>
+                    </td>
+                    {groupBy !== "day" && <td className="px-4 py-2 font-medium">{r.feature}</td>}
+                    {groupBy !== "feature" && (
+                      <td className="px-4 py-2 text-xs text-muted-foreground">
+                        {r.day ? format(new Date(r.day), "MMM d, yyyy") : "—"}
+                      </td>
+                    )}
+                    <td className="px-4 py-2 text-right">{fmtNum(r.requests)}</td>
+                    <td className="px-4 py-2 text-right">{fmtNum(r.prompt_tokens)}</td>
+                    <td className="px-4 py-2 text-right">{fmtNum(r.completion_tokens)}</td>
+                    <td className="px-4 py-2 text-right">{fmtNum(r.tokens)}</td>
+                    <td className={`px-4 py-2 text-right ${r.errors > 0 ? "text-destructive" : ""}`}>
+                      {fmtNum(r.errors)}
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      {fmtUSD(r.cost_usd)}
+                      {r.unpriced_events > 0 && (
+                        <span className="ml-1 text-[10px] text-muted-foreground" title="Some events use a model with no pricing row">
+                          *
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              {drilldown.length > 0 && (
+                <tfoot className="bg-muted/30 text-xs">
+                  <tr className="border-t border-border">
+                    <td className="px-4 py-2 font-medium" colSpan={groupBy === "both" ? 3 : 2}>
+                      Total
+                    </td>
+                    <td className="px-4 py-2 text-right font-medium">{fmtNum(drilldownTotals.requests)}</td>
+                    <td className="px-4 py-2" colSpan={2} />
+                    <td className="px-4 py-2 text-right font-medium">{fmtNum(drilldownTotals.tokens)}</td>
+                    <td className="px-4 py-2" />
+                    <td className="px-4 py-2 text-right font-medium">{fmtUSD(drilldownTotals.cost_usd)}</td>
+                  </tr>
+                </tfoot>
+              )}
+            </table>
+          </div>
+        </section>
+
+        {/* Pricing source */}
+        <section className="bg-card border border-border rounded-lg overflow-hidden print-break-inside-avoid">
+          <div className="p-4 border-b border-border">
+            <h2 className="text-sm font-medium">Pricing source</h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Costs are computed per event from the exact input / output rates below (or a flat per-image rate), not a
+              blended average. Cached responses are counted at zero.{" "}
+              {pricingMeta
+                ? `${fmtNum(pricingMeta.priced_events)} events priced from this table · ${fmtNum(
+                    pricingMeta.unpriced_events,
+                  )} fell back to the logged estimate · ${fmtNum(pricingMeta.cached_events)} cached.`
+                : ""}
+            </p>
+            {pricingMeta && pricingMeta.unpriced_models?.length > 0 && (
+              <p className="text-xs text-destructive mt-1">
+                Missing pricing rows: {pricingMeta.unpriced_models.filter(Boolean).join(", ")}
+              </p>
+            )}
+          </div>
+          <div className="overflow-x-auto max-h-80">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/40 text-xs text-muted-foreground sticky top-0">
+                <tr>
+                  <th className="text-left px-4 py-2 font-medium">Model</th>
+                  <th className="text-right px-4 py-2 font-medium">Input / 1M</th>
+                  <th className="text-right px-4 py-2 font-medium">Output / 1M</th>
+                  <th className="text-right px-4 py-2 font-medium">Flat / call</th>
+                  <th className="text-left px-4 py-2 font-medium">Source</th>
+                  <th className="text-right px-4 py-2 font-medium">Effective</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pricing.map((p) => (
+                  <tr key={p.model} className="border-t border-border hover:bg-muted/20">
+                    <td className="px-4 py-2 font-mono text-xs">{p.model}</td>
+                    <td className="px-4 py-2 text-right">
+                      {p.input_usd_per_mtok != null ? fmtUSD(Number(p.input_usd_per_mtok)) : "—"}
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      {p.output_usd_per_mtok != null ? fmtUSD(Number(p.output_usd_per_mtok)) : "—"}
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      {p.flat_per_call_usd != null ? fmtUSD(Number(p.flat_per_call_usd)) : "—"}
+                    </td>
+                    <td className="px-4 py-2 text-xs text-muted-foreground">
+                      {p.source_url ? (
+                        <a href={p.source_url} target="_blank" rel="noreferrer" className="underline">
+                          {p.source}
+                        </a>
+                      ) : (
+                        p.source
+                      )}
+                    </td>
+                    <td className="px-4 py-2 text-right text-xs text-muted-foreground">
+                      {p.effective_from ? format(new Date(p.effective_from), "MMM d, yyyy") : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
 
         {/* Daily cost line */}
@@ -749,8 +1056,11 @@ export default function TradeAiUsageDashboard() {
         </section>
 
         <p className="text-xs text-muted-foreground">
-          Cost figures are estimates calculated from a static per-model price map maintained in
-          <code className="mx-1">supabase/functions/_shared/aiUsage.ts</code>. Update that file when Lovable pricing changes.
+          Cost is recomputed per event at query time from the exact per-model rates in the pricing table above
+          (prompt tokens × input rate + completion tokens × output rate, or the flat per-image rate). Events whose model
+          has no pricing row fall back to the cost logged at write time by
+          <code className="mx-1">supabase/functions/_shared/aiUsage.ts</code>; keep both in sync when Lovable pricing
+          changes.
         </p>
       </div>
     </div>
