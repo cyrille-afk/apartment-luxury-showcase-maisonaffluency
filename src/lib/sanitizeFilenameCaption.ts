@@ -78,11 +78,33 @@ const HASH_UUID_RE = /\b[0-9a-f]{8}(?:[\s\-_]?[0-9a-f]{4}){3}[\s\-_]?[0-9a-f]{12
 /** Strip trailing counters: "Chair_01", "Chair_1", "Chair-2". */
 const TRAILING_COUNTER_RE = /[\s\-_]\d+$/;
 
+/** Strip trailing CDN hash crumbs (e.g. "_sezoxs", "_abc123"). */
+const TRAILING_HASH_CRUMB_RE = /[\s\-_][a-z0-9]{4,8}$/i;
+
 /** Normalize whitespace and punctuation around a word. */
 function collapseWhitespace(str: string): string {
   return str
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/** Detect if the filename came from a screenshot, camera, or chat app. */
+function hasCameraOrScreenshotNoise(filename: string): boolean {
+  const cameraWords = [
+    "screen shot", "screenshot", "screen capture", "screencapture", "screencap",
+    "screen cap", "capture", "snip", "snipping", "camera", "cam", "iphone",
+    "samsung", "pixel", "gopro", "sony", "canon", "nikon", "fuji", "fujifilm",
+    "leica", "olympus", "panasonic", "img", "dsc", "dscf", "photo", "photos",
+    "picture", "pictures", "pic", "pxl", "whatsapp", "telegram", "signal", "wechat",
+  ];
+  return cameraWords.some((w) =>
+    new RegExp(`\\b${w.replace(/\s/g, "\\s")}\\b`, "gi").test(filename)
+  );
+}
+
+/** Detect if the filename contains a date/time stamp. */
+function hasDateTimeStamp(filename: string): boolean {
+  return DATE_TIME_PATTERNS.some((re) => re.test(filename));
 }
 
 /**
@@ -96,14 +118,17 @@ export function sanitizeFilenameCaption(url: string): string | null {
     const pathname = decodeURIComponent(rawPathname);
     let filename = pathname.split("/").pop() || "";
 
+    // Track whether the original filename was screenshot/camera/date noise.
+    const originalLooksLikeNoise =
+      hasCameraOrScreenshotNoise(filename) || hasDateTimeStamp(filename);
+
     // Strip Supabase storage timestamp prefix.
     filename = filename.replace(SUPABASE_PREFIX_RE, "");
 
     // Strip file extension.
     filename = filename.replace(EXTENSION_RE, "");
 
-    // Normalize separators: underscores, dots used as separators become spaces.
-    // Preserve dots that are part of timestamps until date-time removal below.
+    // Normalize separators: underscores, hyphens become spaces.
     filename = filename.replace(/[_-]+/g, " ");
 
     // Strip UUID / hex hash chunks.
@@ -126,6 +151,13 @@ export function sanitizeFilenameCaption(url: string): string | null {
     // Strip trailing counters.
     filename = filename.replace(TRAILING_COUNTER_RE, "");
 
+    // If the original was screenshot/camera/date noise, aggressively strip any
+    // trailing CDN hash crumb that survived (e.g. "_sezoxs", "_abc123"). This
+    // prevents a leftover hash from becoming a nonsensical caption.
+    if (originalLooksLikeNoise) {
+      filename = filename.replace(TRAILING_HASH_CRUMB_RE, "");
+    }
+
     // Clean up separators.
     filename = collapseWhitespace(filename);
 
@@ -133,6 +165,12 @@ export function sanitizeFilenameCaption(url: string): string | null {
     if (!filename || filename.length < 3) return null;
     if (/^\d+$/.test(filename)) return null;
     if (/^(mp4|mov|webm|m4v|jpeg|jpg|png|webp|avif|gif|heic|tiff|raw)$/i.test(filename)) return null;
+
+    // If the original was noise and all that remains is a short, lowercase,
+    // single-word crumb, treat it as a leftover hash and suppress it.
+    if (originalLooksLikeNoise && /^[a-z0-9]{1,8}$/.test(filename)) {
+      return null;
+    }
 
     // Title-case the remaining words.
     return filename
