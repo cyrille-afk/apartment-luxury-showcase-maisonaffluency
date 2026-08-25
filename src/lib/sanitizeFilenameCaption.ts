@@ -169,12 +169,13 @@ export function sanitizeFilenameCaption(url: string): string | null {
     if (/^(mp4|mov|webm|m4v|jpeg|jpg|png|webp|avif|gif|heic|tiff|raw)$/i.test(filename)) return null;
 
     // If the original was screenshot/camera/date noise and all that remains is
-    // a single short lowercase word, treat it as a leftover CDN hash crumb and
-    // suppress it (e.g. "_sezoxs"). Real names usually have capitalization or
-    // multiple words.
-    if (originalLooksLikeNoise && /^[a-z]{5,8}$/.test(filename)) {
+    // a single short lowercase alphanumeric word, treat it as a leftover CDN
+    // hash crumb and suppress it (e.g. "_sezoxs", "_auiu8c"). Real names usually
+    // have capitalization or multiple words.
+    if (originalLooksLikeNoise && /^[a-z0-9]{5,8}$/.test(filename)) {
       return null;
     }
+
 
     // Title-case the remaining words.
 
