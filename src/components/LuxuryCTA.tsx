@@ -1,10 +1,14 @@
 import { ArrowRight } from "lucide-react";
 
-export default function LuxuryCTA() {
+interface LuxuryCTAProps {
+  onExplore: () => void;
+}
+
+export default function LuxuryCTA({ onExplore }: LuxuryCTAProps) {
   return (
     <div className="flex flex-col items-start space-y-6">
       <p
-        className="text-white max-w-xl text-lg"
+        className="max-w-xl text-lg text-white"
         style={{ textShadow: "0px 2px 8px rgba(0,0,0,0.6)" }}
       >
         A curated collection of masterworks reeditions and contemporary design
@@ -12,14 +16,12 @@ export default function LuxuryCTA() {
       </p>
 
       <button
-        className="group flex items-center gap-4 border border-white/20 bg-white/5 px-6 py-3.5
-                   text-[11px] font-medium tracking-[0.25em] text-white uppercase backdrop-blur-sm
-                   transform translate-x-4 md:translate-x-8
-                   transition-all duration-500 ease-out
-                   hover:border-white hover:bg-white hover:text-black hover:translate-x-12"
+        type="button"
+        onClick={onExplore}
+        className="group flex translate-x-4 items-center gap-4 border border-white/30 bg-black/10 px-6 py-3.5 text-xs font-medium uppercase tracking-[0.25em] text-white backdrop-blur-sm transition-all duration-500 ease-out hover:translate-x-12 hover:border-white hover:bg-white hover:text-black md:translate-x-8"
       >
-        <span>EXPLORE THE COLLECTION</span>
-        <span className="inline-block transition-transform duration-500 ease-out group-hover:translate-x-1.5">→</span>
+        <span>Explore the Collection</span>
+        <ArrowRight className="h-4 w-4 transition-transform duration-500 ease-out group-hover:translate-x-1" />
       </button>
     </div>
   );
