@@ -134,7 +134,7 @@ async function loadDynamicRoutes() {
   // Studios (public directory pages, not prerendered but indexable)
   try {
     const { data, error } = await supabase
-      .from("featured_studios")
+      .from("featured_studios_public")
       .select("slug, updated_at")
       .eq("is_published", true)
       .not("slug", "is", null);
