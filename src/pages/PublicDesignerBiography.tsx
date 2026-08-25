@@ -131,12 +131,13 @@ export default function PublicDesignerBiography() {
           <p className="font-display text-xl md:text-2xl text-foreground/80">
             Interested in pieces from this collection?
           </p>
-          <a
-            href="/trade"
+          <Link
+            to="/trade-program"
             className="mt-6 inline-block font-body text-xs md:text-sm uppercase tracking-wider text-foreground hover:text-accent transition-colors duration-300"
           >
             Join Our Trade Program →
-          </a>
+          </Link>
+
         </div>
       </section>
 
