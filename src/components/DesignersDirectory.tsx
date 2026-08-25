@@ -755,12 +755,13 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
 function CarouselDots({ count, selected, onSelect }: { count: number; selected: number; onSelect: (i: number) => void }) {
   if (count <= 1) return null;
   return (
-    <div className="flex justify-center gap-1.5 mt-3">
+    <div className="flex justify-center gap-1.5 mt-4">
       {Array.from({ length: count }).map((_, i) => (
         <button key={i} onClick={() => onSelect(i)} className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${i === selected ? "bg-foreground scale-125" : "bg-foreground/25 hover:bg-foreground/40"}`} aria-label={`Go to page ${i + 1}`} />
       ))}
     </div>
   );
+
 }
 
 // ─── Mobile Alphabet Accordion ───────────────────────────────────────────────
