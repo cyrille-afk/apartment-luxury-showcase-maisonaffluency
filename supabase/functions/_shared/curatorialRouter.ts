@@ -220,7 +220,7 @@ export async function retrieveProductContext(
 }
 
 function renderContext(products: ProductContextItem[]): string {
-  if (!products.length) return "No matching catalog pieces were found above the relevance cutoff.";
+  if (!products.length) return "EMPTY — no catalog items matched above the relevance cutoff.";
   return products
     .map((p, i) => {
       const price = p.trade_price_cents
