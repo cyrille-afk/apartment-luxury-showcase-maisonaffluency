@@ -193,6 +193,8 @@ const INSTAGRAM_LINKS: Record<string, string> = {
 const HOVER_PICK_OVERRIDES: Record<string, string> = {
   "amelie-vermersch":
     "https://res.cloudinary.com/dif1oamtj/image/upload/v1787568580/maison%20affluency/curators-picks/Amelie%20Vermersch/maj-stool-variants-01.jpg",
+  "arnold-madsen":
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1785828968/Screenshot_2026-08-04_at_3.34.44_PM_kewvrk.png",
 };
 
 // ─── Hook: fetch designer→category mapping from curator picks ────────────────
