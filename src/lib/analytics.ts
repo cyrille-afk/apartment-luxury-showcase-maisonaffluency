@@ -376,3 +376,88 @@ export const trackTour = {
     });
   },
 };
+
+/**
+ * Hero "Explore the Collection" funnel.
+ *
+ * Three stages, all sent to GA4:
+ *   1. hero_cta_impression   — CTA scrolled into view (once per page view)
+ *   2. hero_cta_click        — visitor clicked the CTA
+ *   3. hero_cta_conversion   — the collection section actually became visible
+ *                              on the destination page after that click
+ *
+ * The click stores a short-lived attribution record in sessionStorage so the
+ * conversion event on /designers can be tied back to the originating click
+ * (and report time-to-collection in ms).
+ */
+const HERO_CTA_ATTRIBUTION_KEY = "ma:hero_cta_click";
+const HERO_CTA_ATTRIBUTION_TTL_MS = 5 * 60 * 1000;
+
+const impressionsFired = new Set<string>();
+
+export const trackHeroCta = {
+  impression: (label = "hero_explore_collection") => {
+    if (impressionsFired.has(label)) return;
+    impressionsFired.add(label);
+    trackEvent("hero_cta_impression", {
+      event_category: "CTA",
+      event_label: label,
+      ...getDeviceContext(),
+    });
+  },
+
+  click: (label = "hero_explore_collection", destination = "/designers") => {
+    try {
+      sessionStorage.setItem(
+        HERO_CTA_ATTRIBUTION_KEY,
+        JSON.stringify({ label, destination, ts: Date.now() })
+      );
+    } catch {
+      /* ignore private-mode storage failures */
+    }
+    trackEvent("hero_cta_click", {
+      event_category: "CTA",
+      event_label: label,
+      destination,
+      ...getDeviceContext(),
+    });
+  },
+
+  /**
+   * Fire when the collection/directory section is genuinely visible.
+   * No-op unless the visitor arrived from a recent CTA click.
+   */
+  conversion: (section: string) => {
+    let raw: string | null = null;
+    try {
+      raw = sessionStorage.getItem(HERO_CTA_ATTRIBUTION_KEY);
+    } catch {
+      return;
+    }
+    if (!raw) return;
+
+    let parsed: { label?: string; destination?: string; ts?: number };
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return;
+    }
+    const ts = Number(parsed.ts ?? 0);
+    if (!ts || Date.now() - ts > HERO_CTA_ATTRIBUTION_TTL_MS) {
+      try { sessionStorage.removeItem(HERO_CTA_ATTRIBUTION_KEY); } catch { /* ignore */ }
+      return;
+    }
+
+    // One conversion per click.
+    try { sessionStorage.removeItem(HERO_CTA_ATTRIBUTION_KEY); } catch { /* ignore */ }
+
+    trackEvent("hero_cta_conversion", {
+      event_category: "Conversion",
+      event_label: parsed.label ?? "hero_explore_collection",
+      section,
+      destination: parsed.destination ?? window.location.pathname,
+      time_to_collection_ms: Date.now() - ts,
+      ...getDeviceContext(),
+    });
+  },
+};
