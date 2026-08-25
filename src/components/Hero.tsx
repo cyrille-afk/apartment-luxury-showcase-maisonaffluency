@@ -135,48 +135,14 @@ const Hero = () => {
             Iconic Design.
           </h1>
 
-          <div className="mt-6 md:mt-10 flex w-full max-w-3xl flex-col items-start">
-            <p className="relative inline-block text-sm leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium [text-shadow:0_1px_10px_rgba(0,0,0,0.55)] hero-fade-in-delayed-3 before:content-[''] before:absolute before:-inset-x-3 before:-inset-y-2 before:-z-10 before:rounded-sm before:bg-black/35 before:backdrop-blur-[1px] before:[mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)]">
-              A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
-            </p>
+          <LuxuryCTA
+            className="mt-6 md:mt-10 hero-fade-in-delayed-3"
+            onClick={() => {
+              trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" });
+              navigate("/designers");
+            }}
+          />
 
-            {/* Mobile / PWA — primary CTA directly below paragraph, left-justified */}
-            <button
-              type="button"
-              onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-              className="group mt-12 flex items-center gap-3 font-body text-[13px] font-bold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70 md:hidden"
-            >
-              <span>Explore the Collection</span>
-              <span
-                aria-hidden="true"
-                className="text-[22px] leading-none transition-transform duration-300 group-hover:translate-x-3"
-              >
-                →
-              </span>
-            </button>
-
-            {/* Desktop — primary CTA remains anchored with the text block */}
-            <div className="hidden md:order-2 md:mt-20 md:flex md:w-full md:flex-col md:items-start">
-              <motion.button
-                type="button"
-                onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-                className="group relative inline-flex items-center gap-3 py-2 text-sm tracking-widest text-white uppercase after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:origin-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 hover:after:origin-left hover:after:scale-x-100"
-                whileTap={{ scale: 0.98 }}
-                transition={{ duration: 0.2 }}
-              >
-                <span>EXPLORE THE COLLECTION</span>
-                <span
-                  aria-hidden="true"
-                  className="text-[22px] leading-none transition-transform duration-300 group-hover:translate-x-3 md:group-hover:translate-x-8 transform translate-x-3 md:translate-x-6"
-                >
-                  →
-                </span>
-              </motion.button>
-            </div>
-
-
-
-          </div>
         </div>
 
         {/* Mobile / PWA — secondary CTAs centered above the iOS navigation bar */}
