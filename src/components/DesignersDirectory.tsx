@@ -610,7 +610,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts, pr
 
         {/* Content Layer */}
         <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/50 to-transparent z-10 pointer-events-none flex justify-between items-end">
-          <p className="text-white text-sm font-body tracking-widest uppercase">{displayName}</p>
+          <p className="text-white text-xs leading-[1.1] font-body tracking-widest uppercase max-w-[90%] pr-4">{displayName}</p>
 
           {/* Micro-Pill Tag for Multi-Designers */}
           <button
@@ -729,7 +729,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
 
         {/* Desktop bottom name overlay — dark gradient for editorial luxury */}
         <div className="hidden md:block absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/50 to-transparent z-10 pointer-events-none">
-          <p className="text-white text-sm font-body tracking-widest uppercase">
+          <p className="text-white text-xs leading-[1.1] font-body tracking-widest uppercase max-w-[90%] pr-4">
             {displayName}
           </p>
         </div>
