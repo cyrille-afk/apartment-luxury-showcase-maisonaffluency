@@ -4,7 +4,6 @@ import { scrollToSection } from "@/lib/scrollToSection";
 import { trackEvent, trackCTA } from "@/lib/analytics";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import PrivateTourDialog from "@/components/PrivateTourDialog";
-import LuxuryCTA from "@/components/LuxuryCTA";
 
 
 const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
@@ -46,8 +45,6 @@ const scrollToMeetDesigners = () => {
   });
 };
 
-const heroPrimaryCtaClass =
-  "group inline-flex min-h-12 items-center justify-between gap-6 px-2 py-4 text-left text-white text-[13px] font-body font-bold tracking-[0.25em] uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.75)] transition-opacity duration-300 hover:opacity-70 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70 hero-fade-in-delayed-4";
 
 const Hero = () => {
   const navigate = useNavigate();
