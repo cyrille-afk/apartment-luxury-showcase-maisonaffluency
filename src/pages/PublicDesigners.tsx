@@ -4,6 +4,7 @@ import { categoryUrl } from "@/lib/categorySlugs";
 import { Helmet } from "react-helmet-async";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { markDesignersLandingScrollLock, releaseDesignersLandingScrollLock } from "@/lib/designersScrollLock";
+import { trackHeroCta } from "@/lib/analytics";
 
 import { ChevronUp } from "lucide-react";
 import { useState, useEffect, useLayoutEffect } from "react";
