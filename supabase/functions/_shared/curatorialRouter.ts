@@ -15,6 +15,13 @@ import { withSemanticCache } from "./aiCache.ts";
 import { embedQuery } from "./aiEmbeddings.ts";
 import { MODEL_TIERS, tokenBudget } from "./aiModels.ts";
 import { logAiUsage } from "./aiUsage.ts";
+import {
+  logGuardrailViolation,
+  STRICT_NO_INVENT_SUFFIX,
+  validateAIResponse,
+  type ValidateAIResponseResult,
+} from "./aiGuardrail.ts";
+
 
 const GATEWAY_CHAT_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
