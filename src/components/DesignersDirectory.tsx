@@ -880,6 +880,36 @@ function MobileLetterRow({
 // exposing an unrendered placeholder where content used to be.
 const revealedLettersGlobal = new Set<string>();
 
+const isParentBrandCard = (item: Designer, parentDesignerCountByName: Record<string, number>) =>
+  item.founder === item.name && (parentDesignerCountByName[item.name] ?? 0) > 0;
+
+const getLetterDesignerTotal = (designers: Designer[], parentDesignerCountByName: Record<string, number>) =>
+  designers.reduce((sum, item) => {
+    const childCount = parentDesignerCountByName[item.name] ?? 0;
+    return sum + (isParentBrandCard(item, parentDesignerCountByName) ? childCount + 1 : 1);
+  }, 0);
+
+const getDesignerCardSpan = (item: Designer, parentDesignerCountByName: Record<string, number>) =>
+  isParentBrandCard(item, parentDesignerCountByName) ? 2 : 1;
+
+const getInitialVisibleDesignerCards = (
+  designers: Designer[],
+  parentDesignerCountByName: Record<string, number>,
+  maxSlots: number,
+) => {
+  let usedSlots = 0;
+  const visible: Designer[] = [];
+
+  for (const designer of designers) {
+    const span = getDesignerCardSpan(designer, parentDesignerCountByName);
+    if (visible.length > 0 && usedSlots + span > maxSlots) break;
+    visible.push(designer);
+    usedSlots += span;
+  }
+
+  return visible;
+};
+
 // ─── Letter Group Body ───────────────────────────────────────────────────────
 // Extracted so it only mounts (and its images only start downloading) after
 // the surrounding LetterGroup has been revealed by the intersection observer.
@@ -904,16 +934,18 @@ function LetterGroupBody({
   const matchesExpand = initialExpand && designers.some((d) => d.name === initialExpand || d.founder === initialExpand);
   const [openParent, setOpenParent] = useState<string | null>(matchesExpand ? initialExpand! : null);
   // Progressive disclosure: sections with more than 8 designers show the first
-  // 8 cards, then reveal the rest behind a centered "VIEW ALL" control.
-  const INITIAL_VISIBLE = 8;
-  const hasOverflow = designers.length > INITIAL_VISIBLE;
+  // 8 desktop grid slots, then reveal the rest behind a centered "VIEW ALL" control.
+  const INITIAL_VISIBLE_SLOTS = 8;
+  const totalDesignerCount = getLetterDesignerTotal(designers, parentDesignerCountByName);
+  const initialVisible = getInitialVisibleDesignerCards(designers, parentDesignerCountByName, INITIAL_VISIBLE_SLOTS);
+  const hasOverflow = totalDesignerCount > INITIAL_VISIBLE_SLOTS && designers.length > initialVisible.length;
   const [showAll, setShowAll] = useState<boolean>(!!matchesExpand);
-  const visible = hasOverflow && !showAll ? designers.slice(0, INITIAL_VISIBLE) : designers;
-  const hidden = hasOverflow && !showAll ? designers.slice(INITIAL_VISIBLE) : [];
+  const visible = hasOverflow && !showAll ? initialVisible : designers;
+  const hidden = hasOverflow && !showAll ? designers.slice(initialVisible.length) : [];
 
   const renderCard = (item: Designer, cardIndex: number) => {
     const designerCount = parentDesignerCountByName[item.name] ?? 0;
-    const isParentBrand = item.founder === item.name && designerCount > 0;
+    const isParentBrand = isParentBrandCard(item, parentDesignerCountByName);
     // Eager-load only the first grid row (4 columns at the widest breakpoint).
     const priority = eagerFirstRow && cardIndex < FIRST_ROW_CARDS;
     if (isParentBrand) {
@@ -953,7 +985,7 @@ function LetterGroupBody({
             className="overflow-hidden"
           >
             <div className={`${gridClass} mt-6 lg:mt-8`}>
-              {designers.slice(INITIAL_VISIBLE).map((item, i) => renderCard(item, i + INITIAL_VISIBLE))}
+              {designers.slice(initialVisible.length).map((item, i) => renderCard(item, i + initialVisible.length))}
             </div>
           </motion.div>
         )}
@@ -966,7 +998,7 @@ function LetterGroupBody({
             onClick={() => setShowAll(true)}
             className="relative py-2 font-body text-[11px] uppercase tracking-[0.28em] text-foreground after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:origin-right after:scale-x-0 after:bg-foreground after:transition-transform after:duration-300 hover:after:origin-left hover:after:scale-x-100"
           >
-            View all {designers.length} designers
+            View all {totalDesignerCount} designers
           </button>
         </div>
       )}
@@ -1070,6 +1102,7 @@ function LetterGroup({
   }, [anchorId, isRevealed, letter]);
 
   const matchesExpand = initialExpand && designers.some((d) => d.name === initialExpand || d.founder === initialExpand);
+  const totalDesignerCount = getLetterDesignerTotal(designers, parentDesignerCountByName);
   if (matchesExpand && !isRevealed) {
     // Deep-link is expanding a parent inside this letter — reveal synchronously.
     setIsRevealed(true);
@@ -1082,7 +1115,7 @@ function LetterGroup({
       <h2 className="font-serif text-3xl tracking-wider uppercase text-foreground pt-8 pb-4">
         {letter}
         <span className="text-xs font-body tracking-widest text-muted-foreground ml-2 align-super">
-          ({designers.length})
+          ({totalDesignerCount})
         </span>
       </h2>
 
@@ -1102,7 +1135,7 @@ function LetterGroup({
           className="flex items-center justify-center text-muted-foreground/30"
           style={{ minHeight: `${placeholderHeight}px` }}
         >
-          <span className="font-body text-xs tracking-widest uppercase">{designers.length} designer{designers.length !== 1 ? "s" : ""}</span>
+          <span className="font-body text-xs tracking-widest uppercase">{totalDesignerCount} designer{totalDesignerCount !== 1 ? "s" : ""}</span>
         </div>
       )}
 
