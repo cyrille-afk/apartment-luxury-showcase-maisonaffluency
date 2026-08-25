@@ -128,14 +128,14 @@ const Hero = () => {
         {/* Hero Text Group Layer */}
         <div className="absolute top-[25%] left-6 md:left-16 max-w-xl p-8 rounded-lg bg-gradient-to-br from-black/40 via-black/10 to-transparent backdrop-blur-[2px]">
           {/* Elegant Serif Header */}
-          <h1 className="text-white font-serif text-4xl md:text-5xl leading-tight mb-4 tracking-normal">
+          <h1 className="text-white font-serif text-4xl md:text-[52px] leading-[1.15] mb-6 tracking-normal">
             Modern Masters.<br />
             Iconic Design.
           </h1>
 
-          {/* Highly Readable Protected Body Paragraph */}
+          {/* Body Paragraph */}
           <p
-            className="text-white/95 text-base md:text-lg font-light leading-relaxed mb-8 max-w-md"
+            className="text-white/95 text-base md:text-[17px] font-light leading-relaxed md:leading-[1.75] mb-8 max-w-md"
             style={{ textShadow: "0px 2px 10px rgba(0,0,0,0.5)" }}
           >
             A curated collection of masterworks reeditions and contemporary design for global architectural projects.
