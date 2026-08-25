@@ -79,8 +79,9 @@ const HASH_UUID_RE = /\b[0-9a-f]{8}(?:[\s\-_]?[0-9a-f]{4}){3}[\s\-_]?[0-9a-f]{12
 /** Strip trailing counters: "Chair_01", "Chair_1", "Chair-2". */
 const TRAILING_COUNTER_RE = /[\s\-_]\d+$/;
 
-/** Strip trailing CDN hash crumbs (e.g. "_sezoxs", "_abc123"). */
-const TRAILING_HASH_CRUMB_RE = /[\s\-_][a-z0-9]{4,8}$/i;
+/** Strip trailing CDN hash crumbs (e.g. "_abc123"). Kept conservative: must contain a digit. */
+const TRAILING_HASH_CRUMB_RE = /[\s\-_][a-z0-9]*\d[a-z0-9]{2,7}$/i;
+
 
 /** Normalize whitespace and punctuation around a word. */
 function collapseWhitespace(str: string): string {
