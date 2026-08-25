@@ -1832,10 +1832,11 @@ const TradeDesignersAdmin = () => {
   const queryClient = useQueryClient();
   const [initialDraft] = useState<Partial<DesignerEditorDraft>>(() => readDesignerEditorDraft());
 
-  // Restore unsaved field values only. Reopening a saved accordion/preview can
-  // synchronously mount the heaviest editor subtree and trap the preview on it.
-  const [search, setSearch] = useState("");
-  const [activeLetter, setActiveLetter] = useState<string | null>(null);
+  // Restore lightweight filter state (search + letter) so a refresh keeps the
+  // editor where it was. Accordion/preview stay closed: reopening the heaviest
+  // editor subtree synchronously on mount can trap the preview.
+  const [search, setSearch] = useState(initialDraft.search ?? "");
+  const [activeLetter, setActiveLetter] = useState<string | null>(initialDraft.activeLetter ?? null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editBuffer, setEditBuffer] = useState<Record<string, Partial<DesignerRow>>>(initialDraft.editBuffer ?? {});
   const [previewId, setPreviewId] = useState<string | null>(null);
