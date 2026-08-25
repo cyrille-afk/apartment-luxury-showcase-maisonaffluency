@@ -5,9 +5,9 @@ import { test, expect } from "@playwright/test";
  *
  * Covers regressions the user has been bitten by:
  *  - Mobile/PWA hero image disappearing
- *  - Hero CTAs ("Explore Our Curated Collection", "Meet our Designers") losing styling or going missing
- *  - "Meet our Designers" anchor scroll target missing
- *  - Designers hover hero section disappearing under #meet-designers
+ *  - Hero CTAs ("Explore the Collection", "Singapore Gallery Preview") losing styling or going missing
+ *  - Primary CTA failing to navigate to the designers directory
+ *  - Designers directory route becoming unavailable
  *
  * Runs on both projects defined in playwright.config.ts (mobile-chrome 390x844, desktop-chrome 1280x800).
  */
@@ -36,32 +36,23 @@ test.describe("Landing page", () => {
     );
     expect(naturalWidth, "hero <img> failed to load").toBeGreaterThan(0);
 
-    // Both CTAs visible
+    // Primary and secondary CTAs visible
     await expect(
-      page.getByRole("button", { name: /explore our curated collection/i }),
+      page.getByRole("button", { name: /^explore the collection/i }),
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /meet our designers/i }),
+      page.getByRole("button", { name: /singapore gallery preview/i }),
     ).toBeVisible();
 
-    // Meet-designers scroll target exists in the DOM
-    await expect(page.locator("#meet-designers")).toHaveCount(1);
+    // The designers route remains available as the primary CTA destination.
+    const designersResponse = await page.request.get("/designers");
+    expect(designersResponse.ok()).toBeTruthy();
   });
 
-  test("smoke: 'Meet our Designers' CTA scrolls to designers section", async ({ page }) => {
-    await page.getByRole("button", { name: /meet our designers/i }).click();
-    const section = page.locator("#meet-designers");
-    await expect(section).toBeInViewport({ timeout: 5_000 });
-
-    // Wait past the smooth-scroll + lazy section layout window. This catches
-    // regressions where the CTA briefly hits the target, then scroll-restore or
-    // lazy content above it pushes the target out of view.
-    await page.waitForTimeout(2_500);
-    await expect(section).toBeInViewport();
-
-    const top = await section.evaluate((el) => el.getBoundingClientRect().top);
-    expect(top, "designers section should settle below the fixed header").toBeGreaterThanOrEqual(80);
-    expect(top, "designers section should not settle far below the viewport").toBeLessThan(220);
+  test("smoke: 'Explore the Collection' CTA opens the designers directory", async ({ page }) => {
+    await page.getByRole("button", { name: /^explore the collection/i }).click();
+    await expect(page).toHaveURL(/\/designers(?:[/?#]|$)/, { timeout: 10_000 });
+    await expect(page.getByRole("heading", { name: /designers?/i }).first()).toBeVisible({ timeout: 10_000 });
   });
 
   test("visual: above-the-fold hero snapshot", async ({ page }, testInfo) => {
