@@ -32,8 +32,6 @@ const NOISE_WORDS = [
   "img", "image", "dsc", "dscf", "photo", "photos", "picture", "pictures",
   "pic", "pxl", "whatsapp", "telegram", "signal", "wechat", "untitled",
   "download", "file", "asset", "copy", "final", "finalfinal", "v1", "v2", "v3",
-  // Time-of-day markers when standalone
-  "am", "pm",
   // Prepositions used in timestamps
   "at",
 ];
@@ -43,6 +41,9 @@ const NOISE_WORD_RE = new RegExp(
   "gi"
 );
 
+/** Standalone AM/PM indicators (only strip when isolated, not acronyms). */
+const AM_PM_RE = /\b(am|pm)\b/gi;
+
 /**
  * Date/time patterns that should be removed entirely. These overlap with the
  * noise-word list, but aggressive regex matching is required for compound
@@ -50,13 +51,13 @@ const NOISE_WORD_RE = new RegExp(
  */
 const DATE_TIME_PATTERNS: RegExp[] = [
   // 2026-08-25, 2026 08 25, 2026_08_25, 2026/08/25
-  /\b\d{4}[\s\-_/]\d{2}[\s\-_/]\d{2}\b/gi,
+  /\d{4}[\s\-_/]\d{2}[\s\-_/]\d{2}/gi,
   // 25-08-2026, 25 08 2026, 25/08/2026
-  /\b\d{2}[\s\-_/]\d{2}[\s\-_/]\d{4}\b/gi,
+  /\d{2}[\s\-_/]\d{2}[\s\-_/]\d{4}/gi,
   // 2026-08-25 at 12.25.36 PM, 2026 08 25 at 12.25.36 PM
-  /\b\d{4}[\s\-_/]\d{2}[\s\-_/]\d{2}[\s\-_]*\bat\b[\s\-_]*\d{1,2}[\s\-_:.]?\d{2}([\s\-_:.]?\d{2})?[\s\-_]*(am|pm)?\b/gi,
+  /\d{4}[\s\-_/]\d{2}[\s\-_/]\d{2}[\s\-_]*\bat\b[\s\-_]*\d{1,2}[\s\-_:.]?\d{2}([\s\-_:.]?\d{2})?[\s\-_]*(am|pm)?\b/gi,
   // 25-08-2026 at 12.25.36 PM
-  /\b\d{2}[\s\-_/]\d{2}[\s\-_/]\d{4}[\s\-_]*\bat\b[\s\-_]*\d{1,2}[\s\-_:.]?\d{2}([\s\-_:.]?\d{2})?[\s\-_]*(am|pm)?\b/gi,
+  /\d{2}[\s\-_/]\d{2}[\s\-_/]\d{4}[\s\-_]*\bat\b[\s\-_]*\d{1,2}[\s\-_:.]?\d{2}([\s\-_:.]?\d{2})?[\s\-_]*(am|pm)?\b/gi,
   // 12.25.36 PM, 12:25:36 PM, 12.25 PM, 12:25 PM
   /\b\d{1,2}[\s\-_:.]\d{2}([\s\-_:.]\d{2})?[\s\-_]*(am|pm)\b/gi,
   // 12.25.36 (no AM/PM)
@@ -80,7 +81,6 @@ const TRAILING_COUNTER_RE = /[\s\-_]\d+$/;
 /** Normalize whitespace and punctuation around a word. */
 function collapseWhitespace(str: string): string {
   return str
-    .replace(/[\-_]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -91,7 +91,9 @@ function collapseWhitespace(str: string): string {
  */
 export function sanitizeFilenameCaption(url: string): string | null {
   try {
-    const pathname = new URL(url).pathname;
+    const rawPathname = new URL(url).pathname;
+    // Decode percent-encoded spaces and special chars (e.g. %20 -> space).
+    const pathname = decodeURIComponent(rawPathname);
     let filename = pathname.split("/").pop() || "";
 
     // Strip Supabase storage timestamp prefix.
@@ -100,8 +102,12 @@ export function sanitizeFilenameCaption(url: string): string | null {
     // Strip file extension.
     filename = filename.replace(EXTENSION_RE, "");
 
+    // Normalize separators: underscores, dots used as separators become spaces.
+    // Preserve dots that are part of timestamps until date-time removal below.
+    filename = filename.replace(/[_-]+/g, " ");
+
     // Strip UUID / hex hash chunks.
-    filename = filename.replace(HASH_UUID_RE, " ")
+    filename = filename.replace(HASH_UUID_RE, " ");
 
     // Strip date/time compounds (must run before noise-word stripping).
     for (const re of DATE_TIME_PATTERNS) {
@@ -110,6 +116,12 @@ export function sanitizeFilenameCaption(url: string): string | null {
 
     // Strip isolated noise words.
     filename = filename.replace(NOISE_WORD_RE, " ");
+
+    // Strip isolated AM/PM.
+    filename = filename.replace(AM_PM_RE, " ");
+
+    // Remove standalone numeric tokens (camera counters, counters in the middle).
+    filename = filename.replace(/\b\d+\b/g, " ");
 
     // Strip trailing counters.
     filename = filename.replace(TRAILING_COUNTER_RE, "");
