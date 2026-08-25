@@ -73,6 +73,8 @@ export interface CuratorialQueryArgs {
   /** Skip cache read/write for this call. */
   bypassCache?: boolean;
   feature?: string;
+  /** Disable the anti-hallucination guardrail (default: enabled). */
+  skipGuardrail?: boolean;
 }
 
 export interface CuratorialQueryResult {
@@ -84,7 +86,13 @@ export interface CuratorialQueryResult {
   products: ProductContextItem[];
   usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
   latencyMs: number;
+  guardrail?: {
+    intercepted: boolean;
+    action: "none" | "stripped" | "regenerated" | "regeneration_failed";
+    invalidNames: string[];
+  };
 }
+
 
 function serviceClient() {
   const url = Deno.env.get("SUPABASE_URL");
