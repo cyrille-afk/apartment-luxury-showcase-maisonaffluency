@@ -3113,6 +3113,81 @@ export type Database = {
         }
         Relationships: []
       }
+      ingestion_job_state: {
+        Row: {
+          created_at: string
+          id: boolean
+          is_paused: boolean
+          last_error: string | null
+          last_run_at: string | null
+          lease_owner: string | null
+          lease_until: string | null
+          pause_reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: boolean
+          is_paused?: boolean
+          last_error?: string | null
+          last_run_at?: string | null
+          lease_owner?: string | null
+          lease_until?: string | null
+          pause_reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: boolean
+          is_paused?: boolean
+          last_error?: string | null
+          last_run_at?: string | null
+          lease_owner?: string | null
+          lease_until?: string | null
+          pause_reason?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ingestion_queue: {
+        Row: {
+          attempts: number
+          created_at: string
+          error_message: string | null
+          id: string
+          processed_at: string | null
+          product_id: string | null
+          raw_data: Json
+          source_url: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          processed_at?: string | null
+          product_id?: string | null
+          raw_data?: Json
+          source_url: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          processed_at?: string | null
+          product_id?: string | null
+          raw_data?: Json
+          source_url?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inquiries: {
         Row: {
           admin_notes: string | null
@@ -7880,6 +7955,10 @@ export type Database = {
       }
       _norm_designer_name: { Args: { txt: string }; Returns: string }
       accept_studio_invite: { Args: { _invite_id: string }; Returns: Json }
+      acquire_ingestion_lease: {
+        Args: { _minutes?: number; _owner: string }
+        Returns: boolean
+      }
       add_board_comment_by_token: {
         Args: {
           _author_name?: string
@@ -8370,6 +8449,7 @@ export type Database = {
         }
         Returns: Json
       }
+      release_ingestion_lease: { Args: { _owner: string }; Returns: undefined }
       remap_product_descriptors: { Args: never; Returns: number }
       rotate_board_token: { Args: { _board_id: string }; Returns: string }
       sanitize_biography_citations: { Args: { input: string }; Returns: string }

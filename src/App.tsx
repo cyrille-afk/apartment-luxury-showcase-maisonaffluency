@@ -46,6 +46,7 @@ const TradeAdminTools = lazy(() => import("./pages/TradeAdminTools"));
 const TradeAdminDashboard = lazy(() => import("./pages/TradeAdminDashboard"));
 const TradeConciergeUsage = lazy(() => import("./pages/TradeConciergeUsage"));
 const TradeAiUsageDashboard = lazy(() => import("./pages/TradeAiUsageDashboard"));
+const TradeIngestionQueue = lazy(() => import("./pages/TradeIngestionQueue"));
 const TradeRagDebug = lazy(() => import("./pages/TradeRagDebug"));
 const TradeAiUsagePrintCheck = lazy(() => import("./pages/TradeAiUsagePrintCheck"));
 const TradeAdminConciergeLeads = lazy(() => import("./pages/TradeAdminConciergeLeads"));
@@ -642,6 +643,7 @@ const App = () => {
                     <Route path="admin/concierge-usage" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeConciergeUsage /></Suspense>} />
                     <Route path="admin/ai-usage" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAiUsageDashboard /></Suspense>} />
                     <Route path="admin/ai-usage/print-check" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAiUsagePrintCheck /></Suspense>} />
+                    <Route path="admin/ingestion" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeIngestionQueue /></Suspense>} />
                     <Route path="admin/rag-debug" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeRagDebug /></Suspense>} />
                     <Route path="admin/concierge-leads" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminConciergeLeads /></Suspense>} />
                     <Route path="admin/inquiries" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminInquiries /></Suspense>} />
