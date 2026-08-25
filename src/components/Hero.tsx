@@ -155,17 +155,24 @@ const Hero = () => {
             </button>
 
             {/* Desktop — primary CTA remains anchored with the text block */}
-            <div className="hidden md:order-2 md:mt-16 md:flex md:w-full md:flex-col md:items-start">
+            <div className="hidden md:order-2 md:mt-20 md:flex md:w-full md:flex-col md:items-start">
               <motion.button
                 type="button"
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-                className="relative py-2 text-sm tracking-widest text-white uppercase after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:origin-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 hover:after:origin-left hover:after:scale-x-100"
+                className="group relative inline-flex items-center gap-3 py-2 text-sm tracking-widest text-white uppercase after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:origin-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 hover:after:origin-left hover:after:scale-x-100"
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: 0.2 }}
               >
                 <span>EXPLORE THE COLLECTION</span>
+                <span
+                  aria-hidden="true"
+                  className="text-[22px] leading-none transition-transform duration-300 group-hover:translate-x-3"
+                >
+                  →
+                </span>
               </motion.button>
             </div>
+
 
 
           </div>
