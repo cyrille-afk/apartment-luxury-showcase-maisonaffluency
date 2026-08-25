@@ -294,7 +294,7 @@ Deno.serve(async (req) => {
             sender_domain: payload.sender_domain,
             subject: payload.subject,
             html: payload.html,
-            text: payload.text,
+            text: payload.text || (payload.html ? htmlToPlainText(payload.html) : payload.subject),
             purpose: payload.purpose,
             label: payload.label,
             idempotency_key: payload.idempotency_key,
