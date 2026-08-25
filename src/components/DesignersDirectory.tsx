@@ -188,6 +188,13 @@ const INSTAGRAM_LINKS: Record<string, string> = {
   "jean-michel-frank": "https://www.instagram.com/ecart.paris/",
 };
 
+// ─── Hover-pick image overrides (keyed by DB slug) ───────────────────────────
+// Used for the card hover/tap reveal that normally shows the first curator pick.
+const HOVER_PICK_OVERRIDES: Record<string, string> = {
+  "amelie-vermersch":
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1787568580/maison%20affluency/curators-picks/Amelie%20Vermersch/maj-stool-variants-01.jpg",
+};
+
 // ─── Hook: fetch designer→category mapping from curator picks ────────────────
 function useDesignerCategories() {
   return useQuery({
@@ -627,6 +634,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
   const cardImageUrl = item.image_url || item.hero_image_url;
   const firstPickMap = useContext(FirstPickImageContext);
   const firstPickImageUrl = firstPickMap[item.id] || null;
+  const hoverPickImageUrl = HOVER_PICK_OVERRIDES[item.slug] || firstPickImageUrl;
   const thumbs = CARD_THUMBNAILS[item.slug] || [];
   const instagramLinks: string[] = hasIgPosts ? [] : (() => {
     const hardcoded = INSTAGRAM_LINKS[item.slug];
@@ -638,7 +646,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
   const firstLetter = (displayName || item.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").charAt(0).toUpperCase();
 
   const isLetterA = true; // bottom-anchored vignette applied to every designer card
-  const hasHoverPick = !!firstPickImageUrl && firstPickImageUrl !== cardImageUrl;
+  const hasHoverPick = !!hoverPickImageUrl && hoverPickImageUrl !== cardImageUrl;
   // Mobile/PWA: first tap reveals the curator pick + "Discover the Product" pill; second tap navigates.
   const [mobileRevealed, setMobileRevealed] = React.useState(false);
 
@@ -664,7 +672,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
         {/* Hover/tap reveal — first curator pick fades in over the portrait (desktop: hover; mobile/PWA: tap) */}
         {hasHoverPick && (
           <img
-            {...cldResponsiveImg(firstPickImageUrl!, { widths: [320, 480, 640, 960], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px" })}
+            {...cldResponsiveImg(hoverPickImageUrl!, { widths: [320, 480, 640, 960], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px" })}
             alt=""
             aria-hidden="true"
             draggable={false}
