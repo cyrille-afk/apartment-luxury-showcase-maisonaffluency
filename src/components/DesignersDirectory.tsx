@@ -615,7 +615,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts, pr
           {/* Micro-Pill Tag for Multi-Designers */}
           <button
             onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggle(); }}
-            className="pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/20 bg-white/10 text-[10px] tracking-wider text-white uppercase backdrop-blur-md transition-all duration-300 hover:bg-white hover:text-black"
+            className="pointer-events-auto flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 bg-black/60 backdrop-blur-sm text-white text-[10px] font-sans font-medium uppercase tracking-widest transition-all duration-300 hover:bg-white hover:text-black"
             aria-label={`Show ${designerCount} designers for ${displayName}`}
           >
             <span>Designers{designerCount > 0 ? ` (${designerCount})` : ""}</span>
