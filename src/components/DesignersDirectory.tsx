@@ -903,52 +903,77 @@ function LetterGroupBody({
 }) {
   const matchesExpand = initialExpand && designers.some((d) => d.name === initialExpand || d.founder === initialExpand);
   const [openParent, setOpenParent] = useState<string | null>(matchesExpand ? initialExpand! : null);
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-  const needsCarousel = designers.length > (isMobile ? 2 : 5);
+  // Progressive disclosure: sections with more than 8 designers show the first
+  // 8 cards, then reveal the rest behind a centered "VIEW ALL" control.
+  const INITIAL_VISIBLE = 8;
+  const hasOverflow = designers.length > INITIAL_VISIBLE;
+  const [showAll, setShowAll] = useState<boolean>(!!matchesExpand);
+  const visible = hasOverflow && !showAll ? designers.slice(0, INITIAL_VISIBLE) : designers;
+  const hidden = hasOverflow && !showAll ? designers.slice(INITIAL_VISIBLE) : [];
+
+  const renderCard = (item: Designer, cardIndex: number) => {
+    const designerCount = parentDesignerCountByName[item.name] ?? 0;
+    const isParentBrand = item.founder === item.name && designerCount > 0;
+    // Eager-load only the first grid row (4 columns at the widest breakpoint).
+    const priority = eagerFirstRow && cardIndex < FIRST_ROW_CARDS;
+    if (isParentBrand) {
+      const isOpen = openParent === item.name;
+      return (
+        <React.Fragment key={item.slug}>
+          <ParentBrandCard item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} hasIgPosts={designersWithIgPosts?.has(item.id)} priority={priority} />
+          <AnimatePresence>
+            {isOpen && (
+              <div className="col-span-full">
+                <ParentSubGrid key={item.name} parentName={item.name} onClose={() => setOpenParent(null)} autoScroll={!!matchesExpand && item.name === initialExpand} />
+              </div>
+            )}
+          </AnimatePresence>
+        </React.Fragment>
+      );
+    }
+    return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} hasIgPosts={designersWithIgPosts?.has(item.id)} priority={priority} />;
+  };
+
+  const gridClass = "grid grid-cols-2 md:grid-cols-4 items-stretch gap-6 lg:gap-8";
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
-      {needsCarousel ? (
-        <LetterCarousel
-          letter={letter}
-          designers={designers}
-          openParent={openParent}
-          setOpenParent={setOpenParent}
-          parentDesignerCountByName={parentDesignerCountByName}
-          fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
-          designersWithIgPosts={designersWithIgPosts}
-          initialExpand={initialExpand}
-          eagerFirstRow={eagerFirstRow}
-        />
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-stretch gap-6 lg:gap-8">
-          {designers.map((item, cardIndex) => {
-            const designerCount = parentDesignerCountByName[item.name] ?? 0;
-            const isParentBrand = item.founder === item.name && designerCount > 0;
-            // Eager-load only the first grid row (4 columns at the widest breakpoint).
-            const priority = eagerFirstRow && cardIndex < FIRST_ROW_CARDS;
-            if (isParentBrand) {
-              const isOpen = openParent === item.name;
-              return (
-                <React.Fragment key={item.slug}>
-                  <ParentBrandCard item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} hasIgPosts={designersWithIgPosts?.has(item.id)} priority={priority} />
-                  <AnimatePresence>
-                    {isOpen && (
-                      <div className="col-span-full">
-                        <ParentSubGrid key={item.name} parentName={item.name} onClose={() => setOpenParent(null)} autoScroll={!!matchesExpand && item.name === initialExpand} />
-                      </div>
-                    )}
-                  </AnimatePresence>
-                </React.Fragment>
-              );
-            }
-            return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} hasIgPosts={designersWithIgPosts?.has(item.id)} priority={priority} />;
-          })}
+      <div className={gridClass}>
+        {visible.map((item, i) => renderCard(item, i))}
+      </div>
+
+      <AnimatePresence initial={false}>
+        {hasOverflow && showAll && (
+          <motion.div
+            key="overflow"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <div className={`${gridClass} mt-6 lg:mt-8`}>
+              {designers.slice(INITIAL_VISIBLE).map((item, i) => renderCard(item, i + INITIAL_VISIBLE))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {hasOverflow && !showAll && hidden.length > 0 && (
+        <div className="flex justify-center pt-8">
+          <button
+            type="button"
+            onClick={() => setShowAll(true)}
+            className="relative py-2 font-body text-[11px] uppercase tracking-[0.28em] text-foreground after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:origin-right after:scale-x-0 after:bg-foreground after:transition-transform after:duration-300 hover:after:origin-left hover:after:scale-x-100"
+          >
+            View all {designers.length} designers
+          </button>
         </div>
       )}
     </motion.div>
   );
 }
+
 
 // ─── Letter Group ────────────────────────────────────────────────────────────
 function LetterGroup({
