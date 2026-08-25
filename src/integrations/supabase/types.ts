@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_model_pricing: {
+        Row: {
+          created_at: string
+          currency: string
+          effective_from: string
+          flat_per_call_usd: number | null
+          input_usd_per_mtok: number | null
+          model: string
+          notes: string | null
+          output_usd_per_mtok: number | null
+          source: string
+          source_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          effective_from?: string
+          flat_per_call_usd?: number | null
+          input_usd_per_mtok?: number | null
+          model: string
+          notes?: string | null
+          output_usd_per_mtok?: number | null
+          source?: string
+          source_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          effective_from?: string
+          flat_per_call_usd?: number | null
+          input_usd_per_mtok?: number | null
+          model?: string
+          notes?: string | null
+          output_usd_per_mtok?: number | null
+          source?: string
+          source_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_response_cache: {
         Row: {
           completion_tokens: number | null
