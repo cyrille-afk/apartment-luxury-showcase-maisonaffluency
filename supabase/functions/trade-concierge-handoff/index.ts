@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
         topic: `concierge:${streamId}`,
         event,
         payload: { ...payload, stream_id: streamId, user_id: userId, ts: Date.now() },
-        private: false,
+        private: true,
       }],
     }),
   }).catch((e) => {
