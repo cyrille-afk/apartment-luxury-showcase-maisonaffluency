@@ -8429,6 +8429,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      realtime_topic_allowed: {
+        Args: { _topic: string; _uid: string }
+        Returns: boolean
+      }
       recompute_trade_tier_suggestions: { Args: never; Returns: number }
       record_security_event: {
         Args: {
