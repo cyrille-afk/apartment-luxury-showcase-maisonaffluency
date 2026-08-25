@@ -8190,6 +8190,31 @@ export type Database = {
           similarity: number
         }[]
       }
+      match_trade_products: {
+        Args: {
+          match_count: number
+          match_threshold: number
+          query_embedding: string
+        }
+        Returns: {
+          brand_name: string
+          category: string
+          currency: string
+          description: string
+          designer_country: string
+          designer_id: string
+          designer_name: string
+          designer_slug: string
+          dimensions: string
+          id: string
+          image_url: string
+          materials: string
+          product_name: string
+          similarity: number
+          subcategory: string
+          trade_price_cents: number
+        }[]
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
