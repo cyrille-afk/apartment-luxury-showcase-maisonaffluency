@@ -227,10 +227,6 @@ Deno.serve(async (req) => {
     await supabase.from("ingestion_job_state").update({ last_error: message }).eq("id", true);
     return json({ error: message }, 500);
   } finally {
-    await supabase
-      .from("ingestion_job_state")
-      .update({ lease_until: null, lease_owner: null })
-      .eq("id", true)
-      .eq("lease_owner", owner);
+    await supabase.rpc("release_ingestion_lease", { _owner: owner });
   }
 });
