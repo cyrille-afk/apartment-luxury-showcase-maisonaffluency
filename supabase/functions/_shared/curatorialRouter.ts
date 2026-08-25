@@ -289,14 +289,18 @@ export async function handleCuratorialQuery(
     : [];
 
   // 4. Answer with the filtered context injected.
+  const modeInstruction = isComplex ? FRONTIER_MODE_INSTRUCTION : FLASH_MODE_INSTRUCTION;
   const messages = [
-    { role: "system", content: args.systemPrompt ?? BASE_SYSTEM_PROMPT },
+    { role: "system", content: `${args.systemPrompt ?? BASE_SYSTEM_PROMPT}\n\n${modeInstruction}` },
     ...(args.history ?? []).map((m) => ({ role: m.role, content: m.content })),
     {
       role: "user",
-      content: `Catalog context (top ${products.length}, cosine cutoff ${matchThreshold}):\n\n${renderContext(products)}\n\nClient question: ${args.query}`,
+      content:
+        `${modeInstruction}\n\n[Database Context] (top ${products.length} of max ${matchCount}, cosine cutoff ${matchThreshold})\n` +
+        `${renderContext(products)}\n[End Database Context]\n\nClient question: ${args.query}`,
     },
   ];
+
 
   try {
     const { text, usage } = await callGateway(
