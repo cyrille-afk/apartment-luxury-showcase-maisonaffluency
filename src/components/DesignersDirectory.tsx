@@ -1076,10 +1076,11 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
   const [activePage, setActivePage] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [slotsPerPage, setSlotsPerPage] = useState(() => {
-    if (typeof window === "undefined") return 5;
+    if (typeof window === "undefined") return 4;
     if (window.innerWidth >= 1024) return 4;
     if (window.innerWidth >= 768) return 3;
-    return 2;
+    if (window.innerWidth >= 640) return 2;
+    return 1;
   });
   const dragStartXRef = useRef(0);
   const dragStartScrollLeftRef = useRef(0);
@@ -1089,7 +1090,8 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
     const onResize = () => {
       if (window.innerWidth >= 1024) setSlotsPerPage(4);
       else if (window.innerWidth >= 768) setSlotsPerPage(3);
-      else setSlotsPerPage(2);
+      else if (window.innerWidth >= 640) setSlotsPerPage(2);
+      else setSlotsPerPage(1);
     };
     onResize();
     window.addEventListener("resize", onResize);
