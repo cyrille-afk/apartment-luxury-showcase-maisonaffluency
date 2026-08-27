@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackEvent, trackCTA } from "@/lib/analytics";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
+import { setDarkIosChrome, clearDarkIosChrome } from "@/lib/iosChrome";
 import PrivateTourDialog from "@/components/PrivateTourDialog";
 
 const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
