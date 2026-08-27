@@ -220,12 +220,6 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 
       if (!product) return null;
 
-      const { data: variantMapRow } = await supabase
-        .from("designer_curator_picks_public" as any)
-        .select("variant_image_map")
-        .eq("id", (product as any).id)
-        .maybeSingle();
-
       const brandCandidates = Array.from(new Set([
         designer.display_name,
         designer.name,
