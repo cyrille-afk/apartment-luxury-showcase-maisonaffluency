@@ -992,9 +992,31 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     .filter(Boolean)
     .join(" / ");
 
+  const showMobileBaseTopGrid = (isMobile || isPwa) && (visibleWoodTiles.length > 0 || visibleTopTiles.length > 0);
+
   return (
     <TooltipProvider>
       <div className={className} onMouseLeave={restoreLockedPreview}>
+      {showMobileBaseTopGrid && (
+        <div className={cn("grid gap-4 mb-6", visibleWoodTiles.length > 0 && visibleTopTiles.length > 0 ? "grid-cols-2" : "grid-cols-1")}>
+          {visibleWoodTiles.length > 0 && (
+            <div>
+              <div className="text-xs uppercase text-muted-foreground mb-1">Base</div>
+              <div className="flex gap-2 flex-wrap">
+                {visibleWoodTiles.map((f) => renderTile(f, "base", undefined, "circle"))}
+              </div>
+            </div>
+          )}
+          {visibleTopTiles.length > 0 && (
+            <div>
+              <div className="text-xs uppercase text-muted-foreground mb-1">Top</div>
+              <div className="flex gap-2 flex-wrap">
+                {visibleTopTiles.map((f) => renderTile(f, "top", undefined, "circle"))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       {isRugProduct && visibleFabricTiles.length > 0 ? (
         <div className="border-t border-border/60">
           <button
@@ -1053,7 +1075,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         emptyNote:
           "Full fabric library coming soon. In the meantime, your atelier can be upholstered in COM (Customer's Own Fabric) — please request samples or pricing through your Maison Affluency concierge.",
       })}
-      {showWoodSection && visibleWoodTiles.length > 0 &&
+      {showWoodSection && visibleWoodTiles.length > 0 && !showMobileBaseTopGrid &&
         renderAccordion({
           isOpen: openWood,
           onToggle: () => setOpenWood((v) => !v),
@@ -1078,7 +1100,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           glyph: pickFinishGlyph(visibleWoodTiles, woodLabel),
           tileKind: "base",
         })}
-      {showWoodSection && visibleTopTiles.length > 0 &&
+      {showWoodSection && visibleTopTiles.length > 0 && !showMobileBaseTopGrid &&
         renderAccordion({
           isOpen: openTop,
           onToggle: () => setOpenTop((v) => !v),
