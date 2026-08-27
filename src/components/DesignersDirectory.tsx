@@ -378,6 +378,18 @@ function parseDesignerDisplayName(item: Designer): { displayName: string; parent
 // ─── Sub-Designers Grid ──────────────────────────────────────────────────────
 function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string; onClose: () => void; autoScroll?: boolean }) {
   const { data: designers = [] } = useParentBrandDesigners(parentName);
+  const { data: designersWithIgPosts = new Set<string>() } = useQuery({
+    queryKey: queryKeys.designersWithIgPosts(),
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("designer_instagram_posts")
+        .select("designer_id")
+        .eq("hidden", false);
+      if (!data) return new Set<string>();
+      return new Set(data.map((r: any) => r.designer_id as string));
+    },
+    staleTime: 1000 * 60 * 10,
+  });
   const rootRef = useRef<HTMLDivElement>(null);
 
 
@@ -425,34 +437,41 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
             <span className="font-body text-xs text-muted-foreground/50">Loading…</span>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-12">
-            {designers.map((d) => (
-              <Link
-                key={d.slug}
-                to={`/designers/${d.slug}`}
-                className="group/sub block"
-              >
-                <div className="w-full aspect-[3/4] bg-neutral-50 overflow-hidden">
-                  {d.image ? (
-                    <img
-                      {...cldResponsiveImg(d.image, { widths: [160, 240, 320, 480, 640], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" })}
-                      alt={d.name}
-                      className="object-cover w-full h-full transition-all duration-300 md:grayscale md:opacity-90 md:contrast-[1.02] md:group-hover/sub:grayscale-0 md:group-hover/sub:opacity-100 md:group-hover/sub:contrast-[1.10] md:group-hover/sub:scale-[1.02]"
-                      loading="lazy"
-                      decoding="async"
-                      fetchPriority="low"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2 md:gap-3">
+            {designers.map((d) => {
+              const hasIg = designersWithIgPosts.has(d.id);
+              const igUrl = hasIg ? undefined : (d.instagramUrl || INSTAGRAM_LINKS[d.slug]);
+              return (
+                <Link
+                  key={d.slug}
+                  to={`/designers/${d.slug}`}
+                  className="group/sub rounded-none overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all"
+                >
+                  <div className="aspect-[4/5] relative bg-muted/10 overflow-hidden">
+                    {d.image ? (
+                      <img {...cldResponsiveImg(d.image, { widths: [160, 240, 320, 480], sizes: "(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 14vw" })} alt={d.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110" loading="lazy" decoding="async" fetchPriority="low" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-muted/5">
+                        <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View</span>
                     </div>
-                  )}
-                </div>
-                <p className="mt-3 font-body text-[11px] md:text-xs uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1">
-                  {d.name}
-                </p>
-              </Link>
-            ))}
+                    {igUrl && (
+                      <span className="absolute bottom-1.5 left-2 z-10 font-body text-[7px] text-white/50 tracking-wide drop-shadow-sm">
+                        @{igUrl.replace(/\/+$/, '').split('/').pop()}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="px-2 py-1.5 bg-background text-center">
+                    <p className="font-body text-[10px] md:text-[11px] text-foreground leading-tight line-clamp-1">{d.name}</p>
+                  </div>
+
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>
@@ -521,7 +540,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts, pr
   }, [isOpen]);
 
   return (
-    <div ref={cardRef} data-card-kind="parent" data-designer-slug={item.slug} className="col-span-full group self-stretch rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
+    <div ref={cardRef} data-card-kind="parent" data-designer-slug={item.slug} className="col-span-1 md:col-span-2 group self-stretch rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
       <div className="relative overflow-hidden aspect-[4/3] md:aspect-auto md:h-[400px] group">
         {cardImageUrl ? (
           <img {...cldResponsiveImg(cardImageUrl, { widths: [480, 720, 960, 1280], sizes: "(max-width: 640px) 100vw, (max-width: 1024px) 66vw, 720px" })} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : "low"} />
@@ -819,11 +838,32 @@ const revealedLettersGlobal = new Set<string>();
 const isParentBrandCard = (item: Designer, parentDesignerCountByName: Record<string, number>) =>
   item.founder === item.name && (parentDesignerCountByName[item.name] ?? 0) > 0;
 
+const getLetterDesignerTotal = (designers: Designer[], parentDesignerCountByName: Record<string, number>) =>
+  designers.reduce((sum, item) => {
+    const childCount = parentDesignerCountByName[item.name] ?? 0;
+    return sum + (isParentBrandCard(item, parentDesignerCountByName) ? childCount + 1 : 1);
+  }, 0);
+
+const getDesignerCardSpan = (item: Designer, parentDesignerCountByName: Record<string, number>) =>
+  isParentBrandCard(item, parentDesignerCountByName) ? 2 : 1;
 
 const getInitialVisibleDesignerCards = (
   designers: Designer[],
-  maxCards: number,
-) => designers.slice(0, maxCards);
+  parentDesignerCountByName: Record<string, number>,
+  maxSlots: number,
+) => {
+  let usedSlots = 0;
+  const visible: Designer[] = [];
+
+  for (const designer of designers) {
+    const span = getDesignerCardSpan(designer, parentDesignerCountByName);
+    if (visible.length > 0 && usedSlots + span > maxSlots) break;
+    visible.push(designer);
+    usedSlots += span;
+  }
+
+  return visible;
+};
 
 // ─── Letter Group Body ───────────────────────────────────────────────────────
 // Extracted so it only mounts (and its images only start downloading) after
@@ -850,10 +890,10 @@ function LetterGroupBody({
   const [openParent, setOpenParent] = useState<string | null>(matchesExpand ? initialExpand! : null);
   // Progressive disclosure: sections with more than 8 designers show the first
   // 8 desktop grid slots, then reveal the rest behind a centered "VIEW ALL" control.
-  const INITIAL_VISIBLE_CARDS = 8;
-  const totalDesignerCount = designers.length;
-  const initialVisible = getInitialVisibleDesignerCards(designers, INITIAL_VISIBLE_CARDS);
-  const hasOverflow = designers.length > INITIAL_VISIBLE_CARDS;
+  const INITIAL_VISIBLE_SLOTS = 8;
+  const totalDesignerCount = getLetterDesignerTotal(designers, parentDesignerCountByName);
+  const initialVisible = getInitialVisibleDesignerCards(designers, parentDesignerCountByName, INITIAL_VISIBLE_SLOTS);
+  const hasOverflow = totalDesignerCount > INITIAL_VISIBLE_SLOTS && designers.length > initialVisible.length;
   const [showAll, setShowAll] = useState<boolean>(!!matchesExpand);
   const visible = hasOverflow ? initialVisible : designers;
   const hidden = hasOverflow ? designers.slice(initialVisible.length) : [];
@@ -1017,7 +1057,7 @@ function LetterGroup({
   }, [anchorId, isRevealed, letter]);
 
   const matchesExpand = initialExpand && designers.some((d) => d.name === initialExpand || d.founder === initialExpand);
-  const totalDesignerCount = designers.length;
+  const totalDesignerCount = getLetterDesignerTotal(designers, parentDesignerCountByName);
   if (matchesExpand && !isRevealed) {
     // Deep-link is expanding a parent inside this letter — reveal synchronously.
     setIsRevealed(true);
