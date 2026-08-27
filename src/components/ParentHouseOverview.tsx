@@ -1,23 +1,21 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import { cn } from "@/lib/utils";
 
 /** Accent/case-insensitive fold for search matching. */
 const fold = (s: string) =>
-  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 
 /**
- * Parent-house overview section: lists every designer working under a parent
- * house (e.g. Veronese, Pouenat) as expandable rows. Collapsed rows show the
- * designer's name + specialty; expanding reveals portrait, bio excerpt and a
- * link to the full profile. A search field and specialty filters appear when
- * the roster is large enough to warrant them.
+ * Parent-house roster index: a uniform editorial grid listing every designer
+ * under a parent house (e.g. Veronese, Pouenat). Portrait-only cards route
+ * directly to each designer's page. A search field and minimalist uppercase
+ * text-tag filters appear when the roster is large enough to warrant them.
  */
 export function ParentHouseOverview({ parentName }: { parentName: string }) {
   const { data: designers = [] } = useParentBrandDesigners(parentName);
-  const [openSlug, setOpenSlug] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [specialty, setSpecialty] = useState<string | null>(null);
 
@@ -34,8 +32,7 @@ export function ParentHouseOverview({ parentName }: { parentName: string }) {
       if (!q) return true;
       return (
         fold(d.name).includes(q) ||
-        fold(d.specialty || "").includes(q) ||
-        fold(d.bioExcerpt || "").includes(q)
+        fold(d.specialty || "").includes(q)
       );
     });
   }, [designers, query, specialty]);
@@ -58,8 +55,8 @@ export function ParentHouseOverview({ parentName }: { parentName: string }) {
       </div>
 
       {showControls && (
-        <div className="mb-4 md:mb-6 space-y-3">
-          <div className="relative">
+        <div className="mb-6 md:mb-8 space-y-3">
+          <div className="relative max-w-xs">
             <Search className="absolute left-0 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/70" />
             <input
               type="text"
@@ -82,15 +79,15 @@ export function ParentHouseOverview({ parentName }: { parentName: string }) {
           </div>
 
           {specialties.length > 1 && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-baseline gap-x-5 gap-y-2">
               <button
                 type="button"
                 onClick={() => setSpecialty(null)}
                 className={cn(
-                  "font-body text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 border transition-colors",
+                  "font-body text-[10px] uppercase tracking-[0.18em] transition-colors",
                   specialty === null
-                    ? "border-foreground text-foreground"
-                    : "border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/50"
+                    ? "text-foreground border-b border-foreground pb-0.5"
+                    : "text-muted-foreground/70 hover:text-foreground"
                 )}
               >
                 All
@@ -101,10 +98,10 @@ export function ParentHouseOverview({ parentName }: { parentName: string }) {
                   type="button"
                   onClick={() => setSpecialty(specialty === s ? null : s)}
                   className={cn(
-                    "font-body text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 border transition-colors",
+                    "font-body text-[10px] uppercase tracking-[0.18em] transition-colors",
                     specialty === s
-                      ? "border-foreground text-foreground"
-                      : "border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/50"
+                      ? "text-foreground border-b border-foreground pb-0.5"
+                      : "text-muted-foreground/70 hover:text-foreground"
                   )}
                 >
                   {s}
@@ -121,82 +118,36 @@ export function ParentHouseOverview({ parentName }: { parentName: string }) {
         </p>
       )}
 
-      <ul className="divide-y divide-border/30 border-y border-border/30">
-        {filtered.map((d) => {
-
-          const open = openSlug === d.slug;
-          return (
-            <li key={d.id}>
-              <button
-                type="button"
-                onClick={() => setOpenSlug(open ? null : d.slug)}
-                aria-expanded={open}
-                className="w-full flex items-center justify-between gap-4 py-3 md:py-4 text-left group"
-              >
-                <span className="min-w-0 flex items-baseline gap-3">
-                  <span className="font-display text-base md:text-lg text-foreground group-hover:text-foreground/80 transition-colors truncate">
-                    {d.name}
-                  </span>
-                  {d.specialty && (
-                    <span className="hidden sm:inline font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 truncate">
-                      {d.specialty}
-                    </span>
-                  )}
-                </span>
-                <ChevronDown
-                  className={cn(
-                    "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300",
-                    open && "rotate-180"
-                  )}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-12">
+        {filtered.map((d) => (
+          <Link
+            key={d.id}
+            to={`/designers/${d.slug}`}
+            className="group block"
+          >
+            <div className="w-full aspect-[3/4] bg-neutral-50 overflow-hidden">
+              {d.image ? (
+                <img
+                  src={d.image}
+                  alt={d.name}
+                  loading="lazy"
+                  decoding="async"
+                  className="object-cover w-full h-full transition-all duration-300 grayscale opacity-90 contrast-[1.02] group-hover:grayscale-0 group-hover:opacity-100 group-hover:contrast-[1.10] group-hover:scale-[1.02]"
                 />
-              </button>
-
-              <div
-                className={cn(
-                  "grid transition-[grid-template-rows] duration-300 ease-out",
-                  open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                )}
-              >
-                <div className="overflow-hidden">
-                  <div className="flex gap-4 md:gap-6 pb-5 md:pb-6 items-start">
-                    {d.image && (
-                      <Link
-                        to={`/designers/${d.slug}`}
-                        className="shrink-0 w-20 md:w-28 aspect-[3/4] overflow-hidden bg-muted/40 block group"
-                      >
-                        <img
-                          src={d.image}
-                          alt={d.name}
-                          loading="lazy"
-                          className="w-full h-full object-cover grayscale opacity-90 contrast-[1.02] transition-all duration-300 group-hover:grayscale-0 group-hover:opacity-100 group-hover:contrast-[1.10] group-hover:scale-[1.02]"
-                        />
-                      </Link>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      {d.specialty && (
-                        <p className="sm:hidden font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 mb-1">
-                          {d.specialty}
-                        </p>
-                      )}
-                      {d.bioExcerpt && (
-                        <p className="font-body text-sm leading-relaxed text-foreground/80 line-clamp-3">
-                          {d.bioExcerpt}
-                        </p>
-                      )}
-                      <Link
-                        to={`/designers/${d.slug}`}
-                        className="inline-block mt-3 font-body text-[11px] uppercase tracking-[0.2em] text-foreground border-b border-foreground/40 pb-0.5 hover:border-foreground transition-colors"
-                      >
-                        View Profile
-                      </Link>
-                    </div>
-                  </div>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="font-display text-xl text-muted-foreground/20">
+                    {d.name.charAt(0)}
+                  </span>
                 </div>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+              )}
+            </div>
+            <p className="mt-3 font-body text-[11px] md:text-xs uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1">
+              {d.name}
+            </p>
+          </Link>
+        ))}
+      </div>
     </section>
   );
 }
