@@ -292,7 +292,7 @@ def callout(title: str, body_text: str, st: dict) -> KeepTogether:
     return KeepTogether([Spacer(1, 6), t, Spacer(1, 8)])
 
 def figure(path: str, caption: str | None, st: dict,
-           max_w: float = 156 * mm, max_h: float = 105 * mm) -> KeepTogether:
+           max_w: float = 156 * mm, max_h: float = 165 * mm) -> KeepTogether:
     """Full-width photograph with an optional gold caption line."""
     iw, ih = ImageReader(path).getSize()
     scale = min(max_w / iw, max_h / ih)

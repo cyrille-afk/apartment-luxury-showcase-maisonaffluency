@@ -122,9 +122,8 @@ ALL_DESIGNERS = sorted({d for r in ROOMS for d in r["designers"]}, key=lambda s:
 
 def room_blocks() -> list:
     blocks: list = []
-    for i, room in enumerate(ROOMS):
-        if i:
-            blocks.append(("pagebreak",))
+    for room in ROOMS:
+        blocks.append(("pagebreak",))
         blocks.append(("h", room["title"]))
         blocks.append(("p", f"<i>{room['sub']}</i>"))
         blocks.append(("image", img(room["image"]), room["caption"]))
@@ -136,13 +135,8 @@ def room_blocks() -> list:
 
 
 def designer_columns() -> list:
-    """Three-per-line designer roster rendered as label/value rows."""
-    rows = []
-    step = 3
-    for i in range(0, len(ALL_DESIGNERS), step):
-        chunk = ALL_DESIGNERS[i:i + step]
-        rows.append((chunk[0], ", ".join(chunk[1:]) if len(chunk) > 1 else ""))
-    return rows
+    """Flat alphabetical roster."""
+    return ALL_DESIGNERS
 
 
 SECTIONS = [
@@ -152,7 +146,7 @@ SECTIONS = [
             ("lede", "A high-floor Singapore residence, shaped over many months around its "
                      "owners, its skyline and a tightly edited cast of collectible pieces."),
             ("image", img("living-room-hero_zxfcxl"),
-             "The residence looks out over the Marina Bay skyline from a high floor of a residential tower."),
+             "The principal living space — bespoke seating, hand-painted wallcovering and a curated cast of signed works."),
             ("p", "This brochure documents a fully realised Maison Affluency commission in Singapore. "
                   "The interior moves through entry, living, dining, study and primary suite, pausing on "
                   "the materials, joinery and proportions that anchor the project: hand-rubbed lacquer, "
@@ -212,7 +206,7 @@ SECTIONS = [
                   "historic houses alongside contemporary independents, several represented exclusively "
                   "in the region. Full biographies, provenance notes and the complete catalogue are "
                   "published on maisonaffluency.com/designers."),
-            ("table", designer_columns()),
+            ("p", "  ·  ".join(designer_columns())),
             ("h", "How the roster is built"),
             ("p", "We represent makers, not distributors. Selection favours ateliers with a signature "
                   "material discipline — glass, bronze, lacquer, ceramic, marquetry, hand-knotting — and "
