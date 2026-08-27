@@ -50,8 +50,9 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
 from reportlab.platypus import (
     BaseDocTemplate, PageTemplate, Frame, Paragraph, Spacer,
-    Table, TableStyle, PageBreak, KeepTogether,
+    Table, TableStyle, PageBreak, KeepTogether, Image,
 )
+from reportlab.lib.utils import ImageReader
 from reportlab.platypus.doctemplate import NextPageTemplate
 from reportlab.lib.styles import ParagraphStyle
 
@@ -133,7 +134,8 @@ def _wrap(text: str, max_chars: int) -> list[str]:
 # ---------------------------------------------------------------------------
 # Page decorators (cover + content)
 # ---------------------------------------------------------------------------
-def _draw_cover(canv, doc, title: str, subtitle: str, version: str) -> None:
+def _draw_cover(canv, doc, title: str, subtitle: str, version: str,
+                kicker: str = "TRADE PORTAL  ·  STUDIO GUIDE") -> None:
     title_d = _decode(title)
     subtitle_d = _decode(subtitle)
     canv.saveState()
@@ -154,7 +156,7 @@ def _draw_cover(canv, doc, title: str, subtitle: str, version: str) -> None:
     canv.drawString(x + 26 * mm, y + 8, "MAISON AFFLUENCY")
     canv.setFillColor(GOLD)
     canv.setFont(SANS, 9)
-    canv.drawString(x + 26 * mm, y - 6, "TRADE PORTAL  ·  STUDIO GUIDE")
+    canv.drawString(x + 26 * mm, y - 6, kicker)
     canv.setStrokeColor(GOLD)
     canv.setLineWidth(1.2)
     canv.line(x, y - 18, x + 55 * mm, y - 18)
@@ -187,7 +189,8 @@ def _draw_cover(canv, doc, title: str, subtitle: str, version: str) -> None:
     canv.restoreState()
 
 
-def _draw_content(canv, doc, running_title: str) -> None:
+def _draw_content(canv, doc, running_title: str,
+                  header_label: str = "MAISON AFFLUENCY  ·  TRADE PORTAL") -> None:
     canv.saveState()
     # Header — logo + wordmark
     if os.path.exists(LOGO_PATH):
@@ -199,8 +202,7 @@ def _draw_content(canv, doc, running_title: str) -> None:
             pass
     canv.setFillColor(JADE)
     canv.setFont(SANS_BOLD, 9)
-    canv.drawString(MARGIN_L + 10 * mm, PAGE_H - 18 * mm,
-                    "MAISON AFFLUENCY  ·  TRADE PORTAL")
+    canv.drawString(MARGIN_L + 10 * mm, PAGE_H - 18 * mm, header_label)
     canv.setFillColor(MUTE)
     canv.setFont(SANS, 9)
     canv.drawRightString(PAGE_W - MARGIN_R, PAGE_H - 18 * mm, running_title)
@@ -237,6 +239,10 @@ def styles() -> dict:
                                     textColor=JADE, leading=14, spaceAfter=4),
         "callout_b": ParagraphStyle("callout_b", fontName=SANS, fontSize=10,
                                     textColor=INK, leading=15),
+        "caption":   ParagraphStyle("caption", fontName=SANS, fontSize=8.5,
+                                    textColor=MUTE, leading=12, spaceAfter=0),
+        "lede":      ParagraphStyle("lede", fontName=SERIF_IT, fontSize=13,
+                                    textColor=JADE, leading=19, spaceAfter=12),
         "code":      ParagraphStyle("code", fontName="Courier", fontSize=9,
                                     textColor=JADE_DARK, leading=12),
     }
@@ -285,11 +291,27 @@ def callout(title: str, body_text: str, st: dict) -> KeepTogether:
     ]))
     return KeepTogether([Spacer(1, 6), t, Spacer(1, 8)])
 
+def figure(path: str, caption: str | None, st: dict,
+           max_w: float = 156 * mm, max_h: float = 118 * mm) -> KeepTogether:
+    """Full-width photograph with an optional gold caption line."""
+    iw, ih = ImageReader(path).getSize()
+    scale = min(max_w / iw, max_h / ih)
+    img = Image(path, width=iw * scale, height=ih * scale)
+    img.hAlign = "LEFT"
+    parts = [Spacer(1, 4), img]
+    if caption:
+        parts.append(Spacer(1, 5))
+        parts.append(Paragraph(caption, st["caption"]))
+    parts.append(Spacer(1, 12))
+    return KeepTogether(parts)
+
 # ---------------------------------------------------------------------------
 # Document template
 # ---------------------------------------------------------------------------
 class GuideDoc(BaseDocTemplate):
-    def __init__(self, filename, title, subtitle, running, version):
+    def __init__(self, filename, title, subtitle, running, version,
+                 kicker="TRADE PORTAL  ·  STUDIO GUIDE",
+                 header_label="MAISON AFFLUENCY  ·  TRADE PORTAL"):
         super().__init__(
             filename, pagesize=A4,
             leftMargin=MARGIN_L, rightMargin=MARGIN_R,
@@ -307,9 +329,9 @@ class GuideDoc(BaseDocTemplate):
         )
         self.addPageTemplates([
             PageTemplate(id="cover", frames=[cover_frame],
-                         onPage=lambda c, d: _draw_cover(c, d, title, subtitle, version)),
+                         onPage=lambda c, d: _draw_cover(c, d, title, subtitle, version, kicker)),
             PageTemplate(id="content", frames=[content_frame],
-                         onPage=lambda c, d: _draw_content(c, d, running)),
+                         onPage=lambda c, d: _draw_content(c, d, running, header_label)),
         ])
 
 # ---------------------------------------------------------------------------
@@ -323,11 +345,13 @@ def build_guide(
     sections: list[dict],
     version: str = "STUDIO GUIDE · v1.0",
     font_dir: str = FONT_DIR,
+    kicker: str = "TRADE PORTAL  ·  STUDIO GUIDE",
+    header_label: str = "MAISON AFFLUENCY  ·  TRADE PORTAL",
 ) -> str:
     """Render a guide PDF with the Maison Affluency brand template."""
     register_fonts(font_dir)
     os.makedirs(os.path.dirname(filename) or ".", exist_ok=True)
-    doc = GuideDoc(filename, title, subtitle, running, version)
+    doc = GuideDoc(filename, title, subtitle, running, version, kicker, header_label)
     st = styles()
 
     story = [NextPageTemplate("content"), PageBreak()]
@@ -344,6 +368,10 @@ def build_guide(
                 story.append(Spacer(1, 8))
             elif kind == "callout":
                 story.append(callout(block[1], block[2], st))
+            elif kind == "lede":
+                story.append(Paragraph(block[1], st["lede"]))
+            elif kind == "image":
+                story.append(figure(block[1], block[2] if len(block) > 2 else None, st))
             elif kind == "spacer":
                 story.append(Spacer(1, block[1]))
             elif kind == "pagebreak":
