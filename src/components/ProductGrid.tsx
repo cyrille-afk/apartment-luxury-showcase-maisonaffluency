@@ -23,6 +23,8 @@ import { categoryUrl } from "@/lib/categorySlugs";
 import { normalizeSubcategory, getParentCategoryFromSubcategory } from "@/lib/categoryNormalization";
 import { formatDimensionsMultiline, withImperialPerLine } from "@/lib/formatDimensions";
 import { cldResponsiveImg } from "@/lib/cloudinary";
+import { Link } from "react-router-dom";
+import { designerProfileUrl } from "@/lib/designerUrl";
 
 // ─── SUB_TAGS mapping (same as FeaturedDesigners) ────────────────────────
 const SUB_TAGS: Record<string, string[]> = {
