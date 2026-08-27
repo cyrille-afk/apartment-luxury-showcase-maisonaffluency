@@ -466,7 +466,7 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
                       <img
                         {...cldResponsiveImg(d.image, { widths: [160, 240, 320, 480, 640], sizes })}
                         alt={d.name}
-                        className="w-full h-full object-cover grayscale opacity-90 contrast-[1.02] transition-all duration-300 group-hover/sub:grayscale-0 group-hover/sub:opacity-100 group-hover/sub:contrast-110 group-hover/sub:scale-[1.02]"
+                        className="w-full h-full object-cover grayscale opacity-90 contrast-[1.02] transition-all duration-300 group-hover/sub:grayscale-0 group-hover/sub:opacity-100 group-hover/sub:contrast-[1.10] group-hover/sub:scale-[1.02]"
                         loading="lazy"
                         decoding="async"
                         fetchPriority="low"

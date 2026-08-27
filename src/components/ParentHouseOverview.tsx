@@ -168,7 +168,7 @@ export function ParentHouseOverview({ parentName }: { parentName: string }) {
                           src={d.image}
                           alt={d.name}
                           loading="lazy"
-                          className="w-full h-full object-cover grayscale opacity-90 contrast-[1.02] transition-all duration-300 group-hover:grayscale-0 group-hover:opacity-100 group-hover:contrast-110 group-hover:scale-[1.02]"
+                          className="w-full h-full object-cover grayscale opacity-90 contrast-[1.02] transition-all duration-300 group-hover:grayscale-0 group-hover:opacity-100 group-hover:contrast-[1.10] group-hover:scale-[1.02]"
                         />
                       </Link>
                     )}
