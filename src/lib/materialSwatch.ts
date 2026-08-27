@@ -51,6 +51,18 @@ export function materialSwatchTone(label: string): Tone {
   return FALLBACK;
 }
 
+/**
+ * True when the label maps to a real material/colour tone.
+ * Non-material axes (e.g. "Shape A" / "Shape B", "Model 2") would otherwise
+ * render as identical blank beige circles, which reads as broken UI — those
+ * axes must fall back to the text picker instead of the swatch row.
+ */
+export function hasKnownMaterialTone(label: string): boolean {
+  const l = (label || "").trim();
+  return TONES.some(({ test }) => test.test(l));
+}
+
+
 /** Short display name for a swatch caption: drops any "Prefix:" and trims. */
 export function shortFinishLabel(label: string): string {
   const raw = (label || "").trim();
