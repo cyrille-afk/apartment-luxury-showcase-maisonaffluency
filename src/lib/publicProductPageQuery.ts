@@ -88,37 +88,67 @@ export async function fetchPublicProductPage(
   // title-derived slugs so any bookmarked/shared URLs keep resolving.
   let product = matchPick(picks);
 
-  // Parent houses (e.g. Marta Sala Éditions, Veronese) hold no picks of their
-  // own — their profile aggregates the picks of the designers they publish.
-  // Fall back to the founder family so those product links resolve.
+  // Parent houses (Marta Sala Éditions, Veronese, Ecart, Pouenat, CC-Tapis…)
+  // hold no picks of their own — their profile aggregates the picks of the
+  // designers they publish. Resolve across the whole founder family, then
+  // fall back to a global slug lookup so any parent/child URL resolves.
   if (!product) {
     const familyNames = Array.from(
-      new Set([designer.name, designer.display_name].filter(Boolean)),
+      new Set([designer.name, designer.display_name, designer.founder].filter(Boolean)),
     ) as string[];
     if (familyNames.length > 0) {
-      const { data: children } = await supabase
+      const { data: family } = await supabase
         .from("designers")
         .select("id")
-        .in("founder", familyNames)
-        .eq("is_published", true)
-        .eq("trade_only", false);
-      const childIds = (children || []).map((c: any) => c.id).filter((id: string) => id !== designer.id);
-      if (childIds.length > 0) {
-        const { data: childPicks } = await supabase
+        .or(
+          `founder.in.(${familyNames.map((n) => `"${n.replace(/"/g, '')}"`).join(",")}),name.in.(${familyNames
+            .map((n) => `"${n.replace(/"/g, '')}"`)
+            .join(",")})`,
+        );
+      const familyIds = (family || []).map((c: any) => c.id).filter((id: string) => id !== designer.id);
+      if (familyIds.length > 0) {
+        const { data: familyPicks } = await supabase
           .from("designer_curator_picks_public" as any)
           .select(publicPickFields)
-          .in("designer_id", childIds)
+          .in("designer_id", familyIds)
           .order("sort_order", { ascending: true });
-        const found = matchPick(childPicks as any[] | null);
+        const found = matchPick(familyPicks as any[] | null);
         if (found) {
-          picks = childPicks as any[];
+          picks = familyPicks as any[];
           product = found;
         }
       }
     }
   }
 
+  // Last resort: resolve the product by its canonical slug anywhere in the
+  // public catalog (covers cross-brand links and unknown designer slugs).
+  if (!product) {
+    const { data: globalPicks } = await supabase
+      .from("designer_curator_picks_public" as any)
+      .select(publicPickFields)
+      .eq("slug", productSlug)
+      .limit(1);
+    const found = matchPick(globalPicks as any[] | null);
+    if (found) {
+      picks = globalPicks as any[];
+      product = found;
+    }
+  }
+
   if (!product) return null;
+
+  // If the route designer was unresolvable (trade-only or unknown parent slug),
+  // adopt the designer that actually owns the matched pick.
+  if (!designer.id && (product as any).designer_id) {
+    const { data: owner } = await supabase
+      .from("designers")
+      .select("id, name, slug, display_name, biography")
+      .eq("id", (product as any).designer_id)
+      .maybeSingle();
+    if (owner) designer = owner as any;
+  }
+
 
 
   const tradeProduct = tradeMatches?.find(
