@@ -324,10 +324,18 @@ function RouteScrollLockFailsafe() {
 
   useLayoutEffect(() => {
     if (location.pathname !== "/designers") releaseDesignersLandingScrollLock();
+    // Dark iOS chrome is opt-in for the hero + designers landing only. Any
+    // other route must clear it, otherwise a leftover black canvas shows
+    // behind the iOS toolbar (e.g. deep-linking into a designer profile from
+    // a dark route whose unmount cleanup never ran).
+    if (location.pathname !== "/" && location.pathname !== "/designers") {
+      clearDarkIosChrome();
+    }
   }, [location.pathname]);
 
   return null;
 }
+
 
 function PreviewViewContinuity() {
   const location = useLocation();
