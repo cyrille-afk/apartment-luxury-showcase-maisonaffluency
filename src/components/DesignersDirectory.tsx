@@ -437,67 +437,34 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
             <span className="font-body text-xs text-muted-foreground/50">Loading…</span>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-12 gap-y-8 gap-x-6">
-            {designers.map((d, i) => {
-              const hasIg = designersWithIgPosts.has(d.id);
-              const igUrl = hasIg ? undefined : (d.instagramUrl || INSTAGRAM_LINKS[d.slug]);
-              const isFeatured = i < 3;
-              const spanClass =
-                i === 0
-                  ? "col-span-2 sm:col-span-4 md:col-span-6"
-                  : isFeatured
-                  ? "col-span-1 sm:col-span-2 md:col-span-3"
-                  : "col-span-1 sm:col-span-2 md:col-span-3";
-              const sizes =
-                i === 0
-                  ? "(max-width: 640px) 100vw, (max-width: 768px) 100vw, 50vw"
-                  : "(max-width: 640px) 50vw, (max-width: 768px) 50vw, 25vw";
-              return (
-                <Link
-                  key={d.slug}
-                  to={`/designers/${d.slug}`}
-                  className={cn(
-                    "group/sub rounded-none overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all",
-                    spanClass
-                  )}
-                >
-                  <div className={cn("relative bg-muted/40 overflow-hidden", isFeatured ? "aspect-[4/5]" : "aspect-[3/4]")}>
-                    {d.image ? (
-                      <img
-                        {...cldResponsiveImg(d.image, { widths: [160, 240, 320, 480, 640], sizes })}
-                        alt={d.name}
-                        className="w-full h-full object-cover transition-all duration-300 md:grayscale md:opacity-90 md:contrast-[1.02] md:group-hover/sub:grayscale-0 md:group-hover/sub:opacity-100 md:group-hover/sub:contrast-[1.10] md:group-hover/sub:scale-[1.02]"
-                        loading="lazy"
-                        decoding="async"
-                        fetchPriority="low"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-muted/5">
-                        <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 md:group-hover/sub:opacity-100 transition-opacity duration-300 items-center justify-center hidden md:flex">
-                      <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View</span>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-12">
+            {designers.map((d) => (
+              <Link
+                key={d.slug}
+                to={`/designers/${d.slug}`}
+                className="group/sub block"
+              >
+                <div className="w-full aspect-[3/4] bg-neutral-50 overflow-hidden">
+                  {d.image ? (
+                    <img
+                      {...cldResponsiveImg(d.image, { widths: [160, 240, 320, 480, 640], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" })}
+                      alt={d.name}
+                      className="object-cover w-full h-full transition-all duration-300 md:grayscale md:opacity-90 md:contrast-[1.02] md:group-hover/sub:grayscale-0 md:group-hover/sub:opacity-100 md:group-hover/sub:contrast-[1.10] md:group-hover/sub:scale-[1.02]"
+                      loading="lazy"
+                      decoding="async"
+                      fetchPriority="low"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
                     </div>
-                    {igUrl && (
-                      <span className="absolute bottom-1.5 left-2 z-10 font-body text-[7px] text-white/50 tracking-wide drop-shadow-sm">
-                        @{igUrl.replace(/\/+$/, '').split('/').pop()}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="px-2 py-1.5 bg-background text-center">
-                    <p className={cn(
-                      "font-body text-foreground leading-tight line-clamp-1",
-                      isFeatured ? "text-xs md:text-sm" : "text-[10px] md:text-[11px]"
-                    )}>
-                      {d.name}
-                    </p>
-                  </div>
-
-                </Link>
-              );
-            })}
+                  )}
+                </div>
+                <p className="mt-3 font-body text-[11px] md:text-xs uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1">
+                  {d.name}
+                </p>
+              </Link>
+            ))}
           </div>
         )}
       </div>
