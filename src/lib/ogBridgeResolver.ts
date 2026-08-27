@@ -9,15 +9,34 @@
  * This resolver never guesses: it matches against the real manifest and falls
  * back to the canonical product page URL (which always exists) when no bridge
  * is found, so a shared link can never 404.
+ *
+ * Self-contained on purpose (no imports from whatsapp-share) to avoid a cycle.
  */
-import { useEffect, useState } from "react";
-import { slugify, withOgCacheBust } from "@/lib/whatsapp-share";
 
-const SITE_URL = "https://maisonaffluency.com";
+const slugifyLocal = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[éèêë]/g, "e")
+    .replace(/[àâäáã]/g, "a")
+    .replace(/[ùûüú]/g, "u")
+    .replace(/[ôöóõ]/g, "o")
+    .replace(/[îïí]/g, "i")
+    .replace(/ç/g, "c")
+    .replace(/ñ/g, "n")
+    .replace(/ø/g, "o")
+    .replace(/å/g, "a")
+    .replace(/ř/g, "r")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 
 let cache: string[] | null = null;
 let inflight: Promise<string[]> | null = null;
 
+/** Synchronous access to the loaded manifest (null until preload resolves). */
+export const getOgBridgeIndexSync = (): string[] | null => cache;
+
+/** Load + cache the OG bridge manifest. Call once at app start. */
 export const loadOgBridgeIndex = async (): Promise<string[]> => {
   if (cache) return cache;
   if (inflight) return inflight;
@@ -32,7 +51,7 @@ export const loadOgBridgeIndex = async (): Promise<string[]> => {
     })
     .catch(() => {
       cache = [];
-      return [];
+      return cache;
     })
     .finally(() => {
       inflight = null;
@@ -47,9 +66,9 @@ export const findPieceBridgePath = (
   pieceTitle: string,
   pieceSubtitle?: string | null,
 ): string | null => {
-  const designer = slugify(designerName);
-  const title = slugify(pieceTitle);
-  const subtitle = pieceSubtitle ? slugify(pieceSubtitle) : "";
+  const designer = slugifyLocal(designerName || "");
+  const title = slugifyLocal(pieceTitle || "");
+  const subtitle = pieceSubtitle ? slugifyLocal(pieceSubtitle) : "";
   if (!title) return null;
 
   const exact = [
@@ -63,49 +82,21 @@ export const findPieceBridgePath = (
   }
 
   // Fuzzy: the pipeline keys brand-first and may append the designer as suffix.
-  const containsTitle = index.filter((p) => p.includes(`-${title}-og.html`) || p.includes(`-${title}-`));
+  const containsTitle = index.filter(
+    (p) => p.includes(`-${title}-og.html`) || p.includes(`-${title}-`),
+  );
   if (containsTitle.length) {
+    const withBoth = containsTitle.filter(
+      (p) => designer && subtitle && p.includes(designer) && p.includes(subtitle),
+    );
     const withDesigner = containsTitle.filter((p) => designer && p.includes(designer));
     const withSubtitle = containsTitle.filter((p) => subtitle && p.includes(subtitle));
-    const pick = withDesigner[0] ?? withSubtitle[0] ?? (containsTitle.length === 1 ? containsTitle[0] : null);
+    const pick =
+      withBoth[0] ??
+      withDesigner[0] ??
+      withSubtitle[0] ??
+      (containsTitle.length === 1 ? containsTitle[0] : null);
     if (pick) return pick;
   }
   return null;
-};
-
-/**
- * Resolve the share URL for a piece. Returns the canonical page URL until the
- * manifest resolves (and permanently if no bridge exists) — never a 404 guess.
- */
-export const usePieceOgUrl = (
-  designerName: string | null | undefined,
-  pieceTitle: string | null | undefined,
-  pieceSubtitle?: string | null,
-  canonicalPath?: string,
-): string => {
-  const fallbackPath =
-    canonicalPath ??
-    (typeof window !== "undefined" && window.location.pathname !== "/"
-      ? window.location.pathname
-      : `/designers/${slugify(designerName ?? "")}`);
-  const fallback = `${SITE_URL}${fallbackPath}`;
-  const [url, setUrl] = useState(fallback);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!designerName || !pieceTitle) {
-      setUrl(fallback);
-      return;
-    }
-    loadOgBridgeIndex().then((index) => {
-      if (cancelled) return;
-      const path = findPieceBridgePath(index, designerName, pieceTitle, pieceSubtitle);
-      setUrl(path ? withOgCacheBust(`${SITE_URL}/${path}`) : fallback);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [designerName, pieceTitle, pieceSubtitle, fallback]);
-
-  return url;
 };
