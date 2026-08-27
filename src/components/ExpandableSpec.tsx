@@ -3,7 +3,7 @@ import { ChevronDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { parseMaterialsFallback } from "@/lib/parseSizeVariants";
-import { materialSwatchTone, shortFinishLabel } from "@/lib/materialSwatch";
+import { hasKnownMaterialTone, materialSwatchTone, shortFinishLabel } from "@/lib/materialSwatch";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
@@ -168,7 +168,11 @@ export default function ExpandableSpec({
 
 
   // Multi + swatchMode → horizontal row of circular material swatches.
-  if (swatchMode && placeholder) {
+  // Only when the options actually describe materials/colours; abstract axes
+  // like "Shape A/B" would render as identical blank circles, so they use the
+  // text picker below instead.
+  if (swatchMode && placeholder && lines.some(hasKnownMaterialTone)) {
+
     const pickSwatch = (i: number) => {
       if (disabledSet.has(i)) return;
       try {
