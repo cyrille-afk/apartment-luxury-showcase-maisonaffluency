@@ -1539,7 +1539,7 @@ const PublicDesignerProfile = () => {
 
               {biographySection}
               {isParentBrand && (
-                <div className="hidden md:block">
+                <div className={cn(hideParentHouseOnMobile && "hidden md:block")}>
                   <ParentHouseOverview parentName={designer.name} />
                 </div>
               )}
@@ -1641,7 +1641,7 @@ const PublicDesignerProfile = () => {
 
               {biographySection}
               {isParentBrand && (
-                <div className="hidden md:block">
+                <div className={cn(hideParentHouseOnMobile && "hidden md:block")}>
                   <ParentHouseOverview parentName={designer.name} />
                 </div>
               )}
@@ -1650,7 +1650,7 @@ const PublicDesignerProfile = () => {
           </div>
 
           {isParentBrand && (
-            <div className="hidden md:block">
+            <div className={cn(hideParentHouseOnMobile && "hidden md:block")}>
               <ParentHouseOverview parentName={designer.name} />
             </div>
           )}
