@@ -138,8 +138,8 @@ export function resolveFinishSectionLabels(input: {
     ? getTopPlaceholder({ top_axis_label: input.topAxisLabel })
     : null;
 
-  const baseIsUphol = baseUsable && isUpholsteryAxisLabel(input.baseAxisLabel);
-  const topIsUphol = !!topPlaceholder && isUpholsteryAxisLabel(input.topAxisLabel);
+  const baseIsUphol = baseUsable && isSwatchSectionAxisLabel(input.baseAxisLabel);
+  const topIsUphol = !!topPlaceholder && isSwatchSectionAxisLabel(input.topAxisLabel);
 
   const override = clean(input.woodLabelOverride);
 
