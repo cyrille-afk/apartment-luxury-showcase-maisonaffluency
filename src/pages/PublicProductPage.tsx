@@ -11,10 +11,10 @@ import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { formatProductSubtitleLine, isFinishSubtitle } from "@/lib/subtitleDisplay";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { queryKeys } from "@/lib/queryKeys";
-import { fetchPublicProductPage, PUBLIC_PRODUCT_PAGE_STALE_TIME } from "@/lib/publicProductPageQuery";
+import { fetchPublicProductPage, prefetchPublicProductPage, PUBLIC_PRODUCT_PAGE_STALE_TIME } from "@/lib/publicProductPageQuery";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
@@ -2636,7 +2636,7 @@ const PublicProductPage: React.FC = () => {
                               {rp.title}
                             </p>
                             <p className="font-body text-[10px] text-muted-foreground tracking-wide mt-1">
-                              {formatPublicRrp((relatedRrpMap as any)[rp.id]) || "Price upon request"}
+                              {formatPublicRrp((relatedRrpMap as any)[rp.id]) || "Price upon Request"}
                             </p>
                           </div>
                         </Link>
@@ -2652,6 +2652,9 @@ const PublicProductPage: React.FC = () => {
                         to={`/designers/${designer.slug}/${rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
                         state={{ from: location.pathname + location.search }}
                         className="group block"
+                        onMouseEnter={() => prefetchPublicProductPage(queryClient, designer.slug, rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : "")))}
+                        onFocus={() => prefetchPublicProductPage(queryClient, designer.slug, rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : "")))}
+                        onTouchStart={() => prefetchPublicProductPage(queryClient, designer.slug, rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : "")))}
                       >
                         <div className="relative aspect-square rounded-luxury-sharp overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/40 transition-colors">
                           <img
@@ -2682,7 +2685,7 @@ const PublicProductPage: React.FC = () => {
                             {rp.title}
                           </p>
                           <p className="font-body text-xs text-muted-foreground tracking-wide mt-1">
-                            {formatPublicRrp((relatedRrpMap as any)[rp.id]) || "Price upon request"}
+                            {formatPublicRrp((relatedRrpMap as any)[rp.id]) || "Price upon Request"}
                           </p>
                         </div>
                       </Link>
