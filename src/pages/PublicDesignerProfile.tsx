@@ -1692,15 +1692,27 @@ const PublicDesignerProfile = () => {
                       });
 
                 const forceTwoCol = designer.slug === "adrien-messie" || pickCols === "two";
-                const gridClass = isEmmanuelBabled
-                  ? pickCols === "auto"
-                    ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-2"
-                    : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
-                  : pickCols === "one"
-                    ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5"
-                    : forceTwoCol
-                      ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-2"
-                      : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
+                const pickCount = visiblePicks.length;
+
+                const gridClass = (() => {
+                  if (pickCols === "one") {
+                    return "grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5";
+                  }
+                  if (forceTwoCol) {
+                    return "grid-cols-2 sm:grid-cols-2 md:grid-cols-2";
+                  }
+                  if (pickCount === 2) {
+                    return "grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2";
+                  }
+                  if (pickCount === 3) {
+                    return "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3";
+                  }
+                  if (isEmmanuelBabled) {
+                    return "grid-cols-2 sm:grid-cols-2 md:grid-cols-2";
+                  }
+                  return "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
+                })();
+
 
 
                 const filterItems = categories.map((c) => (
