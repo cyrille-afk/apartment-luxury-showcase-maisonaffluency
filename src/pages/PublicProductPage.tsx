@@ -245,7 +245,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
       return {
         product: {
           ...(product as unknown as ProductRow),
-          variant_image_map: (product as any).variant_image_map || (variantMapRow as any)?.variant_image_map || null,
+          variant_image_map: (product as any).variant_image_map || null,
           image_url: (product as any).image_url || tradeProduct?.image_url || null,
           gallery_images: (product as any).gallery_images?.length
             ? (product as any).gallery_images
