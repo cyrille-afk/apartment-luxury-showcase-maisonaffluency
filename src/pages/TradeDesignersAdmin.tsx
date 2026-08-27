@@ -1799,6 +1799,20 @@ interface DesignerRow {
 
 
 const DESIGNER_EDITOR_DRAFT_KEY = "ma-designer-editor-draft-v2";
+/**
+ * Tiny, always-written companion key holding only the navigation state
+ * (search / letter / open row). The full draft write is debounced 500ms
+ * because it serializes every buffered biography; this one is cheap enough to
+ * write synchronously on every change, so an unexpected reload (iOS memory
+ * purge, build refresh, Cmd+R) can never lose the open designer.
+ */
+const DESIGNER_EDITOR_NAV_KEY = "ma-designer-editor-nav-v1";
+
+type DesignerEditorNav = {
+  search: string;
+  activeLetter: string | null;
+  expandedId: string | null;
+};
 
 type DesignerEditorDraft = {
   search: string;
@@ -1813,17 +1827,36 @@ type DesignerEditorDraft = {
 
 const readDesignerEditorDraft = (): Partial<DesignerEditorDraft> => {
   if (typeof window === "undefined") return {};
+  let draft: Partial<DesignerEditorDraft> = {};
   try {
     // Prefer localStorage (survives tab close + hard reloads); fall back to
     // sessionStorage for drafts saved by older builds.
     const raw =
       localStorage.getItem(DESIGNER_EDITOR_DRAFT_KEY) ||
       sessionStorage.getItem(DESIGNER_EDITOR_DRAFT_KEY);
-    return raw ? JSON.parse(raw) : {};
+    if (raw) draft = JSON.parse(raw);
   } catch {
-    return {};
+    draft = {};
   }
+  // The nav key is written synchronously, so it is always at least as fresh as
+  // the debounced draft — let it win for the three fields it owns.
+  try {
+    const rawNav =
+      localStorage.getItem(DESIGNER_EDITOR_NAV_KEY) ||
+      sessionStorage.getItem(DESIGNER_EDITOR_NAV_KEY);
+    if (rawNav) {
+      const nav = JSON.parse(rawNav) as Partial<DesignerEditorNav>;
+      draft = {
+        ...draft,
+        search: nav.search ?? draft.search,
+        activeLetter: nav.activeLetter ?? draft.activeLetter ?? null,
+        expandedId: nav.expandedId ?? draft.expandedId ?? null,
+      };
+    }
+  } catch { /* noop */ }
+  return draft;
 };
+
 
 
 const TradeDesignersAdmin = () => {
