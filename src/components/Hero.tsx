@@ -150,8 +150,8 @@ const Hero = () => {
                 navigate("/designers");
               }}
               className={`group flex translate-x-4 items-center gap-4 border border-white/20 bg-white/5 px-6 py-3.5 font-body text-[11px] font-medium uppercase tracking-[0.25em] text-white backdrop-blur-sm transition-all duration-500 ease-out hover:translate-x-12 hover:border-white hover:bg-white hover:text-black md:mt-20 md:translate-x-8 ${
-                isPwa ? "mt-24" : "mt-12"
-              }`}
+              isPwa ? "mt-28" : "mt-16"
+            }`}
             >
               <span>Explore the Collection</span>
               <span aria-hidden="true" className="inline-block transition-transform duration-500 ease-out group-hover:translate-x-1.5">→</span>
@@ -164,8 +164,8 @@ const Hero = () => {
           aria-label="Hero secondary actions"
           className={`flex w-full flex-col items-center gap-5 md:hidden ${
             isPwa
-              ? "mt-auto pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-8"
-              : "absolute inset-x-6 bottom-[calc(env(safe-area-inset-bottom)+4rem)] w-auto"
+              ? "mt-auto pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-8"
+              : "absolute inset-x-6 bottom-[calc(env(safe-area-inset-bottom)+2.5rem)] w-auto"
           }`}
         >
           <button
