@@ -13,9 +13,32 @@ import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 // Back-to-Top alongside All Categories, A–Z, and WhatsApp on mobile/PWA.
 
 const PublicGallery = () => {
+  // iOS Safari runs with viewport-fit=cover, so the fixed nav is 96px + the
+  // status-bar inset — taller than the static --header-h constant. Measure the
+  // real nav height so the interlude never tucks under the header.
+  const [headerOffset, setHeaderOffset] = useState<number | null>(null);
+
+  useEffect(() => {
+    const measure = () => {
+      const nav = document.querySelector("nav");
+      const h = nav?.getBoundingClientRect().height;
+      if (h) setHeaderOffset(Math.ceil(h + 12));
+    };
+    measure();
+    const raf = requestAnimationFrame(measure);
+    window.addEventListener("resize", measure);
+    window.addEventListener("orientationchange", measure);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("orientationchange", measure);
+    };
+  }, []);
+
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0 });
   }, []);
+
 
   return (
     <>
@@ -46,7 +69,10 @@ const PublicGallery = () => {
         <h1 className="sr-only">Maison Affluency Gallery</h1>
 
         <div className="mx-auto max-w-7xl px-6 md:px-12">
-          <div className="pt-[var(--header-h)]">
+          <div
+            className="pt-[var(--header-h)]"
+            style={headerOffset ? { paddingTop: headerOffset } : undefined}
+          >
             <ApartmentTourInterlude compact />
           </div>
         </div>
