@@ -587,8 +587,9 @@ function singularizeSub(s: string): string {
               className="group cursor-pointer"
               tabIndex={0}
               onClick={() => handleCardClick(item, idx)}
-              onMouseEnter={() => prefetchPickDetail(item.pick.id)}
-              onFocus={() => prefetchPickDetail(item.pick.id)}
+              onMouseEnter={() => { prefetchPickDetail(item.pick.id); setHoveredIdx(idx); }}
+              onMouseLeave={() => setHoveredIdx((cur) => (cur === idx ? null : cur))}
+              onFocus={() => { prefetchPickDetail(item.pick.id); setHoveredIdx(idx); }}
               onTouchStart={() => prefetchPickDetail(item.pick.id)}
             >
               <div className="relative aspect-square overflow-hidden rounded-luxury-sharp bg-[#f0eeeb] mb-3 flex items-center justify-center">
