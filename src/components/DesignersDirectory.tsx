@@ -752,6 +752,10 @@ function MobileLetterRow({
   const matchesExpand = !!(initialExpand && designers.some((d) => d.name === initialExpand || d.founder === initialExpand));
   const [open, setOpen] = useState<boolean>(!!defaultOpen || matchesExpand);
   const [openParent, setOpenParent] = useState<string | null>(matchesExpand ? initialExpand! : null);
+  const MOBILE_INITIAL_VISIBLE = 8;
+  const [showAll, setShowAll] = useState<boolean>(matchesExpand);
+  const visibleDesigners = showAll ? designers : designers.slice(0, MOBILE_INITIAL_VISIBLE);
+  const hasOverflow = designers.length > MOBILE_INITIAL_VISIBLE;
 
   useEffect(() => {
     if (defaultOpen) setOpen(true);
@@ -783,7 +787,7 @@ function MobileLetterRow({
               <div className="overflow-x-auto snap-x snap-mandatory scrollbar-hide scroll-pl-4">
                 <div className="flex gap-4 pl-4 pr-8">
 
-                  {designers.map((item, cardIndex) => {
+                  {visibleDesigners.map((item, cardIndex) => {
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
                     const isParentBrand = item.founder === item.name && designerCount > 0;
                     // This accordion only renders once the user opens the letter, so the
@@ -808,6 +812,17 @@ function MobileLetterRow({
                   })}
                 </div>
               </div>
+              {hasOverflow && !showAll && (
+                <div className="flex justify-center pt-5">
+                  <button
+                    type="button"
+                    onClick={() => setShowAll(true)}
+                    className="relative py-2 font-body text-[11px] uppercase tracking-[0.28em] text-foreground after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:bg-foreground"
+                  >
+                    View all {designers.length} cards
+                  </button>
+                </div>
+              )}
               <AnimatePresence>
                 {openParent && (
                   <motion.div
