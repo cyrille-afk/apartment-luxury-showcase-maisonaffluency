@@ -1062,23 +1062,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     <TooltipProvider>
       <div className={className} onMouseLeave={restoreLockedPreview}>
       {showMobileBaseTopGrid && (
-        <div className={cn("grid gap-4 mb-6", visibleWoodTiles.length > 0 && visibleTopTiles.length > 0 ? "grid-cols-2" : "grid-cols-1")}>
-          {visibleWoodTiles.length > 0 && (
-            <div>
-              <div className="text-xs uppercase text-muted-foreground mb-1">Base</div>
-              <div className="flex gap-2 flex-wrap">
-                {visibleWoodTiles.map((f) => renderTile(f, "base", undefined, "circle"))}
-              </div>
-            </div>
-          )}
-          {visibleTopTiles.length > 0 && (
-            <div>
-              <div className="text-xs uppercase text-muted-foreground mb-1">Top</div>
-              <div className="flex gap-2 flex-wrap">
-                {visibleTopTiles.map((f) => renderTile(f, "top", undefined, "circle"))}
-              </div>
-            </div>
-          )}
+        <div className="space-y-2">
+          {visibleWoodTiles.length > 0 && renderInlineAxisCarousel(visibleWoodTiles, selectedWoodId, setSelectedWoodId, "Base")}
+          {visibleTopTiles.length > 0 && renderInlineAxisCarousel(visibleTopTiles, selectedTopId, setSelectedTopId, "Top")}
         </div>
       )}
       {isRugProduct && visibleFabricTiles.length > 0 ? (
