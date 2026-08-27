@@ -1012,6 +1012,7 @@ const VariantSelectors: React.FC<{
 const PublicProductPage: React.FC = () => {
   const { slug: designerSlug, productSlug } = useParams<{ slug: string; productSlug: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const location = useLocation();
   const isLegacyArnoldClamChairRoute =
     designerSlug === "arnold-madsen" &&
