@@ -1000,61 +1000,91 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     options: Fabric[],
     selectedId: string | null,
     setSelected: (id: string) => void,
-    label: "Base" | "Top"
+    label: "Base" | "Top",
+    isOpen: boolean,
+    onToggle: () => void
   ) => {
     const selectedItem = options.find((o) => o.id === selectedId);
+    const handleSelect = (option: Fabric) => {
+      setSelected(option.id);
+      if (label === "Top") {
+        onTopFinishChange?.(option.name);
+        onTopFinishSwatchChange?.({ name: option.name, image_url: option.image_url ?? null });
+      } else {
+        onWoodFinishChange?.(option.name);
+        onWoodFinishPricingChange?.({
+          id: option.id,
+          name: option.name,
+          price_cents: (option.frame_price_cents && option.frame_price_cents > 0) ? option.frame_price_cents : 0,
+          currency: option.frame_price_currency || "EUR",
+          image_url: option.image_url ?? null,
+        });
+      }
+      const indices = Array.isArray(option.image_indices) && option.image_indices.length > 0 ? option.image_indices : null;
+      lockedPreviewRef.current = { indices, name: option.name };
+      hoverActiveRef.current = false;
+      if (indices) {
+        setTimeout(() => onSwatchImagesChange?.(indices, { committed: true, swatchName: option.name, jumpOnly: isRugProduct }), 0);
+      } else {
+        onSwatchImagesChange?.(null, { committed: true, swatchName: option.name });
+      }
+    };
     return (
-      <div className="mb-4 w-full">
-        <div className="flex justify-between items-center px-4 mb-2">
-          <span className="text-xs font-semibold tracking-wider text-neutral-500 uppercase">{label}</span>
-          <span className="text-xs text-neutral-400 font-medium">{selectedItem?.name ?? ""}</span>
-        </div>
-        <div className="flex flex-nowrap overflow-x-auto gap-3 px-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
-          {options.map((option) => {
-            const isSelected = selectedId === option.id;
-            return (
-              <button
-                key={option.id}
-                type="button"
-                onClick={() => {
-                  setSelected(option.id);
-                  if (label === "Top") {
-                    onTopFinishChange?.(option.name);
-                    onTopFinishSwatchChange?.({ name: option.name, image_url: option.image_url ?? null });
-                  } else {
-                    onWoodFinishChange?.(option.name);
-                    onWoodFinishPricingChange?.({
-                      id: option.id,
-                      name: option.name,
-                      price_cents: (option.frame_price_cents && option.frame_price_cents > 0) ? option.frame_price_cents : 0,
-                      currency: option.frame_price_currency || "EUR",
-                      image_url: option.image_url ?? null,
-                    });
-                  }
-                  const indices = Array.isArray(option.image_indices) && option.image_indices.length > 0 ? option.image_indices : null;
-                  lockedPreviewRef.current = { indices, name: option.name };
-                  hoverActiveRef.current = false;
-                  if (indices) {
-                    setTimeout(() => onSwatchImagesChange?.(indices, { committed: true, swatchName: option.name, jumpOnly: isRugProduct }), 0);
-                  } else {
-                    onSwatchImagesChange?.(null, { committed: true, swatchName: option.name });
-                  }
-                }}
-                aria-label={`Select ${option.name}`}
-                aria-pressed={isSelected}
-                title={option.supplier ? `${option.supplier} — ${option.name}` : option.name}
-                className={cn(
-                  "w-11 h-11 rounded-full border-2 flex-shrink-0 snap-start transition-all p-0.5",
-                  isSelected ? "border-neutral-900 scale-105" : "border-neutral-200"
-                )}
-              >
-                <div
-                  className="w-full h-full rounded-full bg-cover bg-center"
-                  style={{ backgroundImage: `url(${option.image_url || ""})` }}
-                />
-              </button>
-            );
-          })}
+      <div className="border-b border-border/60">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={isOpen}
+          className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left"
+        >
+          <span className="text-xs font-semibold tracking-wider text-neutral-500 uppercase">
+            {label}
+          </span>
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-xs text-neutral-400 font-medium truncate max-w-[180px]">
+              {selectedItem?.name ?? ""}
+            </span>
+            <ChevronDown
+              className={cn(
+                "w-4 h-4 text-neutral-400 transition-transform duration-300 shrink-0",
+                isOpen && "rotate-180"
+              )}
+              aria-hidden="true"
+            />
+          </div>
+        </button>
+        <div
+          className={cn(
+            "grid transition-[grid-template-rows] duration-300 ease-out",
+            isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+          )}
+        >
+          <div className="overflow-hidden">
+            <div className="flex flex-nowrap overflow-x-auto gap-3 px-4 pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
+              {options.map((option) => {
+                const isSelected = selectedId === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => handleSelect(option)}
+                    aria-label={`Select ${option.name}`}
+                    aria-pressed={isSelected}
+                    title={option.supplier ? `${option.supplier} — ${option.name}` : option.name}
+                    className={cn(
+                      "w-11 h-11 rounded-full border-2 flex-shrink-0 snap-start transition-all p-0.5",
+                      isSelected ? "border-neutral-900 scale-105" : "border-neutral-200"
+                    )}
+                  >
+                    <div
+                      className="w-full h-full rounded-full bg-cover bg-center"
+                      style={{ backgroundImage: `url(${option.image_url || ""})` }}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     );
