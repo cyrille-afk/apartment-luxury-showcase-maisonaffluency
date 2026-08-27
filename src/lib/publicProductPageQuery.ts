@@ -26,14 +26,19 @@ export async function fetchPublicProductPage(
 ) {
   if (!designerSlug || !productSlug) return null;
 
-  const { data: designer } = await supabase
+  const { data: designerRow } = await supabase
     .from("designers")
     .select("id, name, slug, display_name, biography")
     .eq("slug", designerSlug)
-    .eq("is_published", true)
-    .eq("trade_only", false)
     .maybeSingle();
-  if (!designer) return null;
+  // Parent houses are sometimes flagged trade_only / unpublished while still
+  // being linked from public lightboxes — keep resolving their product URLs.
+  let designer = designerRow as any;
+  if (!designer) {
+    // Unknown designer slug: resolve the product globally below.
+    designer = { id: "", name: "", slug: designerSlug, display_name: null, biography: "" };
+  }
+
 
   const brandCandidates = Array.from(
     new Set([designer.display_name, designer.name].filter(Boolean)),
