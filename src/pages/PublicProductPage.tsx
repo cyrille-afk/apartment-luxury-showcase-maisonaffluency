@@ -2617,6 +2617,8 @@ const PublicProductPage: React.FC = () => {
                           to={`/designers/${designer.slug}/${rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
                           state={{ from: location.pathname + location.search }}
                           className="group block shrink-0 basis-[70%] snap-start"
+                          onTouchStart={() => prefetchPublicProductPage(queryClient, designer.slug, rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : "")))}
+                          onMouseEnter={() => prefetchPublicProductPage(queryClient, designer.slug, rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : "")))}
                         >
                           <div className="relative aspect-square rounded-luxury-sharp overflow-hidden bg-muted/30 border border-border">
                             <img
