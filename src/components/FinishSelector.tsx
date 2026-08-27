@@ -992,9 +992,31 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     .filter(Boolean)
     .join(" / ");
 
+  const showMobileBaseTopGrid = (isMobile || isPwa) && (visibleWoodTiles.length > 0 || visibleTopTiles.length > 0);
+
   return (
     <TooltipProvider>
       <div className={className} onMouseLeave={restoreLockedPreview}>
+      {showMobileBaseTopGrid && (
+        <div className={cn("grid gap-4 mb-6", visibleWoodTiles.length > 0 && visibleTopTiles.length > 0 ? "grid-cols-2" : "grid-cols-1")}>
+          {visibleWoodTiles.length > 0 && (
+            <div>
+              <div className="text-xs uppercase text-muted-foreground mb-1">Base</div>
+              <div className="flex gap-2 flex-wrap">
+                {visibleWoodTiles.map((f) => renderTile(f, "base", undefined, "circle"))}
+              </div>
+            </div>
+          )}
+          {visibleTopTiles.length > 0 && (
+            <div>
+              <div className="text-xs uppercase text-muted-foreground mb-1">Top</div>
+              <div className="flex gap-2 flex-wrap">
+                {visibleTopTiles.map((f) => renderTile(f, "top", undefined, "circle"))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       {isRugProduct && visibleFabricTiles.length > 0 ? (
         <div className="border-t border-border/60">
           <button
