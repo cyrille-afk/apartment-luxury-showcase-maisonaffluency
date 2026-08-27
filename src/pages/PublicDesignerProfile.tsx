@@ -1537,7 +1537,11 @@ const PublicDesignerProfile = () => {
               </motion.div>
 
               {biographySection}
-              {isParentBrand && <ParentHouseOverview parentName={designer.name} />}
+              {isParentBrand && (
+                <div className="hidden md:block">
+                  <ParentHouseOverview parentName={designer.name} />
+                </div>
+              )}
             </div>
           ) : (
             /* Atelier profile: panoramic hero + bio below */
@@ -1635,12 +1639,20 @@ const PublicDesignerProfile = () => {
 
 
               {biographySection}
-              {isParentBrand && <ParentHouseOverview parentName={designer.name} />}
+              {isParentBrand && (
+                <div className="hidden md:block">
+                  <ParentHouseOverview parentName={designer.name} />
+                </div>
+              )}
             </div>
           )}
           </div>
 
-          {isParentBrand && <ParentHouseOverview parentName={designer.name} />}
+          {isParentBrand && (
+            <div className="hidden md:block">
+              <ParentHouseOverview parentName={designer.name} />
+            </div>
+          )}
 
           {!newInFormat && (
             <div className={cn(!useNewInSpotlightFormat && "md:hidden")}>
