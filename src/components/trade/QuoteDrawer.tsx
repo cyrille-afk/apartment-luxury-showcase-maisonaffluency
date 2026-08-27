@@ -339,7 +339,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                       } else {
                         return (
                           <span className="font-body text-[9px] text-muted-foreground/60 italic">
-                            Price on request
+                            Price upon Request
                           </span>
                         );
                       }

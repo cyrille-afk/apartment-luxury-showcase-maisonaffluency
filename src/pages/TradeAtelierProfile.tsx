@@ -801,8 +801,8 @@ const TradeAtelierProfile = () => {
                                       <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider" title={`${tierLabel} tier — ${discountLabel} trade discount`}>{tierLabel} –{discountLabel}</span>
                                     </>
                                   : <span className="text-foreground font-semibold">{`${(pick as any).price_prefix ? (pick as any).price_prefix + ' ' : ''}${formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}`}</span>
-                                : "Price on request"
-                              : "Price on request"}
+                                : "Price upon Request"
+                              : "Price upon Request"}
                           </p>
                         </div>
                       </div>

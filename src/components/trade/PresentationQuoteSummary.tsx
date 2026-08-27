@@ -37,7 +37,7 @@ export default function PresentationQuoteSummary({ optionLabel, quoteRef, produc
                 <p className="font-body text-[10px] text-muted-foreground">{p.brand_name}</p>
               </div>
               <p className="font-body text-sm text-foreground/70">
-                {p.price_label || <span className="italic text-muted-foreground">Price on request</span>}
+                {p.price_label || <span className="italic text-muted-foreground">Price upon Request</span>}
               </p>
             </div>
           ))}

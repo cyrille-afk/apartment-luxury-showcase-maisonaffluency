@@ -605,7 +605,7 @@ export default function ProposalBuilder({
             }).format(price / 100);
             desc += `\nPrice: ${formatted}${pricing.trade_price_cents ? " (Trade)" : " (RRP)"}`;
           } else {
-            desc += `\nPrice on request`;
+            desc += `\nPrice upon Request`;
           }
         }
         return desc;
