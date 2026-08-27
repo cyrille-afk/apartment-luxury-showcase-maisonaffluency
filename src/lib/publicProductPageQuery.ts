@@ -58,24 +58,60 @@ export async function fetchPublicProductPage(
       : Promise.resolve({ data: [] as any[] }),
   ]);
 
-  const picks = picksResult.data as any[] | null;
+  let picks = picksResult.data as any[] | null;
   const tradeMatches = tradeMatchesResult.data as any[] | null;
 
-  if (!picks || picks.length === 0) return null;
+  const matchPick = (list: any[] | null) => {
+    if (!list || list.length === 0) return null;
+    return (
+      list.find((p: any) => p.slug === productSlug) ||
+      list.find((p: any) => {
+        const titleSlug = slugify(p.title);
+        const shortSlug = slugify(String(p.title).replace(/\s+by\s+.+$/i, ""));
+        const fullSlug = slugify(p.title + (p.subtitle ? `-${p.subtitle}` : ""));
+        return fullSlug === productSlug || titleSlug === productSlug || shortSlug === productSlug;
+      }) ||
+      list.find((p: any) => productSlug.startsWith(`${slugify(p.title)}-`)) ||
+      null
+    );
+  };
 
   // Canonical match on the stored slug column. Fall back to legacy
   // title-derived slugs so any bookmarked/shared URLs keep resolving.
-  const product =
-    picks.find((p: any) => p.slug === productSlug) ||
-    picks.find((p: any) => {
-      const titleSlug = slugify(p.title);
-      const shortSlug = slugify(String(p.title).replace(/\s+by\s+.+$/i, ""));
-      const fullSlug = slugify(p.title + (p.subtitle ? `-${p.subtitle}` : ""));
-      return fullSlug === productSlug || titleSlug === productSlug || shortSlug === productSlug;
-    }) ||
-    picks.find((p: any) => productSlug.startsWith(`${slugify(p.title)}-`));
+  let product = matchPick(picks);
+
+  // Parent houses (e.g. Marta Sala Éditions, Veronese) hold no picks of their
+  // own — their profile aggregates the picks of the designers they publish.
+  // Fall back to the founder family so those product links resolve.
+  if (!product) {
+    const familyNames = Array.from(
+      new Set([designer.name, designer.display_name].filter(Boolean)),
+    ) as string[];
+    if (familyNames.length > 0) {
+      const { data: children } = await supabase
+        .from("designers")
+        .select("id")
+        .in("founder", familyNames)
+        .eq("is_published", true)
+        .eq("trade_only", false);
+      const childIds = (children || []).map((c: any) => c.id).filter((id: string) => id !== designer.id);
+      if (childIds.length > 0) {
+        const { data: childPicks } = await supabase
+          .from("designer_curator_picks_public" as any)
+          .select(publicPickFields)
+          .in("designer_id", childIds)
+          .order("sort_order", { ascending: true });
+        const found = matchPick(childPicks as any[] | null);
+        if (found) {
+          picks = childPicks as any[];
+          product = found;
+        }
+      }
+    }
+  }
 
   if (!product) return null;
+
 
   const tradeProduct = tradeMatches?.find(
     (tp: any) => tp.product_name === (product as any).title,
