@@ -622,7 +622,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts, pr
 
 // ─── Single Designer Card ────────────────────────────────────────────────────
 function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, priority = false }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number[]>; hasIgPosts?: boolean; /** Above-the-fold (first grid row) — load eagerly. */ priority?: boolean }) {
-  const { displayName, parentLabel } = parseDesignerDisplayName(item);
+  const { displayName } = parseDesignerDisplayName(item);
   const { toast } = useToast();
   const navigate = useNavigate();
   const cardImageUrl = item.image_url || item.hero_image_url;
