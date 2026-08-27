@@ -11,6 +11,8 @@ function removeInlineScrollPin(html: HTMLElement, body: HTMLElement) {
   body.style.removeProperty("overflow");
   body.style.removeProperty("overscroll-behavior");
   body.style.removeProperty("background-color");
+  body.style.removeProperty("background-image");
+
   body.style.removeProperty("position");
   body.style.removeProperty("top");
   body.style.removeProperty("left");
