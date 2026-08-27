@@ -2083,28 +2083,33 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                     Maison Affluency Index
                   </p>
                 </div>
+                {/* When the sticky A–Z bar below is enabled it owns the index —
+                    don't render a second, duplicate letter row here. */}
                 <div className="col-span-8">
-                  <div ref={letterBarRef} className="flex items-center justify-between">
-                    {LETTERS.map((letter) => {
-                      const isActive = activeLetters.has(letter);
-                      return (
-                        <button
-                          key={letter}
-                          data-azbar-letter={letter}
-                          onClick={() => isActive && jumpToLetter(letter)}
-                          className={`font-body text-[11px] lg:text-xs uppercase tracking-[0.18em] leading-none transition-colors duration-200 ${
-                            isActive
-                              ? "text-foreground font-semibold hover:text-primary cursor-pointer"
-                              : "text-muted-foreground/50 cursor-default"
-                          }`}
-                        >
-                          {letter}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div className="h-px bg-border/50 mt-4" />
+                  {!showAlphabetBar && (
+                    <div ref={letterBarRef} className="flex items-center justify-between">
+                      {LETTERS.map((letter) => {
+                        const isActive = activeLetters.has(letter);
+                        return (
+                          <button
+                            key={letter}
+                            data-azbar-letter={letter}
+                            onClick={() => isActive && jumpToLetter(letter)}
+                            className={`font-body text-[11px] lg:text-xs uppercase tracking-[0.18em] leading-none transition-colors duration-200 ${
+                              isActive
+                                ? "text-foreground font-semibold hover:text-primary cursor-pointer"
+                                : "text-muted-foreground/50 cursor-default"
+                            }`}
+                          >
+                            {letter}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {!showAlphabetBar && <div className="h-px bg-border/50 mt-4" />}
                 </div>
+
               </div>
             </div>
           )}
