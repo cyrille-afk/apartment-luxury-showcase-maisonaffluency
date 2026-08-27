@@ -1094,9 +1094,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     <TooltipProvider>
       <div className={className} onMouseLeave={restoreLockedPreview}>
       {showMobileBaseTopGrid && (
-        <div className="space-y-2">
-          {visibleWoodTiles.length > 0 && renderInlineAxisCarousel(visibleWoodTiles, selectedWoodId, setSelectedWoodId, "Base")}
-          {visibleTopTiles.length > 0 && renderInlineAxisCarousel(visibleTopTiles, selectedTopId, setSelectedTopId, "Top")}
+        <div className="border-t border-border/60">
+          {visibleWoodTiles.length > 0 && renderInlineAxisCarousel(visibleWoodTiles, selectedWoodId, setSelectedWoodId, "Base", mobileBaseOpen, () => setMobileBaseOpen((v) => !v))}
+          {visibleTopTiles.length > 0 && renderInlineAxisCarousel(visibleTopTiles, selectedTopId, setSelectedTopId, "Top", mobileTopOpen, () => setMobileTopOpen((v) => !v))}
         </div>
       )}
       {isRugProduct && visibleFabricTiles.length > 0 ? (
