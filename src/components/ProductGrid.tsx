@@ -22,6 +22,7 @@ import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { normalizeSubcategory, getParentCategoryFromSubcategory } from "@/lib/categoryNormalization";
 import { formatDimensionsMultiline, withImperialPerLine } from "@/lib/formatDimensions";
+import { cldResponsiveImg } from "@/lib/cloudinary";
 
 // ─── SUB_TAGS mapping (same as FeaturedDesigners) ────────────────────────
 const SUB_TAGS: Record<string, string[]> = {
@@ -429,6 +430,8 @@ function singularizeSub(s: string): string {
 
   // Mobile/PWA: first tap reveals a "Discover the Product" pill; second tap opens the lightbox.
   const [mobileRevealedIdx, setMobileRevealedIdx] = useState<number | null>(null);
+  // Tracks the hovered card so hover (lifestyle) images are only fetched on intent.
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const handleCardClick = useCallback((_item: ProductItem, index: number) => {
     if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches && mobileRevealedIdx !== index) {
       setMobileRevealedIdx(index);
@@ -584,8 +587,9 @@ function singularizeSub(s: string): string {
               className="group cursor-pointer"
               tabIndex={0}
               onClick={() => handleCardClick(item, idx)}
-              onMouseEnter={() => prefetchPickDetail(item.pick.id)}
-              onFocus={() => prefetchPickDetail(item.pick.id)}
+              onMouseEnter={() => { prefetchPickDetail(item.pick.id); setHoveredIdx(idx); }}
+              onMouseLeave={() => setHoveredIdx((cur) => (cur === idx ? null : cur))}
+              onFocus={() => { prefetchPickDetail(item.pick.id); setHoveredIdx(idx); }}
               onTouchStart={() => prefetchPickDetail(item.pick.id)}
             >
               <div className="relative aspect-square overflow-hidden rounded-luxury-sharp bg-[#f0eeeb] mb-3 flex items-center justify-center">
@@ -607,17 +611,26 @@ function singularizeSub(s: string): string {
                   ) : null;
                 })()}
                 <img
-                  src={item.pick.image}
+                  {...cldResponsiveImg(item.pick.image, {
+                    widths: [300, 400, 600, 800],
+                    sizes: `(max-width: 768px) 50vw, ${gridCols === 4 ? '25vw' : '33vw'}`,
+                  })}
                   alt={`${item.pick.title} by ${item.designerName} — collectible design furniture`}
                   className={`w-full h-full object-contain transition-all duration-500 group-hover:scale-105 ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
                   loading="lazy"
+                  decoding="async"
                 />
-                {item.pick.hoverImage && (
+                {/* Hover image mounts only on hover/focus so it isn't fetched upfront */}
+                {item.pick.hoverImage && hoveredIdx === idx && (
                   <img
-                    src={item.pick.hoverImage}
+                    {...cldResponsiveImg(item.pick.hoverImage, {
+                      widths: [300, 400, 600, 800],
+                      sizes: `(max-width: 768px) 50vw, ${gridCols === 4 ? '25vw' : '33vw'}`,
+                    })}
                     alt={`${item.pick.title} by ${item.designerName} — alternate view`}
                     className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"
                     loading="lazy"
+                    decoding="async"
                   />
                 )}
                 {/* Compare pin button */}
