@@ -101,6 +101,19 @@ export function isUpholsteryAxisLabel(label: string | null | undefined): boolean
 }
 
 /**
+ * True when an axis label belongs in the swatch (soft-material) section.
+ * Lampshades are fabric swatches too ("Shade", "Lampshade", "Shade Fabric"),
+ * but must not widen `isUpholsteryAxisLabel`, which drives COM/upholstery logic.
+ */
+function isSwatchSectionAxisLabel(label: string | null | undefined): boolean {
+  if (isUpholsteryAxisLabel(label)) return true;
+  const axis = clean(label)?.toLowerCase();
+  if (!axis) return false;
+  return /\b(shade|lampshade|lamp shade)\b/.test(axis);
+}
+
+
+/**
  * Resolves which FinishSelector section each variant axis labels.
  *
  * Curators enter axes as Base/Top, but the semantic meaning varies: some
