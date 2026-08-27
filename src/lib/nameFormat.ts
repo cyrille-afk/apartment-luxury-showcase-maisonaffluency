@@ -40,6 +40,7 @@ const SORT_KEY_OVERRIDES: Record<string, string> = {
   "lazzarini & pickering": "lazzarini",
   "alinea design objects": "alinea",
   "herzog & de meuron": "herzog",
+  "hubert & poyer": "hubert",
   "garnier & linker": "garnier",
   "gounot & jähnke": "gounot",
   "gounot & jahnke": "gounot",
@@ -92,6 +93,11 @@ export function sortNameKey(name: string): string {
   const personPart = full.includes(" - ")
     ? full.split(" - ").pop()?.trim() || full
     : full;
+  // Atelier partnerships "X & Y" sort by the first partner, not the last word.
+  if (personPart.includes(" & ")) {
+    const first = stripAccents(personPart.split(" & ")[0].trim()).toLowerCase().replace(/^[^a-z]+/, "");
+    if (first) return first;
+  }
   const words = personPart.split(/\s+/);
   // Use the last alphabetic word (ignore trailing numerics like "1861"
   // and the generic suffix "Studio"/"Studios").
