@@ -69,7 +69,10 @@ const PublicGallery = () => {
         <h1 className="sr-only">Maison Affluency Gallery</h1>
 
         <div className="mx-auto max-w-7xl px-6 md:px-12">
-          <div className="pt-[var(--header-h)]">
+          <div
+            className="pt-[var(--header-h)]"
+            style={headerOffset ? { paddingTop: headerOffset } : undefined}
+          >
             <ApartmentTourInterlude compact />
           </div>
         </div>
