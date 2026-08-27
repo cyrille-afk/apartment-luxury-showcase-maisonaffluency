@@ -23,6 +23,11 @@ import { categoryUrl } from "@/lib/categorySlugs";
 import { normalizeSubcategory, getParentCategoryFromSubcategory } from "@/lib/categoryNormalization";
 import { formatDimensionsMultiline, withImperialPerLine } from "@/lib/formatDimensions";
 import { cldResponsiveImg } from "@/lib/cloudinary";
+import { Link } from "react-router-dom";
+
+const designerSlugify = (s: string) =>
+  s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
 // ─── SUB_TAGS mapping (same as FeaturedDesigners) ────────────────────────
 const SUB_TAGS: Record<string, string[]> = {
@@ -656,9 +661,13 @@ function singularizeSub(s: string): string {
                 </div>
               </div>
               <div className="text-center mt-1">
-                <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-foreground/80 font-semibold">
+                <Link
+                  to={`/designers/${designerSlugify(item.designerId || item.designerName)}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-foreground/80 font-semibold hover:text-foreground hover:underline underline-offset-4 transition-colors"
+                >
                   {item.designerName.includes(' - ') ? item.designerName.split(' - ')[0].trim() : item.designerName}
-                </p>
+                </Link>
                 <h3 className="font-body text-sm md:text-base text-foreground leading-tight mt-1.5 font-medium">
                   {subcategory === "Dining Tables" && !item.pick.title.toLowerCase().includes("table")
                     ? `${item.pick.title} Table`
