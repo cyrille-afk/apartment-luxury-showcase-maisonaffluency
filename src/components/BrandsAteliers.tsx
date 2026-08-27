@@ -2114,76 +2114,61 @@ function ParentBrandSubDesignersGrid({ config, onClose }: { config: ParentBrandC
             <span className="font-body text-xs text-muted-foreground/50">Loading designers…</span>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-12 gap-y-8 gap-x-6">
-            {designers.map((d, i) => {
-              const isFeatured = i < 3;
-              const spanClass =
-                i === 0
-                  ? "col-span-2 sm:col-span-4 md:col-span-6"
-                  : isFeatured
-                  ? "col-span-1 sm:col-span-2 md:col-span-3"
-                  : "col-span-1 sm:col-span-2 md:col-span-3";
-              return (
-                <Link
-                  key={d.slug}
-                  to={`/designers/${d.slug}?from=ateliers`}
-                  className={cn(
-                    "group/sub rounded-lg overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all",
-                    spanClass
-                  )}
-                >
-                  <div className={cn("relative bg-muted/10 overflow-hidden", isFeatured ? "aspect-[4/5]" : "aspect-[3/4]")}>
-                    {d.image ? (
-                      <img
-                        src={d.image}
-                        alt={d.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-muted/5">
-                        <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                      <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View</span>
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2 md:gap-3">
+            {designers.map((d) => (
+              <Link
+                key={d.slug}
+                to={`/designers/${d.slug}?from=ateliers`}
+                className="group/sub rounded-lg overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all"
+              >
+                <div className="aspect-[3/4] relative bg-muted/10 overflow-hidden">
+                  {d.image ? (
+                    <img
+                      src={d.image}
+                      alt={d.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-muted/5">
+                      <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
                     </div>
-                    <span className="absolute top-2 left-2 bg-foreground/75 backdrop-blur-sm text-background font-body text-[7px] uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full flex items-center gap-1">
-                      <Layers className="h-2 w-2" />
-                      {config.pillLabel}
-                    </span>
-                    {/* Share button */}
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const ogUrl = buildDesignerOgUrl(d.name);
-                        const text = `${d.name} — ${config.pillLabel} · Maison Affluency`;
-                        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-                          shareOnWhatsApp(`${text}\n${ogUrl}`);
-                        } else {
-                          navigator.clipboard.writeText(`${text}: ${ogUrl}`);
-                          import("sonner").then(({ toast }) => toast.success("Link copied"));
-                        }
-                      }}
-                      className="absolute bottom-2 right-2 z-10 flex items-center gap-1 px-1.5 py-1 rounded-full bg-white/80 backdrop-blur-sm border border-border/30 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 hover:bg-white"
-                      aria-label={`Share ${d.name}`}
-                    >
-                      <Share2 className="h-2.5 w-2.5 text-foreground/70" />
-                      <span className="font-body text-[7px] uppercase tracking-[0.1em] text-foreground/70">Share</span>
-                    </button>
+                  )}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View</span>
                   </div>
-                  <div className="px-2 py-2 bg-background">
-                    <p className={cn(
-                      "font-body text-foreground leading-tight line-clamp-1 text-center",
-                      isFeatured ? "text-xs md:text-sm" : "text-[10px] md:text-[11px]"
-                    )}>
-                      {d.name}
-                    </p>
-                  </div>
-                </Link>
-              );
-            })}
+                  <span className="absolute top-2 left-2 bg-foreground/75 backdrop-blur-sm text-background font-body text-[7px] uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                    <Layers className="h-2 w-2" />
+                    {config.pillLabel}
+                  </span>
+                  {/* Share button */}
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const ogUrl = buildDesignerOgUrl(d.name);
+                      const text = `${d.name} — ${config.pillLabel} · Maison Affluency`;
+                      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                        shareOnWhatsApp(`${text}\n${ogUrl}`);
+                      } else {
+                        navigator.clipboard.writeText(`${text}: ${ogUrl}`);
+                        import("sonner").then(({ toast }) => toast.success("Link copied"));
+                      }
+                    }}
+                    className="absolute bottom-2 right-2 z-10 flex items-center gap-1 px-1.5 py-1 rounded-full bg-white/80 backdrop-blur-sm border border-border/30 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 hover:bg-white"
+                    aria-label={`Share ${d.name}`}
+                  >
+                    <Share2 className="h-2.5 w-2.5 text-foreground/70" />
+                    <span className="font-body text-[7px] uppercase tracking-[0.1em] text-foreground/70">Share</span>
+                  </button>
+                </div>
+                <div className="px-2 py-1.5 bg-background">
+                  <p className="font-body text-[10px] md:text-[11px] text-foreground leading-tight line-clamp-1 text-center">
+                    {d.name}
+                  </p>
+                </div>
+              </Link>
+            ))}
           </div>
         )}
       </div>
