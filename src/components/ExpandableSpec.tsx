@@ -168,7 +168,11 @@ export default function ExpandableSpec({
 
 
   // Multi + swatchMode → horizontal row of circular material swatches.
-  if (swatchMode && placeholder) {
+  // Only when the options actually describe materials/colours; abstract axes
+  // like "Shape A/B" would render as identical blank circles, so they use the
+  // text picker below instead.
+  if (swatchMode && placeholder && lines.some(hasKnownMaterialTone)) {
+
     const pickSwatch = (i: number) => {
       if (disabledSet.has(i)) return;
       try {
