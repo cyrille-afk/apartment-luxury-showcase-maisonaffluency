@@ -2083,7 +2083,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                     Maison Affluency Index
                   </p>
                 </div>
-                {/* When the sticky A–Z bar below is enabled it owns the index —
+                {/* When the A–Z bar below is enabled it owns the index —
                     don't render a second, duplicate letter row here. */}
                 <div className="col-span-8">
                   {!showAlphabetBar && (
@@ -2114,9 +2114,9 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
             </div>
           )}
 
-          {/* Desktop: sticky A-Z jump bar — hidden when a category/subcategory filter is active */}
+          {/* Desktop: in-flow A-Z jump bar — hidden when a category/subcategory filter is active */}
           {showAlphabetBar && !(selectedCategory || selectedSubcategory) && (
-            <div className="hidden md:block mb-6 sticky top-[var(--header-h)] z-30 bg-background">
+            <div className="hidden md:block mb-6 bg-background">
               <div className="h-px bg-border/60 mb-5" />
               <div
                 ref={letterBarRef}
