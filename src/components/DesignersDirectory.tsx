@@ -382,9 +382,6 @@ const HIDE_PARENT_LABEL_SLUGS = new Set<string>([
   "tristan-auer-veronese",
 ]);
 
-// Parent brands whose sub-designer cards should NOT show the parent name
-// beneath the designer's own name in the expanded sub-grid.
-const HIDE_SUBGRID_PARENT_LABEL = new Set<string>(["Man of Parts", "Pouenat"]);
 
 /** Parse names into [displayName, parentLabel] for correct card rendering */
 function parseDesignerDisplayName(item: Designer): { displayName: string; parentLabel: string | null } {
