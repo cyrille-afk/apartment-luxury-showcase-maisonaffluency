@@ -9,12 +9,19 @@ const DO_NOT_INTERRUPT = [
   "/trade/mood-board",
   "/trade/tearsheet",
   "/trade/presentations",
-  // Admin editors: reloading mid-edit loses in-progress work (designer
-  // editor + product/curator-pick editor live under /trade/admin/designers,
-  // fabrics library under /trade/admin/fabrics, etc.). Block auto-reload
-  // across all admin surfaces.
+  // Admin editors: reloading mid-edit loses in-progress work (fabrics library
+  // under /trade/admin/fabrics, etc.). Block auto-reload across all admin
+  // surfaces — including the ones that do NOT live under /trade/admin.
   "/trade/admin",
+  "/trade/designers/admin",
+  "/trade/collectibles/admin",
+  "/trade/designers/instagram",
+  "/trade/documents-admin",
+  "/trade/quotes-admin",
+  "/trade/description-writer",
+  "/trade/journal",
 ];
+
 
 const isProtectedPath = (p = typeof window !== "undefined" ? window.location.pathname : "") =>
   DO_NOT_INTERRUPT.some((r) => p === r || p.startsWith(r + "/"));
