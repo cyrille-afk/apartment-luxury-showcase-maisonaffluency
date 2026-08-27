@@ -41,6 +41,7 @@ import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { consumeProductBackRef } from "@/lib/designerBackRef";
 import { isChildBrandDesigner, isParentBrandDesigner } from "@/lib/designerHierarchy";
+import { ParentHouseOverview } from "@/components/ParentHouseOverview";
 import { toOgImage } from "@/lib/ogImage";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { sortCuratorPicks, interleaveBySubcategory } from "@/lib/curatorPickSort";
@@ -1536,6 +1537,7 @@ const PublicDesignerProfile = () => {
               </motion.div>
 
               {biographySection}
+              {isParentBrand && <ParentHouseOverview parentName={designer.name} />}
             </div>
           ) : (
             /* Atelier profile: panoramic hero + bio below */
@@ -1633,6 +1635,7 @@ const PublicDesignerProfile = () => {
 
 
               {biographySection}
+              {isParentBrand && <ParentHouseOverview parentName={designer.name} />}
             </div>
           )}
           </div>
