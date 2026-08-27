@@ -65,6 +65,13 @@ const Hero = () => {
   const isPwa = isPwaStandaloneDisplay();
 
   useEffect(() => {
+    // The hero is a full-bleed dark image: paint the iOS chrome black while
+    // it is mounted, and restore the light chrome for every other route.
+    setDarkIosChrome();
+    return () => clearDarkIosChrome();
+  }, []);
+
+  useEffect(() => {
     const isAppleWebKit = /AppleWebKit/i.test(navigator.userAgent) && !/(CriOS|FxiOS|EdgiOS)/i.test(navigator.userAgent);
     if (isAppleWebKit) setShowImageFallback(true);
 
