@@ -819,11 +819,6 @@ const revealedLettersGlobal = new Set<string>();
 const isParentBrandCard = (item: Designer, parentDesignerCountByName: Record<string, number>) =>
   item.founder === item.name && (parentDesignerCountByName[item.name] ?? 0) > 0;
 
-const getLetterDesignerTotal = (designers: Designer[], parentDesignerCountByName: Record<string, number>) =>
-  designers.reduce((sum, item) => {
-    const childCount = parentDesignerCountByName[item.name] ?? 0;
-    return sum + (isParentBrandCard(item, parentDesignerCountByName) ? childCount + 1 : 1);
-  }, 0);
 
 const getInitialVisibleDesignerCards = (
   designers: Designer[],
