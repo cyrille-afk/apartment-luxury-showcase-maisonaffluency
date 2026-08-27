@@ -10,6 +10,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { StudioProvider } from "@/hooks/useStudio";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import { releaseDesignersLandingScrollLock } from "@/lib/designersScrollLock";
+import { clearDarkIosChrome } from "@/lib/iosChrome";
 
 // Defer react-helmet-async — all critical meta tags are already in index.html
 const LazyHelmetProvider = lazy(() =>
