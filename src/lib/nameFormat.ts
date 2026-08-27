@@ -40,6 +40,7 @@ const SORT_KEY_OVERRIDES: Record<string, string> = {
   "lazzarini & pickering": "lazzarini",
   "alinea design objects": "alinea",
   "herzog & de meuron": "herzog",
+  "hubert & poyer": "hubert",
   "garnier & linker": "garnier",
   "gounot & jähnke": "gounot",
   "gounot & jahnke": "gounot",
