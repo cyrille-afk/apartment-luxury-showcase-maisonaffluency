@@ -1478,7 +1478,10 @@ const PublicDesignerProfile = () => {
               <NewInSpotlight designer={designer} showEyebrow={false} variant="underlaid" />
             </div>
           ) : newInFormat ? (
-            newInSection
+            <>
+              {newInSection}
+              {isParentBrand && <ParentHouseOverview parentName={designer.name} />}
+            </>
           ) : useChildHeroLayout ? (
             /* Designer profile: portrait hero, then the same editorial biography flow as the parent */
             <div className="flex flex-col gap-0">
