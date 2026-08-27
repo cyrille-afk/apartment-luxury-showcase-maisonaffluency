@@ -895,25 +895,6 @@ const packDesignerCards = (
   return packed;
 };
 
-const getInitialVisibleDesignerCards = (
-  designers: Designer[],
-  parentDesignerCountByName: Record<string, number>,
-  maxSlots: number,
-) => {
-  let usedSlots = 0;
-  const visible: Designer[] = [];
-
-  for (const designer of designers) {
-    const span = getDesignerCardSpan(designer, parentDesignerCountByName);
-    if (visible.length > 0 && usedSlots + span > maxSlots) break;
-    visible.push(designer);
-    usedSlots += span;
-  }
-
-  return visible;
-};
-
-
 // ─── Letter Group Body ───────────────────────────────────────────────────────
 // Extracted so it only mounts (and its images only start downloading) after
 // the surrounding LetterGroup has been revealed by the intersection observer.
@@ -937,16 +918,16 @@ function LetterGroupBody({
 }) {
   const matchesExpand = initialExpand && designers.some((d) => d.name === initialExpand || d.founder === initialExpand);
   const [openParent, setOpenParent] = useState<string | null>(matchesExpand ? initialExpand! : null);
-  // Progressive disclosure: sections with more than 8 designers show the first
-  // 8 desktop grid slots, then reveal the rest behind a centered "VIEW ALL" control.
-  const INITIAL_VISIBLE_SLOTS = 8;
+  // Progressive disclosure is based on actual top-level cards, not occupied
+  // grid slots or the number of designers nested inside a parent-house card.
+  const INITIAL_VISIBLE_CARDS = 8;
   const totalDesignerCount = getLetterDesignerTotal(designers, parentDesignerCountByName);
   const packedDesigners = useMemo(
     () => packDesignerCards(designers, parentDesignerCountByName),
     [designers, parentDesignerCountByName],
   );
-  const initialVisible = getInitialVisibleDesignerCards(packedDesigners, parentDesignerCountByName, INITIAL_VISIBLE_SLOTS);
-  const hasOverflow = totalDesignerCount > INITIAL_VISIBLE_SLOTS && packedDesigners.length > initialVisible.length;
+  const initialVisible = packedDesigners.slice(0, INITIAL_VISIBLE_CARDS);
+  const hasOverflow = packedDesigners.length > INITIAL_VISIBLE_CARDS;
   const [showAll, setShowAll] = useState<boolean>(!!matchesExpand);
   const visible = hasOverflow ? initialVisible : packedDesigners;
   const hidden = hasOverflow ? packedDesigners.slice(initialVisible.length) : [];
