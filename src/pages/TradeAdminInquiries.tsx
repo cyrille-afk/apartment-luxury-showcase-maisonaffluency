@@ -150,7 +150,7 @@ export default function TradeAdminInquiries() {
               )}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Price-on-Request submissions, concierge leads, and contact-form messages. Draft a quote and mark it ready when reviewed.
+              Price-upon-Request submissions, concierge leads, and contact-form messages. Draft a quote and mark it ready when reviewed.
             </p>
           </div>
         </div>

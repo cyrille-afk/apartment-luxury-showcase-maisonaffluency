@@ -111,7 +111,7 @@ Deno.test("requirements-validation — does NOT emit budget_over when total is w
 Deno.test("requirements-validation — unpriced items are counted but do not inflate the total", () => {
   const gt = makeGT([
     makeItem({ id: "p1", title: "Oak chair", category: "chair", price_cents: 400_000, currency: "EUR" }),
-    makeItem({ id: "p2", title: "Oak chair", category: "chair", price_cents: null }), // Price on Request
+    makeItem({ id: "p2", title: "Oak chair", category: "chair", price_cents: null }), // Price upon Request
   ]);
   const req: RequirementsInput = {
     slots: [{ typology: "chair", qty_min: 2, qty_max: 2 }],

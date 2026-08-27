@@ -153,7 +153,7 @@ async function loadDynamicRoutes() {
     console.warn("[sitemap] studios query failed:", err?.message ?? err);
   }
 
-  // Trade products (public "Price on Request" pages)
+  // Trade products (public "Price upon Request" pages)
   // Read from a sitemap-only projection. The source trade_products table is
   // intentionally protected by RLS, so public builds must not query it directly.
   try {

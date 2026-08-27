@@ -338,7 +338,7 @@ export default function BillingModeCard({
           </div>
         </button>
 
-        {/* MSRP ONLY — price-on-request / retail quote */}
+        {/* MSRP ONLY — price-upon-request / retail quote */}
         <button
           type="button"
           onClick={() => isEditable && !saving && handleModeChange("msrp_only")}
@@ -360,7 +360,7 @@ export default function BillingModeCard({
               </div>
               <p className="text-xs text-muted-foreground">
                 Retail quote at full MSRP with no trade commission or buy-net margin. Use for
-                price-on-request replies to prospective clients before a trade relationship is set.
+                price-upon-request replies to prospective clients before a trade relationship is set.
               </p>
               <p className="text-xs text-foreground/80 tabular-nums">
                 Client pays: {fmtCents(subtotalCents, currency)}

@@ -108,7 +108,7 @@ serve(async (req) => {
       };
     }).filter(Boolean) as any[];
 
-    if (!lines.length) return json({ error: "These pieces are price on request — please send an enquiry instead." }, 400);
+    if (!lines.length) return json({ error: "These pieces are price upon request — please send an enquiry instead." }, 400);
 
     const currency = lines[0].currency || "usd";
     const subtotal = lines.reduce((s, l) => s + l.line_total_cents, 0);

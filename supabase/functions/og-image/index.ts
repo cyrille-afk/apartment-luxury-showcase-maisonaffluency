@@ -120,7 +120,7 @@ async function getOgData(path: string, reqUrl?: URL): Promise<OgData> {
       return {
         title: "Catalogue — Maison Affluency | Luxury Furniture & Collectible Design",
         description:
-          "Browse our curated selection of luxury furniture, lighting, and collectible design by world-renowned designers and ateliers. Price on request.",
+          "Browse our curated selection of luxury furniture, lighting, and collectible design by world-renowned designers and ateliers. Price upon Request.",
         image: DEFAULT_IMAGE,
         url: `${SITE_URL}/catalogue`,
       };

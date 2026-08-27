@@ -113,7 +113,7 @@ export async function loadVerifiedNames(force = false): Promise<VerifiedNameSet 
 /** Non-name bold usage the model legitimately produces — never treated as a hallucination. */
 const BOLD_ALLOWLIST = new Set(
   [
-    "price on request",
+    "price upon request",
     "price upon request",
     "note",
     "materials",
