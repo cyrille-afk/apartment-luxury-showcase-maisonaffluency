@@ -346,41 +346,6 @@ function useFullCuratorPicks(enabled: boolean) {
   });
 }
 
-const HIDE_PARENT_LABEL_SLUGS = new Set<string>([
-  "adrien-messie",
-  "alex-proba",
-  "autoban",
-  "based-upon",
-  "cristian-mohaded",
-  "cristian-mohaded-cc-tapis",
-  "dagmar-london",
-  "eileen-gray",
-  "felix-aublet",
-  "felix-agostini",
-  "glenn-sestig",
-  "gounot-jahnke",
-  "herzog-de-meuron",
-  "jason-miller",
-  "jean-michel-frank",
-  "joseph-dirand",
-  "kira",
-  "laurent-maugoust-cecile-chenais",
-  "lazzarini-pickering",
-  "luca-nichetto",
-  "manuel-aires-mateus",
-  "mariano-fortuny",
-  "matthew-hilton",
-  "neri-hu",
-  "paul-laszlo",
-  "pierre-chareau",
-  "pierre-chareau-mcde",
-  "rowin-atelier",
-  "sam-baron",
-  "sebastian-herkner-man-of-parts",
-  "studio-base-upon",
-  "tristan-auer",
-  "tristan-auer-veronese",
-]);
 
 
 /** Parse names into [displayName, parentLabel] for correct card rendering */
