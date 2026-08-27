@@ -275,6 +275,10 @@ SECTIONS = [
             ("callout", "Next step",
              "Send a plan, a budget range and a date. We return a focused edit with lead times and net "
              "pricing, ready to drop into your specification."),
+            ("spacer", 10),
+            ("image", img("master-suite_y6jaix"),
+             "Maison Affluency — collectible design, bespoke commissioning and white-glove "
+             "installation. Singapore."),
         ],
     },
 ]
