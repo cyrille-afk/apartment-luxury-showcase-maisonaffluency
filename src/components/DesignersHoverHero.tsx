@@ -1192,6 +1192,10 @@ const DesignersHoverHero = () => {
     };
   }, [searchOpen, isDesktopViewport]);
 
+  // Accent-insensitive search key: "Amelie" must match "Amélie".
+  const foldSearch = (s: string) =>
+    s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
   const { groupedResults, totalResults } = useMemo(() => {
     const list = (allDesigners as any[])
       .filter((d) => d.is_published && !d.trade_only)
@@ -1202,9 +1206,9 @@ const DesignersHoverHero = () => {
         image_url: (d.image_url as string | null) ?? null,
         first_pick_image_url: firstPickMap?.get(d.id) ?? null,
       }));
-    const q = searchQuery.trim().toLowerCase();
+    const q = foldSearch(searchQuery.trim());
     const filtered = q
-      ? list.filter((d) => d.name.toLowerCase().includes(q))
+      ? list.filter((d) => foldSearch(d.name).includes(q) || foldSearch(d.slug).includes(q))
       : list;
     filtered.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
     const groups = new Map<string, typeof filtered>();
@@ -1221,12 +1225,21 @@ const DesignersHoverHero = () => {
   const flatResults = useMemo(() => {
     const list = (allDesigners as any[])
       .filter((d) => d.is_published && !d.trade_only)
-      .map((d) => ({ slug: d.slug as string, name: d.name as string }));
-    const q = searchQuery.trim().toLowerCase();
-    const filtered = q ? list.filter((d) => d.name.toLowerCase().includes(q)) : list;
+      .map((d) => ({
+        slug: d.slug as string,
+        name: d.name as string,
+        hero_image_url: (d.hero_image_url as string | null) ?? null,
+        image_url: (d.image_url as string | null) ?? null,
+        first_pick_image_url: firstPickMap?.get(d.id) ?? null,
+      }));
+    const q = foldSearch(searchQuery.trim());
+    const filtered = q
+      ? list.filter((d) => foldSearch(d.name).includes(q) || foldSearch(d.slug).includes(q))
+      : list;
     filtered.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
     return filtered;
-  }, [allDesigners, searchQuery]);
+  }, [allDesigners, searchQuery, firstPickMap]);
+
 
   // Zero-state: curated "Featured Masters" from the hero groupings, sorted.
   const featuredMasters = useMemo(() => {
