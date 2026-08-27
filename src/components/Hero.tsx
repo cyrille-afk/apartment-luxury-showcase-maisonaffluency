@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackEvent, trackCTA } from "@/lib/analytics";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
+import { setDarkIosChrome, clearDarkIosChrome } from "@/lib/iosChrome";
 import PrivateTourDialog from "@/components/PrivateTourDialog";
 
 const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
@@ -63,6 +64,13 @@ const Hero = () => {
   const [tourOpen, setTourOpen] = useState(false);
   const [showImageFallback, setShowImageFallback] = useState(false);
   const isPwa = isPwaStandaloneDisplay();
+
+  useEffect(() => {
+    // The hero is a full-bleed dark image: paint the iOS chrome black while
+    // it is mounted, and restore the light chrome for every other route.
+    setDarkIosChrome();
+    return () => clearDarkIosChrome();
+  }, []);
 
   useEffect(() => {
     const isAppleWebKit = /AppleWebKit/i.test(navigator.userAgent) && !/(CriOS|FxiOS|EdgiOS)/i.test(navigator.userAgent);

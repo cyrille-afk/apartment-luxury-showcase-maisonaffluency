@@ -618,7 +618,13 @@ input, select, textarea {
    gradient used at the bottom of the product page. */
 @media (max-width: 767px) {
   html {
-    background-color: var(--ios-chrome-base, hsl(var(--background)));
+    background-color: hsl(var(--background));
+  }
+
+  /* Dark routes only (hero + designers landing) get the black canvas and the
+     bottom fade behind the iOS toolbar. Light routes keep the page surface. */
+  html.ios-chrome-dark {
+    background-color: var(--ios-chrome-base, #000000);
     background-image: linear-gradient(
       to bottom,
       transparent 0%,
@@ -630,6 +636,7 @@ input, select, textarea {
     background-attachment: fixed;
     background-size: 100% 100%;
   }
+
 
   html.ios-safari-browser body,
   html.ios-safari-browser #root {

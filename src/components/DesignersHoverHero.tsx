@@ -14,6 +14,7 @@
  * wheel/trackpad; on mobile only the names list claims vertical swipes so
  * the rest of the hero remains free for page scrolling.
  */
+import { setDarkIosChrome, clearDarkIosChrome } from "@/lib/iosChrome";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -766,7 +767,7 @@ const DesignersHoverHero = () => {
     // --ios-chrome-base so the shared gradient treatment (index.css) fades it
     // out at the bottom instead of a hard black block.
     html.style.backgroundImage = "";
-    html.style.setProperty("--ios-chrome-base", "#000000");
+    setDarkIosChrome();
     body.style.backgroundImage = "none";
     body.style.backgroundColor = "transparent";
 
@@ -780,7 +781,7 @@ const DesignersHoverHero = () => {
       html.style.removeProperty("background-position");
       html.style.removeProperty("background-repeat");
       html.style.removeProperty("background-color");
-      html.style.removeProperty("--ios-chrome-base");
+      clearDarkIosChrome();
       body.style.removeProperty("background-image");
       body.style.removeProperty("background-color");
     };
