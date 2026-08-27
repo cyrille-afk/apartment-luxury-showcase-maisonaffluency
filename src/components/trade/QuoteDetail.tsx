@@ -645,7 +645,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
       // NOTE: We intentionally do NOT fuzzy-match prices from other catalog rows.
       // Per project rule, products with NULL trade_price_cents must show
-      // "Price on Request" / TBD — fuzzy fallback caused wildly incorrect
+      // "Price upon Request" / TBD — fuzzy fallback caused wildly incorrect
       // prices (e.g. every "...Chandelier" inheriting an unrelated €47k price).
 
       try {

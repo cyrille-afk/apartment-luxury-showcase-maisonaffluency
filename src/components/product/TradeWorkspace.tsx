@@ -160,7 +160,7 @@ export default function TradeWorkspace({
       </span>
     ) : clientSafe ? (
       <span className="font-display text-2xl leading-none">
-        {rrpLabel ? `${usingVariantPrice && !selectedVariantExact ? "From " : ""}${rrpLabel}` : "Price on Request"}
+        {rrpLabel ? `${usingVariantPrice && !selectedVariantExact ? "From " : ""}${rrpLabel}` : "Price upon Request"}
       </span>
     ) : netLabel ? (
       <span className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
@@ -173,7 +173,7 @@ export default function TradeWorkspace({
         )}
       </span>
     ) : (
-      <span className="font-display text-xl leading-none">Price on Request</span>
+      <span className="font-display text-xl leading-none">Price upon Request</span>
     );
 
     return (
@@ -273,7 +273,7 @@ export default function TradeWorkspace({
             /* Client-safe: retail only, never net or margin. */
             <>
               <p className="font-display text-2xl leading-none">
-                {rrpLabel ? `${usingVariantPrice && !selectedVariantExact ? "From " : ""}${rrpLabel}` : "Price on Request"}
+                {rrpLabel ? `${usingVariantPrice && !selectedVariantExact ? "From " : ""}${rrpLabel}` : "Price upon Request"}
               </p>
               <p className="font-body text-[11px] text-muted-foreground mt-1.5">
                 {rrpLabel
@@ -303,7 +303,7 @@ export default function TradeWorkspace({
               </p>
             </>
           ) : (
-            <p className="font-display text-xl leading-none">Price on Request</p>
+            <p className="font-display text-xl leading-none">Price upon Request</p>
           )}
         </div>
 

@@ -758,7 +758,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
                         tradeMeta.currency === "GBP" ? "£" :
                         tradeMeta.currency === "SGD" ? "S$" : "€"
                       }${(livePriceCents / 100).toLocaleString()}`
-                    : "Price on Request"}
+                    : "Price upon Request"}
                 </dd>
                 <dt className="text-muted-foreground">Lead Time</dt>
                 <dd>{tradeMeta.leadTime || "—"}</dd>

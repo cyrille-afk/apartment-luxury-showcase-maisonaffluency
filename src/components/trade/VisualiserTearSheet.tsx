@@ -73,7 +73,7 @@ const SURFACE_LABEL: Record<Surface, string> = {
 };
 
 const formatPrice = (cents: number | null, currency: string | null, prefix: string | null): string => {
-  if (!cents || cents <= 0) return "Price on Request";
+  if (!cents || cents <= 0) return "Price upon Request";
   const cur = (currency || "EUR").toUpperCase();
   try {
     const v = new Intl.NumberFormat("en-US", {
@@ -83,12 +83,12 @@ const formatPrice = (cents: number | null, currency: string | null, prefix: stri
     }).format(cents / 100);
     return prefix ? `${prefix} ${v}` : v;
   } catch {
-    return "Price on Request";
+    return "Price upon Request";
   }
 };
 
 const tierLabel = (tier: string | null) =>
-  tier ? `Price band CAT ${tier.toUpperCase()}` : "Price on Request";
+  tier ? `Price band CAT ${tier.toUpperCase()}` : "Price upon Request";
 
 export function VisualiserTearSheet({
   pins,
@@ -169,7 +169,7 @@ export function VisualiserTearSheet({
           materials: e?.materials ?? null,
           priceLabel: e
             ? formatPrice(e.trade_price_cents, e.currency, e.price_prefix)
-            : "Price on Request",
+            : "Price upon Request",
           enriched: e ?? undefined,
         };
       }

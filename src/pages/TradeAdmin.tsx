@@ -390,7 +390,7 @@ const TradeAdmin = () => {
     <>
       <Helmet><title>Admin — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-5xl space-y-6">
-      {/* Inquiries Inbox — Price on Request + concierge + contact form */}
+      {/* Inquiries Inbox — Price upon Request + concierge + contact form */}
       <Link
         to="/trade/admin/inquiries"
         className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border hover:border-foreground/30 transition-all group"

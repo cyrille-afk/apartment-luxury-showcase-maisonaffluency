@@ -1631,7 +1631,7 @@ const PublicProductPage: React.FC = () => {
 
   /**
    * "Place an Order" — publicly priced pieces go straight into the cart, the
-   * rest fall back to the concierge enquiry flow (price on request).
+   * rest fall back to the concierge enquiry flow (price upon request).
    */
   const handlePlaceOrder = () => {
     const unit = selectedRrp?.cents || Number(publicRrpRow?.rrp_price_cents) || 0;
@@ -2528,7 +2528,7 @@ const PublicProductPage: React.FC = () => {
               {user && (() => {
                 const returnTo = typeof window !== "undefined" ? location.pathname + location.search : "";
                 const q = new URLSearchParams({
-                  subject: `Price on Request — ${product.title} by ${designerDisplay}`,
+                  subject: `Price upon Request — ${product.title} by ${designerDisplay}`,
                   productId: product.id,
                   productSlug: productSlug || "",
                   productName: product.title || "",
