@@ -476,7 +476,7 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
                         <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/40 opacity-0 md:group-hover/sub:opacity-100 transition-opacity duration-300 items-center justify-center hidden md:flex">
                       <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View</span>
                     </div>
                     {igUrl && (
