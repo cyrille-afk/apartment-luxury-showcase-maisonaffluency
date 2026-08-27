@@ -7,6 +7,7 @@ function removeInlineScrollPin(html: HTMLElement, body: HTMLElement) {
   html.style.removeProperty("--designers-landing-vh");
   html.style.removeProperty("--ios-chrome-base");
   html.classList.remove("ios-chrome-dark");
+  document.getElementById("mobile-theme-color")?.setAttribute("content", "#ffffff");
 
 
   body.style.removeProperty("overflow");

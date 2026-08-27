@@ -61,9 +61,14 @@
     </script>
     <meta id="mobile-theme-color" name="theme-color" content="#000000" media="(max-width: 767px)" />
     <script>
-      if (window.__maStandaloneDisplay) {
-        document.getElementById('mobile-theme-color').setAttribute('content', '#ffffff');
-      }
+      (function () {
+        // Only the dark hero landing keeps black iOS chrome on first paint.
+        // Every other route (bios, product pages) is a light surface.
+        var darkRoute = window.location.pathname === '/' || window.location.pathname === '/designers';
+        if (darkRoute) document.documentElement.classList.add('ios-chrome-dark');
+        document.getElementById('mobile-theme-color')
+          .setAttribute('content', darkRoute ? '#000000' : '#ffffff');
+      })();
     </script>
 
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light) and (min-width: 768px)" />
