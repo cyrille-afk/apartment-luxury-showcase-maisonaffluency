@@ -2981,7 +2981,7 @@ async function loadRelevantPieces(
           ] || String(r.default_ship_mode)
         : "";
     const fmtPrice = (r: any) => {
-      if (!r.trade_price_cents || r.trade_price_cents <= 0) return "Price on Request";
+      if (!r.trade_price_cents || r.trade_price_cents <= 0) return "Price upon Request";
       const amt = Math.round(r.trade_price_cents / 100).toLocaleString("en-US");
       const cur = r.currency || "EUR";
       const px = r.price_prefix ? `${r.price_prefix} ` : "";

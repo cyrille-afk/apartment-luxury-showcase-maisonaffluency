@@ -240,7 +240,7 @@ function renderContext(products: ProductContextItem[]): string {
     .map((p, i) => {
       const price = p.trade_price_cents
         ? `${(p.trade_price_cents / 100).toLocaleString()} ${p.currency ?? "EUR"}`
-        : "Price on Request";
+        : "Price upon Request";
       return [
         `${i + 1}. ${p.product_name}`,
         p.brand_name ? `   Brand: ${p.brand_name}` : null,
@@ -271,7 +271,7 @@ FORMATTING OUTPUT:
 - Use clean Markdown. Always bold **Designer Names** and **Product Names**.
 - Present product lists using structured bullet points including: Name, Designer, Material/Finish, and why it fits their space.
 - Keep structural measurements and finish data technically accurate to the context.
-- Write in English. Where a price is absent, say "Price on Request".`;
+- Write in English. Where a price is absent, say "Price upon Request".`;
 
 const FLASH_MODE_INSTRUCTION =
   "ROUTING MODE: Flash — keep the response punchy, concise, and focused on direct product specifications.";

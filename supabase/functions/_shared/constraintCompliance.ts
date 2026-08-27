@@ -184,7 +184,7 @@ export function buildConstraintCompliance(params: {
     const cur = budgetCurrency || "EUR";
     const pieceRows: PieceCompliance[] = pieces.map((p) => {
       if (typeof p.price_cents !== "number" || p.price_cents <= 0) {
-        return { pick_id: p.id, title: p.title, status: "unknown", observed: "Price on Request" };
+        return { pick_id: p.id, title: p.title, status: "unknown", observed: "Price upon Request" };
       }
       const status: ComplianceStatus = p.price_cents <= budgetCents ? "pass" : "fail";
       return { pick_id: p.id, title: p.title, status, observed: `${p.currency || cur} ${Math.round(p.price_cents / 100).toLocaleString("en-US")}` };

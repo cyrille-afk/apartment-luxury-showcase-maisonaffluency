@@ -1459,7 +1459,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
           );
         })()}
         <p className="font-display text-sm mt-1 text-foreground/70">
-          {formatPublicRrp(rrp) || "Price on request"}
+          {formatPublicRrp(rrp) || "Price upon Request"}
         </p>
       </div>
 

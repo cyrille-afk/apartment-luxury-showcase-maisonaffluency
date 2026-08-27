@@ -229,7 +229,7 @@ const CompareDrawer = () => {
                           {item.price}
                         </p>
                       ) : isTradePortal ? (
-                        <p className="font-body text-xs text-white/40 italic">Price on request</p>
+                        <p className="font-body text-xs text-white/40 italic">Price upon Request</p>
                       ) : null}
 
                       {/* Action button - pinned to bottom */}

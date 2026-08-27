@@ -166,7 +166,7 @@ export function ProjectBoardDrawer({
                       </div>
                       <div className="mt-0.5 flex items-baseline justify-between gap-2">
                         <span className="font-body text-[12px] text-foreground">
-                          {net ? fmt(net) : "Price on request"}
+                          {net ? fmt(net) : "Price upon Request"}
                         </span>
                         <span className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
                           {leadLabel(item)}

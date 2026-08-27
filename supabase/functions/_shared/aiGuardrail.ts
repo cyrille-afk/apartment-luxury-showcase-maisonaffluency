@@ -114,6 +114,7 @@ export async function loadVerifiedNames(force = false): Promise<VerifiedNameSet 
 const BOLD_ALLOWLIST = new Set(
   [
     "price on request",
+    "price upon request",
     "note",
     "materials",
     "material",

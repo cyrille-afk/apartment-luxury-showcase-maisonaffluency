@@ -2287,7 +2287,7 @@ const TradeProductPage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <p className="font-body text-sm text-muted-foreground italic order-[-3] md:order-none">Price on request</p>
+              <p className="font-body text-sm text-muted-foreground italic order-[-3] md:order-none">Price upon Request</p>
             )}
 
 
