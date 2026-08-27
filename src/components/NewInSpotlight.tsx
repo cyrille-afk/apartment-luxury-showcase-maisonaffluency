@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, type Transition } from "framer-motion";
 import { ArrowRight, FileText, Maximize2, Instagram } from "lucide-react";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
@@ -128,9 +128,12 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
 
   const resolveSlug = (label: string): string | null => {
     if (!label) return null;
-    const slug = slugByName.get(label.trim().toLowerCase());
-    if (!slug || slug === designer.slug) return null;
-    return slug;
+    const normalizedLabel = label.trim().toLowerCase();
+    const currentDesignerNames = [designer.name, designer.display_name]
+      .filter((value): value is string => Boolean(value))
+      .map((value) => value.trim().toLowerCase());
+    if (currentDesignerNames.includes(normalizedLabel)) return designer.slug;
+    return slugByName.get(normalizedLabel) || null;
   };
 
   const displayName = designer.display_name || designer.name;
@@ -358,16 +361,13 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                       {/* Designer / brand — top, prominent */}
                       {brandLine && (
                         brandSlug ? (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/designers/${brandSlug}`);
-                            }}
+                          <Link
+                            to={`/designers/${brandSlug}`}
+                            onClick={(e) => e.stopPropagation()}
                             className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1 hover:underline underline-offset-4 decoration-foreground/40 transition-colors"
                           >
                             {brandLine}
-                          </button>
+                          </Link>
                         ) : (
                           <span className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1">
                             {brandLine}
