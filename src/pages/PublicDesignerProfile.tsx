@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { prefetchPublicProductPage } from "@/lib/publicProductPageQuery";
+import ProductPrefetchOnVisible from "@/components/ProductPrefetchOnVisible";
 import { supabase } from "@/integrations/supabase/client";
 
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
@@ -2001,6 +2002,10 @@ const PublicDesignerProfile = () => {
                         highlightId === pick.id && "ring-2 ring-primary rounded-luxury-sharp ring-offset-2 ring-offset-background animate-pulse"
                       )}
                     >
+                      <ProductPrefetchOnVisible
+                        designerSlug={targetDesignerSlug}
+                        productSlug={productSlug}
+                      />
                       <div
                         role="link"
                         tabIndex={0}

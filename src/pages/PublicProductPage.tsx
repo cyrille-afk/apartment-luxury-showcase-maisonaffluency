@@ -15,6 +15,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { queryKeys } from "@/lib/queryKeys";
 import { fetchPublicProductPage, prefetchPublicProductPage, PUBLIC_PRODUCT_PAGE_STALE_TIME } from "@/lib/publicProductPageQuery";
+import ProductPrefetchOnVisible from "@/components/ProductPrefetchOnVisible";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
@@ -2621,6 +2622,10 @@ const PublicProductPage: React.FC = () => {
                           onTouchStart={() => prefetchPublicProductPage(queryClient, designer.slug, rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : "")))}
                           onMouseEnter={() => prefetchPublicProductPage(queryClient, designer.slug, rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : "")))}
                         >
+                          <ProductPrefetchOnVisible
+                            designerSlug={designer.slug}
+                            productSlug={rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}
+                          />
                           <div className="relative aspect-square rounded-luxury-sharp overflow-hidden bg-muted/30 border border-border">
                             <img
                               src={rp.image_url}
@@ -2659,6 +2664,10 @@ const PublicProductPage: React.FC = () => {
                         onFocus={() => prefetchPublicProductPage(queryClient, designer.slug, rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : "")))}
                         onTouchStart={() => prefetchPublicProductPage(queryClient, designer.slug, rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : "")))}
                       >
+                        <ProductPrefetchOnVisible
+                          designerSlug={designer.slug}
+                          productSlug={rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}
+                        />
                         <div className="relative aspect-square rounded-luxury-sharp overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/40 transition-colors">
                           <img
                             src={rp.image_url}
