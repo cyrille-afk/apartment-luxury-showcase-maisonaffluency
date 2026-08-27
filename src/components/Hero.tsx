@@ -164,8 +164,8 @@ const Hero = () => {
           aria-label="Hero secondary actions"
           className={`flex w-full flex-col items-center gap-5 md:hidden ${
             isPwa
-              ? "mt-auto pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-8"
-              : "absolute inset-x-6 bottom-[calc(env(safe-area-inset-bottom)+4rem)] w-auto"
+              ? "mt-auto pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-8"
+              : "absolute inset-x-6 bottom-[calc(env(safe-area-inset-bottom)+2.5rem)] w-auto"
           }`}
         >
           <button
