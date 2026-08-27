@@ -4,6 +4,10 @@ import "./index.css";
 import HmrStatusBanner from "./components/dev/HmrStatusBanner";
 import BuildUpdateBanner from "./components/BuildUpdateBanner";
 import { isPwaStandaloneDisplay } from "./lib/pwaMode";
+import { loadOgBridgeIndex } from "./lib/ogBridgeResolver";
+
+// Warm the OG bridge manifest so share links resolve to real files, never 404 guesses.
+void loadOgBridgeIndex();
 
 
 const CACHE_RESET_KEY = "__ma_frontend_cache_reset_v2";
