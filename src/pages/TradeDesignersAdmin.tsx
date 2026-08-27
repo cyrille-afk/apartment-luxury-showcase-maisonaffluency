@@ -1832,12 +1832,13 @@ const TradeDesignersAdmin = () => {
   const queryClient = useQueryClient();
   const [initialDraft] = useState<Partial<DesignerEditorDraft>>(() => readDesignerEditorDraft());
 
-  // Restore lightweight filter state (search + letter) so a refresh keeps the
-  // editor where it was. Accordion/preview stay closed: reopening the heaviest
-  // editor subtree synchronously on mount can trap the preview.
+  // Restore filter state (search + letter) AND the open designer accordion so a
+  // refresh keeps the editor exactly where it was. The preview pane stays
+  // closed: reopening that heaviest subtree synchronously on mount can trap it.
   const [search, setSearch] = useState(initialDraft.search ?? "");
   const [activeLetter, setActiveLetter] = useState<string | null>(initialDraft.activeLetter ?? null);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(initialDraft.expandedId ?? null);
+
   const [editBuffer, setEditBuffer] = useState<Record<string, Partial<DesignerRow>>>(initialDraft.editBuffer ?? {});
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [previewMobile, setPreviewMobile] = useState(false);
