@@ -198,11 +198,32 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 
       const publicPickFields = "id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered";
 
-      const { data: picks } = await supabase
-        .from("designer_curator_picks_public" as any)
-        .select(publicPickFields)
-        .eq("designer_id", designer.id)
-        .order("sort_order", { ascending: true });
+      const brandCandidates = Array.from(new Set([
+        designer.display_name,
+        designer.name,
+      ].filter(Boolean)));
+
+      // Fetch picks and the trade-product image fallback in parallel;
+      // trade_products is queried by brand so it can run concurrently
+      // with picks rather than waiting for the product match.
+      const [picksResult, tradeMatchesResult] = await Promise.all([
+        supabase
+          .from("designer_curator_picks_public" as any)
+          .select(publicPickFields)
+          .eq("designer_id", designer.id)
+          .order("sort_order", { ascending: true }),
+        brandCandidates.length > 0
+          ? supabase
+              .from("trade_products")
+              .select("product_name, image_url, gallery_images")
+              .eq("is_active", true)
+              .eq("is_hidden", false)
+              .in("brand_name", brandCandidates)
+          : Promise.resolve({ data: [] }),
+      ]);
+
+      const picks = picksResult.data;
+      const tradeMatches = tradeMatchesResult.data;
 
       if (!picks || picks.length === 0) return null;
 
@@ -220,27 +241,9 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 
       if (!product) return null;
 
-      const brandCandidates = Array.from(new Set([
-        designer.display_name,
-        designer.name,
-      ].filter(Boolean)));
-
-      let tradeProductQuery = supabase
-        .from("trade_products")
-        .select("image_url, gallery_images")
-        .eq("product_name", (product as any).title)
-        .eq("is_active", true)
-        .eq("is_hidden", false)
-        .limit(1);
-
-      if (brandCandidates.length === 1) {
-        tradeProductQuery = tradeProductQuery.eq("brand_name", brandCandidates[0]);
-      } else if (brandCandidates.length > 1) {
-        tradeProductQuery = tradeProductQuery.in("brand_name", brandCandidates);
-      }
-
-      const { data: tradeMatches } = await tradeProductQuery;
-      const tradeProduct = tradeMatches?.[0] as { image_url?: string | null; gallery_images?: string[] | null } | undefined;
+      const tradeProduct = tradeMatches?.find((tp: any) => tp.product_name === (product as any).title) as
+        | { image_url?: string | null; gallery_images?: string[] | null }
+        | undefined;
 
       return {
         product: {
