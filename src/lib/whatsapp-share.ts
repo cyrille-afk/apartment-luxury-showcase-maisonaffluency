@@ -98,11 +98,24 @@ export const buildParentBrandOgUrl = (name: string) => {
  * WhatsApp/iMessage/Slack scrape the bridge; real browsers get redirected to canonical.
  */
 export const buildPieceOgUrl = (designerName: string, pieceTitle: string, pieceSubtitle?: string | null) => {
+  // Resolve against the real bridge manifest — never guess a filename.
+  const index = getOgBridgeIndexSync();
+  if (index && index.length) {
+    const path = findPieceBridgePath(index, designerName, pieceTitle, pieceSubtitle);
+    if (path) return withOgCacheBust(`${SITE_URL}/${path}`);
+    // No bridge exists: share the canonical page instead of a 404 bridge.
+    const canonicalPath =
+      typeof window !== "undefined" && window.location.pathname !== "/"
+        ? window.location.pathname
+        : `/designers/${slugify(designerName)}`;
+    return `${SITE_URL}${canonicalPath}`;
+  }
   const designerSlug = slugify(designerName);
   const fullPieceTitle = pieceSubtitle ? `${pieceTitle}-${pieceSubtitle}` : pieceTitle;
   const pieceSlug = slugify(fullPieceTitle);
   return withOgCacheBust(`${SITE_URL}/share/og/${designerSlug}-${pieceSlug}-og.html`);
 };
+
 
 
 
