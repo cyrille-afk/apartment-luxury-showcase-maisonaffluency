@@ -466,7 +466,7 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
                       <img
                         {...cldResponsiveImg(d.image, { widths: [160, 240, 320, 480, 640], sizes })}
                         alt={d.name}
-                        className="w-full h-full object-cover grayscale opacity-90 contrast-[1.02] transition-all duration-300 group-hover/sub:grayscale-0 group-hover/sub:opacity-100 group-hover/sub:contrast-[1.10] group-hover/sub:scale-[1.02]"
+                        className="w-full h-full object-cover transition-all duration-300 md:grayscale md:opacity-90 md:contrast-[1.02] md:group-hover/sub:grayscale-0 md:group-hover/sub:opacity-100 md:group-hover/sub:contrast-[1.10] md:group-hover/sub:scale-[1.02]"
                         loading="lazy"
                         decoding="async"
                         fetchPriority="low"
@@ -476,7 +476,7 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
                         <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/40 opacity-0 md:group-hover/sub:opacity-100 transition-opacity duration-300 items-center justify-center hidden md:flex">
                       <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View</span>
                     </div>
                     {igUrl && (
