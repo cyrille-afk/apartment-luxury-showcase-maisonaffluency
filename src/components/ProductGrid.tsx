@@ -611,17 +611,26 @@ function singularizeSub(s: string): string {
                   ) : null;
                 })()}
                 <img
-                  src={item.pick.image}
+                  {...cldResponsiveImg(item.pick.image, {
+                    widths: [300, 400, 600, 800],
+                    sizes: `(max-width: 768px) 50vw, ${gridCols === 4 ? '25vw' : '33vw'}`,
+                  })}
                   alt={`${item.pick.title} by ${item.designerName} — collectible design furniture`}
                   className={`w-full h-full object-contain transition-all duration-500 group-hover:scale-105 ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
                   loading="lazy"
+                  decoding="async"
                 />
-                {item.pick.hoverImage && (
+                {/* Hover image mounts only on hover/focus so it isn't fetched upfront */}
+                {item.pick.hoverImage && hoveredIdx === idx && (
                   <img
-                    src={item.pick.hoverImage}
+                    {...cldResponsiveImg(item.pick.hoverImage, {
+                      widths: [300, 400, 600, 800],
+                      sizes: `(max-width: 768px) 50vw, ${gridCols === 4 ? '25vw' : '33vw'}`,
+                    })}
                     alt={`${item.pick.title} by ${item.designerName} — alternate view`}
                     className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"
                     loading="lazy"
+                    decoding="async"
                   />
                 )}
                 {/* Compare pin button */}
