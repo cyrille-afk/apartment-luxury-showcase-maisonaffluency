@@ -24,7 +24,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { useAllDesigners } from "@/hooks/useDesigner";
+import { useAllDesignersLite } from "@/hooks/useDesigner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { applyCuratorPickOrder } from "@/lib/curatorPickSort";
 import { sortNameKey, lastNameInitial, displayDesignerName } from "@/lib/nameFormat";
@@ -540,7 +540,7 @@ function HeroBgLayer({
 const DesignersHoverHero = () => {
   const navigate = useNavigate();
   const { data: designers } = useFeaturedDesigners();
-  const { data: allDesigners = [] } = useAllDesigners();
+  const { data: allDesigners = [] } = useAllDesignersLite();
   const { data: firstPickMap } = useAllFirstPickImages();
   const designerCount = useMemo(
     () => allDesigners.filter((d: any) => d.is_published).length,

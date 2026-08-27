@@ -13,6 +13,9 @@ export const queryKeys = {
   // ── Designers ────────────────────────────────────────────────────────────
   designersAll: (includeTradeOnly = false) =>
     ["designers-all", includeTradeOnly] as const,
+  /** Slim column set for the A–Z directory list (avoids shipping biographies). */
+  designersAllLite: () => ["designers-all-lite"] as const,
+
   designersNewIn: () => ["designers-new-in"] as const,
   designer: (slug: string | undefined, includeTradeOnly = false) =>
     ["designer", slug, includeTradeOnly] as const,
