@@ -378,18 +378,6 @@ function parseDesignerDisplayName(item: Designer): { displayName: string; parent
 // ─── Sub-Designers Grid ──────────────────────────────────────────────────────
 function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string; onClose: () => void; autoScroll?: boolean }) {
   const { data: designers = [] } = useParentBrandDesigners(parentName);
-  const { data: designersWithIgPosts = new Set<string>() } = useQuery({
-    queryKey: queryKeys.designersWithIgPosts(),
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("designer_instagram_posts")
-        .select("designer_id")
-        .eq("hidden", false);
-      if (!data) return new Set<string>();
-      return new Set(data.map((r: any) => r.designer_id as string));
-    },
-    staleTime: 1000 * 60 * 10,
-  });
   const rootRef = useRef<HTMLDivElement>(null);
 
 
