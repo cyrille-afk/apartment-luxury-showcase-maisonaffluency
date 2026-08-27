@@ -197,7 +197,18 @@ SECTIONS = [
     },
     {
         "title": "The Apartment, Room by Room",
-        "blocks": room_blocks(),
+        "blocks": [
+            ("lede", "Seven sequences, twenty-eight photographed views — each room is documented "
+                     "with the designers and ateliers represented in it."),
+            ("p", "The apartment is read as a walk rather than a set of plans: an inviting lounge "
+                  "opening onto the skyline, a dining room built around a hand-painted landscape, a "
+                  "boudoir treated as a jewellery box, a primary suite in silk and bronze, a compact "
+                  "guest room carried by colour, a study with a wall of monographs, and finally the "
+                  "details that hold the whole together."),
+            ("p", "For each sequence below: the photographed views, and the full list of designers "
+                  "and ateliers whose work appears in that room. Every piece is catalogued online "
+                  "with dimensions, materials, finishes and lead times."),
+        ] + room_blocks(),
     },
     {
         "title": "Designers &amp; Ateliers in This Apartment",
