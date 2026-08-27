@@ -761,13 +761,6 @@ const DesignersHoverHero = () => {
 
     const html = document.documentElement;
     const body = document.body;
-    const previousHtmlBgImage = html.style.backgroundImage;
-    const previousHtmlBgSize = html.style.backgroundSize;
-    const previousHtmlBgPosition = html.style.backgroundPosition;
-    const previousHtmlBgRepeat = html.style.backgroundRepeat;
-    const previousHtmlBgColor = html.style.backgroundColor;
-    const previousBodyBgImage = body.style.backgroundImage;
-    const previousBodyBgColor = body.style.backgroundColor;
 
     // No full-bleed image behind the browser chrome. The canvas base is set via
     // --ios-chrome-base so the shared gradient treatment (index.css) fades it
@@ -777,16 +770,21 @@ const DesignersHoverHero = () => {
     body.style.backgroundImage = "none";
     body.style.backgroundColor = "transparent";
 
+    // Always clear (never "restore") on unmount: the captured previous values
+    // can themselves be the designers-landing overrides, which would leave the
+    // body transparent on the hero page and let the black bottom gradient bleed
+    // into the iOS toolbar.
     return () => {
-      html.style.backgroundImage = previousHtmlBgImage;
-      html.style.backgroundSize = previousHtmlBgSize;
-      html.style.backgroundPosition = previousHtmlBgPosition;
-      html.style.backgroundRepeat = previousHtmlBgRepeat;
-      html.style.backgroundColor = previousHtmlBgColor;
+      html.style.removeProperty("background-image");
+      html.style.removeProperty("background-size");
+      html.style.removeProperty("background-position");
+      html.style.removeProperty("background-repeat");
+      html.style.removeProperty("background-color");
       html.style.removeProperty("--ios-chrome-base");
-      body.style.backgroundImage = previousBodyBgImage;
-      body.style.backgroundColor = previousBodyBgColor;
+      body.style.removeProperty("background-image");
+      body.style.removeProperty("background-color");
     };
+
 
 
   }, [isMobileOrPwa]);
