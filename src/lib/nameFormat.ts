@@ -28,8 +28,9 @@ const stripAccents = (s: string) =>
  *   - "Andrea Claire Studio" → A
  *   - "Charles and Ray Eames" → C
  *   - "Hubert & Poyer" → H
- * Leading articles ("The", "Le", "La", "Les") are ignored for the bucket but
- * kept in the displayed name: "The Haas Brothers" → H.
+ * A leading "The" is ignored for the bucket but kept in the displayed name:
+ * "The Haas Brothers" → H. Other articles ("Le Berre Vevaud", "La Chance")
+ * are part of the brand and stay under L.
  */
 
 // Display name overrides: strip trailing person suffix for brands that should
@@ -45,7 +46,7 @@ export function displayDesignerName(name: string): string {
   return DISPLAY_NAME_OVERRIDES[key] || name;
 }
 
-const LEADING_ARTICLES = /^(the|le|la|les|l')\s+/i;
+const LEADING_ARTICLES = /^the\s+/i;
 
 /**
  * Sortable key for a designer/brand entry: the full public name, accent- and
