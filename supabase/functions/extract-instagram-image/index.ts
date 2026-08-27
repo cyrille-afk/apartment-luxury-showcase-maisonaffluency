@@ -349,6 +349,13 @@ Deno.serve(async (req) => {
         resolution = { url: scrapedUrl, method: "scrape" };
       }
     }
+    if (!resolution) {
+      console.log("HTML scrape failed, trying text proxy...");
+      const proxiedUrl = await extractViaTextProxy(cleanUrl);
+      if (proxiedUrl) {
+        resolution = { url: proxiedUrl, method: "text-proxy" };
+      }
+    }
 
     if (!resolution) {
       return new Response(
