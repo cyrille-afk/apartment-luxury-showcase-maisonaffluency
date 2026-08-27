@@ -26,9 +26,20 @@ const HERO_MOBILE_SRCSET = [
 const HERO_SAFARI_FALLBACK = `${HERO_BASE}/w_780,h_1688,c_fill,g_auto,q_auto:good,f_jpg/${HERO_ID}`;
 const HERO_SAFARI_FALLBACK_DESKTOP = `${HERO_BASE}/w_1920,c_fill,q_auto:good,f_jpg/${HERO_ID}`;
 
+// Warm the /designers route chunk (and its lazy hero) before the user taps the
+// CTA — the biggest chunk of perceived latency was code-splitting on click.
+let designersPrefetched = false;
+const prefetchDesigners = () => {
+  if (designersPrefetched) return;
+  designersPrefetched = true;
+  void import("@/pages/PublicDesigners").catch(() => {});
+  void import("@/components/DesignersHoverHero").catch(() => {});
+};
+
 const revealBelowFold = () => {
   window.dispatchEvent(new CustomEvent("ma:reveal-below-fold"));
 };
+
 
 const scrollToMeetDesigners = () => {
   revealBelowFold();
