@@ -22,6 +22,7 @@ import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { normalizeSubcategory, getParentCategoryFromSubcategory } from "@/lib/categoryNormalization";
 import { formatDimensionsMultiline, withImperialPerLine } from "@/lib/formatDimensions";
+import { cldResponsiveImg } from "@/lib/cloudinary";
 
 // ─── SUB_TAGS mapping (same as FeaturedDesigners) ────────────────────────
 const SUB_TAGS: Record<string, string[]> = {
@@ -429,6 +430,8 @@ function singularizeSub(s: string): string {
 
   // Mobile/PWA: first tap reveals a "Discover the Product" pill; second tap opens the lightbox.
   const [mobileRevealedIdx, setMobileRevealedIdx] = useState<number | null>(null);
+  // Tracks the hovered card so hover (lifestyle) images are only fetched on intent.
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const handleCardClick = useCallback((_item: ProductItem, index: number) => {
     if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches && mobileRevealedIdx !== index) {
       setMobileRevealedIdx(index);
