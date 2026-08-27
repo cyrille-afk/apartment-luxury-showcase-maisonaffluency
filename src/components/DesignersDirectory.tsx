@@ -505,13 +505,8 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
 
                   <div className="px-2 py-1.5 bg-background text-center">
                     <p className="font-body text-[10px] md:text-[11px] text-foreground leading-tight line-clamp-1">{d.name}</p>
-                    <p
-                      className="font-body text-[8px] text-muted-foreground/60 uppercase tracking-[0.1em] mt-0.5 line-clamp-1"
-                      aria-hidden={HIDE_SUBGRID_PARENT_LABEL.has(parentName) ? true : undefined}
-                    >
-                      {HIDE_SUBGRID_PARENT_LABEL.has(parentName) ? "\u00A0" : parentName}
-                    </p>
                   </div>
+
                 </Link>
               );
             })}
