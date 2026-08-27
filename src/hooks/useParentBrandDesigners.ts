@@ -59,6 +59,10 @@ export function useParentBrandDesigners(parentName: string | null) {
               : `https://res.cloudinary.com/dif1oamtj/image/fetch/w_200,h_267,c_fill,g_auto,q_auto,f_auto/${encodeURIComponent(d.image_url)}`
             : "",
           instagramUrl: (igLink as any)?.url || undefined,
+          specialty: d.specialty || null,
+          bioExcerpt: d.biography
+            ? String(d.biography).replace(/<[^>]+>/g, "").split(/\n\n+/)[0]?.trim().slice(0, 220) || null
+            : null,
         };
       }) as SubDesigner[];
     },
