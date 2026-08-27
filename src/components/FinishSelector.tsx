@@ -1075,7 +1075,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         emptyNote:
           "Full fabric library coming soon. In the meantime, your atelier can be upholstered in COM (Customer's Own Fabric) — please request samples or pricing through your Maison Affluency concierge.",
       })}
-      {showWoodSection && visibleWoodTiles.length > 0 &&
+      {showWoodSection && visibleWoodTiles.length > 0 && !showMobileBaseTopGrid &&
         renderAccordion({
           isOpen: openWood,
           onToggle: () => setOpenWood((v) => !v),
@@ -1100,7 +1100,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           glyph: pickFinishGlyph(visibleWoodTiles, woodLabel),
           tileKind: "base",
         })}
-      {showWoodSection && visibleTopTiles.length > 0 &&
+      {showWoodSection && visibleTopTiles.length > 0 && !showMobileBaseTopGrid &&
         renderAccordion({
           isOpen: openTop,
           onToggle: () => setOpenTop((v) => !v),
