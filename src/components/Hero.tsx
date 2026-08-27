@@ -145,6 +145,8 @@ const Hero = () => {
 
             <button
               type="button"
+              onPointerEnter={prefetchDesigners}
+              onTouchStart={prefetchDesigners}
               onClick={() => {
                 trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" });
                 navigate("/designers");
