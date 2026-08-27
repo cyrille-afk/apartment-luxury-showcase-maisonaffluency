@@ -217,6 +217,32 @@ async function extractViaHtmlScrape(url: string): Promise<string | null> {
   }
 }
 
+/**
+ * Last-resort fallback: Instagram sometimes serves a login wall to Supabase's
+ * egress IPs, so the direct og:image scrape returns nothing. Re-fetch the page
+ * through a public text proxy and pull the first post-media CDN URL out of it.
+ * Profile avatars (t51.2885-19) are skipped.
+ */
+async function extractViaTextProxy(url: string): Promise<string | null> {
+  try {
+    const response = await fetch(`https://r.jina.ai/${url}`, {
+      headers: { Accept: "text/plain" },
+      redirect: "follow",
+    });
+    if (!response.ok) {
+      await response.text();
+      return null;
+    }
+    const text = await response.text();
+    const matches = text.match(/https:\/\/[^\s)"'\\]*cdninstagram\.com\/[^\s)"'\\]+/gi);
+    if (!matches?.length) return null;
+    const media = matches.find((m) => !/t51\.2885-19/.test(m)) || null;
+    return media ? upgradeResolution(decodeHtmlEntities(media)) : null;
+  } catch {
+    return null;
+  }
+}
+
 async function downloadImage(candidateUrl: string) {
   const imageResponse = await fetch(candidateUrl, {
     redirect: "follow",
@@ -321,6 +347,13 @@ Deno.serve(async (req) => {
       const scrapedUrl = await extractViaHtmlScrape(cleanUrl);
       if (scrapedUrl) {
         resolution = { url: scrapedUrl, method: "scrape" };
+      }
+    }
+    if (!resolution) {
+      console.log("HTML scrape failed, trying text proxy...");
+      const proxiedUrl = await extractViaTextProxy(cleanUrl);
+      if (proxiedUrl) {
+        resolution = { url: proxiedUrl, method: "text-proxy" };
       }
     }
 
