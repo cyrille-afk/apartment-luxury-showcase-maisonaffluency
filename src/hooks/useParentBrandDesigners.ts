@@ -14,6 +14,8 @@ export interface SubDesigner {
   slug: string;
   image: string;
   instagramUrl?: string;
+  specialty?: string | null;
+  bioExcerpt?: string | null;
 }
 
 export function useParentBrandDesigners(parentName: string | null) {
