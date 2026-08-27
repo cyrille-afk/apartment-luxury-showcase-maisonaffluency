@@ -994,27 +994,77 @@ export default function FinishSelector({ pickId, className, productTitle, produc
 
   const showMobileBaseTopGrid = (isMobile || isPwa) && (visibleWoodTiles.length > 0 || visibleTopTiles.length > 0);
 
+  const renderInlineAxisCarousel = (
+    options: Fabric[],
+    selectedId: string | null,
+    setSelected: (id: string) => void,
+    label: "Base" | "Top"
+  ) => {
+    const selectedItem = options.find((o) => o.id === selectedId);
+    return (
+      <div className="mb-4 w-full">
+        <div className="flex justify-between items-center px-4 mb-2">
+          <span className="text-xs font-semibold tracking-wider text-neutral-500 uppercase">{label}</span>
+          <span className="text-xs text-neutral-400 font-medium">{selectedItem?.name ?? ""}</span>
+        </div>
+        <div className="flex flex-nowrap overflow-x-auto gap-3 px-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
+          {options.map((option) => {
+            const isSelected = selectedId === option.id;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => {
+                  setSelected(option.id);
+                  if (label === "Top") {
+                    onTopFinishChange?.(option.name);
+                    onTopFinishSwatchChange?.({ name: option.name, image_url: option.image_url ?? null });
+                  } else {
+                    onWoodFinishChange?.(option.name);
+                    onWoodFinishPricingChange?.({
+                      id: option.id,
+                      name: option.name,
+                      price_cents: (option.frame_price_cents && option.frame_price_cents > 0) ? option.frame_price_cents : 0,
+                      currency: option.frame_price_currency || "EUR",
+                      image_url: option.image_url ?? null,
+                    });
+                  }
+                  const indices = Array.isArray(option.image_indices) && option.image_indices.length > 0 ? option.image_indices : null;
+                  lockedPreviewRef.current = { indices, name: option.name };
+                  hoverActiveRef.current = false;
+                  if (indices) {
+                    setTimeout(() => onSwatchImagesChange?.(indices, { committed: true, swatchName: option.name, jumpOnly: isRugProduct }), 0);
+                  } else {
+                    onSwatchImagesChange?.(null, { committed: true, swatchName: option.name });
+                  }
+                }}
+                aria-label={`Select ${option.name}`}
+                aria-pressed={isSelected}
+                title={option.supplier ? `${option.supplier} — ${option.name}` : option.name}
+                className={cn(
+                  "w-11 h-11 rounded-full border-2 flex-shrink-0 snap-start transition-all p-0.5",
+                  isSelected ? "border-neutral-900 scale-105" : "border-neutral-200"
+                )}
+              >
+                <div
+                  className="w-full h-full rounded-full bg-cover bg-center"
+                  style={{ backgroundImage: `url(${option.image_url || ""})` }}
+                />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <TooltipProvider>
       <div className={className} onMouseLeave={restoreLockedPreview}>
       {showMobileBaseTopGrid && (
-        <div className={cn("grid gap-4 mb-6", visibleWoodTiles.length > 0 && visibleTopTiles.length > 0 ? "grid-cols-2" : "grid-cols-1")}>
-          {visibleWoodTiles.length > 0 && (
-            <div>
-              <div className="text-xs uppercase text-muted-foreground mb-1">Base</div>
-              <div className="flex gap-2 flex-wrap">
-                {visibleWoodTiles.map((f) => renderTile(f, "base", undefined, "circle"))}
-              </div>
-            </div>
-          )}
-          {visibleTopTiles.length > 0 && (
-            <div>
-              <div className="text-xs uppercase text-muted-foreground mb-1">Top</div>
-              <div className="flex gap-2 flex-wrap">
-                {visibleTopTiles.map((f) => renderTile(f, "top", undefined, "circle"))}
-              </div>
-            </div>
-          )}
+        <div className="space-y-2">
+          {visibleWoodTiles.length > 0 && renderInlineAxisCarousel(visibleWoodTiles, selectedWoodId, setSelectedWoodId, "Base")}
+          {visibleTopTiles.length > 0 && renderInlineAxisCarousel(visibleTopTiles, selectedTopId, setSelectedTopId, "Top")}
         </div>
       )}
       {isRugProduct && visibleFabricTiles.length > 0 ? (
