@@ -926,10 +926,14 @@ function LetterGroupBody({
   // 8 desktop grid slots, then reveal the rest behind a centered "VIEW ALL" control.
   const INITIAL_VISIBLE_SLOTS = 8;
   const totalDesignerCount = getLetterDesignerTotal(designers, parentDesignerCountByName);
-  const initialVisible = getInitialVisibleDesignerCards(designers, parentDesignerCountByName, INITIAL_VISIBLE_SLOTS);
-  const hasOverflow = totalDesignerCount > INITIAL_VISIBLE_SLOTS && designers.length > initialVisible.length;
+  const packedDesigners = useMemo(
+    () => packDesignerCards(designers, parentDesignerCountByName),
+    [designers, parentDesignerCountByName],
+  );
+  const initialVisible = getInitialVisibleDesignerCards(packedDesigners, parentDesignerCountByName, INITIAL_VISIBLE_SLOTS);
+  const hasOverflow = totalDesignerCount > INITIAL_VISIBLE_SLOTS && packedDesigners.length > initialVisible.length;
   const [showAll, setShowAll] = useState<boolean>(!!matchesExpand);
-  const visible = hasOverflow ? initialVisible : designers;
+  const visible = hasOverflow ? initialVisible : packedDesigners;
   const hidden = hasOverflow ? designers.slice(initialVisible.length) : [];
 
   const renderCard = (item: Designer, cardIndex: number) => {
