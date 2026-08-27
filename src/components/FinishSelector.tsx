@@ -272,6 +272,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   const [selectedTopId, setSelectedTopId] = useState<string | null>(null);
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null);
   const [selectedRugComponentIds, setSelectedRugComponentIds] = useState<Record<string, string>>({});
+  const [mobileBaseOpen, setMobileBaseOpen] = useState(false);
+  const [mobileTopOpen, setMobileTopOpen] = useState(false);
   // Images the gallery is *locked* onto (last clicked swatch). Hover previews
   // are transient; leaving the selector restores this locked view.
   const lockedPreviewRef = useRef<{ indices: number[] | null; name: string } | null>(null);
