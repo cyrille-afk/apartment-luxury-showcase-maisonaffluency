@@ -437,19 +437,33 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
             <span className="font-body text-xs text-muted-foreground/50">Loading…</span>
           </div>
         ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2 md:gap-3">
-            {designers.map((d) => {
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-12 gap-y-8 gap-x-6">
+            {designers.map((d, i) => {
               const hasIg = designersWithIgPosts.has(d.id);
               const igUrl = hasIg ? undefined : (d.instagramUrl || INSTAGRAM_LINKS[d.slug]);
+              const isFeatured = i < 3;
+              const spanClass =
+                i === 0
+                  ? "col-span-2 sm:col-span-4 md:col-span-6"
+                  : isFeatured
+                  ? "col-span-1 sm:col-span-2 md:col-span-3"
+                  : "col-span-1 sm:col-span-2 md:col-span-3";
+              const sizes =
+                i === 0
+                  ? "(max-width: 640px) 100vw, (max-width: 768px) 100vw, 50vw"
+                  : "(max-width: 640px) 50vw, (max-width: 768px) 50vw, 25vw";
               return (
                 <Link
                   key={d.slug}
                   to={`/designers/${d.slug}`}
-                  className="group/sub rounded-none overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all"
+                  className={cn(
+                    "group/sub rounded-none overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all",
+                    spanClass
+                  )}
                 >
-                  <div className="aspect-[4/5] relative bg-muted/10 overflow-hidden">
+                  <div className={cn("relative bg-muted/10 overflow-hidden", isFeatured ? "aspect-[4/5]" : "aspect-[3/4]")}>
                     {d.image ? (
-                      <img {...cldResponsiveImg(d.image, { widths: [160, 240, 320, 480], sizes: "(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 14vw" })} alt={d.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110" loading="lazy" decoding="async" fetchPriority="low" />
+                      <img {...cldResponsiveImg(d.image, { widths: [160, 240, 320, 480, 640], sizes })} alt={d.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110" loading="lazy" decoding="async" fetchPriority="low" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-muted/5">
                         <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
@@ -466,7 +480,12 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
                   </div>
 
                   <div className="px-2 py-1.5 bg-background text-center">
-                    <p className="font-body text-[10px] md:text-[11px] text-foreground leading-tight line-clamp-1">{d.name}</p>
+                    <p className={cn(
+                      "font-body text-foreground leading-tight line-clamp-1",
+                      isFeatured ? "text-xs md:text-sm" : "text-[10px] md:text-[11px]"
+                    )}>
+                      {d.name}
+                    </p>
                   </div>
 
                 </Link>
