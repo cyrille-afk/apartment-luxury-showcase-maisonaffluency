@@ -2116,7 +2116,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
           {/* Desktop: sticky A-Z jump bar — hidden when a category/subcategory filter is active */}
           {showAlphabetBar && !(selectedCategory || selectedSubcategory) && (
-            <div className="hidden md:block mb-6 sticky top-[var(--header-h)] z-30 bg-background/95 backdrop-blur-sm">
+            <div className="hidden md:block mb-6 sticky top-[var(--header-h)] z-30 bg-background">
               <div className="h-px bg-border/60 mb-5" />
               <div
                 ref={letterBarRef}
