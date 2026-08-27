@@ -14,6 +14,8 @@ export interface SubDesigner {
   slug: string;
   image: string;
   instagramUrl?: string;
+  specialty?: string | null;
+  bioExcerpt?: string | null;
 }
 
 export function useParentBrandDesigners(parentName: string | null) {
@@ -26,14 +28,14 @@ export function useParentBrandDesigners(parentName: string | null) {
       const [primary, extra] = await Promise.all([
         supabase
           .from("designers")
-          .select("id, name, slug, image_url, links")
+          .select("id, name, slug, image_url, links, specialty, biography")
           .eq("founder", parentName)
           .neq("name", parentName)
           .eq("is_published", true)
           .eq("trade_only", false),
         supabase
           .from("designers")
-          .select("id, name, slug, image_url, links")
+          .select("id, name, slug, image_url, links, specialty, biography")
           .contains("additional_founders", [parentName])
           .neq("name", parentName)
           .eq("is_published", true)
@@ -57,6 +59,10 @@ export function useParentBrandDesigners(parentName: string | null) {
               : `https://res.cloudinary.com/dif1oamtj/image/fetch/w_200,h_267,c_fill,g_auto,q_auto,f_auto/${encodeURIComponent(d.image_url)}`
             : "",
           instagramUrl: (igLink as any)?.url || undefined,
+          specialty: d.specialty || null,
+          bioExcerpt: d.biography
+            ? String(d.biography).replace(/<[^>]+>/g, "").split(/\n\n+/)[0]?.trim().slice(0, 220) || null
+            : null,
         };
       }) as SubDesigner[];
     },
