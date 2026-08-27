@@ -11,9 +11,10 @@ import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { formatProductSubtitleLine, isFinishSubtitle } from "@/lib/subtitleDisplay";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { queryKeys } from "@/lib/queryKeys";
+import { fetchPublicProductPage, prefetchPublicProductPage, PUBLIC_PRODUCT_PAGE_STALE_TIME } from "@/lib/publicProductPageQuery";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
@@ -184,84 +185,16 @@ interface ProductRow {
 function useProductBySlug(designerSlug: string | undefined, productSlug: string | undefined) {
   return useQuery({
     queryKey: queryKeys.publicProductPage(designerSlug, productSlug),
-    queryFn: async () => {
-      if (!designerSlug || !productSlug) return null;
-
-      const { data: designer } = await supabase
-        .from("designers")
-        .select("id, name, slug, display_name, biography")
-        .eq("slug", designerSlug)
-        .eq("is_published", true)
-        .eq("trade_only", false)
-        .maybeSingle();
-      if (!designer) return null;
-
-      const publicPickFields = "id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered";
-
-      const brandCandidates = Array.from(new Set([
-        designer.display_name,
-        designer.name,
-      ].filter(Boolean)));
-
-      // Fetch picks and the trade-product image fallback in parallel;
-      // trade_products is queried by brand so it can run concurrently
-      // with picks rather than waiting for the product match.
-      const [picksResult, tradeMatchesResult] = await Promise.all([
-        supabase
-          .from("designer_curator_picks_public" as any)
-          .select(publicPickFields)
-          .eq("designer_id", designer.id)
-          .order("sort_order", { ascending: true }),
-        brandCandidates.length > 0
-          ? supabase
-              .from("trade_products")
-              .select("product_name, image_url, gallery_images")
-              .eq("is_active", true)
-              .eq("is_hidden", false)
-              .in("brand_name", brandCandidates)
-          : Promise.resolve({ data: [] }),
-      ]);
-
-      const picks = picksResult.data;
-      const tradeMatches = tradeMatchesResult.data;
-
-      if (!picks || picks.length === 0) return null;
-
-      // Canonical match on the stored slug column. Fall back to legacy
-      // title-derived slugs so any bookmarked/shared URLs keep resolving.
-      const product =
-        picks.find((p: any) => p.slug === productSlug) ||
-        picks.find((p: any) => {
-          const titleSlug = slugify(p.title);
-          const shortSlug = slugify(String(p.title).replace(/\s+by\s+.+$/i, ""));
-          const fullSlug = slugify(p.title + (p.subtitle ? `-${p.subtitle}` : ""));
-          return fullSlug === productSlug || titleSlug === productSlug || shortSlug === productSlug;
-        }) ||
-        picks.find((p: any) => productSlug.startsWith(`${slugify(p.title)}-`));
-
-      if (!product) return null;
-
-      const tradeProduct = tradeMatches?.find((tp: any) => tp.product_name === (product as any).title) as
-        | { image_url?: string | null; gallery_images?: string[] | null }
-        | undefined;
-
-      return {
-        product: {
-          ...(product as unknown as ProductRow),
-          variant_image_map: (product as any).variant_image_map || null,
-          image_url: (product as any).image_url || tradeProduct?.image_url || null,
-          gallery_images: (product as any).gallery_images?.length
-            ? (product as any).gallery_images
-            : tradeProduct?.gallery_images || null,
-        },
-        designer: { id: designer.id, name: designer.name, slug: designer.slug, biography: designer.biography || "" },
-        relatedPicks: (picks as unknown as ProductRow[]).filter((p) => p.id !== (product as any).id),
-      };
-    },
+    queryFn: () => fetchPublicProductPage(designerSlug, productSlug) as Promise<{
+      product: ProductRow;
+      designer: { id: string; name: string; slug: string; biography: string };
+      relatedPicks: ProductRow[];
+    } | null>,
     enabled: !!designerSlug && !!productSlug,
-    staleTime: 5 * 60_000,
+    staleTime: PUBLIC_PRODUCT_PAGE_STALE_TIME,
   });
 }
+
 
 /* ------------------------------------------------------------------ */
 /*  Variant selectors (controlled — enables cross-axis disabling)     */
@@ -1079,6 +1012,7 @@ const VariantSelectors: React.FC<{
 const PublicProductPage: React.FC = () => {
   const { slug: designerSlug, productSlug } = useParams<{ slug: string; productSlug: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const location = useLocation();
   const isLegacyArnoldClamChairRoute =
     designerSlug === "arnold-madsen" &&
@@ -2684,6 +2618,8 @@ const PublicProductPage: React.FC = () => {
                           to={`/designers/${designer.slug}/${rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
                           state={{ from: location.pathname + location.search }}
                           className="group block shrink-0 basis-[70%] snap-start"
+                          onTouchStart={() => prefetchPublicProductPage(queryClient, designer.slug, rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : "")))}
+                          onMouseEnter={() => prefetchPublicProductPage(queryClient, designer.slug, rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : "")))}
                         >
                           <div className="relative aspect-square rounded-luxury-sharp overflow-hidden bg-muted/30 border border-border">
                             <img
@@ -2703,7 +2639,7 @@ const PublicProductPage: React.FC = () => {
                               {rp.title}
                             </p>
                             <p className="font-body text-[10px] text-muted-foreground tracking-wide mt-1">
-                              {formatPublicRrp((relatedRrpMap as any)[rp.id]) || "Price upon request"}
+                              {formatPublicRrp((relatedRrpMap as any)[rp.id]) || "Price upon Request"}
                             </p>
                           </div>
                         </Link>
@@ -2719,6 +2655,9 @@ const PublicProductPage: React.FC = () => {
                         to={`/designers/${designer.slug}/${rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
                         state={{ from: location.pathname + location.search }}
                         className="group block"
+                        onMouseEnter={() => prefetchPublicProductPage(queryClient, designer.slug, rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : "")))}
+                        onFocus={() => prefetchPublicProductPage(queryClient, designer.slug, rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : "")))}
+                        onTouchStart={() => prefetchPublicProductPage(queryClient, designer.slug, rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : "")))}
                       >
                         <div className="relative aspect-square rounded-luxury-sharp overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/40 transition-colors">
                           <img
@@ -2749,7 +2688,7 @@ const PublicProductPage: React.FC = () => {
                             {rp.title}
                           </p>
                           <p className="font-body text-xs text-muted-foreground tracking-wide mt-1">
-                            {formatPublicRrp((relatedRrpMap as any)[rp.id]) || "Price upon request"}
+                            {formatPublicRrp((relatedRrpMap as any)[rp.id]) || "Price upon Request"}
                           </p>
                         </div>
                       </Link>
