@@ -825,26 +825,10 @@ const getLetterDesignerTotal = (designers: Designer[], parentDesignerCountByName
     return sum + (isParentBrandCard(item, parentDesignerCountByName) ? childCount + 1 : 1);
   }, 0);
 
-const getDesignerCardSpan = (item: Designer, parentDesignerCountByName: Record<string, number>) =>
-  isParentBrandCard(item, parentDesignerCountByName) ? 2 : 1;
-
 const getInitialVisibleDesignerCards = (
   designers: Designer[],
-  parentDesignerCountByName: Record<string, number>,
-  maxSlots: number,
-) => {
-  let usedSlots = 0;
-  const visible: Designer[] = [];
-
-  for (const designer of designers) {
-    const span = getDesignerCardSpan(designer, parentDesignerCountByName);
-    if (visible.length > 0 && usedSlots + span > maxSlots) break;
-    visible.push(designer);
-    usedSlots += span;
-  }
-
-  return visible;
-};
+  maxCards: number,
+) => designers.slice(0, maxCards);
 
 // ─── Letter Group Body ───────────────────────────────────────────────────────
 // Extracted so it only mounts (and its images only start downloading) after
@@ -871,10 +855,10 @@ function LetterGroupBody({
   const [openParent, setOpenParent] = useState<string | null>(matchesExpand ? initialExpand! : null);
   // Progressive disclosure: sections with more than 8 designers show the first
   // 8 desktop grid slots, then reveal the rest behind a centered "VIEW ALL" control.
-  const INITIAL_VISIBLE_SLOTS = 8;
-  const totalDesignerCount = getLetterDesignerTotal(designers, parentDesignerCountByName);
-  const initialVisible = getInitialVisibleDesignerCards(designers, parentDesignerCountByName, INITIAL_VISIBLE_SLOTS);
-  const hasOverflow = totalDesignerCount > INITIAL_VISIBLE_SLOTS && designers.length > initialVisible.length;
+  const INITIAL_VISIBLE_CARDS = 8;
+  const totalDesignerCount = designers.length;
+  const initialVisible = getInitialVisibleDesignerCards(designers, INITIAL_VISIBLE_CARDS);
+  const hasOverflow = designers.length > INITIAL_VISIBLE_CARDS;
   const [showAll, setShowAll] = useState<boolean>(!!matchesExpand);
   const visible = hasOverflow ? initialVisible : designers;
   const hidden = hasOverflow ? designers.slice(initialVisible.length) : [];
@@ -1038,7 +1022,7 @@ function LetterGroup({
   }, [anchorId, isRevealed, letter]);
 
   const matchesExpand = initialExpand && designers.some((d) => d.name === initialExpand || d.founder === initialExpand);
-  const totalDesignerCount = getLetterDesignerTotal(designers, parentDesignerCountByName);
+  const totalDesignerCount = designers.length;
   if (matchesExpand && !isRevealed) {
     // Deep-link is expanding a parent inside this letter — reveal synchronously.
     setIsRevealed(true);
