@@ -48,11 +48,14 @@ export async function fetchPublicProductPage(
   // trade_products is queried by brand so it can run concurrently
   // with picks rather than waiting for the product match.
   const [picksResult, tradeMatchesResult] = await Promise.all([
-    supabase
-      .from("designer_curator_picks_public" as any)
-      .select(publicPickFields)
-      .eq("designer_id", designer.id)
-      .order("sort_order", { ascending: true }),
+    designer.id
+      ? supabase
+          .from("designer_curator_picks_public" as any)
+          .select(publicPickFields)
+          .eq("designer_id", designer.id)
+          .order("sort_order", { ascending: true })
+      : Promise.resolve({ data: [] as any[] }),
+
     brandCandidates.length > 0
       ? supabase
           .from("trade_products")
