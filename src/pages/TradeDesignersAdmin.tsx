@@ -1878,7 +1878,26 @@ const TradeDesignersAdmin = () => {
   const [previewDebug, setPreviewDebug] = useState(false);
   const [visibleRowCount, setVisibleRowCount] = useState(INITIAL_DESIGNER_ROWS);
 
+  // Synchronous, cheap persistence of the navigation state. Runs on every
+  // change (no debounce) so the open designer survives any reload — including
+  // ones we get no unload event for (iOS tab eviction, crash, forced refresh).
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const hasNav = search.trim() !== "" || activeLetter !== null || expandedId !== null;
+      if (!hasNav) {
+        localStorage.removeItem(DESIGNER_EDITOR_NAV_KEY);
+        sessionStorage.removeItem(DESIGNER_EDITOR_NAV_KEY);
+        return;
+      }
+      const payload = JSON.stringify({ search, activeLetter, expandedId } satisfies DesignerEditorNav);
+      localStorage.setItem(DESIGNER_EDITOR_NAV_KEY, payload);
+      sessionStorage.setItem(DESIGNER_EDITOR_NAV_KEY, payload);
+    } catch { /* storage full / disabled — editing must still work */ }
+  }, [search, activeLetter, expandedId]);
+
+  useEffect(() => {
+
     const hasUnsaved = Object.keys(editBuffer).length > 0;
 
     const persistDraft = () => {
