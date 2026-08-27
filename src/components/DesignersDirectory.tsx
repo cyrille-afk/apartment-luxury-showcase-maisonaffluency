@@ -739,9 +739,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
         </div>
 
         <div className="flex items-center justify-between gap-3">
-          {parentLabel && !HIDE_PARENT_LABEL_SLUGS.has(item.slug) ? (
-            <p data-parent-label className="font-body text-[10px] uppercase tracking-[0.22em] truncate text-white/70">{parentLabel}</p>
-          ) : <span />}
+          <span />
 
           <div className="h-px w-0 group-hover:w-10 transition-all duration-700 ease-out flex-shrink-0 bg-white" />
         </div>
