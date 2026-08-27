@@ -540,7 +540,7 @@ function HeroBgLayer({
 const DesignersHoverHero = () => {
   const navigate = useNavigate();
   const { data: designers } = useFeaturedDesigners();
-  const { data: allDesigners = [] } = useAllDesigners();
+  const { data: allDesigners = [] } = useAllDesignersLite();
   const { data: firstPickMap } = useAllFirstPickImages();
   const designerCount = useMemo(
     () => allDesigners.filter((d: any) => d.is_published).length,
