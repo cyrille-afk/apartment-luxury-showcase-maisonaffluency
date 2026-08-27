@@ -14,6 +14,7 @@ import ProductImageGallery from "@/components/product/ProductImageGallery";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { queryKeys } from "@/lib/queryKeys";
+import { fetchPublicProductPage, PUBLIC_PRODUCT_PAGE_STALE_TIME } from "@/lib/publicProductPageQuery";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
