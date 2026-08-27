@@ -24,7 +24,10 @@ import { normalizeSubcategory, getParentCategoryFromSubcategory } from "@/lib/ca
 import { formatDimensionsMultiline, withImperialPerLine } from "@/lib/formatDimensions";
 import { cldResponsiveImg } from "@/lib/cloudinary";
 import { Link } from "react-router-dom";
-import { designerProfileUrl } from "@/lib/designerUrl";
+
+const designerSlugify = (s: string) =>
+  s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
 // ─── SUB_TAGS mapping (same as FeaturedDesigners) ────────────────────────
 const SUB_TAGS: Record<string, string[]> = {
