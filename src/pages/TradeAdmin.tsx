@@ -398,7 +398,7 @@ const TradeAdmin = () => {
         <Inbox className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
         <div className="flex-1">
           <span className="font-display text-sm text-foreground">Inquiries Inbox</span>
-          <p className="font-body text-[10px] text-muted-foreground">Review Price-on-Request submissions, concierge chat leads, and contact-form messages. Draft a quote from each and mark it ready to send.</p>
+          <p className="font-body text-[10px] text-muted-foreground">Review Price-upon-Request submissions, concierge chat leads, and contact-form messages. Draft a quote from each and mark it ready to send.</p>
         </div>
         <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
       </Link>

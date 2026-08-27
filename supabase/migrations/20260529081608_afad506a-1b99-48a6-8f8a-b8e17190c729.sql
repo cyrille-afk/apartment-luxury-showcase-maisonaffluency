@@ -1,5 +1,5 @@
 -- Hide trade pricing from anonymous (public) visitors at the column level.
--- Public pages always render "Price on Request"; trade users (authenticated)
+-- Public pages always render "Price upon Request"; trade users (authenticated)
 -- continue to see prices via existing RLS.
 REVOKE SELECT (trade_price_cents, price_per_sqm_cents)
   ON public.designer_curator_picks FROM anon;

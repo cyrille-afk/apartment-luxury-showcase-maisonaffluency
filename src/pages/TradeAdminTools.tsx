@@ -14,7 +14,7 @@ import InstagramAuditCard from "@/components/admin/InstagramAuditCard";
 /**
  * Miscellaneous admin tools that used to live at the bottom of /trade/admin.
  * Kept as a separate route so /trade/admin is focused on Trade Applications
- * and Price-on-Request submissions.
+ * and Price-upon-Request submissions.
  */
 export default function TradeAdminTools() {
   const { isAdmin, loading } = useAuth();

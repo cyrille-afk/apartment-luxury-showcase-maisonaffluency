@@ -1635,7 +1635,7 @@ const TradeProductPage: React.FC = () => {
   const suppressTopAsFinish = !topAxisIsDim && (topAxisHasSwatches || (isUpholsteredProduct && isFinishAxisLabel(topAxisLabelRaw)) || (hasWoodSwatches && isFinishAxisLabel(topAxisLabelRaw)));
 
   // When the product has variants but the user hasn't picked one yet, fall back
-  // to the cheapest *priced* variant so we can show "From €X" instead of "Price on request".
+  // to the cheapest *priced* variant so we can show "From €X" instead of "Price upon Request".
   // Variants without a price (price_cents = 0 → "Price upon Request" finishes) are skipped here.
   const pricedVariantCents = hasVariants && sizeVariants
     ? sizeVariants.map((v) => v.price_cents).filter((c) => typeof c === "number" && c > 0)
@@ -1644,12 +1644,12 @@ const TradeProductPage: React.FC = () => {
   // If the user has actively selected a Base/Top/Size in a dual-axis product
   // but no priced variant matches that combination (e.g. a linked swatch like
   // "Ceppo di Sicilia" that hasn't been quoted yet), do NOT fall back to the
-  // cheapest "From €X" — show "Price on request" instead so the UI matches
+  // cheapest "From €X" — show "Price upon Request" instead so the UI matches
   // the selection.
   const dualSelectionMade = isDualAxis && !!(selectedBase || selectedTop || selectedDualSize);
   // Cheapest priced variant matching the user's partial dual-axis selection.
   // Lets us keep showing "From €X" once they pick just a Finish or just a Size,
-  // instead of falling all the way back to "Price on request".
+  // instead of falling all the way back to "Price upon Request".
   const partialDualMinCents = resolvePartialDualMinCents(
     { selectedBase, selectedTop, selectedDualSize },
     { sizeVariants: variantsList, isDualAxis },
