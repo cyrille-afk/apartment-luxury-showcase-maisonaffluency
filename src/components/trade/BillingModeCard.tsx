@@ -356,7 +356,7 @@ export default function BillingModeCard({
             />
             <div className="space-y-1 min-w-0 flex-1">
               <div className="font-medium text-sm flex items-center gap-2">
-                <Tag className="h-3.5 w-3.5" /> MSRP only — price on request
+                <Tag className="h-3.5 w-3.5" /> MSRP only — price upon request
               </div>
               <p className="text-xs text-muted-foreground">
                 Retail quote at full MSRP with no trade commission or buy-net margin. Use for

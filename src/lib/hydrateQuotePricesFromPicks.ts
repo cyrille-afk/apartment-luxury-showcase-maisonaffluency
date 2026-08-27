@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
  * `trade_products` is a mirror of `designer_curator_picks` maintained by a
  * database trigger. When that mirror is missing a row, has a NULL
  * `trade_price_cents`, or has drifted stale from the source pick, quotes end
- * up displaying "Price on Request" or a wrong number even though the pick
+ * up displaying "Price upon Request" or a wrong number even though the pick
  * itself has a valid price.
  *
  * This helper takes any collection of quote items that carry a

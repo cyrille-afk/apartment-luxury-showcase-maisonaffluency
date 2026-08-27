@@ -238,7 +238,7 @@ export function CuratedInventoryGrid({
                       </span>
                     </div>
                   ) : (
-                    <div className="font-body text-[12px] text-foreground/80">Trade Price on Request</div>
+                    <div className="font-body text-[12px] text-foreground/80">Trade Price upon Request</div>
                   )}
                   <span className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground/70">
                     {status}

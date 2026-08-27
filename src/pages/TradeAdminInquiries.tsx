@@ -42,7 +42,7 @@ const STATUS_OPTIONS = [
 
 const SOURCE_OPTIONS = [
   { key: "all", label: "All sources" },
-  { key: "public_product", label: "Price on Request" },
+  { key: "public_product", label: "Price upon Request" },
   { key: "concierge_lead", label: "Concierge chat" },
   { key: "contact_form", label: "Contact form" },
 ];

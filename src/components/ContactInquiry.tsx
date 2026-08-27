@@ -93,7 +93,7 @@ const ContactInquiry = () => {
   const urlSubject = params.get("subject");
   const urlMessage = params.get("message");
   const urlStudio = params.get("studio");
-  // Product context — set by the public product page "Price on Request" CTA
+  // Product context — set by the public product page "Price upon Request" CTA
   // so the admin inquiry inbox can pre-fill a draft quote.
   const urlProductId = params.get("productId") || undefined;
   const urlProductSlug = params.get("productSlug") || undefined;

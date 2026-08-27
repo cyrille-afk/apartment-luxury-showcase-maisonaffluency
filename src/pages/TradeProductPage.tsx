@@ -90,7 +90,7 @@ function applyRugPerSqmPricing(
   if (!variants?.length) return [];
   if (!isRugCategory(category) || !pricePerSqmCents) {
     // Keep ALL variants — including those without an explicit price.
-    // Variants with price_cents = 0 surface as "Price on Request" in the UI
+    // Variants with price_cents = 0 surface as "Price upon Request" in the UI
     // (e.g. a White Onyx finish that hasn't been quoted yet should still
     // appear in the finish dropdown).
     return variants
@@ -107,7 +107,7 @@ function applyRugPerSqmPricing(
       const dimSource = v.base || v.label || "";
       const computed = priceRugVariantFromLabel(dimSource, pricePerSqmCents);
       // Rug variants without computable pricing still appear; they render as
-      // "Price on Request" via the 0-cents fallback.
+      // "Price upon Request" via the 0-cents fallback.
       return { ...v, price_cents: computed ?? 0 };
     })
     .filter((v): v is { label?: string; base?: string; top?: string; price_cents: number } => v !== null);
@@ -339,7 +339,7 @@ function useTradeProductBySlug(
             biography: (designer as any)?.biography || "",
           },
           // Keep the pricing block whenever ANY pricing signal exists — including
-          // 0, which renders as "Price on Request". A truthy check here would
+          // 0, which renders as "Price upon Request". A truthy check here would
           // silently collapse zero-priced records and hide the RFQ CTA.
           pricing: (
             pricing.rrp_price_cents != null ||
@@ -1636,7 +1636,7 @@ const TradeProductPage: React.FC = () => {
 
   // When the product has variants but the user hasn't picked one yet, fall back
   // to the cheapest *priced* variant so we can show "From €X" instead of "Price on request".
-  // Variants without a price (price_cents = 0 → "Price on Request" finishes) are skipped here.
+  // Variants without a price (price_cents = 0 → "Price upon Request" finishes) are skipped here.
   const pricedVariantCents = hasVariants && sizeVariants
     ? sizeVariants.map((v) => v.price_cents).filter((c) => typeof c === "number" && c > 0)
     : [];

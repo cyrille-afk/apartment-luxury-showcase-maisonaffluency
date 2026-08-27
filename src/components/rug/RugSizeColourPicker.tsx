@@ -300,7 +300,7 @@ export default function RugSizeColourPicker({
       )}
 
 
-      {/* PRICE — hidden on public side (page already shows a Price on Request CTA) */}
+      {/* PRICE — hidden on public side (page already shows a Price upon Request CTA) */}
       {!hidePrice && (
         <>
           <div className="rounded-md border border-border/60 bg-muted/30 p-3 flex items-baseline justify-between">

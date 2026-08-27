@@ -326,7 +326,7 @@ const ProductPage = () => {
 
               {/* CTA */}
               <div className="mt-8 space-y-3">
-                <p className="font-body text-xs uppercase tracking-[0.15em] text-muted-foreground">Price on Request</p>
+                <p className="font-body text-xs uppercase tracking-[0.15em] text-muted-foreground">Price upon Request</p>
                 {product.isInShowroom && (
                   <p className="font-body text-xs text-muted-foreground">
                     Visit our Singapore showroom to experience this piece in person
