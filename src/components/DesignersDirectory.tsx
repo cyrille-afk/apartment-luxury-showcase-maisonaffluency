@@ -2083,35 +2083,40 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                     Maison Affluency Index
                   </p>
                 </div>
+                {/* When the sticky A–Z bar below is enabled it owns the index —
+                    don't render a second, duplicate letter row here. */}
                 <div className="col-span-8">
-                  <div ref={letterBarRef} className="flex items-center justify-between">
-                    {LETTERS.map((letter) => {
-                      const isActive = activeLetters.has(letter);
-                      return (
-                        <button
-                          key={letter}
-                          data-azbar-letter={letter}
-                          onClick={() => isActive && jumpToLetter(letter)}
-                          className={`font-body text-[11px] lg:text-xs uppercase tracking-[0.18em] leading-none transition-colors duration-200 ${
-                            isActive
-                              ? "text-foreground font-semibold hover:text-primary cursor-pointer"
-                              : "text-muted-foreground/50 cursor-default"
-                          }`}
-                        >
-                          {letter}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div className="h-px bg-border/50 mt-4" />
+                  {!showAlphabetBar && (
+                    <div ref={letterBarRef} className="flex items-center justify-between">
+                      {LETTERS.map((letter) => {
+                        const isActive = activeLetters.has(letter);
+                        return (
+                          <button
+                            key={letter}
+                            data-azbar-letter={letter}
+                            onClick={() => isActive && jumpToLetter(letter)}
+                            className={`font-body text-[11px] lg:text-xs uppercase tracking-[0.18em] leading-none transition-colors duration-200 ${
+                              isActive
+                                ? "text-foreground font-semibold hover:text-primary cursor-pointer"
+                                : "text-muted-foreground/50 cursor-default"
+                            }`}
+                          >
+                            {letter}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {!showAlphabetBar && <div className="h-px bg-border/50 mt-4" />}
                 </div>
+
               </div>
             </div>
           )}
 
-          {/* Desktop: A-Z jump bar — hidden when a category/subcategory filter is active */}
+          {/* Desktop: sticky A-Z jump bar — hidden when a category/subcategory filter is active */}
           {showAlphabetBar && !(selectedCategory || selectedSubcategory) && (
-            <div className="hidden md:block mb-6">
+            <div className="hidden md:block mb-6 sticky top-[var(--header-h)] z-30 bg-background">
               <div className="h-px bg-border/60 mb-5" />
               <div
                 ref={letterBarRef}
@@ -2124,7 +2129,9 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                       key={letter}
                       data-azbar-letter={letter}
                       onClick={() => jumpToLetter(letter)}
-                      className={`font-serif text-lg lg:text-xl leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/20 cursor-default"}`}
+                      disabled={!isActive}
+                      aria-disabled={!isActive}
+                      className={`font-serif text-lg lg:text-xl leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/15 cursor-default"}`}
                     >
                       {letter}
                     </button>
@@ -2136,7 +2143,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
           )}
 
           {/* Desktop: Filter + Search row */}
-          <div data-sticky-filter-bar className="hidden md:flex relative bg-background pt-4 pb-3 items-center gap-3 mb-6">
+          <div data-sticky-filter-bar className="hidden md:flex relative bg-background pt-4 pb-3 items-center gap-6 mb-6">
             <button
               onPointerDown={() => {
                 filterScrollYRef.current = window.scrollY;
@@ -2156,8 +2163,31 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 <span className="absolute -top-1 -right-2 h-1.5 w-1.5 bg-primary rounded-full" aria-hidden="true" />
               )}
             </button>
-            <div className="flex-1" />
+
+            {/* Real-time designer filter */}
+            <div className="relative flex-1 max-w-sm">
+              <Search className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Filter by designer…"
+                aria-label="Filter by designer"
+                className="w-full bg-transparent border-0 border-b border-border/60 focus:border-foreground/60 focus:outline-none pl-6 pr-6 py-2 font-body text-sm placeholder:text-muted-foreground/70 transition-colors duration-200 [&::-webkit-search-cancel-button]:hidden"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Clear designer filter"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
           </div>
+
 
           {/* Desktop: Sidebar + Directory layout */}
           <div className="hidden md:flex gap-6" data-directory-layout="desktop">

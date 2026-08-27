@@ -21,55 +21,17 @@ const stripAccents = (s: string) =>
   s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
 /**
- * Return a sortable key for a designer/maker name based on the last name
- * (or, for brand-only names, the last significant word).
+ * Brand-first A–Z sorting.
  *
- * Examples:
- * - "Pierre Bonnefille" → "bonnefille"
- * - "Andrée Putman" → "putman"
- * - "Made in Kira - Roman Frankel" → "frankel"
+ * Every entry in the directory is treated as a cohesive brand, so it sorts on
+ * the FIRST letter of its full public name, not on a last name:
+ *   - "Andrea Claire Studio" → A
+ *   - "Charles and Ray Eames" → C
+ *   - "Hubert & Poyer" → H
+ * A leading "The" is ignored for the bucket but kept in the displayed name:
+ * "The Haas Brothers" → H. Other articles ("Le Berre Vevaud", "La Chance")
+ * are part of the brand and stay under L.
  */
-// Explicit overrides for studio/brand names where the default "last word"
-// heuristic gives the wrong A–Z bucket. Key = lowercased full name.
-const SORT_KEY_OVERRIDES: Record<string, string> = {
-  "apparatus studio": "apparatus",
-  "lost profile studio": "lost",
-  "collection particulière": "collection",
-  "collection particuliere": "collection",
-  "man of parts": "man",
-  "lazzarini & pickering": "lazzarini",
-  "alinea design objects": "alinea",
-  "herzog & de meuron": "herzog",
-  "hubert & poyer": "hubert",
-  "garnier & linker": "garnier",
-  "gounot & jähnke": "gounot",
-  "gounot & jahnke": "gounot",
-  "rowin' atelier — rochette frederic & winkler hervé": "rowin",
-  "rowin' atelier - rochette frederic & winkler hervé": "rowin",
-  "rowin' atelier": "rowin",
-  "forest & giaconia": "forest",
-  "made in kira - roman frankel": "made",
-  "made in kira": "made",
-  "poltrona frau": "poltrona",
-  "bruno moinard editions": "moinard",
-  "marta sala éditions": "marta sala",
-  "marta sala editions": "marta sala",
-  "théorème editions": "theoreme",
-  "theoreme editions": "theoreme",
-  "de la espada": "de la espada",
-  "marcantonio brandolini d'adda": "brandolini",
-  "overgaard & dyrman": "overgaard",
-  "la chance": "la chance",
-  "delcourt collection": "delcourt",
-  "toulemonde bochart": "toulemonde",
-  "atelier pendhapa": "atelier pendhapa",
-  "pierre augustin rose": "pierre augustin rose",
-  "emmanuel levet stenne": "levet stenne",
-  "based upon": "based upon",
-  "le berre vevaud": "le berre",
-  "jeremy maxwell wintrebert": "maxwell wintrebert",
-  "dagmar london": "dagmar",
-};
 
 // Display name overrides: strip trailing person suffix for brands that should
 // only show the atelier name.
@@ -84,41 +46,35 @@ export function displayDesignerName(name: string): string {
   return DISPLAY_NAME_OVERRIDES[key] || name;
 }
 
+const LEADING_ARTICLES = /^the\s+/i;
+
+/**
+ * Sortable key for a designer/brand entry: the full public name, accent- and
+ * article-stripped, lowercased. Comparing these with `localeCompare` yields a
+ * strict alphabetical order by brand / first name.
+ */
 export function sortNameKey(name: string): string {
-  const full = name.trim();
+  const full = displayDesignerName((name || "").trim());
   if (!full) return "";
-  const overrideKey = full.toLowerCase();
-  if (SORT_KEY_OVERRIDES[overrideKey]) return SORT_KEY_OVERRIDES[overrideKey];
-  // For "Brand - Person" entries, sort by the person part.
-  const personPart = full.includes(" - ")
-    ? full.split(" - ").pop()?.trim() || full
-    : full;
-  // Atelier partnerships "X & Y" sort by the first partner, not the last word.
-  if (personPart.includes(" & ")) {
-    const first = stripAccents(personPart.split(" & ")[0].trim()).toLowerCase().replace(/^[^a-z]+/, "");
-    if (first) return first;
-  }
-  const words = personPart.split(/\s+/);
-  // Use the last alphabetic word (ignore trailing numerics like "1861"
-  // and the generic suffix "Studio"/"Studios").
-  let idx = words.length - 1;
-  while (
-    idx > 0 &&
-    (/^\d+$/.test(words[idx]) || /^studios?$/i.test(words[idx]))
-  ) {
-    idx--;
-  }
-  const lastWord = words[idx] || "";
-  const key = stripAccents(lastWord).toLowerCase().replace(/^[^a-z]+/, "");
-  return key || sortNameKey(words.slice(0, idx).join(" "));
+  // "Brand - Person" entries are branded by the part before the dash.
+  const brandPart = full.includes(" - ") ? full.split(" - ")[0].trim() : full;
+  let key = stripAccents(brandPart).toLowerCase();
+  key = key.replace(LEADING_ARTICLES, "");
+  // Drop leading punctuation/quotes so "'t Atelier" still buckets on the letter.
+  key = key.replace(/^[^a-z0-9]+/, "").trim();
+  return key || stripAccents(brandPart).toLowerCase();
 }
 
-/** First-letter of the last-name sort key, for A–Z grouping. */
+/** First letter of the brand sort key, for A–Z grouping. */
 export function lastNameInitial(name: string): string {
   const key = sortNameKey(name);
   const first = key.charAt(0).toUpperCase();
   return /[A-Z]/.test(first) ? first : "#";
 }
+
+/** Explicit alias — the directory groups by brand initial, not by last name. */
+export const brandInitial = lastNameInitial;
+
 
 /**
  * Format a designer display name for card headers.
