@@ -1,20 +1,48 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Search, X } from "lucide-react";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import { cn } from "@/lib/utils";
+
+/** Accent/case-insensitive fold for search matching. */
+const fold = (s: string) =>
+  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 
 /**
  * Parent-house overview section: lists every designer working under a parent
  * house (e.g. Veronese, Pouenat) as expandable rows. Collapsed rows show the
  * designer's name + specialty; expanding reveals portrait, bio excerpt and a
- * link to the full profile.
+ * link to the full profile. A search field and specialty filters appear when
+ * the roster is large enough to warrant them.
  */
 export function ParentHouseOverview({ parentName }: { parentName: string }) {
   const { data: designers = [] } = useParentBrandDesigners(parentName);
   const [openSlug, setOpenSlug] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [specialty, setSpecialty] = useState<string | null>(null);
+
+  const specialties = useMemo(() => {
+    const set = new Set<string>();
+    designers.forEach((d) => d.specialty && set.add(d.specialty.trim()));
+    return [...set].sort((a, b) => a.localeCompare(b));
+  }, [designers]);
+
+  const filtered = useMemo(() => {
+    const q = fold(query);
+    return designers.filter((d) => {
+      if (specialty && (d.specialty || "").trim() !== specialty) return false;
+      if (!q) return true;
+      return (
+        fold(d.name).includes(q) ||
+        fold(d.specialty || "").includes(q) ||
+        fold(d.bioExcerpt || "").includes(q)
+      );
+    });
+  }, [designers, query, specialty]);
 
   if (designers.length === 0) return null;
+
+  const showControls = designers.length > 5;
 
   return (
     <section className="mt-10 md:mt-14 border-t border-border/40 pt-6 md:pt-8">
@@ -23,12 +51,79 @@ export function ParentHouseOverview({ parentName }: { parentName: string }) {
           The Designers of {parentName}
         </h2>
         <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
-          {designers.length} {designers.length === 1 ? "designer" : "designers"}
+          {filtered.length === designers.length
+            ? `${designers.length} ${designers.length === 1 ? "designer" : "designers"}`
+            : `${filtered.length} / ${designers.length}`}
         </span>
       </div>
 
+      {showControls && (
+        <div className="mb-4 md:mb-6 space-y-3">
+          <div className="relative">
+            <Search className="absolute left-0 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/70" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search designers"
+              aria-label={`Search the designers of ${parentName}`}
+              className="w-full bg-transparent border-0 border-b border-border/40 focus:border-foreground/60 outline-none pl-6 pr-6 py-2 font-body text-sm placeholder:text-muted-foreground/60 transition-colors"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+                className="absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+
+          {specialties.length > 1 && (
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setSpecialty(null)}
+                className={cn(
+                  "font-body text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 border transition-colors",
+                  specialty === null
+                    ? "border-foreground text-foreground"
+                    : "border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/50"
+                )}
+              >
+                All
+              </button>
+              {specialties.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setSpecialty(specialty === s ? null : s)}
+                  className={cn(
+                    "font-body text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 border transition-colors",
+                    specialty === s
+                      ? "border-foreground text-foreground"
+                      : "border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/50"
+                  )}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {filtered.length === 0 && (
+        <p className="font-body text-sm text-muted-foreground py-6">
+          No designers match your search.
+        </p>
+      )}
+
       <ul className="divide-y divide-border/30 border-y border-border/30">
-        {designers.map((d) => {
+        {filtered.map((d) => {
+
           const open = openSlug === d.slug;
           return (
             <li key={d.id}>
