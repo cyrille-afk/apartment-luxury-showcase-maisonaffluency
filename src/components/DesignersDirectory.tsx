@@ -461,9 +461,16 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
                     spanClass
                   )}
                 >
-                  <div className={cn("relative bg-muted/10 overflow-hidden", isFeatured ? "aspect-[4/5]" : "aspect-[3/4]")}>
+                  <div className={cn("relative bg-muted/40 overflow-hidden", isFeatured ? "aspect-[4/5]" : "aspect-[3/4]")}>
                     {d.image ? (
-                      <img {...cldResponsiveImg(d.image, { widths: [160, 240, 320, 480, 640], sizes })} alt={d.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110" loading="lazy" decoding="async" fetchPriority="low" />
+                      <img
+                        {...cldResponsiveImg(d.image, { widths: [160, 240, 320, 480, 640], sizes })}
+                        alt={d.name}
+                        className="w-full h-full object-cover grayscale opacity-90 contrast-[1.02] transition-all duration-300 group-hover/sub:grayscale-0 group-hover/sub:opacity-100 group-hover/sub:contrast-110 group-hover/sub:scale-[1.02]"
+                        loading="lazy"
+                        decoding="async"
+                        fetchPriority="low"
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-muted/5">
                         <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
