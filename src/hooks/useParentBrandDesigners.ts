@@ -28,14 +28,14 @@ export function useParentBrandDesigners(parentName: string | null) {
       const [primary, extra] = await Promise.all([
         supabase
           .from("designers")
-          .select("id, name, slug, image_url, links")
+          .select("id, name, slug, image_url, links, specialty, biography")
           .eq("founder", parentName)
           .neq("name", parentName)
           .eq("is_published", true)
           .eq("trade_only", false),
         supabase
           .from("designers")
-          .select("id, name, slug, image_url, links")
+          .select("id, name, slug, image_url, links, specialty, biography")
           .contains("additional_founders", [parentName])
           .neq("name", parentName)
           .eq("is_published", true)
