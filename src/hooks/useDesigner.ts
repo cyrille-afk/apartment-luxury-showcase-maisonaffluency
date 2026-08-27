@@ -287,6 +287,46 @@ export function useAllDesigners(
   });
 }
 
+/**
+ * Slim variant of {@link useAllDesigners} for the A–Z directory list.
+ *
+ * `select("*")` ships every biography/philosophy field (~375 KB uncompressed for
+ * the full catalog) which stalls the designers landing page on mobile. The
+ * directory only needs identity + card imagery, which is ~40 KB.
+ */
+export type DesignerLite = {
+  id: string;
+  slug: string;
+  name: string;
+  founder: string | null;
+  is_published: boolean;
+  trade_only: boolean;
+  hero_image_url: string | null;
+  image_url: string | null;
+};
+
+export function useAllDesignersLite() {
+  return useQuery({
+    queryKey: queryKeys.designersAllLite(),
+    staleTime: 1000 * 60 * 30,
+    gcTime: 1000 * 60 * 60,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("designers")
+        .select(
+          "id, slug, name, founder, is_published, trade_only, hero_image_url, image_url"
+        )
+        .eq("trade_only", false)
+        .order("name", { ascending: true });
+      if (error) throw error;
+      return ((data || []) as DesignerLite[]).filter(
+        (d) => !HIDDEN_DESIGNER_SLUGS.has(d.slug)
+      );
+    },
+  });
+}
+
+
 
 /** Fetch designers marked as "New In", ordered by new_in_order */
 export function useNewInDesigners() {
