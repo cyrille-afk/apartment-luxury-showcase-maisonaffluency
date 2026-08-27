@@ -346,41 +346,6 @@ function useFullCuratorPicks(enabled: boolean) {
   });
 }
 
-const HIDE_PARENT_LABEL_SLUGS = new Set<string>([
-  "adrien-messie",
-  "alex-proba",
-  "autoban",
-  "based-upon",
-  "cristian-mohaded",
-  "cristian-mohaded-cc-tapis",
-  "dagmar-london",
-  "eileen-gray",
-  "felix-aublet",
-  "felix-agostini",
-  "glenn-sestig",
-  "gounot-jahnke",
-  "herzog-de-meuron",
-  "jason-miller",
-  "jean-michel-frank",
-  "joseph-dirand",
-  "kira",
-  "laurent-maugoust-cecile-chenais",
-  "lazzarini-pickering",
-  "luca-nichetto",
-  "manuel-aires-mateus",
-  "mariano-fortuny",
-  "matthew-hilton",
-  "neri-hu",
-  "paul-laszlo",
-  "pierre-chareau",
-  "pierre-chareau-mcde",
-  "rowin-atelier",
-  "sam-baron",
-  "sebastian-herkner-man-of-parts",
-  "studio-base-upon",
-  "tristan-auer",
-  "tristan-auer-veronese",
-]);
 
 
 /** Parse names into [displayName, parentLabel] for correct card rendering */
@@ -622,7 +587,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts, pr
 
 // ─── Single Designer Card ────────────────────────────────────────────────────
 function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, priority = false }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number[]>; hasIgPosts?: boolean; /** Above-the-fold (first grid row) — load eagerly. */ priority?: boolean }) {
-  const { displayName, parentLabel } = parseDesignerDisplayName(item);
+  const { displayName } = parseDesignerDisplayName(item);
   const { toast } = useToast();
   const navigate = useNavigate();
   const cardImageUrl = item.image_url || item.hero_image_url;
@@ -739,9 +704,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
         </div>
 
         <div className="flex items-center justify-between gap-3">
-          {parentLabel && !HIDE_PARENT_LABEL_SLUGS.has(item.slug) ? (
-            <p data-parent-label className="font-body text-[10px] uppercase tracking-[0.22em] truncate text-white/70">{parentLabel}</p>
-          ) : <span />}
+          <span />
 
           <div className="h-px w-0 group-hover:w-10 transition-all duration-700 ease-out flex-shrink-0 bg-white" />
         </div>
