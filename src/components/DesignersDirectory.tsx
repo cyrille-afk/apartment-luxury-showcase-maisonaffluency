@@ -521,7 +521,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts, pr
   }, [isOpen]);
 
   return (
-    <div ref={cardRef} data-card-kind="parent" data-designer-slug={item.slug} className="col-span-1 md:col-span-2 group self-stretch rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
+    <div ref={cardRef} data-card-kind="parent" data-designer-slug={item.slug} className="col-span-full group self-stretch rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
       <div className="relative overflow-hidden aspect-[4/3] md:aspect-auto md:h-[400px] group">
         {cardImageUrl ? (
           <img {...cldResponsiveImg(cardImageUrl, { widths: [480, 720, 960, 1280], sizes: "(max-width: 640px) 100vw, (max-width: 1024px) 66vw, 720px" })} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : "low"} />
