@@ -1266,6 +1266,8 @@ const DesignersHoverHero = () => {
       // same fresh discovery, regardless of viewport.
       setExpandedLetters(new Set(["A"]));
       setActiveAccordionLetter("A");
+      // Clear any typed query so reopening the sheet never shows a stale search.
+      setSearchQuery("");
     }
     prevSearchOpenRef.current = searchOpen;
     if (!searchOpen) return;
