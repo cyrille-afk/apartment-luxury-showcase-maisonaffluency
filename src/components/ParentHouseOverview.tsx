@@ -162,13 +162,13 @@ export function ParentHouseOverview({ parentName }: { parentName: string }) {
                     {d.image && (
                       <Link
                         to={`/designers/${d.slug}`}
-                        className="shrink-0 w-20 md:w-28 aspect-[3/4] overflow-hidden bg-neutral-100 block"
+                        className="shrink-0 w-20 md:w-28 aspect-[3/4] overflow-hidden bg-muted/40 block group"
                       >
                         <img
                           src={d.image}
                           alt={d.name}
                           loading="lazy"
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover grayscale opacity-90 contrast-[1.02] transition-all duration-300 group-hover:grayscale-0 group-hover:opacity-100 group-hover:contrast-110 group-hover:scale-[1.02]"
                         />
                       </Link>
                     )}
