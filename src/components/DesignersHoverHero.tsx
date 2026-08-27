@@ -2165,7 +2165,7 @@ const DesignersHoverHero = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search 150+ designers…"
+                  placeholder="Search 170+ designers…"
                   autoCorrect="off"
                   autoCapitalize="none"
                   spellCheck={false}
