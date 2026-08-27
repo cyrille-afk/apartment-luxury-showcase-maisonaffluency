@@ -267,7 +267,7 @@ function ScrollLockedDesigners({
           {!isMobileOrPwa && !locked && directoryReady && (
             <div className="bg-background pt-12 md:pt-16">
               <Suspense fallback={<div className="min-h-[60vh] bg-background" aria-hidden="true" />}>
-                <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} showRunway />
+                <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showRunway />
               </Suspense>
             </div>
           )}
