@@ -28,7 +28,8 @@ export async function fetchPublicProductPage(
 
   const { data: designerRow } = await supabase
     .from("designers")
-    .select("id, name, slug, display_name, biography")
+    .select("id, name, slug, display_name, biography, founder")
+
     .eq("slug", designerSlug)
     .maybeSingle();
   // Parent houses are sometimes flagged trade_only / unpublished while still
