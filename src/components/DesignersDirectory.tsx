@@ -934,7 +934,7 @@ function LetterGroupBody({
   const hasOverflow = totalDesignerCount > INITIAL_VISIBLE_SLOTS && packedDesigners.length > initialVisible.length;
   const [showAll, setShowAll] = useState<boolean>(!!matchesExpand);
   const visible = hasOverflow ? initialVisible : packedDesigners;
-  const hidden = hasOverflow ? designers.slice(initialVisible.length) : [];
+  const hidden = hasOverflow ? packedDesigners.slice(initialVisible.length) : [];
 
   const renderCard = (item: Designer, cardIndex: number) => {
     const designerCount = parentDesignerCountByName[item.name] ?? 0;
