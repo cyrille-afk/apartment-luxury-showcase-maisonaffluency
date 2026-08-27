@@ -235,6 +235,15 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
           if (pick.edition && !specialTags.some(t => t.toLowerCase() === pick.edition!.toLowerCase())) {
             specialTags.unshift(pick.edition);
           }
+          // On a child-designer page the parent house is already labelled under
+          // the picture (e.g. MARTA SALA ÉDITIONS), so a bare "Edition" badge is
+          // redundant there. Parent-house pages keep it, and non-edition
+          // distinctions (Couture, Unique, …) always stay visible.
+          const parentBrandShown = !isParentBrand && founderIsBrand && !!designer.founder
+            && ![designer.name, designer.display_name].includes(designer.founder);
+          const visibleTags = parentBrandShown
+            ? specialTags.filter((t) => !/^(limited[-\s])?(re-)?edition$/i.test(t) && t !== pick.edition)
+            : specialTags;
 
           return (
             <div
@@ -267,9 +276,9 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                     loading="lazy"
                   />
                 )}
-                {specialTags.length > 0 && (
+                {visibleTags.length > 0 && (
                   <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-                    {specialTags.map((tag, i) => (
+                    {visibleTags.map((tag, i) => (
                       <span
                         key={i}
                         className={cn(
