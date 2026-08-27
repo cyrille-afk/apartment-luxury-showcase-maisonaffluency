@@ -451,6 +451,7 @@ const PublicDesignerProfile = () => {
   const [activeCategories, setActiveCategories] = useState<string[]>([]);
   const isParentBrand = isParentBrandDesigner(designer);
   const isChildDesigner = isChildBrandDesigner(designer);
+  const hideParentHouseOnMobile = designer?.slug === "veronese";
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const [mobileRevealedPickId, setMobileRevealedPickId] = useState<string | null>(null);
@@ -1538,7 +1539,7 @@ const PublicDesignerProfile = () => {
 
               {biographySection}
               {isParentBrand && (
-                <div className="hidden md:block">
+                <div className={cn(hideParentHouseOnMobile && "hidden md:block")}>
                   <ParentHouseOverview parentName={designer.name} />
                 </div>
               )}
@@ -1640,7 +1641,7 @@ const PublicDesignerProfile = () => {
 
               {biographySection}
               {isParentBrand && (
-                <div className="hidden md:block">
+                <div className={cn(hideParentHouseOnMobile && "hidden md:block")}>
                   <ParentHouseOverview parentName={designer.name} />
                 </div>
               )}
@@ -1649,7 +1650,7 @@ const PublicDesignerProfile = () => {
           </div>
 
           {isParentBrand && (
-            <div className="hidden md:block">
+            <div className={cn(hideParentHouseOnMobile && "hidden md:block")}>
               <ParentHouseOverview parentName={designer.name} />
             </div>
           )}
