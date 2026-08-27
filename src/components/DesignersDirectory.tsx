@@ -847,6 +847,39 @@ const getLetterDesignerTotal = (designers: Designer[], parentDesignerCountByName
 const getDesignerCardSpan = (item: Designer, parentDesignerCountByName: Record<string, number>) =>
   isParentBrandCard(item, parentDesignerCountByName) ? 2 : 1;
 
+/**
+ * Greedy packing: parent-house cards span 2 grid columns, so a 2-span card that
+ * lands with only 1 column left wraps and leaves a hole (and pushes the next
+ * parent card beside it). Pull a later 1-span card forward to fill the gap.
+ */
+const packDesignerCards = (
+  designers: Designer[],
+  parentDesignerCountByName: Record<string, number>,
+  cols = 4,
+) => {
+  const remaining = [...designers];
+  const packed: Designer[] = [];
+  let col = 0;
+
+  while (remaining.length > 0) {
+    const free = cols - col;
+    let idx = 0;
+    if (getDesignerCardSpan(remaining[0], parentDesignerCountByName) > free) {
+      const fillerIdx = remaining.findIndex(
+        (d) => getDesignerCardSpan(d, parentDesignerCountByName) <= free,
+      );
+      idx = fillerIdx === -1 ? 0 : fillerIdx;
+    }
+    const [next] = remaining.splice(idx, 1);
+    const span = getDesignerCardSpan(next, parentDesignerCountByName);
+    packed.push(next);
+    col += span;
+    if (col >= cols) col = 0;
+  }
+
+  return packed;
+};
+
 const getInitialVisibleDesignerCards = (
   designers: Designer[],
   parentDesignerCountByName: Record<string, number>,
@@ -864,6 +897,7 @@ const getInitialVisibleDesignerCards = (
 
   return visible;
 };
+
 
 // ─── Letter Group Body ───────────────────────────────────────────────────────
 // Extracted so it only mounts (and its images only start downloading) after
