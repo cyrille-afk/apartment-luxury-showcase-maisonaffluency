@@ -382,9 +382,6 @@ const HIDE_PARENT_LABEL_SLUGS = new Set<string>([
   "tristan-auer-veronese",
 ]);
 
-// Parent brands whose sub-designer cards should NOT show the parent name
-// beneath the designer's own name in the expanded sub-grid.
-const HIDE_SUBGRID_PARENT_LABEL = new Set<string>(["Man of Parts", "Pouenat"]);
 
 /** Parse names into [displayName, parentLabel] for correct card rendering */
 function parseDesignerDisplayName(item: Designer): { displayName: string; parentLabel: string | null } {
@@ -505,13 +502,8 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
 
                   <div className="px-2 py-1.5 bg-background text-center">
                     <p className="font-body text-[10px] md:text-[11px] text-foreground leading-tight line-clamp-1">{d.name}</p>
-                    <p
-                      className="font-body text-[8px] text-muted-foreground/60 uppercase tracking-[0.1em] mt-0.5 line-clamp-1"
-                      aria-hidden={HIDE_SUBGRID_PARENT_LABEL.has(parentName) ? true : undefined}
-                    >
-                      {HIDE_SUBGRID_PARENT_LABEL.has(parentName) ? "\u00A0" : parentName}
-                    </p>
                   </div>
+
                 </Link>
               );
             })}
