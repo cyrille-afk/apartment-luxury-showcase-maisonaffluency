@@ -55,6 +55,11 @@ export interface ProductCommerceCtaProps {
   utilityLinks?: ReactNode;
 }
 
+/** Normalize raw DB lead-time copy for display (strips "Ships in" prefixes). */
+function cleanLeadTime(raw: string): string {
+  return raw.replace(/^\s*ships?\s+in\s+/i, "").trim();
+}
+
 /** Luxury quantity stepper: "QUANTITY" label + bordered counter box. */
 function QuantitySelector({
   value,
@@ -219,6 +224,11 @@ export default function ProductCommerceCta({
           at the top; only verified trade renders the Retail/Net block here */}
       {!dockOnly && (
       <div className="hidden md:flex flex-col gap-3 rounded-none border border-border/60 bg-muted/30 p-5 md:p-6">
+        {leadTime && (
+          <p className="font-body text-[11px] uppercase tracking-widest text-neutral-500">
+            Production lead time: {cleanLeadTime(leadTime)}
+          </p>
+        )}
         {tradeApproved && displayNet ? (
           <PriceBlock rrpLabel={retailLabel} netLabel={displayNet} trade from={false} />
         ) : null}
