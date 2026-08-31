@@ -467,53 +467,53 @@ export default function QuoteBriefIntake({
         )}
 
       </form>
+      </div>
 
-      {/* New-visitor trade-member marketing — hidden once a member account is recognized */}
-      {!accountFound && (
-        <div aria-label="Trade member tools" className="mt-10 border-t border-border/60">
-          <p className="pt-6 font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            Included with a trade account
-          </p>
-          {FEATURES.map((feature) => (
-            <div key={feature.title} className="flex flex-col gap-1.5 border-t border-border/40 py-4 first-of-type:border-t-0 first-of-type:pt-4">
-              <p className="font-body text-[11px] uppercase tracking-widest font-medium text-foreground">
-                {feature.title}
-              </p>
-              <p className="font-body text-[11px] font-light leading-relaxed text-neutral-500">
-                {feature.description}
-              </p>
-            </div>
-          ))}
-          <Link
-            to={loginHref}
-            className="mt-2 inline-block font-body text-[10px] uppercase tracking-widest text-muted-foreground underline underline-offset-[6px] decoration-[0.5px] decoration-border transition-colors hover:text-foreground hover:decoration-foreground"
-          >
-            Already a member? Sign in
-          </Link>
-        </div>
-      )}
-
-      {/* Returning-member welcome card */}
-      {accountFound && (
-        <div
-          aria-label="Member profile recognized"
-          className="mt-10 mb-12 rounded-none border border-neutral-200 px-5 pt-5 pb-12 md:px-6 md:pt-6 md:pb-12"
-        >
-          <p className="font-body text-xs font-medium uppercase tracking-widest text-neutral-900">
-            Member Profile Recognized
-          </p>
-          <p className="mt-3 font-body text-xs leading-relaxed text-neutral-500">
-            Welcome back{greetingName ? `, ${greetingName}` : ""}. Upon
-            verification or signing in above, this project brief and its
-            accompanying floor plans will automatically attach to your live
-            Maison Affluency Trade Dashboard for immediate procurement staging.
-          </p>
-          <p className="mt-4 font-body text-[11px] font-light uppercase tracking-widest text-neutral-400">
-            Current Tier: {MEMBER_TIER_LABEL[memberTier] ?? MEMBER_TIER_LABEL.standard}
-          </p>
-        </div>
-      )}
-
+      {/* ── Column 2 — dynamic trade info board ── */}
+      <aside
+        aria-label="Trade information"
+        className="border-t border-neutral-200 bg-neutral-50 p-6 pb-10 md:border-t-0 md:p-8 md:pb-12"
+      >
+        {accountFound ? (
+          <div aria-label="Member profile recognized">
+            <p className="font-body text-xs font-medium uppercase tracking-widest text-neutral-900">
+              Member Profile Recognized
+            </p>
+            <p className="mt-5 font-body text-xs font-light leading-loose text-neutral-500">
+              Welcome back{greetingName ? `, ${greetingName}` : ""}. Upon
+              verification or signing in, this project brief and its
+              accompanying floor plans will automatically attach to your live
+              Maison Affluency Trade Dashboard for immediate procurement staging.
+            </p>
+            <p className="mt-8 font-body text-[11px] font-light uppercase tracking-widest text-neutral-400">
+              Current Tier: {MEMBER_TIER_LABEL[memberTier] ?? MEMBER_TIER_LABEL.standard}
+            </p>
+          </div>
+        ) : (
+          <div aria-label="Trade member tools">
+            <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              Included with a trade account
+            </p>
+            {FEATURES.map((feature) => (
+              <div key={feature.title} className="flex flex-col gap-2 border-t border-neutral-200 py-5 first-of-type:mt-5 first-of-type:border-t-0 first-of-type:pt-0">
+                <p className="font-body text-[11px] uppercase tracking-widest font-medium text-foreground">
+                  {feature.title}
+                </p>
+                <p className="font-body text-[11px] font-light leading-loose text-neutral-500">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
+            <Link
+              to={loginHref}
+              className="mt-4 inline-block font-body text-[10px] uppercase tracking-widest text-muted-foreground underline underline-offset-[6px] decoration-[0.5px] decoration-border transition-colors hover:text-foreground hover:decoration-foreground"
+            >
+              Already a member? Sign in
+            </Link>
+          </div>
+        )}
+      </aside>
     </div>
+
   );
 }
