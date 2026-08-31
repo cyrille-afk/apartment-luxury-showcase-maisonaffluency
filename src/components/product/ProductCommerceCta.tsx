@@ -135,6 +135,7 @@ export default function ProductCommerceCta({
   return (
     <>
       {/* Desktop / in-flow panel */}
+      {!dockOnly && (
       <div className="hidden md:flex flex-col gap-3 rounded-none border border-border/60 bg-muted/30 p-5 md:p-6">
         <PriceBlock rrpLabel={retailLabel} netLabel={displayNet} trade={tradeApproved} from={false} />
 
