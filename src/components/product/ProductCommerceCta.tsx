@@ -140,8 +140,14 @@ export default function ProductCommerceCta({
   redirectTo,
   dock = true,
   dockOnly = false,
+  productTitle,
+  designerName,
+  imageUrl,
+  leadTime,
 }: ProductCommerceCtaProps) {
   const [accessOpen, setAccessOpen] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const [miniCartOpen, setMiniCartOpen] = useState(false);
   const { clientSafe } = useClientSafeMode();
   const { data: pricing } = useTradeProductPricing(productId, tradeApproved);
   const { discountPct, apply } = useTradeDiscount();
