@@ -402,7 +402,7 @@ export default function Checkout() {
             body: {
               title: line.title,
               designer: line.designer || "",
-              price: lineSubtotal(line) / 100,
+              price: line.unitCents / 100,
               currency: line.currency,
               selectedFinish: line.finishLabel || "",
               quantity: lineQty(line),
