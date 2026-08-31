@@ -52,7 +52,7 @@ export interface ProductCommerceCtaProps {
   imageUrl?: string | null;
   leadTime?: string | null;
   /** Secondary utility links rendered inside the action panel */
-  utilityLinks?: React.ReactNode;
+  utilityLinks?: ReactNode;
 }
 
 /** Luxury quantity stepper: "QUANTITY" label + bordered counter box. */
