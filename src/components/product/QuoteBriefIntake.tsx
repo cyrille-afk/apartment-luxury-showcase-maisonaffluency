@@ -219,6 +219,7 @@ export default function QuoteBriefIntake({
         body: {
           action: "submit",
           email: value,
+          fullName: fullName.trim() || undefined,
           brief,
           files: payloadFiles,
           productName: productTitle,
