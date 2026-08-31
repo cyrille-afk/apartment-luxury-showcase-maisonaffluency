@@ -544,15 +544,24 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // gallery arrows must not emit selection/pricing callbacks, otherwise an
   // image-only navigation can trigger product-page variant sync and snap the
   // gallery back to the first image.
+  // A slide mapped to every finish (brand logo / closing frame) is not
+  // finish-specific — never let it drive the highlighted swatch.
+  const isSharedSlide = (oneBased: number) => {
+    const mapped = fabrics.filter((f) => Array.isArray(f.image_indices) && f.image_indices.length > 0);
+    return mapped.length > 1 && mapped.every((f) => f.image_indices!.includes(oneBased));
+  };
+
   useEffect(() => {
     if (isRugProduct) return;
     if (fabrics.length === 0) return;
     if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
     const oneBased = currentGalleryIndex + 1;
+    if (isSharedSlide(oneBased)) return;
     const match = fabrics.find(
       (f) => isFabricCategory(f) && Array.isArray(f.image_indices) && f.image_indices.includes(oneBased),
     );
     if (!match) return;
+
     if (selectedFabricId === match.id) return;
     setSelectedFabricId(match.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -873,8 +882,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (isRugProduct) return;
     if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
     const oneBased = currentGalleryIndex + 1;
+    if (isSharedSlide(oneBased)) return;
     const hit = (list: Fabric[]) =>
       list.find((f) => Array.isArray(f.image_indices) && f.image_indices.includes(oneBased)) || null;
+
     const woodHit = hit(visibleWoodTiles);
     if (woodHit && selectedWoodId !== woodHit.id) setSelectedWoodId(woodHit.id);
     const topHit = hit(visibleTopTiles);
