@@ -94,7 +94,7 @@ export default function ShippingDetailsAccordion({ className }: { className?: st
             </div>
 
             {/* SECTION 4 — Duties & Scheduling */}
-            <div className="px-6 md:px-10 py-6 md:py-8">
+            <div className="px-6 md:px-10 py-6 md:py-8 border-b border-neutral-200">
               <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
                 Duties &amp; Storage
               </p>
@@ -102,6 +102,15 @@ export default function ShippingDetailsAccordion({ className }: { className?: st
                 Duties and customs are handled directly for you. Scheduled delivery to
                 your site, secure storage, and staged delivery setups are available at
                 no additional handling fee.
+              </p>
+            </div>
+
+            {/* SECTION 5 — Concierge Footnote */}
+            <div className="px-6 md:px-10 py-6 md:py-8">
+              <p className="font-body text-[11px] italic leading-relaxed text-neutral-500">
+                Freight, installation, and duties are quoted separately once the
+                destination is confirmed — your design advisor will present a single,
+                all-inclusive figure.
               </p>
             </div>
           </div>
