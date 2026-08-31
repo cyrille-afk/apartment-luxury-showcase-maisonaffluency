@@ -1637,13 +1637,13 @@ const PublicProductPage: React.FC = () => {
         finishLabel,
         imageUrl: images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null,
         leadTime: product.lead_time || null,
-        quantity: 1,
+        quantity,
       },
     };
   };
 
-  const startDirectCheckout = async () => {
-    const { unit, item } = buildCheckoutLine();
+  const startDirectCheckout = async (quantity = 1) => {
+    const { unit, item } = buildCheckoutLine(quantity);
     if (!unit) {
       handlePlaceOrder();
       return;
@@ -1656,6 +1656,7 @@ const PublicProductPage: React.FC = () => {
       unitCents: unit,
       currency: (publicRrpRow?.currency || "USD").toLowerCase(),
       leadTime: item.leadTime,
+      quantity: item.quantity,
       productPath: `/designers/${item.designerSlug}/${item.productSlug}`,
     };
     try {
@@ -1665,8 +1666,8 @@ const PublicProductPage: React.FC = () => {
   };
 
 
-  const handleDirectCheckout = () => {
-    const { unit } = buildCheckoutLine();
+  const handleDirectCheckout = (quantity = 1) => {
+    const { unit } = buildCheckoutLine(quantity);
     if (!unit) {
       handlePlaceOrder();
       return;
@@ -1675,7 +1676,7 @@ const PublicProductPage: React.FC = () => {
       requireAuth(() => {}, "place an order");
       return;
     }
-    void startDirectCheckout();
+    void startDirectCheckout(quantity);
   };
 
 
