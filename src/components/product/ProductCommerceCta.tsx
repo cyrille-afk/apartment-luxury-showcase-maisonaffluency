@@ -134,10 +134,13 @@ export default function ProductCommerceCta({
 
   return (
     <>
-      {/* Desktop / in-flow panel */}
+      {/* Desktop / in-flow panel — public view relies on the page-level price
+          at the top; only verified trade renders the Retail/Net block here */}
       {!dockOnly && (
       <div className="hidden md:flex flex-col gap-3 rounded-none border border-border/60 bg-muted/30 p-5 md:p-6">
-        <PriceBlock rrpLabel={retailLabel} netLabel={displayNet} trade={tradeApproved} from={false} />
+        {tradeApproved && displayNet ? (
+          <PriceBlock rrpLabel={retailLabel} netLabel={displayNet} trade from={false} />
+        ) : null}
 
         {tradeApproved ? (
           <Link to={workspaceHref} state={redirectTo ? { from: redirectTo } : undefined} className={primaryBtn}>
