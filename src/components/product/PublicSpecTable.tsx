@@ -183,7 +183,7 @@ export function TradeExclusiveCard({
           "View pricing, access projects & client management tools, logistical data, and AI curatorial guide."
         )}
       </p>
-      <div className="mt-6 grid grid-cols-2 gap-3">
+      <div className="mt-6 flex flex-col gap-3">
         <Link
           to={loginHref}
           className="inline-flex h-12 w-full items-center justify-center px-3 rounded-none bg-foreground text-background font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:bg-foreground/85 transition-colors"
