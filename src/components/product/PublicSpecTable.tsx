@@ -127,15 +127,18 @@ export function PublicSpecTable({
 export const TRADE_FEATURE_MATRIX: { title: string; description: string }[] = [
   {
     title: "AI Curatorial Co-Pilot",
-    description: "Draft quotes, compile spec sheets, and research our database instantly.",
+    description:
+      "Instantly draft multi-room client quotes, compile tailored spec sheets, and navigate our extensive design database.",
   },
   {
-    title: "3D Axonometric Studio",
-    description: "Configure bespoke finishes, customize dimensions, and preview in real-time.",
+    title: "Studio Axonometric Service",
+    description:
+      "Upload your design briefs or floor plans directly to unlock professional architectural layouts and renders prepared for your presentations.",
   },
   {
     title: "Trade Logistics",
-    description: "Secure exclusive contract margins and manage multi-room project client presentations.",
+    description:
+      "Secure exclusive contract margins, check live logistics metrics, and manage live project procurement pipelines.",
   },
 ];
 
