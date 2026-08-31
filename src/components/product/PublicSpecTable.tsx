@@ -166,24 +166,24 @@ export function TradeExclusiveCard({
   const applyHref = `/trade/apply${q.toString() ? `?${q.toString()}` : ""}`;
 
   return (
-    <div className="rounded-none border border-border/60 bg-muted/30 p-5 md:p-6">
-      <div className="flex items-center justify-center gap-2 mb-3">
+    <div className="rounded-none border border-border/60 bg-muted/30 p-6 md:p-8">
+      <div className="flex items-center justify-center gap-2 mb-4">
         <Lock className="h-3 w-3 text-[hsl(var(--gold))]" aria-hidden="true" />
-        <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        <span className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
           Trade Exclusive Access
         </span>
       </div>
-      <p className="font-body text-xs md:text-sm text-muted-foreground leading-relaxed text-center max-w-sm mx-auto">
+      <p className="font-body text-xs md:text-sm text-muted-foreground leading-relaxed text-center max-w-md mx-auto">
         {rrpLabel ? (
           <>
-            The Public retail price is shown above. Unlock Your Trade pricing, access projects &
+            The Public retail price is shown above. Unlock Your Trade pricing, access projects &amp;
             client management tools, logistical data, and your own AI curatorial guide.
           </>
         ) : (
           "View pricing, access projects & client management tools, logistical data, and AI curatorial guide."
         )}
       </p>
-      <div className="mt-5 grid grid-cols-2 gap-3">
+      <div className="mt-6 grid grid-cols-2 gap-3">
         <Link
           to={loginHref}
           className="inline-flex h-12 w-full items-center justify-center px-3 rounded-none bg-foreground text-background font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:bg-foreground/85 transition-colors"
@@ -199,24 +199,21 @@ export function TradeExclusiveCard({
       </div>
 
       {showFeatureMatrix && (
-        <>
-          <div className="mt-6 border-t border-border/60" />
-          <div
-            aria-label="Trade member tools"
-            className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-5"
-          >
-            {TRADE_FEATURE_MATRIX.map((feature) => (
-              <div key={feature.title} className="flex flex-col gap-1.5">
-                <p className="font-body text-[10px] uppercase tracking-widest font-normal text-foreground">
-                  {feature.title}
-                </p>
-                <p className="font-body text-[10px] font-light leading-relaxed text-muted-foreground">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </>
+        <div aria-label="Trade member tools" className="mt-8 border-t border-border/60">
+          {TRADE_FEATURE_MATRIX.map((feature) => (
+            <div
+              key={feature.title}
+              className="flex flex-col gap-2 py-5 [&:not(:first-child)]:border-t [&:not(:first-child)]:border-border/40"
+            >
+              <p className="font-body text-xs uppercase tracking-widest font-medium text-foreground">
+                {feature.title}
+              </p>
+              <p className="font-body text-[11px] md:text-xs font-light leading-relaxed text-neutral-500">
+                {feature.description}
+              </p>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
