@@ -283,6 +283,114 @@ export default function ProductCommerceCta({
         </div>
       )}
 
+      {/* Slide-out mini-cart drawer (State A order confirmation) */}
+      {!tradeApproved && (
+        <div
+          className={cn(
+            "fixed inset-0 z-[90]",
+            miniCartOpen ? "pointer-events-auto" : "pointer-events-none"
+          )}
+          aria-hidden={!miniCartOpen}
+        >
+          {/* Backdrop */}
+          <div
+            onClick={() => setMiniCartOpen(false)}
+            className={cn(
+              "absolute inset-0 bg-foreground/40 transition-opacity duration-300",
+              miniCartOpen ? "opacity-100" : "opacity-0"
+            )}
+          />
+          {/* Panel — slides right-to-left */}
+          <aside
+            role="dialog"
+            aria-label="Your selection"
+            className={cn(
+              "absolute right-0 top-0 h-full w-full max-w-md",
+              "bg-background border-l border-border/60 rounded-none",
+              "flex flex-col transition-transform duration-300 ease-out will-change-transform",
+              miniCartOpen ? "translate-x-0" : "translate-x-full"
+            )}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-border/60 px-6 h-16 shrink-0">
+              <h2 className="font-body text-xs uppercase tracking-[0.22em] text-foreground">
+                Your Selection
+              </h2>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => setMiniCartOpen(false)}
+                className="flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Line item */}
+            <div className="flex-1 overflow-y-auto px-6 py-6">
+              <div className="flex gap-5">
+                {imageUrl && (
+                  <img
+                    src={imageUrl}
+                    alt={productTitle || "Selected piece"}
+                    className="h-28 w-24 flex-none object-cover rounded-none border border-border/40"
+                  />
+                )}
+                <div className="min-w-0">
+                  {designerName && (
+                    <p className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                      {designerName}
+                    </p>
+                  )}
+                  <p className="mt-1 font-display text-base leading-snug text-foreground">
+                    {productTitle}
+                  </p>
+                  {selectedFinishes.length > 0 && (
+                    <p className="mt-2 font-body text-xs leading-relaxed text-muted-foreground">
+                      {selectedFinishes.join(" / ")}
+                    </p>
+                  )}
+                  {leadTime && (
+                    <p className="mt-1 font-body text-[11px] text-muted-foreground/80">
+                      Lead time · {leadTime}
+                    </p>
+                  )}
+                  {(retailLabel || rrpLabel) && (
+                    <p className="mt-2 font-body text-sm text-foreground">
+                      {retailLabel ?? rrpLabel}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <QuantitySelector value={quantity} onChange={setQuantity} />
+              </div>
+            </div>
+
+            {/* Footer actions */}
+            <div className="shrink-0 border-t border-border/60 px-6 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+              <button
+                type="button"
+                onClick={goToCheckout}
+                disabled={placingOrder}
+                className={primaryBtn}
+              >
+                {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
+                {placingOrder ? "Opening checkout…" : "Go to Checkout"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setMiniCartOpen(false)}
+                className="mt-3 w-full text-center font-body text-[11px] uppercase tracking-widest text-muted-foreground underline underline-offset-4 decoration-border transition-colors hover:text-foreground"
+              >
+                Continue Browsing
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
+
       {/* Quote / customisation → Trade Exclusive Access modal (State A) */}
       <Dialog open={accessOpen} onOpenChange={setAccessOpen}>
         <DialogContent className="max-w-md rounded-none p-0 border-border/60">
