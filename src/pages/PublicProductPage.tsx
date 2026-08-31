@@ -1614,7 +1614,7 @@ const PublicProductPage: React.FC = () => {
    * Direct Stripe checkout (sticky bar "Place Order") — skips the cart page
    * entirely and sends the current piece + selected finish straight to Stripe.
    */
-  const buildCheckoutLine = () => {
+  const buildCheckoutLine = (quantity = 1) => {
     const unit = selectedRrp?.cents || Number(publicRrpRow?.rrp_price_cents) || 0;
     const variants = (product.size_variants || []) as Array<{ label?: string; base?: string; top?: string }>;
     const implicitVariant =
