@@ -7,6 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import ShareMenu from "@/components/ShareMenu";
+import CornerTooltip from "@/components/product/CornerTooltip";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { formatProductSubtitleLine, isFinishSubtitle } from "@/lib/subtitleDisplay";

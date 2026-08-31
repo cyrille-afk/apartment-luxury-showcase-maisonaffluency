@@ -11,6 +11,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import PresentationMode from "@/components/product/PresentationMode";
+import CornerTooltip from "@/components/product/CornerTooltip";
 
 
 
