@@ -191,5 +191,29 @@ Deno.serve(async (req) => {
     })
     .catch((e: unknown) => console.error("confirmation failed", e));
 
+  // New (guest) email → send the standard onboarding verification link.
+  try {
+    const { data: existing } = await supabase
+      .from("profiles")
+      .select("id")
+      .ilike("email", email)
+      .limit(1);
+    if ((existing?.length ?? 0) === 0) {
+      const origin = (() => {
+        try {
+          return pageUrl ? new URL(pageUrl).origin : "https://maisonaffluency.com";
+        } catch {
+          return "https://maisonaffluency.com";
+        }
+      })();
+      await supabase.auth.admin.inviteUserByEmail(email, {
+        redirectTo: `${origin}/trade/launch?next=/trade`,
+      });
+    }
+  } catch (e) {
+    console.error("guest onboarding link failed", e);
+  }
+
   return json({ success: true, id: inquiryId });
+
 });
