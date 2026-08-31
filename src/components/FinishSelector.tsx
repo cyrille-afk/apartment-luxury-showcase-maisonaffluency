@@ -882,8 +882,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (isRugProduct) return;
     if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
     const oneBased = currentGalleryIndex + 1;
+    if (isSharedSlide(oneBased)) return;
     const hit = (list: Fabric[]) =>
       list.find((f) => Array.isArray(f.image_indices) && f.image_indices.includes(oneBased)) || null;
+
     const woodHit = hit(visibleWoodTiles);
     if (woodHit && selectedWoodId !== woodHit.id) setSelectedWoodId(woodHit.id);
     const topHit = hit(visibleTopTiles);
