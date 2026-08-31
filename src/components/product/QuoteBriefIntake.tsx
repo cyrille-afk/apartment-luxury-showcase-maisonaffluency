@@ -70,6 +70,7 @@ export default function QuoteBriefIntake({
   onDone,
 }: Props) {
   const { toast } = useToast();
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [brief, setBrief] = useState("");
   const [files, setFiles] = useState<File[]>([]);
