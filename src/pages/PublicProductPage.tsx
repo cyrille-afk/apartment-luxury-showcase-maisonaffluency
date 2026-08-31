@@ -1695,7 +1695,7 @@ const PublicProductPage: React.FC = () => {
     const iconClass = "shrink-0 text-muted-foreground/70";
 
     return (
-      <div className={cn("flex flex-wrap items-center gap-x-8 gap-y-2", extraClass)}>
+      <div className={cn("flex flex-wrap items-center justify-center gap-x-10 gap-y-2 px-2", extraClass)}>
         <FavoriteFolderPicker pickId={product.id} align="start" side="top">
           <button
             onClick={(e) => e.stopPropagation()}
