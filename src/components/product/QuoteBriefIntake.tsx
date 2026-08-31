@@ -302,12 +302,12 @@ export default function QuoteBriefIntake({
           <div
             className={cn(
               "grid transition-[grid-template-rows,opacity] duration-300 ease-out",
-              accountFound ? "grid-rows-[1fr] opacity-100 mt-3" : "grid-rows-[0fr] opacity-0",
+              accountFound ? "grid-rows-[1fr] opacity-100 mt-3 mb-7" : "grid-rows-[0fr] opacity-0",
             )}
           >
             <div className="overflow-hidden">
-              <div className="rounded-none border border-neutral-200 bg-neutral-50 px-5 py-5 text-center">
-                <p className="font-body text-xs font-normal leading-relaxed text-neutral-800">
+              <div className="rounded-none border border-neutral-200 bg-neutral-50 p-4">
+                <p className="font-body text-xs font-light leading-relaxed text-neutral-700">
                   An active trade account is linked to this email address.
                 </p>
 
