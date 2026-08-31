@@ -302,12 +302,12 @@ export default function QuoteBriefIntake({
           <div
             className={cn(
               "grid transition-[grid-template-rows,opacity] duration-300 ease-out",
-              accountFound ? "grid-rows-[1fr] opacity-100 mt-3 mb-7" : "grid-rows-[0fr] opacity-0",
+              accountFound ? "grid-rows-[1fr] opacity-100 mt-4 mb-6" : "grid-rows-[0fr] opacity-0",
             )}
           >
             <div className="overflow-hidden">
-              <div className="rounded-none border border-neutral-200 bg-neutral-50 p-4">
-                <p className="font-body text-xs font-light leading-relaxed text-neutral-700">
+              <div className="rounded-none border border-neutral-200 bg-neutral-50 px-4 py-5">
+                <p className="text-center font-body text-xs font-light leading-relaxed text-neutral-700">
                   An active trade account is linked to this email address.
                 </p>
 
@@ -317,17 +317,19 @@ export default function QuoteBriefIntake({
                       type="button"
                       onClick={sendCode}
                       disabled={sendingCode}
-                      className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-none bg-foreground px-4 font-body text-[10px] uppercase tracking-widest text-background transition-colors hover:bg-foreground/85 disabled:opacity-60"
+                      className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-none bg-foreground px-4 font-body text-[10px] uppercase tracking-widest text-background transition-colors hover:bg-foreground/85 disabled:opacity-60"
                     >
                       {sendingCode && <Loader2 className="h-3 w-3 animate-spin" />}
                       Verify via 4-digit secure passcode
                     </button>
-                    <Link
-                      to={loginHref}
-                      className="mt-3 inline-block font-body text-[11px] font-light text-neutral-500 underline underline-offset-4 decoration-[0.5px] decoration-neutral-300 transition-colors hover:text-foreground hover:decoration-foreground"
-                    >
-                      Or sign in using your account password
-                    </Link>
+                    <div className="mt-3 text-center">
+                      <Link
+                        to={loginHref}
+                        className="inline-block font-body text-[11px] font-light text-neutral-500 underline underline-offset-4 decoration-[0.5px] decoration-neutral-300 transition-colors hover:text-foreground hover:decoration-foreground"
+                      >
+                        Or sign in using your account password
+                      </Link>
+                    </div>
                   </>
                 ) : (
                   <div className="mt-4 flex flex-col items-center gap-3">
