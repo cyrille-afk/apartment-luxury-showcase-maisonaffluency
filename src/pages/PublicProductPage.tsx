@@ -74,6 +74,7 @@ import {
   quantitativeValue,
 } from "@/components/product/PublicSpecTable";
 import TradeWorkspace from "@/components/product/TradeWorkspace";
+import ProductCommerceCta from "@/components/product/ProductCommerceCta";
 import TradeFirstCta from "@/components/product/TradeFirstCta";
 
 import StickyPurchaseBar from "@/components/product/StickyPurchaseBar";
@@ -2327,9 +2328,14 @@ const PublicProductPage: React.FC = () => {
                   })()}
 
                   {!user && !authLoading && (
-                    <TradeExclusiveCard
-                      redirectTo={location.pathname + location.search}
+                    <ProductCommerceCta
+                      productId={product.id}
                       rrpLabel={publicRrpLabel}
+                      onPlaceOrder={handleDirectCheckout}
+                      placingOrder={checkoutLoading}
+                      onRequestQuote={() => setQuoteRequestOpen(true)}
+                      selectedFinishes={selectedFinishes}
+                      redirectTo={location.pathname + location.search}
                     />
                   )}
 
@@ -2454,6 +2460,21 @@ const PublicProductPage: React.FC = () => {
                 </>
               )}
 
+              {/* Mobile/PWA sticky bottom dock for signed-out visitors —
+                  the in-flow panel lives in the desktop branch above. */}
+              {!user && !authLoading && (
+                <ProductCommerceCta
+                  productId={product.id}
+                  rrpLabel={publicRrpLabel}
+                  dockOnly
+                  onPlaceOrder={handleDirectCheckout}
+                  placingOrder={checkoutLoading}
+                  onRequestQuote={() => setQuoteRequestOpen(true)}
+                  selectedFinishes={selectedFinishes}
+                  redirectTo={location.pathname + location.search}
+                />
+              )}
+
               {/* Signed-in visitors. Verified trade members get the full
                   workspace (net pricing, availability, spec sheet + Felix);
                   everyone else signed in keeps the enquiry CTA. */}
@@ -2495,6 +2516,17 @@ const PublicProductPage: React.FC = () => {
                       inquireHref={inquireHref}
                       felixUrl={typeof window !== "undefined" ? window.location.href : undefined}
                       compact={isMobileOrPwa}
+                    />
+                    <ProductCommerceCta
+                      productId={product.id}
+                      rrpLabel={publicRrpLabel}
+                      tradeApproved
+                      dockOnly
+                      onPlaceOrder={handleDirectCheckout}
+                      placingOrder={checkoutLoading}
+                      onRequestQuote={() => setQuoteRequestOpen(true)}
+                      selectedFinishes={selectedFinishes}
+                      redirectTo={returnTo}
                     />
                     </div>
                   );

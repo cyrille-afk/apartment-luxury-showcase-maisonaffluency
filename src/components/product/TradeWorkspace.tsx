@@ -285,20 +285,20 @@ export default function TradeWorkspace({
             </>
           ) : netLabel ? (
             <>
-              <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-                <p className="font-display text-2xl leading-none">
-                  {usingVariantPrice && !selectedVariantExact ? "From " : ""}
-                  {netLabel}
-                </p>
-                {rrpLabel && netCents !== rrpCents && (
-                  <span className="font-body text-sm text-muted-foreground line-through">
-                    {rrpLabel}
-                  </span>
-                )}
-              </div>
+              <p className="font-body text-[11px] tracking-[0.04em] text-muted-foreground">
+                {rrpLabel
+                  ? `Retail: ${usingVariantPrice && !selectedVariantExact ? "From " : ""}${rrpLabel} (Before Tax)`
+                  : "Retail on request (Before Tax)"}
+              </p>
+              <p className="font-display text-2xl leading-none mt-1">
+                {usingVariantPrice && !selectedVariantExact ? "From " : ""}
+                {netLabel}{" "}
+                <span className="font-body text-xs uppercase tracking-widest text-muted-foreground">
+                  Net Trade Price
+                </span>
+              </p>
               <p className="font-body text-[11px] text-muted-foreground mt-1.5">
-                Your trade net
-                {usingVariantPrice && selectedFinishes.length ? ` · ${selectedFinishes.join(" · ")}` : ""}
+                {usingVariantPrice && selectedFinishes.length ? `${selectedFinishes.join(" · ")}` : "Your tier pricing"}
                 {discountApplied && ` · ${tierLabel} ${discountLabel} off RRP`}
               </p>
             </>
@@ -364,10 +364,20 @@ export default function TradeWorkspace({
           <Link
             to={`/trade/products/${productId}${selectedFinishes.length ? `?finish=${encodeURIComponent(selectedFinishes.join(" / "))}` : ""}`}
             state={returnPath ? { from: returnPath } : undefined}
-            className="flex items-center justify-center px-4 py-3 rounded-md bg-foreground text-background font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/90 transition-colors"
+            className="flex items-center justify-center px-4 py-3 rounded-none bg-foreground text-background font-body text-xs uppercase tracking-widest transition-all hover:bg-foreground/85"
           >
-            Open Full Trade Sheet
+            Add to Co-Pilot Workspace &amp; Order
           </Link>
+          <button
+            type="button"
+            onClick={() => {
+              setFelixOpen(true);
+              window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { openPanel: true } }));
+            }}
+            className="flex items-center justify-center px-4 py-3 rounded-none border border-foreground bg-background text-foreground font-body text-xs uppercase tracking-widest transition-all hover:bg-muted/60"
+          >
+            Open 3D Studio &amp; Axonometric Planning
+          </button>
           {returnPath && (
             <p className="text-center font-body text-[10px] text-muted-foreground/80">
               Your finish selection carries over — use Back to return here.
