@@ -24,6 +24,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { queryKeys } from "@/lib/queryKeys";
 import ShareMenu from "@/components/ShareMenu";
+import CornerTooltip from "@/components/product/CornerTooltip";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
 import ActiveSwatchCaption from "@/components/product/ActiveSwatchCaption";
@@ -1824,40 +1825,44 @@ const TradeProductPage: React.FC = () => {
                       <LightboxDescriptionDropdown description={product.description} />
                     </div>
                   )}
-                  <AddToProjectPopover
-                    productId={favoriteId}
-                    productName={product.title}
-                    onAdded={async () => {
-                      if (!isFavorited(favoriteId)) {
-                        await toggleFavorite(favoriteId);
-                      }
-                    }}
-                    align="end"
-                  >
-                    <button
-                      onClick={(e) => e.stopPropagation()}
-                      aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
-                      className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25"
+                  <CornerTooltip label={favorited ? "Saved to Project" : "Add to Project"} side="bottom" align="end">
+                    <AddToProjectPopover
+                      productId={favoriteId}
+                      productName={product.title}
+                      onAdded={async () => {
+                        if (!isFavorited(favoriteId)) {
+                          await toggleFavorite(favoriteId);
+                        }
+                      }}
+                      align="end"
                     >
-                      <Heart size={18} strokeWidth={1.5} className={cn(favorited ? "fill-destructive text-destructive" : "text-foreground/80")} />
-                    </button>
-                  </AddToProjectPopover>
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
+                        className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25"
+                      >
+                        <Heart size={18} strokeWidth={1.5} className={cn(favorited ? "fill-destructive text-destructive" : "text-foreground/80")} />
+                      </button>
+                    </AddToProjectPopover>
+                  </CornerTooltip>
                 </div>
               }
               bottomRightOverlay={(() => {
                 // Bridge filenames use the raw designer name, not the shortened display name.
                 const shareUrl = buildPieceOgUrl(designer.name, product.title, product.subtitle);
                 return (
-                  <ShareMenu
-                    url={shareUrl}
-                    message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
-                    className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 text-foreground/80"
-                    iconSize="w-[18px] h-[18px]"
-                    iconVariant="ios"
-                    showLabel={false}
-                    imageUrl={images?.[galleryActiveIndex ?? 0] || images?.[0]}
-                    imageName={`${product.title}-${designerDisplay}`}
-                  />
+                  <CornerTooltip label="Share" side="top" align="end">
+                    <ShareMenu
+                      url={shareUrl}
+                      message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
+                      className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 text-foreground/80"
+                      iconSize="w-[18px] h-[18px]"
+                      iconVariant="ios"
+                      showLabel={false}
+                      imageUrl={images?.[galleryActiveIndex ?? 0] || images?.[0]}
+                      imageName={`${product.title}-${designerDisplay}`}
+                    />
+                  </CornerTooltip>
                 );
               })()}
             />
