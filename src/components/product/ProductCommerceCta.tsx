@@ -227,14 +227,14 @@ export default function ProductCommerceCta({
         ) : (
           <>
             <QuantitySelector value={quantity} onChange={setQuantity} />
-            <button type="button" onClick={() => primaryAction()} disabled={placingOrder} className={primaryBtn}>
+            <button type="button" data-commerce-primary onClick={() => primaryAction()} disabled={placingOrder} className={primaryBtn}>
               {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
               {placingOrder ? "Opening checkout…" : primaryLabel}
             </button>
           </>
         )}
 
-        <button type="button" onClick={secondaryAction} className={secondaryBtn}>
+        <button type="button" data-commerce-secondary onClick={secondaryAction} className={secondaryBtn}>
           {secondaryLabel}
         </button>
       </div>
