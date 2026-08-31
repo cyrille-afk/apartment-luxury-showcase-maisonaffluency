@@ -2,8 +2,8 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Loader2, Minus, Plus, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import ManualQuoteForm from "@/components/product/ManualQuoteForm";
-import { TradeExclusiveCard } from "@/components/product/PublicSpecTable";
+import QuoteBriefIntake from "@/components/product/QuoteBriefIntake";
+
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
