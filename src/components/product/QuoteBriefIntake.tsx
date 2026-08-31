@@ -69,6 +69,8 @@ export default function QuoteBriefIntake({
   const [submitting, setSubmitting] = useState(false);
 
   const [accountFound, setAccountFound] = useState(false);
+  const [memberFirstName, setMemberFirstName] = useState("");
+  const [memberTier, setMemberTier] = useState<string>("standard");
   const [checking, setChecking] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
