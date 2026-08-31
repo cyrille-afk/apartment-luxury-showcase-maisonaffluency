@@ -2301,6 +2301,25 @@ const PublicProductPage: React.FC = () => {
                       )}
                     </div>
 
+                    {/* Action block sits directly beneath the finish selector,
+                        ahead of the supporting technical details. */}
+                    {!user && !authLoading && (
+                      <ProductCommerceCta
+                        productId={product.id}
+                        rrpLabel={publicRrpLabel}
+                        productTitle={product.title}
+                        designerName={designerDisplay}
+                        imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
+                        leadTime={product.lead_time}
+                        onPlaceOrder={handleDirectCheckout}
+                        placingOrder={checkoutLoading}
+                        onRequestQuote={() => setQuoteRequestOpen(true)}
+                        selectedFinishes={selectedFinishes}
+                        redirectTo={location.pathname + location.search}
+                        utilityLinks={renderUtilityLinks()}
+                      />
+                    )}
+
                     <div className="flex flex-col gap-5">
                       <VariantDimensionsPanel />
                     </div>
