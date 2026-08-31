@@ -2348,6 +2348,7 @@ const PublicProductPage: React.FC = () => {
                       onRequestQuote={() => setQuoteRequestOpen(true)}
                       selectedFinishes={selectedFinishes}
                       redirectTo={location.pathname + location.search}
+                      utilityLinks={renderUtilityLinks()}
                     />
                   )}
 
