@@ -47,6 +47,16 @@ export function StickyPurchaseBar({
   const [armed, setArmed] = useState(false);
   const { direction, scrollY } = useScrollDirection();
 
+  // Reuse the sidebar CTA panel so the mini-cart drawer / Trade Exclusive
+  // Access lightbox open exactly as they do from the main panel.
+  const fireCommerce = (selector: string, fallback?: () => void) => {
+    const target = document.querySelector<HTMLElement>(selector);
+    if (target) target.click();
+    else fallback?.();
+  };
+  const handlePlaceOrder = () => fireCommerce("[data-commerce-primary]", onPlaceOrder);
+  const handleRequestQuote = () => fireCommerce("[data-commerce-secondary]", onRequestQuote);
+
   useEffect(() => {
     if (visible !== undefined) return;
     if (typeof window === "undefined") return;
