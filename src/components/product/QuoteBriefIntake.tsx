@@ -401,6 +401,9 @@ export default function QuoteBriefIntake({
           {submitting && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
           {submitting ? "Submitting…" : "Submit Project Brief for Quotation"}
         </button>
+        </>
+        )}
+
       </form>
 
       {/* Supporting trade-member notes */}
