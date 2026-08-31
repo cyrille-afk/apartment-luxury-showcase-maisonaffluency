@@ -81,7 +81,26 @@ export default function QuoteBriefIntake({
   if (redirectTo) q.set("redirect", redirectTo);
   const loginHref = `/trade/login${q.toString() ? `?${q.toString()}` : ""}`;
 
-  /* ---- Returning-user detection (debounced) ---- */
+  /* ---- Returning-user detection (debounced + onBlur) ---- */
+  const runCheck = useCallback(async (value: string) => {
+    if (!EMAIL_RE.test(value)) {
+      setAccountFound(false);
+      setCodeSent(false);
+      return;
+    }
+    setChecking(true);
+    try {
+      const { data } = await supabase.functions.invoke("quote-brief-intake", {
+        body: { action: "check_email", email: value },
+      });
+      setAccountFound(Boolean(data?.exists));
+    } catch {
+      setAccountFound(false);
+    } finally {
+      setChecking(false);
+    }
+  }, []);
+
   useEffect(() => {
     const value = email.trim().toLowerCase();
     if (!EMAIL_RE.test(value)) {
@@ -89,26 +108,10 @@ export default function QuoteBriefIntake({
       setCodeSent(false);
       return;
     }
-    let cancelled = false;
-    setChecking(true);
-    const t = window.setTimeout(async () => {
-      try {
-        const { data } = await supabase.functions.invoke("quote-brief-intake", {
-          body: { action: "check_email", email: value },
-        });
-        if (!cancelled) setAccountFound(Boolean(data?.exists));
-      } catch {
-        if (!cancelled) setAccountFound(false);
-      } finally {
-        if (!cancelled) setChecking(false);
-      }
-    }, 550);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(t);
-      window.clearTimeout(t);
-    };
-  }, [email]);
+    const t = window.setTimeout(() => void runCheck(value), 550);
+    return () => window.clearTimeout(t);
+  }, [email, runCheck]);
+
 
   const addFiles = useCallback(
     (incoming: FileList | File[] | null) => {
