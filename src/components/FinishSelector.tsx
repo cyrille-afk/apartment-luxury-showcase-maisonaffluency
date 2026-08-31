@@ -1021,14 +1021,15 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     options: Fabric[],
     selectedId: string | null,
     setSelected: (id: string) => void,
-    label: "Base" | "Top",
+    axis: "Base" | "Top",
+    label: string,
     isOpen: boolean,
     onToggle: () => void
   ) => {
     const selectedItem = options.find((o) => o.id === selectedId);
     const handleSelect = (option: Fabric) => {
       setSelected(option.id);
-      if (label === "Top") {
+      if (axis === "Top") {
         onTopFinishChange?.(option.name);
         onTopFinishSwatchChange?.({ name: option.name, image_url: option.image_url ?? null });
       } else {
@@ -1116,8 +1117,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       <div className={className} onMouseLeave={restoreLockedPreview}>
       {showMobileBaseTopGrid && (
         <div className="border-t border-border/60">
-          {visibleWoodTiles.length > 0 && renderInlineAxisCarousel(visibleWoodTiles, selectedWoodId, setSelectedWoodId, baseAxisLabel, mobileBaseOpen, () => setMobileBaseOpen((v) => !v))}
-          {visibleTopTiles.length > 0 && renderInlineAxisCarousel(visibleTopTiles, selectedTopId, setSelectedTopId, topAxisLabel, mobileTopOpen, () => setMobileTopOpen((v) => !v))}
+          {visibleWoodTiles.length > 0 && renderInlineAxisCarousel(visibleWoodTiles, selectedWoodId, setSelectedWoodId, "Base", baseAxisLabel, mobileBaseOpen, () => setMobileBaseOpen((v) => !v))}
+          {visibleTopTiles.length > 0 && renderInlineAxisCarousel(visibleTopTiles, selectedTopId, setSelectedTopId, "Top", topAxisLabel, mobileTopOpen, () => setMobileTopOpen((v) => !v))}
         </div>
       )}
       {isRugProduct && visibleFabricTiles.length > 0 ? (
