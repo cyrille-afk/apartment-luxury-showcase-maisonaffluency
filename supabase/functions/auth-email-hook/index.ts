@@ -17,10 +17,10 @@ const corsHeaders = {
 }
 
 const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'Confirm your email',
+  signup: 'Confirm your email — Maison Affluency',
   invite: "You've been invited",
-  magiclink: 'Your login link',
-  recovery: 'Reset your password',
+  magiclink: 'Your Maison Affluency verification code',
+  recovery: 'Reset your Maison Affluency password',
   email_change: 'Confirm your new email',
   reauthentication: 'Your verification code',
 }
@@ -36,9 +36,9 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "apartment-luxury-showcase-maisonaffluency"
+const SITE_NAME = "Maison Affluency"
 const SENDER_DOMAIN = "notify.www.maisonaffluency.com"
-const ROOT_DOMAIN = "www.maisonaffluency.com"
+const ROOT_DOMAIN = "maisonaffluency.com"
 const FROM_DOMAIN = "www.maisonaffluency.com" // Domain shown in From address (may be root or sender subdomain)
 
 // Sample data for preview mode ONLY (not used in actual email sending).
