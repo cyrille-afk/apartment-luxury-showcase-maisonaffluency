@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Loader2, Minus, Plus, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -51,6 +51,8 @@ export interface ProductCommerceCtaProps {
   designerName?: string;
   imageUrl?: string | null;
   leadTime?: string | null;
+  /** Secondary utility links rendered inside the action panel */
+  utilityLinks?: ReactNode;
 }
 
 /** Luxury quantity stepper: "QUANTITY" label + bordered counter box. */
@@ -146,6 +148,7 @@ export default function ProductCommerceCta({
   designerName,
   imageUrl,
   leadTime,
+  utilityLinks,
 }: ProductCommerceCtaProps) {
   const [accessOpen, setAccessOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -237,6 +240,14 @@ export default function ProductCommerceCta({
         <button type="button" data-commerce-secondary onClick={secondaryAction} className={secondaryBtn}>
           {secondaryLabel}
         </button>
+
+        {/* Secondary utility links — Favorite / Pin / Finishes PDF, tucked
+            inside the action panel under a faint hairline rule. */}
+        {utilityLinks && (
+          <div className="mt-1 border-t border-border/40 pt-4">
+            {utilityLinks}
+          </div>
+        )}
       </div>
       )}
 
