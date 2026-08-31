@@ -272,7 +272,7 @@ export default function ProductCommerceCta({
             ) : (
               <button
                 type="button"
-                onClick={primaryAction}
+                onClick={() => primaryAction()}
                 disabled={placingOrder}
                 className={cn(primaryBtn, "h-11 flex-1 text-[10px]")}
               >
