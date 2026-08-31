@@ -2352,78 +2352,9 @@ const PublicProductPage: React.FC = () => {
                   )}
 
                   <div className="flex flex-col gap-5">
-                    {(() => {
-                      const tradeApprovedFooter = !!user && (isTradeUser || tradeStatus === "approved");
-                      const hasSheet = !!(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0));
-                      const utilityItem =
-                        "inline-flex items-center gap-2 font-body text-[11px] uppercase tracking-wider text-muted-foreground transition-colors duration-200 hover:text-foreground";
-                      const iconClass = "shrink-0";
-
-                      return (
-                        <div className="flex flex-wrap items-center gap-x-8 gap-y-2 pt-2">
-                          <FavoriteFolderPicker pickId={product.id} align="start" side="top">
-                            <button
-                              onClick={(e) => e.stopPropagation()}
-                              className={cn(
-                                utilityItem,
-                                favorited && "text-destructive hover:text-destructive"
-                              )}
-                            >
-                              <Heart size={14} strokeWidth={1.25} className={cn(iconClass, favorited && "fill-current")} />
-                              {favorited ? "Saved" : "Favorite"}
-                            </button>
-                          </FavoriteFolderPicker>
-
-                          <button
-                            onClick={() => {
-                              if (!user) {
-                                requireAuth(() => {}, "pin this piece to your selection");
-                                return;
-                              }
-                              togglePin(compareItem);
-                            }}
-                            className={cn(
-                              utilityItem,
-                              pinned && "text-[hsl(var(--gold))] hover:text-[hsl(var(--gold))]",
-                              user && compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
-                            )}
-                          >
-                            <Pin size={14} strokeWidth={1.25} className={cn(iconClass, pinned && "fill-current")} />
-                            {pinned ? "Pinned" : "Pin to Selection"}
-                          </button>
-
-                          {hasSheet ? (
-                            <SpecSheetButton
-                              pdfUrl={product.pdf_url}
-                              pdfUrls={product.pdf_urls}
-                              brandName={designerDisplay}
-                              productName={product.title}
-                              variant="button"
-                              className={cn(utilityItem, "cursor-pointer")}
-                              icon={<FileText size={14} strokeWidth={1.25} className={iconClass} />}
-                              onBeforeOpen={() => {
-                                if (tradeApprovedFooter) return true;
-                                if (!user) {
-                                  requireAuth(() => {}, "open this spec sheet");
-                                  return false;
-                                }
-                                let allowed = false;
-                                requireAuth(() => { allowed = true; }, "download this spec sheet");
-                                return allowed;
-                              }}
-                            />
-                          ) : (
-                            <FinishesPdfButton
-                              pickId={product.id}
-                              productName={product.title}
-                              brandName={designerDisplay}
-                              className={cn(utilityItem, "cursor-pointer")}
-                              icon={<Layers size={14} strokeWidth={1.25} className={iconClass} />}
-                            />
-                          )}
-                        </div>
-                      );
-                    })()}
+                    {/* Utility links moved into the main action panel on
+                        desktop; compact standalone row on mobile. */}
+                    <div className="md:hidden">{renderUtilityLinks()}</div>
 
                     {(() => {
                       const variants = (product.size_variants || []) as any[];
