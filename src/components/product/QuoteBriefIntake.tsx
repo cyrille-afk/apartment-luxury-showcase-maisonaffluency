@@ -261,6 +261,21 @@ export default function QuoteBriefIntake({
       {/* Intake form */}
       <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-6">
         <div>
+          <label htmlFor="brief-fullname" className={labelCls}>
+            Full Name (Optional)
+          </label>
+          <input
+            id="brief-fullname"
+            type="text"
+            autoComplete="name"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Your full name"
+            className={cn(inputCls, "mt-2")}
+          />
+        </div>
+
+        <div>
           <label htmlFor="brief-email" className={labelCls}>
             Work Email Address
           </label>
