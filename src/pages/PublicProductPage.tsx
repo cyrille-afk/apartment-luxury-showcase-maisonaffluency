@@ -74,6 +74,7 @@ import {
   quantitativeValue,
 } from "@/components/product/PublicSpecTable";
 import TradeWorkspace from "@/components/product/TradeWorkspace";
+import ProductCommerceCta from "@/components/product/ProductCommerceCta";
 import TradeFirstCta from "@/components/product/TradeFirstCta";
 
 import StickyPurchaseBar from "@/components/product/StickyPurchaseBar";
@@ -2327,9 +2328,14 @@ const PublicProductPage: React.FC = () => {
                   })()}
 
                   {!user && !authLoading && (
-                    <TradeExclusiveCard
-                      redirectTo={location.pathname + location.search}
+                    <ProductCommerceCta
+                      productId={product.id}
                       rrpLabel={publicRrpLabel}
+                      onPlaceOrder={handleDirectCheckout}
+                      placingOrder={checkoutLoading}
+                      onRequestQuote={() => setQuoteRequestOpen(true)}
+                      selectedFinishes={selectedFinishes}
+                      redirectTo={location.pathname + location.search}
                     />
                   )}
 
