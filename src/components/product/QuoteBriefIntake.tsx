@@ -310,6 +310,8 @@ export default function QuoteBriefIntake({
           </div>
         </div>
 
+        {!codeSent && (
+        <>
         <div>
           <label htmlFor="brief-description" className={labelCls}>
             Project Brief Description
