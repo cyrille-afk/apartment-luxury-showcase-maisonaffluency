@@ -215,68 +215,10 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
     child?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [activeIndex]);
 
-  // ---- Hover-triggered micro-scrolling on the vertical thumbnail column ----
-  const hoverScrollRafRef = useRef<number | null>(null);
-  const hoverScrollDirRef = useRef(0); // -1 up, 1 down, 0 idle
+  // Hover-triggered auto-scrolling on the thumbnail column was removed —
+  // it made the strip drift and loop endlessly. The column now scrolls only
+  // on explicit user scroll / navigation.
 
-  const stopHoverScroll = useCallback(() => {
-    hoverScrollDirRef.current = 0;
-    if (hoverScrollRafRef.current != null) {
-      cancelAnimationFrame(hoverScrollRafRef.current);
-      hoverScrollRafRef.current = null;
-    }
-  }, []);
-
-  const runHoverScroll = useCallback(() => {
-    const el = thumbsRef.current;
-    const dir = hoverScrollDirRef.current;
-    if (!el || dir === 0) {
-      hoverScrollRafRef.current = null;
-      return;
-    }
-    const max = el.scrollHeight - el.clientHeight;
-    // Very gentle drift so users can deliberately land on any thumb,
-    // especially the first one, without the strip racing past it.
-    let next = el.scrollTop + dir * 0.55;
-    // Loop the column: drifting past the last thumb wraps back to the first,
-    // and drifting above the first wraps to the last.
-    if (max > 0) {
-      if (next > max + 0.5) next = 0;
-      else if (next < -0.5) next = max;
-    }
-    el.scrollTop = next;
-    hoverScrollRafRef.current = requestAnimationFrame(runHoverScroll);
-  }, []);
-
-  const handleThumbHoverMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      const el = thumbsRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      if (rect.height === 0) return;
-      const scrollable = el.scrollHeight - el.clientHeight > 1;
-      const y = e.clientY - rect.top;
-      // Narrower edge zones leave more calm hover area in the middle
-      // and only auto-scroll when the user clearly intends to traverse.
-      const zone = rect.height * 0.12;
-      let dir = 0;
-      if (scrollable && y <= zone) dir = -1;
-      else if (scrollable && y >= rect.height - zone) dir = 1;
-
-
-      if (dir === 0) {
-        stopHoverScroll();
-        return;
-      }
-      hoverScrollDirRef.current = dir;
-      if (hoverScrollRafRef.current == null) {
-        hoverScrollRafRef.current = requestAnimationFrame(runHoverScroll);
-      }
-    },
-    [runHoverScroll, stopHoverScroll]
-  );
-
-  useEffect(() => stopHoverScroll, [stopHoverScroll]);
 
   // Double-tap on the photo opens the fullscreen viewer so clients can inspect
   // stone grain / weave. Guarded so a tap that was really a swipe never fires.
