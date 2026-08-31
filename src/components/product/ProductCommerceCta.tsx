@@ -187,8 +187,25 @@ export default function ProductCommerceCta({
     ? "Open 3D Studio & Axonometric Planning"
     : "Request a Quote or Customisation";
 
-  const primaryAction = tradeApproved ? undefined : onPlaceOrder;
+  // Public: PLACE ORDER opens the slide-out mini-cart drawer (order confirmation),
+  // which then hands off to checkout with the chosen quantity.
+  const primaryAction = tradeApproved ? undefined : () => setMiniCartOpen(true);
   const secondaryAction = tradeApproved ? openStudio : () => setAccessOpen(true);
+
+  // Lock body scroll while the drawer is open.
+  useEffect(() => {
+    if (!miniCartOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [miniCartOpen]);
+
+  const goToCheckout = () => {
+    setMiniCartOpen(false);
+    onPlaceOrder(quantity);
+  };
 
   return (
     <>
