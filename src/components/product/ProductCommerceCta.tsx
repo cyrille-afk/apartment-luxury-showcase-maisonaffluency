@@ -52,7 +52,7 @@ export interface ProductCommerceCtaProps {
   leadTime?: string | null;
 }
 
-/** Compact luxury quantity stepper: "QUANTITY: − 1 +" */
+/** Luxury quantity stepper: "QUANTITY" label + bordered counter box. */
 function QuantitySelector({
   value,
   onChange,
@@ -65,24 +65,25 @@ function QuantitySelector({
   return (
     <div
       className={cn(
-        "flex items-center justify-between border-b border-border/60",
-        compact ? "py-1.5" : "py-2"
+        "flex items-center justify-between gap-4 rounded-none",
+        compact ? "py-1" : "py-2.5"
       )}
     >
-      <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+      <span className="font-body text-xs font-medium uppercase tracking-widest text-muted-foreground">
         Quantity:
       </span>
-      <div className="flex items-center gap-3">
+      {/* Thin-bordered counter box — mirrors the Select Your Finish dropdowns */}
+      <div className="flex h-10 w-36 items-center justify-between rounded-none border border-border/60 px-3">
         <button
           type="button"
           aria-label="Decrease quantity"
           disabled={value <= 1}
           onClick={() => onChange(Math.max(1, value - 1))}
-          className="flex h-6 w-6 items-center justify-center text-muted-foreground transition-all hover:text-foreground disabled:opacity-30"
+          className="flex h-8 w-8 items-center justify-center rounded-none border border-transparent text-foreground transition-all hover:border-border hover:bg-muted/50 disabled:opacity-30"
         >
-          <Minus className="h-3 w-3" />
+          <Minus className="h-4 w-4" strokeWidth={1.75} />
         </button>
-        <span className="w-5 text-center font-body text-xs tabular-nums text-foreground">
+        <span className="min-w-8 text-center font-body text-sm font-medium tabular-nums text-foreground">
           {value}
         </span>
         <button
@@ -90,9 +91,9 @@ function QuantitySelector({
           aria-label="Increase quantity"
           disabled={value >= 99}
           onClick={() => onChange(Math.min(99, value + 1))}
-          className="flex h-6 w-6 items-center justify-center text-muted-foreground transition-all hover:text-foreground disabled:opacity-30"
+          className="flex h-8 w-8 items-center justify-center rounded-none border border-transparent text-foreground transition-all hover:border-border hover:bg-muted/50 disabled:opacity-30"
         >
-          <Plus className="h-3 w-3" />
+          <Plus className="h-4 w-4" strokeWidth={1.75} />
         </button>
       </div>
     </div>
