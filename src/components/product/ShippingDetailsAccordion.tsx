@@ -105,12 +105,13 @@ export default function ShippingDetailsAccordion({ className }: { className?: st
               </p>
             </div>
 
-            {/* SECTION 5 — Concierge Footnote */}
-            <div className="px-6 md:px-10 py-6 md:py-8">
-              <p className="font-body text-[11px] italic leading-relaxed text-neutral-500">
+            {/* SECTION 5 — Notice Highlight Block */}
+            <div className="p-4 md:p-5 bg-neutral-50 border-b border-neutral-200">
+              <p className="font-body text-xs leading-relaxed text-neutral-800">
+                <span className="font-medium uppercase tracking-widest">Notice — </span>
                 Freight, installation, and duties are quoted separately once the
-                destination is confirmed — your design advisor will present a single,
-                all-inclusive figure.
+                destination is confirmed. Your dedicated design advisor will present a
+                single, all-inclusive landed figure.
               </p>
             </div>
           </div>
