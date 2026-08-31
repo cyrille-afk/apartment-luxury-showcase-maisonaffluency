@@ -281,7 +281,7 @@ export default function ProductCommerceCta({
                 state={redirectTo ? { from: redirectTo } : undefined}
                 className={cn(primaryBtn, "h-11 flex-1")}
               >
-                {primaryLabel}
+                Place Order
               </Link>
             ) : (
               <button
