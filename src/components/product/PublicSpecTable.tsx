@@ -123,18 +123,38 @@ export function PublicSpecTable({
   );
 }
 
+/** Trade tools previewed in the exclusive-access lightbox. */
+export const TRADE_FEATURE_MATRIX: { title: string; description: string }[] = [
+  {
+    title: "AI Curatorial Co-Pilot",
+    description: "Draft quotes, compile spec sheets, and research our database instantly.",
+  },
+  {
+    title: "3D Axonometric Studio",
+    description: "Configure bespoke finishes, customize dimensions, and preview in real-time.",
+  },
+  {
+    title: "Trade Logistics",
+    description: "Secure exclusive contract margins and manage multi-room project client presentations.",
+  },
+];
+
 /**
  * Signed-out paywall shown in place of trade price, lead times and CAD files.
  * `onRequestQuote` opens the dedicated product quote/customisation form.
+ * `showFeatureMatrix` (lightbox only) appends the trade-tools preview grid
+ * below the action buttons.
  */
 export function TradeExclusiveCard({
   redirectTo,
   onRequestQuote,
   rrpLabel,
+  showFeatureMatrix = false,
 }: {
   redirectTo?: string;
   onRequestQuote?: () => void;
   rrpLabel?: string | null;
+  showFeatureMatrix?: boolean;
 }) {
   const q = new URLSearchParams();
   if (redirectTo) q.set("redirect", redirectTo);
@@ -143,7 +163,7 @@ export function TradeExclusiveCard({
   const applyHref = `/trade/apply${q.toString() ? `?${q.toString()}` : ""}`;
 
   return (
-    <div className="rounded-[2px] border border-border/60 bg-muted/30 p-5 md:p-6">
+    <div className="rounded-none border border-border/60 bg-muted/30 p-5 md:p-6">
       <div className="flex items-center justify-center gap-2 mb-3">
         <Lock className="h-3 w-3 text-[hsl(var(--gold))]" aria-hidden="true" />
         <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -163,17 +183,38 @@ export function TradeExclusiveCard({
       <div className="mt-5 grid grid-cols-2 gap-3">
         <Link
           to={loginHref}
-          className="inline-flex h-12 w-full items-center justify-center px-3 rounded-[2px] bg-foreground text-background font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:bg-foreground/85 transition-colors"
+          className="inline-flex h-12 w-full items-center justify-center px-3 rounded-none bg-foreground text-background font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:bg-foreground/85 transition-colors"
         >
           Sign In
         </Link>
         <Link
           to={applyHref}
-          className="inline-flex h-12 w-full items-center justify-center px-3 rounded-[2px] border border-foreground text-foreground font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:bg-muted/60 transition-colors"
+          className="inline-flex h-12 w-full items-center justify-center px-3 rounded-none border border-foreground text-foreground font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:bg-muted/60 transition-colors"
         >
           Apply for Trade Account
         </Link>
       </div>
+
+      {showFeatureMatrix && (
+        <>
+          <div className="mt-6 border-t border-border/60" />
+          <div
+            aria-label="Trade member tools"
+            className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-5"
+          >
+            {TRADE_FEATURE_MATRIX.map((feature) => (
+              <div key={feature.title} className="flex flex-col gap-1.5">
+                <p className="font-body text-[10px] uppercase tracking-widest font-normal text-foreground">
+                  {feature.title}
+                </p>
+                <p className="font-body text-[10px] font-light leading-relaxed text-muted-foreground">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

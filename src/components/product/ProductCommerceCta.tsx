@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Loader2, Minus, Plus, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import ManualQuoteForm from "@/components/product/ManualQuoteForm";
 import { TradeExclusiveCard } from "@/components/product/PublicSpecTable";
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
@@ -149,6 +150,7 @@ export default function ProductCommerceCta({
   const [accessOpen, setAccessOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [miniCartOpen, setMiniCartOpen] = useState(false);
+  const [manualForm, setManualForm] = useState(false);
   const { clientSafe } = useClientSafeMode();
   const { data: pricing } = useTradeProductPricing(productId, tradeApproved);
   const { discountPct, apply } = useTradeDiscount();
@@ -393,21 +395,33 @@ export default function ProductCommerceCta({
       )}
 
       {/* Quote / customisation → Trade Exclusive Access modal (State A) */}
-      <Dialog open={accessOpen} onOpenChange={setAccessOpen}>
+      <Dialog open={accessOpen} onOpenChange={(o) => { setAccessOpen(o); if (!o) setManualForm(false); }}>
         <DialogContent className="max-w-md rounded-none p-0 border-border/60">
-          <div className="p-4 md:p-5">
-            <TradeExclusiveCard redirectTo={redirectTo} rrpLabel={rrpLabel} onRequestQuote={onRequestQuote} />
-            <button
-              type="button"
-              onClick={() => {
-                setAccessOpen(false);
-                onRequestQuote();
-              }}
-              className="mt-3 w-full text-center font-body text-[11px] uppercase tracking-widest text-muted-foreground underline underline-offset-4 decoration-border hover:text-foreground transition-colors"
-            >
-              Or request a quote / customisation directly
-            </button>
-          </div>
+          {manualForm ? (
+            <div className="p-5 md:p-7">
+              <ManualQuoteForm
+                productTitle={productTitle}
+                designerName={designerName}
+                onBack={() => setManualForm(false)}
+                onDone={() => { setAccessOpen(false); setManualForm(false); }}
+              />
+            </div>
+          ) : (
+            <div className="p-4 md:p-5">
+              <TradeExclusiveCard
+                redirectTo={redirectTo}
+                rrpLabel={rrpLabel}
+                showFeatureMatrix
+              />
+              <button
+                type="button"
+                onClick={() => setManualForm(true)}
+                className="mt-4 w-full text-center font-body text-xs tracking-wider uppercase text-muted-foreground underline underline-offset-4 decoration-border hover:text-foreground hover:decoration-foreground transition-colors"
+              >
+                Or request a quote / customisation directly
+              </button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>
