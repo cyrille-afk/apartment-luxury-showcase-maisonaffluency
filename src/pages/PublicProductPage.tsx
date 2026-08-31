@@ -1949,21 +1949,25 @@ const PublicProductPage: React.FC = () => {
                   /* Favorite / studio save stays top-right. */
                   <div className="hidden md:flex items-center gap-3">
                     {user && (isTradeUser || tradeStatus === "approved") ? (
-                      <StudioSaveButton
-                        pickId={product.id}
-                        productTitle={product.title}
-                        finishes={selectedFinishes}
-                      />
+                      <CornerTooltip label="Save to Studio" side="bottom" align="end">
+                        <StudioSaveButton
+                          pickId={product.id}
+                          productTitle={product.title}
+                          finishes={selectedFinishes}
+                        />
+                      </CornerTooltip>
                     ) : (
-                      <FavoriteFolderPicker pickId={product.id} align="end" side="bottom">
-                        <button
-                          onClick={(e) => e.stopPropagation()}
-                          aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
-                          className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25"
-                        >
-                          <Heart size={20} strokeWidth={1.5} className={cn(favorited ? "fill-destructive text-destructive" : "text-foreground/80")} />
-                        </button>
-                      </FavoriteFolderPicker>
+                      <CornerTooltip label={favorited ? "Saved to Favorites" : "Save to Favorites"} side="bottom" align="end">
+                        <FavoriteFolderPicker pickId={product.id} align="end" side="bottom">
+                          <button
+                            onClick={(e) => e.stopPropagation()}
+                            aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
+                            className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25"
+                          >
+                            <Heart size={20} strokeWidth={1.5} className={cn(favorited ? "fill-destructive text-destructive" : "text-foreground/80")} />
+                          </button>
+                        </FavoriteFolderPicker>
+                      </CornerTooltip>
                     )}
                   </div>
                 }
@@ -1972,16 +1976,18 @@ const PublicProductPage: React.FC = () => {
                   // not the shortened display name — using designerDisplay produces a 404 link.
                   const shareUrl = buildPieceOgUrl(designer.name, product.title, product.subtitle);
                   return (
-                    <ShareMenu
-                      url={shareUrl}
-                      message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
-                      className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 text-foreground/80"
-                      iconSize="w-[18px] h-[18px]"
-                      iconVariant="ios"
-                      showLabel={false}
-                      imageUrl={images?.[galleryActiveIndex ?? 0] || images?.[0]}
-                      imageName={`${product.title}-${designerDisplay}`}
-                    />
+                    <CornerTooltip label="Share" side="top" align="end">
+                      <ShareMenu
+                        url={shareUrl}
+                        message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
+                        className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 text-foreground/80"
+                        iconSize="w-[18px] h-[18px]"
+                        iconVariant="ios"
+                        showLabel={false}
+                        imageUrl={images?.[galleryActiveIndex ?? 0] || images?.[0]}
+                        imageName={`${product.title}-${designerDisplay}`}
+                      />
+                    </CornerTooltip>
                   );
                 })()}
               />
