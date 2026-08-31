@@ -2346,30 +2346,6 @@ const PublicProductPage: React.FC = () => {
 
                   <div className="flex flex-col gap-5">
                     {(() => {
-                      const returnTo = typeof window !== "undefined" ? location.pathname + location.search : "";
-                      const q = new URLSearchParams({
-                        subject: `Customization inquiry — ${product.title} by ${designerDisplay}`,
-                        productId: product.id,
-                        productSlug: productSlug || "",
-                        productName: product.title || "",
-                        designerName: designerDisplay || "",
-                        back: returnTo || "",
-                      });
-                      const customizeHref = `/contact?${q.toString()}#contact`;
-                      return (
-                        <div className="border-b border-border/60 pb-3 flex items-start gap-5">
-                          {specIcon("⬗", "mt-0.5")}
-                          <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
-                            <p>Bespoke dimensions and finishes available upon request.</p>
-                            <Link to={customizeHref} className="inline-block mt-1 font-body text-[11px] uppercase tracking-[0.14em] text-foreground underline underline-offset-4 decoration-border hover:text-primary transition-colors">
-                              Request Customization
-                            </Link>
-                          </div>
-                        </div>
-                      );
-                    })()}
-
-                    {(() => {
                       const tradeApprovedFooter = !!user && (isTradeUser || tradeStatus === "approved");
                       const hasSheet = !!(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0));
                       const utilityItem =
