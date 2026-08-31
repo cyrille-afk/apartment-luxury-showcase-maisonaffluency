@@ -30,6 +30,45 @@ function htmlToPlainText(html: string): string {
     .trim()
 }
 
+// Transactional sends are rejected by the provider without an unsubscribe token.
+// Most enqueuers don't set one, so resolve (or create) it here per recipient.
+function generateUnsubscribeToken(): string {
+  const bytes = new Uint8Array(32)
+  crypto.getRandomValues(bytes)
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
+async function resolveUnsubscribeToken(
+  supabase: ReturnType<typeof createClient>,
+  email: string
+): Promise<string | undefined> {
+  const normalized = (email || '').trim().toLowerCase()
+  if (!normalized) return undefined
+  try {
+    const { data: existing } = await supabase
+      .from('email_unsubscribe_tokens')
+      .select('token')
+      .eq('email', normalized)
+      .maybeSingle()
+    if (existing?.token) return existing.token as string
+
+    const token = generateUnsubscribeToken()
+    await supabase
+      .from('email_unsubscribe_tokens')
+      .upsert({ token, email: normalized }, { onConflict: 'email', ignoreDuplicates: true })
+
+    const { data: stored } = await supabase
+      .from('email_unsubscribe_tokens')
+      .select('token')
+      .eq('email', normalized)
+      .maybeSingle()
+    return (stored?.token as string | undefined) ?? token
+  } catch (err) {
+    console.error('Failed to resolve unsubscribe token', { email: normalized, error: err })
+    return undefined
+  }
+}
+
 // Check if an error is a rate-limit (429) response.
 // Uses EmailAPIError.status when available (email-js >=0.x with structured errors),
 // falls back to parsing the error message for older versions.
@@ -286,6 +325,8 @@ Deno.serve(async (req) => {
       }
 
       try {
+        const unsubscribeToken =
+          payload.unsubscribe_token || (await resolveUnsubscribeToken(supabase, payload.to))
         await sendLovableEmail(
           {
             run_id: payload.run_id,
@@ -298,7 +339,7 @@ Deno.serve(async (req) => {
             purpose: payload.purpose,
             label: payload.label,
             idempotency_key: payload.idempotency_key,
-            unsubscribe_token: payload.unsubscribe_token,
+            unsubscribe_token: unsubscribeToken,
             message_id: payload.message_id,
           },
           // sendUrl is optional — when LOVABLE_SEND_URL is not set, the library
