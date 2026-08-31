@@ -33,6 +33,14 @@ const FEATURES = [
   },
 ];
 
+const MEMBER_TIER_LABEL: Record<string, string> = {
+  standard: "Verified Trade Account",
+  silver: "Verified Silver Trade Account",
+  gold: "Verified Gold Trade Account",
+  platinum: "Verified Premium Trade Account",
+};
+
+
 const fileToDataUrl = (file: File) =>
   new Promise<string>((resolve, reject) => {
     const r = new FileReader();
@@ -96,8 +104,12 @@ export default function QuoteBriefIntake({
         body: { action: "check_email", email: value },
       });
       setAccountFound(Boolean(data?.exists));
+      setMemberFirstName(String(data?.firstName ?? "").trim());
+      setMemberTier(String(data?.tier ?? "standard"));
     } catch {
       setAccountFound(false);
+      setMemberFirstName("");
+      setMemberTier("standard");
     } finally {
       setChecking(false);
     }
