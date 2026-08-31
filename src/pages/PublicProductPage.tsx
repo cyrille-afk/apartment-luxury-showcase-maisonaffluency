@@ -2502,6 +2502,17 @@ const PublicProductPage: React.FC = () => {
                       felixUrl={typeof window !== "undefined" ? window.location.href : undefined}
                       compact={isMobileOrPwa}
                     />
+                    <ProductCommerceCta
+                      productId={product.id}
+                      rrpLabel={publicRrpLabel}
+                      tradeApproved
+                      dockOnly
+                      onPlaceOrder={handleDirectCheckout}
+                      placingOrder={checkoutLoading}
+                      onRequestQuote={() => setQuoteRequestOpen(true)}
+                      selectedFinishes={selectedFinishes}
+                      redirectTo={returnTo}
+                    />
                     </div>
                   );
                 }
