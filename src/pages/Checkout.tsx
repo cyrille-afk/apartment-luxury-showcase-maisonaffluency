@@ -22,7 +22,11 @@ export type CheckoutLine = {
   currency: string;
   leadTime?: string | null;
   productPath?: string | null;
+  quantity?: number;
 };
+
+const lineQty = (line: CheckoutLine) => Math.max(1, line.quantity ?? 1);
+const lineSubtotal = (line: CheckoutLine) => line.unitCents * lineQty(line);
 
 const money = (cents: number, currency: string) =>
   new Intl.NumberFormat("en-US", {
@@ -48,7 +52,7 @@ function OrderSummaryDrawer({ line }: { line: CheckoutLine }) {
           Order summary
         </span>
         <span className="flex items-center gap-2 text-sm">
-          {money(line.unitCents, line.currency)}
+          {money(lineSubtotal(line), line.currency)}
           <ChevronDown className={cn("h-4 w-4 transition-transform", open && "rotate-180")} />
         </span>
       </button>
@@ -71,6 +75,11 @@ function OrderSummaryDrawer({ line }: { line: CheckoutLine }) {
             <p className="truncate font-light">{line.title}</p>
             {line.finishLabel && (
               <p className="mt-1 text-xs text-muted-foreground">{line.finishLabel}</p>
+            )}
+            {lineQty(line) > 1 && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Qty {lineQty(line)} · {money(line.unitCents, line.currency)} each
+              </p>
             )}
             {line.leadTime && (
               <p className="mt-1 text-xs text-muted-foreground">Lead time · {line.leadTime}</p>
@@ -200,8 +209,8 @@ function PaymentForm({
       {/* 5 — Sticky summary & CTA */}
       <StickyTotals
         line={line}
-        total={line.unitCents}
-        cta={`Confirm & securely pay ${money(line.unitCents, line.currency)}`}
+        total={lineSubtotal(line)}
+        cta={`Confirm & securely pay ${money(lineSubtotal(line), line.currency)}`}
         busy={submitting}
         onSubmit={confirm}
       />
@@ -231,8 +240,8 @@ function StickyTotals({
     <div className="sticky bottom-0 z-30 mt-8 border-t border-border bg-background/95 px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 backdrop-blur">
       <dl className="space-y-1 text-sm">
         <div className="flex justify-between text-muted-foreground">
-          <dt>Subtotal</dt>
-          <dd>{money(line.unitCents, line.currency)}</dd>
+          <dt>Subtotal{lineQty(line) > 1 ? ` (${lineQty(line)} × ${money(line.unitCents, line.currency)})` : ""}</dt>
+          <dd>{money(lineSubtotal(line), line.currency)}</dd>
         </div>
         {savings ? (
           <div className="flex justify-between text-muted-foreground">
@@ -283,8 +292,8 @@ function WireForm({ line, email, setEmail, onDone }: {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
-  const savings = Math.round(line.unitCents * WIRE_DISCOUNT);
-  const total = line.unitCents - savings;
+  const savings = Math.round(lineSubtotal(line) * WIRE_DISCOUNT);
+  const total = lineSubtotal(line) - savings;
 
   const submit = async () => {
     if (!name.trim() || !email.includes("@")) {
@@ -299,6 +308,7 @@ function WireForm({ line, email, setEmail, onDone }: {
           designer: line.designer || "",
           selectedFinish: line.finishLabel || "",
           currency: line.currency,
+          quantity: lineQty(line),
           amountCents: total,
           name,
           email,
@@ -392,9 +402,10 @@ export default function Checkout() {
             body: {
               title: line.title,
               designer: line.designer || "",
-              price: line.unitCents / 100,
+              price: lineSubtotal(line) / 100,
               currency: line.currency,
               selectedFinish: line.finishLabel || "",
+              quantity: lineQty(line),
             },
           }),
         ]);
