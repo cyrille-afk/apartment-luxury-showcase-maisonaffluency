@@ -34,8 +34,8 @@ export interface ProductCommerceCtaProps {
   rrpLabel?: string | null;
   /** Verified-trade view */
   tradeApproved?: boolean;
-  /** Direct Stripe checkout */
-  onPlaceOrder: () => void;
+  /** Direct Stripe checkout — receives the chosen quantity */
+  onPlaceOrder: (quantity?: number) => void;
   placingOrder?: boolean;
   onRequestQuote: () => void;
   /** Trade: finish selection carried to the workspace */
@@ -45,6 +45,58 @@ export interface ProductCommerceCtaProps {
   dock?: boolean;
   /** Render only the mobile dock (in-flow panel lives elsewhere) */
   dockOnly?: boolean;
+  /** Mini-cart drawer content */
+  productTitle?: string;
+  designerName?: string;
+  imageUrl?: string | null;
+  leadTime?: string | null;
+}
+
+/** Compact luxury quantity stepper: "QUANTITY: − 1 +" */
+function QuantitySelector({
+  value,
+  onChange,
+  compact = false,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+  compact?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center justify-between border-b border-border/60",
+        compact ? "py-1.5" : "py-2"
+      )}
+    >
+      <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        Quantity:
+      </span>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          aria-label="Decrease quantity"
+          disabled={value <= 1}
+          onClick={() => onChange(Math.max(1, value - 1))}
+          className="flex h-6 w-6 items-center justify-center text-muted-foreground transition-all hover:text-foreground disabled:opacity-30"
+        >
+          <Minus className="h-3 w-3" />
+        </button>
+        <span className="w-5 text-center font-body text-xs tabular-nums text-foreground">
+          {value}
+        </span>
+        <button
+          type="button"
+          aria-label="Increase quantity"
+          disabled={value >= 99}
+          onClick={() => onChange(Math.min(99, value + 1))}
+          className="flex h-6 w-6 items-center justify-center text-muted-foreground transition-all hover:text-foreground disabled:opacity-30"
+        >
+          <Plus className="h-3 w-3" />
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function PriceBlock({
