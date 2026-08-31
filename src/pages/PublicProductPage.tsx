@@ -2076,21 +2076,20 @@ const PublicProductPage: React.FC = () => {
                       </div>
                       <h1 className="font-display font-normal text-[1.5rem] md:text-[1.85rem] mt-4 leading-[1.15] tracking-[-0.01em]">
                         {product.title}
+                        {(() => {
+                          const editionLabel = formatEditionLabel(product as any);
+                          return editionLabel ? (
+                            <span className="ml-3 inline-block whitespace-nowrap rounded-none border border-neutral-200 bg-background px-2 py-0.5 align-baseline font-body text-[9px] font-medium uppercase tracking-[0.18em] text-foreground/60">
+                              {editionLabel}
+                            </span>
+                          ) : null;
+                        })()}
                         {formatProductSubtitleLine(product.title, product.subtitle) && (
                           <span className="block mt-1 text-[0.8em] text-muted-foreground">
                             {formatProductSubtitleLine(product.title, product.subtitle)}
                           </span>
                         )}
                       </h1>
-
-                      {(() => {
-                        const editionLabel = formatEditionLabel(product as any);
-                        return editionLabel ? (
-                          <p className="mt-2 font-body text-[10px] uppercase tracking-[0.22em] text-foreground/60">
-                            * {editionLabel}
-                          </p>
-                        ) : null;
-                      })()}
 
                       {publicRrpLabel && (
                         <div className="mt-6">
@@ -2236,21 +2235,20 @@ const PublicProductPage: React.FC = () => {
                     </div>
                     <h1 className="font-display font-normal text-[1.75rem] md:text-[2.15rem] mt-5 leading-[1.15] tracking-[-0.01em]">
                       {product.title}
+                      {(() => {
+                        const editionLabel = formatEditionLabel(product as any);
+                        return editionLabel ? (
+                          <span className="ml-3 inline-block whitespace-nowrap rounded-none border border-neutral-200 bg-background px-2 py-0.5 align-baseline font-body text-[9px] font-medium uppercase tracking-[0.18em] text-foreground/60">
+                            {editionLabel}
+                          </span>
+                        ) : null;
+                      })()}
                       {formatProductSubtitleLine(product.title, product.subtitle) && (
                         <span className="block mt-1 text-[0.8em] text-muted-foreground">
                           {formatProductSubtitleLine(product.title, product.subtitle)}
                         </span>
                       )}
                     </h1>
-
-                    {(() => {
-                      const editionLabel = formatEditionLabel(product as any);
-                      return editionLabel ? (
-                        <p className="mt-2 font-body text-[10px] uppercase tracking-[0.22em] text-foreground/60">
-                          * {editionLabel}
-                        </p>
-                      ) : null;
-                    })()}
 
                     {publicRrpLabel && (
                       <div className="mt-6">
