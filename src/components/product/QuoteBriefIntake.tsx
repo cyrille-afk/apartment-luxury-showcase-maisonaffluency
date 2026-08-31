@@ -489,7 +489,3 @@ export default function QuoteBriefIntake({
     </div>
   );
 }
-      {checking && <span className="sr-only">Checking account…</span>}
-    </div>
-  );
-}
