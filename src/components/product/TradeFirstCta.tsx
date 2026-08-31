@@ -108,7 +108,7 @@ export default function TradeFirstCta({
           </Link>
           <Link
             to="/trade/register"
-            className="mx-auto font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground underline underline-offset-4 decoration-border hover:text-foreground transition-colors"
+            className={secondaryBtn}
           >
             Apply for a Trade Account
           </Link>
