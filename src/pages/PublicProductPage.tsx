@@ -2105,7 +2105,7 @@ const PublicProductPage: React.FC = () => {
 
                     <button
                       type="button"
-                      onClick={handleDirectCheckout}
+                      onClick={() => handleDirectCheckout()}
                       disabled={checkoutLoading}
                       className="flex items-center justify-center gap-2 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 underline underline-offset-4 decoration-border hover:text-foreground transition-colors disabled:opacity-60"
                     >
