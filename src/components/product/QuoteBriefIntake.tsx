@@ -70,6 +70,7 @@ export default function QuoteBriefIntake({
   onDone,
 }: Props) {
   const { toast } = useToast();
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [brief, setBrief] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -86,6 +87,12 @@ export default function QuoteBriefIntake({
   const [verifying, setVerifying] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
+
+  /** Prefer the typed full name, fall back to the account's stored first name. */
+  const typedFirst = fullName.trim().split(/\s+/)[0] ?? "";
+  const greetingName = typedFirst
+    ? typedFirst.charAt(0).toUpperCase() + typedFirst.slice(1).toLowerCase()
+    : memberFirstName;
 
   const q = new URLSearchParams();
   if (redirectTo) q.set("redirect", redirectTo);
@@ -215,6 +222,7 @@ export default function QuoteBriefIntake({
         body: {
           action: "submit",
           email: value,
+          fullName: fullName.trim() || undefined,
           brief,
           files: payloadFiles,
           productName: productTitle,
@@ -256,6 +264,21 @@ export default function QuoteBriefIntake({
 
       {/* Intake form */}
       <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-6">
+        <div>
+          <label htmlFor="brief-fullname" className={labelCls}>
+            Full Name (Optional)
+          </label>
+          <input
+            id="brief-fullname"
+            type="text"
+            autoComplete="name"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Your full name"
+            className={cn(inputCls, "mt-2")}
+          />
+        </div>
+
         <div>
           <label htmlFor="brief-email" className={labelCls}>
             Work Email Address
@@ -471,13 +494,13 @@ export default function QuoteBriefIntake({
       {accountFound && (
         <div
           aria-label="Member profile recognized"
-          className="mt-10 rounded-none border border-neutral-200 px-5 py-5 md:px-6 md:py-6"
+          className="mt-10 mb-12 rounded-none border border-neutral-200 px-5 pt-5 pb-12 md:px-6 md:pt-6 md:pb-12"
         >
           <p className="font-body text-xs font-medium uppercase tracking-widest text-neutral-900">
             Member Profile Recognized
           </p>
           <p className="mt-3 font-body text-xs leading-relaxed text-neutral-500">
-            Welcome back{memberFirstName ? `, ${memberFirstName}` : ""}. Upon
+            Welcome back{greetingName ? `, ${greetingName}` : ""}. Upon
             verification or signing in above, this project brief and its
             accompanying floor plans will automatically attach to your live
             Maison Affluency Trade Dashboard for immediate procurement staging.
@@ -487,6 +510,7 @@ export default function QuoteBriefIntake({
           </p>
         </div>
       )}
+
     </div>
   );
 }
