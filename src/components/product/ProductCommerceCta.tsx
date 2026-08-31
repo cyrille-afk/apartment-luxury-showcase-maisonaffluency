@@ -51,12 +51,13 @@ export interface ProductCommerceCtaProps {
   designerName?: string;
   imageUrl?: string | null;
   leadTime?: string | null;
+  /** Secondary utility links rendered inside the action panel */
+  utilityLinks?: ReactNode;
+}
 
 /** Normalize raw DB lead-time copy for display (strips "Ships in" prefixes). */
 function cleanLeadTime(raw: string): string {
   return raw.replace(/^\s*ships?\s+in\s+/i, "").trim();
-  /** Secondary utility links rendered inside the action panel */
-  utilityLinks?: ReactNode;
 }
 
 /** Luxury quantity stepper: "QUANTITY" label + bordered counter box. */
