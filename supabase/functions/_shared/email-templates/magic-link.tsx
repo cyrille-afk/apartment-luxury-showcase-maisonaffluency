@@ -17,11 +17,13 @@ import {
 interface MagicLinkEmailProps {
   siteName: string
   confirmationUrl: string
+  token?: string
 }
 
 export const MagicLinkEmail = ({
   siteName,
   confirmationUrl,
+  token,
 }: MagicLinkEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
@@ -37,6 +39,12 @@ export const MagicLinkEmail = ({
         <Button style={button} href={confirmationUrl}>
           Sign In
         </Button>
+        {token ? (
+          <>
+            <Text style={text}>Or enter this verification code:</Text>
+            <Text style={codeStyle}>{token}</Text>
+          </>
+        ) : null}
         <Text style={footer}>
           If you didn't request this link, you can safely ignore this email.
         </Text>
@@ -84,6 +92,13 @@ const button = {
   textDecoration: 'none',
   display: 'inline-block',
   margin: '0 0 28px',
+}
+const codeStyle = {
+  fontSize: '26px',
+  letterSpacing: '0.35em',
+  color: 'hsl(168, 10%, 8%)',
+  margin: '0 0 28px',
+  fontWeight: 'normal' as const,
 }
 const footer = { fontSize: '12px', color: 'hsl(168, 10%, 55%)', margin: '0 0 0', lineHeight: '1.5' }
 const brandFooter = {
