@@ -127,39 +127,34 @@ export function StickyPurchaseBar({
           </p>
         </div>
 
-        {/* Far right — primary then secondary */}
-        <div className="flex flex-col items-end gap-1 shrink-0">
-          <div className="flex items-center gap-2">
+        {/* Far right — primary then secondary, mirroring the sidebar CTA hierarchy */}
+        <div className="flex items-center gap-2 shrink-0">
+          {onPlaceOrder && (
             <button
               type="button"
-              onClick={onRequestQuote}
+              onClick={handlePlaceOrder}
+              disabled={placingOrder}
               className={cn(
-                "inline-flex items-center px-6 h-9 rounded-luxury-micro",
-                "bg-foreground text-background font-body text-[10px] uppercase tracking-[0.16em]",
-                "hover:bg-foreground/85 transition-colors"
+                "inline-flex items-center h-8 px-4 rounded-none",
+                "bg-foreground text-background font-body text-[10px] uppercase tracking-widest",
+                "hover:bg-foreground/85 transition-colors disabled:opacity-60"
               )}
             >
-              Inquire to Purchase
+              {placingOrder && <Loader2 className="h-3 w-3 animate-spin mr-2" />}
+              <span>{placingOrder ? "Opening checkout…" : "Place Order"}</span>
             </button>
-            {onPlaceOrder && (
-              <button
-                type="button"
-                onClick={onPlaceOrder}
-                disabled={placingOrder}
-                className={cn(
-                  "inline-flex items-center gap-2 px-6 h-9 rounded-luxury-micro",
-                  "border border-foreground/25 text-foreground font-body text-[10px] uppercase tracking-[0.14em]",
-                  "hover:border-foreground/60 transition-colors disabled:opacity-60"
-                )}
-              >
-                {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                <span>{placingOrder ? "Opening checkout…" : "Secure Checkout"}</span>
-              </button>
+          )}
+          <button
+            type="button"
+            onClick={handleRequestQuote}
+            className={cn(
+              "inline-flex items-center h-8 px-4 rounded-none",
+              "border border-foreground bg-background text-foreground font-body text-[10px] uppercase tracking-widest",
+              "transition-colors hover:bg-muted/60"
             )}
-          </div>
-          <span className="font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground/70 pr-1">
-            White-glove delivery · Secure checkout by Stripe
-          </span>
+          >
+            Request a Quote or Customisation
+          </button>
         </div>
 
       </div>
