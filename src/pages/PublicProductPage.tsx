@@ -2332,6 +2332,10 @@ const PublicProductPage: React.FC = () => {
                     <ProductCommerceCta
                       productId={product.id}
                       rrpLabel={publicRrpLabel}
+                      productTitle={product.title}
+                      designerName={designerDisplay}
+                      imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
+                      leadTime={product.lead_time}
                       onPlaceOrder={handleDirectCheckout}
                       placingOrder={checkoutLoading}
                       onRequestQuote={() => setQuoteRequestOpen(true)}
@@ -2468,6 +2472,10 @@ const PublicProductPage: React.FC = () => {
                   productId={product.id}
                   rrpLabel={publicRrpLabel}
                   dockOnly
+                  productTitle={product.title}
+                  designerName={designerDisplay}
+                  imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
+                  leadTime={product.lead_time}
                   onPlaceOrder={handleDirectCheckout}
                   placingOrder={checkoutLoading}
                   onRequestQuote={() => setQuoteRequestOpen(true)}
