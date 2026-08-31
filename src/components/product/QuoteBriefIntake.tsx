@@ -88,6 +88,9 @@ export default function QuoteBriefIntake({
 
   const inputRef = useRef<HTMLInputElement>(null);
 
+  /** Prefer the typed full name, fall back to the account's stored first name. */
+  const greetingName = fullName.trim().split(/\s+/)[0] || memberFirstName;
+
   const q = new URLSearchParams();
   if (redirectTo) q.set("redirect", redirectTo);
   const loginHref = `/trade/login${q.toString() ? `?${q.toString()}` : ""}`;
