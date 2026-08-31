@@ -279,7 +279,7 @@ export default function ProductCommerceCta({
               <Link
                 to={workspaceHref}
                 state={redirectTo ? { from: redirectTo } : undefined}
-                className={cn(primaryBtn, "h-11 flex-1 text-[10px]")}
+                className={cn(primaryBtn, "h-11 flex-1")}
               >
                 {primaryLabel}
               </Link>
@@ -288,7 +288,7 @@ export default function ProductCommerceCta({
                 type="button"
                 onClick={() => primaryAction()}
                 disabled={placingOrder}
-                className={cn(primaryBtn, "h-11 flex-1 text-[10px]")}
+                className={cn(primaryBtn, "h-11 flex-1")}
               >
                 {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : primaryLabel}
               </button>

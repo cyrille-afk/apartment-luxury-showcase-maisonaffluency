@@ -11,7 +11,7 @@ export default function ShippingDetailsAccordion({ className }: { className?: st
   const [open, setOpen] = useState(false);
 
   return (
-    <div className={cn("mt-3 border-t border-border/60", className)}>
+    <div className={cn("mt-3 mb-2 border-t border-border/60", className)}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
