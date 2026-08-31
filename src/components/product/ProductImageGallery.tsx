@@ -326,13 +326,15 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               presentation mode, expand and share — no competing circular chips. */}
           <div className="absolute top-4 left-4 z-30">
             <DropdownMenu>
-              <DropdownMenuTrigger
-                aria-label="More actions"
-                className="w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 flex items-center justify-center touch-manipulation"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Images size={20} strokeWidth={1.5} className="text-foreground/80" />
-              </DropdownMenuTrigger>
+              <CornerTooltip label="Gallery Views" side="bottom" align="start">
+                <DropdownMenuTrigger
+                  aria-label="More actions"
+                  className="w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 flex items-center justify-center touch-manipulation"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Images size={20} strokeWidth={1.5} className="text-foreground/80" />
+                </DropdownMenuTrigger>
+              </CornerTooltip>
               <DropdownMenuContent align="start" className="min-w-[190px]">
                 <DropdownMenuItem onSelect={() => setPresentOpen(true)} className="gap-2.5 font-body text-[11px] uppercase tracking-[0.16em]">
                   <Expand size={16} strokeWidth={1.5} /> Presentation
