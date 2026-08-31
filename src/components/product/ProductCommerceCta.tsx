@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Loader2, Minus, Plus, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ManualQuoteForm } from "@/components/product/ManualQuoteForm";
 import { TradeExclusiveCard } from "@/components/product/PublicSpecTable";
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
@@ -149,6 +150,7 @@ export default function ProductCommerceCta({
   const [accessOpen, setAccessOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [miniCartOpen, setMiniCartOpen] = useState(false);
+  const [manualForm, setManualForm] = useState(false);
   const { clientSafe } = useClientSafeMode();
   const { data: pricing } = useTradeProductPricing(productId, tradeApproved);
   const { discountPct, apply } = useTradeDiscount();
