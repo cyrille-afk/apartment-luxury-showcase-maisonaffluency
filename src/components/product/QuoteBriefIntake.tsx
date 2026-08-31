@@ -471,13 +471,13 @@ export default function QuoteBriefIntake({
       {accountFound && (
         <div
           aria-label="Member profile recognized"
-          className="mt-10 rounded-none border border-neutral-200 px-5 py-5 md:px-6 md:py-6"
+          className="mt-10 mb-12 rounded-none border border-neutral-200 px-5 pt-5 pb-12 md:px-6 md:pt-6 md:pb-12"
         >
           <p className="font-body text-xs font-medium uppercase tracking-widest text-neutral-900">
             Member Profile Recognized
           </p>
           <p className="mt-3 font-body text-xs leading-relaxed text-neutral-500">
-            Welcome back{memberFirstName ? `, ${memberFirstName}` : ""}. Upon
+            Welcome back{greetingName ? `, ${greetingName}` : ""}. Upon
             verification or signing in above, this project brief and its
             accompanying floor plans will automatically attach to your live
             Maison Affluency Trade Dashboard for immediate procurement staging.
@@ -487,6 +487,7 @@ export default function QuoteBriefIntake({
           </p>
         </div>
       )}
+
     </div>
   );
 }
