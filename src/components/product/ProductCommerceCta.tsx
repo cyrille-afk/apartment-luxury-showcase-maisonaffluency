@@ -417,8 +417,8 @@ export default function ProductCommerceCta({
 
       {/* Quote / customisation → frictionless brief intake (State A) */}
       <Dialog open={accessOpen} onOpenChange={(o) => { setAccessOpen(o); if (!o) setManualForm(false); }}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-none p-0 border-border/60">
-          <div className="p-5 pb-10 md:p-8 md:pb-12">
+        <DialogContent className="flex max-w-lg h-auto max-h-[92vh] flex-col overflow-hidden rounded-none p-0 border-border/60">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 pb-12 md:p-8 md:pb-12">
             <QuoteBriefIntake
               productTitle={productTitle}
               designerName={designerName}
