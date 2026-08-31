@@ -323,28 +323,45 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
 
 
-          {/* Secondary actions live behind a single discreet "more" menu:
-              presentation mode, expand and share — no competing circular chips. */}
+          {/* Top-left corner action. On desktop it is a single, unambiguous
+              "Presentation" button — one click opens the fullscreen viewer.
+              On mobile it still hosts the extra menu items (e.g. Share). */}
           <div className="absolute top-4 left-4 z-30">
-            <DropdownMenu>
-              <CornerTooltip label="Gallery Views" side="bottom" align="start">
-                <DropdownMenuTrigger
-                  aria-label="More actions"
+            {isMobileOrPwa && mobileMenuItems ? (
+              <DropdownMenu>
+                <CornerTooltip label="Presentation" side="bottom" align="start">
+                  <DropdownMenuTrigger
+                    aria-label="Presentation and more actions"
+                    className="w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 flex items-center justify-center touch-manipulation"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Images size={20} strokeWidth={1.5} className="text-foreground/80" />
+                  </DropdownMenuTrigger>
+                </CornerTooltip>
+                <DropdownMenuContent align="start" className="min-w-[190px]">
+                  <DropdownMenuItem onSelect={() => setPresentOpen(true)} className="gap-2.5 font-body text-[11px] uppercase tracking-[0.16em]">
+                    <Expand size={16} strokeWidth={1.5} /> Presentation
+                  </DropdownMenuItem>
+                  {mobileMenuItems}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <CornerTooltip label="Presentation" side="bottom" align="start">
+                <button
+                  type="button"
+                  aria-label="Presentation"
                   className="w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 flex items-center justify-center touch-manipulation"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPresentOpen(true);
+                  }}
                 >
                   <Images size={20} strokeWidth={1.5} className="text-foreground/80" />
-                </DropdownMenuTrigger>
+                </button>
               </CornerTooltip>
-              <DropdownMenuContent align="start" className="min-w-[190px]">
-                <DropdownMenuItem onSelect={() => setPresentOpen(true)} className="gap-2.5 font-body text-[11px] uppercase tracking-[0.16em]">
-                  <Expand size={16} strokeWidth={1.5} /> Presentation
-                </DropdownMenuItem>
-                {mobileMenuItems}
-              </DropdownMenuContent>
-
-            </DropdownMenu>
+            )}
           </div>
+
 
 
           {/* Hover-to-navigate now lives on the vertical thumbnail strip (see above). */}
