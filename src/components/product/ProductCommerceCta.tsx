@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { Loader2, Minus, Plus, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { TradeExclusiveCard } from "@/components/product/PublicSpecTable";
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
@@ -34,8 +34,8 @@ export interface ProductCommerceCtaProps {
   rrpLabel?: string | null;
   /** Verified-trade view */
   tradeApproved?: boolean;
-  /** Direct Stripe checkout */
-  onPlaceOrder: () => void;
+  /** Direct Stripe checkout — receives the chosen quantity */
+  onPlaceOrder: (quantity?: number) => void;
   placingOrder?: boolean;
   onRequestQuote: () => void;
   /** Trade: finish selection carried to the workspace */
@@ -45,6 +45,58 @@ export interface ProductCommerceCtaProps {
   dock?: boolean;
   /** Render only the mobile dock (in-flow panel lives elsewhere) */
   dockOnly?: boolean;
+  /** Mini-cart drawer content */
+  productTitle?: string;
+  designerName?: string;
+  imageUrl?: string | null;
+  leadTime?: string | null;
+}
+
+/** Compact luxury quantity stepper: "QUANTITY: − 1 +" */
+function QuantitySelector({
+  value,
+  onChange,
+  compact = false,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+  compact?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center justify-between border-b border-border/60",
+        compact ? "py-1.5" : "py-2"
+      )}
+    >
+      <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        Quantity:
+      </span>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          aria-label="Decrease quantity"
+          disabled={value <= 1}
+          onClick={() => onChange(Math.max(1, value - 1))}
+          className="flex h-6 w-6 items-center justify-center text-muted-foreground transition-all hover:text-foreground disabled:opacity-30"
+        >
+          <Minus className="h-3 w-3" />
+        </button>
+        <span className="w-5 text-center font-body text-xs tabular-nums text-foreground">
+          {value}
+        </span>
+        <button
+          type="button"
+          aria-label="Increase quantity"
+          disabled={value >= 99}
+          onClick={() => onChange(Math.min(99, value + 1))}
+          className="flex h-6 w-6 items-center justify-center text-muted-foreground transition-all hover:text-foreground disabled:opacity-30"
+        >
+          <Plus className="h-3 w-3" />
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function PriceBlock({
@@ -88,8 +140,14 @@ export default function ProductCommerceCta({
   redirectTo,
   dock = true,
   dockOnly = false,
+  productTitle,
+  designerName,
+  imageUrl,
+  leadTime,
 }: ProductCommerceCtaProps) {
   const [accessOpen, setAccessOpen] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const [miniCartOpen, setMiniCartOpen] = useState(false);
   const { clientSafe } = useClientSafeMode();
   const { data: pricing } = useTradeProductPricing(productId, tradeApproved);
   const { discountPct, apply } = useTradeDiscount();
@@ -129,8 +187,25 @@ export default function ProductCommerceCta({
     ? "Open 3D Studio & Axonometric Planning"
     : "Request a Quote or Customisation";
 
-  const primaryAction = tradeApproved ? undefined : onPlaceOrder;
+  // Public: PLACE ORDER opens the slide-out mini-cart drawer (order confirmation),
+  // which then hands off to checkout with the chosen quantity.
+  const primaryAction = tradeApproved ? undefined : () => setMiniCartOpen(true);
   const secondaryAction = tradeApproved ? openStudio : () => setAccessOpen(true);
+
+  // Lock body scroll while the drawer is open.
+  useEffect(() => {
+    if (!miniCartOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [miniCartOpen]);
+
+  const goToCheckout = () => {
+    setMiniCartOpen(false);
+    onPlaceOrder(quantity);
+  };
 
   return (
     <>
@@ -147,10 +222,13 @@ export default function ProductCommerceCta({
             {primaryLabel}
           </Link>
         ) : (
-          <button type="button" onClick={primaryAction} disabled={placingOrder} className={primaryBtn}>
-            {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
-            {placingOrder ? "Opening checkout…" : primaryLabel}
-          </button>
+          <>
+            <QuantitySelector value={quantity} onChange={setQuantity} />
+            <button type="button" onClick={() => primaryAction()} disabled={placingOrder} className={primaryBtn}>
+              {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
+              {placingOrder ? "Opening checkout…" : primaryLabel}
+            </button>
+          </>
         )}
 
         <button type="button" onClick={secondaryAction} className={secondaryBtn}>
@@ -194,7 +272,7 @@ export default function ProductCommerceCta({
             ) : (
               <button
                 type="button"
-                onClick={primaryAction}
+                onClick={() => primaryAction()}
                 disabled={placingOrder}
                 className={cn(primaryBtn, "h-11 flex-1 text-[10px]")}
               >
@@ -202,6 +280,114 @@ export default function ProductCommerceCta({
               </button>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Slide-out mini-cart drawer (State A order confirmation) */}
+      {!tradeApproved && (
+        <div
+          className={cn(
+            "fixed inset-0 z-[90]",
+            miniCartOpen ? "pointer-events-auto" : "pointer-events-none"
+          )}
+          aria-hidden={!miniCartOpen}
+        >
+          {/* Backdrop */}
+          <div
+            onClick={() => setMiniCartOpen(false)}
+            className={cn(
+              "absolute inset-0 bg-foreground/40 transition-opacity duration-300",
+              miniCartOpen ? "opacity-100" : "opacity-0"
+            )}
+          />
+          {/* Panel — slides right-to-left */}
+          <aside
+            role="dialog"
+            aria-label="Your selection"
+            className={cn(
+              "absolute right-0 top-0 h-full w-full max-w-md",
+              "bg-background border-l border-border/60 rounded-none",
+              "flex flex-col transition-transform duration-300 ease-out will-change-transform",
+              miniCartOpen ? "translate-x-0" : "translate-x-full"
+            )}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-border/60 px-6 h-16 shrink-0">
+              <h2 className="font-body text-xs uppercase tracking-[0.22em] text-foreground">
+                Your Selection
+              </h2>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => setMiniCartOpen(false)}
+                className="flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Line item */}
+            <div className="flex-1 overflow-y-auto px-6 py-6">
+              <div className="flex gap-5">
+                {imageUrl && (
+                  <img
+                    src={imageUrl}
+                    alt={productTitle || "Selected piece"}
+                    className="h-28 w-24 flex-none object-cover rounded-none border border-border/40"
+                  />
+                )}
+                <div className="min-w-0">
+                  {designerName && (
+                    <p className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                      {designerName}
+                    </p>
+                  )}
+                  <p className="mt-1 font-display text-base leading-snug text-foreground">
+                    {productTitle}
+                  </p>
+                  {selectedFinishes.length > 0 && (
+                    <p className="mt-2 font-body text-xs leading-relaxed text-muted-foreground">
+                      {selectedFinishes.join(" / ")}
+                    </p>
+                  )}
+                  {leadTime && (
+                    <p className="mt-1 font-body text-[11px] text-muted-foreground/80">
+                      Lead time · {leadTime}
+                    </p>
+                  )}
+                  {(retailLabel || rrpLabel) && (
+                    <p className="mt-2 font-body text-sm text-foreground">
+                      {retailLabel ?? rrpLabel}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <QuantitySelector value={quantity} onChange={setQuantity} />
+              </div>
+            </div>
+
+            {/* Footer actions */}
+            <div className="shrink-0 border-t border-border/60 px-6 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+              <button
+                type="button"
+                onClick={goToCheckout}
+                disabled={placingOrder}
+                className={primaryBtn}
+              >
+                {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
+                {placingOrder ? "Opening checkout…" : "Go to Checkout"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setMiniCartOpen(false)}
+                className="mt-3 w-full text-center font-body text-[11px] uppercase tracking-widest text-muted-foreground underline underline-offset-4 decoration-border transition-colors hover:text-foreground"
+              >
+                Continue Browsing
+              </button>
+            </div>
+          </aside>
         </div>
       )}
 

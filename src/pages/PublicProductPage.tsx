@@ -1614,7 +1614,7 @@ const PublicProductPage: React.FC = () => {
    * Direct Stripe checkout (sticky bar "Place Order") — skips the cart page
    * entirely and sends the current piece + selected finish straight to Stripe.
    */
-  const buildCheckoutLine = () => {
+  const buildCheckoutLine = (quantity = 1) => {
     const unit = selectedRrp?.cents || Number(publicRrpRow?.rrp_price_cents) || 0;
     const variants = (product.size_variants || []) as Array<{ label?: string; base?: string; top?: string }>;
     const implicitVariant =
@@ -1637,13 +1637,13 @@ const PublicProductPage: React.FC = () => {
         finishLabel,
         imageUrl: images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null,
         leadTime: product.lead_time || null,
-        quantity: 1,
+        quantity,
       },
     };
   };
 
-  const startDirectCheckout = async () => {
-    const { unit, item } = buildCheckoutLine();
+  const startDirectCheckout = async (quantity = 1) => {
+    const { unit, item } = buildCheckoutLine(quantity);
     if (!unit) {
       handlePlaceOrder();
       return;
@@ -1656,6 +1656,7 @@ const PublicProductPage: React.FC = () => {
       unitCents: unit,
       currency: (publicRrpRow?.currency || "USD").toLowerCase(),
       leadTime: item.leadTime,
+      quantity: item.quantity,
       productPath: `/designers/${item.designerSlug}/${item.productSlug}`,
     };
     try {
@@ -1665,8 +1666,8 @@ const PublicProductPage: React.FC = () => {
   };
 
 
-  const handleDirectCheckout = () => {
-    const { unit } = buildCheckoutLine();
+  const handleDirectCheckout = (quantity = 1) => {
+    const { unit } = buildCheckoutLine(quantity);
     if (!unit) {
       handlePlaceOrder();
       return;
@@ -1675,7 +1676,7 @@ const PublicProductPage: React.FC = () => {
       requireAuth(() => {}, "place an order");
       return;
     }
-    void startDirectCheckout();
+    void startDirectCheckout(quantity);
   };
 
 
@@ -2104,7 +2105,7 @@ const PublicProductPage: React.FC = () => {
 
                     <button
                       type="button"
-                      onClick={handleDirectCheckout}
+                      onClick={() => handleDirectCheckout()}
                       disabled={checkoutLoading}
                       className="flex items-center justify-center gap-2 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 underline underline-offset-4 decoration-border hover:text-foreground transition-colors disabled:opacity-60"
                     >
@@ -2331,6 +2332,10 @@ const PublicProductPage: React.FC = () => {
                     <ProductCommerceCta
                       productId={product.id}
                       rrpLabel={publicRrpLabel}
+                      productTitle={product.title}
+                      designerName={designerDisplay}
+                      imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
+                      leadTime={product.lead_time}
                       onPlaceOrder={handleDirectCheckout}
                       placingOrder={checkoutLoading}
                       onRequestQuote={() => setQuoteRequestOpen(true)}
@@ -2467,6 +2472,10 @@ const PublicProductPage: React.FC = () => {
                   productId={product.id}
                   rrpLabel={publicRrpLabel}
                   dockOnly
+                  productTitle={product.title}
+                  designerName={designerDisplay}
+                  imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
+                  leadTime={product.lead_time}
                   onPlaceOrder={handleDirectCheckout}
                   placingOrder={checkoutLoading}
                   onRequestQuote={() => setQuoteRequestOpen(true)}
