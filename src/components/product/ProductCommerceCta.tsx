@@ -43,6 +43,8 @@ export interface ProductCommerceCtaProps {
   redirectTo?: string;
   /** Mobile-only sticky bottom dock */
   dock?: boolean;
+  /** Render only the mobile dock (in-flow panel lives elsewhere) */
+  dockOnly?: boolean;
 }
 
 function PriceBlock({
@@ -85,6 +87,7 @@ export default function ProductCommerceCta({
   selectedFinishes = [],
   redirectTo,
   dock = true,
+  dockOnly = false,
 }: ProductCommerceCtaProps) {
   const [accessOpen, setAccessOpen] = useState(false);
   const { clientSafe } = useClientSafeMode();
