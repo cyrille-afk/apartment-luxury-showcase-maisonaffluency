@@ -45,6 +45,12 @@ export default function TradeFirstCta({
   const secondaryBtn =
     "inline-flex h-12 w-full items-center justify-center px-5 rounded-[2px] bg-background text-foreground border border-foreground font-body text-[11px] font-medium leading-none uppercase tracking-[0.2em] hover:bg-muted/60 transition-colors";
 
+  const secureNote = (
+    <p className="text-center font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground/70">
+      Secure checkout powered by Stripe
+    </p>
+  );
+
   if (signedIn) {
     return (
       <div className={cn("flex flex-col gap-3", className)}>
