@@ -396,9 +396,9 @@ export default function ProductCommerceCta({
 
       {/* Quote / customisation → Trade Exclusive Access modal (State A) */}
       <Dialog open={accessOpen} onOpenChange={(o) => { setAccessOpen(o); if (!o) setManualForm(false); }}>
-        <DialogContent className="max-w-md rounded-none p-0 border-border/60">
+        <DialogContent className="max-w-lg rounded-none p-0 border-border/60">
           {manualForm ? (
-            <div className="p-5 md:p-7">
+            <div className="p-6 md:p-9">
               <ManualQuoteForm
                 productTitle={productTitle}
                 designerName={designerName}
@@ -407,7 +407,7 @@ export default function ProductCommerceCta({
               />
             </div>
           ) : (
-            <div className="p-4 md:p-5">
+            <div className="p-5 md:p-8">
               <TradeExclusiveCard
                 redirectTo={redirectTo}
                 rrpLabel={rrpLabel}
@@ -416,7 +416,7 @@ export default function ProductCommerceCta({
               <button
                 type="button"
                 onClick={() => setManualForm(true)}
-                className="mt-4 w-full text-center font-body text-xs tracking-wider uppercase text-muted-foreground underline underline-offset-4 decoration-border hover:text-foreground hover:decoration-foreground transition-colors"
+                className="mt-8 w-full text-center font-body text-[11px] uppercase tracking-wider text-muted-foreground underline underline-offset-[6px] decoration-[0.5px] decoration-border hover:text-foreground hover:decoration-foreground transition-colors"
               >
                 Or request a quote / customisation directly
               </button>
