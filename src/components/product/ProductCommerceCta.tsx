@@ -415,36 +415,20 @@ export default function ProductCommerceCta({
         </div>
       )}
 
-      {/* Quote / customisation → Trade Exclusive Access modal (State A) */}
+      {/* Quote / customisation → frictionless brief intake (State A) */}
       <Dialog open={accessOpen} onOpenChange={(o) => { setAccessOpen(o); if (!o) setManualForm(false); }}>
-        <DialogContent className="max-w-lg rounded-none p-0 border-border/60">
-          {manualForm ? (
-            <div className="p-6 md:p-9">
-              <ManualQuoteForm
-                productTitle={productTitle}
-                designerName={designerName}
-                onBack={() => setManualForm(false)}
-                onDone={() => { setAccessOpen(false); setManualForm(false); }}
-              />
-            </div>
-          ) : (
-            <div className="p-5 md:p-8">
-              <TradeExclusiveCard
-                redirectTo={redirectTo}
-                rrpLabel={rrpLabel}
-                showFeatureMatrix
-              />
-              <button
-                type="button"
-                onClick={() => setManualForm(true)}
-                className="mt-8 w-full text-center font-body text-[11px] uppercase tracking-wider text-muted-foreground underline underline-offset-[6px] decoration-[0.5px] decoration-border hover:text-foreground hover:decoration-foreground transition-colors"
-              >
-                Or request a quote / customisation directly
-              </button>
-            </div>
-          )}
+        <DialogContent className="max-w-lg max-h-[88vh] overflow-y-auto rounded-none p-0 border-border/60">
+          <div className="p-5 md:p-8">
+            <QuoteBriefIntake
+              productTitle={productTitle}
+              designerName={designerName}
+              redirectTo={redirectTo}
+              onDone={() => { setAccessOpen(false); setManualForm(false); }}
+            />
+          </div>
         </DialogContent>
       </Dialog>
+
     </>
   );
 }
