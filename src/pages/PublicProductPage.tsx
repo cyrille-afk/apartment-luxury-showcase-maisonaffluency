@@ -2238,7 +2238,7 @@ const PublicProductPage: React.FC = () => {
                       {(() => {
                         const editionLabel = formatEditionLabel(product as any);
                         return editionLabel ? (
-                          <span className="ml-3 inline-block whitespace-nowrap rounded-none border border-neutral-200 bg-background px-2 py-0.5 align-baseline font-body text-[9px] font-medium uppercase tracking-[0.18em] text-foreground/60">
+                          <span className="ml-3 inline-block whitespace-nowrap rounded-none border border-neutral-300 bg-background px-2 py-0.5 align-baseline font-body text-[9px] font-medium uppercase tracking-[0.22em] text-foreground/60">
                             {editionLabel}
                           </span>
                         ) : null;
