@@ -37,8 +37,13 @@ export default function TradeFirstCta({
   if (redirectTo) q.set("redirect", redirectTo);
   const loginHref = `/trade/login${q.toString() ? `?${q.toString()}` : ""}`;
 
+  // Clean, sharp, border-based button system — 0px corners, thin 1px rules,
+  // uppercase micro-tracking. Semantic tokens only (dark-mode safe).
   const primaryBtn =
-    "inline-flex h-12 w-full items-center justify-center px-5 rounded-[2px] bg-foreground text-background font-body text-[11px] leading-none uppercase tracking-[0.14em] hover:bg-foreground/85 transition-colors";
+    "inline-flex h-12 w-full items-center justify-center px-5 rounded-[2px] bg-foreground text-background font-body text-[11px] font-medium leading-none uppercase tracking-[0.2em] hover:bg-foreground/85 transition-colors";
+
+  const secondaryBtn =
+    "inline-flex h-12 w-full items-center justify-center px-5 rounded-[2px] bg-background text-foreground border border-foreground font-body text-[11px] font-medium leading-none uppercase tracking-[0.2em] hover:bg-muted/60 transition-colors";
 
   const secureNote = (
     <p className="text-center font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground/70">
@@ -103,7 +108,7 @@ export default function TradeFirstCta({
           </Link>
           <Link
             to="/trade/register"
-            className="mx-auto font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground underline underline-offset-4 decoration-border hover:text-foreground transition-colors"
+            className={secondaryBtn}
           >
             Apply for a Trade Account
           </Link>
