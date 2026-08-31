@@ -33,6 +33,14 @@ const FEATURES = [
   },
 ];
 
+const MEMBER_TIER_LABEL: Record<string, string> = {
+  standard: "Verified Trade Account",
+  silver: "Verified Silver Trade Account",
+  gold: "Verified Gold Trade Account",
+  platinum: "Verified Premium Trade Account",
+};
+
+
 const fileToDataUrl = (file: File) =>
   new Promise<string>((resolve, reject) => {
     const r = new FileReader();
@@ -69,6 +77,8 @@ export default function QuoteBriefIntake({
   const [submitting, setSubmitting] = useState(false);
 
   const [accountFound, setAccountFound] = useState(false);
+  const [memberFirstName, setMemberFirstName] = useState("");
+  const [memberTier, setMemberTier] = useState<string>("standard");
   const [checking, setChecking] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
@@ -94,8 +104,13 @@ export default function QuoteBriefIntake({
         body: { action: "check_email", email: value },
       });
       setAccountFound(Boolean(data?.exists));
+      const rawName = String(data?.firstName ?? "").trim();
+      setMemberFirstName(rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase() : "");
+      setMemberTier(String(data?.tier ?? "standard"));
     } catch {
       setAccountFound(false);
+      setMemberFirstName("");
+      setMemberTier("standard");
     } finally {
       setChecking(false);
     }
@@ -427,29 +442,51 @@ export default function QuoteBriefIntake({
 
       </form>
 
-      {/* Supporting trade-member notes */}
-      <div aria-label="Trade member tools" className="mt-10 border-t border-border/60">
-        <p className="pt-6 font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-          Included with a trade account
-        </p>
-        {FEATURES.map((feature) => (
-          <div key={feature.title} className="flex flex-col gap-1.5 border-t border-border/40 py-4 first-of-type:border-t-0 first-of-type:pt-4">
-            <p className="font-body text-[11px] uppercase tracking-widest font-medium text-foreground">
-              {feature.title}
-            </p>
-            <p className="font-body text-[11px] font-light leading-relaxed text-neutral-500">
-              {feature.description}
-            </p>
-          </div>
-        ))}
-        <Link
-          to={loginHref}
-          className="mt-2 inline-block font-body text-[10px] uppercase tracking-widest text-muted-foreground underline underline-offset-[6px] decoration-[0.5px] decoration-border transition-colors hover:text-foreground hover:decoration-foreground"
+      {/* New-visitor trade-member marketing — hidden once a member account is recognized */}
+      {!accountFound && (
+        <div aria-label="Trade member tools" className="mt-10 border-t border-border/60">
+          <p className="pt-6 font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            Included with a trade account
+          </p>
+          {FEATURES.map((feature) => (
+            <div key={feature.title} className="flex flex-col gap-1.5 border-t border-border/40 py-4 first-of-type:border-t-0 first-of-type:pt-4">
+              <p className="font-body text-[11px] uppercase tracking-widest font-medium text-foreground">
+                {feature.title}
+              </p>
+              <p className="font-body text-[11px] font-light leading-relaxed text-neutral-500">
+                {feature.description}
+              </p>
+            </div>
+          ))}
+          <Link
+            to={loginHref}
+            className="mt-2 inline-block font-body text-[10px] uppercase tracking-widest text-muted-foreground underline underline-offset-[6px] decoration-[0.5px] decoration-border transition-colors hover:text-foreground hover:decoration-foreground"
+          >
+            Already a member? Sign in
+          </Link>
+        </div>
+      )}
+
+      {/* Returning-member welcome card */}
+      {accountFound && (
+        <div
+          aria-label="Member profile recognized"
+          className="mt-10 rounded-none border border-neutral-200 px-5 py-5 md:px-6 md:py-6"
         >
-          Already a member? Sign in
-        </Link>
-      </div>
-      {checking && <span className="sr-only">Checking account…</span>}
+          <p className="font-body text-xs font-medium uppercase tracking-widest text-neutral-900">
+            Member Profile Recognized
+          </p>
+          <p className="mt-3 font-body text-xs leading-relaxed text-neutral-500">
+            Welcome back{memberFirstName ? `, ${memberFirstName}` : ""}. Upon
+            verification or signing in above, this project brief and its
+            accompanying floor plans will automatically attach to your live
+            Maison Affluency Trade Dashboard for immediate procurement staging.
+          </p>
+          <p className="mt-4 font-body text-[11px] font-light uppercase tracking-widest text-neutral-400">
+            Current Tier: {MEMBER_TIER_LABEL[memberTier] ?? MEMBER_TIER_LABEL.standard}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

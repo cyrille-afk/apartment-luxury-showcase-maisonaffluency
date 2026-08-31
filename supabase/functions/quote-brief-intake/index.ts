@@ -72,14 +72,19 @@ Deno.serve(async (req) => {
     }
     const { data, error } = await supabase
       .from("profiles")
-      .select("id")
+      .select("id, first_name, trade_tier")
       .ilike("email", email)
       .limit(1);
     if (error) {
       console.error("check_email failed", error);
       return json({ exists: false });
     }
-    return json({ exists: (data?.length ?? 0) > 0 });
+    const profile = data?.[0] ?? null;
+    return json({
+      exists: Boolean(profile),
+      firstName: profile?.first_name || "",
+      tier: profile?.trade_tier || "standard",
+    });
   }
 
   // ---------- Brief submission ----------
