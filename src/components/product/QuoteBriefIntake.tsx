@@ -249,21 +249,24 @@ export default function QuoteBriefIntake({
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in grid grid-cols-1 md:grid-cols-2 md:items-stretch">
+      {/* ── Column 1 — intake form ── */}
+      <div className="p-5 pb-10 md:p-8 md:pb-10 md:border-r md:border-neutral-200">
       {/* Header */}
-      <div className="flex items-center justify-center gap-2">
+      <div className="flex items-center justify-center gap-2 md:justify-start">
         <Lock className="h-3 w-3 text-[hsl(var(--gold))]" aria-hidden="true" />
         <span className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
           Request a Quote or Customisation
         </span>
       </div>
-      <p className="mx-auto mt-4 max-w-md text-center font-body text-xs md:text-sm font-light leading-relaxed text-muted-foreground">
+      <p className="mx-auto mt-4 max-w-md text-center font-body text-xs md:mx-0 md:text-left md:text-sm font-light leading-relaxed text-muted-foreground">
         Share your project brief and any floor plans. Our concierge will return a
         tailored quotation — no account required.
       </p>
 
       {/* Intake form */}
       <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-6">
+
         <div>
           <label htmlFor="brief-fullname" className={labelCls}>
             Full Name (Optional)
