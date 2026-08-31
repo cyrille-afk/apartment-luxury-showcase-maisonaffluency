@@ -81,7 +81,26 @@ export default function QuoteBriefIntake({
   if (redirectTo) q.set("redirect", redirectTo);
   const loginHref = `/trade/login${q.toString() ? `?${q.toString()}` : ""}`;
 
-  /* ---- Returning-user detection (debounced) ---- */
+  /* ---- Returning-user detection (debounced + onBlur) ---- */
+  const runCheck = useCallback(async (value: string) => {
+    if (!EMAIL_RE.test(value)) {
+      setAccountFound(false);
+      setCodeSent(false);
+      return;
+    }
+    setChecking(true);
+    try {
+      const { data } = await supabase.functions.invoke("quote-brief-intake", {
+        body: { action: "check_email", email: value },
+      });
+      setAccountFound(Boolean(data?.exists));
+    } catch {
+      setAccountFound(false);
+    } finally {
+      setChecking(false);
+    }
+  }, []);
+
   useEffect(() => {
     const value = email.trim().toLowerCase();
     if (!EMAIL_RE.test(value)) {
@@ -89,26 +108,10 @@ export default function QuoteBriefIntake({
       setCodeSent(false);
       return;
     }
-    let cancelled = false;
-    setChecking(true);
-    const t = window.setTimeout(async () => {
-      try {
-        const { data } = await supabase.functions.invoke("quote-brief-intake", {
-          body: { action: "check_email", email: value },
-        });
-        if (!cancelled) setAccountFound(Boolean(data?.exists));
-      } catch {
-        if (!cancelled) setAccountFound(false);
-      } finally {
-        if (!cancelled) setChecking(false);
-      }
-    }, 550);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(t);
-      window.clearTimeout(t);
-    };
-  }, [email]);
+    const t = window.setTimeout(() => void runCheck(value), 550);
+    return () => window.clearTimeout(t);
+  }, [email, runCheck]);
+
 
   const addFiles = useCallback(
     (incoming: FileList | File[] | null) => {
@@ -249,6 +252,7 @@ export default function QuoteBriefIntake({
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onBlur={(e) => void runCheck(e.target.value.trim().toLowerCase())}
             placeholder="you@studio.com"
             className={cn(inputCls, "mt-2")}
           />
@@ -261,52 +265,72 @@ export default function QuoteBriefIntake({
             )}
           >
             <div className="overflow-hidden">
-              <div className="rounded-none border border-border/60 bg-muted/40 px-4 py-4">
-                <p className="font-body text-[11px] uppercase tracking-widest text-foreground">
-                  An existing trade account was found for this address.
+              <div className="rounded-none border border-neutral-200 bg-neutral-50 px-5 py-5 text-center">
+                <p className="font-body text-xs font-normal leading-relaxed text-neutral-800">
+                  An active trade account is linked to this email address.
                 </p>
-                <div className="mt-3 flex flex-col gap-2">
-                  <Link
-                    to={loginHref}
-                    className="text-left font-body text-[11px] font-light leading-relaxed text-muted-foreground underline underline-offset-4 decoration-[0.5px] decoration-border transition-colors hover:text-foreground hover:decoration-foreground"
-                  >
-                    Click here to sign in with password
-                  </Link>
-                  {!codeSent ? (
+
+                {!codeSent ? (
+                  <>
                     <button
                       type="button"
                       onClick={sendCode}
                       disabled={sendingCode}
-                      className="inline-flex items-center gap-2 text-left font-body text-[11px] font-light leading-relaxed text-muted-foreground underline underline-offset-4 decoration-[0.5px] decoration-border transition-colors hover:text-foreground hover:decoration-foreground disabled:opacity-60"
+                      className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-none bg-foreground px-4 font-body text-[10px] uppercase tracking-widest text-background transition-colors hover:bg-foreground/85 disabled:opacity-60"
                     >
                       {sendingCode && <Loader2 className="h-3 w-3 animate-spin" />}
-                      Send a fast verification code to instantly link this project to your workspace.
+                      Verify via 4-digit secure passcode
                     </button>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <input
-                        value={code}
-                        onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
-                        inputMode="numeric"
-                        placeholder="Verification code"
-                        className="h-10 w-40 rounded-none border border-border/60 bg-background px-3 font-body text-sm tracking-[0.3em] text-foreground focus:outline-none focus:border-foreground"
-                      />
-                      <button
-                        type="button"
-                        onClick={verifyCode}
-                        disabled={verifying || code.length < 4}
-                        className="inline-flex h-10 items-center justify-center rounded-none border border-foreground px-4 font-body text-[10px] uppercase tracking-widest text-foreground transition-colors hover:bg-muted/60 disabled:opacity-50"
-                      >
-                        {verifying ? <Loader2 className="h-3 w-3 animate-spin" /> : "Verify"}
-                      </button>
-                    </div>
-                  )}
-                </div>
+                    <Link
+                      to={loginHref}
+                      className="mt-3 inline-block font-body text-[11px] font-light text-neutral-500 underline underline-offset-4 decoration-[0.5px] decoration-neutral-300 transition-colors hover:text-foreground hover:decoration-foreground"
+                    >
+                      Or sign in using your account password
+                    </Link>
+                  </>
+                ) : (
+                  <div className="mt-4 flex flex-col items-center gap-3">
+                    <p className="font-body text-[10px] uppercase tracking-widest text-neutral-500">
+                      Enter the passcode sent to {email.trim().toLowerCase()}
+                    </p>
+                    <input
+                      value={code}
+                      onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                      inputMode="numeric"
+                      autoFocus
+                      placeholder="0000"
+                      aria-label="Secure passcode"
+                      className="h-12 w-44 rounded-none border border-neutral-300 bg-background text-center font-body text-lg tracking-[0.4em] text-foreground focus:outline-none focus:border-foreground"
+                    />
+                    <button
+                      type="button"
+                      onClick={verifyCode}
+                      disabled={verifying || code.length < 4}
+                      className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-none bg-foreground px-4 font-body text-[10px] uppercase tracking-widest text-background transition-colors hover:bg-foreground/85 disabled:opacity-50"
+                    >
+                      {verifying && <Loader2 className="h-3 w-3 animate-spin" />}
+                      Sign in &amp; attach brief
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCodeSent(false);
+                        setCode("");
+                      }}
+                      className="font-body text-[11px] font-light text-neutral-500 underline underline-offset-4 decoration-[0.5px] decoration-neutral-300 transition-colors hover:text-foreground"
+                    >
+                      Back to project brief
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
 
+
+        {!codeSent && (
+        <>
         <div>
           <label htmlFor="brief-description" className={labelCls}>
             Project Brief Description
@@ -398,6 +422,9 @@ export default function QuoteBriefIntake({
           {submitting && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
           {submitting ? "Submitting…" : "Submit Project Brief for Quotation"}
         </button>
+        </>
+        )}
+
       </form>
 
       {/* Supporting trade-member notes */}
