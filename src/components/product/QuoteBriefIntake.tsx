@@ -104,7 +104,8 @@ export default function QuoteBriefIntake({
         body: { action: "check_email", email: value },
       });
       setAccountFound(Boolean(data?.exists));
-      setMemberFirstName(String(data?.firstName ?? "").trim());
+      const rawName = String(data?.firstName ?? "").trim();
+      setMemberFirstName(rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase() : "");
       setMemberTier(String(data?.tier ?? "standard"));
     } catch {
       setAccountFound(false);
