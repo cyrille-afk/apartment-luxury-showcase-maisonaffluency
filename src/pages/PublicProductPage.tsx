@@ -1684,6 +1684,82 @@ const PublicProductPage: React.FC = () => {
 
 
 
+  // Shared secondary utility links (Favorite / Pin / Fabric & Finishes PDF).
+  // Rendered inside the main commerce action panel on desktop, and as a
+  // compact standalone row on mobile.
+  const renderUtilityLinks = (extraClass = "") => {
+    const tradeApprovedFooter = !!user && (isTradeUser || tradeStatus === "approved");
+    const hasSheet = !!(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0));
+    const utilityItem =
+      "inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors duration-200 hover:text-foreground";
+    const iconClass = "shrink-0 text-muted-foreground/70";
+
+    return (
+      <div className={cn("flex flex-wrap items-center gap-x-8 gap-y-2", extraClass)}>
+        <FavoriteFolderPicker pickId={product.id} align="start" side="top">
+          <button
+            onClick={(e) => e.stopPropagation()}
+            className={cn(
+              utilityItem,
+              favorited && "text-destructive hover:text-destructive"
+            )}
+          >
+            <Heart size={12} strokeWidth={1.25} className={cn(iconClass, favorited && "fill-current")} />
+            {favorited ? "Saved" : "Favorite"}
+          </button>
+        </FavoriteFolderPicker>
+
+        <button
+          onClick={() => {
+            if (!user) {
+              requireAuth(() => {}, "pin this piece to your selection");
+              return;
+            }
+            togglePin(compareItem);
+          }}
+          className={cn(
+            utilityItem,
+            pinned && "text-[hsl(var(--gold))] hover:text-[hsl(var(--gold))]",
+            user && compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+          )}
+        >
+          <Pin size={12} strokeWidth={1.25} className={cn(iconClass, pinned && "fill-current")} />
+          {pinned ? "Pinned" : "Pin to Selection"}
+        </button>
+
+        {hasSheet ? (
+          <SpecSheetButton
+            pdfUrl={product.pdf_url}
+            pdfUrls={product.pdf_urls}
+            brandName={designerDisplay}
+            productName={product.title}
+            variant="button"
+            className={cn(utilityItem, "cursor-pointer")}
+            icon={<FileText size={12} strokeWidth={1.25} className={iconClass} />}
+            onBeforeOpen={() => {
+              if (tradeApprovedFooter) return true;
+              if (!user) {
+                requireAuth(() => {}, "open this spec sheet");
+                return false;
+              }
+              let allowed = false;
+              requireAuth(() => { allowed = true; }, "download this spec sheet");
+              return allowed;
+            }}
+          />
+        ) : (
+          <FinishesPdfButton
+            pickId={product.id}
+            productName={product.title}
+            brandName={designerDisplay}
+            className={cn(utilityItem, "cursor-pointer")}
+            icon={<Layers size={12} strokeWidth={1.25} className={iconClass} />}
+          />
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="motion-safe:animate-fade-in">
       {(() => {
