@@ -994,6 +994,27 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     .filter(Boolean)
     .join(" / ");
 
+  const baseAxisLabel = (() => {
+    if (woodLabel && woodLabel.trim()) return woodLabel.trim();
+    const isTable = !!productTitle && /\btable\b/i.test(productTitle);
+    const cats = visibleWoodTiles.map((t) => (t.category || "").trim().toLowerCase());
+    const allStone = cats.length > 0 && cats.every((c) => c === "stone");
+    const noSeparateTop = visibleTopTiles.length === 0;
+    if (isTable && allStone && noSeparateTop) return "Select Your Marble Finish (Top & Base)";
+    if (isTable) return "Select Your Table Finish";
+    return "Select Your Finish";
+  })();
+  const topAxisLabel = (() => {
+    if (topLabel && topLabel.trim()) return topLabel.trim();
+    const title = (productTitle || "").toLowerCase();
+    const m = title.match(/\b(console|dining|coffee|cocktail|side|writing|desk|bedside|conference)\s+table\b/);
+    if (m) {
+      const kind = m[1][0].toUpperCase() + m[1].slice(1);
+      return `Select Your ${kind} Top Finish`;
+    }
+    if (/\btable\b/.test(title)) return "Select Your Table Top Finish";
+    return "Select Your Top Finish";
+  })();
   const showMobileBaseTopGrid = (isMobile || isPwa) && (visibleWoodTiles.length > 0 || visibleTopTiles.length > 0);
 
   const renderInlineAxisCarousel = (
@@ -1095,8 +1116,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       <div className={className} onMouseLeave={restoreLockedPreview}>
       {showMobileBaseTopGrid && (
         <div className="border-t border-border/60">
-          {visibleWoodTiles.length > 0 && renderInlineAxisCarousel(visibleWoodTiles, selectedWoodId, setSelectedWoodId, "Base", mobileBaseOpen, () => setMobileBaseOpen((v) => !v))}
-          {visibleTopTiles.length > 0 && renderInlineAxisCarousel(visibleTopTiles, selectedTopId, setSelectedTopId, "Top", mobileTopOpen, () => setMobileTopOpen((v) => !v))}
+          {visibleWoodTiles.length > 0 && renderInlineAxisCarousel(visibleWoodTiles, selectedWoodId, setSelectedWoodId, baseAxisLabel, mobileBaseOpen, () => setMobileBaseOpen((v) => !v))}
+          {visibleTopTiles.length > 0 && renderInlineAxisCarousel(visibleTopTiles, selectedTopId, setSelectedTopId, topAxisLabel, mobileTopOpen, () => setMobileTopOpen((v) => !v))}
         </div>
       )}
       {isRugProduct && visibleFabricTiles.length > 0 ? (
@@ -1161,22 +1182,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         renderAccordion({
           isOpen: openWood,
           onToggle: () => setOpenWood((v) => !v),
-          label: (() => {
-            if (woodLabel && woodLabel.trim()) return woodLabel.trim();
-            const isTable = !!productTitle && /\btable\b/i.test(productTitle);
-            // Tables typically share a single marble/stone palette across the
-            // top AND the base — collapse the two pickers into one unified
-            // "Top & Base" label so the user sees one selection control.
-            const cats = visibleWoodTiles.map((t) => (t.category || "").trim().toLowerCase());
-            const allStone = cats.length > 0 && cats.every((c) => c === "stone");
-            const noSeparateTop = visibleTopTiles.length === 0;
-            if (isTable && allStone && noSeparateTop) {
-              return "Select Your Marble Finish (Top & Base)";
-            }
-            if (isTable) return "Select Your Table Finish";
-            return "Select Your Finish";
-
-          })(),
+          label: baseAxisLabel,
           selectedName: selectedWoodItem?.name ?? null,
           tiles: visibleWoodTiles,
           glyph: pickFinishGlyph(visibleWoodTiles, woodLabel),
@@ -1186,17 +1192,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         renderAccordion({
           isOpen: openTop,
           onToggle: () => setOpenTop((v) => !v),
-          label: (() => {
-            if (topLabel && topLabel.trim()) return topLabel.trim();
-            const title = (productTitle || "").toLowerCase();
-            const m = title.match(/\b(console|dining|coffee|cocktail|side|writing|desk|bedside|conference)\s+table\b/);
-            if (m) {
-              const kind = m[1][0].toUpperCase() + m[1].slice(1);
-              return `Select Your ${kind} Top Finish`;
-            }
-            if (/\btable\b/.test(title)) return "Select Your Table Top Finish";
-            return "Select Your Top Finish";
-          })(),
+          label: topAxisLabel,
           selectedName: selectedTopItem?.name ?? null,
           tiles: visibleTopTiles,
           glyph: pickFinishGlyph(visibleTopTiles, topLabel),

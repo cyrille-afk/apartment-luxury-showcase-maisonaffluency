@@ -1648,11 +1648,6 @@ const PublicDesignerProfile = () => {
           )}
           </div>
 
-          {isParentBrand && (
-            <div className="hidden md:block">
-              <ParentHouseOverview parentName={designer.name} />
-            </div>
-          )}
 
           {!newInFormat && (
             <div className={cn(!useNewInSpotlightFormat && "md:hidden")}>
