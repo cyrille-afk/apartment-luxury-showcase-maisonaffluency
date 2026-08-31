@@ -68,6 +68,11 @@ export default function ActiveSwatchCaption({
   // tied to multiple finishes; render their names comma-separated and swatches inline.
   const matches = swatches.filter((s) => s.image_indices?.includes(oneBased));
   if (!matches.length) return null;
+  // Shared slides (brand logo, editorial closing frame) are mapped to every
+  // finish so they still appear at the end of each filtered set — they are not
+  // finish-specific, so never caption them.
+  if (swatches.length > 1 && matches.length === swatches.length) return null;
+
 
   const multi = matches.length > 1;
   const isLight = variant === "light";
