@@ -154,6 +154,7 @@ export default function ProductCommerceCta({
           {secondaryLabel}
         </button>
       </div>
+      )}
 
       {/* Mobile sticky bottom dock */}
       {dock && (
