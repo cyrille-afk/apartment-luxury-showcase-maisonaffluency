@@ -1,6 +1,7 @@
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
 import { useEffect, useState, type ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { getCart, shouldUseFullPageCart } from "@/lib/cart";
 import { Loader2, Minus, Plus } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import QuoteBriefIntake from "@/components/product/QuoteBriefIntake";
