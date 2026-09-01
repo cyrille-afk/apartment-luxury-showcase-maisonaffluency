@@ -226,14 +226,16 @@ serve(async (req) => {
             },
           },
         })),
-        {
-          quantity: 1,
-          price_data: {
-            currency,
-            unit_amount: shipping,
-            product_data: { name: "Front Door Delivery (estimate)" },
-          },
-        },
+        ...(shipping > 0
+          ? [{
+              quantity: 1,
+              price_data: {
+                currency,
+                unit_amount: shipping,
+                product_data: { name: "Front Door Premium Delivery" },
+              },
+            }]
+          : []),
       ],
       success_url: `${origin}/order-confirmation?ref=${order.order_ref}&status=paid`,
       cancel_url:
