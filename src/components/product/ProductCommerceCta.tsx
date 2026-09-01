@@ -35,6 +35,10 @@ export interface ProductCommerceCtaProps {
   rrpLabel?: string | null;
   /** Verified-trade view */
   tradeApproved?: boolean;
+  /** Dev role-preview override: precomputed net trade price label (e.g. "$5,259") */
+  netLabelOverride?: string | null;
+  /** Dev role-preview override: precomputed plain retail label (e.g. "$7,513") */
+  retailLabelOverride?: string | null;
   /** Direct Stripe checkout — receives the chosen quantity */
   onPlaceOrder: (quantity?: number) => void;
   placingOrder?: boolean;
@@ -122,8 +126,8 @@ function PriceBlock({
   if (trade && netLabel) {
     return (
       <div className="flex flex-col gap-1">
-        <p className="font-body text-[11px] tracking-[0.04em] text-muted-foreground">
-          {rrpLabel ? `Retail: ${from ? "From " : ""}${rrpLabel} (Before Tax)` : "Retail on request (Before Tax)"}
+        <p className="font-body text-[11px] tracking-[0.04em] text-muted-foreground line-through decoration-muted-foreground/50">
+          {rrpLabel ? `Retail: ${from ? "From " : ""}${rrpLabel}` : "Retail on request"}
         </p>
         <p className="font-display text-2xl leading-none text-foreground">
           {from ? "From " : ""}{netLabel} <span className="font-body text-xs tracking-widest uppercase text-muted-foreground">Net Trade Price</span>
@@ -142,6 +146,8 @@ export default function ProductCommerceCta({
   productId,
   rrpLabel = null,
   tradeApproved = false,
+  netLabelOverride = null,
+  retailLabelOverride = null,
   onPlaceOrder,
   placingOrder = false,
   onRequestQuote,
@@ -180,8 +186,8 @@ export default function ProductCommerceCta({
     }
   };
 
-  const retailLabel = fmt(baseRrpCents) ?? rrpLabel ?? null;
-  const netLabel = tradeApproved && !clientSafe ? fmt(netCents) : null;
+  const retailLabel = retailLabelOverride ?? fmt(baseRrpCents) ?? rrpLabel ?? null;
+  const netLabel = netLabelOverride ?? (tradeApproved && !clientSafe ? fmt(netCents) : null);
   const displayNet = netLabel ?? (tradeApproved && rrpLabel && discountPct ? null : null);
 
   const finishQuery = selectedFinishes.length
@@ -189,19 +195,16 @@ export default function ProductCommerceCta({
     : "";
   const workspaceHref = `/trade/products/${productId}${finishQuery}`;
 
-  const openStudio = () => {
-    window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { openPanel: true } }));
-  };
-
   const primaryLabel = tradeApproved ? "Add to Co-Pilot Workspace & Order" : "Place Order";
   const secondaryLabel = tradeApproved
-    ? "Open 3D Studio & Axonometric Planning"
+    ? "Open Axonometric Studio"
     : "Request a Quote or Customisation";
 
   // Public: PLACE ORDER opens the slide-out mini-cart drawer (order confirmation),
   // which then hands off to checkout with the chosen quantity.
+  // Secondary (both states) opens the brief-upload portal (QuoteBriefIntake).
   const primaryAction = tradeApproved ? undefined : () => setMiniCartOpen(true);
-  const secondaryAction = tradeApproved ? openStudio : () => setAccessOpen(true);
+  const secondaryAction = () => setAccessOpen(true);
 
   // Lock body scroll while the drawer is open.
   useEffect(() => {
@@ -234,7 +237,7 @@ export default function ProductCommerceCta({
         ) : null}
 
         {tradeApproved ? (
-          <Link to={workspaceHref} state={redirectTo ? { from: redirectTo } : undefined} className={primaryBtn}>
+          <Link to={workspaceHref} data-commerce-primary state={redirectTo ? { from: redirectTo } : undefined} className={primaryBtn}>
             {primaryLabel}
           </Link>
         ) : (

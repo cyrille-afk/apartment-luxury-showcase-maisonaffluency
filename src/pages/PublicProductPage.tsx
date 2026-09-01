@@ -86,6 +86,7 @@ import TradePendingReviewCard from "@/components/product/TradePendingReviewCard"
 import QuoteRequestDialog from "@/components/QuoteRequestDialog";
 import { addToCart } from "@/lib/cart";
 import { usePublicRrp, usePublicRrpMap, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
+import { UserRoleProvider, useUserRole, DevRoleToggle, type UserRole } from "@/contexts/UserRoleContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
@@ -1012,7 +1013,7 @@ const VariantSelectors: React.FC<{
 /* ------------------------------------------------------------------ */
 /*  Page component                                                     */
 /* ------------------------------------------------------------------ */
-const PublicProductPage: React.FC = () => {
+const PublicProductPageContent: React.FC = () => {
   const { slug: designerSlug, productSlug } = useParams<{ slug: string; productSlug: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -1060,6 +1061,41 @@ const PublicProductPage: React.FC = () => {
           catalogueRrpLabel
         : catalogueRrpLabel)
     : null;
+
+  // ---- Dev role-preview state (mock auth) -------------------------------
+  // Until the dev dropdown is used, real auth drives the effective role.
+  const { role: devRole, overridden: roleOverridden } = useUserRole();
+  const realRole: UserRole = !user
+    ? "PUBLIC"
+    : isTradeUser || tradeStatus === "approved"
+      ? "TRADE_VERIFIED"
+      : tradeStatus === "pending_review"
+        ? "TRADE_UNVERIFIED"
+        : "RETAIL_BUYER";
+  const effectiveRole: UserRole = roleOverridden ? devRole : realRole;
+  const isTradeVerifiedView = effectiveRole === "TRADE_VERIFIED";
+  const isTradeUnverifiedView = effectiveRole === "TRADE_UNVERIFIED";
+
+  // Pure client-side mock net trade price: 30% off the current base rate.
+  const MOCK_TRADE_DISCOUNT = 0.3;
+  const baseRrpCents = selectedRrp?.cents ?? (Number(publicRrpRow?.rrp_price_cents) || null);
+  const mockNetCents = baseRrpCents ? Math.round(baseRrpCents * (1 - MOCK_TRADE_DISCOUNT)) : null;
+  const priceCurrency = (publicRrpRow?.currency || "USD").toUpperCase();
+  const fmtMock = (cents: number) => {
+    try {
+      return new Intl.NumberFormat("en-US", { style: "currency", currency: priceCurrency, maximumFractionDigits: 0 }).format(cents / 100);
+    } catch {
+      return `${priceCurrency} ${(cents / 100).toLocaleString("en-US")}`;
+    }
+  };
+  const hasFromPrefix = /^From\s+/i.test(publicRrpLabel || "");
+  const retailPlainLabel = publicRrpLabel ? publicRrpLabel.replace(/^From\s+/i, "") : null;
+  const mockNetLabel = mockNetCents ? fmtMock(mockNetCents) : null;
+  const mockNetDisplay = mockNetLabel ? `${hasFromPrefix ? "From " : ""}${mockNetLabel}` : null;
+
+  // Commerce block visibility under the (possibly mocked) role.
+  const showPublicCommerce = roleOverridden ? !isTradeVerifiedView : (!user && !authLoading);
+  const showMockTradeCommerce = roleOverridden && isTradeVerifiedView;
 
   // On landing we intentionally show the catalogue-wide minimum ("From $X"),
   // not the price of the finish in the first photo — this encourages visitors
@@ -1878,17 +1914,24 @@ const PublicProductPage: React.FC = () => {
 
         </div>
 
-        {/* Desktop slim sticky purchase bar */}
+        {/* Desktop slim sticky purchase bar — price + button labels follow the
+            effective role so it stays in sync with the sidebar action block. */}
         <StickyPurchaseBar
           triggerId="main-product-image-container"
           image={images[0]}
           title={product.title}
           designer={designerDisplay}
-          price={publicRrpLabel}
+          price={isTradeVerifiedView && mockNetDisplay ? mockNetDisplay : publicRrpLabel}
+          currencyCode={isTradeVerifiedView && mockNetDisplay ? "Net Trade" : undefined}
+          primaryLabel={isTradeVerifiedView ? "Add to Co-Pilot Workspace & Order" : "Place Order"}
+          secondaryLabel={isTradeVerifiedView ? "Open Axonometric Studio" : "Request a Quote or Customisation"}
           onRequestQuote={() => setQuoteRequestOpen(true)}
           onPlaceOrder={handleDirectCheckout}
           placingOrder={checkoutLoading}
         />
+
+        {/* Dev-only role preview switcher */}
+        <DevRoleToggle />
 
 
 
@@ -2098,7 +2141,23 @@ const PublicProductPage: React.FC = () => {
                         )}
                       </h1>
 
-                      {publicRrpLabel && (
+                      {isTradeVerifiedView && mockNetDisplay ? (
+                        <div className="mt-6">
+                          <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
+                            {hasFromPrefix && (
+                              <span className="text-muted-foreground text-[11px] uppercase tracking-[0.22em] align-middle mr-2">From</span>
+                            )}
+                            <span className="text-foreground align-middle">{mockNetLabel}</span>
+                            <span className="ml-2 align-middle font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Net Trade Price</span>
+                          </p>
+                          {retailPlainLabel && (
+                            <p className="mt-1 font-body text-[11px] tracking-[0.04em] text-muted-foreground">
+                              <span className="line-through decoration-muted-foreground/50">Retail: {retailPlainLabel}</span>
+                            </p>
+                          )}
+                          <ShippingDetailsAccordion />
+                        </div>
+                      ) : publicRrpLabel && (
                         <div className="mt-6">
                           <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
                             {(() => {
@@ -2114,6 +2173,11 @@ const PublicProductPage: React.FC = () => {
                               );
                             })()}
                           </p>
+                          {isTradeUnverifiedView && (
+                            <p className="mt-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-amber-600">
+                              Trade Program Verification Pending
+                            </p>
+                          )}
                           <ShippingDetailsAccordion />
                         </div>
                       )}
@@ -2257,7 +2321,23 @@ const PublicProductPage: React.FC = () => {
                       )}
                     </h1>
 
-                    {publicRrpLabel && (
+                    {isTradeVerifiedView && mockNetDisplay ? (
+                      <div className="mt-6">
+                        <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
+                          {hasFromPrefix && (
+                            <span className="text-muted-foreground text-[11px] uppercase tracking-[0.22em] align-middle mr-2">From</span>
+                          )}
+                          <span className="text-foreground align-middle">{mockNetLabel}</span>
+                          <span className="ml-2 align-middle font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Net Trade Price</span>
+                        </p>
+                        {retailPlainLabel && (
+                          <p className="mt-1 font-body text-[11px] tracking-[0.04em] text-muted-foreground">
+                            <span className="line-through decoration-muted-foreground/50">Retail: {retailPlainLabel}</span>
+                          </p>
+                        )}
+                        <ShippingDetailsAccordion />
+                      </div>
+                    ) : publicRrpLabel && (
                       <div className="mt-6">
                         <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
                           {(() => {
@@ -2273,6 +2353,11 @@ const PublicProductPage: React.FC = () => {
                             );
                           })()}
                         </p>
+                        {isTradeUnverifiedView && (
+                          <p className="mt-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-amber-600">
+                            Trade Program Verification Pending
+                          </p>
+                        )}
                         <ShippingDetailsAccordion />
                       </div>
                     )}
@@ -2310,10 +2395,32 @@ const PublicProductPage: React.FC = () => {
 
                     {/* Action block sits directly beneath the finish selector,
                         ahead of the supporting technical details. */}
-                    {!user && !authLoading && (
+                    {showPublicCommerce && (
                       <ProductCommerceCta
                         productId={product.id}
                         rrpLabel={publicRrpLabel}
+                        productTitle={product.title}
+                        designerName={designerDisplay}
+                        imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
+                        leadTime={product.lead_time}
+                        onPlaceOrder={handleDirectCheckout}
+                        placingOrder={checkoutLoading}
+                        onRequestQuote={() => setQuoteRequestOpen(true)}
+                        selectedFinishes={selectedFinishes}
+                        redirectTo={location.pathname + location.search}
+                        utilityLinks={renderUtilityLinks()}
+                      />
+                    )}
+
+                    {/* Dev role preview — verified trade: in-flow net-price
+                        action block with workspace / studio buttons. */}
+                    {showMockTradeCommerce && (
+                      <ProductCommerceCta
+                        productId={product.id}
+                        rrpLabel={publicRrpLabel}
+                        tradeApproved
+                        netLabelOverride={mockNetLabel}
+                        retailLabelOverride={retailPlainLabel}
                         productTitle={product.title}
                         designerName={designerDisplay}
                         imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
@@ -2377,7 +2484,7 @@ const PublicProductPage: React.FC = () => {
 
               {/* Mobile/PWA sticky bottom dock for signed-out visitors —
                   the in-flow panel lives in the desktop branch above. */}
-              {!user && !authLoading && (
+              {showPublicCommerce && (
                 <ProductCommerceCta
                   productId={product.id}
                   rrpLabel={publicRrpLabel}
@@ -2394,10 +2501,31 @@ const PublicProductPage: React.FC = () => {
                 />
               )}
 
+              {/* Dev role preview — verified trade mobile dock */}
+              {showMockTradeCommerce && (
+                <ProductCommerceCta
+                  productId={product.id}
+                  rrpLabel={publicRrpLabel}
+                  tradeApproved
+                  dockOnly
+                  netLabelOverride={mockNetLabel}
+                  retailLabelOverride={retailPlainLabel}
+                  productTitle={product.title}
+                  designerName={designerDisplay}
+                  imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
+                  leadTime={product.lead_time}
+                  onPlaceOrder={handleDirectCheckout}
+                  placingOrder={checkoutLoading}
+                  onRequestQuote={() => setQuoteRequestOpen(true)}
+                  selectedFinishes={selectedFinishes}
+                  redirectTo={location.pathname + location.search}
+                />
+              )}
+
               {/* Signed-in visitors. Verified trade members get the full
                   workspace (net pricing, availability, spec sheet + Felix);
                   everyone else signed in keeps the enquiry CTA. */}
-              {user && (() => {
+              {user && !roleOverridden && (() => {
                 const returnTo = typeof window !== "undefined" ? location.pathname + location.search : "";
                 const q = new URLSearchParams({
                   subject: `Price upon Request — ${product.title} by ${designerDisplay}`,
@@ -2772,5 +2900,11 @@ const PublicProductPage: React.FC = () => {
     </div>
   );
 };
+
+const PublicProductPage: React.FC = () => (
+  <UserRoleProvider>
+    <PublicProductPageContent />
+  </UserRoleProvider>
+);
 
 export default PublicProductPage;
