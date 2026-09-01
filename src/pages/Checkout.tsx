@@ -333,12 +333,14 @@ function StickyTotals({
   total,
   cta,
   busy,
+  ready = true,
   onSubmit,
 }: {
   lines: CheckoutLine[];
   total: number;
   cta: string;
   busy: boolean;
+  ready?: boolean;
   onSubmit: () => void;
 }) {
   const currency = orderCurrency(lines);
