@@ -1812,10 +1812,7 @@ const PublicProductPageContent: React.FC = () => {
       handlePlaceOrder();
       return;
     }
-    if (!user) {
-      requireAuth(() => {}, "place an order");
-      return;
-    }
+    // Guest checkout by design — no account wall before Stripe.
     void startDirectCheckout(quantity);
   };
 
