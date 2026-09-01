@@ -496,6 +496,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
 
   // Report the displayed swatch names upward (see onDisplayedFinishesChange).
   useEffect(() => {
+    console.log('[dbg displayed]', selectedFabricItem?.name, selectedWoodItem?.name, selectedTopItem?.name, !!onDisplayedFinishesChange);
     onDisplayedFinishesChange?.({
       upholstery: selectedFabricItem?.name ?? null,
       base: selectedWoodItem?.name ?? null,
