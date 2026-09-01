@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAccountDiscount } from "@/hooks/useAccountDiscount";
 import { releaseBodyScroll } from "@/lib/bodyScrollLock";
+
 
 import {
   useCart,
@@ -41,9 +43,13 @@ export default function Cart() {
 
   const currency = items[0]?.currency || "USD";
   const subtotal = useMemo(() => cartSubtotalCents(items), [items]);
+  // Account-level tier discount (admin / verified trade), resolved from the
+  // backend and re-applied server-side before payment.
+  const discount = useAccountDiscount();
   // Delivery is quoted by the advisor post-purchase, so the displayed total
-  // matches the goods subtotal exactly (no invented shipping figure).
-  const total = subtotal;
+  // is the goods subtotal less any tier discount (no invented shipping figure).
+  const total = discount.totalFor(subtotal);
+
 
   // "Continue Selection" returns to the curator's picks of the designer whose
   // piece was added last, rather than the generic designers landing page.
@@ -289,6 +295,14 @@ export default function Cart() {
                     <dt className="text-muted-foreground">Subtotal</dt>
                     <dd className="tabular-nums">{formatMoney(subtotal, currency)}</dd>
                   </div>
+                  {discount.eligible && (
+                    <div className="flex items-baseline justify-between gap-6">
+                      <dt className="text-muted-foreground">{discount.label}</dt>
+                      <dd className="tabular-nums text-foreground">
+                        −{formatMoney(discount.amountFor(subtotal), currency)}
+                      </dd>
+                    </div>
+                  )}
                   <div className="flex items-baseline justify-between gap-6">
                     <dt className="text-muted-foreground">Front Door Premium Delivery</dt>
                     <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
@@ -298,6 +312,7 @@ export default function Cart() {
                     <dd className="tabular-nums font-medium text-base">{formatMoney(total, currency)}</dd>
                   </div>
                 </dl>
+
 
                 <div className="mt-7 space-y-3">
                   <Button

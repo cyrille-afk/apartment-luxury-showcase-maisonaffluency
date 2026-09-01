@@ -5734,6 +5734,9 @@ export type Database = {
         Row: {
           created_at: string
           currency: string
+          discount_cents: number
+          discount_label: string | null
+          discount_pct: number
           email: string | null
           full_name: string | null
           id: string
@@ -5751,6 +5754,9 @@ export type Database = {
         Insert: {
           created_at?: string
           currency?: string
+          discount_cents?: number
+          discount_label?: string | null
+          discount_pct?: number
           email?: string | null
           full_name?: string | null
           id?: string
@@ -5768,6 +5774,9 @@ export type Database = {
         Update: {
           created_at?: string
           currency?: string
+          discount_cents?: number
+          discount_label?: string | null
+          discount_pct?: number
           email?: string | null
           full_name?: string | null
           id?: string

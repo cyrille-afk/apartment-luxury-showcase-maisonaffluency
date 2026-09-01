@@ -111,7 +111,50 @@ serve(async (req) => {
     if (!lines.length) return json({ error: "These pieces are price upon request — please send an enquiry instead." }, 400);
 
     const currency = lines[0].currency || "usd";
+    const grossSubtotal = lines.reduce((s, l) => s + l.line_total_cents, 0);
+
+    // ---- Account-level tier discount (re-derived server-side) -------------
+    // Never trust a discount sent by the client: eligibility comes from
+    // `user_roles` / `profiles.trade_status`, the rate from `trade_tier_config`.
+    let discountPct = 0;
+    let discountLabel: string | null = null;
+    if (userId) {
+      const [rolesRes, profileRes] = await Promise.all([
+        supabaseAdmin.from("user_roles").select("role").eq("user_id", userId),
+        supabaseAdmin.from("profiles").select("trade_tier, trade_status").eq("id", userId).maybeSingle(),
+      ]);
+      const roles: string[] = (rolesRes.data || []).map((r: any) => String(r.role));
+      const isAdmin = roles.includes("admin") || roles.includes("super_admin");
+      const eligible =
+        isAdmin || roles.includes("trade_user") || profileRes.data?.trade_status === "approved";
+      if (eligible) {
+        const rawTier = String(profileRes.data?.trade_tier || "silver");
+        const tier = ["silver", "gold", "platinum"].includes(rawTier) ? rawTier : "silver";
+        const { data: cfg } = await supabaseAdmin
+          .from("trade_tier_config")
+          .select("tier, discount_pct, label")
+          .eq("tier", tier)
+          .maybeSingle();
+        const pct = Number(cfg?.discount_pct);
+        const fallback: Record<string, number> = { silver: 0.08, gold: 0.10, platinum: 0.15 };
+        discountPct = Number.isFinite(pct) && pct > 0 ? pct : fallback[tier];
+        const pretty = `${(discountPct * 100).toFixed(discountPct * 100 % 1 === 0 ? 0 : 1)}%`;
+        const scope = isAdmin ? "Administrator" : `Trade · ${cfg?.label || tier}`;
+        discountLabel = `${scope} Discount (${pretty})`;
+      }
+    }
+
+    // Apply the discount to each unit price so the Stripe line items, the
+    // stored order rows and the on-screen summary all agree to the cent.
+    if (discountPct > 0) {
+      for (const l of lines) {
+        l.unit_price_cents = Math.round(l.unit_price_cents * (1 - discountPct));
+        l.line_total_cents = l.unit_price_cents * l.quantity;
+      }
+    }
+
     const subtotal = lines.reduce((s, l) => s + l.line_total_cents, 0);
+    const discountCents = grossSubtotal - subtotal;
     const shipping = Math.round(subtotal * SHIPPING_RATE);
     const total = subtotal + shipping;
 
@@ -127,7 +170,10 @@ serve(async (req) => {
         payment_method: method,
         status: method === "bank_transfer" ? "awaiting_bank_transfer" : "pending",
         currency,
-        subtotal_cents: subtotal,
+        subtotal_cents: grossSubtotal,
+        discount_cents: discountCents,
+        discount_pct: discountPct,
+        discount_label: discountLabel,
         shipping_cents: shipping,
         total_cents: total,
         notes,
