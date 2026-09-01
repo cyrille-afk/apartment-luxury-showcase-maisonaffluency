@@ -168,7 +168,7 @@ const OrderConfirmationPage = lazy(() => import("./pages/OrderConfirmation"));
 const SuccessPage = lazy(() => import("./pages/Success"));
 const CheckoutPage = lazy(() => import("./pages/Checkout"));
 const ConciergePage = lazy(() => import("./pages/ConciergePage"));
-const PublicProductPage = lazy(() => import("./pages/PublicProductPage"));
+const ProductPageContainer = lazy(() => import("./pages/ProductPageContainer"));
 const CategoryRoute = lazy(() => import("./pages/CategoryRoute"));
 const ScreenshotGallery = lazy(() => import("./pages/ScreenshotGallery"));
 const CuratorsPicksDemo = lazy(() => import("./pages/CuratorsPicksDemo"));
@@ -612,7 +612,7 @@ const App = () => {
                   {/* Public designers directory — hidden from nav until all data is populated */}
                   <Route path="/designers" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesigners /></Suspense>} />
                   <Route path="/designers/:slug/biography" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesignerBiography /></Suspense>} />
-                  <Route path="/designers/:slug/:productSlug" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicProductPage /></Suspense>} />
+                  <Route path="/designers/:slug/:productSlug" element={<Suspense fallback={<PageLoadingSkeleton />}><ProductPageContainer isInsideTradePortal={false} /></Suspense>} />
 
                   <Route path="/designers/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesignerProfile /></Suspense>} />
                   <Route path="/favorites" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicFavorites /></Suspense>} />
@@ -702,8 +702,8 @@ const App = () => {
                     <Route path="admin/price-drift" element={<Suspense fallback={<PageLoadingSkeleton />}><TradePriceDriftAudit /></Suspense>} />
                     <Route path="designers/instagram" element={<TradeInstagramAudit />} />
                     <Route path="designers/:slug" element={<TradeAtelierProfile />} />
-                    <Route path="products/:id" element={<TradeProductPage />} />
-                    <Route path="products/:slug/:productSlug" element={<TradeProductPage />} />
+                    <Route path="products/:id" element={<Suspense fallback={<PageLoadingSkeleton />}><ProductPageContainer isInsideTradePortal /></Suspense>} />
+                    <Route path="products/:slug/:productSlug" element={<Suspense fallback={<PageLoadingSkeleton />}><ProductPageContainer isInsideTradePortal /></Suspense>} />
                     <Route path="boards" element={<TradeBoards />} />
                     <Route path="boards/:id" element={<TradeBoardBuilder />} />
                     <Route path="projects" element={<TradeProjects />} />
