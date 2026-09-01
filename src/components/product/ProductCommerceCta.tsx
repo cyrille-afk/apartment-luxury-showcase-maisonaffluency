@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Loader2, Minus, Plus, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import QuoteBriefIntake from "@/components/product/QuoteBriefIntake";
+import SelectionDrawer, { type PaymentMethod } from "@/components/product/SelectionDrawer";
 
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
@@ -250,6 +251,19 @@ export default function ProductCommerceCta({
   const goToCheckout = () => {
     setMiniCartOpen(false);
     onPlaceOrder(quantity);
+  };
+
+  // Drawer footer: online → Stripe checkout; wire → checkout with the wire
+  // method pre-selected via a one-shot flag.
+  const handleCheckout = (method: PaymentMethod) => {
+    if (method === "wire") {
+      try {
+        sessionStorage.setItem("ma_checkout_wire", "1");
+      } catch {
+        /* private mode — falls back to the online flow */
+      }
+    }
+    goToCheckout();
   };
 
   return (
