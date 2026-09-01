@@ -162,7 +162,12 @@ export default function ProductCommerceCta({
   utilityLinks,
 }: ProductCommerceCtaProps) {
   const [accessOpen, setAccessOpen] = useState(false);
-  const [quantity, setQuantity] = useState(1);
+  // Quantity lives in the container engine so both layout variants share it;
+  // falls back to local state when rendered outside ProductPageContainer.
+  const productConfig = useProductConfigOptional();
+  const [localQuantity, setLocalQuantity] = useState(1);
+  const quantity = productConfig ? productConfig.quantity : localQuantity;
+  const setQuantity = productConfig ? productConfig.setQuantity : setLocalQuantity;
   const [miniCartOpen, setMiniCartOpen] = useState(false);
   const [manualForm, setManualForm] = useState(false);
   const { clientSafe } = useClientSafeMode();
