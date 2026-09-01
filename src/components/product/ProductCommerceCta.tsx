@@ -154,6 +154,7 @@ export default function ProductCommerceCta({
   netLabelOverride = null,
   retailLabelOverride = null,
   onPlaceOrder,
+  onAddToCart,
   placingOrder = false,
   onRequestQuote,
   selectedFinishes = [],
