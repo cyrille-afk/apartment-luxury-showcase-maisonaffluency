@@ -186,8 +186,8 @@ export default function ProductCommerceCta({
     }
   };
 
-  const retailLabel = fmt(baseRrpCents) ?? rrpLabel ?? null;
-  const netLabel = tradeApproved && !clientSafe ? fmt(netCents) : null;
+  const retailLabel = retailLabelOverride ?? fmt(baseRrpCents) ?? rrpLabel ?? null;
+  const netLabel = netLabelOverride ?? (tradeApproved && !clientSafe ? fmt(netCents) : null);
   const displayNet = netLabel ?? (tradeApproved && rrpLabel && discountPct ? null : null);
 
   const finishQuery = selectedFinishes.length
@@ -201,13 +201,15 @@ export default function ProductCommerceCta({
 
   const primaryLabel = tradeApproved ? "Add to Co-Pilot Workspace & Order" : "Place Order";
   const secondaryLabel = tradeApproved
-    ? "Open 3D Studio & Axonometric Planning"
+    ? "Open Axonometric Studio"
     : "Request a Quote or Customisation";
 
   // Public: PLACE ORDER opens the slide-out mini-cart drawer (order confirmation),
   // which then hands off to checkout with the chosen quantity.
+  // Verified trade: secondary opens the brief-upload portal (QuoteBriefIntake).
   const primaryAction = tradeApproved ? undefined : () => setMiniCartOpen(true);
-  const secondaryAction = tradeApproved ? openStudio : () => setAccessOpen(true);
+  const secondaryAction = tradeApproved ? () => setAccessOpen(true) : () => setAccessOpen(true);
+  void openStudio;
 
   // Lock body scroll while the drawer is open.
   useEffect(() => {
