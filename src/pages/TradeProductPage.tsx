@@ -64,6 +64,7 @@ import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageInde
 import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
@@ -510,7 +511,14 @@ const TradeProductPage: React.FC = () => {
   const { toast } = useToast();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
-  const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
+  // Pricing math is owned by the container engine (ProductConfigContext) so
+  // Variant A and Variant B always resolve identical figures. Falls back to the
+  // tier hook when this layout is rendered outside the container.
+  const productConfig = useProductConfigOptional();
+  const tierFallback = useTradeDiscount();
+  const TRADE_DISCOUNT = productConfig?.tierDiscountPct ?? tierFallback.discountPct;
+  const discountLabel = productConfig?.discountLabel ?? tierFallback.discountLabel;
+  const tierLabel = productConfig?.tierLabel ?? tierFallback.tierLabel;
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
 
   // ── Smart back navigation ──

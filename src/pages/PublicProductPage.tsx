@@ -305,6 +305,16 @@ const VariantSelectorsProvider: React.FC<{
   const [selSize, setSelSize] = useState<string | null>(stored?.size ?? null);
   const [defaultPair, setDefaultPair] = useState<{ base: string; top: string } | null>(null);
 
+  // Mirror the finish selection into the container engine so the trade
+  // dashboard variant and this editorial variant share one selection.
+  const finishConfig = useProductConfigOptional();
+  useEffect(() => {
+    finishConfig?.setSelectedWoodFinish(selBase);
+  }, [finishConfig, selBase]);
+  useEffect(() => {
+    finishConfig?.setSelectedUpholstery(selTop);
+  }, [finishConfig, selTop]);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
