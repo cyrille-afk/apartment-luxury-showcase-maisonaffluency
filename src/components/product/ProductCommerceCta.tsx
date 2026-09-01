@@ -42,6 +42,8 @@ export interface ProductCommerceCtaProps {
   retailLabelOverride?: string | null;
   /** Direct Stripe checkout — receives the chosen quantity */
   onPlaceOrder: (quantity?: number) => void;
+  /** Persists the configured piece into the shared cart state (no navigation) */
+  onAddToCart?: (quantity: number) => void;
   placingOrder?: boolean;
   onRequestQuote: () => void;
   /** Trade: finish selection carried to the workspace */
