@@ -2459,7 +2459,7 @@ const TradeProductPage: React.FC = () => {
                 <button
                   type="button"
                   disabled
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-foreground/30 bg-foreground text-background opacity-50 cursor-not-allowed w-full"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none font-body text-[10px] uppercase tracking-[0.18em] transition-colors border border-border bg-background text-foreground opacity-50 cursor-not-allowed w-full"
                 >
                   {finishesLoading ? (
                     <>
@@ -2475,6 +2475,8 @@ const TradeProductPage: React.FC = () => {
                 </button>
               )
             )}
+              </div>
+            </div>
 
             {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}
             <CadAssetsSection productId={tradeProductId} productName={product.title} />
