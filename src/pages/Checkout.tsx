@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Elements, PaymentElement, AddressElement, ExpressCheckoutElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
@@ -22,6 +22,8 @@ const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quali
 const CONCIERGE_WHATSAPP = "https://wa.me/6591393850";
 const CHECKOUT_KEY = "ma_checkout_line";
 
+
+export type ConfirmedShipping = { cents: number; label: string };
 
 export type CheckoutLine = {
   title: string;
@@ -488,7 +490,10 @@ export default function Checkout() {
   const { pct: hookDiscountPct } = useAccountDiscount();
   const [serverDiscountPct, setServerDiscountPct] = useState<number | null>(null);
   const effectiveDiscountPct = serverDiscountPct ?? hookDiscountPct;
-  const lines = useMemo(
+  // Shipping stays "To be Quoted by Advisor" until the buyer confirms an
+  // advisor-issued quote; only then is it added to the Stripe payload.
+  const [shipping, setShipping] = useState<ConfirmedShipping | null>(null);
+  const goodsLines = useMemo(
     () =>
       grossLines && effectiveDiscountPct > 0
         ? grossLines.map((l) => ({
@@ -498,6 +503,21 @@ export default function Checkout() {
         : grossLines,
     [grossLines, effectiveDiscountPct],
   );
+  // The charged order = goods + (confirmed) shipping. When shipping is still
+  // to be quoted there is no shipping line at all, so nothing reaches Stripe.
+  const lines = useMemo<CheckoutLine[] | null>(() => {
+    if (!goodsLines) return null;
+    if (!shipping) return goodsLines;
+    return [
+      ...goodsLines,
+      {
+        title: shipping.label || "Delivery & installation — confirmed advisor quote",
+        unitCents: shipping.cents,
+        currency: orderCurrency(goodsLines),
+        quantity: 1,
+      },
+    ];
+  }, [goodsLines, shipping]);
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [email, setEmail] = useState("");
@@ -517,6 +537,8 @@ export default function Checkout() {
   const [confirmed, setConfirmed] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const initialised = useRef(false);
+  const intentIdRef = useRef<string>("");
+  const [syncing, setSyncing] = useState(false);
 
   // Resolve the order from router state, then sessionStorage, then the saved
   // cart — so Place Order, Go to Checkout and a direct URL all load the same
@@ -575,58 +597,101 @@ export default function Checkout() {
   }, [location.state, navigate]);
 
 
-  useEffect(() => {
-    if (!grossLines?.length || initialised.current) return;
-    initialised.current = true;
-    const first = grossLines[0];
-    (async () => {
+  // Creates (or re-prices) the PaymentIntent. Re-runs whenever the buyer
+  // confirms or clears a shipping quote so Stripe always matches the UI total.
+  const syncIntent = useCallback(
+    async (nextShipping: ConfirmedShipping | null) => {
+      if (!grossLines?.length) return;
+      const first = grossLines[0];
+      setError(null);
+      setSyncing(true);
       try {
-        const [{ data: cfg, error: cfgErr }, { data: pi, error: piErr }] = await Promise.all([
-          supabase.functions.invoke("stripe-config"),
-          supabase.functions.invoke("create-payment-intent", {
-            body: {
-              // Backward-compatible single-item fields (first line) …
-              title: first.title,
-              designer: first.designer || "",
-              price: first.unitCents / 100,
-              currency: orderCurrency(grossLines),
-              selectedFinish: first.finishLabel || "",
-              quantity: lineQty(first),
-              // … plus the full order, which the function charges when present.
-              // Gross prices — the discount is re-derived server-side.
-              items: grossLines.map((l) => ({
-                title: l.title,
-                designer: l.designer || "",
-                selectedFinish: l.finishLabel || "",
-                price: l.unitCents / 100,
-                quantity: lineQty(l),
-              })),
-            },
-          }),
+        const piBody: Record<string, unknown> = {
+          // Backward-compatible single-item fields (first line) …
+          title: first.title,
+          designer: first.designer || "",
+          price: first.unitCents / 100,
+          currency: orderCurrency(grossLines),
+          selectedFinish: first.finishLabel || "",
+          quantity: lineQty(first),
+          // … plus the full order, which the function charges when present.
+          // Gross prices — the tier rate is re-derived server-side.
+          items: grossLines.map((l) => ({
+            title: l.title,
+            designer: l.designer || "",
+            selectedFinish: l.finishLabel || "",
+            price: l.unitCents / 100,
+            quantity: lineQty(l),
+          })),
+          // Shipping is only ever sent once explicitly confirmed.
+          shippingConfirmed: !!nextShipping,
+          shippingCents: nextShipping?.cents ?? 0,
+          shippingLabel: nextShipping?.label ?? "",
+          paymentIntentId: intentIdRef.current || undefined,
+        };
+
+        const needsConfig = !stripePromise;
+        const [cfgRes, piRes] = await Promise.all([
+          needsConfig
+            ? supabase.functions.invoke("stripe-config")
+            : Promise.resolve({ data: null, error: null } as any),
+          supabase.functions.invoke("create-payment-intent", { body: piBody }),
         ]);
-        if (cfgErr || (cfg as any)?.error) throw new Error((cfg as any)?.error || "Stripe is not configured.");
-        if (piErr || (pi as any)?.error) throw new Error((pi as any)?.error || "Unable to start checkout.");
+        const cfg = (cfgRes as any)?.data;
+        if (needsConfig && ((cfgRes as any)?.error || cfg?.error)) {
+          throw new Error(cfg?.error || "Stripe is not configured.");
+        }
+        const pi = (piRes as any)?.data;
+        if ((piRes as any)?.error || pi?.error) {
+          throw new Error(pi?.error || "Unable to start checkout.");
+        }
 
         // Guardrail: the amount Stripe will charge must equal the cart-derived total.
-        const serverPct = Number((pi as any)?.discountPct) || 0;
+        const serverPct = Number(pi?.discountPct) || 0;
         setServerDiscountPct(serverPct);
-        const chargedLines = serverPct > 0
-          ? grossLines.map((l) => ({ ...l, unitCents: Math.round(l.unitCents * (1 - serverPct)) }))
-          : grossLines;
+        const serverShippingCents = Number(pi?.shippingCents) || 0;
+        const currency = orderCurrency(grossLines);
+        const chargedLines: CheckoutLine[] = grossLines.map((l) => ({
+          ...l,
+          unitCents: serverPct > 0 ? Math.round(l.unitCents * (1 - serverPct)) : l.unitCents,
+        }));
+        if (serverShippingCents > 0) {
+          chargedLines.push({
+            title: pi?.shippingLabel || "Delivery & installation — confirmed advisor quote",
+            unitCents: serverShippingCents,
+            currency,
+            quantity: 1,
+          });
+        }
         const check = reconcileBackendAmount(
           buildVerifiedTotals(chargedLines),
-          (pi as any)?.amount,
-          (pi as any)?.currency,
+          pi?.amount,
+          pi?.currency,
         );
         if (check.ok === false) throw new Error(check.reason);
 
-        setStripePromise(loadStripe((cfg as any).publishableKey));
-        setClientSecret((pi as any).clientSecret);
+        intentIdRef.current = String(pi?.paymentIntentId || "");
+        setShipping(
+          serverShippingCents > 0
+            ? { cents: serverShippingCents, label: String(pi?.shippingLabel || "") }
+            : null,
+        );
+        if (needsConfig) setStripePromise(loadStripe(cfg.publishableKey));
+        setClientSecret(pi.clientSecret);
       } catch (err: any) {
         setError(err?.message || "Unable to start checkout.");
+      } finally {
+        setSyncing(false);
       }
-    })();
-  }, [grossLines]);
+    },
+    [grossLines, stripePromise],
+  );
+
+  useEffect(() => {
+    if (!grossLines?.length || initialised.current) return;
+    initialised.current = true;
+    void syncIntent(null);
+  }, [grossLines, syncIntent]);
 
   const appearance = useMemo(
     () => ({
