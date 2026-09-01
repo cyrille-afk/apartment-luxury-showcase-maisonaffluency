@@ -256,6 +256,19 @@ export default function ProductCommerceCta({
     };
   }, [miniCartOpen]);
 
+  // Drawer quantity stepper: raising the quantity to 2+ crosses the full-page
+  // threshold — sync the line into the shared cart and switch layouts
+  // instantly instead of leaving the drawer in a stale single-item state.
+  const handleDrawerQuantity = (q: number) => {
+    setQuantity(q);
+    if (shouldUseFullPageCart(getCart())) return; // already routed
+    if (q >= 2) {
+      onAddToCart?.(q);
+      setMiniCartOpen(false);
+      navigate("/cart");
+    }
+  };
+
   const goToCheckout = () => {
     setMiniCartOpen(false);
     onPlaceOrder(quantity);
@@ -375,7 +388,7 @@ export default function ProductCommerceCta({
           priceLabel={(retailLabel || rrpLabel) ? `From ${(retailLabel ?? rrpLabel ?? "").replace(/^From\s+/i, "")}` : null}
           imageUrl={imageUrl}
           quantity={quantity}
-          onQuantityChange={setQuantity}
+          onQuantityChange={handleDrawerQuantity}
           onCheckout={handleCheckout}
           placing={placingOrder}
         />
