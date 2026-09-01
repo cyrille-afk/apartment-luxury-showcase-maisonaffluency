@@ -118,7 +118,7 @@ export default function SelectionDrawer({
       >
         {/* ── 1 · Sticky header ─────────────────────────────────────────── */}
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-border/60 px-6">
-          <h2 className="font-body text-xs font-medium uppercase tracking-widest text-foreground">
+          <h2 className="font-body text-[10px] font-medium uppercase tracking-widest text-foreground">
             Your Selection
           </h2>
           <button
