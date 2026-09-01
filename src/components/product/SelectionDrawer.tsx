@@ -66,10 +66,70 @@ export default function SelectionDrawer({
 }: SelectionDrawerProps) {
   const [method, setMethod] = useState<PaymentMethod>("online");
   const [localQty, setLocalQty] = useState(1);
+  // Inline concierge widget state — replaces the trust block when engaged.
+  const [conciergeOpen, setConciergeOpen] = useState(false);
+  const [conciergePhone, setConciergePhone] = useState("");
+  const [conciergeMessage, setConciergeMessage] = useState("");
+  const [conciergeError, setConciergeError] = useState<string | null>(null);
+  const [conciergeSending, setConciergeSending] = useState(false);
+  const [conciergeSent, setConciergeSent] = useState(false);
   const quantity = quantityProp ?? localQty;
   const setQuantity = (q: number) => {
     setLocalQty(q);
     onQuantityChange?.(q);
+  };
+
+  const sendConciergeText = async () => {
+    const phone = conciergePhone.trim();
+    const message = conciergeMessage.trim();
+    if (!PHONE_RE.test(phone)) {
+      setConciergeError("Enter a valid mobile / WhatsApp number (7–20 digits, + allowed).");
+      return;
+    }
+    if (message.length < 3) {
+      setConciergeError("Add a short message so our concierge knows how to help.");
+      return;
+    }
+    if (message.length > MESSAGE_MAX) {
+      setConciergeError(`Keep the message under ${MESSAGE_MAX} characters.`);
+      return;
+    }
+    setConciergeError(null);
+    setConciergeSending(true);
+    try {
+      const sessionId =
+        sessionStorage.getItem("ma_concierge_session") ??
+        (() => {
+          const id = crypto.randomUUID();
+          sessionStorage.setItem("ma_concierge_session", id);
+          return id;
+        })();
+      const firstMessage = [
+        "[Cart concierge request]",
+        `Mobile / WhatsApp: ${phone}`,
+        `Piece: ${[brand, title].filter(Boolean).join(" — ") || "Unknown"}`,
+        configuration ? `Configuration: ${configuration}` : null,
+        "",
+        message,
+      ]
+        .filter((l) => l !== null)
+        .join("\n");
+      const { error } = await supabase.functions.invoke("concierge-capture", {
+        body: {
+          surface: "public",
+          session_id: sessionId,
+          first_message: firstMessage,
+          path: window.location.pathname.slice(0, 500),
+          referrer: document.referrer ? document.referrer.slice(0, 500) : null,
+        },
+      });
+      if (error) throw error;
+      setConciergeSent(true);
+    } catch {
+      setConciergeError("Could not send right now — please try again in a moment.");
+    } finally {
+      setConciergeSending(false);
+    }
   };
 
   // Freeze the page behind the sheet while it is open.
