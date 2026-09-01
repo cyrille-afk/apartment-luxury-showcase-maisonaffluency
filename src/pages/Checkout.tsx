@@ -13,7 +13,7 @@ import { getCart } from "@/lib/cart";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 const CONCIERGE_WHATSAPP = "https://wa.me/6591393850";
 const CHECKOUT_KEY = "ma_checkout_line";
-const WIRE_DISCOUNT = 0.015;
+
 
 export type CheckoutLine = {
   title: string;
