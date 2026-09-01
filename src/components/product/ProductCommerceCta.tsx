@@ -1,3 +1,4 @@
+import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
 import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Loader2, Minus, Plus, X } from "lucide-react";
