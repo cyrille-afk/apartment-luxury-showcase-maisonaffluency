@@ -26,10 +26,20 @@ export default function ActiveSwatchCaption({
   pickId,
   activeIndex,
   variant = "dark",
+  selectedNames,
 }: {
   pickId: string | null | undefined;
   activeIndex: number | undefined;
   variant?: CaptionVariant;
+  /**
+   * Names of the finishes the user has actively selected (upholstery, base,
+   * top). When provided, the caption reflects the user's selection rather
+   * than only the per-image `image_indices` mapping — dual-axis products
+   * (e.g. fabric + wood) photograph each fabric against ONE wood variant,
+   * so index matching alone would drop the chosen fabric caption whenever a
+   * different wood is selected.
+   */
+  selectedNames?: Array<string | null | undefined>;
 }) {
   const [swatches, setSwatches] = useState<Swatch[]>([]);
 
