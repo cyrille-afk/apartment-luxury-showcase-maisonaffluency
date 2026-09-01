@@ -1710,9 +1710,14 @@ const PublicProductPageContent: React.FC = () => {
     return true;
   };
 
-  /** Sticky banners: open the mini-cart instead of the account wall. */
-  const openSelectionDrawer = (qty = 1) => {
-    if (!addConfiguredToCart(qty)) {
+  /**
+   * Sticky banners: open the mini-cart instead of the account wall. The CTA
+   * instance that owns the drawer performs the cart write (via onAddToCart),
+   * so this only routes the intent.
+   */
+  const openSelectionDrawer = () => {
+    const unit = selectedRrp?.cents || Number(publicRrpRow?.rrp_price_cents) || 0;
+    if (!unit) {
       handlePlaceOrder();
       return;
     }
