@@ -15,7 +15,6 @@ import {
   removeFromCart,
   clearCart,
   cartSubtotalCents,
-  cartShippingCents,
   formatMoney,
 } from "@/lib/cart";
 
@@ -40,8 +39,9 @@ export default function Cart() {
 
   const currency = items[0]?.currency || "USD";
   const subtotal = useMemo(() => cartSubtotalCents(items), [items]);
-  const shipping = cartShippingCents(subtotal);
-  const total = subtotal + shipping;
+  // Delivery is quoted by the advisor post-purchase, so the displayed total
+  // matches the goods subtotal exactly (no invented shipping figure).
+  const total = subtotal;
 
   // "Continue Selection" returns to the curator's picks of the designer whose
   // piece was added last, rather than the generic designers landing page.
