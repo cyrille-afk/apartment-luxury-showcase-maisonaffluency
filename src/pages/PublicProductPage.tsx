@@ -1997,7 +1997,7 @@ const PublicProductPageContent: React.FC = () => {
             <div className="mt-2 grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={handlePlaceOrder}
+                onClick={openSelectionDrawer}
                 className="flex items-center justify-center px-3 py-2.5 rounded-luxury-micro bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
               >
                 Place an Order
@@ -2026,7 +2026,7 @@ const PublicProductPageContent: React.FC = () => {
           primaryLabel={isTradeVerifiedView ? "Add to Co-Pilot Workspace & Order" : "Place Order"}
           secondaryLabel={isTradeVerifiedView ? "Open Axonometric Studio" : "Request a Quote or Customisation"}
           onRequestQuote={() => setQuoteRequestOpen(true)}
-          onPlaceOrder={handleDirectCheckout}
+          onPlaceOrder={isTradeVerifiedView ? handleDirectCheckout : openSelectionDrawer}
           placingOrder={checkoutLoading}
         />
 
@@ -2514,6 +2514,7 @@ const PublicProductPageContent: React.FC = () => {
                         imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
                         leadTime={product.lead_time}
                         onPlaceOrder={handleDirectCheckout}
+                        onAddToCart={addConfiguredToCart}
                         placingOrder={checkoutLoading}
                         onRequestQuote={() => setQuoteRequestOpen(true)}
                         selectedFinishes={selectedFinishes}
@@ -2606,6 +2607,7 @@ const PublicProductPageContent: React.FC = () => {
                   imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
                   leadTime={product.lead_time}
                   onPlaceOrder={handleDirectCheckout}
+                  onAddToCart={addConfiguredToCart}
                   placingOrder={checkoutLoading}
                   onRequestQuote={() => setQuoteRequestOpen(true)}
                   selectedFinishes={selectedFinishes}
