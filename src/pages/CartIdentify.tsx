@@ -170,6 +170,11 @@ export default function CartIdentify() {
                 <p className="mt-4 font-body text-sm">
                   Continuing as <span className="text-foreground">{user.email}</span>
                 </p>
+                {discount.eligible && (
+                  <p className="mt-2 font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    {discount.label} applied to this order
+                  </p>
+                )}
                 <Button
                   onClick={() => startCheckout(user.email || undefined)}
                   disabled={busy}
