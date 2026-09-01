@@ -195,10 +195,6 @@ export default function ProductCommerceCta({
     : "";
   const workspaceHref = `/trade/products/${productId}${finishQuery}`;
 
-  const openStudio = () => {
-    window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { openPanel: true } }));
-  };
-
   const primaryLabel = tradeApproved ? "Add to Co-Pilot Workspace & Order" : "Place Order";
   const secondaryLabel = tradeApproved
     ? "Open Axonometric Studio"
@@ -206,10 +202,9 @@ export default function ProductCommerceCta({
 
   // Public: PLACE ORDER opens the slide-out mini-cart drawer (order confirmation),
   // which then hands off to checkout with the chosen quantity.
-  // Verified trade: secondary opens the brief-upload portal (QuoteBriefIntake).
+  // Secondary (both states) opens the brief-upload portal (QuoteBriefIntake).
   const primaryAction = tradeApproved ? undefined : () => setMiniCartOpen(true);
-  const secondaryAction = tradeApproved ? () => setAccessOpen(true) : () => setAccessOpen(true);
-  void openStudio;
+  const secondaryAction = () => setAccessOpen(true);
 
   // Lock body scroll while the drawer is open.
   useEffect(() => {
