@@ -86,10 +86,11 @@ export default function ActiveSwatchCaption({
   // When the user has actively selected finishes, caption the SELECTION —
   // resolves thumbnails by name from the swatch list; names without a swatch
   // row still render (text only).
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
   const chosen = (selectedNames || [])
     .map((n) => (n || "").trim())
-    .filter(Boolean);
-  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    .filter(Boolean)
+    .filter((n, i, arr) => arr.findIndex((o) => norm(o) === norm(n)) === i);
   const captionSwatches: Swatch[] = chosen.length
     ? chosen.map((name) => {
         const hit =
