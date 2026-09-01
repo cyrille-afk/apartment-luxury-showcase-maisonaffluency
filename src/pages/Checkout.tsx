@@ -195,12 +195,14 @@ function ConditionalNotes() {
 /* Card / express payment form                                         */
 /* ------------------------------------------------------------------ */
 function PaymentForm({
-  lines,
+  summary,
+  account,
   email,
   setEmail,
   onPaid,
 }: {
-  lines: CheckoutLine[];
+  summary: CheckoutSummary;
+  account: { email: string; role: string } | null;
   email: string;
   setEmail: (v: string) => void;
   onPaid: (ref: string) => void;
@@ -216,8 +218,7 @@ function PaymentForm({
     const t = setTimeout(() => setLoadStage(1), 2500);
     return () => clearTimeout(t);
   }, [paymentReady]);
-  const total = orderSubtotal(lines);
-  const currency = orderCurrency(lines);
+  const { totalCents: total, currency } = summary;
 
   const confirm = async () => {
     if (!paymentReady || !stripe || !elements) return;
