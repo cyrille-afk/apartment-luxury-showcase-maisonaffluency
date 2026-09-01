@@ -2031,7 +2031,7 @@ const PublicProductPageContent: React.FC = () => {
         />
 
         {/* Dev-only role preview switcher (never rendered in production builds) */}
-        {import.meta.env.DEV && <DevRoleToggle />}
+        {import.meta.env.DEV && typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname) && <DevRoleToggle />}
 
 
 
