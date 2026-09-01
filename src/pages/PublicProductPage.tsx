@@ -1914,17 +1914,24 @@ const PublicProductPageContent: React.FC = () => {
 
         </div>
 
-        {/* Desktop slim sticky purchase bar */}
+        {/* Desktop slim sticky purchase bar — price + button labels follow the
+            effective role so it stays in sync with the sidebar action block. */}
         <StickyPurchaseBar
           triggerId="main-product-image-container"
           image={images[0]}
           title={product.title}
           designer={designerDisplay}
-          price={publicRrpLabel}
+          price={isTradeVerifiedView && mockNetDisplay ? mockNetDisplay : publicRrpLabel}
+          currencyCode={isTradeVerifiedView && mockNetDisplay ? "Net Trade" : undefined}
+          primaryLabel={isTradeVerifiedView ? "Add to Co-Pilot Workspace & Order" : "Place Order"}
+          secondaryLabel={isTradeVerifiedView ? "Open Axonometric Studio" : "Request a Quote or Customisation"}
           onRequestQuote={() => setQuoteRequestOpen(true)}
           onPlaceOrder={handleDirectCheckout}
           placingOrder={checkoutLoading}
         />
+
+        {/* Dev-only role preview switcher */}
+        <DevRoleToggle />
 
 
 
