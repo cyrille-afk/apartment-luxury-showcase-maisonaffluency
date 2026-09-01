@@ -27,7 +27,14 @@ export default function Cart() {
   const [fullName, setFullName] = useState("");
   const [pending, setPending] = useState<null | "card" | "bank_transfer">(null);
 
+  // Landing here always means every overlay is gone — never inherit a stray
+  // scroll lock from a drawer that was open when we navigated.
   useEffect(() => {
+    releaseBodyScroll();
+  }, []);
+
+  useEffect(() => {
+
     if (params.get("status") === "cancelled") {
       toast("Checkout cancelled — your cart is still here.");
     }
