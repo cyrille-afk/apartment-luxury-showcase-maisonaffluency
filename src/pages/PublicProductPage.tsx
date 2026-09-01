@@ -86,6 +86,7 @@ import TradePendingReviewCard from "@/components/product/TradePendingReviewCard"
 import QuoteRequestDialog from "@/components/QuoteRequestDialog";
 import { addToCart } from "@/lib/cart";
 import { usePublicRrp, usePublicRrpMap, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
+import { UserRoleProvider, useUserRole, DevRoleToggle, type UserRole } from "@/contexts/UserRoleContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
@@ -1012,7 +1013,7 @@ const VariantSelectors: React.FC<{
 /* ------------------------------------------------------------------ */
 /*  Page component                                                     */
 /* ------------------------------------------------------------------ */
-const PublicProductPage: React.FC = () => {
+const PublicProductPageContent: React.FC = () => {
   const { slug: designerSlug, productSlug } = useParams<{ slug: string; productSlug: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -2772,5 +2773,11 @@ const PublicProductPage: React.FC = () => {
     </div>
   );
 };
+
+const PublicProductPage: React.FC = () => (
+  <UserRoleProvider>
+    <PublicProductPageContent />
+  </UserRoleProvider>
+);
 
 export default PublicProductPage;
