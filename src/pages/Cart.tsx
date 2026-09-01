@@ -129,7 +129,7 @@ export default function Cart() {
                 {items.map((item) => (
                   <li
                     key={item.key}
-                    className="border border-border/70 bg-white px-6 py-7 sm:px-8 grid grid-cols-1 gap-6 sm:grid-cols-[140px_minmax(0,1fr)_auto_140px] sm:gap-8 sm:items-center"
+                    className="border border-border/70 bg-card px-6 py-7 sm:px-8 grid grid-cols-1 gap-6 sm:grid-cols-[140px_minmax(0,1fr)_auto_140px] sm:gap-8 sm:items-center"
                   >
                     {/* Col 1 — image */}
                     <div className="bg-cream">
@@ -229,7 +229,7 @@ export default function Cart() {
 
               {/* Contact details — moved out of the order summary */}
               {!user && (
-                <section className="mt-10 border border-border/70 bg-white px-6 py-8 sm:px-8">
+                <section className="mt-10 border border-border/70 bg-card px-6 py-8 sm:px-8">
                   <h2 className="font-body text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
                     Contact Details
                   </h2>
