@@ -174,7 +174,10 @@ serve(async (req) => {
         currency,
         customer: customerId,
         receipt_email: email ?? undefined,
-        automatic_payment_methods: { enabled: true },
+        // Card-only keeps the Stripe pane clean: no auto-expanded Link pane.
+        // Apple Pay / Google Pay still surface as card wallets via the
+        // ExpressCheckoutElement, so express buyers are not affected.
+        payment_method_types: ["card"],
         description,
         metadata,
       });
