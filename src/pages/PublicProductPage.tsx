@@ -2800,13 +2800,6 @@ const PublicProductPageContent: React.FC = () => {
           })()}
 
           {relatedPicks.length > 0 && (
-
-
-
-
-
-
-          {relatedPicks.length > 0 && (
             <div id="related-picks-section" className="mt-6 pt-6 border-t border-border">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
                 {/* Mobile-only heading: shown above the carousel */}
