@@ -1728,24 +1728,26 @@ const TradeProductPage: React.FC = () => {
     const prefix = explicitPrefix || (isFromPrice && !hasConcreteSelection ? "From " : "");
 
     return (
-      <div className="flex flex-col gap-1">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="font-display text-2xl text-accent font-semibold">
+      <div className="bg-neutral-50 border border-border rounded-none px-4 pt-3 pb-2.5">
+        {/* Cohesive pricing bar — net price anchored left, struck retail +
+            tier badge anchored right, on an ultra-faint neutral tint. */}
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="font-display text-2xl text-accent font-semibold leading-none whitespace-nowrap">
             {prefix}{formatted}
           </span>
           {showTradePrice && (
-            <>
-              <span className="font-body text-sm text-muted-foreground line-through">
+            <span className="flex items-baseline gap-2.5 min-w-0">
+              <span className="font-body text-[13px] text-muted-foreground line-through whitespace-nowrap">
                 {prefix}{formatPriceConverted(rrp + upcharge, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined)}
               </span>
-              <span className="font-body text-[10px] bg-accent/15 text-accent px-2 py-0.5 rounded-full uppercase tracking-wider" title={`${tierLabel} tier — ${discountLabel} trade discount`}>
+              <span className="font-body text-[10px] bg-accent/15 text-accent px-2 py-0.5 uppercase tracking-[0.14em] whitespace-nowrap" title={`${tierLabel} tier — ${discountLabel} trade discount`}>
                 {tierLabel} –{discountLabel}
               </span>
-            </>
+            </span>
           )}
         </div>
         {(selectedWoodPrice || selectedFabric || (!selectedWoodPrice && !selectedFabric && (selectedTop || (isDualAxis && selectedBase && !baseAxisIsDim && !isFinishAxisLabel(baseAxisLabelRaw) ? false : selectedBase)))) && (
-          <span className="font-body text-[11px] text-muted-foreground">
+          <span className="block mt-2 font-body text-[10px] tracking-[0.06em] text-muted-foreground leading-snug">
             {selectedWoodPrice && (
               <>Frame: {selectedWoodPrice.name}</>
             )}
@@ -1773,7 +1775,12 @@ const TradeProductPage: React.FC = () => {
             })()}
           </span>
         )}
-
+        <button
+          onClick={() => setShowTradePrice(!showTradePrice)}
+          className="mt-2 font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
+        >
+          Show {showTradePrice ? "retail" : "trade"} price
+        </button>
       </div>
     );
   };
