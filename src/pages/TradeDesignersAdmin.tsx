@@ -841,6 +841,17 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   </div>
 
                 </div>
+
+                {/* Crates & customs — multiple crates, size-linked, finish-driven HS codes */}
+                <CratesEditor
+                  crateSpecsRaw={(pick as any).crate_specs}
+                  hsCodeRulesRaw={(pick as any).hs_code_rules}
+                  sizeVariantsRaw={(pick as any).size_variants}
+                  currency={pick.currency}
+                  onChangeCrates={(next) => updateField(pick.id, "crate_specs" as any, next)}
+                  onChangeHsRules={(next) => updateField(pick.id, "hs_code_rules" as any, next)}
+                />
+
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                   <div>
                     <label className="text-[10px] text-muted-foreground">Currency</label>
