@@ -2,13 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Elements, PaymentElement, AddressElement, ExpressCheckoutElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
-import { ChevronDown, Lock, Check, Loader2 } from "lucide-react";
+import { Lock, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { getCart } from "@/lib/cart";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
+import { useAuth } from "@/hooks/useAuth";
 import {
   assertCheckoutCopy,
   buildVerifiedTotals,
@@ -51,77 +52,104 @@ const money = (cents: number, currency: string) =>
   }).format(cents / 100);
 
 /* ------------------------------------------------------------------ */
-/* Order summary — every line item, with the math shown in full        */
+/* Order summary math — gross prices, one cart-level discount row      */
 /* ------------------------------------------------------------------ */
-function OrderSummaryDrawer({ lines }: { lines: CheckoutLine[] }) {
-  const [open, setOpen] = useState(true);
-  const currency = orderCurrency(lines);
-  const subtotal = orderSubtotal(lines);
+export type CheckoutSummary = {
+  currency: string;
+  subtotalCents: number;
+  discountCents: number;
+  discountLabel: string | null;
+  shippingCents: number;
+  shippingLabel: string | null;
+  totalCents: number;
+};
+
+/* Signed-in account confirmation — replaces blank email/name inputs.  */
+function AccountBlock({ email, role }: { email: string; role: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4 border border-border bg-muted/30 px-4 py-3">
+      <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Account</span>
+      <span className="truncate text-sm">
+        {email} <span className="text-muted-foreground">({role})</span>
+      </span>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Order summary — persistent sidebar showing the true unit prices,    */
+/* the subtotal, one explicit discount row, and the final total.       */
+/* ------------------------------------------------------------------ */
+function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: CheckoutSummary }) {
+  const { currency } = summary;
   const pieces = lines.reduce((n, l) => n + lineQty(l), 0);
 
   return (
-    <div className="border-y border-border/60">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between px-5 py-4 text-left"
-        aria-expanded={open}
-      >
-        <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-          Order summary · {lines.length} {lines.length === 1 ? "item" : "items"}
-          {pieces !== lines.length ? ` · ${pieces} pieces` : ""}
-        </span>
-        <span className="flex items-center gap-2 text-sm">
-          {money(subtotal, currency)}
-          <ChevronDown className={cn("h-4 w-4 transition-transform", open && "rotate-180")} />
-        </span>
-      </button>
+    <aside className="h-fit border border-border bg-background p-6 lg:sticky lg:top-8">
+      <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+        Order summary · {lines.length} {lines.length === 1 ? "item" : "items"}
+        {pieces !== lines.length ? ` · ${pieces} pieces` : ""}
+      </p>
 
-      {open && (
-        <div className="px-5 pb-5">
-          <ul className="divide-y divide-border/50">
-            {lines.map((line, i) => (
-              <li key={`${line.title}-${line.finishLabel || ""}-${i}`} className="flex gap-4 py-4 first:pt-0">
-                {line.imageUrl && (
-                  <img
-                    src={line.imageUrl}
-                    alt={line.title}
-                    className="h-20 w-20 flex-none object-cover"
-                    loading="lazy"
-                  />
-                )}
-                <div className="min-w-0 flex-1 text-sm">
-                  {line.designer && (
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                      {line.designer}
-                    </p>
-                  )}
-                  <p className="truncate font-light">{line.title}</p>
-                  {line.finishLabel && (
-                    <p className="mt-1 text-xs text-muted-foreground">{line.finishLabel}</p>
-                  )}
-                  {line.leadTime && (
-                    <p className="mt-1 text-xs text-muted-foreground">Lead time · {line.leadTime}</p>
-                  )}
-                  {/* Explicit per-line math: unit × qty = line total */}
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    {money(line.unitCents, line.currency)} × {lineQty(line)} ={" "}
-                    <span className="text-foreground">{money(lineSubtotal(line), line.currency)}</span>
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
+      <ul className="mt-5 divide-y divide-border/50">
+        {lines.map((line, i) => (
+          <li key={`${line.title}-${line.finishLabel || ""}-${i}`} className="flex gap-4 py-4 first:pt-0">
+            {line.imageUrl && (
+              <img
+                src={line.imageUrl}
+                alt={line.title}
+                className="h-20 w-20 flex-none object-cover"
+                loading="lazy"
+              />
+            )}
+            <div className="min-w-0 flex-1 text-sm">
+              {line.designer && (
+                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {line.designer}
+                </p>
+              )}
+              <p className="truncate font-light">{line.title}</p>
+              {line.finishLabel && (
+                <p className="mt-1 text-xs text-muted-foreground">{line.finishLabel}</p>
+              )}
+              {line.leadTime && (
+                <p className="mt-1 text-xs text-muted-foreground">Lead time · {line.leadTime}</p>
+              )}
+              {/* Standard catalogue unit price — never a discounted rate */}
+              <p className="mt-2 text-xs text-muted-foreground">
+                {money(line.unitCents, line.currency)} × {lineQty(line)}
+              </p>
+            </div>
+            <div className="flex-none text-sm">{money(lineSubtotal(line), line.currency)}</div>
+          </li>
+        ))}
+      </ul>
 
-          <div className="mt-4 flex justify-between border-t border-border/60 pt-3 text-sm">
-            <span className="text-muted-foreground">
-              Subtotal · sum of {lines.length} {lines.length === 1 ? "line" : "lines"}
-            </span>
-            <span>{money(subtotal, currency)}</span>
-          </div>
+      <dl className="mt-4 space-y-2 border-t border-border/60 pt-4 text-sm">
+        <div className="flex justify-between">
+          <dt className="text-muted-foreground">Subtotal</dt>
+          <dd>{money(summary.subtotalCents, currency)}</dd>
         </div>
-      )}
-    </div>
+        {summary.discountCents > 0 && summary.discountLabel && (
+          <div className="flex justify-between">
+            <dt className="text-muted-foreground">{summary.discountLabel}</dt>
+            <dd>−{money(summary.discountCents, currency)}</dd>
+          </div>
+        )}
+        {summary.shippingCents > 0 && (
+          <div className="flex justify-between">
+            <dt className="text-muted-foreground">
+              {summary.shippingLabel || "Delivery & installation"}
+            </dt>
+            <dd>{money(summary.shippingCents, currency)}</dd>
+          </div>
+        )}
+        <div className="flex justify-between border-t border-border/60 pt-3 text-base">
+          <dt>Order total</dt>
+          <dd>{money(summary.totalCents, currency)}</dd>
+        </div>
+      </dl>
+    </aside>
   );
 }
 
@@ -167,12 +195,14 @@ function ConditionalNotes() {
 /* Card / express payment form                                         */
 /* ------------------------------------------------------------------ */
 function PaymentForm({
-  lines,
+  summary,
+  account,
   email,
   setEmail,
   onPaid,
 }: {
-  lines: CheckoutLine[];
+  summary: CheckoutSummary;
+  account: { email: string; role: string } | null;
   email: string;
   setEmail: (v: string) => void;
   onPaid: (ref: string) => void;
@@ -188,8 +218,7 @@ function PaymentForm({
     const t = setTimeout(() => setLoadStage(1), 2500);
     return () => clearTimeout(t);
   }, [paymentReady]);
-  const total = orderSubtotal(lines);
-  const currency = orderCurrency(lines);
+  const { totalCents: total, currency } = summary;
 
   const confirm = async () => {
     if (!paymentReady || !stripe || !elements) return;
@@ -218,7 +247,7 @@ function PaymentForm({
   return (
     <>
       {/* 2 — Express tier */}
-      <section className="px-5 pt-6">
+      <section className="pt-2">
         <ExpressCheckoutElement
           options={{ buttonHeight: 48, layout: { maxColumns: 1, maxRows: 3 } }}
           onConfirm={async () => {
@@ -250,19 +279,23 @@ function PaymentForm({
       </section>
 
       {/* 3 — Contact & delivery */}
-      <section className="space-y-4 px-5">
+      <section className="space-y-4">
         <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
           Contact & delivery
         </h2>
-        <input
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email address"
-          className="h-12 w-full rounded-none border border-border bg-background px-4 text-base outline-none focus:border-foreground"
-        />
+        {account ? (
+          <AccountBlock email={account.email} role={account.role} />
+        ) : (
+          <input
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email address"
+            className="h-12 w-full rounded-none border border-border bg-background px-4 text-base outline-none focus:border-foreground"
+          />
+        )}
         <AddressElement
           options={{
             mode: "shipping",
@@ -274,7 +307,7 @@ function PaymentForm({
       </section>
 
       {/* 4 — Payment */}
-      <section className="space-y-4 px-5 pt-8">
+      <section className="space-y-4 pt-8">
         <div className="flex items-end justify-between gap-4 border-b border-border pb-3">
           <div>
             <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
@@ -316,8 +349,7 @@ function PaymentForm({
 
       {/* 5 — Sticky summary & CTA (disabled until card fields are mounted) */}
       <StickyTotals
-        lines={lines}
-        total={total}
+        summary={summary}
         ready={paymentReady}
         cta={
           paymentReady
@@ -335,39 +367,41 @@ function PaymentForm({
 /* Sticky bottom summary                                               */
 /* ------------------------------------------------------------------ */
 function StickyTotals({
-  lines,
-  total,
+  summary,
   cta,
   busy,
   ready = true,
   onSubmit,
 }: {
-  lines: CheckoutLine[];
-  total: number;
+  summary: CheckoutSummary;
   cta: string;
   busy: boolean;
   ready?: boolean;
   onSubmit: () => void;
 }) {
-  const currency = orderCurrency(lines);
+  const { currency } = summary;
   return (
-    <div className="sticky bottom-0 z-30 mt-8 border-t border-border bg-background/95 px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 backdrop-blur">
-      <dl className="space-y-1 text-sm">
-        {lines.map((line, i) => (
-          <div key={`t-${i}`} className="flex justify-between gap-4 text-muted-foreground">
-            <dt className="min-w-0 truncate">
-              {line.title}
-              <span className="text-muted-foreground/70">
-                {" "}
-                — {money(line.unitCents, line.currency)} × {lineQty(line)}
-              </span>
-            </dt>
-            <dd className="flex-none">{money(lineSubtotal(line), line.currency)}</dd>
+    <div className="sticky bottom-0 z-30 mt-8 border-t border-border bg-background/95 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 backdrop-blur lg:static lg:border-0 lg:bg-transparent lg:backdrop-blur-none">
+      <dl className="space-y-1.5 text-sm">
+        <div className="flex justify-between text-muted-foreground">
+          <dt>Subtotal</dt>
+          <dd>{money(summary.subtotalCents, currency)}</dd>
+        </div>
+        {summary.discountCents > 0 && summary.discountLabel && (
+          <div className="flex justify-between text-muted-foreground">
+            <dt>{summary.discountLabel}</dt>
+            <dd>−{money(summary.discountCents, currency)}</dd>
           </div>
-        ))}
-        <div className="flex justify-between border-t border-border/60 pt-2 text-base">
-          <dt>Total{lines.length > 1 ? ` (${lines.length} items)` : ""}</dt>
-          <dd>{money(total, currency)}</dd>
+        )}
+        {summary.shippingCents > 0 && (
+          <div className="flex justify-between text-muted-foreground">
+            <dt>{summary.shippingLabel || "Delivery & installation"}</dt>
+            <dd>{money(summary.shippingCents, currency)}</dd>
+          </div>
+        )}
+        <div className="flex justify-between border-t border-border/60 pt-2 text-base text-foreground">
+          <dt>Order total</dt>
+          <dd>{money(summary.totalCents, currency)}</dd>
         </div>
       </dl>
 
@@ -398,8 +432,10 @@ function StickyTotals({
 /* ------------------------------------------------------------------ */
 /* Wire transfer form                                                  */
 /* ------------------------------------------------------------------ */
-function WireForm({ lines, email, setEmail, onDone }: {
+function WireForm({ lines, summary, account, email, setEmail, onDone }: {
   lines: CheckoutLine[];
+  summary: CheckoutSummary;
+  account: { email: string; role: string } | null;
   email: string;
   setEmail: (v: string) => void;
   onDone: (ref: string) => void;
@@ -408,11 +444,10 @@ function WireForm({ lines, email, setEmail, onDone }: {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
-  const total = orderSubtotal(lines);
-  const currency = orderCurrency(lines);
+  const { totalCents: total, currency } = summary;
 
   const submit = async () => {
-    if (!name.trim() || !email.includes("@")) {
+    if (!account && (!name.trim() || !email.includes("@"))) {
       toast.error("Please add your name and email.");
       return;
     }
@@ -437,8 +472,8 @@ function WireForm({ lines, email, setEmail, onDone }: {
             quantity: lineQty(l),
             lineCents: lineSubtotal(l),
           })),
-          name,
-          email,
+          name: account ? account.email : name,
+          email: account ? account.email : email,
           phone,
           address,
         },
@@ -457,12 +492,18 @@ function WireForm({ lines, email, setEmail, onDone }: {
 
   return (
     <>
-      <section className="space-y-4 px-5 pt-6">
+      <section className="space-y-4 pt-6">
         <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
           Bank wire — contact & delivery
         </h2>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" autoComplete="name" className={field} />
-        <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" type="email" inputMode="email" autoComplete="email" className={field} />
+        {account ? (
+          <AccountBlock email={account.email} role={account.role} />
+        ) : (
+          <>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" autoComplete="name" className={field} />
+            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" type="email" inputMode="email" autoComplete="email" className={field} />
+          </>
+        )}
         <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone" type="tel" inputMode="tel" autoComplete="tel" className={field} />
         <textarea value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Delivery address" rows={3} className="w-full rounded-none border border-border bg-background p-4 text-base outline-none focus:border-foreground" />
         <p className="text-xs text-muted-foreground">
@@ -470,8 +511,7 @@ function WireForm({ lines, email, setEmail, onDone }: {
         </p>
       </section>
       <StickyTotals
-        lines={lines}
-        total={total}
+        summary={summary}
         cta={`Request wire instructions · ${money(total, currency)}`}
         busy={busy}
         onSubmit={submit}
@@ -512,7 +552,7 @@ function ShippingQuoteCard({
   };
 
   return (
-    <section className="mx-5 mt-5 border border-border">
+    <section className="border border-border">
       <div className="flex items-start justify-between gap-4 px-4 py-4">
         <div className="min-w-0">
           <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -595,37 +635,43 @@ export default function Checkout() {
   // Account-level tier discount. The hook drives the first paint; the value
   // returned by the PaymentIntent is authoritative once it arrives, so the
   // displayed total always equals the amount Stripe will charge.
-  const { pct: hookDiscountPct } = useAccountDiscount();
+  const { pct: hookDiscountPct, label: discountRowLabel } = useAccountDiscount();
   const [serverDiscountPct, setServerDiscountPct] = useState<number | null>(null);
   const effectiveDiscountPct = serverDiscountPct ?? hookDiscountPct;
   // Shipping stays "To be Quoted by Advisor" until the buyer confirms an
   // advisor-issued quote; only then is it added to the Stripe payload.
   const [shipping, setShipping] = useState<ConfirmedShipping | null>(null);
-  const goodsLines = useMemo(
-    () =>
-      grossLines && effectiveDiscountPct > 0
-        ? grossLines.map((l) => ({
-            ...l,
-            unitCents: Math.round(l.unitCents * (1 - effectiveDiscountPct)),
-          }))
-        : grossLines,
-    [grossLines, effectiveDiscountPct],
-  );
-  // The charged order = goods + (confirmed) shipping. When shipping is still
-  // to be quoted there is no shipping line at all, so nothing reaches Stripe.
-  const lines = useMemo<CheckoutLine[] | null>(() => {
-    if (!goodsLines) return null;
-    if (!shipping) return goodsLines;
-    return [
-      ...goodsLines,
-      {
-        title: shipping.label || "Delivery & installation — confirmed advisor quote",
-        unitCents: shipping.cents,
-        currency: orderCurrency(goodsLines),
-        quantity: 1,
-      },
-    ];
-  }, [goodsLines, shipping]);
+  // Signed-in account — replaces blank email/name inputs with a confirmation.
+  const { user, isAdmin, isSuperAdmin, isTradeUser } = useAuth();
+  const account = user?.email
+    ? {
+        email: user.email,
+        role: isAdmin || isSuperAdmin ? "Admin" : isTradeUser ? "Trade" : "Member",
+      }
+    : null;
+  // Signed-in buyers never retype their email.
+  useEffect(() => {
+    if (user?.email) setEmail((v) => v || user.email!);
+  }, [user]);
+  // Summary math: line items keep their standard catalogue prices; the tier
+  // discount is applied once at cart level, exactly like the backend charge.
+  const summary = useMemo<CheckoutSummary | null>(() => {
+    if (!grossLines?.length) return null;
+    const currency = orderCurrency(grossLines);
+    const subtotalCents = orderSubtotal(grossLines);
+    const discountCents =
+      effectiveDiscountPct > 0 ? Math.round(subtotalCents * effectiveDiscountPct) : 0;
+    const shippingCents = shipping?.cents ?? 0;
+    return {
+      currency,
+      subtotalCents,
+      discountCents,
+      discountLabel: discountCents > 0 ? discountRowLabel : null,
+      shippingCents,
+      shippingLabel: shipping?.label ?? null,
+      totalCents: subtotalCents - discountCents + shippingCents,
+    };
+  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping]);
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [email, setEmail] = useState("");
@@ -754,25 +800,18 @@ export default function Checkout() {
           throw new Error(pi?.error || "Unable to start checkout.");
         }
 
-        // Guardrail: the amount Stripe will charge must equal the cart-derived total.
+        // Guardrail: the amount Stripe will charge must equal the cart-derived
+        // total. The tier rate is applied once at cart level — never per unit.
         const serverPct = Number(pi?.discountPct) || 0;
         setServerDiscountPct(serverPct);
         const serverShippingCents = Number(pi?.shippingCents) || 0;
-        const currency = orderCurrency(grossLines);
-        const chargedLines: CheckoutLine[] = grossLines.map((l) => ({
-          ...l,
-          unitCents: serverPct > 0 ? Math.round(l.unitCents * (1 - serverPct)) : l.unitCents,
-        }));
-        if (serverShippingCents > 0) {
-          chargedLines.push({
-            title: pi?.shippingLabel || "Delivery & installation — confirmed advisor quote",
-            unitCents: serverShippingCents,
-            currency,
-            quantity: 1,
-          });
-        }
+        const totals = buildVerifiedTotals(grossLines);
+        const expectedCents =
+          totals.totalCents -
+          (serverPct > 0 ? Math.round(totals.totalCents * serverPct) : 0) +
+          serverShippingCents;
         const check = reconcileBackendAmount(
-          buildVerifiedTotals(chargedLines),
+          { ...totals, totalCents: expectedCents },
           pi?.amount,
           pi?.currency,
         );
@@ -885,8 +924,8 @@ export default function Checkout() {
     [],
   );
 
-  if (!lines?.length) return null;
-  const homePath = lines[0].productPath || "/";
+  if (!grossLines?.length || !summary) return null;
+  const homePath = grossLines[0].productPath || "/";
 
   if (confirmed) {
     return (
@@ -913,9 +952,9 @@ export default function Checkout() {
   }
 
   return (
-    <main className="mx-auto min-h-[100dvh] max-w-xl bg-background pb-4">
+    <main className="mx-auto min-h-[100dvh] max-w-6xl bg-background pb-16">
       {/* 1 — Minimalist header */}
-      <header className="flex flex-col items-center gap-2 px-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-4">
+      <header className="flex flex-col items-center gap-2 px-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-6">
         <button onClick={() => navigate(homePath)} aria-label="Maison Affluency">
           <img src={logoIcon} alt="Maison Affluency" className="h-8 w-auto" />
         </button>
@@ -924,57 +963,79 @@ export default function Checkout() {
         </span>
       </header>
 
-      <OrderSummaryDrawer lines={lines} />
-
-      <ShippingQuoteCard
-        currency={orderCurrency(lines)}
-        shipping={shipping}
-        busy={syncing}
-        onConfirm={(s) => void syncIntent(s)}
-        onClear={() => void syncIntent(null)}
-      />
-
-      {/* Payment method switch */}
-      <div className="px-5 pt-5">
-        <button
-          type="button"
-          onClick={() => setWire((v) => !v)}
-          className={cn(
-            "flex w-full items-center justify-between border px-4 py-3 text-left text-sm",
-            wire ? "border-foreground bg-muted/40" : "border-border",
-          )}
-        >
-          <span>Bank wire transfer</span>
-
-          <span
-            className={cn(
-              "h-5 w-9 flex-none rounded-full border transition-colors",
-              wire ? "border-foreground bg-foreground" : "border-border bg-muted",
-            )}
-          >
-            <span
-              className={cn(
-                "block h-4 w-4 translate-y-[1px] rounded-full bg-background transition-transform",
-                wire ? "translate-x-[18px]" : "translate-x-[2px]",
-              )}
-            />
-          </span>
-        </button>
-      </div>
-
-      {wire ? (
-        <WireForm lines={lines} email={email} setEmail={setEmail} onDone={setConfirmed} />
-      ) : error ? (
-        <div className="px-5 py-16 text-center text-sm text-muted-foreground">{error}</div>
-      ) : stripePromise && clientSecret ? (
-        <Elements stripe={stripePromise} options={{ clientSecret, appearance, fonts: stripeFonts }}>
-          <PaymentForm lines={lines} email={email} setEmail={setEmail} onPaid={setConfirmed} />
-        </Elements>
-      ) : (
-        <div className="flex justify-center py-24">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      {/* Two-column split: actions left, persistent order summary right */}
+      <div className="grid gap-10 px-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-14 lg:px-10">
+        {/* Right — order summary (shown first on mobile) */}
+        <div className="order-first lg:order-last">
+          <OrderSummary lines={grossLines} summary={summary} />
         </div>
-      )}
+
+        {/* Left — checkout actions */}
+        <div className="min-w-0">
+          <ShippingQuoteCard
+            currency={summary.currency}
+            shipping={shipping}
+            busy={syncing}
+            onConfirm={(s) => void syncIntent(s)}
+            onClear={() => void syncIntent(null)}
+          />
+
+          {/* Payment method switch */}
+          <div className="pt-5">
+            <button
+              type="button"
+              onClick={() => setWire((v) => !v)}
+              className={cn(
+                "flex w-full items-center justify-between border px-4 py-3 text-left text-sm",
+                wire ? "border-foreground bg-muted/40" : "border-border",
+              )}
+            >
+              <span>Bank wire transfer</span>
+
+              <span
+                className={cn(
+                  "h-5 w-9 flex-none rounded-full border transition-colors",
+                  wire ? "border-foreground bg-foreground" : "border-border bg-muted",
+                )}
+              >
+                <span
+                  className={cn(
+                    "block h-4 w-4 translate-y-[1px] rounded-full bg-background transition-transform",
+                    wire ? "translate-x-[18px]" : "translate-x-[2px]",
+                  )}
+                />
+              </span>
+            </button>
+          </div>
+
+          {wire ? (
+            <WireForm
+              lines={grossLines}
+              summary={summary}
+              account={account}
+              email={email}
+              setEmail={setEmail}
+              onDone={setConfirmed}
+            />
+          ) : error ? (
+            <div className="py-16 text-center text-sm text-muted-foreground">{error}</div>
+          ) : stripePromise && clientSecret ? (
+            <Elements stripe={stripePromise} options={{ clientSecret, appearance, fonts: stripeFonts }}>
+              <PaymentForm
+                summary={summary}
+                account={account}
+                email={email}
+                setEmail={setEmail}
+                onPaid={setConfirmed}
+              />
+            </Elements>
+          ) : (
+            <div className="flex justify-center py-24">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          )}
+        </div>
+      </div>
     </main>
   );
 }
