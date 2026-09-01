@@ -127,6 +127,17 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
           />
         ))}
 
+        {/* Desktop: persistent close control, top-right — never fades */}
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onClose(); }}
+          aria-label="Exit presentation mode"
+          className="hidden md:flex absolute z-20 w-10 h-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white/85 transition-colors duration-300 hover:bg-white/20"
+          style={{ top: "max(1.5rem, calc(env(safe-area-inset-top) + 1rem))", right: "1.5rem" }}
+        >
+          <X size={18} strokeWidth={1.5} />
+        </button>
+
         {/* Desktop edge arrows — fade with the chrome */}
         {images.length > 1 && (
           <>
