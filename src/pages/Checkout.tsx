@@ -388,8 +388,31 @@ export default function Checkout() {
         }
       }
     } catch { /* ignore */ }
+    // Direct visit / new tab: fall back to the saved selection so the page
+    // mounts Stripe instead of silently bouncing to the homepage.
+    const cart = getCart();
+    if (cart.length) {
+      const first = cart[0];
+      const fallback: CheckoutLine = {
+        title: first.title,
+        designer: first.designerName,
+        finishLabel: first.finishLabel,
+        imageUrl: first.imageUrl,
+        unitCents: first.unitPriceCents,
+        currency: first.currency,
+        leadTime: first.leadTime,
+        productPath: first.designerSlug && first.productSlug
+          ? `/designers/${first.designerSlug}/${first.productSlug}`
+          : null,
+        quantity: first.quantity,
+      };
+      sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify(fallback));
+      setLine(fallback);
+      return;
+    }
     navigate("/", { replace: true });
   }, [location.state, navigate]);
+
 
   useEffect(() => {
     if (!line || initialised.current) return;
