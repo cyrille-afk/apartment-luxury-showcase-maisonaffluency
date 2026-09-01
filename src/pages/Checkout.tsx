@@ -8,6 +8,13 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { getCart } from "@/lib/cart";
+import {
+  assertCheckoutCopy,
+  buildVerifiedTotals,
+  lineQuantity,
+  lineTotalCents,
+  reconcileBackendAmount,
+} from "@/lib/checkoutGuardrails";
 
 
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
@@ -27,9 +34,10 @@ export type CheckoutLine = {
   quantity?: number;
 };
 
-const lineQty = (line: CheckoutLine) => Math.max(1, line.quantity ?? 1);
-const lineSubtotal = (line: CheckoutLine) => line.unitCents * lineQty(line);
-const orderSubtotal = (lines: CheckoutLine[]) => lines.reduce((sum, l) => sum + lineSubtotal(l), 0);
+/* All amounts below are derived only from cart line items — see checkoutGuardrails. */
+const lineQty = (line: CheckoutLine) => lineQuantity(line);
+const lineSubtotal = (line: CheckoutLine) => lineTotalCents(line);
+const orderSubtotal = (lines: CheckoutLine[]) => buildVerifiedTotals(lines).totalCents;
 const orderCurrency = (lines: CheckoutLine[]) => lines[0]?.currency || "usd";
 
 const money = (cents: number, currency: string) =>
@@ -116,26 +124,38 @@ function OrderSummaryDrawer({ lines }: { lines: CheckoutLine[] }) {
 
 /* ------------------------------------------------------------------ */
 /* Conditional charges — shown so nothing is a surprise later          */
+/* Every string passes the guardrail in @/lib/checkoutGuardrails.          */
 /* ------------------------------------------------------------------ */
+const CONDITIONAL_NOTES: { label: string; body: string }[] = [
+  {
+    label: "Delivery, installation & insurance",
+    body: "quoted separately by your advisor once the destination is confirmed. Not charged on this page.",
+  },
+  {
+    label: "Duties, import taxes & VAT",
+    body: "assessed by the destination country and billed at import. Not included above.",
+  },
+  {
+    label: "Trade net pricing",
+    body: "applies only to verified trade accounts, on the trade portal. Prices here are retail.",
+  },
+  {
+    label: "Bank wire transfer",
+    body: "applies only when you select it above; it changes the payment method, not the amount.",
+  },
+].map((n) => ({
+  label: assertCheckoutCopy(n.label, "conditional note label"),
+  body: assertCheckoutCopy(n.body, "conditional note body"),
+}));
+
 function ConditionalNotes() {
   return (
     <ul className="mt-3 space-y-1.5 text-[11px] leading-relaxed text-muted-foreground">
-      <li>
-        <span className="text-foreground">Delivery, installation &amp; insurance</span> — quoted
-        separately by your advisor once the destination is confirmed. Not charged on this page.
-      </li>
-      <li>
-        <span className="text-foreground">Duties, import taxes &amp; VAT</span> — assessed by the
-        destination country and billed at import. Not included above.
-      </li>
-      <li>
-        <span className="text-foreground">Trade net pricing</span> — applies only to verified trade
-        accounts, on the trade portal. Prices here are retail.
-      </li>
-      <li>
-        <span className="text-foreground">Bank wire transfer</span> — applies only when you select
-        it above; it changes the payment method, not the amount.
-      </li>
+      {CONDITIONAL_NOTES.filter((n) => n.body).map((n) => (
+        <li key={n.label}>
+          <span className="text-foreground">{n.label}</span> — {n.body}
+        </li>
+      ))}
     </ul>
   );
 }
@@ -520,6 +540,15 @@ export default function Checkout() {
         ]);
         if (cfgErr || (cfg as any)?.error) throw new Error((cfg as any)?.error || "Stripe is not configured.");
         if (piErr || (pi as any)?.error) throw new Error((pi as any)?.error || "Unable to start checkout.");
+
+        // Guardrail: the amount Stripe will charge must equal the cart-derived total.
+        const check = reconcileBackendAmount(
+          buildVerifiedTotals(lines),
+          (pi as any)?.amount,
+          (pi as any)?.currency,
+        );
+        if (check.ok === false) throw new Error(check.reason);
+
         setStripePromise(loadStripe((cfg as any).publishableKey));
         setClientSecret((pi as any).clientSecret);
       } catch (err: any) {
