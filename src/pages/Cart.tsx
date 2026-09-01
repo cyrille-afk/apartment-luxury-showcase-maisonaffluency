@@ -67,6 +67,30 @@ export default function Cart() {
       navigate(`/cart/identify?method=${method}`);
       return;
     }
+    // Card payments use the branded in-page checkout (/checkout) so the
+    // collector never leaves Maison Affluency's design system. Bank transfer
+    // still creates the order + wire instructions via the edge function.
+    if (method === "card") {
+      navigate("/checkout", {
+        state: {
+          lines: items.map((i) => ({
+            title: i.title,
+            designer: i.designerName,
+            finishLabel: i.finishLabel,
+            imageUrl: i.imageUrl,
+            unitCents: i.unitPriceCents,
+            currency: i.currency,
+            leadTime: i.leadTime,
+            productPath:
+              i.designerSlug && i.productSlug
+                ? `/designers/${i.designerSlug}/${i.productSlug}`
+                : null,
+            quantity: i.quantity,
+          })),
+        },
+      });
+      return;
+    }
     setPending(method);
     try {
       const { data, error } = await supabase.functions.invoke("create-cart-checkout", {
@@ -90,10 +114,6 @@ export default function Cart() {
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      if (method === "card" && (data as any)?.url) {
-        window.location.href = (data as any).url;
-        return;
-      }
       clearCart();
       navigate(`/order-confirmation?ref=${(data as any).orderRef}&status=bank_transfer`);
     } catch (e: any) {

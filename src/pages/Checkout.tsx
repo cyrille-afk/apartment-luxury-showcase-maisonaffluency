@@ -306,7 +306,10 @@ function PaymentForm({
             </div>
           )}
           <div className={cn(!paymentReady && "invisible")}>
-            <PaymentElement options={{ layout: "tabs" }} onReady={() => setPaymentReady(true)} />
+            <PaymentElement
+              options={{ layout: "tabs", paymentMethodOrder: ["card"] }}
+              onReady={() => setPaymentReady(true)}
+            />
           </div>
         </div>
       </section>
@@ -373,7 +376,7 @@ function StickyTotals({
         disabled={busy || !ready}
         onClick={onSubmit}
         aria-disabled={!ready}
-        className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-none bg-[#1A1A1A] text-[12px] uppercase tracking-[0.2em] text-white disabled:cursor-not-allowed disabled:opacity-40"
+        className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-none bg-[#0A0A0A] text-[12px] uppercase tracking-[0.2em] text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-40"
       >
         {!ready && !busy && <Loader2 className="h-4 w-4 animate-spin" />}
         {busy && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -798,17 +801,87 @@ export default function Checkout() {
     void syncIntent(null);
   }, [grossLines, syncIntent]);
 
+  // Maison Affluency monochrome theme for Stripe Elements: sharp 0px corners,
+  // pure-black focus/primary states, thin hairline borders, serif labels.
   const appearance = useMemo(
     () => ({
-      theme: "stripe" as const,
+      theme: "flat" as const,
       variables: {
-        colorPrimary: "#1A1A1A",
-        colorText: "#14201c",
+        colorPrimary: "#0A0A0A",
+        colorBackground: "#FFFFFF",
+        colorText: "#0A0A0A",
+        colorTextSecondary: "#6B6B6B",
+        colorTextPlaceholder: "#A3A3A3",
+        colorDanger: "#B42318",
+        colorIconCardCvc: "#6B6B6B",
         borderRadius: "0px",
-        fontFamily: "inherit",
+        fontFamily: "'Lora', Georgia, serif",
+        fontSizeBase: "15px",
+        fontWeightNormal: "400",
         spacingUnit: "4px",
       },
+      rules: {
+        ".Input": {
+          border: "1px solid #E4E2DE",
+          borderRadius: "0px",
+          boxShadow: "none",
+          backgroundColor: "#FFFFFF",
+          padding: "12px 14px",
+        },
+        ".Input:hover": { border: "1px solid #C9C6C0", boxShadow: "none" },
+        ".Input:focus": {
+          border: "1px solid #0A0A0A",
+          boxShadow: "none",
+          outline: "none",
+        },
+        ".Input--invalid": { borderColor: "#B42318", boxShadow: "none" },
+        ".Label": {
+          fontSize: "10px",
+          fontWeight: "500",
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          color: "#6B6B6B",
+          marginBottom: "6px",
+        },
+        ".Tab": {
+          border: "1px solid #E4E2DE",
+          borderRadius: "0px",
+          boxShadow: "none",
+        },
+        ".Tab:hover": { border: "1px solid #C9C6C0", boxShadow: "none" },
+        ".Tab--selected": {
+          border: "1px solid #0A0A0A",
+          boxShadow: "none",
+          backgroundColor: "#FFFFFF",
+        },
+        ".TabIcon--selected": { color: "#0A0A0A" },
+        ".TabLabel--selected": { color: "#0A0A0A" },
+        ".Block": {
+          border: "1px solid #E4E2DE",
+          borderRadius: "0px",
+          boxShadow: "none",
+        },
+        ".Block:focus": { border: "1px solid #0A0A0A", boxShadow: "none" },
+        ".PickerItem": { borderRadius: "0px" },
+        ".MenuAction:hover": { backgroundColor: "#F5F4F2" },
+        ".CheckboxInput": { borderRadius: "0px" },
+        ".CheckboxInput--checked": {
+          backgroundColor: "#0A0A0A",
+          borderColor: "#0A0A0A",
+        },
+      },
     }),
+    [],
+  );
+
+  // Load the site's serif into Stripe's iframe so inputs match the page type.
+  const stripeFonts = useMemo(
+    () => [
+      {
+        cssSrc:
+          "https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&display=swap",
+      },
+    ],
     [],
   );
 
@@ -894,7 +967,7 @@ export default function Checkout() {
       ) : error ? (
         <div className="px-5 py-16 text-center text-sm text-muted-foreground">{error}</div>
       ) : stripePromise && clientSecret ? (
-        <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
+        <Elements stripe={stripePromise} options={{ clientSecret, appearance, fonts: stripeFonts }}>
           <PaymentForm lines={lines} email={email} setEmail={setEmail} onPaid={setConfirmed} />
         </Elements>
       ) : (
