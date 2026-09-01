@@ -190,17 +190,11 @@ serve(async (req) => {
     const discountPct = resolved.pct;
     const discountLabel = resolved.label;
 
-    // Apply the discount to each unit price so the Stripe line items, the
-    // stored order rows and the on-screen summary all agree to the cent.
-    if (discountPct > 0) {
-      for (const l of lines) {
-        l.unit_price_cents = Math.round(l.unit_price_cents * (1 - discountPct));
-        l.line_total_cents = l.unit_price_cents * l.quantity;
-      }
-    }
-
-    const subtotal = lines.reduce((s, l) => s + l.line_total_cents, 0);
-    const discountCents = grossSubtotal - subtotal;
+    // The discount is taken once on the cart subtotal (never per unit), so the
+    // charged total matches the on-screen "ORDER TOTAL" to the cent. Line items
+    // keep their full displayed price and Stripe applies an amount-off coupon.
+    const discountCents = discountPct > 0 ? Math.round(grossSubtotal * discountPct) : 0;
+    const subtotal = grossSubtotal - discountCents;
     // Shipping is "To be Quoted by Advisor" until an advisor confirms a rate.
     // Only charge it when the client explicitly passes a confirmed amount.
     const shippingConfirmed = body?.shippingConfirmed === true;
@@ -210,6 +204,7 @@ serve(async (req) => {
         ? Math.min(rawShipping, subtotal)
         : 0;
     const total = subtotal + shipping;
+
 
     const orderRef = `MA-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
