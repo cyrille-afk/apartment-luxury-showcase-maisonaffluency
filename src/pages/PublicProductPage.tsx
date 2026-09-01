@@ -1139,8 +1139,11 @@ const PublicProductPageContent: React.FC = () => {
     (publicRrpLabel ? publicRrpLabel.replace(/^From\s+/i, "") : null);
 
   // Commerce block visibility under the (possibly mocked) role.
-  const showPublicCommerce = roleOverridden ? !isTradeVerifiedView : (!user && !authLoading);
-  const showMockTradeCommerce = roleOverridden && isTradeVerifiedView;
+  // Verified trade — mocked OR real auth — renders the exact same commerce
+  // template. Non-trade signed-out visitors keep the public CTA.
+  const showMockTradeCommerce = isTradeVerifiedView;
+  const showPublicCommerce =
+    !isTradeVerifiedView && (roleOverridden ? true : !user && !authLoading);
 
   // On landing we intentionally show the catalogue-wide minimum ("From $X"),
   // not the price of the finish in the first photo — this encourages visitors
@@ -2600,7 +2603,7 @@ const PublicProductPageContent: React.FC = () => {
                       originLine={product.origin}
                       leadTime={product.lead_time}
                       selectedFinishes={selectedFinishes}
-                      selectedVariantCents={selectedVariantPrice?.cents ?? null}
+                      selectedVariantCents={productData.baseRetailPriceCents || null}
                       selectedVariantExact={!!selectedVariantPrice?.exact}
                       returnPath={returnTo}
                       pdfUrl={product.pdf_url}
