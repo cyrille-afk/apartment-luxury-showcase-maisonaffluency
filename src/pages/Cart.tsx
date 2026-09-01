@@ -41,9 +41,13 @@ export default function Cart() {
 
   const currency = items[0]?.currency || "USD";
   const subtotal = useMemo(() => cartSubtotalCents(items), [items]);
+  // Account-level tier discount (admin / verified trade), resolved from the
+  // backend and re-applied server-side before payment.
+  const discount = useAccountDiscount();
   // Delivery is quoted by the advisor post-purchase, so the displayed total
-  // matches the goods subtotal exactly (no invented shipping figure).
-  const total = subtotal;
+  // is the goods subtotal less any tier discount (no invented shipping figure).
+  const total = discount.totalFor(subtotal);
+
 
   // "Continue Selection" returns to the curator's picks of the designer whose
   // piece was added last, rather than the generic designers landing page.

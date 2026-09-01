@@ -51,6 +51,10 @@ export default function CartIdentify() {
 
   const currency = items[0]?.currency || "USD";
   const subtotal = useMemo(() => cartSubtotalCents(items), [items]);
+  // Tier discount for the authenticated account (admin / verified trade).
+  const discount = useAccountDiscount();
+  const orderTotal = discount.totalFor(subtotal);
+
 
   const startCheckout = async (contactEmail?: string, fullName?: string) => {
     if (!items.length) return;
