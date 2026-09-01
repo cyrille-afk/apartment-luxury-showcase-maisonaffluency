@@ -87,6 +87,8 @@ import QuoteRequestDialog from "@/components/QuoteRequestDialog";
 import { addToCart } from "@/lib/cart";
 import { usePublicRrp, usePublicRrpMap, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
+import { computeDisplayPrice } from "@/lib/productPricing";
 import { UserRoleProvider, useUserRole, DevRoleToggle, type UserRole } from "@/contexts/UserRoleContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
