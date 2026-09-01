@@ -5,7 +5,6 @@ import { Minus, Plus, Loader2, Heart } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -25,8 +24,6 @@ export default function Cart() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { user } = useAuth();
-  const [email, setEmail] = useState("");
-  const [fullName, setFullName] = useState("");
   const [pending, setPending] = useState<null | "card" | "bank_transfer">(null);
 
   // Landing here always means every overlay is gone — never inherit a stray
@@ -42,10 +39,6 @@ export default function Cart() {
     }
   }, [params]);
 
-  useEffect(() => {
-    if (user?.email) setEmail((e) => e || user.email!);
-  }, [user]);
-
   const currency = items[0]?.currency || "USD";
   const subtotal = useMemo(() => cartSubtotalCents(items), [items]);
   // Delivery is quoted by the advisor post-purchase, so the displayed total
@@ -58,10 +51,13 @@ export default function Cart() {
     ? `/designers/${items[items.length - 1].designerSlug}`
     : "/designers";
 
-  const checkout = async (method: "card" | "bank_transfer") => {
+  // Step 1 hands off to the identity gateway (step 2), where the collector
+  // signs in, creates an account, or continues as a guest. Signed-in
+  // collectors skip straight through to the payment session.
+  const goToIdentity = async (method: "card" | "bank_transfer") => {
     if (!items.length) return;
-    if (!user && !/^\S+@\S+\.\S+$/.test(email)) {
-      toast.error("Please enter a valid email address.");
+    if (!user) {
+      navigate(`/cart/identify?method=${method}`);
       return;
     }
     setPending(method);
@@ -69,8 +65,7 @@ export default function Cart() {
       const { data, error } = await supabase.functions.invoke("create-cart-checkout", {
         body: {
           method,
-          email: email || undefined,
-          fullName: fullName || undefined,
+          email: user.email || undefined,
           items: items.map((i) => ({
             pickId: i.pickId,
             productSlug: i.productSlug,
@@ -236,30 +231,6 @@ export default function Cart() {
                 ))}
               </ul>
 
-              {/* Contact details — moved out of the order summary */}
-              {!user && (
-                <section className="mt-10 border border-border/70 bg-card px-6 py-8 sm:px-8">
-                  <h2 className="font-body text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-                    Contact Details
-                  </h2>
-                  <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                    <Input
-                      type="email"
-                      placeholder="Email address"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="rounded-none"
-                    />
-                    <Input
-                      placeholder="Full name (optional)"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="rounded-none"
-                    />
-                  </div>
-                </section>
-              )}
-
               {/* Need Help? — concierge channels */}
               <section className="mt-10 border border-border/70 bg-cream px-6 py-10 sm:px-8">
                 <h2 className="font-display text-xl">Need Help?</h2>
@@ -328,7 +299,7 @@ export default function Cart() {
 
                 <div className="mt-7 space-y-3">
                   <Button
-                    onClick={() => checkout("card")}
+                    onClick={() => goToIdentity("card")}
                     disabled={pending !== null}
                     className="w-full rounded-none h-12 bg-foreground text-background hover:bg-foreground/90 font-body text-[11px] uppercase tracking-[0.22em]"
                   >
@@ -337,7 +308,7 @@ export default function Cart() {
 
                   <Button
                     variant="outline"
-                    onClick={() => checkout("bank_transfer")}
+                    onClick={() => goToIdentity("bank_transfer")}
                     disabled={pending !== null}
                     className="w-full rounded-none h-12 border-foreground text-foreground hover:bg-muted/60 font-body text-[11px] uppercase tracking-[0.22em]"
                   >
