@@ -105,12 +105,16 @@ export default function CartIdentify() {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      await startCheckout(email);
+      // Do NOT jump straight to Stripe: roles and tier are re-read first so the
+      // summary can show the account's discount before payment.
+      await refreshRoles?.();
+      toast.success("Signed in — your account pricing has been applied.");
     } catch (err: any) {
       toast.error(err?.message || "We couldn't sign you in.");
     } finally {
       setSigningIn(false);
     }
+
   };
 
   const handleGuest = async (e: React.FormEvent) => {
