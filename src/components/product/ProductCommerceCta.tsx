@@ -237,7 +237,7 @@ export default function ProductCommerceCta({
         ) : null}
 
         {tradeApproved ? (
-          <Link to={workspaceHref} state={redirectTo ? { from: redirectTo } : undefined} className={primaryBtn}>
+          <Link to={workspaceHref} data-commerce-primary state={redirectTo ? { from: redirectTo } : undefined} className={primaryBtn}>
             {primaryLabel}
           </Link>
         ) : (
