@@ -170,6 +170,7 @@ export default function ProductCommerceCta({
   leadTime,
   utilityLinks,
 }: ProductCommerceCtaProps) {
+  const navigate = useNavigate();
   const [accessOpen, setAccessOpen] = useState(false);
   // Quantity lives in the container engine so both layout variants share it;
   // falls back to local state when rendered outside ProductPageContainer.
