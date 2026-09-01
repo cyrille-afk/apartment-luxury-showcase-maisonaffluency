@@ -7,8 +7,14 @@ import {
   Landmark,
   Truck,
   MessageSquare,
+  Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+
+/** Mobile / WhatsApp number: digits, +, spaces, dashes, parentheses — 7–20 chars. */
+const PHONE_RE = /^[+0-9][0-9 ()-]{6,19}$/;
+const MESSAGE_MAX = 500;
 
 /**
  * SelectionDrawer — the premium "YOUR SELECTION" sliding sidebar.
@@ -60,10 +66,62 @@ export default function SelectionDrawer({
 }: SelectionDrawerProps) {
   const [method, setMethod] = useState<PaymentMethod>("online");
   const [localQty, setLocalQty] = useState(1);
+  // Inline concierge widget state — replaces the trust block when engaged.
+  const [conciergeOpen, setConciergeOpen] = useState(false);
+  const [conciergePhone, setConciergePhone] = useState("");
+  const [conciergeMessage, setConciergeMessage] = useState("");
+  const [conciergeError, setConciergeError] = useState<string | null>(null);
+  const [conciergeSending, setConciergeSending] = useState(false);
+  const [conciergeSent, setConciergeSent] = useState(false);
   const quantity = quantityProp ?? localQty;
   const setQuantity = (q: number) => {
     setLocalQty(q);
     onQuantityChange?.(q);
+  };
+
+  const sendConciergeText = async () => {
+    const phone = conciergePhone.trim();
+    const message = conciergeMessage.trim();
+    if (!PHONE_RE.test(phone)) {
+      setConciergeError("Enter a valid mobile / WhatsApp number (7–20 digits, + allowed).");
+      return;
+    }
+    if (message.length < 3) {
+      setConciergeError("Add a short message so our concierge knows how to help.");
+      return;
+    }
+    if (message.length > MESSAGE_MAX) {
+      setConciergeError(`Keep the message under ${MESSAGE_MAX} characters.`);
+      return;
+    }
+    setConciergeError(null);
+    setConciergeSending(true);
+    try {
+      const sessionId =
+        sessionStorage.getItem("ma_concierge_session") ??
+        (() => {
+          const id = crypto.randomUUID();
+          sessionStorage.setItem("ma_concierge_session", id);
+          return id;
+        })();
+      const { error } = await supabase.functions.invoke("concierge-text-request", {
+        body: {
+          phone,
+          message,
+          session_id: sessionId,
+          product: [brand, title].filter(Boolean).join(" — ") || null,
+          configuration: configuration ?? null,
+          path: window.location.pathname.slice(0, 500),
+          referrer: document.referrer ? document.referrer.slice(0, 500) : null,
+        },
+      });
+      if (error) throw error;
+      setConciergeSent(true);
+    } catch {
+      setConciergeError("Could not send right now — please try again in a moment.");
+    } finally {
+      setConciergeSending(false);
+    }
   };
 
   // Freeze the page behind the sheet while it is open.
@@ -225,28 +283,98 @@ export default function SelectionDrawer({
             />
           </div>
 
-          {/* 5 · Trust & concierge block */}
+          {/* 5 · Trust & concierge block — swaps for the inline contact widget */}
           <div className="mt-6 border border-border/50 bg-cream px-4 py-4">
-            <div className="flex gap-3">
-              <Truck className="mt-0.5 h-4 w-4 flex-none text-foreground/70" strokeWidth={1.5} />
-              <p className="font-body text-[11px] leading-relaxed text-muted-foreground">
-                Premium white-glove delivery &amp; professional installation will be calculated and
-                quoted by your advisor post-purchase.
-              </p>
-            </div>
-            <div className="mt-3 flex gap-3">
-              <MessageSquare className="mt-0.5 h-4 w-4 flex-none text-foreground/70" strokeWidth={1.5} />
-              <p className="font-body text-[11px] leading-relaxed text-muted-foreground">
-                Need assistance with luxury card limits?{" "}
-                <a
-                  href="/contact"
-                  className="text-foreground underline underline-offset-4 decoration-border transition-colors hover:decoration-foreground"
-                >
-                  Text our private concierge instantly
-                </a>
-                .
-              </p>
-            </div>
+            {!conciergeOpen ? (
+              <>
+                <div className="flex gap-3">
+                  <Truck className="mt-0.5 h-4 w-4 flex-none text-foreground/70" strokeWidth={1.5} />
+                  <p className="font-body text-[11px] leading-relaxed text-muted-foreground">
+                    Premium white-glove delivery &amp; professional installation will be calculated and
+                    quoted by your advisor post-purchase.
+                  </p>
+                </div>
+                <div className="mt-3 flex gap-3">
+                  <MessageSquare className="mt-0.5 h-4 w-4 flex-none text-foreground/70" strokeWidth={1.5} />
+                  <p className="font-body text-[11px] leading-relaxed text-muted-foreground">
+                    Need assistance with luxury card limits?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setConciergeOpen(true)}
+                      className="text-foreground underline underline-offset-4 decoration-border transition-colors hover:decoration-foreground"
+                    >
+                      Text our private concierge instantly
+                    </button>
+                    .
+                  </p>
+                </div>
+              </>
+            ) : conciergeSent ? (
+              <div className="flex gap-3">
+                <MessageSquare className="mt-0.5 h-4 w-4 flex-none text-foreground/70" strokeWidth={1.5} />
+                <p className="font-body text-[11px] leading-relaxed text-muted-foreground">
+                  Message sent — our private concierge will text you back shortly on the number provided.
+                </p>
+              </div>
+            ) : (
+              <div>
+                <p className="font-body text-[10px] font-medium uppercase tracking-widest text-foreground">
+                  Text our private concierge
+                </p>
+                <label className="mt-3 block">
+                  <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Mobile / WhatsApp Number
+                  </span>
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    maxLength={20}
+                    value={conciergePhone}
+                    onChange={(e) => setConciergePhone(e.target.value)}
+                    placeholder="+65 9123 4567"
+                    className="mt-1 h-10 w-full border border-border/60 bg-background px-3 font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-foreground/40"
+                  />
+                </label>
+                <label className="mt-3 block">
+                  <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Your Message
+                  </span>
+                  <textarea
+                    rows={2}
+                    maxLength={MESSAGE_MAX}
+                    value={conciergeMessage}
+                    onChange={(e) => setConciergeMessage(e.target.value)}
+                    placeholder="e.g. Questions on payment limits or delivery timing…"
+                    className="mt-1 w-full resize-none border border-border/60 bg-background px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-foreground/40"
+                  />
+                </label>
+                {conciergeError && (
+                  <p className="mt-2 font-body text-[11px] text-destructive">{conciergeError}</p>
+                )}
+                <div className="mt-3 flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={sendConciergeText}
+                    disabled={conciergeSending}
+                    className="inline-flex h-10 flex-1 items-center justify-center gap-2 bg-foreground px-4 font-body text-[10px] font-medium uppercase tracking-widest text-background transition-all hover:bg-foreground/85 disabled:opacity-60"
+                  >
+                    <Send className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    {conciergeSending ? "Sending…" : "Send Text"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setConciergeOpen(false);
+                      setConciergeError(null);
+                    }}
+                    className="font-body text-[10px] uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
