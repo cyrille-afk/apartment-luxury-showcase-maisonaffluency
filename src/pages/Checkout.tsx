@@ -124,26 +124,38 @@ function OrderSummaryDrawer({ lines }: { lines: CheckoutLine[] }) {
 
 /* ------------------------------------------------------------------ */
 /* Conditional charges — shown so nothing is a surprise later          */
+/* Every string passes the guardrail: no invented discounts or perks.  */
 /* ------------------------------------------------------------------ */
+const CONDITIONAL_NOTES: { label: string; body: string }[] = [
+  {
+    label: "Delivery, installation & insurance",
+    body: "quoted separately by your advisor once the destination is confirmed. Not charged on this page.",
+  },
+  {
+    label: "Duties, import taxes & VAT",
+    body: "assessed by the destination country and billed at import. Not included above.",
+  },
+  {
+    label: "Trade net pricing",
+    body: "applies only to verified trade accounts, on the trade portal. Prices here are retail.",
+  },
+  {
+    label: "Bank wire transfer",
+    body: "applies only when you select it above; it changes the payment method, not the amount.",
+  },
+].map((n) => ({
+  label: assertCheckoutCopy(n.label, "conditional note label"),
+  body: assertCheckoutCopy(n.body, "conditional note body"),
+}));
+
 function ConditionalNotes() {
   return (
     <ul className="mt-3 space-y-1.5 text-[11px] leading-relaxed text-muted-foreground">
-      <li>
-        <span className="text-foreground">Delivery, installation &amp; insurance</span> — quoted
-        separately by your advisor once the destination is confirmed. Not charged on this page.
-      </li>
-      <li>
-        <span className="text-foreground">Duties, import taxes &amp; VAT</span> — assessed by the
-        destination country and billed at import. Not included above.
-      </li>
-      <li>
-        <span className="text-foreground">Trade net pricing</span> — applies only to verified trade
-        accounts, on the trade portal. Prices here are retail.
-      </li>
-      <li>
-        <span className="text-foreground">Bank wire transfer</span> — applies only when you select
-        it above; it changes the payment method, not the amount.
-      </li>
+      {CONDITIONAL_NOTES.filter((n) => n.body).map((n) => (
+        <li key={n.label}>
+          <span className="text-foreground">{n.label}</span> — {n.body}
+        </li>
+      ))}
     </ul>
   );
 }
