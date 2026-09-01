@@ -212,11 +212,30 @@ export default function ProductCommerceCta({
     ? "Open Axonometric Studio"
     : "Request a Quote or Customisation";
 
-  // Public: PLACE ORDER opens the slide-out mini-cart drawer (order confirmation),
-  // which then hands off to checkout with the chosen quantity.
+  // Public: PLACE ORDER writes the configured piece into the shared cart state
+  // and slides open the "Your Selection" drawer — never the account wall.
   // Secondary (both states) opens the brief-upload portal (QuoteBriefIntake).
-  const primaryAction = tradeApproved ? undefined : () => setMiniCartOpen(true);
+  const openSelection = () => {
+    onAddToCart?.(quantity);
+    setMiniCartOpen(true);
+  };
+  const primaryAction = tradeApproved ? undefined : openSelection;
   const secondaryAction = () => setAccessOpen(true);
+
+  // Sticky banners dispatch this instead of navigating to /cart. Only the
+  // instance matching the current breakpoint reacts, so one drawer opens.
+  useEffect(() => {
+    if (tradeApproved) return;
+    const handler = () => {
+      const isDesktop =
+        typeof window !== "undefined" &&
+        window.matchMedia("(min-width: 768px)").matches;
+      if (dockOnly === isDesktop) return;
+      openSelection();
+    };
+    window.addEventListener("ma:open-selection", handler);
+    return () => window.removeEventListener("ma:open-selection", handler);
+  });
 
   // Lock body scroll while the drawer is open.
   useEffect(() => {
