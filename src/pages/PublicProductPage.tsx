@@ -1994,8 +1994,8 @@ const PublicProductPageContent: React.FC = () => {
           placingOrder={checkoutLoading}
         />
 
-        {/* Dev-only role preview switcher */}
-        <DevRoleToggle />
+        {/* Dev-only role preview switcher (never rendered in production builds) */}
+        {import.meta.env.DEV && <DevRoleToggle />}
 
 
 
