@@ -35,6 +35,10 @@ export interface ProductCommerceCtaProps {
   rrpLabel?: string | null;
   /** Verified-trade view */
   tradeApproved?: boolean;
+  /** Dev role-preview override: precomputed net trade price label (e.g. "$5,259") */
+  netLabelOverride?: string | null;
+  /** Dev role-preview override: precomputed plain retail label (e.g. "$7,513") */
+  retailLabelOverride?: string | null;
   /** Direct Stripe checkout — receives the chosen quantity */
   onPlaceOrder: (quantity?: number) => void;
   placingOrder?: boolean;
@@ -122,8 +126,8 @@ function PriceBlock({
   if (trade && netLabel) {
     return (
       <div className="flex flex-col gap-1">
-        <p className="font-body text-[11px] tracking-[0.04em] text-muted-foreground">
-          {rrpLabel ? `Retail: ${from ? "From " : ""}${rrpLabel} (Before Tax)` : "Retail on request (Before Tax)"}
+        <p className="font-body text-[11px] tracking-[0.04em] text-muted-foreground line-through decoration-muted-foreground/50">
+          {rrpLabel ? `Retail: ${from ? "From " : ""}${rrpLabel}` : "Retail on request"}
         </p>
         <p className="font-display text-2xl leading-none text-foreground">
           {from ? "From " : ""}{netLabel} <span className="font-body text-xs tracking-widest uppercase text-muted-foreground">Net Trade Price</span>
