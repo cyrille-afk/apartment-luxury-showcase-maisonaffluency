@@ -207,6 +207,7 @@ export default function SelectionDrawer({
           <p className="font-body text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
             Payment Method
           </p>
+          {/* Section labels share one style token with QUANTITY + YOUR SELECTION. */}
           <div className="mt-3 flex flex-col gap-2" role="radiogroup" aria-label="Payment method">
             <PaymentOption
               active={method === "online"}
@@ -303,15 +304,16 @@ function PaymentOption({
           : "border-border/70 bg-transparent hover:border-border"
       )}
     >
+      {/* Sharp square selector marker — matches the square buttons/counters. */}
       <span
         className={cn(
-          "flex h-4 w-4 flex-none items-center justify-center rounded-full border transition-colors",
+          "flex h-4 w-4 flex-none items-center justify-center border transition-colors",
           active ? "border-foreground" : "border-border"
         )}
       >
         <span
           className={cn(
-            "h-2 w-2 rounded-full transition-colors",
+            "h-2 w-2 transition-colors",
             active ? "bg-foreground" : "bg-transparent"
           )}
         />
