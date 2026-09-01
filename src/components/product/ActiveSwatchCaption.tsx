@@ -83,8 +83,23 @@ export default function ActiveSwatchCaption({
   // finish-specific, so never caption them.
   if (swatches.length > 1 && matches.length === swatches.length) return null;
 
+  // When the user has actively selected finishes, caption the SELECTION —
+  // resolves thumbnails by name from the swatch list; names without a swatch
+  // row still render (text only).
+  const chosen = (selectedNames || [])
+    .map((n) => (n || "").trim())
+    .filter(Boolean);
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const captionSwatches: Swatch[] = chosen.length
+    ? chosen.map((name) => {
+        const hit =
+          swatches.find((s) => norm(s.name) === norm(name)) ||
+          swatches.find((s) => norm(s.name).includes(norm(name)) || norm(name).includes(norm(s.name)));
+        return hit ?? { fabric_id: `sel-${name}`, name, image_url: null, image_indices: null };
+      })
+    : matches;
 
-  const multi = matches.length > 1;
+  const multi = captionSwatches.length > 1;
   const isLight = variant === "light";
 
   if (multi) {
