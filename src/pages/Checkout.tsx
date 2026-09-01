@@ -247,7 +247,7 @@ function PaymentForm({
   return (
     <>
       {/* 2 — Express tier */}
-      <section className="px-5 pt-6">
+      <section className="pt-2">
         <ExpressCheckoutElement
           options={{ buttonHeight: 48, layout: { maxColumns: 1, maxRows: 3 } }}
           onConfirm={async () => {
@@ -279,19 +279,23 @@ function PaymentForm({
       </section>
 
       {/* 3 — Contact & delivery */}
-      <section className="space-y-4 px-5">
+      <section className="space-y-4">
         <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
           Contact & delivery
         </h2>
-        <input
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email address"
-          className="h-12 w-full rounded-none border border-border bg-background px-4 text-base outline-none focus:border-foreground"
-        />
+        {account ? (
+          <AccountBlock email={account.email} role={account.role} />
+        ) : (
+          <input
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email address"
+            className="h-12 w-full rounded-none border border-border bg-background px-4 text-base outline-none focus:border-foreground"
+          />
+        )}
         <AddressElement
           options={{
             mode: "shipping",
@@ -303,7 +307,7 @@ function PaymentForm({
       </section>
 
       {/* 4 — Payment */}
-      <section className="space-y-4 px-5 pt-8">
+      <section className="space-y-4 pt-8">
         <div className="flex items-end justify-between gap-4 border-b border-border pb-3">
           <div>
             <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
