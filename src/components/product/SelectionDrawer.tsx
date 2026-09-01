@@ -10,6 +10,8 @@ import {
   Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
+
 import { supabase } from "@/integrations/supabase/client";
 
 /** Mobile / WhatsApp number: digits, +, spaces, dashes, parentheses — 7–20 chars. */
