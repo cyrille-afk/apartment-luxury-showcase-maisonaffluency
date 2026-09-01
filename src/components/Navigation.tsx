@@ -35,6 +35,7 @@ import { supabase } from "@/integrations/supabase/client";
 // useFeaturedPublicDocument import removed — AD free-download flow discontinued.
 import FavoritesHoverPreview from "@/components/FavoritesHoverPreview";
 import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitcher";
+import CartNavButton from "@/components/CartNavButton";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
 const leftNavItems = [{
