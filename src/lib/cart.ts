@@ -114,9 +114,9 @@ export function formatMoney(cents: number, currency = "USD") {
 }
 
 /**
- * Display-routing rule (price-agnostic): a cart holding a single item stays in
- * the sliding drawer; once the cart holds 2+ items (by total quantity), it
- * routes to the dedicated full-page cart (/cart).
+ * Display-routing rule (price-agnostic): a cart holding a single unique line
+ * stays in the sliding drawer; once a 2nd unique line is added, it routes to
+ * the dedicated full-page cart (/cart). Quantity on one line never routes.
  */
 export const FULL_PAGE_CART_MIN_ITEMS = 2;
 
@@ -125,5 +125,5 @@ export function cartItemCount(list: CartItem[] = getCart()) {
 }
 
 export function shouldUseFullPageCart(list: CartItem[] = getCart()) {
-  return cartItemCount(list) >= FULL_PAGE_CART_MIN_ITEMS;
+  return list.length >= FULL_PAGE_CART_MIN_ITEMS;
 }
