@@ -432,8 +432,10 @@ function StickyTotals({
 /* ------------------------------------------------------------------ */
 /* Wire transfer form                                                  */
 /* ------------------------------------------------------------------ */
-function WireForm({ lines, email, setEmail, onDone }: {
+function WireForm({ lines, summary, account, email, setEmail, onDone }: {
   lines: CheckoutLine[];
+  summary: CheckoutSummary;
+  account: { email: string; role: string } | null;
   email: string;
   setEmail: (v: string) => void;
   onDone: (ref: string) => void;
@@ -442,11 +444,10 @@ function WireForm({ lines, email, setEmail, onDone }: {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
-  const total = orderSubtotal(lines);
-  const currency = orderCurrency(lines);
+  const { totalCents: total, currency } = summary;
 
   const submit = async () => {
-    if (!name.trim() || !email.includes("@")) {
+    if (!account && (!name.trim() || !email.includes("@"))) {
       toast.error("Please add your name and email.");
       return;
     }
@@ -491,12 +492,18 @@ function WireForm({ lines, email, setEmail, onDone }: {
 
   return (
     <>
-      <section className="space-y-4 px-5 pt-6">
+      <section className="space-y-4 pt-6">
         <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
           Bank wire — contact & delivery
         </h2>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" autoComplete="name" className={field} />
-        <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" type="email" inputMode="email" autoComplete="email" className={field} />
+        {account ? (
+          <AccountBlock email={account.email} role={account.role} />
+        ) : (
+          <>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" autoComplete="name" className={field} />
+            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" type="email" inputMode="email" autoComplete="email" className={field} />
+          </>
+        )}
         <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone" type="tel" inputMode="tel" autoComplete="tel" className={field} />
         <textarea value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Delivery address" rows={3} className="w-full rounded-none border border-border bg-background p-4 text-base outline-none focus:border-foreground" />
         <p className="text-xs text-muted-foreground">
@@ -504,8 +511,7 @@ function WireForm({ lines, email, setEmail, onDone }: {
         </p>
       </section>
       <StickyTotals
-        lines={lines}
-        total={total}
+        summary={summary}
         cta={`Request wire instructions · ${money(total, currency)}`}
         busy={busy}
         onSubmit={submit}
