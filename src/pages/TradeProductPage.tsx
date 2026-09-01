@@ -2398,14 +2398,16 @@ const TradeProductPage: React.FC = () => {
 
 
 
-            {/* Bespoke / customisation request */}
-            <button
-              onClick={() => setCustomRequestOpen(true)}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-border text-foreground hover:bg-muted w-full"
-            >
-              <Wand2 size={13} />
-              Request Customisation
-            </button>
+              {/* Uniform secondary stack — identical widths, sharp corners,
+                  consistent thin neutral outlines */}
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => setCustomRequestOpen(true)}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none font-body text-[10px] uppercase tracking-[0.18em] transition-colors border border-border bg-background text-foreground hover:bg-muted/60 w-full"
+                >
+                  <Wand2 size={13} />
+                  Request Customisation
+                </button>
 
             {/* 3D model viewer moved beneath the photo (left column) as a
                 collapsed accordion. Finish selectors act as its legend here. */}
