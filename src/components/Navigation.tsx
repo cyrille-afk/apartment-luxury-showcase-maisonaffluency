@@ -35,6 +35,7 @@ import { supabase } from "@/integrations/supabase/client";
 // useFeaturedPublicDocument import removed — AD free-download flow discontinued.
 import FavoritesHoverPreview from "@/components/FavoritesHoverPreview";
 import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitcher";
+import CartNavButton from "@/components/CartNavButton";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
 const leftNavItems = [{
@@ -437,8 +438,11 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </div>
             </div>
 
-            {/* Flag — right edge, vertically centered with burger */}
-            <ShippingDestinationSwitcher compact showIso flagClassName="text-2xl" className="-mr-1" />
+            {/* Cart + flag — right edge, vertically centered with burger */}
+            <div className="flex items-center gap-2">
+              <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
+              <ShippingDestinationSwitcher compact showIso flagClassName="text-2xl" className="-mr-1" />
+            </div>
 
 
 
@@ -808,6 +812,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   )}
                 </button>
               </FavoritesHoverPreview>
+
+              <CartNavButton />
             </div>
           </div>
 
