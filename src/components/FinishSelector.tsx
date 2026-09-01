@@ -705,8 +705,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         const fabricIdx = isFabricGroup ? indices : idxOf(selectedFabricId);
         const woodIdx = isFabricGroup ? idxOf(selectedWoodId) : indices;
         if (fabricIdx && woodIdx) {
-          const shared = fabricIdx.filter((i) => woodIdx.includes(i));
-          emitted = shared.length ? shared : fabricIdx;
+          // Universal slides (brand logo / closing frame) sit in every set —
+          // they must not count as a genuine fabric×wood photograph.
+          const shared = fabricIdx.filter((i) => woodIdx.includes(i) && !isSharedSlide(i));
+          emitted = shared.length ? [...shared, ...fabricIdx.filter((i) => isSharedSlide(i))] : fabricIdx;
         }
       }
 
