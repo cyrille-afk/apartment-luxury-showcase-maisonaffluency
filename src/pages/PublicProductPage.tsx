@@ -458,7 +458,9 @@ const VariantSelectorsProvider: React.FC<{
     onSwatchImagesChange,
     onFinishesMissingImagesChange,
     onFinishGroupingResolved,
+    onDisplayedFinishesChange,
   };
+
 
   return (
     <VariantSelectorsContext.Provider value={value}>
