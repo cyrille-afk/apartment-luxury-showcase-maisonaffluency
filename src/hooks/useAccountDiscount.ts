@@ -20,6 +20,8 @@ export interface AccountDiscount {
   pct: number;
   /** Row label, e.g. "Trade Discount · Silver (8%)". */
   label: string;
+  /** Badge text, e.g. "Admin Pricing Active" or "Trade Silver Active". Empty when ineligible. */
+  badgeText: string;
   /** Discount amount in minor units for a given subtotal. */
   amountFor: (subtotalCents: number) => number;
   /** Subtotal minus the discount. */
