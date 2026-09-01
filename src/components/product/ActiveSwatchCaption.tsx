@@ -103,6 +103,23 @@ export default function ActiveSwatchCaption({
   const multi = captionSwatches.length > 1;
   const isLight = variant === "light";
 
+  // Not every fabric × frame pairing is photographed. When the visible frame
+  // shot differs from the selection, say so plainly rather than implying the
+  // photo depicts the chosen combination.
+  const unmatched = chosen.length
+    ? captionSwatches.filter(
+        (s) => Array.isArray(s.image_indices) && s.image_indices.length > 0 && !s.image_indices.includes(oneBased),
+      )
+    : [];
+  const photographedIn = unmatched.length
+    ? matches
+        .filter((m) => !captionSwatches.some((c) => norm(c.name) === norm(m.name)))
+        .map((m) => m.name)
+    : [];
+  const note = unmatched.length
+    ? `Photographed in ${photographedIn.length ? photographedIn.join(" / ") : "an alternate finish"} — your selection is made to order`
+    : null;
+
   if (multi) {
     // Several finishes → keep them on a single swipeable line, no "Shown in" label.
     return (
