@@ -35,14 +35,21 @@ export const mergeFinishFacet = (
   if (s.includes(a)) return swatch;
 
   // Shared leading words ("Sheepskin SKANDILOCK" + "Sheepskin 09 Moonlight")
-  // → "Sheepskin SKANDILOCK — 09 Moonlight".
+  // → "Sheepskin SKANDILOCK — 09 Moonlight". Only when the axis's extra words
+  // are a supplier REFERENCE (all-caps or containing digits); otherwise the
+  // two are simply different materials ("Oiled Oak" vs "Oiled Walnut") and
+  // merging them would invent a finish that doesn't exist.
   const at = tokens(axis);
   const st = tokens(swatch);
   let shared = 0;
   while (shared < at.length && shared < st.length && at[shared] === st[shared]) shared += 1;
-  if (shared > 0 && shared < st.length) {
-    const remainder = swatch.split(/\s+/).slice(shared).join(" ");
-    return `${axis} — ${remainder}`;
+  if (shared > 0 && shared < st.length && shared < at.length) {
+    const axisExtra = axis.split(/\s+/).slice(shared);
+    const isReference = axisExtra.every((w) => /\d/.test(w) || (w.length > 2 && w === w.toUpperCase()));
+    if (isReference) {
+      const remainder = swatch.split(/\s+/).slice(shared).join(" ");
+      return `${axis} — ${remainder}`;
+    }
   }
 
   // Unrelated values: the swatch is what the shopper is looking at.
