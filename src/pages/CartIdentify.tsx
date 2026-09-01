@@ -32,7 +32,7 @@ export default function CartIdentify() {
   const items = useCart();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const { user } = useAuth();
+  const { user, refreshRoles } = useAuth();
 
   const method: Method = params.get("method") === "bank_transfer" ? "bank_transfer" : "card";
 
