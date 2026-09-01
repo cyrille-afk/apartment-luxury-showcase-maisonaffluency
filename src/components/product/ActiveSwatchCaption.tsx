@@ -120,9 +120,21 @@ export default function ActiveSwatchCaption({
     ? `Photographed in ${photographedIn.length ? photographedIn.join(" / ") : "an alternate finish"} — your selection is made to order`
     : null;
 
+  const noteLine = note ? (
+    <p
+      className={cn(
+        "mt-1 px-2 text-center font-body text-[9px] uppercase tracking-[0.16em]",
+        isLight ? "text-white/60" : "text-muted-foreground/70",
+      )}
+    >
+      {note}
+    </p>
+  ) : null;
+
   if (multi) {
     // Several finishes → keep them on a single swipeable line, no "Shown in" label.
     return (
+      <div>
       <div className={cn(
         "mt-3 flex items-center gap-3 overflow-x-auto whitespace-nowrap px-2 no-scrollbar [scrollbar-width:none] justify-start sm:justify-center",
         isLight && "text-white/90"
@@ -148,10 +160,13 @@ export default function ActiveSwatchCaption({
           </span>
         ))}
       </div>
+      {noteLine}
+      </div>
     );
   }
 
   return (
+    <div>
     <div className="mt-3 flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 px-2 text-center">
       <span className={cn(
         "font-body text-[10px] uppercase tracking-[0.15em]",
@@ -178,6 +193,8 @@ export default function ActiveSwatchCaption({
         )}
         <span>{captionSwatches[0].name}</span>
       </span>
+    </div>
+    {noteLine}
     </div>
   );
 }
