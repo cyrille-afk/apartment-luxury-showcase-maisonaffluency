@@ -1107,7 +1107,7 @@ const PublicProductPageContent: React.FC = () => {
   const { discountPct: tierDiscountPct, tierLabel: tradeTierLabel } = useTradeDiscount();
   const realRole: UserRole = !user
     ? "PUBLIC"
-    : isTradeUser || tradeStatus === "approved"
+    : hasTradeAccess
       ? "TRADE_VERIFIED"
       : tradeStatus === "pending_review"
         ? "TRADE_UNVERIFIED"
@@ -1861,7 +1861,7 @@ const PublicProductPageContent: React.FC = () => {
   // Rendered inside the main commerce action panel on desktop, and as a
   // compact standalone row on mobile.
   const renderUtilityLinks = (extraClass = "") => {
-    const tradeApprovedFooter = !!user && (isTradeUser || tradeStatus === "approved");
+    const tradeApprovedFooter = !!user && hasTradeAccess;
     const hasSheet = !!(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0));
     const utilityItem =
       "inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors duration-200 hover:text-foreground";
@@ -2131,7 +2131,7 @@ const PublicProductPageContent: React.FC = () => {
                 overlay={
                   /* Favorite / studio save stays top-right. */
                   <div className="hidden md:flex items-center gap-3">
-                    {user && (isTradeUser || tradeStatus === "approved") ? (
+                    {user && hasTradeAccess ? (
                       <CornerTooltip label="Save to Studio" side="bottom" align="end">
                         <StudioSaveButton
                           pickId={product.id}
@@ -2180,7 +2180,7 @@ const PublicProductPageContent: React.FC = () => {
               {/* Mobile-only image overlay: share + favorite / studio save, top-right */}
               <div className="md:hidden pointer-events-none absolute inset-x-0 top-0 z-40" style={{ height: galleryCompact ? "20vh" : "45vh" }}>
                 <div className="absolute top-4 right-4 flex items-center gap-3 pointer-events-auto">
-                  {user && (isTradeUser || tradeStatus === "approved") ? (
+                  {user && hasTradeAccess ? (
                     // Trade members get the studio "drop" anchor instead of the
                     // retail heart: one tap → bottom sheet → project.
                     <StudioSaveButton
@@ -2693,7 +2693,7 @@ const PublicProductPageContent: React.FC = () => {
                 });
                 const inquireHref = `/contact?${q.toString()}#contact`;
 
-                const tradeApproved = isTradeUser || tradeStatus === "approved";
+                const tradeApproved = hasTradeAccess;
 
                 if (!tradeApproved && tradeStatus === "pending_review") {
                   return <TradePendingReviewCard />;
@@ -2791,7 +2791,7 @@ const PublicProductPageContent: React.FC = () => {
 
           {/* Verified trade — Zone 1/2/3 workspace (strip + Felix | specs),
               running full width directly below the main product view. */}
-          {user && !roleOverridden && tradeStatus !== "pending_review" && (isTradeUser || tradeStatus === "approved") && !isMobileOrPwa && (() => {
+          {user && !roleOverridden && hasTradeAccess && !isMobileOrPwa && (() => {
             const returnTo = location.pathname + location.search;
             const q = new URLSearchParams({
               subject: `Price upon Request — ${product.title} by ${designerDisplay}`,
