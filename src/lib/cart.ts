@@ -9,11 +9,14 @@ export interface CartItem {
   title: string;
   designerName: string;
   finishLabel: string | null;
+  /** Structured variant axes (base × top × size) used to re-price server-side. */
+  variant?: { base: string | null; top: string | null; size: string | null } | null;
   imageUrl: string | null;
   leadTime: string | null;
   unitPriceCents: number;
   currency: string;
   quantity: number;
+
 }
 
 const STORAGE_KEY = "ma_cart_v1";
