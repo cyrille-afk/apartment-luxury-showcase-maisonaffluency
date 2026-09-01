@@ -217,8 +217,14 @@ export default function ProductCommerceCta({
   // Public: PLACE ORDER writes the configured piece into the shared cart state
   // and slides open the "Your Selection" drawer — never the account wall.
   // Secondary (both states) opens the brief-upload portal (QuoteBriefIntake).
+  // Display-routing controller: below $5,000 the sliding drawer handles the
+  // order; at or above the threshold we route to the full-page /cart layout.
   const openSelection = () => {
     onAddToCart?.(quantity);
+    if (shouldUseFullPageCart(getCart())) {
+      navigate("/cart");
+      return;
+    }
     setMiniCartOpen(true);
   };
   const primaryAction = tradeApproved ? undefined : openSelection;
