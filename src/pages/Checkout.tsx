@@ -306,7 +306,10 @@ function PaymentForm({
             </div>
           )}
           <div className={cn(!paymentReady && "invisible")}>
-            <PaymentElement options={{ layout: "tabs" }} onReady={() => setPaymentReady(true)} />
+            <PaymentElement
+              options={{ layout: "tabs", paymentMethodOrder: ["card"] }}
+              onReady={() => setPaymentReady(true)}
+            />
           </div>
         </div>
       </section>
@@ -373,7 +376,7 @@ function StickyTotals({
         disabled={busy || !ready}
         onClick={onSubmit}
         aria-disabled={!ready}
-        className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-none bg-[#1A1A1A] text-[12px] uppercase tracking-[0.2em] text-white disabled:cursor-not-allowed disabled:opacity-40"
+        className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-none bg-[#0A0A0A] text-[12px] uppercase tracking-[0.2em] text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-40"
       >
         {!ready && !busy && <Loader2 className="h-4 w-4 animate-spin" />}
         {busy && <Loader2 className="h-4 w-4 animate-spin" />}
