@@ -10,7 +10,6 @@ const corsHeaders = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-const SHIPPING_RATE = 0.15;
 
 interface IncomingItem {
   pickId: string;
