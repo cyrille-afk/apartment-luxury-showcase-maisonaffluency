@@ -42,6 +42,7 @@ import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder, formatVa
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { isRugCategory, parseRugDims, looksLikeDimension } from "@/lib/rugPricing";
 import FinishSelector from "@/components/FinishSelector";
+import { composeOrderFinishLabel } from "@/lib/orderFinishLabel";
 import ShippingDetailsAccordion from "@/components/product/ShippingDetailsAccordion";
 import OriginStoryDrawer from "@/components/product/OriginStoryDrawer";
 
@@ -1229,6 +1230,14 @@ const PublicProductPageContent: React.FC = () => {
   // Finish/size selection surfaced in the authenticated Trade Workspace and
   // injected into Felix's product context.
   const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
+  // Swatch names currently DISPLAYED in the finish accordions (colourways).
+  // Order lines merge these with the variant axis references so the basket
+  // reads exactly what the shopper sees on the page.
+  const [displayedFinishes, setDisplayedFinishes] = useState<{
+    upholstery: string | null;
+    base: string | null;
+    top: string | null;
+  }>({ upholstery: null, base: null, top: null });
   // Signed-out visitors get an elegant explainer instead of the gated PDF.
   const [specSheetLocked, setSpecSheetLocked] = useState(false);
   // Height of the gallery column captured before the collapse, so we can keep
@@ -1649,6 +1658,33 @@ const PublicProductPageContent: React.FC = () => {
    * "Place an Order" — publicly priced pieces go straight into the cart, the
    * rest fall back to the concierge enquiry flow (price upon request).
    */
+  /**
+   * Finish line for cart / checkout rows: variant axis references merged with
+   * the swatch colourways displayed in the selector (e.g. "Sheepskin
+   * SKANDILOCK — 09 Moonlight / Oiled Walnut"), then the implicit single
+   * variant, then the materials line.
+   */
+  const buildOrderFinishLabel = (): string | null => {
+    const variants = (product.size_variants || []) as Array<{ label?: string; base?: string; top?: string }>;
+    const sel = rrpSelectionRef.current || { base: null, top: null, size: null };
+    const single = variants.length === 1 ? variants[0] : null;
+    const composed = composeOrderFinishLabel({
+      base: sel.base || single?.base || null,
+      top: sel.top || single?.top || null,
+      size: sel.size || null,
+      displayedBase: displayedFinishes.base,
+      displayedTop: displayedFinishes.top,
+      displayedUpholstery: displayedFinishes.upholstery,
+    });
+    return (
+      composed ||
+      (selectedFinishes.length ? selectedFinishes.join(" / ") : "") ||
+      (single ? [single.base, single.top, single.label].filter(Boolean).join(" / ") : "") ||
+      (product.materials || "").trim() ||
+      null
+    );
+  };
+
   const handlePlaceOrder = () => {
     const unit = selectedRrp?.cents || Number(publicRrpRow?.rrp_price_cents) || 0;
     if (!unit) {
@@ -1667,16 +1703,7 @@ const PublicProductPageContent: React.FC = () => {
     // Finish shown on the cart line: the user's explicit selection first, then
     // the piece's implicit finish (single-variant products never fire a change
     // event), then the materials line as a last resort.
-    const variants = (product.size_variants || []) as Array<{ label?: string; base?: string; top?: string }>;
-    const implicitVariant =
-      variants.length === 1
-        ? [variants[0].base, variants[0].top, variants[0].label].filter(Boolean).join(" / ")
-        : "";
-    const finishLabel =
-      (selectedFinishes.length ? selectedFinishes.join(" / ") : "") ||
-      implicitVariant ||
-      (product.materials || "").trim() ||
-      null;
+    const finishLabel = buildOrderFinishLabel();
 
     addToCart({
       pickId: product.id,
@@ -1699,16 +1726,7 @@ const PublicProductPageContent: React.FC = () => {
    */
   const buildCheckoutLine = (quantity = 1) => {
     const unit = selectedRrp?.cents || Number(publicRrpRow?.rrp_price_cents) || 0;
-    const variants = (product.size_variants || []) as Array<{ label?: string; base?: string; top?: string }>;
-    const implicitVariant =
-      variants.length === 1
-        ? [variants[0].base, variants[0].top, variants[0].label].filter(Boolean).join(" / ")
-        : "";
-    const finishLabel =
-      (selectedFinishes.length ? selectedFinishes.join(" / ") : "") ||
-      implicitVariant ||
-      (product.materials || "").trim() ||
-      null;
+    const finishLabel = buildOrderFinishLabel();
     return {
       unit,
       item: {
@@ -2153,6 +2171,7 @@ const PublicProductPageContent: React.FC = () => {
                       setGalleryJumpNonce((n) => n + 1);
                     }}
                     onFinishesMissingImagesChange={setFinishesMissingImages}
+                    onDisplayedFinishesChange={setDisplayedFinishes}
                     onFinishGroupingResolved={() => setFinishGroupingPending(false)}
                   >
                     <div className="flex flex-col gap-5 order-2">
@@ -2426,6 +2445,7 @@ const PublicProductPageContent: React.FC = () => {
                       setGalleryJumpNonce((n) => n + 1);
                     }}
                     onFinishesMissingImagesChange={setFinishesMissingImages}
+                    onDisplayedFinishesChange={setDisplayedFinishes}
                     onFinishGroupingResolved={() => setFinishGroupingPending(false)}
                   >
                     <div className="flex flex-col gap-5">
