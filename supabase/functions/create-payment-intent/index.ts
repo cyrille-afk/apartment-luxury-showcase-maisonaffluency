@@ -92,7 +92,22 @@ serve(async (req) => {
       for (const i of items) i.unitAmount = Math.round(i.unitAmount * (1 - discountPct));
     }
 
-    const amount = items.reduce((sum, i) => sum + i.unitAmount * i.quantity, 0);
+    const goodsAmount = items.reduce((sum, i) => sum + i.unitAmount * i.quantity, 0);
+
+    // ---- Shipping (opt-in only) ----
+    // Shipping is "To be Quoted by Advisor" until the buyer explicitly confirms
+    // an advisor-issued quote. No estimate is ever invented server-side.
+    const shippingConfirmed = body?.shippingConfirmed === true;
+    const rawShipping = Number(body?.shippingCents);
+    const shippingCents =
+      shippingConfirmed && Number.isFinite(rawShipping) && rawShipping > 0
+        ? Math.round(rawShipping)
+        : 0;
+    if (shippingCents > 5_000_000) return json({ error: "Shipping amount out of range." }, 400);
+    const shippingLabel =
+      typeof body?.shippingLabel === "string" ? body.shippingLabel.trim().slice(0, 120) : "";
+
+    const amount = goodsAmount + shippingCents;
     if (amount < 100 || amount > 100_000_00 * 100) return json({ error: "Price out of range." }, 400);
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
@@ -114,14 +129,7 @@ serve(async (req) => {
       .join(" | ")
       .slice(0, 300);
 
-    const intent = await stripe.paymentIntents.create({
-      amount,
-      currency,
-      customer: customerId,
-      receipt_email: email ?? undefined,
-      automatic_payment_methods: { enabled: true },
-      description,
-      metadata: {
+    const metadata: Record<string, string> = {
         payment_type: "onsite_checkout",
         user_id: userId ?? "",
         product_title: first.title,
@@ -131,11 +139,46 @@ serve(async (req) => {
         item_count: String(items.length),
         discount_pct: String(discountPct),
         discount_label: discountLabel ?? "",
+        shipping_cents: String(shippingCents),
+        shipping_label: shippingLabel,
         line_items: JSON.stringify(
           items.map((i) => ({ t: i.title, f: i.finish, u: i.unitAmount, q: i.quantity })),
         ).slice(0, 500),
-      },
-    });
+    };
+
+    // Reuse the open PaymentIntent when the buyer only added a confirmed
+    // shipping quote; fall back to a fresh intent when it can no longer change.
+    const reuseId = typeof body?.paymentIntentId === "string" ? body.paymentIntentId : "";
+    let intent: Stripe.PaymentIntent | null = null;
+    if (reuseId.startsWith("pi_")) {
+      try {
+        const existing = await stripe.paymentIntents.retrieve(reuseId);
+        const updatable =
+          existing.status === "requires_payment_method" ||
+          existing.status === "requires_confirmation";
+        if (updatable && existing.currency === currency) {
+          intent = await stripe.paymentIntents.update(reuseId, {
+            amount,
+            description,
+            metadata,
+          });
+        }
+      } catch (_e) {
+        intent = null;
+      }
+    }
+
+    if (!intent) {
+      intent = await stripe.paymentIntents.create({
+        amount,
+        currency,
+        customer: customerId,
+        receipt_email: email ?? undefined,
+        automatic_payment_methods: { enabled: true },
+        description,
+        metadata,
+      });
+    }
 
 
     return json({
@@ -145,6 +188,9 @@ serve(async (req) => {
       currency,
       discountPct,
       discountLabel,
+      goodsAmount,
+      shippingCents,
+      shippingLabel,
     });
   } catch (err) {
     console.error("[create-payment-intent] error", err);
