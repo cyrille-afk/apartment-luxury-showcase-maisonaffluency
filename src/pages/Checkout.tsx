@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { getCart } from "@/lib/cart";
+import { useAccountDiscount } from "@/hooks/useAccountDiscount";
 import {
   assertCheckoutCopy,
   buildVerifiedTotals,
@@ -480,7 +481,23 @@ function WireForm({ lines, email, setEmail, onDone }: {
 export default function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [lines, setLines] = useState<CheckoutLine[] | null>(null);
+  const [grossLines, setLines] = useState<CheckoutLine[] | null>(null);
+  // Account-level tier discount. The hook drives the first paint; the value
+  // returned by the PaymentIntent is authoritative once it arrives, so the
+  // displayed total always equals the amount Stripe will charge.
+  const { pct: hookDiscountPct } = useAccountDiscount();
+  const [serverDiscountPct, setServerDiscountPct] = useState<number | null>(null);
+  const effectiveDiscountPct = serverDiscountPct ?? hookDiscountPct;
+  const lines = useMemo(
+    () =>
+      grossLines && effectiveDiscountPct > 0
+        ? grossLines.map((l) => ({
+            ...l,
+            unitCents: Math.round(l.unitCents * (1 - effectiveDiscountPct)),
+          }))
+        : grossLines,
+    [grossLines, effectiveDiscountPct],
+  );
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [email, setEmail] = useState("");
@@ -559,9 +576,9 @@ export default function Checkout() {
 
 
   useEffect(() => {
-    if (!lines?.length || initialised.current) return;
+    if (!grossLines?.length || initialised.current) return;
     initialised.current = true;
-    const first = lines[0];
+    const first = grossLines[0];
     (async () => {
       try {
         const [{ data: cfg, error: cfgErr }, { data: pi, error: piErr }] = await Promise.all([
@@ -572,11 +589,12 @@ export default function Checkout() {
               title: first.title,
               designer: first.designer || "",
               price: first.unitCents / 100,
-              currency: orderCurrency(lines),
+              currency: orderCurrency(grossLines),
               selectedFinish: first.finishLabel || "",
               quantity: lineQty(first),
               // … plus the full order, which the function charges when present.
-              items: lines.map((l) => ({
+              // Gross prices — the discount is re-derived server-side.
+              items: grossLines.map((l) => ({
                 title: l.title,
                 designer: l.designer || "",
                 selectedFinish: l.finishLabel || "",
@@ -590,8 +608,13 @@ export default function Checkout() {
         if (piErr || (pi as any)?.error) throw new Error((pi as any)?.error || "Unable to start checkout.");
 
         // Guardrail: the amount Stripe will charge must equal the cart-derived total.
+        const serverPct = Number((pi as any)?.discountPct) || 0;
+        setServerDiscountPct(serverPct);
+        const chargedLines = serverPct > 0
+          ? grossLines.map((l) => ({ ...l, unitCents: Math.round(l.unitCents * (1 - serverPct)) }))
+          : grossLines;
         const check = reconcileBackendAmount(
-          buildVerifiedTotals(lines),
+          buildVerifiedTotals(chargedLines),
           (pi as any)?.amount,
           (pi as any)?.currency,
         );
@@ -603,7 +626,7 @@ export default function Checkout() {
         setError(err?.message || "Unable to start checkout.");
       }
     })();
-  }, [lines]);
+  }, [grossLines]);
 
   const appearance = useMemo(
     () => ({
