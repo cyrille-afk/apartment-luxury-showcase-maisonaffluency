@@ -2,13 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Elements, PaymentElement, AddressElement, ExpressCheckoutElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
-import { ChevronDown, Lock, Check, Loader2 } from "lucide-react";
+import { Lock, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { getCart } from "@/lib/cart";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
+import { useAuth } from "@/hooks/useAuth";
 import {
   assertCheckoutCopy,
   buildVerifiedTotals,
@@ -51,77 +52,104 @@ const money = (cents: number, currency: string) =>
   }).format(cents / 100);
 
 /* ------------------------------------------------------------------ */
-/* Order summary — every line item, with the math shown in full        */
+/* Order summary math — gross prices, one cart-level discount row      */
 /* ------------------------------------------------------------------ */
-function OrderSummaryDrawer({ lines }: { lines: CheckoutLine[] }) {
-  const [open, setOpen] = useState(true);
-  const currency = orderCurrency(lines);
-  const subtotal = orderSubtotal(lines);
+export type CheckoutSummary = {
+  currency: string;
+  subtotalCents: number;
+  discountCents: number;
+  discountLabel: string | null;
+  shippingCents: number;
+  shippingLabel: string | null;
+  totalCents: number;
+};
+
+/* Signed-in account confirmation — replaces blank email/name inputs.  */
+function AccountBlock({ email, role }: { email: string; role: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4 border border-border bg-muted/30 px-4 py-3">
+      <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Account</span>
+      <span className="truncate text-sm">
+        {email} <span className="text-muted-foreground">({role})</span>
+      </span>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Order summary — persistent sidebar showing the true unit prices,    */
+/* the subtotal, one explicit discount row, and the final total.       */
+/* ------------------------------------------------------------------ */
+function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: CheckoutSummary }) {
+  const { currency } = summary;
   const pieces = lines.reduce((n, l) => n + lineQty(l), 0);
 
   return (
-    <div className="border-y border-border/60">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between px-5 py-4 text-left"
-        aria-expanded={open}
-      >
-        <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-          Order summary · {lines.length} {lines.length === 1 ? "item" : "items"}
-          {pieces !== lines.length ? ` · ${pieces} pieces` : ""}
-        </span>
-        <span className="flex items-center gap-2 text-sm">
-          {money(subtotal, currency)}
-          <ChevronDown className={cn("h-4 w-4 transition-transform", open && "rotate-180")} />
-        </span>
-      </button>
+    <aside className="h-fit border border-border bg-background p-6 lg:sticky lg:top-8">
+      <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+        Order summary · {lines.length} {lines.length === 1 ? "item" : "items"}
+        {pieces !== lines.length ? ` · ${pieces} pieces` : ""}
+      </p>
 
-      {open && (
-        <div className="px-5 pb-5">
-          <ul className="divide-y divide-border/50">
-            {lines.map((line, i) => (
-              <li key={`${line.title}-${line.finishLabel || ""}-${i}`} className="flex gap-4 py-4 first:pt-0">
-                {line.imageUrl && (
-                  <img
-                    src={line.imageUrl}
-                    alt={line.title}
-                    className="h-20 w-20 flex-none object-cover"
-                    loading="lazy"
-                  />
-                )}
-                <div className="min-w-0 flex-1 text-sm">
-                  {line.designer && (
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                      {line.designer}
-                    </p>
-                  )}
-                  <p className="truncate font-light">{line.title}</p>
-                  {line.finishLabel && (
-                    <p className="mt-1 text-xs text-muted-foreground">{line.finishLabel}</p>
-                  )}
-                  {line.leadTime && (
-                    <p className="mt-1 text-xs text-muted-foreground">Lead time · {line.leadTime}</p>
-                  )}
-                  {/* Explicit per-line math: unit × qty = line total */}
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    {money(line.unitCents, line.currency)} × {lineQty(line)} ={" "}
-                    <span className="text-foreground">{money(lineSubtotal(line), line.currency)}</span>
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
+      <ul className="mt-5 divide-y divide-border/50">
+        {lines.map((line, i) => (
+          <li key={`${line.title}-${line.finishLabel || ""}-${i}`} className="flex gap-4 py-4 first:pt-0">
+            {line.imageUrl && (
+              <img
+                src={line.imageUrl}
+                alt={line.title}
+                className="h-20 w-20 flex-none object-cover"
+                loading="lazy"
+              />
+            )}
+            <div className="min-w-0 flex-1 text-sm">
+              {line.designer && (
+                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {line.designer}
+                </p>
+              )}
+              <p className="truncate font-light">{line.title}</p>
+              {line.finishLabel && (
+                <p className="mt-1 text-xs text-muted-foreground">{line.finishLabel}</p>
+              )}
+              {line.leadTime && (
+                <p className="mt-1 text-xs text-muted-foreground">Lead time · {line.leadTime}</p>
+              )}
+              {/* Standard catalogue unit price — never a discounted rate */}
+              <p className="mt-2 text-xs text-muted-foreground">
+                {money(line.unitCents, line.currency)} × {lineQty(line)}
+              </p>
+            </div>
+            <div className="flex-none text-sm">{money(lineSubtotal(line), line.currency)}</div>
+          </li>
+        ))}
+      </ul>
 
-          <div className="mt-4 flex justify-between border-t border-border/60 pt-3 text-sm">
-            <span className="text-muted-foreground">
-              Subtotal · sum of {lines.length} {lines.length === 1 ? "line" : "lines"}
-            </span>
-            <span>{money(subtotal, currency)}</span>
-          </div>
+      <dl className="mt-4 space-y-2 border-t border-border/60 pt-4 text-sm">
+        <div className="flex justify-between">
+          <dt className="text-muted-foreground">Subtotal</dt>
+          <dd>{money(summary.subtotalCents, currency)}</dd>
         </div>
-      )}
-    </div>
+        {summary.discountCents > 0 && summary.discountLabel && (
+          <div className="flex justify-between">
+            <dt className="text-muted-foreground">{summary.discountLabel}</dt>
+            <dd>−{money(summary.discountCents, currency)}</dd>
+          </div>
+        )}
+        {summary.shippingCents > 0 && (
+          <div className="flex justify-between">
+            <dt className="text-muted-foreground">
+              {summary.shippingLabel || "Delivery & installation"}
+            </dt>
+            <dd>{money(summary.shippingCents, currency)}</dd>
+          </div>
+        )}
+        <div className="flex justify-between border-t border-border/60 pt-3 text-base">
+          <dt>Order total</dt>
+          <dd>{money(summary.totalCents, currency)}</dd>
+        </div>
+      </dl>
+    </aside>
   );
 }
 
