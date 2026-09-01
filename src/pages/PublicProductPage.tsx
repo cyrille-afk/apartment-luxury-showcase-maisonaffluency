@@ -1079,8 +1079,10 @@ const PublicProductPageContent: React.FC = () => {
   const isTradeUnverifiedView = effectiveRole === "TRADE_UNVERIFIED";
 
   // ---- Structured product data + reactive pricing math -------------------
-  // Every displayed figure is derived from this single dataset object and the
-  // active user context — no hardcoded price strings anywhere in the markup.
+  // Variant A is purely presentational: the numbers come from the container's
+  // shared engine (ProductConfigContext) so the trade dashboard variant and
+  // this editorial layout always resolve to identical figures.
+  const productConfig = useProductConfigOptional();
   const productData = {
     id: data?.product?.id ?? "",
     name: data?.product?.title ?? "",
@@ -1096,40 +1098,14 @@ const PublicProductPageContent: React.FC = () => {
   const hasFromPrefix = /^From\s+/i.test(publicRrpLabel || "");
   const priceCurrency = (publicRrpRow?.currency || "USD").toUpperCase();
 
-  /** Pure function: derives every price label from productData + userRole. */
-  const computeDisplayPrice = (
-    data: typeof productData,
-    role: UserRole,
-    currency: string,
-    withFromPrefix: boolean
-  ) => {
-    const fmt = (cents: number) => {
-      try {
-        return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(cents / 100);
-      } catch {
-        return `${currency} ${(cents / 100).toLocaleString("en-US")}`;
-      }
-    };
-    // TRADE_VERIFIED: net price computed programmatically from the base rate.
-    if (role === "TRADE_VERIFIED" && data.baseRetailPriceCents > 0 && data.tradeDiscountMultiplier > 0) {
-      const netCents = Math.round(data.baseRetailPriceCents * (1 - data.tradeDiscountMultiplier));
-      const netLabel = fmt(netCents);
-      return {
-        isTrade: true as const,
-        netLabel,
-        netDisplay: `${withFromPrefix ? "From " : ""}${netLabel}`,
-        retailFootnoteLabel: fmt(data.baseRetailPriceCents),
-      };
-    }
-    // PUBLIC / RETAIL_BUYER / TRADE_UNVERIFIED: base retail figure.
-    return {
-      isTrade: false as const,
-      netLabel: null as string | null,
-      netDisplay: null as string | null,
-      retailFootnoteLabel:
-        data.baseRetailPriceCents > 0 ? fmt(data.baseRetailPriceCents) : null,
-    };
-  };
+  // Publish the current selection's base rate + currency into the container so
+  // both layout variants (and the quantity stepper) compute off one source.
+  useEffect(() => {
+    productConfig?.setBaseRetailPriceCents(productData.baseRetailPriceCents);
+  }, [productConfig, productData.baseRetailPriceCents]);
+  useEffect(() => {
+    productConfig?.setCurrency(priceCurrency);
+  }, [productConfig, priceCurrency]);
 
   const pricing = computeDisplayPrice(productData, effectiveRole, priceCurrency, hasFromPrefix);
   const mockNetLabel = pricing.netLabel;
