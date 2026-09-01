@@ -1,7 +1,7 @@
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
 import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Loader2, Minus, Plus, X } from "lucide-react";
+import { Loader2, Minus, Plus } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import QuoteBriefIntake from "@/components/product/QuoteBriefIntake";
 import SelectionDrawer, { type PaymentMethod } from "@/components/product/SelectionDrawer";
