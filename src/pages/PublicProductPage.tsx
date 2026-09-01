@@ -85,7 +85,7 @@ import { setStickyProductBarActive } from "@/lib/stickyProductBar";
 import TradePendingReviewCard from "@/components/product/TradePendingReviewCard";
 
 import QuoteRequestDialog from "@/components/QuoteRequestDialog";
-import { addToCart } from "@/lib/cart";
+import { addToCart, setQuantity as setCartQuantity } from "@/lib/cart";
 import { usePublicRrp, usePublicRrpMap, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
@@ -1685,6 +1685,45 @@ const PublicProductPageContent: React.FC = () => {
     );
   };
 
+  /**
+   * Writes the currently configured piece (finishes + quantity) into the
+   * shared cart state without navigating — used by "Place Order", which then
+   * slides open the "Your Selection" drawer. Returns false when the piece has
+   * no public price (those fall back to the concierge enquiry route).
+   */
+  const addConfiguredToCart = (qty = 1) => {
+    const unit = selectedRrp?.cents || Number(publicRrpRow?.rrp_price_cents) || 0;
+    if (!unit) return false;
+    const key = addToCart({
+      pickId: product.id,
+      productSlug: productSlug || "",
+      designerSlug: designer.slug,
+      title: product.title,
+      designerName: designerDisplay,
+      finishLabel: buildOrderFinishLabel(),
+      imageUrl: images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null,
+      leadTime: product.lead_time || null,
+      unitPriceCents: unit,
+      currency: (publicRrpRow?.currency || "USD").toUpperCase(),
+    });
+    setCartQuantity(key, Math.max(1, qty));
+    return true;
+  };
+
+  /**
+   * Sticky banners: open the mini-cart instead of the account wall. The CTA
+   * instance that owns the drawer performs the cart write (via onAddToCart),
+   * so this only routes the intent.
+   */
+  const openSelectionDrawer = () => {
+    const unit = selectedRrp?.cents || Number(publicRrpRow?.rrp_price_cents) || 0;
+    if (!unit) {
+      handlePlaceOrder();
+      return;
+    }
+    window.dispatchEvent(new CustomEvent("ma:open-selection"));
+  };
+
   const handlePlaceOrder = () => {
     const unit = selectedRrp?.cents || Number(publicRrpRow?.rrp_price_cents) || 0;
     if (!unit) {
@@ -1773,10 +1812,7 @@ const PublicProductPageContent: React.FC = () => {
       handlePlaceOrder();
       return;
     }
-    if (!user) {
-      requireAuth(() => {}, "place an order");
-      return;
-    }
+    // Guest checkout by design — no account wall before Stripe.
     void startDirectCheckout(quantity);
   };
 
@@ -1961,7 +1997,7 @@ const PublicProductPageContent: React.FC = () => {
             <div className="mt-2 grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={handlePlaceOrder}
+                onClick={openSelectionDrawer}
                 className="flex items-center justify-center px-3 py-2.5 rounded-luxury-micro bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
               >
                 Place an Order
@@ -1990,7 +2026,7 @@ const PublicProductPageContent: React.FC = () => {
           primaryLabel={isTradeVerifiedView ? "Add to Co-Pilot Workspace & Order" : "Place Order"}
           secondaryLabel={isTradeVerifiedView ? "Open Axonometric Studio" : "Request a Quote or Customisation"}
           onRequestQuote={() => setQuoteRequestOpen(true)}
-          onPlaceOrder={handleDirectCheckout}
+          onPlaceOrder={isTradeVerifiedView ? handleDirectCheckout : openSelectionDrawer}
           placingOrder={checkoutLoading}
         />
 
@@ -2478,6 +2514,7 @@ const PublicProductPageContent: React.FC = () => {
                         imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
                         leadTime={product.lead_time}
                         onPlaceOrder={handleDirectCheckout}
+                        onAddToCart={addConfiguredToCart}
                         placingOrder={checkoutLoading}
                         onRequestQuote={() => setQuoteRequestOpen(true)}
                         selectedFinishes={selectedFinishes}
@@ -2570,6 +2607,7 @@ const PublicProductPageContent: React.FC = () => {
                   imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
                   leadTime={product.lead_time}
                   onPlaceOrder={handleDirectCheckout}
+                  onAddToCart={addConfiguredToCart}
                   placingOrder={checkoutLoading}
                   onRequestQuote={() => setQuoteRequestOpen(true)}
                   selectedFinishes={selectedFinishes}
