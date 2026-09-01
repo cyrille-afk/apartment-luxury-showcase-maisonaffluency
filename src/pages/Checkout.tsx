@@ -124,7 +124,7 @@ function OrderSummaryDrawer({ lines }: { lines: CheckoutLine[] }) {
 
 /* ------------------------------------------------------------------ */
 /* Conditional charges — shown so nothing is a surprise later          */
-/* Every string passes the guardrail: no invented discounts or perks.  */
+/* Every string passes the guardrail in @/lib/checkoutGuardrails.          */
 /* ------------------------------------------------------------------ */
 const CONDITIONAL_NOTES: { label: string; body: string }[] = [
   {
