@@ -38,7 +38,8 @@ export function useAccountDiscount(): AccountDiscount {
     (isTradeUser || isAdmin || isSuperAdmin || tradeStatus === "approved");
 
   const pct = eligible ? discountPct : 0;
-  const scope = isAdmin || isSuperAdmin ? "Administrator" : `Trade · ${tierLabel}`;
+  const isAdminAccount = isAdmin || isSuperAdmin;
+  const scope = isAdminAccount ? "Administrator" : `Trade · ${tierLabel}`;
 
   const amountFor = (subtotalCents: number) =>
     pct > 0 ? Math.round((subtotalCents || 0) * pct) : 0;
@@ -47,6 +48,11 @@ export function useAccountDiscount(): AccountDiscount {
     eligible,
     pct,
     label: `${scope} Discount (${discountLabel})`,
+    badgeText: eligible
+      ? isAdminAccount
+        ? "Admin Pricing Active"
+        : `Trade ${tierLabel} Active`
+      : "",
     amountFor,
     totalFor: (subtotalCents: number) => (subtotalCents || 0) - amountFor(subtotalCents),
   };
