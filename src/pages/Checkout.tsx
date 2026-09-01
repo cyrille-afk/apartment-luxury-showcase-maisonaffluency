@@ -1016,14 +1016,22 @@ export default function Checkout() {
           ) : error ? (
             <div className="py-16 text-center text-sm text-muted-foreground">{error}</div>
           ) : stripePromise && clientSecret ? (
-        <Elements stripe={stripePromise} options={{ clientSecret, appearance, fonts: stripeFonts }}>
-          <PaymentForm lines={lines} email={email} setEmail={setEmail} onPaid={setConfirmed} />
-        </Elements>
-      ) : (
-        <div className="flex justify-center py-24">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            <Elements stripe={stripePromise} options={{ clientSecret, appearance, fonts: stripeFonts }}>
+              <PaymentForm
+                summary={summary}
+                account={account}
+                email={email}
+                setEmail={setEmail}
+                onPaid={setConfirmed}
+              />
+            </Elements>
+          ) : (
+            <div className="flex justify-center py-24">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </main>
   );
 }
