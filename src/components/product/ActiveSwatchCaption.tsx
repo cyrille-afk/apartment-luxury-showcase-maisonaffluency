@@ -145,10 +145,10 @@ export default function ActiveSwatchCaption({
         "font-body text-sm inline-flex items-center gap-1",
         isLight ? "text-white" : "text-foreground"
       )}>
-        {matches[0].image_url ? (
+        {captionSwatches[0].image_url ? (
           <img
-            src={matches[0].image_url}
-            alt={matches[0].name}
+            src={captionSwatches[0].image_url}
+            alt={captionSwatches[0].name}
             className={cn(
               "w-5 h-5 rounded-full object-cover border",
               isLight ? "border-white/30" : "border-border"
