@@ -221,8 +221,15 @@ export default function ProductCommerceCta({
   // Display-routing controller (price-agnostic): a single-item cart stays in
   // the drawer; 2+ items route to the full-page /cart layout.
   const openSelection = () => {
-    onAddToCart?.(quantity);
+    const added = onAddToCart?.(quantity);
+    // Pieces without a public price never enter the cart — route those to the
+    // concierge enquiry instead of opening an empty drawer over a locked page.
+    if (added === false) {
+      onPlaceOrder(quantity);
+      return;
+    }
     if (shouldUseFullPageCart(getCart())) {
+      setMiniCartOpen(false);
       navigate("/cart");
       return;
     }
@@ -246,15 +253,16 @@ export default function ProductCommerceCta({
     return () => window.removeEventListener("ma:open-selection", handler);
   });
 
-  // Lock body scroll while the drawer is open.
+  // Safety net: if the cart reaches 2+ lines while the drawer is open (a write
+  // that landed after the click, or another tab), hand off to the full page.
   useEffect(() => {
     if (!miniCartOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [miniCartOpen]);
+    if (shouldUseFullPageCart(cartItems)) {
+      setMiniCartOpen(false);
+      navigate("/cart");
+    }
+  }, [miniCartOpen, cartItems, navigate]);
+
 
   // Drawer quantity stepper: quantity alone never changes the layout — only a
   // 2nd unique line routes to the full-page cart. Keep the line in sync.
