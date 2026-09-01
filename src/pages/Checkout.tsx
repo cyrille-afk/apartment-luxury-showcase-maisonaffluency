@@ -13,7 +13,7 @@ import { getCart } from "@/lib/cart";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 const CONCIERGE_WHATSAPP = "https://wa.me/6591393850";
 const CHECKOUT_KEY = "ma_checkout_line";
-const WIRE_DISCOUNT = 0.015;
+
 
 export type CheckoutLine = {
   title: string;
@@ -191,15 +191,6 @@ function PaymentForm({
             autocomplete: { mode: "automatic" },
           }}
         />
-        <div className="flex items-start gap-3 border border-foreground/70 bg-muted/40 p-4">
-          <Check className="mt-0.5 h-4 w-4 flex-none" />
-          <div>
-            <p className="text-sm">Complimentary fully-insured white-glove delivery & installation</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Included on every acquisition. Our concierge schedules placement with your team.
-            </p>
-          </div>
-        </div>
       </section>
 
       {/* 4 — Payment */}
@@ -229,14 +220,12 @@ function StickyTotals({
   cta,
   busy,
   onSubmit,
-  savings,
 }: {
   line: CheckoutLine;
   total: number;
   cta: string;
   busy: boolean;
   onSubmit: () => void;
-  savings?: number;
 }) {
   return (
     <div className="sticky bottom-0 z-30 mt-8 border-t border-border bg-background/95 px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 backdrop-blur">
@@ -245,21 +234,12 @@ function StickyTotals({
           <dt>Subtotal{lineQty(line) > 1 ? ` (${lineQty(line)} × ${money(line.unitCents, line.currency)})` : ""}</dt>
           <dd>{money(lineSubtotal(line), line.currency)}</dd>
         </div>
-        {savings ? (
-          <div className="flex justify-between text-muted-foreground">
-            <dt>Concierge discount (1.5%)</dt>
-            <dd>−{money(savings, line.currency)}</dd>
-          </div>
-        ) : null}
-        <div className="flex justify-between text-muted-foreground">
-          <dt>White-glove delivery</dt>
-          <dd>Complimentary</dd>
-        </div>
         <div className="flex justify-between pt-1 text-base">
           <dt>Total</dt>
           <dd>{money(total, line.currency)}</dd>
         </div>
       </dl>
+
       <button
         type="button"
         disabled={busy}
@@ -294,8 +274,8 @@ function WireForm({ line, email, setEmail, onDone }: {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
-  const savings = Math.round(lineSubtotal(line) * WIRE_DISCOUNT);
-  const total = lineSubtotal(line) - savings;
+  const total = lineSubtotal(line);
+
 
   const submit = async () => {
     if (!name.trim() || !email.includes("@")) {
@@ -347,8 +327,8 @@ function WireForm({ line, email, setEmail, onDone }: {
       <StickyTotals
         line={line}
         total={total}
-        savings={savings}
         cta={`Request wire instructions · ${money(total, line.currency)}`}
+
         busy={busy}
         onSubmit={submit}
       />
@@ -508,10 +488,8 @@ export default function Checkout() {
             wire ? "border-foreground bg-muted/40" : "border-border",
           )}
         >
-          <span>
-            Bank wire transfer
-            <span className="ml-2 text-xs text-muted-foreground">Save 1.5% concierge discount</span>
-          </span>
+          <span>Bank wire transfer</span>
+
           <span
             className={cn(
               "h-5 w-9 flex-none rounded-full border transition-colors",
