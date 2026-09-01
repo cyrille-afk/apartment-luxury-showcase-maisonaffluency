@@ -112,3 +112,13 @@ export function formatMoney(cents: number, currency = "USD") {
   const amount = Math.round(cents / 100).toLocaleString("en-US");
   return symbol ? `${symbol}${amount}` : `${amount} ${code}`;
 }
+
+/**
+ * Display-routing threshold: carts worth $5,000 USD or more open the dedicated
+ * full-page cart (/cart); anything below stays in the sliding drawer.
+ */
+export const FULL_PAGE_CART_THRESHOLD_CENTS = 500_000;
+
+export function shouldUseFullPageCart(list: CartItem[] = getCart()) {
+  return cartSubtotalCents(list) >= FULL_PAGE_CART_THRESHOLD_CENTS;
+}
