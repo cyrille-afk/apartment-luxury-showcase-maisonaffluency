@@ -46,6 +46,8 @@ export interface ProductCommerceCtaProps {
   onRequestQuote: () => void;
   /** Trade: finish selection carried to the workspace */
   selectedFinishes?: string[];
+  /** Display-accurate finish label (axis reference merged with swatch colourway). */
+  orderFinishLabel?: string | null;
   redirectTo?: string;
   /** Mobile-only sticky bottom dock */
   dock?: boolean;
@@ -153,6 +155,7 @@ export default function ProductCommerceCta({
   placingOrder = false,
   onRequestQuote,
   selectedFinishes = [],
+  orderFinishLabel = null,
   redirectTo,
   dock = true,
   dockOnly = false,
@@ -378,9 +381,9 @@ export default function ProductCommerceCta({
                   <p className="mt-1 font-display text-base leading-snug text-foreground">
                     {productTitle}
                   </p>
-                  {selectedFinishes.length > 0 && (
+                  {(orderFinishLabel || selectedFinishes.length > 0) && (
                     <p className="mt-2 font-body text-xs leading-relaxed text-muted-foreground">
-                      {selectedFinishes.join(" / ")}
+                      {orderFinishLabel || selectedFinishes.join(" / ")}
                     </p>
                   )}
                   {leadTime && (
