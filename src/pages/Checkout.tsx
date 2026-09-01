@@ -157,6 +157,7 @@ function PaymentForm({
   const stripe = useStripe();
   const elements = useElements();
   const [submitting, setSubmitting] = useState(false);
+  const [paymentReady, setPaymentReady] = useState(false);
   const total = orderSubtotal(lines);
   const currency = orderCurrency(lines);
 
@@ -245,17 +246,29 @@ function PaymentForm({
       {/* 4 — Payment */}
       <section className="space-y-4 px-5 pt-8">
         <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Payment</h2>
-        <PaymentElement options={{ layout: "tabs" }} />
+        <div className="relative min-h-28">
+          {!paymentReady && (
+            <div className="absolute inset-0 flex items-center justify-center border border-border" role="status">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <span className="sr-only">Loading secure card fields</span>
+            </div>
+          )}
+          <div className={cn(!paymentReady && "invisible")}>
+            <PaymentElement options={{ layout: "tabs" }} onReady={() => setPaymentReady(true)} />
+          </div>
+        </div>
       </section>
 
       {/* 5 — Sticky summary & CTA */}
-      <StickyTotals
-        lines={lines}
-        total={total}
-        cta={`Confirm & securely pay ${money(total, currency)}`}
-        busy={submitting}
-        onSubmit={confirm}
-      />
+      {paymentReady && (
+        <StickyTotals
+          lines={lines}
+          total={total}
+          cta={`Confirm & securely pay ${money(total, currency)}`}
+          busy={submitting}
+          onSubmit={confirm}
+        />
+      )}
     </>
   );
 }
