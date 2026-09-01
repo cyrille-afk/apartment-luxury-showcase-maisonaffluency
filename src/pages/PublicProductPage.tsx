@@ -86,6 +86,7 @@ import TradePendingReviewCard from "@/components/product/TradePendingReviewCard"
 import QuoteRequestDialog from "@/components/QuoteRequestDialog";
 import { addToCart } from "@/lib/cart";
 import { usePublicRrp, usePublicRrpMap, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { UserRoleProvider, useUserRole, DevRoleToggle, type UserRole } from "@/contexts/UserRoleContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -1065,6 +1066,7 @@ const PublicProductPageContent: React.FC = () => {
   // ---- Dev role-preview state (mock auth) -------------------------------
   // Until the dev dropdown is used, real auth drives the effective role.
   const { role: devRole, overridden: roleOverridden } = useUserRole();
+  const { discountPct: tierDiscountPct, tierLabel: tradeTierLabel } = useTradeDiscount();
   const realRole: UserRole = !user
     ? "PUBLIC"
     : isTradeUser || tradeStatus === "approved"
@@ -1080,13 +1082,16 @@ const PublicProductPageContent: React.FC = () => {
   // Every displayed figure is derived from this single dataset object and the
   // active user context — no hardcoded price strings anywhere in the markup.
   const productData = {
-    id: data?.product?.id ?? "clam-chair-1944",
-    name: data?.product?.title ?? "Clam Chair, 1944",
-    // Base retail rate in minor units, from the live pricing source of truth.
+    id: data?.product?.id ?? "",
+    name: data?.product?.title ?? "",
+    // Base retail rate in minor units — the selected size/finish always wins so
+    // the header tracks the same figure as the trade workspace block.
     baseRetailPriceCents:
-      selectedRrp?.cents ?? (Number(publicRrpRow?.rrp_price_cents) || 0),
-    // 30% trade discount multiplier for verified trade professionals.
-    tradeDiscountMultiplier: 0.3,
+      (selectedVariantPrice?.cents && selectedVariantPrice.cents > 0
+        ? selectedVariantPrice.cents
+        : selectedRrp?.cents) ?? (Number(publicRrpRow?.rrp_price_cents) || 0),
+    // Real assigned tier discount (trade_tier_config) — never a mock rate.
+    tradeDiscountMultiplier: tierDiscountPct || 0,
   };
   const hasFromPrefix = /^From\s+/i.test(publicRrpLabel || "");
   const priceCurrency = (publicRrpRow?.currency || "USD").toUpperCase();
@@ -1106,7 +1111,7 @@ const PublicProductPageContent: React.FC = () => {
       }
     };
     // TRADE_VERIFIED: net price computed programmatically from the base rate.
-    if (role === "TRADE_VERIFIED" && data.baseRetailPriceCents > 0) {
+    if (role === "TRADE_VERIFIED" && data.baseRetailPriceCents > 0 && data.tradeDiscountMultiplier > 0) {
       const netCents = Math.round(data.baseRetailPriceCents * (1 - data.tradeDiscountMultiplier));
       const netLabel = fmt(netCents);
       return {
