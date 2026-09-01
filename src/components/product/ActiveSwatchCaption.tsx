@@ -109,7 +109,7 @@ export default function ActiveSwatchCaption({
         "mt-3 flex items-center gap-3 overflow-x-auto whitespace-nowrap px-2 no-scrollbar [scrollbar-width:none] justify-start sm:justify-center",
         isLight && "text-white/90"
       )}>
-        {matches.map((m) => (
+        {captionSwatches.map((m) => (
           <span key={m.fabric_id} className="inline-flex shrink-0 items-center gap-1.5">
             {m.image_url ? (
               <img
