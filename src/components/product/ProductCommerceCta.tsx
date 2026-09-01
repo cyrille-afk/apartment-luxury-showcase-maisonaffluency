@@ -146,6 +146,8 @@ export default function ProductCommerceCta({
   productId,
   rrpLabel = null,
   tradeApproved = false,
+  netLabelOverride = null,
+  retailLabelOverride = null,
   onPlaceOrder,
   placingOrder = false,
   onRequestQuote,
