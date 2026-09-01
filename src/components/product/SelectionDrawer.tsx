@@ -291,28 +291,98 @@ export default function SelectionDrawer({
             />
           </div>
 
-          {/* 5 · Trust & concierge block */}
+          {/* 5 · Trust & concierge block — swaps for the inline contact widget */}
           <div className="mt-6 border border-border/50 bg-cream px-4 py-4">
-            <div className="flex gap-3">
-              <Truck className="mt-0.5 h-4 w-4 flex-none text-foreground/70" strokeWidth={1.5} />
-              <p className="font-body text-[11px] leading-relaxed text-muted-foreground">
-                Premium white-glove delivery &amp; professional installation will be calculated and
-                quoted by your advisor post-purchase.
-              </p>
-            </div>
-            <div className="mt-3 flex gap-3">
-              <MessageSquare className="mt-0.5 h-4 w-4 flex-none text-foreground/70" strokeWidth={1.5} />
-              <p className="font-body text-[11px] leading-relaxed text-muted-foreground">
-                Need assistance with luxury card limits?{" "}
-                <a
-                  href="/contact"
-                  className="text-foreground underline underline-offset-4 decoration-border transition-colors hover:decoration-foreground"
-                >
-                  Text our private concierge instantly
-                </a>
-                .
-              </p>
-            </div>
+            {!conciergeOpen ? (
+              <>
+                <div className="flex gap-3">
+                  <Truck className="mt-0.5 h-4 w-4 flex-none text-foreground/70" strokeWidth={1.5} />
+                  <p className="font-body text-[11px] leading-relaxed text-muted-foreground">
+                    Premium white-glove delivery &amp; professional installation will be calculated and
+                    quoted by your advisor post-purchase.
+                  </p>
+                </div>
+                <div className="mt-3 flex gap-3">
+                  <MessageSquare className="mt-0.5 h-4 w-4 flex-none text-foreground/70" strokeWidth={1.5} />
+                  <p className="font-body text-[11px] leading-relaxed text-muted-foreground">
+                    Need assistance with luxury card limits?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setConciergeOpen(true)}
+                      className="text-foreground underline underline-offset-4 decoration-border transition-colors hover:decoration-foreground"
+                    >
+                      Text our private concierge instantly
+                    </button>
+                    .
+                  </p>
+                </div>
+              </>
+            ) : conciergeSent ? (
+              <div className="flex gap-3">
+                <MessageSquare className="mt-0.5 h-4 w-4 flex-none text-foreground/70" strokeWidth={1.5} />
+                <p className="font-body text-[11px] leading-relaxed text-muted-foreground">
+                  Message sent — our private concierge will text you back shortly on the number provided.
+                </p>
+              </div>
+            ) : (
+              <div>
+                <p className="font-body text-[10px] font-medium uppercase tracking-widest text-foreground">
+                  Text our private concierge
+                </p>
+                <label className="mt-3 block">
+                  <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Mobile / WhatsApp Number
+                  </span>
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    maxLength={20}
+                    value={conciergePhone}
+                    onChange={(e) => setConciergePhone(e.target.value)}
+                    placeholder="+65 9123 4567"
+                    className="mt-1 h-10 w-full border border-border/60 bg-background px-3 font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-foreground/40"
+                  />
+                </label>
+                <label className="mt-3 block">
+                  <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Your Message
+                  </span>
+                  <textarea
+                    rows={2}
+                    maxLength={MESSAGE_MAX}
+                    value={conciergeMessage}
+                    onChange={(e) => setConciergeMessage(e.target.value)}
+                    placeholder="e.g. Questions on payment limits or delivery timing…"
+                    className="mt-1 w-full resize-none border border-border/60 bg-background px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-foreground/40"
+                  />
+                </label>
+                {conciergeError && (
+                  <p className="mt-2 font-body text-[11px] text-destructive">{conciergeError}</p>
+                )}
+                <div className="mt-3 flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={sendConciergeText}
+                    disabled={conciergeSending}
+                    className="inline-flex h-10 flex-1 items-center justify-center gap-2 bg-foreground px-4 font-body text-[10px] font-medium uppercase tracking-widest text-background transition-all hover:bg-foreground/85 disabled:opacity-60"
+                  >
+                    <Send className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    {conciergeSending ? "Sending…" : "Send Text"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setConciergeOpen(false);
+                      setConciergeError(null);
+                    }}
+                    className="font-body text-[10px] uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
