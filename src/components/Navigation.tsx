@@ -438,8 +438,11 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </div>
             </div>
 
-            {/* Flag — right edge, vertically centered with burger */}
-            <ShippingDestinationSwitcher compact showIso flagClassName="text-2xl" className="-mr-1" />
+            {/* Cart + flag — right edge, vertically centered with burger */}
+            <div className="flex items-center gap-2">
+              <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
+              <ShippingDestinationSwitcher compact showIso flagClassName="text-2xl" className="-mr-1" />
+            </div>
 
 
 
