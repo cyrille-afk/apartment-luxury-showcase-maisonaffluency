@@ -1111,7 +1111,7 @@ const PublicProductPageContent: React.FC = () => {
       }
     };
     // TRADE_VERIFIED: net price computed programmatically from the base rate.
-    if (role === "TRADE_VERIFIED" && data.baseRetailPriceCents > 0) {
+    if (role === "TRADE_VERIFIED" && data.baseRetailPriceCents > 0 && data.tradeDiscountMultiplier > 0) {
       const netCents = Math.round(data.baseRetailPriceCents * (1 - data.tradeDiscountMultiplier));
       const netLabel = fmt(netCents);
       return {
