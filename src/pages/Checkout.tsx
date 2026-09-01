@@ -178,11 +178,18 @@ function PaymentForm({
   const elements = useElements();
   const [submitting, setSubmitting] = useState(false);
   const [paymentReady, setPaymentReady] = useState(false);
+  // Staged messaging so the wait for Stripe's iframe is legible, not a blank gap.
+  const [loadStage, setLoadStage] = useState(0);
+  useEffect(() => {
+    if (paymentReady) return;
+    const t = setTimeout(() => setLoadStage(1), 2500);
+    return () => clearTimeout(t);
+  }, [paymentReady]);
   const total = orderSubtotal(lines);
   const currency = orderCurrency(lines);
 
   const confirm = async () => {
-    if (!stripe || !elements) return;
+    if (!paymentReady || !stripe || !elements) return;
     setSubmitting(true);
     try {
       const { error: submitError } = await elements.submit();
@@ -276,11 +283,23 @@ function PaymentForm({
             Powered by Stripe
           </span>
         </div>
-        <div className="relative min-h-28">
+        <div className="relative min-h-32">
           {!paymentReady && (
-            <div className="absolute inset-0 flex items-center justify-center border border-border" role="status">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              <span className="sr-only">Loading secure card fields</span>
+            <div
+              className="absolute inset-0 flex flex-col items-center justify-center gap-2 border border-border bg-muted/30"
+              role="status"
+              aria-live="polite"
+            >
+              <span className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {loadStage === 0 ? "Opening secure Stripe session" : "Preparing card fields"}
+              </span>
+              <span className="h-px w-28 overflow-hidden bg-border">
+                <span className="block h-full w-1/3 animate-pulse bg-foreground" />
+              </span>
+              <span className="text-[10px] text-muted-foreground/70">
+                Secure card form loading — this takes a few seconds
+              </span>
             </div>
           )}
           <div className={cn(!paymentReady && "invisible")}>
@@ -289,16 +308,19 @@ function PaymentForm({
         </div>
       </section>
 
-      {/* 5 — Sticky summary & CTA */}
-      {paymentReady && (
-        <StickyTotals
-          lines={lines}
-          total={total}
-          cta={`Confirm & securely pay ${money(total, currency)}`}
-          busy={submitting}
-          onSubmit={confirm}
-        />
-      )}
+      {/* 5 — Sticky summary & CTA (disabled until card fields are mounted) */}
+      <StickyTotals
+        lines={lines}
+        total={total}
+        ready={paymentReady}
+        cta={
+          paymentReady
+            ? `Confirm & securely pay ${money(total, currency)}`
+            : "Preparing secure payment…"
+        }
+        busy={submitting}
+        onSubmit={confirm}
+      />
     </>
   );
 }
