@@ -8,6 +8,13 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { getCart } from "@/lib/cart";
+import {
+  assertCheckoutCopy,
+  buildVerifiedTotals,
+  lineQuantity,
+  lineTotalCents,
+  reconcileBackendAmount,
+} from "@/lib/checkoutGuardrails";
 
 
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
