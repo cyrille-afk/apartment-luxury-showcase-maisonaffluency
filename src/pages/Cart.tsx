@@ -317,24 +317,6 @@ export default function Cart() {
                   </div>
                 </dl>
 
-                {!user && (
-                  <div className="mt-7 grid gap-3">
-                    <Input
-                      type="email"
-                      placeholder="Email address"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="rounded-none"
-                    />
-                    <Input
-                      placeholder="Full name (optional)"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="rounded-none"
-                    />
-                  </div>
-                )}
-
                 <div className="mt-7 space-y-3">
                   <Button
                     onClick={() => checkout("card")}
