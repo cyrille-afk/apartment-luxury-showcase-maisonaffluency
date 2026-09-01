@@ -17,7 +17,7 @@ import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { formatProductSubtitleLine } from "@/lib/subtitleDisplay";
 import {
-  Heart, Scale, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box, MessageCircle,
+  Heart, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box,
 } from "lucide-react";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { useQuery } from "@tanstack/react-query";
@@ -1728,24 +1728,26 @@ const TradeProductPage: React.FC = () => {
     const prefix = explicitPrefix || (isFromPrice && !hasConcreteSelection ? "From " : "");
 
     return (
-      <div className="flex flex-col gap-1">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="font-display text-2xl text-accent font-semibold">
+      <div className="bg-neutral-50 border border-border rounded-none px-4 pt-3 pb-2.5">
+        {/* Cohesive pricing bar — net price anchored left, struck retail +
+            tier badge anchored right, on an ultra-faint neutral tint. */}
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="font-display text-2xl text-accent font-semibold leading-none whitespace-nowrap">
             {prefix}{formatted}
           </span>
           {showTradePrice && (
-            <>
-              <span className="font-body text-sm text-muted-foreground line-through">
+            <span className="flex items-baseline gap-2.5 min-w-0">
+              <span className="font-body text-[13px] text-muted-foreground line-through whitespace-nowrap">
                 {prefix}{formatPriceConverted(rrp + upcharge, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined)}
               </span>
-              <span className="font-body text-[10px] bg-accent/15 text-accent px-2 py-0.5 rounded-full uppercase tracking-wider" title={`${tierLabel} tier — ${discountLabel} trade discount`}>
+              <span className="font-body text-[10px] bg-accent/15 text-accent px-2 py-0.5 uppercase tracking-[0.14em] whitespace-nowrap" title={`${tierLabel} tier — ${discountLabel} trade discount`}>
                 {tierLabel} –{discountLabel}
               </span>
-            </>
+            </span>
           )}
         </div>
         {(selectedWoodPrice || selectedFabric || (!selectedWoodPrice && !selectedFabric && (selectedTop || (isDualAxis && selectedBase && !baseAxisIsDim && !isFinishAxisLabel(baseAxisLabelRaw) ? false : selectedBase)))) && (
-          <span className="font-body text-[11px] text-muted-foreground">
+          <span className="block mt-2 font-body text-[10px] tracking-[0.06em] text-muted-foreground leading-snug">
             {selectedWoodPrice && (
               <>Frame: {selectedWoodPrice.name}</>
             )}
@@ -1773,7 +1775,12 @@ const TradeProductPage: React.FC = () => {
             })()}
           </span>
         )}
-
+        <button
+          onClick={() => setShowTradePrice(!showTradePrice)}
+          className="mt-2 font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
+        >
+          Show {showTradePrice ? "retail" : "trade"} price
+        </button>
       </div>
     );
   };
@@ -2302,41 +2309,37 @@ const TradeProductPage: React.FC = () => {
 
             {/* Trade price + retail/trade toggle (size driven by selector above) */}
         {effectiveRrpCents ? (
-              <div className="flex flex-col gap-2 pt-1 order-[-3] md:order-none">
+              <div className="order-[-3] md:order-none">
                 {renderPrice()}
-                <button
-                  onClick={() => setShowTradePrice(!showTradePrice)}
-                  className="self-start font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
-                >
-                  Show {showTradePrice ? "retail" : "trade"} price
-                </button>
               </div>
             ) : (
               <p className="font-body text-sm text-muted-foreground italic order-[-3] md:order-none">Price upon Request</p>
             )}
 
 
-            {/* Primary CTA — Add to Quote */}
-            <button
-              onClick={handleAddToQuote}
-              disabled={adding}
-              className={cn(
-                "mt-1 flex items-center justify-center gap-2 px-5 py-3.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full",
-                added
-                  ? "bg-emerald-600 text-white"
-                  : "bg-foreground text-background hover:bg-foreground/90",
-                adding && "opacity-60"
-              )}
-            >
-              {adding ? (
-                <DotCircleLoader size="sm" />
-              ) : added ? (
-                <Check size={14} />
-              ) : (
-                <ShoppingCart size={14} />
-              )}
-              {added ? "Added to Quote" : "Add to Quote"}
-            </button>
+            {/* ===== Primary action block — CTA, utility links, secondary stack ===== */}
+            <div className="flex flex-col gap-2.5">
+              {/* Primary CTA — Add to Quote (sleek, low-profile) */}
+              <button
+                onClick={handleAddToQuote}
+                disabled={adding}
+                className={cn(
+                  "flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full",
+                  added
+                    ? "bg-emerald-600 text-white"
+                    : "bg-foreground text-background hover:bg-foreground/90",
+                  adding && "opacity-60"
+                )}
+              >
+                {adding ? (
+                  <DotCircleLoader size="sm" />
+                ) : added ? (
+                  <Check size={14} />
+                ) : (
+                  <ShoppingCart size={14} />
+                )}
+                {added ? "Added to Quote" : "Add to Quote"}
+              </button>
 
             {finishesMissingImages.length > 0 && (
               <p className="font-body text-[11px] text-muted-foreground -mt-1 italic">
@@ -2346,61 +2349,65 @@ const TradeProductPage: React.FC = () => {
               </p>
             )}
 
-            {/* Secondary actions: Pin / Spec Sheet — borderless text links */}
-            <div className="flex items-center justify-start gap-6">
-              <button
-                onClick={() => togglePin(compareItem)}
-                className={cn(
-                  "flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] transition-colors",
-                  pinned
-                    ? "text-[hsl(var(--gold))]"
-                    : "text-muted-foreground hover:text-foreground",
-                  compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
-                )}
-              >
-                <Scale size={13} />
-                {pinned ? "Pinned" : "Pin to Selection"}
-              </button>
-
-              {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0) || pricing?.spec_sheet_url) ? (
-                <SpecSheetButton
-                  pdfUrl={product.pdf_url || pricing?.spec_sheet_url || null}
-                  pdfUrls={product.pdf_urls}
-                  brandName={designerDisplay}
-                  productName={product.title}
-                  variant="button"
-                  className="flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-[hsl(var(--pdf-red))] hover:opacity-80 transition-opacity cursor-pointer"
-                />
-              ) : (
-                <Link
-                  to="/trade/samples"
-                  className="flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+              {/* Utility links — centered, micro-typography, pipe-separated */}
+              <div className="flex items-center justify-center gap-3">
+                <button
+                  onClick={() => togglePin(compareItem)}
+                  className={cn(
+                    "font-body text-[10px] uppercase tracking-[0.16em] transition-colors",
+                    pinned
+                      ? "text-[hsl(var(--gold))]"
+                      : "text-muted-foreground hover:text-foreground",
+                    compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                  )}
                 >
-                  Procurement
-                </Link>
-              )}
+                  {pinned ? "Pinned" : "Pin to Selection"}
+                </button>
 
-              <a
-                href={`https://wa.me/6591393850?text=${encodeURIComponent(`Hello Maison Affluency — I'd like more information on the ${product.title} by ${designerDisplay}.`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <MessageCircle size={13} />
-                Contact Us
-              </a>
-            </div>
+                <span aria-hidden="true" className="text-border select-none">|</span>
+
+                {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0) || pricing?.spec_sheet_url) ? (
+                  <SpecSheetButton
+                    pdfUrl={product.pdf_url || pricing?.spec_sheet_url || null}
+                    pdfUrls={product.pdf_urls}
+                    brandName={designerDisplay}
+                    productName={product.title}
+                    variant="button"
+                    className="font-body text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--pdf-red))] hover:opacity-80 transition-opacity cursor-pointer"
+                  />
+                ) : (
+                  <Link
+                    to="/trade/samples"
+                    className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Procurement
+                  </Link>
+                )}
+
+                <span aria-hidden="true" className="text-border select-none">|</span>
+
+                <a
+                  href={`https://wa.me/6591393850?text=${encodeURIComponent(`Hello Maison Affluency — I'd like more information on the ${product.title} by ${designerDisplay}.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Contact Us
+                </a>
+              </div>
 
 
 
-            {/* Bespoke / customisation request */}
-            <button
-              onClick={() => setCustomRequestOpen(true)}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-border text-foreground hover:bg-muted w-full"
-            >
-              <Wand2 size={13} />
-              Request Customisation
-            </button>
+              {/* Uniform secondary stack — identical widths, sharp corners,
+                  consistent thin neutral outlines */}
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => setCustomRequestOpen(true)}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none font-body text-[10px] uppercase tracking-[0.18em] transition-colors border border-border bg-background text-foreground hover:bg-muted/60 w-full"
+                >
+                  <Wand2 size={13} />
+                  Request Customisation
+                </button>
 
             {/* 3D model viewer moved beneath the photo (left column) as a
                 collapsed accordion. Finish selectors act as its legend here. */}
@@ -2443,7 +2450,7 @@ const TradeProductPage: React.FC = () => {
                     });
                     navigate(`/trade/tearsheets?${params.toString()}`);
                   }}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-foreground/30 bg-foreground text-background hover:bg-foreground/90 w-full"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none font-body text-[10px] uppercase tracking-[0.18em] transition-colors border border-border bg-background text-foreground hover:bg-muted/60 w-full"
                 >
                   <FileText size={13} />
                   Draft Tearsheet with These Finishes
@@ -2452,7 +2459,7 @@ const TradeProductPage: React.FC = () => {
                 <button
                   type="button"
                   disabled
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-foreground/30 bg-foreground text-background opacity-50 cursor-not-allowed w-full"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none font-body text-[10px] uppercase tracking-[0.18em] transition-colors border border-border bg-background text-foreground opacity-50 cursor-not-allowed w-full"
                 >
                   {finishesLoading ? (
                     <>
@@ -2468,6 +2475,8 @@ const TradeProductPage: React.FC = () => {
                 </button>
               )
             )}
+              </div>
+            </div>
 
             {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}
             <CadAssetsSection productId={tradeProductId} productName={product.title} />
