@@ -29,6 +29,8 @@ export type CheckoutLine = {
 
 const lineQty = (line: CheckoutLine) => Math.max(1, line.quantity ?? 1);
 const lineSubtotal = (line: CheckoutLine) => line.unitCents * lineQty(line);
+const orderSubtotal = (lines: CheckoutLine[]) => lines.reduce((sum, l) => sum + lineSubtotal(l), 0);
+const orderCurrency = (lines: CheckoutLine[]) => lines[0]?.currency || "usd";
 
 const money = (cents: number, currency: string) =>
   new Intl.NumberFormat("en-US", {
@@ -38,10 +40,14 @@ const money = (cents: number, currency: string) =>
   }).format(cents / 100);
 
 /* ------------------------------------------------------------------ */
-/* Order summary                                                       */
+/* Order summary — every line item, with the math shown in full        */
 /* ------------------------------------------------------------------ */
-function OrderSummaryDrawer({ line }: { line: CheckoutLine }) {
-  const [open, setOpen] = useState(false);
+function OrderSummaryDrawer({ lines }: { lines: CheckoutLine[] }) {
+  const [open, setOpen] = useState(true);
+  const currency = orderCurrency(lines);
+  const subtotal = orderSubtotal(lines);
+  const pieces = lines.reduce((n, l) => n + lineQty(l), 0);
+
   return (
     <div className="border-y border-border/60">
       <button
@@ -51,41 +57,56 @@ function OrderSummaryDrawer({ line }: { line: CheckoutLine }) {
         aria-expanded={open}
       >
         <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-          Order summary
+          Order summary · {lines.length} {lines.length === 1 ? "item" : "items"}
+          {pieces !== lines.length ? ` · ${pieces} pieces` : ""}
         </span>
         <span className="flex items-center gap-2 text-sm">
-          {money(lineSubtotal(line), line.currency)}
+          {money(subtotal, currency)}
           <ChevronDown className={cn("h-4 w-4 transition-transform", open && "rotate-180")} />
         </span>
       </button>
+
       {open && (
-        <div className="flex gap-4 px-5 pb-5">
-          {line.imageUrl && (
-            <img
-              src={line.imageUrl}
-              alt={line.title}
-              className="h-20 w-20 flex-none object-cover"
-              loading="lazy"
-            />
-          )}
-          <div className="min-w-0 text-sm">
-            {line.designer && (
-              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                {line.designer}
-              </p>
-            )}
-            <p className="truncate font-light">{line.title}</p>
-            {line.finishLabel && (
-              <p className="mt-1 text-xs text-muted-foreground">{line.finishLabel}</p>
-            )}
-            {lineQty(line) > 1 && (
-              <p className="mt-1 text-xs text-muted-foreground">
-                Qty {lineQty(line)} · {money(line.unitCents, line.currency)} each
-              </p>
-            )}
-            {line.leadTime && (
-              <p className="mt-1 text-xs text-muted-foreground">Lead time · {line.leadTime}</p>
-            )}
+        <div className="px-5 pb-5">
+          <ul className="divide-y divide-border/50">
+            {lines.map((line, i) => (
+              <li key={`${line.title}-${line.finishLabel || ""}-${i}`} className="flex gap-4 py-4 first:pt-0">
+                {line.imageUrl && (
+                  <img
+                    src={line.imageUrl}
+                    alt={line.title}
+                    className="h-20 w-20 flex-none object-cover"
+                    loading="lazy"
+                  />
+                )}
+                <div className="min-w-0 flex-1 text-sm">
+                  {line.designer && (
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                      {line.designer}
+                    </p>
+                  )}
+                  <p className="truncate font-light">{line.title}</p>
+                  {line.finishLabel && (
+                    <p className="mt-1 text-xs text-muted-foreground">{line.finishLabel}</p>
+                  )}
+                  {line.leadTime && (
+                    <p className="mt-1 text-xs text-muted-foreground">Lead time · {line.leadTime}</p>
+                  )}
+                  {/* Explicit per-line math: unit × qty = line total */}
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {money(line.unitCents, line.currency)} × {lineQty(line)} ={" "}
+                    <span className="text-foreground">{money(lineSubtotal(line), line.currency)}</span>
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-4 flex justify-between border-t border-border/60 pt-3 text-sm">
+            <span className="text-muted-foreground">
+              Subtotal · sum of {lines.length} {lines.length === 1 ? "line" : "lines"}
+            </span>
+            <span>{money(subtotal, currency)}</span>
           </div>
         </div>
       )}
@@ -94,15 +115,41 @@ function OrderSummaryDrawer({ line }: { line: CheckoutLine }) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Conditional charges — shown so nothing is a surprise later          */
+/* ------------------------------------------------------------------ */
+function ConditionalNotes() {
+  return (
+    <ul className="mt-3 space-y-1.5 text-[11px] leading-relaxed text-muted-foreground">
+      <li>
+        <span className="text-foreground">Delivery, installation &amp; insurance</span> — quoted
+        separately by your advisor once the destination is confirmed. Not charged on this page.
+      </li>
+      <li>
+        <span className="text-foreground">Duties, import taxes &amp; VAT</span> — assessed by the
+        destination country and billed at import. Not included above.
+      </li>
+      <li>
+        <span className="text-foreground">Trade net pricing</span> — applies only to verified trade
+        accounts, on the trade portal. Prices here are retail.
+      </li>
+      <li>
+        <span className="text-foreground">Bank wire transfer</span> — applies only when you select
+        it above; it changes the payment method, not the amount.
+      </li>
+    </ul>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Card / express payment form                                         */
 /* ------------------------------------------------------------------ */
 function PaymentForm({
-  line,
+  lines,
   email,
   setEmail,
   onPaid,
 }: {
-  line: CheckoutLine;
+  lines: CheckoutLine[];
   email: string;
   setEmail: (v: string) => void;
   onPaid: (ref: string) => void;
@@ -110,6 +157,8 @@ function PaymentForm({
   const stripe = useStripe();
   const elements = useElements();
   const [submitting, setSubmitting] = useState(false);
+  const total = orderSubtotal(lines);
+  const currency = orderCurrency(lines);
 
   const confirm = async () => {
     if (!stripe || !elements) return;
@@ -169,7 +218,7 @@ function PaymentForm({
         </div>
       </section>
 
-      {/* 3 — Contact & white-glove delivery */}
+      {/* 3 — Contact & delivery */}
       <section className="space-y-4 px-5">
         <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
           Contact & delivery
@@ -201,9 +250,9 @@ function PaymentForm({
 
       {/* 5 — Sticky summary & CTA */}
       <StickyTotals
-        line={line}
-        total={lineSubtotal(line)}
-        cta={`Confirm & securely pay ${money(lineSubtotal(line), line.currency)}`}
+        lines={lines}
+        total={total}
+        cta={`Confirm & securely pay ${money(total, currency)}`}
         busy={submitting}
         onSubmit={confirm}
       />
@@ -215,28 +264,37 @@ function PaymentForm({
 /* Sticky bottom summary                                               */
 /* ------------------------------------------------------------------ */
 function StickyTotals({
-  line,
+  lines,
   total,
   cta,
   busy,
   onSubmit,
 }: {
-  line: CheckoutLine;
+  lines: CheckoutLine[];
   total: number;
   cta: string;
   busy: boolean;
   onSubmit: () => void;
 }) {
+  const currency = orderCurrency(lines);
   return (
     <div className="sticky bottom-0 z-30 mt-8 border-t border-border bg-background/95 px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 backdrop-blur">
       <dl className="space-y-1 text-sm">
-        <div className="flex justify-between text-muted-foreground">
-          <dt>Subtotal{lineQty(line) > 1 ? ` (${lineQty(line)} × ${money(line.unitCents, line.currency)})` : ""}</dt>
-          <dd>{money(lineSubtotal(line), line.currency)}</dd>
-        </div>
-        <div className="flex justify-between pt-1 text-base">
-          <dt>Total</dt>
-          <dd>{money(total, line.currency)}</dd>
+        {lines.map((line, i) => (
+          <div key={`t-${i}`} className="flex justify-between gap-4 text-muted-foreground">
+            <dt className="min-w-0 truncate">
+              {line.title}
+              <span className="text-muted-foreground/70">
+                {" "}
+                — {money(line.unitCents, line.currency)} × {lineQty(line)}
+              </span>
+            </dt>
+            <dd className="flex-none">{money(lineSubtotal(line), line.currency)}</dd>
+          </div>
+        ))}
+        <div className="flex justify-between border-t border-border/60 pt-2 text-base">
+          <dt>Total{lines.length > 1 ? ` (${lines.length} items)` : ""}</dt>
+          <dd>{money(total, currency)}</dd>
         </div>
       </dl>
 
@@ -249,6 +307,7 @@ function StickyTotals({
         {busy && <Loader2 className="h-4 w-4 animate-spin" />}
         {cta}
       </button>
+      <ConditionalNotes />
       <a
         href={CONCIERGE_WHATSAPP}
         target="_blank"
@@ -264,8 +323,8 @@ function StickyTotals({
 /* ------------------------------------------------------------------ */
 /* Wire transfer form                                                  */
 /* ------------------------------------------------------------------ */
-function WireForm({ line, email, setEmail, onDone }: {
-  line: CheckoutLine;
+function WireForm({ lines, email, setEmail, onDone }: {
+  lines: CheckoutLine[];
   email: string;
   setEmail: (v: string) => void;
   onDone: (ref: string) => void;
@@ -274,8 +333,8 @@ function WireForm({ line, email, setEmail, onDone }: {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
-  const total = lineSubtotal(line);
-
+  const total = orderSubtotal(lines);
+  const currency = orderCurrency(lines);
 
   const submit = async () => {
     if (!name.trim() || !email.includes("@")) {
@@ -284,14 +343,25 @@ function WireForm({ line, email, setEmail, onDone }: {
     }
     setBusy(true);
     try {
+      const first = lines[0];
       const { data, error } = await supabase.functions.invoke("request-wire-transfer", {
         body: {
-          title: line.title,
-          designer: line.designer || "",
-          selectedFinish: line.finishLabel || "",
-          currency: line.currency,
-          quantity: lineQty(line),
+          title: lines.length > 1
+            ? `${first.title} + ${lines.length - 1} more`
+            : first.title,
+          designer: first.designer || "",
+          selectedFinish: first.finishLabel || "",
+          currency,
+          quantity: lines.reduce((n, l) => n + lineQty(l), 0),
           amountCents: total,
+          items: lines.map((l) => ({
+            title: l.title,
+            designer: l.designer || "",
+            finish: l.finishLabel || "",
+            unitCents: l.unitCents,
+            quantity: lineQty(l),
+            lineCents: lineSubtotal(l),
+          })),
           name,
           email,
           phone,
@@ -325,10 +395,9 @@ function WireForm({ line, email, setEmail, onDone }: {
         </p>
       </section>
       <StickyTotals
-        line={line}
+        lines={lines}
         total={total}
-        cta={`Request wire instructions · ${money(total, line.currency)}`}
-
+        cta={`Request wire instructions · ${money(total, currency)}`}
         busy={busy}
         onSubmit={submit}
       />
@@ -342,7 +411,7 @@ function WireForm({ line, email, setEmail, onDone }: {
 export default function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [line, setLine] = useState<CheckoutLine | null>(null);
+  const [lines, setLines] = useState<CheckoutLine[] | null>(null);
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [email, setEmail] = useState("");
@@ -351,66 +420,88 @@ export default function Checkout() {
   const [error, setError] = useState<string | null>(null);
   const initialised = useRef(false);
 
-  // Resolve the line item from router state, falling back to sessionStorage
-  // so a refresh keeps the checkout alive.
+  // Resolve the order from router state, then sessionStorage, then the saved
+  // cart — so Place Order, Go to Checkout and a direct URL all load the same
+  // contents instead of bouncing to the homepage.
   useEffect(() => {
+    const valid = (l: any): l is CheckoutLine => !!l && Number(l.unitCents) > 0;
+
     const fromState = (location.state as any)?.line as CheckoutLine | undefined;
-    if (fromState?.unitCents) {
-      sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify(fromState));
-      setLine(fromState);
+    const fromStateMany = (location.state as any)?.lines as CheckoutLine[] | undefined;
+    const stateLines = (fromStateMany?.filter(valid) ?? []).length
+      ? fromStateMany!.filter(valid)
+      : valid(fromState) ? [fromState!] : [];
+    if (stateLines.length) {
+      sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify(stateLines));
+      setLines(stateLines);
       return;
     }
+
     try {
       const raw = sessionStorage.getItem(CHECKOUT_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw) as CheckoutLine;
-        if (parsed?.unitCents) {
-          setLine(parsed);
+        const parsed = JSON.parse(raw);
+        const stored: CheckoutLine[] = Array.isArray(parsed)
+          ? parsed.filter(valid)
+          : valid(parsed) ? [parsed] : [];
+        if (stored.length) {
+          setLines(stored);
           return;
         }
       }
     } catch { /* ignore */ }
-    // Direct visit / new tab: fall back to the saved selection so the page
-    // mounts Stripe instead of silently bouncing to the homepage.
+
+    // Direct visit / new tab: rebuild the FULL cart, not just the first line.
     const cart = getCart();
     if (cart.length) {
-      const first = cart[0];
-      const fallback: CheckoutLine = {
-        title: first.title,
-        designer: first.designerName,
-        finishLabel: first.finishLabel,
-        imageUrl: first.imageUrl,
-        unitCents: first.unitPriceCents,
-        currency: first.currency,
-        leadTime: first.leadTime,
-        productPath: first.designerSlug && first.productSlug
-          ? `/designers/${first.designerSlug}/${first.productSlug}`
+      const fallback: CheckoutLine[] = cart.map((item) => ({
+        title: item.title,
+        designer: item.designerName,
+        finishLabel: item.finishLabel,
+        imageUrl: item.imageUrl,
+        unitCents: item.unitPriceCents,
+        currency: item.currency,
+        leadTime: item.leadTime,
+        productPath: item.designerSlug && item.productSlug
+          ? `/designers/${item.designerSlug}/${item.productSlug}`
           : null,
-        quantity: first.quantity,
-      };
-      sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify(fallback));
-      setLine(fallback);
-      return;
+        quantity: item.quantity,
+      })).filter(valid);
+      if (fallback.length) {
+        sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify(fallback));
+        setLines(fallback);
+        return;
+      }
     }
     navigate("/", { replace: true });
   }, [location.state, navigate]);
 
 
   useEffect(() => {
-    if (!line || initialised.current) return;
+    if (!lines?.length || initialised.current) return;
     initialised.current = true;
+    const first = lines[0];
     (async () => {
       try {
         const [{ data: cfg, error: cfgErr }, { data: pi, error: piErr }] = await Promise.all([
           supabase.functions.invoke("stripe-config"),
           supabase.functions.invoke("create-payment-intent", {
             body: {
-              title: line.title,
-              designer: line.designer || "",
-              price: line.unitCents / 100,
-              currency: line.currency,
-              selectedFinish: line.finishLabel || "",
-              quantity: lineQty(line),
+              // Backward-compatible single-item fields (first line) …
+              title: first.title,
+              designer: first.designer || "",
+              price: first.unitCents / 100,
+              currency: orderCurrency(lines),
+              selectedFinish: first.finishLabel || "",
+              quantity: lineQty(first),
+              // … plus the full order, which the function charges when present.
+              items: lines.map((l) => ({
+                title: l.title,
+                designer: l.designer || "",
+                selectedFinish: l.finishLabel || "",
+                price: l.unitCents / 100,
+                quantity: lineQty(l),
+              })),
             },
           }),
         ]);
@@ -422,7 +513,7 @@ export default function Checkout() {
         setError(err?.message || "Unable to start checkout.");
       }
     })();
-  }, [line]);
+  }, [lines]);
 
   const appearance = useMemo(
     () => ({
@@ -438,7 +529,8 @@ export default function Checkout() {
     [],
   );
 
-  if (!line) return null;
+  if (!lines?.length) return null;
+  const homePath = lines[0].productPath || "/";
 
   if (confirmed) {
     return (
@@ -452,10 +544,10 @@ export default function Checkout() {
           <span className="text-foreground">{confirmed}</span>.
         </p>
         <p className="mt-2 text-sm text-muted-foreground">
-          A private advisor will contact you shortly to arrange white-glove delivery.
+          A private advisor will contact you shortly to arrange delivery.
         </p>
         <button
-          onClick={() => navigate(line.productPath || "/")}
+          onClick={() => navigate(homePath)}
           className="mt-8 h-12 w-full max-w-xs rounded-none border border-foreground text-[11px] uppercase tracking-[0.2em]"
         >
           Continue browsing
@@ -468,7 +560,7 @@ export default function Checkout() {
     <main className="mx-auto min-h-[100dvh] max-w-xl bg-background pb-4">
       {/* 1 — Minimalist header */}
       <header className="flex flex-col items-center gap-2 px-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-4">
-        <button onClick={() => navigate(line.productPath || "/")} aria-label="Maison Affluency">
+        <button onClick={() => navigate(homePath)} aria-label="Maison Affluency">
           <img src={logoIcon} alt="Maison Affluency" className="h-8 w-auto" />
         </button>
         <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -476,7 +568,7 @@ export default function Checkout() {
         </span>
       </header>
 
-      <OrderSummaryDrawer line={line} />
+      <OrderSummaryDrawer lines={lines} />
 
       {/* Payment method switch */}
       <div className="px-5 pt-5">
@@ -507,12 +599,12 @@ export default function Checkout() {
       </div>
 
       {wire ? (
-        <WireForm line={line} email={email} setEmail={setEmail} onDone={setConfirmed} />
+        <WireForm lines={lines} email={email} setEmail={setEmail} onDone={setConfirmed} />
       ) : error ? (
         <div className="px-5 py-16 text-center text-sm text-muted-foreground">{error}</div>
       ) : stripePromise && clientSecret ? (
         <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
-          <PaymentForm line={line} email={email} setEmail={setEmail} onPaid={setConfirmed} />
+          <PaymentForm lines={lines} email={email} setEmail={setEmail} onPaid={setConfirmed} />
         </Elements>
       ) : (
         <div className="flex justify-center py-24">
