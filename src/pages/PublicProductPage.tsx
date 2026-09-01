@@ -1685,6 +1685,40 @@ const PublicProductPageContent: React.FC = () => {
     );
   };
 
+  /**
+   * Writes the currently configured piece (finishes + quantity) into the
+   * shared cart state without navigating — used by "Place Order", which then
+   * slides open the "Your Selection" drawer. Returns false when the piece has
+   * no public price (those fall back to the concierge enquiry route).
+   */
+  const addConfiguredToCart = (qty = 1) => {
+    const unit = selectedRrp?.cents || Number(publicRrpRow?.rrp_price_cents) || 0;
+    if (!unit) return false;
+    const key = addToCart({
+      pickId: product.id,
+      productSlug: productSlug || "",
+      designerSlug: designer.slug,
+      title: product.title,
+      designerName: designerDisplay,
+      finishLabel: buildOrderFinishLabel(),
+      imageUrl: images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null,
+      leadTime: product.lead_time || null,
+      unitPriceCents: unit,
+      currency: (publicRrpRow?.currency || "USD").toUpperCase(),
+    });
+    setCartQuantity(key, Math.max(1, qty));
+    return true;
+  };
+
+  /** Sticky banners: open the mini-cart instead of the account wall. */
+  const openSelectionDrawer = (qty = 1) => {
+    if (!addConfiguredToCart(qty)) {
+      handlePlaceOrder();
+      return;
+    }
+    window.dispatchEvent(new CustomEvent("ma:open-selection"));
+  };
+
   const handlePlaceOrder = () => {
     const unit = selectedRrp?.cents || Number(publicRrpRow?.rrp_price_cents) || 0;
     if (!unit) {
