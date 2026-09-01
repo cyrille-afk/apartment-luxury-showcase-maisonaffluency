@@ -690,8 +690,28 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       // sync above (e.g. handleMaterialChange's partial-pair fallback to
       // index 0). Defer to the next tick to outrun the state updates queued
       // by the upstream handlers.
-      if (indices) {
-        setTimeout(() => onSwatchImagesChange?.(indices, { committed: true, swatchName: f.name, jumpOnly: isRugProduct }), 0);
+      // Dual-axis products (fabric × wood) photograph each fabric against a
+      // subset of wood variants. Show only the photos that satisfy BOTH the
+      // upholstery and the frame selection; when that pair was never
+      // photographed together, keep the fabric's own set visible (the
+      // colourway is the dominant visual) instead of jumping to a frame-only
+      // shot that shows a different fabric.
+      const idxOf = (id: string | null) => {
+        const it = id ? fabrics.find((x) => x.id === id) : null;
+        return Array.isArray(it?.image_indices) && it!.image_indices!.length ? it!.image_indices! : null;
+      };
+      let emitted = indices;
+      if (!isRugGroup && !isCoverGroup && !isTopGroup && indices) {
+        const fabricIdx = isFabricGroup ? indices : idxOf(selectedFabricId);
+        const woodIdx = isFabricGroup ? idxOf(selectedWoodId) : indices;
+        if (fabricIdx && woodIdx) {
+          const shared = fabricIdx.filter((i) => woodIdx.includes(i));
+          emitted = shared.length ? shared : fabricIdx;
+        }
+      }
+
+      if (emitted) {
+        setTimeout(() => onSwatchImagesChange?.(emitted!, { committed: true, swatchName: f.name, jumpOnly: isRugProduct }), 0);
       } else {
         onSwatchImagesChange?.(null, { committed: true, swatchName: f.name });
       }
