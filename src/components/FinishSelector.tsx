@@ -268,7 +268,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
   const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
@@ -493,6 +493,16 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   const selectedWoodItem = fabrics.find((f) => f.id === selectedWoodId) || null;
   const selectedTopItem = fabrics.find((f) => f.id === selectedTopId) || null;
   const selectedCoverItem = fabrics.find((f) => f.id === selectedCoverId) || null;
+
+  // Report the displayed swatch names upward (see onDisplayedFinishesChange).
+  useEffect(() => {
+    onDisplayedFinishesChange?.({
+      upholstery: selectedFabricItem?.name ?? null,
+      base: selectedWoodItem?.name ?? null,
+      top: selectedTopItem?.name ?? null,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFabricItem?.name, selectedWoodItem?.name, selectedTopItem?.name]);
 
   useEffect(() => {
     if (!preselectFabricName || fabrics.length === 0 || selectedFabricId) return;
