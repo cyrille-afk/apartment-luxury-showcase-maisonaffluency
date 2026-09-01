@@ -248,6 +248,7 @@ type VariantSelectorsContextType = {
   onSwatchImagesChange?: (imageIndices: number[] | null, meta?: { committed?: boolean; swatchName?: string; jumpOnly?: boolean }) => void;
   onFinishesMissingImagesChange?: (names: string[]) => void;
   onFinishGroupingResolved?: () => void;
+  onDisplayedFinishesChange?: (names: { upholstery: string | null; base: string | null; top: string | null }) => void;
 };
 
 const VariantSelectorsContext = React.createContext<VariantSelectorsContextType | null>(null);
@@ -266,8 +267,9 @@ const VariantSelectorsProvider: React.FC<{
   onSwatchImagesChange?: (imageIndices: number[] | null, meta?: { committed?: boolean; swatchName?: string; jumpOnly?: boolean }) => void;
   onFinishesMissingImagesChange?: (names: string[]) => void;
   onFinishGroupingResolved?: () => void;
+  onDisplayedFinishesChange?: (names: { upholstery: string | null; base: string | null; top: string | null }) => void;
   children: React.ReactNode;
-}> = ({ product, onMaterialChange, galleryActiveIndex, finishMap, onSwatchImagesChange, onFinishesMissingImagesChange, onFinishGroupingResolved, children }) => {
+}> = ({ product, onMaterialChange, galleryActiveIndex, finishMap, onSwatchImagesChange, onFinishesMissingImagesChange, onFinishGroupingResolved, onDisplayedFinishesChange, children }) => {
   const axes = computeVariantAxes(product.size_variants);
   const {
     isDualAxis,
@@ -479,6 +481,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
     clearAllDualSelections,
     onMaterialChange, galleryActiveIndex, onSwatchImagesChange, onFinishesMissingImagesChange,
     onFinishGroupingResolved,
+    onDisplayedFinishesChange,
   } = ctx;
 
   const isFinishAxis = isFinishAxisLabel;
@@ -538,6 +541,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
         onWoodFinishesAvailable={setLinkedWoodFinishes}
         onSwatchImagesChange={onSwatchImagesChange}
         onFinishGroupingResolved={onFinishGroupingResolved}
+        onDisplayedFinishesChange={onDisplayedFinishesChange}
         onFinishesMissingImagesChange={onFinishesMissingImagesChange}
         currentGalleryIndex={galleryActiveIndex ?? 0}
         onWoodFinishChange={(woodName) => {
