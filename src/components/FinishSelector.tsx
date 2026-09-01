@@ -281,6 +281,13 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
   const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
   const [selectedWoodId, setSelectedWoodId] = useState<string | null>(null);
+  /**
+   * Axes the user has explicitly clicked. The image-driven highlight below
+   * must never overwrite an explicit choice: a fabric × frame pair that was
+   * never photographed together would otherwise silently revert the frame to
+   * whatever the visible photo happens to show.
+   */
+  const userPickedAxesRef = useRef<Record<string, boolean>>({});
   const [selectedTopId, setSelectedTopId] = useState<string | null>(null);
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null);
   const [selectedRugComponentIds, setSelectedRugComponentIds] = useState<Record<string, string>>({});
@@ -630,6 +637,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         setSelectedRugComponentIds((prev) => ({ ...prev, [component]: f.id }));
       } else {
         setSelected(f.id);
+        userPickedAxesRef.current[
+          isFabricGroup ? "fabric" : isCoverGroup ? "cover" : isTopGroup ? "top" : "wood"
+        ] = true;
       }
       const indices = Array.isArray(f.image_indices) && f.image_indices.length > 0 ? f.image_indices : null;
       // Only fabric/leather drives the upholstery price tier. Wood finishes
@@ -930,12 +940,13 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const hit = (list: Fabric[]) =>
       list.find((f) => Array.isArray(f.image_indices) && f.image_indices.includes(oneBased)) || null;
 
+    const picked = userPickedAxesRef.current;
     const woodHit = hit(visibleWoodTiles);
-    if (woodHit && selectedWoodId !== woodHit.id) setSelectedWoodId(woodHit.id);
+    if (!picked.wood && woodHit && selectedWoodId !== woodHit.id) setSelectedWoodId(woodHit.id);
     const topHit = hit(visibleTopTiles);
-    if (topHit && selectedTopId !== topHit.id) setSelectedTopId(topHit.id);
+    if (!picked.top && topHit && selectedTopId !== topHit.id) setSelectedTopId(topHit.id);
     const coverHit = hit(visibleCoverTiles);
-    if (coverHit && selectedCoverId !== coverHit.id) setSelectedCoverId(coverHit.id);
+    if (!picked.cover && coverHit && selectedCoverId !== coverHit.id) setSelectedCoverId(coverHit.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentGalleryIndex, fabrics]);
 
