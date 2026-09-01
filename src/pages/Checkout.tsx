@@ -132,7 +132,7 @@ function OrderSummaryDrawer({ lines }: { lines: CheckoutLine[] }) {
 const CONDITIONAL_NOTES: { label: string; body: string }[] = [
   {
     label: "Delivery, installation & insurance",
-    body: "quoted separately by your advisor once the destination is confirmed. Not charged on this page.",
+    body: "quoted separately by your advisor once the destination is confirmed. Charged here only after you add the confirmed quote above.",
   },
   {
     label: "Duties, import taxes & VAT",
@@ -477,6 +477,111 @@ function WireForm({ lines, email, setEmail, onDone }: {
   );
 }
 
+
+/* ------------------------------------------------------------------ */
+/* Shipping quote — nothing is charged until an advisor quote is added */
+/* ------------------------------------------------------------------ */
+function ShippingQuoteCard({
+  currency,
+  shipping,
+  busy,
+  onConfirm,
+  onClear,
+}: {
+  currency: string;
+  shipping: ConfirmedShipping | null;
+  busy: boolean;
+  onConfirm: (s: ConfirmedShipping) => void;
+  onClear: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [amount, setAmount] = useState("");
+  const [label, setLabel] = useState("");
+
+  const submit = () => {
+    const value = Number(String(amount).replace(/[^0-9.]/g, ""));
+    if (!Number.isFinite(value) || value <= 0) {
+      toast.error("Enter the shipping amount from your advisor quote.");
+      return;
+    }
+    onConfirm({ cents: Math.round(value * 100), label: label.trim() });
+    setOpen(false);
+  };
+
+  return (
+    <section className="mx-5 mt-5 border border-border">
+      <div className="flex items-start justify-between gap-4 px-4 py-4">
+        <div className="min-w-0">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            Delivery &amp; installation
+          </p>
+          <p className="mt-1 text-sm">
+            {shipping
+              ? shipping.label || "Confirmed advisor quote"
+              : "To be Quoted by Advisor"}
+          </p>
+          {!shipping && (
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              Not part of the amount below until you add your advisor quote.
+            </p>
+          )}
+        </div>
+        <div className="flex-none text-right text-sm">
+          {shipping ? money(shipping.cents, currency) : "—"}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-4 border-t border-border/60 px-4 py-3">
+        {shipping ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={onClear}
+            className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground underline underline-offset-4 disabled:opacity-40"
+          >
+            Remove shipping quote
+          </button>
+        ) : (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => setOpen((v) => !v)}
+            className="text-[11px] uppercase tracking-[0.18em] underline underline-offset-4 disabled:opacity-40"
+          >
+            {open ? "Cancel" : "Add confirmed shipping quote"}
+          </button>
+        )}
+        {busy && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+      </div>
+
+      {open && !shipping && (
+        <div className="space-y-3 border-t border-border/60 px-4 py-4">
+          <input
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder={`Shipping amount (${(currency || "usd").toUpperCase()})`}
+            inputMode="decimal"
+            className="h-12 w-full rounded-none border border-border bg-background px-4 text-base outline-none focus:border-foreground"
+          />
+          <input
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="Quote reference (optional)"
+            className="h-12 w-full rounded-none border border-border bg-background px-4 text-base outline-none focus:border-foreground"
+          />
+          <button
+            type="button"
+            onClick={submit}
+            className="h-12 w-full rounded-none bg-[#1A1A1A] text-[11px] uppercase tracking-[0.2em] text-white"
+          >
+            Confirm shipping quote
+          </button>
+        </div>
+      )}
+    </section>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* Page                                                                */
 /* ------------------------------------------------------------------ */
@@ -747,6 +852,14 @@ export default function Checkout() {
       </header>
 
       <OrderSummaryDrawer lines={lines} />
+
+      <ShippingQuoteCard
+        currency={orderCurrency(lines)}
+        shipping={shipping}
+        busy={syncing}
+        onConfirm={(s) => void syncIntent(s)}
+        onClear={() => void syncIntent(null)}
+      />
 
       {/* Payment method switch */}
       <div className="px-5 pt-5">
