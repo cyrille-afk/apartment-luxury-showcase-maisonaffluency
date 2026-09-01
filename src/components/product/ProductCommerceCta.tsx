@@ -1,7 +1,7 @@
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getCart, shouldUseFullPageCart } from "@/lib/cart";
+import { getCart, shouldUseFullPageCart, useCart } from "@/lib/cart";
 import { Loader2, Minus, Plus } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import QuoteBriefIntake from "@/components/product/QuoteBriefIntake";
@@ -45,7 +45,7 @@ export interface ProductCommerceCtaProps {
   /** Direct Stripe checkout — receives the chosen quantity */
   onPlaceOrder: (quantity?: number) => void;
   /** Persists the configured piece into the shared cart state (no navigation) */
-  onAddToCart?: (quantity: number) => void;
+  onAddToCart?: (quantity: number) => boolean | void;
   placingOrder?: boolean;
   onRequestQuote: () => void;
   /** Trade: finish selection carried to the workspace */
@@ -179,6 +179,7 @@ export default function ProductCommerceCta({
   const quantity = productConfig ? productConfig.quantity : localQuantity;
   const setQuantity = productConfig ? productConfig.setQuantity : setLocalQuantity;
   const [miniCartOpen, setMiniCartOpen] = useState(false);
+  const cartItems = useCart();
   const [manualForm, setManualForm] = useState(false);
   const { clientSafe } = useClientSafeMode();
   const { data: pricing } = useTradeProductPricing(productId, tradeApproved);
