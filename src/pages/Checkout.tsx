@@ -367,10 +367,12 @@ function StickyTotals({
 
       <button
         type="button"
-        disabled={busy}
+        disabled={busy || !ready}
         onClick={onSubmit}
-        className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-none bg-[#1A1A1A] text-[12px] uppercase tracking-[0.2em] text-white disabled:opacity-60"
+        aria-disabled={!ready}
+        className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-none bg-[#1A1A1A] text-[12px] uppercase tracking-[0.2em] text-white disabled:cursor-not-allowed disabled:opacity-40"
       >
+        {!ready && !busy && <Loader2 className="h-4 w-4 animate-spin" />}
         {busy && <Loader2 className="h-4 w-4 animate-spin" />}
         {cta}
       </button>
