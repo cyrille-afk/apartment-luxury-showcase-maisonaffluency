@@ -265,7 +265,17 @@ function PaymentForm({
 
       {/* 4 — Payment */}
       <section className="space-y-4 px-5 pt-8">
-        <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Payment</h2>
+        <div className="flex items-end justify-between gap-4 border-b border-border pb-3">
+          <div>
+            <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+              Secure card payment
+            </h2>
+            <p className="mt-1 text-xs text-foreground">Visa · Mastercard · American Express</p>
+          </div>
+          <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            Powered by Stripe
+          </span>
+        </div>
         <div className="relative min-h-28">
           {!paymentReady && (
             <div className="absolute inset-0 flex items-center justify-center border border-border" role="status">
