@@ -44,26 +44,39 @@ serve(async (req) => {
 
     // ---- Input validation ----
     const body = await req.json().catch(() => ({}));
-    const title = typeof body?.title === "string" ? body.title.trim() : "";
-    const selectedFinish =
-      typeof body?.selectedFinish === "string" ? body.selectedFinish.trim().slice(0, 250) : "";
-    const designer = typeof body?.designer === "string" ? body.designer.trim().slice(0, 120) : "";
     const email =
       typeof body?.email === "string" && body.email.includes("@")
         ? body.email.trim().slice(0, 200)
         : userEmail;
-    const rawPrice = Number(body?.price);
     const currency = (typeof body?.currency === "string" ? body.currency : "usd").toLowerCase();
-    const quantity = Math.min(20, Math.max(1, Math.round(Number(body?.quantity) || 1)));
 
-    if (!title || title.length > 200) return json({ error: "A valid product title is required." }, 400);
-    if (!Number.isFinite(rawPrice) || rawPrice <= 0) {
-      return json({ error: "A valid price is required." }, 400);
+    type Item = { title: string; designer: string; finish: string; unitAmount: number; quantity: number };
+    const parseItem = (raw: any): Item | null => {
+      const title = typeof raw?.title === "string" ? raw.title.trim() : "";
+      const price = Number(raw?.price);
+      if (!title || title.length > 200) return null;
+      if (!Number.isFinite(price) || price <= 0) return null;
+      return {
+        title: title.slice(0, 200),
+        designer: typeof raw?.designer === "string" ? raw.designer.trim().slice(0, 120) : "",
+        finish: typeof raw?.selectedFinish === "string" ? raw.selectedFinish.trim().slice(0, 250) : "",
+        // `price` arrives as a major-unit amount (e.g. 7513) → convert to cents.
+        unitAmount: Math.round(price * 100),
+        quantity: Math.min(20, Math.max(1, Math.round(Number(raw?.quantity) || 1))),
+      };
+    };
+
+    // Multi-line orders send `items`; single-line callers keep the flat shape.
+    const rawItems = Array.isArray(body?.items) && body.items.length ? body.items : [body];
+    if (rawItems.length > 20) return json({ error: "Too many items in one order." }, 400);
+    const items: Item[] = [];
+    for (const raw of rawItems) {
+      const item = parseItem(raw);
+      if (!item) return json({ error: "A valid product title and price are required." }, 400);
+      items.push(item);
     }
 
-    // `price` arrives as a major-unit amount (e.g. 75000) → convert to cents.
-    const unitAmount = Math.round(rawPrice * 100);
-    const amount = unitAmount * quantity;
+    const amount = items.reduce((sum, i) => sum + i.unitAmount * i.quantity, 0);
     if (amount < 100 || amount > 100_000_00 * 100) return json({ error: "Price out of range." }, 400);
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
@@ -79,22 +92,33 @@ serve(async (req) => {
         : (await stripe.customers.create({ email })).id;
     }
 
+    const first = items[0];
+    const description = items
+      .map((i) => `${[i.designer, i.title].filter(Boolean).join(" — ")} ×${i.quantity}`)
+      .join(" | ")
+      .slice(0, 300);
+
     const intent = await stripe.paymentIntents.create({
       amount,
       currency,
       customer: customerId,
       receipt_email: email ?? undefined,
       automatic_payment_methods: { enabled: true },
-      description: [designer, title].filter(Boolean).join(" — ").slice(0, 300),
+      description,
       metadata: {
         payment_type: "onsite_checkout",
         user_id: userId ?? "",
-        product_title: title.slice(0, 200),
-        designer,
-        selected_finish: selectedFinish,
-        quantity: String(quantity),
+        product_title: first.title,
+        designer: first.designer,
+        selected_finish: first.finish,
+        quantity: String(items.reduce((n, i) => n + i.quantity, 0)),
+        item_count: String(items.length),
+        line_items: JSON.stringify(
+          items.map((i) => ({ t: i.title, f: i.finish, u: i.unitAmount, q: i.quantity })),
+        ).slice(0, 500),
       },
     });
+
 
     return json({
       clientSecret: intent.client_secret,
