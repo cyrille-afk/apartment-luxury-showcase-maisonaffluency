@@ -1,6 +1,7 @@
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
 import { useEffect, useState, type ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { getCart, shouldUseFullPageCart } from "@/lib/cart";
 import { Loader2, Minus, Plus } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import QuoteBriefIntake from "@/components/product/QuoteBriefIntake";
@@ -169,6 +170,7 @@ export default function ProductCommerceCta({
   leadTime,
   utilityLinks,
 }: ProductCommerceCtaProps) {
+  const navigate = useNavigate();
   const [accessOpen, setAccessOpen] = useState(false);
   // Quantity lives in the container engine so both layout variants share it;
   // falls back to local state when rendered outside ProductPageContainer.
@@ -216,8 +218,14 @@ export default function ProductCommerceCta({
   // Public: PLACE ORDER writes the configured piece into the shared cart state
   // and slides open the "Your Selection" drawer — never the account wall.
   // Secondary (both states) opens the brief-upload portal (QuoteBriefIntake).
+  // Display-routing controller: below $5,000 the sliding drawer handles the
+  // order; at or above the threshold we route to the full-page /cart layout.
   const openSelection = () => {
     onAddToCart?.(quantity);
+    if (shouldUseFullPageCart(getCart())) {
+      navigate("/cart");
+      return;
+    }
     setMiniCartOpen(true);
   };
   const primaryAction = tradeApproved ? undefined : openSelection;
