@@ -1994,8 +1994,8 @@ const PublicProductPageContent: React.FC = () => {
           placingOrder={checkoutLoading}
         />
 
-        {/* Dev-only role preview switcher */}
-        <DevRoleToggle />
+        {/* Dev-only role preview switcher (never rendered in production builds) */}
+        {import.meta.env.DEV && <DevRoleToggle />}
 
 
 
@@ -2625,7 +2625,6 @@ const PublicProductPageContent: React.FC = () => {
                       originLine={product.origin}
                       leadTime={product.lead_time}
                       selectedFinishes={selectedFinishes}
-                  orderFinishLabel={buildOrderFinishLabel()}
                       selectedVariantCents={productData.baseRetailPriceCents || null}
                       selectedVariantExact={!!selectedVariantPrice?.exact}
                       returnPath={returnTo}
