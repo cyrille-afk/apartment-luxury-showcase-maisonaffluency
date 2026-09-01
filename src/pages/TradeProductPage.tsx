@@ -553,6 +553,14 @@ const TradeProductPage: React.FC = () => {
   // actually picked. Null means "no shrink override".
   const [selectedTopDisplay, setSelectedTopDisplay] = useState<string | null>(null);
   const [selectedBaseDisplay, setSelectedBaseDisplay] = useState<string | null>(null);
+
+  // Mirror the dashboard's finish selection into the shared container engine.
+  useEffect(() => {
+    productConfig?.setSelectedWoodFinish(selectedBase);
+  }, [productConfig, selectedBase]);
+  useEffect(() => {
+    productConfig?.setSelectedUpholstery(selectedTop);
+  }, [productConfig, selectedTop]);
   const [selectedSwatchGalleryIndices, setSelectedSwatchGalleryIndices] = useState<number[] | null>(null);
   // Hold the reel back until FinishSelector resolves per-finish photo grouping
   // so the full mixed set never flashes before narrowing (mirrors public page).
