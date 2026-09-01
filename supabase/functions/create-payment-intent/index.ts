@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -76,6 +77,21 @@ serve(async (req) => {
       items.push(item);
     }
 
+    // ---- Account-level tier discount (re-derived server-side) ----
+    // Clients send gross prices; the discount is applied here so the amount
+    // charged equals the discounted total shown in the order summary.
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    );
+    const { pct: discountPct, label: discountLabel } = await resolveAccountDiscount(
+      supabaseAdmin,
+      userId,
+    );
+    if (discountPct > 0) {
+      for (const i of items) i.unitAmount = Math.round(i.unitAmount * (1 - discountPct));
+    }
+
     const amount = items.reduce((sum, i) => sum + i.unitAmount * i.quantity, 0);
     if (amount < 100 || amount > 100_000_00 * 100) return json({ error: "Price out of range." }, 400);
 
@@ -113,6 +129,8 @@ serve(async (req) => {
         selected_finish: first.finish,
         quantity: String(items.reduce((n, i) => n + i.quantity, 0)),
         item_count: String(items.length),
+        discount_pct: String(discountPct),
+        discount_label: discountLabel ?? "",
         line_items: JSON.stringify(
           items.map((i) => ({ t: i.title, f: i.finish, u: i.unitAmount, q: i.quantity })),
         ).slice(0, 500),
@@ -125,6 +143,8 @@ serve(async (req) => {
       paymentIntentId: intent.id,
       amount,
       currency,
+      discountPct,
+      discountLabel,
     });
   } catch (err) {
     console.error("[create-payment-intent] error", err);

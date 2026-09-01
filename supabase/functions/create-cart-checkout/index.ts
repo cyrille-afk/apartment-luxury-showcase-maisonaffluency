@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,7 +11,6 @@ const corsHeaders = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-const SHIPPING_RATE = 0.15;
 
 interface IncomingItem {
   pickId: string;
@@ -116,33 +116,9 @@ serve(async (req) => {
     // ---- Account-level tier discount (re-derived server-side) -------------
     // Never trust a discount sent by the client: eligibility comes from
     // `user_roles` / `profiles.trade_status`, the rate from `trade_tier_config`.
-    let discountPct = 0;
-    let discountLabel: string | null = null;
-    if (userId) {
-      const [rolesRes, profileRes] = await Promise.all([
-        supabaseAdmin.from("user_roles").select("role").eq("user_id", userId),
-        supabaseAdmin.from("profiles").select("trade_tier, trade_status").eq("id", userId).maybeSingle(),
-      ]);
-      const roles: string[] = (rolesRes.data || []).map((r: any) => String(r.role));
-      const isAdmin = roles.includes("admin") || roles.includes("super_admin");
-      const eligible =
-        isAdmin || roles.includes("trade_user") || profileRes.data?.trade_status === "approved";
-      if (eligible) {
-        const rawTier = String(profileRes.data?.trade_tier || "silver");
-        const tier = ["silver", "gold", "platinum"].includes(rawTier) ? rawTier : "silver";
-        const { data: cfg } = await supabaseAdmin
-          .from("trade_tier_config")
-          .select("tier, discount_pct, label")
-          .eq("tier", tier)
-          .maybeSingle();
-        const pct = Number(cfg?.discount_pct);
-        const fallback: Record<string, number> = { silver: 0.08, gold: 0.10, platinum: 0.15 };
-        discountPct = Number.isFinite(pct) && pct > 0 ? pct : fallback[tier];
-        const pretty = `${(discountPct * 100).toFixed(discountPct * 100 % 1 === 0 ? 0 : 1)}%`;
-        const scope = isAdmin ? "Administrator" : `Trade · ${cfg?.label || tier}`;
-        discountLabel = `${scope} Discount (${pretty})`;
-      }
-    }
+    const resolved = await resolveAccountDiscount(supabaseAdmin, userId);
+    const discountPct = resolved.pct;
+    const discountLabel = resolved.label;
 
     // Apply the discount to each unit price so the Stripe line items, the
     // stored order rows and the on-screen summary all agree to the cent.
@@ -155,7 +131,14 @@ serve(async (req) => {
 
     const subtotal = lines.reduce((s, l) => s + l.line_total_cents, 0);
     const discountCents = grossSubtotal - subtotal;
-    const shipping = Math.round(subtotal * SHIPPING_RATE);
+    // Shipping is "To be Quoted by Advisor" until an advisor confirms a rate.
+    // Only charge it when the client explicitly passes a confirmed amount.
+    const shippingConfirmed = body?.shippingConfirmed === true;
+    const rawShipping = Math.round(Number(body?.shippingCents) || 0);
+    const shipping =
+      shippingConfirmed && Number.isFinite(rawShipping) && rawShipping > 0
+        ? Math.min(rawShipping, subtotal)
+        : 0;
     const total = subtotal + shipping;
 
     const orderRef = `MA-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
@@ -219,14 +202,16 @@ serve(async (req) => {
             },
           },
         })),
-        {
-          quantity: 1,
-          price_data: {
-            currency,
-            unit_amount: shipping,
-            product_data: { name: "Front Door Delivery (estimate)" },
-          },
-        },
+        ...(shipping > 0
+          ? [{
+              quantity: 1,
+              price_data: {
+                currency,
+                unit_amount: shipping,
+                product_data: { name: "Front Door Premium Delivery" },
+              },
+            }]
+          : []),
       ],
       success_url: `${origin}/order-confirmation?ref=${order.order_ref}&status=paid`,
       cancel_url:
