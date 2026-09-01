@@ -158,6 +158,18 @@ interface FinishSelectorProps {
   /** Fires when the user picks a top-axis swatch. */
   onTopFinishChange?: (name: string | null) => void;
   /**
+   * Mirrors the swatch names currently DISPLAYED in the accordion headers —
+   * including the display-only highlight driven by the hero gallery image.
+   * Callers use it so the cart / quote line reads the same finish the shopper
+   * sees on the page (colourway), not just the variant axis reference.
+   */
+  onDisplayedFinishesChange?: (names: {
+    upholstery: string | null;
+    base: string | null;
+    top: string | null;
+  }) => void;
+
+  /**
    * Fires alongside onTopFinishChange with the swatch's image_url so callers
    * (product page 3D viewer) can feed it as the top-material texture.
    */
