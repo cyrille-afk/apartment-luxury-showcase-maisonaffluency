@@ -19,10 +19,18 @@ interface IncomingItem {
   title?: string;
   designerName?: string;
   finishLabel?: string | null;
+  /** Structured variant axes as selected on the product page. */
+  variant?: { base?: string | null; top?: string | null; size?: string | null } | null;
+  /** Unit price displayed in the cart, in cents. Validated against the catalog. */
+  expectedUnitPriceCents?: number | null;
   imageUrl?: string | null;
   leadTime?: string | null;
   quantity?: number;
 }
+
+/** Every price on this platform is quoted and charged in USD. */
+const CHECKOUT_CURRENCY = "usd";
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -77,19 +85,70 @@ serve(async (req) => {
 
     const norm = (s: unknown) => String(s ?? "").trim().toLowerCase();
 
+    // Resolution rules (no currency conversion, no silent fallbacks):
+    //  1. The cart's displayed unit price wins when it exists verbatim in the
+    //     catalog (base RRP or any variant price) — Stripe then charges the
+    //     exact figure the collector saw.
+    //  2. Otherwise the dual-axis selection (base × top × size) is resolved.
+    //  3. If a finish was configured and neither path matches, the line is
+    //     rejected rather than charged at the cheapest base price.
+    const mismatched: string[] = [];
+
     const lines = rawItems.map((item) => {
       const row = byPick.get(String(item.pickId));
       if (!row) return null;
       const qty = Math.min(50, Math.max(1, Math.round(Number(item.quantity) || 1)));
-      let unit = Number(row.rrp_price_cents) || 0;
-      const finish = norm(item.finishLabel);
+      const basePrice = Number(row.rrp_price_cents) || 0;
       const variants: any[] = Array.isArray(row.rrp_size_variants) ? row.rrp_size_variants : [];
-      if (finish) {
+      const variantPrices = variants
+        .map((v) => Number(v?.price_cents))
+        .filter((c) => Number.isFinite(c) && c > 0);
+      const catalogPrices = new Set<number>([...(basePrice > 0 ? [basePrice] : []), ...variantPrices]);
+
+      let unit = 0;
+
+      // 1. Exact sync with the cart figure, validated against the catalog.
+      const expected = Math.round(Number(item.expectedUnitPriceCents) || 0);
+      if (expected > 0 && catalogPrices.has(expected)) unit = expected;
+
+      // 2. Structured dual-axis resolution.
+      const sel = item.variant || {};
+      const selBase = norm(sel.base);
+      const selTop = norm(sel.top);
+      const selSize = norm(sel.size);
+      if (!unit && (selBase || selTop || selSize)) {
+        const match = variants.find((v) => {
+          if (selBase && norm(v?.base) !== selBase) return false;
+          if (selTop && norm(v?.top) !== selTop) return false;
+          if (selSize && norm(v?.label) !== selSize) return false;
+          return true;
+        });
+        const c = Number(match?.price_cents);
+        if (Number.isFinite(c) && c > 0) unit = c;
+      }
+
+      // 3. Legacy free-text finish label — every axis token must be present.
+      const finish = norm(item.finishLabel);
+      if (!unit && finish) {
         const match = variants.find((v) =>
-          [v?.base, v?.top, v?.label].some((f) => f && norm(f) === finish),
+          [v?.base, v?.top, v?.label]
+            .filter(Boolean)
+            .every((f: string) => finish.includes(norm(f))),
         );
         const c = Number(match?.price_cents);
         if (Number.isFinite(c) && c > 0) unit = c;
+      }
+
+      if (!unit && !finish && !selBase && !selTop && !selSize && variants.length === 0) {
+        unit = basePrice;
+      }
+
+      if (!unit) {
+        if (expected > 0 || finish || selBase || selTop || selSize) {
+          mismatched.push((item.title || "A piece").slice(0, 120));
+          return null;
+        }
+        unit = basePrice;
       }
       if (!unit || unit <= 0) return null;
       return {
@@ -104,14 +163,25 @@ serve(async (req) => {
         quantity: qty,
         unit_price_cents: unit,
         line_total_cents: unit * qty,
-        currency: (row.currency || "usd").toLowerCase(),
+        currency: CHECKOUT_CURRENCY,
       };
     }).filter(Boolean) as any[];
 
+    if (mismatched.length) {
+      console.error("[create-cart-checkout] price/finish mismatch", mismatched);
+      return json(
+        {
+          error: `The configuration for ${mismatched.join(", ")} is no longer priced in the catalogue. Please reopen the piece and reselect your finish.`,
+        },
+        409,
+      );
+    }
+
     if (!lines.length) return json({ error: "These pieces are price upon request — please send an enquiry instead." }, 400);
 
-    const currency = lines[0].currency || "usd";
+    const currency = CHECKOUT_CURRENCY;
     const grossSubtotal = lines.reduce((s, l) => s + l.line_total_cents, 0);
+
 
     // ---- Account-level tier discount (re-derived server-side) -------------
     // Never trust a discount sent by the client: eligibility comes from
@@ -120,17 +190,11 @@ serve(async (req) => {
     const discountPct = resolved.pct;
     const discountLabel = resolved.label;
 
-    // Apply the discount to each unit price so the Stripe line items, the
-    // stored order rows and the on-screen summary all agree to the cent.
-    if (discountPct > 0) {
-      for (const l of lines) {
-        l.unit_price_cents = Math.round(l.unit_price_cents * (1 - discountPct));
-        l.line_total_cents = l.unit_price_cents * l.quantity;
-      }
-    }
-
-    const subtotal = lines.reduce((s, l) => s + l.line_total_cents, 0);
-    const discountCents = grossSubtotal - subtotal;
+    // The discount is taken once on the cart subtotal (never per unit), so the
+    // charged total matches the on-screen "ORDER TOTAL" to the cent. Line items
+    // keep their full displayed price and Stripe applies an amount-off coupon.
+    const discountCents = discountPct > 0 ? Math.round(grossSubtotal * discountPct) : 0;
+    const subtotal = grossSubtotal - discountCents;
     // Shipping is "To be Quoted by Advisor" until an advisor confirms a rate.
     // Only charge it when the client explicitly passes a confirmed amount.
     const shippingConfirmed = body?.shippingConfirmed === true;
@@ -140,6 +204,7 @@ serve(async (req) => {
         ? Math.min(rawShipping, subtotal)
         : 0;
     const total = subtotal + shipping;
+
 
     const orderRef = `MA-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
@@ -185,15 +250,31 @@ serve(async (req) => {
 
     const origin = req.headers.get("origin") || "https://www.maisonaffluency.com";
 
+    // One-off, session-scoped coupon carrying the exact discount shown in the
+    // Order Summary — keeps line items at their displayed price.
+    let couponId: string | undefined;
+    if (discountCents > 0) {
+      const coupon = await stripe.coupons.create({
+        amount_off: discountCents,
+        currency: CHECKOUT_CURRENCY,
+        duration: "once",
+        name: (discountLabel || "Account Discount").slice(0, 40),
+        max_redemptions: 1,
+      });
+      couponId = coupon.id;
+    }
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : buyerEmail,
       mode: "payment",
+      currency: CHECKOUT_CURRENCY,
+      ...(couponId ? { discounts: [{ coupon: couponId }] } : {}),
       line_items: [
         ...lines.map((l) => ({
           quantity: l.quantity,
           price_data: {
-            currency,
+            currency: CHECKOUT_CURRENCY,
             unit_amount: l.unit_price_cents,
             product_data: {
               name: [l.title, l.designer_name].filter(Boolean).join(" — ").slice(0, 250),
@@ -206,7 +287,7 @@ serve(async (req) => {
           ? [{
               quantity: 1,
               price_data: {
-                currency,
+                currency: CHECKOUT_CURRENCY,
                 unit_amount: shipping,
                 product_data: { name: "Front Door Premium Delivery" },
               },
@@ -218,8 +299,14 @@ serve(async (req) => {
         typeof body?.cancelPath === "string" && /^\/[A-Za-z0-9\-._~/?&=%]*$/.test(body.cancelPath)
           ? `${origin}${body.cancelPath}`
           : `${origin}/cart?status=cancelled`,
-      metadata: { payment_type: "cart_order", order_id: order.id, order_ref: order.order_ref },
+      metadata: {
+        payment_type: "cart_order",
+        order_id: order.id,
+        order_ref: order.order_ref,
+        expected_total_cents: String(total),
+      },
     });
+
 
     await supabaseAdmin.from("shop_orders").update({ stripe_session_id: session.id }).eq("id", order.id);
 
