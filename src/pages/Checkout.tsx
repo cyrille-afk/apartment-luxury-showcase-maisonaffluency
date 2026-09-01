@@ -484,7 +484,19 @@ export default function Checkout() {
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [email, setEmail] = useState("");
-  const [wire, setWire] = useState(false);
+  // Wire mode can be pre-selected by the "Your Selection" drawer
+  // ("Proceed to Wire Instructions") via a one-shot sessionStorage flag.
+  const [wire, setWire] = useState(() => {
+    try {
+      if (sessionStorage.getItem("ma_checkout_wire") === "1") {
+        sessionStorage.removeItem("ma_checkout_wire");
+        return true;
+      }
+    } catch {
+      /* private mode — default to online */
+    }
+    return false;
+  });
   const [confirmed, setConfirmed] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const initialised = useRef(false);
