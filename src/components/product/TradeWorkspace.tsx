@@ -8,6 +8,9 @@ import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { supabase } from "@/integrations/supabase/client";
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { formatHandcrafted } from "@/lib/formatHandcrafted";
+import { originToCountry } from "@/lib/productOrigin";
+import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { cn } from "@/lib/utils";
 import type { FelixProductContext } from "@/components/product/ProductFelixPanel";
 
@@ -242,193 +245,178 @@ export default function TradeWorkspace({
     );
   }
 
+  // Strip + spec-table data
+  const originCountry = originToCountry(originLine);
+  const handcraftedLine = formatHandcrafted(originLine, null);
+
+  /**
+   * Zone 1 — full-width Trade Workspace strip: data points on one line with
+   * hairline vertical dividers, action buttons grouped on the right.
+   * Zones 2 & 3 — 50/50 split: Felix (left) | technical specifications (right).
+   */
+  const StripCell = ({ label, children }: { label: string; children: React.ReactNode }) => (
+    <div className="flex flex-col justify-center gap-1 py-4 lg:py-5 lg:px-7 first:lg:pl-0 min-w-0">
+      <p className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground whitespace-nowrap">
+        {label}
+      </p>
+      <p className="font-body text-sm leading-snug">{children}</p>
+    </div>
+  );
+
   return (
-    <section
-      aria-label="Trade workspace"
-      className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in"
-    >
-
-      {/* Left — commercial data */}
-      <div className="rounded-lg border border-border bg-card/40 p-5 flex flex-col">
-        <div className="flex items-center justify-between gap-3">
-          <p className="font-body text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--gold))]">
-            Trade Workspace
-          </p>
-          <div className="flex items-center gap-2">
-            <ClientSafeToggle />
-            {tierLabel && !clientSafe && (
-              <span className="font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground border border-border rounded-full px-2 py-0.5 whitespace-nowrap">
-                {tierLabel} −{discountLabel}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-4">
-          {isLoading ? (
-            <div className="flex items-center gap-2 text-muted-foreground font-body text-xs">
-              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading trade pricing…
-            </div>
-          ) : clientSafe ? (
-            /* Client-safe: retail only, never net or margin. */
-            <>
-              <p className="font-display text-2xl leading-none">
-                {rrpLabel ? `${usingVariantPrice && !selectedVariantExact ? "From " : ""}${rrpLabel}` : "Price upon Request"}
-              </p>
-              <p className="font-body text-[11px] text-muted-foreground mt-1.5">
-                {rrpLabel
-                  ? usingVariantPrice
-                    ? `Recommended retail · ${selectedFinishes.join(" · ") || "selected configuration"}`
-                    : "Recommended retail"
-                  : "Available on request"}
-              </p>
-            </>
-          ) : netLabel ? (
-            <>
-              <p className="font-body text-[11px] tracking-[0.04em] text-muted-foreground">
-                {rrpLabel
-                  ? `Retail: ${usingVariantPrice && !selectedVariantExact ? "From " : ""}${rrpLabel} (Before Tax)`
-                  : "Retail on request (Before Tax)"}
-              </p>
-              <p className="font-display text-2xl leading-none mt-1">
-                {usingVariantPrice && !selectedVariantExact ? "From " : ""}
-                {netLabel}{" "}
-                <span className="font-body text-xs uppercase tracking-widest text-muted-foreground">
-                  Net Trade Price
+    <section aria-label="Trade workspace" className="mt-10 animate-fade-in">
+      {/* ── Zone 1 — Trade Workspace strip ─────────────────────────────── */}
+      <div className="border-y border-border">
+        <div className="flex flex-col lg:flex-row lg:items-stretch lg:divide-x lg:divide-border/60">
+          <div className="flex flex-col lg:flex-row lg:items-stretch lg:flex-1 min-w-0 lg:divide-x lg:divide-border/60 divide-y lg:divide-y-0 divide-border/60">
+            {/* Tier */}
+            <div className="flex flex-wrap items-center gap-3 py-4 lg:py-0 lg:px-7 lg:first:pl-0 flex-1 lg:flex-none">
+              <ClientSafeToggle />
+              {tierLabel && !clientSafe && (
+                <span className="inline-flex items-center rounded-full border border-[hsl(var(--gold))]/40 px-2.5 py-1 font-body text-[9px] uppercase tracking-[0.16em] text-[hsl(var(--gold))] whitespace-nowrap">
+                  {tierLabel} − {discountLabel}
                 </span>
-              </p>
-              <p className="font-body text-[11px] text-muted-foreground mt-1.5">
-                {usingVariantPrice && selectedFinishes.length ? `${selectedFinishes.join(" · ")}` : "Your tier pricing"}
-                {discountApplied && ` · ${tierLabel} ${discountLabel} off RRP`}
-              </p>
-            </>
-          ) : (
-            <p className="font-display text-xl leading-none">Price upon Request</p>
-          )}
-        </div>
-
-
-
-        <dl className="mt-5 space-y-2.5">
-          <div className="flex items-baseline gap-4">
-            <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground w-28 shrink-0">
-              Availability
-            </dt>
-            <dd className="font-body text-sm">{stockLabel}</dd>
-          </div>
-          {resolvedLead && (
-            <div className="flex items-baseline gap-4">
-              <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground w-28 shrink-0">
-                Lead time
-              </dt>
-              <dd className="font-body text-sm">{resolvedLead}</dd>
-            </div>
-          )}
-          {originLine && (
-            <div className="flex items-baseline gap-4">
-              <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground w-28 shrink-0">
-                Origin
-              </dt>
-              <dd className="font-body text-sm">{originLine}</dd>
-            </div>
-          )}
-          <div className="flex items-baseline gap-4">
-            <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground w-28 shrink-0">
-              Finishes
-            </dt>
-            <dd className="font-body text-sm">
-              {selectedFinishes.length ? selectedFinishes.join(" · ") : "No finish selected yet"}
-            </dd>
-          </div>
-        </dl>
-
-        <div className="mt-5 flex flex-col gap-2">
-          {/* Mobile → desktop continuity: pushes this piece (with the chosen
-              finishes) to the studio desktop, ready for the next session. */}
-          <button
-            type="button"
-            onClick={sendToDesktop}
-            disabled={sending || sent}
-            className="flex items-center justify-center gap-1.5 px-4 py-3 rounded-md border border-[hsl(var(--gold))]/50 text-[hsl(var(--gold))] font-body text-[11px] uppercase tracking-[0.12em] transition-colors hover:bg-[hsl(var(--gold))]/5 disabled:opacity-70 touch-manipulation"
-          >
-            {sending ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : sent ? (
-              <Check className="h-3.5 w-3.5" />
-            ) : (
-              <Laptop className="h-3.5 w-3.5" />
-            )}
-            {sent ? "Waiting on your desktop" : "Send to Desktop"}
-          </button>
-
-          <Link
-            to={`/trade/products/${productId}${selectedFinishes.length ? `?finish=${encodeURIComponent(selectedFinishes.join(" / "))}` : ""}`}
-            state={returnPath ? { from: returnPath } : undefined}
-            className="flex items-center justify-center px-4 py-3 rounded-none bg-foreground text-background font-body text-xs uppercase tracking-widest transition-all hover:bg-foreground/85"
-          >
-            Add to Co-Pilot Workspace &amp; Order
-          </Link>
-          <button
-            type="button"
-            onClick={() => {
-              setFelixOpen(true);
-              window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { openPanel: true } }));
-            }}
-            className="flex items-center justify-center px-4 py-3 rounded-none border border-foreground bg-background text-foreground font-body text-xs uppercase tracking-widest transition-all hover:bg-muted/60"
-          >
-            Open 3D Studio &amp; Axonometric Planning
-          </button>
-          {returnPath && (
-            <p className="text-center font-body text-[10px] text-muted-foreground/80">
-              Your finish selection carries over — use Back to return here.
-            </p>
-          )}
-
-          {hasSpecSheet ? (
-            <SpecSheetButton
-              pdfUrl={pdfUrl || pricing?.spec_sheet_url || undefined}
-              pdfUrls={pdfUrls as any}
-              brandName={designerDisplay}
-              productName={title}
-              variant="button"
-              className="flex items-center justify-center gap-1.5 px-4 py-3 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-foreground/40 text-foreground hover:bg-foreground/5 cursor-pointer"
-            />
-          ) : (
-            <Link
-              to={inquireHref}
-              className={cn(
-                "flex items-center justify-center gap-1.5 px-4 py-3 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-foreground/40 text-foreground hover:bg-foreground/5"
               )}
+            </div>
+
+            {/* Retail vs Net Trade price */}
+            <div className="flex flex-col justify-center gap-1 py-4 lg:py-5 lg:px-7 min-w-0">
+              <p className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+                {clientSafe ? "Recommended Retail" : "Net Trade Price"}
+              </p>
+              {isLoading ? (
+                <span className="inline-flex items-center gap-2 font-body text-xs text-muted-foreground">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading trade pricing…
+                </span>
+              ) : clientSafe ? (
+                <p className="font-body text-sm leading-snug">
+                  {rrpLabel ? `${usingVariantPrice && !selectedVariantExact ? "From " : ""}${rrpLabel}` : "Price upon Request"}
+                </p>
+              ) : netLabel ? (
+                <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                  <span className="font-display text-lg leading-none">
+                    {usingVariantPrice && !selectedVariantExact ? "From " : ""}
+                    {netLabel}
+                  </span>
+                  {rrpLabel && netCents !== rrpCents && (
+                    <span className="font-body text-[11px] text-muted-foreground line-through">{rrpLabel}</span>
+                  )}
+                </p>
+              ) : (
+                <p className="font-body text-sm leading-snug">Price upon Request</p>
+              )}
+            </div>
+
+            <StripCell label="Availability">{stockLabel}</StripCell>
+            {resolvedLead && <StripCell label="Lead Time">{resolvedLead}</StripCell>}
+            {originCountry && <StripCell label="Origin">{originCountry}</StripCell>}
+          </div>
+
+          {/* Action group — right side of the strip */}
+          <div className="flex flex-wrap sm:flex-nowrap lg:flex-wrap xl:flex-nowrap items-center gap-2 py-4 lg:py-0 lg:pl-7 lg:pr-1 lg:my-3">
+            <Link
+              to={`/trade/products/${productId}${selectedFinishes.length ? `?finish=${encodeURIComponent(selectedFinishes.join(" / "))}` : ""}`}
+              state={returnPath ? { from: returnPath } : undefined}
+              className="flex-1 whitespace-nowrap inline-flex items-center justify-center px-4 py-2.5 bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] transition-colors hover:bg-foreground/85"
             >
-              <FileDown className="h-3.5 w-3.5" />
-              Request Spec Sheet
+              Add to Co-Pilot Workspace
             </Link>
-          )}
+            <button
+              type="button"
+              onClick={() => {
+                setFelixOpen(true);
+                window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { openPanel: true } }));
+              }}
+              className="flex-1 whitespace-nowrap inline-flex items-center justify-center px-4 py-2.5 border border-foreground/50 text-foreground font-body text-[10px] uppercase tracking-[0.12em] transition-colors hover:bg-muted/60"
+            >
+              Open 3D Studio
+            </button>
+            {hasSpecSheet ? (
+              <SpecSheetButton
+                pdfUrl={pdfUrl || pricing?.spec_sheet_url || undefined}
+                pdfUrls={pdfUrls as any}
+                brandName={designerDisplay}
+                productName={title}
+                variant="button"
+                className="flex-1 whitespace-nowrap inline-flex items-center justify-center gap-1.5 px-4 py-2.5 font-body text-[10px] uppercase tracking-[0.12em] border border-foreground/40 text-foreground hover:bg-foreground/5 cursor-pointer"
+              />
+            ) : (
+              <Link
+                to={inquireHref}
+                className="flex-1 whitespace-nowrap inline-flex items-center justify-center gap-1.5 px-4 py-2.5 border border-foreground/40 text-foreground font-body text-[10px] uppercase tracking-[0.12em] transition-colors hover:bg-foreground/5"
+              >
+                <FileDown className="h-3.5 w-3.5" />
+                Request Spec Sheet
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Right — Felix. Collapsed behind a launcher on mobile so the pricing
-          block stays adjacent to the finish selectors. */}
-      <div>
-        {!felixOpen && (
-          <button
-            type="button"
-            onClick={() => setFelixOpen(true)}
-            className="md:hidden w-full flex items-center justify-center px-4 py-3 rounded-md border border-border font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Ask Felix about this piece
-          </button>
-        )}
-        <div className={cn(!felixOpen && "hidden md:block")}>
+      {/* ── Zones 2 & 3 — 50/50 lower split ────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 mt-10">
+        {/* Zone 2 — Felix AI Curatorial Guide */}
+        <div className="min-w-0">
           <Suspense
             fallback={
-              <div className="rounded-lg border border-border bg-card/40 p-5 flex items-center gap-2 text-muted-foreground font-body text-xs">
+              <div className="rounded-none border border-border bg-card/40 p-6 flex items-center gap-2 text-muted-foreground font-body text-xs">
                 <Loader2 className="h-3.5 w-3.5 animate-spin" /> Waking the curatorial guide…
               </div>
             }
           >
             <ProductFelixPanel context={felixContext} />
           </Suspense>
+        </div>
+
+        {/* Zone 3 — Technical Specifications */}
+        <div className="min-w-0">
+          <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            Technical Specifications
+          </p>
+          <dl className="mt-4">
+            {dimensions && (
+              <div className="flex items-baseline justify-between gap-8 py-3.5 border-b border-border/60 first:border-t">
+                <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground shrink-0">
+                  Dimensions
+                </dt>
+                <dd className="font-body text-sm leading-relaxed text-right">
+                  {formatDimensionsMultiline(dimensions)}
+                </dd>
+              </div>
+            )}
+            {materials && (
+              <div className="flex items-baseline justify-between gap-8 py-3.5 border-b border-border/60">
+                <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground shrink-0">
+                  Materials
+                </dt>
+                <dd className="font-body text-sm leading-relaxed text-right">{materials}</dd>
+              </div>
+            )}
+            {handcraftedLine && (
+              <div className="flex items-baseline justify-between gap-8 py-3.5 border-b border-border/60">
+                <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground shrink-0">
+                  Origin
+                </dt>
+                <dd className="font-body text-sm leading-relaxed text-right">{handcraftedLine}</dd>
+              </div>
+            )}
+            <div className="flex items-baseline justify-between gap-8 py-3.5 border-b border-border/60">
+              <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground shrink-0">
+                Finishes
+              </dt>
+              <dd className="font-body text-sm leading-relaxed text-right">
+                {selectedFinishes.length ? selectedFinishes.join(" · ") : "No finish selected yet"}
+              </dd>
+            </div>
+            {resolvedLead && (
+              <div className="flex items-baseline justify-between gap-8 py-3.5 border-b border-border/60">
+                <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground shrink-0">
+                  Lead Time
+                </dt>
+                <dd className="font-body text-sm leading-relaxed text-right">{resolvedLead}</dd>
+              </div>
+            )}
+          </dl>
         </div>
       </div>
     </section>

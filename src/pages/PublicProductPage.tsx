@@ -2677,9 +2677,14 @@ const PublicProductPageContent: React.FC = () => {
                 }
 
                 if (tradeApproved) {
+                  // Desktop renders the full-width three-zone workspace below
+                  // the main product grid (see below); mobile/PWA keeps the
+                  // collapsed price block here, next to the finish selectors.
+                  if (!isMobileOrPwa) return null;
                   return (
-                    <div className={isMobileOrPwa ? "order-2" : undefined}>
+                    <div className="order-2">
                     <TradeWorkspace
+                      compact
                       productId={product.id}
                       title={product.title}
                       designerDisplay={designerDisplay}
@@ -2695,7 +2700,6 @@ const PublicProductPageContent: React.FC = () => {
                       pdfUrls={product.pdf_urls}
                       inquireHref={inquireHref}
                       felixUrl={typeof window !== "undefined" ? window.location.href : undefined}
-                      compact={isMobileOrPwa}
                     />
                     <ProductCommerceCta
                       productId={product.id}
@@ -2761,6 +2765,41 @@ const PublicProductPageContent: React.FC = () => {
               </Dialog>
             </div>
           </div>
+
+          {/* Verified trade — Zone 1/2/3 workspace (strip + Felix | specs),
+              running full width directly below the main product view. */}
+          {user && !roleOverridden && tradeStatus !== "pending_review" && (isTradeUser || tradeStatus === "approved") && !isMobileOrPwa && (() => {
+            const returnTo = location.pathname + location.search;
+            const q = new URLSearchParams({
+              subject: `Price upon Request — ${product.title} by ${designerDisplay}`,
+              productId: product.id,
+              productSlug: productSlug || "",
+              productName: product.title || "",
+              designerName: designerDisplay || "",
+              back: returnTo || "",
+            });
+            return (
+              <TradeWorkspace
+                productId={product.id}
+                title={product.title}
+                designerDisplay={designerDisplay}
+                dimensions={product.dimensions}
+                materials={product.materials || (product as any).materials_description}
+                originLine={product.origin}
+                leadTime={product.lead_time}
+                selectedFinishes={selectedFinishes}
+                selectedVariantCents={productData.baseRetailPriceCents || null}
+                selectedVariantExact={!!selectedVariantPrice?.exact}
+                returnPath={returnTo}
+                pdfUrl={product.pdf_url}
+                pdfUrls={product.pdf_urls}
+                inquireHref={`/contact?${q.toString()}#contact`}
+                felixUrl={typeof window !== "undefined" ? window.location.href : undefined}
+              />
+            );
+          })()}
+
+          {relatedPicks.length > 0 && (
 
 
 
