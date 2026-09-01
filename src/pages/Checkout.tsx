@@ -349,8 +349,7 @@ function PaymentForm({
 
       {/* 5 — Sticky summary & CTA (disabled until card fields are mounted) */}
       <StickyTotals
-        lines={lines}
-        total={total}
+        summary={summary}
         ready={paymentReady}
         cta={
           paymentReady
@@ -368,39 +367,41 @@ function PaymentForm({
 /* Sticky bottom summary                                               */
 /* ------------------------------------------------------------------ */
 function StickyTotals({
-  lines,
-  total,
+  summary,
   cta,
   busy,
   ready = true,
   onSubmit,
 }: {
-  lines: CheckoutLine[];
-  total: number;
+  summary: CheckoutSummary;
   cta: string;
   busy: boolean;
   ready?: boolean;
   onSubmit: () => void;
 }) {
-  const currency = orderCurrency(lines);
+  const { currency } = summary;
   return (
-    <div className="sticky bottom-0 z-30 mt-8 border-t border-border bg-background/95 px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 backdrop-blur">
-      <dl className="space-y-1 text-sm">
-        {lines.map((line, i) => (
-          <div key={`t-${i}`} className="flex justify-between gap-4 text-muted-foreground">
-            <dt className="min-w-0 truncate">
-              {line.title}
-              <span className="text-muted-foreground/70">
-                {" "}
-                — {money(line.unitCents, line.currency)} × {lineQty(line)}
-              </span>
-            </dt>
-            <dd className="flex-none">{money(lineSubtotal(line), line.currency)}</dd>
+    <div className="sticky bottom-0 z-30 mt-8 border-t border-border bg-background/95 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 backdrop-blur lg:static lg:border-0 lg:bg-transparent lg:backdrop-blur-none">
+      <dl className="space-y-1.5 text-sm">
+        <div className="flex justify-between text-muted-foreground">
+          <dt>Subtotal</dt>
+          <dd>{money(summary.subtotalCents, currency)}</dd>
+        </div>
+        {summary.discountCents > 0 && summary.discountLabel && (
+          <div className="flex justify-between text-muted-foreground">
+            <dt>{summary.discountLabel}</dt>
+            <dd>−{money(summary.discountCents, currency)}</dd>
           </div>
-        ))}
-        <div className="flex justify-between border-t border-border/60 pt-2 text-base">
-          <dt>Total{lines.length > 1 ? ` (${lines.length} items)` : ""}</dt>
-          <dd>{money(total, currency)}</dd>
+        )}
+        {summary.shippingCents > 0 && (
+          <div className="flex justify-between text-muted-foreground">
+            <dt>{summary.shippingLabel || "Delivery & installation"}</dt>
+            <dd>{money(summary.shippingCents, currency)}</dd>
+          </div>
+        )}
+        <div className="flex justify-between border-t border-border/60 pt-2 text-base text-foreground">
+          <dt>Order total</dt>
+          <dd>{money(summary.totalCents, currency)}</dd>
         </div>
       </dl>
 
