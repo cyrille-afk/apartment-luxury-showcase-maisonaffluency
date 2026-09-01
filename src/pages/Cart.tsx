@@ -236,30 +236,6 @@ export default function Cart() {
                 ))}
               </ul>
 
-              {/* Contact details — moved out of the order summary */}
-              {!user && (
-                <section className="mt-10 border border-border/70 bg-card px-6 py-8 sm:px-8">
-                  <h2 className="font-body text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-                    Contact Details
-                  </h2>
-                  <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                    <Input
-                      type="email"
-                      placeholder="Email address"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="rounded-none"
-                    />
-                    <Input
-                      placeholder="Full name (optional)"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="rounded-none"
-                    />
-                  </div>
-                </section>
-              )}
-
               {/* Need Help? — concierge channels */}
               <section className="mt-10 border border-border/70 bg-cream px-6 py-10 sm:px-8">
                 <h2 className="font-display text-xl">Need Help?</h2>

@@ -163,6 +163,7 @@ const PublicGallery = lazy(() => import("./pages/PublicGallery"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
 const CartPage = lazy(() => import("./pages/Cart"));
+const CartIdentifyPage = lazy(() => import("./pages/CartIdentify"));
 const OrderConfirmationPage = lazy(() => import("./pages/OrderConfirmation"));
 const SuccessPage = lazy(() => import("./pages/Success"));
 const CheckoutPage = lazy(() => import("./pages/Checkout"));
@@ -621,6 +622,7 @@ const App = () => {
                   <Route path="/curators-picks-demo" element={<Suspense fallback={<PageLoadingSkeleton />}><CuratorsPicksDemo /></Suspense>} />
                   <Route path="/contact" element={<Suspense fallback={<PageLoadingSkeleton />}><ContactPage /></Suspense>} />
                   <Route path="/cart" element={<Suspense fallback={<PageLoadingSkeleton />}><CartPage /></Suspense>} />
+                  <Route path="/cart/identify" element={<Suspense fallback={<PageLoadingSkeleton />}><CartIdentifyPage /></Suspense>} />
                   <Route path="/order-confirmation" element={<Suspense fallback={<PageLoadingSkeleton />}><OrderConfirmationPage /></Suspense>} />
                   <Route path="/success" element={<Suspense fallback={<PageLoadingSkeleton />}><SuccessPage /></Suspense>} />
                   <Route path="/checkout" element={<Suspense fallback={<PageLoadingSkeleton />}><CheckoutPage /></Suspense>} />
