@@ -10,6 +10,8 @@ import {
   Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
+
 import { supabase } from "@/integrations/supabase/client";
 
 /** Mobile / WhatsApp number: digits, +, spaces, dashes, parentheses — 7–20 chars. */
@@ -124,15 +126,16 @@ export default function SelectionDrawer({
     }
   };
 
-  // Freeze the page behind the sheet while it is open.
+  // Freeze the page behind the sheet while it is open (ref-counted so
+  // overlapping overlays can never strand the page in a locked state).
   useEffect(() => {
     if (!isOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    lockBodyScroll();
     return () => {
-      document.body.style.overflow = prev;
+      unlockBodyScroll();
     };
   }, [isOpen]);
+
 
   // Escape closes — standard luxury-sheet behaviour.
   useEffect(() => {

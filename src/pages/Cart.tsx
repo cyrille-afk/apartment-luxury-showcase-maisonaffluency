@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { releaseBodyScroll } from "@/lib/bodyScrollLock";
+
 import {
   useCart,
   setQuantity,
@@ -27,7 +29,14 @@ export default function Cart() {
   const [fullName, setFullName] = useState("");
   const [pending, setPending] = useState<null | "card" | "bank_transfer">(null);
 
+  // Landing here always means every overlay is gone — never inherit a stray
+  // scroll lock from a drawer that was open when we navigated.
   useEffect(() => {
+    releaseBodyScroll();
+  }, []);
+
+  useEffect(() => {
+
     if (params.get("status") === "cancelled") {
       toast("Checkout cancelled — your cart is still here.");
     }
