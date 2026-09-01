@@ -1728,11 +1728,12 @@ const TradeProductPage: React.FC = () => {
     const prefix = explicitPrefix || (isFromPrice && !hasConcreteSelection ? "From " : "");
 
     return (
-      <div className="bg-neutral-50 border border-border rounded-none px-4 py-3.5">
+      <div className="w-full bg-neutral-50 border border-border rounded-none px-4 py-3.5">
         {/* Cohesive pricing bar — net price anchored left, struck retail +
-            tier badge anchored right, on an ultra-faint neutral tint.
-            The right pair is one flex child so it can never split past the
-            box's right border; gap-3 keeps a uniform inset on all sides. */}
+            tier badge anchored right as one standard flex row. The box's own
+            px-4 padding is the only right inset, so the pair can never bleed
+            past the inner border edge; the right pair is a single shrink-0
+            flex child inside a justify-between row (no absolute positioning). */}
         <div className="flex items-baseline justify-between gap-3">
           <span className="font-display text-2xl text-accent font-semibold leading-none whitespace-nowrap min-w-0">
             {prefix}{formatted}
