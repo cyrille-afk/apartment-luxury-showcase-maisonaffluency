@@ -256,17 +256,11 @@ export default function ProductCommerceCta({
     };
   }, [miniCartOpen]);
 
-  // Drawer quantity stepper: raising the quantity to 2+ crosses the full-page
-  // threshold — sync the line into the shared cart and switch layouts
-  // instantly instead of leaving the drawer in a stale single-item state.
+  // Drawer quantity stepper: quantity alone never changes the layout — only a
+  // 2nd unique line routes to the full-page cart. Keep the line in sync.
   const handleDrawerQuantity = (q: number) => {
     setQuantity(q);
-    if (shouldUseFullPageCart(getCart())) return; // already routed
-    if (q >= 2) {
-      onAddToCart?.(q);
-      setMiniCartOpen(false);
-      navigate("/cart");
-    }
+    onAddToCart?.(q);
   };
 
   const goToCheckout = () => {
