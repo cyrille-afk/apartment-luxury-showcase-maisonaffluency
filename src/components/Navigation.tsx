@@ -808,6 +808,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   )}
                 </button>
               </FavoritesHoverPreview>
+
+              <CartNavButton />
             </div>
           </div>
 
