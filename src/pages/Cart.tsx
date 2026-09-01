@@ -123,100 +123,103 @@ export default function Cart() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-12 lg:gap-16 pt-12">
-            {/* ── Left column · item summary ─────────────────────────── */}
+            {/* ── Left column · item cards ──────────────────────────── */}
             <div>
-              <ul className="divide-y divide-border/70 border-y border-border/70">
+              <ul className="space-y-5">
                 {items.map((item) => (
-                  <li key={item.key} className="py-10 grid grid-cols-1 sm:grid-cols-[160px_minmax(0,1fr)] gap-8">
+                  <li
+                    key={item.key}
+                    className="border border-border/70 bg-white px-6 py-7 sm:px-8 grid grid-cols-1 gap-6 sm:grid-cols-[140px_minmax(0,1fr)_auto_140px] sm:gap-8 sm:items-center"
+                  >
+                    {/* Col 1 — image */}
                     <div className="bg-cream">
                       {item.imageUrl ? (
                         <img
                           src={item.imageUrl}
                           alt={item.title}
                           loading="lazy"
-                          className="w-full h-40 object-contain"
+                          className="w-full h-36 object-contain"
                         />
                       ) : (
-                        <div className="h-40" />
+                        <div className="h-36" />
                       )}
                     </div>
 
+                    {/* Col 2 — details */}
                     <div className="min-w-0">
-                      <div className="flex flex-wrap items-start justify-between gap-6">
-                        <div className="min-w-0">
-                          <p className="font-body font-light text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-                            {item.designerName}
-                          </p>
-                          <h2 className="font-display text-lg mt-2">
-                            <Link
-                              to={`/designers/${item.designerSlug}/${item.productSlug}`}
-                              className="hover:text-[hsl(var(--gold))] transition-colors"
-                            >
-                              {item.title}
-                            </Link>
-                          </h2>
-                          {item.finishLabel && (
-                            <p className="font-body text-sm text-muted-foreground mt-3 leading-relaxed">
-                              {item.finishLabel}
-                            </p>
-                          )}
-                        </div>
+                      <p className="font-body font-light text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+                        {item.designerName}
+                      </p>
+                      <h2 className="font-display text-lg mt-2">
+                        <Link
+                          to={`/designers/${item.designerSlug}/${item.productSlug}`}
+                          className="hover:text-[hsl(var(--gold))] transition-colors"
+                        >
+                          {item.title}
+                        </Link>
+                      </h2>
+                      {item.finishLabel && (
+                        <p className="font-body text-sm text-muted-foreground mt-2 leading-relaxed">
+                          {item.finishLabel}
+                        </p>
+                      )}
+                      {item.leadTime && (
+                        <p className="mt-4 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                          Production lead time: {item.leadTime}
+                        </p>
+                      )}
+                    </div>
 
-                        <div className="text-right">
-                          <p className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Total</p>
-                          <p className="font-display text-lg tabular-nums mt-1">
-                            {formatMoney(item.unitPriceCents * item.quantity, item.currency)}
-                          </p>
-                          {item.quantity > 1 && (
-                            <p className="font-body text-[11px] text-muted-foreground mt-1 tabular-nums">
-                              {formatMoney(item.unitPriceCents, item.currency)} each
-                            </p>
-                          )}
-                        </div>
+                    {/* Col 3 — quantity + actions */}
+                    <div className="flex flex-row sm:flex-col items-center sm:items-stretch gap-4">
+                      <div className="inline-flex items-center justify-center border border-border">
+                        <button
+                          type="button"
+                          aria-label="Decrease quantity"
+                          onClick={() => setQuantity(item.key, item.quantity - 1)}
+                          className="px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <Minus className="h-3.5 w-3.5" />
+                        </button>
+                        <span className="w-8 text-center font-body text-sm tabular-nums">{item.quantity}</span>
+                        <button
+                          type="button"
+                          aria-label="Increase quantity"
+                          onClick={() => setQuantity(item.key, item.quantity + 1)}
+                          className="px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                        </button>
                       </div>
-
-                      <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-4">
-                        <div className="inline-flex items-center border border-border">
-                          <button
-                            type="button"
-                            aria-label="Decrease quantity"
-                            onClick={() => setQuantity(item.key, item.quantity - 1)}
-                            className="px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            <Minus className="h-3.5 w-3.5" />
-                          </button>
-                          <span className="px-5 font-body text-sm tabular-nums">{item.quantity}</span>
-                          <button
-                            type="button"
-                            aria-label="Increase quantity"
-                            onClick={() => setQuantity(item.key, item.quantity + 1)}
-                            className="px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            <Plus className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-
+                      <div className="flex items-center gap-5 sm:justify-center">
                         <FavoriteFolderPicker pickId={item.pickId} align="start">
                           <button
                             type="button"
-                            className="inline-flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors"
+                            aria-label="Add to wishlist"
+                            className="text-muted-foreground hover:text-foreground transition-colors"
                           >
                             <Heart className="h-3.5 w-3.5" />
-                            Add to Wishlist
                           </button>
                         </FavoriteFolderPicker>
                         <button
                           type="button"
                           onClick={() => removeFromCart(item.key)}
-                          className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors"
+                          className="font-body text-[9px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors"
                         >
                           Remove
                         </button>
                       </div>
+                    </div>
 
-                      {item.leadTime && (
-                        <p className="mt-6 font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                          Production lead time: {item.leadTime}
+                    {/* Col 4 — price */}
+                    <div className="text-left sm:text-right">
+                      <p className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Total</p>
+                      <p className="font-display text-lg tabular-nums mt-1">
+                        {formatMoney(item.unitPriceCents * item.quantity, item.currency)}
+                      </p>
+                      {item.quantity > 1 && (
+                        <p className="font-body text-[11px] text-muted-foreground mt-1 tabular-nums">
+                          {formatMoney(item.unitPriceCents, item.currency)} each
                         </p>
                       )}
                     </div>
@@ -224,8 +227,32 @@ export default function Cart() {
                 ))}
               </ul>
 
+              {/* Contact details — moved out of the order summary */}
+              {!user && (
+                <section className="mt-10 border border-border/70 bg-white px-6 py-8 sm:px-8">
+                  <h2 className="font-body text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                    Contact Details
+                  </h2>
+                  <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                    <Input
+                      type="email"
+                      placeholder="Email address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="rounded-none"
+                    />
+                    <Input
+                      placeholder="Full name (optional)"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="rounded-none"
+                    />
+                  </div>
+                </section>
+              )}
+
               {/* Need Help? — concierge channels */}
-              <section className="mt-14 border border-border/70 bg-cream px-8 py-10">
+              <section className="mt-10 border border-border/70 bg-cream px-6 py-10 sm:px-8">
                 <h2 className="font-display text-xl">Need Help?</h2>
                 <p className="mt-3 font-body text-sm text-muted-foreground max-w-md leading-relaxed">
                   A private advisor can assist with configuration, lead times, delivery planning and
