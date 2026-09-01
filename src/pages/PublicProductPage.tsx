@@ -2569,7 +2569,7 @@ const PublicProductPageContent: React.FC = () => {
                     </div>
                   </VariantSelectorsProvider>
 
-                  {(() => {
+                  {!isTradeVerifiedView && (() => {
                     // Lead time intentionally excluded here — it lives at the
                     // top of the action block so it binds to the purchase flow.
                     const handcrafted = formatHandcrafted(product.origin, null);
@@ -2589,7 +2589,7 @@ const PublicProductPageContent: React.FC = () => {
                         desktop; compact standalone row on mobile. */}
                     <div className="md:hidden">{renderUtilityLinks()}</div>
 
-                    {(() => {
+                    {!isTradeVerifiedView && (() => {
                       const variants = (product.size_variants || []) as any[];
                       const upholstery = Array.from(
                         new Set(
