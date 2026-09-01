@@ -228,14 +228,14 @@ export default function SelectionDrawer({
           {/* 5 · Trust & concierge block */}
           <div className="mt-6 border border-border/50 bg-cream px-4 py-4">
             <div className="flex gap-3">
-              <Truck className="mt-0.5 h-4 w-4 flex-none text-muted-foreground" strokeWidth={1.5} />
+              <Truck className="mt-0.5 h-4 w-4 flex-none text-foreground/70" strokeWidth={1.5} />
               <p className="font-body text-[11px] leading-relaxed text-muted-foreground">
                 Premium white-glove delivery &amp; professional installation will be calculated and
                 quoted by your advisor post-purchase.
               </p>
             </div>
             <div className="mt-3 flex gap-3">
-              <MessageSquare className="mt-0.5 h-4 w-4 flex-none text-muted-foreground" strokeWidth={1.5} />
+              <MessageSquare className="mt-0.5 h-4 w-4 flex-none text-foreground/70" strokeWidth={1.5} />
               <p className="font-body text-[11px] leading-relaxed text-muted-foreground">
                 Need assistance with luxury card limits?{" "}
                 <a
