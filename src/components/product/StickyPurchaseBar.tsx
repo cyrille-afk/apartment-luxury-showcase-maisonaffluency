@@ -18,6 +18,9 @@ export interface StickyPurchaseBarProps {
   onRequestQuote: () => void;
   /** Direct Stripe checkout for the current product + selected finish */
   onPlaceOrder?: () => void;
+  /** Role-driven label overrides (default: Place Order / Request a Quote…) */
+  primaryLabel?: string;
+  secondaryLabel?: string;
   /** Shows a spinner while the checkout session is being created */
   placingOrder?: boolean;
   /** Element whose bottom edge leaving the viewport arms the bar */
@@ -39,6 +42,8 @@ export function StickyPurchaseBar({
   currencyCode,
   onRequestQuote,
   onPlaceOrder,
+  primaryLabel = "Place Order",
+  secondaryLabel = "Request a Quote or Customisation",
   placingOrder = false,
   triggerId = "main-product-image-container",
   topOffset,
@@ -153,7 +158,7 @@ export function StickyPurchaseBar({
                 )}
               >
                 {placingOrder && <Loader2 className="h-3 w-3 animate-spin mr-2" />}
-                <span>{placingOrder ? "Opening checkout…" : "Place Order"}</span>
+                <span>{placingOrder ? "Opening checkout…" : primaryLabel}</span>
               </button>
             )}
             <button
@@ -165,7 +170,7 @@ export function StickyPurchaseBar({
                 "transition-colors hover:bg-muted/60"
               )}
             >
-              Request a Quote or Customisation
+              {secondaryLabel}
             </button>
           </div>
           <p className="mt-1 font-body text-[9px] font-light uppercase tracking-widest text-muted-foreground/60 leading-none whitespace-nowrap">
