@@ -540,6 +540,15 @@ export default function Checkout() {
         ]);
         if (cfgErr || (cfg as any)?.error) throw new Error((cfg as any)?.error || "Stripe is not configured.");
         if (piErr || (pi as any)?.error) throw new Error((pi as any)?.error || "Unable to start checkout.");
+
+        // Guardrail: the amount Stripe will charge must equal the cart-derived total.
+        const check = reconcileBackendAmount(
+          buildVerifiedTotals(lines),
+          (pi as any)?.amount,
+          (pi as any)?.currency,
+        );
+        if (!check.ok) throw new Error(check.reason);
+
         setStripePromise(loadStripe((cfg as any).publishableKey));
         setClientSecret((pi as any).clientSecret);
       } catch (err: any) {
