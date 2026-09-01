@@ -2374,10 +2374,32 @@ const PublicProductPageContent: React.FC = () => {
 
                     {/* Action block sits directly beneath the finish selector,
                         ahead of the supporting technical details. */}
-                    {!user && !authLoading && (
+                    {showPublicCommerce && (
                       <ProductCommerceCta
                         productId={product.id}
                         rrpLabel={publicRrpLabel}
+                        productTitle={product.title}
+                        designerName={designerDisplay}
+                        imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
+                        leadTime={product.lead_time}
+                        onPlaceOrder={handleDirectCheckout}
+                        placingOrder={checkoutLoading}
+                        onRequestQuote={() => setQuoteRequestOpen(true)}
+                        selectedFinishes={selectedFinishes}
+                        redirectTo={location.pathname + location.search}
+                        utilityLinks={renderUtilityLinks()}
+                      />
+                    )}
+
+                    {/* Dev role preview — verified trade: in-flow net-price
+                        action block with workspace / studio buttons. */}
+                    {showMockTradeCommerce && (
+                      <ProductCommerceCta
+                        productId={product.id}
+                        rrpLabel={publicRrpLabel}
+                        tradeApproved
+                        netLabelOverride={mockNetLabel}
+                        retailLabelOverride={retailPlainLabel}
                         productTitle={product.title}
                         designerName={designerDisplay}
                         imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
@@ -2441,7 +2463,7 @@ const PublicProductPageContent: React.FC = () => {
 
               {/* Mobile/PWA sticky bottom dock for signed-out visitors —
                   the in-flow panel lives in the desktop branch above. */}
-              {!user && !authLoading && (
+              {showPublicCommerce && (
                 <ProductCommerceCta
                   productId={product.id}
                   rrpLabel={publicRrpLabel}
@@ -2458,10 +2480,31 @@ const PublicProductPageContent: React.FC = () => {
                 />
               )}
 
+              {/* Dev role preview — verified trade mobile dock */}
+              {showMockTradeCommerce && (
+                <ProductCommerceCta
+                  productId={product.id}
+                  rrpLabel={publicRrpLabel}
+                  tradeApproved
+                  dockOnly
+                  netLabelOverride={mockNetLabel}
+                  retailLabelOverride={retailPlainLabel}
+                  productTitle={product.title}
+                  designerName={designerDisplay}
+                  imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
+                  leadTime={product.lead_time}
+                  onPlaceOrder={handleDirectCheckout}
+                  placingOrder={checkoutLoading}
+                  onRequestQuote={() => setQuoteRequestOpen(true)}
+                  selectedFinishes={selectedFinishes}
+                  redirectTo={location.pathname + location.search}
+                />
+              )}
+
               {/* Signed-in visitors. Verified trade members get the full
                   workspace (net pricing, availability, spec sheet + Felix);
                   everyone else signed in keeps the enquiry CTA. */}
-              {user && (() => {
+              {user && !roleOverridden && (() => {
                 const returnTo = typeof window !== "undefined" ? location.pathname + location.search : "";
                 const q = new URLSearchParams({
                   subject: `Price upon Request — ${product.title} by ${designerDisplay}`,
