@@ -89,7 +89,7 @@ export default function SelectionDrawer({
   return (
     <div
       className={cn(
-        "fixed inset-0 z-[90]",
+        "fixed inset-0 z-[10000]",
         isOpen ? "pointer-events-auto" : "pointer-events-none"
       )}
       aria-hidden={!isOpen}

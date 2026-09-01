@@ -364,7 +364,7 @@ export default function ProductCommerceCta({
           title={productTitle}
           configuration={orderFinishLabel || (selectedFinishes.length ? selectedFinishes.join(" / ") : null)}
           leadTime={leadTime}
-          priceLabel={(retailLabel || rrpLabel) ? `From ${retailLabel ?? rrpLabel}` : null}
+          priceLabel={(retailLabel || rrpLabel) ? `From ${(retailLabel ?? rrpLabel ?? "").replace(/^From\s+/i, "")}` : null}
           imageUrl={imageUrl}
           quantity={quantity}
           onQuantityChange={setQuantity}
