@@ -1691,6 +1691,21 @@ const PublicProductPageContent: React.FC = () => {
    * slides open the "Your Selection" drawer. Returns false when the piece has
    * no public price (those fall back to the concierge enquiry route).
    */
+  /**
+   * Structured variant axes for server-side re-pricing — the free-text finish
+   * label alone cannot resolve a dual-axis (base x top) price matrix.
+   */
+  const buildVariantSelection = () => {
+    const variants = (product.size_variants || []) as Array<{ label?: string; base?: string; top?: string }>;
+    const sel = rrpSelectionRef.current || { base: null, top: null, size: null };
+    const single = variants.length === 1 ? variants[0] : null;
+    return {
+      base: sel.base || single?.base || null,
+      top: sel.top || single?.top || null,
+      size: sel.size || single?.label || null,
+    };
+  };
+
   const addConfiguredToCart = (qty = 1) => {
     const unit = selectedRrp?.cents || Number(publicRrpRow?.rrp_price_cents) || 0;
     if (!unit) return false;
@@ -1701,6 +1716,7 @@ const PublicProductPageContent: React.FC = () => {
       title: product.title,
       designerName: designerDisplay,
       finishLabel: buildOrderFinishLabel(),
+      variant: buildVariantSelection(),
       imageUrl: images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null,
       leadTime: product.lead_time || null,
       unitPriceCents: unit,
@@ -1751,6 +1767,7 @@ const PublicProductPageContent: React.FC = () => {
       title: product.title,
       designerName: designerDisplay,
       finishLabel,
+      variant: buildVariantSelection(),
       imageUrl: images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null,
       leadTime: product.lead_time || null,
       unitPriceCents: unit,

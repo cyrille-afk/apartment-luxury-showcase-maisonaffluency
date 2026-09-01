@@ -80,6 +80,8 @@ export default function Cart() {
             title: i.title,
             designerName: i.designerName,
             finishLabel: i.finishLabel,
+            variant: i.variant ?? null,
+            expectedUnitPriceCents: i.unitPriceCents,
             imageUrl: i.imageUrl,
             leadTime: i.leadTime,
             quantity: i.quantity,
