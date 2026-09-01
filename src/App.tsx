@@ -143,7 +143,6 @@ const TradeInstagramAudit = lazy(() => import("./pages/TradeInstagramAudit"));
 const TradeAuditLog = lazy(() => import("./pages/TradeAuditLog"));
 const TradeClientProfiles = lazy(() => import("./pages/TradeClientProfiles"));
 const TradeAtelierProfile = lazy(() => import("./pages/TradeAtelierProfile"));
-const TradeProductPage = lazy(() => import("./pages/TradeProductPage"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NewIn = lazy(() => import("./pages/NewIn"));
 const Journal = lazy(() => import("./pages/Journal"));
