@@ -2317,27 +2317,29 @@ const TradeProductPage: React.FC = () => {
             )}
 
 
-            {/* Primary CTA — Add to Quote */}
-            <button
-              onClick={handleAddToQuote}
-              disabled={adding}
-              className={cn(
-                "mt-1 flex items-center justify-center gap-2 px-5 py-3.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full",
-                added
-                  ? "bg-emerald-600 text-white"
-                  : "bg-foreground text-background hover:bg-foreground/90",
-                adding && "opacity-60"
-              )}
-            >
-              {adding ? (
-                <DotCircleLoader size="sm" />
-              ) : added ? (
-                <Check size={14} />
-              ) : (
-                <ShoppingCart size={14} />
-              )}
-              {added ? "Added to Quote" : "Add to Quote"}
-            </button>
+            {/* ===== Primary action block — CTA, utility links, secondary stack ===== */}
+            <div className="flex flex-col gap-2.5">
+              {/* Primary CTA — Add to Quote (sleek, low-profile) */}
+              <button
+                onClick={handleAddToQuote}
+                disabled={adding}
+                className={cn(
+                  "flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full",
+                  added
+                    ? "bg-emerald-600 text-white"
+                    : "bg-foreground text-background hover:bg-foreground/90",
+                  adding && "opacity-60"
+                )}
+              >
+                {adding ? (
+                  <DotCircleLoader size="sm" />
+                ) : added ? (
+                  <Check size={14} />
+                ) : (
+                  <ShoppingCart size={14} />
+                )}
+                {added ? "Added to Quote" : "Add to Quote"}
+              </button>
 
             {finishesMissingImages.length > 0 && (
               <p className="font-body text-[11px] text-muted-foreground -mt-1 italic">
@@ -2347,50 +2349,52 @@ const TradeProductPage: React.FC = () => {
               </p>
             )}
 
-            {/* Secondary actions: Pin / Spec Sheet — borderless text links */}
-            <div className="flex items-center justify-start gap-6">
-              <button
-                onClick={() => togglePin(compareItem)}
-                className={cn(
-                  "flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] transition-colors",
-                  pinned
-                    ? "text-[hsl(var(--gold))]"
-                    : "text-muted-foreground hover:text-foreground",
-                  compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
-                )}
-              >
-                <Scale size={13} />
-                {pinned ? "Pinned" : "Pin to Selection"}
-              </button>
-
-              {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0) || pricing?.spec_sheet_url) ? (
-                <SpecSheetButton
-                  pdfUrl={product.pdf_url || pricing?.spec_sheet_url || null}
-                  pdfUrls={product.pdf_urls}
-                  brandName={designerDisplay}
-                  productName={product.title}
-                  variant="button"
-                  className="flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-[hsl(var(--pdf-red))] hover:opacity-80 transition-opacity cursor-pointer"
-                />
-              ) : (
-                <Link
-                  to="/trade/samples"
-                  className="flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+              {/* Utility links — centered, micro-typography, pipe-separated */}
+              <div className="flex items-center justify-center gap-3">
+                <button
+                  onClick={() => togglePin(compareItem)}
+                  className={cn(
+                    "font-body text-[10px] uppercase tracking-[0.16em] transition-colors",
+                    pinned
+                      ? "text-[hsl(var(--gold))]"
+                      : "text-muted-foreground hover:text-foreground",
+                    compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                  )}
                 >
-                  Procurement
-                </Link>
-              )}
+                  {pinned ? "Pinned" : "Pin to Selection"}
+                </button>
 
-              <a
-                href={`https://wa.me/6591393850?text=${encodeURIComponent(`Hello Maison Affluency — I'd like more information on the ${product.title} by ${designerDisplay}.`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <MessageCircle size={13} />
-                Contact Us
-              </a>
-            </div>
+                <span aria-hidden="true" className="text-border select-none">|</span>
+
+                {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0) || pricing?.spec_sheet_url) ? (
+                  <SpecSheetButton
+                    pdfUrl={product.pdf_url || pricing?.spec_sheet_url || null}
+                    pdfUrls={product.pdf_urls}
+                    brandName={designerDisplay}
+                    productName={product.title}
+                    variant="button"
+                    className="font-body text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--pdf-red))] hover:opacity-80 transition-opacity cursor-pointer"
+                  />
+                ) : (
+                  <Link
+                    to="/trade/samples"
+                    className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Procurement
+                  </Link>
+                )}
+
+                <span aria-hidden="true" className="text-border select-none">|</span>
+
+                <a
+                  href={`https://wa.me/6591393850?text=${encodeURIComponent(`Hello Maison Affluency — I'd like more information on the ${product.title} by ${designerDisplay}.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Contact Us
+                </a>
+              </div>
 
 
 
