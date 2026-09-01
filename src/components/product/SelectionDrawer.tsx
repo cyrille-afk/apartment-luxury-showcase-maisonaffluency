@@ -104,21 +104,13 @@ export default function SelectionDrawer({
           sessionStorage.setItem("ma_concierge_session", id);
           return id;
         })();
-      const firstMessage = [
-        "[Cart concierge request]",
-        `Mobile / WhatsApp: ${phone}`,
-        `Piece: ${[brand, title].filter(Boolean).join(" — ") || "Unknown"}`,
-        configuration ? `Configuration: ${configuration}` : null,
-        "",
-        message,
-      ]
-        .filter((l) => l !== null)
-        .join("\n");
-      const { error } = await supabase.functions.invoke("concierge-capture", {
+      const { error } = await supabase.functions.invoke("concierge-text-request", {
         body: {
-          surface: "public",
+          phone,
+          message,
           session_id: sessionId,
-          first_message: firstMessage,
+          product: [brand, title].filter(Boolean).join(" — ") || null,
+          configuration: configuration ?? null,
           path: window.location.pathname.slice(0, 500),
           referrer: document.referrer ? document.referrer.slice(0, 500) : null,
         },
