@@ -158,7 +158,7 @@ export default function ActiveSwatchCaption({
         ) : (
           <div className={cn("w-5 h-5 rounded-full", isLight ? "bg-white/20" : "bg-muted")} />
         )}
-        <span>{matches[0].name}</span>
+        <span>{captionSwatches[0].name}</span>
       </span>
     </div>
   );
