@@ -547,7 +547,7 @@ export default function Checkout() {
           (pi as any)?.amount,
           (pi as any)?.currency,
         );
-        if (!check.ok) throw new Error(check.reason);
+        if (check.ok === false) throw new Error(check.reason);
 
         setStripePromise(loadStripe((cfg as any).publishableKey));
         setClientSecret((pi as any).clientSecret);
