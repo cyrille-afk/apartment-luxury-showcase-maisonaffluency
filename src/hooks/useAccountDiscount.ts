@@ -20,6 +20,8 @@ export interface AccountDiscount {
   pct: number;
   /** Row label, e.g. "Trade Discount · Silver (8%)". */
   label: string;
+  /** Badge text, e.g. "Admin Pricing Active" or "Trade Silver Active". Empty when ineligible. */
+  badgeText: string;
   /** Discount amount in minor units for a given subtotal. */
   amountFor: (subtotalCents: number) => number;
   /** Subtotal minus the discount. */
@@ -36,7 +38,8 @@ export function useAccountDiscount(): AccountDiscount {
     (isTradeUser || isAdmin || isSuperAdmin || tradeStatus === "approved");
 
   const pct = eligible ? discountPct : 0;
-  const scope = isAdmin || isSuperAdmin ? "Administrator" : `Trade · ${tierLabel}`;
+  const isAdminAccount = isAdmin || isSuperAdmin;
+  const scope = isAdminAccount ? "Administrator" : `Trade · ${tierLabel}`;
 
   const amountFor = (subtotalCents: number) =>
     pct > 0 ? Math.round((subtotalCents || 0) * pct) : 0;
@@ -45,6 +48,11 @@ export function useAccountDiscount(): AccountDiscount {
     eligible,
     pct,
     label: `${scope} Discount (${discountLabel})`,
+    badgeText: eligible
+      ? isAdminAccount
+        ? "Admin Pricing Active"
+        : `Trade ${tierLabel} Active`
+      : "",
     amountFor,
     totalFor: (subtotalCents: number) => (subtotalCents || 0) - amountFor(subtotalCents),
   };
