@@ -1899,7 +1899,15 @@ const TradeProductPage: React.FC = () => {
             {/* Mobile/PWA: the "Shown in" caption lives on the presentation
                 photography instead of stacking under the gallery. */}
             <div className="hidden md:block md:border-0 md:shadow-none">
-              <ActiveSwatchCaption pickId={product.id} activeIndex={galleryActiveIndex ?? 0} />
+              <ActiveSwatchCaption
+                pickId={product.id}
+                activeIndex={galleryActiveIndex ?? 0}
+                selectedNames={[
+                  selectedFabric?.name,
+                  selectedBaseDisplay ?? selectedWoodPrice?.name ?? selectedSingleMaterial,
+                  selectedTopDisplay,
+                ]}
+              />
             </div>
 
             {/* Interactive 3D model — collapsed by default under the photo.

@@ -26,10 +26,20 @@ export default function ActiveSwatchCaption({
   pickId,
   activeIndex,
   variant = "dark",
+  selectedNames,
 }: {
   pickId: string | null | undefined;
   activeIndex: number | undefined;
   variant?: CaptionVariant;
+  /**
+   * Names of the finishes the user has actively selected (upholstery, base,
+   * top). When provided, the caption reflects the user's selection rather
+   * than only the per-image `image_indices` mapping — dual-axis products
+   * (e.g. fabric + wood) photograph each fabric against ONE wood variant,
+   * so index matching alone would drop the chosen fabric caption whenever a
+   * different wood is selected.
+   */
+  selectedNames?: Array<string | null | undefined>;
 }) {
   const [swatches, setSwatches] = useState<Swatch[]>([]);
 
@@ -73,8 +83,24 @@ export default function ActiveSwatchCaption({
   // finish-specific, so never caption them.
   if (swatches.length > 1 && matches.length === swatches.length) return null;
 
+  // When the user has actively selected finishes, caption the SELECTION —
+  // resolves thumbnails by name from the swatch list; names without a swatch
+  // row still render (text only).
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const chosen = (selectedNames || [])
+    .map((n) => (n || "").trim())
+    .filter(Boolean)
+    .filter((n, i, arr) => arr.findIndex((o) => norm(o) === norm(n)) === i);
+  const captionSwatches: Swatch[] = chosen.length
+    ? chosen.map((name) => {
+        const hit =
+          swatches.find((s) => norm(s.name) === norm(name)) ||
+          swatches.find((s) => norm(s.name).includes(norm(name)) || norm(name).includes(norm(s.name)));
+        return hit ?? { fabric_id: `sel-${name}`, name, image_url: null, image_indices: null };
+      })
+    : matches;
 
-  const multi = matches.length > 1;
+  const multi = captionSwatches.length > 1;
   const isLight = variant === "light";
 
   if (multi) {
@@ -84,7 +110,7 @@ export default function ActiveSwatchCaption({
         "mt-3 flex items-center gap-3 overflow-x-auto whitespace-nowrap px-2 no-scrollbar [scrollbar-width:none] justify-start sm:justify-center",
         isLight && "text-white/90"
       )}>
-        {matches.map((m) => (
+        {captionSwatches.map((m) => (
           <span key={m.fabric_id} className="inline-flex shrink-0 items-center gap-1.5">
             {m.image_url ? (
               <img
@@ -120,10 +146,10 @@ export default function ActiveSwatchCaption({
         "font-body text-sm inline-flex items-center gap-1",
         isLight ? "text-white" : "text-foreground"
       )}>
-        {matches[0].image_url ? (
+        {captionSwatches[0].image_url ? (
           <img
-            src={matches[0].image_url}
-            alt={matches[0].name}
+            src={captionSwatches[0].image_url}
+            alt={captionSwatches[0].name}
             className={cn(
               "w-5 h-5 rounded-full object-cover border",
               isLight ? "border-white/30" : "border-border"
@@ -133,7 +159,7 @@ export default function ActiveSwatchCaption({
         ) : (
           <div className={cn("w-5 h-5 rounded-full", isLight ? "bg-white/20" : "bg-muted")} />
         )}
-        <span>{matches[0].name}</span>
+        <span>{captionSwatches[0].name}</span>
       </span>
     </div>
   );
