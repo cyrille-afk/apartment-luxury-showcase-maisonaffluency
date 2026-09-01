@@ -138,17 +138,14 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
           <X size={18} strokeWidth={1.5} />
         </button>
 
-        {/* Desktop edge arrows — fade with the chrome */}
+        {/* Desktop edge arrows — never fade (mirrors the persistent close + pagination) */}
         {images.length > 1 && (
           <>
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); revealChrome(); go(index - 1); }}
               aria-label="Previous"
-              className={cn(
-                "hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 w-11 h-11 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white/80 transition-opacity duration-300",
-                chromeVisible ? "opacity-100" : "opacity-0 pointer-events-none"
-              )}
+              className="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 w-11 h-11 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white/80 transition-colors duration-300 hover:bg-white/20"
             >
               <ChevronLeft size={20} />
             </button>
@@ -156,10 +153,7 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
               type="button"
               onClick={(e) => { e.stopPropagation(); revealChrome(); go(index + 1); }}
               aria-label="Next"
-              className={cn(
-                "hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 w-11 h-11 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white/80 transition-opacity duration-300",
-                chromeVisible ? "opacity-100" : "opacity-0 pointer-events-none"
-              )}
+              className="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 w-11 h-11 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white/80 transition-colors duration-300 hover:bg-white/20"
             >
               <ChevronRight size={20} />
             </button>
