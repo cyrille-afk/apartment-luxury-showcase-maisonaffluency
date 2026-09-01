@@ -180,11 +180,13 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
         </div>
       )}
 
-      {/* Bottom control rail: progress markers + counter + close (mirrors the expanded image view) */}
+      {/* Bottom control rail: progress markers + counter + close (mirrors the expanded image view).
+          Desktop: never hides — pagination and counter stay permanently visible.
+          Mobile/PWA: keeps the tap-to-reveal + auto-hide behaviour. */}
       <div
         className={cn(
           "absolute left-0 right-0 z-10 flex items-center gap-4 px-5 transition-opacity duration-300",
-          chromeVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+          isMobileOrPwa && !chromeVisible ? "opacity-0 pointer-events-none" : "opacity-100"
         )}
         style={{ bottom: "max(1.25rem, calc(env(safe-area-inset-bottom) + 0.5rem))" }}
       >
@@ -209,15 +211,18 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
             {String(index + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
           </span>
         )}
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); onClose(); }}
-          onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); onClose(); }}
-          aria-label="Exit presentation mode"
-          className="shrink-0 w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/85 touch-manipulation ml-auto"
-        >
-          <X size={18} strokeWidth={1.5} />
-        </button>
+        {/* Mobile/PWA close — Desktop uses the persistent top-right X instead */}
+        {isMobileOrPwa && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onClose(); }}
+            onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); onClose(); }}
+            aria-label="Exit presentation mode"
+            className="shrink-0 w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/85 touch-manipulation ml-auto"
+          >
+            <X size={18} strokeWidth={1.5} />
+          </button>
+        )}
       </div>
     </div>,
     document.body
