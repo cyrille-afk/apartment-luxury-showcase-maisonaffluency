@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAccountDiscount } from "@/hooks/useAccountDiscount";
 import { releaseBodyScroll } from "@/lib/bodyScrollLock";
+
 
 import {
   useCart,
