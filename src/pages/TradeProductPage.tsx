@@ -64,6 +64,7 @@ import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageInde
 import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
@@ -510,7 +511,14 @@ const TradeProductPage: React.FC = () => {
   const { toast } = useToast();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
-  const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
+  // Pricing math is owned by the container engine (ProductConfigContext) so
+  // Variant A and Variant B always resolve identical figures. Falls back to the
+  // tier hook when this layout is rendered outside the container.
+  const productConfig = useProductConfigOptional();
+  const tierFallback = useTradeDiscount();
+  const TRADE_DISCOUNT = productConfig?.tierDiscountPct ?? tierFallback.discountPct;
+  const discountLabel = productConfig?.discountLabel ?? tierFallback.discountLabel;
+  const tierLabel = productConfig?.tierLabel ?? tierFallback.tierLabel;
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
 
   // ── Smart back navigation ──
@@ -545,6 +553,14 @@ const TradeProductPage: React.FC = () => {
   // actually picked. Null means "no shrink override".
   const [selectedTopDisplay, setSelectedTopDisplay] = useState<string | null>(null);
   const [selectedBaseDisplay, setSelectedBaseDisplay] = useState<string | null>(null);
+
+  // Mirror the dashboard's finish selection into the shared container engine.
+  useEffect(() => {
+    productConfig?.setSelectedWoodFinish(selectedBase);
+  }, [productConfig, selectedBase]);
+  useEffect(() => {
+    productConfig?.setSelectedUpholstery(selectedTop);
+  }, [productConfig, selectedTop]);
   const [selectedSwatchGalleryIndices, setSelectedSwatchGalleryIndices] = useState<number[] | null>(null);
   // Hold the reel back until FinishSelector resolves per-finish photo grouping
   // so the full mixed set never flashes before narrowing (mirrors public page).
@@ -566,6 +582,10 @@ const TradeProductPage: React.FC = () => {
   // material/finish dropdown is changed (state-backed so behaviour matches the
   // public side exactly).
   const [galleryActiveIndex, setGalleryActiveIndex] = useState<number | undefined>(undefined);
+  // Active image index is part of the shared container state.
+  useEffect(() => {
+    productConfig?.setActiveImageIndex(galleryActiveIndex ?? 0);
+  }, [productConfig, galleryActiveIndex]);
   // Bumped on every parent-initiated jump so the gallery re-syncs even when the
   // numeric index is identical to the previous one (e.g. re-selecting the same finish).
   const [galleryJumpNonce, setGalleryJumpNonce] = useState(0);
