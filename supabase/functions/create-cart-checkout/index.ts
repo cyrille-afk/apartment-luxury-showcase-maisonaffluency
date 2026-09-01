@@ -85,19 +85,70 @@ serve(async (req) => {
 
     const norm = (s: unknown) => String(s ?? "").trim().toLowerCase();
 
+    // Resolution rules (no currency conversion, no silent fallbacks):
+    //  1. The cart's displayed unit price wins when it exists verbatim in the
+    //     catalog (base RRP or any variant price) — Stripe then charges the
+    //     exact figure the collector saw.
+    //  2. Otherwise the dual-axis selection (base × top × size) is resolved.
+    //  3. If a finish was configured and neither path matches, the line is
+    //     rejected rather than charged at the cheapest base price.
+    const mismatched: string[] = [];
+
     const lines = rawItems.map((item) => {
       const row = byPick.get(String(item.pickId));
       if (!row) return null;
       const qty = Math.min(50, Math.max(1, Math.round(Number(item.quantity) || 1)));
-      let unit = Number(row.rrp_price_cents) || 0;
-      const finish = norm(item.finishLabel);
+      const basePrice = Number(row.rrp_price_cents) || 0;
       const variants: any[] = Array.isArray(row.rrp_size_variants) ? row.rrp_size_variants : [];
-      if (finish) {
+      const variantPrices = variants
+        .map((v) => Number(v?.price_cents))
+        .filter((c) => Number.isFinite(c) && c > 0);
+      const catalogPrices = new Set<number>([...(basePrice > 0 ? [basePrice] : []), ...variantPrices]);
+
+      let unit = 0;
+
+      // 1. Exact sync with the cart figure, validated against the catalog.
+      const expected = Math.round(Number(item.expectedUnitPriceCents) || 0);
+      if (expected > 0 && catalogPrices.has(expected)) unit = expected;
+
+      // 2. Structured dual-axis resolution.
+      const sel = item.variant || {};
+      const selBase = norm(sel.base);
+      const selTop = norm(sel.top);
+      const selSize = norm(sel.size);
+      if (!unit && (selBase || selTop || selSize)) {
+        const match = variants.find((v) => {
+          if (selBase && norm(v?.base) !== selBase) return false;
+          if (selTop && norm(v?.top) !== selTop) return false;
+          if (selSize && norm(v?.label) !== selSize) return false;
+          return true;
+        });
+        const c = Number(match?.price_cents);
+        if (Number.isFinite(c) && c > 0) unit = c;
+      }
+
+      // 3. Legacy free-text finish label — every axis token must be present.
+      const finish = norm(item.finishLabel);
+      if (!unit && finish) {
         const match = variants.find((v) =>
-          [v?.base, v?.top, v?.label].some((f) => f && norm(f) === finish),
+          [v?.base, v?.top, v?.label]
+            .filter(Boolean)
+            .every((f: string) => finish.includes(norm(f))),
         );
         const c = Number(match?.price_cents);
         if (Number.isFinite(c) && c > 0) unit = c;
+      }
+
+      if (!unit && !finish && !selBase && !selTop && !selSize && variants.length === 0) {
+        unit = basePrice;
+      }
+
+      if (!unit) {
+        if (expected > 0 || finish || selBase || selTop || selSize) {
+          mismatched.push((item.title || "A piece").slice(0, 120));
+          return null;
+        }
+        unit = basePrice;
       }
       if (!unit || unit <= 0) return null;
       return {
@@ -112,14 +163,25 @@ serve(async (req) => {
         quantity: qty,
         unit_price_cents: unit,
         line_total_cents: unit * qty,
-        currency: (row.currency || "usd").toLowerCase(),
+        currency: CHECKOUT_CURRENCY,
       };
     }).filter(Boolean) as any[];
 
+    if (mismatched.length) {
+      console.error("[create-cart-checkout] price/finish mismatch", mismatched);
+      return json(
+        {
+          error: `The configuration for ${mismatched.join(", ")} is no longer priced in the catalogue. Please reopen the piece and reselect your finish.`,
+        },
+        409,
+      );
+    }
+
     if (!lines.length) return json({ error: "These pieces are price upon request — please send an enquiry instead." }, 400);
 
-    const currency = lines[0].currency || "usd";
+    const currency = CHECKOUT_CURRENCY;
     const grossSubtotal = lines.reduce((s, l) => s + l.line_total_cents, 0);
+
 
     // ---- Account-level tier discount (re-derived server-side) -------------
     // Never trust a discount sent by the client: eligibility comes from
