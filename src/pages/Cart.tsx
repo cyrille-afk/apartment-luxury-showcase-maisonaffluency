@@ -109,6 +109,7 @@ export default function Cart() {
           <h1 className="font-display font-normal text-[1.6rem] md:text-[2.25rem] tracking-[-0.01em]">Your Cart</h1>
           <Link
             to={continueHref}
+            state={{ smoothScroll: false }}
             className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors"
           >
             Continue Selection
@@ -120,9 +121,10 @@ export default function Cart() {
             <p className="font-body text-sm text-muted-foreground">Your cart is empty.</p>
             <Link
               to="/designers"
+              state={{ smoothScroll: false }}
               className="mt-6 inline-flex items-center justify-center px-6 py-3 bg-foreground text-background font-body text-[10px] uppercase tracking-[0.22em]"
             >
-              Browse the Collection
+              Explore Our Designers
             </Link>
           </div>
         ) : (
