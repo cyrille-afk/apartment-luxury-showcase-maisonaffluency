@@ -7,8 +7,14 @@ import {
   Landmark,
   Truck,
   MessageSquare,
+  Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+
+/** Mobile / WhatsApp number: digits, +, spaces, dashes, parentheses — 7–20 chars. */
+const PHONE_RE = /^[+0-9][0-9 ()-]{6,19}$/;
+const MESSAGE_MAX = 500;
 
 /**
  * SelectionDrawer — the premium "YOUR SELECTION" sliding sidebar.
