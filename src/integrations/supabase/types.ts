@@ -2016,6 +2016,7 @@ export type Database = {
           base_axis_label: string | null
           category: string | null
           com_meters: number | null
+          crate_specs: Json
           created_at: string
           currency: string
           default_ship_mode: string | null
@@ -2036,6 +2037,7 @@ export type Database = {
           height_mm: number | null
           hover_image_url: string | null
           hs_code: string | null
+          hs_code_rules: Json
           id: string
           image_url: string
           is_contract_grade: boolean
@@ -2079,6 +2081,7 @@ export type Database = {
           base_axis_label?: string | null
           category?: string | null
           com_meters?: number | null
+          crate_specs?: Json
           created_at?: string
           currency?: string
           default_ship_mode?: string | null
@@ -2099,6 +2102,7 @@ export type Database = {
           height_mm?: number | null
           hover_image_url?: string | null
           hs_code?: string | null
+          hs_code_rules?: Json
           id?: string
           image_url?: string
           is_contract_grade?: boolean
@@ -2142,6 +2146,7 @@ export type Database = {
           base_axis_label?: string | null
           category?: string | null
           com_meters?: number | null
+          crate_specs?: Json
           created_at?: string
           currency?: string
           default_ship_mode?: string | null
@@ -2162,6 +2167,7 @@ export type Database = {
           height_mm?: number | null
           hover_image_url?: string | null
           hs_code?: string | null
+          hs_code_rules?: Json
           id?: string
           image_url?: string
           is_contract_grade?: boolean
@@ -7063,6 +7069,7 @@ export type Database = {
           base_axis_label: string | null
           brand_name: string
           category: string
+          crate_specs: Json
           created_at: string
           currency: string
           default_ship_mode: string | null
@@ -7077,6 +7084,7 @@ export type Database = {
           glb_url: string | null
           height_mm: number | null
           hs_code: string | null
+          hs_code_rules: Json
           id: string
           image_url: string | null
           in_situ_sg: boolean
@@ -7130,6 +7138,7 @@ export type Database = {
           base_axis_label?: string | null
           brand_name: string
           category?: string
+          crate_specs?: Json
           created_at?: string
           currency?: string
           default_ship_mode?: string | null
@@ -7144,6 +7153,7 @@ export type Database = {
           glb_url?: string | null
           height_mm?: number | null
           hs_code?: string | null
+          hs_code_rules?: Json
           id?: string
           image_url?: string | null
           in_situ_sg?: boolean
@@ -7197,6 +7207,7 @@ export type Database = {
           base_axis_label?: string | null
           brand_name?: string
           category?: string
+          crate_specs?: Json
           created_at?: string
           currency?: string
           default_ship_mode?: string | null
@@ -7211,6 +7222,7 @@ export type Database = {
           glb_url?: string | null
           height_mm?: number | null
           hs_code?: string | null
+          hs_code_rules?: Json
           id?: string
           image_url?: string | null
           in_situ_sg?: boolean
