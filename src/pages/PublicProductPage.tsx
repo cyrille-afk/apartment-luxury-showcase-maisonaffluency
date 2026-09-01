@@ -2032,20 +2032,24 @@ const PublicProductPageContent: React.FC = () => {
         </div>
 
         {/* Desktop slim sticky purchase bar — price + button labels follow the
-            effective role so it stays in sync with the sidebar action block. */}
-        <StickyPurchaseBar
-          triggerId="main-product-image-container"
-          image={images[0]}
-          title={product.title}
-          designer={designerDisplay}
-          price={isTradeVerifiedView && mockNetDisplay ? mockNetDisplay : publicRrpLabel}
-          currencyCode={isTradeVerifiedView && mockNetDisplay ? "Net Trade" : undefined}
-          primaryLabel={isTradeVerifiedView ? "Add to Co-Pilot Workspace & Order" : "Place Order"}
-          secondaryLabel={isTradeVerifiedView ? "Open Axonometric Studio" : "Request a Quote or Customisation"}
-          onRequestQuote={() => setQuoteRequestOpen(true)}
-          onPlaceOrder={isTradeVerifiedView ? handleDirectCheckout : openSelectionDrawer}
-          placingOrder={checkoutLoading}
-        />
+            effective role so it stays in sync with the sidebar action block.
+            Hidden for verified trade: the full-width workspace strip below the
+            product grid replaces it and removes the overlapping floating block. */}
+        {!isTradeVerifiedView && (
+          <StickyPurchaseBar
+            triggerId="main-product-image-container"
+            image={images[0]}
+            title={product.title}
+            designer={designerDisplay}
+            price={isTradeVerifiedView && mockNetDisplay ? mockNetDisplay : publicRrpLabel}
+            currencyCode={isTradeVerifiedView && mockNetDisplay ? "Net Trade" : undefined}
+            primaryLabel={isTradeVerifiedView ? "Add to Co-Pilot Workspace & Order" : "Place Order"}
+            secondaryLabel={isTradeVerifiedView ? "Open Axonometric Studio" : "Request a Quote or Customisation"}
+            onRequestQuote={() => setQuoteRequestOpen(true)}
+            onPlaceOrder={isTradeVerifiedView ? handleDirectCheckout : openSelectionDrawer}
+            placingOrder={checkoutLoading}
+          />
+        )}
 
         {/* Dev-only role preview switcher (never rendered in production builds) */}
         {import.meta.env.DEV && typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname) && <DevRoleToggle />}
@@ -2569,7 +2573,7 @@ const PublicProductPageContent: React.FC = () => {
                     </div>
                   </VariantSelectorsProvider>
 
-                  {(() => {
+                  {!isTradeVerifiedView && (() => {
                     // Lead time intentionally excluded here — it lives at the
                     // top of the action block so it binds to the purchase flow.
                     const handcrafted = formatHandcrafted(product.origin, null);
@@ -2589,7 +2593,7 @@ const PublicProductPageContent: React.FC = () => {
                         desktop; compact standalone row on mobile. */}
                     <div className="md:hidden">{renderUtilityLinks()}</div>
 
-                    {(() => {
+                    {!isTradeVerifiedView && (() => {
                       const variants = (product.size_variants || []) as any[];
                       const upholstery = Array.from(
                         new Set(
@@ -2677,9 +2681,14 @@ const PublicProductPageContent: React.FC = () => {
                 }
 
                 if (tradeApproved) {
+                  // Desktop renders the full-width three-zone workspace below
+                  // the main product grid (see below); mobile/PWA keeps the
+                  // collapsed price block here, next to the finish selectors.
+                  if (!isMobileOrPwa) return null;
                   return (
-                    <div className={isMobileOrPwa ? "order-2" : undefined}>
+                    <div className="order-2">
                     <TradeWorkspace
+                      compact
                       productId={product.id}
                       title={product.title}
                       designerDisplay={designerDisplay}
@@ -2695,7 +2704,6 @@ const PublicProductPageContent: React.FC = () => {
                       pdfUrls={product.pdf_urls}
                       inquireHref={inquireHref}
                       felixUrl={typeof window !== "undefined" ? window.location.href : undefined}
-                      compact={isMobileOrPwa}
                     />
                     <ProductCommerceCta
                       productId={product.id}
@@ -2762,10 +2770,38 @@ const PublicProductPageContent: React.FC = () => {
             </div>
           </div>
 
-
-
-
-
+          {/* Verified trade — Zone 1/2/3 workspace (strip + Felix | specs),
+              running full width directly below the main product view. */}
+          {user && !roleOverridden && tradeStatus !== "pending_review" && (isTradeUser || tradeStatus === "approved") && !isMobileOrPwa && (() => {
+            const returnTo = location.pathname + location.search;
+            const q = new URLSearchParams({
+              subject: `Price upon Request — ${product.title} by ${designerDisplay}`,
+              productId: product.id,
+              productSlug: productSlug || "",
+              productName: product.title || "",
+              designerName: designerDisplay || "",
+              back: returnTo || "",
+            });
+            return (
+              <TradeWorkspace
+                productId={product.id}
+                title={product.title}
+                designerDisplay={designerDisplay}
+                dimensions={product.dimensions}
+                materials={product.materials || (product as any).materials_description}
+                originLine={product.origin}
+                leadTime={product.lead_time}
+                selectedFinishes={selectedFinishes}
+                selectedVariantCents={productData.baseRetailPriceCents || null}
+                selectedVariantExact={!!selectedVariantPrice?.exact}
+                returnPath={returnTo}
+                pdfUrl={product.pdf_url}
+                pdfUrls={product.pdf_urls}
+                inquireHref={`/contact?${q.toString()}#contact`}
+                felixUrl={typeof window !== "undefined" ? window.location.href : undefined}
+              />
+            );
+          })()}
 
           {relatedPicks.length > 0 && (
             <div id="related-picks-section" className="mt-6 pt-6 border-t border-border">
