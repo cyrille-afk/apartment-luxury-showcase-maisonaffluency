@@ -796,25 +796,18 @@ export default function Checkout() {
           throw new Error(pi?.error || "Unable to start checkout.");
         }
 
-        // Guardrail: the amount Stripe will charge must equal the cart-derived total.
+        // Guardrail: the amount Stripe will charge must equal the cart-derived
+        // total. The tier rate is applied once at cart level — never per unit.
         const serverPct = Number(pi?.discountPct) || 0;
         setServerDiscountPct(serverPct);
         const serverShippingCents = Number(pi?.shippingCents) || 0;
-        const currency = orderCurrency(grossLines);
-        const chargedLines: CheckoutLine[] = grossLines.map((l) => ({
-          ...l,
-          unitCents: serverPct > 0 ? Math.round(l.unitCents * (1 - serverPct)) : l.unitCents,
-        }));
-        if (serverShippingCents > 0) {
-          chargedLines.push({
-            title: pi?.shippingLabel || "Delivery & installation — confirmed advisor quote",
-            unitCents: serverShippingCents,
-            currency,
-            quantity: 1,
-          });
-        }
+        const totals = buildVerifiedTotals(grossLines);
+        const expectedCents =
+          totals.totalCents -
+          (serverPct > 0 ? Math.round(totals.totalCents * serverPct) : 0) +
+          serverShippingCents;
         const check = reconcileBackendAmount(
-          buildVerifiedTotals(chargedLines),
+          { ...totals, totalCents: expectedCents },
           pi?.amount,
           pi?.currency,
         );
@@ -927,8 +920,8 @@ export default function Checkout() {
     [],
   );
 
-  if (!lines?.length) return null;
-  const homePath = lines[0].productPath || "/";
+  if (!grossLines?.length || !summary) return null;
+  const homePath = grossLines[0].productPath || "/";
 
   if (confirmed) {
     return (
@@ -955,9 +948,9 @@ export default function Checkout() {
   }
 
   return (
-    <main className="mx-auto min-h-[100dvh] max-w-xl bg-background pb-4">
+    <main className="mx-auto min-h-[100dvh] max-w-6xl bg-background pb-16">
       {/* 1 — Minimalist header */}
-      <header className="flex flex-col items-center gap-2 px-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-4">
+      <header className="flex flex-col items-center gap-2 px-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-6">
         <button onClick={() => navigate(homePath)} aria-label="Maison Affluency">
           <img src={logoIcon} alt="Maison Affluency" className="h-8 w-auto" />
         </button>
@@ -966,49 +959,63 @@ export default function Checkout() {
         </span>
       </header>
 
-      <OrderSummaryDrawer lines={lines} />
+      {/* Two-column split: actions left, persistent order summary right */}
+      <div className="grid gap-10 px-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-14 lg:px-10">
+        {/* Right — order summary (shown first on mobile) */}
+        <div className="order-first lg:order-last">
+          <OrderSummary lines={grossLines} summary={summary} />
+        </div>
 
-      <ShippingQuoteCard
-        currency={orderCurrency(lines)}
-        shipping={shipping}
-        busy={syncing}
-        onConfirm={(s) => void syncIntent(s)}
-        onClear={() => void syncIntent(null)}
-      />
+        {/* Left — checkout actions */}
+        <div className="min-w-0">
+          <ShippingQuoteCard
+            currency={summary.currency}
+            shipping={shipping}
+            busy={syncing}
+            onConfirm={(s) => void syncIntent(s)}
+            onClear={() => void syncIntent(null)}
+          />
 
-      {/* Payment method switch */}
-      <div className="px-5 pt-5">
-        <button
-          type="button"
-          onClick={() => setWire((v) => !v)}
-          className={cn(
-            "flex w-full items-center justify-between border px-4 py-3 text-left text-sm",
-            wire ? "border-foreground bg-muted/40" : "border-border",
-          )}
-        >
-          <span>Bank wire transfer</span>
-
-          <span
-            className={cn(
-              "h-5 w-9 flex-none rounded-full border transition-colors",
-              wire ? "border-foreground bg-foreground" : "border-border bg-muted",
-            )}
-          >
-            <span
+          {/* Payment method switch */}
+          <div className="pt-5">
+            <button
+              type="button"
+              onClick={() => setWire((v) => !v)}
               className={cn(
-                "block h-4 w-4 translate-y-[1px] rounded-full bg-background transition-transform",
-                wire ? "translate-x-[18px]" : "translate-x-[2px]",
+                "flex w-full items-center justify-between border px-4 py-3 text-left text-sm",
+                wire ? "border-foreground bg-muted/40" : "border-border",
               )}
-            />
-          </span>
-        </button>
-      </div>
+            >
+              <span>Bank wire transfer</span>
 
-      {wire ? (
-        <WireForm lines={lines} email={email} setEmail={setEmail} onDone={setConfirmed} />
-      ) : error ? (
-        <div className="px-5 py-16 text-center text-sm text-muted-foreground">{error}</div>
-      ) : stripePromise && clientSecret ? (
+              <span
+                className={cn(
+                  "h-5 w-9 flex-none rounded-full border transition-colors",
+                  wire ? "border-foreground bg-foreground" : "border-border bg-muted",
+                )}
+              >
+                <span
+                  className={cn(
+                    "block h-4 w-4 translate-y-[1px] rounded-full bg-background transition-transform",
+                    wire ? "translate-x-[18px]" : "translate-x-[2px]",
+                  )}
+                />
+              </span>
+            </button>
+          </div>
+
+          {wire ? (
+            <WireForm
+              lines={grossLines}
+              summary={summary}
+              account={account}
+              email={email}
+              setEmail={setEmail}
+              onDone={setConfirmed}
+            />
+          ) : error ? (
+            <div className="py-16 text-center text-sm text-muted-foreground">{error}</div>
+          ) : stripePromise && clientSecret ? (
         <Elements stripe={stripePromise} options={{ clientSecret, appearance, fonts: stripeFonts }}>
           <PaymentForm lines={lines} email={email} setEmail={setEmail} onPaid={setConfirmed} />
         </Elements>
