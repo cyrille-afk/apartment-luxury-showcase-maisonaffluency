@@ -1080,10 +1080,11 @@ const PublicProductPageContent: React.FC = () => {
   // Every displayed figure is derived from this single dataset object and the
   // active user context — no hardcoded price strings anywhere in the markup.
   const productData = {
-    id: (product as { id?: string } | undefined)?.id ?? "clam-chair-1944",
-    name: product?.title ?? "Clam Chair, 1944",
+    id: data?.product?.id ?? "clam-chair-1944",
+    name: data?.product?.title ?? "Clam Chair, 1944",
     // Base retail rate in minor units, from the live pricing source of truth.
-    baseRetailPriceCents: selectedRrp?.cents ?? Number(publicRrpRow?.rrp_price_cents) || 0,
+    baseRetailPriceCents:
+      selectedRrp?.cents ?? (Number(publicRrpRow?.rrp_price_cents) || 0),
     // 30% trade discount multiplier for verified trade professionals.
     tradeDiscountMultiplier: 0.3,
   };
