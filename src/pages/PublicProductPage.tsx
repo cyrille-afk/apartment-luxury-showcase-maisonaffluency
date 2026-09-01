@@ -1041,7 +1041,26 @@ const PublicProductPageContent: React.FC = () => {
   const isLegacyArnoldClamChairRoute =
     designerSlug === "arnold-madsen" &&
     /^clam-chair-(?:oiled-walnut|oiled-oak|fumed-oak)$/.test(productSlug || "");
-  const { user, isTradeUser, tradeStatus, loading: authLoading } = useAuth();
+  const {
+    user,
+    isTradeUser,
+    isAdmin,
+    isSuperAdmin,
+    tradeStatus,
+    applicationStatus,
+    loading: authLoading,
+  } = useAuth();
+  /**
+   * Single source of truth for "may see the Trade Workspace".
+   * Verified trade role OR approved profile trade_status OR an approved
+   * trade application OR an admin/super-admin account.
+   */
+  const hasTradeAccess =
+    isTradeUser ||
+    tradeStatus === "approved" ||
+    applicationStatus === "approved" ||
+    isAdmin ||
+    isSuperAdmin;
   const stateFrom = (location.state as { from?: string } | null)?.from;
   const isGridUrl = (p?: string | null) => !!p && /[?&](category|subcategory)=/.test(p);
   const storedFrom = typeof window !== "undefined" ? sessionStorage.getItem("product_from_path") : null;
