@@ -85,7 +85,7 @@ import { setStickyProductBarActive } from "@/lib/stickyProductBar";
 import TradePendingReviewCard from "@/components/product/TradePendingReviewCard";
 
 import QuoteRequestDialog from "@/components/QuoteRequestDialog";
-import { addToCart } from "@/lib/cart";
+import { addToCart, setQuantity as setCartQuantity } from "@/lib/cart";
 import { usePublicRrp, usePublicRrpMap, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
