@@ -552,7 +552,7 @@ function ShippingQuoteCard({
   };
 
   return (
-    <section className="mx-5 mt-5 border border-border">
+    <section className="border border-border">
       <div className="flex items-start justify-between gap-4 px-4 py-4">
         <div className="min-w-0">
           <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -649,6 +649,10 @@ export default function Checkout() {
         role: isAdmin || isSuperAdmin ? "Admin" : isTradeUser ? "Trade" : "Member",
       }
     : null;
+  // Signed-in buyers never retype their email.
+  useEffect(() => {
+    if (user?.email) setEmail((v) => v || user.email!);
+  }, [user]);
   // Summary math: line items keep their standard catalogue prices; the tier
   // discount is applied once at cart level, exactly like the backend charge.
   const summary = useMemo<CheckoutSummary | null>(() => {
