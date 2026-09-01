@@ -1076,22 +1076,62 @@ const PublicProductPageContent: React.FC = () => {
   const isTradeVerifiedView = effectiveRole === "TRADE_VERIFIED";
   const isTradeUnverifiedView = effectiveRole === "TRADE_UNVERIFIED";
 
-  // Pure client-side mock net trade price: 30% off the current base rate.
-  const MOCK_TRADE_DISCOUNT = 0.3;
-  const baseRrpCents = selectedRrp?.cents ?? (Number(publicRrpRow?.rrp_price_cents) || null);
-  const mockNetCents = baseRrpCents ? Math.round(baseRrpCents * (1 - MOCK_TRADE_DISCOUNT)) : null;
-  const priceCurrency = (publicRrpRow?.currency || "USD").toUpperCase();
-  const fmtMock = (cents: number) => {
-    try {
-      return new Intl.NumberFormat("en-US", { style: "currency", currency: priceCurrency, maximumFractionDigits: 0 }).format(cents / 100);
-    } catch {
-      return `${priceCurrency} ${(cents / 100).toLocaleString("en-US")}`;
-    }
+  // ---- Structured product data + reactive pricing math -------------------
+  // Every displayed figure is derived from this single dataset object and the
+  // active user context — no hardcoded price strings anywhere in the markup.
+  const productData = {
+    id: data?.product?.id ?? "clam-chair-1944",
+    name: data?.product?.title ?? "Clam Chair, 1944",
+    // Base retail rate in minor units, from the live pricing source of truth.
+    baseRetailPriceCents:
+      selectedRrp?.cents ?? (Number(publicRrpRow?.rrp_price_cents) || 0),
+    // 30% trade discount multiplier for verified trade professionals.
+    tradeDiscountMultiplier: 0.3,
   };
   const hasFromPrefix = /^From\s+/i.test(publicRrpLabel || "");
-  const retailPlainLabel = publicRrpLabel ? publicRrpLabel.replace(/^From\s+/i, "") : null;
-  const mockNetLabel = mockNetCents ? fmtMock(mockNetCents) : null;
-  const mockNetDisplay = mockNetLabel ? `${hasFromPrefix ? "From " : ""}${mockNetLabel}` : null;
+  const priceCurrency = (publicRrpRow?.currency || "USD").toUpperCase();
+
+  /** Pure function: derives every price label from productData + userRole. */
+  const computeDisplayPrice = (
+    data: typeof productData,
+    role: UserRole,
+    currency: string,
+    withFromPrefix: boolean
+  ) => {
+    const fmt = (cents: number) => {
+      try {
+        return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(cents / 100);
+      } catch {
+        return `${currency} ${(cents / 100).toLocaleString("en-US")}`;
+      }
+    };
+    // TRADE_VERIFIED: net price computed programmatically from the base rate.
+    if (role === "TRADE_VERIFIED" && data.baseRetailPriceCents > 0) {
+      const netCents = Math.round(data.baseRetailPriceCents * (1 - data.tradeDiscountMultiplier));
+      const netLabel = fmt(netCents);
+      return {
+        isTrade: true as const,
+        netLabel,
+        netDisplay: `${withFromPrefix ? "From " : ""}${netLabel}`,
+        retailFootnoteLabel: fmt(data.baseRetailPriceCents),
+      };
+    }
+    // PUBLIC / RETAIL_BUYER / TRADE_UNVERIFIED: base retail figure.
+    return {
+      isTrade: false as const,
+      netLabel: null as string | null,
+      netDisplay: null as string | null,
+      retailFootnoteLabel:
+        data.baseRetailPriceCents > 0 ? fmt(data.baseRetailPriceCents) : null,
+    };
+  };
+
+  const pricing = computeDisplayPrice(productData, effectiveRole, priceCurrency, hasFromPrefix);
+  const mockNetLabel = pricing.netLabel;
+  const mockNetDisplay = pricing.netDisplay;
+  const retailPlainLabel =
+    pricing.retailFootnoteLabel ??
+    (publicRrpLabel ? publicRrpLabel.replace(/^From\s+/i, "") : null);
 
   // Commerce block visibility under the (possibly mocked) role.
   const showPublicCommerce = roleOverridden ? !isTradeVerifiedView : (!user && !authLoading);
