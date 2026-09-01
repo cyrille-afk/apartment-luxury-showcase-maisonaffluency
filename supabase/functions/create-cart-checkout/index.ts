@@ -155,7 +155,14 @@ serve(async (req) => {
 
     const subtotal = lines.reduce((s, l) => s + l.line_total_cents, 0);
     const discountCents = grossSubtotal - subtotal;
-    const shipping = Math.round(subtotal * SHIPPING_RATE);
+    // Shipping is "To be Quoted by Advisor" until an advisor confirms a rate.
+    // Only charge it when the client explicitly passes a confirmed amount.
+    const shippingConfirmed = body?.shippingConfirmed === true;
+    const rawShipping = Math.round(Number(body?.shippingCents) || 0);
+    const shipping =
+      shippingConfirmed && Number.isFinite(rawShipping) && rawShipping > 0
+        ? Math.min(rawShipping, subtotal)
+        : 0;
     const total = subtotal + shipping;
 
     const orderRef = `MA-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
