@@ -250,15 +250,31 @@ serve(async (req) => {
 
     const origin = req.headers.get("origin") || "https://www.maisonaffluency.com";
 
+    // One-off, session-scoped coupon carrying the exact discount shown in the
+    // Order Summary — keeps line items at their displayed price.
+    let couponId: string | undefined;
+    if (discountCents > 0) {
+      const coupon = await stripe.coupons.create({
+        amount_off: discountCents,
+        currency: CHECKOUT_CURRENCY,
+        duration: "once",
+        name: (discountLabel || "Account Discount").slice(0, 40),
+        max_redemptions: 1,
+      });
+      couponId = coupon.id;
+    }
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : buyerEmail,
       mode: "payment",
+      currency: CHECKOUT_CURRENCY,
+      ...(couponId ? { discounts: [{ coupon: couponId }] } : {}),
       line_items: [
         ...lines.map((l) => ({
           quantity: l.quantity,
           price_data: {
-            currency,
+            currency: CHECKOUT_CURRENCY,
             unit_amount: l.unit_price_cents,
             product_data: {
               name: [l.title, l.designer_name].filter(Boolean).join(" — ").slice(0, 250),
@@ -271,7 +287,7 @@ serve(async (req) => {
           ? [{
               quantity: 1,
               price_data: {
-                currency,
+                currency: CHECKOUT_CURRENCY,
                 unit_amount: shipping,
                 product_data: { name: "Front Door Premium Delivery" },
               },
@@ -283,8 +299,14 @@ serve(async (req) => {
         typeof body?.cancelPath === "string" && /^\/[A-Za-z0-9\-._~/?&=%]*$/.test(body.cancelPath)
           ? `${origin}${body.cancelPath}`
           : `${origin}/cart?status=cancelled`,
-      metadata: { payment_type: "cart_order", order_id: order.id, order_ref: order.order_ref },
+      metadata: {
+        payment_type: "cart_order",
+        order_id: order.id,
+        order_ref: order.order_ref,
+        expected_total_cents: String(total),
+      },
     });
+
 
     await supabaseAdmin.from("shop_orders").update({ stripe_session_id: session.id }).eq("id", order.id);
 
