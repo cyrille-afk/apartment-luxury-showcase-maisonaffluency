@@ -27,9 +27,10 @@ export type CheckoutLine = {
   quantity?: number;
 };
 
-const lineQty = (line: CheckoutLine) => Math.max(1, line.quantity ?? 1);
-const lineSubtotal = (line: CheckoutLine) => line.unitCents * lineQty(line);
-const orderSubtotal = (lines: CheckoutLine[]) => lines.reduce((sum, l) => sum + lineSubtotal(l), 0);
+/* All amounts below are derived only from cart line items — see checkoutGuardrails. */
+const lineQty = (line: CheckoutLine) => lineQuantity(line);
+const lineSubtotal = (line: CheckoutLine) => lineTotalCents(line);
+const orderSubtotal = (lines: CheckoutLine[]) => buildVerifiedTotals(lines).totalCents;
 const orderCurrency = (lines: CheckoutLine[]) => lines[0]?.currency || "usd";
 
 const money = (cents: number, currency: string) =>
