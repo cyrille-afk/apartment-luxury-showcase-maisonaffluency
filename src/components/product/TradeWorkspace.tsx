@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
-import { originToCountry } from "@/lib/productOrigin";
+
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { cn } from "@/lib/utils";
 import type { FelixProductContext } from "@/components/product/ProductFelixPanel";
@@ -65,12 +65,6 @@ function formatCents(cents: number | null | undefined, currency?: string | null,
   }
 }
 
-const STOCK_LABEL: Record<string, string> = {
-  in_stock: "In stock",
-  low_stock: "Low stock",
-  made_to_order: "Made to order",
-  discontinued: "Discontinued",
-};
 
 /**
  * Authenticated Trade Workspace.
@@ -141,8 +135,6 @@ export default function TradeWorkspace({
 
   const rrpLabel = formatCents(rrpCents, pricing?.currency, pricing?.price_unit);
   const netLabel = formatCents(netCents, pricing?.currency, pricing?.price_unit);
-  const stockKey = pricing?.stock_status_override || "made_to_order";
-  const stockLabel = STOCK_LABEL[stockKey] || "Made to order";
   const resolvedLead = pricing?.lead_time || leadTime || null;
   const hasSpecSheet = !!(pdfUrl || (pdfUrls && pdfUrls.length > 0) || pricing?.spec_sheet_url);
 
@@ -245,111 +237,53 @@ export default function TradeWorkspace({
     );
   }
 
-  // Strip + spec-table data
-  const originCountry = originToCountry(originLine);
+  // Spec-table data
   const handcraftedLine = formatHandcrafted(originLine, null);
 
   /**
-   * Zone 1 — full-width Trade Workspace strip: data points on one line with
-   * hairline vertical dividers, action buttons grouped on the right.
+   * Zone 1 — action strip: the three trade action buttons on one line.
    * Zones 2 & 3 — 50/50 split: Felix (left) | technical specifications (right).
    */
-  const StripCell = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div className="flex flex-col justify-center gap-1 py-4 lg:py-5 lg:px-7 first:lg:pl-0 min-w-0">
-      <p className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground whitespace-nowrap">
-        {label}
-      </p>
-      <p className="font-body text-sm leading-snug">{children}</p>
-    </div>
-  );
-
   return (
     <section aria-label="Trade workspace" className="mt-10 animate-fade-in">
-      {/* ── Zone 1 — Trade Workspace strip ─────────────────────────────── */}
+      {/* ── Zone 1 — action strip ───────────────────────────────────────── */}
       <div className="border-y border-border">
-        <div className="flex flex-col lg:flex-row lg:items-stretch lg:divide-x lg:divide-border/60">
-          <div className="flex flex-col lg:flex-row lg:items-stretch lg:flex-1 min-w-0 lg:divide-x lg:divide-border/60 divide-y lg:divide-y-0 divide-border/60">
-            {/* Tier */}
-            <div className="flex flex-wrap items-center gap-3 py-4 lg:py-0 lg:px-7 lg:first:pl-0 flex-1 lg:flex-none">
-              <ClientSafeToggle />
-              {tierLabel && !clientSafe && (
-                <span className="inline-flex items-center rounded-full border border-[hsl(var(--gold))]/40 px-2.5 py-1 font-body text-[9px] uppercase tracking-[0.16em] text-[hsl(var(--gold))] whitespace-nowrap">
-                  {tierLabel} − {discountLabel}
-                </span>
-              )}
-            </div>
-
-            {/* Retail vs Net Trade price */}
-            <div className="flex flex-col justify-center gap-1 py-4 lg:py-5 lg:px-7 min-w-0">
-              <p className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
-                {clientSafe ? "Recommended Retail" : "Net Trade Price"}
-              </p>
-              {isLoading ? (
-                <span className="inline-flex items-center gap-2 font-body text-xs text-muted-foreground">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading trade pricing…
-                </span>
-              ) : clientSafe ? (
-                <p className="font-body text-sm leading-snug">
-                  {rrpLabel ? `${usingVariantPrice && !selectedVariantExact ? "From " : ""}${rrpLabel}` : "Price upon Request"}
-                </p>
-              ) : netLabel ? (
-                <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-                  <span className="font-display text-lg leading-none">
-                    {usingVariantPrice && !selectedVariantExact ? "From " : ""}
-                    {netLabel}
-                  </span>
-                  {rrpLabel && netCents !== rrpCents && (
-                    <span className="font-body text-[11px] text-muted-foreground line-through">{rrpLabel}</span>
-                  )}
-                </p>
-              ) : (
-                <p className="font-body text-sm leading-snug">Price upon Request</p>
-              )}
-            </div>
-
-            <StripCell label="Availability">{stockLabel}</StripCell>
-            {resolvedLead && <StripCell label="Lead Time">{resolvedLead}</StripCell>}
-            {originCountry && <StripCell label="Origin">{originCountry}</StripCell>}
-          </div>
-
-          {/* Action group — right side of the strip */}
-          <div className="flex flex-wrap sm:flex-nowrap lg:flex-wrap xl:flex-nowrap items-center gap-2 py-4 lg:py-0 lg:pl-7 lg:pr-1 lg:my-3">
+        <div className="flex flex-wrap sm:flex-nowrap items-center justify-end gap-2 py-4 lg:px-1">
+          <Link
+            to={`/trade/products/${productId}${selectedFinishes.length ? `?finish=${encodeURIComponent(selectedFinishes.join(" / "))}` : ""}`}
+            state={returnPath ? { from: returnPath } : undefined}
+            className="whitespace-nowrap inline-flex items-center justify-center px-4 py-2.5 bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] transition-colors hover:bg-foreground/85"
+          >
+            Add to Co-Pilot Workspace
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              setFelixOpen(true);
+              window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { openPanel: true } }));
+            }}
+            className="whitespace-nowrap inline-flex items-center justify-center px-4 py-2.5 border border-foreground/50 text-foreground font-body text-[10px] uppercase tracking-[0.12em] transition-colors hover:bg-muted/60"
+          >
+            Open 3D Studio
+          </button>
+          {hasSpecSheet ? (
+            <SpecSheetButton
+              pdfUrl={pdfUrl || pricing?.spec_sheet_url || undefined}
+              pdfUrls={pdfUrls as any}
+              brandName={designerDisplay}
+              productName={title}
+              variant="button"
+              className="whitespace-nowrap inline-flex items-center justify-center gap-1.5 px-4 py-2.5 font-body text-[10px] uppercase tracking-[0.12em] border border-foreground/40 text-foreground hover:bg-foreground/5 cursor-pointer"
+            />
+          ) : (
             <Link
-              to={`/trade/products/${productId}${selectedFinishes.length ? `?finish=${encodeURIComponent(selectedFinishes.join(" / "))}` : ""}`}
-              state={returnPath ? { from: returnPath } : undefined}
-              className="flex-1 whitespace-nowrap inline-flex items-center justify-center px-4 py-2.5 bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] transition-colors hover:bg-foreground/85"
+              to={inquireHref}
+              className="whitespace-nowrap inline-flex items-center justify-center gap-1.5 px-4 py-2.5 border border-foreground/40 text-foreground font-body text-[10px] uppercase tracking-[0.12em] transition-colors hover:bg-foreground/5"
             >
-              Add to Co-Pilot Workspace
+              <FileDown className="h-3.5 w-3.5" />
+              Request Spec Sheet
             </Link>
-            <button
-              type="button"
-              onClick={() => {
-                setFelixOpen(true);
-                window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { openPanel: true } }));
-              }}
-              className="flex-1 whitespace-nowrap inline-flex items-center justify-center px-4 py-2.5 border border-foreground/50 text-foreground font-body text-[10px] uppercase tracking-[0.12em] transition-colors hover:bg-muted/60"
-            >
-              Open 3D Studio
-            </button>
-            {hasSpecSheet ? (
-              <SpecSheetButton
-                pdfUrl={pdfUrl || pricing?.spec_sheet_url || undefined}
-                pdfUrls={pdfUrls as any}
-                brandName={designerDisplay}
-                productName={title}
-                variant="button"
-                className="flex-1 whitespace-nowrap inline-flex items-center justify-center gap-1.5 px-4 py-2.5 font-body text-[10px] uppercase tracking-[0.12em] border border-foreground/40 text-foreground hover:bg-foreground/5 cursor-pointer"
-              />
-            ) : (
-              <Link
-                to={inquireHref}
-                className="flex-1 whitespace-nowrap inline-flex items-center justify-center gap-1.5 px-4 py-2.5 border border-foreground/40 text-foreground font-body text-[10px] uppercase tracking-[0.12em] transition-colors hover:bg-foreground/5"
-              >
-                <FileDown className="h-3.5 w-3.5" />
-                Request Spec Sheet
-              </Link>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
