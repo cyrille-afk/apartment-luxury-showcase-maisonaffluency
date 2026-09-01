@@ -86,6 +86,7 @@ import TradePendingReviewCard from "@/components/product/TradePendingReviewCard"
 import QuoteRequestDialog from "@/components/QuoteRequestDialog";
 import { addToCart } from "@/lib/cart";
 import { usePublicRrp, usePublicRrpMap, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { UserRoleProvider, useUserRole, DevRoleToggle, type UserRole } from "@/contexts/UserRoleContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -1065,6 +1066,7 @@ const PublicProductPageContent: React.FC = () => {
   // ---- Dev role-preview state (mock auth) -------------------------------
   // Until the dev dropdown is used, real auth drives the effective role.
   const { role: devRole, overridden: roleOverridden } = useUserRole();
+  const { discountPct: tierDiscountPct, tierLabel: tradeTierLabel } = useTradeDiscount();
   const realRole: UserRole = !user
     ? "PUBLIC"
     : isTradeUser || tradeStatus === "approved"
