@@ -17,7 +17,7 @@ import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { formatProductSubtitleLine } from "@/lib/subtitleDisplay";
 import {
-  Heart, Scale, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box, MessageCircle,
+  Heart, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box,
 } from "lucide-react";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { useQuery } from "@tanstack/react-query";
