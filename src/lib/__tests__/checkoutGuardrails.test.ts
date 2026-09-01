@@ -34,10 +34,12 @@ describe("verified totals", () => {
 describe("checkout copy", () => {
   it("contains no unverifiable pricing claims", () => {
     const src = readFileSync("src/pages/Checkout.tsx", "utf8");
-    // Strip the guardrail import line, which legitimately names the module.
+    // Scan only user-visible code: strip comments (engineering notes may
+    // legitimately name real backend mechanics) and the guardrail import.
     const text = src
+      .replace(/\/\*[\s\S]*?\*\//g, "")
       .split("\n")
-      .filter((l) => !l.includes("checkoutGuardrails"))
+      .filter((l) => !l.includes("checkoutGuardrails") && !/^\s*\/\//.test(l))
       .join("\n");
     const hits = FORBIDDEN_CHECKOUT_CLAIMS.filter((r) => r.pattern.test(text)).map((r) => r.label);
     expect(hits).toEqual([]);
