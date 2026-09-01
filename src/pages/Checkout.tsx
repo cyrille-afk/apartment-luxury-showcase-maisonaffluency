@@ -635,37 +635,39 @@ export default function Checkout() {
   // Account-level tier discount. The hook drives the first paint; the value
   // returned by the PaymentIntent is authoritative once it arrives, so the
   // displayed total always equals the amount Stripe will charge.
-  const { pct: hookDiscountPct } = useAccountDiscount();
+  const { pct: hookDiscountPct, label: discountRowLabel } = useAccountDiscount();
   const [serverDiscountPct, setServerDiscountPct] = useState<number | null>(null);
   const effectiveDiscountPct = serverDiscountPct ?? hookDiscountPct;
   // Shipping stays "To be Quoted by Advisor" until the buyer confirms an
   // advisor-issued quote; only then is it added to the Stripe payload.
   const [shipping, setShipping] = useState<ConfirmedShipping | null>(null);
-  const goodsLines = useMemo(
-    () =>
-      grossLines && effectiveDiscountPct > 0
-        ? grossLines.map((l) => ({
-            ...l,
-            unitCents: Math.round(l.unitCents * (1 - effectiveDiscountPct)),
-          }))
-        : grossLines,
-    [grossLines, effectiveDiscountPct],
-  );
-  // The charged order = goods + (confirmed) shipping. When shipping is still
-  // to be quoted there is no shipping line at all, so nothing reaches Stripe.
-  const lines = useMemo<CheckoutLine[] | null>(() => {
-    if (!goodsLines) return null;
-    if (!shipping) return goodsLines;
-    return [
-      ...goodsLines,
-      {
-        title: shipping.label || "Delivery & installation — confirmed advisor quote",
-        unitCents: shipping.cents,
-        currency: orderCurrency(goodsLines),
-        quantity: 1,
-      },
-    ];
-  }, [goodsLines, shipping]);
+  // Signed-in account — replaces blank email/name inputs with a confirmation.
+  const { user, isAdmin, isSuperAdmin, isTradeUser } = useAuth();
+  const account = user?.email
+    ? {
+        email: user.email,
+        role: isAdmin || isSuperAdmin ? "Admin" : isTradeUser ? "Trade" : "Member",
+      }
+    : null;
+  // Summary math: line items keep their standard catalogue prices; the tier
+  // discount is applied once at cart level, exactly like the backend charge.
+  const summary = useMemo<CheckoutSummary | null>(() => {
+    if (!grossLines?.length) return null;
+    const currency = orderCurrency(grossLines);
+    const subtotalCents = orderSubtotal(grossLines);
+    const discountCents =
+      effectiveDiscountPct > 0 ? Math.round(subtotalCents * effectiveDiscountPct) : 0;
+    const shippingCents = shipping?.cents ?? 0;
+    return {
+      currency,
+      subtotalCents,
+      discountCents,
+      discountLabel: discountCents > 0 ? discountRowLabel : null,
+      shippingCents,
+      shippingLabel: shipping?.label ?? null,
+      totalCents: subtotalCents - discountCents + shippingCents,
+    };
+  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping]);
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [email, setEmail] = useState("");
