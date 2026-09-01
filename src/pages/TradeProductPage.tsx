@@ -2461,7 +2461,7 @@ const TradeProductPage: React.FC = () => {
                 <button
                   type="button"
                   disabled
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none font-body text-[10px] uppercase tracking-[0.18em] transition-colors border border-border bg-background text-foreground opacity-50 cursor-not-allowed w-full"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none font-body text-[10px] uppercase tracking-[0.18em] transition-colors border border-border bg-background text-neutral-900 opacity-50 cursor-not-allowed w-full"
                 >
                   {finishesLoading ? (
                     <>
