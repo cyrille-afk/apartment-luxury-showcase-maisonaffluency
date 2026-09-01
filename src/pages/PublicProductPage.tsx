@@ -1062,6 +1062,41 @@ const PublicProductPageContent: React.FC = () => {
         : catalogueRrpLabel)
     : null;
 
+  // ---- Dev role-preview state (mock auth) -------------------------------
+  // Until the dev dropdown is used, real auth drives the effective role.
+  const { role: devRole, overridden: roleOverridden } = useUserRole();
+  const realRole: UserRole = !user
+    ? "PUBLIC"
+    : isTradeUser || tradeStatus === "approved"
+      ? "TRADE_VERIFIED"
+      : tradeStatus === "pending_review"
+        ? "TRADE_UNVERIFIED"
+        : "RETAIL_BUYER";
+  const effectiveRole: UserRole = roleOverridden ? devRole : realRole;
+  const isTradeVerifiedView = effectiveRole === "TRADE_VERIFIED";
+  const isTradeUnverifiedView = effectiveRole === "TRADE_UNVERIFIED";
+
+  // Pure client-side mock net trade price: 30% off the current base rate.
+  const MOCK_TRADE_DISCOUNT = 0.3;
+  const baseRrpCents = selectedRrp?.cents ?? (Number(publicRrpRow?.rrp_price_cents) || null);
+  const mockNetCents = baseRrpCents ? Math.round(baseRrpCents * (1 - MOCK_TRADE_DISCOUNT)) : null;
+  const priceCurrency = (publicRrpRow?.currency || "USD").toUpperCase();
+  const fmtMock = (cents: number) => {
+    try {
+      return new Intl.NumberFormat("en-US", { style: "currency", currency: priceCurrency, maximumFractionDigits: 0 }).format(cents / 100);
+    } catch {
+      return `${priceCurrency} ${(cents / 100).toLocaleString("en-US")}`;
+    }
+  };
+  const hasFromPrefix = /^From\s+/i.test(publicRrpLabel || "");
+  const retailPlainLabel = publicRrpLabel ? publicRrpLabel.replace(/^From\s+/i, "") : null;
+  const mockNetLabel = mockNetCents ? fmtMock(mockNetCents) : null;
+  const mockNetDisplay = mockNetLabel ? `${hasFromPrefix ? "From " : ""}${mockNetLabel}` : null;
+
+  // Commerce block visibility under the (possibly mocked) role.
+  const showPublicCommerce = roleOverridden ? !isTradeVerifiedView : (!user && !authLoading);
+  const showMockTradeCommerce = roleOverridden && isTradeVerifiedView;
+
   // On landing we intentionally show the catalogue-wide minimum ("From $X"),
   // not the price of the finish in the first photo — this encourages visitors
   // to browse the finishes to discover the full price range.
