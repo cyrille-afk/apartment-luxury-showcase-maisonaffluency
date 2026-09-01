@@ -1728,15 +1728,17 @@ const TradeProductPage: React.FC = () => {
     const prefix = explicitPrefix || (isFromPrice && !hasConcreteSelection ? "From " : "");
 
     return (
-      <div className="bg-neutral-50 border border-border rounded-none px-4 pt-3 pb-2.5">
+      <div className="bg-neutral-50 border border-border rounded-none px-4 py-3.5">
         {/* Cohesive pricing bar — net price anchored left, struck retail +
-            tier badge anchored right, on an ultra-faint neutral tint. */}
+            tier badge anchored right, on an ultra-faint neutral tint.
+            The right pair is one flex child so it can never split past the
+            box's right border; gap-3 keeps a uniform inset on all sides. */}
         <div className="flex items-baseline justify-between gap-3">
-          <span className="font-display text-2xl text-accent font-semibold leading-none whitespace-nowrap">
+          <span className="font-display text-2xl text-accent font-semibold leading-none whitespace-nowrap min-w-0">
             {prefix}{formatted}
           </span>
           {showTradePrice && (
-            <span className="flex items-baseline gap-2.5 min-w-0">
+            <span className="flex items-baseline justify-end gap-2.5 shrink-0">
               <span className="font-body text-[13px] text-muted-foreground line-through whitespace-nowrap">
                 {prefix}{formatPriceConverted(rrp + upcharge, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined)}
               </span>
@@ -2403,7 +2405,7 @@ const TradeProductPage: React.FC = () => {
               <div className="flex flex-col gap-2">
                 <button
                   onClick={() => setCustomRequestOpen(true)}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none font-body text-[10px] uppercase tracking-[0.18em] transition-colors border border-border bg-background text-foreground hover:bg-muted/60 w-full"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none font-body text-[10px] uppercase tracking-[0.18em] transition-colors border border-border bg-background text-neutral-900 hover:bg-muted/60 w-full"
                 >
                   <Wand2 size={13} />
                   Request Customisation
@@ -2450,7 +2452,7 @@ const TradeProductPage: React.FC = () => {
                     });
                     navigate(`/trade/tearsheets?${params.toString()}`);
                   }}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none font-body text-[10px] uppercase tracking-[0.18em] transition-colors border border-border bg-background text-foreground hover:bg-muted/60 w-full"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none font-body text-[10px] uppercase tracking-[0.18em] transition-colors border border-border bg-background text-neutral-900 hover:bg-muted/60 w-full"
                 >
                   <FileText size={13} />
                   Draft Tearsheet with These Finishes
