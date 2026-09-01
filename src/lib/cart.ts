@@ -114,11 +114,16 @@ export function formatMoney(cents: number, currency = "USD") {
 }
 
 /**
- * Display-routing threshold: carts worth $5,000 USD or more open the dedicated
- * full-page cart (/cart); anything below stays in the sliding drawer.
+ * Display-routing rule (price-agnostic): a cart holding a single item stays in
+ * the sliding drawer; once the cart holds 2+ items (by total quantity), it
+ * routes to the dedicated full-page cart (/cart).
  */
-export const FULL_PAGE_CART_THRESHOLD_CENTS = 500_000;
+export const FULL_PAGE_CART_MIN_ITEMS = 2;
+
+export function cartItemCount(list: CartItem[] = getCart()) {
+  return list.reduce((sum, i) => sum + (i.quantity || 1), 0);
+}
 
 export function shouldUseFullPageCart(list: CartItem[] = getCart()) {
-  return cartSubtotalCents(list) >= FULL_PAGE_CART_THRESHOLD_CENTS;
+  return cartItemCount(list) >= FULL_PAGE_CART_MIN_ITEMS;
 }
