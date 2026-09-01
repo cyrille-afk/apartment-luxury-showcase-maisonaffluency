@@ -19,10 +19,18 @@ interface IncomingItem {
   title?: string;
   designerName?: string;
   finishLabel?: string | null;
+  /** Structured variant axes as selected on the product page. */
+  variant?: { base?: string | null; top?: string | null; size?: string | null } | null;
+  /** Unit price displayed in the cart, in cents. Validated against the catalog. */
+  expectedUnitPriceCents?: number | null;
   imageUrl?: string | null;
   leadTime?: string | null;
   quantity?: number;
 }
+
+/** Every price on this platform is quoted and charged in USD. */
+const CHECKOUT_CURRENCY = "usd";
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
