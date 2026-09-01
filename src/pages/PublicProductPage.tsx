@@ -2625,7 +2625,6 @@ const PublicProductPageContent: React.FC = () => {
                       originLine={product.origin}
                       leadTime={product.lead_time}
                       selectedFinishes={selectedFinishes}
-                  orderFinishLabel={buildOrderFinishLabel()}
                       selectedVariantCents={productData.baseRetailPriceCents || null}
                       selectedVariantExact={!!selectedVariantPrice?.exact}
                       returnPath={returnTo}
