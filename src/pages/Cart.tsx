@@ -100,9 +100,9 @@ export default function Cart() {
 
       <Navigation borderless />
 
-      <div className="pt-[var(--header-h)] pb-24 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-baseline justify-between border-b border-border pb-4">
-          <h1 className="font-display font-normal text-[1.6rem] md:text-[2rem] tracking-[-0.01em]">Your Cart</h1>
+      <div className="pt-[var(--header-h)] pb-24 max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
+        <div className="flex items-baseline justify-between border-b border-border pb-6 pt-8">
+          <h1 className="font-display font-normal text-[1.6rem] md:text-[2.25rem] tracking-[-0.01em]">Your Cart</h1>
           <Link
             to={continueHref}
             className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors"
@@ -112,7 +112,7 @@ export default function Cart() {
         </div>
 
         {items.length === 0 ? (
-          <div className="py-20 text-center">
+          <div className="py-24 text-center">
             <p className="font-body text-sm text-muted-foreground">Your cart is empty.</p>
             <Link
               to="/designers"
@@ -122,154 +122,232 @@ export default function Cart() {
             </Link>
           </div>
         ) : (
-          <>
-            <ul className="divide-y divide-border">
-              {items.map((item) => (
-                <li key={item.key} className="py-8">
-                  {item.imageUrl && (
-                    <div className="bg-muted/30 mb-6">
-                      <img
-                        src={item.imageUrl}
-                        alt={item.title}
-                        loading="lazy"
-                        className="w-full h-auto max-h-[320px] object-contain mx-auto"
-                      />
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-12 lg:gap-16 pt-12">
+            {/* ── Left column · item summary ─────────────────────────── */}
+            <div>
+              <ul className="divide-y divide-border/70 border-y border-border/70">
+                {items.map((item) => (
+                  <li key={item.key} className="py-10 grid grid-cols-1 sm:grid-cols-[160px_minmax(0,1fr)] gap-8">
+                    <div className="bg-cream">
+                      {item.imageUrl ? (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.title}
+                          loading="lazy"
+                          className="w-full h-40 object-contain"
+                        />
+                      ) : (
+                        <div className="h-40" />
+                      )}
                     </div>
-                  )}
 
-                  <p className="font-body font-light text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-                    {item.designerName}
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-start justify-between gap-6">
+                        <div className="min-w-0">
+                          <p className="font-body font-light text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+                            {item.designerName}
+                          </p>
+                          <h2 className="font-display text-lg mt-2">
+                            <Link
+                              to={`/designers/${item.designerSlug}/${item.productSlug}`}
+                              className="hover:text-[hsl(var(--gold))] transition-colors"
+                            >
+                              {item.title}
+                            </Link>
+                          </h2>
+                          {item.finishLabel && (
+                            <p className="font-body text-sm text-muted-foreground mt-3 leading-relaxed">
+                              {item.finishLabel}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="text-right">
+                          <p className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Total</p>
+                          <p className="font-display text-lg tabular-nums mt-1">
+                            {formatMoney(item.unitPriceCents * item.quantity, item.currency)}
+                          </p>
+                          {item.quantity > 1 && (
+                            <p className="font-body text-[11px] text-muted-foreground mt-1 tabular-nums">
+                              {formatMoney(item.unitPriceCents, item.currency)} each
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-4">
+                        <div className="inline-flex items-center border border-border">
+                          <button
+                            type="button"
+                            aria-label="Decrease quantity"
+                            onClick={() => setQuantity(item.key, item.quantity - 1)}
+                            className="px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            <Minus className="h-3.5 w-3.5" />
+                          </button>
+                          <span className="px-5 font-body text-sm tabular-nums">{item.quantity}</span>
+                          <button
+                            type="button"
+                            aria-label="Increase quantity"
+                            onClick={() => setQuantity(item.key, item.quantity + 1)}
+                            className="px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+
+                        <FavoriteFolderPicker pickId={item.pickId} align="start">
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            <Heart className="h-3.5 w-3.5" />
+                            Add to Wishlist
+                          </button>
+                        </FavoriteFolderPicker>
+                        <button
+                          type="button"
+                          onClick={() => removeFromCart(item.key)}
+                          className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
+
+                      {item.leadTime && (
+                        <p className="mt-6 font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                          Production lead time: {item.leadTime}
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Need Help? — concierge channels */}
+              <section className="mt-14 border border-border/70 bg-cream px-8 py-10">
+                <h2 className="font-display text-xl">Need Help?</h2>
+                <p className="mt-3 font-body text-sm text-muted-foreground max-w-md leading-relaxed">
+                  A private advisor can assist with configuration, lead times, delivery planning and
+                  payment arrangements before you confirm your order.
+                </p>
+                <dl className="mt-8 grid gap-6 sm:grid-cols-3 font-body text-sm">
+                  <div>
+                    <dt className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Concierge</dt>
+                    <dd className="mt-2">
+                      <a href="mailto:concierge@maisonaffluency.com" className="hover:text-[hsl(var(--gold))] transition-colors">
+                        concierge@maisonaffluency.com
+                      </a>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Trade Program</dt>
+                    <dd className="mt-2">
+                      <a href="mailto:trade@maisonaffluency.com" className="hover:text-[hsl(var(--gold))] transition-colors">
+                        trade@maisonaffluency.com
+                      </a>
+                    </dd>
+                    <dd className="mt-1">
+                      <Link to="/trade" className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors">
+                        Discover the Trade Program
+                      </Link>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Direct Line</dt>
+                    <dd className="mt-2">
+                      <Link to="/contact" className="hover:text-[hsl(var(--gold))] transition-colors">
+                        Request a call back
+                      </Link>
+                    </dd>
+                    <dd className="mt-1">
+                      <a href="mailto:hello@maisonaffluency.com" className="text-muted-foreground hover:text-foreground transition-colors">
+                        hello@maisonaffluency.com
+                      </a>
+                    </dd>
+                  </div>
+                </dl>
+              </section>
+            </div>
+
+            {/* ── Right column · order summary card ──────────────────── */}
+            <aside className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] h-fit">
+              <div className="border border-border/70 px-7 py-8">
+                <h2 className="font-display text-xl">Order Summary</h2>
+
+                <dl className="mt-7 space-y-4 font-body text-sm">
+                  <div className="flex items-baseline justify-between">
+                    <dt className="text-muted-foreground">Subtotal</dt>
+                    <dd className="tabular-nums">{formatMoney(subtotal, currency)}</dd>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-6">
+                    <dt className="text-muted-foreground">Front Door Premium Delivery</dt>
+                    <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
+                  </div>
+                  <div className="flex items-baseline justify-between border-t border-border pt-4">
+                    <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
+                    <dd className="tabular-nums font-medium text-base">{formatMoney(total, currency)}</dd>
+                  </div>
+                </dl>
+
+                {!user && (
+                  <div className="mt-7 grid gap-3">
+                    <Input
+                      type="email"
+                      placeholder="Email address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="rounded-none"
+                    />
+                    <Input
+                      placeholder="Full name (optional)"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="rounded-none"
+                    />
+                  </div>
+                )}
+
+                <div className="mt-7 space-y-3">
+                  <Button
+                    onClick={() => checkout("card")}
+                    disabled={pending !== null}
+                    className="w-full rounded-none h-12 bg-foreground text-background hover:bg-foreground/90 font-body text-[11px] uppercase tracking-[0.22em]"
+                  >
+                    {pending === "card" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Proceed to Checkout"}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => checkout("bank_transfer")}
+                    disabled={pending !== null}
+                    className="w-full rounded-none h-12 border-foreground text-foreground hover:bg-muted/60 font-body text-[11px] uppercase tracking-[0.22em]"
+                  >
+                    {pending === "bank_transfer" ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Pay via Bank Wire Transfer"
+                    )}
+                  </Button>
+                  <p className="text-center font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    Preferred for Trade &amp; Corporate Accounts
                   </p>
-                  <h2 className="font-display text-base md:text-lg mt-2">
-                    <Link to={`/designers/${item.designerSlug}/${item.productSlug}`} className="hover:text-[hsl(var(--gold))] transition-colors">
-                      {item.title}
-                    </Link>
-                  </h2>
-                  {item.finishLabel && (
-                    <p className="font-body text-sm text-muted-foreground mt-2">{item.finishLabel}</p>
-                  )}
+                </div>
 
-                  <div className="mt-5 inline-flex items-center border border-border">
-                    <button
-                      type="button"
-                      aria-label="Decrease quantity"
-                      onClick={() => setQuantity(item.key, item.quantity - 1)}
-                      className="px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
+                {/* Payment methods — desaturated monochrome row */}
+                <div className="mt-8 grid grid-cols-3 gap-2 border-t border-border/60 pt-6 opacity-60">
+                  {["Visa", "Mastercard", "Bank Transfer"].map((label) => (
+                    <div
+                      key={label}
+                      className="flex h-9 items-center justify-center border border-border/70 font-body text-[9px] uppercase tracking-[0.18em] text-muted-foreground"
                     >
-                      <Minus className="h-3.5 w-3.5" />
-                    </button>
-                    <span className="px-5 font-body text-sm tabular-nums">{item.quantity}</span>
-                    <button
-                      type="button"
-                      aria-label="Increase quantity"
-                      onClick={() => setQuantity(item.key, item.quantity + 1)}
-                      className="px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-
-                  <dl className="mt-6 space-y-2 font-body text-sm">
-                    <div className="flex items-baseline justify-between">
-                      <dt className="uppercase tracking-[0.16em] text-[11px] text-muted-foreground">Price</dt>
-                      <dd className="tabular-nums">{formatMoney(item.unitPriceCents, item.currency)}</dd>
+                      {label}
                     </div>
-                    <div className="flex items-baseline justify-between">
-                      <dt className="uppercase tracking-[0.16em] text-[11px] text-muted-foreground">Total</dt>
-                      <dd className="tabular-nums">{formatMoney(item.unitPriceCents * item.quantity, item.currency)}</dd>
-                    </div>
-                  </dl>
-
-                  {item.leadTime && (
-                    <p className="mt-5 pt-4 border-t border-border/60 font-body text-sm">
-                      Production lead time: {item.leadTime}
-                    </p>
-                  )}
-
-                  <div className="mt-4 flex items-center gap-6">
-                    <FavoriteFolderPicker pickId={item.pickId} align="start">
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <Heart className="h-3.5 w-3.5" />
-                        Add to Wishlist
-                      </button>
-                    </FavoriteFolderPicker>
-                    <button
-                      type="button"
-                      onClick={() => removeFromCart(item.key)}
-                      className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            <section className="mt-10 border-t border-border pt-8">
-              <h2 className="font-display text-lg">Order Summary</h2>
-
-              <dl className="mt-6 space-y-3 font-body text-sm">
-                <div className="flex items-baseline justify-between">
-                  <dt className="text-muted-foreground">Subtotal</dt>
-                  <dd className="tabular-nums">{formatMoney(subtotal, currency)}</dd>
+                  ))}
                 </div>
-                <div className="flex items-baseline justify-between gap-6">
-                  <dt className="text-muted-foreground">Shipping</dt>
-                  <dd className="tabular-nums text-right">Front Door Delivery: {formatMoney(shipping, currency)}</dd>
-                </div>
-                <div className="flex items-baseline justify-between border-t border-border pt-3">
-                  <dt className="font-medium">Order Total</dt>
-                  <dd className="tabular-nums font-medium">{formatMoney(total, currency)}</dd>
-                </div>
-              </dl>
-
-              <p className="mt-3 font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground/80">
-                Delivery is an estimate — duties and white-glove options confirmed by your concierge.
-              </p>
-
-              {!user && (
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  <Input
-                    type="email"
-                    placeholder="Email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="rounded-control"
-                  />
-                  <Input
-                    placeholder="Full name (optional)"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="rounded-control"
-                  />
-                </div>
-              )}
-
-              <div className="mt-6 space-y-4">
-                <Button
-                  onClick={() => checkout("card")}
-                  disabled={pending !== null}
-                  className="w-full rounded-control h-12 bg-foreground text-background hover:bg-foreground/90 font-body text-[11px] uppercase tracking-[0.22em]"
-                >
-                  {pending === "card" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Proceed to Checkout"}
-                </Button>
-
-                <p className="text-center font-body text-[11px] text-muted-foreground">- OR -</p>
-
-                <Button
-                  variant="outline"
-                  onClick={() => checkout("bank_transfer")}
-                  disabled={pending !== null}
-                  className="w-full rounded-control h-12 border-foreground/40 font-body text-[11px] uppercase tracking-[0.22em]"
-                >
-                  {pending === "bank_transfer" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Pay by Bank Transfer"}
-                </Button>
               </div>
-            </section>
-          </>
+            </aside>
+          </div>
         )}
       </div>
     </div>
