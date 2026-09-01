@@ -289,6 +289,14 @@ export default function Cart() {
                     <dt className="text-muted-foreground">Subtotal</dt>
                     <dd className="tabular-nums">{formatMoney(subtotal, currency)}</dd>
                   </div>
+                  {discount.eligible && (
+                    <div className="flex items-baseline justify-between gap-6">
+                      <dt className="text-muted-foreground">{discount.label}</dt>
+                      <dd className="tabular-nums text-foreground">
+                        −{formatMoney(discount.amountFor(subtotal), currency)}
+                      </dd>
+                    </div>
+                  )}
                   <div className="flex items-baseline justify-between gap-6">
                     <dt className="text-muted-foreground">Front Door Premium Delivery</dt>
                     <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
@@ -298,6 +306,7 @@ export default function Cart() {
                     <dd className="tabular-nums font-medium text-base">{formatMoney(total, currency)}</dd>
                   </div>
                 </dl>
+
 
                 <div className="mt-7 space-y-3">
                   <Button

@@ -303,15 +303,24 @@ export default function CartIdentify() {
                   <dt className="text-muted-foreground">Subtotal</dt>
                   <dd className="tabular-nums">{formatMoney(subtotal, currency)}</dd>
                 </div>
+                {discount.eligible && (
+                  <div className="flex items-baseline justify-between gap-6">
+                    <dt className="text-muted-foreground">{discount.label}</dt>
+                    <dd className="tabular-nums text-foreground">
+                      −{formatMoney(discount.amountFor(subtotal), currency)}
+                    </dd>
+                  </div>
+                )}
                 <div className="flex items-baseline justify-between gap-6">
                   <dt className="text-muted-foreground">Front Door Premium Delivery</dt>
                   <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
                 </div>
                 <div className="flex items-baseline justify-between border-t border-border pt-4">
                   <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
-                  <dd className="tabular-nums font-medium text-base">{formatMoney(subtotal, currency)}</dd>
+                  <dd className="tabular-nums font-medium text-base">{formatMoney(orderTotal, currency)}</dd>
                 </div>
               </dl>
+
 
               <p className="mt-6 text-center font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                 {method === "bank_transfer" ? "Bank Wire Transfer" : "Secure Card Payment"}
