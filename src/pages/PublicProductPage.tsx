@@ -2473,6 +2473,7 @@ const PublicProductPageContent: React.FC = () => {
                         placingOrder={checkoutLoading}
                         onRequestQuote={() => setQuoteRequestOpen(true)}
                         selectedFinishes={selectedFinishes}
+                  orderFinishLabel={buildOrderFinishLabel()}
                         redirectTo={location.pathname + location.search}
                         utilityLinks={renderUtilityLinks()}
                       />
@@ -2495,6 +2496,7 @@ const PublicProductPageContent: React.FC = () => {
                         placingOrder={checkoutLoading}
                         onRequestQuote={() => setQuoteRequestOpen(true)}
                         selectedFinishes={selectedFinishes}
+                  orderFinishLabel={buildOrderFinishLabel()}
                         redirectTo={location.pathname + location.search}
                         utilityLinks={renderUtilityLinks()}
                       />
@@ -2563,6 +2565,7 @@ const PublicProductPageContent: React.FC = () => {
                   placingOrder={checkoutLoading}
                   onRequestQuote={() => setQuoteRequestOpen(true)}
                   selectedFinishes={selectedFinishes}
+                  orderFinishLabel={buildOrderFinishLabel()}
                   redirectTo={location.pathname + location.search}
                 />
               )}
@@ -2584,6 +2587,7 @@ const PublicProductPageContent: React.FC = () => {
                   placingOrder={checkoutLoading}
                   onRequestQuote={() => setQuoteRequestOpen(true)}
                   selectedFinishes={selectedFinishes}
+                  orderFinishLabel={buildOrderFinishLabel()}
                   redirectTo={location.pathname + location.search}
                 />
               )}
@@ -2621,6 +2625,7 @@ const PublicProductPageContent: React.FC = () => {
                       originLine={product.origin}
                       leadTime={product.lead_time}
                       selectedFinishes={selectedFinishes}
+                  orderFinishLabel={buildOrderFinishLabel()}
                       selectedVariantCents={productData.baseRetailPriceCents || null}
                       selectedVariantExact={!!selectedVariantPrice?.exact}
                       returnPath={returnTo}
@@ -2639,6 +2644,7 @@ const PublicProductPageContent: React.FC = () => {
                       placingOrder={checkoutLoading}
                       onRequestQuote={() => setQuoteRequestOpen(true)}
                       selectedFinishes={selectedFinishes}
+                  orderFinishLabel={buildOrderFinishLabel()}
                       redirectTo={returnTo}
                     />
                     </div>
