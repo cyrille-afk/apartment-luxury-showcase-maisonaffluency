@@ -257,7 +257,7 @@ function ConditionalNotes() {
 /* ------------------------------------------------------------------ */
 /* Delivery & payment options — shipping module + payment method tabs  */
 /* ------------------------------------------------------------------ */
-type PaymentMethod = "card" | "wire" | "wallet";
+type PaymentMethod = "card" | "wire" | "wallet" | "paynow";
 
 const METHOD_TABS: { id: PaymentMethod; label: string; hint: string }[] = [
   { id: "card", label: "Secure Card Payment", hint: "Visa · Mastercard · Amex" },
@@ -265,13 +265,27 @@ const METHOD_TABS: { id: PaymentMethod; label: string; hint: string }[] = [
   { id: "wallet", label: "Digital Wallet", hint: "Google Pay · Apple Pay · Link" },
 ];
 
+/**
+ * PayNow tab — shown only for SGD-priced orders. Stripe's virtual-account bank
+ * transfers (customer_balance) are not offered to Singapore merchants, so SGD
+ * trade orders settle through PayNow QR instead.
+ */
+const PAYNOW_TAB: { id: PaymentMethod; label: string; hint: string } = {
+  id: "paynow",
+  label: "PayNow",
+  hint: "Scan with any Singapore banking app",
+};
+
 function DeliveryPaymentOptions({
   method,
   setMethod,
+  paynowAvailable,
 }: {
   method: PaymentMethod;
   setMethod: (m: PaymentMethod) => void;
+  paynowAvailable: boolean;
 }) {
+  const tabs = paynowAvailable ? [...METHOD_TABS, PAYNOW_TAB] : METHOD_TABS;
   return (
     <section className="mt-6 w-full space-y-5 border-t border-border pt-8">
       <h2 className="text-[11px] font-light uppercase tracking-[0.26em] text-muted-foreground">
@@ -280,9 +294,12 @@ function DeliveryPaymentOptions({
       <div
         role="radiogroup"
         aria-label="Payment method"
-        className="grid w-full grid-cols-1 border border-neutral-200 sm:grid-cols-3"
+        className={cn(
+          "grid w-full grid-cols-1 border border-neutral-200",
+          tabs.length === 4 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3",
+        )}
       >
-        {METHOD_TABS.map((tab, i) => {
+        {tabs.map((tab, i) => {
           const active = tab.id === method;
           return (
             <button
