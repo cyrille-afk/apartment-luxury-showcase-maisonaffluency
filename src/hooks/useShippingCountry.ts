@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import {
+  getCartCbm,
   getEstimatedShipping,
   getShippingZone,
   type ShippingEstimateItem,
@@ -43,6 +44,8 @@ export type EstimatedShipping = {
   /** Currency of the zone rate, when a zone matched. */
   currency: string | null;
   available: boolean;
+  /** Total crated volume of the cart used for the estimate. */
+  cbm: number;
 };
 
 /**
@@ -60,6 +63,7 @@ export function useEstimatedShipping(
       i.title ?? "",
       i.category ?? "",
       i.itemClass ?? "",
+      i.cbm ?? "",
       i.shippingModifier ?? "",
       i.quantity ?? 1,
       i.unitPriceCents ?? 0,
@@ -74,6 +78,7 @@ export function useEstimatedShipping(
       cents: rate != null ? Math.round(rate * 100) : 0,
       currency: zone?.currency ?? null,
       available: rate != null,
+      cbm: getCartCbm(items ?? null),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryCode, signature]);
