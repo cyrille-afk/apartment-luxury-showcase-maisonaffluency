@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { cloudinaryUrl } from "@/lib/cloudinary";
-import { getCart } from "@/lib/cart";
+import { getCart, clearCart } from "@/lib/cart";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -689,6 +689,18 @@ export default function Checkout() {
     return false;
   });
   const [confirmed, setConfirmed] = useState<string | null>(null);
+  // Once payment (card or wire) succeeds the basket must be emptied, otherwise
+  // the header bag keeps the purchased lines and re-entering /checkout would
+  // rebuild — and re-charge — the same order.
+  const completeOrder = useCallback((reference: string) => {
+    clearCart();
+    try {
+      sessionStorage.removeItem(CHECKOUT_KEY);
+    } catch {
+      /* private mode */
+    }
+    setConfirmed(reference);
+  }, []);
   const [error, setError] = useState<string | null>(null);
   const initialised = useRef(false);
   const intentIdRef = useRef<string>("");
@@ -1015,7 +1027,7 @@ export default function Checkout() {
               account={account}
               email={email}
               setEmail={setEmail}
-              onDone={setConfirmed}
+              onDone={completeOrder}
             />
           ) : error ? (
             <div className="py-16 text-center text-sm text-muted-foreground">{error}</div>
@@ -1026,7 +1038,7 @@ export default function Checkout() {
                 account={account}
                 email={email}
                 setEmail={setEmail}
-                onPaid={setConfirmed}
+                onPaid={completeOrder}
               />
             </Elements>
           ) : (

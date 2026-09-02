@@ -58,7 +58,27 @@ export default function CartNavButton({
       }
     }
     setOpen(false);
-    navigate("/checkout");
+    // Always hand the current cart to /checkout explicitly: without router
+    // state the page would fall back to a stale "ma_checkout_line" entry left
+    // behind by an earlier direct Place Order and charge the wrong product.
+    navigate("/checkout", {
+      state: {
+        lines: items.map((i) => ({
+          title: i.title,
+          designer: i.designerName,
+          finishLabel: i.finishLabel,
+          imageUrl: i.imageUrl,
+          unitCents: i.unitPriceCents,
+          currency: i.currency,
+          leadTime: i.leadTime,
+          productPath:
+            i.designerSlug && i.productSlug
+              ? `/designers/${i.designerSlug}/${i.productSlug}`
+              : null,
+          quantity: i.quantity,
+        })),
+      },
+    });
   };
 
   return (
