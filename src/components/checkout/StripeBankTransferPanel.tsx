@@ -164,6 +164,7 @@ export default function StripeBankTransferPanel({
 }) {
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [reason, setReason] = useState<FailureReason>(null);
   const [addresses, setAddresses] = useState<FinancialAddress[]>([]);
   const [reference, setReference] = useState<string | null>(null);
   const [hostedUrl, setHostedUrl] = useState<string | null>(null);
@@ -177,6 +178,7 @@ export default function StripeBankTransferPanel({
     let cancelled = false;
     setLoading(true);
     setFailed(false);
+    setReason(null);
     (async () => {
       try {
         const { data, error } = await supabase.functions.invoke("create-bank-transfer-intent", {
@@ -192,6 +194,13 @@ export default function StripeBankTransferPanel({
         const list = (data as any)?.financialAddresses as FinancialAddress[] | undefined;
         if (error || (data as any)?.error || !list?.length) {
           setFailed(true);
+          setReason(
+            classifyFailure(
+              (data as any)?.error,
+              (data as any)?.detail,
+              error ? String((error as any)?.message ?? "") : "",
+            ),
+          );
         } else {
           setAddresses(list);
           setActiveRail(0);
@@ -199,7 +208,10 @@ export default function StripeBankTransferPanel({
           setHostedUrl((data as any)?.hostedInstructionsUrl ?? null);
         }
       } catch {
-        if (!cancelled) setFailed(true);
+        if (!cancelled) {
+          setFailed(true);
+          setReason("error");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -230,7 +242,15 @@ export default function StripeBankTransferPanel({
     );
   }
 
-  if (failed || !addresses.length) return <>{fallback}</>;
+  if (failed || !addresses.length) {
+    return (
+      <div className="space-y-5">
+        <UnavailableBanner reason={reason} currency={currency} />
+        {fallback}
+      </div>
+    );
+  }
+
 
   const rail = addresses[Math.min(activeRail, addresses.length - 1)];
 
