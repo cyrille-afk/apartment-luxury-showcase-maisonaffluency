@@ -41,6 +41,9 @@ export type CheckoutLine = {
   leadTime?: string | null;
   productPath?: string | null;
   quantity?: number;
+  /** Freight class hints — drive the shipping estimate multiplier. */
+  category?: string | null;
+  shippingModifier?: number | null;
 };
 
 /* All amounts below are derived only from cart line items — see checkoutGuardrails. */
@@ -855,7 +858,15 @@ export default function Checkout() {
   }, [user]);
   // Summary math: line items keep their standard catalogue prices; the tier
   // discount is applied once at cart level, exactly like the backend charge.
-  const estimate = useEstimatedShipping();
+  const estimate = useEstimatedShipping(
+    (grossLines ?? []).map((l) => ({
+      title: l.title,
+      category: l.category ?? null,
+      shippingModifier: l.shippingModifier ?? null,
+      quantity: lineQty(l),
+      unitPriceCents: l.unitCents,
+    })),
+  );
   const summary = useMemo<CheckoutSummary | null>(() => {
     if (!grossLines?.length) return null;
     const currency = orderCurrency(grossLines);
