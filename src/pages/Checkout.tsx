@@ -592,10 +592,11 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
 
       {optionsSlot}
 
-      <section className="pt-8">
+      <section className="space-y-5 pt-8">
         <p className="text-xs text-muted-foreground">
-          Our concierge will send fully-insured wiring instructions within one business hour.
+          Our concierge will also email these fully-insured wiring instructions within one business hour.
         </p>
+        <WireDetailsGrid />
       </section>
       <StickyTotals
         summary={summary}
