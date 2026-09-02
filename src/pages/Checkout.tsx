@@ -72,7 +72,7 @@ export type CheckoutSummary = {
 function AccountBlock({ email, role }: { email: string; role: string }) {
   return (
     <div className="flex items-center justify-between gap-4 border border-border bg-muted/30 px-4 py-3">
-      <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Account</span>
+      <span className="text-[11px] font-light uppercase tracking-[0.24em] text-muted-foreground">Account</span>
       <span className="truncate text-sm">
         {email} <span className="text-muted-foreground">({role})</span>
       </span>
@@ -130,7 +130,7 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
                     Lead time · {line.leadTime}
                   </p>
                 )}
-                <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-1">
+                <p className="font-body text-[10px] font-light uppercase tracking-[0.24em] text-muted-foreground mt-1">
                   Qty {lineQty(line)}
                 </p>
               </div>
@@ -172,7 +172,7 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
           </div>
         </dl>
 
-        <p className="mt-6 text-center font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        <p className="mt-6 text-center font-body text-[10px] font-light uppercase tracking-[0.24em] text-muted-foreground">
           Secure Card Payment
         </p>
       </div>
@@ -241,14 +241,14 @@ function DeliveryPaymentOptions({
 }) {
   return (
     <section className="space-y-5 border-t border-border pt-8">
-      <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+      <h2 className="text-[11px] font-light uppercase tracking-[0.26em] text-muted-foreground">
         Delivery &amp; payment options
       </h2>
       {children}
       <div
         role="radiogroup"
         aria-label="Payment method"
-        className="grid grid-cols-1 border border-border sm:grid-cols-3"
+        className="grid grid-cols-1 border border-neutral-200 sm:grid-cols-3"
       >
         {METHOD_TABS.map((tab, i) => {
           const active = tab.id === method;
@@ -261,11 +261,11 @@ function DeliveryPaymentOptions({
               onClick={() => setMethod(tab.id)}
               className={cn(
                 "flex flex-col items-start gap-1 px-4 py-4 text-left transition-colors",
-                i > 0 && "border-t border-border sm:border-l sm:border-t-0",
+                i > 0 && "border-t border-neutral-200 sm:border-l sm:border-t-0",
                 active ? "bg-foreground text-background" : "hover:bg-muted/40",
               )}
             >
-              <span className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em]">
+              <span className="flex items-center gap-2 text-[11px] font-light uppercase tracking-[0.22em]">
                 <span
                   className={cn(
                     "h-2.5 w-2.5 flex-none rounded-full border",
@@ -352,7 +352,7 @@ function PaymentForm({
     <>
       {/* 1 — Contact & delivery */}
       <section className="space-y-4 pb-8">
-        <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+        <h2 className="text-[11px] font-light uppercase tracking-[0.26em] text-muted-foreground">
           Contact & delivery
         </h2>
         {account ? (
@@ -365,7 +365,7 @@ function PaymentForm({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email address"
-            className="h-12 w-full rounded-none border border-border bg-background px-4 text-base outline-none focus:border-foreground"
+            className="h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground"
           />
         )}
         <AddressElement
@@ -381,95 +381,98 @@ function PaymentForm({
       {/* 2 — Delivery & payment options */}
       {optionsSlot}
 
-      {/* 3 — Selected payment panel */}
-      {method === "wallet" ? (
-        <section className="space-y-4 pt-8">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-            Pay with your digital wallet
-          </p>
-          <ExpressCheckoutElement
-            options={{ buttonHeight: 48, layout: { maxColumns: 1, maxRows: 3 } }}
-            onConfirm={async () => {
-              if (!stripe || !elements) return;
-              const { error: submitError } = await elements.submit();
-              if (submitError) {
-                toast.error(submitError.message || "Payment could not be completed.");
-                return;
-              }
-              const { error, paymentIntent } = await stripe.confirmPayment({
-                elements,
-                redirect: "if_required",
-                confirmParams: { return_url: `${window.location.origin}/checkout` },
-              });
-              if (error) {
-                toast.error(error.message || "Payment could not be completed.");
-                return;
-              }
-              if (paymentIntent) onPaid(paymentIntent.id);
-            }}
-          />
-          <p className="text-xs text-muted-foreground">
-            Wallet availability depends on your device and browser. Switch to secure card payment if
-            no wallet appears.
-          </p>
-          <ConditionalNotes />
-        </section>
-      ) : (
-        <>
-          <section className="space-y-4 pt-8">
-            <div className="flex items-end justify-between gap-4 border-b border-border pb-3">
-              <div>
-                <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-                  Secure card payment
-                </h2>
-                <p className="mt-1 text-xs text-foreground">Visa · Mastercard · American Express</p>
-              </div>
-              <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                Powered by Stripe
-              </span>
-            </div>
-            <div className="relative min-h-32">
-              {!paymentReady && (
-                <div
-                  className="absolute inset-0 flex flex-col items-center justify-center gap-2 border border-border bg-muted/30"
-                  role="status"
-                  aria-live="polite"
-                >
-                  <span className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {loadStage === 0 ? "Opening secure Stripe session" : "Preparing card fields"}
-                  </span>
-                  <span className="h-px w-28 overflow-hidden bg-border">
-                    <span className="block h-full w-1/3 animate-pulse bg-foreground" />
-                  </span>
-                  <span className="text-[10px] text-muted-foreground/70">
-                    Secure card form loading — this takes a few seconds
-                  </span>
-                </div>
-              )}
-              <div className={cn(!paymentReady && "invisible")}>
-                <PaymentElement
-                  options={{ layout: "tabs", paymentMethodOrder: ["card"] }}
-                  onReady={() => setPaymentReady(true)}
-                />
-              </div>
-            </div>
-          </section>
-
-          {/* 4 — Sticky summary & CTA (disabled until card fields are mounted) */}
-          <StickyTotals
-            summary={summary}
-            ready={paymentReady}
-            cta={
-              paymentReady
-                ? `Confirm & securely pay ${money(total, currency)}`
-                : "Preparing secure payment…"
+      {/* 3 — Selected payment panel. Both Stripe elements stay mounted; the
+          inactive one is hidden with CSS so the Elements instance is never
+          destroyed and re-created when tabs switch. */}
+      <section className={cn("space-y-5 pt-10", method !== "wallet" && "hidden")}>
+        <p className="text-[11px] font-light uppercase tracking-[0.24em] text-muted-foreground">
+          Pay with your digital wallet
+        </p>
+        <ExpressCheckoutElement
+          options={{ buttonHeight: 48, layout: { maxColumns: 1, maxRows: 3 } }}
+          onConfirm={async () => {
+            if (!stripe || !elements) return;
+            const { error: submitError } = await elements.submit();
+            if (submitError) {
+              toast.error(submitError.message || "Payment could not be completed.");
+              return;
             }
-            busy={submitting}
-            onSubmit={confirm}
-          />
-        </>
-      )}
+            const { error, paymentIntent } = await stripe.confirmPayment({
+              elements,
+              redirect: "if_required",
+              confirmParams: { return_url: `${window.location.origin}/checkout` },
+            });
+            if (error) {
+              toast.error(error.message || "Payment could not be completed.");
+              return;
+            }
+            if (paymentIntent) onPaid(paymentIntent.id);
+          }}
+        />
+        <p className="text-xs font-light leading-relaxed text-muted-foreground">
+          Wallet availability depends on your device and browser. Switch to secure card payment if
+          no wallet appears.
+        </p>
+        <ConditionalNotes />
+      </section>
+
+      <div className={cn(method === "wallet" && "hidden")}>
+        <section className="space-y-5 pt-10">
+          <div className="flex items-end justify-between gap-4 border-b border-neutral-200 pb-4">
+            <div>
+              <h2 className="text-[11px] font-light uppercase tracking-[0.26em] text-muted-foreground">
+                Secure card payment
+              </h2>
+              <p className="mt-1.5 text-xs font-light text-foreground">
+                Visa · Mastercard · American Express
+              </p>
+            </div>
+            <span className="shrink-0 text-[10px] font-light uppercase tracking-[0.22em] text-muted-foreground">
+              Powered by Stripe
+            </span>
+          </div>
+          <div className="relative min-h-32">
+            {!paymentReady && (
+              <div
+                className="absolute inset-0 flex flex-col items-center justify-center gap-2 border border-neutral-200 bg-muted/20"
+                role="status"
+                aria-live="polite"
+              >
+                <span className="flex items-center gap-2 text-[11px] font-light uppercase tracking-[0.24em] text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {loadStage === 0 ? "Opening secure Stripe session" : "Preparing card fields"}
+                </span>
+                <span className="h-px w-28 overflow-hidden bg-border">
+                  <span className="block h-full w-1/3 animate-pulse bg-foreground" />
+                </span>
+                <span className="text-[10px] font-light text-muted-foreground/70">
+                  Secure card form loading — this takes a few seconds
+                </span>
+              </div>
+            )}
+            <div className={cn(!paymentReady && "invisible")}>
+              <PaymentElement
+                options={{ layout: "tabs", paymentMethodOrder: ["card"] }}
+                onReady={() => setPaymentReady(true)}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* 4 — Sticky summary & CTA (disabled until card fields are mounted) */}
+        <StickyTotals
+          summary={summary}
+          ready={paymentReady}
+          cta={
+            paymentReady
+              ? `Confirm & securely pay ${money(total, currency)}`
+              : "Preparing secure payment…"
+          }
+          busy={submitting}
+          onSubmit={confirm}
+        />
+      </div>
+
 
     </>
   );
@@ -499,7 +502,7 @@ function StickyTotals({
         disabled={busy || !ready}
         onClick={onSubmit}
         aria-disabled={!ready}
-        className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-none bg-[#0A0A0A] text-[12px] uppercase tracking-[0.2em] text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-40"
+        className="mt-6 flex h-16 w-full items-center justify-center gap-3 rounded-none bg-[#0A0A0A] px-8 text-[11px] font-light uppercase tracking-[0.3em] text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-40"
       >
         {!ready && !busy && <Loader2 className="h-4 w-4 animate-spin" />}
         {busy && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -579,12 +582,12 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
     }
   };
 
-  const field = "h-12 w-full rounded-none border border-border bg-background px-4 text-base outline-none focus:border-foreground";
+  const field = "h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground";
 
   return (
     <>
       <section className="space-y-4 pt-6">
-        <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+        <h2 className="text-[11px] font-light uppercase tracking-[0.26em] text-muted-foreground">
           Bank wire — contact & delivery
         </h2>
         {account ? (
@@ -596,7 +599,7 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
           </>
         )}
         <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone" type="tel" inputMode="tel" autoComplete="tel" className={field} />
-        <textarea value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Delivery address" rows={3} className="w-full rounded-none border border-border bg-background p-4 text-base outline-none focus:border-foreground" />
+        <textarea value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Delivery address" rows={3} className="w-full rounded-none border border-neutral-200 bg-background p-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground" />
       </section>
 
       {optionsSlot}
@@ -649,10 +652,10 @@ function ShippingQuoteCard({
   };
 
   return (
-    <section className="border border-border">
+    <section className="border border-neutral-200">
       <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-3.5">
         <div className="min-w-0">
-          <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-[10px] font-light uppercase tracking-[0.24em] text-muted-foreground">
             Delivery &amp; installation
           </p>
           <p className="mt-0.5 truncate text-sm">
@@ -668,7 +671,7 @@ function ShippingQuoteCard({
             type="button"
             disabled={busy}
             onClick={() => (shipping ? onClear() : setOpen((v) => !v))}
-            className="h-9 rounded-none border border-foreground px-4 text-[10px] uppercase tracking-[0.18em] transition-colors hover:bg-foreground hover:text-background disabled:opacity-40"
+            className="h-10 rounded-none border border-neutral-300 px-5 text-[10px] font-light uppercase tracking-[0.24em] transition-colors hover:border-foreground hover:bg-foreground hover:text-background disabled:opacity-40"
           >
             {shipping ? "Remove" : open ? "Cancel" : "Add confirmed shipping quote"}
           </button>
@@ -683,18 +686,18 @@ function ShippingQuoteCard({
             onChange={(e) => setAmount(e.target.value)}
             placeholder={`Shipping amount (${(currency || "usd").toUpperCase()})`}
             inputMode="decimal"
-            className="h-12 w-full rounded-none border border-border bg-background px-4 text-base outline-none focus:border-foreground"
+            className="h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground"
           />
           <input
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             placeholder="Quote reference (optional)"
-            className="h-12 w-full rounded-none border border-border bg-background px-4 text-base outline-none focus:border-foreground"
+            className="h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground"
           />
           <button
             type="button"
             onClick={submit}
-            className="h-12 w-full rounded-none bg-[#1A1A1A] text-[11px] uppercase tracking-[0.2em] text-white"
+            className="h-12 w-full rounded-none bg-[#1A1A1A] text-[10px] font-light uppercase tracking-[0.28em] text-white"
           >
             Confirm shipping quote
           </button>
@@ -954,13 +957,13 @@ export default function Checkout() {
       },
       rules: {
         ".Input": {
-          border: "1px solid #E4E2DE",
+          border: "1px solid #E7E5E1",
           borderRadius: "0px",
           boxShadow: "none",
           backgroundColor: "#FFFFFF",
-          padding: "12px 14px",
+          padding: "16px 20px",
         },
-        ".Input:hover": { border: "1px solid #C9C6C0", boxShadow: "none" },
+        ".Input:hover": { border: "1px solid #D6D3CD", boxShadow: "none" },
         ".Input:focus": {
           border: "1px solid #0A0A0A",
           boxShadow: "none",
@@ -969,10 +972,11 @@ export default function Checkout() {
         ".Input--invalid": { borderColor: "#B42318", boxShadow: "none" },
         ".Label": {
           fontSize: "10px",
-          fontWeight: "500",
-          letterSpacing: "0.18em",
+          fontWeight: "300",
+          letterSpacing: "0.24em",
           textTransform: "uppercase",
           color: "#6B6B6B",
+
           marginBottom: "6px",
         },
         ".Tab": {
@@ -1069,7 +1073,7 @@ export default function Checkout() {
           <h1 className="font-display font-normal text-[1.6rem] md:text-[2.25rem] tracking-[-0.01em]">
             Secure Checkout
           </h1>
-          <span className="flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          <span className="flex items-center gap-1.5 font-body text-[10px] font-light uppercase tracking-[0.24em] text-muted-foreground">
             <Lock className="h-3 w-3" /> 256-bit Encrypted
           </span>
         </div>
