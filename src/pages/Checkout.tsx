@@ -756,17 +756,19 @@ export default function Checkout() {
   const [email, setEmail] = useState("");
   // Wire mode can be pre-selected by the "Your Selection" drawer
   // ("Proceed to Wire Instructions") via a one-shot sessionStorage flag.
-  const [wire, setWire] = useState(() => {
+  const [method, setMethod] = useState<PaymentMethod>(() => {
     try {
       if (sessionStorage.getItem("ma_checkout_wire") === "1") {
         sessionStorage.removeItem("ma_checkout_wire");
-        return true;
+        return "wire";
       }
     } catch {
       /* private mode — default to online */
     }
-    return false;
+    return "card";
   });
+  const wire = method === "wire";
+
   const [confirmed, setConfirmed] = useState<string | null>(null);
   // Once payment (card or wire) succeeds the basket must be emptied, otherwise
   // the header bag keeps the purchased lines and re-entering /checkout would
