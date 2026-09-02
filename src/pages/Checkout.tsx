@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { cloudinaryUrl } from "@/lib/cloudinary";
-import { getCart } from "@/lib/cart";
+import { getCart, clearCart } from "@/lib/cart";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -1027,7 +1027,7 @@ export default function Checkout() {
               account={account}
               email={email}
               setEmail={setEmail}
-              onDone={setConfirmed}
+              onDone={completeOrder}
             />
           ) : error ? (
             <div className="py-16 text-center text-sm text-muted-foreground">{error}</div>
@@ -1038,7 +1038,7 @@ export default function Checkout() {
                 account={account}
                 email={email}
                 setEmail={setEmail}
-                onPaid={setConfirmed}
+                onPaid={completeOrder}
               />
             </Elements>
           ) : (
