@@ -366,16 +366,11 @@ export default function Cart() {
                   </p>
                 </div>
 
-                {/* Payment methods — desaturated monochrome row */}
-                <div className="mt-8 grid grid-cols-3 gap-2 border-t border-border/60 pt-6 opacity-60">
-                  {["Visa", "Mastercard", "Bank Transfer"].map((label) => (
-                    <div
-                      key={label}
-                      className="flex h-9 items-center justify-center border border-border/70 font-body text-[9px] uppercase tracking-[0.18em] text-muted-foreground"
-                    >
-                      {label}
-                    </div>
-                  ))}
+                {/* Payment methods — monochrome marks, borderless */}
+                <div className="mt-8 flex items-center justify-center gap-10 border-t border-border/60 pt-6 text-foreground/70">
+                  <VisaMark />
+                  <MastercardMark />
+                  <BankTransferMark />
                 </div>
               </div>
             </aside>
