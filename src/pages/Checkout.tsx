@@ -613,6 +613,16 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
   const { totalCents: total, currency } = summary;
+  const orderRef = useMemo(
+    () =>
+      stableOrderReference(
+        JSON.stringify({
+          c: currency,
+          i: lines.map((l) => [l.title, l.finishLabel || "", lineQty(l)]),
+        }),
+      ),
+    [currency, lines],
+  );
 
   const submit = async () => {
     if (!account && (!name.trim() || !email.includes("@"))) {
