@@ -403,13 +403,16 @@ function PaymentForm({
           />
         )}
         <AddressElement
+          // Remount when the header/modal destination changes so the
+          // "Country or Region" field snaps to the newly saved country.
+          key={destination.iso}
           options={{
             mode: "shipping",
             display: { name: "full" },
             fields: { phone: "always" },
             autocomplete: { mode: "automatic" },
             // Carry the country chosen in the cart forward so freight stays consistent.
-            defaultValues: { address: { country: getCurrentDestination().iso } },
+            defaultValues: { address: { country: destination.iso } },
           }}
 
           onChange={(e) => {
