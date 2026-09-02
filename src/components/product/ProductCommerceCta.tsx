@@ -367,13 +367,14 @@ export default function ProductCommerceCta({
               )}
             </div>
             {tradeApproved ? (
-              <Link
-                to={workspaceHref}
-                state={redirectTo ? { from: redirectTo } : undefined}
+              <button
+                type="button"
+                onClick={() => onPlaceOrder(quantity)}
+                disabled={placingOrder}
                 className={cn(primaryBtn, "h-11 flex-1")}
               >
-                Place Order
-              </Link>
+                {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : primaryLabel}
+              </button>
             ) : (
               <button
                 type="button"
