@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Copy, Check, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { TransferReferenceNote } from "@/components/checkout/TransferReferenceNote";
 import { cn } from "@/lib/utils";
 
 /* ------------------------------------------------------------------ */
