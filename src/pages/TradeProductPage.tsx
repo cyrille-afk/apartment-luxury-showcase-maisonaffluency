@@ -78,6 +78,8 @@ import SpecGlyph from "@/components/product/SpecGlyph";
 import AlsoContainsFinishes from "@/components/product/AlsoContainsFinishes";
 import { firstPublicVariantDimensionLabel } from "@/lib/productVariantSpecs";
 import { createActiveDraftQuote, fetchActiveDraftQuoteId } from "@/lib/activeProjectId";
+import { addToCart } from "@/lib/cart";
+import AxonometricStudioButton from "@/components/product/AxonometricStudioButton";
 
 const specIcon = (symbol: string, className = "") => (
   <SpecGlyph symbol={symbol} className={className} />
