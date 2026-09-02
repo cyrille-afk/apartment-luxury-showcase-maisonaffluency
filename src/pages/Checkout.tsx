@@ -44,12 +44,14 @@ const lineSubtotal = (line: CheckoutLine) => lineTotalCents(line);
 const orderSubtotal = (lines: CheckoutLine[]) => buildVerifiedTotals(lines).totalCents;
 const orderCurrency = (lines: CheckoutLine[]) => lines[0]?.currency || "usd";
 
+/* Clean integers, no decimals — identical to the cart / sign-in pages. */
 const money = (cents: number, currency: string) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: (currency || "usd").toUpperCase(),
-    maximumFractionDigits: 2,
-  }).format(cents / 100);
+    maximumFractionDigits: 0,
+  }).format(Math.round(cents / 100));
+
 
 /* ------------------------------------------------------------------ */
 /* Order summary math — gross prices, one cart-level discount row      */
