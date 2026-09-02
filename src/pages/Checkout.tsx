@@ -1,15 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { Elements, PaymentElement, AddressElement, ExpressCheckoutElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import { Lock, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { cloudinaryUrl } from "@/lib/cloudinary";
 import { getCart, clearCart } from "@/lib/cart";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
 import { useAuth } from "@/hooks/useAuth";
+import { Helmet } from "react-helmet-async";
+import Navigation from "@/components/Navigation";
+import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";
+import { ArrowLeft } from "lucide-react";
 import {
   assertCheckoutCopy,
   buildVerifiedTotals,
@@ -19,7 +22,6 @@ import {
 } from "@/lib/checkoutGuardrails";
 
 
-const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 const CONCIERGE_WHATSAPP = "https://wa.me/6591393850";
 const CHECKOUT_KEY = "ma_checkout_line";
 
@@ -44,12 +46,14 @@ const lineSubtotal = (line: CheckoutLine) => lineTotalCents(line);
 const orderSubtotal = (lines: CheckoutLine[]) => buildVerifiedTotals(lines).totalCents;
 const orderCurrency = (lines: CheckoutLine[]) => lines[0]?.currency || "usd";
 
+/* Clean integers, no decimals — identical to the cart / sign-in pages. */
 const money = (cents: number, currency: string) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: (currency || "usd").toUpperCase(),
-    maximumFractionDigits: 2,
-  }).format(cents / 100);
+    maximumFractionDigits: 0,
+  }).format(Math.round(cents / 100));
+
 
 /* ------------------------------------------------------------------ */
 /* Order summary math — gross prices, one cart-level discount row      */
@@ -82,76 +86,100 @@ function AccountBlock({ email, role }: { email: string; role: string }) {
 /* ------------------------------------------------------------------ */
 function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: CheckoutSummary }) {
   const { currency } = summary;
-  const pieces = lines.reduce((n, l) => n + lineQty(l), 0);
 
   return (
-    <aside className="h-fit border border-border bg-background p-6 lg:sticky lg:top-8">
-      <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-        Order summary · {lines.length} {lines.length === 1 ? "item" : "items"}
-        {pieces !== lines.length ? ` · ${pieces} pieces` : ""}
-      </p>
+    <aside className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] h-fit">
+      <div className="border border-border/70 px-7 py-8">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-display text-xl">Order Summary</h2>
+          <AccountPricingBadge />
+        </div>
 
-      <ul className="mt-5 divide-y divide-border/50">
-        {lines.map((line, i) => (
-          <li key={`${line.title}-${line.finishLabel || ""}-${i}`} className="flex gap-4 py-4 first:pt-0">
-            {line.imageUrl && (
-              <img
-                src={line.imageUrl}
-                alt={line.title}
-                className="h-20 w-20 flex-none object-cover"
-                loading="lazy"
-              />
-            )}
-            <div className="min-w-0 flex-1 text-sm">
-              {line.designer && (
-                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                  {line.designer}
+        <ul className="mt-6 space-y-4">
+          {lines.map((line, i) => (
+            <li
+              key={`${line.title}-${line.finishLabel || ""}-${i}`}
+              className="flex gap-4 border-b border-border/60 pb-4 last:border-0 last:pb-0"
+            >
+              <div className="w-16 shrink-0 bg-cream">
+                {line.imageUrl ? (
+                  <img
+                    src={line.imageUrl}
+                    alt={line.title}
+                    loading="lazy"
+                    className="w-16 h-16 object-contain"
+                  />
+                ) : (
+                  <div className="w-16 h-16" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                {line.designer && (
+                  <p className="font-body font-light text-[9px] uppercase tracking-[0.24em] text-muted-foreground">
+                    {line.designer}
+                  </p>
+                )}
+                <p className="font-display text-sm mt-1 truncate">{line.title}</p>
+                {line.finishLabel && (
+                  <p className="font-body text-[11px] text-muted-foreground mt-1 line-clamp-2">
+                    {line.finishLabel}
+                  </p>
+                )}
+                {line.leadTime && (
+                  <p className="font-body text-[11px] text-muted-foreground mt-1">
+                    Lead time · {line.leadTime}
+                  </p>
+                )}
+                <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-1">
+                  Qty {lineQty(line)}
                 </p>
-              )}
-              <p className="truncate font-light">{line.title}</p>
-              {line.finishLabel && (
-                <p className="mt-1 text-xs text-muted-foreground">{line.finishLabel}</p>
-              )}
-              {line.leadTime && (
-                <p className="mt-1 text-xs text-muted-foreground">Lead time · {line.leadTime}</p>
-              )}
-              {/* Standard catalogue unit price — never a discounted rate */}
-              <p className="mt-2 text-xs text-muted-foreground">
-                {money(line.unitCents, line.currency)} × {lineQty(line)}
+              </div>
+              <p className="font-body text-sm tabular-nums shrink-0">
+                {money(lineSubtotal(line), line.currency)}
               </p>
-            </div>
-            <div className="flex-none text-sm">{money(lineSubtotal(line), line.currency)}</div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
 
-      <dl className="mt-4 space-y-2 border-t border-border/60 pt-4 text-sm">
-        <div className="flex justify-between">
-          <dt className="text-muted-foreground">Subtotal</dt>
-          <dd>{money(summary.subtotalCents, currency)}</dd>
-        </div>
-        {summary.discountCents > 0 && summary.discountLabel && (
-          <div className="flex justify-between">
-            <dt className="text-muted-foreground">{summary.discountLabel}</dt>
-            <dd>−{money(summary.discountCents, currency)}</dd>
+        <dl className="mt-7 space-y-4 font-body text-sm border-t border-border pt-6">
+          <div className="flex items-baseline justify-between">
+            <dt className="text-muted-foreground">Subtotal</dt>
+            <dd className="tabular-nums">{money(summary.subtotalCents, currency)}</dd>
           </div>
-        )}
-        {summary.shippingCents > 0 && (
-          <div className="flex justify-between">
+          {summary.discountCents > 0 && summary.discountLabel && (
+            <div className="flex items-baseline justify-between gap-6">
+              <dt className="text-muted-foreground">{summary.discountLabel}</dt>
+              <dd className="tabular-nums text-foreground">
+                −{money(summary.discountCents, currency)}
+              </dd>
+            </div>
+          )}
+          <div className="flex items-baseline justify-between gap-6">
             <dt className="text-muted-foreground">
-              {summary.shippingLabel || "Delivery & installation"}
+              {summary.shippingLabel || "Front Door Premium Delivery"}
             </dt>
-            <dd>{money(summary.shippingCents, currency)}</dd>
+            {summary.shippingCents > 0 ? (
+              <dd className="tabular-nums">{money(summary.shippingCents, currency)}</dd>
+            ) : (
+              <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
+            )}
           </div>
-        )}
-        <div className="flex justify-between border-t border-border/60 pt-3 text-base">
-          <dt>Order total</dt>
-          <dd>{money(summary.totalCents, currency)}</dd>
-        </div>
-      </dl>
+          <div className="flex items-baseline justify-between border-t border-border pt-4">
+            <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
+            <dd className="tabular-nums font-medium text-base">
+              {money(summary.totalCents, currency)}
+            </dd>
+          </div>
+        </dl>
+
+        <p className="mt-6 text-center font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          Secure Card Payment
+        </p>
+      </div>
     </aside>
   );
 }
+
 
 /* ------------------------------------------------------------------ */
 /* Conditional charges — shown so nothing is a surprise later          */
@@ -964,24 +992,37 @@ export default function Checkout() {
   }
 
   return (
-    <main className="mx-auto min-h-[100dvh] max-w-6xl bg-background pb-16">
-      {/* 1 — Minimalist header */}
-      <header className="flex flex-col items-center gap-2 px-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-6">
-        <button onClick={() => navigate(homePath)} aria-label="Maison Affluency">
-          <img src={logoIcon} alt="Maison Affluency" className="h-8 w-auto" />
-        </button>
-        <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-          <Lock className="h-3 w-3" /> 256-bit encrypted secure checkout
-        </span>
-      </header>
+    <div className="min-h-screen bg-background text-foreground">
+      <Helmet>
+        <title>Secure Checkout — Maison Affluency</title>
+        <meta name="description" content="Complete your Maison Affluency acquisition through our encrypted secure checkout." />
+        <meta name="robots" content="noindex,nofollow" />
+      </Helmet>
 
-      {/* Two-column split: actions left, persistent order summary right */}
-      <div className="grid gap-10 px-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-14 lg:px-10">
-        {/* Right — order summary (shown first on mobile) */}
-        <div className="order-first lg:order-last">
-          <OrderSummary lines={grossLines} summary={summary} />
+      <Navigation borderless />
+
+      <main className="pt-[var(--header-h)] pb-24 max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
+        <div className="pt-8">
+          <Link
+            to="/cart"
+            className="inline-flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            Back to cart
+          </Link>
         </div>
 
+        <div className="flex items-baseline justify-between gap-6 border-b border-border pb-6 pt-5">
+          <h1 className="font-display font-normal text-[1.6rem] md:text-[2.25rem] tracking-[-0.01em]">
+            Secure Checkout
+          </h1>
+          <span className="flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            <Lock className="h-3 w-3" /> 256-bit Encrypted
+          </span>
+        </div>
+
+        {/* Two-column split: actions left, persistent order summary right */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-12 lg:gap-16 pt-12">
         {/* Left — checkout actions */}
         <div className="min-w-0">
           <ShippingQuoteCard
@@ -1047,7 +1088,11 @@ export default function Checkout() {
             </div>
           )}
         </div>
-      </div>
-    </main>
+
+        {/* Right — persistent order summary */}
+        <OrderSummary lines={grossLines} summary={summary} />
+        </div>
+      </main>
+    </div>
   );
 }
