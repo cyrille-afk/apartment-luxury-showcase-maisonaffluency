@@ -308,7 +308,7 @@ function PaymentForm({
   setEmail: (v: string) => void;
   onPaid: (ref: string) => void;
   method: PaymentMethod;
-  optionsSlot: (children: React.ReactNode) => React.ReactNode;
+  optionsSlot: React.ReactNode;
 }) {
   const stripe = useStripe();
   const elements = useElements();
