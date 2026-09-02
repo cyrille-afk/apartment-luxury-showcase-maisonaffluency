@@ -381,7 +381,7 @@ export default function Cart() {
                 </div>
 
                 {/* Payment methods — monochrome marks, borderless */}
-                <div className="mt-8 flex items-center justify-center gap-10 border-t border-border/60 pt-6 text-foreground/70">
+                <div className="mt-8 flex items-center justify-center gap-12 border-t border-border/60 pt-6 text-foreground/80">
                   <VisaMark />
                   <MastercardMark />
                   <BankTransferMark />
