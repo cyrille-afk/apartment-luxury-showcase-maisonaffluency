@@ -163,6 +163,17 @@ export default function TradeTearsheets() {
     } catch {}
   }, [filterProjectId]);
   const [selectedProduct, setSelectedProduct] = useState<TearsheetProduct | null>(null);
+  // Once the user explicitly returns to the list, stop the auto-select effect
+  // from immediately re-opening the handoff product.
+  const dismissedHandoffRef = useRef(false);
+  const backToProducts = () => {
+    dismissedHandoffRef.current = true;
+    setSelectedProduct(null);
+    const next = new URLSearchParams(searchParams);
+    ["product", "fabric", "fabricImg", "wood", "woodImg", "variant"].forEach((k) => next.delete(k));
+    setSearchParams(next, { replace: true });
+  };
+
   const printRef = useRef<HTMLDivElement>(null);
 
   // Resolve a display-ready lead time for the selected product:
@@ -458,6 +469,7 @@ export default function TradeTearsheets() {
   // on either side of the merge), so links from the product page land on the
   // right tearsheet even when the merge kept the "other" canonical id.
   useEffect(() => {
+    if (dismissedHandoffRef.current) return;
     if (!initialFinishes.productId || selectedProduct || products.length === 0) return;
     const direct = products.find((p) => p.id === initialFinishes.productId);
     if (direct) { setSelectedProduct(direct); return; }
@@ -781,7 +793,7 @@ export default function TradeTearsheets() {
                   );
                 }
                 return (
-                  <Button variant="ghost" size="sm" onClick={() => setSelectedProduct(null)}>← Back to products</Button>
+                  <Button variant="ghost" size="sm" onClick={backToProducts}>← Back to products</Button>
                 );
               })()}
               <div className="flex items-center gap-2">

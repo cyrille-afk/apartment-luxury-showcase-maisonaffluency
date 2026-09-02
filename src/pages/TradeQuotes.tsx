@@ -173,8 +173,69 @@ const TradeQuotes = () => {
     sessionSeedRef.done = sess.id;
 
     (async () => {
+      // Resolve the session's product to a trade_products row so the quote is
+      // seeded with an actual line item (the session id may be a curator pick).
+      const resolveTradeProductId = async (): Promise<{ id: string; price: number | null; currency: string | null } | null> => {
+        const pid = sess.product?.id;
+        if (!pid) return null;
+        const direct = await supabase
+          .from("trade_products")
+          .select("id, trade_price_cents, currency")
+          .eq("id", pid)
+          .maybeSingle();
+        if ((direct.data as any)?.id) {
+          const d = direct.data as any;
+          return { id: d.id, price: d.trade_price_cents ?? null, currency: d.currency ?? null };
+        }
+        const twin = await supabase
+          .from("trade_products")
+          .select("id, trade_price_cents, currency")
+          .eq("source_pick_id", pid)
+          .maybeSingle();
+        if ((twin.data as any)?.id) {
+          const t = twin.data as any;
+          return { id: t.id, price: t.trade_price_cents ?? null, currency: t.currency ?? null };
+        }
+        return null;
+      };
+
+      const seedItem = async (targetQuoteId: string) => {
+        const { count } = await supabase
+          .from("trade_quote_items")
+          .select("id", { count: "exact", head: true })
+          .eq("quote_id", targetQuoteId);
+        if ((count ?? 0) > 0) return;
+        const prod = await resolveTradeProductId();
+        if (!prod) {
+          toast({
+            title: "Product not in the trade catalogue",
+            description: "The quote was created — add the piece manually from the catalogue.",
+            variant: "destructive",
+          });
+          return;
+        }
+        const variantLabel = sess.finishes.variant || sess.finishes.fabric || null;
+        const { error: itemError } = await supabase.from("trade_quote_items").insert({
+          quote_id: targetQuoteId,
+          product_id: prod.id,
+          quantity: 1,
+          variant_label: variantLabel,
+          unit_price_cents: prod.price ?? null,
+          unit_price_currency: prod.currency ?? null,
+          image_url: sess.product?.imageUrl ?? null,
+          notes: [
+            sess.finishes.fabric && `Fabric: ${sess.finishes.fabric}`,
+            sess.finishes.wood && `Wood: ${sess.finishes.wood}`,
+          ].filter(Boolean).join(" · ") || null,
+        } as any);
+        if (itemError) {
+          toast({ title: "Could not add the piece to the quote", description: itemError.message, variant: "destructive" });
+        }
+      };
+
       // If the session already has a quoteId, just open it.
       if (sess.quoteId) {
+        await seedItem(sess.quoteId);
         setSelectedQuoteId(sess.quoteId);
         const clean = new URLSearchParams(searchParams);
         clean.delete("fromSession");
@@ -209,12 +270,14 @@ const TradeQuotes = () => {
         return;
       }
       updateConciergeSession({ quoteId: (data as any).id });
+      await seedItem((data as any).id);
       const clean = new URLSearchParams(searchParams);
       clean.delete("fromSession");
       setSearchParams(clean, { replace: true });
       setSelectedQuoteId((data as any).id);
-      toast({ title: "Quote seeded from concierge session", description: "Your brief and locked finishes were added to the quote notes." });
+      toast({ title: "Quote seeded from concierge session", description: "Your piece, brief and locked finishes were added to the quote." });
     })();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, currentStudio, canEdit, searchParams]);
 
