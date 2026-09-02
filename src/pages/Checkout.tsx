@@ -874,6 +874,7 @@ export default function Checkout() {
       quantity: lineQty(l),
       unitPriceCents: l.unitCents,
     })),
+    formCountry,
   );
   const summary = useMemo<CheckoutSummary | null>(() => {
     if (!grossLines?.length) return null;
