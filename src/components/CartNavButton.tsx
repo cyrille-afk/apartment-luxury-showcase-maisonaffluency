@@ -9,7 +9,6 @@ import {
   cartSubtotalCents,
   setQuantity,
   removeFromCart,
-  shouldUseFullPageCart,
   formatMoney,
 } from "@/lib/cart";
 
