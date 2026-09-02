@@ -692,6 +692,7 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
         <StripeBankTransferPanel
           currency={currency}
           email={account ? account.email : email}
+          orderReference={orderRef}
           items={lines.map((l) => ({
             title: l.title,
             designer: l.designer || "",
@@ -706,7 +707,7 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
               <p className="text-xs text-muted-foreground">
                 Our concierge will also email these fully-insured wiring instructions within one business hour.
               </p>
-              <WireDetailsGrid />
+              <WireDetailsGrid reference={orderRef} />
             </div>
           }
         />
