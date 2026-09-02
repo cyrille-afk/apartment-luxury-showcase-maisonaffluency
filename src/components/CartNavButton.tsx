@@ -93,22 +93,35 @@ export default function CartNavButton({
       </button>
 
       <SelectionDrawer
-        isOpen={open && !!line}
+        isOpen={open && items.length > 0}
         onClose={() => setOpen(false)}
-        brand={line?.designerName ?? null}
-        title={line?.title ?? null}
-        configuration={line?.finishLabel ?? null}
-        leadTime={line?.leadTime ?? null}
-        priceLabel={
-          line && line.unitPriceCents > 0
-            ? formatMoney(line.unitPriceCents, line.currency)
-            : "Price upon Request"
+        lines={items.map((i) => ({
+          key: i.key,
+          brand: i.designerName,
+          title: i.title,
+          configuration: i.finishLabel,
+          leadTime: i.leadTime,
+          imageUrl: i.imageUrl,
+          quantity: i.quantity,
+          priceLabel:
+            i.unitPriceCents > 0
+              ? formatMoney(i.unitPriceCents * i.quantity, i.currency)
+              : "Price upon Request",
+        }))}
+        subtotalLabel={
+          items.some((i) => i.unitPriceCents > 0)
+            ? formatMoney(cartSubtotalCents(items), items[0]?.currency)
+            : null
         }
-        imageUrl={line?.imageUrl ?? null}
-        quantity={line?.quantity ?? 1}
-        onQuantityChange={handleQuantity}
+        onLineQuantityChange={handleQuantity}
+        onRemoveLine={(key) => removeFromCart(key)}
+        onViewCart={() => {
+          setOpen(false);
+          navigate("/cart");
+        }}
         onCheckout={handleCheckout}
       />
+
     </>
   );
 }
