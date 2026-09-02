@@ -73,6 +73,8 @@ export type CheckoutSummary = {
   shippingLabel: string | null;
   /** Base freight estimated from the buyer's country. 0 when unknown. */
   estimatedShippingCents: number;
+  /** Display name of the matched shipping zone (e.g. "Asia Pacific"). */
+  shippingZoneLabel: string | null;
   /** Displayed total — includes the estimated freight when present. */
   totalCents: number;
   /** Amount actually charged now (excludes unconfirmed estimated freight). */
@@ -167,8 +169,13 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
           )}
           <div>
             <div className="flex items-baseline justify-between gap-6">
-              <dt className="text-muted-foreground">
-                {summary.shippingLabel || "Front Door Premium Delivery"}
+              <dt className="text-muted-foreground flex items-baseline gap-2">
+                <span>{summary.shippingLabel || "Front Door Premium Delivery"}</span>
+                {summary.shippingZoneLabel && (
+                  <span className="shrink-0 border border-border/70 px-1.5 py-px text-[9px] font-light uppercase tracking-[0.18em] text-muted-foreground/80">
+                    {summary.shippingZoneLabel}
+                  </span>
+                )}
               </dt>
               {summary.shippingCents > 0 ? (
                 <dd className="tabular-nums">{money(summary.shippingCents, currency)}</dd>
@@ -895,10 +902,11 @@ export default function Checkout() {
       shippingCents,
       shippingLabel: shipping?.label ?? null,
       estimatedShippingCents,
+      shippingZoneLabel: estimate.zoneLabel ?? null,
       totalCents: chargeTotalCents + estimatedShippingCents,
       chargeTotalCents,
     };
-  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents]);
+  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel]);
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [email, setEmail] = useState("");
