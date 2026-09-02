@@ -78,6 +78,8 @@ import SpecGlyph from "@/components/product/SpecGlyph";
 import AlsoContainsFinishes from "@/components/product/AlsoContainsFinishes";
 import { firstPublicVariantDimensionLabel } from "@/lib/productVariantSpecs";
 import { createActiveDraftQuote, fetchActiveDraftQuoteId } from "@/lib/activeProjectId";
+import { addToCart } from "@/lib/cart";
+import AxonometricStudioButton from "@/components/product/AxonometricStudioButton";
 
 const specIcon = (symbol: string, className = "") => (
   <SpecGlyph symbol={symbol} className={className} />
@@ -1696,7 +1698,57 @@ const TradeProductPage: React.FC = () => {
       ? Math.round(selectedFabric.price_per_lm_cents * fabricMeters)
       : 0;
 
+  /**
+   * Catalogue (RRP) rate for the CURRENT selection, in the product currency.
+   * The tier discount is applied once, server-side, at checkout — the cart
+   * always carries the retail rate so both surfaces reconcile.
+   */
+  const currentRrpCents = (): number => {
+    if (!pricing || !effectiveRrpCents) return 0;
+    let rrp = effectiveRrpCents;
+    if (selectedWoodPrice?.price_cents && selectedWoodPrice.price_cents > 0) {
+      rrp = selectedWoodPrice.currency === pricing.currency
+        ? selectedWoodPrice.price_cents
+        : convertCents(selectedWoodPrice.price_cents, selectedWoodPrice.currency, pricing.currency as DisplayCurrency, fxRates);
+    }
+    let upcharge = 0;
+    if (fabricUpchargeCentsRaw > 0) {
+      const fromCcy = selectedFabric?.currency || pricing.currency;
+      upcharge = fromCcy === pricing.currency
+        ? fabricUpchargeCentsRaw
+        : convertCents(fabricUpchargeCentsRaw, fromCcy, pricing.currency as DisplayCurrency, fxRates);
+    }
+    return rrp + upcharge;
+  };
+
+  /** Direct order — writes the configured piece into the shared cart. */
+  const handleProceedToOrder = () => {
+    const unit = currentRrpCents();
+    if (!unit) {
+      toast({ title: "Price upon Request", description: "Our concierge will confirm the rate for this configuration." });
+      return;
+    }
+    const finishLabel = [selectedBase, selectedTop, selectedDualSize, selectedSingleSize, selectedFabric?.name]
+      .filter(Boolean).map(String).join(" · ") || null;
+    addToCart({
+      pickId: product.id,
+      productSlug: product.slug || slugify(product.title),
+      designerSlug: designer.slug || slugify(designer.name),
+      title: product.title,
+      designerName: designerDisplay,
+      finishLabel,
+      variant: { base: selectedBase, top: selectedTop, size: selectedDualSize || selectedSingleSize },
+      imageUrl: product.image_url || null,
+      leadTime: product.lead_time || null,
+      unitPriceCents: unit,
+      currency: (pricing?.currency || "USD").toUpperCase(),
+      quantity: 1,
+    });
+    navigate("/cart");
+  };
+
   const renderPrice = () => {
+
     if (!pricing || !effectiveRrpCents) return null;
     // When a wood-finish swatch carries a frame-price override, it becomes
     // the RRP base; otherwise fall back to the size_variants base.
@@ -2325,6 +2377,11 @@ const TradeProductPage: React.FC = () => {
               <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" />
             </div>
 
+            {/* Axonometric Studio — standalone visualisation tool sitting
+                directly under the configuration selectors, detached from the
+                purchase / co-pilot block below. */}
+            <AxonometricStudioButton productId={product.id} className="order-[-4] md:order-none" />
+
 
             {/* Trade price + retail/trade toggle (size driven by selector above) */}
         {effectiveRrpCents ? (
@@ -2338,15 +2395,24 @@ const TradeProductPage: React.FC = () => {
 
             {/* ===== Primary action block — CTA, utility links, secondary stack ===== */}
             <div className="flex flex-col gap-2.5">
-              {/* Primary CTA — Add to Quote (sleek, low-profile) */}
+              {/* Primary CTA — direct order at the net trade rate */}
+              <button
+                onClick={handleProceedToOrder}
+                className="flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
+              >
+                <ShoppingCart size={14} />
+                Proceed to Order
+              </button>
+
+              {/* Secondary — co-pilot workspace (quote) */}
               <button
                 onClick={handleAddToQuote}
                 disabled={adding}
                 className={cn(
-                  "flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full",
+                  "flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full border",
                   added
-                    ? "bg-emerald-600 text-white"
-                    : "bg-foreground text-background hover:bg-foreground/90",
+                    ? "border-emerald-600 text-emerald-700 bg-background"
+                    : "border-foreground/40 bg-background text-foreground hover:bg-muted/60",
                   adding && "opacity-60"
                 )}
               >
@@ -2354,11 +2420,10 @@ const TradeProductPage: React.FC = () => {
                   <DotCircleLoader size="sm" />
                 ) : added ? (
                   <Check size={14} />
-                ) : (
-                  <ShoppingCart size={14} />
-                )}
-                {added ? "Added to Quote" : "Add to Quote"}
+                ) : null}
+                {added ? "Added to Co-Pilot Workspace" : "Add to Co-Pilot Workspace"}
               </button>
+
 
             {finishesMissingImages.length > 0 && (
               <p className="font-body text-[11px] text-muted-foreground -mt-1 italic">
