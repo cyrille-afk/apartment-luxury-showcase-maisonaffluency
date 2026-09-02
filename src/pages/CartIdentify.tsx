@@ -12,6 +12,7 @@ import { useAccountDiscount } from "@/hooks/useAccountDiscount";
 import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";
 import { releaseBodyScroll } from "@/lib/bodyScrollLock";
 import { useEstimatedShipping, ESTIMATED_SHIPPING_NOTE } from "@/hooks/useShippingCountry";
+import { useShippingDestination } from "@/lib/shippingDestination";
 
 import {
   useCart,
@@ -364,7 +365,7 @@ export default function CartIdentify() {
                     )}
                   </div>
                   {freightEstimate.cents > 0 && (
-                    <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                    <p className="mt-1.5 font-light italic text-[10px] tracking-[0.06em] text-muted-foreground">
                       {ESTIMATED_SHIPPING_NOTE}
                     </p>
                   )}
