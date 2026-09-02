@@ -169,8 +169,13 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
           )}
           <div>
             <div className="flex items-baseline justify-between gap-6">
-              <dt className="text-muted-foreground">
-                {summary.shippingLabel || "Front Door Premium Delivery"}
+              <dt className="text-muted-foreground flex items-baseline gap-2">
+                <span>{summary.shippingLabel || "Front Door Premium Delivery"}</span>
+                {summary.shippingZoneLabel && (
+                  <span className="shrink-0 border border-border/70 px-1.5 py-px text-[9px] font-light uppercase tracking-[0.18em] text-muted-foreground/80">
+                    {summary.shippingZoneLabel}
+                  </span>
+                )}
               </dt>
               {summary.shippingCents > 0 ? (
                 <dd className="tabular-nums">{money(summary.shippingCents, currency)}</dd>
