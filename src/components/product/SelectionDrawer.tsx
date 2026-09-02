@@ -222,6 +222,94 @@ export default function SelectionDrawer({
 
         {/* ── Scrollable body — scroll is isolated here ─────────────────── */}
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-6">
+          {multiLine ? (
+            /* 2 · Every line in the selection */
+            <div className="flex flex-col divide-y divide-border/50">
+              {lines!.map((l) => (
+                <div key={l.key} className="flex gap-4 py-5 first:pt-0">
+                  {l.imageUrl && (
+                    <img
+                      src={l.imageUrl}
+                      alt={l.title || "Selected piece"}
+                      className="h-24 w-24 flex-none border border-border/40 bg-cream object-cover"
+                      loading="lazy"
+                    />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    {l.brand && (
+                      <p className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
+                        {l.brand}
+                      </p>
+                    )}
+                    {l.title && (
+                      <p className="mt-1 font-display text-base leading-snug text-foreground">
+                        {l.title}
+                      </p>
+                    )}
+                    {l.configuration && (
+                      <p className="mt-2 font-body text-xs leading-relaxed text-muted-foreground">
+                        {l.configuration}
+                      </p>
+                    )}
+                    {l.leadTime && (
+                      <p className="mt-1.5 font-body text-[11px] text-muted-foreground/80">
+                        Lead time: {l.leadTime}
+                      </p>
+                    )}
+                    {l.priceLabel && (
+                      <p className="mt-2 font-body text-sm font-medium text-foreground">
+                        {l.priceLabel}
+                      </p>
+                    )}
+                    <div className="mt-3 flex items-center gap-4">
+                      <div className="flex h-9 w-28 items-center justify-between border border-border/60">
+                        <button
+                          type="button"
+                          aria-label="Decrease quantity"
+                          disabled={l.quantity <= 1}
+                          onClick={() => onLineQuantityChange?.(l.key, l.quantity - 1)}
+                          className="flex h-full w-9 items-center justify-center text-foreground transition-colors hover:bg-muted/50 disabled:opacity-30"
+                        >
+                          <Minus className="h-3.5 w-3.5" strokeWidth={1.5} />
+                        </button>
+                        <span className="min-w-6 text-center font-body text-sm tabular-nums text-foreground">
+                          {l.quantity}
+                        </span>
+                        <button
+                          type="button"
+                          aria-label="Increase quantity"
+                          onClick={() => onLineQuantityChange?.(l.key, Math.min(99, l.quantity + 1))}
+                          className="flex h-full w-9 items-center justify-center text-foreground transition-colors hover:bg-muted/50"
+                        >
+                          <Plus className="h-3.5 w-3.5" strokeWidth={1.5} />
+                        </button>
+                      </div>
+                      {onRemoveLine && (
+                        <button
+                          type="button"
+                          onClick={() => onRemoveLine(l.key)}
+                          className="font-body text-[10px] uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {subtotalLabel && (
+                <div className="flex items-center justify-between py-5">
+                  <span className="font-body text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
+                    Subtotal
+                  </span>
+                  <span className="font-body text-sm font-medium text-foreground">
+                    {subtotalLabel}
+                  </span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
           {/* 2 · Product info row */}
           <div className="flex gap-4">
             {imageUrl && (
@@ -289,6 +377,9 @@ export default function SelectionDrawer({
               </button>
             </div>
           </div>
+            </>
+          )}
+
 
           <div className="my-6 h-px bg-border/50" />
 
