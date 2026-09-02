@@ -656,10 +656,27 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
       {optionsSlot}
 
       <section className="space-y-5 pt-8">
-        <p className="text-xs text-muted-foreground">
-          Our concierge will also email these fully-insured wiring instructions within one business hour.
-        </p>
-        <WireDetailsGrid />
+        <StripeBankTransferPanel
+          currency={currency}
+          email={account ? account.email : email}
+          items={lines.map((l) => ({
+            title: l.title,
+            designer: l.designer || "",
+            selectedFinish: l.finishLabel || "",
+            price: l.unitCents / 100,
+            quantity: lineQty(l),
+          }))}
+          shippingConfirmed={summary.shippingCents > 0}
+          shippingCents={summary.shippingCents}
+          fallback={
+            <div className="space-y-5">
+              <p className="text-xs text-muted-foreground">
+                Our concierge will also email these fully-insured wiring instructions within one business hour.
+              </p>
+              <WireDetailsGrid />
+            </div>
+          }
+        />
       </section>
       <StickyTotals
         summary={summary}
