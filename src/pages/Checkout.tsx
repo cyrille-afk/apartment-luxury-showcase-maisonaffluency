@@ -846,6 +846,7 @@ export default function Checkout() {
   }, [user]);
   // Summary math: line items keep their standard catalogue prices; the tier
   // discount is applied once at cart level, exactly like the backend charge.
+  const estimate = useEstimatedShipping();
   const summary = useMemo<CheckoutSummary | null>(() => {
     if (!grossLines?.length) return null;
     const currency = orderCurrency(grossLines);
@@ -853,6 +854,10 @@ export default function Checkout() {
     const discountCents =
       effectiveDiscountPct > 0 ? Math.round(subtotalCents * effectiveDiscountPct) : 0;
     const shippingCents = shipping?.cents ?? 0;
+    // Country-based base freight is indicative only: it is displayed and added
+    // to the shown Order Total, but never charged until an advisor confirms it.
+    const estimatedShippingCents = shippingCents > 0 ? 0 : estimate.cents;
+    const chargeTotalCents = subtotalCents - discountCents + shippingCents;
     return {
       currency,
       subtotalCents,
@@ -860,9 +865,11 @@ export default function Checkout() {
       discountLabel: discountCents > 0 ? discountRowLabel : null,
       shippingCents,
       shippingLabel: shipping?.label ?? null,
-      totalCents: subtotalCents - discountCents + shippingCents,
+      estimatedShippingCents,
+      totalCents: chargeTotalCents + estimatedShippingCents,
+      chargeTotalCents,
     };
-  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping]);
+  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents]);
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [email, setEmail] = useState("");
