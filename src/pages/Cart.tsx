@@ -258,11 +258,19 @@ export default function Cart() {
                       <p className="font-display text-lg tabular-nums mt-1">
                         {formatMoney(item.unitPriceCents * item.quantity, item.currency)}
                       </p>
-                      {item.quantity > 1 && (
-                        <p className="font-body text-[11px] text-muted-foreground mt-1 tabular-nums">
-                          {formatMoney(item.unitPriceCents, item.currency)} each
-                        </p>
-                      )}
+                       {item.quantity > 1 && (
+                         <p className="font-body text-[11px] text-muted-foreground mt-1 tabular-nums">
+                           {formatMoney(item.unitPriceCents, item.currency)} each
+                         </p>
+                       )}
+                       {item.sourceCurrency && item.fxRate ? (
+                         <p className="font-body text-[10px] italic text-muted-foreground mt-1 tabular-nums">
+                           Converted from {formatMoney(
+                             (item.sourceUnitPriceCents || 0) * item.quantity,
+                             item.sourceCurrency,
+                           )} · 1 {item.sourceCurrency} = {item.fxRate.toFixed(4)} {item.currency}
+                         </p>
+                       ) : null}
                     </div>
                   </li>
                 ))}
