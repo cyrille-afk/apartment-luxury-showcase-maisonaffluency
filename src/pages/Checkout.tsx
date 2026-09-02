@@ -407,7 +407,10 @@ function PaymentForm({
             display: { name: "full" },
             fields: { phone: "always" },
             autocomplete: { mode: "automatic" },
+            // Carry the country chosen in the cart forward so freight stays consistent.
+            defaultValues: { address: { country: getCurrentDestination().iso } },
           }}
+
           onChange={(e) => {
             onCountryChange?.(e.value?.address?.country || null);
           }}
