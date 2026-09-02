@@ -1002,6 +1002,32 @@ export default function Checkout() {
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-12 lg:gap-16 pt-12">
         {/* Left — checkout actions */}
         <div className="min-w-0">
+          {wire ? (
+            <WireForm
+              lines={grossLines}
+              summary={summary}
+              account={account}
+              email={email}
+              setEmail={setEmail}
+              onDone={completeOrder}
+            />
+          ) : error ? (
+            <div className="py-16 text-center text-sm text-muted-foreground">{error}</div>
+          ) : stripePromise && clientSecret ? (
+            <Elements stripe={stripePromise} options={{ clientSecret, appearance, fonts: stripeFonts }}>
+              <PaymentForm
+                summary={summary}
+                account={account}
+                email={email}
+                setEmail={setEmail}
+                onPaid={completeOrder}
+              />
+            </Elements>
+          ) : (
+            <div className="flex justify-center py-24">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          )}
           {/* Payment method switch */}
           <div className="pt-5">
             <button
@@ -1030,32 +1056,7 @@ export default function Checkout() {
             </button>
           </div>
 
-          {wire ? (
-            <WireForm
-              lines={grossLines}
-              summary={summary}
-              account={account}
-              email={email}
-              setEmail={setEmail}
-              onDone={completeOrder}
-            />
-          ) : error ? (
-            <div className="py-16 text-center text-sm text-muted-foreground">{error}</div>
-          ) : stripePromise && clientSecret ? (
-            <Elements stripe={stripePromise} options={{ clientSecret, appearance, fonts: stripeFonts }}>
-              <PaymentForm
-                summary={summary}
-                account={account}
-                email={email}
-                setEmail={setEmail}
-                onPaid={completeOrder}
-              />
-            </Elements>
-          ) : (
-            <div className="flex justify-center py-24">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            </div>
-          )}
+          <div className="pt-6">
           <ShippingQuoteCard
             currency={summary.currency}
             shipping={shipping}
@@ -1063,6 +1064,7 @@ export default function Checkout() {
             onConfirm={(s) => void syncIntent(s)}
             onClear={() => void syncIntent(null)}
           />
+          </div>
 
         </div>
 
