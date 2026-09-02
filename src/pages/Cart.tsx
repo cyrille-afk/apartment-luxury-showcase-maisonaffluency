@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
 import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";
 import { releaseBodyScroll } from "@/lib/bodyScrollLock";
+import { VisaMark, MastercardMark, BankTransferMark } from "@/components/checkout/PaymentMarks";
 
 
 import {
