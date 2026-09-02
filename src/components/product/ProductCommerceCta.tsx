@@ -19,8 +19,11 @@ import { cn } from "@/lib/utils";
  * Quote or Customisation" — the latter opens the Trade Exclusive Access card
  * in a modal.
  *
- * STATE B (verified trade): two-line price (Retail … Before Tax / Net Trade
- * Price) + workspace order + studio planning actions.
+ * STATE B (verified trade): two-line price (Retail / Net Trade Price) +
+ * quantity stepper + "Proceed to Order" (direct checkout at the net trade
+ * rate) + a secondary outlined "Add to Co-Pilot Workspace" link. The
+ * Axonometric Studio entry lives outside this box, directly under the finish
+ * selectors (see AxonometricStudioButton).
  *
  * On mobile a fixed sticky bottom dock keeps price + primary action within
  * reach while scrolling.
@@ -211,10 +214,8 @@ export default function ProductCommerceCta({
     : "";
   const workspaceHref = `/trade/products/${productId}${finishQuery}`;
 
-  const primaryLabel = tradeApproved ? "Add to Co-Pilot Workspace & Order" : "Place Order";
-  const secondaryLabel = tradeApproved
-    ? "Open Axonometric Studio"
-    : "Request a Quote or Customisation";
+  const primaryLabel = tradeApproved ? "Proceed to Order" : "Place Order";
+  const secondaryLabel = "Request a Quote or Customisation";
 
   // Public: PLACE ORDER writes the configured piece into the shared cart state
   // and slides open the "Your Selection" drawer — never the account wall.
@@ -306,9 +307,18 @@ export default function ProductCommerceCta({
         ) : null}
 
         {tradeApproved ? (
-          <Link to={workspaceHref} data-commerce-primary state={redirectTo ? { from: redirectTo } : undefined} className={primaryBtn}>
-            {primaryLabel}
-          </Link>
+          <>
+            <QuantitySelector value={quantity} onChange={setQuantity} />
+            {/* Primary: direct order at the net trade rate — no workspace detour. */}
+            <button type="button" data-commerce-primary onClick={() => onPlaceOrder(quantity)} disabled={placingOrder} className={primaryBtn}>
+              {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
+              {placingOrder ? "Opening checkout…" : primaryLabel}
+            </button>
+            {/* Secondary: co-pilot workspace planning. */}
+            <Link to={workspaceHref} data-commerce-secondary state={redirectTo ? { from: redirectTo } : undefined} className={secondaryBtn}>
+              Add to Co-Pilot Workspace
+            </Link>
+          </>
         ) : (
           <>
             <QuantitySelector value={quantity} onChange={setQuantity} />
@@ -316,12 +326,11 @@ export default function ProductCommerceCta({
               {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
               {placingOrder ? "Opening checkout…" : primaryLabel}
             </button>
+            <button type="button" data-commerce-secondary onClick={secondaryAction} className={secondaryBtn}>
+              {secondaryLabel}
+            </button>
           </>
         )}
-
-        <button type="button" data-commerce-secondary onClick={secondaryAction} className={secondaryBtn}>
-          {secondaryLabel}
-        </button>
 
         {/* Secondary utility links — Favorite / Pin / Finishes PDF, tucked
             inside the action panel under a faint hairline rule. */}
@@ -358,13 +367,14 @@ export default function ProductCommerceCta({
               )}
             </div>
             {tradeApproved ? (
-              <Link
-                to={workspaceHref}
-                state={redirectTo ? { from: redirectTo } : undefined}
+              <button
+                type="button"
+                onClick={() => onPlaceOrder(quantity)}
+                disabled={placingOrder}
                 className={cn(primaryBtn, "h-11 flex-1")}
               >
-                Place Order
-              </Link>
+                {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : primaryLabel}
+              </button>
             ) : (
               <button
                 type="button"
