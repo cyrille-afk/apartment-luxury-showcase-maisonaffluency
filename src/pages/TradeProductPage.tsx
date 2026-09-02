@@ -2494,15 +2494,17 @@ const TradeProductPage: React.FC = () => {
                 Visible whenever the product has linked swatches. Disabled while
                 swatches load and until at least one finish is chosen. */}
             {(finishesLoading || hasLinkedFabrics || linkedWoodFinishes.length > 0) && (
-              (selectedFabric || selectedWoodPrice) && !finishesLoading ? (
+              (selectedFabric || selectedWoodPrice || selectedTop || selectedBase || selectedSingleMaterial) && !finishesLoading ? (
                 <button
                   type="button"
                   onClick={() => {
                     const params = new URLSearchParams();
                     params.set("product", product.id);
-                    if (selectedFabric?.name) params.set("fabric", selectedFabric.name);
+                    const fabricName = selectedFabric?.name || selectedTopDisplay || selectedTop || null;
+                    const woodName = selectedWoodPrice?.name || selectedBaseDisplay || selectedBase || selectedSingleMaterial || null;
+                    if (fabricName) params.set("fabric", String(fabricName));
                     if (selectedFabric?.image_url) params.set("fabricImg", selectedFabric.image_url);
-                    if (selectedWoodPrice?.name) params.set("wood", selectedWoodPrice.name);
+                    if (woodName) params.set("wood", String(woodName));
                     if (selectedWoodPrice?.image_url) params.set("woodImg", selectedWoodPrice.image_url);
                     const variantLabelParts = [selectedBase, selectedTop, selectedDualSize, selectedSingleSize]
                       .filter(Boolean).map(String);
@@ -2517,12 +2519,12 @@ const TradeProductPage: React.FC = () => {
                         imageUrl: selectedFabric?.image_url ?? null,
                         source: "trade",
                       },
-                      finishes: {
-                        fabric: selectedFabric?.name ?? null,
-                        fabricImg: selectedFabric?.image_url ?? null,
-                        wood: selectedWoodPrice?.name ?? null,
-                        woodImg: selectedWoodPrice?.image_url ?? null,
-                        variant: variantLabelParts.length ? variantLabelParts.join(" · ") : null,
+                       finishes: {
+                         fabric: fabricName,
+                         fabricImg: selectedFabric?.image_url ?? null,
+                         wood: woodName,
+                         woodImg: selectedWoodPrice?.image_url ?? null,
+                         variant: variantLabelParts.length ? variantLabelParts.join(" · ") : null,
                       },
                       locked: true,
                     });
