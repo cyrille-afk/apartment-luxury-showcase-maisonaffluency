@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { useToast } from "@/hooks/use-toast";
 
 const TradeLogin = () => {
@@ -30,8 +29,11 @@ const TradeLogin = () => {
     setGoogleLoading(true);
 
     try {
-      const oauthPromise = lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}/trade`,
+      const oauthPromise = supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/trade`,
+        },
       });
 
       const timeoutPromise = new Promise<never>((_, reject) => {
@@ -43,14 +45,8 @@ const TradeLogin = () => {
       const result = await Promise.race([oauthPromise, timeoutPromise]);
 
       if (result.error) {
-        toast({ title: "Google Sign-In Failed", description: String(result.error), variant: "destructive" });
+        toast({ title: "Google Sign-In Failed", description: result.error.message, variant: "destructive" });
         return;
-      }
-
-      // In some environments OAuth returns tokens without doing a full-page redirect.
-      // Ensure users still enter the trade portal immediately.
-      if (!result.redirected) {
-        navigate("/trade", { replace: true });
       }
     } catch (err) {
       toast({

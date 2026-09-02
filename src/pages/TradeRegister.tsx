@@ -5,7 +5,6 @@ import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { useToast } from "@/hooks/use-toast";
 
 /* ── Lightweight public signup form ─────────────────────────────── */
@@ -22,13 +21,14 @@ const PublicSignupForm = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+      const result = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin,
+        },
       });
       if (result.error) {
-        toast({ title: "Google Sign-In Failed", description: String(result.error), variant: "destructive" });
-      } else if (!result.redirected) {
-        navigate("/", { replace: true });
+        toast({ title: "Google Sign-In Failed", description: result.error.message, variant: "destructive" });
       }
     } catch (err) {
       toast({ title: "Google Sign-In Failed", description: err instanceof Error ? err.message : "Unexpected error", variant: "destructive" });
