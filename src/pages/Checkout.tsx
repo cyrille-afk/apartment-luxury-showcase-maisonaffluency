@@ -162,14 +162,23 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
               </dd>
             </div>
           )}
-          <div className="flex items-baseline justify-between gap-6">
-            <dt className="text-muted-foreground">
-              {summary.shippingLabel || "Front Door Premium Delivery"}
-            </dt>
-            {summary.shippingCents > 0 ? (
-              <dd className="tabular-nums">{money(summary.shippingCents, currency)}</dd>
-            ) : (
-              <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
+          <div>
+            <div className="flex items-baseline justify-between gap-6">
+              <dt className="text-muted-foreground">
+                {summary.shippingLabel || "Front Door Premium Delivery"}
+              </dt>
+              {summary.shippingCents > 0 ? (
+                <dd className="tabular-nums">{money(summary.shippingCents, currency)}</dd>
+              ) : summary.estimatedShippingCents > 0 ? (
+                <dd className="tabular-nums">{money(summary.estimatedShippingCents, currency)}</dd>
+              ) : (
+                <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
+              )}
+            </div>
+            {summary.shippingCents === 0 && summary.estimatedShippingCents > 0 && (
+              <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                {ESTIMATED_SHIPPING_NOTE}
+              </p>
             )}
           </div>
           <div className="flex items-baseline justify-between border-t border-border pt-4">
