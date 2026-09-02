@@ -103,7 +103,9 @@ export default function SelectionDrawer({
   const [conciergeError, setConciergeError] = useState<string | null>(null);
   const [conciergeSending, setConciergeSending] = useState(false);
   const [conciergeSent, setConciergeSent] = useState(false);
+  const multiLine = Array.isArray(lines) && lines.length > 0;
   const quantity = quantityProp ?? localQty;
+
   const setQuantity = (q: number) => {
     setLocalQty(q);
     onQuantityChange?.(q);
