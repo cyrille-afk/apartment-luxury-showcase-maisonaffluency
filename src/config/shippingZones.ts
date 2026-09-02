@@ -21,22 +21,32 @@ export const SHIPPING_ZONES: Record<string, ShippingZone> = {
   domesticEu: {
     baseRate: 1200,
     currency: "EUR",
-    countries: ["FR", "DE", "IT"],
+    countries: [
+      "FR", "DE", "IT", "ES", "NL", "BE", "IE", "PT", "AT",
+      "LU", "MC", "GR", "CH", "GB",
+    ],
     label: "Domestic EU",
   },
   northAmerica: {
     baseRate: 5132,
     currency: "USD",
-    countries: ["US", "CA"],
+    countries: ["US", "CA", "MX"],
     label: "North America",
+  },
+  middleEast: {
+    baseRate: 4800,
+    currency: "USD",
+    countries: ["AE", "SA", "QA", "KW", "BH", "OM"],
+    label: "Middle East",
   },
   asiaPacific: {
     baseRate: 5800,
     currency: "USD",
-    countries: ["SG", "JP", "AU"],
+    countries: ["SG", "JP", "AU", "HK", "NZ", "KR", "TW", "MY", "TH", "ID"],
     label: "Asia Pacific",
   },
 } as const;
+
 
 /** Fallback zone applied when a country is not matched to any zone. */
 export const DEFAULT_SHIPPING_ZONE: ShippingZone = {

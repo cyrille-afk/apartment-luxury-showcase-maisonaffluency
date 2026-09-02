@@ -13,6 +13,7 @@ import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";
 import { releaseBodyScroll } from "@/lib/bodyScrollLock";
 import { VisaMark, MastercardMark, BankTransferMark } from "@/components/checkout/PaymentMarks";
 import { useEstimatedShipping, ESTIMATED_SHIPPING_NOTE } from "@/hooks/useShippingCountry";
+import { useShippingDestination } from "@/lib/shippingDestination";
 
 
 import {
@@ -51,7 +52,8 @@ export default function Cart() {
   const discount = useAccountDiscount();
   // Delivery is quoted by the advisor post-purchase, so the displayed total
   // is the goods subtotal less any tier discount (no invented shipping figure).
-  const freightEstimate = useEstimatedShipping(items);
+  const destination = useShippingDestination();
+  const freightEstimate = useEstimatedShipping(items, destination.iso);
   const total = discount.totalFor(subtotal) + freightEstimate.cents;
 
 
@@ -334,7 +336,14 @@ export default function Cart() {
                   )}
                   <div>
                     <div className="flex items-baseline justify-between gap-6">
-                      <dt className="text-muted-foreground">Front Door Premium Delivery</dt>
+                      <dt className="flex flex-wrap items-baseline gap-2 text-muted-foreground">
+                        Front Door Premium Delivery
+                        {freightEstimate.cents > 0 && freightEstimate.zoneLabel && (
+                          <span className="border border-border/70 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
+                            {freightEstimate.zoneLabel}
+                          </span>
+                        )}
+                      </dt>
                       {freightEstimate.cents > 0 ? (
                         <dd className="tabular-nums">{formatMoney(freightEstimate.cents, currency)}</dd>
                       ) : (
@@ -342,11 +351,12 @@ export default function Cart() {
                       )}
                     </div>
                     {freightEstimate.cents > 0 && (
-                      <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                      <p className="mt-1.5 font-light italic text-[10px] tracking-[0.06em] text-muted-foreground">
                         {ESTIMATED_SHIPPING_NOTE}
                       </p>
                     )}
                   </div>
+
                   <div className="flex items-baseline justify-between border-t border-border pt-4">
                     <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
                     <dd className="tabular-nums font-medium text-base">{formatMoney(total, currency)}</dd>
