@@ -6,10 +6,13 @@ import SelectionDrawer, { type PaymentMethod } from "@/components/product/Select
 import {
   useCart,
   cartItemCount,
+  cartSubtotalCents,
   setQuantity,
+  removeFromCart,
   shouldUseFullPageCart,
   formatMoney,
 } from "@/lib/cart";
+
 
 /**
  * Global header cart entry point.
