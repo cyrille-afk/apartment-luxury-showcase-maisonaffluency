@@ -79,7 +79,7 @@ import AlsoContainsFinishes from "@/components/product/AlsoContainsFinishes";
 import { firstPublicVariantDimensionLabel } from "@/lib/productVariantSpecs";
 import { createActiveDraftQuote, fetchActiveDraftQuoteId } from "@/lib/activeProjectId";
 import { addToCart } from "@/lib/cart";
-import AxonometricStudioButton from "@/components/product/AxonometricStudioButton";
+
 
 const specIcon = (symbol: string, className = "") => (
   <SpecGlyph symbol={symbol} className={className} />
@@ -2376,12 +2376,6 @@ const TradeProductPage: React.FC = () => {
               )}
               <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" />
             </div>
-
-            {/* Axonometric Studio — standalone visualisation tool sitting
-                directly under the configuration selectors, detached from the
-                purchase / co-pilot block below. */}
-            <AxonometricStudioButton productId={product.id} className="order-[-4] md:order-none" />
-
 
             {/* Trade price + retail/trade toggle (size driven by selector above) */}
         {effectiveRrpCents ? (
