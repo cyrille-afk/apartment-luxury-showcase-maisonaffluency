@@ -318,6 +318,7 @@ function PaymentForm({
   onPaid,
   method,
   optionsSlot,
+  onCountryChange,
 }: {
   summary: CheckoutSummary;
   account: { email: string; role: string } | null;
@@ -326,6 +327,7 @@ function PaymentForm({
   onPaid: (ref: string) => void;
   method: PaymentMethod;
   optionsSlot: React.ReactNode;
+  onCountryChange?: (code: string | null) => void;
 }) {
   const stripe = useStripe();
   const elements = useElements();
