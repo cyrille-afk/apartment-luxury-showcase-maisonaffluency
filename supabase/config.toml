@@ -71,3 +71,5 @@ project_id = "dcrauiygaezoduwdjmsm"
 
 
 
+  [functions.create-bank-transfer-intent]
+    verify_jwt = false
