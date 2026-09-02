@@ -257,18 +257,15 @@ const METHOD_TABS: { id: PaymentMethod; label: string; hint: string }[] = [
 function DeliveryPaymentOptions({
   method,
   setMethod,
-  children,
 }: {
   method: PaymentMethod;
   setMethod: (m: PaymentMethod) => void;
-  children: React.ReactNode;
 }) {
   return (
     <section className="mt-6 w-full space-y-5 border-t border-border pt-8">
       <h2 className="text-[11px] font-light uppercase tracking-[0.26em] text-muted-foreground">
         Delivery &amp; payment options
       </h2>
-      {children}
       <div
         role="radiogroup"
         aria-label="Payment method"
