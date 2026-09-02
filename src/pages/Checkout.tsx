@@ -351,7 +351,7 @@ function PaymentForm({
   return (
     <>
       {/* 1 — Contact & delivery */}
-      <section className="space-y-4 pb-8">
+      <section className="space-y-4 pb-12">
         <h2 className="text-[11px] font-light uppercase tracking-[0.26em] text-muted-foreground">
           Contact & delivery
         </h2>
