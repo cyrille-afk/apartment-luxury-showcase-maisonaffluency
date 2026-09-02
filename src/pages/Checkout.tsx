@@ -954,13 +954,13 @@ export default function Checkout() {
       },
       rules: {
         ".Input": {
-          border: "1px solid #E4E2DE",
+          border: "1px solid #E7E5E1",
           borderRadius: "0px",
           boxShadow: "none",
           backgroundColor: "#FFFFFF",
-          padding: "12px 14px",
+          padding: "16px 20px",
         },
-        ".Input:hover": { border: "1px solid #C9C6C0", boxShadow: "none" },
+        ".Input:hover": { border: "1px solid #D6D3CD", boxShadow: "none" },
         ".Input:focus": {
           border: "1px solid #0A0A0A",
           boxShadow: "none",
@@ -969,10 +969,11 @@ export default function Checkout() {
         ".Input--invalid": { borderColor: "#B42318", boxShadow: "none" },
         ".Label": {
           fontSize: "10px",
-          fontWeight: "500",
-          letterSpacing: "0.18em",
+          fontWeight: "300",
+          letterSpacing: "0.24em",
           textTransform: "uppercase",
           color: "#6B6B6B",
+
           marginBottom: "6px",
         },
         ".Tab": {
