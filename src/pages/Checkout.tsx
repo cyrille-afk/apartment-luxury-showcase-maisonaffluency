@@ -10,6 +10,11 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { getCart, clearCart } from "@/lib/cart";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
 import { useAuth } from "@/hooks/useAuth";
+import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
+import Navigation from "@/components/Navigation";
+import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";
+import { ArrowLeft } from "lucide-react";
 import {
   assertCheckoutCopy,
   buildVerifiedTotals,
@@ -990,24 +995,37 @@ export default function Checkout() {
   }
 
   return (
-    <main className="mx-auto min-h-[100dvh] max-w-6xl bg-background pb-16">
-      {/* 1 — Minimalist header */}
-      <header className="flex flex-col items-center gap-2 px-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-6">
-        <button onClick={() => navigate(homePath)} aria-label="Maison Affluency">
-          <img src={logoIcon} alt="Maison Affluency" className="h-8 w-auto" />
-        </button>
-        <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-          <Lock className="h-3 w-3" /> 256-bit encrypted secure checkout
-        </span>
-      </header>
+    <div className="min-h-screen bg-background text-foreground">
+      <Helmet>
+        <title>Secure Checkout — Maison Affluency</title>
+        <meta name="description" content="Complete your Maison Affluency acquisition through our encrypted secure checkout." />
+        <meta name="robots" content="noindex,nofollow" />
+      </Helmet>
 
-      {/* Two-column split: actions left, persistent order summary right */}
-      <div className="grid gap-10 px-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-14 lg:px-10">
-        {/* Right — order summary (shown first on mobile) */}
-        <div className="order-first lg:order-last">
-          <OrderSummary lines={grossLines} summary={summary} />
+      <Navigation borderless />
+
+      <main className="pt-[var(--header-h)] pb-24 max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
+        <div className="pt-8">
+          <Link
+            to="/cart"
+            className="inline-flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            Back to cart
+          </Link>
         </div>
 
+        <div className="flex items-baseline justify-between gap-6 border-b border-border pb-6 pt-5">
+          <h1 className="font-display font-normal text-[1.6rem] md:text-[2.25rem] tracking-[-0.01em]">
+            Secure Checkout
+          </h1>
+          <span className="flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            <Lock className="h-3 w-3" /> 256-bit Encrypted
+          </span>
+        </div>
+
+        {/* Two-column split: actions left, persistent order summary right */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-12 lg:gap-16 pt-12">
         {/* Left — checkout actions */}
         <div className="min-w-0">
           <ShippingQuoteCard
@@ -1073,7 +1091,11 @@ export default function Checkout() {
             </div>
           )}
         </div>
-      </div>
-    </main>
+
+        {/* Right — persistent order summary */}
+        <OrderSummary lines={grossLines} summary={summary} />
+        </div>
+      </main>
+    </div>
   );
 }
