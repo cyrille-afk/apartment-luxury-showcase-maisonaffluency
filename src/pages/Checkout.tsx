@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Helmet } from "react-helmet-async";
 import Navigation from "@/components/Navigation";
 import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";
+import StripeBankTransferPanel from "@/components/checkout/StripeBankTransferPanel";
 import { ArrowLeft } from "lucide-react";
 import {
   assertCheckoutCopy,
