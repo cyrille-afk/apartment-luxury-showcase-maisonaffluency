@@ -8,6 +8,8 @@ export interface ShippingZone {
   currency: string;
   /** ISO 3166-1 alpha-2 country codes covered by this zone. */
   countries: string[];
+  /** Human-readable zone name shown in the checkout order summary. */
+  label: string;
 }
 
 /**
@@ -20,16 +22,19 @@ export const SHIPPING_ZONES: Record<string, ShippingZone> = {
     baseRate: 1200,
     currency: "EUR",
     countries: ["FR", "DE", "IT"],
+    label: "Domestic EU",
   },
   northAmerica: {
     baseRate: 5132,
     currency: "USD",
     countries: ["US", "CA"],
+    label: "North America",
   },
   asiaPacific: {
     baseRate: 5800,
     currency: "USD",
     countries: ["SG", "JP", "AU"],
+    label: "Asia Pacific",
   },
 } as const;
 
@@ -38,6 +43,7 @@ export const DEFAULT_SHIPPING_ZONE: ShippingZone = {
   baseRate: 6400,
   currency: "USD",
   countries: [],
+  label: "Rest of World",
 };
 
 const COUNTRY_TO_ZONE = new Map<string, ShippingZone>();
@@ -180,4 +186,9 @@ export function getShippingZone(countryCode: string): ShippingZone | null {
   if (!countryCode) return null;
   const code = countryCode.trim().toUpperCase();
   return COUNTRY_TO_ZONE.get(code) ?? null;
+}
+
+/** Resolves the display label of the shipping zone for a country code (e.g. "Asia Pacific"). */
+export function getShippingZoneLabel(countryCode: string): string | null {
+  return getShippingZone(countryCode)?.label ?? null;
 }
