@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { X, FileDown, UserPlus } from "lucide-react";
 import { createPortal } from "react-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { useToast } from "@/hooks/use-toast";
 
 /**
@@ -58,14 +57,14 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.href,
+      const result = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.href,
+        },
       });
       if (result.error) {
-        toast({ title: "Google Sign-In Failed", description: String(result.error), variant: "destructive" });
-      } else if (!result.redirected) {
-        onClose();
-        window.location.reload();
+        toast({ title: "Google Sign-In Failed", description: result.error.message, variant: "destructive" });
       }
     } catch (err) {
       toast({ title: "Google Sign-In Failed", description: err instanceof Error ? err.message : "Unexpected error", variant: "destructive" });
