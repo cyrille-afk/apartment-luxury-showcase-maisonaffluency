@@ -14,6 +14,7 @@ import { releaseBodyScroll } from "@/lib/bodyScrollLock";
 import { VisaMark, MastercardMark, BankTransferMark } from "@/components/checkout/PaymentMarks";
 import { useEstimatedShipping, ESTIMATED_SHIPPING_NOTE } from "@/hooks/useShippingCountry";
 import { useShippingDestination } from "@/lib/shippingDestination";
+import { ShippingCountryIndicator } from "@/components/checkout/ShippingCountryIndicator";
 
 
 import {
@@ -355,7 +356,9 @@ export default function Cart() {
                         {ESTIMATED_SHIPPING_NOTE}
                       </p>
                     )}
+                    <ShippingCountryIndicator className="mt-2" />
                   </div>
+
 
                   <div className="flex items-baseline justify-between border-t border-border pt-4">
                     <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
