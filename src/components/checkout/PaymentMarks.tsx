@@ -19,10 +19,9 @@ export function MastercardMark({ className = "" }: { className?: string }) {
       aria-label="Mastercard"
       viewBox="0 0 40 24"
       fill="currentColor"
-      fillRule="evenodd"
       className={`h-7 w-auto shrink-0 ${className}`}
     >
-      <path d="M12 12 m-10 0 a10 10 0 1 0 20 0 a10 10 0 1 0 -20 0 M28 12 m-10 0 a10 10 0 1 0 20 0 a10 10 0 1 0 -20 0 M20 6 A10 10 0 0 1 20 18 A10 10 0 0 1 20 6 Z" />
+      <path d="M12 12 m-10 0 a10 10 0 1 0 20 0 a10 10 0 1 0 -20 0 M28 12 m-10 0 a10 10 0 1 0 20 0 a10 10 0 1 0 -20 0" />
     </svg>
   );
 }
