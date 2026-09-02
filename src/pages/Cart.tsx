@@ -51,7 +51,8 @@ export default function Cart() {
   const discount = useAccountDiscount();
   // Delivery is quoted by the advisor post-purchase, so the displayed total
   // is the goods subtotal less any tier discount (no invented shipping figure).
-  const freightEstimate = useEstimatedShipping(items);
+  const destination = useShippingDestination();
+  const freightEstimate = useEstimatedShipping(items, destination.iso);
   const total = discount.totalFor(subtotal) + freightEstimate.cents;
 
 
