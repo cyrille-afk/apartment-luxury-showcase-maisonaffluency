@@ -307,9 +307,18 @@ export default function ProductCommerceCta({
         ) : null}
 
         {tradeApproved ? (
-          <Link to={workspaceHref} data-commerce-primary state={redirectTo ? { from: redirectTo } : undefined} className={primaryBtn}>
-            {primaryLabel}
-          </Link>
+          <>
+            <QuantitySelector value={quantity} onChange={setQuantity} />
+            {/* Primary: direct order at the net trade rate — no workspace detour. */}
+            <button type="button" data-commerce-primary onClick={() => onPlaceOrder(quantity)} disabled={placingOrder} className={primaryBtn}>
+              {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
+              {placingOrder ? "Opening checkout…" : primaryLabel}
+            </button>
+            {/* Secondary: co-pilot workspace planning. */}
+            <Link to={workspaceHref} data-commerce-secondary state={redirectTo ? { from: redirectTo } : undefined} className={secondaryBtn}>
+              Add to Co-Pilot Workspace
+            </Link>
+          </>
         ) : (
           <>
             <QuantitySelector value={quantity} onChange={setQuantity} />
@@ -317,12 +326,11 @@ export default function ProductCommerceCta({
               {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
               {placingOrder ? "Opening checkout…" : primaryLabel}
             </button>
+            <button type="button" data-commerce-secondary onClick={secondaryAction} className={secondaryBtn}>
+              {secondaryLabel}
+            </button>
           </>
         )}
-
-        <button type="button" data-commerce-secondary onClick={secondaryAction} className={secondaryBtn}>
-          {secondaryLabel}
-        </button>
 
         {/* Secondary utility links — Favorite / Pin / Finishes PDF, tucked
             inside the action panel under a faint hairline rule. */}
