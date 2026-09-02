@@ -30,24 +30,20 @@ export default function CartNavButton({
   const count = cartItemCount(items);
   const [open, setOpen] = useState(false);
 
-  const line = items[0];
-
   const handleClick = () => {
     if (items.length === 0) {
       navigate("/cart");
       return;
     }
-    if (shouldUseFullPageCart(items)) {
-      navigate("/cart");
-      return;
-    }
+    // Always show the full selection in the drawer — every line, with its own
+    // stepper. The full-page cart stays available via "View Full Cart".
     setOpen(true);
   };
 
-  const handleQuantity = (q: number) => {
-    if (!line) return;
-    setQuantity(line.key, q);
+  const handleQuantity = (key: string, q: number) => {
+    setQuantity(key, q);
   };
+
 
   const handleCheckout = (method: PaymentMethod) => {
     if (method === "wire") {
