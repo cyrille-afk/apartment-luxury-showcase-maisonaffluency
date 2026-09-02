@@ -220,6 +220,77 @@ function ConditionalNotes() {
 }
 
 /* ------------------------------------------------------------------ */
+/* Delivery & payment options — shipping module + payment method tabs  */
+/* ------------------------------------------------------------------ */
+type PaymentMethod = "card" | "wire" | "wallet";
+
+const METHOD_TABS: { id: PaymentMethod; label: string; hint: string }[] = [
+  { id: "card", label: "Secure Card Payment", hint: "Visa · Mastercard · Amex" },
+  { id: "wire", label: "Bank Wire Transfer", hint: "Instructions within one business hour" },
+  { id: "wallet", label: "Digital Wallet", hint: "Google Pay · Apple Pay · Link" },
+];
+
+function DeliveryPaymentOptions({
+  method,
+  setMethod,
+  children,
+}: {
+  method: PaymentMethod;
+  setMethod: (m: PaymentMethod) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="space-y-5 border-t border-border pt-8">
+      <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+        Delivery &amp; payment options
+      </h2>
+      {children}
+      <div
+        role="radiogroup"
+        aria-label="Payment method"
+        className="grid grid-cols-1 border border-border sm:grid-cols-3"
+      >
+        {METHOD_TABS.map((tab, i) => {
+          const active = tab.id === method;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => setMethod(tab.id)}
+              className={cn(
+                "flex flex-col items-start gap-1 px-4 py-4 text-left transition-colors",
+                i > 0 && "border-t border-border sm:border-l sm:border-t-0",
+                active ? "bg-foreground text-background" : "hover:bg-muted/40",
+              )}
+            >
+              <span className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em]">
+                <span
+                  className={cn(
+                    "h-2.5 w-2.5 flex-none rounded-full border",
+                    active ? "border-background bg-background" : "border-border",
+                  )}
+                />
+                {tab.label}
+              </span>
+              <span
+                className={cn(
+                  "text-[10px] leading-relaxed",
+                  active ? "text-background/70" : "text-muted-foreground",
+                )}
+              >
+                {tab.hint}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Card / express payment form                                         */
 /* ------------------------------------------------------------------ */
 function PaymentForm({
@@ -228,12 +299,16 @@ function PaymentForm({
   email,
   setEmail,
   onPaid,
+  method,
+  optionsSlot,
 }: {
   summary: CheckoutSummary;
   account: { email: string; role: string } | null;
   email: string;
   setEmail: (v: string) => void;
   onPaid: (ref: string) => void;
+  method: PaymentMethod;
+  optionsSlot: (children: React.ReactNode) => React.ReactNode;
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -246,6 +321,7 @@ function PaymentForm({
     const t = setTimeout(() => setLoadStage(1), 2500);
     return () => clearTimeout(t);
   }, [paymentReady]);
+
   const { totalCents: total, currency } = summary;
 
   const confirm = async () => {
