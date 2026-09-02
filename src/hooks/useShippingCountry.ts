@@ -19,9 +19,13 @@ export function detectCountryCode(fallback?: string | null): string | null {
   try {
     const stored = localStorage.getItem(OVERRIDE_KEY);
     if (stored) return stored.trim().toUpperCase();
+    // Header flag switcher / IP-geo cache (shared with trade display currency).
+    const dest = localStorage.getItem("trade.detectedCountry");
+    if (dest) return dest.trim().toUpperCase();
   } catch {
     /* private mode */
   }
+
   try {
     const locales = [
       ...(navigator.languages || []),
