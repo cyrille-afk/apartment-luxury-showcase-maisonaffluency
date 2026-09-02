@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Copy, Check, Loader2 } from "lucide-react";
+import { Copy, Check, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -147,6 +147,81 @@ function RowGrid({ rows, reference }: { rows: Row[]; reference?: string | null }
   );
 }
 
+/* ------------------------------------------------------------------ */
+/* Failure diagnostics — why virtual routing could not be issued.      */
+/* ------------------------------------------------------------------ */
+type FailureReason = "not_enabled" | "unsupported_currency" | "error" | null;
+
+function classifyFailure(code?: string, detail?: string, transport?: string): FailureReason {
+  if (code === "unsupported_currency") return "unsupported_currency";
+  const text = `${detail ?? ""} ${transport ?? ""}`.toLowerCase();
+  if (
+    code === "bank_transfer_unavailable" &&
+    (text.includes("customer_balance") ||
+      text.includes("activated in your dashboard") ||
+      text.includes("payment method type") ||
+      text === " ")
+  ) {
+    return "not_enabled";
+  }
+  if (code === "bank_transfer_unavailable") return "not_enabled";
+  return "error";
+}
+
+function isOperatorView() {
+  if (typeof window === "undefined") return false;
+  const h = window.location.hostname;
+  return h === "localhost" || h === "127.0.0.1";
+}
+
+function UnavailableBanner({ reason, currency }: { reason: FailureReason; currency: string }) {
+  if (!reason) return null;
+
+  const buyerCopy =
+    reason === "unsupported_currency"
+      ? `Automatic ${currency.toUpperCase()} routing isn’t available for this currency. Use the verified account details below, or your advisor will confirm the best route for your bank.`
+      : reason === "not_enabled"
+        ? "Automatically generated local routing is momentarily unavailable. The verified Maison Affluency account details below remain valid for this order."
+        : "We couldn’t generate your dedicated account just now. The verified account details below remain valid — our concierge will confirm receipt.";
+
+  return (
+    <div className="border border-neutral-200 bg-neutral-50 px-5 py-4">
+      <div className="flex items-start gap-3">
+        <AlertCircle className="mt-0.5 h-3.5 w-3.5 flex-none text-muted-foreground" />
+        <div className="space-y-2">
+          <p className="text-[10px] font-light uppercase tracking-[0.22em] text-muted-foreground">
+            {reason === "unsupported_currency"
+              ? `Local ${currency.toUpperCase()} routing unavailable`
+              : "Virtual routing unavailable"}
+          </p>
+          <p className="text-xs font-light leading-relaxed text-muted-foreground">{buyerCopy}</p>
+
+          {isOperatorView() && reason === "not_enabled" && (
+            <div className="mt-3 border-t border-neutral-200 pt-3 text-[11px] font-light leading-relaxed text-muted-foreground">
+              <span className="uppercase tracking-[0.2em]">Operator note</span>
+              <p className="mt-1">
+                Stripe rejected <code>customer_balance</code>: bank transfers are not
+                activated on the connected account. Enable them in Stripe →{" "}
+                <strong>Settings → Payments → Payment methods → Bank transfers</strong>{" "}
+                (approval required), then reload this tab. Virtual IBAN / sort code /
+                ACH routing will populate automatically.
+              </p>
+              <a
+                href="https://dashboard.stripe.com/settings/payment_methods"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-block underline underline-offset-4"
+              >
+                Open Stripe payment methods
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function StripeBankTransferPanel({
   items,
   currency,
@@ -164,6 +239,7 @@ export default function StripeBankTransferPanel({
 }) {
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [reason, setReason] = useState<FailureReason>(null);
   const [addresses, setAddresses] = useState<FinancialAddress[]>([]);
   const [reference, setReference] = useState<string | null>(null);
   const [hostedUrl, setHostedUrl] = useState<string | null>(null);
@@ -177,6 +253,7 @@ export default function StripeBankTransferPanel({
     let cancelled = false;
     setLoading(true);
     setFailed(false);
+    setReason(null);
     (async () => {
       try {
         const { data, error } = await supabase.functions.invoke("create-bank-transfer-intent", {
@@ -192,6 +269,13 @@ export default function StripeBankTransferPanel({
         const list = (data as any)?.financialAddresses as FinancialAddress[] | undefined;
         if (error || (data as any)?.error || !list?.length) {
           setFailed(true);
+          setReason(
+            classifyFailure(
+              (data as any)?.error,
+              (data as any)?.detail,
+              error ? String((error as any)?.message ?? "") : "",
+            ),
+          );
         } else {
           setAddresses(list);
           setActiveRail(0);
@@ -199,7 +283,10 @@ export default function StripeBankTransferPanel({
           setHostedUrl((data as any)?.hostedInstructionsUrl ?? null);
         }
       } catch {
-        if (!cancelled) setFailed(true);
+        if (!cancelled) {
+          setFailed(true);
+          setReason("error");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -230,7 +317,15 @@ export default function StripeBankTransferPanel({
     );
   }
 
-  if (failed || !addresses.length) return <>{fallback}</>;
+  if (failed || !addresses.length) {
+    return (
+      <div className="space-y-5">
+        <UnavailableBanner reason={reason} currency={currency} />
+        {fallback}
+      </div>
+    );
+  }
+
 
   const rail = addresses[Math.min(activeRail, addresses.length - 1)];
 
