@@ -220,6 +220,77 @@ function ConditionalNotes() {
 }
 
 /* ------------------------------------------------------------------ */
+/* Delivery & payment options — shipping module + payment method tabs  */
+/* ------------------------------------------------------------------ */
+type PaymentMethod = "card" | "wire" | "wallet";
+
+const METHOD_TABS: { id: PaymentMethod; label: string; hint: string }[] = [
+  { id: "card", label: "Secure Card Payment", hint: "Visa · Mastercard · Amex" },
+  { id: "wire", label: "Bank Wire Transfer", hint: "Instructions within one business hour" },
+  { id: "wallet", label: "Digital Wallet", hint: "Google Pay · Apple Pay · Link" },
+];
+
+function DeliveryPaymentOptions({
+  method,
+  setMethod,
+  children,
+}: {
+  method: PaymentMethod;
+  setMethod: (m: PaymentMethod) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="space-y-5 border-t border-border pt-8">
+      <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+        Delivery &amp; payment options
+      </h2>
+      {children}
+      <div
+        role="radiogroup"
+        aria-label="Payment method"
+        className="grid grid-cols-1 border border-border sm:grid-cols-3"
+      >
+        {METHOD_TABS.map((tab, i) => {
+          const active = tab.id === method;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => setMethod(tab.id)}
+              className={cn(
+                "flex flex-col items-start gap-1 px-4 py-4 text-left transition-colors",
+                i > 0 && "border-t border-border sm:border-l sm:border-t-0",
+                active ? "bg-foreground text-background" : "hover:bg-muted/40",
+              )}
+            >
+              <span className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em]">
+                <span
+                  className={cn(
+                    "h-2.5 w-2.5 flex-none rounded-full border",
+                    active ? "border-background bg-background" : "border-border",
+                  )}
+                />
+                {tab.label}
+              </span>
+              <span
+                className={cn(
+                  "text-[10px] leading-relaxed",
+                  active ? "text-background/70" : "text-muted-foreground",
+                )}
+              >
+                {tab.hint}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Card / express payment form                                         */
 /* ------------------------------------------------------------------ */
 function PaymentForm({
@@ -228,12 +299,16 @@ function PaymentForm({
   email,
   setEmail,
   onPaid,
+  method,
+  optionsSlot,
 }: {
   summary: CheckoutSummary;
   account: { email: string; role: string } | null;
   email: string;
   setEmail: (v: string) => void;
   onPaid: (ref: string) => void;
+  method: PaymentMethod;
+  optionsSlot: React.ReactNode;
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -246,6 +321,7 @@ function PaymentForm({
     const t = setTimeout(() => setLoadStage(1), 2500);
     return () => clearTimeout(t);
   }, [paymentReady]);
+
   const { totalCents: total, currency } = summary;
 
   const confirm = async () => {
@@ -302,91 +378,99 @@ function PaymentForm({
         />
       </section>
 
-      {/* 2 — Express tier */}
-      <section className="pt-2">
-        <ExpressCheckoutElement
-          options={{ buttonHeight: 48, layout: { maxColumns: 1, maxRows: 3 } }}
-          onConfirm={async () => {
-            if (!stripe || !elements) return;
-            const { error: submitError } = await elements.submit();
-            if (submitError) {
-              toast.error(submitError.message || "Payment could not be completed.");
-              return;
-            }
-            const { error, paymentIntent } = await stripe.confirmPayment({
-              elements,
-              redirect: "if_required",
-              confirmParams: { return_url: `${window.location.origin}/checkout` },
-            });
-            if (error) {
-              toast.error(error.message || "Payment could not be completed.");
-              return;
-            }
-            if (paymentIntent) onPaid(paymentIntent.id);
-          }}
-        />
-        <div className="my-6 flex items-center gap-4">
-          <span className="h-px flex-1 bg-border" />
-          <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-            Or continue with secure checkout
-          </span>
-          <span className="h-px flex-1 bg-border" />
-        </div>
-      </section>
+      {/* 2 — Delivery & payment options */}
+      {optionsSlot}
 
-      {/* 4 — Payment */}
-      <section className="space-y-4 pt-8">
-        <div className="flex items-end justify-between gap-4 border-b border-border pb-3">
-          <div>
-            <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-              Secure card payment
-            </h2>
-            <p className="mt-1 text-xs text-foreground">Visa · Mastercard · American Express</p>
-          </div>
-          <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-            Powered by Stripe
-          </span>
-        </div>
-        <div className="relative min-h-32">
-          {!paymentReady && (
-            <div
-              className="absolute inset-0 flex flex-col items-center justify-center gap-2 border border-border bg-muted/30"
-              role="status"
-              aria-live="polite"
-            >
-              <span className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                {loadStage === 0 ? "Opening secure Stripe session" : "Preparing card fields"}
-              </span>
-              <span className="h-px w-28 overflow-hidden bg-border">
-                <span className="block h-full w-1/3 animate-pulse bg-foreground" />
-              </span>
-              <span className="text-[10px] text-muted-foreground/70">
-                Secure card form loading — this takes a few seconds
+      {/* 3 — Selected payment panel */}
+      {method === "wallet" ? (
+        <section className="space-y-4 pt-8">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            Pay with your digital wallet
+          </p>
+          <ExpressCheckoutElement
+            options={{ buttonHeight: 48, layout: { maxColumns: 1, maxRows: 3 } }}
+            onConfirm={async () => {
+              if (!stripe || !elements) return;
+              const { error: submitError } = await elements.submit();
+              if (submitError) {
+                toast.error(submitError.message || "Payment could not be completed.");
+                return;
+              }
+              const { error, paymentIntent } = await stripe.confirmPayment({
+                elements,
+                redirect: "if_required",
+                confirmParams: { return_url: `${window.location.origin}/checkout` },
+              });
+              if (error) {
+                toast.error(error.message || "Payment could not be completed.");
+                return;
+              }
+              if (paymentIntent) onPaid(paymentIntent.id);
+            }}
+          />
+          <p className="text-xs text-muted-foreground">
+            Wallet availability depends on your device and browser. Switch to secure card payment if
+            no wallet appears.
+          </p>
+          <ConditionalNotes />
+        </section>
+      ) : (
+        <>
+          <section className="space-y-4 pt-8">
+            <div className="flex items-end justify-between gap-4 border-b border-border pb-3">
+              <div>
+                <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                  Secure card payment
+                </h2>
+                <p className="mt-1 text-xs text-foreground">Visa · Mastercard · American Express</p>
+              </div>
+              <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                Powered by Stripe
               </span>
             </div>
-          )}
-          <div className={cn(!paymentReady && "invisible")}>
-            <PaymentElement
-              options={{ layout: "tabs", paymentMethodOrder: ["card"] }}
-              onReady={() => setPaymentReady(true)}
-            />
-          </div>
-        </div>
-      </section>
+            <div className="relative min-h-32">
+              {!paymentReady && (
+                <div
+                  className="absolute inset-0 flex flex-col items-center justify-center gap-2 border border-border bg-muted/30"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <span className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {loadStage === 0 ? "Opening secure Stripe session" : "Preparing card fields"}
+                  </span>
+                  <span className="h-px w-28 overflow-hidden bg-border">
+                    <span className="block h-full w-1/3 animate-pulse bg-foreground" />
+                  </span>
+                  <span className="text-[10px] text-muted-foreground/70">
+                    Secure card form loading — this takes a few seconds
+                  </span>
+                </div>
+              )}
+              <div className={cn(!paymentReady && "invisible")}>
+                <PaymentElement
+                  options={{ layout: "tabs", paymentMethodOrder: ["card"] }}
+                  onReady={() => setPaymentReady(true)}
+                />
+              </div>
+            </div>
+          </section>
 
-      {/* 5 — Sticky summary & CTA (disabled until card fields are mounted) */}
-      <StickyTotals
-        summary={summary}
-        ready={paymentReady}
-        cta={
-          paymentReady
-            ? `Confirm & securely pay ${money(total, currency)}`
-            : "Preparing secure payment…"
-        }
-        busy={submitting}
-        onSubmit={confirm}
-      />
+          {/* 4 — Sticky summary & CTA (disabled until card fields are mounted) */}
+          <StickyTotals
+            summary={summary}
+            ready={paymentReady}
+            cta={
+              paymentReady
+                ? `Confirm & securely pay ${money(total, currency)}`
+                : "Preparing secure payment…"
+            }
+            busy={submitting}
+            onSubmit={confirm}
+          />
+        </>
+      )}
+
     </>
   );
 }
@@ -437,14 +521,16 @@ function StickyTotals({
 /* ------------------------------------------------------------------ */
 /* Wire transfer form                                                  */
 /* ------------------------------------------------------------------ */
-function WireForm({ lines, summary, account, email, setEmail, onDone }: {
+function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlot }: {
   lines: CheckoutLine[];
   summary: CheckoutSummary;
   account: { email: string; role: string } | null;
   email: string;
   setEmail: (v: string) => void;
   onDone: (ref: string) => void;
+  optionsSlot: React.ReactNode;
 }) {
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -511,6 +597,11 @@ function WireForm({ lines, summary, account, email, setEmail, onDone }: {
         )}
         <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone" type="tel" inputMode="tel" autoComplete="tel" className={field} />
         <textarea value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Delivery address" rows={3} className="w-full rounded-none border border-border bg-background p-4 text-base outline-none focus:border-foreground" />
+      </section>
+
+      {optionsSlot}
+
+      <section className="pt-8">
         <p className="text-xs text-muted-foreground">
           Our concierge will send fully-insured wiring instructions within one business hour.
         </p>
@@ -522,6 +613,7 @@ function WireForm({ lines, summary, account, email, setEmail, onDone }: {
         onSubmit={submit}
       />
     </>
+
   );
 }
 
@@ -558,49 +650,31 @@ function ShippingQuoteCard({
 
   return (
     <section className="border border-border">
-      <div className="flex items-start justify-between gap-4 px-4 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-3.5">
         <div className="min-w-0">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
             Delivery &amp; installation
           </p>
-          <p className="mt-1 text-sm">
+          <p className="mt-0.5 truncate text-sm">
             {shipping
               ? shipping.label || "Confirmed advisor quote"
               : "To be Quoted by Advisor"}
           </p>
-          {!shipping && (
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              Not part of the amount below until you add your advisor quote.
-            </p>
-          )}
         </div>
-        <div className="flex-none text-right text-sm">
-          {shipping ? money(shipping.cents, currency) : "—"}
+        <div className="flex flex-none items-center gap-4">
+          <span className="text-sm">{shipping ? money(shipping.cents, currency) : "—"}</span>
+          {busy && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => (shipping ? onClear() : setOpen((v) => !v))}
+            className="h-9 rounded-none border border-foreground px-4 text-[10px] uppercase tracking-[0.18em] transition-colors hover:bg-foreground hover:text-background disabled:opacity-40"
+          >
+            {shipping ? "Remove" : open ? "Cancel" : "Add confirmed shipping quote"}
+          </button>
         </div>
       </div>
 
-      <div className="flex items-center gap-4 border-t border-border/60 px-4 py-3">
-        {shipping ? (
-          <button
-            type="button"
-            disabled={busy}
-            onClick={onClear}
-            className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground underline underline-offset-4 disabled:opacity-40"
-          >
-            Remove shipping quote
-          </button>
-        ) : (
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => setOpen((v) => !v)}
-            className="text-[11px] uppercase tracking-[0.18em] underline underline-offset-4 disabled:opacity-40"
-          >
-            {open ? "Cancel" : "Add confirmed shipping quote"}
-          </button>
-        )}
-        {busy && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
-      </div>
 
       {open && !shipping && (
         <div className="space-y-3 border-t border-border/60 px-4 py-4">
@@ -682,17 +756,19 @@ export default function Checkout() {
   const [email, setEmail] = useState("");
   // Wire mode can be pre-selected by the "Your Selection" drawer
   // ("Proceed to Wire Instructions") via a one-shot sessionStorage flag.
-  const [wire, setWire] = useState(() => {
+  const [method, setMethod] = useState<PaymentMethod>(() => {
     try {
       if (sessionStorage.getItem("ma_checkout_wire") === "1") {
         sessionStorage.removeItem("ma_checkout_wire");
-        return true;
+        return "wire";
       }
     } catch {
       /* private mode — default to online */
     }
-    return false;
+    return "card";
   });
+  const wire = method === "wire";
+
   const [confirmed, setConfirmed] = useState<string | null>(null);
   // Once payment (card or wire) succeeds the basket must be emptied, otherwise
   // the header bag keeps the purchased lines and re-entering /checkout would
@@ -1002,69 +1078,56 @@ export default function Checkout() {
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-12 lg:gap-16 pt-12">
         {/* Left — checkout actions */}
         <div className="min-w-0">
-          {wire ? (
-            <WireForm
-              lines={grossLines}
-              summary={summary}
-              account={account}
-              email={email}
-              setEmail={setEmail}
-              onDone={completeOrder}
-            />
-          ) : error ? (
-            <div className="py-16 text-center text-sm text-muted-foreground">{error}</div>
-          ) : stripePromise && clientSecret ? (
-            <Elements stripe={stripePromise} options={{ clientSecret, appearance, fonts: stripeFonts }}>
-              <PaymentForm
-                summary={summary}
-                account={account}
-                email={email}
-                setEmail={setEmail}
-                onPaid={completeOrder}
-              />
-            </Elements>
-          ) : (
-            <div className="flex justify-center py-24">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            </div>
-          )}
-          {/* Payment method switch */}
-          <div className="pt-5">
-            <button
-              type="button"
-              onClick={() => setWire((v) => !v)}
-              className={cn(
-                "flex w-full items-center justify-between border px-4 py-3 text-left text-sm",
-                wire ? "border-foreground bg-muted/40" : "border-border",
-              )}
-            >
-              <span>Bank wire transfer</span>
-
-              <span
-                className={cn(
-                  "h-5 w-9 flex-none rounded-full border transition-colors",
-                  wire ? "border-foreground bg-foreground" : "border-border bg-muted",
-                )}
-              >
-                <span
-                  className={cn(
-                    "block h-4 w-4 translate-y-[1px] rounded-full bg-background transition-transform",
-                    wire ? "translate-x-[18px]" : "translate-x-[2px]",
-                  )}
+          {(() => {
+            const optionsSlot = (
+              <DeliveryPaymentOptions method={method} setMethod={setMethod}>
+                <ShippingQuoteCard
+                  currency={summary.currency}
+                  shipping={shipping}
+                  busy={syncing}
+                  onConfirm={(s) => void syncIntent(s)}
+                  onClear={() => void syncIntent(null)}
                 />
-              </span>
-            </button>
-          </div>
+              </DeliveryPaymentOptions>
+            );
+            if (method === "wire") {
+              return (
+                <WireForm
+                  lines={grossLines}
+                  summary={summary}
+                  account={account}
+                  email={email}
+                  setEmail={setEmail}
+                  onDone={completeOrder}
+                  optionsSlot={optionsSlot}
+                />
+              );
+            }
+            if (error) {
+              return <div className="py-16 text-center text-sm text-muted-foreground">{error}</div>;
+            }
+            if (stripePromise && clientSecret) {
+              return (
+                <Elements stripe={stripePromise} options={{ clientSecret, appearance, fonts: stripeFonts }}>
+                  <PaymentForm
+                    summary={summary}
+                    account={account}
+                    email={email}
+                    setEmail={setEmail}
+                    onPaid={completeOrder}
+                    method={method}
+                    optionsSlot={optionsSlot}
+                  />
+                </Elements>
+              );
+            }
+            return (
+              <div className="flex justify-center py-24">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            );
+          })()}
 
-          <div className="pt-6">
-          <ShippingQuoteCard
-            currency={summary.currency}
-            shipping={shipping}
-            busy={syncing}
-            onConfirm={(s) => void syncIntent(s)}
-            onClear={() => void syncIntent(null)}
-          />
-          </div>
 
         </div>
 
