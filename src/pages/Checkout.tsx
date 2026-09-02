@@ -274,6 +274,34 @@ function PaymentForm({
 
   return (
     <>
+      {/* 1 — Contact & delivery */}
+      <section className="space-y-4 pb-8">
+        <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+          Contact & delivery
+        </h2>
+        {account ? (
+          <AccountBlock email={account.email} role={account.role} />
+        ) : (
+          <input
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email address"
+            className="h-12 w-full rounded-none border border-border bg-background px-4 text-base outline-none focus:border-foreground"
+          />
+        )}
+        <AddressElement
+          options={{
+            mode: "shipping",
+            display: { name: "full" },
+            fields: { phone: "always" },
+            autocomplete: { mode: "automatic" },
+          }}
+        />
+      </section>
+
       {/* 2 — Express tier */}
       <section className="pt-2">
         <ExpressCheckoutElement
@@ -304,34 +332,6 @@ function PaymentForm({
           </span>
           <span className="h-px flex-1 bg-border" />
         </div>
-      </section>
-
-      {/* 3 — Contact & delivery */}
-      <section className="space-y-4">
-        <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-          Contact & delivery
-        </h2>
-        {account ? (
-          <AccountBlock email={account.email} role={account.role} />
-        ) : (
-          <input
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email address"
-            className="h-12 w-full rounded-none border border-border bg-background px-4 text-base outline-none focus:border-foreground"
-          />
-        )}
-        <AddressElement
-          options={{
-            mode: "shipping",
-            display: { name: "full" },
-            fields: { phone: "always" },
-            autocomplete: { mode: "automatic" },
-          }}
-        />
       </section>
 
       {/* 4 — Payment */}
@@ -410,29 +410,6 @@ function StickyTotals({
   const { currency } = summary;
   return (
     <div className="sticky bottom-0 z-30 mt-8 border-t border-border bg-background/95 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 backdrop-blur lg:static lg:border-0 lg:bg-transparent lg:backdrop-blur-none">
-      <dl className="space-y-1.5 text-sm">
-        <div className="flex justify-between text-muted-foreground">
-          <dt>Subtotal</dt>
-          <dd>{money(summary.subtotalCents, currency)}</dd>
-        </div>
-        {summary.discountCents > 0 && summary.discountLabel && (
-          <div className="flex justify-between text-muted-foreground">
-            <dt>{summary.discountLabel}</dt>
-            <dd>−{money(summary.discountCents, currency)}</dd>
-          </div>
-        )}
-        {summary.shippingCents > 0 && (
-          <div className="flex justify-between text-muted-foreground">
-            <dt>{summary.shippingLabel || "Delivery & installation"}</dt>
-            <dd>{money(summary.shippingCents, currency)}</dd>
-          </div>
-        )}
-        <div className="flex justify-between border-t border-border/60 pt-2 text-base text-foreground">
-          <dt>Order total</dt>
-          <dd>{money(summary.totalCents, currency)}</dd>
-        </div>
-      </dl>
-
       <button
         type="button"
         disabled={busy || !ready}
