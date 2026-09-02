@@ -45,22 +45,19 @@ for (const zone of Object.values(SHIPPING_ZONES)) {
 
 /**
  * Returns the base shipping rate for a country code, or null when the
- * country is unknown and no fallback should be applied.
- * Unknown countries resolve to the Rest of World fallback rate.
+ * country is unknown. Callers that want a fallback rate for unmatched
+ * countries can use DEFAULT_SHIPPING_ZONE.baseRate (Rest of World).
  */
 export function getEstimatedShipping(countryCode: string): number | null {
   if (!countryCode) return null;
   const code = countryCode.trim().toUpperCase();
-  if (code.length !== 2 || !/^[A-Z]{2}$/.test(code)) return null;
-
-  const zone = COUNTRY_TO_ZONE.get(code) ?? DEFAULT_SHIPPING_ZONE;
-  return zone.baseRate;
+  if (!COUNTRY_TO_ZONE.has(code)) return null;
+  return COUNTRY_TO_ZONE.get(code)!.baseRate;
 }
 
-/** Resolves the full zone (rate + currency) for a country code. */
+/** Resolves the full zone (rate + currency) for a country code. Unknown countries return null. */
 export function getShippingZone(countryCode: string): ShippingZone | null {
   if (!countryCode) return null;
   const code = countryCode.trim().toUpperCase();
-  if (code.length !== 2 || !/^[A-Z]{2}$/.test(code)) return null;
-  return COUNTRY_TO_ZONE.get(code) ?? DEFAULT_SHIPPING_ZONE;
+  return COUNTRY_TO_ZONE.get(code) ?? null;
 }
