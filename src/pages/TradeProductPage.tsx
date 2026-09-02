@@ -1730,6 +1730,14 @@ const TradeProductPage: React.FC = () => {
     }
     const finishLabel = [selectedBase, selectedTop, selectedDualSize, selectedSingleSize, selectedFabric?.name]
       .filter(Boolean).map(String).join(" · ") || null;
+    // Carry the price in the currency the user is actually looking at, and
+    // keep the original rate + FX factor on the line so the cart can show
+    // exactly what was converted and at which rate.
+    const srcCcy = (pricing?.currency || "USD").toUpperCase();
+    const tgtCcy = displayCurrency === "original" ? srcCcy : displayCurrency;
+    const converted = convertCents(unit, srcCcy, tgtCcy as DisplayCurrency, fxRates);
+    const didConvert = tgtCcy !== srcCcy && converted !== unit;
+
     addToCart({
       pickId: product.id,
       productSlug: product.slug || slugify(product.title),
@@ -1740,9 +1748,12 @@ const TradeProductPage: React.FC = () => {
       variant: { base: selectedBase, top: selectedTop, size: selectedDualSize || selectedSingleSize },
       imageUrl: product.image_url || null,
       leadTime: product.lead_time || null,
-      unitPriceCents: unit,
-      currency: (pricing?.currency || "USD").toUpperCase(),
+      unitPriceCents: converted,
+      currency: tgtCcy,
       quantity: 1,
+      sourceCurrency: didConvert ? srcCcy : null,
+      sourceUnitPriceCents: didConvert ? unit : null,
+      fxRate: didConvert ? fxRates[`${srcCcy}_${tgtCcy}`] ?? converted / unit : null,
     });
     navigate("/cart");
   };
