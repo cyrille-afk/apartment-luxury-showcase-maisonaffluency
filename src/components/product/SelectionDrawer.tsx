@@ -516,6 +516,15 @@ export default function SelectionDrawer({
                 ? "Go to Checkout"
                 : "Proceed to Wire Instructions"}
           </button>
+          {onViewCart && (
+            <button
+              type="button"
+              onClick={onViewCart}
+              className="mt-3 inline-flex h-11 w-full items-center justify-center border border-border/70 font-body text-[11px] uppercase tracking-widest text-foreground transition-colors hover:border-foreground"
+            >
+              View Full Cart
+            </button>
+          )}
           <button
             type="button"
             onClick={onClose}
@@ -523,6 +532,7 @@ export default function SelectionDrawer({
           >
             Continue Browsing
           </button>
+
         </footer>
       </aside>
     </div>
