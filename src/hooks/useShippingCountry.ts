@@ -43,6 +43,8 @@ export type EstimatedShipping = {
   cents: number;
   /** Currency of the zone rate, when a zone matched. */
   currency: string | null;
+  /** Display name of the matched zone (e.g. "Asia Pacific"), when a zone matched. */
+  zoneLabel: string | null;
   available: boolean;
   /** Total crated volume of the cart used for the estimate. */
   cbm: number;
@@ -77,6 +79,7 @@ export function useEstimatedShipping(
       countryCode: code,
       cents: rate != null ? Math.round(rate * 100) : 0,
       currency: zone?.currency ?? null,
+      zoneLabel: zone?.label ?? null,
       available: rate != null,
       cbm: getCartCbm(items ?? null),
     };
