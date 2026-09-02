@@ -214,10 +214,8 @@ export default function ProductCommerceCta({
     : "";
   const workspaceHref = `/trade/products/${productId}${finishQuery}`;
 
-  const primaryLabel = tradeApproved ? "Add to Co-Pilot Workspace & Order" : "Place Order";
-  const secondaryLabel = tradeApproved
-    ? "Open Axonometric Studio"
-    : "Request a Quote or Customisation";
+  const primaryLabel = tradeApproved ? "Proceed to Order" : "Place Order";
+  const secondaryLabel = "Request a Quote or Customisation";
 
   // Public: PLACE ORDER writes the configured piece into the shared cart state
   // and slides open the "Your Selection" drawer — never the account wall.
