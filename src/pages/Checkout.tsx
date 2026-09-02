@@ -14,6 +14,7 @@ import Navigation from "@/components/Navigation";
 import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";
 import StripeBankTransferPanel from "@/components/checkout/StripeBankTransferPanel";
 import { TransferReferenceNote } from "@/components/checkout/TransferReferenceNote";
+import { useEstimatedShipping, ESTIMATED_SHIPPING_NOTE } from "@/hooks/useShippingCountry";
 import { ArrowLeft } from "lucide-react";
 import {
   assertCheckoutCopy,
