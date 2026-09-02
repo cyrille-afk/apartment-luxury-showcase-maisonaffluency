@@ -172,9 +172,6 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
           </div>
         </dl>
 
-        <p className="mt-6 text-center font-body text-[10px] font-light uppercase tracking-[0.24em] text-muted-foreground">
-          Secure Card Payment
-        </p>
       </div>
     </aside>
   );
