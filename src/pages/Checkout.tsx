@@ -1052,7 +1052,7 @@ export default function Checkout() {
   // Creates (or re-prices) the PaymentIntent. Re-runs whenever the buyer
   // confirms or clears a shipping quote so Stripe always matches the UI total.
   const syncIntent = useCallback(
-    async (nextShipping: ConfirmedShipping | null) => {
+    async (nextShipping: ConfirmedShipping | null, intentMethod: "card" | "paynow" = "card") => {
       if (!grossLines?.length) return;
       const first = grossLines[0];
       setError(null);
@@ -1080,6 +1080,9 @@ export default function Checkout() {
           shippingCents: nextShipping?.cents ?? 0,
           shippingLabel: nextShipping?.label ?? "",
           paymentIntentId: intentIdRef.current || undefined,
+          // PayNow needs its own PaymentIntent: the payment method type is
+          // fixed at creation and cannot be swapped on an existing intent.
+          paymentMethod: intentMethod,
         };
 
         const needsConfig = !stripePromise;
@@ -1135,8 +1138,23 @@ export default function Checkout() {
   useEffect(() => {
     if (!grossLines?.length || initialised.current) return;
     initialised.current = true;
-    void syncIntent(null);
+    void syncIntent(null, method === "paynow" ? "paynow" : "card");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grossLines, syncIntent]);
+
+  // Switching between the card/wallet panes and PayNow requires a brand-new
+  // PaymentIntent, so drop the old client secret and re-create it.
+  const intentMethodRef = useRef<"card" | "paynow">(method === "paynow" ? "paynow" : "card");
+  useEffect(() => {
+    if (!initialised.current || !grossLines?.length) return;
+    const next: "card" | "paynow" = method === "paynow" ? "paynow" : "card";
+    if (next === intentMethodRef.current) return;
+    intentMethodRef.current = next;
+    intentIdRef.current = "";
+    setClientSecret(null);
+    void syncIntent(shipping, next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [method, grossLines, syncIntent]);
 
   // Maison Affluency monochrome theme for Stripe Elements: sharp 0px corners,
   // pure-black focus/primary states, thin hairline borders, serif labels.
@@ -1286,7 +1304,11 @@ export default function Checkout() {
         <div className="min-w-0">
           {(() => {
             const optionsSlot = (
-              <DeliveryPaymentOptions method={method} setMethod={setMethod} />
+              <DeliveryPaymentOptions
+                method={method}
+                setMethod={setMethod}
+                paynowAvailable={summary.currency.toLowerCase() === "sgd"}
+              />
             );
             if (method === "wire") {
               return (
@@ -1306,7 +1328,11 @@ export default function Checkout() {
             }
             if (stripePromise && clientSecret) {
               return (
-                <Elements stripe={stripePromise} options={{ clientSecret, appearance, fonts: stripeFonts }}>
+                <Elements
+                  key={clientSecret}
+                  stripe={stripePromise}
+                  options={{ clientSecret, appearance, fonts: stripeFonts }}
+                >
                   <PaymentForm
                     summary={summary}
                     account={account}
