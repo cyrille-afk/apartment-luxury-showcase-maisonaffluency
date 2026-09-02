@@ -163,6 +163,17 @@ export default function TradeTearsheets() {
     } catch {}
   }, [filterProjectId]);
   const [selectedProduct, setSelectedProduct] = useState<TearsheetProduct | null>(null);
+  // Once the user explicitly returns to the list, stop the auto-select effect
+  // from immediately re-opening the handoff product.
+  const dismissedHandoffRef = useRef(false);
+  const backToProducts = () => {
+    dismissedHandoffRef.current = true;
+    setSelectedProduct(null);
+    const next = new URLSearchParams(searchParams);
+    ["product", "fabric", "fabricImg", "wood", "woodImg", "variant"].forEach((k) => next.delete(k));
+    setSearchParams(next, { replace: true });
+  };
+
   const printRef = useRef<HTMLDivElement>(null);
 
   // Resolve a display-ready lead time for the selected product:
