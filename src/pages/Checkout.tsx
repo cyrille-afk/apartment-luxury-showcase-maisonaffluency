@@ -650,49 +650,31 @@ function ShippingQuoteCard({
 
   return (
     <section className="border border-border">
-      <div className="flex items-start justify-between gap-4 px-4 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-3.5">
         <div className="min-w-0">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
             Delivery &amp; installation
           </p>
-          <p className="mt-1 text-sm">
+          <p className="mt-0.5 truncate text-sm">
             {shipping
               ? shipping.label || "Confirmed advisor quote"
               : "To be Quoted by Advisor"}
           </p>
-          {!shipping && (
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              Not part of the amount below until you add your advisor quote.
-            </p>
-          )}
         </div>
-        <div className="flex-none text-right text-sm">
-          {shipping ? money(shipping.cents, currency) : "—"}
+        <div className="flex flex-none items-center gap-4">
+          <span className="text-sm">{shipping ? money(shipping.cents, currency) : "—"}</span>
+          {busy && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => (shipping ? onClear() : setOpen((v) => !v))}
+            className="h-9 rounded-none border border-foreground px-4 text-[10px] uppercase tracking-[0.18em] transition-colors hover:bg-foreground hover:text-background disabled:opacity-40"
+          >
+            {shipping ? "Remove" : open ? "Cancel" : "Add confirmed shipping quote"}
+          </button>
         </div>
       </div>
 
-      <div className="flex items-center gap-4 border-t border-border/60 px-4 py-3">
-        {shipping ? (
-          <button
-            type="button"
-            disabled={busy}
-            onClick={onClear}
-            className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground underline underline-offset-4 disabled:opacity-40"
-          >
-            Remove shipping quote
-          </button>
-        ) : (
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => setOpen((v) => !v)}
-            className="text-[11px] uppercase tracking-[0.18em] underline underline-offset-4 disabled:opacity-40"
-          >
-            {open ? "Cancel" : "Add confirmed shipping quote"}
-          </button>
-        )}
-        {busy && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
-      </div>
 
       {open && !shipping && (
         <div className="space-y-3 border-t border-border/60 px-4 py-4">
