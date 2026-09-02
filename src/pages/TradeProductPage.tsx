@@ -1748,9 +1748,12 @@ const TradeProductPage: React.FC = () => {
       variant: { base: selectedBase, top: selectedTop, size: selectedDualSize || selectedSingleSize },
       imageUrl: product.image_url || null,
       leadTime: product.lead_time || null,
-      unitPriceCents: unit,
-      currency: (pricing?.currency || "USD").toUpperCase(),
+      unitPriceCents: converted,
+      currency: tgtCcy,
       quantity: 1,
+      sourceCurrency: didConvert ? srcCcy : null,
+      sourceUnitPriceCents: didConvert ? unit : null,
+      fxRate: didConvert ? fxRates[`${srcCcy}_${tgtCcy}`] ?? converted / unit : null,
     });
     navigate("/cart");
   };
