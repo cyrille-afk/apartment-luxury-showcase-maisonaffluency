@@ -2377,6 +2377,11 @@ const TradeProductPage: React.FC = () => {
               <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" />
             </div>
 
+            {/* Axonometric Studio — standalone visualisation tool sitting
+                directly under the configuration selectors, detached from the
+                purchase / co-pilot block below. */}
+            <AxonometricStudioButton productId={product.id} className="order-[-4] md:order-none" />
+
 
             {/* Trade price + retail/trade toggle (size driven by selector above) */}
         {effectiveRrpCents ? (
@@ -2390,15 +2395,24 @@ const TradeProductPage: React.FC = () => {
 
             {/* ===== Primary action block — CTA, utility links, secondary stack ===== */}
             <div className="flex flex-col gap-2.5">
-              {/* Primary CTA — Add to Quote (sleek, low-profile) */}
+              {/* Primary CTA — direct order at the net trade rate */}
+              <button
+                onClick={handleProceedToOrder}
+                className="flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
+              >
+                <ShoppingCart size={14} />
+                Proceed to Order
+              </button>
+
+              {/* Secondary — co-pilot workspace (quote) */}
               <button
                 onClick={handleAddToQuote}
                 disabled={adding}
                 className={cn(
-                  "flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full",
+                  "flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full border",
                   added
-                    ? "bg-emerald-600 text-white"
-                    : "bg-foreground text-background hover:bg-foreground/90",
+                    ? "border-emerald-600 text-emerald-700 bg-background"
+                    : "border-foreground/40 bg-background text-foreground hover:bg-muted/60",
                   adding && "opacity-60"
                 )}
               >
@@ -2406,11 +2420,10 @@ const TradeProductPage: React.FC = () => {
                   <DotCircleLoader size="sm" />
                 ) : added ? (
                   <Check size={14} />
-                ) : (
-                  <ShoppingCart size={14} />
-                )}
-                {added ? "Added to Quote" : "Add to Quote"}
+                ) : null}
+                {added ? "Added to Co-Pilot Workspace" : "Add to Co-Pilot Workspace"}
               </button>
+
 
             {finishesMissingImages.length > 0 && (
               <p className="font-body text-[11px] text-muted-foreground -mt-1 italic">
