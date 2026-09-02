@@ -57,7 +57,7 @@ export default function CartIdentify() {
   const subtotal = useMemo(() => cartSubtotalCents(items), [items]);
   // Tier discount for the authenticated account (admin / verified trade).
   const discount = useAccountDiscount();
-  const freightEstimate = useEstimatedShipping();
+  const freightEstimate = useEstimatedShipping(items);
   const orderTotal = discount.totalFor(subtotal) + freightEstimate.cents;
 
 

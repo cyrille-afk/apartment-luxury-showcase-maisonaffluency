@@ -1,5 +1,10 @@
 import { useMemo } from "react";
-import { getEstimatedShipping, getShippingZone } from "@/config/shippingZones";
+import {
+  getEstimatedShipping,
+  getShippingZone,
+  type ShippingEstimateItem,
+} from "@/config/shippingZones";
+
 
 const OVERRIDE_KEY = "ma_shipping_country";
 
@@ -40,11 +45,29 @@ export type EstimatedShipping = {
   available: boolean;
 };
 
-/** Estimated base freight for the detected (or provided) country. */
-export function useEstimatedShipping(countryCode?: string | null): EstimatedShipping {
+/**
+ * Estimated freight for the detected (or provided) country, scaled by the
+ * active cart lines: Base Country Zone Rate × Item Class Multiplier × qty.
+ * Recomputes whenever quantities, finishes or products change.
+ */
+export function useEstimatedShipping(
+  items?: ShippingEstimateItem[] | null,
+  countryCode?: string | null,
+): EstimatedShipping {
+  // Stable dependency: only the fields that influence the freight maths.
+  const signature = JSON.stringify(
+    (items ?? []).map((i) => [
+      i.title ?? "",
+      i.category ?? "",
+      i.itemClass ?? "",
+      i.shippingModifier ?? "",
+      i.quantity ?? 1,
+      i.unitPriceCents ?? 0,
+    ]),
+  );
   return useMemo(() => {
     const code = detectCountryCode(countryCode);
-    const rate = code ? getEstimatedShipping(code) : null;
+    const rate = code ? getEstimatedShipping(code, items ?? null) : null;
     const zone = code ? getShippingZone(code) : null;
     return {
       countryCode: code,
@@ -52,8 +75,10 @@ export function useEstimatedShipping(countryCode?: string | null): EstimatedShip
       currency: zone?.currency ?? null,
       available: rate != null,
     };
-  }, [countryCode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countryCode, signature]);
 }
+
 
 export const ESTIMATED_SHIPPING_NOTE =
   "Estimated Base Freight (Final quote verified by Advisor)";
