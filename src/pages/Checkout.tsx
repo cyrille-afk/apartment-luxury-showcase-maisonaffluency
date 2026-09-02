@@ -381,6 +381,7 @@ function PaymentForm({
   }, [paymentReady]);
 
   const { chargeTotalCents: total, currency } = summary;
+  const paynow = method === "paynow";
 
   const confirm = async () => {
     if (!paymentReady || !stripe || !elements) return;
@@ -398,7 +399,11 @@ function PaymentForm({
         onPaid(paymentIntent.id);
         return;
       }
-      throw new Error("Payment could not be completed.");
+      throw new Error(
+        paynow
+          ? "The PayNow QR was not completed. Please scan and approve it in your banking app, then try again."
+          : "Payment could not be completed.",
+      );
     } catch (err: any) {
       toast.error(err?.message || "Payment could not be completed.");
     } finally {
@@ -495,19 +500,23 @@ function PaymentForm({
               >
                 <span className="flex items-center gap-2 text-[11px] font-light uppercase tracking-[0.24em] text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  {loadStage === 0 ? "Opening secure Stripe session" : "Preparing card fields"}
+                  {loadStage === 0
+                    ? "Opening secure Stripe session"
+                    : paynow ? "Preparing PayNow QR" : "Preparing card fields"}
                 </span>
                 <span className="h-px w-28 overflow-hidden bg-border">
                   <span className="block h-full w-1/3 animate-pulse bg-foreground" />
                 </span>
                 <span className="text-[10px] font-light text-muted-foreground/70">
-                  Secure card form loading — this takes a few seconds
+                  {paynow
+                  ? "PayNow session loading — this takes a few seconds"
+                  : "Secure card form loading — this takes a few seconds"}
                 </span>
               </div>
             )}
             <div className={cn(!paymentReady && "invisible")}>
               <PaymentElement
-                options={{ layout: "tabs", paymentMethodOrder: ["card"] }}
+                options={{ layout: "tabs", paymentMethodOrder: [paynow ? "paynow" : "card"] }}
                 onReady={() => setPaymentReady(true)}
               />
             </div>
@@ -520,7 +529,9 @@ function PaymentForm({
           ready={paymentReady}
           cta={
             paymentReady
-              ? `Confirm & securely pay ${money(total, currency)}`
+              ? paynow
+                ? `Generate PayNow QR · ${money(total, currency)}`
+                : `Confirm & securely pay ${money(total, currency)}`
               : "Preparing secure payment…"
           }
           busy={submitting}
