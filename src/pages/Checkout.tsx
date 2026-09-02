@@ -16,6 +16,7 @@ import StripeBankTransferPanel from "@/components/checkout/StripeBankTransferPan
 import { VisaMark, MastercardMark, BankTransferMark } from "@/components/checkout/PaymentMarks";
 import { TransferReferenceNote } from "@/components/checkout/TransferReferenceNote";
 import { useEstimatedShipping, ESTIMATED_SHIPPING_NOTE } from "@/hooks/useShippingCountry";
+import { getCurrentDestination } from "@/lib/shippingDestination";
 import { ArrowLeft } from "lucide-react";
 import {
   assertCheckoutCopy,
