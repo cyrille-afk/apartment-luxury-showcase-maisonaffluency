@@ -14,6 +14,7 @@ import Navigation from "@/components/Navigation";
 import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";
 import StripeBankTransferPanel from "@/components/checkout/StripeBankTransferPanel";
 import { TransferReferenceNote } from "@/components/checkout/TransferReferenceNote";
+import { useEstimatedShipping, ESTIMATED_SHIPPING_NOTE } from "@/hooks/useShippingCountry";
 import { ArrowLeft } from "lucide-react";
 import {
   assertCheckoutCopy,
@@ -67,7 +68,12 @@ export type CheckoutSummary = {
   discountLabel: string | null;
   shippingCents: number;
   shippingLabel: string | null;
+  /** Base freight estimated from the buyer's country. 0 when unknown. */
+  estimatedShippingCents: number;
+  /** Displayed total — includes the estimated freight when present. */
   totalCents: number;
+  /** Amount actually charged now (excludes unconfirmed estimated freight). */
+  chargeTotalCents: number;
 };
 
 /* Signed-in account confirmation — replaces blank email/name inputs.  */
@@ -156,14 +162,23 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
               </dd>
             </div>
           )}
-          <div className="flex items-baseline justify-between gap-6">
-            <dt className="text-muted-foreground">
-              {summary.shippingLabel || "Front Door Premium Delivery"}
-            </dt>
-            {summary.shippingCents > 0 ? (
-              <dd className="tabular-nums">{money(summary.shippingCents, currency)}</dd>
-            ) : (
-              <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
+          <div>
+            <div className="flex items-baseline justify-between gap-6">
+              <dt className="text-muted-foreground">
+                {summary.shippingLabel || "Front Door Premium Delivery"}
+              </dt>
+              {summary.shippingCents > 0 ? (
+                <dd className="tabular-nums">{money(summary.shippingCents, currency)}</dd>
+              ) : summary.estimatedShippingCents > 0 ? (
+                <dd className="tabular-nums">{money(summary.estimatedShippingCents, currency)}</dd>
+              ) : (
+                <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
+              )}
+            </div>
+            {summary.shippingCents === 0 && summary.estimatedShippingCents > 0 && (
+              <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                {ESTIMATED_SHIPPING_NOTE}
+              </p>
             )}
           </div>
           <div className="flex items-baseline justify-between border-t border-border pt-4">
@@ -321,7 +336,7 @@ function PaymentForm({
     return () => clearTimeout(t);
   }, [paymentReady]);
 
-  const { totalCents: total, currency } = summary;
+  const { chargeTotalCents: total, currency } = summary;
 
   const confirm = async () => {
     if (!paymentReady || !stripe || !elements) return;
@@ -612,7 +627,7 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
-  const { totalCents: total, currency } = summary;
+  const { chargeTotalCents: total, currency } = summary;
   const orderRef = useMemo(
     () =>
       stableOrderReference(
@@ -840,6 +855,7 @@ export default function Checkout() {
   }, [user]);
   // Summary math: line items keep their standard catalogue prices; the tier
   // discount is applied once at cart level, exactly like the backend charge.
+  const estimate = useEstimatedShipping();
   const summary = useMemo<CheckoutSummary | null>(() => {
     if (!grossLines?.length) return null;
     const currency = orderCurrency(grossLines);
@@ -847,6 +863,10 @@ export default function Checkout() {
     const discountCents =
       effectiveDiscountPct > 0 ? Math.round(subtotalCents * effectiveDiscountPct) : 0;
     const shippingCents = shipping?.cents ?? 0;
+    // Country-based base freight is indicative only: it is displayed and added
+    // to the shown Order Total, but never charged until an advisor confirms it.
+    const estimatedShippingCents = shippingCents > 0 ? 0 : estimate.cents;
+    const chargeTotalCents = subtotalCents - discountCents + shippingCents;
     return {
       currency,
       subtotalCents,
@@ -854,9 +874,11 @@ export default function Checkout() {
       discountLabel: discountCents > 0 ? discountRowLabel : null,
       shippingCents,
       shippingLabel: shipping?.label ?? null,
-      totalCents: subtotalCents - discountCents + shippingCents,
+      estimatedShippingCents,
+      totalCents: chargeTotalCents + estimatedShippingCents,
+      chargeTotalCents,
     };
-  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping]);
+  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents]);
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [email, setEmail] = useState("");

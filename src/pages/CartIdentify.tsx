@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
 import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";
 import { releaseBodyScroll } from "@/lib/bodyScrollLock";
+import { useEstimatedShipping, ESTIMATED_SHIPPING_NOTE } from "@/hooks/useShippingCountry";
 
 import {
   useCart,
@@ -56,7 +57,8 @@ export default function CartIdentify() {
   const subtotal = useMemo(() => cartSubtotalCents(items), [items]);
   // Tier discount for the authenticated account (admin / verified trade).
   const discount = useAccountDiscount();
-  const orderTotal = discount.totalFor(subtotal);
+  const freightEstimate = useEstimatedShipping();
+  const orderTotal = discount.totalFor(subtotal) + freightEstimate.cents;
 
 
   const startCheckout = async (contactEmail?: string, fullName?: string) => {
@@ -352,9 +354,20 @@ export default function CartIdentify() {
                     </dd>
                   </div>
                 )}
-                <div className="flex items-baseline justify-between gap-6">
-                  <dt className="text-muted-foreground">Front Door Premium Delivery</dt>
-                  <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
+                <div>
+                  <div className="flex items-baseline justify-between gap-6">
+                    <dt className="text-muted-foreground">Front Door Premium Delivery</dt>
+                    {freightEstimate.cents > 0 ? (
+                      <dd className="tabular-nums">{formatMoney(freightEstimate.cents, currency)}</dd>
+                    ) : (
+                      <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
+                    )}
+                  </div>
+                  {freightEstimate.cents > 0 && (
+                    <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                      {ESTIMATED_SHIPPING_NOTE}
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-baseline justify-between border-t border-border pt-4">
                   <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
