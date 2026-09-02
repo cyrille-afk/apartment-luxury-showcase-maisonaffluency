@@ -31,6 +31,17 @@ const MESSAGE_MAX = 500;
 
 export type PaymentMethod = "online" | "wire";
 
+export interface DrawerLine {
+  key: string;
+  brand?: string | null;
+  title?: string | null;
+  configuration?: string | null;
+  leadTime?: string | null;
+  priceLabel?: string | null;
+  imageUrl?: string | null;
+  quantity: number;
+}
+
 export interface SelectionDrawerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -47,6 +58,17 @@ export interface SelectionDrawerProps {
   imageUrl?: string | null;
   quantity?: number;
   onQuantityChange?: (q: number) => void;
+  /**
+   * Multi-line mode: when supplied, the sheet lists EVERY cart line (with its
+   * own stepper + remove) instead of the single-product block.
+   */
+  lines?: DrawerLine[];
+  onLineQuantityChange?: (key: string, q: number) => void;
+  onRemoveLine?: (key: string) => void;
+  /** Formatted subtotal shown above the footer in multi-line mode. */
+  subtotalLabel?: string | null;
+  /** Optional "View full cart" secondary action. */
+  onViewCart?: () => void;
   /** Fired by the sticky footer CTA with the selected payment method */
   onCheckout?: (method: PaymentMethod) => void;
   placing?: boolean;
@@ -63,9 +85,15 @@ export default function SelectionDrawer({
   imageUrl = null,
   quantity: quantityProp,
   onQuantityChange,
+  lines,
+  onLineQuantityChange,
+  onRemoveLine,
+  subtotalLabel = null,
+  onViewCart,
   onCheckout,
   placing = false,
 }: SelectionDrawerProps) {
+
   const [method, setMethod] = useState<PaymentMethod>("online");
   const [localQty, setLocalQty] = useState(1);
   // Inline concierge widget state — replaces the trust block when engaged.
