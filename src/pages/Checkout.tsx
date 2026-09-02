@@ -346,6 +346,13 @@ function PaymentForm({
 }) {
   const stripe = useStripe();
   const elements = useElements();
+  // Header / "Shipping destination & currency" modal selection. Saving there
+  // must immediately drive both the address field and the freight estimate.
+  const destination = useShippingDestination();
+  useEffect(() => {
+    onCountryChange?.(destination.iso);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [destination.iso]);
   const [submitting, setSubmitting] = useState(false);
   const [paymentReady, setPaymentReady] = useState(false);
   // Staged messaging so the wait for Stripe's iframe is legible, not a blank gap.
