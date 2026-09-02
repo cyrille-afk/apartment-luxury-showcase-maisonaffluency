@@ -1002,14 +1002,6 @@ export default function Checkout() {
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-12 lg:gap-16 pt-12">
         {/* Left — checkout actions */}
         <div className="min-w-0">
-          <ShippingQuoteCard
-            currency={summary.currency}
-            shipping={shipping}
-            busy={syncing}
-            onConfirm={(s) => void syncIntent(s)}
-            onClear={() => void syncIntent(null)}
-          />
-
           {/* Payment method switch */}
           <div className="pt-5">
             <button
@@ -1064,6 +1056,14 @@ export default function Checkout() {
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
           )}
+          <ShippingQuoteCard
+            currency={summary.currency}
+            shipping={shipping}
+            busy={syncing}
+            onConfirm={(s) => void syncIntent(s)}
+            onClear={() => void syncIntent(null)}
+          />
+
         </div>
 
         {/* Right — persistent order summary */}
