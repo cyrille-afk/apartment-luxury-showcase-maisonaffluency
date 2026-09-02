@@ -394,6 +394,9 @@ function PaymentForm({
             fields: { phone: "always" },
             autocomplete: { mode: "automatic" },
           }}
+          onChange={(e) => {
+            onCountryChange?.(e.value?.address?.country || null);
+          }}
         />
       </section>
 
