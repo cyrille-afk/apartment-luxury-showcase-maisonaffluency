@@ -16,6 +16,9 @@ export interface CartItem {
   unitPriceCents: number;
   currency: string;
   quantity: number;
+  /** Freight class hints — drive the shipping estimate multiplier. */
+  category?: string | null;
+  shippingModifier?: number | null;
 
 }
 
