@@ -336,7 +336,7 @@ function PaymentForm({
     return () => clearTimeout(t);
   }, [paymentReady]);
 
-  const { totalCents: total, currency } = summary;
+  const { chargeTotalCents: total, currency } = summary;
 
   const confirm = async () => {
     if (!paymentReady || !stripe || !elements) return;
@@ -627,7 +627,7 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
-  const { totalCents: total, currency } = summary;
+  const { chargeTotalCents: total, currency } = summary;
   const orderRef = useMemo(
     () =>
       stableOrderReference(
