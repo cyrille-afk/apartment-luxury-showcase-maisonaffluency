@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Copy, Check, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { TransferReferenceNote } from "@/components/checkout/TransferReferenceNote";
 import { cn } from "@/lib/utils";
 
 /* ------------------------------------------------------------------ */
@@ -228,6 +229,7 @@ export default function StripeBankTransferPanel({
   email,
   shippingConfirmed,
   shippingCents,
+  orderReference,
   fallback,
 }: {
   items: WireItem[];
@@ -235,6 +237,7 @@ export default function StripeBankTransferPanel({
   email: string;
   shippingConfirmed?: boolean;
   shippingCents?: number;
+  orderReference?: string;
   fallback: React.ReactNode;
 }) {
   const [loading, setLoading] = useState(false);
@@ -358,8 +361,10 @@ export default function StripeBankTransferPanel({
 
       <RowGrid rows={addressRows(rail)} reference={reference} />
 
+      {orderReference && <TransferReferenceNote value={orderReference} />}
+
       <p className="text-xs font-light text-muted-foreground">
-        Transfers must include the payment reference above so your order is matched
+        Transfers must include the reference note above so your order is matched
         automatically. Our concierge will also email these fully-insured wiring
         instructions within one business hour.
       </p>

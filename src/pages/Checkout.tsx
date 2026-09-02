@@ -13,6 +13,7 @@ import { Helmet } from "react-helmet-async";
 import Navigation from "@/components/Navigation";
 import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";
 import StripeBankTransferPanel from "@/components/checkout/StripeBankTransferPanel";
+import { TransferReferenceNote } from "@/components/checkout/TransferReferenceNote";
 import { ArrowLeft } from "lucide-react";
 import {
   assertCheckoutCopy,
@@ -521,28 +522,49 @@ const BANK_DETAILS: { label: string; value: string; copyable?: boolean }[] = [
   { label: "SWIFT / BIC Code", value: "DBSSSGSGXXX", copyable: true },
 ];
 
-function WireDetailsGrid() {
+function WireDetailsGrid({ reference }: { reference: string }) {
   return (
-    <div className="w-full border border-neutral-200">
-      {BANK_DETAILS.map((row, i) => (
-        <div
-          key={row.label}
-          className={cn(
-            "flex items-center justify-between gap-x-6 gap-y-1 px-5 py-4",
-            i > 0 && "border-t border-neutral-100",
-          )}
-        >
-          <span className="flex-none text-[10px] font-light uppercase tracking-[0.22em] text-muted-foreground">
-            {row.label}
-          </span>
-          <span className="flex min-w-0 items-center justify-end gap-3 text-right">
-            <span className="truncate text-sm font-light">{row.value}</span>
-            {row.copyable && <CopyButton value={row.value} label={row.label} />}
-          </span>
-        </div>
-      ))}
+    <div className="w-full space-y-4">
+      <div className="w-full border border-neutral-200">
+        {BANK_DETAILS.map((row, i) => (
+          <div
+            key={row.label}
+            className={cn(
+              "flex items-center justify-between gap-x-6 gap-y-1 px-5 py-4",
+              i > 0 && "border-t border-neutral-100",
+            )}
+          >
+            <span className="flex-none text-[10px] font-light uppercase tracking-[0.22em] text-muted-foreground">
+              {row.label}
+            </span>
+            <span className="flex min-w-0 items-center justify-end gap-3 text-right">
+              <span className="truncate text-sm font-light">{row.value}</span>
+              {row.copyable && <CopyButton value={row.value} label={row.label} />}
+            </span>
+          </div>
+        ))}
+      </div>
+      <TransferReferenceNote value={reference} />
     </div>
   );
+}
+
+/**
+ * Stable per-cart wire reference (e.g. TRADE-ORDER-#10243) so the buyer sees
+ * the same string across reloads and our treasury can pre-match the transfer.
+ */
+function stableOrderReference(fingerprint: string): string {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem("ma_trade_order_ref") || "null");
+    if (saved?.hash === fingerprint && typeof saved?.ref === "string") return saved.ref;
+  } catch { /* ignore corrupt storage */ }
+  let h = 0;
+  for (let i = 0; i < fingerprint.length; i++) h = (h * 31 + fingerprint.charCodeAt(i)) >>> 0;
+  const ref = `TRADE-ORDER-#${10000 + (h % 90000)}`;
+  try {
+    window.localStorage.setItem("ma_trade_order_ref", JSON.stringify({ hash: fingerprint, ref }));
+  } catch { /* storage unavailable — ref simply regenerates */ }
+  return ref;
 }
 
 function CopyButton({ value, label }: { value: string; label: string }) {
@@ -591,6 +613,16 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
   const { totalCents: total, currency } = summary;
+  const orderRef = useMemo(
+    () =>
+      stableOrderReference(
+        JSON.stringify({
+          c: currency,
+          i: lines.map((l) => [l.title, l.finishLabel || "", lineQty(l)]),
+        }),
+      ),
+    [currency, lines],
+  );
 
   const submit = async () => {
     if (!account && (!name.trim() || !email.includes("@"))) {
@@ -660,6 +692,7 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
         <StripeBankTransferPanel
           currency={currency}
           email={account ? account.email : email}
+          orderReference={orderRef}
           items={lines.map((l) => ({
             title: l.title,
             designer: l.designer || "",
@@ -674,7 +707,7 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
               <p className="text-xs text-muted-foreground">
                 Our concierge will also email these fully-insured wiring instructions within one business hour.
               </p>
-              <WireDetailsGrid />
+              <WireDetailsGrid reference={orderRef} />
             </div>
           }
         />
