@@ -689,6 +689,18 @@ export default function Checkout() {
     return false;
   });
   const [confirmed, setConfirmed] = useState<string | null>(null);
+  // Once payment (card or wire) succeeds the basket must be emptied, otherwise
+  // the header bag keeps the purchased lines and re-entering /checkout would
+  // rebuild — and re-charge — the same order.
+  const completeOrder = useCallback((reference: string) => {
+    clearCart();
+    try {
+      sessionStorage.removeItem(CHECKOUT_KEY);
+    } catch {
+      /* private mode */
+    }
+    setConfirmed(reference);
+  }, []);
   const [error, setError] = useState<string | null>(null);
   const initialised = useRef(false);
   const intentIdRef = useRef<string>("");
