@@ -521,14 +521,16 @@ function StickyTotals({
 /* ------------------------------------------------------------------ */
 /* Wire transfer form                                                  */
 /* ------------------------------------------------------------------ */
-function WireForm({ lines, summary, account, email, setEmail, onDone }: {
+function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlot }: {
   lines: CheckoutLine[];
   summary: CheckoutSummary;
   account: { email: string; role: string } | null;
   email: string;
   setEmail: (v: string) => void;
   onDone: (ref: string) => void;
+  optionsSlot: React.ReactNode;
 }) {
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
