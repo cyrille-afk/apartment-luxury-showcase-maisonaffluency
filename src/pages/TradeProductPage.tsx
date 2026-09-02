@@ -2519,12 +2519,12 @@ const TradeProductPage: React.FC = () => {
                         imageUrl: selectedFabric?.image_url ?? null,
                         source: "trade",
                       },
-                      finishes: {
-                        fabric: selectedFabric?.name ?? null,
-                        fabricImg: selectedFabric?.image_url ?? null,
-                        wood: selectedWoodPrice?.name ?? null,
-                        woodImg: selectedWoodPrice?.image_url ?? null,
-                        variant: variantLabelParts.length ? variantLabelParts.join(" · ") : null,
+                       finishes: {
+                         fabric: fabricName,
+                         fabricImg: selectedFabric?.image_url ?? null,
+                         wood: woodName,
+                         woodImg: selectedWoodPrice?.image_url ?? null,
+                         variant: variantLabelParts.length ? variantLabelParts.join(" · ") : null,
                       },
                       locked: true,
                     });
