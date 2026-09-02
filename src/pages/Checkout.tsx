@@ -257,18 +257,15 @@ const METHOD_TABS: { id: PaymentMethod; label: string; hint: string }[] = [
 function DeliveryPaymentOptions({
   method,
   setMethod,
-  children,
 }: {
   method: PaymentMethod;
   setMethod: (m: PaymentMethod) => void;
-  children: React.ReactNode;
 }) {
   return (
     <section className="mt-6 w-full space-y-5 border-t border-border pt-8">
       <h2 className="text-[11px] font-light uppercase tracking-[0.26em] text-muted-foreground">
         Delivery &amp; payment options
       </h2>
-      {children}
       <div
         role="radiogroup"
         aria-label="Payment method"
@@ -1237,15 +1234,7 @@ export default function Checkout() {
         <div className="min-w-0">
           {(() => {
             const optionsSlot = (
-              <DeliveryPaymentOptions method={method} setMethod={setMethod}>
-                <ShippingQuoteCard
-                  currency={summary.currency}
-                  shipping={shipping}
-                  busy={syncing}
-                  onConfirm={(s) => void syncIntent(s)}
-                  onClear={() => void syncIntent(null)}
-                />
-              </DeliveryPaymentOptions>
+              <DeliveryPaymentOptions method={method} setMethod={setMethod} />
             );
             if (method === "wire") {
               return (
