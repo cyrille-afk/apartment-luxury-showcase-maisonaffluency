@@ -19,8 +19,11 @@ import { cn } from "@/lib/utils";
  * Quote or Customisation" — the latter opens the Trade Exclusive Access card
  * in a modal.
  *
- * STATE B (verified trade): two-line price (Retail … Before Tax / Net Trade
- * Price) + workspace order + studio planning actions.
+ * STATE B (verified trade): two-line price (Retail / Net Trade Price) +
+ * quantity stepper + "Proceed to Order" (direct checkout at the net trade
+ * rate) + a secondary outlined "Add to Co-Pilot Workspace" link. The
+ * Axonometric Studio entry lives outside this box, directly under the finish
+ * selectors (see AxonometricStudioButton).
  *
  * On mobile a fixed sticky bottom dock keeps price + primary action within
  * reach while scrolling.
