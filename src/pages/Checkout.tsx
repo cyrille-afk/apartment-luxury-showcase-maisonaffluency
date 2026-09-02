@@ -417,20 +417,8 @@ function PaymentForm({
       </section>
 
       <div className={cn(method === "wallet" && "hidden")}>
-        <section className="space-y-5 pt-10">
-          <div className="flex items-end justify-between gap-4 border-b border-neutral-200 pb-4">
-            <div>
-              <h2 className="text-[11px] font-light uppercase tracking-[0.26em] text-muted-foreground">
-                Secure card payment
-              </h2>
-              <p className="mt-1.5 text-xs font-light text-foreground">
-                Visa · Mastercard · American Express
-              </p>
-            </div>
-            <span className="shrink-0 text-[10px] font-light uppercase tracking-[0.22em] text-muted-foreground">
-              Powered by Stripe
-            </span>
-          </div>
+          <section className="space-y-5 pt-10">
+
           <div className="relative min-h-32">
             {!paymentReady && (
               <div
