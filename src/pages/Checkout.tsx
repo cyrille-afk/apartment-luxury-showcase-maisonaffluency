@@ -257,7 +257,7 @@ function ConditionalNotes() {
 /* ------------------------------------------------------------------ */
 /* Delivery & payment options — shipping module + payment method tabs  */
 /* ------------------------------------------------------------------ */
-type PaymentMethod = "card" | "wire" | "wallet";
+type PaymentMethod = "card" | "wire" | "wallet" | "paynow";
 
 const METHOD_TABS: { id: PaymentMethod; label: string; hint: string }[] = [
   { id: "card", label: "Secure Card Payment", hint: "Visa · Mastercard · Amex" },
@@ -265,13 +265,27 @@ const METHOD_TABS: { id: PaymentMethod; label: string; hint: string }[] = [
   { id: "wallet", label: "Digital Wallet", hint: "Google Pay · Apple Pay · Link" },
 ];
 
+/**
+ * PayNow tab — shown only for SGD-priced orders. Stripe's virtual-account bank
+ * transfers (customer_balance) are not offered to Singapore merchants, so SGD
+ * trade orders settle through PayNow QR instead.
+ */
+const PAYNOW_TAB: { id: PaymentMethod; label: string; hint: string } = {
+  id: "paynow",
+  label: "PayNow",
+  hint: "Scan with any Singapore banking app",
+};
+
 function DeliveryPaymentOptions({
   method,
   setMethod,
+  paynowAvailable,
 }: {
   method: PaymentMethod;
   setMethod: (m: PaymentMethod) => void;
+  paynowAvailable: boolean;
 }) {
+  const tabs = paynowAvailable ? [...METHOD_TABS, PAYNOW_TAB] : METHOD_TABS;
   return (
     <section className="mt-6 w-full space-y-5 border-t border-border pt-8">
       <h2 className="text-[11px] font-light uppercase tracking-[0.26em] text-muted-foreground">
@@ -280,9 +294,12 @@ function DeliveryPaymentOptions({
       <div
         role="radiogroup"
         aria-label="Payment method"
-        className="grid w-full grid-cols-1 border border-neutral-200 sm:grid-cols-3"
+        className={cn(
+          "grid w-full grid-cols-1 border border-neutral-200",
+          tabs.length === 4 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3",
+        )}
       >
-        {METHOD_TABS.map((tab, i) => {
+        {tabs.map((tab, i) => {
           const active = tab.id === method;
           return (
             <button
@@ -364,6 +381,7 @@ function PaymentForm({
   }, [paymentReady]);
 
   const { chargeTotalCents: total, currency } = summary;
+  const paynow = method === "paynow";
 
   const confirm = async () => {
     if (!paymentReady || !stripe || !elements) return;
@@ -381,7 +399,11 @@ function PaymentForm({
         onPaid(paymentIntent.id);
         return;
       }
-      throw new Error("Payment could not be completed.");
+      throw new Error(
+        paynow
+          ? "The PayNow QR was not completed. Please scan and approve it in your banking app, then try again."
+          : "Payment could not be completed.",
+      );
     } catch (err: any) {
       toast.error(err?.message || "Payment could not be completed.");
     } finally {
@@ -478,19 +500,23 @@ function PaymentForm({
               >
                 <span className="flex items-center gap-2 text-[11px] font-light uppercase tracking-[0.24em] text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  {loadStage === 0 ? "Opening secure Stripe session" : "Preparing card fields"}
+                  {loadStage === 0
+                    ? "Opening secure Stripe session"
+                    : paynow ? "Preparing PayNow QR" : "Preparing card fields"}
                 </span>
                 <span className="h-px w-28 overflow-hidden bg-border">
                   <span className="block h-full w-1/3 animate-pulse bg-foreground" />
                 </span>
                 <span className="text-[10px] font-light text-muted-foreground/70">
-                  Secure card form loading — this takes a few seconds
+                  {paynow
+                  ? "PayNow session loading — this takes a few seconds"
+                  : "Secure card form loading — this takes a few seconds"}
                 </span>
               </div>
             )}
             <div className={cn(!paymentReady && "invisible")}>
               <PaymentElement
-                options={{ layout: "tabs", paymentMethodOrder: ["card"] }}
+                options={{ layout: "tabs", paymentMethodOrder: [paynow ? "paynow" : "card"] }}
                 onReady={() => setPaymentReady(true)}
               />
             </div>
@@ -503,7 +529,9 @@ function PaymentForm({
           ready={paymentReady}
           cta={
             paymentReady
-              ? `Confirm & securely pay ${money(total, currency)}`
+              ? paynow
+                ? `Generate PayNow QR · ${money(total, currency)}`
+                : `Confirm & securely pay ${money(total, currency)}`
               : "Preparing secure payment…"
           }
           busy={submitting}
@@ -1024,7 +1052,7 @@ export default function Checkout() {
   // Creates (or re-prices) the PaymentIntent. Re-runs whenever the buyer
   // confirms or clears a shipping quote so Stripe always matches the UI total.
   const syncIntent = useCallback(
-    async (nextShipping: ConfirmedShipping | null) => {
+    async (nextShipping: ConfirmedShipping | null, intentMethod: "card" | "paynow" = "card") => {
       if (!grossLines?.length) return;
       const first = grossLines[0];
       setError(null);
@@ -1052,6 +1080,9 @@ export default function Checkout() {
           shippingCents: nextShipping?.cents ?? 0,
           shippingLabel: nextShipping?.label ?? "",
           paymentIntentId: intentIdRef.current || undefined,
+          // PayNow needs its own PaymentIntent: the payment method type is
+          // fixed at creation and cannot be swapped on an existing intent.
+          paymentMethod: intentMethod,
         };
 
         const needsConfig = !stripePromise;
@@ -1107,8 +1138,23 @@ export default function Checkout() {
   useEffect(() => {
     if (!grossLines?.length || initialised.current) return;
     initialised.current = true;
-    void syncIntent(null);
+    void syncIntent(null, method === "paynow" ? "paynow" : "card");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grossLines, syncIntent]);
+
+  // Switching between the card/wallet panes and PayNow requires a brand-new
+  // PaymentIntent, so drop the old client secret and re-create it.
+  const intentMethodRef = useRef<"card" | "paynow">(method === "paynow" ? "paynow" : "card");
+  useEffect(() => {
+    if (!initialised.current || !grossLines?.length) return;
+    const next: "card" | "paynow" = method === "paynow" ? "paynow" : "card";
+    if (next === intentMethodRef.current) return;
+    intentMethodRef.current = next;
+    intentIdRef.current = "";
+    setClientSecret(null);
+    void syncIntent(shipping, next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [method, grossLines, syncIntent]);
 
   // Maison Affluency monochrome theme for Stripe Elements: sharp 0px corners,
   // pure-black focus/primary states, thin hairline borders, serif labels.
@@ -1258,7 +1304,11 @@ export default function Checkout() {
         <div className="min-w-0">
           {(() => {
             const optionsSlot = (
-              <DeliveryPaymentOptions method={method} setMethod={setMethod} />
+              <DeliveryPaymentOptions
+                method={method}
+                setMethod={setMethod}
+                paynowAvailable={summary.currency.toLowerCase() === "sgd"}
+              />
             );
             if (method === "wire") {
               return (
@@ -1278,7 +1328,11 @@ export default function Checkout() {
             }
             if (stripePromise && clientSecret) {
               return (
-                <Elements stripe={stripePromise} options={{ clientSecret, appearance, fonts: stripeFonts }}>
+                <Elements
+                  key={clientSecret}
+                  stripe={stripePromise}
+                  options={{ clientSecret, appearance, fonts: stripeFonts }}
+                >
                   <PaymentForm
                     summary={summary}
                     account={account}
