@@ -178,7 +178,10 @@ export default function SelectionDrawer({
     return () => window.removeEventListener("keydown", onKey);
   }, [isOpen, onClose]);
 
-  return (
+  // Portal to document.body so the drawer escapes any ancestor stacking
+  // context (transforms, blurs) — its z-[10000] must always beat the
+  // fixed header navigation (z-50).
+  return createPortal(
     <div
       className={cn(
         "fixed inset-0 z-[10000]",
@@ -536,7 +539,8 @@ export default function SelectionDrawer({
 
         </footer>
       </aside>
-    </div>
+    </div>,
+    document.body
   );
 }
 
