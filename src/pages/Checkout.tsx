@@ -199,6 +199,15 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
           </div>
         </dl>
 
+        <div
+          aria-label="Accepted payment methods"
+          className="mt-8 flex items-center justify-center gap-10 text-foreground/80 [&_svg]:h-6"
+        >
+          <VisaMark />
+          <MastercardMark />
+          <BankTransferMark />
+        </div>
+
       </div>
     </aside>
   );
