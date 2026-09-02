@@ -240,7 +240,7 @@ function DeliveryPaymentOptions({
   children: React.ReactNode;
 }) {
   return (
-    <section className="space-y-5 border-t border-border pt-8">
+    <section className="mt-6 w-full space-y-5 border-t border-border pt-8">
       <h2 className="text-[11px] font-light uppercase tracking-[0.26em] text-muted-foreground">
         Delivery &amp; payment options
       </h2>
@@ -248,7 +248,7 @@ function DeliveryPaymentOptions({
       <div
         role="radiogroup"
         aria-label="Payment method"
-        className="grid grid-cols-1 border border-neutral-200 sm:grid-cols-3"
+        className="grid w-full grid-cols-1 border border-neutral-200 sm:grid-cols-3"
       >
         {METHOD_TABS.map((tab, i) => {
           const active = tab.id === method;
