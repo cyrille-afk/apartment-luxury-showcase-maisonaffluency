@@ -378,91 +378,99 @@ function PaymentForm({
         />
       </section>
 
-      {/* 2 — Express tier */}
-      <section className="pt-2">
-        <ExpressCheckoutElement
-          options={{ buttonHeight: 48, layout: { maxColumns: 1, maxRows: 3 } }}
-          onConfirm={async () => {
-            if (!stripe || !elements) return;
-            const { error: submitError } = await elements.submit();
-            if (submitError) {
-              toast.error(submitError.message || "Payment could not be completed.");
-              return;
-            }
-            const { error, paymentIntent } = await stripe.confirmPayment({
-              elements,
-              redirect: "if_required",
-              confirmParams: { return_url: `${window.location.origin}/checkout` },
-            });
-            if (error) {
-              toast.error(error.message || "Payment could not be completed.");
-              return;
-            }
-            if (paymentIntent) onPaid(paymentIntent.id);
-          }}
-        />
-        <div className="my-6 flex items-center gap-4">
-          <span className="h-px flex-1 bg-border" />
-          <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-            Or continue with secure checkout
-          </span>
-          <span className="h-px flex-1 bg-border" />
-        </div>
-      </section>
+      {/* 2 — Delivery & payment options */}
+      {optionsSlot}
 
-      {/* 4 — Payment */}
-      <section className="space-y-4 pt-8">
-        <div className="flex items-end justify-between gap-4 border-b border-border pb-3">
-          <div>
-            <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-              Secure card payment
-            </h2>
-            <p className="mt-1 text-xs text-foreground">Visa · Mastercard · American Express</p>
-          </div>
-          <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-            Powered by Stripe
-          </span>
-        </div>
-        <div className="relative min-h-32">
-          {!paymentReady && (
-            <div
-              className="absolute inset-0 flex flex-col items-center justify-center gap-2 border border-border bg-muted/30"
-              role="status"
-              aria-live="polite"
-            >
-              <span className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                {loadStage === 0 ? "Opening secure Stripe session" : "Preparing card fields"}
-              </span>
-              <span className="h-px w-28 overflow-hidden bg-border">
-                <span className="block h-full w-1/3 animate-pulse bg-foreground" />
-              </span>
-              <span className="text-[10px] text-muted-foreground/70">
-                Secure card form loading — this takes a few seconds
+      {/* 3 — Selected payment panel */}
+      {method === "wallet" ? (
+        <section className="space-y-4 pt-8">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            Pay with your digital wallet
+          </p>
+          <ExpressCheckoutElement
+            options={{ buttonHeight: 48, layout: { maxColumns: 1, maxRows: 3 } }}
+            onConfirm={async () => {
+              if (!stripe || !elements) return;
+              const { error: submitError } = await elements.submit();
+              if (submitError) {
+                toast.error(submitError.message || "Payment could not be completed.");
+                return;
+              }
+              const { error, paymentIntent } = await stripe.confirmPayment({
+                elements,
+                redirect: "if_required",
+                confirmParams: { return_url: `${window.location.origin}/checkout` },
+              });
+              if (error) {
+                toast.error(error.message || "Payment could not be completed.");
+                return;
+              }
+              if (paymentIntent) onPaid(paymentIntent.id);
+            }}
+          />
+          <p className="text-xs text-muted-foreground">
+            Wallet availability depends on your device and browser. Switch to secure card payment if
+            no wallet appears.
+          </p>
+          <ConditionalNotes />
+        </section>
+      ) : (
+        <>
+          <section className="space-y-4 pt-8">
+            <div className="flex items-end justify-between gap-4 border-b border-border pb-3">
+              <div>
+                <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                  Secure card payment
+                </h2>
+                <p className="mt-1 text-xs text-foreground">Visa · Mastercard · American Express</p>
+              </div>
+              <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                Powered by Stripe
               </span>
             </div>
-          )}
-          <div className={cn(!paymentReady && "invisible")}>
-            <PaymentElement
-              options={{ layout: "tabs", paymentMethodOrder: ["card"] }}
-              onReady={() => setPaymentReady(true)}
-            />
-          </div>
-        </div>
-      </section>
+            <div className="relative min-h-32">
+              {!paymentReady && (
+                <div
+                  className="absolute inset-0 flex flex-col items-center justify-center gap-2 border border-border bg-muted/30"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <span className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {loadStage === 0 ? "Opening secure Stripe session" : "Preparing card fields"}
+                  </span>
+                  <span className="h-px w-28 overflow-hidden bg-border">
+                    <span className="block h-full w-1/3 animate-pulse bg-foreground" />
+                  </span>
+                  <span className="text-[10px] text-muted-foreground/70">
+                    Secure card form loading — this takes a few seconds
+                  </span>
+                </div>
+              )}
+              <div className={cn(!paymentReady && "invisible")}>
+                <PaymentElement
+                  options={{ layout: "tabs", paymentMethodOrder: ["card"] }}
+                  onReady={() => setPaymentReady(true)}
+                />
+              </div>
+            </div>
+          </section>
 
-      {/* 5 — Sticky summary & CTA (disabled until card fields are mounted) */}
-      <StickyTotals
-        summary={summary}
-        ready={paymentReady}
-        cta={
-          paymentReady
-            ? `Confirm & securely pay ${money(total, currency)}`
-            : "Preparing secure payment…"
-        }
-        busy={submitting}
-        onSubmit={confirm}
-      />
+          {/* 4 — Sticky summary & CTA (disabled until card fields are mounted) */}
+          <StickyTotals
+            summary={summary}
+            ready={paymentReady}
+            cta={
+              paymentReady
+                ? `Confirm & securely pay ${money(total, currency)}`
+                : "Preparing secure payment…"
+            }
+            busy={submitting}
+            onSubmit={confirm}
+          />
+        </>
+      )}
+
     </>
   );
 }
