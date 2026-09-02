@@ -13,6 +13,7 @@ import { Helmet } from "react-helmet-async";
 import Navigation from "@/components/Navigation";
 import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";
 import StripeBankTransferPanel from "@/components/checkout/StripeBankTransferPanel";
+import { VisaMark, MastercardMark, BankTransferMark } from "@/components/checkout/PaymentMarks";
 import { TransferReferenceNote } from "@/components/checkout/TransferReferenceNote";
 import { useEstimatedShipping, ESTIMATED_SHIPPING_NOTE } from "@/hooks/useShippingCountry";
 import { ArrowLeft } from "lucide-react";
@@ -198,6 +199,15 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
             </dd>
           </div>
         </dl>
+
+        <div
+          aria-label="Accepted payment methods"
+          className="mt-8 flex items-center justify-center gap-10 text-foreground/80 [&_svg]:h-6"
+        >
+          <VisaMark />
+          <MastercardMark />
+          <BankTransferMark />
+        </div>
 
       </div>
     </aside>
