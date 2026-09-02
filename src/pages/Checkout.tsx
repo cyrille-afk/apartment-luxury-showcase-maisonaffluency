@@ -68,7 +68,12 @@ export type CheckoutSummary = {
   discountLabel: string | null;
   shippingCents: number;
   shippingLabel: string | null;
+  /** Base freight estimated from the buyer's country. 0 when unknown. */
+  estimatedShippingCents: number;
+  /** Displayed total — includes the estimated freight when present. */
   totalCents: number;
+  /** Amount actually charged now (excludes unconfirmed estimated freight). */
+  chargeTotalCents: number;
 };
 
 /* Signed-in account confirmation — replaces blank email/name inputs.  */
