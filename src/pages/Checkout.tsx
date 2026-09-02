@@ -1,17 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { Elements, PaymentElement, AddressElement, ExpressCheckoutElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import { Lock, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { cloudinaryUrl } from "@/lib/cloudinary";
 import { getCart, clearCart } from "@/lib/cart";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
 import { useAuth } from "@/hooks/useAuth";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";
 import { ArrowLeft } from "lucide-react";
@@ -24,7 +22,6 @@ import {
 } from "@/lib/checkoutGuardrails";
 
 
-const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 const CONCIERGE_WHATSAPP = "https://wa.me/6591393850";
 const CHECKOUT_KEY = "ma_checkout_line";
 
