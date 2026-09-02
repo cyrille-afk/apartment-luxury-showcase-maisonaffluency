@@ -50,6 +50,13 @@ serve(async (req) => {
         ? body.email.trim().slice(0, 200)
         : userEmail;
     const currency = (typeof body?.currency === "string" ? body.currency : "usd").toLowerCase();
+    // PayNow is Singapore-only and SGD-only (Stripe requirement). Bank
+    // transfers (customer_balance) are not available to SG merchants, so SGD
+    // orders get PayNow instead.
+    const requestedMethod: "card" | "paynow" = body?.paymentMethod === "paynow" ? "paynow" : "card";
+    if (requestedMethod === "paynow" && currency !== "sgd") {
+      return json({ error: "PayNow is available only on SGD-priced orders." }, 400);
+    }
 
     type Item = { title: string; designer: string; finish: string; unitAmount: number; quantity: number };
     const parseItem = (raw: any): Item | null => {
@@ -156,7 +163,8 @@ serve(async (req) => {
         const updatable =
           existing.status === "requires_payment_method" ||
           existing.status === "requires_confirmation";
-        if (updatable && existing.currency === currency) {
+        const sameMethod = (existing.payment_method_types ?? []).includes(requestedMethod);
+        if (updatable && existing.currency === currency && sameMethod) {
           intent = await stripe.paymentIntents.update(reuseId, {
             amount,
             description,
@@ -177,7 +185,7 @@ serve(async (req) => {
         // Card-only keeps the Stripe pane clean: no auto-expanded Link pane.
         // Apple Pay / Google Pay still surface as card wallets via the
         // ExpressCheckoutElement, so express buyers are not affected.
-        payment_method_types: ["card"],
+        payment_method_types: [requestedMethod],
         description,
         metadata,
       });
@@ -189,6 +197,7 @@ serve(async (req) => {
       paymentIntentId: intent.id,
       amount,
       currency,
+      paymentMethod: requestedMethod,
       discountPct,
       discountLabel,
       goodsAmount,
