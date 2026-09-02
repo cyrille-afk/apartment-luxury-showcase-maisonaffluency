@@ -1237,15 +1237,7 @@ export default function Checkout() {
         <div className="min-w-0">
           {(() => {
             const optionsSlot = (
-              <DeliveryPaymentOptions method={method} setMethod={setMethod}>
-                <ShippingQuoteCard
-                  currency={summary.currency}
-                  shipping={shipping}
-                  busy={syncing}
-                  onConfirm={(s) => void syncIntent(s)}
-                  onClear={() => void syncIntent(null)}
-                />
-              </DeliveryPaymentOptions>
+              <DeliveryPaymentOptions method={method} setMethod={setMethod} />
             );
             if (method === "wire") {
               return (
