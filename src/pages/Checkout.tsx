@@ -595,6 +595,11 @@ function WireForm({ lines, summary, account, email, setEmail, onDone }: {
         )}
         <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone" type="tel" inputMode="tel" autoComplete="tel" className={field} />
         <textarea value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Delivery address" rows={3} className="w-full rounded-none border border-border bg-background p-4 text-base outline-none focus:border-foreground" />
+      </section>
+
+      {optionsSlot}
+
+      <section className="pt-8">
         <p className="text-xs text-muted-foreground">
           Our concierge will send fully-insured wiring instructions within one business hour.
         </p>
@@ -606,6 +611,7 @@ function WireForm({ lines, summary, account, email, setEmail, onDone }: {
         onSubmit={submit}
       />
     </>
+
   );
 }
 
