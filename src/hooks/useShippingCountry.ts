@@ -1,5 +1,10 @@
 import { useMemo } from "react";
-import { getEstimatedShipping, getShippingZone } from "@/config/shippingZones";
+import {
+  getEstimatedShipping,
+  getShippingZone,
+  type ShippingEstimateItem,
+} from "@/config/shippingZones";
+
 
 const OVERRIDE_KEY = "ma_shipping_country";
 
