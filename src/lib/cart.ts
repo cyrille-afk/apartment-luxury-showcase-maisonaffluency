@@ -16,6 +16,12 @@ export interface CartItem {
   unitPriceCents: number;
   currency: string;
   quantity: number;
+  /** Original catalogue currency when the line was converted for display. */
+  sourceCurrency?: string | null;
+  /** Unit price in the original catalogue currency (pre-conversion). */
+  sourceUnitPriceCents?: number | null;
+  /** FX rate applied: 1 sourceCurrency = fxRate currency. */
+  fxRate?: number | null;
   /** Freight class hints — drive the shipping estimate multiplier. */
   category?: string | null;
   shippingModifier?: number | null;
