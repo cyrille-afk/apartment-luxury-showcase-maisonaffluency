@@ -849,6 +849,9 @@ export default function Checkout() {
   // Shipping stays "To be Quoted by Advisor" until the buyer confirms an
   // advisor-issued quote; only then is it added to the Stripe payload.
   const [shipping, setShipping] = useState<ConfirmedShipping | null>(null);
+  // Country picked in the "Country or Region" field of the delivery address —
+  // drives the estimated base freight row in the Order Summary.
+  const [formCountry, setFormCountry] = useState<string | null>(null);
   // Signed-in account — replaces blank email/name inputs with a confirmation.
   const { user, isAdmin, isSuperAdmin, isTradeUser } = useAuth();
   const account = user?.email
