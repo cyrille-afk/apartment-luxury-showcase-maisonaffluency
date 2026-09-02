@@ -179,7 +179,7 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
               )}
             </div>
             {summary.shippingCents === 0 && summary.estimatedShippingCents > 0 && (
-              <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+              <p className="mt-1.5 italic font-light text-[10px] tracking-[0.06em] text-muted-foreground">
                 {ESTIMATED_SHIPPING_NOTE}
               </p>
             )}
@@ -318,6 +318,7 @@ function PaymentForm({
   onPaid,
   method,
   optionsSlot,
+  onCountryChange,
 }: {
   summary: CheckoutSummary;
   account: { email: string; role: string } | null;
@@ -326,6 +327,7 @@ function PaymentForm({
   onPaid: (ref: string) => void;
   method: PaymentMethod;
   optionsSlot: React.ReactNode;
+  onCountryChange?: (code: string | null) => void;
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -391,6 +393,9 @@ function PaymentForm({
             display: { name: "full" },
             fields: { phone: "always" },
             autocomplete: { mode: "automatic" },
+          }}
+          onChange={(e) => {
+            onCountryChange?.(e.value?.address?.country || null);
           }}
         />
       </section>
@@ -844,6 +849,9 @@ export default function Checkout() {
   // Shipping stays "To be Quoted by Advisor" until the buyer confirms an
   // advisor-issued quote; only then is it added to the Stripe payload.
   const [shipping, setShipping] = useState<ConfirmedShipping | null>(null);
+  // Country picked in the "Country or Region" field of the delivery address —
+  // drives the estimated base freight row in the Order Summary.
+  const [formCountry, setFormCountry] = useState<string | null>(null);
   // Signed-in account — replaces blank email/name inputs with a confirmation.
   const { user, isAdmin, isSuperAdmin, isTradeUser } = useAuth();
   const account = user?.email
@@ -866,6 +874,7 @@ export default function Checkout() {
       quantity: lineQty(l),
       unitPriceCents: l.unitCents,
     })),
+    formCountry,
   );
   const summary = useMemo<CheckoutSummary | null>(() => {
     if (!grossLines?.length) return null;
@@ -1255,6 +1264,7 @@ export default function Checkout() {
                     email={email}
                     setEmail={setEmail}
                     onPaid={completeOrder}
+                    onCountryChange={setFormCountry}
                     method={method}
                     optionsSlot={optionsSlot}
                   />
