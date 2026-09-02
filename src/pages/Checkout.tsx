@@ -16,7 +16,7 @@ import StripeBankTransferPanel from "@/components/checkout/StripeBankTransferPan
 import { VisaMark, MastercardMark, BankTransferMark } from "@/components/checkout/PaymentMarks";
 import { TransferReferenceNote } from "@/components/checkout/TransferReferenceNote";
 import { useEstimatedShipping, ESTIMATED_SHIPPING_NOTE } from "@/hooks/useShippingCountry";
-import { getCurrentDestination } from "@/lib/shippingDestination";
+import { getCurrentDestination, useShippingDestination } from "@/lib/shippingDestination";
 import { ArrowLeft } from "lucide-react";
 import {
   assertCheckoutCopy,
@@ -346,6 +346,13 @@ function PaymentForm({
 }) {
   const stripe = useStripe();
   const elements = useElements();
+  // Header / "Shipping destination & currency" modal selection. Saving there
+  // must immediately drive both the address field and the freight estimate.
+  const destination = useShippingDestination();
+  useEffect(() => {
+    onCountryChange?.(destination.iso);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [destination.iso]);
   const [submitting, setSubmitting] = useState(false);
   const [paymentReady, setPaymentReady] = useState(false);
   // Staged messaging so the wait for Stripe's iframe is legible, not a blank gap.
@@ -403,13 +410,16 @@ function PaymentForm({
           />
         )}
         <AddressElement
+          // Remount when the header/modal destination changes so the
+          // "Country or Region" field snaps to the newly saved country.
+          key={destination.iso}
           options={{
             mode: "shipping",
             display: { name: "full" },
             fields: { phone: "always" },
             autocomplete: { mode: "automatic" },
             // Carry the country chosen in the cart forward so freight stays consistent.
-            defaultValues: { address: { country: getCurrentDestination().iso } },
+            defaultValues: { address: { country: destination.iso } },
           }}
 
           onChange={(e) => {
