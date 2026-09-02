@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { Elements, PaymentElement, AddressElement, ExpressCheckoutElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
-import { Lock, Check, Loader2 } from "lucide-react";
+import { Lock, Check, Loader2, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -172,9 +172,6 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
           </div>
         </dl>
 
-        <p className="mt-6 text-center font-body text-[10px] font-light uppercase tracking-[0.24em] text-muted-foreground">
-          Secure Card Payment
-        </p>
       </div>
     </aside>
   );
@@ -512,6 +509,72 @@ function StickyTotals({
 /* ------------------------------------------------------------------ */
 /* Wire transfer form                                                  */
 /* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ */
+/* Bank details — replace placeholder values with live credentials.    */
+/* ------------------------------------------------------------------ */
+const BANK_DETAILS: { label: string; value: string; copyable?: boolean }[] = [
+  { label: "Beneficiary Name", value: "Maison Affluency Pte. Ltd." },
+  { label: "Bank Name", value: "DBS Bank" },
+  { label: "Bank Address", value: "12 Marina Boulevard, Marina Bay Financial Centre, Singapore 018982" },
+  { label: "Account Number / IBAN", value: "000-000-000-0", copyable: true },
+  { label: "SWIFT / BIC Code", value: "DBSSSGSGXXX", copyable: true },
+];
+
+function WireDetailsGrid() {
+  return (
+    <div className="w-full border border-neutral-200">
+      {BANK_DETAILS.map((row, i) => (
+        <div
+          key={row.label}
+          className={cn(
+            "flex items-center justify-between gap-x-6 gap-y-1 px-5 py-4",
+            i > 0 && "border-t border-neutral-100",
+          )}
+        >
+          <span className="flex-none text-[10px] font-light uppercase tracking-[0.22em] text-muted-foreground">
+            {row.label}
+          </span>
+          <span className="flex min-w-0 items-center justify-end gap-3 text-right">
+            <span className="truncate text-sm font-light">{row.value}</span>
+            {row.copyable && <CopyButton value={row.value} label={row.label} />}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CopyButton({ value, label }: { value: string; label: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      aria-label={`Copy ${label}`}
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(value);
+          setCopied(true);
+          toast.success(`${label} copied`);
+          setTimeout(() => setCopied(false), 2000);
+        } catch {
+          toast.error("Unable to copy — please select the text manually.");
+        }
+      }}
+      className={cn(
+        "flex-none rounded-none border p-1.5 transition-colors",
+        copied
+          ? "border-foreground text-foreground"
+          : "border-neutral-200 text-muted-foreground hover:border-foreground hover:text-foreground",
+      )}
+    >
+      {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+    </button>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Bank wire — payment by transfer, no card data collected             */
+/* ------------------------------------------------------------------ */
 function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlot }: {
   lines: CheckoutLine[];
   summary: CheckoutSummary;
@@ -592,10 +655,11 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
 
       {optionsSlot}
 
-      <section className="pt-8">
+      <section className="space-y-5 pt-8">
         <p className="text-xs text-muted-foreground">
-          Our concierge will send fully-insured wiring instructions within one business hour.
+          Our concierge will also email these fully-insured wiring instructions within one business hour.
         </p>
+        <WireDetailsGrid />
       </section>
       <StickyTotals
         summary={summary}
