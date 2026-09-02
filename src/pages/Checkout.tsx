@@ -73,6 +73,8 @@ export type CheckoutSummary = {
   shippingLabel: string | null;
   /** Base freight estimated from the buyer's country. 0 when unknown. */
   estimatedShippingCents: number;
+  /** Display name of the matched shipping zone (e.g. "Asia Pacific"). */
+  shippingZoneLabel: string | null;
   /** Displayed total — includes the estimated freight when present. */
   totalCents: number;
   /** Amount actually charged now (excludes unconfirmed estimated freight). */
@@ -895,10 +897,11 @@ export default function Checkout() {
       shippingCents,
       shippingLabel: shipping?.label ?? null,
       estimatedShippingCents,
+      shippingZoneLabel: estimate.zoneLabel ?? null,
       totalCents: chargeTotalCents + estimatedShippingCents,
       chargeTotalCents,
     };
-  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents]);
+  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel]);
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [email, setEmail] = useState("");
