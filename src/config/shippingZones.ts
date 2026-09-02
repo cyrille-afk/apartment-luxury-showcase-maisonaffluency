@@ -147,7 +147,11 @@ export function getEstimatedShipping(
     // insurance and handling than their volumetric class suggests.
     const value = item.unitPriceCents != null ? item.unitPriceCents / 100 : 0;
     if (value > 0) {
-      perUnit = Math.max(perUnit, Math.min(zone.baseRate, value * VALUE_SHARE_FLOOR));
+      const classRate = zone.baseRate * modifier;
+      perUnit = Math.max(
+        perUnit,
+        Math.min(value * VALUE_SHARE_FLOOR, classRate * 1.5, zone.baseRate),
+      );
     }
     total += perUnit * qty;
   }
