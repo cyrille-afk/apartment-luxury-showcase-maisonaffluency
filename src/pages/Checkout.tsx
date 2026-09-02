@@ -84,76 +84,100 @@ function AccountBlock({ email, role }: { email: string; role: string }) {
 /* ------------------------------------------------------------------ */
 function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: CheckoutSummary }) {
   const { currency } = summary;
-  const pieces = lines.reduce((n, l) => n + lineQty(l), 0);
 
   return (
-    <aside className="h-fit border border-border bg-background p-6 lg:sticky lg:top-8">
-      <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-        Order summary · {lines.length} {lines.length === 1 ? "item" : "items"}
-        {pieces !== lines.length ? ` · ${pieces} pieces` : ""}
-      </p>
+    <aside className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] h-fit">
+      <div className="border border-border/70 px-7 py-8">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-display text-xl">Order Summary</h2>
+          <AccountPricingBadge />
+        </div>
 
-      <ul className="mt-5 divide-y divide-border/50">
-        {lines.map((line, i) => (
-          <li key={`${line.title}-${line.finishLabel || ""}-${i}`} className="flex gap-4 py-4 first:pt-0">
-            {line.imageUrl && (
-              <img
-                src={line.imageUrl}
-                alt={line.title}
-                className="h-20 w-20 flex-none object-cover"
-                loading="lazy"
-              />
-            )}
-            <div className="min-w-0 flex-1 text-sm">
-              {line.designer && (
-                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                  {line.designer}
+        <ul className="mt-6 space-y-4">
+          {lines.map((line, i) => (
+            <li
+              key={`${line.title}-${line.finishLabel || ""}-${i}`}
+              className="flex gap-4 border-b border-border/60 pb-4 last:border-0 last:pb-0"
+            >
+              <div className="w-16 shrink-0 bg-cream">
+                {line.imageUrl ? (
+                  <img
+                    src={line.imageUrl}
+                    alt={line.title}
+                    loading="lazy"
+                    className="w-16 h-16 object-contain"
+                  />
+                ) : (
+                  <div className="w-16 h-16" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                {line.designer && (
+                  <p className="font-body font-light text-[9px] uppercase tracking-[0.24em] text-muted-foreground">
+                    {line.designer}
+                  </p>
+                )}
+                <p className="font-display text-sm mt-1 truncate">{line.title}</p>
+                {line.finishLabel && (
+                  <p className="font-body text-[11px] text-muted-foreground mt-1 line-clamp-2">
+                    {line.finishLabel}
+                  </p>
+                )}
+                {line.leadTime && (
+                  <p className="font-body text-[11px] text-muted-foreground mt-1">
+                    Lead time · {line.leadTime}
+                  </p>
+                )}
+                <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-1">
+                  Qty {lineQty(line)}
                 </p>
-              )}
-              <p className="truncate font-light">{line.title}</p>
-              {line.finishLabel && (
-                <p className="mt-1 text-xs text-muted-foreground">{line.finishLabel}</p>
-              )}
-              {line.leadTime && (
-                <p className="mt-1 text-xs text-muted-foreground">Lead time · {line.leadTime}</p>
-              )}
-              {/* Standard catalogue unit price — never a discounted rate */}
-              <p className="mt-2 text-xs text-muted-foreground">
-                {money(line.unitCents, line.currency)} × {lineQty(line)}
+              </div>
+              <p className="font-body text-sm tabular-nums shrink-0">
+                {money(lineSubtotal(line), line.currency)}
               </p>
-            </div>
-            <div className="flex-none text-sm">{money(lineSubtotal(line), line.currency)}</div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
 
-      <dl className="mt-4 space-y-2 border-t border-border/60 pt-4 text-sm">
-        <div className="flex justify-between">
-          <dt className="text-muted-foreground">Subtotal</dt>
-          <dd>{money(summary.subtotalCents, currency)}</dd>
-        </div>
-        {summary.discountCents > 0 && summary.discountLabel && (
-          <div className="flex justify-between">
-            <dt className="text-muted-foreground">{summary.discountLabel}</dt>
-            <dd>−{money(summary.discountCents, currency)}</dd>
+        <dl className="mt-7 space-y-4 font-body text-sm border-t border-border pt-6">
+          <div className="flex items-baseline justify-between">
+            <dt className="text-muted-foreground">Subtotal</dt>
+            <dd className="tabular-nums">{money(summary.subtotalCents, currency)}</dd>
           </div>
-        )}
-        {summary.shippingCents > 0 && (
-          <div className="flex justify-between">
+          {summary.discountCents > 0 && summary.discountLabel && (
+            <div className="flex items-baseline justify-between gap-6">
+              <dt className="text-muted-foreground">{summary.discountLabel}</dt>
+              <dd className="tabular-nums text-foreground">
+                −{money(summary.discountCents, currency)}
+              </dd>
+            </div>
+          )}
+          <div className="flex items-baseline justify-between gap-6">
             <dt className="text-muted-foreground">
-              {summary.shippingLabel || "Delivery & installation"}
+              {summary.shippingLabel || "Front Door Premium Delivery"}
             </dt>
-            <dd>{money(summary.shippingCents, currency)}</dd>
+            {summary.shippingCents > 0 ? (
+              <dd className="tabular-nums">{money(summary.shippingCents, currency)}</dd>
+            ) : (
+              <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
+            )}
           </div>
-        )}
-        <div className="flex justify-between border-t border-border/60 pt-3 text-base">
-          <dt>Order total</dt>
-          <dd>{money(summary.totalCents, currency)}</dd>
-        </div>
-      </dl>
+          <div className="flex items-baseline justify-between border-t border-border pt-4">
+            <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
+            <dd className="tabular-nums font-medium text-base">
+              {money(summary.totalCents, currency)}
+            </dd>
+          </div>
+        </dl>
+
+        <p className="mt-6 text-center font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          Secure Card Payment
+        </p>
+      </div>
     </aside>
   );
 }
+
 
 /* ------------------------------------------------------------------ */
 /* Conditional charges — shown so nothing is a surprise later          */
