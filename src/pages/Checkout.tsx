@@ -1264,6 +1264,7 @@ export default function Checkout() {
                     email={email}
                     setEmail={setEmail}
                     onPaid={completeOrder}
+                    onCountryChange={setFormCountry}
                     method={method}
                     optionsSlot={optionsSlot}
                   />
