@@ -179,7 +179,7 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
               )}
             </div>
             {summary.shippingCents === 0 && summary.estimatedShippingCents > 0 && (
-              <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+              <p className="mt-1.5 italic font-light text-[10px] tracking-[0.06em] text-muted-foreground">
                 {ESTIMATED_SHIPPING_NOTE}
               </p>
             )}
