@@ -218,6 +218,9 @@ serve(async (req) => {
       goodsAmount,
       shippingCents,
       shippingLabel,
+      taxCents,
+      taxLabel: gstApplies ? "GST (9%)" : null,
+
     });
   } catch (err) {
     console.error("[create-payment-intent] error", err);
