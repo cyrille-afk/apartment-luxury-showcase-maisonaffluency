@@ -1805,27 +1805,25 @@ const TradeProductPage: React.FC = () => {
 
 
     return (
-      <div className="w-full bg-neutral-50 border border-border rounded-none px-4 py-3.5">
-        {/* Cohesive pricing bar — net price anchored left, struck retail +
-            tier badge anchored right as one standard flex row. The box's own
-            px-4 padding is the only right inset, so the pair can never bleed
-            past the inner border edge; the right pair is a single shrink-0
-            flex child inside a justify-between row (no absolute positioning). */}
-        <div className="flex items-baseline justify-between gap-3">
-          <span className="font-display text-2xl text-accent font-semibold leading-none whitespace-nowrap min-w-0">
-            {prefix}{formatted}
-          </span>
-          {showTradePrice && (
-            <span className="flex items-baseline justify-end gap-2.5 shrink-0">
-              <span className="font-body text-[13px] text-muted-foreground line-through whitespace-nowrap">
-                {prefix}{formatPriceConverted(rrp + upcharge, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined)}
-              </span>
-              <span className="font-body text-[10px] bg-accent/15 text-accent px-2 py-0.5 uppercase tracking-[0.14em] whitespace-nowrap" title={`${tierLabel} tier — ${discountLabel} trade discount`}>
-                {tierLabel} –{discountLabel}
-              </span>
+      <div>
+        {/* Headline price — identical to the designer-side trade sheet:
+            net trade price with the struck retail rate underneath. */}
+        <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
+          {prefix && (
+            <span className="text-muted-foreground text-[11px] uppercase tracking-[0.22em] align-middle mr-2">
+              {prefix.trim()}
             </span>
           )}
-        </div>
+          <span className="text-foreground align-middle">{netLabel}</span>
+          <span className="ml-2 align-middle font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            Net Trade Price
+          </span>
+        </p>
+        {retailLabel && (
+          <p className="mt-1 font-body text-[11px] tracking-[0.04em] text-muted-foreground">
+            <span className="line-through decoration-muted-foreground/50">Retail: {retailLabel}</span>
+          </p>
+        )}
         {(selectedWoodPrice || selectedFabric || (!selectedWoodPrice && !selectedFabric && (selectedTop || (isDualAxis && selectedBase && !baseAxisIsDim && !isFinishAxisLabel(baseAxisLabelRaw) ? false : selectedBase)))) && (
           <span className="block mt-2 font-body text-[10px] tracking-[0.06em] text-muted-foreground leading-snug">
             {selectedWoodPrice && (
@@ -1855,14 +1853,10 @@ const TradeProductPage: React.FC = () => {
             })()}
           </span>
         )}
-        <button
-          onClick={() => setShowTradePrice(!showTradePrice)}
-          className="mt-2 font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
-        >
-          Show {showTradePrice ? "retail" : "trade"} price
-        </button>
+        <ShippingDetailsAccordion />
       </div>
     );
+
   };
 
   // Sample request deep-link to Procurement
