@@ -207,7 +207,14 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
             )}
             <RegionalLogisticsNote compact className="mt-2" />
           </div>
+          {summary.taxCents > 0 && summary.taxLabel && (
+            <div className="flex items-baseline justify-between gap-6">
+              <dt className="text-muted-foreground">{summary.taxLabel}</dt>
+              <dd className="tabular-nums">{money(summary.taxCents, currency)}</dd>
+            </div>
+          )}
           <div className="border-t border-border pt-4">
+
             <div className="flex items-baseline justify-between">
               <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
               <dd className="tabular-nums font-medium text-base">
