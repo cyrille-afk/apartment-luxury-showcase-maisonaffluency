@@ -29,6 +29,20 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
 
+    // Auth required: sending invoices (and writing to private storage) must
+    // never be possible anonymously.
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return json({ error: "Authentication required." }, 401);
+    }
+    const anon = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_ANON_KEY") ?? "");
+    const { data: claims, error: claimsErr } = await anon.auth.getClaims(authHeader.replace("Bearer ", ""));
+    const sub = (claims?.claims as Record<string, unknown> | undefined)?.sub;
+    if (claimsErr || !sub) {
+      return json({ error: "Invalid or expired session." }, 401);
+    }
+    const userId = String(sub);
+
     const body = await req.json().catch(() => ({}));
     const orderRef = str(body?.orderRef, 64);
     const orderId = str(body?.orderId, 64);
@@ -41,6 +55,24 @@ serve(async (req) => {
 
     if (!orderRef || !recipientEmail.includes("@")) {
       return json({ error: "Order reference and a valid email are required." }, 400);
+    }
+
+    // Authorization: the caller must own the order, or hold an admin/trade role.
+    const { data: orderRow } = await supabase
+      .from("shop_orders")
+      .select("user_id")
+      .eq("order_ref", orderRef)
+      .maybeSingle();
+    const isOwner = orderRow?.user_id != null && orderRow.user_id === userId;
+    const { data: isStaff } = await supabase.rpc("has_any_role", {
+      _user_id: userId,
+      _roles: ["admin", "super_admin", "trade_user"],
+    }).then(
+      (r) => r,
+      () => ({ data: false }),
+    );
+    if (!isOwner && !isStaff) {
+      return json({ error: "You are not authorized to invoice this order." }, 403);
     }
 
     /* Store the PDF (best effort — never block the email on storage). */
