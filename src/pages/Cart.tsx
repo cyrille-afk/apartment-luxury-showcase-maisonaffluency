@@ -372,9 +372,18 @@ export default function Cart() {
                   </div>
 
 
-                  <div className="flex items-baseline justify-between border-t border-border pt-4">
-                    <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
-                    <dd className="tabular-nums font-medium text-base">{formatMoney(total, currency)}</dd>
+                  <div className="border-t border-border pt-4">
+                    <div className="flex items-baseline justify-between">
+                      <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
+                      <dd className="tabular-nums font-medium text-base">{formatMoney(total, currency)}</dd>
+                    </div>
+                    {freightEstimate.cents > 0 && (
+                      <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                        Payable now. With estimated freight ·{" "}
+                        {formatMoney(estimatedGrandTotal, currency)} — freight invoiced separately once
+                        confirmed by your advisor.
+                      </p>
+                    )}
                   </div>
                 </dl>
 
