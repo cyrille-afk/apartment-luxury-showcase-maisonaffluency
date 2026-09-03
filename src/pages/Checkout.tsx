@@ -943,6 +943,8 @@ export default function Checkout() {
   const { pct: hookDiscountPct, label: discountRowLabel } = useAccountDiscount();
   const [serverDiscountPct, setServerDiscountPct] = useState<number | null>(null);
   const effectiveDiscountPct = serverDiscountPct ?? hookDiscountPct;
+  // Tax returned by the PaymentIntent — authoritative over the local estimate.
+  const [serverTax, setServerTax] = useState<{ cents: number; label: string | null } | null>(null);
   // Shipping stays "To be Quoted by Advisor" until the buyer confirms an
   // advisor-issued quote; only then is it added to the Stripe payload.
   const [shipping, setShipping] = useState<ConfirmedShipping | null>(null);
@@ -985,11 +987,15 @@ export default function Checkout() {
     // to the shown Order Total, but never charged until an advisor confirms it.
     const estimatedShippingCents = shippingCents > 0 ? 0 : estimate.cents;
     const netCents = subtotalCents - discountCents + shippingCents;
-    // Singapore GST (9%) applies only to domestic SGD deliveries.
-    const gst = isSingaporeGstOrder(formCountry, currency);
-    const taxCents = gst ? Math.round(netCents * SG_GST_RATE) : 0;
+    // Tax follows the configurable rules (destination + currency must match).
+    const rule = resolveTaxRule(formCountry, currency);
+    const localTaxCents = computeTaxCents(subtotalCents - discountCents, shippingCents, rule);
+    // The PaymentIntent is authoritative: once the server has priced the order
+    // the displayed tax and total equal the amount actually charged.
+    const taxCents = serverTax !== null ? serverTax.cents : localTaxCents;
     const chargeTotalCents = netCents + taxCents;
-    const estimatedTaxCents = gst ? Math.round(estimatedShippingCents * SG_GST_RATE) : 0;
+    const estimatedTaxCents =
+      rule && rule.taxShipping ? Math.round(estimatedShippingCents * rule.rate) : 0;
     return {
       currency,
       subtotalCents,
@@ -1000,7 +1006,7 @@ export default function Checkout() {
       estimatedShippingCents,
       shippingZoneLabel: estimate.zoneLabel ?? null,
       taxCents,
-      taxLabel: gst ? `GST (${Math.round(SG_GST_RATE * 100)}%)` : null,
+      taxLabel: taxCents > 0 ? (serverTax?.label ?? (rule ? taxRowLabel(rule) : null)) : null,
       totalCents: chargeTotalCents + estimatedShippingCents + estimatedTaxCents,
       chargeTotalCents,
     };
