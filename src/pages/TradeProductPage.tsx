@@ -17,7 +17,7 @@ import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { formatProductSubtitleLine } from "@/lib/subtitleDisplay";
 import {
-  Heart, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box,
+  Heart, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box, Minus, Plus, Pin,
 } from "lucide-react";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { useQuery } from "@tanstack/react-query";
@@ -28,6 +28,10 @@ import ShareMenu from "@/components/ShareMenu";
 import CornerTooltip from "@/components/product/CornerTooltip";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
+import ShippingDetailsAccordion from "@/components/product/ShippingDetailsAccordion";
+import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
+import FinishesPdfButton from "@/components/product/FinishesPdfButton";
+
 import ActiveSwatchCaption from "@/components/product/ActiveSwatchCaption";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import CadAssetsSection from "@/components/trade/CadAssetsSection";
@@ -518,6 +522,9 @@ const TradeProductPage: React.FC = () => {
   // Variant A and Variant B always resolve identical figures. Falls back to the
   // tier hook when this layout is rendered outside the container.
   const productConfig = useProductConfigOptional();
+  const [localQuantity, setLocalQuantity] = useState(1);
+  const quantity = productConfig ? productConfig.quantity : localQuantity;
+  const setQuantity = productConfig ? productConfig.setQuantity : setLocalQuantity;
   const tierFallback = useTradeDiscount();
   const TRADE_DISCOUNT = productConfig?.tierDiscountPct ?? tierFallback.discountPct;
   const discountLabel = productConfig?.discountLabel ?? tierFallback.discountLabel;
@@ -1751,7 +1758,7 @@ const TradeProductPage: React.FC = () => {
       leadTime: product.lead_time || null,
       unitPriceCents: converted,
       currency: tgtCcy,
-      quantity: 1,
+      quantity,
       sourceCurrency: didConvert ? srcCcy : null,
       sourceUnitPriceCents: didConvert ? unit : null,
       fxRate: didConvert ? fxRates[`${srcCcy}_${tgtCcy}`] ?? converted / unit : null,
@@ -1759,20 +1766,21 @@ const TradeProductPage: React.FC = () => {
     navigate("/cart");
   };
 
-  const renderPrice = () => {
-
+  /**
+   * Shared price maths for both the headline price line and the boxed action
+   * panel, so the trade catalogue sheet reads exactly like the designer-side
+   * trade sheet (net trade price + struck retail).
+   */
+  const priceLabels = (() => {
     if (!pricing || !effectiveRrpCents) return null;
     // When a wood-finish swatch carries a frame-price override, it becomes
     // the RRP base; otherwise fall back to the size_variants base.
     let rrp = effectiveRrpCents;
     if (selectedWoodPrice?.price_cents && selectedWoodPrice.price_cents > 0) {
-      const woodCents = selectedWoodPrice.currency === pricing.currency
+      rrp = selectedWoodPrice.currency === pricing.currency
         ? selectedWoodPrice.price_cents
         : convertCents(selectedWoodPrice.price_cents, selectedWoodPrice.currency, pricing.currency as DisplayCurrency, fxRates);
-      rrp = woodCents;
     }
-    const trade = Math.round(rrp * (1 - TRADE_DISCOUNT));
-    const cents = showTradePrice ? trade : rrp;
     // Add the fabric per-LM upcharge on top. The upcharge sits in the fabric's
     // currency; convert to the product currency when they differ.
     let upcharge = 0;
@@ -1782,37 +1790,47 @@ const TradeProductPage: React.FC = () => {
         ? fabricUpchargeCentsRaw
         : convertCents(fabricUpchargeCentsRaw, fromCcy, pricing.currency as DisplayCurrency, fxRates);
     }
-    const centsWithFabric = cents + upcharge;
-    const formatted = formatPriceConverted(centsWithFabric, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined);
+    const retailCents = rrp + upcharge;
+    const netCents = Math.round(rrp * (1 - TRADE_DISCOUNT)) + upcharge;
     // Once the user has made a concrete fabric or wood-frame selection, the
-    // price is fully resolved — never show "From" (whether it comes from the
-    // explicit curator prefix or the dual-axis fallback).
+    // price is fully resolved — never show "From".
     const hasConcreteSelection = !!selectedFabric || !!selectedWoodPrice || !!activeVariant;
     const explicitPrefix = pricing.price_prefix && !hasConcreteSelection ? `${pricing.price_prefix} ` : "";
     const prefix = explicitPrefix || (isFromPrice && !hasConcreteSelection ? "From " : "");
+    const unit = pricing.price_unit || undefined;
+    return {
+      prefix,
+      upcharge,
+      netLabel: formatPriceConverted(netCents, pricing.currency, displayCurrency, fxRates, unit),
+      retailLabel: formatPriceConverted(retailCents, pricing.currency, displayCurrency, fxRates, unit),
+    };
+  })();
+
+  const renderPrice = () => {
+    if (!priceLabels) return null;
+    const { prefix, netLabel, retailLabel, upcharge } = priceLabels;
+
 
     return (
-      <div className="w-full bg-neutral-50 border border-border rounded-none px-4 py-3.5">
-        {/* Cohesive pricing bar — net price anchored left, struck retail +
-            tier badge anchored right as one standard flex row. The box's own
-            px-4 padding is the only right inset, so the pair can never bleed
-            past the inner border edge; the right pair is a single shrink-0
-            flex child inside a justify-between row (no absolute positioning). */}
-        <div className="flex items-baseline justify-between gap-3">
-          <span className="font-display text-2xl text-accent font-semibold leading-none whitespace-nowrap min-w-0">
-            {prefix}{formatted}
-          </span>
-          {showTradePrice && (
-            <span className="flex items-baseline justify-end gap-2.5 shrink-0">
-              <span className="font-body text-[13px] text-muted-foreground line-through whitespace-nowrap">
-                {prefix}{formatPriceConverted(rrp + upcharge, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined)}
-              </span>
-              <span className="font-body text-[10px] bg-accent/15 text-accent px-2 py-0.5 uppercase tracking-[0.14em] whitespace-nowrap" title={`${tierLabel} tier — ${discountLabel} trade discount`}>
-                {tierLabel} –{discountLabel}
-              </span>
+      <div>
+        {/* Headline price — identical to the designer-side trade sheet:
+            net trade price with the struck retail rate underneath. */}
+        <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
+          {prefix && (
+            <span className="text-muted-foreground text-[11px] uppercase tracking-[0.22em] align-middle mr-2">
+              {prefix.trim()}
             </span>
           )}
-        </div>
+          <span className="text-foreground align-middle">{netLabel}</span>
+          <span className="ml-2 align-middle font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            Net Trade Price
+          </span>
+        </p>
+        {retailLabel && (
+          <p className="mt-1 font-body text-[11px] tracking-[0.04em] text-muted-foreground">
+            <span className="line-through decoration-muted-foreground/50">Retail: {retailLabel}</span>
+          </p>
+        )}
         {(selectedWoodPrice || selectedFabric || (!selectedWoodPrice && !selectedFabric && (selectedTop || (isDualAxis && selectedBase && !baseAxisIsDim && !isFinishAxisLabel(baseAxisLabelRaw) ? false : selectedBase)))) && (
           <span className="block mt-2 font-body text-[10px] tracking-[0.06em] text-muted-foreground leading-snug">
             {selectedWoodPrice && (
@@ -1842,14 +1860,10 @@ const TradeProductPage: React.FC = () => {
             })()}
           </span>
         )}
-        <button
-          onClick={() => setShowTradePrice(!showTradePrice)}
-          className="mt-2 font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
-        >
-          Show {showTradePrice ? "retail" : "trade"} price
-        </button>
+        <ShippingDetailsAccordion />
       </div>
     );
+
   };
 
   // Sample request deep-link to Procurement
@@ -2077,7 +2091,18 @@ const TradeProductPage: React.FC = () => {
             </div>
 
 
+            {/* Headline trade price — sits above the finish selectors on
+                desktop, exactly like the designer-side trade sheet. */}
+            {effectiveRrpCents ? (
+              <div className="order-[-3] md:order-none">{renderPrice()}</div>
+            ) : (
+              <p className="font-body text-sm text-muted-foreground italic order-[-3] md:order-none">
+                Price upon Request
+              </p>
+            )}
+
             {/* Finish selection — mobile: directly under the photography */}
+
             <div className="flex flex-col gap-2 order-[-5] md:order-none">
               <FinishSelector
                   pickId={product.id}
@@ -2389,102 +2414,155 @@ const TradeProductPage: React.FC = () => {
               <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" />
             </div>
 
-            {/* Trade price + retail/trade toggle (size driven by selector above) */}
-        {effectiveRrpCents ? (
-              <div className="order-[-3] md:order-none">
-                {renderPrice()}
-              </div>
-            ) : (
-              <p className="font-body text-sm text-muted-foreground italic order-[-3] md:order-none">Price upon Request</p>
-            )}
 
 
-            {/* ===== Primary action block — CTA, utility links, secondary stack ===== */}
+
+
+            {/* ===== Primary action block — boxed panel identical to the
+                designer-side trade sheet (lead time, price, quantity, CTAs,
+                utility links), followed by the trade-only secondary stack. */}
             <div className="flex flex-col gap-2.5">
-              {/* Primary CTA — direct order at the net trade rate */}
-              <button
-                onClick={handleProceedToOrder}
-                className="flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
-              >
-                <ShoppingCart size={14} />
-                Proceed to Order
-              </button>
-
-              {/* Secondary — co-pilot workspace (quote) */}
-              <button
-                onClick={handleAddToQuote}
-                disabled={adding}
-                className={cn(
-                  "flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full border",
-                  added
-                    ? "border-emerald-600 text-emerald-700 bg-background"
-                    : "border-foreground/40 bg-background text-foreground hover:bg-muted/60",
-                  adding && "opacity-60"
+              <div className="flex flex-col gap-3 rounded-none border border-border/60 bg-muted/30 p-5 md:p-6">
+                {product.lead_time && (
+                  <p className="font-body text-[11px] uppercase tracking-widest text-neutral-500">
+                    Production lead time: {String(product.lead_time).replace(/^lead\s*time:?\s*/i, "")}
+                  </p>
                 )}
-              >
-                {adding ? (
-                  <DotCircleLoader size="sm" />
-                ) : added ? (
-                  <Check size={14} />
-                ) : null}
-                {added ? "Added to Co-Pilot Workspace" : "Add to Co-Pilot Workspace"}
-              </button>
 
+                {priceLabels && (
+                  <div className="flex flex-col gap-1">
+                    {priceLabels.retailLabel && (
+                      <p className="font-body text-[11px] tracking-[0.04em] text-muted-foreground line-through decoration-muted-foreground/50">
+                        Retail: {priceLabels.prefix}{priceLabels.retailLabel}
+                      </p>
+                    )}
+                    <p className="font-display text-2xl leading-none text-foreground">
+                      {priceLabels.prefix}{priceLabels.netLabel}{" "}
+                      <span className="font-body text-xs tracking-widest uppercase text-muted-foreground">
+                        Net Trade Price
+                      </span>
+                    </p>
+                  </div>
+                )}
 
-            {finishesMissingImages.length > 0 && (
-              <p className="font-body text-[11px] text-muted-foreground -mt-1 italic">
-                Heads up — no reference image on file for{" "}
-                <span className="text-foreground">{finishesMissingImages.join(", ")}</span>. A note
-                will be attached to the quote so our concierge can confirm visuals.
-              </p>
-            )}
+                {/* Quantity */}
+                <div className="flex items-center justify-between border-y border-border/50 py-2.5">
+                  <span className="font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    Quantity:
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      aria-label="Decrease quantity"
+                      disabled={quantity <= 1}
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="flex h-8 w-8 items-center justify-center rounded-none border border-transparent text-foreground transition-all hover:border-border hover:bg-muted/50 disabled:opacity-30"
+                    >
+                      <Minus className="h-4 w-4" strokeWidth={1.75} />
+                    </button>
+                    <span className="min-w-8 text-center font-body text-sm font-medium tabular-nums text-foreground">
+                      {quantity}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label="Increase quantity"
+                      disabled={quantity >= 99}
+                      onClick={() => setQuantity(Math.min(99, quantity + 1))}
+                      className="flex h-8 w-8 items-center justify-center rounded-none border border-transparent text-foreground transition-all hover:border-border hover:bg-muted/50 disabled:opacity-30"
+                    >
+                      <Plus className="h-4 w-4" strokeWidth={1.75} />
+                    </button>
+                  </div>
+                </div>
 
-              {/* Utility links — centered, micro-typography, pipe-separated */}
-              <div className="flex items-center justify-center gap-3">
+                {/* Primary CTA — direct order at the net trade rate */}
                 <button
-                  onClick={() => togglePin(compareItem)}
-                  className={cn(
-                    "font-body text-[10px] uppercase tracking-[0.16em] transition-colors",
-                    pinned
-                      ? "text-[hsl(var(--gold))]"
-                      : "text-muted-foreground hover:text-foreground",
-                    compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
-                  )}
+                  onClick={handleProceedToOrder}
+                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
                 >
-                  {pinned ? "Pinned" : "Pin to Selection"}
+                  <ShoppingCart size={14} />
+                  Proceed to Order
                 </button>
 
-                <span aria-hidden="true" className="text-border select-none">|</span>
-
-                {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0) || pricing?.spec_sheet_url) ? (
-                  <SpecSheetButton
-                    pdfUrl={product.pdf_url || pricing?.spec_sheet_url || null}
-                    pdfUrls={product.pdf_urls}
-                    brandName={designerDisplay}
-                    productName={product.title}
-                    variant="button"
-                    className="font-body text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--pdf-red))] hover:opacity-80 transition-opacity cursor-pointer"
-                  />
-                ) : (
-                  <Link
-                    to="/trade/samples"
-                    className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Procurement
-                  </Link>
-                )}
-
-                <span aria-hidden="true" className="text-border select-none">|</span>
-
-                <a
-                  href={`https://wa.me/6591393850?text=${encodeURIComponent(`Hello Maison Affluency — I'd like more information on the ${product.title} by ${designerDisplay}.`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors"
+                {/* Secondary — co-pilot workspace (quote) */}
+                <button
+                  onClick={handleAddToQuote}
+                  disabled={adding}
+                  className={cn(
+                    "flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full border",
+                    added
+                      ? "border-emerald-600 text-emerald-700 bg-background"
+                      : "border-foreground/40 bg-background text-foreground hover:bg-muted/60",
+                    adding && "opacity-60"
+                  )}
                 >
-                  Contact Us
-                </a>
+                  {adding ? (
+                    <DotCircleLoader size="sm" />
+                  ) : added ? (
+                    <Check size={14} />
+                  ) : null}
+                  {added ? "Added to Co-Pilot Workspace" : "Add to Co-Pilot Workspace"}
+                </button>
+
+                {/* Utility links — Favorite / Pin / Fabric & Finishes PDF */}
+                <div className="mt-1 border-t border-border/40 pt-4">
+                  <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-2 px-2">
+                    <FavoriteFolderPicker pickId={favoriteId} align="start" side="top">
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground",
+                          favorited && "text-destructive hover:text-destructive"
+                        )}
+                      >
+                        <Heart size={12} strokeWidth={1.25} className={cn("shrink-0", favorited && "fill-current")} />
+                        {favorited ? "Saved" : "Favorite"}
+                      </button>
+                    </FavoriteFolderPicker>
+
+                    <button
+                      onClick={() => togglePin(compareItem)}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground",
+                        pinned && "text-[hsl(var(--gold))] hover:text-[hsl(var(--gold))]",
+                        compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                      )}
+                    >
+                      <Pin size={12} strokeWidth={1.25} className={cn("shrink-0", pinned && "fill-current")} />
+                      {pinned ? "Pinned" : "Pin to Selection"}
+                    </button>
+
+                    {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0) || pricing?.spec_sheet_url) ? (
+                      <SpecSheetButton
+                        pdfUrl={product.pdf_url || pricing?.spec_sheet_url || null}
+                        pdfUrls={product.pdf_urls}
+                        brandName={designerDisplay}
+                        productName={product.title}
+                        variant="button"
+                        className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground cursor-pointer"
+                        icon={<FileText size={12} strokeWidth={1.25} className="shrink-0" />}
+                      />
+                    ) : (
+                      <FinishesPdfButton
+                        pickId={product.id}
+                        productName={product.title}
+                        brandName={designerDisplay}
+                        className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground cursor-pointer"
+                        icon={<Layers size={12} strokeWidth={1.25} className="shrink-0" />}
+                      />
+                    )}
+                  </div>
+                </div>
               </div>
+
+              {finishesMissingImages.length > 0 && (
+                <p className="font-body text-[11px] text-muted-foreground italic">
+                  Heads up — no reference image on file for{" "}
+                  <span className="text-foreground">{finishesMissingImages.join(", ")}</span>. A note
+                  will be attached to the quote so our concierge can confirm visuals.
+                </p>
+              )}
+
 
 
 
