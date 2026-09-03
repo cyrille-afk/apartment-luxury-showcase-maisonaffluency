@@ -1130,10 +1130,13 @@ export default function Checkout() {
           shippingCents: nextShipping?.cents ?? 0,
           shippingLabel: nextShipping?.label ?? "",
           paymentIntentId: intentIdRef.current || undefined,
+          // Destination country — drives Singapore GST server-side.
+          shippingCountry: formCountry ?? "",
           // PayNow needs its own PaymentIntent: the payment method type is
           // fixed at creation and cannot be swapped on an existing intent.
           paymentMethod: intentMethod,
         };
+
 
         const needsConfig = !stripePromise;
         const [cfgRes, piRes] = await Promise.all([
