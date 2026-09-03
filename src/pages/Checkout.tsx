@@ -80,11 +80,21 @@ export type CheckoutSummary = {
   estimatedShippingCents: number;
   /** Display name of the matched shipping zone (e.g. "Asia Pacific"). */
   shippingZoneLabel: string | null;
+  /** Singapore GST charged on domestic SGD orders. 0 otherwise. */
+  taxCents: number;
+  /** Row label for the tax line, e.g. "GST (9%)". */
+  taxLabel: string | null;
   /** Displayed total — includes the estimated freight when present. */
   totalCents: number;
   /** Amount actually charged now (excludes unconfirmed estimated freight). */
   chargeTotalCents: number;
 };
+
+/* Singapore GST: domestic SGD deliveries are taxed at 9%; exports are zero-rated. */
+export const SG_GST_RATE = 0.09;
+export const isSingaporeGstOrder = (country: string | null, currency: string) =>
+  (country || "").toUpperCase() === "SG" && (currency || "").toLowerCase() === "sgd";
+
 
 /* Signed-in account confirmation — replaces blank email/name inputs.  */
 function AccountBlock({ email, role }: { email: string; role: string }) {
@@ -197,7 +207,14 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
             )}
             <RegionalLogisticsNote compact className="mt-2" />
           </div>
+          {summary.taxCents > 0 && summary.taxLabel && (
+            <div className="flex items-baseline justify-between gap-6">
+              <dt className="text-muted-foreground">{summary.taxLabel}</dt>
+              <dd className="tabular-nums">{money(summary.taxCents, currency)}</dd>
+            </div>
+          )}
           <div className="border-t border-border pt-4">
+
             <div className="flex items-baseline justify-between">
               <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
               <dd className="tabular-nums font-medium text-base">
@@ -967,7 +984,12 @@ export default function Checkout() {
     // Country-based base freight is indicative only: it is displayed and added
     // to the shown Order Total, but never charged until an advisor confirms it.
     const estimatedShippingCents = shippingCents > 0 ? 0 : estimate.cents;
-    const chargeTotalCents = subtotalCents - discountCents + shippingCents;
+    const netCents = subtotalCents - discountCents + shippingCents;
+    // Singapore GST (9%) applies only to domestic SGD deliveries.
+    const gst = isSingaporeGstOrder(formCountry, currency);
+    const taxCents = gst ? Math.round(netCents * SG_GST_RATE) : 0;
+    const chargeTotalCents = netCents + taxCents;
+    const estimatedTaxCents = gst ? Math.round(estimatedShippingCents * SG_GST_RATE) : 0;
     return {
       currency,
       subtotalCents,
@@ -977,10 +999,13 @@ export default function Checkout() {
       shippingLabel: shipping?.label ?? null,
       estimatedShippingCents,
       shippingZoneLabel: estimate.zoneLabel ?? null,
-      totalCents: chargeTotalCents + estimatedShippingCents,
+      taxCents,
+      taxLabel: gst ? `GST (${Math.round(SG_GST_RATE * 100)}%)` : null,
+      totalCents: chargeTotalCents + estimatedShippingCents + estimatedTaxCents,
       chargeTotalCents,
     };
-  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel]);
+  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, formCountry]);
+
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [email, setEmail] = useState("");
@@ -1105,10 +1130,13 @@ export default function Checkout() {
           shippingCents: nextShipping?.cents ?? 0,
           shippingLabel: nextShipping?.label ?? "",
           paymentIntentId: intentIdRef.current || undefined,
+          // Destination country — drives Singapore GST server-side.
+          shippingCountry: formCountry ?? "",
           // PayNow needs its own PaymentIntent: the payment method type is
           // fixed at creation and cannot be swapped on an existing intent.
           paymentMethod: intentMethod,
         };
+
 
         const needsConfig = !stripePromise;
         const [cfgRes, piRes] = await Promise.all([
@@ -1131,11 +1159,13 @@ export default function Checkout() {
         const serverPct = Number(pi?.discountPct) || 0;
         setServerDiscountPct(serverPct);
         const serverShippingCents = Number(pi?.shippingCents) || 0;
+        const serverTaxCents = Number(pi?.taxCents) || 0;
         const totals = buildVerifiedTotals(grossLines);
         const expectedCents =
           totals.totalCents -
           (serverPct > 0 ? Math.round(totals.totalCents * serverPct) : 0) +
-          serverShippingCents;
+          serverShippingCents +
+          serverTaxCents;
         const check = reconcileBackendAmount(
           { ...totals, totalCents: expectedCents },
           pi?.amount,
@@ -1157,8 +1187,9 @@ export default function Checkout() {
         setSyncing(false);
       }
     },
-    [grossLines, stripePromise],
+    [grossLines, stripePromise, formCountry],
   );
+
 
   useEffect(() => {
     if (!grossLines?.length || initialised.current) return;
@@ -1166,6 +1197,19 @@ export default function Checkout() {
     void syncIntent(null, method === "paynow" ? "paynow" : "card");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grossLines, syncIntent]);
+
+  // The destination country changes the GST due, so the PaymentIntent must be
+  // re-priced whenever it changes after the first sync.
+  const taxCountryRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!initialised.current || !grossLines?.length) return;
+    if (taxCountryRef.current === formCountry) return;
+    taxCountryRef.current = formCountry;
+    void syncIntent(shipping, method === "paynow" ? "paynow" : "card");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formCountry, grossLines]);
+
+
 
   // Switching between the card/wallet panes and PayNow requires a brand-new
   // PaymentIntent, so drop the old client secret and re-create it.

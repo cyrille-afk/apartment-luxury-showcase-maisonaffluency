@@ -115,8 +115,18 @@ serve(async (req) => {
     const shippingLabel =
       typeof body?.shippingLabel === "string" ? body.shippingLabel.trim().slice(0, 120) : "";
 
-    const amount = goodsAmount + shippingCents;
+    // ---- Singapore GST ----
+    // 9% applies only when the goods are delivered in Singapore and priced in
+    // SGD. Exports are zero-rated, so every other destination stays untaxed.
+    const shippingCountry =
+      typeof body?.shippingCountry === "string" ? body.shippingCountry.trim().toUpperCase() : "";
+    const gstApplies = shippingCountry === "SG" && currency === "sgd";
+    const taxRate = gstApplies ? 0.09 : 0;
+    const taxCents = taxRate > 0 ? Math.round((goodsAmount + shippingCents) * taxRate) : 0;
+
+    const amount = goodsAmount + shippingCents + taxCents;
     if (amount < 100 || amount > 100_000_00 * 100) return json({ error: "Price out of range." }, 400);
+
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) return json({ error: "Payments are not configured." }, 500);
@@ -149,7 +159,11 @@ serve(async (req) => {
         discount_label: discountLabel ?? "",
         shipping_cents: String(shippingCents),
         shipping_label: shippingLabel,
+        shipping_country: shippingCountry,
+        tax_cents: String(taxCents),
+        tax_label: gstApplies ? "GST (9%)" : "",
         line_items: JSON.stringify(
+
           items.map((i) => ({ t: i.title, f: i.finish, u: i.unitAmount, q: i.quantity })),
         ).slice(0, 500),
     };
@@ -204,6 +218,9 @@ serve(async (req) => {
       goodsAmount,
       shippingCents,
       shippingLabel,
+      taxCents,
+      taxLabel: gstApplies ? "GST (9%)" : null,
+
     });
   } catch (err) {
     console.error("[create-payment-intent] error", err);
