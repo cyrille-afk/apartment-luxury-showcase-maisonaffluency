@@ -1198,6 +1198,19 @@ export default function Checkout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grossLines, syncIntent]);
 
+  // The destination country changes the GST due, so the PaymentIntent must be
+  // re-priced whenever it changes after the first sync.
+  const taxCountryRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!initialised.current || !grossLines?.length) return;
+    if (taxCountryRef.current === formCountry) return;
+    taxCountryRef.current = formCountry;
+    void syncIntent(shipping, method === "paynow" ? "paynow" : "card");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formCountry, grossLines]);
+
+
+
   // Switching between the card/wallet panes and PayNow requires a brand-new
   // PaymentIntent, so drop the old client secret and re-create it.
   const intentMethodRef = useRef<"card" | "paynow">(method === "paynow" ? "paynow" : "card");
