@@ -115,6 +115,93 @@ async function notifyAdmin(admin: any, app: any, aiError: string, attempts: numb
   }
 }
 
+// Applicant flagged for manual review → instant Slack/Discord alert.
+// Payload is shaped so a plain Slack or Discord incoming webhook renders it as
+// text, while custom endpoints still get the structured fields.
+async function notifyFlagged(
+  app: any,
+  applicantName: string,
+  confidence: number,
+  reasoning: string,
+) {
+  const webhook = Deno.env.get("ADMIN_ALERT_WEBHOOK_URL");
+  if (!webhook) return;
+  const link = `${TRIAGE_URL}?application=${app.id}`;
+  const lines = [
+    `*Trade application flagged for review* (confidence ${confidence}/100)`,
+    `• Applicant: ${applicantName || "(unknown)"}`,
+    `• Company: ${app.company_name || "(unknown)"}`,
+    `• Country: ${app.country || "(unknown)"}`,
+    `• Website: ${app.company_website || "(none provided)"}`,
+    `• Reason: ${(reasoning || "No reasoning returned").slice(0, 600)}`,
+    `→ Triage: ${link}`,
+  ].join("\n");
+
+  const payload = {
+    event: "trade_application_flagged",
+    text: lines, // Slack
+    content: lines, // Discord
+    application_id: app.id,
+    applicant_name: applicantName,
+    company_name: app.company_name,
+    country: app.country,
+    website: app.company_website,
+    confidence_score: confidence,
+    reason: reasoning,
+    triage_url: link,
+    at: new Date().toISOString(),
+  };
+
+  try {
+    const secret = Deno.env.get("ADMIN_ALERT_WEBHOOK_SECRET");
+    await fetch(webhook, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(secret ? { "X-Webhook-Secret": secret } : {}),
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch (_) {
+    // non-fatal — the triage dashboard remains the source of truth
+  }
+}
+
+async function callGateway(
+  key: string,
+  model: string,
+  content: any,
+  opts: { json?: boolean; timeout?: number } = {},
+): Promise<{ text: string; error: string }> {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), opts.timeout ?? AI_TIMEOUT_MS);
+  try {
+    const body: Record<string, unknown> = {
+      model,
+      messages: [{ role: "user", content }],
+    };
+    if (opts.json) body.response_format = { type: "json_object" };
+    // GPT-5.6 models on /v1/chat/completions must disable reasoning explicitly.
+    if (model.startsWith("openai/gpt-5.6")) body.reasoning_effort = "none";
+
+    const res = await fetch(GATEWAY_URL, {
+      method: "POST",
+      signal: ctrl.signal,
+      headers: { "Content-Type": "application/json", "Lovable-API-Key": key },
+      body: JSON.stringify(body),
+    });
+    clearTimeout(t);
+    if (!res.ok) {
+      return { text: "", error: `AI gateway returned ${res.status}: ${(await res.text()).slice(0, 300)}` };
+    }
+    const data = await res.json();
+    return { text: data?.choices?.[0]?.message?.content || "", error: "" };
+  } catch (e) {
+    clearTimeout(t);
+    return { text: "", error: e instanceof Error ? e.message : "AI request failed" };
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
