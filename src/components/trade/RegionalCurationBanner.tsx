@@ -91,7 +91,7 @@ export function RegionalCurationBanner() {
                     {items.map((p) => (
                       <Link
                         key={p.id}
-                        to={`/trade/product/${p.id}`}
+                        to={`/trade/products/${p.id}`}
                         className="group block"
                       >
                         <div className="aspect-square bg-muted overflow-hidden rounded-sm">
