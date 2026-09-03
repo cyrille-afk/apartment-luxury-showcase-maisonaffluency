@@ -5827,13 +5827,24 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          marked_paid_by: string | null
           notes: string | null
           order_ref: string
+          paid_at: string | null
+          payment_channel: string | null
+          payment_confirmation_sent_at: string | null
           payment_method: string
+          payment_receipt_path: string | null
+          phone: string | null
+          proforma_invoice_path: string | null
+          region_tier: string | null
+          shipping_address: string | null
           shipping_cents: number
           status: string
           stripe_session_id: string | null
           subtotal_cents: number
+          tax_cents: number
+          tax_label: string | null
           total_cents: number
           updated_at: string
           user_id: string | null
@@ -5847,13 +5858,24 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          marked_paid_by?: string | null
           notes?: string | null
           order_ref: string
+          paid_at?: string | null
+          payment_channel?: string | null
+          payment_confirmation_sent_at?: string | null
           payment_method?: string
+          payment_receipt_path?: string | null
+          phone?: string | null
+          proforma_invoice_path?: string | null
+          region_tier?: string | null
+          shipping_address?: string | null
           shipping_cents?: number
           status?: string
           stripe_session_id?: string | null
           subtotal_cents?: number
+          tax_cents?: number
+          tax_label?: string | null
           total_cents?: number
           updated_at?: string
           user_id?: string | null
@@ -5867,13 +5889,24 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          marked_paid_by?: string | null
           notes?: string | null
           order_ref?: string
+          paid_at?: string | null
+          payment_channel?: string | null
+          payment_confirmation_sent_at?: string | null
           payment_method?: string
+          payment_receipt_path?: string | null
+          phone?: string | null
+          proforma_invoice_path?: string | null
+          region_tier?: string | null
+          shipping_address?: string | null
           shipping_cents?: number
           status?: string
           stripe_session_id?: string | null
           subtotal_cents?: number
+          tax_cents?: number
+          tax_label?: string | null
           total_cents?: number
           updated_at?: string
           user_id?: string | null

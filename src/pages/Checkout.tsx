@@ -18,6 +18,8 @@ import { TransferReferenceNote } from "@/components/checkout/TransferReferenceNo
 import { useEstimatedShipping, ESTIMATED_SHIPPING_NOTE } from "@/hooks/useShippingCountry";
 import { getCurrentDestination, useShippingDestination } from "@/lib/shippingDestination";
 import RegionalLogisticsNote from "@/components/trade/RegionalLogisticsNote";
+import RegionalPaymentPanel from "@/components/checkout/RegionalPaymentPanel";
+import { useRegionalLogistics, mapCountryToRegionTier } from "@/hooks/useRegionalLogistics";
 import { ArrowLeft } from "lucide-react";
 import {
   assertCheckoutCopy,
@@ -703,6 +705,14 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
   const { chargeTotalCents: total, currency } = summary;
+
+  /* Region drives the settlement channel: the signed-in trade profile wins,
+     otherwise we fall back to the chosen shipping destination.              */
+  const destination = useShippingDestination();
+  const destinationCountry = destination.name;
+  const { regionTier: profileRegion } = useRegionalLogistics();
+  const destinationRegion = mapCountryToRegionTier(destination.name);
+  const regionTier = account ? profileRegion : destinationRegion;
   const orderRef = useMemo(
     () =>
       stableOrderReference(
@@ -779,29 +789,32 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
       {optionsSlot}
 
       <section className="space-y-5 pt-8">
-        <StripeBankTransferPanel
+        <RegionalPaymentPanel
+          orderRef={orderRef}
+          regionTier={regionTier}
+          country={destinationCountry}
           currency={currency}
-          email={account ? account.email : email}
-          orderReference={orderRef}
-          items={lines.map((l) => ({
+          buyer={{
+            name: account ? account.email : name,
+            email: account ? account.email : email,
+            phone,
+            address,
+          }}
+          lines={lines.map((l) => ({
             title: l.title,
             designer: l.designer || "",
-            selectedFinish: l.finishLabel || "",
-            price: l.unitCents / 100,
+            finishLabel: l.finishLabel || "",
             quantity: lineQty(l),
+            unitCents: l.unitCents,
           }))}
-          shippingConfirmed={summary.shippingCents > 0}
+          subtotalCents={summary.subtotalCents}
+          discountCents={summary.discountCents}
+          discountLabel={summary.discountLabel}
           shippingCents={summary.shippingCents}
-          fallback={
-            <div className="space-y-5">
-              <p className="text-xs text-muted-foreground">
-                Our concierge will also email these fully-insured wiring instructions within one business hour.
-              </p>
-              <WireDetailsGrid reference={orderRef} />
-            </div>
-          }
+          shippingLabel={summary.shippingLabel}
         />
       </section>
+
       <StickyTotals
         summary={summary}
         cta={`Request wire instructions · ${money(total, currency)}`}
