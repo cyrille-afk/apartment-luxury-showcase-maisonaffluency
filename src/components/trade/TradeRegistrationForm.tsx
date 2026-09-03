@@ -40,6 +40,13 @@ const tradeRegisterSchema = z.object({
   path: ["confirmPassword"],
 });
 
+const getCorporateRegPlaceholder = (country: string): string => {
+  if (country === "Singapore") return "Enter your 9 or 10-digit ACRA UEN (e.g., 2026XXXXXX)";
+  if (country === "United Arab Emirates" || country === "Saudi Arabia")
+    return "Enter your DED Trade License / CR Number";
+  return "Business registration number";
+};
+
 type FieldErrors = Partial<Record<string, string>>;
 
 interface TradeRegistrationFormProps {
