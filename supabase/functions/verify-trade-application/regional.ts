@@ -65,6 +65,11 @@ const NAME_TO_CODE: Record<string, string> = {
   kuwait: "KW",
   bahrain: "BH",
   oman: "OM",
+  "united kingdom": "GB",
+  uk: "GB",
+  "great britain": "GB",
+  england: "GB",
+  scotland: "GB",
 };
 
 export function countryCode(country?: string | null): string {
