@@ -191,8 +191,18 @@ export default function AdminTradeReview() {
 
         <div className="space-y-6">
           {apps.map((app) => {
-            const reasoning =
-              (app.ai_result as { reasoning?: string } | null)?.reasoning || app.verification_notes || "—";
+            const result = app.ai_result as
+              | {
+                  reasoning?: string;
+                  credential_body?: string;
+                  region?: string;
+                  extracted_identifiers?: { type: string; value: string; valid: boolean | null; note?: string }[];
+                }
+              | null;
+            const reasoning = result?.reasoning || app.verification_notes || "—";
+            const identifiers = Array.isArray(result?.extracted_identifiers)
+              ? result!.extracted_identifiers!.filter((i) => i && (i.value || i.type))
+              : [];
             const score = app.ai_confidence != null ? Math.round(Number(app.ai_confidence)) : null;
             return (
               <article key={app.id} className="border border-border rounded-sm p-6">
