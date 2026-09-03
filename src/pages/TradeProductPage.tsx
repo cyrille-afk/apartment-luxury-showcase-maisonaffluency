@@ -23,6 +23,7 @@ import { renderParagraph } from "@/components/EditorialBiography";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { queryKeys } from "@/lib/queryKeys";
+import RegionalLogisticsNote from "@/components/trade/RegionalLogisticsNote";
 import ShareMenu from "@/components/ShareMenu";
 import CornerTooltip from "@/components/product/CornerTooltip";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
