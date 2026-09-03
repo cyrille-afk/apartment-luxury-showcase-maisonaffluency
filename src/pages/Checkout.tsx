@@ -221,19 +221,40 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
             )}
             <RegionalLogisticsNote compact className="mt-2" />
           </div>
-          {summary.taxCents > 0 && summary.taxLabel && (
-            <div>
-              <div className="flex items-baseline justify-between gap-6">
-                <dt className="text-muted-foreground">{summary.taxLabel}</dt>
-                <dd className="tabular-nums">{money(summary.taxCents, currency)}</dd>
-              </div>
-              {summary.taxRegistrationLine && (
-                <p className="mt-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-                  {summary.taxRegistrationLine}
-                </p>
-              )}
+          <div className="border-t border-border/60 pt-4">
+            <div className="flex items-baseline justify-between gap-6">
+              <dt className="text-muted-foreground">
+                {summary.taxLabel || (summary.taxApplied ? "Tax" : "Tax (zero-rated)")}
+              </dt>
+              <dd className="tabular-nums">
+                {summary.taxApplied ? money(summary.taxCents, currency) : money(0, currency)}
+              </dd>
             </div>
-          )}
+            <dl className="mt-2 space-y-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+              <div className="flex items-baseline justify-between gap-6">
+                <dt>Rate</dt>
+                <dd className="tabular-nums">
+                  {summary.taxApplied ? `${Number((summary.taxRate * 100).toFixed(2))}%` : "0% — zero-rated"}
+                </dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-6">
+                <dt>Taxable base{summary.taxApplied && summary.taxShipping ? " (goods + delivery)" : summary.taxApplied ? " (goods)" : ""}</dt>
+                <dd className="tabular-nums">{money(summary.taxableBaseCents, currency)}</dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-6">
+                <dt>Destination</dt>
+                <dd>{summary.taxCountry ?? "—"} · {currency.toUpperCase()}</dd>
+              </div>
+            </dl>
+            <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+              {summary.taxStatusNote}
+            </p>
+            {summary.taxRegistrationLine && (
+              <p className="mt-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                {summary.taxRegistrationLine}
+              </p>
+            )}
+          </div>
           <div className="border-t border-border pt-4">
 
             <div className="flex items-baseline justify-between">
