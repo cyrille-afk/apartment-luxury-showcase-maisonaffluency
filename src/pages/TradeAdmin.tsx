@@ -235,6 +235,13 @@ interface Application {
   message: string | null;
   status: string;
   created_at: string;
+  instagram_handle: string | null;
+  tax_vat_id: string | null;
+  credential_document_path: string | null;
+  tax_exempt_status: boolean;
+  verification_notes: string | null;
+  ai_confidence: number | null;
+  ai_verified_at: string | null;
   verification_checklist_sent_at: string | null;
   verification_checklist_sent_by: string | null;
   verification_checklist_sent_by_name: string | null;
@@ -248,7 +255,7 @@ const TradeAdmin = () => {
   const { toast } = useToast();
   const [applications, setApplications] = useState<Application[]>([]);
   const [fetching, setFetching] = useState(true);
-  const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
+  const [filter, setFilter] = useState<"pending" | "flagged" | "approved" | "rejected" | "all">("pending");
   const [confirmDialog, setConfirmDialog] = useState<{ app: Application; action: "approved" | "rejected" } | null>(null);
   const [sendingChecklist, setSendingChecklist] = useState(false);
   const [checklistPreview, setChecklistPreview] = useState<{
@@ -341,6 +348,7 @@ const TradeAdmin = () => {
     // Update application status
     await supabase.from("trade_applications").update({
       status: action,
+      tax_exempt_status: action === "approved",
       reviewed_at: new Date().toISOString(),
       reviewed_by: user?.id,
     }).eq("id", app.id);
@@ -434,7 +442,7 @@ const TradeAdmin = () => {
 
       {/* Filter tabs */}
       <div className="flex gap-2 mb-6">
-        {(["pending", "approved", "rejected", "all"] as const).map((f) => (
+        {(["pending", "flagged", "approved", "rejected", "all"] as const).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
@@ -486,10 +494,12 @@ const TradeAdmin = () => {
                     </span>
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider ${
                       app.status === "pending" ? "bg-warning/10 text-warning" :
+                      app.status === "flagged" ? "bg-warning/20 text-warning" :
                       app.status === "approved" ? "bg-success/10 text-success" :
                       "bg-destructive/10 text-destructive"
                     }`}>
                       {app.status === "pending" && <Clock className="h-3 w-3" />}
+                      {app.status === "flagged" && <AlertTriangle className="h-3 w-3" />}
                       {app.status === "approved" && <Check className="h-3 w-3" />}
                       {app.status === "rejected" && <X className="h-3 w-3" />}
                       {app.status}
@@ -514,6 +524,39 @@ const TradeAdmin = () => {
                   </div>
                   {app.certification_details && (
                     <p className="font-body text-xs text-muted-foreground mt-1">Cert: {app.certification_details}</p>
+                  )}
+                  {(app.instagram_handle || app.tax_vat_id) && (
+                    <p className="font-body text-xs text-muted-foreground mt-1">
+                      {app.instagram_handle ? `Instagram: ${app.instagram_handle}` : ""}
+                      {app.instagram_handle && app.tax_vat_id ? " · " : ""}
+                      {app.tax_vat_id ? `Tax/VAT: ${app.tax_vat_id}` : ""}
+                    </p>
+                  )}
+                  {app.ai_verified_at && (
+                    <div className="mt-3 rounded-md border border-border bg-muted/30 px-3 py-2">
+                      <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground/70">
+                        AI verification · confidence {Math.round((app.ai_confidence ?? 0) * 100)}%
+                        {app.tax_exempt_status ? " · tax-exempt" : ""}
+                      </p>
+                      {app.verification_notes && (
+                        <p className="font-body text-xs text-foreground mt-1 leading-relaxed">{app.verification_notes}</p>
+                      )}
+                    </div>
+                  )}
+                  {app.credential_document_path && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const { data } = await supabase.storage
+                          .from("trade-credentials")
+                          .createSignedUrl(app.credential_document_path!, 300);
+                        if (data?.signedUrl) window.open(data.signedUrl, "_blank", "noopener");
+                        else toast({ title: "Could not open document", variant: "destructive" });
+                      }}
+                      className="mt-2 inline-flex items-center gap-1 font-body text-xs text-foreground hover:underline"
+                    >
+                      View credential document <ExternalLink className="h-3 w-3" />
+                    </button>
                   )}
                   {app.message && (
                     <p className="font-body text-xs text-muted-foreground mt-2 italic">"{app.message}"</p>

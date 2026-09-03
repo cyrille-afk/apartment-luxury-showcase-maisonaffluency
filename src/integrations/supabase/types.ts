@@ -6362,73 +6362,97 @@ export type Database = {
       }
       trade_applications: {
         Row: {
+          ai_confidence: number | null
+          ai_result: Json | null
+          ai_verified_at: string | null
           certification_details: string | null
           city: string
           company_name: string
           company_website: string | null
           country: string
           created_at: string
+          credential_document_path: string | null
           edit_completed_at: string | null
           edit_completed_by_name: string | null
           edit_token_expires_at: string | null
           edit_token_hash: string | null
           id: string
+          instagram_handle: string | null
           is_certified_professional: boolean
           job_title: string
           message: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: Database["public"]["Enums"]["trade_application_status"]
+          tax_exempt_status: boolean
+          tax_vat_id: string | null
           user_id: string
           verification_checklist_sent_at: string | null
           verification_checklist_sent_by: string | null
           verification_checklist_sent_by_name: string | null
+          verification_notes: string | null
         }
         Insert: {
+          ai_confidence?: number | null
+          ai_result?: Json | null
+          ai_verified_at?: string | null
           certification_details?: string | null
           city?: string
           company_name: string
           company_website?: string | null
           country?: string
           created_at?: string
+          credential_document_path?: string | null
           edit_completed_at?: string | null
           edit_completed_by_name?: string | null
           edit_token_expires_at?: string | null
           edit_token_hash?: string | null
           id?: string
+          instagram_handle?: string | null
           is_certified_professional?: boolean
           job_title?: string
           message?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["trade_application_status"]
+          tax_exempt_status?: boolean
+          tax_vat_id?: string | null
           user_id: string
           verification_checklist_sent_at?: string | null
           verification_checklist_sent_by?: string | null
           verification_checklist_sent_by_name?: string | null
+          verification_notes?: string | null
         }
         Update: {
+          ai_confidence?: number | null
+          ai_result?: Json | null
+          ai_verified_at?: string | null
           certification_details?: string | null
           city?: string
           company_name?: string
           company_website?: string | null
           country?: string
           created_at?: string
+          credential_document_path?: string | null
           edit_completed_at?: string | null
           edit_completed_by_name?: string | null
           edit_token_expires_at?: string | null
           edit_token_hash?: string | null
           id?: string
+          instagram_handle?: string | null
           is_certified_professional?: boolean
           job_title?: string
           message?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["trade_application_status"]
+          tax_exempt_status?: boolean
+          tax_vat_id?: string | null
           user_id?: string
           verification_checklist_sent_at?: string | null
           verification_checklist_sent_by?: string | null
           verification_checklist_sent_by_name?: string | null
+          verification_notes?: string | null
         }
         Relationships: []
       }
@@ -8544,7 +8568,7 @@ export type Database = {
         | "returned"
         | "cancelled"
       studio_role: "owner" | "admin" | "editor" | "viewer"
-      trade_application_status: "pending" | "approved" | "rejected"
+      trade_application_status: "pending" | "approved" | "rejected" | "flagged"
       trade_tier: "standard" | "silver" | "gold" | "platinum"
     }
     CompositeTypes: {
@@ -8723,7 +8747,7 @@ export const Constants = {
         "cancelled",
       ],
       studio_role: ["owner", "admin", "editor", "viewer"],
-      trade_application_status: ["pending", "approved", "rejected"],
+      trade_application_status: ["pending", "approved", "rejected", "flagged"],
       trade_tier: ["standard", "silver", "gold", "platinum"],
     },
   },

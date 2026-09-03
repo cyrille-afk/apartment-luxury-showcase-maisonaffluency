@@ -29,6 +29,8 @@ const tradeRegisterSchema = z.object({
   jobTitle: z.string().trim().min(1, "Job title is required").max(150, "Job title is too long"),
   country: z.string().min(1),
   city: z.string().trim().max(100, "City name is too long").optional().or(z.literal("")),
+  instagramHandle: z.string().trim().max(60, "Instagram handle is too long").optional().or(z.literal("")),
+  taxVatId: z.string().trim().max(60, "Tax/VAT ID is too long").optional().or(z.literal("")),
   isCertified: z.boolean(),
   certificationDetails: z.string().trim().max(300, "Certification details are too long").optional().or(z.literal("")),
   message: z.string().trim().max(2000, "Message is too long").optional().or(z.literal("")),
@@ -59,6 +61,8 @@ const TradeRegistrationForm = ({
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const inferredCountryRef = useRef<string>("");
+  const [credentialFile, setCredentialFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string>("");
   const [form, setForm] = useState({
     email: prefillEmail,
     password: "",
@@ -71,6 +75,8 @@ const TradeRegistrationForm = ({
     jobTitle: "",
     country: "",
     city: "",
+    instagramHandle: "",
+    taxVatId: "",
     isCertified: false,
     certificationDetails: "",
     message: "",
@@ -131,17 +137,41 @@ const TradeRegistrationForm = ({
         country: form.country,
       }).eq("id", authData.user.id);
 
-      await supabase.from("trade_applications").insert({
+      // Upload the credential document to the private bucket (needs a live
+      // session — when e-mail confirmation is pending the applicant can add it
+      // later from the dashboard status tracker).
+      let credentialPath: string | null = null;
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (credentialFile && sessionData.session) {
+        const ext = credentialFile.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
+        const path = `${authData.user.id}/credential-${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("trade-credentials")
+          .upload(path, credentialFile, { contentType: credentialFile.type || undefined, upsert: true });
+        if (!upErr) credentialPath = path;
+      }
+
+      const { data: appRow } = await supabase.from("trade_applications").insert({
         user_id: authData.user.id,
         company_name: form.companyName,
         company_website: form.companyWebsite || null,
         job_title: form.jobTitle,
         country: form.country,
         city: form.city,
+        instagram_handle: form.instagramHandle || null,
+        tax_vat_id: form.taxVatId || null,
+        credential_document_path: credentialPath,
         is_certified_professional: form.isCertified,
         certification_details: form.certificationDetails || null,
         message: form.message || null,
-      });
+      }).select("id").maybeSingle();
+
+      // Kick off the asynchronous AI credential check (fire-and-forget).
+      if (appRow?.id && sessionData.session) {
+        supabase.functions
+          .invoke("verify-trade-application", { body: { application_id: appRow.id } })
+          .catch((err) => console.error("Verification kickoff failed:", err));
+      }
 
       const fullName = `${form.firstName} ${form.lastName}`.trim();
       const emailBody = [
@@ -275,7 +305,59 @@ const TradeRegistrationForm = ({
               className={fieldClass("city")} />
             <FieldError field="city" />
           </div>
+          <div>
+            <label className="font-body text-sm text-foreground">Instagram Handle</label>
+            <input type="text" inputMode="text" placeholder="@studio" value={form.instagramHandle}
+              onChange={(e) => update("instagramHandle", e.target.value)}
+              className={`${fieldClass("instagramHandle")} placeholder:text-muted-foreground/50`} />
+            <FieldError field="instagramHandle" />
+          </div>
+          <div>
+            <label className="font-body text-sm text-foreground">Tax / VAT ID</label>
+            <input type="text" value={form.taxVatId} onChange={(e) => update("taxVatId", e.target.value)}
+              className={fieldClass("taxVatId")} />
+            <FieldError field="taxVatId" />
+          </div>
         </div>
+      </div>
+
+      {/* Professional Credentials upload */}
+      <div>
+        <h3 className="font-display text-base text-foreground mb-1">Professional Credentials</h3>
+        <p className="font-body text-xs text-muted-foreground mb-3">
+          ASID / RIBA / SIA card, business licence, or a recent project invoice. Stored privately and reviewed
+          only for verification. PDF, JPG or PNG, up to 15&nbsp;MB.
+        </p>
+        <label
+          htmlFor="credential-upload"
+          className="flex flex-col items-center justify-center gap-1 w-full py-7 px-4 border border-dashed border-border rounded-lg cursor-pointer hover:border-foreground/40 transition-colors text-center"
+        >
+          <span className="font-body text-sm text-foreground">
+            {credentialFile ? credentialFile.name : "Upload a credential document"}
+          </span>
+          <span className="font-body text-[11px] text-muted-foreground">
+            {credentialFile
+              ? `${Math.round(credentialFile.size / 1024)} KB · tap to replace`
+              : "Drag a file here or tap to browse"}
+          </span>
+        </label>
+        <input
+          id="credential-upload"
+          type="file"
+          accept="application/pdf,image/jpeg,image/png,image/webp"
+          className="sr-only"
+          onChange={(e) => {
+            const f = e.target.files?.[0] || null;
+            if (f && f.size > 15 * 1024 * 1024) {
+              setFileError("File must be under 15 MB");
+              setCredentialFile(null);
+              return;
+            }
+            setFileError("");
+            setCredentialFile(f);
+          }}
+        />
+        {fileError && <p className="text-destructive text-xs font-body mt-1">{fileError}</p>}
       </div>
 
       {/* Professional Certification */}

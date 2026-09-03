@@ -11,6 +11,7 @@ import { FfeUnlockTile } from "@/components/trade/FfeUnlockTile";
 import { useTradeCredits } from "@/hooks/useTradeCredits";
 import { useToast } from "@/hooks/use-toast";
 import { MobileHandoffWidget } from "@/components/trade/MobileHandoffWidget";
+import TradeVerificationTracker from "@/components/trade/TradeVerificationTracker";
 
 interface FavPreview {
   favoriteId: string;
@@ -115,6 +116,7 @@ export default function TradeMyDashboard() {
     <>
       <Helmet><title>{isImpersonating ? "Viewing user dashboard" : "My Dashboard"} — Maison Affluency</title></Helmet>
       <div className="container max-w-7xl mx-auto px-4 py-8">
+        {!isImpersonating && <TradeVerificationTracker />}
         {showRestricted && (
           <div className="mb-6 flex items-start justify-between gap-3 px-4 py-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/30">
             <div className="flex items-start gap-2 min-w-0">
