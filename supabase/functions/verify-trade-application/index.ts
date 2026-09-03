@@ -43,6 +43,11 @@ type Verdict = {
   tax_id_plausible: boolean;
   website_reachable: boolean;
   notes: string;
+  /** Regional corporate identifiers read off the document / website. */
+  extracted_identifiers?: { type: string; value: string }[];
+  /** e.g. "SIDAC Accreditation (ID Class 2)", "Dubai DED Trade Licence" */
+  credential_body?: string;
+  regional_credential?: boolean;
 };
 
 const json = (body: unknown, status = 200) =>
