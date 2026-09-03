@@ -17,7 +17,11 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-3.7-flash";
+// Stage 1 — fast, cost-effective multimodal parse of the credential document.
+const EXTRACT_MODEL = "google/gemini-3.7-flash";
+// Stage 2 — frontier reasoning model that issues the actual verdict.
+const VERDICT_MODEL = "openai/gpt-5.6-sol";
+const TRIAGE_URL = "https://www.maisonaffluency.com/admin/trade-review";
 const AI_TIMEOUT_MS = 45_000;
 const SITE_TIMEOUT_MS = 12_000;
 const AUTO_APPROVE_AT = 85; // confidence_score out of 100
@@ -108,6 +112,93 @@ async function notifyAdmin(admin: any, app: any, aiError: string, attempts: numb
     });
   } catch (_) {
     // non-fatal
+  }
+}
+
+// Applicant flagged for manual review → instant Slack/Discord alert.
+// Payload is shaped so a plain Slack or Discord incoming webhook renders it as
+// text, while custom endpoints still get the structured fields.
+async function notifyFlagged(
+  app: any,
+  applicantName: string,
+  confidence: number,
+  reasoning: string,
+) {
+  const webhook = Deno.env.get("ADMIN_ALERT_WEBHOOK_URL");
+  if (!webhook) return;
+  const link = `${TRIAGE_URL}?application=${app.id}`;
+  const lines = [
+    `*Trade application flagged for review* (confidence ${confidence}/100)`,
+    `• Applicant: ${applicantName || "(unknown)"}`,
+    `• Company: ${app.company_name || "(unknown)"}`,
+    `• Country: ${app.country || "(unknown)"}`,
+    `• Website: ${app.company_website || "(none provided)"}`,
+    `• Reason: ${(reasoning || "No reasoning returned").slice(0, 600)}`,
+    `→ Triage: ${link}`,
+  ].join("\n");
+
+  const payload = {
+    event: "trade_application_flagged",
+    text: lines, // Slack
+    content: lines, // Discord
+    application_id: app.id,
+    applicant_name: applicantName,
+    company_name: app.company_name,
+    country: app.country,
+    website: app.company_website,
+    confidence_score: confidence,
+    reason: reasoning,
+    triage_url: link,
+    at: new Date().toISOString(),
+  };
+
+  try {
+    const secret = Deno.env.get("ADMIN_ALERT_WEBHOOK_SECRET");
+    await fetch(webhook, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(secret ? { "X-Webhook-Secret": secret } : {}),
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch (_) {
+    // non-fatal — the triage dashboard remains the source of truth
+  }
+}
+
+async function callGateway(
+  key: string,
+  model: string,
+  content: any,
+  opts: { json?: boolean; timeout?: number } = {},
+): Promise<{ text: string; error: string }> {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), opts.timeout ?? AI_TIMEOUT_MS);
+  try {
+    const body: Record<string, unknown> = {
+      model,
+      messages: [{ role: "user", content }],
+    };
+    if (opts.json) body.response_format = { type: "json_object" };
+    // GPT-5.6 models on /v1/chat/completions must disable reasoning explicitly.
+    if (model.startsWith("openai/gpt-5.6")) body.reasoning_effort = "none";
+
+    const res = await fetch(GATEWAY_URL, {
+      method: "POST",
+      signal: ctrl.signal,
+      headers: { "Content-Type": "application/json", "Lovable-API-Key": key },
+      body: JSON.stringify(body),
+    });
+    clearTimeout(t);
+    if (!res.ok) {
+      return { text: "", error: `AI gateway returned ${res.status}: ${(await res.text()).slice(0, 300)}` };
+    }
+    const data = await res.json();
+    return { text: data?.choices?.[0]?.message?.content || "", error: "" };
+  } catch (e) {
+    clearTimeout(t);
+    return { text: "", error: e instanceof Error ? e.message : "AI request failed" };
   }
 }
 
@@ -203,6 +294,33 @@ Deno.serve(async (req) => {
       `\nApply the same judgement: do not repeat the mistakes above, and do not flag cases the human has consistently approved.`
     : "";
 
+  // ── Stage 1: fast Flash pass extracts the credential document's text ──
+  let docExtract = "";
+  let stage1Error = "";
+  if (docImage && LOVABLE_API_KEY) {
+    const { text, error } = await callGateway(
+      LOVABLE_API_KEY,
+      EXTRACT_MODEL,
+      [
+        {
+          type: "text",
+          text:
+            "Transcribe every legible element of this professional credential document: issuing body, holder name, company name, membership/licence number, dates, and any registration or tax identifiers. Output plain text only, no commentary. If it is not a credential document, say exactly: NOT_A_CREDENTIAL_DOCUMENT.",
+        },
+        { type: "image_url", image_url: { url: docImage.dataUrl } },
+      ],
+      { timeout: 25_000 },
+    );
+    docExtract = (text || "").slice(0, 4000);
+    stage1Error = error;
+  }
+
+  const docSection = docExtract
+    ? `${docNote}\nExtracted document text (parsed by a fast OCR model):\n${docExtract}`
+    : stage1Error
+      ? `${docNote}\nDocument text extraction failed (${stage1Error}).`
+      : docNote;
+
   const prompt = `You are vetting an application to a luxury trade program for architects and interior designers.
 
 APPLICANT
@@ -221,7 +339,8 @@ Status: ${site.status || "unreachable / password-protected / blocked"}
 Extracted text: ${site.text ? site.text.slice(0, 5000) : "(none)"}
 
 CREDENTIAL DOCUMENT
-${docNote}
+${docSection}
+
 
 Assess:
 (a) does the website or document plausibly match the company/applicant name?
@@ -232,39 +351,28 @@ Return ONLY a JSON object, no prose, with keys:
 confidence_score (integer 0-100), reasoning (2-4 sentences explaining the score, written for a human reviewer), legitimate_practice (bool), name_matches (bool), high_end_design (bool), tax_id_plausible (bool), website_reachable (bool), notes (one short summary line, max 40 words).
 Be conservative: if the website is unreachable, password-protected or the evidence is ambiguous, keep confidence_score below 60.${fewShot}`;
 
-  const content: any[] = [{ type: "text", text: prompt }];
-  if (docImage) content.push({ type: "image_url", image_url: { url: docImage.dataUrl } });
-
+  // ── Stage 2: frontier model issues the verdict from the parsed evidence ──
   let verdict: Verdict | null = null;
   let aiError = "";
   if (!LOVABLE_API_KEY) {
     aiError = "AI gateway key not configured.";
   } else {
-    try {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), AI_TIMEOUT_MS);
-      const res = await fetch(GATEWAY_URL, {
-        method: "POST",
-        signal: ctrl.signal,
-        headers: { "Content-Type": "application/json", "Lovable-API-Key": LOVABLE_API_KEY },
-        body: JSON.stringify({
-          model: MODEL,
-          messages: [{ role: "user", content }],
-          response_format: { type: "json_object" },
-        }),
-      });
-      clearTimeout(t);
-      if (!res.ok) {
-        aiError = `AI gateway returned ${res.status}: ${(await res.text()).slice(0, 300)}`;
+    const { text: raw, error } = await callGateway(LOVABLE_API_KEY, VERDICT_MODEL, prompt, {
+      json: true,
+    });
+    if (error) {
+      aiError = error;
+    } else {
+      const match = typeof raw === "string" ? raw.match(/\{[\s\S]*\}/) : null;
+      if (match) {
+        try {
+          verdict = JSON.parse(match[0]) as Verdict;
+        } catch {
+          aiError = "Model returned malformed JSON.";
+        }
       } else {
-        const data = await res.json();
-        const raw = data?.choices?.[0]?.message?.content || "";
-        const match = typeof raw === "string" ? raw.match(/\{[\s\S]*\}/) : null;
-        if (match) verdict = JSON.parse(match[0]) as Verdict;
-        else aiError = "Model returned no parsable JSON.";
+        aiError = "Model returned no parsable JSON.";
       }
-    } catch (e) {
-      aiError = e instanceof Error ? e.message : "AI request failed";
     }
   }
 
@@ -292,7 +400,10 @@ Be conservative: if the website is unreachable, password-protected or the eviden
       })
       .eq("id", applicationId);
 
-    if (!retryable) await notifyAdmin(admin, app, aiError, attempts);
+    if (!retryable) {
+      await notifyAdmin(admin, app, aiError, attempts);
+      await notifyFlagged(app, applicantName, 0, `Automatic verification failed twice: ${aiError}`);
+    }
 
     return json({ status: retryable ? "system_retry" : "flagged_for_review", error: aiError, attempts });
   }
@@ -318,6 +429,10 @@ Be conservative: if the website is unreachable, password-protected or the eviden
       ...(autoApprove ? { reviewed_at: new Date().toISOString() } : {}),
     })
     .eq("id", applicationId);
+
+  if (!autoApprove) {
+    await notifyFlagged(app, applicantName, confidenceScore, notes);
+  }
 
   if (autoApprove) {
     await admin.from("user_roles").upsert(
