@@ -2305,6 +2305,11 @@ const PublicProductPageContent: React.FC = () => {
                         )}
                       </h1>
 
+                      {isTradeVerifiedView && (
+                        <div className="mt-4 flex justify-start">
+                          <CurrencyToggle compact value={displayCurrency} onChange={setDisplayCurrency} />
+                        </div>
+                      )}
                       {isTradeVerifiedView && mockNetDisplay ? (
                         <div className="mt-6">
                           <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
@@ -2485,6 +2490,11 @@ const PublicProductPageContent: React.FC = () => {
                       )}
                     </h1>
 
+                    {isTradeVerifiedView && (
+                      <div className="mt-4 flex justify-end">
+                        <CurrencyToggle compact value={displayCurrency} onChange={setDisplayCurrency} />
+                      </div>
+                    )}
                     {isTradeVerifiedView && mockNetDisplay ? (
                       <div className="mt-6">
                         <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
