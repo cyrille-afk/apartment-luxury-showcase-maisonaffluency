@@ -1148,11 +1148,24 @@ const PublicProductPageContent: React.FC = () => {
   }, [productConfig, priceCurrency]);
 
   const pricing = computeDisplayPrice(productData, effectiveRole, priceCurrency, hasFromPrefix);
-  const mockNetLabel = pricing.netLabel;
-  const mockNetDisplay = pricing.netDisplay;
+  // Trade views get the same currency switcher as the Trade Portal product page.
+  const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
+  const fxRates = useFxRates();
+  const toDisplay = (cents: number) =>
+    formatPriceConverted(cents, priceCurrency, displayCurrency, fxRates);
+  const mockNetLabel =
+    isTradeVerifiedView && pricing.netCents != null ? toDisplay(pricing.netCents) : pricing.netLabel;
+  const mockNetDisplay =
+    isTradeVerifiedView && mockNetLabel
+      ? `${hasFromPrefix ? "From " : ""}${mockNetLabel}`
+      : pricing.netDisplay;
   const retailPlainLabel =
+    (isTradeVerifiedView && productData.baseRetailPriceCents > 0
+      ? toDisplay(productData.baseRetailPriceCents)
+      : null) ??
     pricing.retailFootnoteLabel ??
     (publicRrpLabel ? publicRrpLabel.replace(/^From\s+/i, "") : null);
+
 
   // Commerce block visibility under the (possibly mocked) role.
   // Verified trade — mocked OR real auth — renders the exact same commerce
