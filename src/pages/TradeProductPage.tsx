@@ -2400,14 +2400,8 @@ const TradeProductPage: React.FC = () => {
               <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" />
             </div>
 
-            {/* Trade price + retail/trade toggle (size driven by selector above) */}
-        {effectiveRrpCents ? (
-              <div className="order-[-3] md:order-none">
-                {renderPrice()}
-              </div>
-            ) : (
-              <p className="font-body text-sm text-muted-foreground italic order-[-3] md:order-none">Price upon Request</p>
-            )}
+
+
 
 
             {/* ===== Primary action block — CTA, utility links, secondary stack ===== */}
