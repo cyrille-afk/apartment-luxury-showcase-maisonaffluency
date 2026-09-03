@@ -172,6 +172,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // super_admin briefly looks like a public user and gets bounced
         // to /trade/me?restricted=1.
         await fetchUserData(resolved.user.id, sbClient);
+        const oauthReturnPath = sessionStorage.getItem("maison:oauth-return-path");
+        if (oauthReturnPath === "/trade") {
+          sessionStorage.removeItem("maison:oauth-return-path");
+          window.location.replace(oauthReturnPath);
+          return;
+        }
       }
       setLoading(false);
     };

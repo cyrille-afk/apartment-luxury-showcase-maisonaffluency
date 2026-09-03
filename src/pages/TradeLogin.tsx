@@ -28,6 +28,7 @@ const TradeLogin = () => {
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
+    sessionStorage.setItem("maison:oauth-return-path", "/trade");
 
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
@@ -38,12 +39,15 @@ const TradeLogin = () => {
       });
       if (result.redirected) return; // browser is navigating to Google
       if (result.error) {
+        sessionStorage.removeItem("maison:oauth-return-path");
         toast({ title: "Google Sign-In Failed", description: result.error.message, variant: "destructive" });
         return;
       }
       // Session set — land on the trade workspace.
+      sessionStorage.removeItem("maison:oauth-return-path");
       navigate("/trade");
     } catch (err) {
+      sessionStorage.removeItem("maison:oauth-return-path");
       toast({
         title: "Google Sign-In Failed",
         description: err instanceof Error ? err.message : "Unexpected OAuth error",
