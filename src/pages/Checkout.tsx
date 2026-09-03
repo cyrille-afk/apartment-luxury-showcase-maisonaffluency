@@ -21,7 +21,7 @@ import RegionalLogisticsNote from "@/components/trade/RegionalLogisticsNote";
 import RegionalPaymentPanel from "@/components/checkout/RegionalPaymentPanel";
 import { useRegionalLogistics, mapCountryToRegionTier } from "@/hooks/useRegionalLogistics";
 import { ArrowLeft } from "lucide-react";
-import { resolveTaxRule, computeTaxCents, taxRowLabel } from "@/config/taxRules";
+import { resolveTaxRule, computeTaxCents, taxRowLabel, taxRegistrationLine } from "@/config/taxRules";
 import {
   assertCheckoutCopy,
   buildVerifiedTotals,
@@ -1016,6 +1016,7 @@ export default function Checkout() {
       shippingZoneLabel: estimate.zoneLabel ?? null,
       taxCents,
       taxLabel: taxCents > 0 ? (serverTax?.label ?? (rule ? taxRowLabel(rule) : null)) : null,
+      taxRegistrationLine: taxCents > 0 ? taxRegistrationLine(rule) : null,
       totalCents: chargeTotalCents + estimatedShippingCents + estimatedTaxCents,
       chargeTotalCents,
     };
