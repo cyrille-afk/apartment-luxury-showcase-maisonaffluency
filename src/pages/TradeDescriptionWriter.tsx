@@ -490,7 +490,7 @@ export default function TradeDescriptionWriter() {
                     onChange={(e) => {
                       setResult(e.target.value);
                       setResultLength(e.target.value.length);
-                      if (e.target.value.length <= 160) setSeoWarning(null);
+                      if (tone !== "seo" || e.target.value.length <= 160) setSeoWarning(null);
                     }}
                     rows={Math.min(20, Math.max(6, result.split("\n").length + 2))}
                     className="w-full resize-y rounded-md border border-border bg-background p-3 font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
