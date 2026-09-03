@@ -329,17 +329,34 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
         </div>
       </dl>
 
-      <button
-        type="button"
-        onClick={issueInvoice}
-        disabled={busy}
-        className="flex h-14 w-full items-center justify-center gap-3 bg-foreground text-sm uppercase tracking-[0.2em] text-background transition-opacity hover:opacity-90 disabled:opacity-60"
-      >
-        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-        {busy ? "Preparing" : "Issue pro-forma invoice"}
-      </button>
+      {isAuthed === false ? (
+        <div className="border border-border bg-foreground/[0.03] px-5 py-5 text-center">
+          <Lock className="mx-auto h-4 w-4 text-muted-foreground" />
+          <p className="mt-2 text-sm">Sign in to issue your pro-forma invoice</p>
+          <p className="mt-1 text-xs font-light text-muted-foreground">
+            Pro-forma orders are tied to your trade account so our concierge can reconcile your transfer.
+          </p>
+          <button
+            type="button"
+            onClick={promptSignIn}
+            className="mt-4 flex h-12 w-full items-center justify-center gap-3 bg-foreground text-sm uppercase tracking-[0.2em] text-background transition-opacity hover:opacity-90"
+          >
+            Sign in to continue
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={issueInvoice}
+          disabled={busy || isAuthed !== true}
+          className="flex h-14 w-full items-center justify-center gap-3 bg-foreground text-sm uppercase tracking-[0.2em] text-background transition-opacity hover:opacity-90 disabled:opacity-60"
+        >
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          {busy ? "Preparing" : "Issue pro-forma invoice"}
+        </button>
+      )}
 
-      <div className="space-y-3 border-t border-border pt-6">
+      <div className={cn("space-y-3 border-t border-border pt-6", isAuthed === false && "hidden")}>
         <h3 className="text-[11px] font-light uppercase tracking-[0.26em] text-muted-foreground">
           Attach payment receipt
         </h3>
