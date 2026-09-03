@@ -36,14 +36,19 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
 
-    let userId: string | null = null;
+    // Auth required: a pro-forma order is a binding trade-desk commitment, so
+    // anonymous callers are rejected outright.
     const authHeader = req.headers.get("Authorization");
-    if (authHeader) {
-      const anon = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_ANON_KEY") ?? "");
-      const { data } = await anon.auth.getClaims(authHeader.replace("Bearer ", ""));
-      const sub = (data?.claims as Record<string, unknown> | undefined)?.sub;
-      if (sub) userId = String(sub);
+    if (!authHeader?.startsWith("Bearer ")) {
+      return json({ error: "Authentication required." }, 401);
     }
+    const anon = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_ANON_KEY") ?? "");
+    const { data: claims, error: claimsErr } = await anon.auth.getClaims(authHeader.replace("Bearer ", ""));
+    const sub = (claims?.claims as Record<string, unknown> | undefined)?.sub;
+    if (claimsErr || !sub) {
+      return json({ error: "Invalid or expired session." }, 401);
+    }
+    const userId = String(sub);
 
     const body = await req.json().catch(() => ({}));
 
