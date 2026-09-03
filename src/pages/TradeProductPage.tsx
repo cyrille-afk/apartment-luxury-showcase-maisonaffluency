@@ -28,6 +28,10 @@ import ShareMenu from "@/components/ShareMenu";
 import CornerTooltip from "@/components/product/CornerTooltip";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
+import ShippingDetailsAccordion from "@/components/product/ShippingDetailsAccordion";
+import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
+import FinishesPdfButton from "@/components/product/FinishesPdfButton";
+
 import ActiveSwatchCaption from "@/components/product/ActiveSwatchCaption";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import CadAssetsSection from "@/components/trade/CadAssetsSection";
