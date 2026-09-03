@@ -1759,20 +1759,21 @@ const TradeProductPage: React.FC = () => {
     navigate("/cart");
   };
 
-  const renderPrice = () => {
-
+  /**
+   * Shared price maths for both the headline price line and the boxed action
+   * panel, so the trade catalogue sheet reads exactly like the designer-side
+   * trade sheet (net trade price + struck retail).
+   */
+  const priceLabels = (() => {
     if (!pricing || !effectiveRrpCents) return null;
     // When a wood-finish swatch carries a frame-price override, it becomes
     // the RRP base; otherwise fall back to the size_variants base.
     let rrp = effectiveRrpCents;
     if (selectedWoodPrice?.price_cents && selectedWoodPrice.price_cents > 0) {
-      const woodCents = selectedWoodPrice.currency === pricing.currency
+      rrp = selectedWoodPrice.currency === pricing.currency
         ? selectedWoodPrice.price_cents
         : convertCents(selectedWoodPrice.price_cents, selectedWoodPrice.currency, pricing.currency as DisplayCurrency, fxRates);
-      rrp = woodCents;
     }
-    const trade = Math.round(rrp * (1 - TRADE_DISCOUNT));
-    const cents = showTradePrice ? trade : rrp;
     // Add the fabric per-LM upcharge on top. The upcharge sits in the fabric's
     // currency; convert to the product currency when they differ.
     let upcharge = 0;
@@ -1782,14 +1783,26 @@ const TradeProductPage: React.FC = () => {
         ? fabricUpchargeCentsRaw
         : convertCents(fabricUpchargeCentsRaw, fromCcy, pricing.currency as DisplayCurrency, fxRates);
     }
-    const centsWithFabric = cents + upcharge;
-    const formatted = formatPriceConverted(centsWithFabric, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined);
+    const retailCents = rrp + upcharge;
+    const netCents = Math.round(rrp * (1 - TRADE_DISCOUNT)) + upcharge;
     // Once the user has made a concrete fabric or wood-frame selection, the
-    // price is fully resolved — never show "From" (whether it comes from the
-    // explicit curator prefix or the dual-axis fallback).
+    // price is fully resolved — never show "From".
     const hasConcreteSelection = !!selectedFabric || !!selectedWoodPrice || !!activeVariant;
     const explicitPrefix = pricing.price_prefix && !hasConcreteSelection ? `${pricing.price_prefix} ` : "";
     const prefix = explicitPrefix || (isFromPrice && !hasConcreteSelection ? "From " : "");
+    const unit = pricing.price_unit || undefined;
+    return {
+      prefix,
+      upcharge,
+      netLabel: formatPriceConverted(netCents, pricing.currency, displayCurrency, fxRates, unit),
+      retailLabel: formatPriceConverted(retailCents, pricing.currency, displayCurrency, fxRates, unit),
+    };
+  })();
+
+  const renderPrice = () => {
+    if (!priceLabels) return null;
+    const { prefix, netLabel, retailLabel, upcharge } = priceLabels;
+
 
     return (
       <div className="w-full bg-neutral-50 border border-border rounded-none px-4 py-3.5">
