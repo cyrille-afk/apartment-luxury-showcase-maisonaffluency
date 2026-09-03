@@ -422,11 +422,34 @@ Be conservative: if the website is unreachable, password-protected or the eviden
     return json({ status: retryable ? "system_retry" : "flagged_for_review", error: aiError, attempts });
   }
 
-  const confidenceScore = Math.max(0, Math.min(100, Math.round(Number(verdict.confidence_score) || 0)));
+  const rawScore = Math.max(0, Math.min(100, Math.round(Number(verdict.confidence_score) || 0)));
+
+  // ── Structural validation of the extracted regional corporate IDs ──
+  const declared = app.tax_vat_id
+    ? [{ type: `${app.country || ""} Tax/VAT ID`.trim(), value: String(app.tax_vat_id) }]
+    : [];
+  const modelIds = Array.isArray(verdict.extracted_identifiers) ? verdict.extracted_identifiers : [];
+  const seen = new Set<string>();
+  const merged = [...modelIds, ...declared].filter((i) => {
+    const k = `${(i as any)?.type}|${(i as any)?.value}`.toLowerCase();
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+  const identifiers: ExtractedIdentifier[] = validateIdentifiers(merged, app.country);
+  const malformed = identifiers.filter((i) => i.valid === false);
+
+  // A suspicious corporate ID always goes to a human, whatever the model said.
+  const confidenceScore = malformed.length ? Math.min(rawScore, 70) : rawScore;
   const autoApprove = confidenceScore >= AUTO_APPROVE_AT;
 
   const status = autoApprove ? "approved" : "flagged_for_review";
-  const notes = verdict.reasoning || verdict.notes || "";
+  const idNote = malformed.length
+    ? ` Structural check flagged ${malformed.length} improperly formatted corporate ID(s): ${malformed
+        .map((i) => `${i.type} "${i.value}" — ${i.note}`)
+        .join("; ")}`
+    : "";
+  const notes = `${verdict.reasoning || verdict.notes || ""}${idNote}`.trim();
 
   await admin
     .from("trade_applications")
@@ -438,7 +461,15 @@ Be conservative: if the website is unreachable, password-protected or the eviden
       verification_attempts: attempts,
       next_retry_at: null,
       last_verification_error: null,
-      ai_result: { ...verdict, confidence_score: confidenceScore, website_status: site.status },
+      ai_result: {
+        ...verdict,
+        confidence_score: confidenceScore,
+        model_confidence_score: rawScore,
+        website_status: site.status,
+        region: regionFor(app.country),
+        extracted_identifiers: identifiers,
+        identifier_warnings: malformed.length,
+      },
       ai_verified_at: new Date().toISOString(),
       ...(autoApprove ? { reviewed_at: new Date().toISOString() } : {}),
     })
