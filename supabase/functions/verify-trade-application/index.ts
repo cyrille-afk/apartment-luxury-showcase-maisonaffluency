@@ -339,7 +339,8 @@ Status: ${site.status || "unreachable / password-protected / blocked"}
 Extracted text: ${site.text ? site.text.slice(0, 5000) : "(none)"}
 
 CREDENTIAL DOCUMENT
-${docNote}
+${docSection}
+
 
 Assess:
 (a) does the website or document plausibly match the company/applicant name?
