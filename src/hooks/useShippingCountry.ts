@@ -62,7 +62,10 @@ export type EstimatedShipping = {
 export function useEstimatedShipping(
   items?: ShippingEstimateItem[] | null,
   countryCode?: string | null,
+  /** Currency the estimate should be expressed in (usually the cart currency). */
+  targetCurrency?: string | null,
 ): EstimatedShipping {
+  const fxRates = useFxRates();
   // Stable dependency: only the fields that influence the freight maths.
   const signature = JSON.stringify(
     (items ?? []).map((i) => [
