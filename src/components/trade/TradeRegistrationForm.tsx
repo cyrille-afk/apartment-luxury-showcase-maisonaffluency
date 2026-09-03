@@ -30,6 +30,7 @@ const tradeRegisterSchema = z.object({
   country: z.string().min(1),
   city: z.string().trim().max(100, "City name is too long").optional().or(z.literal("")),
   instagramHandle: z.string().trim().max(60, "Instagram handle is too long").optional().or(z.literal("")),
+  corporateRegNumber: z.string().trim().min(1, "Corporate registry number is required").max(60, "Registry number is too long"),
   taxVatId: z.string().trim().max(60, "Tax/VAT ID is too long").optional().or(z.literal("")),
   isCertified: z.boolean(),
   certificationDetails: z.string().trim().max(300, "Certification details are too long").optional().or(z.literal("")),
@@ -76,6 +77,7 @@ const TradeRegistrationForm = ({
     country: "",
     city: "",
     instagramHandle: "",
+    corporateRegNumber: "",
     taxVatId: "",
     isCertified: false,
     certificationDetails: "",
@@ -159,6 +161,7 @@ const TradeRegistrationForm = ({
         country: form.country,
         city: form.city,
         instagram_handle: form.instagramHandle || null,
+        corporate_reg_number: form.corporateRegNumber,
         tax_vat_id: form.taxVatId || null,
         credential_document_path: credentialPath,
         is_certified_professional: form.isCertified,
@@ -311,6 +314,16 @@ const TradeRegistrationForm = ({
               onChange={(e) => update("instagramHandle", e.target.value)}
               className={`${fieldClass("instagramHandle")} placeholder:text-muted-foreground/50`} />
             <FieldError field="instagramHandle" />
+          </div>
+          <div>
+            <label className="font-body text-sm text-foreground">Corporate Registry Number<span className="text-destructive">*</span></label>
+            <input type="text" value={form.corporateRegNumber} onChange={(e) => update("corporateRegNumber", e.target.value)}
+              placeholder={getCorporateRegPlaceholder(form.country)}
+              className={`${fieldClass("corporateRegNumber")} placeholder:text-muted-foreground/50`} />
+            <p className="font-body text-[11px] text-muted-foreground mt-1">
+              UEN for SG, Trade License / TRN for GCC, Business Reg No. elsewhere
+            </p>
+            <FieldError field="corporateRegNumber" />
           </div>
           <div>
             <label className="font-body text-sm text-foreground">Tax / VAT ID</label>
