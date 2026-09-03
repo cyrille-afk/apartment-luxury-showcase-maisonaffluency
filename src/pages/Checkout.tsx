@@ -85,6 +85,8 @@ export type CheckoutSummary = {
   taxCents: number;
   /** Row label for the tax line, e.g. "GST (9%)". */
   taxLabel: string | null;
+  /** Merchant tax registration line, e.g. "GST Reg. No. UEN 201717288Z". */
+  taxRegistrationLine: string | null;
   /** Displayed total — includes the estimated freight when present. */
   totalCents: number;
   /** Amount actually charged now (excludes unconfirmed estimated freight). */
@@ -208,9 +210,16 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
             <RegionalLogisticsNote compact className="mt-2" />
           </div>
           {summary.taxCents > 0 && summary.taxLabel && (
-            <div className="flex items-baseline justify-between gap-6">
-              <dt className="text-muted-foreground">{summary.taxLabel}</dt>
-              <dd className="tabular-nums">{money(summary.taxCents, currency)}</dd>
+            <div>
+              <div className="flex items-baseline justify-between gap-6">
+                <dt className="text-muted-foreground">{summary.taxLabel}</dt>
+                <dd className="tabular-nums">{money(summary.taxCents, currency)}</dd>
+              </div>
+              {summary.taxRegistrationLine && (
+                <p className="mt-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                  {summary.taxRegistrationLine}
+                </p>
+              )}
             </div>
           )}
           <div className="border-t border-border pt-4">
