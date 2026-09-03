@@ -852,6 +852,7 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
           orderRef={orderRef}
           regionTier={regionTier}
           country={destinationCountry}
+          countryIso={destination.iso}
           currency={currency}
           buyer={{
             name: account ? account.email : name,
@@ -992,7 +993,11 @@ export default function Checkout() {
   const [shipping, setShipping] = useState<ConfirmedShipping | null>(null);
   // Country picked in the "Country or Region" field of the delivery address —
   // drives the estimated base freight row in the Order Summary.
-  const [formCountry, setFormCountry] = useState<string | null>(null);
+  // Defaults to the globally chosen shipping destination so tax is resolved
+  // even in wire mode, where no Stripe address element sets this.
+  const [formCountry, setFormCountry] = useState<string | null>(
+    () => getCurrentDestination()?.iso ?? null,
+  );
   // Signed-in account — replaces blank email/name inputs with a confirmation.
   const { user, isAdmin, isSuperAdmin, isTradeUser } = useAuth();
   const account = user?.email
