@@ -162,6 +162,7 @@ serve(async (req) => {
         shipping_country: shippingCountry,
         tax_cents: String(taxCents),
         tax_label: gstApplies ? "GST (9%)" : "",
+        line_items: JSON.stringify(
 
           items.map((i) => ({ t: i.title, f: i.finish, u: i.unitAmount, q: i.quantity })),
         ).slice(0, 500),
