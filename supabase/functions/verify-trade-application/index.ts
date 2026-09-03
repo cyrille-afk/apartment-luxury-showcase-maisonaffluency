@@ -316,7 +316,7 @@ Deno.serve(async (req) => {
         {
           type: "text",
           text:
-            "Transcribe every legible element of this professional credential document: issuing body, holder name, company name, membership/licence number, dates, and any registration or tax identifiers. Output plain text only, no commentary. If it is not a credential document, say exactly: NOT_A_CREDENTIAL_DOCUMENT.",
+            "Transcribe every legible element of this professional credential document: issuing body, holder name, company name, membership/licence/accreditation number, class or grade, issue and expiry dates, and any registration or tax identifiers. Pay particular attention to regional identifiers and quote them verbatim: Singapore UEN / ACRA numbers, SIDAC or SIDS accreditation (including ID Class 1/2/3), SIA membership numbers, Malaysia SSM numbers, UAE DED or free-zone trade licence numbers, GCC Tax Registration Numbers (TRN), Saudi Commercial Registration (CR) numbers, APID certificate numbers. Transcribe Arabic or Chinese text as well, followed by an English translation in parentheses. Output plain text only, no commentary. If it is not a credential document, say exactly: NOT_A_CREDENTIAL_DOCUMENT.",
         },
         { type: "image_url", image_url: { url: docImage.dataUrl } },
       ],
