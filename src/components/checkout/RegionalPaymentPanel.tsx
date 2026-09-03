@@ -9,8 +9,9 @@
  * emails it to the buyer, and lets signed-in buyers attach their remittance
  * receipt for treasury reconciliation.
  */
-import { useMemo, useState } from "react";
-import { Check, Copy, Download, Loader2, Upload } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Check, Copy, Download, Loader2, Lock, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -99,6 +100,24 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
   const [issued, setIssued] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [receiptName, setReceiptName] = useState<string | null>(null);
+
+  // Pro-forma orders and invoices now require a session (edge functions reject
+  // anonymous calls with 401) — guests are asked to sign in first instead.
+  const navigate = useNavigate();
+  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setIsAuthed(Boolean(data.user)));
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "INITIAL_SESSION") return;
+      setIsAuthed(Boolean(session?.user));
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const promptSignIn = () => {
+    toast.error("Please sign in to issue a pro-forma invoice.");
+    navigate("/trade/login", { state: { returnTo: window.location.pathname + window.location.search } });
+  };
 
   const buildPdf = () =>
     buildProformaInvoicePdf({
