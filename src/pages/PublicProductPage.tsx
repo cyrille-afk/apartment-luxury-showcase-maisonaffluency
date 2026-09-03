@@ -77,7 +77,8 @@ import {
 } from "@/components/product/PublicSpecTable";
 import TradeWorkspace from "@/components/product/TradeWorkspace";
 import ProductCommerceCta from "@/components/product/ProductCommerceCta";
-import AxonometricStudioButton from "@/components/product/AxonometricStudioButton";
+import CurrencyToggle, { formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
+import { n as useTradeDisplayCurrency } from "@/hooks/n";
 import TradeFirstCta from "@/components/product/TradeFirstCta";
 
 import StickyPurchaseBar from "@/components/product/StickyPurchaseBar";
