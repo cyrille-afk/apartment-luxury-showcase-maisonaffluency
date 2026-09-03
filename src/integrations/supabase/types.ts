@@ -6380,13 +6380,16 @@ export type Database = {
           instagram_handle: string | null
           is_certified_professional: boolean
           job_title: string
+          last_verification_error: string | null
           message: string | null
+          next_retry_at: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: Database["public"]["Enums"]["trade_application_status"]
           tax_exempt_status: boolean
           tax_vat_id: string | null
           user_id: string
+          verification_attempts: number
           verification_checklist_sent_at: string | null
           verification_checklist_sent_by: string | null
           verification_checklist_sent_by_name: string | null
@@ -6411,13 +6414,16 @@ export type Database = {
           instagram_handle?: string | null
           is_certified_professional?: boolean
           job_title?: string
+          last_verification_error?: string | null
           message?: string | null
+          next_retry_at?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["trade_application_status"]
           tax_exempt_status?: boolean
           tax_vat_id?: string | null
           user_id: string
+          verification_attempts?: number
           verification_checklist_sent_at?: string | null
           verification_checklist_sent_by?: string | null
           verification_checklist_sent_by_name?: string | null
@@ -6442,13 +6448,16 @@ export type Database = {
           instagram_handle?: string | null
           is_certified_professional?: boolean
           job_title?: string
+          last_verification_error?: string | null
           message?: string | null
+          next_retry_at?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["trade_application_status"]
           tax_exempt_status?: boolean
           tax_vat_id?: string | null
           user_id?: string
+          verification_attempts?: number
           verification_checklist_sent_at?: string | null
           verification_checklist_sent_by?: string | null
           verification_checklist_sent_by_name?: string | null
@@ -7894,6 +7903,53 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_feedback_loops: {
+        Row: {
+          admin_decision: string
+          admin_notes: string | null
+          ai_confidence: number | null
+          ai_reasoning: string | null
+          application_id: string | null
+          created_at: string
+          decided_by: string | null
+          id: string
+          submission: Json
+          updated_at: string
+        }
+        Insert: {
+          admin_decision: string
+          admin_notes?: string | null
+          ai_confidence?: number | null
+          ai_reasoning?: string | null
+          application_id?: string | null
+          created_at?: string
+          decided_by?: string | null
+          id?: string
+          submission?: Json
+          updated_at?: string
+        }
+        Update: {
+          admin_decision?: string
+          admin_notes?: string | null
+          ai_confidence?: number | null
+          ai_reasoning?: string | null
+          application_id?: string | null
+          created_at?: string
+          decided_by?: string | null
+          id?: string
+          submission?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_feedback_loops_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "trade_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       video_watch_events: {
         Row: {
           created_at: string
@@ -8568,7 +8624,13 @@ export type Database = {
         | "returned"
         | "cancelled"
       studio_role: "owner" | "admin" | "editor" | "viewer"
-      trade_application_status: "pending" | "approved" | "rejected" | "flagged"
+      trade_application_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "flagged"
+        | "flagged_for_review"
+        | "system_retry"
       trade_tier: "standard" | "silver" | "gold" | "platinum"
     }
     CompositeTypes: {
@@ -8747,7 +8809,14 @@ export const Constants = {
         "cancelled",
       ],
       studio_role: ["owner", "admin", "editor", "viewer"],
-      trade_application_status: ["pending", "approved", "rejected", "flagged"],
+      trade_application_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "flagged",
+        "flagged_for_review",
+        "system_retry",
+      ],
       trade_tier: ["standard", "silver", "gold", "platinum"],
     },
   },
