@@ -191,8 +191,18 @@ export default function AdminTradeReview() {
 
         <div className="space-y-6">
           {apps.map((app) => {
-            const reasoning =
-              (app.ai_result as { reasoning?: string } | null)?.reasoning || app.verification_notes || "—";
+            const result = app.ai_result as
+              | {
+                  reasoning?: string;
+                  credential_body?: string;
+                  region?: string;
+                  extracted_identifiers?: { type: string; value: string; valid: boolean | null; note?: string }[];
+                }
+              | null;
+            const reasoning = result?.reasoning || app.verification_notes || "—";
+            const identifiers = Array.isArray(result?.extracted_identifiers)
+              ? result!.extracted_identifiers!.filter((i) => i && (i.value || i.type))
+              : [];
             const score = app.ai_confidence != null ? Math.round(Number(app.ai_confidence)) : null;
             return (
               <article key={app.id} className="border border-border rounded-sm p-6">
@@ -236,6 +246,50 @@ export default function AdminTradeReview() {
                     </p>
                   )}
                 </div>
+
+                {(identifiers.length > 0 || result?.credential_body || result?.region) && (
+                  <div className="mt-4 rounded-sm border border-border p-4">
+                    <p className="font-body text-[10px] uppercase tracking-[0.24em] text-muted-foreground mb-3">
+                      Extracted entity identifiers
+                      {result?.region ? ` · ${result.region.replace("SG_ASEAN", "Singapore / ASEAN").replace("GCC", "Middle East (GCC)").replace("ROW", "Rest of world")}` : ""}
+                    </p>
+                    {result?.credential_body && (
+                      <p className="font-body text-sm mb-3">
+                        <span className="text-muted-foreground">Credential: </span>
+                        {result.credential_body}
+                      </p>
+                    )}
+                    <ul className="space-y-2">
+                      {identifiers.map((id, i) => (
+                        <li key={`${id.type}-${i}`} className="flex flex-wrap items-baseline gap-2">
+                          <span className="font-body text-sm">
+                            Extracted {id.type}: <span className="font-mono">{id.value || "—"}</span>
+                          </span>
+                          {id.valid === true && (
+                            <span className="font-body text-[10px] uppercase tracking-[0.2em] px-1.5 py-0.5 rounded-sm bg-primary/10 text-primary">
+                              Format valid
+                            </span>
+                          )}
+                          {id.valid === false && (
+                            <span className="font-body text-[10px] uppercase tracking-[0.2em] px-1.5 py-0.5 rounded-sm bg-destructive/15 text-destructive">
+                              Suspicious format
+                            </span>
+                          )}
+                          {id.valid === false && id.note && (
+                            <span className="font-body text-xs text-muted-foreground w-full">{id.note}</span>
+                          )}
+                        </li>
+                      ))}
+                      {identifiers.length === 0 && (
+                        <li className="font-body text-xs text-muted-foreground">
+                          No corporate identifier could be extracted from the document or website.
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+
+
 
                 <div className="mt-4 flex flex-wrap gap-4 font-body text-xs">
                   {app.company_website && (

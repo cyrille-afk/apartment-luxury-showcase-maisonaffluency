@@ -14,6 +14,12 @@
 // Fail-safe: any error leaves the application in `flagged` so a human decides.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import {
+  credentialGuidance,
+  regionFor,
+  validateIdentifiers,
+  type ExtractedIdentifier,
+} from "./regional.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
@@ -37,6 +43,11 @@ type Verdict = {
   tax_id_plausible: boolean;
   website_reachable: boolean;
   notes: string;
+  /** Regional corporate identifiers read off the document / website. */
+  extracted_identifiers?: { type: string; value: string }[];
+  /** e.g. "SIDAC Accreditation (ID Class 2)", "Dubai DED Trade Licence" */
+  credential_body?: string;
+  regional_credential?: boolean;
 };
 
 const json = (body: unknown, status = 200) =>
@@ -305,7 +316,7 @@ Deno.serve(async (req) => {
         {
           type: "text",
           text:
-            "Transcribe every legible element of this professional credential document: issuing body, holder name, company name, membership/licence number, dates, and any registration or tax identifiers. Output plain text only, no commentary. If it is not a credential document, say exactly: NOT_A_CREDENTIAL_DOCUMENT.",
+            "Transcribe every legible element of this professional credential document: issuing body, holder name, company name, membership/licence/accreditation number, class or grade, issue and expiry dates, and any registration or tax identifiers. Pay particular attention to regional identifiers and quote them verbatim: Singapore UEN / ACRA numbers, SIDAC or SIDS accreditation (including ID Class 1/2/3), SIA membership numbers, Malaysia SSM numbers, UAE DED or free-zone trade licence numbers, GCC Tax Registration Numbers (TRN), Saudi Commercial Registration (CR) numbers, APID certificate numbers. Transcribe Arabic or Chinese text as well, followed by an English translation in parentheses. Output plain text only, no commentary. If it is not a credential document, say exactly: NOT_A_CREDENTIAL_DOCUMENT.",
         },
         { type: "image_url", image_url: { url: docImage.dataUrl } },
       ],
@@ -342,14 +353,17 @@ CREDENTIAL DOCUMENT
 ${docSection}
 
 
+${credentialGuidance(app.country)}
+
 Assess:
 (a) does the website or document plausibly match the company/applicant name?
 (b) does the business actively operate in high-end interior design or architecture?
-(c) is the Tax/VAT ID structurally correct for the stated country (format only)?
+(c) are the corporate identifiers (Tax/VAT ID, UEN, TRN, CR number, trade licence) structurally correct for the stated country (format only)?
 
 Return ONLY a JSON object, no prose, with keys:
-confidence_score (integer 0-100), reasoning (2-4 sentences explaining the score, written for a human reviewer), legitimate_practice (bool), name_matches (bool), high_end_design (bool), tax_id_plausible (bool), website_reachable (bool), notes (one short summary line, max 40 words).
-Be conservative: if the website is unreachable, password-protected or the evidence is ambiguous, keep confidence_score below 60.${fewShot}`;
+confidence_score (integer 0-100), reasoning (2-4 sentences explaining the score, written for a human reviewer), legitimate_practice (bool), name_matches (bool), high_end_design (bool), tax_id_plausible (bool), website_reachable (bool), notes (one short summary line, max 40 words), credential_body (string naming the issuing body and class/grade if any, e.g. "SIDAC Accreditation — Interior Designer Class 2" or "Dubai DED Trade Licence"; empty string if none), regional_credential (bool — true when the proof is a Singapore/ASEAN or GCC national credential), extracted_identifiers (array of objects {type, value} where type is the identifier's name such as "Singapore UEN", "UAE TRN", "Saudi CR Number", "UAE Trade Licence", "Malaysia SSM Registration", "VAT Number", and value is the identifier exactly as printed; empty array if none found).
+Be conservative: if the website is unreachable, password-protected or the evidence is ambiguous, keep confidence_score below 60. But apply the CRITICAL SCORING RULE above — a clear, name-matching regional credential from Asia or the Middle East scores 85 or higher even when no Western professional body is present.${fewShot}`;
+
 
   // ── Stage 2: frontier model issues the verdict from the parsed evidence ──
   let verdict: Verdict | null = null;
@@ -408,11 +422,34 @@ Be conservative: if the website is unreachable, password-protected or the eviden
     return json({ status: retryable ? "system_retry" : "flagged_for_review", error: aiError, attempts });
   }
 
-  const confidenceScore = Math.max(0, Math.min(100, Math.round(Number(verdict.confidence_score) || 0)));
+  const rawScore = Math.max(0, Math.min(100, Math.round(Number(verdict.confidence_score) || 0)));
+
+  // ── Structural validation of the extracted regional corporate IDs ──
+  const declared = app.tax_vat_id
+    ? [{ type: `${app.country || ""} Tax/VAT ID`.trim(), value: String(app.tax_vat_id) }]
+    : [];
+  const modelIds = Array.isArray(verdict.extracted_identifiers) ? verdict.extracted_identifiers : [];
+  const seen = new Set<string>();
+  const merged = [...modelIds, ...declared].filter((i) => {
+    const k = `${(i as any)?.type}|${(i as any)?.value}`.toLowerCase();
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+  const identifiers: ExtractedIdentifier[] = validateIdentifiers(merged, app.country);
+  const malformed = identifiers.filter((i) => i.valid === false);
+
+  // A suspicious corporate ID always goes to a human, whatever the model said.
+  const confidenceScore = malformed.length ? Math.min(rawScore, 70) : rawScore;
   const autoApprove = confidenceScore >= AUTO_APPROVE_AT;
 
   const status = autoApprove ? "approved" : "flagged_for_review";
-  const notes = verdict.reasoning || verdict.notes || "";
+  const idNote = malformed.length
+    ? ` Structural check flagged ${malformed.length} improperly formatted corporate ID(s): ${malformed
+        .map((i) => `${i.type} "${i.value}" — ${i.note}`)
+        .join("; ")}`
+    : "";
+  const notes = `${verdict.reasoning || verdict.notes || ""}${idNote}`.trim();
 
   await admin
     .from("trade_applications")
@@ -424,7 +461,15 @@ Be conservative: if the website is unreachable, password-protected or the eviden
       verification_attempts: attempts,
       next_retry_at: null,
       last_verification_error: null,
-      ai_result: { ...verdict, confidence_score: confidenceScore, website_status: site.status },
+      ai_result: {
+        ...verdict,
+        confidence_score: confidenceScore,
+        model_confidence_score: rawScore,
+        website_status: site.status,
+        region: regionFor(app.country),
+        extracted_identifiers: identifiers,
+        identifier_warnings: malformed.length,
+      },
       ai_verified_at: new Date().toISOString(),
       ...(autoApprove ? { reviewed_at: new Date().toISOString() } : {}),
     })
