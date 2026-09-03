@@ -15,6 +15,9 @@ interface PaymentConfirmedProps {
   totalFormatted?: string
   receivedOn?: string
   leadTimeNote?: string | null
+  taxLabel?: string | null
+  taxFormatted?: string | null
+  taxRegistrationLine?: string | null
 }
 
 const PaymentConfirmedEmail = ({
@@ -24,6 +27,9 @@ const PaymentConfirmedEmail = ({
   totalFormatted = '—',
   receivedOn,
   leadTimeNote,
+  taxLabel,
+  taxFormatted,
+  taxRegistrationLine,
 }: PaymentConfirmedProps) => (
   <Html lang="en" dir="ltr">
     <Head />
@@ -57,6 +63,12 @@ const PaymentConfirmedEmail = ({
                 <td style={totalLabel}>Order ID</td>
                 <td style={totalAmount}>{orderRef}</td>
               </tr>
+              {taxLabel && taxFormatted ? (
+                <tr>
+                  <td style={totalLabel}>{taxLabel}</td>
+                  <td style={totalAmount}>{taxFormatted} {currency}</td>
+                </tr>
+              ) : null}
               <tr>
                 <td colSpan={2}><Hr style={dividerSubtle} /></td>
               </tr>
@@ -67,6 +79,10 @@ const PaymentConfirmedEmail = ({
             </tbody>
           </table>
         </Section>
+
+        {taxRegistrationLine ? (
+          <Text style={footerSmall}>{taxRegistrationLine}</Text>
+        ) : null}
 
         <Text style={text}>
           {leadTimeNote
@@ -121,6 +137,9 @@ export const template = {
     currency: 'SGD',
     totalFormatted: '42,180.00',
     receivedOn: '18 Jun 2026',
+    taxLabel: 'GST (9%)',
+    taxFormatted: '3,483.30',
+    taxRegistrationLine: 'GST Reg. No. UEN 201717288Z',
   },
 } satisfies TemplateEntry
 

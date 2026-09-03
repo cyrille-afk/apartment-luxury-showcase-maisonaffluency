@@ -21,7 +21,7 @@ import RegionalLogisticsNote from "@/components/trade/RegionalLogisticsNote";
 import RegionalPaymentPanel from "@/components/checkout/RegionalPaymentPanel";
 import { useRegionalLogistics, mapCountryToRegionTier } from "@/hooks/useRegionalLogistics";
 import { ArrowLeft } from "lucide-react";
-import { resolveTaxRule, computeTaxCents, taxRowLabel } from "@/config/taxRules";
+import { resolveTaxRule, computeTaxCents, taxRowLabel, taxRegistrationLine } from "@/config/taxRules";
 import {
   assertCheckoutCopy,
   buildVerifiedTotals,
@@ -85,6 +85,8 @@ export type CheckoutSummary = {
   taxCents: number;
   /** Row label for the tax line, e.g. "GST (9%)". */
   taxLabel: string | null;
+  /** Merchant tax registration line, e.g. "GST Reg. No. UEN 201717288Z". */
+  taxRegistrationLine: string | null;
   /** Displayed total — includes the estimated freight when present. */
   totalCents: number;
   /** Amount actually charged now (excludes unconfirmed estimated freight). */
@@ -208,9 +210,16 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
             <RegionalLogisticsNote compact className="mt-2" />
           </div>
           {summary.taxCents > 0 && summary.taxLabel && (
-            <div className="flex items-baseline justify-between gap-6">
-              <dt className="text-muted-foreground">{summary.taxLabel}</dt>
-              <dd className="tabular-nums">{money(summary.taxCents, currency)}</dd>
+            <div>
+              <div className="flex items-baseline justify-between gap-6">
+                <dt className="text-muted-foreground">{summary.taxLabel}</dt>
+                <dd className="tabular-nums">{money(summary.taxCents, currency)}</dd>
+              </div>
+              {summary.taxRegistrationLine && (
+                <p className="mt-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                  {summary.taxRegistrationLine}
+                </p>
+              )}
             </div>
           )}
           <div className="border-t border-border pt-4">
@@ -1007,6 +1016,7 @@ export default function Checkout() {
       shippingZoneLabel: estimate.zoneLabel ?? null,
       taxCents,
       taxLabel: taxCents > 0 ? (serverTax?.label ?? (rule ? taxRowLabel(rule) : null)) : null,
+      taxRegistrationLine: taxCents > 0 ? taxRegistrationLine(rule) : null,
       totalCents: chargeTotalCents + estimatedShippingCents + estimatedTaxCents,
       chargeTotalCents,
     };
@@ -1337,6 +1347,12 @@ export default function Checkout() {
         <p className="mt-2 text-sm text-muted-foreground">
           A private advisor will contact you shortly to arrange delivery.
         </p>
+        {summary.taxCents > 0 && summary.taxLabel && (
+          <p className="mt-4 font-light text-[11px] tracking-[0.06em] text-muted-foreground">
+            Includes {summary.taxLabel} {money(summary.taxCents, summary.currency)}
+            {summary.taxRegistrationLine ? ` · ${summary.taxRegistrationLine}` : ""}
+          </p>
+        )}
         <button
           onClick={() => navigate(homePath)}
           className="mt-8 h-12 w-full max-w-xs rounded-none border border-foreground text-[11px] uppercase tracking-[0.2em]"
