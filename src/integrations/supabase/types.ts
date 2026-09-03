@@ -1923,6 +1923,45 @@ export type Database = {
         }
         Relationships: []
       }
+      curated_drops: {
+        Row: {
+          created_at: string
+          description: string | null
+          featured_products: string[]
+          hero_image_url: string | null
+          id: string
+          is_active: boolean
+          sort_order: number
+          target_region: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          featured_products?: string[]
+          hero_image_url?: string | null
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          target_region?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          featured_products?: string[]
+          hero_image_url?: string | null
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          target_region?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       custom_inquiries: {
         Row: {
           company: string | null
@@ -5073,6 +5112,48 @@ export type Database = {
         }
         Relationships: []
       }
+      regional_logistics_tiers: {
+        Row: {
+          base_shipping_markup: number
+          created_at: string
+          delivery_mode: string
+          estimated_lead_time: string
+          hub_city: string | null
+          id: string
+          notes: string | null
+          region_tier: Database["public"]["Enums"]["region_tier"]
+          show_singapore_tax: boolean
+          tax_handling_mode: string
+          updated_at: string
+        }
+        Insert: {
+          base_shipping_markup?: number
+          created_at?: string
+          delivery_mode?: string
+          estimated_lead_time?: string
+          hub_city?: string | null
+          id?: string
+          notes?: string | null
+          region_tier: Database["public"]["Enums"]["region_tier"]
+          show_singapore_tax?: boolean
+          tax_handling_mode?: string
+          updated_at?: string
+        }
+        Update: {
+          base_shipping_markup?: number
+          created_at?: string
+          delivery_mode?: string
+          estimated_lead_time?: string
+          hub_city?: string | null
+          id?: string
+          notes?: string | null
+          region_tier?: Database["public"]["Enums"]["region_tier"]
+          show_singapore_tax?: boolean
+          tax_handling_mode?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       room_planner_projects: {
         Row: {
           created_at: string
@@ -6383,6 +6464,7 @@ export type Database = {
           last_verification_error: string | null
           message: string | null
           next_retry_at: string | null
+          region_tier: Database["public"]["Enums"]["region_tier"]
           reviewed_at: string | null
           reviewed_by: string | null
           status: Database["public"]["Enums"]["trade_application_status"]
@@ -6417,6 +6499,7 @@ export type Database = {
           last_verification_error?: string | null
           message?: string | null
           next_retry_at?: string | null
+          region_tier?: Database["public"]["Enums"]["region_tier"]
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["trade_application_status"]
@@ -6451,6 +6534,7 @@ export type Database = {
           last_verification_error?: string | null
           message?: string | null
           next_retry_at?: string | null
+          region_tier?: Database["public"]["Enums"]["region_tier"]
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["trade_application_status"]
@@ -8372,6 +8456,10 @@ export type Database = {
         Args: { _details?: Json; _route: string }
         Returns: undefined
       }
+      map_country_to_region_tier: {
+        Args: { _country: string }
+        Returns: Database["public"]["Enums"]["region_tier"]
+      }
       match_catalog: {
         Args: { match_count?: number; query_embedding: string }
         Returns: {
@@ -8617,6 +8705,7 @@ export type Database = {
         | "ready"
         | "published"
         | "killed"
+      region_tier: "ASEAN" | "GCC" | "ROW"
       sample_request_status:
         | "requested"
         | "approved"
@@ -8801,6 +8890,7 @@ export const Constants = {
         "published",
         "killed",
       ],
+      region_tier: ["ASEAN", "GCC", "ROW"],
       sample_request_status: [
         "requested",
         "approved",
