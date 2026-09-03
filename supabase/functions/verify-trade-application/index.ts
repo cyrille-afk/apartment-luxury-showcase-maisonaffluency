@@ -351,39 +351,28 @@ Return ONLY a JSON object, no prose, with keys:
 confidence_score (integer 0-100), reasoning (2-4 sentences explaining the score, written for a human reviewer), legitimate_practice (bool), name_matches (bool), high_end_design (bool), tax_id_plausible (bool), website_reachable (bool), notes (one short summary line, max 40 words).
 Be conservative: if the website is unreachable, password-protected or the evidence is ambiguous, keep confidence_score below 60.${fewShot}`;
 
-  const content: any[] = [{ type: "text", text: prompt }];
-  if (docImage) content.push({ type: "image_url", image_url: { url: docImage.dataUrl } });
-
+  // ── Stage 2: frontier model issues the verdict from the parsed evidence ──
   let verdict: Verdict | null = null;
   let aiError = "";
   if (!LOVABLE_API_KEY) {
     aiError = "AI gateway key not configured.";
   } else {
-    try {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), AI_TIMEOUT_MS);
-      const res = await fetch(GATEWAY_URL, {
-        method: "POST",
-        signal: ctrl.signal,
-        headers: { "Content-Type": "application/json", "Lovable-API-Key": LOVABLE_API_KEY },
-        body: JSON.stringify({
-          model: MODEL,
-          messages: [{ role: "user", content }],
-          response_format: { type: "json_object" },
-        }),
-      });
-      clearTimeout(t);
-      if (!res.ok) {
-        aiError = `AI gateway returned ${res.status}: ${(await res.text()).slice(0, 300)}`;
+    const { text: raw, error } = await callGateway(LOVABLE_API_KEY, VERDICT_MODEL, prompt, {
+      json: true,
+    });
+    if (error) {
+      aiError = error;
+    } else {
+      const match = typeof raw === "string" ? raw.match(/\{[\s\S]*\}/) : null;
+      if (match) {
+        try {
+          verdict = JSON.parse(match[0]) as Verdict;
+        } catch {
+          aiError = "Model returned malformed JSON.";
+        }
       } else {
-        const data = await res.json();
-        const raw = data?.choices?.[0]?.message?.content || "";
-        const match = typeof raw === "string" ? raw.match(/\{[\s\S]*\}/) : null;
-        if (match) verdict = JSON.parse(match[0]) as Verdict;
-        else aiError = "Model returned no parsable JSON.";
+        aiError = "Model returned no parsable JSON.";
       }
-    } catch (e) {
-      aiError = e instanceof Error ? e.message : "AI request failed";
     }
   }
 
