@@ -1347,6 +1347,12 @@ export default function Checkout() {
         <p className="mt-2 text-sm text-muted-foreground">
           A private advisor will contact you shortly to arrange delivery.
         </p>
+        {summary.taxCents > 0 && summary.taxLabel && (
+          <p className="mt-4 font-light text-[11px] tracking-[0.06em] text-muted-foreground">
+            Includes {summary.taxLabel} {money(summary.taxCents, summary.currency)}
+            {summary.taxRegistrationLine ? ` · ${summary.taxRegistrationLine}` : ""}
+          </p>
+        )}
         <button
           onClick={() => navigate(homePath)}
           className="mt-8 h-12 w-full max-w-xs rounded-none border border-foreground text-[11px] uppercase tracking-[0.2em]"
