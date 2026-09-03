@@ -294,6 +294,33 @@ Deno.serve(async (req) => {
       `\nApply the same judgement: do not repeat the mistakes above, and do not flag cases the human has consistently approved.`
     : "";
 
+  // ── Stage 1: fast Flash pass extracts the credential document's text ──
+  let docExtract = "";
+  let stage1Error = "";
+  if (docImage && LOVABLE_API_KEY) {
+    const { text, error } = await callGateway(
+      LOVABLE_API_KEY,
+      EXTRACT_MODEL,
+      [
+        {
+          type: "text",
+          text:
+            "Transcribe every legible element of this professional credential document: issuing body, holder name, company name, membership/licence number, dates, and any registration or tax identifiers. Output plain text only, no commentary. If it is not a credential document, say exactly: NOT_A_CREDENTIAL_DOCUMENT.",
+        },
+        { type: "image_url", image_url: { url: docImage.dataUrl } },
+      ],
+      { timeout: 25_000 },
+    );
+    docExtract = (text || "").slice(0, 4000);
+    stage1Error = error;
+  }
+
+  const docSection = docExtract
+    ? `${docNote}\nExtracted document text (parsed by a fast OCR model):\n${docExtract}`
+    : stage1Error
+      ? `${docNote}\nDocument text extraction failed (${stage1Error}).`
+      : docNote;
+
   const prompt = `You are vetting an application to a luxury trade program for architects and interior designers.
 
 APPLICANT
