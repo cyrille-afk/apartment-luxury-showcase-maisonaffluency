@@ -247,6 +247,50 @@ export default function AdminTradeReview() {
                   )}
                 </div>
 
+                {(identifiers.length > 0 || result?.credential_body || result?.region) && (
+                  <div className="mt-4 rounded-sm border border-border p-4">
+                    <p className="font-body text-[10px] uppercase tracking-[0.24em] text-muted-foreground mb-3">
+                      Extracted entity identifiers
+                      {result?.region ? ` · ${result.region.replace("SG_ASEAN", "Singapore / ASEAN").replace("GCC", "Middle East (GCC)").replace("ROW", "Rest of world")}` : ""}
+                    </p>
+                    {result?.credential_body && (
+                      <p className="font-body text-sm mb-3">
+                        <span className="text-muted-foreground">Credential: </span>
+                        {result.credential_body}
+                      </p>
+                    )}
+                    <ul className="space-y-2">
+                      {identifiers.map((id, i) => (
+                        <li key={`${id.type}-${i}`} className="flex flex-wrap items-baseline gap-2">
+                          <span className="font-body text-sm">
+                            Extracted {id.type}: <span className="font-mono">{id.value || "—"}</span>
+                          </span>
+                          {id.valid === true && (
+                            <span className="font-body text-[10px] uppercase tracking-[0.2em] px-1.5 py-0.5 rounded-sm bg-primary/10 text-primary">
+                              Format valid
+                            </span>
+                          )}
+                          {id.valid === false && (
+                            <span className="font-body text-[10px] uppercase tracking-[0.2em] px-1.5 py-0.5 rounded-sm bg-destructive/15 text-destructive">
+                              Suspicious format
+                            </span>
+                          )}
+                          {id.valid === false && id.note && (
+                            <span className="font-body text-xs text-muted-foreground w-full">{id.note}</span>
+                          )}
+                        </li>
+                      ))}
+                      {identifiers.length === 0 && (
+                        <li className="font-body text-xs text-muted-foreground">
+                          No corporate identifier could be extracted from the document or website.
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+
+
+
                 <div className="mt-4 flex flex-wrap gap-4 font-body text-xs">
                   {app.company_website && (
                     <a
