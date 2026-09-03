@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { useToast } from "@/hooks/use-toast";
 
 const TradeLogin = () => {
@@ -29,25 +30,16 @@ const TradeLogin = () => {
     setGoogleLoading(true);
 
     try {
-      const oauthPromise = supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/trade`,
-        },
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: `${window.location.origin}/trade`,
       });
-
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        window.setTimeout(() => {
-          reject(new Error("Google sign-in timed out. Please allow pop-ups and try again."));
-        }, 15000);
-      });
-
-      const result = await Promise.race([oauthPromise, timeoutPromise]);
-
+      if (result.redirected) return; // browser is navigating to Google
       if (result.error) {
         toast({ title: "Google Sign-In Failed", description: result.error.message, variant: "destructive" });
         return;
       }
+      // Session set — land on the trade workspace.
+      navigate("/trade");
     } catch (err) {
       toast({
         title: "Google Sign-In Failed",
