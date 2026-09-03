@@ -766,7 +766,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
             {[
               { step: "01", title: "Apply Online", desc: "Complete a short application with your company credentials and professional background." },
-              { step: "02", title: "Get Approved", desc: "Our team reviews your application within 1–2 business days and activates your trade account." },
+              { step: "02", title: "Get Approved", desc: "Get verified instantly — our automated system reviews global design credentials in real time and activates your trade account." },
               { step: "03", title: "Start Sourcing", desc: "Access trade pricing, request bespoke quotations, and work directly with your dedicated advisor." },
             ].map((item, i) => (
               <motion.div
@@ -838,7 +838,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   { q: "How does the quotation process work?", a: "You can build quotes directly from our product library. Once submitted, our team reviews and confirms pricing within 24 hours. Complex or multi-brand projects may take slightly longer as we coordinate with our ateliers." },
                   { q: "Do you ship internationally?", a: "Yes. We arrange consolidated, fully insured shipping to most countries. Our logistics team will recommend the most appropriate freight partners for your project location." },
                   { q: "Can I request custom or bespoke pieces?", a: "Absolutely. We work directly with specialist workshops and renowned designers worldwide to fulfil custom requirements — from material modifications to entirely bespoke commissions." },
-                  { q: "How long does the application review take?", a: "Applications are typically reviewed within 1–2 business days. You'll receive an email notification once your account has been approved." },
+                  { q: "How long does the application review take?", a: "Get verified instantly. Our automated system reviews global design credentials in real time — you'll receive an email notification as soon as your account is approved." },
                   { q: "Are prices shown ex-VAT or inclusive?", a: "All trade prices are quoted ex-VAT. Where the destination requires it (e.g. EU intra-community deliveries, UK VAT-registered businesses), VAT is itemised separately on the final quotation. Singapore GST is applied where applicable." },
                   { q: "Where do shipments originate?", a: "The majority of our roster is based in France and Italy, with selected ateliers across Spain, the Netherlands, Switzerland and the UK. Goods consolidate at our European hubs before international dispatch — typically a short, well-trodden route for UK and EU clients." },
                   { q: "How are post-Brexit duties handled for UK deliveries?", a: "We coordinate customs clearance into Great Britain and Northern Ireland on your behalf. Import VAT and any applicable duty are calculated against HMRC tariff codes for each piece and surfaced on the quote — no surprises on delivery." },
@@ -950,7 +950,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 {mobileFormExpanded && (
                   <div className="lg:hidden">
                     <p className="font-body text-sm text-muted-foreground mb-6">
-                      Complete the form below to get started.<br />We'll review your application within 1–2 business days.
+                      Get verified instantly.<br />Our automated system reviews global design credentials in real time.
                     </p>
                     <TradeRegistrationForm prefillEmail={heroEmail || prefillEmail} />
                     <p className="mt-6 font-body text-sm text-muted-foreground">
@@ -965,7 +965,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 {/* Desktop: always show full form */}
                 <div className="hidden lg:block">
                   <p className="font-body text-sm text-muted-foreground mb-6">
-                    Complete the form below to get started.<br />We'll review your application within 1–2 business days.
+                    Get verified instantly.<br />Our automated system reviews global design credentials in real time.
                   </p>
                   <TradeRegistrationForm prefillEmail={heroEmail || prefillEmail} />
                   <p className="mt-6 font-body text-sm text-muted-foreground">
