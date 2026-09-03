@@ -977,7 +977,12 @@ export default function Checkout() {
     // Country-based base freight is indicative only: it is displayed and added
     // to the shown Order Total, but never charged until an advisor confirms it.
     const estimatedShippingCents = shippingCents > 0 ? 0 : estimate.cents;
-    const chargeTotalCents = subtotalCents - discountCents + shippingCents;
+    const netCents = subtotalCents - discountCents + shippingCents;
+    // Singapore GST (9%) applies only to domestic SGD deliveries.
+    const gst = isSingaporeGstOrder(formCountry, currency);
+    const taxCents = gst ? Math.round(netCents * SG_GST_RATE) : 0;
+    const chargeTotalCents = netCents + taxCents;
+    const estimatedTaxCents = gst ? Math.round(estimatedShippingCents * SG_GST_RATE) : 0;
     return {
       currency,
       subtotalCents,
@@ -987,10 +992,13 @@ export default function Checkout() {
       shippingLabel: shipping?.label ?? null,
       estimatedShippingCents,
       shippingZoneLabel: estimate.zoneLabel ?? null,
-      totalCents: chargeTotalCents + estimatedShippingCents,
+      taxCents,
+      taxLabel: gst ? `GST (${Math.round(SG_GST_RATE * 100)}%)` : null,
+      totalCents: chargeTotalCents + estimatedShippingCents + estimatedTaxCents,
       chargeTotalCents,
     };
-  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel]);
+  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, formCountry]);
+
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [email, setEmail] = useState("");
