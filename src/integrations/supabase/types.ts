@@ -8344,6 +8344,7 @@ export type Database = {
       }
       has_verified_access: { Args: { _user_id: string }; Returns: boolean }
       invoke_scrape_products_with_retry: { Args: never; Returns: undefined }
+      is_approved_trade_user: { Args: { _user_id?: string }; Returns: boolean }
       is_client_trade_approved: {
         Args: { _client_id: string }
         Returns: {
