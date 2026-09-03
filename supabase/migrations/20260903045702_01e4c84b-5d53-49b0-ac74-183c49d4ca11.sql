@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.add_gallery_product_to_quote(uuid,uuid,text,text,text,text,text,text,integer);
