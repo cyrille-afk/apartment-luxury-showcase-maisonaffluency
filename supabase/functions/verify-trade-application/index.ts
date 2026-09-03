@@ -353,14 +353,17 @@ CREDENTIAL DOCUMENT
 ${docSection}
 
 
+${credentialGuidance(app.country)}
+
 Assess:
 (a) does the website or document plausibly match the company/applicant name?
 (b) does the business actively operate in high-end interior design or architecture?
-(c) is the Tax/VAT ID structurally correct for the stated country (format only)?
+(c) are the corporate identifiers (Tax/VAT ID, UEN, TRN, CR number, trade licence) structurally correct for the stated country (format only)?
 
 Return ONLY a JSON object, no prose, with keys:
-confidence_score (integer 0-100), reasoning (2-4 sentences explaining the score, written for a human reviewer), legitimate_practice (bool), name_matches (bool), high_end_design (bool), tax_id_plausible (bool), website_reachable (bool), notes (one short summary line, max 40 words).
-Be conservative: if the website is unreachable, password-protected or the evidence is ambiguous, keep confidence_score below 60.${fewShot}`;
+confidence_score (integer 0-100), reasoning (2-4 sentences explaining the score, written for a human reviewer), legitimate_practice (bool), name_matches (bool), high_end_design (bool), tax_id_plausible (bool), website_reachable (bool), notes (one short summary line, max 40 words), credential_body (string naming the issuing body and class/grade if any, e.g. "SIDAC Accreditation — Interior Designer Class 2" or "Dubai DED Trade Licence"; empty string if none), regional_credential (bool — true when the proof is a Singapore/ASEAN or GCC national credential), extracted_identifiers (array of objects {type, value} where type is the identifier's name such as "Singapore UEN", "UAE TRN", "Saudi CR Number", "UAE Trade Licence", "Malaysia SSM Registration", "VAT Number", and value is the identifier exactly as printed; empty array if none found).
+Be conservative: if the website is unreachable, password-protected or the evidence is ambiguous, keep confidence_score below 60. But apply the CRITICAL SCORING RULE above — a clear, name-matching regional credential from Asia or the Middle East scores 85 or higher even when no Western professional body is present.${fewShot}`;
+
 
   // ── Stage 2: frontier model issues the verdict from the parsed evidence ──
   let verdict: Verdict | null = null;
