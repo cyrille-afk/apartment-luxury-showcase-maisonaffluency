@@ -1010,7 +1010,7 @@ export default function Checkout() {
       totalCents: chargeTotalCents + estimatedShippingCents + estimatedTaxCents,
       chargeTotalCents,
     };
-  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, formCountry]);
+  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, formCountry, serverTax]);
 
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -1166,6 +1166,10 @@ export default function Checkout() {
         setServerDiscountPct(serverPct);
         const serverShippingCents = Number(pi?.shippingCents) || 0;
         const serverTaxCents = Number(pi?.taxCents) || 0;
+        setServerTax({
+          cents: serverTaxCents,
+          label: typeof pi?.taxLabel === "string" && pi.taxLabel ? pi.taxLabel : null,
+        });
         const totals = buildVerifiedTotals(grossLines);
         const expectedCents =
           totals.totalCents -
