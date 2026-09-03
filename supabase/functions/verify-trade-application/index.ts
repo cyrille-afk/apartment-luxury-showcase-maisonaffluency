@@ -65,6 +65,52 @@ async function fetchSite(url: string): Promise<{ ok: boolean; text: string; stat
   }
 }
 
+// Second consecutive failure → notify the operator through a secure webhook
+// (falls back to a transactional email when no webhook is configured).
+async function notifyAdmin(admin: any, app: any, aiError: string, attempts: number) {
+  const webhook = Deno.env.get("ADMIN_ALERT_WEBHOOK_URL");
+  const payload = {
+    event: "trade_verification_failed",
+    application_id: app.id,
+    company_name: app.company_name,
+    country: app.country,
+    attempts,
+    error: aiError,
+    at: new Date().toISOString(),
+  };
+  if (webhook) {
+    try {
+      const secret = Deno.env.get("ADMIN_ALERT_WEBHOOK_SECRET");
+      await fetch(webhook, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(secret ? { "X-Webhook-Secret": secret } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
+      return;
+    } catch (_) {
+      // fall through to email
+    }
+  }
+  try {
+    await admin.functions.invoke("send-transactional-email", {
+      body: {
+        templateName: "scrape-failure-alert",
+        recipientEmail: "cyrille@maisonaffluency.com",
+        idempotencyKey: `trade-verify-fail-${app.id}-${attempts}`,
+        templateData: {
+          windowMinutes: 15,
+          failures: [{ status_code: 500, body: `Trade verification failed for ${app.company_name}: ${aiError}`, created: payload.at }],
+        },
+      },
+    });
+  } catch (_) {
+    // non-fatal
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -222,19 +268,40 @@ Be conservative: if the website is unreachable, password-protected or the eviden
     }
   }
 
-  const confidence = verdict ? Math.max(0, Math.min(1, Number(verdict.confidence) || 0)) : 0;
-  const autoApprove =
-    !!verdict &&
-    verdict.legitimate_practice &&
-    verdict.high_end_design &&
-    verdict.name_matches &&
-    verdict.website_reachable &&
-    confidence >= AUTO_APPROVE_AT;
+  const attempts = (app.verification_attempts ?? 0) + 1;
 
-  const status = autoApprove ? "approved" : "flagged";
-  const notes = verdict
-    ? verdict.notes
-    : `Automatic verification unavailable — ${aiError || "unknown error"}. Manual review required.`;
+  // ── Error loop: AI unavailable / timed out / unparsable → system_retry ──
+  if (!verdict) {
+    const retryable = attempts < MAX_ATTEMPTS;
+    const nextRetry = retryable
+      ? new Date(Date.now() + RETRY_DELAY_MIN * 60_000).toISOString()
+      : null;
+
+    await admin
+      .from("trade_applications")
+      .update({
+        status: retryable ? "system_retry" : "flagged_for_review",
+        verification_attempts: attempts,
+        next_retry_at: nextRetry,
+        last_verification_error: aiError || "Verification failed",
+        verification_notes: retryable
+          ? `Automatic verification could not complete (${aiError || "unknown error"}). A retry is scheduled in ${RETRY_DELAY_MIN} minutes.`
+          : `Automatic verification failed twice (${aiError || "unknown error"}). Manual review required.`,
+        ai_verified_at: new Date().toISOString(),
+        ai_result: { ai_error: aiError, attempts },
+      })
+      .eq("id", applicationId);
+
+    if (!retryable) await notifyAdmin(admin, app, aiError, attempts);
+
+    return json({ status: retryable ? "system_retry" : "flagged_for_review", error: aiError, attempts });
+  }
+
+  const confidenceScore = Math.max(0, Math.min(100, Math.round(Number(verdict.confidence_score) || 0)));
+  const autoApprove = confidenceScore >= AUTO_APPROVE_AT;
+
+  const status = autoApprove ? "approved" : "flagged_for_review";
+  const notes = verdict.reasoning || verdict.notes || "";
 
   await admin
     .from("trade_applications")
@@ -242,8 +309,11 @@ Be conservative: if the website is unreachable, password-protected or the eviden
       status,
       tax_exempt_status: autoApprove,
       verification_notes: notes,
-      ai_confidence: confidence,
-      ai_result: verdict ? { ...verdict, website_status: site.status, ai_error: aiError || null } : { ai_error: aiError },
+      ai_confidence: confidenceScore,
+      verification_attempts: attempts,
+      next_retry_at: null,
+      last_verification_error: null,
+      ai_result: { ...verdict, confidence_score: confidenceScore, website_status: site.status },
       ai_verified_at: new Date().toISOString(),
       ...(autoApprove ? { reviewed_at: new Date().toISOString() } : {}),
     })
@@ -270,5 +340,5 @@ Be conservative: if the website is unreachable, password-protected or the eviden
     }
   }
 
-  return json({ status, confidence, notes });
+  return json({ status, confidence_score: confidenceScore, reasoning: notes });
 });
