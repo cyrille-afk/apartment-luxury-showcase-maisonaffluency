@@ -2891,6 +2891,7 @@ const TradeProductPage: React.FC = () => {
                 );
               })()}
 
+              <RegionalLogisticsNote className="mt-1" />
             </div>
           </div>
         </div>
