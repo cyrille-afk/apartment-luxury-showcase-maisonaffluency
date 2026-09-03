@@ -15,7 +15,9 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import {
+  AUTO_APPROVE_AT,
   credentialGuidance,
+  decideVerification,
   regionFor,
   validateIdentifiers,
   type ExtractedIdentifier,
