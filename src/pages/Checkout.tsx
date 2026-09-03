@@ -940,6 +940,7 @@ export default function Checkout() {
       unitPriceCents: l.unitCents,
     })),
     formCountry,
+    orderCurrency(grossLines ?? []),
   );
   const summary = useMemo<CheckoutSummary | null>(() => {
     if (!grossLines?.length) return null;
