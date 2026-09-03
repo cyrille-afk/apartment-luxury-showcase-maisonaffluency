@@ -74,7 +74,9 @@ export default function Cart() {
   const lastSlug = items.length ? items[items.length - 1].designerSlug : null;
   const continueHref = hasTradeAccess
     ? lastSlug
-      ? `/trade/designers/${lastSlug}`
+      ? // Trade atelier pages open the full portrait biography by default;
+        // the summary flag lands on the product catalogue view instead.
+        `/trade/designers/${lastSlug}?portrait=summary`
       : "/trade/designers"
     : lastSlug
       ? `/designers/${lastSlug}`
