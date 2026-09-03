@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { resolveTaxRule, taxRowLabel, taxRegistrationLine } from "../_shared/taxRules.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -40,7 +41,7 @@ serve(async (req) => {
 
     const { data: order, error: readErr } = await supabase
       .from("shop_orders")
-      .select("id, order_ref, email, full_name, currency, total_cents, paid_at, payment_confirmation_sent_at")
+      .select("id, order_ref, email, full_name, currency, total_cents, tax_cents, tax_label, paid_at, payment_confirmation_sent_at")
       .eq("id", orderId)
       .single();
     if (readErr || !order) return json({ error: "Order not found." }, 404);
@@ -71,6 +72,16 @@ serve(async (req) => {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         }).format((order.total_cents ?? 0) / 100);
+        // Tax is itemised on the receipt, with our GST registration number.
+        const taxCents = Number(order.tax_cents ?? 0);
+        const taxRule = taxCents > 0 ? resolveTaxRule("SG", order.currency ?? "") : null;
+        const taxFormatted =
+          taxCents > 0
+            ? new Intl.NumberFormat("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }).format(taxCents / 100)
+            : null;
 
         const { error: mailErr } = await supabase.functions.invoke("send-transactional-email", {
           body: {
@@ -82,6 +93,9 @@ serve(async (req) => {
               orderRef: order.order_ref,
               currency: (order.currency ?? "usd").toUpperCase(),
               totalFormatted,
+              taxLabel: taxCents > 0 ? (order.tax_label || (taxRule ? taxRowLabel(taxRule) : null)) : null,
+              taxFormatted,
+              taxRegistrationLine: taxCents > 0 ? taxRegistrationLine(taxRule) : null,
               receivedOn: new Date(paidAt).toLocaleDateString("en-GB", {
                 day: "2-digit",
                 month: "short",
