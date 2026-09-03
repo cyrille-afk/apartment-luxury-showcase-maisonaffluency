@@ -424,8 +424,6 @@ Be conservative: if the website is unreachable, password-protected or the eviden
     return json({ status: retryable ? "system_retry" : "flagged_for_review", error: aiError, attempts });
   }
 
-  const rawScore = Math.max(0, Math.min(100, Math.round(Number(verdict.confidence_score) || 0)));
-
   // ── Structural validation of the extracted regional corporate IDs ──
   const declared = app.tax_vat_id
     ? [{ type: `${app.country || ""} Tax/VAT ID`.trim(), value: String(app.tax_vat_id) }]
@@ -439,13 +437,11 @@ Be conservative: if the website is unreachable, password-protected or the eviden
     return true;
   });
   const identifiers: ExtractedIdentifier[] = validateIdentifiers(merged, app.country);
-  const malformed = identifiers.filter((i) => i.valid === false);
 
   // A suspicious corporate ID always goes to a human, whatever the model said.
-  const confidenceScore = malformed.length ? Math.min(rawScore, 70) : rawScore;
-  const autoApprove = confidenceScore >= AUTO_APPROVE_AT;
+  const decision = decideVerification(verdict.confidence_score, identifiers);
+  const { rawScore, confidenceScore, autoApprove, malformed, status } = decision;
 
-  const status = autoApprove ? "approved" : "flagged_for_review";
   const idNote = malformed.length
     ? ` Structural check flagged ${malformed.length} improperly formatted corporate ID(s): ${malformed
         .map((i) => `${i.type} "${i.value}" — ${i.note}`)
