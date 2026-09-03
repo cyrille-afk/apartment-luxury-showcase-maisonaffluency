@@ -207,7 +207,7 @@ const TradeRegistrationForm = ({
 
       toast({
         title: "Application Submitted",
-        description: "Please check your email to verify your account. We'll review your application within 1-2 business days.",
+        description: "Please check your email to verify your account. Get verified instantly — our automated system reviews global design credentials in real time.",
       });
 
       navigate("/trade/login");
