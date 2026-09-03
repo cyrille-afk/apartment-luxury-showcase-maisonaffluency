@@ -14,6 +14,12 @@
 // Fail-safe: any error leaves the application in `flagged` so a human decides.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import {
+  credentialGuidance,
+  regionFor,
+  validateIdentifiers,
+  type ExtractedIdentifier,
+} from "./regional.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
