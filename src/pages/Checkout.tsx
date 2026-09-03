@@ -1095,6 +1095,12 @@ export default function Checkout() {
     return "card";
   });
   const wire = method === "wire";
+  // In wire mode there is no Stripe address element, so the global shipping
+  // destination drives the tax country shown in the summary.
+  const pageDestination = useShippingDestination();
+  useEffect(() => {
+    if (wire) setFormCountry(pageDestination.iso);
+  }, [wire, pageDestination.iso]);
 
   const [confirmed, setConfirmed] = useState<string | null>(null);
   // Once payment (card or wire) succeeds the basket must be emptied, otherwise
