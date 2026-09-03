@@ -77,7 +77,8 @@ import {
 } from "@/components/product/PublicSpecTable";
 import TradeWorkspace from "@/components/product/TradeWorkspace";
 import ProductCommerceCta from "@/components/product/ProductCommerceCta";
-import AxonometricStudioButton from "@/components/product/AxonometricStudioButton";
+import CurrencyToggle, { formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
+import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import TradeFirstCta from "@/components/product/TradeFirstCta";
 
 import StickyPurchaseBar from "@/components/product/StickyPurchaseBar";
@@ -1147,11 +1148,24 @@ const PublicProductPageContent: React.FC = () => {
   }, [productConfig, priceCurrency]);
 
   const pricing = computeDisplayPrice(productData, effectiveRole, priceCurrency, hasFromPrefix);
-  const mockNetLabel = pricing.netLabel;
-  const mockNetDisplay = pricing.netDisplay;
+  // Trade views get the same currency switcher as the Trade Portal product page.
+  const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
+  const fxRates = useFxRates();
+  const toDisplay = (cents: number) =>
+    formatPriceConverted(cents, priceCurrency, displayCurrency, fxRates);
+  const mockNetLabel =
+    isTradeVerifiedView && pricing.netCents != null ? toDisplay(pricing.netCents) : pricing.netLabel;
+  const mockNetDisplay =
+    isTradeVerifiedView && mockNetLabel
+      ? `${hasFromPrefix ? "From " : ""}${mockNetLabel}`
+      : pricing.netDisplay;
   const retailPlainLabel =
+    (isTradeVerifiedView && productData.baseRetailPriceCents > 0
+      ? toDisplay(productData.baseRetailPriceCents)
+      : null) ??
     pricing.retailFootnoteLabel ??
     (publicRrpLabel ? publicRrpLabel.replace(/^From\s+/i, "") : null);
+
 
   // Commerce block visibility under the (possibly mocked) role.
   // Verified trade — mocked OR real auth — renders the exact same commerce
@@ -2291,6 +2305,11 @@ const PublicProductPageContent: React.FC = () => {
                         )}
                       </h1>
 
+                      {isTradeVerifiedView && (
+                        <div className="mt-4 flex justify-start">
+                          <CurrencyToggle compact value={displayCurrency} onChange={setDisplayCurrency} />
+                        </div>
+                      )}
                       {isTradeVerifiedView && mockNetDisplay ? (
                         <div className="mt-6">
                           <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
@@ -2471,6 +2490,11 @@ const PublicProductPageContent: React.FC = () => {
                       )}
                     </h1>
 
+                    {isTradeVerifiedView && (
+                      <div className="mt-4 flex justify-end">
+                        <CurrencyToggle compact value={displayCurrency} onChange={setDisplayCurrency} />
+                      </div>
+                    )}
                     {isTradeVerifiedView && mockNetDisplay ? (
                       <div className="mt-6">
                         <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
@@ -2535,12 +2559,6 @@ const PublicProductPageContent: React.FC = () => {
                   >
                     <div className="flex flex-col gap-5">
                       <VariantFinishSelectors />
-                      {/* Axonometric Studio — standalone visualisation tool for
-                          every verified trade user, detached from the purchase
-                          / co-pilot action box below. */}
-                      {isTradeVerifiedView && (
-                        <AxonometricStudioButton productId={product.id} />
-                      )}
                       {finishesMissingImages.length > 0 && (
                         <p className="font-body text-[11px] text-muted-foreground italic mt-1">
                           No reference image on file for{" "}
