@@ -23,11 +23,14 @@ import {
   type TradePaymentChannel,
 } from "@/config/tradePaymentChannels";
 import { buildProformaInvoicePdf, type ProformaLine } from "@/lib/proformaInvoicePdf";
+import { computeTaxCents, resolveTaxRule, taxRowLabel } from "@/config/taxRules";
 
 export interface RegionalPaymentPanelProps {
   orderRef: string;
   regionTier: RegionTier;
   country?: string | null;
+  /** ISO 3166-1 alpha-2 destination code — drives the canonical tax rule. */
+  countryIso?: string | null;
   currency: string;
   buyer: { name: string; email: string; phone?: string | null; address?: string | null };
   lines: ProformaLine[];
@@ -75,6 +78,7 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
     orderRef,
     regionTier,
     country,
+    countryIso,
     currency,
     buyer,
     lines,
@@ -90,9 +94,25 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
   const [channelId, setChannelId] = useState<PaymentChannelId>(channels[0].id);
   const channel: TradePaymentChannel = channels.find((c) => c.id === channelId) ?? channels[0];
 
-  const tax = useMemo(() => taxConfigForRegion(regionTier, country), [regionTier, country]);
+  // Single source of truth: the same rule engine the checkout summary and the
+  // PaymentIntent use, so the invoiced total always matches the page total.
+  const rule = useMemo(
+    () => resolveTaxRule(countryIso ?? country, currency),
+    [countryIso, country, currency],
+  );
+  const tax = useMemo(
+    () =>
+      rule
+        ? { rate: rule.rate, label: taxRowLabel(rule) }
+        : { rate: 0, label: taxConfigForRegion(regionTier, country).label },
+    [rule, regionTier, country],
+  );
   const taxableCents = Math.max(0, subtotalCents - discountCents) + shippingCents;
-  const taxCents = Math.round(taxableCents * tax.rate);
+  const taxCents = computeTaxCents(
+    Math.max(0, subtotalCents - discountCents),
+    shippingCents,
+    rule,
+  );
   const totalCents = taxableCents + taxCents;
 
   const [busy, setBusy] = useState(false);
