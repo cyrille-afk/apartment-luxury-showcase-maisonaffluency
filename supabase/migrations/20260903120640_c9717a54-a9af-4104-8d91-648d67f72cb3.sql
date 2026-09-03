@@ -1,0 +1,1 @@
+ALTER TABLE public.trade_applications ADD COLUMN IF NOT EXISTS corporate_reg_number TEXT;

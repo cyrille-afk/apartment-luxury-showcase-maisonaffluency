@@ -6484,6 +6484,7 @@ export type Database = {
           city: string
           company_name: string
           company_website: string | null
+          corporate_reg_number: string | null
           country: string
           created_at: string
           credential_document_path: string | null
@@ -6522,6 +6523,7 @@ export type Database = {
           city?: string
           company_name: string
           company_website?: string | null
+          corporate_reg_number?: string | null
           country?: string
           created_at?: string
           credential_document_path?: string | null
@@ -6560,6 +6562,7 @@ export type Database = {
           city?: string
           company_name?: string
           company_website?: string | null
+          corporate_reg_number?: string | null
           country?: string
           created_at?: string
           credential_document_path?: string | null
