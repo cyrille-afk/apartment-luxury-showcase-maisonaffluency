@@ -17,40 +17,40 @@
  * be guaranteed a usable number. Rates are cached in-memory for 10 minutes.
  */
 
-/** Approximate cross rates (last reviewed 2026). Guarantees conversion never
- *  no-ops when the network is down. Kept in sync with the table bundled in
- *  `src/components/trade/CurrencyToggle.tsx`. */
+/** Approximate cross rates (last reviewed 2026-09-03 vs open.er-api.com).
+ *  Guarantees conversion never no-ops when the network is down. Kept in sync
+ *  with the table bundled in `src/components/trade/CurrencyToggle.tsx`. */
 export const FALLBACK_RATES: Record<string, number> = {
   // self
   SGD_SGD: 1, EUR_EUR: 1, USD_USD: 1, GBP_GBP: 1, CHF_CHF: 1,
   AED_AED: 1, HKD_HKD: 1, AUD_AUD: 1, JPY_JPY: 1, CAD_CAD: 1,
   // EUR base
-  EUR_SGD: 1.46, EUR_USD: 1.08, EUR_GBP: 0.86, EUR_CHF: 0.97,
-  EUR_AED: 3.97, EUR_HKD: 8.45, EUR_AUD: 1.67, EUR_JPY: 168, EUR_CAD: 1.48,
+  EUR_SGD: 1.473, EUR_USD: 1.1583, EUR_GBP: 0.8589, EUR_CHF: 0.9421,
+  EUR_AED: 4.2538, EUR_HKD: 9.083, EUR_AUD: 1.6178, EUR_JPY: 184.2694, EUR_CAD: 1.606,
   // USD base
-  USD_EUR: 0.93, USD_SGD: 1.34, USD_GBP: 0.79, USD_CHF: 0.90,
-  USD_AED: 3.67, USD_HKD: 7.82, USD_AUD: 1.55, USD_JPY: 155, USD_CAD: 1.37,
+  USD_EUR: 0.8633, USD_SGD: 1.2717, USD_GBP: 0.7416, USD_CHF: 0.8134,
+  USD_AED: 3.6725, USD_HKD: 7.8418, USD_AUD: 1.3967, USD_JPY: 159.0888, USD_CAD: 1.3865,
   // SGD base
-  SGD_EUR: 0.68, SGD_USD: 0.75, SGD_GBP: 0.59, SGD_CHF: 0.67,
-  SGD_AED: 2.74, SGD_HKD: 5.84, SGD_AUD: 1.16, SGD_JPY: 116, SGD_CAD: 1.02,
+  SGD_EUR: 0.6789, SGD_USD: 0.7863, SGD_GBP: 0.5831, SGD_CHF: 0.6396,
+  SGD_AED: 2.8878, SGD_HKD: 6.1663, SGD_AUD: 1.0983, SGD_JPY: 125.0974, SGD_CAD: 1.0903,
   // GBP base
-  GBP_EUR: 1.16, GBP_USD: 1.27, GBP_SGD: 1.70, GBP_CHF: 1.13,
-  GBP_AED: 4.66, GBP_HKD: 9.91, GBP_AUD: 1.96, GBP_JPY: 197, GBP_CAD: 1.74,
+  GBP_EUR: 1.1642, GBP_USD: 1.3485, GBP_SGD: 1.7149, GBP_CHF: 1.0968,
+  GBP_AED: 4.9523, GBP_HKD: 10.5746, GBP_AUD: 1.8834, GBP_JPY: 214.53, GBP_CAD: 1.8697,
   // CHF base
-  CHF_EUR: 1.03, CHF_USD: 1.11, CHF_SGD: 1.49, CHF_GBP: 0.88,
-  CHF_AED: 4.08, CHF_HKD: 8.69, CHF_AUD: 1.72, CHF_JPY: 172, CHF_CAD: 1.52,
+  CHF_EUR: 1.0614, CHF_USD: 1.2294, CHF_SGD: 1.5635, CHF_GBP: 0.9117,
+  CHF_AED: 4.5151, CHF_HKD: 9.641, CHF_AUD: 1.7171, CHF_JPY: 195.5895, CHF_CAD: 1.7046,
   // AED base
-  AED_EUR: 0.25, AED_USD: 0.27, AED_SGD: 0.36, AED_GBP: 0.21,
-  AED_CHF: 0.24, AED_HKD: 2.13, AED_AUD: 0.42, AED_JPY: 42, AED_CAD: 0.37,
+  AED_EUR: 0.2351, AED_USD: 0.2723, AED_SGD: 0.3463, AED_GBP: 0.2019,
+  AED_CHF: 0.2215, AED_HKD: 2.1353, AED_AUD: 0.3803, AED_JPY: 43.3189, AED_CAD: 0.3775,
   // HKD base
-  HKD_EUR: 0.12, HKD_USD: 0.13, HKD_SGD: 0.17, HKD_GBP: 0.10,
-  HKD_CHF: 0.12, HKD_AED: 0.47, HKD_AUD: 0.20, HKD_JPY: 20, HKD_CAD: 0.18,
+  HKD_EUR: 0.1101, HKD_USD: 0.1275, HKD_SGD: 0.1622, HKD_GBP: 0.0946,
+  HKD_CHF: 0.1037, HKD_AED: 0.4683, HKD_AUD: 0.1781, HKD_JPY: 20.2872, HKD_CAD: 0.1768,
   // AUD base
-  AUD_EUR: 0.60, AUD_USD: 0.65, AUD_SGD: 0.86, AUD_GBP: 0.51,
-  AUD_CHF: 0.58, AUD_AED: 2.39, AUD_HKD: 5.10, AUD_JPY: 100, AUD_CAD: 0.89,
+  AUD_EUR: 0.6181, AUD_USD: 0.716, AUD_SGD: 0.9105, AUD_GBP: 0.5309,
+  AUD_CHF: 0.5824, AUD_AED: 2.6294, AUD_HKD: 5.6146, AUD_JPY: 113.9045, AUD_CAD: 0.9927,
   // CAD base
-  CAD_EUR: 0.68, CAD_USD: 0.73, CAD_SGD: 0.98, CAD_GBP: 0.58,
-  CAD_CHF: 0.66, CAD_AED: 2.68, CAD_HKD: 5.71, CAD_AUD: 1.13, CAD_JPY: 113,
+  CAD_EUR: 0.6227, CAD_USD: 0.7212, CAD_SGD: 0.9172, CAD_GBP: 0.5349,
+  CAD_CHF: 0.5866, CAD_AED: 2.6488, CAD_HKD: 5.6558, CAD_AUD: 1.0073, CAD_JPY: 114.7414,
 };
 
 export type FxSource = "identity" | "frankfurter" | "open-er-api" | "hardcoded" | "unknown";
@@ -103,7 +103,7 @@ const fetchWithTimeout = async (url: string, ms = 4000): Promise<Response> => {
 const fromFrankfurter = async (src: string, tgt: string): Promise<number | null> => {
   try {
     const res = await fetchWithTimeout(
-      `https://api.frankfurter.app/latest?from=${src}&to=${tgt}`,
+      `https://api.frankfurter.dev/v1/latest?base=${src}&symbols=${tgt}`,
     );
     if (!res.ok) return null;
     const data = await res.json();

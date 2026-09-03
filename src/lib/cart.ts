@@ -96,6 +96,32 @@ export function clearCart() {
   commit([]);
 }
 
+/**
+ * Re-price converted lines against fresh FX rates. Lines store the rate
+ * captured at add-to-cart time, which can be the offline fallback — this
+ * re-derives unitPriceCents/fxRate from the source price so the cart and
+ * checkout always reflect the current live rate. No-op for unconverted lines.
+ */
+export async function refreshCartFx() {
+  const stale = items.filter(
+    (i) => i.sourceCurrency && i.sourceUnitPriceCents && i.sourceCurrency !== i.currency,
+  );
+  if (stale.length === 0) return;
+  const { getFxRate } = await import("@/lib/fxRates");
+  let changed = false;
+  const next = await Promise.all(
+    items.map(async (i) => {
+      if (!i.sourceCurrency || !i.sourceUnitPriceCents || i.sourceCurrency === i.currency) return i;
+      const rate = await getFxRate(i.sourceCurrency, i.currency);
+      const unitPriceCents = Math.round(i.sourceUnitPriceCents * rate);
+      if (unitPriceCents === i.unitPriceCents && i.fxRate === rate) return i;
+      changed = true;
+      return { ...i, unitPriceCents, fxRate: rate };
+    }),
+  );
+  if (changed) commit(next);
+}
+
 function subscribe(cb: () => void) {
   listeners.add(cb);
   return () => listeners.delete(cb);
