@@ -95,11 +95,12 @@ serve(async (req) => {
       supabaseAdmin,
       userId,
     );
-    if (discountPct > 0) {
-      for (const i of items) i.unitAmount = Math.round(i.unitAmount * (1 - discountPct));
-    }
-
-    const goodsAmount = items.reduce((sum, i) => sum + i.unitAmount * i.quantity, 0);
+    // The discount is applied ONCE at cart level (never per unit): rounding a
+    // per-line discount drifts by a few cents against the client-side total
+    // and trips the checkout guardrail.
+    const grossAmount = items.reduce((sum, i) => sum + i.unitAmount * i.quantity, 0);
+    const discountCents = discountPct > 0 ? Math.round(grossAmount * discountPct) : 0;
+    const goodsAmount = grossAmount - discountCents;
 
     // ---- Shipping (opt-in only) ----
     // Shipping is "To be Quoted by Advisor" until the buyer explicitly confirms
