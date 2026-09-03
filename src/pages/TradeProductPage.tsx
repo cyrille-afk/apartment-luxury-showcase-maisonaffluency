@@ -2088,7 +2088,18 @@ const TradeProductPage: React.FC = () => {
             </div>
 
 
+            {/* Headline trade price — sits above the finish selectors on
+                desktop, exactly like the designer-side trade sheet. */}
+            {effectiveRrpCents ? (
+              <div className="order-[-3] md:order-none">{renderPrice()}</div>
+            ) : (
+              <p className="font-body text-sm text-muted-foreground italic order-[-3] md:order-none">
+                Price upon Request
+              </p>
+            )}
+
             {/* Finish selection — mobile: directly under the photography */}
+
             <div className="flex flex-col gap-2 order-[-5] md:order-none">
               <FinishSelector
                   pickId={product.id}
