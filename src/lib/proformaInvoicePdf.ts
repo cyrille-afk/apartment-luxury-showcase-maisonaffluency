@@ -175,7 +175,7 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
   y += 16;
 
   const ensureRoom = (needed: number) => {
-    if (y + needed < pageH - 96) return;
+    if (y + needed < pageH - 74) return;
     footer();
     doc.addPage();
     y = M;
@@ -202,7 +202,7 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
       doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
       doc.text(detail, M, y + blockH);
     }
-    y += blockH + (detail ? 14 : 4) + 12;
+    y += blockH + (detail ? 13 : 3) + 6;
   }
 
   rule(y);
@@ -236,8 +236,8 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
   totalRow("Total due", money(args.totalCents, args.currency), true);
 
   /* Payment instructions -------------------------------------------- */
-  ensureRoom(190);
-  y += 8;
+  ensureRoom(300);
+  y += 4;
   rule(y);
   y += 20;
   doc.setFontSize(8);
@@ -254,7 +254,7 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
     doc.setTextColor(FG[0], FG[1], FG[2]);
     const valueLines = doc.splitTextToSize(row.value, contentW - 170) as string[];
     valueLines.forEach((v, i) => doc.text(v, M + 170, y + i * 12));
-    y += Math.max(14, valueLines.length * 12 + 2);
+    y += Math.max(13, valueLines.length * 11.5 + 1);
   }
 
   y += 6;
@@ -263,13 +263,13 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
   for (const note of args.channel.instructions) {
     const noteLines = doc.splitTextToSize(`— ${note}`, contentW) as string[];
     ensureRoom(noteLines.length * 11 + 4);
-    noteLines.forEach((n, i) => doc.text(n, M, y + i * 11));
-    y += noteLines.length * 11 + 3;
+    noteLines.forEach((n, i) => doc.text(n, M, y + i * 10.5));
+    y += noteLines.length * 10.5 + 2;
   }
 
   /* Mandatory reference call-out ------------------------------------ */
-  ensureRoom(56);
-  y += 10;
+  ensureRoom(64);
+  y += 8;
   doc.setDrawColor(FG[0], FG[1], FG[2]);
   doc.setLineWidth(0.8);
   doc.rect(M, y, contentW, 40);
