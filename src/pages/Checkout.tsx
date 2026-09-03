@@ -1017,6 +1017,18 @@ export default function Checkout() {
     const chargeTotalCents = netCents + taxCents;
     const estimatedTaxCents =
       rule && rule.taxShipping ? Math.round(estimatedShippingCents * rule.rate) : 0;
+    // Breakdown inputs: the base the rate is applied to, plus a plain-language
+    // explanation of why the order is taxed or zero-rated.
+    const taxableBaseCents = rule
+      ? Math.max(0, subtotalCents - discountCents) +
+        (rule.taxShipping ? Math.max(0, shippingCents) : 0)
+      : 0;
+    const destination = (formCountry || "").trim().toUpperCase() || null;
+    const taxStatusNote = rule
+      ? `${rule.name} charged on ${rule.taxShipping ? "goods and delivery" : "goods"} for ${destination} orders billed in ${currency.toUpperCase()}.`
+      : !destination
+        ? "Select a destination country to see whether tax applies."
+        : `Zero-rated — no ${currency.toUpperCase()} tax rule applies to shipments to ${destination}.`;
     return {
       currency,
       subtotalCents,
@@ -1029,6 +1041,12 @@ export default function Checkout() {
       taxCents,
       taxLabel: taxCents > 0 ? (serverTax?.label ?? (rule ? taxRowLabel(rule) : null)) : null,
       taxRegistrationLine: taxCents > 0 ? taxRegistrationLine(rule) : null,
+      taxRate: rule?.rate ?? 0,
+      taxableBaseCents,
+      taxApplied: Boolean(rule),
+      taxStatusNote,
+      taxCountry: destination,
+      taxShipping: Boolean(rule?.taxShipping),
       totalCents: chargeTotalCents + estimatedShippingCents + estimatedTaxCents,
       chargeTotalCents,
     };
