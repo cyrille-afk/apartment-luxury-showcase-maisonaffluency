@@ -14,6 +14,74 @@ const COUNTRIES = [
   "United Arab Emirates", "United Kingdom", "United States", "Vietnam", "Other"
 ];
 
+// Per-country registry / tax-id format rules. Each returns an error string or null.
+const CORPORATE_REG_RULES: Record<string, { pattern: RegExp; hint: string }> = {
+  // ACRA UEN: 8–9 digits + check letter (e.g. 200012345A) or newer TyyPQnnnnX format
+  Singapore: {
+    pattern: /^(\d{8,9}[A-Za-z]|[RT]\d{2}[A-Za-z]{2}\d{4}[A-Za-z])$/,
+    hint: "Enter a valid ACRA UEN (e.g. 200012345A or T08LL1234A)",
+  },
+  // UAE DED trade licence: digits, optionally prefixed (e.g. CN-1234567 or 1234567)
+  "United Arab Emirates": {
+    pattern: /^([A-Za-z]{1,3}-?)?\d{5,8}$/,
+    hint: "Enter a valid DED trade licence number (e.g. CN-1234567)",
+  },
+  "Saudi Arabia": {
+    pattern: /^\d{10}$/,
+    hint: "Enter your 10-digit Commercial Registration (CR) number",
+  },
+  // UK Companies House: 8 digits, or 2 letters + 6 digits (e.g. SC123456)
+  "United Kingdom": {
+    pattern: /^(\d{8}|[A-Za-z]{2}\d{6})$/,
+    hint: "Enter a valid Companies House number (e.g. 12345678 or SC123456)",
+  },
+  // US EIN: 9 digits, often written 12-3456789
+  "United States": {
+    pattern: /^\d{2}-?\d{7}$/,
+    hint: "Enter a valid 9-digit EIN (e.g. 12-3456789)",
+  },
+  // Australia ABN: 11 digits
+  Australia: {
+    pattern: /^\d{2}\s?\d{3}\s?\d{3}\s?\d{3}$/,
+    hint: "Enter a valid 11-digit ABN (e.g. 51 824 753 556)",
+  },
+  // Hong Kong BR number: 8 digits
+  "Hong Kong": {
+    pattern: /^\d{8}(-\d{3})?$/,
+    hint: "Enter a valid Business Registration number (8 digits)",
+  },
+};
+
+const TAX_VAT_RULES: Record<string, { pattern: RegExp; hint: string }> = {
+  // SG GST registration mirrors the UEN
+  Singapore: {
+    pattern: /^(\d{8,9}[A-Za-z]|[RT]\d{2}[A-Za-z]{2}\d{4}[A-Za-z]|M\d{8}[A-Za-z])$/,
+    hint: "Enter a valid GST registration number (same format as your UEN)",
+  },
+  // UAE TRN: exactly 15 digits
+  "United Arab Emirates": {
+    pattern: /^\d{15}$/,
+    hint: "Enter your 15-digit TRN",
+  },
+  "Saudi Arabia": {
+    pattern: /^3\d{14}$/,
+    hint: "Enter your 15-digit VAT number (starts with 3)",
+  },
+  // UK VAT: GB + 9 digits (or 12 for branch traders)
+  "United Kingdom": {
+    pattern: /^(GB)?\d{9}(\d{3})?$/i,
+    hint: "Enter a valid UK VAT number (9 digits, optionally prefixed GB)",
+  },
+  // EU member states in the list: 2-letter country code + 8–12 alphanumerics
+  France: { pattern: /^FR[A-Za-z0-9]{2}\d{9}$/i, hint: "Enter a valid FR VAT number (e.g. FR12345678901)" },
+  Germany: { pattern: /^DE\d{9}$/i, hint: "Enter a valid DE VAT number (e.g. DE123456789)" },
+  Italy: { pattern: /^IT\d{11}$/i, hint: "Enter a valid IT VAT number (e.g. IT12345678901)" },
+  Spain: { pattern: /^ES[A-Za-z0-9]\d{7}[A-Za-z0-9]$/i, hint: "Enter a valid ES VAT number (e.g. ESA12345678)" },
+  Netherlands: { pattern: /^NL\d{9}B\d{2}$/i, hint: "Enter a valid NL VAT number (e.g. NL123456789B01)" },
+};
+
+const GENERIC_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9\s./-]{2,58}[A-Za-z0-9]$/;
+
 const tradeRegisterSchema = z.object({
   email: z.string().trim().email("Please enter a valid email address").max(255, "Email is too long"),
   password: z.string().min(8, "Password must be at least 8 characters").max(128, "Password is too long"),
@@ -30,14 +98,37 @@ const tradeRegisterSchema = z.object({
   country: z.string().min(1),
   city: z.string().trim().max(100, "City name is too long").optional().or(z.literal("")),
   instagramHandle: z.string().trim().max(60, "Instagram handle is too long").optional().or(z.literal("")),
-  corporateRegNumber: z.string().trim().min(1, "Corporate registry number is required").max(60, "Registry number is too long"),
+  corporateRegNumber: z.string().trim().min(4, "Corporate registry number is required (min 4 characters)").max(60, "Registry number is too long"),
   taxVatId: z.string().trim().max(60, "Tax/VAT ID is too long").optional().or(z.literal("")),
   isCertified: z.boolean(),
   certificationDetails: z.string().trim().max(300, "Certification details are too long").optional().or(z.literal("")),
   message: z.string().trim().max(2000, "Message is too long").optional().or(z.literal("")),
-}).refine(d => d.password === d.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
+}).superRefine((d, ctx) => {
+  if (d.password !== d.confirmPassword) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Passwords don't match", path: ["confirmPassword"] });
+  }
+  const regRule = CORPORATE_REG_RULES[d.country];
+  if (regRule && !regRule.pattern.test(d.corporateRegNumber)) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: regRule.hint, path: ["corporateRegNumber"] });
+  } else if (!regRule && !GENERIC_ID_PATTERN.test(d.corporateRegNumber)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Enter a valid registry number (4–60 characters: letters, digits, spaces, . / -)",
+      path: ["corporateRegNumber"],
+    });
+  }
+  if (d.taxVatId) {
+    const vatRule = TAX_VAT_RULES[d.country];
+    if (vatRule && !vatRule.pattern.test(d.taxVatId.replace(/\s/g, ""))) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: vatRule.hint, path: ["taxVatId"] });
+    } else if (!vatRule && !GENERIC_ID_PATTERN.test(d.taxVatId)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Enter a valid Tax/VAT ID (4–60 characters: letters, digits, spaces, . / -)",
+        path: ["taxVatId"],
+      });
+    }
+  }
 });
 
 const getCorporateRegPlaceholder = (country: string): string => {
