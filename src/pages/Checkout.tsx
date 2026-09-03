@@ -17,6 +17,7 @@ import { VisaMark, MastercardMark, BankTransferMark } from "@/components/checkou
 import { TransferReferenceNote } from "@/components/checkout/TransferReferenceNote";
 import { useEstimatedShipping, ESTIMATED_SHIPPING_NOTE } from "@/hooks/useShippingCountry";
 import { getCurrentDestination, useShippingDestination } from "@/lib/shippingDestination";
+import RegionalLogisticsNote from "@/components/trade/RegionalLogisticsNote";
 import { ArrowLeft } from "lucide-react";
 import {
   assertCheckoutCopy,
@@ -192,6 +193,7 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
                 {ESTIMATED_SHIPPING_NOTE}
               </p>
             )}
+            <RegionalLogisticsNote compact className="mt-2" />
           </div>
           <div className="border-t border-border pt-4">
             <div className="flex items-baseline justify-between">
