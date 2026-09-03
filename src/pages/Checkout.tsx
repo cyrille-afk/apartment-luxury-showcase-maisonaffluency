@@ -193,11 +193,20 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
               </p>
             )}
           </div>
-          <div className="flex items-baseline justify-between border-t border-border pt-4">
-            <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
-            <dd className="tabular-nums font-medium text-base">
-              {money(summary.totalCents, currency)}
-            </dd>
+          <div className="border-t border-border pt-4">
+            <div className="flex items-baseline justify-between">
+              <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
+              <dd className="tabular-nums font-medium text-base">
+                {money(summary.chargeTotalCents, currency)}
+              </dd>
+            </div>
+            {summary.estimatedShippingCents > 0 && (
+              <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                Payable now. With estimated freight ·{" "}
+                {money(summary.totalCents, currency)} — freight invoiced separately once confirmed by
+                your advisor.
+              </p>
+            )}
           </div>
         </dl>
 
