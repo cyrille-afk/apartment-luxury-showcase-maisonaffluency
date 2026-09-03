@@ -54,8 +54,12 @@ export default function Cart() {
   // Delivery is quoted by the advisor post-purchase, so the displayed total
   // is the goods subtotal less any tier discount (no invented shipping figure).
   const destination = useShippingDestination();
-  const freightEstimate = useEstimatedShipping(items, destination.iso);
-  const total = discount.totalFor(subtotal) + freightEstimate.cents;
+  const freightEstimate = useEstimatedShipping(items, destination.iso, currency);
+  // Payable now = goods less tier discount. The freight figure is indicative
+  // only (advisor-verified) and is never charged, so it is shown separately
+  // rather than folded into the amount the customer is asked to pay.
+  const total = discount.totalFor(subtotal);
+  const estimatedGrandTotal = total + freightEstimate.cents;
 
 
   // "Continue Selection" returns to the curator's picks of the designer whose
