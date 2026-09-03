@@ -21,6 +21,7 @@ import RegionalLogisticsNote from "@/components/trade/RegionalLogisticsNote";
 import RegionalPaymentPanel from "@/components/checkout/RegionalPaymentPanel";
 import { useRegionalLogistics, mapCountryToRegionTier } from "@/hooks/useRegionalLogistics";
 import { ArrowLeft } from "lucide-react";
+import { resolveTaxRule, computeTaxCents, taxRowLabel } from "@/config/taxRules";
 import {
   assertCheckoutCopy,
   buildVerifiedTotals,
@@ -80,7 +81,7 @@ export type CheckoutSummary = {
   estimatedShippingCents: number;
   /** Display name of the matched shipping zone (e.g. "Asia Pacific"). */
   shippingZoneLabel: string | null;
-  /** Singapore GST charged on domestic SGD orders. 0 otherwise. */
+  /** Consumption tax (GST/VAT) due per the configurable rules. 0 otherwise. */
   taxCents: number;
   /** Row label for the tax line, e.g. "GST (9%)". */
   taxLabel: string | null;
@@ -90,10 +91,9 @@ export type CheckoutSummary = {
   chargeTotalCents: number;
 };
 
-/* Singapore GST: domestic SGD deliveries are taxed at 9%; exports are zero-rated. */
-export const SG_GST_RATE = 0.09;
-export const isSingaporeGstOrder = (country: string | null, currency: string) =>
-  (country || "").toUpperCase() === "SG" && (currency || "").toLowerCase() === "sgd";
+/* Tax rules live in src/config/taxRules.ts and are mirrored server-side. */
+export const isTaxableOrder = (country: string | null, currency: string) =>
+  resolveTaxRule(country, currency) !== null;
 
 
 /* Signed-in account confirmation — replaces blank email/name inputs.  */
