@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
+import { resolveTaxRule, computeTaxCents, taxRowLabel } from "../_shared/taxRules.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -115,14 +116,14 @@ serve(async (req) => {
     const shippingLabel =
       typeof body?.shippingLabel === "string" ? body.shippingLabel.trim().slice(0, 120) : "";
 
-    // ---- Singapore GST ----
-    // 9% applies only when the goods are delivered in Singapore and priced in
-    // SGD. Exports are zero-rated, so every other destination stays untaxed.
+    // ---- Consumption tax (configurable rules) ----
+    // A rule applies only when the destination country AND the order currency
+    // match (see _shared/taxRules.ts). Everything else is zero-rated.
     const shippingCountry =
       typeof body?.shippingCountry === "string" ? body.shippingCountry.trim().toUpperCase() : "";
-    const gstApplies = shippingCountry === "SG" && currency === "sgd";
-    const taxRate = gstApplies ? 0.09 : 0;
-    const taxCents = taxRate > 0 ? Math.round((goodsAmount + shippingCents) * taxRate) : 0;
+    const taxRule = resolveTaxRule(shippingCountry, currency);
+    const taxCents = computeTaxCents(goodsAmount, shippingCents, taxRule);
+    const taxLabel = taxRule ? taxRowLabel(taxRule) : null;
 
     const amount = goodsAmount + shippingCents + taxCents;
     if (amount < 100 || amount > 100_000_00 * 100) return json({ error: "Price out of range." }, 400);
@@ -161,7 +162,7 @@ serve(async (req) => {
         shipping_label: shippingLabel,
         shipping_country: shippingCountry,
         tax_cents: String(taxCents),
-        tax_label: gstApplies ? "GST (9%)" : "",
+        tax_label: taxLabel ?? "",
         line_items: JSON.stringify(
 
           items.map((i) => ({ t: i.title, f: i.finish, u: i.unitAmount, q: i.quantity })),
@@ -219,7 +220,8 @@ serve(async (req) => {
       shippingCents,
       shippingLabel,
       taxCents,
-      taxLabel: gstApplies ? "GST (9%)" : null,
+      taxLabel,
+      taxRate: taxRule?.rate ?? 0,
 
     });
   } catch (err) {

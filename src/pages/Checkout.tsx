@@ -21,6 +21,7 @@ import RegionalLogisticsNote from "@/components/trade/RegionalLogisticsNote";
 import RegionalPaymentPanel from "@/components/checkout/RegionalPaymentPanel";
 import { useRegionalLogistics, mapCountryToRegionTier } from "@/hooks/useRegionalLogistics";
 import { ArrowLeft } from "lucide-react";
+import { resolveTaxRule, computeTaxCents, taxRowLabel } from "@/config/taxRules";
 import {
   assertCheckoutCopy,
   buildVerifiedTotals,
@@ -80,7 +81,7 @@ export type CheckoutSummary = {
   estimatedShippingCents: number;
   /** Display name of the matched shipping zone (e.g. "Asia Pacific"). */
   shippingZoneLabel: string | null;
-  /** Singapore GST charged on domestic SGD orders. 0 otherwise. */
+  /** Consumption tax (GST/VAT) due per the configurable rules. 0 otherwise. */
   taxCents: number;
   /** Row label for the tax line, e.g. "GST (9%)". */
   taxLabel: string | null;
@@ -90,10 +91,9 @@ export type CheckoutSummary = {
   chargeTotalCents: number;
 };
 
-/* Singapore GST: domestic SGD deliveries are taxed at 9%; exports are zero-rated. */
-export const SG_GST_RATE = 0.09;
-export const isSingaporeGstOrder = (country: string | null, currency: string) =>
-  (country || "").toUpperCase() === "SG" && (currency || "").toLowerCase() === "sgd";
+/* Tax rules live in src/config/taxRules.ts and are mirrored server-side. */
+export const isTaxableOrder = (country: string | null, currency: string) =>
+  resolveTaxRule(country, currency) !== null;
 
 
 /* Signed-in account confirmation — replaces blank email/name inputs.  */
@@ -943,6 +943,8 @@ export default function Checkout() {
   const { pct: hookDiscountPct, label: discountRowLabel } = useAccountDiscount();
   const [serverDiscountPct, setServerDiscountPct] = useState<number | null>(null);
   const effectiveDiscountPct = serverDiscountPct ?? hookDiscountPct;
+  // Tax returned by the PaymentIntent — authoritative over the local estimate.
+  const [serverTax, setServerTax] = useState<{ cents: number; label: string | null } | null>(null);
   // Shipping stays "To be Quoted by Advisor" until the buyer confirms an
   // advisor-issued quote; only then is it added to the Stripe payload.
   const [shipping, setShipping] = useState<ConfirmedShipping | null>(null);
@@ -985,11 +987,15 @@ export default function Checkout() {
     // to the shown Order Total, but never charged until an advisor confirms it.
     const estimatedShippingCents = shippingCents > 0 ? 0 : estimate.cents;
     const netCents = subtotalCents - discountCents + shippingCents;
-    // Singapore GST (9%) applies only to domestic SGD deliveries.
-    const gst = isSingaporeGstOrder(formCountry, currency);
-    const taxCents = gst ? Math.round(netCents * SG_GST_RATE) : 0;
+    // Tax follows the configurable rules (destination + currency must match).
+    const rule = resolveTaxRule(formCountry, currency);
+    const localTaxCents = computeTaxCents(subtotalCents - discountCents, shippingCents, rule);
+    // The PaymentIntent is authoritative: once the server has priced the order
+    // the displayed tax and total equal the amount actually charged.
+    const taxCents = serverTax !== null ? serverTax.cents : localTaxCents;
     const chargeTotalCents = netCents + taxCents;
-    const estimatedTaxCents = gst ? Math.round(estimatedShippingCents * SG_GST_RATE) : 0;
+    const estimatedTaxCents =
+      rule && rule.taxShipping ? Math.round(estimatedShippingCents * rule.rate) : 0;
     return {
       currency,
       subtotalCents,
@@ -1000,11 +1006,11 @@ export default function Checkout() {
       estimatedShippingCents,
       shippingZoneLabel: estimate.zoneLabel ?? null,
       taxCents,
-      taxLabel: gst ? `GST (${Math.round(SG_GST_RATE * 100)}%)` : null,
+      taxLabel: taxCents > 0 ? (serverTax?.label ?? (rule ? taxRowLabel(rule) : null)) : null,
       totalCents: chargeTotalCents + estimatedShippingCents + estimatedTaxCents,
       chargeTotalCents,
     };
-  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, formCountry]);
+  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, formCountry, serverTax]);
 
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -1160,6 +1166,10 @@ export default function Checkout() {
         setServerDiscountPct(serverPct);
         const serverShippingCents = Number(pi?.shippingCents) || 0;
         const serverTaxCents = Number(pi?.taxCents) || 0;
+        setServerTax({
+          cents: serverTaxCents,
+          label: typeof pi?.taxLabel === "string" && pi.taxLabel ? pi.taxLabel : null,
+        });
         const totals = buildVerifiedTotals(grossLines);
         const expectedCents =
           totals.totalCents -
