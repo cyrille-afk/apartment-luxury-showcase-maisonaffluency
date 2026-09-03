@@ -485,6 +485,9 @@ Be conservative: if the website is unreachable, password-protected or the eviden
     : "";
   const notes = `${verdict.reasoning || verdict.notes || ""}${idNote}`.trim();
 
+  const alreadyAlerted = app.last_flag_alert_fingerprint === evidenceFingerprint;
+  const emailAlreadySent = !!app.approval_email_sent_at;
+
   await admin
     .from("trade_applications")
     .update({
@@ -495,6 +498,12 @@ Be conservative: if the website is unreachable, password-protected or the eviden
       verification_attempts: attempts,
       next_retry_at: null,
       last_verification_error: null,
+      verification_fingerprint: evidenceFingerprint,
+      ...(autoApprove
+        ? {}
+        : alreadyAlerted
+          ? {}
+          : { last_flag_alert_fingerprint: evidenceFingerprint }),
       ai_result: {
         ...verdict,
         confidence_score: confidenceScore,
@@ -509,7 +518,8 @@ Be conservative: if the website is unreachable, password-protected or the eviden
     })
     .eq("id", applicationId);
 
-  if (!autoApprove) {
+  // One alert per distinct evidence set.
+  if (!autoApprove && !alreadyAlerted) {
     await notifyFlagged(app, applicantName, confidenceScore, notes);
   }
 
@@ -518,21 +528,30 @@ Be conservative: if the website is unreachable, password-protected or the eviden
       { user_id: app.user_id, role: "trade_user" },
       { onConflict: "user_id,role" },
     );
-    if (profile?.email) {
-      try {
-        await admin.functions.invoke("send-transactional-email", {
-          body: {
-            templateName: "trade-approval",
-            recipientEmail: profile.email,
-            idempotencyKey: `trade-approval-${applicationId}`,
-            templateData: { name: applicantName, companyName: app.company_name },
-          },
-        });
-      } catch (_) {
-        // non-fatal
+    // Welcome email exactly once per application, whatever the evidence set.
+    if (profile?.email && !emailAlreadySent) {
+      const { error: claimErr } = await admin
+        .from("trade_applications")
+        .update({ approval_email_sent_at: new Date().toISOString() })
+        .eq("id", applicationId)
+        .is("approval_email_sent_at", null);
+      if (!claimErr) {
+        try {
+          await admin.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "trade-approval",
+              recipientEmail: profile.email,
+              idempotencyKey: `trade-approval-${applicationId}`,
+              templateData: { name: applicantName, companyName: app.company_name },
+            },
+          });
+        } catch (_) {
+          // non-fatal
+        }
       }
     }
   }
+
 
   return json({ status, confidence_score: confidenceScore, reasoning: notes });
 });
