@@ -17,7 +17,11 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-3.7-flash";
+// Stage 1 — fast, cost-effective multimodal parse of the credential document.
+const EXTRACT_MODEL = "google/gemini-3.7-flash";
+// Stage 2 — frontier reasoning model that issues the actual verdict.
+const VERDICT_MODEL = "openai/gpt-5.6-sol";
+const TRIAGE_URL = "https://www.maisonaffluency.com/admin/trade-review";
 const AI_TIMEOUT_MS = 45_000;
 const SITE_TIMEOUT_MS = 12_000;
 const AUTO_APPROVE_AT = 85; // confidence_score out of 100
