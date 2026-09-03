@@ -24,6 +24,7 @@ import {
   clearCart,
   cartSubtotalCents,
   formatMoney,
+  refreshCartFx,
 } from "@/lib/cart";
 
 export default function Cart() {
@@ -37,6 +38,9 @@ export default function Cart() {
   // scroll lock from a drawer that was open when we navigated.
   useEffect(() => {
     releaseBodyScroll();
+    // Re-price any converted lines with the current live FX rate — stored
+    // lines may carry a stale/offline rate from add-to-cart time.
+    refreshCartFx();
   }, []);
 
   useEffect(() => {
