@@ -17,7 +17,7 @@ import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { formatProductSubtitleLine } from "@/lib/subtitleDisplay";
 import {
-  Heart, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box,
+  Heart, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box, Minus, Plus, Pin,
 } from "lucide-react";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { useQuery } from "@tanstack/react-query";
@@ -522,6 +522,9 @@ const TradeProductPage: React.FC = () => {
   // Variant A and Variant B always resolve identical figures. Falls back to the
   // tier hook when this layout is rendered outside the container.
   const productConfig = useProductConfigOptional();
+  const [localQuantity, setLocalQuantity] = useState(1);
+  const quantity = productConfig ? productConfig.quantity : localQuantity;
+  const setQuantity = productConfig ? productConfig.setQuantity : setLocalQuantity;
   const tierFallback = useTradeDiscount();
   const TRADE_DISCOUNT = productConfig?.tierDiscountPct ?? tierFallback.discountPct;
   const discountLabel = productConfig?.discountLabel ?? tierFallback.discountLabel;
@@ -1755,7 +1758,7 @@ const TradeProductPage: React.FC = () => {
       leadTime: product.lead_time || null,
       unitPriceCents: converted,
       currency: tgtCcy,
-      quantity: 1,
+      quantity,
       sourceCurrency: didConvert ? srcCcy : null,
       sourceUnitPriceCents: didConvert ? unit : null,
       fxRate: didConvert ? fxRates[`${srcCcy}_${tgtCcy}`] ?? converted / unit : null,
