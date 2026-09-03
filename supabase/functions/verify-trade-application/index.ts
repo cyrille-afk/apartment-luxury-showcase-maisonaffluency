@@ -430,6 +430,10 @@ Be conservative: if the website is unreachable, password-protected or the eviden
     })
     .eq("id", applicationId);
 
+  if (!autoApprove) {
+    await notifyFlagged(app, applicantName, confidenceScore, notes);
+  }
+
   if (autoApprove) {
     await admin.from("user_roles").upsert(
       { user_id: app.user_id, role: "trade_user" },
