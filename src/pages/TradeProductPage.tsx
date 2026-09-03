@@ -2415,92 +2415,151 @@ const TradeProductPage: React.FC = () => {
 
 
 
-            {/* ===== Primary action block — CTA, utility links, secondary stack ===== */}
+            {/* ===== Primary action block — boxed panel identical to the
+                designer-side trade sheet (lead time, price, quantity, CTAs,
+                utility links), followed by the trade-only secondary stack. */}
             <div className="flex flex-col gap-2.5">
-              {/* Primary CTA — direct order at the net trade rate */}
-              <button
-                onClick={handleProceedToOrder}
-                className="flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
-              >
-                <ShoppingCart size={14} />
-                Proceed to Order
-              </button>
-
-              {/* Secondary — co-pilot workspace (quote) */}
-              <button
-                onClick={handleAddToQuote}
-                disabled={adding}
-                className={cn(
-                  "flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full border",
-                  added
-                    ? "border-emerald-600 text-emerald-700 bg-background"
-                    : "border-foreground/40 bg-background text-foreground hover:bg-muted/60",
-                  adding && "opacity-60"
+              <div className="flex flex-col gap-3 rounded-none border border-border/60 bg-muted/30 p-5 md:p-6">
+                {product.lead_time && (
+                  <p className="font-body text-[11px] uppercase tracking-widest text-neutral-500">
+                    Production lead time: {String(product.lead_time).replace(/^lead\s*time:?\s*/i, "")}
+                  </p>
                 )}
-              >
-                {adding ? (
-                  <DotCircleLoader size="sm" />
-                ) : added ? (
-                  <Check size={14} />
-                ) : null}
-                {added ? "Added to Co-Pilot Workspace" : "Add to Co-Pilot Workspace"}
-              </button>
 
+                {priceLabels && (
+                  <div className="flex flex-col gap-1">
+                    {priceLabels.retailLabel && (
+                      <p className="font-body text-[11px] tracking-[0.04em] text-muted-foreground line-through decoration-muted-foreground/50">
+                        Retail: {priceLabels.prefix}{priceLabels.retailLabel}
+                      </p>
+                    )}
+                    <p className="font-display text-2xl leading-none text-foreground">
+                      {priceLabels.prefix}{priceLabels.netLabel}{" "}
+                      <span className="font-body text-xs tracking-widest uppercase text-muted-foreground">
+                        Net Trade Price
+                      </span>
+                    </p>
+                  </div>
+                )}
 
-            {finishesMissingImages.length > 0 && (
-              <p className="font-body text-[11px] text-muted-foreground -mt-1 italic">
-                Heads up — no reference image on file for{" "}
-                <span className="text-foreground">{finishesMissingImages.join(", ")}</span>. A note
-                will be attached to the quote so our concierge can confirm visuals.
-              </p>
-            )}
+                {/* Quantity */}
+                <div className="flex items-center justify-between border-y border-border/50 py-2.5">
+                  <span className="font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    Quantity:
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      aria-label="Decrease quantity"
+                      disabled={quantity <= 1}
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="flex h-8 w-8 items-center justify-center rounded-none border border-transparent text-foreground transition-all hover:border-border hover:bg-muted/50 disabled:opacity-30"
+                    >
+                      <Minus className="h-4 w-4" strokeWidth={1.75} />
+                    </button>
+                    <span className="min-w-8 text-center font-body text-sm font-medium tabular-nums text-foreground">
+                      {quantity}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label="Increase quantity"
+                      disabled={quantity >= 99}
+                      onClick={() => setQuantity(Math.min(99, quantity + 1))}
+                      className="flex h-8 w-8 items-center justify-center rounded-none border border-transparent text-foreground transition-all hover:border-border hover:bg-muted/50 disabled:opacity-30"
+                    >
+                      <Plus className="h-4 w-4" strokeWidth={1.75} />
+                    </button>
+                  </div>
+                </div>
 
-              {/* Utility links — centered, micro-typography, pipe-separated */}
-              <div className="flex items-center justify-center gap-3">
+                {/* Primary CTA — direct order at the net trade rate */}
                 <button
-                  onClick={() => togglePin(compareItem)}
-                  className={cn(
-                    "font-body text-[10px] uppercase tracking-[0.16em] transition-colors",
-                    pinned
-                      ? "text-[hsl(var(--gold))]"
-                      : "text-muted-foreground hover:text-foreground",
-                    compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
-                  )}
+                  onClick={handleProceedToOrder}
+                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
                 >
-                  {pinned ? "Pinned" : "Pin to Selection"}
+                  <ShoppingCart size={14} />
+                  Proceed to Order
                 </button>
 
-                <span aria-hidden="true" className="text-border select-none">|</span>
-
-                {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0) || pricing?.spec_sheet_url) ? (
-                  <SpecSheetButton
-                    pdfUrl={product.pdf_url || pricing?.spec_sheet_url || null}
-                    pdfUrls={product.pdf_urls}
-                    brandName={designerDisplay}
-                    productName={product.title}
-                    variant="button"
-                    className="font-body text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--pdf-red))] hover:opacity-80 transition-opacity cursor-pointer"
-                  />
-                ) : (
-                  <Link
-                    to="/trade/samples"
-                    className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Procurement
-                  </Link>
-                )}
-
-                <span aria-hidden="true" className="text-border select-none">|</span>
-
-                <a
-                  href={`https://wa.me/6591393850?text=${encodeURIComponent(`Hello Maison Affluency — I'd like more information on the ${product.title} by ${designerDisplay}.`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors"
+                {/* Secondary — co-pilot workspace (quote) */}
+                <button
+                  onClick={handleAddToQuote}
+                  disabled={adding}
+                  className={cn(
+                    "flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full border",
+                    added
+                      ? "border-emerald-600 text-emerald-700 bg-background"
+                      : "border-foreground/40 bg-background text-foreground hover:bg-muted/60",
+                    adding && "opacity-60"
+                  )}
                 >
-                  Contact Us
-                </a>
+                  {adding ? (
+                    <DotCircleLoader size="sm" />
+                  ) : added ? (
+                    <Check size={14} />
+                  ) : null}
+                  {added ? "Added to Co-Pilot Workspace" : "Add to Co-Pilot Workspace"}
+                </button>
+
+                {/* Utility links — Favorite / Pin / Fabric & Finishes PDF */}
+                <div className="mt-1 border-t border-border/40 pt-4">
+                  <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-2 px-2">
+                    <FavoriteFolderPicker pickId={favoriteId} align="start" side="top">
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground",
+                          favorited && "text-destructive hover:text-destructive"
+                        )}
+                      >
+                        <Heart size={12} strokeWidth={1.25} className={cn("shrink-0", favorited && "fill-current")} />
+                        {favorited ? "Saved" : "Favorite"}
+                      </button>
+                    </FavoriteFolderPicker>
+
+                    <button
+                      onClick={() => togglePin(compareItem)}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground",
+                        pinned && "text-[hsl(var(--gold))] hover:text-[hsl(var(--gold))]",
+                        compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                      )}
+                    >
+                      <Pin size={12} strokeWidth={1.25} className={cn("shrink-0", pinned && "fill-current")} />
+                      {pinned ? "Pinned" : "Pin to Selection"}
+                    </button>
+
+                    {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0) || pricing?.spec_sheet_url) ? (
+                      <SpecSheetButton
+                        pdfUrl={product.pdf_url || pricing?.spec_sheet_url || null}
+                        pdfUrls={product.pdf_urls}
+                        brandName={designerDisplay}
+                        productName={product.title}
+                        variant="button"
+                        className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground cursor-pointer"
+                        icon={<FileText size={12} strokeWidth={1.25} className="shrink-0" />}
+                      />
+                    ) : (
+                      <FinishesPdfButton
+                        pickId={product.id}
+                        productName={product.title}
+                        brandName={designerDisplay}
+                        className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground cursor-pointer"
+                        icon={<Layers size={12} strokeWidth={1.25} className="shrink-0" />}
+                      />
+                    )}
+                  </div>
+                </div>
               </div>
+
+              {finishesMissingImages.length > 0 && (
+                <p className="font-body text-[11px] text-muted-foreground italic">
+                  Heads up — no reference image on file for{" "}
+                  <span className="text-foreground">{finishesMissingImages.join(", ")}</span>. A note
+                  will be attached to the quote so our concierge can confirm visuals.
+                </p>
+              )}
+
 
 
 
