@@ -255,7 +255,7 @@ const TradeAdmin = () => {
   const { toast } = useToast();
   const [applications, setApplications] = useState<Application[]>([]);
   const [fetching, setFetching] = useState(true);
-  const [filter, setFilter] = useState<"pending" | "flagged" | "approved" | "rejected" | "all">("pending");
+  const [filter, setFilter] = useState<"pending" | "flagged_for_review" | "system_retry" | "approved" | "rejected" | "all">("pending");
   const [confirmDialog, setConfirmDialog] = useState<{ app: Application; action: "approved" | "rejected" } | null>(null);
   const [sendingChecklist, setSendingChecklist] = useState(false);
   const [checklistPreview, setChecklistPreview] = useState<{
@@ -387,6 +387,25 @@ const TradeAdmin = () => {
       }
     }
 
+    // Continuous learning loop: record manual corrections of AI-flagged applications.
+    if (["flagged", "flagged_for_review", "system_retry"].includes(app.status)) {
+      await supabase.from("verification_feedback_loops").insert({
+        application_id: app.id,
+        submission: {
+          company_name: app.company_name,
+          company_website: app.company_website,
+          job_title: app.job_title,
+          country: app.country,
+          city: app.city,
+          applicant_email: applicantEmail ?? null,
+        },
+        ai_reasoning: app.verification_notes,
+        ai_confidence: app.ai_confidence,
+        admin_decision: action,
+        decided_by: user?.id ?? null,
+      } as never);
+    }
+
     toast({ title: `Application ${action}` });
     fetchApplications();
   };
@@ -442,7 +461,7 @@ const TradeAdmin = () => {
 
       {/* Filter tabs */}
       <div className="flex gap-2 mb-6">
-        {(["pending", "flagged", "approved", "rejected", "all"] as const).map((f) => (
+        {(["pending", "flagged_for_review", "system_retry", "approved", "rejected", "all"] as const).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
@@ -494,12 +513,12 @@ const TradeAdmin = () => {
                     </span>
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider ${
                       app.status === "pending" ? "bg-warning/10 text-warning" :
-                      app.status === "flagged" ? "bg-warning/20 text-warning" :
+                      (app.status === "flagged" || app.status === "flagged_for_review" || app.status === "system_retry") ? "bg-warning/20 text-warning" :
                       app.status === "approved" ? "bg-success/10 text-success" :
                       "bg-destructive/10 text-destructive"
                     }`}>
                       {app.status === "pending" && <Clock className="h-3 w-3" />}
-                      {app.status === "flagged" && <AlertTriangle className="h-3 w-3" />}
+                      {(app.status === "flagged" || app.status === "flagged_for_review" || app.status === "system_retry") && <AlertTriangle className="h-3 w-3" />}
                       {app.status === "approved" && <Check className="h-3 w-3" />}
                       {app.status === "rejected" && <X className="h-3 w-3" />}
                       {app.status}

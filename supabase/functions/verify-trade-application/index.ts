@@ -20,10 +20,13 @@ const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-3.7-flash";
 const AI_TIMEOUT_MS = 45_000;
 const SITE_TIMEOUT_MS = 12_000;
-const AUTO_APPROVE_AT = 0.82;
+const AUTO_APPROVE_AT = 85; // confidence_score out of 100
+const MAX_ATTEMPTS = 2;
+const RETRY_DELAY_MIN = 15;
 
 type Verdict = {
-  confidence: number;
+  confidence_score: number;
+  reasoning: string;
   legitimate_practice: boolean;
   name_matches: boolean;
   high_end_design: boolean;
@@ -62,6 +65,52 @@ async function fetchSite(url: string): Promise<{ ok: boolean; text: string; stat
   }
 }
 
+// Second consecutive failure → notify the operator through a secure webhook
+// (falls back to a transactional email when no webhook is configured).
+async function notifyAdmin(admin: any, app: any, aiError: string, attempts: number) {
+  const webhook = Deno.env.get("ADMIN_ALERT_WEBHOOK_URL");
+  const payload = {
+    event: "trade_verification_failed",
+    application_id: app.id,
+    company_name: app.company_name,
+    country: app.country,
+    attempts,
+    error: aiError,
+    at: new Date().toISOString(),
+  };
+  if (webhook) {
+    try {
+      const secret = Deno.env.get("ADMIN_ALERT_WEBHOOK_SECRET");
+      await fetch(webhook, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(secret ? { "X-Webhook-Secret": secret } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
+      return;
+    } catch (_) {
+      // fall through to email
+    }
+  }
+  try {
+    await admin.functions.invoke("send-transactional-email", {
+      body: {
+        templateName: "scrape-failure-alert",
+        recipientEmail: "cyrille@maisonaffluency.com",
+        idempotencyKey: `trade-verify-fail-${app.id}-${attempts}`,
+        templateData: {
+          windowMinutes: 15,
+          failures: [{ status_code: 500, body: `Trade verification failed for ${app.company_name}: ${aiError}`, created: payload.at }],
+        },
+      },
+    });
+  } catch (_) {
+    // non-fatal
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -82,11 +131,16 @@ Deno.serve(async (req) => {
 
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
-  // Caller must be the applicant or an admin.
-  const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") || "";
-  const { data: claimsData } = await admin.auth.getClaims(token);
-  const callerId = (claimsData as any)?.claims?.sub as string | undefined;
-  if (!callerId) return json({ error: "Unauthorized" }, 401);
+  // Caller must be the applicant, an admin, or the internal retry cron.
+  const cronSecret = Deno.env.get("CRON_SECRET");
+  const isCron = !!cronSecret && req.headers.get("x-cron-secret") === cronSecret;
+  let callerId: string | undefined;
+  if (!isCron) {
+    const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") || "";
+    const { data: claimsData } = await admin.auth.getClaims(token);
+    callerId = (claimsData as any)?.claims?.sub as string | undefined;
+    if (!callerId) return json({ error: "Unauthorized" }, 401);
+  }
 
   const { data: app, error: appErr } = await admin
     .from("trade_applications")
@@ -95,7 +149,7 @@ Deno.serve(async (req) => {
     .maybeSingle();
   if (appErr || !app) return json({ error: "Application not found" }, 404);
 
-  if (app.user_id !== callerId) {
+  if (!isCron && app.user_id !== callerId) {
     const { data: isAdmin } = await admin.rpc("has_role", { _user_id: callerId, _role: "admin" });
     if (!isAdmin) return json({ error: "Forbidden" }, 403);
   }
@@ -131,6 +185,24 @@ Deno.serve(async (req) => {
     }
   }
 
+  // ── Continuous learning: recent manual corrections as few-shot examples ──
+  const { data: feedback } = await admin
+    .from("verification_feedback_loops")
+    .select("submission, ai_reasoning, ai_confidence, admin_decision, admin_notes")
+    .order("created_at", { ascending: false })
+    .limit(12);
+
+  const fewShot = (feedback || []).length
+    ? `\n\nPAST HUMAN CORRECTIONS (learn from these — the human decision is always the ground truth):\n` +
+      (feedback || [])
+        .map((f: any, i: number) => {
+          const sub = f.submission || {};
+          return `Example ${i + 1}: Company "${sub.company_name ?? "?"}" (${sub.country ?? "?"}), website ${sub.company_website ?? "none"}, title ${sub.job_title ?? "?"}. AI said (confidence ${f.ai_confidence ?? "?"}): ${(f.ai_reasoning || "").slice(0, 240)} → HUMAN DECISION: ${String(f.admin_decision).toUpperCase()}${f.admin_notes ? ` (${String(f.admin_notes).slice(0, 160)})` : ""}.`;
+        })
+        .join("\n") +
+      `\nApply the same judgement: do not repeat the mistakes above, and do not flag cases the human has consistently approved.`
+    : "";
+
   const prompt = `You are vetting an application to a luxury trade program for architects and interior designers.
 
 APPLICANT
@@ -157,8 +229,8 @@ Assess:
 (c) is the Tax/VAT ID structurally correct for the stated country (format only)?
 
 Return ONLY a JSON object, no prose, with keys:
-confidence (0-1 number), legitimate_practice (bool), name_matches (bool), high_end_design (bool), tax_id_plausible (bool), website_reachable (bool), notes (one short paragraph for a human reviewer, max 60 words).
-Be conservative: if the website is unreachable, password-protected or the evidence is ambiguous, keep confidence below 0.6.`;
+confidence_score (integer 0-100), reasoning (2-4 sentences explaining the score, written for a human reviewer), legitimate_practice (bool), name_matches (bool), high_end_design (bool), tax_id_plausible (bool), website_reachable (bool), notes (one short summary line, max 40 words).
+Be conservative: if the website is unreachable, password-protected or the evidence is ambiguous, keep confidence_score below 60.${fewShot}`;
 
   const content: any[] = [{ type: "text", text: prompt }];
   if (docImage) content.push({ type: "image_url", image_url: { url: docImage.dataUrl } });
@@ -196,19 +268,40 @@ Be conservative: if the website is unreachable, password-protected or the eviden
     }
   }
 
-  const confidence = verdict ? Math.max(0, Math.min(1, Number(verdict.confidence) || 0)) : 0;
-  const autoApprove =
-    !!verdict &&
-    verdict.legitimate_practice &&
-    verdict.high_end_design &&
-    verdict.name_matches &&
-    verdict.website_reachable &&
-    confidence >= AUTO_APPROVE_AT;
+  const attempts = (app.verification_attempts ?? 0) + 1;
 
-  const status = autoApprove ? "approved" : "flagged";
-  const notes = verdict
-    ? verdict.notes
-    : `Automatic verification unavailable — ${aiError || "unknown error"}. Manual review required.`;
+  // ── Error loop: AI unavailable / timed out / unparsable → system_retry ──
+  if (!verdict) {
+    const retryable = attempts < MAX_ATTEMPTS;
+    const nextRetry = retryable
+      ? new Date(Date.now() + RETRY_DELAY_MIN * 60_000).toISOString()
+      : null;
+
+    await admin
+      .from("trade_applications")
+      .update({
+        status: retryable ? "system_retry" : "flagged_for_review",
+        verification_attempts: attempts,
+        next_retry_at: nextRetry,
+        last_verification_error: aiError || "Verification failed",
+        verification_notes: retryable
+          ? `Automatic verification could not complete (${aiError || "unknown error"}). A retry is scheduled in ${RETRY_DELAY_MIN} minutes.`
+          : `Automatic verification failed twice (${aiError || "unknown error"}). Manual review required.`,
+        ai_verified_at: new Date().toISOString(),
+        ai_result: { ai_error: aiError, attempts },
+      })
+      .eq("id", applicationId);
+
+    if (!retryable) await notifyAdmin(admin, app, aiError, attempts);
+
+    return json({ status: retryable ? "system_retry" : "flagged_for_review", error: aiError, attempts });
+  }
+
+  const confidenceScore = Math.max(0, Math.min(100, Math.round(Number(verdict.confidence_score) || 0)));
+  const autoApprove = confidenceScore >= AUTO_APPROVE_AT;
+
+  const status = autoApprove ? "approved" : "flagged_for_review";
+  const notes = verdict.reasoning || verdict.notes || "";
 
   await admin
     .from("trade_applications")
@@ -216,8 +309,11 @@ Be conservative: if the website is unreachable, password-protected or the eviden
       status,
       tax_exempt_status: autoApprove,
       verification_notes: notes,
-      ai_confidence: confidence,
-      ai_result: verdict ? { ...verdict, website_status: site.status, ai_error: aiError || null } : { ai_error: aiError },
+      ai_confidence: confidenceScore,
+      verification_attempts: attempts,
+      next_retry_at: null,
+      last_verification_error: null,
+      ai_result: { ...verdict, confidence_score: confidenceScore, website_status: site.status },
       ai_verified_at: new Date().toISOString(),
       ...(autoApprove ? { reviewed_at: new Date().toISOString() } : {}),
     })
@@ -244,5 +340,5 @@ Be conservative: if the website is unreachable, password-protected or the eviden
     }
   }
 
-  return json({ status, confidence, notes });
+  return json({ status, confidence_score: confidenceScore, reasoning: notes });
 });
