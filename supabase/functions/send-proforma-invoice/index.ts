@@ -64,13 +64,18 @@ serve(async (req) => {
       .eq("order_ref", orderRef)
       .maybeSingle();
     const isOwner = orderRow?.user_id != null && orderRow.user_id === userId;
-    const { data: isStaff } = await supabase.rpc("has_any_role", {
-      _user_id: userId,
-      _roles: ["admin", "super_admin", "trade_user"],
-    }).then(
-      (r) => r,
-      () => ({ data: false }),
-    );
+    let isStaff = false;
+    if (!isOwner) {
+      const roleChecks = await Promise.all(
+        (["admin", "super_admin", "trade_user"] as const).map((role) =>
+          supabase.rpc("has_role", { _user_id: userId, _role: role }).then(
+            (r) => Boolean(r.data),
+            () => false,
+          ),
+        ),
+      );
+      isStaff = roleChecks.some(Boolean);
+    }
     if (!isOwner && !isStaff) {
       return json({ error: "You are not authorized to invoice this order." }, 403);
     }
