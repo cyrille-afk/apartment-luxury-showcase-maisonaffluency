@@ -87,6 +87,18 @@ export type CheckoutSummary = {
   taxLabel: string | null;
   /** Merchant tax registration line, e.g. "GST Reg. No. UEN 201717288Z". */
   taxRegistrationLine: string | null;
+  /** Tax rate as a fraction (0.09 = 9%); 0 when zero-rated. */
+  taxRate: number;
+  /** Amount the rate is applied to (discounted goods + taxable freight). */
+  taxableBaseCents: number;
+  /** Whether a tax rule matched the destination/currency pair. */
+  taxApplied: boolean;
+  /** Human explanation of the zero-rated / applied status. */
+  taxStatusNote: string;
+  /** Destination country code driving the rule, when known. */
+  taxCountry: string | null;
+  /** Whether freight is inside the taxable base. */
+  taxShipping: boolean;
   /** Displayed total — includes the estimated freight when present. */
   totalCents: number;
   /** Amount actually charged now (excludes unconfirmed estimated freight). */
@@ -209,19 +221,40 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
             )}
             <RegionalLogisticsNote compact className="mt-2" />
           </div>
-          {summary.taxCents > 0 && summary.taxLabel && (
-            <div>
-              <div className="flex items-baseline justify-between gap-6">
-                <dt className="text-muted-foreground">{summary.taxLabel}</dt>
-                <dd className="tabular-nums">{money(summary.taxCents, currency)}</dd>
-              </div>
-              {summary.taxRegistrationLine && (
-                <p className="mt-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-                  {summary.taxRegistrationLine}
-                </p>
-              )}
+          <div className="border-t border-border/60 pt-4">
+            <div className="flex items-baseline justify-between gap-6">
+              <dt className="text-muted-foreground">
+                {summary.taxLabel || (summary.taxApplied ? "Tax" : "Tax (zero-rated)")}
+              </dt>
+              <dd className="tabular-nums">
+                {summary.taxApplied ? money(summary.taxCents, currency) : money(0, currency)}
+              </dd>
             </div>
-          )}
+            <dl className="mt-2 space-y-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+              <div className="flex items-baseline justify-between gap-6">
+                <dt>Rate</dt>
+                <dd className="tabular-nums">
+                  {summary.taxApplied ? `${Number((summary.taxRate * 100).toFixed(2))}%` : "0% — zero-rated"}
+                </dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-6">
+                <dt>Taxable base{summary.taxApplied && summary.taxShipping ? " (goods + delivery)" : summary.taxApplied ? " (goods)" : ""}</dt>
+                <dd className="tabular-nums">{money(summary.taxableBaseCents, currency)}</dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-6">
+                <dt>Destination</dt>
+                <dd>{summary.taxCountry ?? "—"} · {currency.toUpperCase()}</dd>
+              </div>
+            </dl>
+            <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+              {summary.taxStatusNote}
+            </p>
+            {summary.taxRegistrationLine && (
+              <p className="mt-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                {summary.taxRegistrationLine}
+              </p>
+            )}
+          </div>
           <div className="border-t border-border pt-4">
 
             <div className="flex items-baseline justify-between">
@@ -1005,6 +1038,18 @@ export default function Checkout() {
     const chargeTotalCents = netCents + taxCents;
     const estimatedTaxCents =
       rule && rule.taxShipping ? Math.round(estimatedShippingCents * rule.rate) : 0;
+    // Breakdown inputs: the base the rate is applied to, plus a plain-language
+    // explanation of why the order is taxed or zero-rated.
+    const taxableBaseCents = rule
+      ? Math.max(0, subtotalCents - discountCents) +
+        (rule.taxShipping ? Math.max(0, shippingCents) : 0)
+      : 0;
+    const destination = (formCountry || "").trim().toUpperCase() || null;
+    const taxStatusNote = rule
+      ? `${rule.name} charged on ${rule.taxShipping ? "goods and delivery" : "goods"} for ${destination} orders billed in ${currency.toUpperCase()}.`
+      : !destination
+        ? "Select a destination country to see whether tax applies."
+        : `Zero-rated — no ${currency.toUpperCase()} tax rule applies to shipments to ${destination}.`;
     return {
       currency,
       subtotalCents,
@@ -1017,6 +1062,12 @@ export default function Checkout() {
       taxCents,
       taxLabel: taxCents > 0 ? (serverTax?.label ?? (rule ? taxRowLabel(rule) : null)) : null,
       taxRegistrationLine: taxCents > 0 ? taxRegistrationLine(rule) : null,
+      taxRate: rule?.rate ?? 0,
+      taxableBaseCents,
+      taxApplied: Boolean(rule),
+      taxStatusNote,
+      taxCountry: destination,
+      taxShipping: Boolean(rule?.taxShipping),
       totalCents: chargeTotalCents + estimatedShippingCents + estimatedTaxCents,
       chargeTotalCents,
     };
