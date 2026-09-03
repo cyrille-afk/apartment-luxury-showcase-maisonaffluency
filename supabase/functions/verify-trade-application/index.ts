@@ -85,11 +85,16 @@ Deno.serve(async (req) => {
 
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
-  // Caller must be the applicant or an admin.
-  const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") || "";
-  const { data: claimsData } = await admin.auth.getClaims(token);
-  const callerId = (claimsData as any)?.claims?.sub as string | undefined;
-  if (!callerId) return json({ error: "Unauthorized" }, 401);
+  // Caller must be the applicant, an admin, or the internal retry cron.
+  const cronSecret = Deno.env.get("CRON_SECRET");
+  const isCron = !!cronSecret && req.headers.get("x-cron-secret") === cronSecret;
+  let callerId: string | undefined;
+  if (!isCron) {
+    const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") || "";
+    const { data: claimsData } = await admin.auth.getClaims(token);
+    callerId = (claimsData as any)?.claims?.sub as string | undefined;
+    if (!callerId) return json({ error: "Unauthorized" }, 401);
+  }
 
   const { data: app, error: appErr } = await admin
     .from("trade_applications")
@@ -98,7 +103,7 @@ Deno.serve(async (req) => {
     .maybeSingle();
   if (appErr || !app) return json({ error: "Application not found" }, 404);
 
-  if (app.user_id !== callerId) {
+  if (!isCron && app.user_id !== callerId) {
     const { data: isAdmin } = await admin.rpc("has_role", { _user_id: callerId, _role: "admin" });
     if (!isAdmin) return json({ error: "Forbidden" }, 403);
   }
@@ -134,6 +139,24 @@ Deno.serve(async (req) => {
     }
   }
 
+  // ── Continuous learning: recent manual corrections as few-shot examples ──
+  const { data: feedback } = await admin
+    .from("verification_feedback_loops")
+    .select("submission, ai_reasoning, ai_confidence, admin_decision, admin_notes")
+    .order("created_at", { ascending: false })
+    .limit(12);
+
+  const fewShot = (feedback || []).length
+    ? `\n\nPAST HUMAN CORRECTIONS (learn from these — the human decision is always the ground truth):\n` +
+      (feedback || [])
+        .map((f: any, i: number) => {
+          const sub = f.submission || {};
+          return `Example ${i + 1}: Company "${sub.company_name ?? "?"}" (${sub.country ?? "?"}), website ${sub.company_website ?? "none"}, title ${sub.job_title ?? "?"}. AI said (confidence ${f.ai_confidence ?? "?"}): ${(f.ai_reasoning || "").slice(0, 240)} → HUMAN DECISION: ${String(f.admin_decision).toUpperCase()}${f.admin_notes ? ` (${String(f.admin_notes).slice(0, 160)})` : ""}.`;
+        })
+        .join("\n") +
+      `\nApply the same judgement: do not repeat the mistakes above, and do not flag cases the human has consistently approved.`
+    : "";
+
   const prompt = `You are vetting an application to a luxury trade program for architects and interior designers.
 
 APPLICANT
@@ -160,8 +183,8 @@ Assess:
 (c) is the Tax/VAT ID structurally correct for the stated country (format only)?
 
 Return ONLY a JSON object, no prose, with keys:
-confidence (0-1 number), legitimate_practice (bool), name_matches (bool), high_end_design (bool), tax_id_plausible (bool), website_reachable (bool), notes (one short paragraph for a human reviewer, max 60 words).
-Be conservative: if the website is unreachable, password-protected or the evidence is ambiguous, keep confidence below 0.6.`;
+confidence_score (integer 0-100), reasoning (2-4 sentences explaining the score, written for a human reviewer), legitimate_practice (bool), name_matches (bool), high_end_design (bool), tax_id_plausible (bool), website_reachable (bool), notes (one short summary line, max 40 words).
+Be conservative: if the website is unreachable, password-protected or the evidence is ambiguous, keep confidence_score below 60.${fewShot}`;
 
   const content: any[] = [{ type: "text", text: prompt }];
   if (docImage) content.push({ type: "image_url", image_url: { url: docImage.dataUrl } });
