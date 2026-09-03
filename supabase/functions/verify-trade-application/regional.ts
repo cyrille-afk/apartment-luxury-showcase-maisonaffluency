@@ -65,6 +65,11 @@ const NAME_TO_CODE: Record<string, string> = {
   kuwait: "KW",
   bahrain: "BH",
   oman: "OM",
+  "united kingdom": "GB",
+  uk: "GB",
+  "great britain": "GB",
+  england: "GB",
+  scotland: "GB",
 };
 
 export function countryCode(country?: string | null): string {
@@ -215,4 +220,41 @@ export function validateIdentifiers(
     });
   }
   return out;
+}
+
+// ── Confidence thresholds ────────────────────────────────────────────
+/** Auto-approval threshold (confidence_score out of 100). */
+export const AUTO_APPROVE_AT = 85;
+/** Ceiling applied when any extracted corporate ID is structurally malformed. */
+export const MALFORMED_ID_CEILING = 70;
+
+export type VerificationDecision = {
+  /** Score after clamping and the malformed-ID ceiling. */
+  confidenceScore: number;
+  /** Score exactly as returned by the model (clamped to 0-100). */
+  rawScore: number;
+  status: "approved" | "flagged_for_review";
+  autoApprove: boolean;
+  malformed: ExtractedIdentifier[];
+};
+
+/**
+ * Pure threshold logic: clamp the model score, cap it when a corporate ID is
+ * structurally suspicious, and decide auto-approval vs human triage.
+ */
+export function decideVerification(
+  rawConfidence: unknown,
+  identifiers: ExtractedIdentifier[],
+): VerificationDecision {
+  const rawScore = Math.max(0, Math.min(100, Math.round(Number(rawConfidence) || 0)));
+  const malformed = identifiers.filter((i) => i.valid === false);
+  const confidenceScore = malformed.length ? Math.min(rawScore, MALFORMED_ID_CEILING) : rawScore;
+  const autoApprove = confidenceScore >= AUTO_APPROVE_AT;
+  return {
+    rawScore,
+    confidenceScore,
+    autoApprove,
+    status: autoApprove ? "approved" : "flagged_for_review",
+    malformed,
+  };
 }
