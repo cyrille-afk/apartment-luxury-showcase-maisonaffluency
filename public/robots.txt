@@ -96,3 +96,5 @@ User-agent: cohere-ai
 Disallow: /
 
 Sitemap: https://maisonaffluency.com/sitemap.xml
+Disallow: /admin/trade-review
+Disallow: /trade/admin/trade-review
