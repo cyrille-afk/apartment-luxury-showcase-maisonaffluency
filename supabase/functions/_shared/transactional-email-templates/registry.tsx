@@ -21,6 +21,8 @@ import { template as tradeVerificationChecklist } from './trade-verification-che
 import { template as collectorApproval } from './collector-approval.tsx'
 import { template as collectorRejection } from './collector-rejection.tsx'
 import { template as cnDirectorBrief } from './cn-director-brief.tsx'
+import { template as proformaInvoice } from './proforma-invoice.tsx'
+import { template as orderPaymentConfirmed } from './order-payment-confirmed.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'trade-approval': tradeApproval,
@@ -35,4 +37,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'collector-approval': collectorApproval,
   'collector-rejection': collectorRejection,
   'cn-director-brief': cnDirectorBrief,
+  'proforma-invoice': proformaInvoice,
+  'order-payment-confirmed': orderPaymentConfirmed,
 }

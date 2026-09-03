@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertTriangle, Check, ExternalLink, Loader2, RefreshCw, X } from "lucide-react";
+import OrderLedger from "@/components/admin/OrderLedger";
 
 interface FlaggedApplication {
   id: string;
@@ -35,6 +36,7 @@ const REVIEW_STATUSES = ["flagged_for_review", "flagged", "system_retry"];
 export default function AdminTradeReview() {
   const { isAdmin, loading, user } = useAuth();
   const { toast } = useToast();
+  const [tab, setTab] = useState<"queue" | "orders">("queue");
   const [apps, setApps] = useState<FlaggedApplication[]>([]);
   const [fetching, setFetching] = useState(true);
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -186,16 +188,43 @@ export default function AdminTradeReview() {
         <header className="flex items-end justify-between border-b border-border pb-6 mb-8">
           <div>
             <p className="font-body text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Admin</p>
-            <h1 className="font-display text-3xl mt-2">Trade Triage Queue</h1>
+            <h1 className="font-display text-3xl mt-2">
+              {tab === "queue" ? "Trade Triage Queue" : "Order Ledger"}
+            </h1>
             <p className="font-body text-xs text-muted-foreground mt-2">
-              Applications the verification agent could not clear on its own.
+              {tab === "queue"
+                ? "Applications the verification agent could not clear on its own."
+                : "Bank-settled orders awaiting reconciliation and payment confirmation."}
             </p>
           </div>
-          <Button variant="ghost" size="sm" onClick={fetchApps} disabled={fetching} className="font-body text-xs">
-            <RefreshCw className={`h-3.5 w-3.5 mr-2 ${fetching ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
+          {tab === "queue" && (
+            <Button variant="ghost" size="sm" onClick={fetchApps} disabled={fetching} className="font-body text-xs">
+              <RefreshCw className={`h-3.5 w-3.5 mr-2 ${fetching ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+          )}
         </header>
+
+        <nav className="flex gap-2 mb-8">
+          {(["queue", "orders"] as const).map((id) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setTab(id)}
+              className={`border px-4 py-2 font-body text-[11px] uppercase tracking-[0.18em] transition-colors ${
+                tab === id ? "border-foreground" : "border-border text-muted-foreground hover:border-neutral-400"
+              }`}
+            >
+              {id === "queue" ? "Verification queue" : "Order ledger"}
+            </button>
+          ))}
+        </nav>
+
+        {tab === "orders" && <OrderLedger />}
+
+        {tab === "queue" && (
+        <>
+
 
         {fetching && <p className="font-body text-sm text-muted-foreground">Loading queue…</p>}
 
@@ -362,6 +391,8 @@ export default function AdminTradeReview() {
             );
           })}
         </div>
+        </>
+        )}
       </div>
     </>
   );
