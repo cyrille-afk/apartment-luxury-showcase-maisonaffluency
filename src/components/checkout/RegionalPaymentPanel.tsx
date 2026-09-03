@@ -174,6 +174,10 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
       toast.error("Please add your email address above first.");
       return;
     }
+    if (isAuthed === false) {
+      promptSignIn();
+      return;
+    }
     setBusy(true);
     try {
       const id = await recordOrder();
@@ -211,7 +215,7 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
       const { data: auth } = await supabase.auth.getUser();
       const uid = auth.user?.id;
       if (!uid) {
-        toast.error("Please sign in to attach a receipt, or email it to concierge@maisonaffluency.com.");
+        promptSignIn();
         return;
       }
       const id = await recordOrder();
