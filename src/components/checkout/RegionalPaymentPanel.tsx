@@ -9,8 +9,9 @@
  * emails it to the buyer, and lets signed-in buyers attach their remittance
  * receipt for treasury reconciliation.
  */
-import { useMemo, useState } from "react";
-import { Check, Copy, Download, Loader2, Upload } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Check, Copy, Download, Loader2, Lock, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -100,6 +101,24 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
   const [uploading, setUploading] = useState(false);
   const [receiptName, setReceiptName] = useState<string | null>(null);
 
+  // Pro-forma orders and invoices now require a session (edge functions reject
+  // anonymous calls with 401) — guests are asked to sign in first instead.
+  const navigate = useNavigate();
+  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setIsAuthed(Boolean(data.user)));
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "INITIAL_SESSION") return;
+      setIsAuthed(Boolean(session?.user));
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const promptSignIn = () => {
+    toast.error("Please sign in to issue a pro-forma invoice.");
+    navigate("/trade/login", { state: { returnTo: window.location.pathname + window.location.search } });
+  };
+
   const buildPdf = () =>
     buildProformaInvoicePdf({
       orderRef,
@@ -155,6 +174,10 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
       toast.error("Please add your email address above first.");
       return;
     }
+    if (isAuthed === false) {
+      promptSignIn();
+      return;
+    }
     setBusy(true);
     try {
       const id = await recordOrder();
@@ -192,7 +215,7 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
       const { data: auth } = await supabase.auth.getUser();
       const uid = auth.user?.id;
       if (!uid) {
-        toast.error("Please sign in to attach a receipt, or email it to concierge@maisonaffluency.com.");
+        promptSignIn();
         return;
       }
       const id = await recordOrder();
@@ -306,17 +329,34 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
         </div>
       </dl>
 
-      <button
-        type="button"
-        onClick={issueInvoice}
-        disabled={busy}
-        className="flex h-14 w-full items-center justify-center gap-3 bg-foreground text-sm uppercase tracking-[0.2em] text-background transition-opacity hover:opacity-90 disabled:opacity-60"
-      >
-        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-        {busy ? "Preparing" : "Issue pro-forma invoice"}
-      </button>
+      {isAuthed === false ? (
+        <div className="border border-border bg-foreground/[0.03] px-5 py-5 text-center">
+          <Lock className="mx-auto h-4 w-4 text-muted-foreground" />
+          <p className="mt-2 text-sm">Sign in to issue your pro-forma invoice</p>
+          <p className="mt-1 text-xs font-light text-muted-foreground">
+            Pro-forma orders are tied to your trade account so our concierge can reconcile your transfer.
+          </p>
+          <button
+            type="button"
+            onClick={promptSignIn}
+            className="mt-4 flex h-12 w-full items-center justify-center gap-3 bg-foreground text-sm uppercase tracking-[0.2em] text-background transition-opacity hover:opacity-90"
+          >
+            Sign in to continue
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={issueInvoice}
+          disabled={busy || isAuthed !== true}
+          className="flex h-14 w-full items-center justify-center gap-3 bg-foreground text-sm uppercase tracking-[0.2em] text-background transition-opacity hover:opacity-90 disabled:opacity-60"
+        >
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          {busy ? "Preparing" : "Issue pro-forma invoice"}
+        </button>
+      )}
 
-      <div className="space-y-3 border-t border-border pt-6">
+      <div className={cn("space-y-3 border-t border-border pt-6", isAuthed === false && "hidden")}>
         <h3 className="text-[11px] font-light uppercase tracking-[0.26em] text-muted-foreground">
           Attach payment receipt
         </h3>
