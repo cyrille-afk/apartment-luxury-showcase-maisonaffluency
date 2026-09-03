@@ -215,6 +215,14 @@ async function callGateway(
   }
 }
 
+async function sha256(input: string): Promise<string> {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(input));
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -223,15 +231,18 @@ Deno.serve(async (req) => {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
   let applicationId = "";
+  let force = false;
   try {
     const body = await req.json();
     applicationId = String(body?.application_id || "");
+    force = body?.force === true;
   } catch {
     return json({ error: "Invalid JSON body" }, 400);
   }
   if (!/^[0-9a-f-]{36}$/i.test(applicationId)) {
     return json({ error: "application_id must be a UUID" }, 400);
   }
+
 
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
@@ -258,7 +269,32 @@ Deno.serve(async (req) => {
     if (!isAdmin) return json({ error: "Forbidden" }, 403);
   }
 
+  // ── Idempotency ───────────────────────────────────────────────────
+  // The verdict is a pure function of the submitted evidence. Fingerprint it
+  // so re-invocations (double submit, retry cron, admin re-run) never redo the
+  // AI work, re-send the welcome email or re-fire the flagged webhook.
+  const evidenceFingerprint = await sha256([
+    app.credential_document_path || "",
+    (app.company_website || "").trim().toLowerCase(),
+    (app.company_name || "").trim().toLowerCase(),
+    (app.country || "").trim().toLowerCase(),
+    (app.tax_vat_id || "").trim().toLowerCase(),
+    (app.instagram_handle || "").trim().toLowerCase(),
+    (app.job_title || "").trim().toLowerCase(),
+  ].join("|"));
+
+  const TERMINAL = new Set(["approved", "flagged_for_review", "flagged", "rejected"]);
+  if (!force && app.verification_fingerprint === evidenceFingerprint && TERMINAL.has(String(app.status))) {
+    return json({
+      status: app.status,
+      confidence_score: app.ai_confidence,
+      reasoning: app.verification_notes,
+      idempotent: true,
+    });
+  }
+
   const { data: profile } = await admin
+
     .from("profiles")
     .select("first_name, last_name, email")
     .eq("id", app.user_id)
@@ -449,6 +485,9 @@ Be conservative: if the website is unreachable, password-protected or the eviden
     : "";
   const notes = `${verdict.reasoning || verdict.notes || ""}${idNote}`.trim();
 
+  const alreadyAlerted = app.last_flag_alert_fingerprint === evidenceFingerprint;
+  const emailAlreadySent = !!app.approval_email_sent_at;
+
   await admin
     .from("trade_applications")
     .update({
@@ -459,6 +498,12 @@ Be conservative: if the website is unreachable, password-protected or the eviden
       verification_attempts: attempts,
       next_retry_at: null,
       last_verification_error: null,
+      verification_fingerprint: evidenceFingerprint,
+      ...(autoApprove
+        ? {}
+        : alreadyAlerted
+          ? {}
+          : { last_flag_alert_fingerprint: evidenceFingerprint }),
       ai_result: {
         ...verdict,
         confidence_score: confidenceScore,
@@ -473,7 +518,8 @@ Be conservative: if the website is unreachable, password-protected or the eviden
     })
     .eq("id", applicationId);
 
-  if (!autoApprove) {
+  // One alert per distinct evidence set.
+  if (!autoApprove && !alreadyAlerted) {
     await notifyFlagged(app, applicantName, confidenceScore, notes);
   }
 
@@ -482,21 +528,30 @@ Be conservative: if the website is unreachable, password-protected or the eviden
       { user_id: app.user_id, role: "trade_user" },
       { onConflict: "user_id,role" },
     );
-    if (profile?.email) {
-      try {
-        await admin.functions.invoke("send-transactional-email", {
-          body: {
-            templateName: "trade-approval",
-            recipientEmail: profile.email,
-            idempotencyKey: `trade-approval-${applicationId}`,
-            templateData: { name: applicantName, companyName: app.company_name },
-          },
-        });
-      } catch (_) {
-        // non-fatal
+    // Welcome email exactly once per application, whatever the evidence set.
+    if (profile?.email && !emailAlreadySent) {
+      const { error: claimErr } = await admin
+        .from("trade_applications")
+        .update({ approval_email_sent_at: new Date().toISOString() })
+        .eq("id", applicationId)
+        .is("approval_email_sent_at", null);
+      if (!claimErr) {
+        try {
+          await admin.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "trade-approval",
+              recipientEmail: profile.email,
+              idempotencyKey: `trade-approval-${applicationId}`,
+              templateData: { name: applicantName, companyName: app.company_name },
+            },
+          });
+        } catch (_) {
+          // non-fatal
+        }
       }
     }
   }
+
 
   return json({ status, confidence_score: confidenceScore, reasoning: notes });
 });

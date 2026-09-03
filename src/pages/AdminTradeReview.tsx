@@ -92,46 +92,63 @@ export default function AdminTradeReview() {
       }
 
       // Continuous learning loop: persist the correction for future prompts.
-      await supabase.from("verification_feedback_loops").insert({
-        application_id: app.id,
-        submission: {
-          company_name: app.company_name,
-          company_website: app.company_website,
-          job_title: app.job_title,
-          country: app.country,
-          city: app.city,
-          instagram_handle: app.instagram_handle,
-          tax_vat_id: app.tax_vat_id,
-          has_credential_document: !!app.credential_document_path,
-          applicant_email: app.profiles?.email ?? null,
-        },
-        ai_reasoning:
-          (app.ai_result as { reasoning?: string } | null)?.reasoning ||
-          app.verification_notes ||
-          app.last_verification_error,
-        ai_confidence: app.ai_confidence,
-        admin_decision: decision,
-        admin_notes: notes[app.id]?.trim() || null,
-        decided_by: user?.id ?? null,
-      } as never);
+      // Upsert on (application_id, admin_decision) so repeating the same
+      // decision never creates duplicate learning rows.
+      await supabase.from("verification_feedback_loops").upsert(
+        {
+          application_id: app.id,
+          submission: {
+            company_name: app.company_name,
+            company_website: app.company_website,
+            job_title: app.job_title,
+            country: app.country,
+            city: app.city,
+            instagram_handle: app.instagram_handle,
+            tax_vat_id: app.tax_vat_id,
+            has_credential_document: !!app.credential_document_path,
+            applicant_email: app.profiles?.email ?? null,
+          },
+          ai_reasoning:
+            (app.ai_result as { reasoning?: string } | null)?.reasoning ||
+            app.verification_notes ||
+            app.last_verification_error,
+          ai_confidence: app.ai_confidence,
+          admin_decision: decision,
+          admin_notes: notes[app.id]?.trim() || null,
+          decided_by: user?.id ?? null,
+          updated_at: new Date().toISOString(),
+        } as never,
+        { onConflict: "application_id,admin_decision" },
+      );
 
       if (decision === "approved" && app.profiles?.email) {
-        try {
-          await supabase.functions.invoke("send-transactional-email", {
-            body: {
-              templateName: "trade-approval",
-              recipientEmail: app.profiles.email,
-              idempotencyKey: `trade-approval-${app.id}`,
-              templateData: {
-                name: `${app.profiles.first_name ?? ""} ${app.profiles.last_name ?? ""}`.trim(),
-                companyName: app.company_name,
+        // Claim the send slot atomically — the welcome email goes out once.
+        const { data: claimed } = await supabase
+          .from("trade_applications")
+          .update({ approval_email_sent_at: new Date().toISOString() } as never)
+          .eq("id", app.id)
+          .is("approval_email_sent_at", null)
+          .select("id");
+
+        if (claimed && claimed.length > 0) {
+          try {
+            await supabase.functions.invoke("send-transactional-email", {
+              body: {
+                templateName: "trade-approval",
+                recipientEmail: app.profiles.email,
+                idempotencyKey: `trade-approval-${app.id}`,
+                templateData: {
+                  name: `${app.profiles.first_name ?? ""} ${app.profiles.last_name ?? ""}`.trim(),
+                  companyName: app.company_name,
+                },
               },
-            },
-          });
-        } catch {
-          /* non-fatal */
+            });
+          } catch {
+            /* non-fatal */
+          }
         }
       }
+
 
       toast({ title: decision === "approved" ? "Application approved" : "Application rejected" });
       setApps((prev) => prev.filter((a) => a.id !== app.id));

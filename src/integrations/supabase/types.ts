@@ -6446,6 +6446,7 @@ export type Database = {
           ai_confidence: number | null
           ai_result: Json | null
           ai_verified_at: string | null
+          approval_email_sent_at: string | null
           certification_details: string | null
           city: string
           company_name: string
@@ -6461,6 +6462,7 @@ export type Database = {
           instagram_handle: string | null
           is_certified_professional: boolean
           job_title: string
+          last_flag_alert_fingerprint: string | null
           last_verification_error: string | null
           message: string | null
           next_retry_at: string | null
@@ -6475,12 +6477,14 @@ export type Database = {
           verification_checklist_sent_at: string | null
           verification_checklist_sent_by: string | null
           verification_checklist_sent_by_name: string | null
+          verification_fingerprint: string | null
           verification_notes: string | null
         }
         Insert: {
           ai_confidence?: number | null
           ai_result?: Json | null
           ai_verified_at?: string | null
+          approval_email_sent_at?: string | null
           certification_details?: string | null
           city?: string
           company_name: string
@@ -6496,6 +6500,7 @@ export type Database = {
           instagram_handle?: string | null
           is_certified_professional?: boolean
           job_title?: string
+          last_flag_alert_fingerprint?: string | null
           last_verification_error?: string | null
           message?: string | null
           next_retry_at?: string | null
@@ -6510,12 +6515,14 @@ export type Database = {
           verification_checklist_sent_at?: string | null
           verification_checklist_sent_by?: string | null
           verification_checklist_sent_by_name?: string | null
+          verification_fingerprint?: string | null
           verification_notes?: string | null
         }
         Update: {
           ai_confidence?: number | null
           ai_result?: Json | null
           ai_verified_at?: string | null
+          approval_email_sent_at?: string | null
           certification_details?: string | null
           city?: string
           company_name?: string
@@ -6531,6 +6538,7 @@ export type Database = {
           instagram_handle?: string | null
           is_certified_professional?: boolean
           job_title?: string
+          last_flag_alert_fingerprint?: string | null
           last_verification_error?: string | null
           message?: string | null
           next_retry_at?: string | null
@@ -6545,6 +6553,7 @@ export type Database = {
           verification_checklist_sent_at?: string | null
           verification_checklist_sent_by?: string | null
           verification_checklist_sent_by_name?: string | null
+          verification_fingerprint?: string | null
           verification_notes?: string | null
         }
         Relationships: []
