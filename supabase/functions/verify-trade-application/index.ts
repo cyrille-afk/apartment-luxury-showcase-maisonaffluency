@@ -20,10 +20,13 @@ const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-3.7-flash";
 const AI_TIMEOUT_MS = 45_000;
 const SITE_TIMEOUT_MS = 12_000;
-const AUTO_APPROVE_AT = 0.82;
+const AUTO_APPROVE_AT = 85; // confidence_score out of 100
+const MAX_ATTEMPTS = 2;
+const RETRY_DELAY_MIN = 15;
 
 type Verdict = {
-  confidence: number;
+  confidence_score: number;
+  reasoning: string;
   legitimate_practice: boolean;
   name_matches: boolean;
   high_end_design: boolean;
