@@ -78,7 +78,7 @@ import {
 import TradeWorkspace from "@/components/product/TradeWorkspace";
 import ProductCommerceCta from "@/components/product/ProductCommerceCta";
 import CurrencyToggle, { formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
-import { n as useTradeDisplayCurrency } from "@/hooks/n";
+import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import TradeFirstCta from "@/components/product/TradeFirstCta";
 
 import StickyPurchaseBar from "@/components/product/StickyPurchaseBar";
@@ -2536,12 +2536,6 @@ const PublicProductPageContent: React.FC = () => {
                   >
                     <div className="flex flex-col gap-5">
                       <VariantFinishSelectors />
-                      {/* Axonometric Studio — standalone visualisation tool for
-                          every verified trade user, detached from the purchase
-                          / co-pilot action box below. */}
-                      {isTradeVerifiedView && (
-                        <AxonometricStudioButton productId={product.id} />
-                      )}
                       {finishesMissingImages.length > 0 && (
                         <p className="font-body text-[11px] text-muted-foreground italic mt-1">
                           No reference image on file for{" "}
