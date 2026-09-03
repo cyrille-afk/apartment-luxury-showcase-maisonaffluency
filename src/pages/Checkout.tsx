@@ -87,6 +87,18 @@ export type CheckoutSummary = {
   taxLabel: string | null;
   /** Merchant tax registration line, e.g. "GST Reg. No. UEN 201717288Z". */
   taxRegistrationLine: string | null;
+  /** Tax rate as a fraction (0.09 = 9%); 0 when zero-rated. */
+  taxRate: number;
+  /** Amount the rate is applied to (discounted goods + taxable freight). */
+  taxableBaseCents: number;
+  /** Whether a tax rule matched the destination/currency pair. */
+  taxApplied: boolean;
+  /** Human explanation of the zero-rated / applied status. */
+  taxStatusNote: string;
+  /** Destination country code driving the rule, when known. */
+  taxCountry: string | null;
+  /** Whether freight is inside the taxable base. */
+  taxShipping: boolean;
   /** Displayed total — includes the estimated freight when present. */
   totalCents: number;
   /** Amount actually charged now (excludes unconfirmed estimated freight). */
