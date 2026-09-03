@@ -171,7 +171,7 @@ export default function Cart() {
           <div className="py-24 text-center">
             <p className="font-body text-sm text-muted-foreground">Your cart is empty.</p>
             <Link
-              to="/designers"
+              to={hasTradeAccess ? "/trade/designers" : "/designers"}
               state={{ smoothScroll: false }}
               className="mt-6 inline-flex items-center justify-center px-6 py-3 bg-foreground text-background font-body text-[10px] uppercase tracking-[0.22em]"
             >
