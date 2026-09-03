@@ -453,13 +453,32 @@ export default function TradeDescriptionWriter() {
               <div className="space-y-3">
                 <div className="rounded-lg border border-border bg-card p-5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className={cn(
-                      "font-body text-xs",
-                      resultLength > 160 ? "text-red-600 font-medium" : "text-muted-foreground"
-                    )}>
-                      {resultLength} / 160 characters
-                      {resultLength > 160 && " — exceeds Google display limit"}
-                    </span>
+                    {(() => {
+                      const wordCount = result.trim() ? result.trim().split(/\s+/).length : 0;
+                      if (tone === "seo") {
+                        const over = resultLength > 160;
+                        return (
+                          <span className={cn("font-body text-xs", over ? "text-red-600 font-medium" : "text-muted-foreground")}>
+                            {resultLength} / 160 characters
+                            {over && " — exceeds Google display limit"}
+                          </span>
+                        );
+                      }
+                      if (tone === "seo_long") {
+                        const out = wordCount < 180 || wordCount > 260;
+                        return (
+                          <span className={cn("font-body text-xs", out ? "text-amber-600 font-medium" : "text-muted-foreground")}>
+                            {wordCount} / 180–260 words
+                            {out && (wordCount < 180 ? " — below target range" : " — above target range")}
+                          </span>
+                        );
+                      }
+                      return (
+                        <span className="font-body text-xs text-muted-foreground">
+                          {resultLength} characters · {wordCount} words
+                        </span>
+                      );
+                    })()}
                     {seoWarning && (
                       <span className="flex items-center gap-1 text-xs font-medium text-amber-600">
                         <AlertCircle className="h-3.5 w-3.5" /> {seoWarning}
