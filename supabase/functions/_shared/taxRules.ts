@@ -9,10 +9,11 @@ export interface TaxRule {
   rate: number;
   name: string;
   taxShipping: boolean;
+  registrationNumber?: string;
 }
 
 export const TAX_RULES: TaxRule[] = [
-  { country: "SG", currencies: ["sgd"], rate: 0.09, name: "GST", taxShipping: true },
+  { country: "SG", currencies: ["sgd"], rate: 0.09, name: "GST", taxShipping: true, registrationNumber: "UEN 201717288Z" },
 ];
 
 export const resolveTaxRule = (
@@ -39,3 +40,7 @@ export const computeTaxCents = (
   const base = Math.max(0, goodsCents) + (rule.taxShipping ? Math.max(0, shippingCents) : 0);
   return Math.round(base * rule.rate);
 };
+
+/** Line printed on receipts, e.g. "GST Reg. No. UEN 201717288Z". */
+export const taxRegistrationLine = (rule: TaxRule | null | undefined): string | null =>
+  rule?.registrationNumber ? `${rule.name} Reg. No. ${rule.registrationNumber}` : null;
