@@ -31,7 +31,7 @@ export default function Cart() {
   const items = useCart();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const { user } = useAuth();
+  const { user, isTradeUser, isAdmin, tradeStatus } = useAuth();
   const [pending, setPending] = useState<null | "card" | "bank_transfer">(null);
 
   // Landing here always means every overlay is gone — never inherit a stray
@@ -68,9 +68,17 @@ export default function Cart() {
 
   // "Continue Selection" returns to the curator's picks of the designer whose
   // piece was added last, rather than the generic designers landing page.
-  const continueHref = items.length
-    ? `/designers/${items[items.length - 1].designerSlug}`
-    : "/designers";
+  // Trade members (and admins) keep their full trade catalogue context rather
+  // than being dropped back onto the public template.
+  const hasTradeAccess = isAdmin || (isTradeUser && tradeStatus === "approved");
+  const lastSlug = items.length ? items[items.length - 1].designerSlug : null;
+  const continueHref = hasTradeAccess
+    ? lastSlug
+      ? `/trade/designers/${lastSlug}`
+      : "/trade/designers"
+    : lastSlug
+      ? `/designers/${lastSlug}`
+      : "/designers";
 
   // Step 1 hands off to the identity gateway (step 2), where the collector
   // signs in, creates an account, or continues as a guest. Signed-in
@@ -163,7 +171,7 @@ export default function Cart() {
           <div className="py-24 text-center">
             <p className="font-body text-sm text-muted-foreground">Your cart is empty.</p>
             <Link
-              to="/designers"
+              to={hasTradeAccess ? "/trade/designers" : "/designers"}
               state={{ smoothScroll: false }}
               className="mt-6 inline-flex items-center justify-center px-6 py-3 bg-foreground text-background font-body text-[10px] uppercase tracking-[0.22em]"
             >
