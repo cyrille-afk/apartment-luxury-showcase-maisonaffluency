@@ -1159,11 +1159,13 @@ export default function Checkout() {
         const serverPct = Number(pi?.discountPct) || 0;
         setServerDiscountPct(serverPct);
         const serverShippingCents = Number(pi?.shippingCents) || 0;
+        const serverTaxCents = Number(pi?.taxCents) || 0;
         const totals = buildVerifiedTotals(grossLines);
         const expectedCents =
           totals.totalCents -
           (serverPct > 0 ? Math.round(totals.totalCents * serverPct) : 0) +
-          serverShippingCents;
+          serverShippingCents +
+          serverTaxCents;
         const check = reconcileBackendAmount(
           { ...totals, totalCents: expectedCents },
           pi?.amount,
@@ -1185,8 +1187,9 @@ export default function Checkout() {
         setSyncing(false);
       }
     },
-    [grossLines, stripePromise],
+    [grossLines, stripePromise, formCountry],
   );
+
 
   useEffect(() => {
     if (!grossLines?.length || initialised.current) return;
