@@ -1938,22 +1938,22 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       const { data: sess } = await supabase.auth.getSession();
       const uid = sess.session?.user?.id;
       if (uid) {
+        // `phone` is not readable directly (column-level grant excludes it) —
+        // it is only exposed through the security-definer helper.
         const { data: p } = await supabase
           .from("profiles")
-          .select("preferred_contact_method, whatsapp, phone, email")
+          .select("email")
           .eq("id", uid)
           .maybeSingle();
-        if (p) {
-          const method = String((p as any).preferred_contact_method || "").toLowerCase();
-          if (method === "whatsapp" && (p as any).whatsapp) {
-            preferredContact = "WhatsApp";
-            contactValue = (p as any).whatsapp;
-          } else if (method === "phone" && (p as any).phone) {
+        if (p && (p as any).email) {
+          preferredContact = "email";
+          contactValue = (p as any).email;
+        }
+        if (!contactValue) {
+          const { data: ph } = await supabase.rpc("get_my_phone");
+          if (ph) {
             preferredContact = "phone";
-            contactValue = (p as any).phone;
-          } else if ((p as any).email) {
-            preferredContact = "email";
-            contactValue = (p as any).email;
+            contactValue = String(ph);
           }
         }
       }
