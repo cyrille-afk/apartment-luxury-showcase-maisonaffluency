@@ -261,7 +261,32 @@ Deno.serve(async (req) => {
     if (!isAdmin) return json({ error: "Forbidden" }, 403);
   }
 
+  // ── Idempotency ───────────────────────────────────────────────────
+  // The verdict is a pure function of the submitted evidence. Fingerprint it
+  // so re-invocations (double submit, retry cron, admin re-run) never redo the
+  // AI work, re-send the welcome email or re-fire the flagged webhook.
+  const evidenceFingerprint = await sha256([
+    app.credential_document_path || "",
+    (app.company_website || "").trim().toLowerCase(),
+    (app.company_name || "").trim().toLowerCase(),
+    (app.country || "").trim().toLowerCase(),
+    (app.tax_vat_id || "").trim().toLowerCase(),
+    (app.instagram_handle || "").trim().toLowerCase(),
+    (app.job_title || "").trim().toLowerCase(),
+  ].join("|"));
+
+  const TERMINAL = new Set(["approved", "flagged_for_review", "flagged", "rejected"]);
+  if (!force && app.verification_fingerprint === evidenceFingerprint && TERMINAL.has(String(app.status))) {
+    return json({
+      status: app.status,
+      confidence_score: app.ai_confidence,
+      reasoning: app.verification_notes,
+      idempotent: true,
+    });
+  }
+
   const { data: profile } = await admin
+
     .from("profiles")
     .select("first_name, last_name, email")
     .eq("id", app.user_id)
