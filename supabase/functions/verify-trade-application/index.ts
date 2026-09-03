@@ -223,15 +223,18 @@ Deno.serve(async (req) => {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
   let applicationId = "";
+  let force = false;
   try {
     const body = await req.json();
     applicationId = String(body?.application_id || "");
+    force = body?.force === true;
   } catch {
     return json({ error: "Invalid JSON body" }, 400);
   }
   if (!/^[0-9a-f-]{36}$/i.test(applicationId)) {
     return json({ error: "application_id must be a UUID" }, 400);
   }
+
 
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
