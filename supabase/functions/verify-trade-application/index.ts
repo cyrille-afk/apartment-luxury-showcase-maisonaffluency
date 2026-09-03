@@ -400,7 +400,10 @@ Be conservative: if the website is unreachable, password-protected or the eviden
       })
       .eq("id", applicationId);
 
-    if (!retryable) await notifyAdmin(admin, app, aiError, attempts);
+    if (!retryable) {
+      await notifyAdmin(admin, app, aiError, attempts);
+      await notifyFlagged(app, applicantName, 0, `Automatic verification failed twice: ${aiError}`);
+    }
 
     return json({ status: retryable ? "system_retry" : "flagged_for_review", error: aiError, attempts });
   }
