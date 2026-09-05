@@ -4,7 +4,8 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { User, Lock, Building, Phone, Mail, Save, Camera, Award, TrendingUp, Compass } from "lucide-react";
+import { User, Lock, Building, Phone, Mail, Save, Camera, Award, TrendingUp, Compass, Sparkles } from "lucide-react";
+import { saveName, sanitizeName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
@@ -59,6 +60,33 @@ const TradeSettings = () => {
     newPassword: "",
     confirmPassword: "",
   });
+
+  const [copilotName, setCopilotName] = useState("");
+  const [savingCopilot, setSavingCopilot] = useState(false);
+
+  useEffect(() => {
+    if (profile?.concierge_name) setCopilotName(profile.concierge_name);
+  }, [profile?.concierge_name]);
+
+  const handleSaveCopilot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setSavingCopilot(true);
+    const chosen = sanitizeName(copilotName) || DEFAULT_NAME;
+    saveName(chosen);
+    window.dispatchEvent(new CustomEvent("concierge:name-changed", { detail: chosen }));
+    const { error } = await supabase
+      .from("profiles")
+      .update({ concierge_name: chosen === DEFAULT_NAME ? null : chosen } as any)
+      .eq("id", user.id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      setCopilotName(chosen);
+      toast({ title: "Copilot updated", description: `Your copilot will now introduce itself as ${chosen}.` });
+    }
+    setSavingCopilot(false);
+  };
 
   useEffect(() => {
     if (profile) {
@@ -481,6 +509,38 @@ const TradeSettings = () => {
         >
           <Save className="h-3.5 w-3.5" />
           {saving ? "Saving…" : "Save Changes"}
+        </button>
+      </form>
+
+      {/* Copilot Section */}
+      <form onSubmit={handleSaveCopilot} className="mb-10">
+        <div className="flex items-center gap-2 mb-5">
+          <Sparkles className="h-4 w-4 text-muted-foreground" />
+          <h2 className="font-display text-base text-foreground">Your AI Copilot</h2>
+        </div>
+        <div>
+          <label className="font-body text-xs text-muted-foreground uppercase tracking-wider mb-1.5 block">
+            Copilot Name
+          </label>
+          <input
+            type="text"
+            value={copilotName}
+            onChange={(e) => setCopilotName(sanitizeName(e.target.value))}
+            placeholder={`e.g. ${DEFAULT_NAME}, Pierre, Assistant, Concierge`}
+            maxLength={32}
+            className={inputClass}
+          />
+          <p className="font-body text-[10px] text-muted-foreground/70 mt-1.5">
+            This is how your copilot introduces itself across the trade portal. Saved to your profile, it follows you on every device.
+          </p>
+        </div>
+        <button
+          type="submit"
+          disabled={savingCopilot}
+          className="mt-6 inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-50"
+        >
+          <Sparkles className="h-3.5 w-3.5" />
+          {savingCopilot ? "Saving…" : "Save Copilot Name"}
         </button>
       </form>
 
