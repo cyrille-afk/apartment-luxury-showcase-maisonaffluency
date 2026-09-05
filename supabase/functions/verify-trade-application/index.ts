@@ -178,6 +178,7 @@ async function whatsappFallback(
       channel: "twilio_whatsapp",
       event: "trade_application_flagged",
       application_id: app.id,
+      status: "failed",
       payload: {
         company_name: app.company_name,
         country: app.country,
@@ -187,6 +188,7 @@ async function whatsappFallback(
       },
       error: String(errorDetail).slice(0, 2000),
     });
+
   } catch (_) {
     // non-fatal
   }
@@ -227,7 +229,8 @@ async function sendWhatsAppFlagAlert(
   const twilioKey = Deno.env.get("TWILIO_API_KEY");
   if (!to || !from || !lovableKey || !twilioKey) return;
 
-  const link = `https://maisonaffluency.com/admin/trade-review?application=${app.id}`;
+  // Deep link opens the exact application drawer on the triage dashboard.
+  const link = `${TRIAGE_URL}?application=${app.id}&open=1`;
   const location = [app.city, app.country].filter(Boolean).join(", ") || "(unknown)";
   const website = app.company_website || "(none provided)";
   const instagram = app.instagram_handle
@@ -268,12 +271,45 @@ Review credentials and approve international net pricing instantly:
       const errBody = await res.text();
       console.error(`Twilio WhatsApp alert failed [${res.status}]: ${errBody}`);
       await whatsappFallback(admin, app, confidence, reasoning, `Twilio ${res.status}: ${errBody}`);
+      return;
+    }
+    // Audit trail: record every delivered alert with its full payload.
+    let sid: string | null = null;
+    try {
+      const json = await res.json();
+      sid = json?.sid ?? null;
+    } catch (_) {
+      // body not JSON — still log the send
+    }
+    try {
+      await admin.from("admin_alert_log").insert({
+        channel: "twilio_whatsapp",
+        event: "trade_application_flagged",
+        application_id: app.id,
+        status: "sent",
+        provider_message_id: sid,
+        payload: {
+          to,
+          from,
+          message: body,
+          company_name: app.company_name,
+          applicant_name: applicantName,
+          country: app.country,
+          confidence_score: confidence,
+          reason: reasoning,
+          triage_url: link,
+        },
+        error: null,
+      });
+    } catch (_) {
+      // non-fatal
     }
   } catch (err) {
     console.error("Twilio WhatsApp alert error:", err);
     await whatsappFallback(admin, app, confidence, reasoning, err instanceof Error ? err.message : String(err));
   }
 }
+
 
 // Applicant flagged for manual review → instant Slack/Discord alert.
 // Payload is shaped so a plain Slack or Discord incoming webhook renders it as
