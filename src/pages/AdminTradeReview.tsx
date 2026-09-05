@@ -246,12 +246,13 @@ export default function AdminTradeReview() {
           try {
             await supabase.functions.invoke("send-transactional-email", {
               body: {
-                templateName: "trade-approval",
+                templateName: "trade-welcome-founder",
                 recipientEmail: app.profiles.email,
-                idempotencyKey: `trade-approval-${app.id}`,
+                idempotencyKey: `trade-welcome-founder-${app.id}`,
                 templateData: {
                   name: applicantName(app),
                   companyName: app.company_name,
+                  founderName: "Cyrille Delval",
                 },
               },
             });
