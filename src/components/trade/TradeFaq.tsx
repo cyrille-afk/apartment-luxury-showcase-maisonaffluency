@@ -19,8 +19,10 @@ const TradeFaq = ({ isUKVariant = false }: { isUKVariant?: boolean }) => {
     { q: "Where do shipments originate?", a: "The majority of our roster is based in France and Italy, with selected ateliers across Spain, the Netherlands, Switzerland and the UK. Goods consolidate at our European hubs before international dispatch — typically a short, well-trodden route for UK and EU clients." },
     { q: "How are post-Brexit duties handled for UK deliveries?", a: "We coordinate customs clearance into Great Britain and Northern Ireland on your behalf. Import VAT and any applicable duty are calculated against HMRC tariff codes for each piece and surfaced on the quote — no surprises on delivery." },
     { q: "Do you offer DDP or DAP shipping terms?", a: "Both. Delivered Duty Paid (DDP) bundles freight, customs, duty and import VAT into a single landed price — recommended for residential clients. Delivered At Place (DAP) is available where your studio or freight forwarder prefers to clear goods directly." },
+    { q: "Can I use my own freight forwarder or logistics provider?", a: "Yes. While our automated portal provides instant DDP and DAP quotes through our consolidated white-glove partners, you can easily select 'Ex-Works' during checkout to have your preferred global logistics firm coordinate collection directly from our European ateliers." },
+    { q: "Do you offer physical material swatches for project mood boards?", a: "Absolutely. Verified trade members can request physical samples, wood finishes, and textile swatches directly through their project folders dashboard. Most standard textile and leather swatches are dispatched internationally within 48 hours." },
   ];
-  const COLLAPSED_COUNT = 7;
+  const COLLAPSED_COUNT = 10;
   const visibleItems = faqExpanded ? FAQ_ITEMS : FAQ_ITEMS.slice(0, COLLAPSED_COUNT);
   const hiddenCount = FAQ_ITEMS.length - COLLAPSED_COUNT;
 
