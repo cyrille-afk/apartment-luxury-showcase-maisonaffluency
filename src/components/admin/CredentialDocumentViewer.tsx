@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { TransformWrapper, TransformComponent, useControls } from "react-zoom-pan-pinch";
 import { Loader2, Minus, Plus, RotateCw, Maximize2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 type Props = {
   url: string;
@@ -199,7 +200,8 @@ export default function CredentialDocumentViewer({ url, fileName, className }: P
         heightClass="h-[46vh] sm:h-[420px]"
       />
       <Dialog open={full} onOpenChange={setFull}>
-        <DialogContent className="max-w-[100vw] w-screen h-[100dvh] sm:max-w-[95vw] sm:w-[95vw] sm:h-[92vh] p-3 sm:p-5 overflow-hidden">
+        <DialogContent className="max-w-[100vw] w-screen h-[100dvh] sm:max-w-[95vw] sm:w-[95vw] sm:h-[92vh] p-3 pt-12 sm:p-5 sm:pt-12 overflow-hidden">
+          <VisuallyHidden><DialogTitle>Business credential document</DialogTitle></VisuallyHidden>
           <Surface
             url={url}
             fileName={name}
