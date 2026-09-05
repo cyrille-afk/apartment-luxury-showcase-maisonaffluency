@@ -23,7 +23,7 @@ import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
-import { shareProfileOnWhatsApp, buildAtelierOgUrl, buildParentBrandOgUrl, buildDesignerOgUrl, shareOnWhatsApp, withOgCacheBust } from "@/lib/whatsapp-share";
+import { shareProfileOnWhatsApp, buildAtelierOgUrl, buildParentBrandOgUrl, buildDesignerOgUrl, withOgCacheBust } from "@/lib/whatsapp-share";
 import WhatsAppShareButton from "./WhatsAppShareButton";
 import ShareMenu from "./ShareMenu";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
