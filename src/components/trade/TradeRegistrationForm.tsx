@@ -172,6 +172,8 @@ const TradeRegistrationForm = ({
   const [fileError, setFileError] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const [uploadedPath, setUploadedPath] = useState<string | null>(null);
+  // Holds the in-flight upload so submission can await a confirmed storage path.
+  const uploadPromiseRef = useRef<Promise<string | null> | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -233,6 +235,19 @@ const TradeRegistrationForm = ({
     setLoading(true);
 
     try {
+      // Wait for any in-flight credential upload so the AI verification always
+      // runs against a confirmed storage path (no upload/verify race).
+      let confirmedPath: string | null = uploadedPath;
+      if (uploadPromiseRef.current) {
+        confirmedPath = (await uploadPromiseRef.current) ?? null;
+      }
+      if (credentialFile && !confirmedPath) {
+        setLoading(false);
+        setFileError("Your document is still uploading or failed to upload. Please retry before submitting.");
+        toast({ title: "Document not uploaded", description: "Please re-attach your credential document.", variant: "destructive" });
+        return;
+      }
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -253,7 +268,7 @@ const TradeRegistrationForm = ({
       // The credential document is uploaded immediately on file selection so
       // the applicant gets feedback and a preview before submitting. The path
       // is stored in the `anon/` folder when the user is not yet confirmed.
-      const credentialPath = uploadedPath;
+      const credentialPath = confirmedPath;
       const { data: sessionData } = await supabase.auth.getSession();
 
       const { data: appRow } = await supabase.from("trade_applications").insert({
@@ -317,7 +332,7 @@ const TradeRegistrationForm = ({
   const uploadCredential = async (file: File) => {
     setUploading(true);
     setFileError("");
-    try {
+    const task = (async (): Promise<string | null> => {
       const ext = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "pdf";
       const folder = `anon/${crypto.randomUUID()}`;
       const path = `${folder}/credential-${Date.now()}.${ext}`;
@@ -328,12 +343,13 @@ const TradeRegistrationForm = ({
         setFileError("Your document could not be uploaded. Please try again.");
         toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
         setUploadedPath(null);
-      } else {
-        setUploadedPath(path);
+        return null;
       }
-    } finally {
-      setUploading(false);
-    }
+      setUploadedPath(path);
+      return path;
+    })().finally(() => setUploading(false));
+    uploadPromiseRef.current = task;
+    return task;
   };
 
   const openPreview = async () => {
@@ -619,7 +635,7 @@ const TradeRegistrationForm = ({
         <FieldError field="message" />
       </div>
 
-      <button type="submit" disabled={loading}
+      <button type="submit" disabled={loading || uploading}
         className="w-full py-3 bg-[hsl(var(--gold))] text-white font-body text-sm uppercase tracking-[0.2em] rounded-full hover:bg-[hsl(var(--gold)/0.9)] transition-all disabled:opacity-50 font-bold inline-flex items-center justify-center gap-2">
         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
         {uploading ? "Uploading document…" : loading ? "Submitting..." : "Submit Application"}
