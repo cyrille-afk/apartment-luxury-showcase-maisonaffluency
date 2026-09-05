@@ -8,7 +8,7 @@ interface AuthContextType {
   isTradeUser: boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
-  profile: { first_name: string; last_name: string; company: string; email: string; trade_status?: string | null } | null;
+  profile: { first_name: string; last_name: string; company: string; email: string; trade_status?: string | null; has_seen_trade_intro?: boolean | null; concierge_name?: string | null } | null;
   /** Vetting state from public.profiles.trade_status: approved | pending_review | rejected */
   tradeStatus: "approved" | "pending_review" | "rejected" | null;
   applicationStatus: "none" | "pending" | "approved" | "rejected";
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       [rolesRes, profileRes, appRes] = await Promise.all([
         client.from("user_roles").select("role").eq("user_id", userId),
-        client.from("profiles").select("first_name, last_name, company, email, trade_status").eq("id", userId).single(),
+        client.from("profiles").select("first_name, last_name, company, email, trade_status, has_seen_trade_intro, concierge_name").eq("id", userId).single(),
         client.from("trade_applications").select("status").eq("user_id", userId).order("created_at", { ascending: false }).limit(1),
       ]);
     } catch (error) {

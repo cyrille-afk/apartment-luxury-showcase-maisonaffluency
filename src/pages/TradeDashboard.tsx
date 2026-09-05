@@ -17,7 +17,6 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
-import { loadOnboardingWelcome } from "@/lib/onboardingWelcome";
 import dashboard3dStudioImage from "@/assets/dashboard-3d-style-neutrals.jpg";
 
 interface BrandFolder {
@@ -97,72 +96,6 @@ const TradeDashboard = () => {
       window.removeEventListener("concierge:name-changed", sync as EventListener);
     };
   }, []);
-
-  // First-session welcome: auto-open the AI Concierge with a personalised greeting
-  // and a prompt to rename it. Gated by profiles.has_seen_trade_intro so it only fires once.
-  // Greeting template + buttons are loaded from `onboarding_flow_config` so an admin
-  // can edit the flow at /trade/admin/onboarding without touching code.
-  useEffect(() => {
-    if (!user) return;
-    // Gate the proprietary Trade Program greeting behind verified membership.
-    // Non-members (pending/rejected applicants, admins without trade_user role,
-    // or any signed-in visitor) never see Felix's Atelier welcome.
-    if (!isTradeUser) return;
-    let cancelled = false;
-    (async () => {
-      // The DB flag `profiles.has_seen_trade_intro` is the single source of
-      // truth so an admin reset can always replay the welcome. We intentionally
-      // do NOT short-circuit on the localStorage `trade_quick_tour_done` flag.
-
-      const { data } = await supabase
-        .from("profiles")
-        .select("has_seen_trade_intro")
-        .eq("id", user.id)
-        .maybeSingle();
-      if (cancelled || !data || data.has_seen_trade_intro !== false) return;
-
-      const conciergeName = loadName() || DEFAULT_NAME;
-      const { enabled, message, actions } = await loadOnboardingWelcome({
-        firstName: profile?.first_name,
-        conciergeName,
-      });
-
-      if (!enabled) {
-        await supabase.from("profiles").update({ has_seen_trade_intro: true }).eq("id", user.id);
-        return;
-      }
-
-      // Respect persisted dismissal: if the user has already closed the
-      // welcome modal during this first-login session, do not re-open on refresh.
-      let dismissed = false;
-      try { dismissed = localStorage.getItem("ma:welcome-dismissed") === "1"; } catch {}
-      let hasExistingConciergeTranscript = false;
-      try {
-        const rawTimeline = sessionStorage.getItem("concierge:timeline");
-        const parsedTimeline = rawTimeline ? JSON.parse(rawTimeline) : null;
-        hasExistingConciergeTranscript = Array.isArray(parsedTimeline) && parsedTimeline.some(
-          (item) => item?.kind === "msg" && !item?.onboarding && typeof item?.content === "string" && item.content.trim().length > 0,
-        );
-      } catch {}
-      if (dismissed) {
-        await supabase.from("profiles").update({ has_seen_trade_intro: true }).eq("id", user.id);
-        return;
-      }
-      if (hasExistingConciergeTranscript) return;
-
-      try { localStorage.setItem("ma:welcome-pending", "1"); } catch {}
-      window.dispatchEvent(new CustomEvent("ma:welcome-pending"));
-
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent("concierge:stage", {
-          detail: { openPanel: true, resetPanel: true, replaceTimeline: true, message, actions, onboarding: true },
-        }));
-      }, 600);
-
-      await supabase.from("profiles").update({ has_seen_trade_intro: true }).eq("id", user.id);
-    })();
-    return () => { cancelled = true; };
-  }, [user, profile?.first_name, isTradeUser]);
 
   useEffect(() => {
     const fetchData = async () => {
