@@ -169,6 +169,23 @@ export default function AdminTradeReview() {
         await supabase.from("user_roles").delete().eq("user_id", app.user_id).eq("role", "trade_user" as never);
       }
 
+      // Audit trail: record the admin override with who/when/why.
+      await supabase.from("verification_audit_log").insert({
+        application_id: app.id,
+        event: "admin_override",
+        actor: "admin",
+        actor_user_id: user?.id ?? null,
+        previous_status: app.status,
+        outcome: decision,
+        confidence_score: app.ai_confidence,
+        reasoning: notes[app.id]?.trim() || null,
+        details: {
+          reviewer_email: user?.email ?? null,
+          ai_reasoning:
+            (app.ai_result as { reasoning?: string } | null)?.reasoning || null,
+        },
+      } as never);
+
       // Continuous learning loop: persist the correction for future prompts.
       await supabase.from("verification_feedback_loops").upsert(
         {

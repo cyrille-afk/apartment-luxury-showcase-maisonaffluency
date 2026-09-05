@@ -678,6 +678,25 @@ Be conservative: if the website is unreachable, password-protected or the eviden
     })
     .eq("id", applicationId);
 
+  await writeAudit(admin, {
+    application_id: applicationId,
+    event: "verification_run",
+    actor: "ai",
+    previous_status: app.status,
+    outcome: status,
+    confidence_score: confidenceScore,
+    reasoning: notes,
+    attempt: attempts,
+    details: {
+      model_confidence_score: rawScore,
+      auto_approve: autoApprove,
+      website_status: site.status,
+      region: regionFor(app.country),
+      identifier_warnings: malformed.length,
+      fingerprint: evidenceFingerprint,
+    },
+  });
+
   // One alert per distinct evidence set.
   if (!autoApprove && !alreadyAlerted) {
     await notifyFlagged(app, applicantName, confidenceScore, notes, admin);
