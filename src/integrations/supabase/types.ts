@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_alert_log: {
+        Row: {
+          application_id: string | null
+          channel: string
+          created_at: string
+          error: string
+          event: string
+          id: string
+          payload: Json
+        }
+        Insert: {
+          application_id?: string | null
+          channel: string
+          created_at?: string
+          error: string
+          event: string
+          id?: string
+          payload?: Json
+        }
+        Update: {
+          application_id?: string | null
+          channel?: string
+          created_at?: string
+          error?: string
+          event?: string
+          id?: string
+          payload?: Json
+        }
+        Relationships: []
+      }
       ai_model_pricing: {
         Row: {
           created_at: string

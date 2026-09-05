@@ -128,6 +128,105 @@ async function notifyAdmin(admin: any, app: any, aiError: string, attempts: numb
   }
 }
 
+const TWILIO_GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
+
+// Twilio failure → persist the error in Supabase and email the operator, so a
+// flagged application is never lost even if WhatsApp delivery is down.
+async function whatsappFallback(
+  admin: any,
+  app: any,
+  confidence: number,
+  reasoning: string,
+  errorDetail: string,
+) {
+  try {
+    await admin.from("admin_alert_log").insert({
+      channel: "twilio_whatsapp",
+      event: "trade_application_flagged",
+      application_id: app.id,
+      payload: {
+        company_name: app.company_name,
+        country: app.country,
+        confidence_score: confidence,
+        reason: reasoning,
+        triage_url: `${TRIAGE_URL}?application=${app.id}`,
+      },
+      error: String(errorDetail).slice(0, 2000),
+    });
+  } catch (_) {
+    // non-fatal
+  }
+  try {
+    await admin.functions.invoke("send-transactional-email", {
+      body: {
+        templateName: "scrape-failure-alert",
+        recipientEmail: "cyrille@maisonaffluency.com",
+        idempotencyKey: `whatsapp-flag-fail-${app.id}-${confidence}`,
+        templateData: {
+          windowMinutes: 0,
+          failures: [{
+            status_code: 502,
+            body: `WhatsApp alert failed for ${app.company_name}: ${String(errorDetail).slice(0, 400)}. Review: ${TRIAGE_URL}?application=${app.id}`,
+            created: new Date().toISOString(),
+          }],
+        },
+      },
+    });
+  } catch (_) {
+    // non-fatal
+  }
+}
+
+// Applicant flagged → WhatsApp alert to the operator via the Twilio connector
+// gateway. Credentials (Account SID / auth) are handled by the gateway; only
+// the sender/recipient numbers live in env vars.
+async function sendWhatsAppFlagAlert(
+  admin: any,
+  app: any,
+  applicantName: string,
+  confidence: number,
+  reasoning: string,
+) {
+  const to = Deno.env.get("ADMIN_WHATSAPP_TO");
+  const from = Deno.env.get("TWILIO_WHATSAPP_FROM");
+  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+  const twilioKey = Deno.env.get("TWILIO_API_KEY");
+  if (!to || !from || !lovableKey || !twilioKey) return;
+
+  const link = `${TRIAGE_URL}?application=${app.id}`;
+  const body = [
+    "🚨 New Trade Application Alert",
+    "",
+    `Company: ${app.company_name || "(unknown)"}`,
+    `Contact: ${applicantName || "(unknown)"}`,
+    `Country: ${app.country || "(unknown)"}`,
+    `AI Confidence: ${confidence}/100`,
+    `Reasoning: ${(reasoning || "No reasoning returned").slice(0, 400)}`,
+    "",
+    `Approve instantly: ${link}`,
+  ].join("\n");
+
+  try {
+    const res = await fetch(`${TWILIO_GATEWAY_URL}/Messages.json`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${lovableKey}`,
+        "X-Connection-Api-Key": twilioKey,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ To: to, From: from, Body: body }),
+    });
+    if (!res.ok) {
+      const errBody = await res.text();
+      console.error(`Twilio WhatsApp alert failed [${res.status}]: ${errBody}`);
+      await whatsappFallback(admin, app, confidence, reasoning, `Twilio ${res.status}: ${errBody}`);
+    }
+  } catch (err) {
+    console.error("Twilio WhatsApp alert error:", err);
+    await whatsappFallback(admin, app, confidence, reasoning, err instanceof Error ? err.message : String(err));
+  }
+}
+
 // Applicant flagged for manual review → instant Slack/Discord alert.
 // Payload is shaped so a plain Slack or Discord incoming webhook renders it as
 // text, while custom endpoints still get the structured fields.
@@ -136,7 +235,9 @@ async function notifyFlagged(
   applicantName: string,
   confidence: number,
   reasoning: string,
+  admin?: any,
 ) {
+  if (admin) await sendWhatsAppFlagAlert(admin, app, applicantName, confidence, reasoning);
   const webhook = Deno.env.get("ADMIN_ALERT_WEBHOOK_URL");
   if (!webhook) return;
   const link = `${TRIAGE_URL}?application=${app.id}`;
@@ -454,7 +555,7 @@ Be conservative: if the website is unreachable, password-protected or the eviden
 
     if (!retryable) {
       await notifyAdmin(admin, app, aiError, attempts);
-      await notifyFlagged(app, applicantName, 0, `Automatic verification failed twice: ${aiError}`);
+      await notifyFlagged(app, applicantName, 0, `Automatic verification failed twice: ${aiError}`, admin);
     }
 
     return json({ status: retryable ? "system_retry" : "flagged_for_review", error: aiError, attempts });
@@ -520,7 +621,7 @@ Be conservative: if the website is unreachable, password-protected or the eviden
 
   // One alert per distinct evidence set.
   if (!autoApprove && !alreadyAlerted) {
-    await notifyFlagged(app, applicantName, confidenceScore, notes);
+    await notifyFlagged(app, applicantName, confidenceScore, notes, admin);
   }
 
   if (autoApprove) {
