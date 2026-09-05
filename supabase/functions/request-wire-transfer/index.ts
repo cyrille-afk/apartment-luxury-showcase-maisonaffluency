@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { Resend } from "https://esm.sh/resend@2.0.0";
+import { sendLovableEmail } from "../_shared/lovableEmail.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -92,10 +92,10 @@ serve(async (req) => {
     }).format(amountCents / 100);
 
     try {
-      const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-      await resend.emails.send({
-        from: "Maison Affluency <orders@maisonaffluency.com>",
+      await sendLovableEmail({
         to: ADMIN_EMAILS,
+        label: "wire-transfer-request",
+        idempotencyKey: `wire-${reference}`,
         subject: `🏦 Wire transfer request ${reference} — ${title}`,
         html: `
           <div style="font-family:Georgia,serif;color:#14201c;">
