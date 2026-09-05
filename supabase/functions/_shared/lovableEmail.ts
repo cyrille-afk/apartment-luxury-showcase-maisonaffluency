@@ -5,7 +5,11 @@
 // which handles sending, retries and rate-limit backoff.
 //
 // Configuration mirrors `send-transactional-email` — do NOT change manually.
-import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+
+// Loosely typed to accept clients created from any supabase-js version in this project.
+// deno-lint-ignore no-explicit-any
+type SupabaseClient = any;
 
 const SITE_NAME = "Maison Affluency";
 // Verified sender subdomain delegated to Lovable's nameservers.
