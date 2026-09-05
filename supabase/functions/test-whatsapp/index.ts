@@ -17,7 +17,7 @@ Deno.serve(async () => {
     },
     body: new URLSearchParams({
       To: "whatsapp:+6591393850",
-      From: "whatsapp:+14155238886",
+      From: "whatsapp:+17372508034",
       Body: "Test from Maison Affluency: your Twilio WhatsApp sandbox is working end-to-end.",
     }),
   });
