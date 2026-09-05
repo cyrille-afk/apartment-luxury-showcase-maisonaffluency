@@ -17,8 +17,8 @@ Deno.serve(async () => {
     },
     body: new URLSearchParams({
       To: "whatsapp:+6591393850",
-      From: "whatsapp:+17372508034",
-      Body: "Test from Maison Affluency: your Twilio WhatsApp sandbox is working end-to-end.",
+      From: "whatsapp:+15673913401",
+      Body: "Test from Maison Affluency: your WhatsApp Business sender +1 567-391-3401 is now live.",
     }),
   });
   const text = await res.text();
