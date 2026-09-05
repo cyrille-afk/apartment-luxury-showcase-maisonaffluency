@@ -103,7 +103,7 @@ const tradeRegisterSchema = z.object({
     .refine(v => !v || /^https?:\/\/.+/.test(v), "Please enter a valid URL starting with http:// or https://")
     .optional().or(z.literal("")),
   jobTitle: z.string().trim().min(1, "Job title is required").max(150, "Job title is too long"),
-  country: z.string().min(1),
+  country: z.string().min(1, "Please select your country"),
   city: z.string().trim().max(100, "City name is too long").optional().or(z.literal("")),
   instagramHandle: z.string().trim().max(60, "Instagram handle is too long").optional().or(z.literal("")),
   corporateRegNumber: z.string().trim().min(4, "Corporate registry number is required (min 4 characters)").max(60, "Registry number is too long"),
@@ -455,12 +455,13 @@ const TradeRegistrationForm = ({
             <FieldError field="jobTitle" />
           </div>
           <div>
-            <label className="font-body text-sm text-foreground">Country</label>
+            <label className="font-body text-sm text-foreground">Country<span className="text-destructive">*</span></label>
             <select value={form.country} onChange={(e) => update("country", e.target.value)}
               className={`${fieldClass("country")} appearance-none ${!form.country ? "text-muted-foreground" : ""}`}>
               <option value="" disabled>— Select country —</option>
               {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
+            <FieldError field="country" />
           </div>
           <div>
             <label className="font-body text-sm text-foreground">City</label>
