@@ -58,6 +58,40 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
+type AuditEntry = {
+  application_id: string;
+  event: "verification_run" | "admin_override";
+  actor: "ai" | "admin";
+  actor_user_id?: string | null;
+  previous_status?: string | null;
+  outcome: string;
+  confidence_score?: number | null;
+  reasoning?: string | null;
+  attempt?: number | null;
+  details?: Record<string, unknown>;
+};
+
+// Append-only audit trail — failures here must never break the main flow.
+async function writeAudit(admin: any, entry: AuditEntry) {
+  try {
+    const { error } = await admin.from("verification_audit_log").insert({
+      application_id: entry.application_id,
+      event: entry.event,
+      actor: entry.actor,
+      actor_user_id: entry.actor_user_id ?? null,
+      previous_status: entry.previous_status ?? null,
+      outcome: entry.outcome,
+      confidence_score: entry.confidence_score ?? null,
+      reasoning: entry.reasoning ?? null,
+      attempt: entry.attempt ?? null,
+      details: entry.details ?? {},
+    });
+    if (error) console.error("audit log insert failed:", error.message);
+  } catch (e) {
+    console.error("audit log insert failed:", e);
+  }
+}
+
 async function fetchSite(url: string): Promise<{ ok: boolean; text: string; status: number }> {
   try {
     const ctrl = new AbortController();
@@ -571,6 +605,17 @@ Be conservative: if the website is unreachable, password-protected or the eviden
       await notifyAdmin(admin, app, aiError, attempts);
       await notifyFlagged(app, applicantName, 0, `Automatic verification failed twice: ${aiError}`, admin);
     }
+
+    await writeAudit(admin, {
+      application_id: applicationId,
+      event: "verification_run",
+      actor: "ai",
+      previous_status: app.status,
+      outcome: retryable ? "system_retry" : "flagged_for_review",
+      reasoning: aiError || "Verification failed",
+      attempt: attempts,
+      details: { error: aiError, retryable, next_retry_at: nextRetry },
+    });
 
     return json({ status: retryable ? "system_retry" : "flagged_for_review", error: aiError, attempts });
   }
