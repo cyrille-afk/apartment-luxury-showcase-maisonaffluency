@@ -3,7 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Eye } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 import { getPhonePlaceholder } from "@/lib/phonePlaceholder";
 import { trackForm } from "@/lib/analytics";
@@ -164,6 +171,10 @@ const TradeRegistrationForm = ({
   const [credentialFile, setCredentialFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string>("");
   const [uploading, setUploading] = useState(false);
+  const [uploadedPath, setUploadedPath] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [form, setForm] = useState({
     email: prefillEmail,
     password: "",
@@ -239,30 +250,11 @@ const TradeRegistrationForm = ({
         country: form.country,
       }).eq("id", authData.user.id);
 
-      // Upload the credential document to the private bucket. Anonymous
-      // uploads land in the `anon/` folder (allowed by storage policy) so the
-      // file is captured even when e-mail confirmation is still pending.
-      let credentialPath: string | null = null;
+      // The credential document is uploaded immediately on file selection so
+      // the applicant gets feedback and a preview before submitting. The path
+      // is stored in the `anon/` folder when the user is not yet confirmed.
+      const credentialPath = uploadedPath;
       const { data: sessionData } = await supabase.auth.getSession();
-      if (credentialFile) {
-        setUploading(true);
-        try {
-          const ext = credentialFile.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "pdf";
-          const folder = sessionData.session ? authData.user.id : `anon/${crypto.randomUUID()}`;
-          const path = `${folder}/credential-${Date.now()}.${ext}`;
-          const { error: upErr } = await supabase.storage
-            .from("trade-credentials")
-            .upload(path, credentialFile, { contentType: credentialFile.type || undefined, upsert: true });
-          if (upErr) {
-            setFileError("Your document could not be uploaded. Please try again or submit without it.");
-            toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
-          } else {
-            credentialPath = path;
-          }
-        } finally {
-          setUploading(false);
-        }
-      }
 
       const { data: appRow } = await supabase.from("trade_applications").insert({
         user_id: authData.user.id,
@@ -320,6 +312,44 @@ const TradeRegistrationForm = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  const uploadCredential = async (file: File) => {
+    setUploading(true);
+    setFileError("");
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "pdf";
+      const folder = `anon/${crypto.randomUUID()}`;
+      const path = `${folder}/credential-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("trade-credentials")
+        .upload(path, file, { contentType: file.type || undefined });
+      if (upErr) {
+        setFileError("Your document could not be uploaded. Please try again.");
+        toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
+        setUploadedPath(null);
+      } else {
+        setUploadedPath(path);
+      }
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const openPreview = async () => {
+    if (!uploadedPath) return;
+    setPreviewOpen(true);
+    setPreviewLoading(true);
+    const { data, error } = await supabase.storage
+      .from("trade-credentials")
+      .createSignedUrl(uploadedPath, 600);
+    if (error || !data?.signedUrl) {
+      toast({ title: "Preview unavailable", description: error?.message || "Could not create a secure preview link.", variant: "destructive" });
+      setPreviewOpen(false);
+    } else {
+      setPreviewUrl(data.signedUrl);
+    }
+    setPreviewLoading(false);
   };
 
   const fieldClass = (field: string) =>
@@ -480,7 +510,7 @@ const TradeRegistrationForm = ({
           type="file"
           accept="application/pdf,image/jpeg,image/png"
           className="sr-only"
-          onChange={(e) => {
+          onChange={async (e) => {
             const f = e.target.files?.[0] || null;
             e.target.value = "";
             if (!f) return;
@@ -488,23 +518,78 @@ const TradeRegistrationForm = ({
             if (!okTypes.includes(f.type)) {
               setFileError("Only PDF, JPG or PNG files are accepted.");
               setCredentialFile(null);
+              setUploadedPath(null);
               return;
             }
             if (f.size > 15 * 1024 * 1024) {
               setFileError(`"${f.name}" is ${(f.size / 1024 / 1024).toFixed(1)} MB — the maximum is 15 MB.`);
               setCredentialFile(null);
+              setUploadedPath(null);
               return;
             }
             setFileError("");
             setCredentialFile(f);
+            setUploadedPath(null);
+            await uploadCredential(f);
           }}
         />
+        {uploadedPath && !uploading && (
+          <div className="mt-3 flex items-start gap-3 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2.5">
+            <div className="flex-1 min-w-0">
+              <p className="font-body text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+                Document uploaded successfully
+              </p>
+              <p className="font-body text-[11px] text-emerald-600/80 dark:text-emerald-400/80 truncate">
+                {credentialFile?.name}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={openPreview}
+              className="inline-flex items-center gap-1.5 font-body text-xs text-emerald-700 dark:text-emerald-300 hover:underline shrink-0"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              Preview
+            </button>
+          </div>
+        )}
         {fileError && (
           <div className="mt-2 flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2.5">
             <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
             <p className="text-destructive text-xs font-body">{fileError}</p>
           </div>
         )}
+        <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+          <DialogContent className="max-w-3xl w-[calc(100%-2rem)] p-0 overflow-hidden">
+            <DialogHeader className="px-5 pt-5 pb-2">
+              <DialogTitle className="font-display text-base">Credential Preview</DialogTitle>
+              <DialogDescription className="font-body text-xs">
+                {credentialFile?.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="relative bg-muted/50 flex items-center justify-center min-h-[320px] max-h-[70vh]">
+              {previewLoading && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  <span className="font-body text-xs text-muted-foreground">Generating secure preview…</span>
+                </div>
+              )}
+              {previewUrl && credentialFile?.type === "application/pdf" ? (
+                <iframe
+                  src={previewUrl}
+                  title="Credential preview"
+                  className="w-full h-[70vh] min-h-[320px] border-0"
+                />
+              ) : previewUrl ? (
+                <img
+                  src={previewUrl}
+                  alt="Credential preview"
+                  className="max-h-[70vh] max-w-full object-contain"
+                />
+              ) : null}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Professional Certification */}
