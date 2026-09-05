@@ -308,7 +308,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               <Link to="/designers" aria-label="Search designers"><Search className="h-3.5 w-3.5" /></Link>
               <Link to="/trade/login" aria-label="Account"><UserRound className="h-3.5 w-3.5" /></Link>
               <Link to="/favorites" aria-label="Favorites" className="hidden sm:block"><Heart className="h-3.5 w-3.5" /></Link>
-              <Link to="/cart" aria-label="Shopping bag"><ShoppingBag className="h-3.5 w-3.5" /></Link>
+              <Link to="/cart" aria-label="Shopping bag" className="hidden sm:block"><ShoppingBag className="h-3.5 w-3.5" /></Link>
             </div>
           </div>
 
