@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import CredentialDocumentViewer from "@/components/admin/CredentialDocumentViewer";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { AlertTriangle, Check, ExternalLink, FileText, Loader2, RefreshCw, X } from "lucide-react";
 import OrderLedger from "@/components/admin/OrderLedger";
