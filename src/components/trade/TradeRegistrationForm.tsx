@@ -187,6 +187,7 @@ const TradeRegistrationForm = ({
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const inferredCountryRef = useRef<string>("");
+  const summaryRef = useRef<HTMLDivElement>(null);
   const [credentialFile, setCredentialFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string>("");
   const [uploading, setUploading] = useState(false);
@@ -246,7 +247,16 @@ const TradeRegistrationForm = ({
         if (!fieldErrors[key]) fieldErrors[key] = err.message;
       });
       setErrors(fieldErrors);
-      toast({ title: "Please fix the errors below", variant: "destructive" });
+      toast({
+        title: "Please fix the errors below",
+        description: Object.entries(fieldErrors)
+          .map(([f, m]) => `${FIELD_LABELS[f] ?? f}: ${m}`)
+          .join(" · "),
+        variant: "destructive",
+      });
+      requestAnimationFrame(() => {
+        summaryRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
       return;
     }
 
