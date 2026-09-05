@@ -10,7 +10,7 @@ type Screen = "welcome" | "personalize";
 const STORAGE_KEY = "ma:copilot-onboarded";
 const OVERLAY_ID = "trade-copilot-onboarding";
 
-function useOnboardingOpen(): boolean {
+function useOnboardingOpen(): { open: boolean; markDone: () => void } {
   const { profile, loading } = useAuth();
   const [open, setOpen] = useState(false);
 
@@ -21,12 +21,17 @@ function useOnboardingOpen(): boolean {
     setOpen(!completed);
   }, [profile?.has_seen_trade_intro, loading]);
 
-  return open;
+  const markDone = useCallback(() => {
+    setOpen(false);
+    try { localStorage.setItem(STORAGE_KEY, "1"); } catch {}
+  }, []);
+
+  return { open, markDone };
 }
 
 export default function TradeCopilotOnboarding() {
   const { profile, user } = useAuth();
-  const open = useOnboardingOpen();
+  const { open, markDone } = useOnboardingOpen();
   const [screen, setScreen] = useState<Screen>("welcome");
   const [nickname, setNickname] = useState("");
   const [busy, setBusy] = useState(false);
