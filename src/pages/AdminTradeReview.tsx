@@ -11,6 +11,17 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { AlertTriangle, Check, ExternalLink, FileText, Loader2, RefreshCw, X } from "lucide-react";
 import OrderLedger from "@/components/admin/OrderLedger";
 
+type AuditEntry = {
+  id: string;
+  event: "verification_run" | "admin_override";
+  actor: "ai" | "admin";
+  outcome: string;
+  confidence_score: number | null;
+  reasoning: string | null;
+  attempt: number | null;
+  created_at: string;
+};
+
 interface FlaggedApplication {
   id: string;
   user_id: string;
@@ -134,6 +145,7 @@ export default function AdminTradeReview() {
   const openApp = async (app: FlaggedApplication) => {
     setOpenId(app.id);
     setAudit([]);
+    setDocUrl(null);
     const { data: auditRows } = await supabase
       .from("verification_audit_log" as never)
       .select("id, event, actor, outcome, confidence_score, reasoning, attempt, created_at")
