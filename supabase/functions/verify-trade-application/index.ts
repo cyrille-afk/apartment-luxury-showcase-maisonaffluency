@@ -555,7 +555,7 @@ Be conservative: if the website is unreachable, password-protected or the eviden
 
     if (!retryable) {
       await notifyAdmin(admin, app, aiError, attempts);
-      await notifyFlagged(app, applicantName, 0, `Automatic verification failed twice: ${aiError}`);
+      await notifyFlagged(app, applicantName, 0, `Automatic verification failed twice: ${aiError}`, admin);
     }
 
     return json({ status: retryable ? "system_retry" : "flagged_for_review", error: aiError, attempts });
