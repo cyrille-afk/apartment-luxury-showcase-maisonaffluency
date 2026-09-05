@@ -11,15 +11,15 @@ const STORAGE_KEY = "ma:copilot-onboarded";
 const OVERLAY_ID = "trade-copilot-onboarding";
 
 function useOnboardingOpen(): { open: boolean; markDone: () => void } {
-  const { profile, loading } = useAuth();
+  const { profile, loading, isTradeUser } = useAuth();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (loading) return;
     // Only show for approved trade users who haven't completed the overlay.
     const completed = profile?.has_seen_trade_intro === true || localStorage.getItem(STORAGE_KEY) === "1";
-    setOpen(!completed);
-  }, [profile?.has_seen_trade_intro, loading]);
+    setOpen(isTradeUser && !completed);
+  }, [profile?.has_seen_trade_intro, loading, isTradeUser]);
 
   const markDone = useCallback(() => {
     setOpen(false);
