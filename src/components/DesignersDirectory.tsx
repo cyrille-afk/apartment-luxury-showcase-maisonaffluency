@@ -4,7 +4,7 @@ import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useDesignerFinishFamilies } from "@/hooks/useDesignerFinishFamilies";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Share2, Plus, SlidersHorizontal, Heart } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Plus, SlidersHorizontal, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
@@ -27,6 +27,7 @@ import { pickMatchesCategoryFilter } from "@/lib/pickCategoryFilter";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { usePublicRrpMap, formatPublicRrp, type PublicRrpRow } from "@/hooks/usePublicRrp";
 import { withOgCacheBust } from "@/lib/whatsapp-share";
+import ShareMenu from "./ShareMenu";
 import { cldResponsiveImg } from "@/lib/cloudinary";
 
 import { GALLERY } from "@/constants/galleryIndex";
@@ -1920,37 +1921,24 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                     <h2 className="text-xl md:text-3xl lg:text-4xl font-serif text-foreground leading-tight">
                       {hero ? hero.title : "Designers & Makers"}
                     </h2>
-                    <button
-                      onClick={() => {
-                        const shareUrl = withOgCacheBust("https://www.maisonaffluency.com/designers-og.html");
-                        const text = `${hero ? hero.title : "Designers & Makers On View"} — Maison Affluency\n${shareUrl}`;
-                        const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
-                        window.open(wa, "_blank", "noopener");
-                      }}
-                      className="md:hidden flex-shrink-0 mt-1 p-1.5 -mr-1 text-foreground/70 hover:text-primary transition-colors"
-                      aria-label="Share section"
-                    >
-                      <Share2 className="w-4 h-4" />
-                    </button>
+                    <div className="md:hidden flex-shrink-0 mt-1 -mr-1">
+                      <ShareMenu
+                        url={withOgCacheBust("https://www.maisonaffluency.com/designers-og.html")}
+                        message={`${hero ? hero.title : "Designers & Makers On View"} — Maison Affluency: ${withOgCacheBust("https://www.maisonaffluency.com/designers-og.html")}`}
+                      />
+                    </div>
                   </div>
                   <p className="text-[12px] md:text-base text-muted-foreground font-body max-w-3xl leading-snug md:leading-relaxed mb-1 md:mb-4 text-justify">
                     {hero
                       ? hero.summary
                       : "Discover the visionary designers whose exceptional work currently defines Maison Affluency Singapore. Each brings their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture."}
                   </p>
-                  <button
-                    onClick={() => {
-                      const shareUrl = withOgCacheBust("https://www.maisonaffluency.com/designers-og.html");
-                      const text = `${hero ? hero.title : "Designers & Makers On View"} — Maison Affluency\n${shareUrl}`;
-                      const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
-                      window.open(wa, "_blank", "noopener");
-                    }}
-                    className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-body text-foreground hover:text-primary transition-colors"
-                    aria-label="Share section"
-                  >
-                    <Share2 className="w-3.5 h-3.5" />
-                    Share
-                  </button>
+                  <div className="hidden md:inline-flex">
+                    <ShareMenu
+                      url={withOgCacheBust("https://www.maisonaffluency.com/designers-og.html")}
+                      message={`${hero ? hero.title : "Designers & Makers On View"} — Maison Affluency: ${withOgCacheBust("https://www.maisonaffluency.com/designers-og.html")}`}
+                    />
+                  </div>
                 </div>
               </div>
             </motion.div>

@@ -8,11 +8,11 @@ import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "react";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
-import { ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal, MessageSquareQuote, FileDown, CornerDownRight, Scale, Share2 } from "lucide-react";
+import { ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal, MessageSquareQuote, FileDown, CornerDownRight, Scale } from "lucide-react";
 import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
-import { shareProfileOnWhatsApp, sharePageOnWhatsApp, buildDesignerOgUrl, buildPieceOgUrl } from "@/lib/whatsapp-share";
+import { shareProfileOnWhatsApp, buildDesignerOgUrl, buildPieceOgUrl, withOgCacheBust } from "@/lib/whatsapp-share";
 import ShareMenu from "./ShareMenu";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
 import { scrollToSection } from "@/lib/scrollToSection";
@@ -762,21 +762,10 @@ const Collectibles = () => {
                 <p className="font-body text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed mb-4 text-justify">
                   Collectible design refers to unique or limited-edition, often handmade, functional art pieces—such as furniture, lighting, and ceramics—that bridge the gap between art and utility. These items, characterized by high-level craftsmanship, storytelling, and investment potential, are often sought after for their artistic value and ability to enhance.
                 </p>
-                <button
-                  onClick={() => {
-                    sharePageOnWhatsApp(
-                      "/collectibles",
-                      "Collectible Design On View — Maison Affluency",
-                      undefined,
-                      { directUrlPath: "/collectibles-og.html" }
-                    );
-                  }}
-                  className="inline-flex items-center gap-1.5 text-[11px] font-body text-foreground hover:text-primary transition-colors"
-                  aria-label="Share Collectible Design section"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  Share
-                </button>
+                <ShareMenu
+                  url={withOgCacheBust("https://www.maisonaffluency.com/collectibles-og.html")}
+                  message={`Collectible Design On View — Maison Affluency: ${withOgCacheBust("https://www.maisonaffluency.com/collectibles-og.html")}`}
+                />
               </div>
             </div>
           </motion.div>
