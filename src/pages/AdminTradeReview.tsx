@@ -381,13 +381,16 @@ export default function AdminTradeReview() {
 
       {/* Detail drawer */}
       <Sheet open={!!selected} onOpenChange={(o) => !o && setOpenId(null)}>
-        <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto p-0">
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-xl overflow-y-auto overscroll-contain p-0 h-[100dvh] max-h-[100dvh]"
+        >
           {selected && (
-            <div className="px-8 py-10">
-              <p className="font-body text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+            <div className="px-5 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8 sm:py-10">
+              <p className="font-body text-[10px] uppercase tracking-[0.28em] text-muted-foreground pr-8">
                 {selected.status === "system_retry" ? "System retry" : selected.status.replace(/_/g, " ")}
               </p>
-              <h2 className="font-display text-3xl mt-3 tracking-tight">
+              <h2 className="font-display text-2xl sm:text-3xl mt-3 tracking-tight break-words">
                 {selected.company_name || "Unnamed practice"}
               </h2>
               <p className="font-body text-xs text-muted-foreground mt-2">
