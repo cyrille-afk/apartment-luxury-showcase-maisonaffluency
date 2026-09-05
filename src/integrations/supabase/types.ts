@@ -8062,6 +8062,59 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_audit_log: {
+        Row: {
+          actor: string
+          actor_user_id: string | null
+          application_id: string
+          attempt: number | null
+          confidence_score: number | null
+          created_at: string
+          details: Json
+          event: string
+          id: string
+          outcome: string
+          previous_status: string | null
+          reasoning: string | null
+        }
+        Insert: {
+          actor?: string
+          actor_user_id?: string | null
+          application_id: string
+          attempt?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          details?: Json
+          event: string
+          id?: string
+          outcome?: string
+          previous_status?: string | null
+          reasoning?: string | null
+        }
+        Update: {
+          actor?: string
+          actor_user_id?: string | null
+          application_id?: string
+          attempt?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          details?: Json
+          event?: string
+          id?: string
+          outcome?: string
+          previous_status?: string | null
+          reasoning?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_audit_log_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "trade_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       verification_feedback_loops: {
         Row: {
           admin_decision: string

@@ -8,8 +8,19 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import CredentialDocumentViewer from "@/components/admin/CredentialDocumentViewer";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { AlertTriangle, Check, ExternalLink, FileText, Loader2, RefreshCw, X } from "lucide-react";
+import { AlertTriangle, Check, ExternalLink, FileText, History, Loader2, RefreshCw, X } from "lucide-react";
 import OrderLedger from "@/components/admin/OrderLedger";
+
+type AuditEntry = {
+  id: string;
+  event: "verification_run" | "admin_override";
+  actor: "ai" | "admin";
+  outcome: string;
+  confidence_score: number | null;
+  reasoning: string | null;
+  attempt: number | null;
+  created_at: string;
+};
 
 interface FlaggedApplication {
   id: string;
@@ -76,6 +87,7 @@ export default function AdminTradeReview() {
   const [busy, setBusy] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [docUrl, setDocUrl] = useState<string | null>(null);
+  const [audit, setAudit] = useState<AuditEntry[]>([]);
   const [metrics, setMetrics] = useState<{ pending: number; approved: number; avg: number | null }>({
     pending: 0,
     approved: 0,
@@ -133,7 +145,14 @@ export default function AdminTradeReview() {
 
   const openApp = async (app: FlaggedApplication) => {
     setOpenId(app.id);
+    setAudit([]);
     setDocUrl(null);
+    const { data: auditRows } = await supabase
+      .from("verification_audit_log" as never)
+      .select("id, event, actor, outcome, confidence_score, reasoning, attempt, created_at")
+      .eq("application_id", app.id)
+      .order("created_at", { ascending: true });
+    setAudit((auditRows as unknown as AuditEntry[]) || []);
     if (app.credential_document_path) {
       const { data } = await supabase.storage
         .from("trade-credentials")
@@ -168,6 +187,23 @@ export default function AdminTradeReview() {
       } else {
         await supabase.from("user_roles").delete().eq("user_id", app.user_id).eq("role", "trade_user" as never);
       }
+
+      // Audit trail: record the admin override with who/when/why.
+      await supabase.from("verification_audit_log").insert({
+        application_id: app.id,
+        event: "admin_override",
+        actor: "admin",
+        actor_user_id: user?.id ?? null,
+        previous_status: app.status,
+        outcome: decision,
+        confidence_score: app.ai_confidence,
+        reasoning: notes[app.id]?.trim() || null,
+        details: {
+          reviewer_email: user?.email ?? null,
+          ai_reasoning:
+            (app.ai_result as { reasoning?: string } | null)?.reasoning || null,
+        },
+      } as never);
 
       // Continuous learning loop: persist the correction for future prompts.
       await supabase.from("verification_feedback_loops").upsert(
@@ -460,6 +496,36 @@ export default function AdminTradeReview() {
                       </li>
                     ))}
                   </ul>
+                )}
+              </section>
+
+              {/* Audit trail */}
+              <section className="mt-10 border-t border-border/60 pt-6">
+                <p className="font-body text-[10px] uppercase tracking-[0.24em] text-muted-foreground mb-4 flex items-center gap-1.5">
+                  <History className="h-3 w-3" /> Audit trail
+                </p>
+                {audit.length === 0 ? (
+                  <p className="font-body text-xs text-muted-foreground">No recorded events yet.</p>
+                ) : (
+                  <ol className="space-y-4">
+                    {audit.map((e) => (
+                      <li key={e.id} className="relative pl-5 before:absolute before:left-0 before:top-1.5 before:h-1.5 before:w-1.5 before:rounded-full before:bg-muted-foreground/50">
+                        <p className="font-body text-xs text-muted-foreground">
+                          {new Date(e.created_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
+                          {" · "}
+                          {e.actor === "ai" ? "AI verification" : "Admin override"}
+                          {e.attempt ? ` · attempt ${e.attempt}` : ""}
+                        </p>
+                        <p className="font-body text-sm mt-0.5">
+                          Outcome: <span className="font-medium">{e.outcome.replace(/_/g, " ")}</span>
+                          {e.confidence_score != null && ` · confidence ${Math.round(Number(e.confidence_score))}/100`}
+                        </p>
+                        {e.reasoning && (
+                          <p className="font-body text-xs text-muted-foreground mt-1 leading-relaxed">{e.reasoning}</p>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
                 )}
               </section>
 

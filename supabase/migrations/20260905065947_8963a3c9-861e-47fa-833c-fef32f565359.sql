@@ -1,0 +1,1 @@
+ALTER TABLE public.verification_audit_log ADD COLUMN outcome TEXT NOT NULL DEFAULT 'unknown';
