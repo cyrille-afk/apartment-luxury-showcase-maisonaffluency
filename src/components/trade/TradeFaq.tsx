@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronDown } from "lucide-react";
 
 /* Extracted from TradeLanding — FAQ column shared by the /trade/apply page. */
 const TradeFaq = ({ isUKVariant = false }: { isUKVariant?: boolean }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const [faqExpanded, setFaqExpanded] = useState(false);
 
   const FAQ_ITEMS = [
     { q: "Who is eligible to join the Trade Program?", a: "The program is designed for architects, interior designers, decorators, and luxury hospitality professionals. We review each application based on company credentials and professional background." },
@@ -22,9 +20,6 @@ const TradeFaq = ({ isUKVariant = false }: { isUKVariant?: boolean }) => {
     { q: "Can I use my own freight forwarder or logistics provider?", a: "Yes. While our automated portal provides instant DDP and DAP quotes through our consolidated white-glove partners, you can easily select 'Ex-Works' during checkout to have your preferred global logistics firm coordinate collection directly from our European ateliers." },
     { q: "Do you offer physical material swatches for project mood boards?", a: "Absolutely. Verified trade members can request physical samples, wood finishes, and textile swatches directly through their project folders dashboard. Most standard textile and leather swatches are dispatched internationally within 48 hours." },
   ];
-  const COLLAPSED_COUNT = 10;
-  const visibleItems = faqExpanded ? FAQ_ITEMS : FAQ_ITEMS.slice(0, COLLAPSED_COUNT);
-  const hiddenCount = FAQ_ITEMS.length - COLLAPSED_COUNT;
 
   return (
     <div className="flex-1">
@@ -47,7 +42,7 @@ const TradeFaq = ({ isUKVariant = false }: { isUKVariant?: boolean }) => {
       </motion.div>
 
       <div className="space-y-0 divide-y divide-border">
-        {visibleItems.map((faq, i) => (
+        {FAQ_ITEMS.map((faq, i) => (
           <div key={i} className="py-4">
             <button
               type="button"
@@ -63,21 +58,6 @@ const TradeFaq = ({ isUKVariant = false }: { isUKVariant?: boolean }) => {
           </div>
         ))}
       </div>
-      {hiddenCount > 0 && (
-        <div className="mt-6 flex justify-center">
-          <button
-            type="button"
-            onClick={() => setFaqExpanded((v) => !v)}
-            aria-expanded={faqExpanded}
-            className="inline-flex items-center gap-1.5 font-body text-xs uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {faqExpanded ? "Show less" : `Show ${hiddenCount} more`}
-            <ChevronDown
-              className={`w-3.5 h-3.5 transition-transform duration-200 ${faqExpanded ? "rotate-180" : ""}`}
-            />
-          </button>
-        </div>
-      )}
     </div>
   );
 };
