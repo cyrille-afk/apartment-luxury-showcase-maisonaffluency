@@ -490,23 +490,66 @@ Deno.serve(async (req) => {
   // ── Gather evidence ───────────────────────────────────────────────
   const site = app.company_website ? await fetchSite(app.company_website) : { ok: false, text: "", status: 0 };
 
-  let docImage: { dataUrl: string } | null = null;
+  // Credential document → model input. Images are passed by short-lived signed
+  // URL; PDFs must be inlined as a base64 `file` block (providers do not fetch
+  // PDFs by link), so both paths give the model the full document contents.
+  let docPart: Record<string, unknown> | null = null;
   let docNote = "No credential document uploaded.";
   if (app.credential_document_path) {
-    const { data: file } = await admin.storage.from("trade-credentials").download(app.credential_document_path);
-    if (file) {
-      const type = file.type || "application/octet-stream";
-      if (type.startsWith("image/") && file.size < 6_000_000) {
-        const buf = new Uint8Array(await file.arrayBuffer());
-        let bin = "";
-        for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
-        docImage = { dataUrl: `data:${type};base64,${btoa(bin)}` };
-        docNote = "Credential document attached as an image below.";
-      } else {
-        docNote = `Credential document uploaded (${type}, ${Math.round(file.size / 1024)} KB) — not machine-readable here.`;
-      }
+    // 5-minute signed read URL so the model has explicit access to the file.
+    const { data: signed } = await admin.storage
+      .from("trade-credentials")
+      .createSignedUrl(app.credential_document_path, 300);
+    const { data: file } = await admin.storage
+      .from("trade-credentials")
+      .download(app.credential_document_path);
+
+    if (!file || file.size === 0) {
+      docNote = "Credential document could not be retrieved from storage.";
     } else {
-      docNote = "Credential document could not be retrieved.";
+      let type = file.type || "";
+      if (!type || type === "application/octet-stream") {
+        const ext = app.credential_document_path.split(".").pop()?.toLowerCase() || "";
+        type = ext === "pdf"
+          ? "application/pdf"
+          : ext === "png"
+            ? "image/png"
+            : ext === "webp"
+              ? "image/webp"
+              : ext === "jpg" || ext === "jpeg"
+                ? "image/jpeg"
+                : type || "application/octet-stream";
+      }
+      const kb = Math.round(file.size / 1024);
+
+      if (type.startsWith("image/") && signed?.signedUrl) {
+        docPart = { type: "image_url", image_url: { url: signed.signedUrl } };
+        docNote = `Credential document attached (${type}, ${kb} KB).`;
+      } else if (type.startsWith("image/") || type === "application/pdf") {
+        if (file.size > 18_000_000) {
+          docNote = `Credential document uploaded (${type}, ${kb} KB) — too large to parse.`;
+        } else {
+          const buf = new Uint8Array(await file.arrayBuffer());
+          let bin = "";
+          const chunk = 0x8000;
+          for (let i = 0; i < buf.length; i += chunk) {
+            bin += String.fromCharCode(...buf.subarray(i, i + chunk));
+          }
+          const b64 = btoa(bin);
+          docPart = type === "application/pdf"
+            ? {
+                type: "file",
+                file: {
+                  filename: app.credential_document_path.split("/").pop() || "credential.pdf",
+                  file_data: `data:application/pdf;base64,${b64}`,
+                },
+              }
+            : { type: "image_url", image_url: { url: `data:${type};base64,${b64}` } };
+          docNote = `Credential document attached (${type}, ${kb} KB).`;
+        }
+      } else {
+        docNote = `Credential document uploaded (${type}, ${kb} KB) — unsupported format.`;
+      }
     }
   }
 
@@ -531,7 +574,7 @@ Deno.serve(async (req) => {
   // ── Stage 1: fast Flash pass extracts the credential document's text ──
   let docExtract = "";
   let stage1Error = "";
-  if (docImage && LOVABLE_API_KEY) {
+  if (docPart && LOVABLE_API_KEY) {
     const { text, error } = await callGateway(
       LOVABLE_API_KEY,
       EXTRACT_MODEL,
@@ -541,7 +584,7 @@ Deno.serve(async (req) => {
           text:
             "Transcribe every legible element of this professional credential document: issuing body, holder name, company name, membership/licence/accreditation number, class or grade, issue and expiry dates, and any registration or tax identifiers. Pay particular attention to regional identifiers and quote them verbatim: Singapore UEN / ACRA numbers, SIDAC or SIDS accreditation (including ID Class 1/2/3), SIA membership numbers, Malaysia SSM numbers, UAE DED or free-zone trade licence numbers, GCC Tax Registration Numbers (TRN), Saudi Commercial Registration (CR) numbers, APID certificate numbers. Transcribe Arabic or Chinese text as well, followed by an English translation in parentheses. Output plain text only, no commentary. If it is not a credential document, say exactly: NOT_A_CREDENTIAL_DOCUMENT.",
         },
-        { type: "image_url", image_url: { url: docImage.dataUrl } },
+        docPart,
       ],
       { timeout: 25_000 },
     );
