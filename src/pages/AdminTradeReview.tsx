@@ -492,11 +492,11 @@ export default function AdminTradeReview() {
                   placeholder="Optional note — this is fed back to the verification agent as a learning example."
                   className="font-body text-sm min-h-[80px]"
                 />
-                <div className="mt-5 flex flex-wrap gap-3">
+                <div className="mt-5 flex flex-col sm:flex-row sm:flex-wrap gap-3">
                   <Button
                     onClick={() => decide(selected, "approved")}
                     disabled={busy === selected.id}
-                    className="font-body text-xs uppercase tracking-[0.18em]"
+                    className="font-body text-xs uppercase tracking-[0.18em] w-full sm:w-auto h-11 sm:h-10"
                   >
                     {busy === selected.id ? (
                       <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
@@ -509,7 +509,7 @@ export default function AdminTradeReview() {
                     variant="outline"
                     onClick={() => decide(selected, "rejected")}
                     disabled={busy === selected.id}
-                    className="font-body text-xs uppercase tracking-[0.18em]"
+                    className="font-body text-xs uppercase tracking-[0.18em] w-full sm:w-auto h-11 sm:h-10"
                   >
                     <X className="h-3.5 w-3.5 mr-2" />
                     Reject application
