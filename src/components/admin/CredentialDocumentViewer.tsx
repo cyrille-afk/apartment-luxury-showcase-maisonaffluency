@@ -92,7 +92,7 @@ function PdfPages({ url, onError }: { url: string; onError: () => void }) {
           canvas.style.marginBottom = "8px";
           const ctx = canvas.getContext("2d");
           if (!ctx) continue;
-          await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+          await page.render({ canvasContext: ctx, viewport }).promise;
           if (cancelled || !containerRef.current) return;
           containerRef.current.appendChild(canvas);
         }
