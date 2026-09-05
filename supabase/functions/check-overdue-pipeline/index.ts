@@ -35,7 +35,7 @@ serve(async (req: Request) => {
   }
 
   // Cron-only: require shared secret. Prevents external callers from
-  // spamming admin inboxes via Resend.
+  // spamming admin inboxes.
   const cronSecret = req.headers.get("x-cron-secret");
   if (!cronSecret || cronSecret !== Deno.env.get("CRON_SECRET")) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
