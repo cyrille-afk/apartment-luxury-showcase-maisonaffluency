@@ -718,10 +718,14 @@ Be conservative: if the website is unreachable, password-protected or the eviden
         try {
           await admin.functions.invoke("send-transactional-email", {
             body: {
-              templateName: "trade-approval",
+              templateName: "trade-welcome-auto",
               recipientEmail: profile.email,
-              idempotencyKey: `trade-approval-${applicationId}`,
-              templateData: { name: applicantName, companyName: app.company_name },
+              idempotencyKey: `trade-welcome-auto-${applicationId}`,
+              templateData: {
+                name: applicantName,
+                companyName: app.company_name,
+                country: app.country,
+              },
             },
           });
         } catch (_) {

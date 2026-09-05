@@ -10,6 +10,8 @@ export interface TemplateEntry {
 }
 
 import { template as tradeApproval } from './trade-approval.tsx'
+import { template as tradeWelcomeAuto } from './trade-welcome-auto.tsx'
+import { template as tradeWelcomeFounder } from './trade-welcome-founder.tsx'
 import { template as welcomeRegistration } from './welcome-registration.tsx'
 import { template as featuredMagazineUpdate } from './featured-magazine-update.tsx'
 import { template as scrapeFailureAlert } from './scrape-failure-alert.tsx'
@@ -26,6 +28,8 @@ import { template as orderPaymentConfirmed } from './order-payment-confirmed.tsx
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'trade-approval': tradeApproval,
+  'trade-welcome-auto': tradeWelcomeAuto,
+  'trade-welcome-founder': tradeWelcomeFounder,
   'welcome-registration': welcomeRegistration,
   'featured-magazine-update': featuredMagazineUpdate,
   'scrape-failure-alert': scrapeFailureAlert,
