@@ -10,23 +10,28 @@ type Screen = "welcome" | "personalize";
 const STORAGE_KEY = "ma:copilot-onboarded";
 const OVERLAY_ID = "trade-copilot-onboarding";
 
-function useOnboardingOpen(): boolean {
-  const { profile, loading } = useAuth();
+function useOnboardingOpen(): { open: boolean; markDone: () => void } {
+  const { profile, loading, isTradeUser } = useAuth();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (loading) return;
     // Only show for approved trade users who haven't completed the overlay.
     const completed = profile?.has_seen_trade_intro === true || localStorage.getItem(STORAGE_KEY) === "1";
-    setOpen(!completed);
-  }, [profile?.has_seen_trade_intro, loading]);
+    setOpen(isTradeUser && !completed);
+  }, [profile?.has_seen_trade_intro, loading, isTradeUser]);
 
-  return open;
+  const markDone = useCallback(() => {
+    setOpen(false);
+    try { localStorage.setItem(STORAGE_KEY, "1"); } catch {}
+  }, []);
+
+  return { open, markDone };
 }
 
 export default function TradeCopilotOnboarding() {
   const { profile, user } = useAuth();
-  const open = useOnboardingOpen();
+  const { open, markDone } = useOnboardingOpen();
   const [screen, setScreen] = useState<Screen>("welcome");
   const [nickname, setNickname] = useState("");
   const [busy, setBusy] = useState(false);
@@ -58,13 +63,9 @@ export default function TradeCopilotOnboarding() {
       })
       .eq("id", user.id);
 
-    try {
-      localStorage.setItem(STORAGE_KEY, "1");
-    } catch {}
-
     setBusy(false);
-    setScreen("welcome");
-  }, [nickname, user]);
+    markDone();
+  }, [nickname, user, markDone]);
 
   if (!open) return null;
 
