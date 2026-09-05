@@ -695,3 +695,8 @@ input, select, textarea {
     max-height: none;
   }
 }
+
+@keyframes shimmer-line {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
