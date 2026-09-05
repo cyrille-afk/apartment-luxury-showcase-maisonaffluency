@@ -148,6 +148,25 @@ const getCorporateRegPlaceholder = (country: string): string => {
 
 type FieldErrors = Partial<Record<string, string>>;
 
+const FIELD_LABELS: Record<string, string> = {
+  email: "Email",
+  password: "Password",
+  confirmPassword: "Confirm Password",
+  firstName: "First Name",
+  lastName: "Last Name",
+  phone: "Phone",
+  companyName: "Company Name",
+  companyWebsite: "Company Website",
+  jobTitle: "Job Title",
+  country: "Country",
+  city: "City",
+  instagramHandle: "Instagram Handle",
+  corporateRegNumber: "Corporate Registry Number",
+  taxVatId: "Tax / VAT ID",
+  certificationDetails: "Certification Details",
+  message: "Message",
+};
+
 interface TradeRegistrationFormProps {
   prefillEmail?: string;
   prefillFirstName?: string;
