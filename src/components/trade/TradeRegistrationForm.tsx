@@ -171,6 +171,10 @@ const TradeRegistrationForm = ({
   const [credentialFile, setCredentialFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string>("");
   const [uploading, setUploading] = useState(false);
+  const [uploadedPath, setUploadedPath] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [form, setForm] = useState({
     email: prefillEmail,
     password: "",
