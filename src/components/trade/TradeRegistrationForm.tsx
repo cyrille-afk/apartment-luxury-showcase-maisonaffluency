@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { Loader2, AlertCircle } from "lucide-react";
 
 import { getPhonePlaceholder } from "@/lib/phonePlaceholder";
 import { trackForm } from "@/lib/analytics";
@@ -162,6 +163,7 @@ const TradeRegistrationForm = ({
   const inferredCountryRef = useRef<string>("");
   const [credentialFile, setCredentialFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({
     email: prefillEmail,
     password: "",
@@ -237,18 +239,29 @@ const TradeRegistrationForm = ({
         country: form.country,
       }).eq("id", authData.user.id);
 
-      // Upload the credential document to the private bucket (needs a live
-      // session — when e-mail confirmation is pending the applicant can add it
-      // later from the dashboard status tracker).
+      // Upload the credential document to the private bucket. Anonymous
+      // uploads land in the `anon/` folder (allowed by storage policy) so the
+      // file is captured even when e-mail confirmation is still pending.
       let credentialPath: string | null = null;
       const { data: sessionData } = await supabase.auth.getSession();
-      if (credentialFile && sessionData.session) {
-        const ext = credentialFile.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
-        const path = `${authData.user.id}/credential-${Date.now()}.${ext}`;
-        const { error: upErr } = await supabase.storage
-          .from("trade-credentials")
-          .upload(path, credentialFile, { contentType: credentialFile.type || undefined, upsert: true });
-        if (!upErr) credentialPath = path;
+      if (credentialFile) {
+        setUploading(true);
+        try {
+          const ext = credentialFile.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "pdf";
+          const folder = sessionData.session ? authData.user.id : `anon/${crypto.randomUUID()}`;
+          const path = `${folder}/credential-${Date.now()}.${ext}`;
+          const { error: upErr } = await supabase.storage
+            .from("trade-credentials")
+            .upload(path, credentialFile, { contentType: credentialFile.type || undefined, upsert: true });
+          if (upErr) {
+            setFileError("Your document could not be uploaded. Please try again or submit without it.");
+            toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
+          } else {
+            credentialPath = path;
+          }
+        } finally {
+          setUploading(false);
+        }
       }
 
       const { data: appRow } = await supabase.from("trade_applications").insert({
@@ -441,26 +454,44 @@ const TradeRegistrationForm = ({
         </p>
         <label
           htmlFor="credential-upload"
-          className="flex flex-col items-center justify-center gap-1 w-full py-7 px-4 border border-dashed border-border rounded-lg cursor-pointer hover:border-foreground/40 transition-colors text-center"
+          className={`flex flex-col items-center justify-center gap-1 w-full py-7 px-4 border border-dashed border-border rounded-lg transition-colors text-center ${
+            uploading ? "opacity-60 pointer-events-none" : "cursor-pointer hover:border-foreground/40"
+          }`}
         >
-          <span className="font-body text-sm text-foreground">
-            {credentialFile ? credentialFile.name : "Upload a credential document"}
-          </span>
+          {uploading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+              <span className="font-body text-sm text-foreground">Uploading {credentialFile?.name}…</span>
+            </>
+          ) : (
+            <span className="font-body text-sm text-foreground">
+              {credentialFile ? credentialFile.name : "Upload a credential document"}
+            </span>
+          )}
           <span className="font-body text-[11px] text-muted-foreground">
-            {credentialFile
-              ? `${Math.round(credentialFile.size / 1024)} KB · tap to replace`
-              : "Drag a file here or tap to browse"}
+            {!uploading &&
+              (credentialFile
+                ? `${Math.round(credentialFile.size / 1024)} KB · tap to replace`
+                : "Drag a file here or tap to browse")}
           </span>
         </label>
         <input
           id="credential-upload"
           type="file"
-          accept="application/pdf,image/jpeg,image/png,image/webp"
+          accept="application/pdf,image/jpeg,image/png"
           className="sr-only"
           onChange={(e) => {
             const f = e.target.files?.[0] || null;
-            if (f && f.size > 15 * 1024 * 1024) {
-              setFileError("File must be under 15 MB");
+            e.target.value = "";
+            if (!f) return;
+            const okTypes = ["application/pdf", "image/jpeg", "image/png"];
+            if (!okTypes.includes(f.type)) {
+              setFileError("Only PDF, JPG or PNG files are accepted.");
+              setCredentialFile(null);
+              return;
+            }
+            if (f.size > 15 * 1024 * 1024) {
+              setFileError(`"${f.name}" is ${(f.size / 1024 / 1024).toFixed(1)} MB — the maximum is 15 MB.`);
               setCredentialFile(null);
               return;
             }
@@ -468,7 +499,12 @@ const TradeRegistrationForm = ({
             setCredentialFile(f);
           }}
         />
-        {fileError && <p className="text-destructive text-xs font-body mt-1">{fileError}</p>}
+        {fileError && (
+          <div className="mt-2 flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2.5">
+            <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+            <p className="text-destructive text-xs font-body">{fileError}</p>
+          </div>
+        )}
       </div>
 
       {/* Professional Certification */}
@@ -499,8 +535,9 @@ const TradeRegistrationForm = ({
       </div>
 
       <button type="submit" disabled={loading}
-        className="w-full py-3 bg-[hsl(var(--gold))] text-white font-body text-sm uppercase tracking-[0.2em] rounded-full hover:bg-[hsl(var(--gold)/0.9)] transition-all disabled:opacity-50 font-bold">
-        {loading ? "Submitting..." : "Submit Application"}
+        className="w-full py-3 bg-[hsl(var(--gold))] text-white font-body text-sm uppercase tracking-[0.2em] rounded-full hover:bg-[hsl(var(--gold)/0.9)] transition-all disabled:opacity-50 font-bold inline-flex items-center justify-center gap-2">
+        {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+        {uploading ? "Uploading document…" : loading ? "Submitting..." : "Submit Application"}
       </button>
     </form>
   );
