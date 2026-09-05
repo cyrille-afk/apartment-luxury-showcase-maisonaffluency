@@ -17,7 +17,6 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import {
   channelsForRegion,
-  taxConfigForRegion,
   type PaymentChannelId,
   type RegionTier,
   type TradePaymentChannel,
@@ -104,8 +103,8 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
     () =>
       rule
         ? { rate: rule.rate, label: taxRowLabel(rule) }
-        : { rate: 0, label: taxConfigForRegion(regionTier, country).label },
-    [rule, regionTier, country],
+        : { rate: 0, label: "Tax (zero-rated)" },
+    [rule],
   );
   const taxableCents = Math.max(0, subtotalCents - discountCents) + shippingCents;
   const taxCents = computeTaxCents(
