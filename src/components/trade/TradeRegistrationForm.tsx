@@ -103,7 +103,7 @@ const tradeRegisterSchema = z.object({
     .refine(v => !v || /^https?:\/\/.+/.test(v), "Please enter a valid URL starting with http:// or https://")
     .optional().or(z.literal("")),
   jobTitle: z.string().trim().min(1, "Job title is required").max(150, "Job title is too long"),
-  country: z.string().min(1),
+  country: z.string().min(1, "Please select your country"),
   city: z.string().trim().max(100, "City name is too long").optional().or(z.literal("")),
   instagramHandle: z.string().trim().max(60, "Instagram handle is too long").optional().or(z.literal("")),
   corporateRegNumber: z.string().trim().min(4, "Corporate registry number is required (min 4 characters)").max(60, "Registry number is too long"),
@@ -148,6 +148,25 @@ const getCorporateRegPlaceholder = (country: string): string => {
 
 type FieldErrors = Partial<Record<string, string>>;
 
+const FIELD_LABELS: Record<string, string> = {
+  email: "Email",
+  password: "Password",
+  confirmPassword: "Confirm Password",
+  firstName: "First Name",
+  lastName: "Last Name",
+  phone: "Phone",
+  companyName: "Company Name",
+  companyWebsite: "Company Website",
+  jobTitle: "Job Title",
+  country: "Country",
+  city: "City",
+  instagramHandle: "Instagram Handle",
+  corporateRegNumber: "Corporate Registry Number",
+  taxVatId: "Tax / VAT ID",
+  certificationDetails: "Certification Details",
+  message: "Message",
+};
+
 interface TradeRegistrationFormProps {
   prefillEmail?: string;
   prefillFirstName?: string;
@@ -168,6 +187,7 @@ const TradeRegistrationForm = ({
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const inferredCountryRef = useRef<string>("");
+  const summaryRef = useRef<HTMLDivElement>(null);
   const [credentialFile, setCredentialFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string>("");
   const [uploading, setUploading] = useState(false);
@@ -227,7 +247,16 @@ const TradeRegistrationForm = ({
         if (!fieldErrors[key]) fieldErrors[key] = err.message;
       });
       setErrors(fieldErrors);
-      toast({ title: "Please fix the errors below", variant: "destructive" });
+      toast({
+        title: "Please fix the errors below",
+        description: Object.entries(fieldErrors)
+          .map(([f, m]) => `${FIELD_LABELS[f] ?? f}: ${m}`)
+          .join(" · "),
+        variant: "destructive",
+      });
+      requestAnimationFrame(() => {
+        summaryRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
       return;
     }
 
@@ -379,8 +408,28 @@ const TradeRegistrationForm = ({
   const FieldError = ({ field }: { field: string }) =>
     errors[field] ? <p className="text-destructive text-xs font-body mt-1">{errors[field]}</p> : null;
 
+  const errorEntries = Object.entries(errors).filter(([, msg]) => Boolean(msg)) as [string, string][];
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+      {errorEntries.length > 0 && (
+        <div
+          ref={summaryRef}
+          role="alert"
+          className="border border-destructive/40 bg-destructive/5 px-4 py-3 rounded-sm"
+        >
+          <p className="font-body text-sm text-destructive mb-1">
+            Please correct the following before submitting:
+          </p>
+          <ul className="list-disc pl-5 space-y-0.5">
+            {errorEntries.map(([field, msg]) => (
+              <li key={field} className="font-body text-xs text-destructive">
+                <span className="font-medium">{FIELD_LABELS[field] ?? field}:</span> {msg}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {/* Account Details */}
       <div>
         <h3 className="font-display text-base text-foreground mb-3">Account Details</h3>
@@ -455,12 +504,13 @@ const TradeRegistrationForm = ({
             <FieldError field="jobTitle" />
           </div>
           <div>
-            <label className="font-body text-sm text-foreground">Country</label>
+            <label className="font-body text-sm text-foreground">Country<span className="text-destructive">*</span></label>
             <select value={form.country} onChange={(e) => update("country", e.target.value)}
               className={`${fieldClass("country")} appearance-none ${!form.country ? "text-muted-foreground" : ""}`}>
               <option value="" disabled>— Select country —</option>
               {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
+            <FieldError field="country" />
           </div>
           <div>
             <label className="font-body text-sm text-foreground">City</label>
