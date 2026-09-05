@@ -162,6 +162,7 @@ const TradeRegistrationForm = ({
   const inferredCountryRef = useRef<string>("");
   const [credentialFile, setCredentialFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({
     email: prefillEmail,
     password: "",
