@@ -476,6 +476,7 @@ const TradeLayout = () => {
         <QuickTour />
         <BriefWizard />
         <BackToTopButton />
+        <TradeCopilotOnboarding />
       </Suspense>
     </SidebarProvider>
   );
