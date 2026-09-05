@@ -81,6 +81,7 @@
     "react-konva": "18.2.10",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.18.0",
+    "react-zoom-pan-pinch": "^4.2.0",
     "recharts": "^3.9.0",
     "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.1",

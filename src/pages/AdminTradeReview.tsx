@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import CredentialDocumentViewer from "@/components/admin/CredentialDocumentViewer";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { AlertTriangle, Check, ExternalLink, FileText, Loader2, RefreshCw, X } from "lucide-react";
 import OrderLedger from "@/components/admin/OrderLedger";
@@ -380,13 +381,16 @@ export default function AdminTradeReview() {
 
       {/* Detail drawer */}
       <Sheet open={!!selected} onOpenChange={(o) => !o && setOpenId(null)}>
-        <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto p-0">
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-xl overflow-y-auto overscroll-contain p-0 h-[100dvh] max-h-[100dvh]"
+        >
           {selected && (
-            <div className="px-8 py-10">
-              <p className="font-body text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+            <div className="px-5 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8 sm:py-10">
+              <p className="font-body text-[10px] uppercase tracking-[0.28em] text-muted-foreground pr-8">
                 {selected.status === "system_retry" ? "System retry" : selected.status.replace(/_/g, " ")}
               </p>
-              <h2 className="font-display text-3xl mt-3 tracking-tight">
+              <h2 className="font-display text-2xl sm:text-3xl mt-3 tracking-tight break-words">
                 {selected.company_name || "Unnamed practice"}
               </h2>
               <p className="font-body text-xs text-muted-foreground mt-2">
@@ -402,7 +406,7 @@ export default function AdminTradeReview() {
                     href={selected.company_website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 underline underline-offset-4"
+                    className="inline-flex items-center gap-1 underline underline-offset-4 break-all"
                   >
                     {selected.company_website} <ExternalLink className="h-3 w-3" />
                   </a>
@@ -473,25 +477,10 @@ export default function AdminTradeReview() {
                   </p>
                 )}
                 {docUrl && (
-                  <>
-                    {/\.(png|jpe?g|webp|gif)(\?|$)/i.test(selected.credential_document_path || "") ? (
-                      <img src={docUrl} alt="Uploaded business credential" className="w-full border border-border/60" />
-                    ) : (
-                      <iframe
-                        src={docUrl}
-                        title="Uploaded business credential"
-                        className="w-full h-[420px] border border-border/60 bg-muted/20"
-                      />
-                    )}
-                    <a
-                      href={docUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-3 inline-flex items-center gap-1.5 font-body text-xs underline underline-offset-4"
-                    >
-                      <FileText className="h-3 w-3" /> Open full document
-                    </a>
-                  </>
+                  <CredentialDocumentViewer
+                    url={docUrl}
+                    fileName={selected.credential_document_path}
+                  />
                 )}
               </section>
 
@@ -503,11 +492,11 @@ export default function AdminTradeReview() {
                   placeholder="Optional note — this is fed back to the verification agent as a learning example."
                   className="font-body text-sm min-h-[80px]"
                 />
-                <div className="mt-5 flex flex-wrap gap-3">
+                <div className="mt-5 flex flex-col sm:flex-row sm:flex-wrap gap-3">
                   <Button
                     onClick={() => decide(selected, "approved")}
                     disabled={busy === selected.id}
-                    className="font-body text-xs uppercase tracking-[0.18em]"
+                    className="font-body text-xs uppercase tracking-[0.18em] w-full sm:w-auto h-11 sm:h-10"
                   >
                     {busy === selected.id ? (
                       <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
@@ -520,7 +509,7 @@ export default function AdminTradeReview() {
                     variant="outline"
                     onClick={() => decide(selected, "rejected")}
                     disabled={busy === selected.id}
-                    className="font-body text-xs uppercase tracking-[0.18em]"
+                    className="font-body text-xs uppercase tracking-[0.18em] w-full sm:w-auto h-11 sm:h-10"
                   >
                     <X className="h-3.5 w-3.5 mr-2" />
                     Reject application
