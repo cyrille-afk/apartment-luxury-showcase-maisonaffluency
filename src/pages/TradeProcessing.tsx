@@ -41,12 +41,12 @@ const TradeProcessing = () => {
     const check = async () => {
       const { data } = await supabase
         .from("trade_applications")
-        .select("approval_status")
+        .select("status")
         .eq("id", applicationId)
         .maybeSingle();
 
       if (cancelled || settled.current) return;
-      const status = data?.approval_status ?? null;
+      const status = data?.status ?? null;
 
       if (status === "approved") {
         settled.current = true;
