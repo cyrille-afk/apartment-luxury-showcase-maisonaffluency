@@ -61,6 +61,33 @@ const TradeSettings = () => {
     confirmPassword: "",
   });
 
+  const [copilotName, setCopilotName] = useState("");
+  const [savingCopilot, setSavingCopilot] = useState(false);
+
+  useEffect(() => {
+    if (profile?.concierge_name) setCopilotName(profile.concierge_name);
+  }, [profile?.concierge_name]);
+
+  const handleSaveCopilot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setSavingCopilot(true);
+    const chosen = sanitizeName(copilotName) || DEFAULT_NAME;
+    saveName(chosen);
+    window.dispatchEvent(new CustomEvent("concierge:name-changed", { detail: chosen }));
+    const { error } = await supabase
+      .from("profiles")
+      .update({ concierge_name: chosen === DEFAULT_NAME ? null : chosen } as any)
+      .eq("id", user.id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      setCopilotName(chosen);
+      toast({ title: "Copilot updated", description: `Your copilot will now introduce itself as ${chosen}.` });
+    }
+    setSavingCopilot(false);
+  };
+
   useEffect(() => {
     if (profile) {
       setForm((f) => ({
