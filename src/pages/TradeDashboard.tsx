@@ -16,6 +16,7 @@ import { InstallNativeAppCard } from "@/components/trade/InstallNativeAppCard";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
+import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import dashboard3dStudioImage from "@/assets/dashboard-3d-style-neutrals.jpg";
 
 interface BrandFolder {
