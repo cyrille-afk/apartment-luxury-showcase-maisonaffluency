@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ChevronDown, Quote, Share2, Check } from "lucide-react";
-import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import { ArrowLeft, Quote, Share2, Check } from "lucide-react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { withOgCacheBust, shareOnWhatsApp } from "@/lib/whatsapp-share";
@@ -10,7 +10,7 @@ import projectFoldersImg from "@/assets/benefit-project-folders.jpg";
 const studioBeforeImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773976063/Screen_Shot_2026-03-20_at_11.05.23_AM_fo0aaz.png";
 const studioAfterImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773975478/Screen_Shot_2026-03-20_at_10.57.13_AM_yiqv4q.png";
 import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/SectionHero";
-import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
+
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
 const TRADE_PROGRAM_SHARE_URL = withOgCacheBust("https://www.maisonaffluency.com/trade-program-og.html");
 
@@ -18,37 +18,6 @@ const TRADE_PROGRAM_SHARE_URL = withOgCacheBust("https://www.maisonaffluency.com
 // directly by TradeRegistrationForm and QuoteRequestDialog as their default value.
 
 
-const FaqItem = ({ question, answer }: { question: string; answer: string }) => {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="border-b border-border">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between py-4 md:py-5 text-left gap-4"
-      >
-        <span className="font-display text-sm md:text-base text-foreground">{question}</span>
-        <ChevronDown
-          className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
-        />
-      </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="overflow-hidden"
-          >
-            <p className="font-body text-sm leading-relaxed text-muted-foreground pb-5 text-justify">
-              {answer}
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
 
 const benefits = [
   {
@@ -119,20 +88,14 @@ const testimonials = [
 ];
 
 const TradeLanding = () => {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const [faqExpanded, setFaqExpanded] = useState(false);
-  const formRef = useRef<HTMLDivElement>(null);
   // Featured Issue (AD) free-download removed from the trade area.
 
-
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const prefillEmail = searchParams.get("email") || "";
   const regionParam = (searchParams.get("region") || "").toLowerCase();
   const [isUKVariant, setIsUKVariant] = useState<boolean>(
     regionParam === "uk" || regionParam === "gb",
   );
-  const [mobileFormExpanded, setMobileFormExpanded] = useState(false);
-  const [heroEmail, setHeroEmail] = useState("");
   const [shareCopied, setShareCopied] = useState(false);
 
   // Overridable 3D Studio images from HeroManager
@@ -148,42 +111,14 @@ const TradeLanding = () => {
     });
   }, []);
 
-  const location = useLocation();
-
+  // Legacy #apply/#register deep links now live on the dedicated application page.
   useEffect(() => {
-    const hash = location.hash;
-    if (!hash || (hash !== "#register" && hash !== "#apply")) return;
+    const hash = window.location.hash;
+    if (hash === "#register" || hash === "#apply") {
+      navigate("/trade/apply", { replace: true });
+    }
+  }, [navigate]);
 
-    const id = hash.replace("#", "");
-    const scrollToHash = () => {
-      const target = document.getElementById(id);
-      if (!target) return;
-
-      const nav = document.querySelector("nav");
-      const featuredBanner = document.querySelector("[data-featured-read-banner]");
-      const navHeight = nav?.getBoundingClientRect().height ?? 0;
-      const bannerHeight = featuredBanner && window.getComputedStyle(featuredBanner).position === "fixed"
-        ? featuredBanner.getBoundingClientRect().height
-        : 0;
-      const offset = navHeight + bannerHeight + 28;
-
-      const y = target.getBoundingClientRect().top + window.scrollY - offset;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    };
-
-    requestAnimationFrame(() => setTimeout(scrollToHash, 250));
-  }, [location.hash]);
-
-  const scrollToForm = () => {
-    const el = formRef.current;
-    if (!el) return;
-    const y = el.getBoundingClientRect().top + window.scrollY - 80;
-    window.scrollTo({ top: y, behavior: "smooth" });
-  };
-
-  const toggleAccordion = (index: number) => {
-    setOpenIndex(openIndex === index ? null : index);
-  };
 
 /* ─── Mobile Benefits Carousel ─── */
 const MobileBenefitsCarousel = ({ benefits }: { benefits: typeof import("./TradeLanding").default extends never ? any : { title: string; description: string; image: string }[] }) => {
@@ -423,12 +358,8 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 onSubmit={(e) => {
                   e.preventDefault();
                   const formData = new FormData(e.currentTarget);
-                  const email = formData.get("email") as string;
-                  if (email) {
-                    setHeroEmail(email);
-                    setMobileFormExpanded(true);
-                  }
-                  scrollToForm();
+                  const email = (formData.get("email") as string) || "";
+                  navigate(`/trade/apply${email ? `?email=${encodeURIComponent(email)}` : ""}`);
                 }}
                 className="flex items-center gap-3 mt-6 w-full max-w-lg px-4"
               >
@@ -1003,7 +934,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
               <button
-                onClick={() => { setMobileFormExpanded(false); setHeroEmail(""); scrollToForm(); }}
+                onClick={() => navigate("/trade/apply")}
                 className="inline-flex items-center px-8 py-3 bg-[hsl(var(--gold))] hover:bg-[hsl(var(--gold)/0.9)] text-white border border-[hsl(var(--gold))] font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 font-bold min-w-[160px] justify-center"
               >
                 Apply Now
