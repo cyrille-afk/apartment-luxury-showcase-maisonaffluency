@@ -406,7 +406,7 @@ export default function AdminTradeReview() {
                     href={selected.company_website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 underline underline-offset-4"
+                    className="inline-flex items-center gap-1 underline underline-offset-4 break-all"
                   >
                     {selected.company_website} <ExternalLink className="h-3 w-3" />
                   </a>
