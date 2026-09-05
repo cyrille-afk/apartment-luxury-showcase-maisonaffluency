@@ -535,8 +535,9 @@ const TradeRegistrationForm = ({
       </div>
 
       <button type="submit" disabled={loading}
-        className="w-full py-3 bg-[hsl(var(--gold))] text-white font-body text-sm uppercase tracking-[0.2em] rounded-full hover:bg-[hsl(var(--gold)/0.9)] transition-all disabled:opacity-50 font-bold">
-        {loading ? "Submitting..." : "Submit Application"}
+        className="w-full py-3 bg-[hsl(var(--gold))] text-white font-body text-sm uppercase tracking-[0.2em] rounded-full hover:bg-[hsl(var(--gold)/0.9)] transition-all disabled:opacity-50 font-bold inline-flex items-center justify-center gap-2">
+        {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+        {uploading ? "Uploading document…" : loading ? "Submitting..." : "Submit Application"}
       </button>
     </form>
   );
