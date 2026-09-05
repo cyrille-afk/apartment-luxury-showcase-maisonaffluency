@@ -87,6 +87,7 @@ export default function AdminTradeReview() {
   const [busy, setBusy] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [docUrl, setDocUrl] = useState<string | null>(null);
+  const [audit, setAudit] = useState<AuditEntry[]>([]);
   const [metrics, setMetrics] = useState<{ pending: number; approved: number; avg: number | null }>({
     pending: 0,
     approved: 0,
