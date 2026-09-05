@@ -14,6 +14,7 @@ import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { shareProfileOnWhatsApp, withOgCacheBust } from "@/lib/whatsapp-share";
+import ShareMenu from "./ShareMenu";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
 import WhatsAppShareButton from "./WhatsAppShareButton";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
