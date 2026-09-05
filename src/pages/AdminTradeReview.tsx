@@ -153,7 +153,6 @@ export default function AdminTradeReview() {
       .eq("application_id", app.id)
       .order("created_at", { ascending: true });
     setAudit((auditRows as unknown as AuditEntry[]) || []);
-    setDocUrl(null);
     if (app.credential_document_path) {
       const { data } = await supabase.storage
         .from("trade-credentials")
