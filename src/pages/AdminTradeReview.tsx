@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import CredentialDocumentViewer from "@/components/admin/CredentialDocumentViewer";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { AlertTriangle, Check, ExternalLink, FileText, Loader2, RefreshCw, X } from "lucide-react";
+import { AlertTriangle, Check, ExternalLink, FileText, History, Loader2, RefreshCw, X } from "lucide-react";
 import OrderLedger from "@/components/admin/OrderLedger";
 
 type AuditEntry = {
@@ -496,6 +496,36 @@ export default function AdminTradeReview() {
                       </li>
                     ))}
                   </ul>
+                )}
+              </section>
+
+              {/* Audit trail */}
+              <section className="mt-10 border-t border-border/60 pt-6">
+                <p className="font-body text-[10px] uppercase tracking-[0.24em] text-muted-foreground mb-4 flex items-center gap-1.5">
+                  <History className="h-3 w-3" /> Audit trail
+                </p>
+                {audit.length === 0 ? (
+                  <p className="font-body text-xs text-muted-foreground">No recorded events yet.</p>
+                ) : (
+                  <ol className="space-y-4">
+                    {audit.map((e) => (
+                      <li key={e.id} className="relative pl-5 before:absolute before:left-0 before:top-1.5 before:h-1.5 before:w-1.5 before:rounded-full before:bg-muted-foreground/50">
+                        <p className="font-body text-xs text-muted-foreground">
+                          {new Date(e.created_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
+                          {" · "}
+                          {e.actor === "ai" ? "AI verification" : "Admin override"}
+                          {e.attempt ? ` · attempt ${e.attempt}` : ""}
+                        </p>
+                        <p className="font-body text-sm mt-0.5">
+                          Outcome: <span className="font-medium">{e.outcome.replace(/_/g, " ")}</span>
+                          {e.confidence_score != null && ` · confidence ${Math.round(Number(e.confidence_score))}/100`}
+                        </p>
+                        {e.reasoning && (
+                          <p className="font-body text-xs text-muted-foreground mt-1 leading-relaxed">{e.reasoning}</p>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
                 )}
               </section>
 
