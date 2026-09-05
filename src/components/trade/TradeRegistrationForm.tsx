@@ -334,6 +334,22 @@ const TradeRegistrationForm = ({
     }
   };
 
+  const openPreview = async () => {
+    if (!uploadedPath) return;
+    setPreviewOpen(true);
+    setPreviewLoading(true);
+    const { data, error } = await supabase.storage
+      .from("trade-credentials")
+      .createSignedUrl(uploadedPath, 600);
+    if (error || !data?.signedUrl) {
+      toast({ title: "Preview unavailable", description: error?.message || "Could not create a secure preview link.", variant: "destructive" });
+      setPreviewOpen(false);
+    } else {
+      setPreviewUrl(data.signedUrl);
+    }
+    setPreviewLoading(false);
+  };
+
   const fieldClass = (field: string) =>
     `w-full mt-1 pb-2 border-b bg-transparent font-body text-sm text-foreground outline-none transition-colors text-[16px] ${
       errors[field] ? "border-destructive" : "border-border focus:border-foreground"
