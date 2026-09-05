@@ -2142,25 +2142,18 @@ function ParentBrandSubDesignersGrid({ config, onClose }: { config: ParentBrandC
                     {config.pillLabel}
                   </span>
                   {/* Share button */}
-                  <button
+                  <div
+                    className="absolute bottom-2 right-2 z-10 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      const ogUrl = buildDesignerOgUrl(d.name);
-                      const text = `${d.name} — ${config.pillLabel} · Maison Affluency`;
-                      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-                        shareOnWhatsApp(`${text}\n${ogUrl}`);
-                      } else {
-                        navigator.clipboard.writeText(`${text}: ${ogUrl}`);
-                        import("sonner").then(({ toast }) => toast.success("Link copied"));
-                      }
                     }}
-                    className="absolute bottom-2 right-2 z-10 flex items-center gap-1 px-1.5 py-1 rounded-full bg-white/80 backdrop-blur-sm border border-border/30 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 hover:bg-white"
-                    aria-label={`Share ${d.name}`}
                   >
-                    <Share2 className="h-2.5 w-2.5 text-foreground/70" />
-                    <span className="font-body text-[7px] uppercase tracking-[0.1em] text-foreground/70">Share</span>
-                  </button>
+                    <ShareMenu
+                      url={buildDesignerOgUrl(d.name)}
+                      message={`${d.name} — ${config.pillLabel} · Maison Affluency: ${buildDesignerOgUrl(d.name)}`}
+                    />
+                  </div>
                 </div>
                 <div className="px-2 py-1.5 bg-background">
                   <p className="font-body text-[10px] md:text-[11px] text-foreground leading-tight line-clamp-1 text-center">
@@ -3023,19 +3016,10 @@ const BrandsAteliers = () => {
             We collaborate with the world's most distinguished furniture houses, textile ateliers, and artisan workshops 
             to bring exceptional pieces to discerning collectors and design professionals.
           </p>
-          <button
-            onClick={() => {
-              const shareUrl = withOgCacheBust("https://www.maisonaffluency.com/brands-og.html");
-              const text = `Ateliers & Partners — Maison Affluency\n${shareUrl}`;
-              const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
-              window.open(wa, "_blank", "noopener");
-            }}
-            className="inline-flex items-center gap-1.5 text-[11px] font-body text-foreground hover:text-primary transition-colors"
-            aria-label="Share Ateliers & Partners section"
-          >
-            <Share2 className="w-3.5 h-3.5" />
-            Share
-          </button>
+          <ShareMenu
+            url={withOgCacheBust("https://www.maisonaffluency.com/brands-og.html")}
+            message={`Ateliers & Partners — Maison Affluency: ${withOgCacheBust("https://www.maisonaffluency.com/brands-og.html")}`}
+          />
         </motion.div>
 
         <div className="relative">

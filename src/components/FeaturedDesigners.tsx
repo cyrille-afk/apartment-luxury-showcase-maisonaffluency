@@ -2218,19 +2218,10 @@ const FeaturedDesigners = () => {
                 Discover the visionary designers whose exceptional work currently defines Maison Affluency Singapore. Each brings
                 their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture.
               </p>
-              <button
-                onClick={() => {
-                  const shareUrl = withOgCacheBust("https://www.maisonaffluency.com/designers-og.html");
-                  const text = `Designers & Makers On View — Maison Affluency\n${shareUrl}`;
-                  const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
-                  window.open(wa, "_blank", "noopener");
-                }}
-                className="inline-flex items-center gap-1.5 text-[11px] font-body text-foreground hover:text-primary transition-colors"
-                aria-label="Share Designers & Makers section"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                Share
-              </button>
+              <ShareMenu
+                url={withOgCacheBust("https://www.maisonaffluency.com/designers-og.html")}
+                message={`Designers & Makers On View — Maison Affluency: ${withOgCacheBust("https://www.maisonaffluency.com/designers-og.html")}`}
+              />
             </div>
           </div>
         </motion.div>
