@@ -19,28 +19,34 @@ export type Database = {
           application_id: string | null
           channel: string
           created_at: string
-          error: string
+          error: string | null
           event: string
           id: string
           payload: Json
+          provider_message_id: string | null
+          status: string
         }
         Insert: {
           application_id?: string | null
           channel: string
           created_at?: string
-          error: string
+          error?: string | null
           event: string
           id?: string
           payload?: Json
+          provider_message_id?: string | null
+          status?: string
         }
         Update: {
           application_id?: string | null
           channel?: string
           created_at?: string
-          error?: string
+          error?: string | null
           event?: string
           id?: string
           payload?: Json
+          provider_message_id?: string | null
+          status?: string
         }
         Relationships: []
       }
