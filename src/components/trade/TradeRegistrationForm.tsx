@@ -516,23 +516,77 @@ const TradeRegistrationForm = ({
             if (!okTypes.includes(f.type)) {
               setFileError("Only PDF, JPG or PNG files are accepted.");
               setCredentialFile(null);
+              setUploadedPath(null);
               return;
             }
             if (f.size > 15 * 1024 * 1024) {
               setFileError(`"${f.name}" is ${(f.size / 1024 / 1024).toFixed(1)} MB — the maximum is 15 MB.`);
               setCredentialFile(null);
+              setUploadedPath(null);
               return;
             }
             setFileError("");
             setCredentialFile(f);
+            setUploadedPath(null);
           }}
         />
+        {uploadedPath && !uploading && (
+          <div className="mt-3 flex items-start gap-3 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2.5">
+            <div className="flex-1 min-w-0">
+              <p className="font-body text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+                Document uploaded successfully
+              </p>
+              <p className="font-body text-[11px] text-emerald-600/80 dark:text-emerald-400/80 truncate">
+                {credentialFile?.name}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={openPreview}
+              className="inline-flex items-center gap-1.5 font-body text-xs text-emerald-700 dark:text-emerald-300 hover:underline shrink-0"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              Preview
+            </button>
+          </div>
+        )}
         {fileError && (
           <div className="mt-2 flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2.5">
             <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
             <p className="text-destructive text-xs font-body">{fileError}</p>
           </div>
         )}
+        <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+          <DialogContent className="max-w-3xl w-[calc(100%-2rem)] p-0 overflow-hidden">
+            <DialogHeader className="px-5 pt-5 pb-2">
+              <DialogTitle className="font-display text-base">Credential Preview</DialogTitle>
+              <DialogDescription className="font-body text-xs">
+                {credentialFile?.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="relative bg-muted/50 flex items-center justify-center min-h-[320px] max-h-[70vh]">
+              {previewLoading && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  <span className="font-body text-xs text-muted-foreground">Generating secure preview…</span>
+                </div>
+              )}
+              {previewUrl && credentialFile?.type === "application/pdf" ? (
+                <iframe
+                  src={previewUrl}
+                  title="Credential preview"
+                  className="w-full h-[70vh] min-h-[320px] border-0"
+                />
+              ) : previewUrl ? (
+                <img
+                  src={previewUrl}
+                  alt="Credential preview"
+                  className="max-h-[70vh] max-w-full object-contain"
+                />
+              ) : null}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Professional Certification */}
