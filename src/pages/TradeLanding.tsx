@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Quote } from "lucide-react";
+import { ArrowLeft, Quote, Sparkles } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -448,6 +448,56 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             Tailored for a community of professionals who value time, quality, and commitment, Maison Affluency Trade Program unlocks a suite of exclusive benefits, specifically conceived to meet design professionals' needs and bring your creative visions to life. Whether it is creating a one-off bespoke piece or supporting you on larger-scale projects, Maison Affluency dedicated Trade Team provides customised support to deliver seamless luxury residential projects, from first contact to post-sale assistance.
           </p>
         </motion.div>
+
+        {/* ─── What You Unlock ─── */}
+        <div className="w-full bg-muted/30 border-y border-border">
+          <div className="max-w-6xl mx-auto px-6 md:px-12 py-14 md:py-20">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.8 }}
+              >
+                <p className="font-body text-xs tracking-[0.25em] uppercase text-accent mb-4">
+                  What You Unlock
+                </p>
+                <h2 className="font-display text-2xl md:text-3xl lg:text-4xl text-foreground mb-5 leading-tight">
+                  Elevate your studio workflow.
+                </h2>
+                <p className="font-body text-sm md:text-base leading-relaxed text-muted-foreground text-justify">
+                  Joining the Maison Affluency Trade Program gives you exclusive pricing, dedicated logistical support, and immediate access to Felix.
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.8, delay: 0.15 }}
+                className="rounded-sm border border-border bg-card/40 backdrop-blur-sm p-6 md:p-8"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-accent/10 text-accent">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <p className="font-body text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--gold))]">
+                    Felix · AI Curatorial Guide
+                  </p>
+                </div>
+                <h3 className="font-display text-lg md:text-xl text-foreground mb-3">
+                  Meet Felix: Your Digital Studio Assistant
+                </h3>
+                <p className="font-body text-sm leading-relaxed text-muted-foreground text-justify">
+                  Felix is our proprietary AI curation copilot built natively into your trade dashboard. Upload a mood board, and Felix will instantly cross-reference our global inventory to source matching masterworks, calculate trade margins, and generate bespoke PDF client presentations in seconds.
+                </p>
+                <p className="font-body text-sm leading-relaxed text-muted-foreground text-justify mt-3">
+                  Tailor your studio experience: Felix can be renamed to whatever suits your firm's culture.
+                </p>
+              </motion.div>
+            </div>
+          </div>
+        </div>
 
         {/* ─── Mobile: Accordion | Desktop: 50/50 split ─── */}
 
