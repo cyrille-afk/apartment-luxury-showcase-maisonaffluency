@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
-import { Resend } from "https://esm.sh/resend@2.0.0";
+import { sendLovableEmail } from "../_shared/lovableEmail.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -49,8 +49,6 @@ serve(async (req) => {
 
   const { event_id, event_type, user_id, table_name, columns, source, occurred_at } = body;
 
-  const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
   const rows = (Array.isArray(columns) ? columns : [])
     .map((c: any) => {
       const col = typeof c === "string" ? { column: c } : c;
@@ -90,16 +88,13 @@ serve(async (req) => {
       <p style="font-size:11px;color:#999;margin-top:16px;text-align:center;">Maison Affluency — Automated security alert</p>
     </div>`;
 
-  await Promise.allSettled(
-    ADMIN_EMAILS.map((to) =>
-      resend.emails.send({
-        from: FROM_ADDRESS,
-        to,
-        subject: `[Security] Pricing tamper attempt blocked on ${table_name ?? "unknown table"}`,
-        html,
-      })
-    )
-  );
+  await sendLovableEmail({
+    to: ADMIN_EMAILS,
+    subject: `[Security] Pricing tamper attempt blocked on ${table_name ?? "unknown table"}`,
+    html,
+    label: "pricing-tamper-alert",
+    idempotencyKey: event_id ? `pricing-tamper:${event_id}` : undefined,
+  });
 
   return new Response(JSON.stringify({ ok: true, event_id }), {
     status: 200,
