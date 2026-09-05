@@ -473,25 +473,10 @@ export default function AdminTradeReview() {
                   </p>
                 )}
                 {docUrl && (
-                  <>
-                    {/\.(png|jpe?g|webp|gif)(\?|$)/i.test(selected.credential_document_path || "") ? (
-                      <img src={docUrl} alt="Uploaded business credential" className="w-full border border-border/60" />
-                    ) : (
-                      <iframe
-                        src={docUrl}
-                        title="Uploaded business credential"
-                        className="w-full h-[420px] border border-border/60 bg-muted/20"
-                      />
-                    )}
-                    <a
-                      href={docUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-3 inline-flex items-center gap-1.5 font-body text-xs underline underline-offset-4"
-                    >
-                      <FileText className="h-3 w-3" /> Open full document
-                    </a>
-                  </>
+                  <CredentialDocumentViewer
+                    url={docUrl}
+                    fileName={selected.credential_document_path}
+                  />
                 )}
               </section>
 
