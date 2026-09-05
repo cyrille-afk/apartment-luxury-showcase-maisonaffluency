@@ -63,8 +63,8 @@ export default function TradeCopilotOnboarding() {
       })
       .eq("id", user.id);
 
-    markDone();
     setBusy(false);
+    markDone();
   }, [nickname, user, markDone]);
 
   if (!open) return null;
