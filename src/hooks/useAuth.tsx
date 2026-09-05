@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       [rolesRes, profileRes, appRes] = await Promise.all([
         client.from("user_roles").select("role").eq("user_id", userId),
-        client.from("profiles").select("first_name, last_name, company, email, trade_status").eq("id", userId).single(),
+        client.from("profiles").select("first_name, last_name, company, email, trade_status, has_seen_trade_intro, concierge_name").eq("id", userId).single(),
         client.from("trade_applications").select("status").eq("user_id", userId).order("created_at", { ascending: false }).limit(1),
       ]);
     } catch (error) {
