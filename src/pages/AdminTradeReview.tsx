@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Navigate } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import CredentialDocumentViewer from "@/components/admin/CredentialDocumentViewer";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { AlertTriangle, Check, ExternalLink, FileText, History, Loader2, RefreshCw, X } from "lucide-react";
+import { AlertTriangle, Check, ExternalLink, FileText, History, Loader2, MessageSquare, RefreshCw, X } from "lucide-react";
 import OrderLedger from "@/components/admin/OrderLedger";
 
 type AuditEntry = {
@@ -19,6 +19,17 @@ type AuditEntry = {
   confidence_score: number | null;
   reasoning: string | null;
   attempt: number | null;
+  created_at: string;
+};
+
+type AlertEntry = {
+  id: string;
+  channel: string;
+  event: string;
+  status: string | null;
+  provider_message_id: string | null;
+  payload: Record<string, unknown> | null;
+  error: string | null;
   created_at: string;
 };
 
@@ -80,7 +91,9 @@ export default function AdminTradeReview() {
   const { isAdmin, loading, user } = useAuth();
   const { toast } = useToast();
   const [tab, setTab] = useState<"queue" | "orders">("queue");
-  const [filter, setFilter] = useState<Filter>("flagged");
+  const [filter, setFilter] = useState<Filter>(
+    new URLSearchParams(window.location.search).get("application") ? "all" : "flagged",
+  );
   const [apps, setApps] = useState<FlaggedApplication[]>([]);
   const [fetching, setFetching] = useState(true);
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -88,6 +101,10 @@ export default function AdminTradeReview() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [docUrl, setDocUrl] = useState<string | null>(null);
   const [audit, setAudit] = useState<AuditEntry[]>([]);
+  const [alerts, setAlerts] = useState<AlertEntry[]>([]);
+  const [searchParams] = useSearchParams();
+  const deepLinkId = searchParams.get("application");
+  const deepLinkDone = useRef(false);
   const [metrics, setMetrics] = useState<{ pending: number; approved: number; avg: number | null }>({
     pending: 0,
     approved: 0,
@@ -141,11 +158,23 @@ export default function AdminTradeReview() {
     if (isAdmin) fetchMetrics();
   }, [isAdmin, fetchMetrics]);
 
+  // Deep link from the WhatsApp alert: /admin/trade-review?application=<id>
+  useEffect(() => {
+    if (!isAdmin || !deepLinkId || deepLinkDone.current || fetching) return;
+    const match = apps.find((a) => a.id === deepLinkId);
+    if (match) {
+      deepLinkDone.current = true;
+      void openApp(match);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin, deepLinkId, apps, fetching]);
+
   const selected = useMemo(() => apps.find((a) => a.id === openId) ?? null, [apps, openId]);
 
   const openApp = async (app: FlaggedApplication) => {
     setOpenId(app.id);
     setAudit([]);
+    setAlerts([]);
     setDocUrl(null);
     const { data: auditRows } = await supabase
       .from("verification_audit_log" as never)
@@ -153,6 +182,12 @@ export default function AdminTradeReview() {
       .eq("application_id", app.id)
       .order("created_at", { ascending: true });
     setAudit((auditRows as unknown as AuditEntry[]) || []);
+    const { data: alertRows } = await supabase
+      .from("admin_alert_log" as never)
+      .select("id, channel, event, status, provider_message_id, payload, error, created_at")
+      .eq("application_id", app.id)
+      .order("created_at", { ascending: false });
+    setAlerts((alertRows as unknown as AlertEntry[]) || []);
     if (app.credential_document_path) {
       const { data } = await supabase.storage
         .from("trade-credentials")
@@ -524,6 +559,42 @@ export default function AdminTradeReview() {
                         {e.reasoning && (
                           <p className="font-body text-xs text-muted-foreground mt-1 leading-relaxed">{e.reasoning}</p>
                         )}
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </section>
+
+              {/* WhatsApp alert log */}
+              <section className="mt-10 border-t border-border/60 pt-6">
+                <p className="font-body text-[10px] uppercase tracking-[0.24em] text-muted-foreground mb-4 flex items-center gap-1.5">
+                  <MessageSquare className="h-3 w-3" /> Alert log
+                </p>
+                {alerts.length === 0 ? (
+                  <p className="font-body text-xs text-muted-foreground">No alerts sent for this application.</p>
+                ) : (
+                  <ol className="space-y-4">
+                    {alerts.map((a) => (
+                      <li key={a.id} className="border border-border/60 p-3">
+                        <p className="font-body text-xs text-muted-foreground">
+                          {new Date(a.created_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
+                          {" · "}
+                          {a.channel.replace(/_/g, " ")}
+                          {" · "}
+                          <span className={a.status === "failed" ? "text-destructive" : "text-primary"}>
+                            {a.status ?? "sent"}
+                          </span>
+                        </p>
+                        <p className="font-body text-[11px] text-muted-foreground mt-0.5">
+                          Application {selected.id}
+                          {a.provider_message_id ? ` · message ${a.provider_message_id}` : ""}
+                        </p>
+                        {a.error && (
+                          <p className="font-body text-xs text-destructive mt-1 break-words">{a.error}</p>
+                        )}
+                        <pre className="mt-2 max-h-56 overflow-auto bg-muted/40 p-2 font-mono text-[10px] leading-relaxed whitespace-pre-wrap break-words">
+{JSON.stringify(a.payload ?? {}, null, 2)}
+                        </pre>
                       </li>
                     ))}
                   </ol>
