@@ -334,6 +334,28 @@ const TradeRegistrationForm = ({
     }
   };
 
+  const uploadCredential = async (file: File) => {
+    setUploading(true);
+    setFileError("");
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "pdf";
+      const folder = `anon/${crypto.randomUUID()}`;
+      const path = `${folder}/credential-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("trade-credentials")
+        .upload(path, file, { contentType: file.type || undefined, upsert: true });
+      if (upErr) {
+        setFileError("Your document could not be uploaded. Please try again.");
+        toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
+        setUploadedPath(null);
+      } else {
+        setUploadedPath(path);
+      }
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const openPreview = async () => {
     if (!uploadedPath) return;
     setPreviewOpen(true);
