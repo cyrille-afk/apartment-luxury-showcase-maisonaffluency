@@ -1,0 +1,2 @@
+GRANT INSERT ON public.verification_audit_log TO authenticated;
+CREATE POLICY "Admins can append verification audit log" ON public.verification_audit_log FOR INSERT TO authenticated WITH CHECK (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'super_admin'));
