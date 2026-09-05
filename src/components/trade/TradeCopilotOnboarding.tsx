@@ -63,13 +63,9 @@ export default function TradeCopilotOnboarding() {
       })
       .eq("id", user.id);
 
-    try {
-      localStorage.setItem(STORAGE_KEY, "1");
-    } catch {}
-
+    markDone();
     setBusy(false);
-    setScreen("welcome");
-  }, [nickname, user]);
+  }, [nickname, user, markDone]);
 
   if (!open) return null;
 
