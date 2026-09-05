@@ -27,6 +27,7 @@ import { pickMatchesCategoryFilter } from "@/lib/pickCategoryFilter";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { usePublicRrpMap, formatPublicRrp, type PublicRrpRow } from "@/hooks/usePublicRrp";
 import { withOgCacheBust } from "@/lib/whatsapp-share";
+import ShareMenu from "./ShareMenu";
 import { cldResponsiveImg } from "@/lib/cloudinary";
 
 import { GALLERY } from "@/constants/galleryIndex";
@@ -1932,19 +1933,12 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                       ? hero.summary
                       : "Discover the visionary designers whose exceptional work currently defines Maison Affluency Singapore. Each brings their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture."}
                   </p>
-                  <button
-                    onClick={() => {
-                      const shareUrl = withOgCacheBust("https://www.maisonaffluency.com/designers-og.html");
-                      const text = `${hero ? hero.title : "Designers & Makers On View"} — Maison Affluency\n${shareUrl}`;
-                      const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
-                      window.open(wa, "_blank", "noopener");
-                    }}
-                    className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-body text-foreground hover:text-primary transition-colors"
-                    aria-label="Share section"
-                  >
-                    <Share2 className="w-3.5 h-3.5" />
-                    Share
-                  </button>
+                  <div className="hidden md:inline-flex">
+                    <ShareMenu
+                      url={withOgCacheBust("https://www.maisonaffluency.com/designers-og.html")}
+                      message={`${hero ? hero.title : "Designers & Makers On View"} — Maison Affluency: ${withOgCacheBust("https://www.maisonaffluency.com/designers-og.html")}`}
+                    />
+                  </div>
                 </div>
               </div>
             </motion.div>
