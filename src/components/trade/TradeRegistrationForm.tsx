@@ -530,7 +530,7 @@ const TradeRegistrationForm = ({
           type="file"
           accept="application/pdf,image/jpeg,image/png"
           className="sr-only"
-          onChange={(e) => {
+          onChange={async (e) => {
             const f = e.target.files?.[0] || null;
             e.target.value = "";
             if (!f) return;
@@ -550,6 +550,7 @@ const TradeRegistrationForm = ({
             setFileError("");
             setCredentialFile(f);
             setUploadedPath(null);
+            await uploadCredential(f);
           }}
         />
         {uploadedPath && !uploading && (
