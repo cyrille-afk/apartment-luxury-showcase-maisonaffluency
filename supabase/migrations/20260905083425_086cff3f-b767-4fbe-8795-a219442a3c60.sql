@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Anon applicants read own uploaded credentials" ON storage.objects;
