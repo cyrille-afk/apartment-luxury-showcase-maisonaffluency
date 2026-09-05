@@ -133,6 +133,13 @@ export default function AdminTradeReview() {
 
   const openApp = async (app: FlaggedApplication) => {
     setOpenId(app.id);
+    setAudit([]);
+    const { data: auditRows } = await supabase
+      .from("verification_audit_log" as never)
+      .select("id, event, actor, outcome, confidence_score, reasoning, attempt, created_at")
+      .eq("application_id", app.id)
+      .order("created_at", { ascending: true });
+    setAudit((auditRows as unknown as AuditEntry[]) || []);
     setDocUrl(null);
     if (app.credential_document_path) {
       const { data } = await supabase.storage
