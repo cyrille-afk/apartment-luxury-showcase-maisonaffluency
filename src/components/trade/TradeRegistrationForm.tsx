@@ -323,7 +323,7 @@ const TradeRegistrationForm = ({
       const path = `${folder}/credential-${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("trade-credentials")
-        .upload(path, file, { contentType: file.type || undefined, upsert: true });
+        .upload(path, file, { contentType: file.type || undefined });
       if (upErr) {
         setFileError("Your document could not be uploaded. Please try again.");
         toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
