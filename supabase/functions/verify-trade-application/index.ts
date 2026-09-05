@@ -621,7 +621,7 @@ Be conservative: if the website is unreachable, password-protected or the eviden
 
   // One alert per distinct evidence set.
   if (!autoApprove && !alreadyAlerted) {
-    await notifyFlagged(app, applicantName, confidenceScore, notes);
+    await notifyFlagged(app, applicantName, confidenceScore, notes, admin);
   }
 
   if (autoApprove) {
