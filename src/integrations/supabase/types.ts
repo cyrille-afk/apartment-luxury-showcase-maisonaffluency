@@ -8073,6 +8073,7 @@ export type Database = {
           details: Json
           event: string
           id: string
+          outcome: string
           previous_status: string | null
           reasoning: string | null
         }
@@ -8086,6 +8087,7 @@ export type Database = {
           details?: Json
           event: string
           id?: string
+          outcome?: string
           previous_status?: string | null
           reasoning?: string | null
         }
@@ -8099,6 +8101,7 @@ export type Database = {
           details?: Json
           event?: string
           id?: string
+          outcome?: string
           previous_status?: string | null
           reasoning?: string | null
         }
