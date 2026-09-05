@@ -43,6 +43,7 @@ const TradeGuidesAnalytics = lazy(() => import("./pages/TradeGuidesAnalytics"));
 const TradeErrorBoundary = lazy(() => import("./components/trade/TradeErrorBoundary"));
 const TradeDashboard = lazy(() => import("./pages/TradeDashboard"));
 const TradeAdmin = lazy(() => import("./pages/TradeAdmin"));
+const ViewerTest = lazy(() => import("./pages/ViewerTest"));
 const AdminTradeReview = lazy(() => import("./pages/AdminTradeReview"));
 const TradeAdminTools = lazy(() => import("./pages/TradeAdminTools"));
 const TradeAdminDashboard = lazy(() => import("./pages/TradeAdminDashboard"));
@@ -645,6 +646,7 @@ const App = () => {
                   <Route path="/trade/spec-sheet" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeSpecSheet /></Suspense>} />
                   <Route path="/trade/launch" element={<Suspense fallback={null}><TradeMobileLaunch /></Suspense>} />
                   <Route path="/trade/mobile-launch" element={<Suspense fallback={null}><TradeMobileLaunch /></Suspense>} />
+                  <Route path="/__viewer-test" element={<Suspense fallback={null}><ViewerTest /></Suspense>} />
                   <Route path="/admin/trade-review" element={<Suspense fallback={<PageLoadingSkeleton />}><AdminTradeReview /></Suspense>} />
                   <Route path="/trade" element={<Suspense fallback={null}><TradeErrorBoundary><TradeLayout /></TradeErrorBoundary></Suspense>}>
                     <Route index element={<TradeDashboard />} />
