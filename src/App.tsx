@@ -28,6 +28,7 @@ const TradePurgeCache = lazy(() => import("./pages/TradePurgeCache"));
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
 const TradeLanding = lazy(() => import("./pages/TradeLanding"));
 const TradeApply = lazy(() => import("./pages/TradeApply"));
+const TradeProcessing = lazy(() => import("./pages/TradeProcessing"));
 const TradeDemoPage = lazy(() => import("./pages/TradeDemoPage"));
 const Studios = lazy(() => import("./pages/Studios"));
 const StudioSubmit = lazy(() => import("./pages/StudioSubmit"));
@@ -604,6 +605,7 @@ const App = () => {
                   <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />
                   <Route path="/trade-program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
                   <Route path="/trade/apply" element={<Suspense fallback={null}><TradeApply /></Suspense>} />
+                  <Route path="/trade/processing" element={<Suspense fallback={null}><TradeProcessing /></Suspense>} />
                   <Route path="/trade-demo" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeDemoPage /></Suspense>} />
                   <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
                   <Route path="/collector-signup" element={<Suspense fallback={null}><CollectorSignup /></Suspense>} />

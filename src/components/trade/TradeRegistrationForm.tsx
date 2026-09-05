@@ -347,10 +347,10 @@ const TradeRegistrationForm = ({
 
       toast({
         title: "Application Submitted",
-        description: "Please check your email to verify your account. Get verified instantly — our automated system reviews global design credentials in real time.",
+        description: "Get verified instantly — our automated system reviews global design credentials in real time.",
       });
 
-      navigate("/trade/login");
+      navigate(appRow?.id ? `/trade/processing?app=${appRow.id}` : "/trade/processing", { replace: true });
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
