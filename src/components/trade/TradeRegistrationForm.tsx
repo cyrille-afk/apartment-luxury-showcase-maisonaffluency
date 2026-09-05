@@ -379,8 +379,28 @@ const TradeRegistrationForm = ({
   const FieldError = ({ field }: { field: string }) =>
     errors[field] ? <p className="text-destructive text-xs font-body mt-1">{errors[field]}</p> : null;
 
+  const errorEntries = Object.entries(errors).filter(([, msg]) => Boolean(msg)) as [string, string][];
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+      {errorEntries.length > 0 && (
+        <div
+          ref={summaryRef}
+          role="alert"
+          className="border border-destructive/40 bg-destructive/5 px-4 py-3 rounded-sm"
+        >
+          <p className="font-body text-sm text-destructive mb-1">
+            Please correct the following before submitting:
+          </p>
+          <ul className="list-disc pl-5 space-y-0.5">
+            {errorEntries.map(([field, msg]) => (
+              <li key={field} className="font-body text-xs text-destructive">
+                <span className="font-medium">{FIELD_LABELS[field] ?? field}:</span> {msg}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {/* Account Details */}
       <div>
         <h3 className="font-display text-base text-foreground mb-3">Account Details</h3>
