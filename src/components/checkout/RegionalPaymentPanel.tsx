@@ -17,7 +17,6 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import {
   channelsForRegion,
-  taxConfigForRegion,
   type PaymentChannelId,
   type RegionTier,
   type TradePaymentChannel,
