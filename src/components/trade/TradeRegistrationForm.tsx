@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { Loader2, AlertCircle } from "lucide-react";
 
 import { getPhonePlaceholder } from "@/lib/phonePlaceholder";
 import { trackForm } from "@/lib/analytics";
@@ -453,26 +454,44 @@ const TradeRegistrationForm = ({
         </p>
         <label
           htmlFor="credential-upload"
-          className="flex flex-col items-center justify-center gap-1 w-full py-7 px-4 border border-dashed border-border rounded-lg cursor-pointer hover:border-foreground/40 transition-colors text-center"
+          className={`flex flex-col items-center justify-center gap-1 w-full py-7 px-4 border border-dashed border-border rounded-lg transition-colors text-center ${
+            uploading ? "opacity-60 pointer-events-none" : "cursor-pointer hover:border-foreground/40"
+          }`}
         >
-          <span className="font-body text-sm text-foreground">
-            {credentialFile ? credentialFile.name : "Upload a credential document"}
-          </span>
+          {uploading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+              <span className="font-body text-sm text-foreground">Uploading {credentialFile?.name}…</span>
+            </>
+          ) : (
+            <span className="font-body text-sm text-foreground">
+              {credentialFile ? credentialFile.name : "Upload a credential document"}
+            </span>
+          )}
           <span className="font-body text-[11px] text-muted-foreground">
-            {credentialFile
-              ? `${Math.round(credentialFile.size / 1024)} KB · tap to replace`
-              : "Drag a file here or tap to browse"}
+            {!uploading &&
+              (credentialFile
+                ? `${Math.round(credentialFile.size / 1024)} KB · tap to replace`
+                : "Drag a file here or tap to browse")}
           </span>
         </label>
         <input
           id="credential-upload"
           type="file"
-          accept="application/pdf,image/jpeg,image/png,image/webp"
+          accept="application/pdf,image/jpeg,image/png"
           className="sr-only"
           onChange={(e) => {
             const f = e.target.files?.[0] || null;
-            if (f && f.size > 15 * 1024 * 1024) {
-              setFileError("File must be under 15 MB");
+            e.target.value = "";
+            if (!f) return;
+            const okTypes = ["application/pdf", "image/jpeg", "image/png"];
+            if (!okTypes.includes(f.type)) {
+              setFileError("Only PDF, JPG or PNG files are accepted.");
+              setCredentialFile(null);
+              return;
+            }
+            if (f.size > 15 * 1024 * 1024) {
+              setFileError(`"${f.name}" is ${(f.size / 1024 / 1024).toFixed(1)} MB — the maximum is 15 MB.`);
               setCredentialFile(null);
               return;
             }
@@ -480,7 +499,12 @@ const TradeRegistrationForm = ({
             setCredentialFile(f);
           }}
         />
-        {fileError && <p className="text-destructive text-xs font-body mt-1">{fileError}</p>}
+        {fileError && (
+          <div className="mt-2 flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2.5">
+            <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+            <p className="text-destructive text-xs font-body">{fileError}</p>
+          </div>
+        )}
       </div>
 
       {/* Professional Certification */}
