@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronDown } from "lucide-react";
 
 /* Extracted from TradeLanding — FAQ column shared by the /trade/apply page. */
 const TradeFaq = ({ isUKVariant = false }: { isUKVariant?: boolean }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const [faqExpanded, setFaqExpanded] = useState(false);
 
   const FAQ_ITEMS = [
     { q: "Who is eligible to join the Trade Program?", a: "The program is designed for architects, interior designers, decorators, and luxury hospitality professionals. We review each application based on company credentials and professional background." },
