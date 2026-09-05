@@ -42,7 +42,7 @@ const TradeFaq = ({ isUKVariant = false }: { isUKVariant?: boolean }) => {
       </motion.div>
 
       <div className="space-y-0 divide-y divide-border">
-        {visibleItems.map((faq, i) => (
+        {FAQ_ITEMS.map((faq, i) => (
           <div key={i} className="py-4">
             <button
               type="button"
@@ -58,21 +58,6 @@ const TradeFaq = ({ isUKVariant = false }: { isUKVariant?: boolean }) => {
           </div>
         ))}
       </div>
-      {hiddenCount > 0 && (
-        <div className="mt-6 flex justify-center">
-          <button
-            type="button"
-            onClick={() => setFaqExpanded((v) => !v)}
-            aria-expanded={faqExpanded}
-            className="inline-flex items-center gap-1.5 font-body text-xs uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {faqExpanded ? "Show less" : `Show ${hiddenCount} more`}
-            <ChevronDown
-              className={`w-3.5 h-3.5 transition-transform duration-200 ${faqExpanded ? "rotate-180" : ""}`}
-            />
-          </button>
-        </div>
-      )}
     </div>
   );
 };
