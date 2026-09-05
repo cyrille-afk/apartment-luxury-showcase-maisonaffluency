@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { sendLovableEmail } from "../_shared/lovableEmail.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -92,9 +93,8 @@ serve(async (req) => {
         .eq("id", escalation.id);
     }
 
-    // 3. Email concierge@maisonaffluency.com via Resend
-    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    if (RESEND_API_KEY) {
+    // 3. Email concierge@maisonaffluency.com via Lovable Emails
+    {
       const lines = (excerpt || [])
         .map((m) => {
           const role = m.role === "assistant" || m.role === "user" ? m.role : "message";
@@ -112,27 +112,24 @@ serve(async (req) => {
           ${lines || "<p>(no excerpt)</p>"}
         </div>`;
       try {
-        const r = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            from: "Maison Affluency Concierge <concierge@maisonaffluency.com>",
-            to: ["concierge@maisonaffluency.com"],
-            reply_to: userEmail || undefined,
-            subject: `Concierge escalation — ${userName} (${sentiment})`,
-            html,
-          }),
-        });
-        if (r.ok && escalation?.id) {
+        const emailResult = await sendLovableEmail({
+          to: "concierge@maisonaffluency.com",
+          replyTo: userEmail || undefined,
+          subject: `Concierge escalation — ${userName} (${sentiment})`,
+          html,
+          label: "concierge-escalation",
+          idempotencyKey: escalation?.id ? `escalation:${escalation.id}` : undefined,
+        }, supabase);
+        if (emailResult.queued.length > 0 && escalation?.id) {
           await supabase
             .from("trade_concierge_escalations")
             .update({ notified_email: true })
             .eq("id", escalation.id);
-        } else if (!r.ok) {
-          console.error("resend failed:", r.status, await r.text());
+        } else if (emailResult.failed.length > 0) {
+          console.error("escalation email failed:", emailResult.failed);
         }
       } catch (e) {
-        console.error("resend error:", e);
+        console.error("escalation email error:", e);
       }
     }
 
