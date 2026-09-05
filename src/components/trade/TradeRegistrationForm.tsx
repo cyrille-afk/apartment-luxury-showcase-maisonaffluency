@@ -250,31 +250,11 @@ const TradeRegistrationForm = ({
         country: form.country,
       }).eq("id", authData.user.id);
 
-      // Upload the credential document to the private bucket. Anonymous
-      // uploads land in the `anon/` folder (allowed by storage policy) so the
-      // file is captured even when e-mail confirmation is still pending.
-      let credentialPath: string | null = null;
+      // The credential document is uploaded immediately on file selection so
+      // the applicant gets feedback and a preview before submitting. The path
+      // is stored in the `anon/` folder when the user is not yet confirmed.
+      const credentialPath = uploadedPath;
       const { data: sessionData } = await supabase.auth.getSession();
-      if (credentialFile) {
-        setUploading(true);
-        try {
-          const ext = credentialFile.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "pdf";
-          const folder = sessionData.session ? authData.user.id : `anon/${crypto.randomUUID()}`;
-          const path = `${folder}/credential-${Date.now()}.${ext}`;
-          const { error: upErr } = await supabase.storage
-            .from("trade-credentials")
-            .upload(path, credentialFile, { contentType: credentialFile.type || undefined, upsert: true });
-          if (upErr) {
-            setFileError("Your document could not be uploaded. Please try again or submit without it.");
-            toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
-          } else {
-            credentialPath = path;
-            setUploadedPath(path);
-          }
-        } finally {
-          setUploading(false);
-        }
-      }
 
       const { data: appRow } = await supabase.from("trade_applications").insert({
         user_id: authData.user.id,
