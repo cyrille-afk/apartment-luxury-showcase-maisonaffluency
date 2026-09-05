@@ -20,9 +20,6 @@ const TradeFaq = ({ isUKVariant = false }: { isUKVariant?: boolean }) => {
     { q: "Can I use my own freight forwarder or logistics provider?", a: "Yes. While our automated portal provides instant DDP and DAP quotes through our consolidated white-glove partners, you can easily select 'Ex-Works' during checkout to have your preferred global logistics firm coordinate collection directly from our European ateliers." },
     { q: "Do you offer physical material swatches for project mood boards?", a: "Absolutely. Verified trade members can request physical samples, wood finishes, and textile swatches directly through their project folders dashboard. Most standard textile and leather swatches are dispatched internationally within 48 hours." },
   ];
-  const COLLAPSED_COUNT = 10;
-  const visibleItems = faqExpanded ? FAQ_ITEMS : FAQ_ITEMS.slice(0, COLLAPSED_COUNT);
-  const hiddenCount = FAQ_ITEMS.length - COLLAPSED_COUNT;
 
   return (
     <div className="flex-1">
