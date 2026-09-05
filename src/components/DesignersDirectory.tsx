@@ -1920,18 +1920,12 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                     <h2 className="text-xl md:text-3xl lg:text-4xl font-serif text-foreground leading-tight">
                       {hero ? hero.title : "Designers & Makers"}
                     </h2>
-                    <button
-                      onClick={() => {
-                        const shareUrl = withOgCacheBust("https://www.maisonaffluency.com/designers-og.html");
-                        const text = `${hero ? hero.title : "Designers & Makers On View"} — Maison Affluency\n${shareUrl}`;
-                        const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
-                        window.open(wa, "_blank", "noopener");
-                      }}
-                      className="md:hidden flex-shrink-0 mt-1 p-1.5 -mr-1 text-foreground/70 hover:text-primary transition-colors"
-                      aria-label="Share section"
-                    >
-                      <Share2 className="w-4 h-4" />
-                    </button>
+                    <div className="md:hidden flex-shrink-0 mt-1 -mr-1">
+                      <ShareMenu
+                        url={withOgCacheBust("https://www.maisonaffluency.com/designers-og.html")}
+                        message={`${hero ? hero.title : "Designers & Makers On View"} — Maison Affluency: ${withOgCacheBust("https://www.maisonaffluency.com/designers-og.html")}`}
+                      />
+                    </div>
                   </div>
                   <p className="text-[12px] md:text-base text-muted-foreground font-body max-w-3xl leading-snug md:leading-relaxed mb-1 md:mb-4 text-justify">
                     {hero
