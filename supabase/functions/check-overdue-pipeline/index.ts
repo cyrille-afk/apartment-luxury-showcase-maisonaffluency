@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { Resend } from "https://esm.sh/resend@2.0.0";
+import { sendLovableEmail } from "../_shared/lovableEmail.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -35,7 +35,7 @@ serve(async (req: Request) => {
   }
 
   // Cron-only: require shared secret. Prevents external callers from
-  // spamming admin inboxes via Resend.
+  // spamming admin inboxes.
   const cronSecret = req.headers.get("x-cron-secret");
   if (!cronSecret || cronSecret !== Deno.env.get("CRON_SECRET")) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -47,17 +47,7 @@ serve(async (req: Request) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
-
-    if (!resendApiKey) {
-      return new Response(
-        JSON.stringify({ error: "RESEND_API_KEY not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
-    }
-
     const supabase = createClient(supabaseUrl, serviceRoleKey);
-    const resend = new Resend(resendApiKey);
 
     // Get today's date in YYYY-MM-DD
     const today = new Date().toISOString().split("T")[0];
@@ -143,17 +133,18 @@ serve(async (req: Request) => {
       </div>
     `;
 
-    const { error: emailError } = await resend.emails.send({
-      from: "Maison Affluency <notify@notify.www.maisonaffluency.com>",
+    const emailResult = await sendLovableEmail({
       to: ADMIN_EMAILS,
       subject: `📝 ${overdueItems.length} Overdue Article${overdueItems.length > 1 ? "s" : ""} — Editorial Pipeline`,
       html: htmlBody,
-    });
+      label: "overdue-pipeline-alert",
+      idempotencyKey: `overdue-pipeline-${today}`,
+    }, supabase);
 
-    if (emailError) {
-      console.error("Email send error:", emailError);
+    if (emailResult.queued.length === 0) {
+      console.error("Email send error:", emailResult.failed);
       return new Response(
-        JSON.stringify({ error: "Failed to send email", details: emailError }),
+        JSON.stringify({ error: "Failed to send email", details: emailResult.failed }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }

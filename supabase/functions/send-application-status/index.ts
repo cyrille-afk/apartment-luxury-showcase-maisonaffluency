@@ -1,8 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { Resend } from "https://esm.sh/resend@2.0.0";
+import { sendLovableEmail } from "../_shared/lovableEmail.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -116,9 +114,9 @@ const handler = async (req: Request): Promise<Response> => {
         </p>
       `;
 
-    const emailResult = await resend.emails.send({
-      from: "Maison Affluency <onboarding@resend.dev>",
-      to: [applicantEmail],
+    const emailResult = await sendLovableEmail({
+      to: applicantEmail,
+      label: "application-status",
       subject,
       html: `
         <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #faf9f7;">

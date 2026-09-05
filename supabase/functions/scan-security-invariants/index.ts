@@ -7,7 +7,7 @@
 // the existing `security_alert_state` table.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
-import { Resend } from "https://esm.sh/resend@2.0.0";
+import { sendLovableEmail } from "../_shared/lovableEmail.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -184,7 +184,6 @@ serve(async (req) => {
   const skipped: string[] = [];
 
   if (violations.length > 0) {
-    const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
     const cutoff = new Date(Date.now() - ALERT_COOLDOWN_MIN * 60_000).toISOString();
     for (const t of violations) {
       const { data: state } = await supabase
@@ -211,16 +210,13 @@ serve(async (req) => {
           <p style="font-size:11px;color:#999;margin-top:20px;">Maison Affluency • automated invariant scan • ${new Date().toUTCString()}</p>
         </div>`;
 
-      await Promise.allSettled(
-        ADMIN_EMAILS.map((to) =>
-          resend.emails.send({
-            from: "Maison Affluency <noreply@notify.www.maisonaffluency.com>",
-            to,
-            subject: `[Security ${t.severity.toUpperCase()}] ${t.title}`,
-            html,
-          })
-        ),
-      );
+      await sendLovableEmail({
+        to: ADMIN_EMAILS,
+        subject: `[Security ${t.severity.toUpperCase()}] ${t.title}`,
+        html,
+        label: "security-invariant-alert",
+        idempotencyKey: `security-invariant:${t.key}:${new Date().toISOString().slice(0, 13)}`,
+      }, supabase);
       await supabase.from("security_alert_state").upsert({
         id: t.key,
         last_alerted_at: new Date().toISOString(),

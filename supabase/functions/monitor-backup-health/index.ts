@@ -6,7 +6,7 @@
 // admins if anything is missing, errored, or returned a non-2xx status.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
-import { Resend } from "https://esm.sh/resend@2.0.0";
+import { sendLovableEmail } from "../_shared/lovableEmail.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -198,21 +198,14 @@ serve(async (req) => {
           </p>
         </div>`;
 
-      const resendKey = Deno.env.get("RESEND_API_KEY");
-      if (resendKey) {
-        const resend = new Resend(resendKey);
-        await Promise.allSettled(
-          ADMIN_EMAILS.map((to) =>
-            resend.emails.send({
-              from: "Maison Affluency <noreply@notify.www.maisonaffluency.com>",
-              to,
-              subject: `[Backup] FAILURE on ${today} — ${failures.length} issue(s)`,
-              html,
-            }),
-          ),
-        );
-        alertSent = true;
-      }
+      const emailResult = await sendLovableEmail({
+        to: ADMIN_EMAILS,
+        subject: `[Backup] FAILURE on ${today} — ${failures.length} issue(s)`,
+        html,
+        label: "backup-health-alert",
+        idempotencyKey: `backup-health:${today}`,
+      }, supabase);
+      alertSent = emailResult.queued.length > 0;
 
       await supabase.from("security_alert_state").upsert({
         id: dedupeKey,

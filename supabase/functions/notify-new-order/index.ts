@@ -1,7 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { Resend } from "https://esm.sh/resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { sendLovableEmail } from "../_shared/lovableEmail.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -101,20 +99,14 @@ serve(async (req) => {
       </div>
     `;
 
-    const results = await Promise.allSettled(
-      ADMIN_EMAILS.map((adminEmail) =>
-        resend.emails.send({
-          from: "Maison Affluency <noreply@notify.www.maisonaffluency.com>",
-          to: adminEmail,
-          subject,
-          html,
-        })
-      )
-    );
+    const emailResult = await sendLovableEmail({
+      to: ADMIN_EMAILS,
+      subject,
+      html,
+      label: "new-order-notification",
+    });
 
-    const errors = results
-      .filter((r) => r.status === "rejected")
-      .map((r) => (r as PromiseRejectedResult).reason?.message);
+    const errors = emailResult.failed.map((f) => `${f.email}: ${f.error}`);
 
     if (errors.length) console.error("[notify-new-order] send errors", errors);
 
