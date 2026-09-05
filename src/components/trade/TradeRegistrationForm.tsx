@@ -352,21 +352,24 @@ const TradeRegistrationForm = ({
     return task;
   };
 
-  const openPreview = async () => {
-    if (!uploadedPath) return;
+  // Preview is rendered from the file the applicant just selected in this
+  // browser session — the uploaded object is never read back from storage,
+  // so anonymous read access to the private bucket is not required.
+  const openPreview = () => {
+    if (!uploadedPath || !credentialFile) return;
     setPreviewOpen(true);
-    setPreviewLoading(true);
-    const { data, error } = await supabase.storage
-      .from("trade-credentials")
-      .createSignedUrl(uploadedPath, 600);
-    if (error || !data?.signedUrl) {
-      toast({ title: "Preview unavailable", description: error?.message || "Could not create a secure preview link.", variant: "destructive" });
-      setPreviewOpen(false);
-    } else {
-      setPreviewUrl(data.signedUrl);
-    }
     setPreviewLoading(false);
+    setPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(credentialFile);
+    });
   };
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   const fieldClass = (field: string) =>
     `w-full mt-1 pb-2 border-b bg-transparent font-body text-sm text-foreground outline-none transition-colors text-[16px] ${
