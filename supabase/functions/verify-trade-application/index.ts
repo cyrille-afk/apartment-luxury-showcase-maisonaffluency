@@ -178,6 +178,7 @@ async function whatsappFallback(
       channel: "twilio_whatsapp",
       event: "trade_application_flagged",
       application_id: app.id,
+      status: "failed",
       payload: {
         company_name: app.company_name,
         country: app.country,
@@ -187,6 +188,7 @@ async function whatsappFallback(
       },
       error: String(errorDetail).slice(0, 2000),
     });
+
   } catch (_) {
     // non-fatal
   }
