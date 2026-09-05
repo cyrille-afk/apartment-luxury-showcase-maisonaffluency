@@ -193,18 +193,32 @@ async function sendWhatsAppFlagAlert(
   const twilioKey = Deno.env.get("TWILIO_API_KEY");
   if (!to || !from || !lovableKey || !twilioKey) return;
 
-  const link = `${TRIAGE_URL}?application=${app.id}`;
-  const body = [
-    "🚨 New Trade Application Alert",
-    "",
-    `Company: ${app.company_name || "(unknown)"}`,
-    `Contact: ${applicantName || "(unknown)"}`,
-    `Country: ${app.country || "(unknown)"}`,
-    `AI Confidence: ${confidence}/100`,
-    `Reasoning: ${(reasoning || "No reasoning returned").slice(0, 400)}`,
-    "",
-    `Approve instantly: ${link}`,
-  ].join("\n");
+  const link = `https://maisonaffluency.com/admin/trade-review?application=${app.id}`;
+  const location = [app.city, app.country].filter(Boolean).join(", ") || "(unknown)";
+  const website = app.company_website || "(none provided)";
+  const instagram = app.instagram_handle
+    ? `@${String(app.instagram_handle).replace(/^@/, "")}`
+    : "—";
+  const reason = (reasoning || "No reasoning returned").slice(0, 400);
+
+  const body = `🚨 MAISON AFFLUENCY: NEW TRADE PROGRAM APPLICATION
+
+A new professional has requested access to the global trade program. The AI verification engine requires your final approval.
+
+👤 APPLICANT DETAILS:
+• Studio: ${app.company_name || "(unknown)"}
+• Founder/Lead: ${applicantName || "(unknown)"}
+• Location: ${location}
+• Portfolio: ${website}
+• IG: ${instagram}
+
+📊 AI CRITICAL RADAR:
+• Confidence Score: ${confidence}/100
+• System Flag: ${reason}
+
+⚡ DIRECT ACTION REQUIRED:
+Review credentials and approve international net pricing instantly:
+👉 ${link}`;
 
   try {
     const res = await fetch(`${TWILIO_GATEWAY_URL}/Messages.json`, {
