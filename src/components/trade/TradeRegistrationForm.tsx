@@ -269,6 +269,7 @@ const TradeRegistrationForm = ({
             toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
           } else {
             credentialPath = path;
+            setUploadedPath(path);
           }
         } finally {
           setUploading(false);
