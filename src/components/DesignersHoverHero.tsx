@@ -1631,7 +1631,7 @@ const DesignersHoverHero = () => {
         </button>
 
         {/* Live network footprint — sits beneath the search field */}
-        <p className="mt-2.5 self-start text-left max-w-[340px] font-body text-[11px] leading-relaxed font-light text-neutral-400">
+        <p className="mt-2.5 self-start text-left min-w-[320px] max-w-[360px] font-body text-[11px] leading-relaxed font-light text-neutral-400">
           150+ master profiles live. Introducing new digital ateliers and exclusive collections weekly.
         </p>
 
