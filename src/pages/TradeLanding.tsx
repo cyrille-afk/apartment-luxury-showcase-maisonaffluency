@@ -315,24 +315,24 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         <div aria-hidden className="h-24 md:h-[120px] pt-[env(safe-area-inset-top)]" />
 
         {/* ─── Split-screen Hero ─── */}
-        <div ref={heroRef} className="relative flex h-[calc(100lvh-6rem)] min-h-[720px] w-full flex-col overflow-hidden md:h-[calc(100vh-256px)] md:min-h-0 md:flex-row">
+        <div ref={heroRef} className="relative flex h-[calc(100lvh-6rem)] min-h-[580px] w-full flex-col overflow-hidden md:h-[calc(100vh-256px)] md:min-h-0 md:flex-row">
           {/* Left Side */}
-          <div className="relative z-20 flex h-[45%] w-full shrink-0 items-center justify-center bg-background px-6 pb-8 pt-5 md:h-auto md:w-1/2 md:justify-start md:px-12 md:py-12 lg:px-16">
+          <div className="relative z-20 flex shrink-0 h-auto w-full items-center justify-center bg-background px-6 pb-4 pt-2 md:h-auto md:w-1/2 md:justify-start md:px-12 md:py-12 lg:px-16">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1 }}
               className="relative w-[85%] max-w-xl text-center md:ml-auto md:w-full md:pr-12 md:text-left lg:pr-16"
             >
-              <h1 className="font-display text-[1.75rem] leading-[1.12] text-foreground sm:text-3xl lg:text-5xl tracking-wide">
+              <h1 className="font-display text-[1.65rem] leading-[1.1] text-foreground sm:text-3xl lg:text-5xl tracking-wide">
                 Welcome To<br />Maison&nbsp;Affluency
               </h1>
-              <p className="mt-2 font-display text-[1.75rem] font-light leading-[1.12] tracking-widest text-accent sm:text-3xl md:mt-3 md:text-foreground lg:text-5xl">
+              <p className="mt-1 font-display text-[1.65rem] font-light leading-[1.1] tracking-widest text-accent sm:text-3xl md:mt-2 md:text-foreground lg:text-5xl">
                 Trade Program
               </p>
               <motion.div
                 style={{ y: mobileFormRise }}
-                className="relative z-30 mx-auto mt-6 w-full bg-background px-4 py-5 shadow-[0_12px_35px_hsl(var(--foreground)/0.08)] md:mx-0 md:bg-transparent md:p-0 md:shadow-none md:!transform-none"
+                className="relative z-30 mx-auto mt-4 w-full bg-background px-3 py-3 shadow-[0_12px_35px_hsl(var(--foreground)/0.08)] md:mx-0 md:bg-transparent md:p-0 md:shadow-none md:!transform-none"
               >
                 <AnimatePresence mode="wait" initial={false}>
                   {!emailSubmitted ? (
@@ -345,23 +345,23 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                     >
                       <form
                         onSubmit={handleJoinSubmit}
-                        className="mx-auto flex w-full max-w-lg flex-col items-stretch gap-3 md:mx-0 md:flex-row md:items-center"
+                        className="mx-auto flex w-full max-w-lg flex-col items-stretch gap-2.5 md:mx-0 md:flex-row md:items-center"
                       >
                         <input
                           type="email"
                           name="email"
                           required
                           placeholder="Your work email"
-                          className="w-full border border-border/60 bg-card px-5 py-3.5 font-body text-xs uppercase tracking-[0.15em] text-foreground outline-none transition-colors duration-300 placeholder:text-muted-foreground/60 focus:border-accent focus:ring-1 focus:ring-accent/30 md:flex-1"
+                          className="w-full border border-border/60 bg-card px-5 py-3 font-body text-xs uppercase tracking-[0.15em] text-foreground outline-none transition-colors duration-300 placeholder:text-muted-foreground/60 focus:border-accent focus:ring-1 focus:ring-accent/30 md:flex-1"
                         />
                         <button
                           type="submit"
-                          className="min-w-[120px] w-full border border-gold bg-gold px-6 py-3.5 text-center font-body text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground transition-colors duration-300 hover:bg-gold/90 md:w-auto"
+                          className="min-w-[120px] w-full border border-gold bg-gold px-6 py-3 text-center font-body text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground transition-colors duration-300 hover:bg-gold/90 md:w-auto"
                         >
                           Join Now
                         </button>
                       </form>
-                      <p className="mt-4 text-center font-body text-[11px] tracking-wide text-muted-foreground md:text-left md:text-xs">
+                      <p className="mt-2 text-center font-body text-[11px] tracking-wide text-muted-foreground md:text-left md:text-xs">
                         Already registered?{" "}
                         <Link to="/trade/login" className="text-foreground underline underline-offset-2 hover:text-foreground/80 transition-colors">
                           Sign in
@@ -374,10 +374,10 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.45, ease: "easeOut", delay: 0.15 }}
-                      className="flex flex-col items-center justify-center py-4 text-center md:items-start md:text-left"
+                      className="flex flex-col items-center justify-center py-2 text-center md:items-start md:text-left"
                     >
                       <svg
-                        className="mb-4 h-7 w-7 text-accent"
+                        className="mb-3 h-6 w-6 text-accent"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -388,10 +388,10 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                       >
                         <path d="M4.5 12.5l5 5L19.5 6" />
                       </svg>
-                      <p className="font-display text-xl text-foreground sm:text-2xl">
+                      <p className="font-display text-lg text-foreground sm:text-2xl">
                         Thank You for Your Interest.
                       </p>
-                      <p className="mt-2 max-w-xs font-body text-[11px] leading-relaxed text-muted-foreground sm:text-xs md:max-w-sm">
+                      <p className="mt-1.5 max-w-xs font-body text-[11px] leading-relaxed text-muted-foreground sm:text-xs md:max-w-sm">
                         An invitation link has been sent to your work email. Our team will review your credentials shortly.
                       </p>
                     </motion.div>
@@ -406,7 +406,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             <img
               src={cloudinaryUrl("dining-room_ey0bu5", { width: 1200, quality: "auto:good" })}
               alt="Maison Affluency Trade Program"
-              className="absolute inset-0 h-full w-full object-cover object-center md:object-contain"
+              className="absolute inset-0 h-full w-full object-cover object-bottom md:object-contain"
               data-pin-nopin="true"
             />
             {/* WhatsApp share — direct deep link */}
