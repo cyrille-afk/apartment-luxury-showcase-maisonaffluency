@@ -307,10 +307,13 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: "easeOut", delay: 0.15 }}
-          className="flex flex-col items-center justify-center py-2 text-center md:items-start md:text-left"
+          className={cn(
+            "flex flex-col items-center justify-center py-2 text-center md:items-start md:text-left",
+            ghost && "drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]"
+          )}
         >
           <svg
-            className="mb-3 h-6 w-6 text-accent"
+            className={cn("mb-3 h-6 w-6", ghost ? "text-white" : "text-accent")}
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -321,10 +324,10 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
           >
             <path d="M4.5 12.5l5 5L19.5 6" />
           </svg>
-          <p className="font-display text-lg text-foreground sm:text-2xl">
+          <p className={cn("font-display text-lg sm:text-2xl", ghost ? "text-white" : "text-foreground")}>
             Thank You for Your Interest.
           </p>
-          <p className="mt-1.5 max-w-xs font-body text-[11px] leading-relaxed text-muted-foreground sm:text-xs md:max-w-sm">
+          <p className={cn("mt-1.5 max-w-xs font-body text-[11px] leading-relaxed sm:text-xs md:max-w-sm", ghost ? "text-white/90" : "text-muted-foreground")}>
             An invitation link has been sent to your work email. Our team will review your credentials shortly.
           </p>
         </motion.div>
