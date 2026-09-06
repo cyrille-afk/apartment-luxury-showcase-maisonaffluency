@@ -402,7 +402,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
         })}</script>
       </Helmet>
 
-      <div className="min-h-screen scroll-smooth bg-transparent md:bg-background">
+      <div className="min-h-screen scroll-smooth bg-background">
         {/* Full official site header (fixed) */}
         <Navigation />
         {/* Spacer reserving the fixed header's footprint */}
