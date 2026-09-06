@@ -607,6 +607,7 @@ const App = () => {
                   <Route path="/trade-program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
                   <Route path="/trade/apply" element={<Suspense fallback={null}><TradeApply /></Suspense>} />
                   <Route path="/trade/processing" element={<Suspense fallback={null}><TradeProcessing /></Suspense>} />
+                  <Route path="/trade-dashboard" element={<Suspense fallback={null}><TradeClientDashboard /></Suspense>} />
                   <Route path="/trade-demo" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeDemoPage /></Suspense>} />
                   <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
                   <Route path="/collector-signup" element={<Suspense fallback={null}><CollectorSignup /></Suspense>} />
