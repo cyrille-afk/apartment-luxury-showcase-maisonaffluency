@@ -639,15 +639,25 @@ input, select, textarea {
 
   /* The Trade Program hero reaches the physical bottom edge. Paint the iOS
      browser/PWA backing canvas with that same photograph so the toolbar's
-     translucent safe area reveals the image instead of the default white. */
+     translucent safe area reveals the image instead of the default white.
+     The root underlay is pure black so any exposed viewport buffer can never
+     flash white. */
   html.ios-chrome-image {
-    background-color: transparent;
+    background-color: #000000;
     background-image: none;
   }
 
   html.ios-chrome-image body,
   html.ios-chrome-image #root {
     background-color: transparent;
+  }
+
+  /* Track the live iOS glass viewport edge regardless of Safari toolbar
+     expansion state. */
+  html.ios-chrome-image,
+  html.ios-chrome-image body,
+  html.ios-chrome-image #root {
+    min-height: 100dvh;
   }
 
   /* iOS does not reliably render a fixed background attached to <html> under
