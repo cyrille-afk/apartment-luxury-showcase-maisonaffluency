@@ -190,6 +190,45 @@ function emitOgManifestPlugin(): Plugin {
   };
 }
 
+/**
+ * Emit a real `/trade-program/index.html` app shell with Trade Program OG tags.
+ * Social crawlers do not execute React/Helmet, so the generic SPA fallback can
+ * only expose homepage metadata unless this route has its own static shell.
+ */
+function emitTradeProgramShellPlugin(): Plugin {
+  return {
+    name: "emit-trade-program-shell",
+    apply: "build",
+    enforce: "post",
+    closeBundle() {
+      const outDir = path.resolve(__dirname, "dist");
+      const indexPath = path.join(outDir, "index.html");
+      if (!fs.existsSync(indexPath)) return;
+
+      const title = "Trade Program — Maison Affluency";
+      const description = "Exclusive benefits for architects, interior designers, and luxury hospitality professionals.";
+      const canonical = "https://www.maisonaffluency.com/trade-program";
+      const image = "https://www.maisonaffluency.com/trade-program-hero-whatsapp.jpg";
+      let html = fs.readFileSync(indexPath, "utf-8");
+
+      html = html
+        .replace(/<title>[^<]*<\/title>/i, `<title>${title}</title>`)
+        .replace(/<meta property="og:title" content="[^"]*">/i, `<meta property="og:title" content="${title}">`)
+        .replace(/<meta property="og:description" content="[^"]*">/i, `<meta property="og:description" content="${description}">`)
+        .replace(/<meta property="og:url" content="[^"]*">/i, `<meta property="og:url" content="${canonical}">`)
+        .replace(/<meta property="og:image" content="[^"]*">/i, `<meta property="og:image" content="${image}">`)
+        .replace(/<meta name="twitter:title" content="[^"]*">/i, `<meta name="twitter:title" content="${title}">`)
+        .replace(/<meta name="twitter:description" content="[^"]*">/i, `<meta name="twitter:description" content="${description}">`)
+        .replace(/<meta name="twitter:image" content="[^"]*">/i, `<meta name="twitter:image" content="${image}">`)
+        .replace("</head>", `    <link rel="canonical" href="${canonical}">\n  </head>`);
+
+      const routeDir = path.join(outDir, "trade-program");
+      fs.mkdirSync(routeDir, { recursive: true });
+      fs.writeFileSync(path.join(routeDir, "index.html"), html);
+    },
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const buildId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -213,6 +252,7 @@ export default defineConfig(({ mode }) => {
       emitVersionPlugin(buildId),
       emitOgManifestPlugin(),
       inlineCriticalCssPlugin(),
+      emitTradeProgramShellPlugin(),
 
     ].filter(Boolean),
   resolve: {
