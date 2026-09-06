@@ -968,6 +968,16 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [fullscreen, setFullscreen] = useState<boolean>(() => {
     try { return localStorage.getItem("concierge:fullscreen") === "1"; } catch { return false; }
   });
+  const [tabletViewport, setTabletViewport] = useState<boolean>(() =>
+    typeof window !== "undefined" && window.matchMedia("(max-width: 1279px)").matches
+  );
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1279px)");
+    const syncViewport = () => setTabletViewport(media.matches);
+    media.addEventListener("change", syncViewport);
+    syncViewport();
+    return () => media.removeEventListener("change", syncViewport);
+  }, []);
   // When the tearsheet card opens its Insights sidebar it needs the concierge
   // panel to be at its wide 560px size so the sidebar sits alongside instead
   // of overlapping. We temporarily force-expand without persisting, and
@@ -3336,7 +3346,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         <div
           data-concierge-panel
           style={
-            modalMode
+            tabletViewport && !minimized
+              ? { inset: 0, width: "100%", height: "100dvh", maxWidth: "none", transform: "none" }
+              : modalMode
               ? { width: PANEL_W }
               : fullscreen
                 ? { width: PANEL_W }
