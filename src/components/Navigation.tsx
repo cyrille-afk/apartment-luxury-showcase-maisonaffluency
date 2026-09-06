@@ -439,7 +439,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             </div>
 
             {/* User + cart — right edge, vertically centered with burger */}
-            <div className="flex items-center gap-4 pr-1">
+            <div className="flex items-center gap-5 pr-2">
               <button
                 type="button"
                 onClick={() => {
