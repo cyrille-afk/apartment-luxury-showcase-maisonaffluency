@@ -1943,11 +1943,11 @@ const DesignersHoverHero = () => {
         {/* Directory label — pinned to the svh frame bottom on mobile only.
             Lowered slightly so it sits closer to the bottom edge. */}
         {isMobileBrowser && directoryLabels(cn(
-          "absolute flex items-center text-white w-full max-w-[340px] pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center px-6 bottom-[calc(1.5rem+env(safe-area-inset-bottom))]"
+          "absolute flex items-center text-white w-full min-w-[320px] max-w-[340px] pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center bottom-[calc(1.5rem+env(safe-area-inset-bottom))]"
         ), directoryRef, "left")}
 
         {isStandalone && directoryLabels(cn(
-          "absolute flex items-center text-white w-full max-w-[340px] pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center px-6 bottom-[calc(1rem+env(safe-area-inset-bottom))]"
+          "absolute flex items-center text-white w-full min-w-[320px] max-w-[340px] pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center bottom-[calc(1rem+env(safe-area-inset-bottom))]"
         ), directoryRef, "left")}
 
 
