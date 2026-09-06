@@ -1575,8 +1575,7 @@ const DesignersHoverHero = () => {
   ) => (
     <div ref={ref} className={className}>
       <div className={cn(
-        "flex flex-col",
-        !isMobileOrPwa && "w-full",
+        "flex flex-col w-full",
         align === "center" && "items-center text-center",
         align === "right" && "items-end"
       )}>
