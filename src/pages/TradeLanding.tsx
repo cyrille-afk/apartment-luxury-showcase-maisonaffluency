@@ -1115,6 +1115,7 @@ const TradeLanding = () => {
           </motion.div>
         </div>
         </div>
+        </div>
       </div>
     </>
   );
