@@ -398,7 +398,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
 
         {/* ─── Split-screen Hero ─── */}
         <div ref={heroRef} className="relative flex h-[calc(100lvh-6rem)] min-h-[580px] w-full flex-col overflow-hidden md:h-[calc(100vh-256px)] md:min-h-0 md:flex-row">
-          {/* Left Side */}
+          {/* Left Side: title (mobile) / title + form (desktop) */}
           <div className="relative z-20 flex shrink-0 h-auto w-full items-center justify-center bg-background px-6 pb-4 pt-2 md:h-auto md:w-1/2 md:justify-start md:px-12 md:py-12 lg:px-16">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -414,83 +414,29 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
               </p>
               <motion.div
                 style={{ y: mobileFormRise }}
-                className="relative z-30 mx-auto mt-4 w-full bg-background px-3 py-3 shadow-[0_12px_35px_hsl(var(--foreground)/0.08)] md:mx-0 md:bg-transparent md:p-0 md:shadow-none md:!transform-none"
+                className="relative z-30 mx-auto mt-4 hidden w-full bg-background px-3 py-3 shadow-[0_12px_35px_hsl(var(--foreground)/0.08)] md:mx-0 md:block md:bg-transparent md:p-0 md:shadow-none md:!transform-none"
               >
-                <AnimatePresence mode="wait" initial={false}>
-                  {!emailSubmitted ? (
-                    <motion.div
-                      key="join-form"
-                      initial={{ opacity: 1 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.35, ease: "easeInOut" }}
-                    >
-                      <form
-                        onSubmit={handleJoinSubmit}
-                        className="mx-auto flex w-full max-w-lg flex-col items-stretch gap-2.5 md:mx-0 md:flex-row md:items-center"
-                      >
-                        <input
-                          type="email"
-                          name="email"
-                          required
-                          placeholder="Your work email"
-                          className="w-full border border-border/60 bg-card px-5 py-3 font-body text-xs uppercase tracking-[0.15em] text-foreground outline-none transition-colors duration-300 placeholder:text-muted-foreground/60 focus:border-accent focus:ring-1 focus:ring-accent/30 md:flex-1"
-                        />
-                        <button
-                          type="submit"
-                          className="min-w-[120px] w-full border border-gold bg-gold px-6 py-3 text-center font-body text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground transition-colors duration-300 hover:bg-gold/90 md:w-auto"
-                        >
-                          Join Now
-                        </button>
-                      </form>
-                      <p className="mt-2 text-center font-body text-[11px] tracking-wide text-muted-foreground md:text-left md:text-xs">
-                        Already registered?{" "}
-                        <Link to="/trade/login" className="text-foreground underline underline-offset-2 hover:text-foreground/80 transition-colors">
-                          Sign in
-                        </Link>
-                      </p>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="join-success"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.45, ease: "easeOut", delay: 0.15 }}
-                      className="flex flex-col items-center justify-center py-2 text-center md:items-start md:text-left"
-                    >
-                      <svg
-                        className="mb-3 h-6 w-6 text-accent"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.25"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M4.5 12.5l5 5L19.5 6" />
-                      </svg>
-                      <p className="font-display text-lg text-foreground sm:text-2xl">
-                        Thank You for Your Interest.
-                      </p>
-                      <p className="mt-1.5 max-w-xs font-body text-[11px] leading-relaxed text-muted-foreground sm:text-xs md:max-w-sm">
-                        An invitation link has been sent to your work email. Our team will review your credentials shortly.
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <HeroJoinForm ghost={false} />
               </motion.div>
             </motion.div>
           </div>
 
-          {/* Right Side */}
-          <div className="relative min-h-0 flex-1 w-full bg-muted md:h-full md:w-1/2 md:flex-none">
+          {/* Right Side / Mobile Image */}
+          <div className="relative min-h-[68%] flex-1 w-full bg-muted md:h-full md:w-1/2 md:flex-none">
             <img
               src={cloudinaryUrl("dining-room_ey0bu5", { width: 1200, quality: "auto:good" })}
               alt="Maison Affluency Trade Program"
               className="absolute inset-0 h-full w-full object-cover object-bottom md:object-contain"
               data-pin-nopin="true"
             />
+
+            {/* Mobile ghost form overlay */}
+            <div className="absolute inset-x-0 bottom-20 z-30 px-5 md:hidden">
+              <div className="mx-auto w-[85%] max-w-md rounded-sm border border-white/40 bg-white/70 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.12)] backdrop-blur-md">
+                <HeroJoinForm ghost />
+              </div>
+            </div>
+
             {/* WhatsApp share — direct deep link */}
             <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 z-10">
               <button
