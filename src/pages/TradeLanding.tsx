@@ -432,6 +432,9 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
 
         {/* Featured Issue download banner removed — AD issue no longer offered as free download in the trade area. */}
 
+        {/* Everything below the stats bar: hidden on desktop so the landing acts as a fixed full-screen poster */}
+        <div className="md:hidden">
+
 
         {/* ─── Intro text block ─── */}
         <motion.div
@@ -803,6 +806,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               </p>
             </div>
           </motion.div>
+        </div>
         </div>
       </div>
     </>
