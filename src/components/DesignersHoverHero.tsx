@@ -1623,8 +1623,7 @@ const DesignersHoverHero = () => {
               : "w-full rounded-lg border border-gold/10 bg-white/[0.04] px-3 py-2.5 text-[13px] text-white/75 hover:text-white hover:bg-white/[0.07] hover:border-gold/20",
             align === "left" && "text-left justify-start",
             align === "center" && "text-center justify-center",
-            align === "right" && "text-right flex-row-reverse justify-start",
-            "order-2 sm:order-1"
+            align === "right" && "text-right flex-row-reverse justify-start"
           )}
         >
           <Search className={cn("h-3.5 w-3.5 not-italic", isMobileOrPwa ? "text-white/70" : "text-white/45")} aria-hidden="true" />
