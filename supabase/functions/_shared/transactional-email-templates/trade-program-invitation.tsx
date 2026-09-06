@@ -18,7 +18,7 @@ interface Props {
 const Email = ({ email, companyName }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your Maison Affluency Trade Program invitation</Preview>
+    <Preview>Maison Affluency Trade Program: Application Received</Preview>
     <Body style={main}>
       <Container style={container}>
         <Text style={eyebrow}>MAISON AFFLUENCY — EST. 2017</Text>
