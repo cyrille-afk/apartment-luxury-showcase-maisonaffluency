@@ -612,15 +612,15 @@ const TradeLanding = () => {
         {/* ─── Split-screen Hero ─── */}
         <div ref={heroRef} className="relative flex h-[calc(100dvh-6rem)] min-h-[580px] w-full flex-col md:h-[calc(100vh-256px)] md:min-h-0 md:flex-row">
           {/* Left Side: title (mobile) / title + form (desktop) */}
-          <div className="relative z-20 flex shrink-0 h-auto w-full items-start justify-start bg-background px-6 pb-4 pt-2 md:h-auto md:w-1/2 md:items-center md:justify-start md:px-12 md:py-12 lg:px-16">
+          <div className="relative z-20 flex shrink-0 h-auto w-full items-center justify-center bg-background px-6 pb-4 pt-2 md:h-auto md:w-1/2 md:justify-start md:px-12 md:py-12 lg:px-16">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1 }}
-              className="relative w-[85%] max-w-xl text-left md:ml-auto md:w-full md:pr-12 md:text-left lg:pr-16"
+              className="relative w-[85%] max-w-xl text-justify md:ml-auto md:w-full md:pr-12 md:text-left lg:pr-16"
             >
-              <h1 className="whitespace-nowrap font-display text-[1.35rem] leading-[1.2] text-foreground sm:text-3xl lg:text-5xl tracking-wide">
-                Welcome to our Trade Program
+              <h1 className="font-display text-[1.65rem] leading-[1.2] text-foreground sm:text-3xl lg:text-5xl tracking-wide">
+                Welcome to our <span className="text-accent md:text-foreground">Trade&nbsp;Program</span>
               </h1>
               <motion.div
                 style={{ y: mobileFormRise }}
@@ -651,7 +651,7 @@ const TradeLanding = () => {
             />
 
             {/* Mobile form overlay — floats just below the chandelier globe and above the table */}
-            <div className="absolute inset-x-0 top-[26%] z-30 px-5 md:hidden">
+            <div className="absolute inset-x-0 top-[40%] z-30 px-5 md:hidden">
               {/* Readability underlay — blends into the photograph */}
               <div
                 aria-hidden
