@@ -112,15 +112,48 @@ const TradeLanding = () => {
   const [isUKVariant, setIsUKVariant] = useState<boolean>(
     regionParam === "uk" || regionParam === "gb",
   );
-  const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [joinStep, setJoinStep] = useState<1 | 2 | 3>(1);
+  const [joinLoading, setJoinLoading] = useState(false);
+  const [joinError, setJoinError] = useState<string | null>(null);
+  const [joinEmail, setJoinEmail] = useState("");
 
-  const handleJoinSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleJoinSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const email = (formData.get("email") as string) || "";
+    const email = ((formData.get("email") as string) || "").trim();
     if (!email) return;
-    setEmailSubmitted(true);
+    setJoinLoading(true);
+    setJoinError(null);
+    const { error } = await supabase.functions.invoke("trade-program-signup", {
+      body: { email, step: 1 },
+    });
+    setJoinLoading(false);
+    if (error) {
+      setJoinError("We couldn't register that email. Please try again.");
+      return;
+    }
+    setJoinEmail(email);
+    setJoinStep(2);
   };
+
+  const handleStudioSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const companyName = ((formData.get("company") as string) || "").trim();
+    const websiteUrl = ((formData.get("website") as string) || "").trim();
+    setJoinLoading(true);
+    setJoinError(null);
+    const { error } = await supabase.functions.invoke("trade-program-signup", {
+      body: { email: joinEmail, step: 2, companyName, websiteUrl },
+    });
+    setJoinLoading(false);
+    if (error) {
+      setJoinError("We couldn't save your studio details. Please try again.");
+      return;
+    }
+    setJoinStep(3);
+  };
+
 
   // Overridable 3D Studio images from HeroManager
   const [studioBeforeImg, setStudioBeforeImg] = useState(studioBeforeImgFallback);
