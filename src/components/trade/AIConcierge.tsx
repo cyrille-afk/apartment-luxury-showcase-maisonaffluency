@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { Button } from "@/components/ui/button";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList, MessagesSquare, Plus, Trash2 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { BriefBuilder } from "@/components/trade/concierge/BriefBuilder";
@@ -3344,7 +3345,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   : { width: PANEL_W }
           }
           className={cn(
-            "fixed z-[10000] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border shadow-2xl print:hidden overflow-hidden",
+            "fixed z-[10000] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border shadow-2xl print:hidden overflow-hidden max-xl:!inset-0 max-xl:!h-[100dvh] max-xl:!max-h-[100dvh] max-xl:!w-full max-xl:!max-w-none max-xl:!translate-x-0 max-xl:!translate-y-0 max-xl:rounded-none",
             modalMode
               ? cn(
                   "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-cream border-jade/40 ring-1 ring-jade/30 shadow-[0_30px_80px_-20px_hsl(var(--foreground)/0.5)]",
@@ -3353,7 +3354,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               : "bg-background border-border animate-fade-in",
             !modalMode && fullscreen && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
             !modalMode && !fullscreen && !pos && "bottom-20 md:bottom-6 right-4",
-            minimized ? "h-auto" : ((fullscreen || modalMode) ? "h-[calc(100vh-2rem)]" : (expanded ? "h-[760px] max-h-[calc(100vh-4rem)]" : "h-[560px] max-h-[calc(100vh-6rem)]"))
+            minimized ? "h-auto max-xl:!inset-auto max-xl:!right-4 max-xl:!bottom-4 max-xl:!h-auto max-xl:!w-[min(560px,calc(100vw-2rem))] max-xl:!rounded-2xl" : ((fullscreen || modalMode) ? "h-[calc(100dvh-2rem)]" : (expanded ? "h-[760px] max-h-[calc(100dvh-4rem)]" : "h-[560px] max-h-[calc(100dvh-6rem)]"))
           )}
         >
           <div
@@ -5105,19 +5106,21 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             </div>
 
             {/* Quick-action chips: visual entry points so designers know how to interact with Felix without reading the full welcome text. */}
-            <div className={cn("flex flex-wrap lg:flex-nowrap items-center justify-center gap-2", fullscreen && "shrink-0")}>
-              <button
+            <div className={cn("grid grid-cols-1 sm:grid-cols-3 items-stretch justify-start gap-2", fullscreen && "shrink-0")}>
+              <Button
                 type="button"
+                variant="outline"
                 onClick={() => moodInputRef.current?.click()}
                 disabled={streaming || attachments.length >= MAX_ATTACHMENTS}
-                className="cursor-pointer whitespace-nowrap rounded-full border border-[#E5E5E5] bg-[#FAFAFA] px-4 py-1.5 text-center font-body text-[10px] uppercase tracking-[0.14em] text-[#4A4A46] transition-all duration-200 ease-in-out hover:bg-[#F0F0F0] hover:text-[#1A1A1A] disabled:cursor-not-allowed disabled:opacity-40"
+                className="h-11 lg:h-10 w-full justify-start rounded-none px-4 font-body text-xs uppercase tracking-wider"
                 aria-label="Upload mood board"
                 title="Upload a mood board image to Block 3"
               >
-                [ Upload Moodboard ]
-              </button>
-              <button
+                Upload Moodboard
+              </Button>
+              <Button
                 type="button"
+                variant="outline"
                 onClick={() => {
                   if (!/Block\s+1\s*—/i.test(input)) {
                     const current = input.trim();
@@ -5129,26 +5132,27 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   setBriefBuilderOpen(true);
                 }}
                 disabled={streaming}
-                className="cursor-pointer whitespace-nowrap rounded-full border border-[#E5E5E5] bg-[#FAFAFA] px-4 py-1.5 text-center font-body text-[10px] uppercase tracking-[0.14em] text-[#4A4A46] transition-all duration-200 ease-in-out hover:bg-[#F0F0F0] hover:text-[#1A1A1A] disabled:cursor-not-allowed disabled:opacity-40"
+                className="h-11 lg:h-10 w-full justify-start rounded-none px-4 font-body text-xs uppercase tracking-wider"
                 aria-label="Request custom quote"
                 title="Open the Architectural Brief Builder for a custom quote"
               >
-                [ Request Custom Quote ]
-              </button>
-              <button
+                Request Custom Quote
+              </Button>
+              <Button
                 type="button"
+                variant="outline"
                 onClick={() => send("What are the current lead times for your pieces?")}
                 disabled={streaming}
-                className="cursor-pointer whitespace-nowrap rounded-full border border-[#E5E5E5] bg-[#FAFAFA] px-4 py-1.5 text-center font-body text-[10px] uppercase tracking-[0.14em] text-[#4A4A46] transition-all duration-200 ease-in-out hover:bg-[#F0F0F0] hover:text-[#1A1A1A] disabled:cursor-not-allowed disabled:opacity-40"
+                className="h-11 lg:h-10 w-full justify-start rounded-none px-4 font-body text-xs uppercase tracking-wider"
                 aria-label="Check lead times"
                 title="Ask Felix about current lead times"
               >
-                [ Check Lead Times ]
-              </button>
+                Check Lead Times
+              </Button>
             </div>
 
 
-            <div className={cn("flex items-end gap-2", fullscreen && "shrink-0")}>
+            <div className={cn("flex flex-wrap lg:flex-nowrap items-end gap-2", fullscreen && "shrink-0")}>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -5169,7 +5173,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={streaming || attachments.length >= MAX_ATTACHMENTS}
-                className="shrink-0 rounded-xl border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
+                className="order-2 h-11 w-11 shrink-0 rounded-none border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors lg:order-none lg:h-auto lg:w-auto lg:rounded-xl"
                 aria-label="Attach room plan, image or PDF"
                 title="Attach a room plan, photo or PDF"
               >
@@ -5179,7 +5183,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 type="button"
                 onClick={() => moodInputRef.current?.click()}
                 disabled={streaming || attachments.length >= MAX_ATTACHMENTS}
-                className="shrink-0 rounded-xl border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
+                className="order-2 h-11 w-11 shrink-0 rounded-none border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors lg:order-none lg:h-auto lg:w-auto lg:rounded-xl"
                 aria-label="Attach mood board images to Block 3"
                 title="Attach mood board (images bound to Block 3)"
               >
@@ -5199,7 +5203,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                     setBriefBuilderOpen(true);
                   }}
                   disabled={streaming}
-                  className="shrink-0 rounded-xl border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
+                  className="order-2 h-11 w-11 shrink-0 rounded-none border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors lg:order-none lg:h-auto lg:w-auto lg:rounded-xl"
                   aria-label="Open Architectural Brief Builder"
                   title="Open Architectural Brief Builder"
                 >
@@ -5212,7 +5216,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 type="button"
                 onClick={() => setShowBriefPreview((v) => !v)}
                 disabled={!input.trim()}
-                className={`shrink-0 rounded-xl border p-2 disabled:opacity-40 transition-colors ${
+                className={`order-2 h-11 w-11 shrink-0 rounded-none border p-2 disabled:opacity-40 transition-colors lg:order-none lg:h-auto lg:w-auto lg:rounded-xl ${
                   showBriefPreview
                     ? "border-accent bg-accent/10 text-accent"
                     : "border-border bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -5225,7 +5229,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               </button>
               {briefBuilderOpen ? (
                 <div
-                  className={`flex-1 flex items-center gap-2 rounded-xl border border-dashed px-3 py-2 font-body text-xs italic border-accent/50 bg-accent/5 text-muted-foreground`}
+                  className={`order-1 basis-full flex items-center gap-2 rounded-none border border-dashed px-3 py-2 font-body text-xs italic border-accent/50 bg-accent/5 text-muted-foreground lg:order-none lg:basis-auto lg:flex-1 lg:rounded-xl`}
                   title={
                     briefValidation.valid
                       ? "Structured brief ready — press Send"
@@ -5260,7 +5264,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   onKeyDown={handleKeyDown}
                   placeholder={composerPlaceholder}
                   rows={1}
-                  className="flex-1 resize-none rounded-xl border border-border bg-muted/50 px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="order-1 min-h-11 basis-full resize-none rounded-none border border-border bg-muted/50 px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent lg:order-none lg:basis-auto lg:flex-1 lg:rounded-xl"
                   disabled={streaming}
                 />
               )}
@@ -5271,7 +5275,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   (!input.trim() && attachments.length === 0) ||
                   streaming
                 }
-                className="shrink-0 rounded-xl bg-foreground text-background p-2 disabled:opacity-40 hover:opacity-90 transition-opacity"
+                className="order-2 ml-auto h-11 w-11 shrink-0 rounded-none bg-foreground text-background p-2 disabled:opacity-40 hover:opacity-90 transition-opacity lg:order-none lg:ml-0 lg:h-auto lg:w-auto lg:rounded-xl"
                 aria-label="Send"
                 title="Send"
               >
