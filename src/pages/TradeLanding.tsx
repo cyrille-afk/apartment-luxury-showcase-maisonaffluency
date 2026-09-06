@@ -278,7 +278,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
               className={cn(
                 "w-full px-5 py-3 font-body text-xs uppercase tracking-[0.15em] text-foreground outline-none transition-colors duration-300 placeholder:text-muted-foreground/60 focus:border-accent focus:ring-1 focus:ring-accent/30",
                 ghost
-                  ? "border border-white/50 bg-white/80 backdrop-blur-sm"
+                  ? "border border-white/50 bg-white/90 backdrop-blur-sm"
                   : "border border-border/60 bg-card md:flex-1"
 
               )}
@@ -290,7 +290,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
               Join Now
             </button>
           </form>
-          <p className={cn("mt-2 text-center font-body text-[11px] tracking-wide md:text-left md:text-xs", ghost ? "text-white/90" : "text-muted-foreground")}>
+          <p className={cn("mt-2 text-center font-body text-[11px] tracking-wide md:text-left md:text-xs", ghost ? "text-white/95 drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]" : "text-muted-foreground")}>
             Already registered?{" "}
 
             <Link
