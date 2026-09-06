@@ -332,8 +332,9 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
 };
 
 const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
+  const credentialFileRef = useRef<HTMLInputElement>(null);
   const labelCls = cn(
-    "block text-left font-body text-[10px] uppercase tracking-[0.22em]",
+    "mb-1.5 block text-left font-body text-[10px] uppercase tracking-[0.22em]",
     ghost ? "text-white/85" : "text-muted-foreground"
   );
   const inputCls = cn(
