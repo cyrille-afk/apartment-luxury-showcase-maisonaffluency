@@ -104,7 +104,15 @@ const TradeLanding = () => {
   const [isUKVariant, setIsUKVariant] = useState<boolean>(
     regionParam === "uk" || regionParam === "gb",
   );
-  
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
+
+  const handleJoinSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = (formData.get("email") as string) || "";
+    if (!email) return;
+    setEmailSubmitted(true);
+  };
 
   // Overridable 3D Studio images from HeroManager
   const [studioBeforeImg, setStudioBeforeImg] = useState(studioBeforeImgFallback);
