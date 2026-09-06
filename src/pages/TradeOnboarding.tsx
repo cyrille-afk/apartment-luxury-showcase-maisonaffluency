@@ -22,7 +22,7 @@ export default function TradeOnboarding() {
 
   return (
     <main
-      className="min-h-screen w-full flex items-center justify-center px-6"
+      className="min-h-[100lvh] w-full flex items-center justify-center px-6"
       style={{ backgroundColor: "#F5F5F3" }}
     >
       <div className="relative w-full max-w-4xl min-h-[520px] flex items-center justify-center">
