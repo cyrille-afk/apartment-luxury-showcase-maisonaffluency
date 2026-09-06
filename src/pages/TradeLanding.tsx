@@ -309,7 +309,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         {/* ─── Split-screen Hero ─── */}
         <div ref={heroRef} className="relative flex h-[calc(100lvh-6rem)] min-h-[720px] w-full flex-col overflow-hidden md:h-[calc(100vh-256px)] md:min-h-0 md:flex-row">
           {/* Left Side */}
-          <div className="relative z-20 flex h-[48%] w-full shrink-0 items-center justify-center bg-background px-6 pb-8 pt-5 md:h-auto md:w-1/2 md:justify-start md:px-12 md:py-12 lg:px-16">
+          <div className="relative z-20 flex h-[45%] w-full shrink-0 items-center justify-center bg-background px-6 pb-8 pt-5 md:h-auto md:w-1/2 md:justify-start md:px-12 md:py-12 lg:px-16">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
