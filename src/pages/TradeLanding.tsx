@@ -383,7 +383,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
           {/* Right Side */}
           <div className="w-full md:w-1/2 relative min-h-[40vh] md:min-h-0 md:h-full">
             <img
-              src={cloudinaryUrl("dining-room_ey0bu5", { width: 1200, height: 1600, quality: "auto:good", crop: "fill", gravity: "auto" })}
+              src={cloudinaryUrl("dining-room_ey0bu5", { width: 1400, height: 1050, quality: "auto:good", crop: "fill", gravity: "north" })}
               alt="Maison Affluency Trade Program"
               className="absolute inset-0 w-full h-full object-cover object-top"
               data-pin-nopin="true"
