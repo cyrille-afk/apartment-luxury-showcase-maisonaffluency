@@ -602,13 +602,25 @@ const TradeLanding = () => {
       </Helmet>
 
       <div className="min-h-[100dvh] scroll-smooth bg-transparent md:bg-background">
+        {/* Global hero backdrop — fixed full-bleed canvas behind everything (mobile only; desktop uses split-screen) */}
+        <div aria-hidden className="fixed inset-0 z-0 h-[100dvh] w-screen md:hidden">
+          <img
+            src={TRADE_PROGRAM_HERO_IMAGE}
+            alt=""
+            className="h-full w-full object-cover object-bottom"
+            data-pin-nopin="true"
+          />
+        </div>
+
+        {/* Scrolling content layer above the backdrop */}
+        <div className="relative z-10 w-full min-h-[100dvh] bg-transparent">
         {/* Full official site header (fixed) */}
         <Navigation />
         {/* Spacer reserving the fixed header's footprint */}
         <div aria-hidden className="h-24 md:h-[120px] pt-[env(safe-area-inset-top)]" />
 
         {/* ─── Split-screen Hero ─── */}
-        <div ref={heroRef} className="relative flex h-[calc(100dvh-6rem+env(safe-area-inset-bottom))] min-h-[580px] w-full flex-col overflow-hidden -mb-[env(safe-area-inset-bottom)] md:mb-0 md:h-[calc(100vh-256px)] md:min-h-0 md:flex-row">
+        <div ref={heroRef} className="relative flex h-[calc(100dvh-6rem)] min-h-[580px] w-full flex-col md:h-[calc(100vh-256px)] md:min-h-0 md:flex-row">
           {/* Left Side: title (mobile) / title + form (desktop) */}
           <div className="relative z-20 flex shrink-0 h-auto w-full items-center justify-center bg-background px-6 pb-4 pt-2 md:h-auto md:w-1/2 md:justify-start md:px-12 md:py-12 lg:px-16">
             <motion.div
@@ -642,12 +654,12 @@ const TradeLanding = () => {
             </motion.div>
           </div>
 
-          {/* Right Side / Mobile Image */}
+          {/* Right Side (desktop image; mobile uses the fixed global backdrop) */}
           <div className="relative min-h-[68%] flex-1 w-full bg-transparent md:h-full md:w-1/2 md:flex-none">
             <img
               src={TRADE_PROGRAM_HERO_IMAGE}
               alt="Maison Affluency Trade Program"
-              className="absolute inset-0 h-full w-full object-cover object-bottom md:object-contain"
+              className="absolute inset-0 hidden h-full w-full object-cover object-bottom md:block md:object-contain"
               data-pin-nopin="true"
             />
 
@@ -1101,6 +1113,7 @@ const TradeLanding = () => {
               </p>
             </div>
           </motion.div>
+        </div>
         </div>
         </div>
       </div>
