@@ -134,11 +134,8 @@ const Hero = () => {
         </picture>
       )}
 
-      {/* Legibility scrim: bottom-45% fade on mobile/PWA, subtler 35% fade on desktop */}
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-black/60 via-black/15 to-transparent md:h-[35%] md:from-black/40 md:via-transparent md:to-transparent"
-        aria-hidden="true"
-      />
+
+
 
 
       {/* Text overlay — desktop keeps the previous anchored-top editorial layout;
@@ -152,13 +149,13 @@ const Hero = () => {
       }`}>
 
         <div className="w-full max-w-xl md:max-w-4xl md:text-left">
-          <h1 className="font-display text-4xl font-normal leading-[1.08] tracking-[0.01em] text-hero-text md:text-5xl lg:text-6xl">
+          <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
             Modern Masters.<br />
             Iconic Design.
           </h1>
 
           <div className="mt-6 flex w-full max-w-3xl flex-col items-start md:mt-10">
-            <p className="relative inline-block text-left font-serif text-sm font-medium leading-relaxed text-white [text-shadow:0_1px_10px_rgba(0,0,0,0.55)] hero-fade-in-delayed-3 before:absolute before:-inset-x-3 before:-inset-y-2 before:-z-10 before:rounded-sm before:bg-black/35 before:content-[''] before:backdrop-blur-[1px] before:[mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)] md:text-xl lg:text-2xl">
+            <p className="relative inline-block text-left font-serif text-sm font-medium leading-relaxed text-white [text-shadow:0_1px_10px_rgba(0,0,0,0.55)] hero-fade-in-delayed-3 md:text-xl lg:text-2xl">
               A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
 
@@ -195,7 +192,7 @@ const Hero = () => {
               trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
               scrollToSection("apartment-tour-heading");
             }}
-            className="font-body text-[11px] font-light uppercase tracking-[0.25em] text-hero-text drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
+            className="font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
           >
             Singapore Gallery Preview
           </button>
@@ -203,10 +200,10 @@ const Hero = () => {
           <button
             type="button"
             onClick={openTour}
-            className="group flex flex-col items-center font-body text-[11px] font-light uppercase tracking-[0.25em] text-hero-text drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
+            className="group flex flex-col items-center font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
           >
             <span>Book Private Appointment</span>
-            <span className="text-[9px] font-light normal-case italic tracking-widest text-hero-text/80 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]">(trade only)</span>
+            <span className="text-[9px] font-bold normal-case italic tracking-widest text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]">(trade only)</span>
           </button>
         </nav>
 
@@ -217,7 +214,7 @@ const Hero = () => {
       {/* Desktop — secondary CTAs lowered to the bottom, centred, same ghost UI */}
       <nav
         aria-label="Hero secondary actions"
-        className="hero-fade-in-delayed-5 pointer-events-auto absolute inset-x-0 bottom-8 z-20 mx-auto hidden w-fit flex-col items-center gap-3 font-body text-[10px] font-light uppercase tracking-[0.34em] text-hero-text [text-shadow:0_1px_5px_rgba(0,0,0,0.7)] md:flex"
+        className="hero-fade-in-delayed-5 pointer-events-auto absolute bottom-8 inset-x-0 mx-auto w-fit z-20 hidden flex-col items-center gap-3 md:flex font-body text-[10px] font-light uppercase tracking-[0.34em] text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.6)]"
       >
         <div className="inline-flex items-center gap-3">
           <button
@@ -237,7 +234,7 @@ const Hero = () => {
             className="transition-opacity duration-300 hover:opacity-70"
           >
             Book Private Appointment{" "}
-            <span className="ml-2 tracking-[0.2em] text-hero-text/70">(Trade Only)</span>
+            <span className="ml-2 tracking-[0.2em] text-white/70">(Trade Only)</span>
           </button>
         </div>
       </nav>

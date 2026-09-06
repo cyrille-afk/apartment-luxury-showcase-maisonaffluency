@@ -36,13 +36,13 @@ const TradeFloatingCTA = () => {
     >
       <div className="mx-auto max-w-7xl px-5 md:px-14 lg:px-24 relative h-0">
         <div className="absolute bottom-24 right-5 md:right-14 lg:right-24 pointer-events-auto">
-          <div className="relative max-w-[92vw] rounded-full border border-trade-banner-line/75 bg-trade-banner px-7 py-4 text-trade-banner-line shadow-lg">
+          <div className="relative bg-foreground/95 backdrop-blur-sm text-background px-7 py-4 rounded-full shadow-lg border border-accent/20 max-w-[92vw]">
             <button
               onClick={dismiss}
               aria-label="Dismiss"
-              className="absolute -right-2.5 -top-2.5 z-10 rounded-full border border-trade-banner-line/75 bg-trade-banner p-2 shadow-md transition-opacity hover:opacity-80"
+              className="absolute -top-2.5 -right-2.5 p-2 rounded-full bg-foreground border border-background/20 hover:bg-foreground/80 transition-colors shadow-md z-10"
             >
-              <X className="h-4 w-4 text-trade-banner-line" />
+              <X className="w-4 h-4 text-background" />
             </button>
             {/* Desktop: single row */}
             <div className="hidden sm:flex items-center gap-5">
@@ -51,7 +51,7 @@ const TradeFloatingCTA = () => {
               </p>
               <Link
                 to="/trade-program"
-                className="shrink-0 whitespace-nowrap rounded-full border border-trade-banner-line bg-trade-banner-line px-5 py-2.5 font-body text-sm font-normal uppercase tracking-[0.15em] text-trade-banner shadow-sm transition-all hover:-translate-y-0.5 hover:opacity-90 hover:shadow-md"
+                className="shrink-0 px-5 py-2.5 bg-accent text-black font-body text-sm font-semibold uppercase tracking-[0.15em] rounded-full border border-black/15 shadow-sm hover:bg-accent/90 hover:-translate-y-0.5 hover:shadow-md transition-all whitespace-nowrap"
               >
                 Join Our Trade Program
               </Link>
