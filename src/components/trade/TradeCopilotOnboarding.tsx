@@ -20,7 +20,9 @@ function useOnboardingOpen(): { open: boolean; markDone: () => void } {
     if (loading) return;
     // Only on the trade dashboard, for approved trade users who haven't
     // completed the overlay (profile flag or this browser).
-    const onDashboard = pathname.startsWith("/trade/dashboard");
+    // The dashboard is the index route of /trade (with /trade/dashboard as an alias).
+    const p = pathname.replace(/\/+$/, "");
+    const onDashboard = p === "/trade" || p === "/trade/dashboard";
     const completed = profile?.has_seen_trade_intro === true || localStorage.getItem(STORAGE_KEY) === "1";
     setOpen(isTradeUser && onDashboard && !completed);
   }, [profile?.has_seen_trade_intro, loading, isTradeUser, pathname]);
