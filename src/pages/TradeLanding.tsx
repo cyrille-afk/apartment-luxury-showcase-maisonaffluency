@@ -158,7 +158,7 @@ const MobileBenefitsCarousel = ({ benefits }: { benefits: typeof import("./Trade
   }, []);
 
   return (
-    <div className="md:hidden pb-8">
+    <div className="md:hidden mt-6 pb-10">
       <div
         ref={scrollRef}
         onScroll={handleScroll}
@@ -187,7 +187,7 @@ const MobileBenefitsCarousel = ({ benefits }: { benefits: typeof import("./Trade
         ))}
       </div>
       {/* Dots */}
-      <div className="flex justify-center gap-2 mt-4">
+      <div className="flex justify-center gap-2 mt-6">
         {benefits.map((_: any, i: number) => (
           <span key={i} className={`w-1.5 h-1.5 rounded-full transition-colors ${i === activeIndex ? "bg-accent" : "bg-border"}`} />
         ))}
@@ -552,7 +552,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.8, delay: 0.15 }}
-                className="rounded-sm border border-border bg-card/40 backdrop-blur-sm p-6 md:p-8"
+              className="rounded-[4px] border border-border/60 bg-cream p-6 md:p-8"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-accent/10 text-accent">
@@ -562,7 +562,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
                     Felix · AI Curatorial Guide
                   </p>
                 </div>
-                <h3 className="font-display text-lg md:text-xl text-foreground mb-3">
+                <h3 className="font-display text-xl md:text-2xl italic text-foreground mb-3">
                   Meet Felix: Your Digital Studio Assistant
                 </h3>
                 <p className="font-body text-sm leading-relaxed text-muted-foreground text-justify">
