@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
-import { Quote, Sparkles } from "lucide-react";
+import { Quote, Sparkles, Upload } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
@@ -113,10 +113,11 @@ const TradeLanding = () => {
   const [isUKVariant, setIsUKVariant] = useState<boolean>(
     regionParam === "uk" || regionParam === "gb",
   );
-  const [joinStep, setJoinStep] = useState<1 | 2 | 3>(1);
+  const [joinStep, setJoinStep] = useState<1 | 2 | 3 | 4>(1);
   const [joinLoading, setJoinLoading] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [joinEmail, setJoinEmail] = useState("");
+  const [joinCredentialFile, setJoinCredentialFile] = useState<File | null>(null);
 
   const handleJoinSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -153,6 +154,45 @@ const TradeLanding = () => {
       return;
     }
     setJoinStep(3);
+  };
+
+  const fileToDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+
+  const handleCredentialsSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const businessRegNumber = ((formData.get("regNumber") as string) || "").trim();
+    setJoinLoading(true);
+    setJoinError(null);
+    let document: { name: string; contentType: string; data: string } | undefined;
+    if (joinCredentialFile) {
+      if (joinCredentialFile.size > 15 * 1024 * 1024) {
+        setJoinLoading(false);
+        setJoinError("The document is too large (max 15 MB).");
+        return;
+      }
+      const dataUrl = await fileToDataUrl(joinCredentialFile);
+      document = {
+        name: joinCredentialFile.name,
+        contentType: joinCredentialFile.type || "application/octet-stream",
+        data: dataUrl.split(",")[1] || "",
+      };
+    }
+    const { error } = await supabase.functions.invoke("trade-program-signup", {
+      body: { email: joinEmail, step: 3, businessRegNumber, document },
+    });
+    setJoinLoading(false);
+    if (error) {
+      setJoinError("We couldn't submit your application. Please try again.");
+      return;
+    }
+    setJoinStep(4);
   };
 
 
@@ -292,8 +332,9 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
 };
 
 const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
+  const credentialFileRef = useRef<HTMLInputElement>(null);
   const labelCls = cn(
-    "block text-left font-body text-[10px] uppercase tracking-[0.22em]",
+    "mb-1.5 block text-left font-body text-[10px] uppercase tracking-[0.22em]",
     ghost ? "text-white/85" : "text-muted-foreground"
   );
   const inputCls = cn(
@@ -365,16 +406,74 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
           </div>
 
           <form onSubmit={handleStudioSubmit} className="flex w-full flex-col gap-3">
-            <div className="space-y-1.5">
+            <div>
               <label htmlFor="company" className={labelCls}>Company / Firm Name</label>
               <input id="company" name="company" required placeholder="Studio name" className={inputCls} />
             </div>
-            <div className="space-y-1.5">
+            <div>
               <label htmlFor="website" className={labelCls}>Website or Portfolio Link</label>
               <input id="website" name="website" placeholder="www.yourstudio.com" className={inputCls} />
             </div>
             <button type="submit" disabled={joinLoading} className={cn(goldBtn, "mt-1")}>
               {joinLoading ? "Saving…" : "Continue"}
+            </button>
+          </form>
+          {joinError && (
+            <p className={cn("mt-2 text-center font-body text-[11px]", ghost ? "text-white" : "text-destructive")}>
+              {joinError}
+            </p>
+          )}
+        </motion.div>
+      ) : joinStep === 3 ? (
+        <motion.div
+          key="join-step-3"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className={cn("mx-auto w-full", ghost ? "max-w-md" : "max-w-lg md:mx-0")}
+        >
+          <p className={cn("font-display text-sm italic sm:text-base", ghost ? "text-white" : "text-foreground")}>
+            Step 3 of 3 · Professional Verification
+          </p>
+          <div className={cn("mt-2 mb-4 h-px w-full", ghost ? "bg-white/30" : "bg-border")}>
+            <div className="h-px w-full bg-gold" />
+          </div>
+
+          <form onSubmit={handleCredentialsSubmit} className="flex w-full flex-col gap-3">
+            <div>
+              <label htmlFor="regNumber" className={labelCls}>Business Registration Number / Tax ID</label>
+              <input id="regNumber" name="regNumber" placeholder="e.g. UEN, VAT, EIN" className={inputCls} />
+            </div>
+            <div>
+              <span className={labelCls}>Professional Certification or Portfolio</span>
+              <input
+                ref={credentialFileRef}
+                type="file"
+                accept="application/pdf,image/*"
+                className="hidden"
+                onChange={(e) => {
+                  setJoinCredentialFile(e.target.files?.[0] ?? null);
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => credentialFileRef.current?.click()}
+                className={cn(
+                  "flex w-full items-center justify-between px-5 py-3 font-body text-xs uppercase tracking-[0.15em] transition-colors duration-300",
+                  ghost
+                    ? "border border-dashed border-white/50 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20"
+                    : "border border-dashed border-border/60 bg-card text-muted-foreground hover:border-accent/50 hover:text-foreground"
+                )}
+              >
+                <span className="truncate">
+                  {joinCredentialFile ? joinCredentialFile.name : "Upload certification or portfolio PDF"}
+                </span>
+                <Upload className="ml-3 h-3.5 w-3.5 shrink-0" />
+              </button>
+            </div>
+            <button type="submit" disabled={joinLoading} className={cn(goldBtn, "mt-1")}>
+              {joinLoading ? "Submitting…" : "Submit Application"}
             </button>
           </form>
           {joinError && (
