@@ -267,6 +267,12 @@ const FEATURED_GROUPS = [
 ];
 
 const MOBILE_BG_OVERRIDES: Record<string, string> = {
+  // Alexander Lamont's raw pick is a square studio shot with a baked-in black
+  // ceiling and gray floor; as a full-viewport background it reads as an
+  // unanchored floating image. Use the pre-cropped full-bleed straw-marquetry
+  // texture portrait instead.
+  "alexander-lamont":
+    "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/designers/alexander-lamont/hero-mobile-casque-texture.jpg",
   "jean-michel-frank":
     "https://res.cloudinary.com/dif1oamtj/image/upload/v1777428180/JMF_1935_Round_Table__02_Portrait_BD_1_aozicg.jpg",
   "hamrei":
