@@ -156,6 +156,45 @@ const TradeLanding = () => {
     setJoinStep(3);
   };
 
+  const fileToDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+
+  const handleCredentialsSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const businessRegNumber = ((formData.get("regNumber") as string) || "").trim();
+    setJoinLoading(true);
+    setJoinError(null);
+    let document: { name: string; contentType: string; data: string } | undefined;
+    if (joinCredentialFile) {
+      if (joinCredentialFile.size > 15 * 1024 * 1024) {
+        setJoinLoading(false);
+        setJoinError("The document is too large (max 15 MB).");
+        return;
+      }
+      const dataUrl = await fileToDataUrl(joinCredentialFile);
+      document = {
+        name: joinCredentialFile.name,
+        contentType: joinCredentialFile.type || "application/octet-stream",
+        data: dataUrl.split(",")[1] || "",
+      };
+    }
+    const { error } = await supabase.functions.invoke("trade-program-signup", {
+      body: { email: joinEmail, step: 3, businessRegNumber, document },
+    });
+    setJoinLoading(false);
+    if (error) {
+      setJoinError("We couldn't submit your application. Please try again.");
+      return;
+    }
+    setJoinStep(4);
+  };
+
 
   // Overridable 3D Studio images from HeroManager
   const [studioBeforeImg, setStudioBeforeImg] = useState(studioBeforeImgFallback);
