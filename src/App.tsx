@@ -26,7 +26,6 @@ const TradePurgeCache = lazy(() => import("./pages/TradePurgeCache"));
 
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
-const TradeLanding = lazy(() => import("./pages/TradeLanding"));
 const TradeApply = lazy(() => import("./pages/TradeApply"));
 const TradeProcessing = lazy(() => import("./pages/TradeProcessing"));
 const TradeClientDashboard = lazy(() => import("./pages/TradeClientDashboard"));
@@ -605,7 +604,8 @@ const App = () => {
 
                   {/* Trade Portal */}
                   <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />
-                  <Route path="/trade-program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
+                  <Route path="/trade-program" element={<Suspense fallback={null}><TradeProgramLanding /></Suspense>} />
+                  <Route path="/trade-landing" element={<Navigate to="/trade-program" replace />} />
                   <Route path="/trade/apply" element={<Suspense fallback={null}><TradeApply /></Suspense>} />
                   <Route path="/trade/processing" element={<Suspense fallback={null}><TradeProcessing /></Suspense>} />
                   <Route path="/trade-dashboard" element={<Suspense fallback={null}><TradeClientDashboard /></Suspense>} />
