@@ -65,13 +65,15 @@ export default function TradeOnboarding() {
           }`}
         >
           <div className="max-w-2xl w-full flex flex-col items-center">
-            <h1
-              className="text-2xl md:text-4xl text-black leading-snug mb-10"
-              style={instrumentSerif}
-            >
-              Every great design studio operates differently. What would you like to call your AI
-              curation copilot?
-            </h1>
+            {!initialized && (
+              <h1
+                className="text-2xl md:text-4xl text-black leading-snug mb-10"
+                style={instrumentSerif}
+              >
+                Every great design studio operates differently. What would you like to call your AI
+                curation copilot?
+              </h1>
+            )}
 
             {!initialized ? (
               <>
