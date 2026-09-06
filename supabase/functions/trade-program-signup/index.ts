@@ -31,11 +31,14 @@ Deno.serve(async (req) => {
   const step = Number(body.step ?? 1)
   const companyName = body.companyName ? String(body.companyName).trim().slice(0, 200) : null
   const websiteUrl = body.websiteUrl ? String(body.websiteUrl).trim().slice(0, 300) : null
+  const businessRegNumber = body.businessRegNumber
+    ? String(body.businessRegNumber).trim().slice(0, 120)
+    : null
 
   if (!email || email.length > 254 || !EMAIL_RE.test(email)) {
     return json({ error: 'A valid work email is required' }, 400)
   }
-  if (step !== 1 && step !== 2) return json({ error: 'Invalid step' }, 400)
+  if (step !== 1 && step !== 2 && step !== 3) return json({ error: 'Invalid step' }, 400)
 
   const supabase = createClient(supabaseUrl, serviceKey)
 
