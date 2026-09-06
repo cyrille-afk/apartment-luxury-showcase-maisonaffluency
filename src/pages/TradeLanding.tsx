@@ -324,7 +324,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               </p>
               <motion.div
                 style={{ y: mobileFormRise }}
-                className="relative z-30 mx-auto mt-6 w-full bg-background px-4 py-5 shadow-[0_12px_35px_hsl(var(--foreground)/0.08)] md:mx-0 md:bg-transparent md:p-0 md:shadow-none md:transform-none"
+                className="relative z-30 mx-auto mt-6 w-full bg-background px-4 py-5 shadow-[0_12px_35px_hsl(var(--foreground)/0.08)] md:mx-0 md:bg-transparent md:p-0 md:shadow-none md:!transform-none"
               >
                 <form
                   onSubmit={(e) => {
