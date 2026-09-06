@@ -449,36 +449,22 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 "flex items-center justify-end gap-4"
               )}
             >
-              {location.pathname === "/trade-program" ? (
-                <>
-                  <ShippingDestinationSwitcher
-                    compact
-                    showIso
-                    flagClassName="text-base leading-none"
-                    className="text-foreground"
-                  />
-                  <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
-                </>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (user) {
-                        navigate("/trade");
-                      } else {
-                        setAuthGateMode("login");
-                        setAuthGateOpen(true);
-                      }
-                    }}
-                    aria-label={user ? "My account" : "Sign in"}
-                    className="relative flex items-center justify-center w-10 h-10 text-foreground hover:text-primary transition-colors"
-                  >
-                    <User className="w-[20px] h-[20px]" strokeWidth={1.5} />
-                  </button>
-                  <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
-                </>
-              )}
+              <button
+                type="button"
+                onClick={() => {
+                  if (user) {
+                    navigate("/trade");
+                  } else {
+                    setAuthGateMode("login");
+                    setAuthGateOpen(true);
+                  }
+                }}
+                aria-label={user ? "My account" : "Sign in"}
+                className="relative flex items-center justify-center w-10 h-10 text-foreground hover:text-primary transition-colors"
+              >
+                <User className="w-[20px] h-[20px]" strokeWidth={1.5} />
+              </button>
+              <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
             </div>
 
             <SheetContent side="left" className="w-full overflow-y-auto flex flex-col" aria-describedby={undefined}>
