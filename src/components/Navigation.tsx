@@ -418,7 +418,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
 
       <div className="mx-auto max-w-7xl px-6 md:px-12">
         {/* Mobile: single row */}
-        <div className="grid grid-cols-[auto_1fr_auto] h-24 items-center md:hidden">
+        <div className="grid grid-cols-[1fr_auto_1fr] h-24 items-center md:hidden">
           <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
             {/* Burger — far left */}
             <SheetTrigger asChild>
@@ -427,7 +427,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </Button>
             </SheetTrigger>
 
-            {/* Brand — centered, constrained so it never overlaps the side groups */}
+            {/* Brand — absolutely centered in the viewport */}
             <div className="flex justify-center min-w-0 px-2">
               <div className="flex flex-col items-center max-w-full overflow-hidden">
                 <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap truncate">
@@ -446,8 +446,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             {/* Right-side group: location + cart on trade-program, user + cart elsewhere */}
             <div
               className={cn(
-                "flex items-center",
-                location.pathname === "/trade-program" ? "gap-3 pr-4" : "gap-4"
+                "flex items-center justify-end gap-4"
               )}
             >
               {location.pathname === "/trade-program" ? (
