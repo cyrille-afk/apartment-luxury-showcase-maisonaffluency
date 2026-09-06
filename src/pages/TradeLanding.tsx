@@ -358,7 +358,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
                   window.open(waUrl, "_blank", "noopener,noreferrer");
                 }}
-                className="flex items-center justify-center w-11 h-11 rounded-full bg-background/80 backdrop-blur-md border border-border/30 text-[hsl(var(--jade))] shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:bg-background hover:scale-105 hover:shadow-[0_10px_40px_rgba(0,0,0,0.12)] touch-manipulation"
+                className="flex items-center justify-center w-11 h-11 rounded-full bg-background/80 backdrop-blur-md border border-border/30 text-[hsl(var(--jade))] shadow-lg transition-all duration-300 hover:bg-background hover:scale-105 hover:shadow-xl touch-manipulation"
                 aria-label="Share on WhatsApp"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
