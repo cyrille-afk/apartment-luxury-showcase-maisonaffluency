@@ -334,9 +334,9 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         </div>
 
         {/* ─── Split-screen Hero ─── */}
-        <div className="relative w-full min-h-[calc(100svh-3.5rem)] flex flex-col md:flex-row">
+        <div className="relative w-full min-h-[calc(100svh-3.5rem)] md:min-h-0 md:h-[calc(100vh-180px)] md:max-h-[75vh] flex flex-col md:flex-row overflow-hidden">
           {/* Left Side */}
-          <div className="w-full md:w-1/2 flex items-center justify-start px-6 md:px-12 lg:px-16 py-16 md:py-0 bg-background">
+          <div className="w-full md:w-1/2 flex items-center justify-start px-6 md:px-12 lg:px-16 py-12 md:py-12 bg-background">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -381,7 +381,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
           </div>
 
           {/* Right Side */}
-          <div className="w-full md:w-1/2 relative min-h-[40vh] md:min-h-0">
+          <div className="w-full md:w-1/2 relative min-h-[40vh] md:min-h-0 md:h-full">
             <img
               src={cloudinaryUrl("dining-room_ey0bu5", { width: 1200, height: 1600, quality: "auto:good", crop: "fill", gravity: "auto" })}
               alt="Maison Affluency Trade Program"
