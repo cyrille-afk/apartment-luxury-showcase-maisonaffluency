@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Quote, Sparkles } from "lucide-react";
+import { Quote, Sparkles } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -11,6 +11,7 @@ import projectFoldersImg from "@/assets/benefit-project-folders.jpg";
 const studioBeforeImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773976063/Screen_Shot_2026-03-20_at_11.05.23_AM_fo0aaz.png";
 const studioAfterImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773975478/Screen_Shot_2026-03-20_at_10.57.13_AM_yiqv4q.png";
 import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/SectionHero";
+import Navigation from "@/components/Navigation";
 
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
 const TRADE_PROGRAM_SHARE_URL = withOgCacheBust("https://www.maisonaffluency.com/trade-program-og.html");
@@ -289,21 +290,13 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
       </Helmet>
 
       <div className="min-h-screen bg-background">
-        {/* Sticky top nav */}
-        <div className="w-full border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
-          <div className="max-w-7xl mx-auto px-4 md:px-12 py-3 flex items-center justify-between">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-1.5 font-body text-xs font-semibold text-foreground hover:text-primary transition-colors uppercase tracking-[0.1em]"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Maison Affluency
-            </Link>
-          </div>
-        </div>
+        {/* Full official site header (fixed) */}
+        <Navigation />
+        {/* Spacer reserving the fixed header's footprint */}
+        <div aria-hidden className="h-24 md:h-[120px] pt-[env(safe-area-inset-top)]" />
 
         {/* ─── Split-screen Hero ─── */}
-        <div className="relative w-full min-h-[calc(100svh-3.5rem)] md:min-h-0 md:h-[calc(100vh-187px)] flex flex-col md:flex-row overflow-hidden">
+        <div className="relative w-full min-h-[calc(100svh-6rem)] md:min-h-0 md:h-[calc(100vh-256px)] flex flex-col md:flex-row overflow-hidden">
           {/* Left Side */}
           <div className="w-full md:w-1/2 flex items-center justify-start px-6 md:px-12 lg:px-16 py-12 md:py-12 bg-background">
             <motion.div
@@ -354,7 +347,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             <img
               src={cloudinaryUrl("dining-room_ey0bu5", { width: 1200, quality: "auto:good" })}
               alt="Maison Affluency Trade Program"
-              className="absolute inset-0 w-full h-full object-contain"
+              className="absolute inset-0 w-full h-full object-cover object-top"
               data-pin-nopin="true"
             />
             {/* Share button — bottom right of hero */}
