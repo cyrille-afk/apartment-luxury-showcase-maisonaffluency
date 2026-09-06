@@ -414,17 +414,17 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
     )}>
 
       <div className="mx-auto max-w-7xl px-6 md:px-12">
-        {/* Mobile: single row */}
-        <div className="grid grid-cols-[auto_1fr_auto] h-24 items-center md:hidden">
+        {/* Mobile: single row — logo perfectly centered with equal side tracks */}
+        <div className="grid grid-cols-[1fr_auto_1fr] h-24 items-center md:hidden">
           <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
             {/* Burger — far left */}
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-12 w-12 -ml-2 text-primary" aria-label="Toggle menu">
+              <Button variant="ghost" size="icon" className="h-12 w-12 -ml-2 text-primary justify-self-start" aria-label="Toggle menu">
                 {isOpen ? <X className="h-8 w-8" strokeWidth={3} /> : <Menu className="h-8 w-8" strokeWidth={3} />}
               </Button>
             </SheetTrigger>
 
-            {/* Brand — centered, constrained so it never overlaps the side groups */}
+            {/* Brand — perfectly centered */}
             <div className="flex justify-center min-w-0 px-2">
               <div className="flex flex-col items-center max-w-full overflow-hidden">
                 <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap truncate">
@@ -440,24 +440,43 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </div>
             </div>
 
-            {/* User + cart — far right group, 16px spacing */}
-            <div className="flex items-center gap-4">
-              <button
-                type="button"
-                onClick={() => {
-                  if (user) {
-                    navigate("/trade");
-                  } else {
-                    setAuthGateMode("login");
-                    setAuthGateOpen(true);
-                  }
-                }}
-                aria-label={user ? "My account" : "Sign in"}
-                className="relative flex items-center justify-center w-10 h-10 text-foreground hover:text-primary transition-colors"
-              >
-                <User className="w-[20px] h-[20px]" strokeWidth={1.5} />
-              </button>
-              <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
+            {/* Right-side group: location + cart on trade-program, user + cart elsewhere */}
+            <div
+              className={cn(
+                "flex items-center justify-self-end",
+                location.pathname === "/trade-program" ? "gap-3 pr-4" : "gap-4"
+              )}
+            >
+              {location.pathname === "/trade-program" ? (
+                <>
+                  <ShippingDestinationSwitcher
+                    compact
+                    showIso
+                    flagClassName="text-base leading-none"
+                    className="text-foreground"
+                  />
+                  <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (user) {
+                        navigate("/trade");
+                      } else {
+                        setAuthGateMode("login");
+                        setAuthGateOpen(true);
+                      }
+                    }}
+                    aria-label={user ? "My account" : "Sign in"}
+                    className="relative flex items-center justify-center w-10 h-10 text-foreground hover:text-primary transition-colors"
+                  >
+                    <User className="w-[20px] h-[20px]" strokeWidth={1.5} />
+                  </button>
+                  <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
+                </>
+              )}
             </div>
 
             <SheetContent side="left" className="w-full overflow-y-auto flex flex-col" aria-describedby={undefined}>
