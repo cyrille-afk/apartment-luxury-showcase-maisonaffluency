@@ -301,19 +301,19 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         <div aria-hidden className="h-24 md:h-[120px] pt-[env(safe-area-inset-top)]" />
 
         {/* ─── Split-screen Hero ─── */}
-        <div className="relative w-full min-h-[calc(100svh-6rem)] md:min-h-0 md:h-[calc(100vh-256px)] flex flex-col md:flex-row overflow-hidden">
+        <div className="relative flex h-[calc(100lvh-6rem)] min-h-[680px] w-full flex-col overflow-hidden md:h-[calc(100vh-256px)] md:min-h-0 md:flex-row">
           {/* Left Side */}
-          <div className="w-full md:w-1/2 flex items-center justify-start px-6 md:px-12 lg:px-16 py-12 md:py-12 bg-background">
+          <div className="relative z-20 flex h-[48%] w-full shrink-0 items-center justify-center bg-background px-6 pb-8 pt-5 md:h-auto md:w-1/2 md:justify-start md:px-12 md:py-12 lg:px-16">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1 }}
-              className="w-full max-w-xl ml-auto md:pr-12 lg:pr-16"
+              className="relative w-[85%] max-w-xl text-center md:ml-auto md:w-full md:pr-12 md:text-left lg:pr-16"
             >
-              <h1 className="font-display text-2xl sm:text-3xl lg:text-5xl text-foreground tracking-wide">
+              <h1 className="font-display text-[1.75rem] leading-[1.12] text-foreground sm:text-3xl lg:text-5xl tracking-wide">
                 Welcome To<br />Maison&nbsp;Affluency
               </h1>
-              <p className="font-display text-2xl sm:text-3xl lg:text-5xl text-foreground mt-3 tracking-widest font-light">
+              <p className="mt-2 font-display text-[1.75rem] font-light leading-[1.12] tracking-widest text-accent sm:text-3xl md:mt-3 md:text-foreground lg:text-5xl">
                 Trade Program
               </p>
               <form
@@ -323,22 +323,22 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   const email = (formData.get("email") as string) || "";
                   navigate(`/trade/apply${email ? `?email=${encodeURIComponent(email)}` : ""}`);
                 }}
-                className="flex flex-col md:flex-row items-stretch md:items-center gap-3 mt-6 w-full max-w-lg"
+                className="mx-auto mt-6 flex w-full max-w-lg flex-col items-stretch gap-3 md:mx-0 md:flex-row md:items-center"
               >
                 <input
                   type="email"
                   name="email"
                   placeholder="Your work email"
-                  className="w-full md:flex-1 bg-white border border-border/30 focus:border-border/60 text-foreground placeholder:text-muted-foreground/60 px-5 py-3 font-body text-xs uppercase tracking-[0.15em] rounded-none transition-all duration-300 outline-none focus:ring-1 focus:ring-border/30"
+                  className="w-full border border-border/60 bg-card px-5 py-3.5 font-body text-xs uppercase tracking-[0.15em] text-foreground outline-none transition-colors duration-300 placeholder:text-muted-foreground/60 focus:border-accent focus:ring-1 focus:ring-accent/30 md:flex-1"
                 />
                 <button
                   type="submit"
-                  className="w-full md:w-auto bg-[hsl(var(--gold))] hover:bg-[hsl(var(--gold)/0.9)] text-white border border-[hsl(var(--gold))] px-6 py-3 font-body text-xs uppercase tracking-[0.2em] rounded-none transition-all duration-300 font-bold min-w-[120px] text-center whitespace-nowrap"
+                  className="min-w-[120px] w-full border border-gold bg-gold px-6 py-3.5 text-center font-body text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground transition-colors duration-300 hover:bg-gold/90 md:w-auto"
                 >
                   Join Now
                 </button>
               </form>
-              <p className="mt-4 text-center font-body text-xs text-muted-foreground tracking-wide">
+              <p className="mt-4 text-center font-body text-[11px] tracking-wide text-muted-foreground md:text-left md:text-xs">
                 Already registered?{" "}
                 <Link to="/trade/login" className="text-foreground underline underline-offset-2 hover:text-foreground/80 transition-colors">
                   Sign in
@@ -348,11 +348,11 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
           </div>
 
           {/* Right Side */}
-          <div className="w-full md:w-1/2 relative min-h-[40vh] md:min-h-0 md:h-full bg-muted">
+          <div className="relative min-h-0 flex-1 w-full bg-muted md:h-full md:w-1/2 md:flex-none">
             <img
               src={cloudinaryUrl("dining-room_ey0bu5", { width: 1200, quality: "auto:good" })}
               alt="Maison Affluency Trade Program"
-              className="absolute inset-0 w-full h-full object-contain object-center"
+              className="absolute inset-0 h-full w-full object-cover object-center md:object-contain"
               data-pin-nopin="true"
             />
             {/* WhatsApp share — direct deep link */}
@@ -375,7 +375,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         </div>
 
         {/* ─── Provenance Trust Strip ─── */}
-        <div className="w-full bg-background border-b border-border">
+        <div className="hidden w-full bg-background border-b border-border md:block">
           <p className="max-w-5xl mx-auto px-6 py-2.5 text-center font-body text-[11px] md:text-xs text-muted-foreground uppercase tracking-[0.18em]">
             {isUKVariant
               ? "Shipping to the UK from European ateliers — France, Italy & beyond"
@@ -384,8 +384,8 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         </div>
 
         {/* ─── Stats Bar ─── */}
-        <div className="w-full border-y border-border">
-          <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
+        <div className="w-full border-y border-border bg-background">
+          <div className="mx-auto grid max-w-5xl grid-cols-2 md:grid-cols-4 md:divide-x md:divide-border">
             {stats.map((stat, i) => (
               <motion.div
                 key={stat.label}
@@ -393,12 +393,12 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="flex flex-col items-center py-4 md:py-5"
+                className={`flex min-h-[88px] flex-col items-center justify-center px-2 py-3 md:min-h-0 md:py-5 ${i % 2 === 0 ? "border-r border-border md:border-r-0" : ""} ${i < 2 ? "border-b border-border md:border-b-0" : ""}`}
               >
-                <span className="font-display text-2xl md:text-3xl text-foreground/80 tracking-wide">
+                <span className="font-display text-xl md:text-3xl text-foreground/80 tracking-wide">
                   {stat.value}
                 </span>
-                <span className="font-body text-[11px] md:text-xs text-muted-foreground uppercase tracking-[0.15em] mt-1">
+                <span className="mt-1 text-center font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground md:text-xs md:tracking-[0.15em]">
                   {stat.label}
                 </span>
               </motion.div>
