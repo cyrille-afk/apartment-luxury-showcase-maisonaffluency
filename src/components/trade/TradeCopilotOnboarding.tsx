@@ -187,7 +187,7 @@ export default function TradeCopilotOnboarding() {
               <button
                 onClick={complete}
                 disabled={busy}
-                className="inline-flex min-w-[220px] items-center justify-center gap-2 border border-accent bg-accent px-8 py-3 font-body text-xs uppercase tracking-[0.18em] text-accent-foreground transition-colors hover:bg-primary hover:text-primary-foreground disabled:opacity-70"
+                className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-foreground text-background font-body text-xs uppercase tracking-[0.18em] hover:bg-foreground/90 transition-colors disabled:opacity-70 min-w-[220px]"
               >
                 {busy ? (
                   <>

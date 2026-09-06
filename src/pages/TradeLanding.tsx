@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ChevronDown, Heart, MapPin, Quote, Search, ShoppingBag, Sparkles, UserRound } from "lucide-react";
+import { ArrowLeft, Quote, Sparkles } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -289,56 +289,71 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
       </Helmet>
 
       <div className="min-h-screen bg-background">
-        {/* Editorial two-tier navigation */}
-        <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/95 backdrop-blur-md pt-[env(safe-area-inset-top)]">
-          <div className="mx-auto grid min-h-14 max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-4 md:px-10">
-            <div role="group" aria-label="Choose region" className="flex items-center gap-2 justify-self-start font-body text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
-              <MapPin className="h-3 w-3 text-accent" aria-hidden="true" />
-              <button type="button" onClick={() => setIsUKVariant(false)} aria-pressed={!isUKVariant} className={!isUKVariant ? "text-foreground" : "transition-colors hover:text-foreground"}>Worldwide</button>
-              <span aria-hidden="true" className="text-border">/</span>
-              <button type="button" onClick={() => setIsUKVariant(true)} aria-pressed={isUKVariant} className={isUKVariant ? "text-foreground" : "transition-colors hover:text-foreground"}>UK</button>
-            </div>
-
-            <Link to="/" aria-label="Maison Affluency home" className="justify-self-center whitespace-nowrap font-display text-[22px] uppercase text-foreground md:text-[31px]">
-              <span className="tracking-[0.12em] md:tracking-[0.2em]">Maison Affluency</span>
+        {/* Sticky top nav */}
+        <div className="w-full border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
+          <div className="max-w-7xl mx-auto px-4 md:px-12 py-3 flex items-center justify-between">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 font-body text-xs font-semibold text-foreground hover:text-primary transition-colors uppercase tracking-[0.1em]"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Maison Affluency
             </Link>
-
-            <div className="flex items-center justify-self-end gap-3 text-foreground md:gap-4">
-              <Link to="/contact" className="hidden font-body text-[9px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground md:block">Contact us</Link>
-              <Link to="/designers" aria-label="Search designers"><Search className="h-3.5 w-3.5" /></Link>
-              <Link to="/trade/login" aria-label="Account"><UserRound className="h-3.5 w-3.5" /></Link>
-              <Link to="/favorites" aria-label="Favorites" className="hidden sm:block"><Heart className="h-3.5 w-3.5" /></Link>
-              <Link to="/cart" aria-label="Shopping bag" className="hidden sm:block"><ShoppingBag className="h-3.5 w-3.5" /></Link>
+            {/* Region selector — switches landing copy without changing the URL */}
+            <div
+              role="group"
+              aria-label="Choose region"
+              className="inline-flex items-center rounded-full border border-border bg-background overflow-hidden"
+            >
+              <button
+                type="button"
+                onClick={() => setIsUKVariant(false)}
+                aria-pressed={!isUKVariant}
+                className={`px-3 py-1 font-body text-[10px] md:text-[11px] uppercase tracking-[0.15em] transition-colors ${
+                  !isUKVariant
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Worldwide
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsUKVariant(true)}
+                aria-pressed={isUKVariant}
+                className={`px-3 py-1 font-body text-[10px] md:text-[11px] uppercase tracking-[0.15em] transition-colors border-l border-border ${
+                  isUKVariant
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                UK
+              </button>
             </div>
           </div>
+        </div>
 
-          <nav aria-label="Main navigation" className="overflow-x-auto border-t border-border/50 px-4 scrollbar-hide">
-            <div className="mx-auto flex min-w-max max-w-4xl items-center justify-center gap-7 py-3 font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground md:gap-10 md:text-[10px]">
-              <Link to="/new-in" className="transition-colors hover:text-foreground">New in</Link>
-              <Link to="/products-category/furniture" className="inline-flex items-center gap-1 transition-colors hover:text-foreground">Categories <ChevronDown className="h-3 w-3" /></Link>
-              <Link to="/designers" className="transition-colors hover:text-foreground">Designers</Link>
-              <Link to="/gallery" className="transition-colors hover:text-foreground">Interactive gallery</Link>
-              <Link to="/journal" className="transition-colors hover:text-foreground">Journal</Link>
-              <span className="border-b border-accent pb-1 font-medium text-foreground">Trade program</span>
-            </div>
-          </nav>
-        </header>
-
-        {/* ─── Editorial Trade Hero ─── */}
-        <section className="mx-auto grid w-full max-w-7xl items-stretch px-5 py-8 md:grid-cols-[0.9fr_1.1fr] md:gap-12 md:px-10 md:py-12 lg:gap-20 lg:py-16">
+        {/* ─── Full-width Hero ─── */}
+        <div className="relative w-full h-[35svh] md:h-[50vh] overflow-hidden">
+          <img
+            src={cloudinaryUrl("v1772085848/intimate-dining_ux4pee", { width: 1920, height: 1080, quality: "auto:good", crop: "fill", gravity: "auto" })}
+            alt="Maison Affluency Trade Program"
+            className="w-full h-full object-cover"
+            data-pin-nopin="true"
+          />
+          <div className="absolute inset-0 bg-foreground/20" />
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
-            className="flex flex-col justify-center py-8 text-left md:py-12"
+            className="absolute inset-0 flex flex-col items-center justify-center text-center px-6"
           >
-            <div>
-              <p className="mb-5 font-body text-[10px] font-medium uppercase tracking-[0.28em] text-accent">Exclusively for professionals</p>
-              <h1 className="font-display text-5xl leading-[0.98] text-foreground sm:text-6xl lg:text-7xl">
-                Maison Affluency<br /><span className="italic">Trade Program</span>
+            <div className="flex flex-col items-center">
+              <h1 className="font-display text-2xl sm:text-3xl lg:text-5xl text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.6)] tracking-wide">
+                Welcome To Maison Affluency
               </h1>
-              <p className="mt-6 max-w-lg font-body text-sm font-normal leading-relaxed text-muted-foreground md:text-base">
-                White-glove procurement, preferred trade pricing, and priority access to collectible design for architects and interior designers worldwide.
+              <p className="font-display text-2xl sm:text-3xl lg:text-5xl text-white mt-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-widest font-light">
+                Trade Program
               </p>
               <form
                 onSubmit={(e) => {
@@ -347,45 +362,38 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   const email = (formData.get("email") as string) || "";
                   navigate(`/trade/apply${email ? `?email=${encodeURIComponent(email)}` : ""}`);
                 }}
-                className="mt-8 flex w-full max-w-lg flex-col gap-3 sm:flex-row"
+                className="flex items-center gap-3 mt-6 w-full max-w-lg px-4"
               >
                 <input
                   type="email"
                   name="email"
                   placeholder="Your work email"
-                  className="min-w-0 flex-1 border border-border bg-card px-5 py-3.5 font-body text-xs uppercase tracking-[0.14em] text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+                  className="flex-1 bg-white border border-border/30 focus:border-border/60 text-foreground placeholder:text-muted-foreground/60 px-5 py-3 font-body text-xs uppercase tracking-[0.15em] rounded-full transition-all duration-300 outline-none focus:ring-1 focus:ring-border/30"
                 />
                 <button
                   type="submit"
-                  className="min-w-[140px] whitespace-nowrap border border-accent bg-accent px-7 py-3.5 text-center font-body text-xs font-medium uppercase tracking-[0.18em] text-accent-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                  className="bg-[hsl(var(--gold))] hover:bg-[hsl(var(--gold)/0.9)] text-white border border-[hsl(var(--gold))] px-6 py-3 font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 font-bold min-w-[120px] text-center whitespace-nowrap"
                 >
                   Join Now
                 </button>
               </form>
-              <p className="mt-5 font-body text-xs tracking-wide text-muted-foreground">
+              <p className="mt-5 font-body text-xs text-white/70 tracking-wide">
                 Already registered?{" "}
-                <Link to="/trade/login" className="text-foreground underline decoration-accent underline-offset-4 transition-colors hover:text-primary/70">
+                <Link to="/trade/login" className="text-white underline underline-offset-2 hover:text-white/90 transition-colors">
                   Sign in
                 </Link>
               </p>
             </div>
           </motion.div>
-          <div className="relative min-h-[360px] overflow-hidden md:aspect-[4/5] md:min-h-0">
-            <img
-              src={cloudinaryUrl("v1772085848/intimate-dining_ux4pee", { width: 1400, height: 1750, quality: "auto:good", crop: "fill", gravity: "auto" })}
-              alt="Maison Affluency Trade Program interior"
-              className="h-full w-full object-cover transition-transform duration-1000 motion-safe:hover:scale-[1.02]"
-              data-pin-nopin="true"
-            />
-            <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-foreground/10" />
-            <div className="absolute bottom-4 right-4 z-10">
+
+          {/* Share button — bottom right of hero */}
+          <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 z-10">
             <ShareMenu
               url={TRADE_PROGRAM_SHARE_URL}
               message={`Maison Affluency — Trade Program: ${TRADE_PROGRAM_SHARE_URL}`}
             />
-            </div>
           </div>
-        </section>
+        </div>
 
         {/* ─── Provenance Trust Strip ─── */}
         <div className="w-full bg-background border-b border-border">

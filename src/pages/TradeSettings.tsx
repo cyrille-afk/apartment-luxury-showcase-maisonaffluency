@@ -505,7 +505,7 @@ const TradeSettings = () => {
         <button
           type="submit"
           disabled={saving}
-          className="mt-6 inline-flex items-center gap-2 border border-accent bg-accent px-6 py-2.5 font-body text-xs uppercase tracking-[0.1em] text-accent-foreground transition-colors hover:bg-primary hover:text-primary-foreground disabled:opacity-50"
+          className="mt-6 inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-50"
         >
           <Save className="h-3.5 w-3.5" />
           {saving ? "Saving…" : "Save Changes"}

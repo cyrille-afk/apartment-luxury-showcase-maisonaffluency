@@ -2,71 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: 'Instrument Serif';
-  src: url('/fonts/InstrumentSerif-Regular.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Instrument Serif';
-  src: url('/fonts/InstrumentSerif-Italic.ttf') format('truetype');
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Work Sans';
-  src: url('/fonts/WorkSans-Regular.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Work Sans';
-  src: url('/fonts/WorkSans-Medium.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-}
-
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    --background: 60 9% 96%;
-    --foreground: 164 49% 13%;
+    --background: 32 20% 97%;
+    --foreground: 168 10% 8%;
 
-    --card: 60 12% 98%;
-    --card-foreground: 164 49% 13%;
+    --card: 0 0% 100%;
+    --card-foreground: 168 15% 15%;
 
-    --popover: 60 12% 98%;
-    --popover-foreground: 164 49% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 168 15% 15%;
 
-    --primary: 164 49% 13%;
-    --primary-foreground: 60 9% 96%;
+    --primary: 168 45% 30%;
+    --primary-foreground: 32 20% 97%;
 
     --secondary: 15 70% 58%;
     --secondary-foreground: 32 20% 97%;
 
-    --muted: 40 8% 90%;
-    --muted-foreground: 41 9% 61%;
+    --muted: 32 15% 90%;
+    --muted-foreground: 168 10% 38%;
 
-    --accent: 40 42% 60%;
-    --accent-foreground: 164 49% 13%;
+    --accent: 36 40% 65%;
+    --accent-foreground: 168 15% 15%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 41 9% 76%;
-    --input: 41 9% 76%;
-    --ring: 164 49% 13%;
+    --border: 32 15% 88%;
+    --input: 32 15% 88%;
+    --ring: 168 45% 30%;
 
     --radius: 0px;
 
@@ -78,16 +46,16 @@ All colors MUST be HSL.
 
     
     /* Custom Design Tokens */
-    --jade: 164 49% 13%;
+    --jade: 168 45% 30%;
     --jade-light: 168 35% 50%;
     --jade-soft: 168 25% 85%;
     --terracotta: 15 70% 58%;
     --terracotta-light: 15 60% 70%;
-    --gold: 40 42% 60%;
+    --gold: 36 55% 50%;
     /* Brighter bronze-gold used for text over dark hero imagery */
     --gold-bright: 38 70% 72%;
-    --cream: 60 9% 96%;
-    --warm-gray: 41 9% 61%;
+    --cream: 32 20% 97%;
+    --warm-gray: 32 10% 50%;
     --spec-dimension-icon: 207 24% 68%;
 
     /* Brand / third-party colors */
@@ -107,8 +75,8 @@ All colors MUST be HSL.
     --shadow-elegant: 0 10px 40px rgba(0, 0, 0, 0.12);
     
     /* Typography */
-    --font-display: 'Instrument Serif', Georgia, serif;
-    --font-body: 'Work Sans', Arial, sans-serif;
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'Inter', sans-serif;
     
     /* Transitions */
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);

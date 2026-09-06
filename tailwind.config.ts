@@ -96,10 +96,10 @@ export default {
       },
 
       fontFamily: {
-        display: ["Instrument Serif", "Georgia", "serif"],
-        serif: ["Instrument Serif", "Georgia", "serif"],
+        display: ["Playfair Display", "serif"],
+        serif: ["Playfair Display", "serif"],
         brand: ["Cinzel", "Georgia", "serif"],
-        body: ["Work Sans", "Arial", "sans-serif"],
+        body: ["Lora", "Georgia", "serif"],
       },
       keyframes: {
         "accordion-down": {
