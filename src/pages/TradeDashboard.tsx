@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Image, FileText, FolderOpen, FolderClosed,
@@ -79,6 +80,7 @@ const formatRelativeDate = (dateStr: string) => {
 const TradeDashboard = () => {
   const { profile, user, isTradeUser } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [brands, setBrands] = useState<BrandFolder[]>([]);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,6 +97,19 @@ const TradeDashboard = () => {
       window.removeEventListener("storage", sync);
       window.removeEventListener("concierge:name-changed", sync as EventListener);
     };
+  }, []);
+
+  // Arriving from /trade-onboarding ("Enter Workspace") — confirm the copilot
+  // is live with a single non-intrusive toast at the base of the sidebar.
+  useEffect(() => {
+    if (searchParams.get("onboarded") !== "1") return;
+    const name = loadName() || DEFAULT_NAME;
+    toast.success(`${name} is fully initialized and active in your studio workspace.`, {
+      position: "bottom-left",
+    });
+    searchParams.delete("onboarded");
+    setSearchParams(searchParams, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

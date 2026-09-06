@@ -1,8 +1,17 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTradeCopilot } from "@/contexts/TradeCopilotContext";
+import { saveName } from "@/components/trade/conciergeGreeting";
 
 const SUGGESTIONS = ["DESIGN CONCIERGE", "STUDIO ASSISTANT", "HEAD ARCHIVIST"];
+
+// "STUDIO ASSISTANT" / "FELIX" -> "Studio Assistant" / "Felix"
+const toCleanCase = (raw: string) =>
+  raw
+    .toLowerCase()
+    .split(" ")
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ");
 
 const instrumentSerif = { fontFamily: "'Instrument Serif', serif" };
 
@@ -15,8 +24,12 @@ export default function TradeOnboarding() {
   const selectSuggestion = (name: string) => setInputValue(name);
 
   const handleInitialize = () => {
-    const name = inputValue.trim() || SUGGESTIONS[0];
+    const name = toCleanCase(inputValue.trim() || SUGGESTIONS[0]);
     setCopilotName(name);
+    // Bridge into the global concierge identity so the dashboard header pill,
+    // chat greeting, and system prompts all pick up the chosen name.
+    saveName(name);
+    window.dispatchEvent(new CustomEvent("concierge:name-changed", { detail: name }));
     setInitialized(true);
   };
 
@@ -113,7 +126,7 @@ export default function TradeOnboarding() {
                   Welcome, <span className="text-black">{copilotName}</span>.
                 </p>
                 <Link
-                  to="/trade"
+                  to="/trade?onboarded=1"
                   className="inline-block rounded-none bg-black text-white px-10 py-4 text-xs md:text-sm uppercase tracking-[0.25em] font-sans hover:bg-neutral-800 transition-colors duration-300"
                 >
                   Enter Workspace
