@@ -619,12 +619,9 @@ const TradeLanding = () => {
               transition={{ duration: 1 }}
               className="relative w-[85%] max-w-xl text-center md:ml-auto md:w-full md:pr-12 md:text-left lg:pr-16"
             >
-              <h1 className="font-display text-[1.65rem] leading-[1.1] text-foreground sm:text-3xl lg:text-5xl tracking-wide">
-                Welcome To<br />Maison&nbsp;Affluency
+              <h1 className="font-display text-[1.65rem] leading-[1.2] text-foreground sm:text-3xl lg:text-5xl tracking-wide">
+                Welcome to our <span className="text-accent md:text-foreground">Trade&nbsp;Program</span>
               </h1>
-              <p className="mt-1 font-display text-[1.65rem] font-light leading-[1.1] tracking-widest text-accent sm:text-3xl md:mt-2 md:text-foreground lg:text-5xl">
-                Trade Program
-              </p>
               <motion.div
                 style={{ y: mobileFormRise }}
                 className="relative z-30 mx-auto mt-4 hidden w-full bg-background px-3 py-3 shadow-[0_12px_35px_hsl(var(--foreground)/0.08)] md:mx-0 md:block md:bg-transparent md:p-0 md:shadow-none md:!transform-none"
@@ -649,7 +646,7 @@ const TradeLanding = () => {
             <img
               src={TRADE_PROGRAM_HERO_IMAGE}
               alt="Maison Affluency Trade Program"
-              className="absolute inset-0 h-full w-full object-cover object-bottom md:object-contain"
+              className="absolute inset-0 h-full w-full object-cover object-[50%_20%] md:object-contain md:object-center"
               data-pin-nopin="true"
             />
 
