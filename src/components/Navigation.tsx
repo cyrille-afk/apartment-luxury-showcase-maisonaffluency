@@ -418,7 +418,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
 
       <div className="mx-auto max-w-7xl px-6 md:px-12">
         {/* Mobile: single row */}
-        <div className="grid grid-cols-[auto_1fr_auto] h-24 items-center md:hidden">
+        <div className="relative flex h-24 items-center justify-between md:hidden">
           <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
             {/* Burger — far left */}
             <SheetTrigger asChild>
@@ -427,8 +427,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </Button>
             </SheetTrigger>
 
-            {/* Brand — centered, constrained so it never overlaps the side groups */}
-            <div className="flex justify-center min-w-0 px-2">
+            {/* Brand — absolutely centered in the viewport */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center min-w-0 px-2">
               <div className="flex flex-col items-center max-w-full overflow-hidden">
                 <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap truncate">
                   <span className="font-brand text-[1.65rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
@@ -446,40 +446,25 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             {/* Right-side group: location + cart on trade-program, user + cart elsewhere */}
             <div
               className={cn(
-                "flex items-center",
-                location.pathname === "/trade-program" ? "gap-3 pr-4" : "gap-4"
+                "flex items-center justify-end gap-4"
               )}
             >
-              {location.pathname === "/trade-program" ? (
-                <>
-                  <ShippingDestinationSwitcher
-                    compact
-                    showIso
-                    flagClassName="text-base leading-none"
-                    className="text-foreground"
-                  />
-                  <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
-                </>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (user) {
-                        navigate("/trade");
-                      } else {
-                        setAuthGateMode("login");
-                        setAuthGateOpen(true);
-                      }
-                    }}
-                    aria-label={user ? "My account" : "Sign in"}
-                    className="relative flex items-center justify-center w-10 h-10 text-foreground hover:text-primary transition-colors"
-                  >
-                    <User className="w-[20px] h-[20px]" strokeWidth={1.5} />
-                  </button>
-                  <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
-                </>
-              )}
+              <button
+                type="button"
+                onClick={() => {
+                  if (user) {
+                    navigate("/trade");
+                  } else {
+                    setAuthGateMode("login");
+                    setAuthGateOpen(true);
+                  }
+                }}
+                aria-label={user ? "My account" : "Sign in"}
+                className="relative flex items-center justify-center w-10 h-10 text-foreground hover:text-primary transition-colors"
+              >
+                <User className="w-[20px] h-[20px]" strokeWidth={1.5} />
+              </button>
+              <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
             </div>
 
             <SheetContent side="left" className="w-full overflow-y-auto flex flex-col" aria-describedby={undefined}>
