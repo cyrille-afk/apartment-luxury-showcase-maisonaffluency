@@ -4,7 +4,6 @@ import { Quote, Sparkles } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
-import { withOgCacheBust } from "@/lib/whatsapp-share";
 import ShareMenu from "@/components/ShareMenu";
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
 import projectFoldersImg from "@/assets/benefit-project-folders.jpg";
@@ -14,7 +13,7 @@ import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/Section
 import Navigation from "@/components/Navigation";
 
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
-const TRADE_PROGRAM_SHARE_URL = withOgCacheBust("https://www.maisonaffluency.com/trade-program-og.html");
+const TRADE_PROGRAM_SHARE_URL = "https://www.maisonaffluency.com/trade-program-share-v2.html";
 
 // Browser country inference moved to src/lib/inferCountry.ts and is now consumed
 // directly by TradeRegistrationForm and QuoteRequestDialog as their default value.
