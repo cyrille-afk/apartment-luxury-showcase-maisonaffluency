@@ -97,6 +97,7 @@ export default function TradeEditorialHeader({
           <Link to="/journal" className={navLinkClass}>Journal</Link>
           <span className={`${navLinkClass} border-b border-accent pb-1 text-foreground`}>Trade program</span>
         </div>
+        </div>
       </nav>
     </header>
   );
