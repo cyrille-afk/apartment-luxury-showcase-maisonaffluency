@@ -199,10 +199,37 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
+    color: #232323 !important;
+    font-weight: 300;
+    letter-spacing: 0.035em;
   }
-  
+
+  p, span, a, button, label, input, textarea, select, li, dt, dd {
+    color: #232323 !important;
+  }
+
+  p, a, button, label, input, textarea, select, li, dt, dd {
+    font-weight: 300;
+    letter-spacing: 0.05em;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
+    color: #232323 !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.05em;
+    line-height: 1.4;
+  }
+
+  .font-display, .font-serif {
+    font-weight: 400 !important;
+    letter-spacing: 0.05em;
+    line-height: 1.4;
+  }
+
+  .font-body {
+    font-weight: 300;
+    letter-spacing: 0.05em;
   }
 }
 
