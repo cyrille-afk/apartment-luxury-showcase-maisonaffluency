@@ -13,7 +13,7 @@ import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/Section
 import Navigation from "@/components/Navigation";
 
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
-const TRADE_PROGRAM_SHARE_URL = "https://www.maisonaffluency.com/trade-program-share-v4.html";
+const TRADE_PROGRAM_SHARE_URL = "https://www.maisonaffluency.com/trade-program";
 const TRADE_PROGRAM_SHARE_IMAGE = "https://www.maisonaffluency.com/trade-program-hero-whatsapp.jpg";
 
 // Browser country inference moved to src/lib/inferCountry.ts and is now consumed
@@ -253,17 +253,17 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
           property="og:image"
           content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772600100/IMG_3387_1_p1mhex"
         />
-        <meta property="og:url" content="https://maisonaffluency.com/trade-program" />
+        <meta property="og:url" content="https://www.maisonaffluency.com/trade-program" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Trade Program — Maison Affluency" />
         <meta name="twitter:description" content="Join Maison Affluency's Trade Program for architects and interior designers — exclusive pricing, dedicated advisors, custom sourcing, and insured shipping." />
         <meta name="twitter:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772600100/IMG_3387_1_p1mhex" />
-        <link rel="canonical" href="https://maisonaffluency.com/trade-program" />
+        <link rel="canonical" href="https://www.maisonaffluency.com/trade-program" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebPage",
           "name": "Trade Program — Maison Affluency",
-          "url": "https://maisonaffluency.com/trade-program",
+          "url": "https://www.maisonaffluency.com/trade-program",
           "description": "Exclusive trade program for architects and interior designers offering trade pricing, dedicated client advisors, custom requests, material libraries, and consolidated insured shipping.",
           "publisher": { "@type": "Organization", "name": "Maison Affluency" },
           "mainEntity": {

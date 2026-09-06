@@ -22,7 +22,9 @@ const CRAWLER_UA = /bot|crawl|spider|slurp|bingpreview|mediapartners|facebookext
 
 // Routes the Worker should NEVER prerender (auth-gated, dynamic data, large bundles).
 const SKIP_PATTERNS = [
-  /^\/trade(\/|$)/,
+  // Keep authenticated Trade Portal routes private, but allow the public
+  // `/trade-program` landing page to receive crawler-rendered OG metadata.
+  /^\/trade(?:\/|$)/,
   /^\/studio(\/|$)/,
   /^\/admin(\/|$)/,
   /^\/board\//,
