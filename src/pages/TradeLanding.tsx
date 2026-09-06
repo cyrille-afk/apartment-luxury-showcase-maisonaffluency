@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { Quote, Sparkles } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { cn } from "@/lib/utils";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
