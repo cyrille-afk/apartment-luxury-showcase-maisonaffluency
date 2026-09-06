@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { fetchPublishedArticles, CATEGORY_LABELS, type JournalArticle, type JournalCategory } from "@/lib/journal";
+import Navigation from "@/components/Navigation";
 import FeaturedReadBanner from "@/components/FeaturedReadBanner";
 import DesignerIndexLinks from "@/components/DesignerIndexLinks";
 
@@ -59,20 +58,8 @@ const Journal = () => {
         })}</script>
       </Helmet>
 
-      <div className="min-h-screen bg-background">
-        {/* Nav */}
-        <div className="w-full border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
-          <div className="max-w-7xl mx-auto px-4 md:px-12 py-3 flex items-center justify-between">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-1.5 font-body text-xs font-semibold text-foreground hover:text-primary transition-colors uppercase tracking-[0.1em]"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Maison Affluency
-            </Link>
-            <span className="font-display text-sm tracking-widest text-muted-foreground">Journal</span>
-          </div>
-        </div>
+      <div className="min-h-screen overflow-y-auto bg-background pt-[calc(96px+env(safe-area-inset-top))] md:pt-[calc(120px+env(safe-area-inset-top))]">
+        <Navigation />
         <FeaturedReadBanner />
 
         {/* Hero */}
@@ -100,7 +87,7 @@ const Journal = () => {
           <div className="flex flex-wrap gap-2 justify-center">
             <button
               onClick={() => setActiveCategory("all")}
-              className={`px-4 py-1.5 rounded-full font-body text-[11px] uppercase tracking-[0.15em] border transition-colors ${
+              className={`px-4 py-1.5 rounded-none font-body text-[11px] uppercase tracking-[0.15em] border transition-colors ${
                 activeCategory === "all"
                   ? "bg-foreground text-background border-foreground"
                   : "border-border text-muted-foreground hover:text-foreground hover:border-foreground"
@@ -112,7 +99,7 @@ const Journal = () => {
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-1.5 rounded-full font-body text-[11px] uppercase tracking-[0.15em] border transition-colors ${
+                className={`px-4 py-1.5 rounded-none font-body text-[11px] uppercase tracking-[0.15em] border transition-colors ${
                   activeCategory === cat
                     ? "bg-foreground text-background border-foreground"
                     : "border-border text-muted-foreground hover:text-foreground hover:border-foreground"
