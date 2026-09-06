@@ -213,10 +213,14 @@ function emitTradeProgramShellPlugin(): Plugin {
 
       html = html
         .replace(/<title>[^<]*<\/title>/i, `<title>${title}</title>`)
+        .replace("</title>", `</title>\n    <meta name="description" content="${description}">`)
         .replace(/<meta property="og:title" content="[^"]*">/i, `<meta property="og:title" content="${title}">`)
         .replace(/<meta property="og:description" content="[^"]*">/i, `<meta property="og:description" content="${description}">`)
         .replace(/<meta property="og:url" content="[^"]*">/i, `<meta property="og:url" content="${canonical}">`)
-        .replace(/<meta property="og:image" content="[^"]*">/i, `<meta property="og:image" content="${image}">`)
+        .replace(
+          /<meta property="og:image" content="[^"]*">/i,
+          `<meta property="og:image" content="${image}">\n    <meta property="og:image:secure_url" content="${image}">\n    <meta property="og:image:type" content="image/jpeg">`,
+        )
         .replace(/<meta name="twitter:title" content="[^"]*">/i, `<meta name="twitter:title" content="${title}">`)
         .replace(/<meta name="twitter:description" content="[^"]*">/i, `<meta name="twitter:description" content="${description}">`)
         .replace(/<meta name="twitter:image" content="[^"]*">/i, `<meta name="twitter:image" content="${image}">`)
