@@ -7479,8 +7479,10 @@ export type Database = {
       }
       trade_program_signups: {
         Row: {
+          business_reg_number: string | null
           company_name: string | null
           created_at: string
+          credential_document_path: string | null
           email: string
           id: string
           invite_email_sent_at: string | null
@@ -7492,8 +7494,10 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          business_reg_number?: string | null
           company_name?: string | null
           created_at?: string
+          credential_document_path?: string | null
           email: string
           id?: string
           invite_email_sent_at?: string | null
@@ -7505,8 +7509,10 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          business_reg_number?: string | null
           company_name?: string | null
           created_at?: string
+          credential_document_path?: string | null
           email?: string
           id?: string
           invite_email_sent_at?: string | null
