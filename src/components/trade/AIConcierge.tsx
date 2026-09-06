@@ -3347,7 +3347,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           data-concierge-panel
           style={
             tabletViewport && !minimized
-              ? { inset: 0, width: "100%", height: "100dvh", maxWidth: "none", transform: "none" }
+              ? { inset: 0, width: "100%", height: "100dvh", maxWidth: "none", maxHeight: "none", transform: "none" }
               : modalMode
               ? { width: PANEL_W }
               : fullscreen
