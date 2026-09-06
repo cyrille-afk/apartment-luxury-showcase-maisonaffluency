@@ -347,7 +347,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             <img
               src={cloudinaryUrl("dining-room_ey0bu5", { width: 1200, quality: "auto:good" })}
               alt="Maison Affluency Trade Program"
-              className="absolute inset-0 w-full h-full object-contain"
+              className="absolute inset-0 w-full h-full object-cover object-top"
               data-pin-nopin="true"
             />
             {/* Share button — bottom right of hero */}
