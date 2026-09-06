@@ -335,36 +335,45 @@ export default function TradeProgramLanding() {
         }
         .ma-tpl-link:hover { color: ${GOLD}; }
 
-        /* ─── Provenance strip ─── */
+        /* ─── Provenance + Metrics strip (bounded to header width) ─── */
+        .ma-tpl-metrics-wrap {
+          max-width: 1280px;
+          margin: 0 auto;
+          padding: 0 20px;
+          border-bottom: 1px solid ${LINE};
+        }
         .ma-tpl-provenance {
           border-bottom: 1px solid ${LINE};
           text-align: center;
           padding: 11px 24px;
-          font-size: 11px;
-          letter-spacing: 0.18em;
+          font-size: 10.5px;
+          font-weight: 400;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
           color: ${MUTED};
         }
 
         /* ─── Metrics strip ─── */
         .ma-tpl-bar {
-          border-bottom: 1px solid ${LINE};
           display: grid;
           grid-template-columns: repeat(4, 1fr);
         }
-        .ma-tpl-stat { text-align: center; padding: 34px 16px; border-right: 1px solid ${LINE}; }
+        .ma-tpl-stat { text-align: center; padding: clamp(28px, 3.5vw, 48px) 16px; border-right: 1px solid ${LINE}; }
         .ma-tpl-stat:last-child { border-right: none; }
         .ma-tpl-stat-num {
           font-family: ${serif};
-          font-size: clamp(28px, 3vw, 42px);
+          font-size: clamp(44px, 5vw, 72px);
+          font-weight: 300;
           color: ${INK};
           line-height: 1;
           margin: 0 0 10px 0;
         }
         .ma-tpl-stat-label {
-          font-size: 10px;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
+          font-family: ${labelSans};
+          font-size: 9px;
+          font-weight: 300;
+          letter-spacing: 0.24em;
+          text-transform: lowercase;
           color: ${MUTED};
           margin: 0;
         }
