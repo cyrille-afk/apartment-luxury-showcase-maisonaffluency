@@ -23,6 +23,7 @@ const MUTED = "rgba(27, 27, 25, 0.5)";
 
 const serif = "'Instrument Serif', 'Cormorant Garamond', Georgia, serif";
 const sans = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+const labelSans = "'Work Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 
 const studioBeforeFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773976063/Screen_Shot_2026-03-20_at_11.05.23_AM_fo0aaz.png";
 const studioAfterFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773975478/Screen_Shot_2026-03-20_at_10.57.13_AM_yiqv4q.png";
