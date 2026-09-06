@@ -290,12 +290,12 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
               Join Now
             </button>
           </form>
-          <p className={cn("mt-2 text-center font-body text-[11px] tracking-wide md:text-left md:text-xs", ghost ? "text-foreground" : "text-muted-foreground")}>
+          <p className={cn("mt-2 text-center font-body text-[11px] tracking-wide md:text-left md:text-xs", ghost ? "text-white/90" : "text-muted-foreground")}>
             Already registered?{" "}
 
             <Link
               to="/trade/login"
-              className="text-foreground underline underline-offset-2 hover:text-foreground/80 transition-colors"
+              className={cn("underline underline-offset-2 transition-colors", ghost ? "text-white hover:text-white/80" : "text-foreground hover:text-foreground/80")}
             >
               Sign in
             </Link>
