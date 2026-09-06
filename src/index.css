@@ -88,12 +88,6 @@ All colors MUST be HSL.
     --gold-bright: 38 70% 72%;
     --cream: 60 9% 96%;
     --warm-gray: 41 9% 61%;
-    --gallery-canvas: 45 20% 97%;
-    --gallery-ink: 60 1% 17%;
-    --gallery-caption: 36 8% 48%;
-    --hero-text: 45 33% 96%;
-    --trade-banner: 0 0% 14%;
-    --trade-banner-line: 45 33% 90%;
     --spec-dimension-icon: 207 24% 68%;
 
     /* Brand / third-party colors */
@@ -175,12 +169,6 @@ All colors MUST be HSL.
     --gold-bright: 38 62% 76%;
     --cream: 32 15% 90%;
     --warm-gray: 32 8% 60%;
-    --gallery-canvas: 168 15% 12%;
-    --gallery-ink: 32 14% 91%;
-    --gallery-caption: 32 8% 66%;
-    --hero-text: 45 33% 96%;
-    --trade-banner: 0 0% 14%;
-    --trade-banner-line: 45 33% 90%;
     --spec-dimension-icon: 207 24% 68%;
 
     --gradient-jade: linear-gradient(135deg, hsl(168 40% 45%) 0%, hsl(168 35% 58%) 100%);
@@ -206,40 +194,10 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
     font-family: var(--font-body);
   }
-
+  
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
   }
-}
-
-/* Interactive Gallery's quiet editorial typography. Kept page-scoped so
-   image-overlay heroes and dark surfaces elsewhere retain their contrast. */
-.gallery-editorial {
-  color: #232323;
-}
-
-.gallery-editorial p,
-.gallery-editorial span,
-.gallery-editorial a,
-.gallery-editorial button,
-.gallery-editorial label,
-.gallery-editorial li {
-  font-weight: 300;
-  letter-spacing: 0.05em;
-}
-
-.gallery-editorial h1,
-.gallery-editorial h2,
-.gallery-editorial h3,
-.gallery-editorial h4,
-.gallery-editorial h5,
-.gallery-editorial h6,
-.gallery-editorial .font-display,
-.gallery-editorial .font-serif {
-  color: #232323;
-  font-weight: 400 !important;
-  letter-spacing: 0.05em;
-  line-height: 1.4;
 }
 
 @layer utilities {
