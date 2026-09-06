@@ -433,22 +433,22 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
             />
 
             {/* Mobile ghost form overlay */}
-            <div className="absolute inset-x-0 bottom-10 z-30 px-5 md:hidden">
-              <div className="mx-auto w-[85%] max-w-md rounded-sm border border-white/20 bg-white/20 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.12)] backdrop-blur-md">
+            <div className="absolute inset-x-0 bottom-8 z-30 px-5 md:hidden">
+              <div className="mx-auto w-[85%] max-w-md rounded-sm border border-white/20 bg-white/5 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.12)] backdrop-blur-lg">
                 <HeroJoinForm ghost />
               </div>
             </div>
 
 
             {/* WhatsApp share — direct deep link */}
-            <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 z-10">
+            <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 z-40">
               <button
                 onClick={() => {
                   const message = `Explore Maison Affluency's exclusive Trade Program for design professionals: ${TRADE_PROGRAM_SHARE_URL}`;
                   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
                   window.open(waUrl, "_blank", "noopener,noreferrer");
                 }}
-                className="flex items-center justify-center w-11 h-11 rounded-full bg-background text-foreground/80 border border-border/60 shadow-[0_2px_10px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_4px_14px_rgba(0,0,0,0.12)] hover:scale-105 touch-manipulation"
+                className="flex items-center justify-center w-11 h-11 rounded-full bg-white/10 text-foreground border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.08)] backdrop-blur-md transition-all duration-300 hover:shadow-[0_4px_14px_rgba(0,0,0,0.12)] hover:scale-105 touch-manipulation"
                 aria-label="Share on WhatsApp"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
