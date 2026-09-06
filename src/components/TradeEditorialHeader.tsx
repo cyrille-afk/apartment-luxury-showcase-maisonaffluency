@@ -20,7 +20,7 @@ export default function TradeEditorialHeader({
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/45 bg-background/95 pt-[env(safe-area-inset-top)] backdrop-blur-md">
       {/* Wordmark tier */}
-      <div className="relative flex w-full items-center justify-between px-4 pb-2 pt-4 sm:px-10 sm:pt-6 lg:px-16">
+      <div className="relative mx-auto flex w-full max-w-7xl items-center justify-between px-6 pb-2 pt-4 sm:pt-6 md:px-12">
         <div
           role="group"
           aria-label="Choose region"
@@ -85,7 +85,8 @@ export default function TradeEditorialHeader({
       </div>
 
       {/* Navigation tier */}
-      <nav aria-label="Main navigation" className="w-full overflow-x-auto border-t border-border/35 px-4 scrollbar-hide sm:px-10 lg:px-16">
+      <nav aria-label="Main navigation" className="w-full overflow-x-auto border-t border-border/35 scrollbar-hide">
+        <div className="mx-auto w-full max-w-7xl px-6 md:px-12">
         <div className="flex min-w-max items-center justify-center gap-7 py-2 sm:gap-10 md:gap-12 lg:gap-16">
           <Link to="/new-in" className={navLinkClass}>New in</Link>
           <Link to="/products-category/furniture" className={`${navLinkClass} inline-flex items-center gap-2`}>
