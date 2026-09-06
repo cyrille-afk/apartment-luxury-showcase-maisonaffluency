@@ -428,7 +428,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             <div className="flex justify-center min-w-0 px-2">
               <div className="flex flex-col items-center max-w-full overflow-hidden">
                 <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap truncate">
-                  <span className="font-brand text-[1.9rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+                  <span className="font-brand text-[1.65rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                     <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
                   </span>
                 </button>
