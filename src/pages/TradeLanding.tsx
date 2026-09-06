@@ -13,7 +13,7 @@ import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/Section
 import Navigation from "@/components/Navigation";
 
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
-const TRADE_PROGRAM_SHARE_URL = "https://www.maisonaffluency.com/trade-program-share-v2.html";
+const TRADE_PROGRAM_SHARE_URL = "https://www.maisonaffluency.com/trade-program-share-v3.html";
 
 // Browser country inference moved to src/lib/inferCountry.ts and is now consumed
 // directly by TradeRegistrationForm and QuoteRequestDialog as their default value.
