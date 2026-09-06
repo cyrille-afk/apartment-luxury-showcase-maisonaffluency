@@ -1623,16 +1623,17 @@ const DesignersHoverHero = () => {
               : "w-full rounded-lg border border-gold/10 bg-white/[0.04] px-3 py-2.5 text-[13px] text-white/75 hover:text-white hover:bg-white/[0.07] hover:border-gold/20",
             align === "left" && "text-left justify-start",
             align === "center" && "text-center justify-center",
-            align === "right" && "text-right flex-row-reverse justify-start"
+            align === "right" && "text-right flex-row-reverse justify-start",
+            "order-2 sm:order-1"
           )}
         >
           <Search className={cn("h-3.5 w-3.5 not-italic", isMobileOrPwa ? "text-white/70" : "text-white/45")} aria-hidden="true" />
           Search 150+ Designers
         </button>
 
-        {/* Live network footprint — sits directly beneath the search field */}
-        <p className="mt-2.5 font-body text-[11px] font-light italic tracking-[0.08em] text-[#A39E93]">
-          170+ master profiles live. Introducing new digital ateliers and exclusive collections weekly.
+        {/* Live network footprint — sits beneath the search field on desktop, above it on mobile */}
+        <p className="order-1 sm:order-2 mb-2 sm:mb-0 sm:mt-2.5 font-body text-[11px] leading-relaxed font-light text-neutral-400">
+          150+ master profiles live. Introducing new digital ateliers and exclusive collections weekly.
         </p>
 
         {/* Subtle divider separating the search utility from the Masters list */}
