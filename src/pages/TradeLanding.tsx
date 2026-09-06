@@ -441,7 +441,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
 
 
             {/* WhatsApp share — direct deep link */}
-            <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 z-40">
+            <div className="absolute bottom-5 right-5 md:bottom-6 md:right-6 z-40">
               <button
                 onClick={() => {
                   const message = `Explore Maison Affluency's exclusive Trade Program for design professionals: ${TRADE_PROGRAM_SHARE_URL}`;
