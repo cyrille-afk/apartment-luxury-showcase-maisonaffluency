@@ -18,7 +18,7 @@ interface Props {
 const Email = ({ email, companyName }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your Maison Affluency Trade Program invitation</Preview>
+    <Preview>Maison Affluency Trade Program: Application Received</Preview>
     <Body style={main}>
       <Container style={container}>
         <Text style={eyebrow}>MAISON AFFLUENCY — EST. 2017</Text>
@@ -35,14 +35,13 @@ const Email = ({ email, companyName }: Props) => (
         </Text>
 
         <Text style={paragraph}>
-          To complete your enrolment and unlock trade pricing, bespoke quotations,
-          project folders and our full library of ateliers and collectible design,
-          continue your application below.
+          Our curation team is currently reviewing your professional credentials.
+          You will receive an update regarding your trade account status within 24–48 hours.
         </Text>
 
         <Section style={{ margin: '28px 0' }}>
-          <Button href={`${SITE_URL}/trade/apply`} style={button}>
-            Complete Your Application
+          <Button href={`${SITE_URL}/trade-dashboard`} style={button}>
+            Go to Your Dashboard
           </Button>
         </Section>
 
@@ -60,7 +59,7 @@ const Email = ({ email, companyName }: Props) => (
 
 export const template = {
   component: Email,
-  subject: 'Your Maison Affluency Trade Program invitation',
+  subject: 'Maison Affluency Trade Program: Application Received',
   displayName: 'Trade Program Invitation',
   previewData: { email: 'studio@example.com', companyName: 'Studio Example' },
 } satisfies TemplateEntry
