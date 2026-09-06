@@ -642,16 +642,32 @@ input, select, textarea {
      translucent safe area reveals the image instead of the default white. */
   html.ios-chrome-image {
     background-color: transparent;
-    background-image: var(--ios-chrome-image);
-    background-position: center bottom;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-attachment: fixed;
+    background-image: none;
   }
 
   html.ios-chrome-image body,
   html.ios-chrome-image #root {
     background-color: transparent;
+  }
+
+  /* iOS does not reliably render a fixed background attached to <html> under
+     its translucent bottom chrome. A fixed body layer gives Safari and an
+     installed PWA a real painted surface through the bottom safe area. */
+  html.ios-chrome-image body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: var(--ios-chrome-image);
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  html.ios-chrome-image #root {
+    position: relative;
+    z-index: 1;
   }
 
 
