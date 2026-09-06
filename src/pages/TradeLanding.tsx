@@ -113,10 +113,11 @@ const TradeLanding = () => {
   const [isUKVariant, setIsUKVariant] = useState<boolean>(
     regionParam === "uk" || regionParam === "gb",
   );
-  const [joinStep, setJoinStep] = useState<1 | 2 | 3>(1);
+  const [joinStep, setJoinStep] = useState<1 | 2 | 3 | 4>(1);
   const [joinLoading, setJoinLoading] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [joinEmail, setJoinEmail] = useState("");
+  const [joinCredentialFile, setJoinCredentialFile] = useState<File | null>(null);
 
   const handleJoinSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
