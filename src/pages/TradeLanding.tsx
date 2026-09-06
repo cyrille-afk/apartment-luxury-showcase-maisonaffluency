@@ -290,12 +290,12 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
               Join Now
             </button>
           </form>
-          <p className={cn("mt-2 text-center font-body text-[11px] tracking-wide md:text-left md:text-xs", ghost ? "text-foreground" : "text-muted-foreground")}>
+          <p className={cn("mt-2 text-center font-body text-[11px] tracking-wide md:text-left md:text-xs", ghost ? "text-white/90" : "text-muted-foreground")}>
             Already registered?{" "}
 
             <Link
               to="/trade/login"
-              className="text-foreground underline underline-offset-2 hover:text-foreground/80 transition-colors"
+              className={cn("underline underline-offset-2 transition-colors", ghost ? "text-white hover:text-white/80" : "text-foreground hover:text-foreground/80")}
             >
               Sign in
             </Link>
@@ -432,16 +432,16 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
               data-pin-nopin="true"
             />
 
-            {/* Mobile ghost form overlay */}
+            {/* Mobile form overlay */}
             <div className="absolute inset-x-0 bottom-8 z-30 px-5 md:hidden">
-              <div className="mx-auto w-[85%] max-w-md rounded-sm border border-white/20 bg-white/5 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.12)] backdrop-blur-lg">
+              <div className="mx-auto w-[85%] max-w-md">
                 <HeroJoinForm ghost />
               </div>
             </div>
 
 
             {/* WhatsApp share — direct deep link */}
-            <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 z-40">
+            <div className="absolute bottom-5 right-5 md:bottom-6 md:right-6 z-40">
               <button
                 onClick={() => {
                   const message = `Explore Maison Affluency's exclusive Trade Program for design professionals: ${TRADE_PROGRAM_SHARE_URL}`;
