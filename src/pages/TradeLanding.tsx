@@ -627,7 +627,17 @@ const TradeLanding = () => {
                 style={{ y: mobileFormRise }}
                 className="relative z-30 mx-auto mt-4 hidden w-full bg-background px-3 py-3 shadow-[0_12px_35px_hsl(var(--foreground)/0.08)] md:mx-0 md:block md:bg-transparent md:p-0 md:shadow-none md:!transform-none"
               >
-                <HeroJoinForm ghost={false} />
+                <HeroJoinForm
+                  ghost={false}
+                  joinStep={joinStep}
+                  joinLoading={joinLoading}
+                  joinError={joinError}
+                  joinCredentialFile={joinCredentialFile}
+                  setJoinCredentialFile={setJoinCredentialFile}
+                  handleJoinSubmit={handleJoinSubmit}
+                  handleStudioSubmit={handleStudioSubmit}
+                  handleCredentialsSubmit={handleCredentialsSubmit}
+                />
               </motion.div>
             </motion.div>
           </div>
@@ -649,7 +659,17 @@ const TradeLanding = () => {
                 className="pointer-events-none absolute inset-x-0 -top-10 -bottom-12 bg-gradient-to-b from-black/0 via-black/40 to-black/0"
               />
               <div className="relative mx-auto w-[85%] max-w-md">
-                <HeroJoinForm ghost />
+                <HeroJoinForm
+                  ghost
+                  joinStep={joinStep}
+                  joinLoading={joinLoading}
+                  joinError={joinError}
+                  joinCredentialFile={joinCredentialFile}
+                  setJoinCredentialFile={setJoinCredentialFile}
+                  handleJoinSubmit={handleJoinSubmit}
+                  handleStudioSubmit={handleStudioSubmit}
+                  handleCredentialsSubmit={handleCredentialsSubmit}
+                />
               </div>
             </div>
 
