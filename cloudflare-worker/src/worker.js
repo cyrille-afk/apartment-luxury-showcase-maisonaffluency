@@ -44,6 +44,19 @@ export default {
     const isHtmlRoute = !PASSTHROUGH_EXT.test(url.pathname);
     const isSkipped = SKIP_PATTERNS.some((re) => re.test(url.pathname));
 
+    // The Trade Program has a dedicated static app shell containing its full
+    // Open Graph image metadata. Return it directly so WhatsApp never depends
+    // on browser rendering or an old prerender cache.
+    if (isCrawler && url.pathname.replace(/\/$/, "") === "/trade-program") {
+      const routeShellUrl = new URL("/trade-program/index.html", url);
+      routeShellUrl.hostname = env.ORIGIN_HOST;
+      return fetch(routeShellUrl.toString(), {
+        method: "GET",
+        headers: request.headers,
+        redirect: "manual",
+      });
+    }
+
     // Real users + assets + skipped routes -> straight to origin.
     if (!isCrawler || !isHtmlRoute || isSkipped) {
       return forwardToOrigin(request, env);

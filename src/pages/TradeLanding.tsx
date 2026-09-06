@@ -14,6 +14,7 @@ import Navigation from "@/components/Navigation";
 
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
 const TRADE_PROGRAM_SHARE_URL = "https://www.maisonaffluency.com/trade-program";
+const TRADE_PROGRAM_SHARE_IMAGE = "https://www.maisonaffluency.com/trade-program-hero-whatsapp.jpg";
 
 // Browser country inference moved to src/lib/inferCountry.ts and is now consumed
 // directly by TradeRegistrationForm and QuoteRequestDialog as their default value.
@@ -250,13 +251,18 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         />
         <meta
           property="og:image"
-          content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772600100/IMG_3387_1_p1mhex"
+          content={TRADE_PROGRAM_SHARE_IMAGE}
         />
+        <meta property="og:image:secure_url" content={TRADE_PROGRAM_SHARE_IMAGE} />
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Maison Affluency Trade Program" />
         <meta property="og:url" content="https://www.maisonaffluency.com/trade-program" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Trade Program — Maison Affluency" />
         <meta name="twitter:description" content="Join Maison Affluency's Trade Program for architects and interior designers — exclusive pricing, dedicated advisors, custom sourcing, and insured shipping." />
-        <meta name="twitter:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772600100/IMG_3387_1_p1mhex" />
+        <meta name="twitter:image" content={TRADE_PROGRAM_SHARE_IMAGE} />
         <link rel="canonical" href="https://www.maisonaffluency.com/trade-program" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
@@ -353,8 +359,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 z-10">
               <button
                 onClick={() => {
-                  const pageUrl = typeof window !== "undefined" ? window.location.href : TRADE_PROGRAM_SHARE_URL;
-                  const message = `Explore Maison Affluency's exclusive Trade Program for design professionals: ${pageUrl}`;
+                  const message = `Explore Maison Affluency's exclusive Trade Program for design professionals: ${TRADE_PROGRAM_SHARE_URL}`;
                   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
                   window.open(waUrl, "_blank", "noopener,noreferrer");
                 }}
