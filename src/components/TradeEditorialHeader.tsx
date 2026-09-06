@@ -20,20 +20,20 @@ export default function TradeEditorialHeader({
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/45 bg-background/95 pt-[env(safe-area-inset-top)] backdrop-blur-md">
       {/* Wordmark tier */}
-      <div className="relative flex w-full items-center justify-between px-6 py-6 sm:px-10 lg:px-16 lg:py-8">
+      <div className="relative flex w-full items-center justify-between px-4 py-4 sm:px-10 sm:py-6 lg:px-16 lg:py-8">
         <div
           role="group"
           aria-label="Choose region"
-          className="flex items-center gap-2 font-body text-[10px] font-normal uppercase tracking-[0.2em] text-muted-foreground sm:text-xs lg:text-[13px]"
+          className="flex flex-shrink-0 items-center gap-1.5 font-body text-[9px] font-normal uppercase tracking-[0.18em] text-muted-foreground sm:gap-2 sm:text-[11px] lg:text-[13px]"
         >
-          <span aria-hidden="true" className="h-2 w-2 rounded-full border border-accent" />
+          <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full border border-accent sm:h-2 sm:w-2" />
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={() => onRegionChange(false)}
             aria-pressed={!isUKVariant}
-            className={`h-auto min-w-0 rounded-none p-0 font-body text-[10px] font-normal uppercase tracking-[0.2em] hover:bg-transparent sm:text-xs lg:text-[13px] ${!isUKVariant ? "text-foreground" : "text-muted-foreground"}`}
+            className={`h-auto min-w-0 rounded-none p-0 font-body text-[9px] font-normal uppercase tracking-[0.18em] hover:bg-transparent sm:text-[11px] lg:text-[13px] ${!isUKVariant ? "text-foreground" : "text-muted-foreground"}`}
           >
             <span className="sm:hidden">WW</span>
             <span className="hidden sm:inline">Worldwide</span>
@@ -45,7 +45,7 @@ export default function TradeEditorialHeader({
             size="sm"
             onClick={() => onRegionChange(true)}
             aria-pressed={isUKVariant}
-            className={`h-auto min-w-0 rounded-none p-0 font-body text-[10px] font-normal uppercase tracking-[0.2em] hover:bg-transparent sm:text-xs lg:text-[13px] ${isUKVariant ? "text-foreground" : "text-muted-foreground"}`}
+            className={`h-auto min-w-0 rounded-none p-0 font-body text-[9px] font-normal uppercase tracking-[0.18em] hover:bg-transparent sm:text-[11px] lg:text-[13px] ${isUKVariant ? "text-foreground" : "text-muted-foreground"}`}
           >
             UK
           </Button>
@@ -54,23 +54,23 @@ export default function TradeEditorialHeader({
         <Link
           to="/"
           aria-label="Maison Affluency home"
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap font-display text-2xl font-normal uppercase tracking-[0.28em] text-foreground sm:text-3xl lg:text-4xl"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap font-display text-base font-normal uppercase tracking-[0.18em] text-foreground sm:text-2xl sm:tracking-[0.25em] lg:text-4xl lg:tracking-[0.28em]"
         >
           Maison Affluency
         </Link>
 
-        <div className="flex items-center gap-1 justify-self-end sm:gap-2">
+        <div className="flex flex-shrink-0 items-center gap-0.5 justify-self-end sm:gap-2">
           <Link
             to="/contact"
-            className="mr-3 hidden whitespace-nowrap font-body text-[10px] font-normal uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground md:block lg:text-[13px]"
+            className="mr-2 hidden whitespace-nowrap font-body text-[9px] font-normal uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground md:block lg:text-[13px]"
           >
             Contact us
           </Link>
           <Link to="/designers" aria-label="Search" className={utilityLinkClass}>
-            <Search className="h-[18px] w-[18px] stroke-[1.3] lg:h-5 lg:w-5" />
+            <Search className="h-4 w-4 stroke-[1.3] sm:h-[18px] sm:w-[18px] lg:h-5 lg:w-5" />
           </Link>
           <Link to="/trade/login" aria-label="Account" className={utilityLinkClass}>
-            <UserRound className="h-[18px] w-[18px] stroke-[1.3] lg:h-5 lg:w-5" />
+            <UserRound className="h-4 w-4 stroke-[1.3] sm:h-[18px] sm:w-[18px] lg:h-5 lg:w-5" />
           </Link>
           <Link to="/cart" aria-label="Shopping bag" className={`${utilityLinkClass} hidden sm:inline-flex`}>
             <ShoppingBag className="h-[18px] w-[18px] stroke-[1.3] lg:h-5 lg:w-5" />
@@ -79,8 +79,8 @@ export default function TradeEditorialHeader({
       </div>
 
       {/* Navigation tier */}
-      <nav aria-label="Main navigation" className="w-full overflow-x-auto border-t border-border/35 px-6 scrollbar-hide sm:px-10 lg:px-16">
-        <div className="flex min-w-max items-center justify-center gap-10 py-4 sm:gap-12 md:gap-14 lg:gap-16">
+      <nav aria-label="Main navigation" className="w-full overflow-x-auto border-t border-border/35 px-4 scrollbar-hide sm:px-10 lg:px-16">
+        <div className="flex min-w-max items-center justify-center gap-7 py-3.5 sm:gap-10 sm:py-4 md:gap-12 lg:gap-16">
           <Link to="/new-in" className={navLinkClass}>New in</Link>
           <Link to="/products-category/furniture" className={`${navLinkClass} inline-flex items-center gap-2`}>
             Categories <ChevronDown className="h-3 w-3 stroke-[1.2]" />
