@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Quote, Sparkles } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -93,6 +93,12 @@ const TradeLanding = () => {
   // Featured Issue (AD) free-download removed from the trade area.
 
   const navigate = useNavigate();
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: heroScrollProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const mobileFormRise = useTransform(heroScrollProgress, [0, 0.75], [18, -46]);
   const [searchParams] = useSearchParams();
   const regionParam = (searchParams.get("region") || "").toLowerCase();
   const [isUKVariant, setIsUKVariant] = useState<boolean>(
@@ -294,14 +300,14 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         })}</script>
       </Helmet>
 
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen scroll-smooth bg-background">
         {/* Full official site header (fixed) */}
         <Navigation />
         {/* Spacer reserving the fixed header's footprint */}
         <div aria-hidden className="h-24 md:h-[120px] pt-[env(safe-area-inset-top)]" />
 
         {/* ─── Split-screen Hero ─── */}
-        <div className="relative flex h-[calc(100lvh-6rem)] min-h-[680px] w-full flex-col overflow-hidden md:h-[calc(100vh-256px)] md:min-h-0 md:flex-row">
+        <div ref={heroRef} className="relative flex h-[calc(100lvh-6rem)] min-h-[720px] w-full flex-col overflow-hidden md:h-[calc(100vh-256px)] md:min-h-0 md:flex-row">
           {/* Left Side */}
           <div className="relative z-20 flex h-[48%] w-full shrink-0 items-center justify-center bg-background px-6 pb-8 pt-5 md:h-auto md:w-1/2 md:justify-start md:px-12 md:py-12 lg:px-16">
             <motion.div
@@ -316,34 +322,39 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               <p className="mt-2 font-display text-[1.75rem] font-light leading-[1.12] tracking-widest text-accent sm:text-3xl md:mt-3 md:text-foreground lg:text-5xl">
                 Trade Program
               </p>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.currentTarget);
-                  const email = (formData.get("email") as string) || "";
-                  navigate(`/trade/apply${email ? `?email=${encodeURIComponent(email)}` : ""}`);
-                }}
-                className="mx-auto mt-6 flex w-full max-w-lg flex-col items-stretch gap-3 md:mx-0 md:flex-row md:items-center"
+              <motion.div
+                style={{ y: mobileFormRise }}
+                className="relative z-30 mx-auto mt-6 w-full bg-background px-4 py-5 shadow-[0_12px_35px_hsl(var(--foreground)/0.08)] md:mx-0 md:bg-transparent md:p-0 md:shadow-none md:transform-none"
               >
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Your work email"
-                  className="w-full border border-border/60 bg-card px-5 py-3.5 font-body text-xs uppercase tracking-[0.15em] text-foreground outline-none transition-colors duration-300 placeholder:text-muted-foreground/60 focus:border-accent focus:ring-1 focus:ring-accent/30 md:flex-1"
-                />
-                <button
-                  type="submit"
-                  className="min-w-[120px] w-full border border-gold bg-gold px-6 py-3.5 text-center font-body text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground transition-colors duration-300 hover:bg-gold/90 md:w-auto"
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    const email = (formData.get("email") as string) || "";
+                    navigate(`/trade/apply${email ? `?email=${encodeURIComponent(email)}` : ""}`);
+                  }}
+                  className="mx-auto flex w-full max-w-lg flex-col items-stretch gap-3 md:mx-0 md:flex-row md:items-center"
                 >
-                  Join Now
-                </button>
-              </form>
-              <p className="mt-4 text-center font-body text-[11px] tracking-wide text-muted-foreground md:text-left md:text-xs">
-                Already registered?{" "}
-                <Link to="/trade/login" className="text-foreground underline underline-offset-2 hover:text-foreground/80 transition-colors">
-                  Sign in
-                </Link>
-              </p>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Your work email"
+                    className="w-full border border-border/60 bg-card px-5 py-3.5 font-body text-xs uppercase tracking-[0.15em] text-foreground outline-none transition-colors duration-300 placeholder:text-muted-foreground/60 focus:border-accent focus:ring-1 focus:ring-accent/30 md:flex-1"
+                  />
+                  <button
+                    type="submit"
+                    className="min-w-[120px] w-full border border-gold bg-gold px-6 py-3.5 text-center font-body text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground transition-colors duration-300 hover:bg-gold/90 md:w-auto"
+                  >
+                    Join Now
+                  </button>
+                </form>
+                <p className="mt-4 text-center font-body text-[11px] tracking-wide text-muted-foreground md:text-left md:text-xs">
+                  Already registered?{" "}
+                  <Link to="/trade/login" className="text-foreground underline underline-offset-2 hover:text-foreground/80 transition-colors">
+                    Sign in
+                  </Link>
+                </p>
+              </motion.div>
             </motion.div>
           </div>
 
@@ -384,8 +395,8 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         </div>
 
         {/* ─── Stats Bar ─── */}
-        <div className="w-full border-y border-border bg-background">
-          <div className="mx-auto grid max-w-5xl grid-cols-2 md:grid-cols-4 md:divide-x md:divide-border">
+        <div className="w-full border-y border-border bg-background py-6 md:py-0">
+          <div className="mx-auto grid max-w-5xl grid-cols-2 gap-x-5 gap-y-8 px-6 md:grid-cols-4 md:gap-0 md:px-0 md:divide-x md:divide-border">
             {stats.map((stat, i) => (
               <motion.div
                 key={stat.label}
@@ -393,7 +404,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className={`flex min-h-[88px] flex-col items-center justify-center px-2 py-3 md:min-h-0 md:py-5 ${i % 2 === 0 ? "border-r border-border md:border-r-0" : ""} ${i < 2 ? "border-b border-border md:border-b-0" : ""}`}
+                className="flex min-h-[72px] flex-col items-center justify-center px-2 py-2 md:min-h-0 md:py-5"
               >
                 <span className="font-display text-xl md:text-3xl text-foreground/80 tracking-wide">
                   {stat.value}
