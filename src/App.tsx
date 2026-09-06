@@ -335,7 +335,11 @@ function RouteScrollLockFailsafe() {
     // other route must clear it, otherwise a leftover black canvas shows
     // behind the iOS toolbar (e.g. deep-linking into a designer profile from
     // a dark route whose unmount cleanup never ran).
-    if (location.pathname !== "/" && location.pathname !== "/designers") {
+    if (
+      location.pathname !== "/" &&
+      location.pathname !== "/designers" &&
+      location.pathname !== "/trade-program"
+    ) {
       clearDarkIosChrome();
     }
   }, [location.pathname]);

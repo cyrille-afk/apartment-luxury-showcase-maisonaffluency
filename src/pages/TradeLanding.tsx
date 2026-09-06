@@ -5,6 +5,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
 import { cloudinaryUrl } from "@/lib/cloudinary";
+import { clearDarkIosChrome, setImageIosChrome } from "@/lib/iosChrome";
 
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
 import projectFoldersImg from "@/assets/benefit-project-folders.jpg";
@@ -16,6 +17,7 @@ import Navigation from "@/components/Navigation";
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
 const TRADE_PROGRAM_SHARE_URL = "https://www.maisonaffluency.com/trade-program";
 const TRADE_PROGRAM_SHARE_IMAGE = "https://www.maisonaffluency.com/trade-program-hero-whatsapp.jpg";
+const TRADE_PROGRAM_HERO_IMAGE = cloudinaryUrl("dining-room_ey0bu5", { width: 1200, quality: "auto:good" });
 
 // Browser country inference moved to src/lib/inferCountry.ts and is now consumed
 // directly by TradeRegistrationForm and QuoteRequestDialog as their default value.
@@ -91,6 +93,11 @@ const testimonials = [
 ];
 
 const TradeLanding = () => {
+  useEffect(() => {
+    setImageIosChrome(TRADE_PROGRAM_HERO_IMAGE);
+    return () => clearDarkIosChrome();
+  }, []);
+
   // Featured Issue (AD) free-download removed from the trade area.
 
   const navigate = useNavigate();
@@ -395,7 +402,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
         })}</script>
       </Helmet>
 
-      <div className="min-h-screen scroll-smooth bg-background">
+      <div className="min-h-screen scroll-smooth bg-transparent md:bg-background">
         {/* Full official site header (fixed) */}
         <Navigation />
         {/* Spacer reserving the fixed header's footprint */}
@@ -429,7 +436,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
           {/* Right Side / Mobile Image */}
           <div className="relative min-h-[68%] flex-1 w-full bg-transparent md:h-full md:w-1/2 md:flex-none">
             <img
-              src={cloudinaryUrl("dining-room_ey0bu5", { width: 1200, quality: "auto:good" })}
+              src={TRADE_PROGRAM_HERO_IMAGE}
               alt="Maison Affluency Trade Program"
               className="absolute inset-0 h-full w-full object-cover object-bottom md:object-contain"
               data-pin-nopin="true"
