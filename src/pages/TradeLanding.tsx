@@ -617,10 +617,10 @@ const TradeLanding = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1 }}
-              className="relative w-[85%] max-w-xl text-justify md:ml-auto md:w-full md:pr-12 md:text-left lg:pr-16"
+              className="relative w-[85%] max-w-xl md:ml-auto md:w-full md:pr-12 md:text-left lg:pr-16"
             >
-              <h1 className="font-display text-[1.65rem] leading-[1.2] text-foreground sm:text-3xl lg:text-5xl tracking-wide">
-                Welcome to our <span className="text-accent md:text-foreground">Trade&nbsp;Program</span>
+              <h1 className="whitespace-nowrap font-display text-[1.35rem] leading-[1.2] text-foreground sm:text-3xl lg:text-5xl tracking-wide">
+                Welcome to our Trade Program
               </h1>
               <motion.div
                 style={{ y: mobileFormRise }}
