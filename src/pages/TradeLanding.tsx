@@ -651,7 +651,7 @@ const TradeLanding = () => {
             />
 
             {/* Mobile form overlay — floats just below the chandelier globe and above the table */}
-            <div className="absolute inset-x-0 top-[31%] z-30 px-5 md:hidden">
+            <div className="absolute inset-x-0 top-[40%] z-30 px-5 md:hidden">
               {/* Readability underlay — blends into the photograph */}
               <div
                 aria-hidden
