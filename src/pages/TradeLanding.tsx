@@ -288,7 +288,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         })}</script>
       </Helmet>
 
-      <div className="min-h-screen md:h-screen md:overflow-hidden bg-background md:grid md:grid-rows-[auto_minmax(0,1fr)_auto_auto]">
+      <div className="min-h-screen bg-background">
         {/* Sticky top nav */}
         <div className="w-full border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
           <div className="max-w-7xl mx-auto px-4 md:px-12 py-3 flex items-center justify-between">
@@ -303,7 +303,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         </div>
 
         {/* ─── Split-screen Hero ─── */}
-        <div className="relative w-full min-h-[calc(100svh-3.5rem)] md:min-h-0 md:flex-1 flex flex-col md:flex-row overflow-hidden">
+        <div className="relative w-full min-h-[calc(100svh-3.5rem)] md:min-h-0 md:h-[calc(100vh-187px)] flex flex-col md:flex-row overflow-hidden">
           {/* Left Side */}
           <div className="w-full md:w-1/2 flex items-center justify-start px-6 md:px-12 lg:px-16 py-12 md:py-12 bg-background">
             <motion.div
@@ -401,8 +401,8 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
 
         {/* Featured Issue download banner removed — AD issue no longer offered as free download in the trade area. */}
 
-        {/* Everything below the stats bar: hidden on desktop so the landing acts as a fixed full-screen poster */}
-        <div className="md:hidden">
+        {/* Full Trade Program content */}
+        <div>
 
 
         {/* ─── Intro text block ─── */}
