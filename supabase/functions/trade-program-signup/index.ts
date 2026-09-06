@@ -53,6 +53,9 @@ Deno.serve(async (req) => {
     payload.company_name = companyName
     payload.website_url = websiteUrl
   }
+  if (step === 3) {
+    payload.business_reg_number = businessRegNumber
+  }
   if (!existing) {
     payload.user_agent = (req.headers.get('user-agent') ?? '').slice(0, 500) || null
     payload.referrer = (req.headers.get('referer') ?? '').slice(0, 500) || null
