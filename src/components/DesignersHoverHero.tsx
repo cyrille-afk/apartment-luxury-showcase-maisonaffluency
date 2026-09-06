@@ -1575,8 +1575,7 @@ const DesignersHoverHero = () => {
   ) => (
     <div ref={ref} className={className}>
       <div className={cn(
-        "flex flex-col",
-        !isMobileOrPwa && "w-full",
+        "flex flex-col w-full",
         align === "center" && "items-center text-center",
         align === "right" && "items-end"
       )}>
@@ -1619,7 +1618,7 @@ const DesignersHoverHero = () => {
           className={cn(
             "inline-flex items-center gap-2 text-xs font-body font-light italic transition-colors",
             isMobileOrPwa
-              ? "text-white/85 hover:text-white underline-offset-4 hover:underline"
+              ? cn("text-white/85 hover:text-white underline-offset-4 hover:underline", align === "left" && "w-full justify-start")
               : "w-full rounded-lg border border-gold/10 bg-white/[0.04] px-3 py-2.5 text-[13px] text-white/75 hover:text-white hover:bg-white/[0.07] hover:border-gold/20",
             align === "left" && "text-left justify-start",
             align === "center" && "text-center justify-center",
@@ -1631,7 +1630,10 @@ const DesignersHoverHero = () => {
         </button>
 
         {/* Live network footprint — sits beneath the search field */}
-        <p className="mt-2.5 self-start text-left min-w-[340px] max-w-[360px] font-body text-[11px] leading-relaxed font-light text-neutral-400">
+        <p className={cn(
+          "mt-2.5 self-start text-left font-body text-[11px] leading-relaxed font-light text-neutral-400",
+          isMobileOrPwa ? "w-full" : "min-w-[340px] max-w-[360px]"
+        )}>
           150+ master profiles live.{" "}
           <br className="sm:hidden" />
           Introducing new digital ateliers and exclusive collections weekly.
@@ -1941,12 +1943,12 @@ const DesignersHoverHero = () => {
         {/* Directory label — pinned to the svh frame bottom on mobile only.
             Lowered slightly so it sits closer to the bottom edge. */}
         {isMobileBrowser && directoryLabels(cn(
-          "absolute flex items-center gap-10 text-white w-fit pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center px-6 bottom-[calc(1.5rem+env(safe-area-inset-bottom))]"
-        ), directoryRef, "center")}
+          "absolute flex items-center text-white w-full min-w-[320px] max-w-[340px] pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center bottom-[calc(1.5rem+env(safe-area-inset-bottom))]"
+        ), directoryRef, "left")}
 
         {isStandalone && directoryLabels(cn(
-          "absolute flex items-center gap-10 text-white w-fit pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center px-6 bottom-[calc(1rem+env(safe-area-inset-bottom))]"
-        ), directoryRef, "center")}
+          "absolute flex items-center text-white w-full min-w-[320px] max-w-[340px] pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center bottom-[calc(1rem+env(safe-area-inset-bottom))]"
+        ), directoryRef, "left")}
 
 
         {/* Mobile/PWA scroll hint — quiet mouse icon above the directory, right-justified.

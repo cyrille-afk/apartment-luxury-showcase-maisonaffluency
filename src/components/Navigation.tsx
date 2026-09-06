@@ -438,10 +438,24 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </div>
             </div>
 
-            {/* Cart + flag — right edge, vertically centered with burger */}
-            <div className="flex items-center gap-2">
+            {/* User + cart — right edge, vertically centered with burger */}
+            <div className="flex items-center gap-5 pr-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (user) {
+                    navigate("/trade");
+                  } else {
+                    setAuthGateMode("login");
+                    setAuthGateOpen(true);
+                  }
+                }}
+                aria-label={user ? "My account" : "Sign in"}
+                className="relative flex items-center justify-center w-10 h-10 text-foreground hover:text-primary transition-colors"
+              >
+                <User className="w-[20px] h-[20px]" strokeWidth={1.5} />
+              </button>
               <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
-              <ShippingDestinationSwitcher compact showIso flagClassName="text-2xl" className="-mr-1" />
             </div>
 
 
