@@ -99,6 +99,19 @@ const TradeDashboard = () => {
     };
   }, []);
 
+  // Arriving from /trade-onboarding ("Enter Workspace") — confirm the copilot
+  // is live with a single non-intrusive toast at the base of the sidebar.
+  useEffect(() => {
+    if (searchParams.get("onboarded") !== "1") return;
+    const name = loadName() || DEFAULT_NAME;
+    toast.success(`${name} is fully initialized and active in your studio workspace.`, {
+      position: "bottom-left",
+    });
+    searchParams.delete("onboarded");
+    setSearchParams(searchParams, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       // Fetch dashboard hero overrides
