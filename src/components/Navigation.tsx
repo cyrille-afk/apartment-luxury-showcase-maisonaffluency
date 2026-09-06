@@ -414,21 +414,21 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
     )}>
 
       <div className="mx-auto max-w-7xl px-6 md:px-12">
-        {/* Mobile: single row — logo perfectly centered with equal side tracks */}
-        <div className="grid grid-cols-[1fr_auto_1fr] h-24 items-center md:hidden">
+        {/* Mobile: single row — logo perfectly centered, side groups absolutely positioned */}
+        <div className="relative flex items-center justify-center h-24 md:hidden">
           <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
             {/* Burger — far left */}
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-12 w-12 -ml-2 text-primary justify-self-start" aria-label="Toggle menu">
+              <Button variant="ghost" size="icon" className="absolute left-0 h-12 w-12 -ml-2 text-primary" aria-label="Toggle menu">
                 {isOpen ? <X className="h-8 w-8" strokeWidth={3} /> : <Menu className="h-8 w-8" strokeWidth={3} />}
               </Button>
             </SheetTrigger>
 
-            {/* Brand — perfectly centered */}
-            <div className="flex justify-center min-w-0 px-2">
+            {/* Brand — perfectly centered, capped so it never overlaps the side groups */}
+            <div className="flex justify-center min-w-0 px-2 max-w-[60%]">
               <div className="flex flex-col items-center max-w-full overflow-hidden">
                 <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap truncate">
-                  <span className="font-brand text-[1.9rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+                  <span className="font-brand text-[1.7rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                     <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
                   </span>
                 </button>
@@ -443,7 +443,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             {/* Right-side group: location + cart on trade-program, user + cart elsewhere */}
             <div
               className={cn(
-                "flex items-center justify-self-end",
+                "absolute right-0 top-1/2 -translate-y-1/2 flex items-center",
                 location.pathname === "/trade-program" ? "gap-3 pr-4" : "gap-4"
               )}
             >
