@@ -93,133 +93,8 @@ const testimonials = [
   },
 ];
 
-const TradeLanding = () => {
-  useEffect(() => {
-    setImageIosChrome(TRADE_PROGRAM_HERO_IMAGE);
-    return () => clearDarkIosChrome();
-  }, []);
-
-  // Featured Issue (AD) free-download removed from the trade area.
-
-  const navigate = useNavigate();
-  const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress: heroScrollProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-  const mobileFormRise = useTransform(heroScrollProgress, [0, 0.75], [18, -46]);
-  const [searchParams] = useSearchParams();
-  const regionParam = (searchParams.get("region") || "").toLowerCase();
-  const [isUKVariant, setIsUKVariant] = useState<boolean>(
-    regionParam === "uk" || regionParam === "gb",
-  );
-  const [joinStep, setJoinStep] = useState<1 | 2 | 3 | 4>(1);
-  const [joinLoading, setJoinLoading] = useState(false);
-  const [joinError, setJoinError] = useState<string | null>(null);
-  const [joinEmail, setJoinEmail] = useState("");
-  const [joinCredentialFile, setJoinCredentialFile] = useState<File | null>(null);
-
-  const handleJoinSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const email = ((formData.get("email") as string) || "").trim();
-    if (!email) return;
-    setJoinLoading(true);
-    setJoinError(null);
-    const { error } = await supabase.functions.invoke("trade-program-signup", {
-      body: { email, step: 1 },
-    });
-    setJoinLoading(false);
-    if (error) {
-      setJoinError("We couldn't register that email. Please try again.");
-      return;
-    }
-    setJoinEmail(email);
-    setJoinStep(2);
-  };
-
-  const handleStudioSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const companyName = ((formData.get("company") as string) || "").trim();
-    const websiteUrl = ((formData.get("website") as string) || "").trim();
-    setJoinLoading(true);
-    setJoinError(null);
-    const { error } = await supabase.functions.invoke("trade-program-signup", {
-      body: { email: joinEmail, step: 2, companyName, websiteUrl },
-    });
-    setJoinLoading(false);
-    if (error) {
-      setJoinError("We couldn't save your studio details. Please try again.");
-      return;
-    }
-    setJoinStep(3);
-  };
-
-  const fileToDataUrl = (file: File) =>
-    new Promise<string>((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(r.result as string);
-      r.onerror = reject;
-      r.readAsDataURL(file);
-    });
-
-  const handleCredentialsSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const businessRegNumber = ((formData.get("regNumber") as string) || "").trim();
-    setJoinLoading(true);
-    setJoinError(null);
-    let document: { name: string; contentType: string; data: string } | undefined;
-    if (joinCredentialFile) {
-      if (joinCredentialFile.size > 15 * 1024 * 1024) {
-        setJoinLoading(false);
-        setJoinError("The document is too large (max 15 MB).");
-        return;
-      }
-      const dataUrl = await fileToDataUrl(joinCredentialFile);
-      document = {
-        name: joinCredentialFile.name,
-        contentType: joinCredentialFile.type || "application/octet-stream",
-        data: dataUrl.split(",")[1] || "",
-      };
-    }
-    const { error } = await supabase.functions.invoke("trade-program-signup", {
-      body: { email: joinEmail, step: 3, businessRegNumber, document },
-    });
-    setJoinLoading(false);
-    if (error) {
-      setJoinError("We couldn't submit your application. Please try again.");
-      return;
-    }
-    setJoinStep(4);
-  };
-
-
-  // Overridable 3D Studio images from HeroManager
-  const [studioBeforeImg, setStudioBeforeImg] = useState(studioBeforeImgFallback);
-  const [studioAfterImg, setStudioAfterImg] = useState(studioAfterImgFallback);
-
-  useEffect(() => {
-    loadHeroOverrides().then(() => {
-      const before = getHeroCacheEntry("landing-3d-before");
-      const after = getHeroCacheEntry("landing-3d-after");
-      if (before) setStudioBeforeImg(before.image_url);
-      if (after) setStudioAfterImg(after.image_url);
-    });
-  }, []);
-
-  // Legacy #apply/#register deep links now live on the dedicated application page.
-  useEffect(() => {
-    const hash = window.location.hash;
-    if (hash === "#register" || hash === "#apply") {
-      navigate("/trade/apply", { replace: true });
-    }
-  }, [navigate]);
-
-
 /* ─── Mobile Benefits Carousel ─── */
-const MobileBenefitsCarousel = ({ benefits }: { benefits: typeof import("./TradeLanding").default extends never ? any : { title: string; description: string; image: string }[] }) => {
+const MobileBenefitsCarousel = ({ benefits }: { benefits: { title: string; description: string; image: string; objectPosition?: string }[] }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -239,7 +114,7 @@ const MobileBenefitsCarousel = ({ benefits }: { benefits: typeof import("./Trade
         className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-5"
         style={{ WebkitOverflowScrolling: "touch" }}
       >
-        {benefits.map((benefit: any, index: number) => (
+        {benefits.map((benefit, index) => (
           <div
             key={index}
             className="snap-center shrink-0 w-[85%] rounded-sm overflow-hidden border border-border bg-background"
@@ -262,7 +137,7 @@ const MobileBenefitsCarousel = ({ benefits }: { benefits: typeof import("./Trade
       </div>
       {/* Dots */}
       <div className="flex justify-center gap-2 mt-6">
-        {benefits.map((_: any, i: number) => (
+        {benefits.map((_, i) => (
           <span key={i} className={`w-1.5 h-1.5 rounded-full transition-colors ${i === activeIndex ? "bg-accent" : "bg-border"}`} />
         ))}
       </div>
@@ -331,7 +206,30 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
   );
 };
 
-const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
+/* ─── Hero Join Form ─── */
+interface HeroJoinFormProps {
+  ghost?: boolean;
+  joinStep: 1 | 2 | 3 | 4;
+  joinLoading: boolean;
+  joinError: string | null;
+  joinCredentialFile: File | null;
+  setJoinCredentialFile: (f: File | null) => void;
+  handleJoinSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  handleStudioSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  handleCredentialsSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+}
+
+const HeroJoinForm = ({
+  ghost = false,
+  joinStep,
+  joinLoading,
+  joinError,
+  joinCredentialFile,
+  setJoinCredentialFile,
+  handleJoinSubmit,
+  handleStudioSubmit,
+  handleCredentialsSubmit,
+}: HeroJoinFormProps) => {
   const credentialFileRef = useRef<HTMLInputElement>(null);
   const labelCls = cn(
     "mb-1.5 block text-left font-body text-[10px] uppercase tracking-[0.22em]",
@@ -517,6 +415,132 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
   );
 };
 
+const TradeLanding = () => {
+  useEffect(() => {
+    setImageIosChrome(TRADE_PROGRAM_HERO_IMAGE);
+    return () => clearDarkIosChrome();
+  }, []);
+
+  // Featured Issue (AD) free-download removed from the trade area.
+
+  const navigate = useNavigate();
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: heroScrollProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const mobileFormRise = useTransform(heroScrollProgress, [0, 0.75], [18, -46]);
+  const [searchParams] = useSearchParams();
+  const regionParam = (searchParams.get("region") || "").toLowerCase();
+  const [isUKVariant, setIsUKVariant] = useState<boolean>(
+    regionParam === "uk" || regionParam === "gb",
+  );
+  const [joinStep, setJoinStep] = useState<1 | 2 | 3 | 4>(1);
+  const [joinLoading, setJoinLoading] = useState(false);
+  const [joinError, setJoinError] = useState<string | null>(null);
+  const [joinEmail, setJoinEmail] = useState("");
+  const [joinCredentialFile, setJoinCredentialFile] = useState<File | null>(null);
+
+  const handleJoinSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = ((formData.get("email") as string) || "").trim();
+    if (!email) return;
+    setJoinLoading(true);
+    setJoinError(null);
+    const { error } = await supabase.functions.invoke("trade-program-signup", {
+      body: { email, step: 1 },
+    });
+    setJoinLoading(false);
+    if (error) {
+      setJoinError("We couldn't register that email. Please try again.");
+      return;
+    }
+    setJoinEmail(email);
+    setJoinStep(2);
+  };
+
+  const handleStudioSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const companyName = ((formData.get("company") as string) || "").trim();
+    const websiteUrl = ((formData.get("website") as string) || "").trim();
+    setJoinLoading(true);
+    setJoinError(null);
+    const { error } = await supabase.functions.invoke("trade-program-signup", {
+      body: { email: joinEmail, step: 2, companyName, websiteUrl },
+    });
+    setJoinLoading(false);
+    if (error) {
+      setJoinError("We couldn't save your studio details. Please try again.");
+      return;
+    }
+    setJoinStep(3);
+  };
+
+  const fileToDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+
+  const handleCredentialsSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const businessRegNumber = ((formData.get("regNumber") as string) || "").trim();
+    setJoinLoading(true);
+    setJoinError(null);
+    let document: { name: string; contentType: string; data: string } | undefined;
+    if (joinCredentialFile) {
+      if (joinCredentialFile.size > 15 * 1024 * 1024) {
+        setJoinLoading(false);
+        setJoinError("The document is too large (max 15 MB).");
+        return;
+      }
+      const dataUrl = await fileToDataUrl(joinCredentialFile);
+      document = {
+        name: joinCredentialFile.name,
+        contentType: joinCredentialFile.type || "application/octet-stream",
+        data: dataUrl.split(",")[1] || "",
+      };
+    }
+    const { error } = await supabase.functions.invoke("trade-program-signup", {
+      body: { email: joinEmail, step: 3, businessRegNumber, document },
+    });
+    setJoinLoading(false);
+    if (error) {
+      setJoinError("We couldn't submit your application. Please try again.");
+      return;
+    }
+    setJoinStep(4);
+  };
+
+
+  // Overridable 3D Studio images from HeroManager
+  const [studioBeforeImg, setStudioBeforeImg] = useState(studioBeforeImgFallback);
+  const [studioAfterImg, setStudioAfterImg] = useState(studioAfterImgFallback);
+
+  useEffect(() => {
+    loadHeroOverrides().then(() => {
+      const before = getHeroCacheEntry("landing-3d-before");
+      const after = getHeroCacheEntry("landing-3d-after");
+      if (before) setStudioBeforeImg(before.image_url);
+      if (after) setStudioAfterImg(after.image_url);
+    });
+  }, []);
+
+  // Legacy #apply/#register deep links now live on the dedicated application page.
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash === "#register" || hash === "#apply") {
+      navigate("/trade/apply", { replace: true });
+    }
+  }, [navigate]);
+
+
+
 
   return (
     <>
@@ -603,7 +627,17 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
                 style={{ y: mobileFormRise }}
                 className="relative z-30 mx-auto mt-4 hidden w-full bg-background px-3 py-3 shadow-[0_12px_35px_hsl(var(--foreground)/0.08)] md:mx-0 md:block md:bg-transparent md:p-0 md:shadow-none md:!transform-none"
               >
-                <HeroJoinForm ghost={false} />
+                <HeroJoinForm
+                  ghost={false}
+                  joinStep={joinStep}
+                  joinLoading={joinLoading}
+                  joinError={joinError}
+                  joinCredentialFile={joinCredentialFile}
+                  setJoinCredentialFile={setJoinCredentialFile}
+                  handleJoinSubmit={handleJoinSubmit}
+                  handleStudioSubmit={handleStudioSubmit}
+                  handleCredentialsSubmit={handleCredentialsSubmit}
+                />
               </motion.div>
             </motion.div>
           </div>
@@ -625,7 +659,17 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
                 className="pointer-events-none absolute inset-x-0 -top-10 -bottom-12 bg-gradient-to-b from-black/0 via-black/40 to-black/0"
               />
               <div className="relative mx-auto w-[85%] max-w-md">
-                <HeroJoinForm ghost />
+                <HeroJoinForm
+                  ghost
+                  joinStep={joinStep}
+                  joinLoading={joinLoading}
+                  joinError={joinError}
+                  joinCredentialFile={joinCredentialFile}
+                  setJoinCredentialFile={setJoinCredentialFile}
+                  handleJoinSubmit={handleJoinSubmit}
+                  handleStudioSubmit={handleStudioSubmit}
+                  handleCredentialsSubmit={handleCredentialsSubmit}
+                />
               </div>
             </div>
 
@@ -684,7 +728,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
         {/* Featured Issue download banner removed — AD issue no longer offered as free download in the trade area. */}
 
         {/* Full Trade Program content */}
-        <div>
+        <div className="bg-background">
 
 
         {/* ─── Intro text block ─── */}
