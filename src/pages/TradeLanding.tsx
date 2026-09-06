@@ -288,7 +288,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         })}</script>
       </Helmet>
 
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen md:h-screen md:overflow-hidden bg-background md:flex md:flex-col">
         {/* Sticky top nav */}
         <div className="w-full border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
           <div className="max-w-7xl mx-auto px-4 md:px-12 py-3 flex items-center justify-between">
@@ -334,7 +334,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         </div>
 
         {/* ─── Split-screen Hero ─── */}
-        <div className="relative w-full min-h-[calc(100svh-3.5rem)] md:min-h-0 md:h-[calc(100vh-180px)] md:max-h-[75vh] flex flex-col md:flex-row overflow-hidden">
+        <div className="relative w-full min-h-[calc(100svh-3.5rem)] md:min-h-0 md:flex-1 flex flex-col md:flex-row overflow-hidden">
           {/* Left Side */}
           <div className="w-full md:w-1/2 flex items-center justify-start px-6 md:px-12 lg:px-16 py-12 md:py-12 bg-background">
             <motion.div
@@ -385,7 +385,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             <img
               src={cloudinaryUrl("dining-room_ey0bu5", { width: 1200, height: 1600, quality: "auto:good", crop: "fill", gravity: "auto" })}
               alt="Maison Affluency Trade Program"
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover object-top"
               data-pin-nopin="true"
             />
             {/* Share button — bottom right of hero */}
