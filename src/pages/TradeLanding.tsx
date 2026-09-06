@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Quote, Sparkles } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
