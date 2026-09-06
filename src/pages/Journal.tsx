@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { fetchPublishedArticles, CATEGORY_LABELS, type JournalArticle, type JournalCategory } from "@/lib/journal";
