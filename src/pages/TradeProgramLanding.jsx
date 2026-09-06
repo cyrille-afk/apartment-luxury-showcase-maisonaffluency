@@ -761,22 +761,23 @@ export default function TradeProgramLanding() {
         </div>
       </main>
 
-      {/* ─── Provenance strip ─── */}
-      <p className="ma-tpl-provenance">
-        {isUKVariant
-          ? "Shipping to the UK from European ateliers — France, Italy & beyond"
-          : "Shipping worldwide from European ateliers — France, Italy & beyond"}
-      </p>
+      {/* ─── Provenance + Metrics strip ─── */}
+      <div className="ma-tpl-metrics-wrap">
+        <p className="ma-tpl-provenance">
+          {isUKVariant
+            ? "Shipping to the UK from European ateliers — France, Italy & beyond"
+            : "Shipping worldwide from European ateliers — France, Italy & beyond"}
+        </p>
 
-      {/* ─── 3. Metrics strip ─── */}
-      <section className="ma-tpl-bar" aria-label="Programme metrics">
-        {METRICS.map((stat) => (
-          <div key={stat.label} className="ma-tpl-stat">
-            <p className="ma-tpl-stat-num">{stat.value}</p>
-            <p className="ma-tpl-stat-label">{stat.label}</p>
-          </div>
-        ))}
-      </section>
+        <section className="ma-tpl-bar" aria-label="Programme metrics">
+          {METRICS.map((stat) => (
+            <div key={stat.label} className="ma-tpl-stat">
+              <p className="ma-tpl-stat-num">{stat.value}</p>
+              <p className="ma-tpl-stat-label">{stat.label}</p>
+            </div>
+          ))}
+        </section>
+      </div>
 
       {/* ─── 4. Benefits & overview copy ─── */}
       <section className="ma-tpl-overview">
