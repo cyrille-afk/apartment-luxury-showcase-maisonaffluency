@@ -172,6 +172,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   const stickyProductBarActive = useStickyProductBarActive();
   const programmaticScrollActive = useProgrammaticScrollActive();
   const navHidden =
+    location.pathname !== "/trade-program" &&
     ((scrollDirection === "down" && navScrollY > 240 && !programmaticScrollActive) ||
       stickyProductBarActive) &&
     !isOpen &&
@@ -408,7 +409,9 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   return <><nav className={cn(
       "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
       navHidden ? "-translate-y-full" : "translate-y-0",
-      borderless
+      location.pathname === "/trade-program"
+        ? "bg-background/90 backdrop-blur-md border-b border-border/30"
+        : borderless
         ? "bg-[#FAFAFA] border-b border-transparent md:bg-white md:border-b md:border-zinc-100"
         : "bg-[#FAFAFA] border-b border-border/30 md:bg-white md:border-b md:border-zinc-100"
     )}>
