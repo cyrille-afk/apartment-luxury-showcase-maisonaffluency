@@ -42,10 +42,11 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <!-- iOS Home Screen app: standalone uses system chrome; avoid translucent overlap under the status bar -->
+    <!-- iOS Home Screen app: translucent system chrome allows route artwork to
+         continue through the device safe areas instead of creating white bars. -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Maison Affluency" />
     <!-- Decide iOS browser chrome before first paint. A DOM overlay cannot paint
          Safari's toolbar because it lives outside the page viewport. -->
