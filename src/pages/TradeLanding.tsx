@@ -1086,9 +1086,7 @@ const TradeLanding = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
+            initial={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             className="relative z-10 max-w-3xl mx-auto px-8 pt-16 pb-[max(4rem,env(safe-area-inset-bottom)+3rem)] md:py-24 text-center"
           >
