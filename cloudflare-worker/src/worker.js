@@ -44,6 +44,20 @@ export default {
     const isHtmlRoute = !PASSTHROUGH_EXT.test(url.pathname);
     const isSkipped = SKIP_PATTERNS.some((re) => re.test(url.pathname));
 
+    // The Trade Program has a dedicated static app shell containing its full
+    // Open Graph image metadata. Return it directly so WhatsApp never depends
+    // on browser rendering, the SPA shell, or an old prerender cache.
+    if (isCrawler && url.pathname.replace(/\/$/, "") === "/trade-program") {
+      return new Response(tradeProgramShareHtml(), {
+        headers: {
+          "content-type": "text/html; charset=utf-8",
+          "cache-control": "public, max-age=300",
+          "x-robots-tag": "index, follow",
+          "x-prerender-source": "trade-program-static-og",
+        },
+      });
+    }
+
     // Real users + assets + skipped routes -> straight to origin.
     if (!isCrawler || !isHtmlRoute || isSkipped) {
       return forwardToOrigin(request, env);
@@ -78,6 +92,35 @@ export default {
     });
   },
 };
+
+function tradeProgramShareHtml() {
+  const title = "Trade Program — Maison Affluency";
+  const description = "Exclusive benefits for architects, interior designers, and luxury hospitality professionals.";
+  const canonical = "https://www.maisonaffluency.com/trade-program";
+  const image = "https://www.maisonaffluency.com/trade-program-hero-whatsapp.jpg";
+  return `<!doctype html><html lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>${title}</title>
+    <meta name="description" content="${description}">
+    <link rel="canonical" href="${canonical}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Maison Affluency">
+    <meta property="og:title" content="${title}">
+    <meta property="og:description" content="${description}">
+    <meta property="og:url" content="${canonical}">
+    <meta property="og:image" content="${image}">
+    <meta property="og:image:secure_url" content="${image}">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Maison Affluency Trade Program">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${title}">
+    <meta name="twitter:description" content="${description}">
+    <meta name="twitter:image" content="${image}">
+  </head><body><main><h1>${title}</h1><p>${description}</p><img src="${image}" alt="Maison Affluency Trade Program" width="1200" height="630"></main></body></html>`;
+}
 
 async function forwardToOrigin(request, env, extraHeaders = {}) {
   const url = new URL(request.url);

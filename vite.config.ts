@@ -219,7 +219,7 @@ function emitTradeProgramShellPlugin(): Plugin {
         .replace(/<meta property="og:url" content="[^"]*">/i, `<meta property="og:url" content="${canonical}">`)
         .replace(
           /<meta property="og:image" content="[^"]*">/i,
-          `<meta property="og:image" content="${image}">\n    <meta property="og:image:secure_url" content="${image}">\n    <meta property="og:image:type" content="image/jpeg">`,
+          `<meta property="og:image" content="${image}">\n    <meta property="og:image:secure_url" content="${image}">\n    <meta property="og:image:type" content="image/jpeg">\n    <meta property="og:image:width" content="1200">\n    <meta property="og:image:height" content="630">\n    <meta property="og:image:alt" content="Maison Affluency Trade Program">`,
         )
         .replace(/<meta name="twitter:title" content="[^"]*">/i, `<meta name="twitter:title" content="${title}">`)
         .replace(/<meta name="twitter:description" content="[^"]*">/i, `<meta name="twitter:description" content="${description}">`)
