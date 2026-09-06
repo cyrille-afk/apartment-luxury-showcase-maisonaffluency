@@ -5,6 +5,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
 import { cloudinaryUrl } from "@/lib/cloudinary";
+import { supabase } from "@/integrations/supabase/client";
 import { clearDarkIosChrome, setImageIosChrome } from "@/lib/iosChrome";
 
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
@@ -112,15 +113,48 @@ const TradeLanding = () => {
   const [isUKVariant, setIsUKVariant] = useState<boolean>(
     regionParam === "uk" || regionParam === "gb",
   );
-  const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [joinStep, setJoinStep] = useState<1 | 2 | 3>(1);
+  const [joinLoading, setJoinLoading] = useState(false);
+  const [joinError, setJoinError] = useState<string | null>(null);
+  const [joinEmail, setJoinEmail] = useState("");
 
-  const handleJoinSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleJoinSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const email = (formData.get("email") as string) || "";
+    const email = ((formData.get("email") as string) || "").trim();
     if (!email) return;
-    setEmailSubmitted(true);
+    setJoinLoading(true);
+    setJoinError(null);
+    const { error } = await supabase.functions.invoke("trade-program-signup", {
+      body: { email, step: 1 },
+    });
+    setJoinLoading(false);
+    if (error) {
+      setJoinError("We couldn't register that email. Please try again.");
+      return;
+    }
+    setJoinEmail(email);
+    setJoinStep(2);
   };
+
+  const handleStudioSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const companyName = ((formData.get("company") as string) || "").trim();
+    const websiteUrl = ((formData.get("website") as string) || "").trim();
+    setJoinLoading(true);
+    setJoinError(null);
+    const { error } = await supabase.functions.invoke("trade-program-signup", {
+      body: { email: joinEmail, step: 2, companyName, websiteUrl },
+    });
+    setJoinLoading(false);
+    if (error) {
+      setJoinError("We couldn't save your studio details. Please try again.");
+      return;
+    }
+    setJoinStep(3);
+  };
+
 
   // Overridable 3D Studio images from HeroManager
   const [studioBeforeImg, setStudioBeforeImg] = useState(studioBeforeImgFallback);
@@ -258,11 +292,24 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
 };
 
 const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
+  const labelCls = cn(
+    "block text-left font-body text-[10px] uppercase tracking-[0.22em]",
+    ghost ? "text-white/85" : "text-muted-foreground"
+  );
+  const inputCls = cn(
+    "w-full px-5 py-3 font-body text-xs uppercase tracking-[0.15em] text-foreground outline-none transition-colors duration-300 placeholder:text-muted-foreground/60 focus:border-accent focus:ring-1 focus:ring-accent/30",
+    ghost
+      ? "border border-white/50 bg-white/90 backdrop-blur-sm"
+      : "border border-border/60 bg-card"
+  );
+  const goldBtn =
+    "w-full border border-gold bg-gold px-6 py-3 text-center font-body text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground transition-colors duration-300 hover:bg-gold/90 disabled:opacity-60";
+
   return (
     <AnimatePresence mode="wait" initial={false}>
-      {!emailSubmitted ? (
+      {joinStep === 1 ? (
         <motion.div
-          key="join-form"
+          key="join-step-1"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -272,9 +319,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
             onSubmit={handleJoinSubmit}
             className={cn(
               "mx-auto flex w-full flex-col items-stretch gap-2.5",
-              ghost
-                ? "max-w-md"
-                : "max-w-lg md:mx-0 md:flex-row md:items-center"
+              ghost ? "max-w-md" : "max-w-lg md:mx-0 md:flex-row md:items-center"
             )}
           >
             <input
@@ -282,24 +327,19 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
               name="email"
               required
               placeholder="Your work email"
-              className={cn(
-                "w-full px-5 py-3 font-body text-xs uppercase tracking-[0.15em] text-foreground outline-none transition-colors duration-300 placeholder:text-muted-foreground/60 focus:border-accent focus:ring-1 focus:ring-accent/30",
-                ghost
-                  ? "border border-white/50 bg-white/90 backdrop-blur-sm"
-                  : "border border-border/60 bg-card md:flex-1"
-
-              )}
+              className={cn(inputCls, !ghost && "md:flex-1")}
             />
-            <button
-              type="submit"
-              className="min-w-[120px] w-full border border-gold bg-gold px-6 py-3 text-center font-body text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground transition-colors duration-300 hover:bg-gold/90 md:w-auto"
-            >
-              Join Now
+            <button type="submit" disabled={joinLoading} className={cn(goldBtn, "min-w-[120px] md:w-auto")}>
+              {joinLoading ? "Sending…" : "Join Now"}
             </button>
           </form>
+          {joinError && (
+            <p className={cn("mt-2 text-center font-body text-[11px] md:text-left", ghost ? "text-white" : "text-destructive")}>
+              {joinError}
+            </p>
+          )}
           <p className={cn("mt-2 text-center font-body text-[11px] tracking-wide md:text-left md:text-xs", ghost ? "text-white/95 drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]" : "text-muted-foreground")}>
             Already registered?{" "}
-
             <Link
               to="/trade/login"
               className={cn("underline underline-offset-2 transition-colors", ghost ? "text-white hover:text-white/80" : "text-foreground hover:text-foreground/80")}
@@ -307,6 +347,41 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
               Sign in
             </Link>
           </p>
+        </motion.div>
+      ) : joinStep === 2 ? (
+        <motion.div
+          key="join-step-2"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className={cn("mx-auto w-full", ghost ? "max-w-md" : "max-w-lg md:mx-0")}
+        >
+          <p className={cn("font-display text-sm italic sm:text-base", ghost ? "text-white" : "text-foreground")}>
+            Step 2 of 3 · Studio Details
+          </p>
+          <div className={cn("mt-2 mb-4 h-px w-full", ghost ? "bg-white/30" : "bg-border")}>
+            <div className="h-px w-2/3 bg-gold" />
+          </div>
+
+          <form onSubmit={handleStudioSubmit} className="flex w-full flex-col gap-3">
+            <div className="space-y-1.5">
+              <label htmlFor="company" className={labelCls}>Company / Firm Name</label>
+              <input id="company" name="company" required placeholder="Studio name" className={inputCls} />
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="website" className={labelCls}>Website or Portfolio Link</label>
+              <input id="website" name="website" placeholder="www.yourstudio.com" className={inputCls} />
+            </div>
+            <button type="submit" disabled={joinLoading} className={cn(goldBtn, "mt-1")}>
+              {joinLoading ? "Saving…" : "Continue"}
+            </button>
+          </form>
+          {joinError && (
+            <p className={cn("mt-2 text-center font-body text-[11px]", ghost ? "text-white" : "text-destructive")}>
+              {joinError}
+            </p>
+          )}
         </motion.div>
       ) : (
         <motion.div
@@ -342,6 +417,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
     </AnimatePresence>
   );
 };
+
 
   return (
     <>
@@ -444,7 +520,12 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
 
             {/* Mobile form overlay — floats just below the chandelier globe and above the table */}
             <div className="absolute inset-x-0 top-[31%] z-30 px-5 md:hidden">
-              <div className="mx-auto w-[85%] max-w-md">
+              {/* Readability underlay — blends into the photograph */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 -top-10 -bottom-12 bg-gradient-to-b from-black/0 via-black/40 to-black/0"
+              />
+              <div className="relative mx-auto w-[85%] max-w-md">
                 <HeroJoinForm ghost />
               </div>
             </div>

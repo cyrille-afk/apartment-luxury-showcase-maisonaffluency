@@ -73,3 +73,5 @@ project_id = "dcrauiygaezoduwdjmsm"
 
   [functions.create-bank-transfer-intent]
     verify_jwt = false
+  [functions.trade-program-signup]
+    verify_jwt = false

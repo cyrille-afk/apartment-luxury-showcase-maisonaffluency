@@ -7477,6 +7477,48 @@ export type Database = {
           },
         ]
       }
+      trade_program_signups: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          email: string
+          id: string
+          invite_email_sent_at: string | null
+          referrer: string | null
+          source: string
+          step: number
+          updated_at: string
+          user_agent: string | null
+          website_url: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          invite_email_sent_at?: string | null
+          referrer?: string | null
+          source?: string
+          step?: number
+          updated_at?: string
+          user_agent?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          invite_email_sent_at?: string | null
+          referrer?: string | null
+          source?: string
+          step?: number
+          updated_at?: string
+          user_agent?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       trade_quote_extras: {
         Row: {
           amount_cents: number
