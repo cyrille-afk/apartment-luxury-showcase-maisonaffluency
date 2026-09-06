@@ -278,8 +278,9 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
               className={cn(
                 "w-full px-5 py-3 font-body text-xs uppercase tracking-[0.15em] text-foreground outline-none transition-colors duration-300 placeholder:text-muted-foreground/60 focus:border-accent focus:ring-1 focus:ring-accent/30",
                 ghost
-                  ? "border border-white/50 bg-white/50 backdrop-blur-sm"
+                  ? "border border-white/50 bg-white/80 backdrop-blur-sm"
                   : "border border-border/60 bg-card md:flex-1"
+
               )}
             />
             <button
@@ -289,8 +290,9 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
               Join Now
             </button>
           </form>
-          <p className="mt-2 text-center font-body text-[11px] tracking-wide text-muted-foreground md:text-left md:text-xs">
+          <p className={cn("mt-2 text-center font-body text-[11px] tracking-wide md:text-left md:text-xs", ghost ? "text-foreground" : "text-muted-foreground")}>
             Already registered?{" "}
+
             <Link
               to="/trade/login"
               className="text-foreground underline underline-offset-2 hover:text-foreground/80 transition-colors"
@@ -431,11 +433,12 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
             />
 
             {/* Mobile ghost form overlay */}
-            <div className="absolute inset-x-0 bottom-20 z-30 px-5 md:hidden">
-              <div className="mx-auto w-[85%] max-w-md rounded-sm border border-white/40 bg-white/70 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.12)] backdrop-blur-md">
+            <div className="absolute inset-x-0 bottom-10 z-30 px-5 md:hidden">
+              <div className="mx-auto w-[85%] max-w-md rounded-sm border border-white/20 bg-white/20 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.12)] backdrop-blur-md">
                 <HeroJoinForm ghost />
               </div>
             </div>
+
 
             {/* WhatsApp share — direct deep link */}
             <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 z-10">
