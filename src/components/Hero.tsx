@@ -134,8 +134,11 @@ const Hero = () => {
         </picture>
       )}
 
-
-
+      {/* Legibility scrim: bottom-45% fade on mobile/PWA, subtler 35% fade on desktop */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-black/60 via-black/15 to-transparent md:h-[35%] md:from-black/40 md:via-transparent md:to-transparent"
+        aria-hidden="true"
+      />
 
 
       {/* Text overlay — desktop keeps the previous anchored-top editorial layout;
@@ -155,7 +158,7 @@ const Hero = () => {
           </h1>
 
           <div className="mt-6 flex w-full max-w-3xl flex-col items-start md:mt-10">
-            <p className="relative inline-block text-left font-serif text-sm font-medium leading-relaxed text-white [text-shadow:0_1px_10px_rgba(0,0,0,0.55)] hero-fade-in-delayed-3 md:text-xl lg:text-2xl">
+            <p className="relative inline-block text-left font-serif text-sm font-medium leading-relaxed text-white [text-shadow:0_1px_10px_rgba(0,0,0,0.55)] hero-fade-in-delayed-3 before:absolute before:-inset-x-3 before:-inset-y-2 before:-z-10 before:rounded-sm before:bg-black/35 before:content-[''] before:backdrop-blur-[1px] before:[mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)] md:text-xl lg:text-2xl">
               A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
 
@@ -214,7 +217,7 @@ const Hero = () => {
       {/* Desktop — secondary CTAs lowered to the bottom, centred, same ghost UI */}
       <nav
         aria-label="Hero secondary actions"
-        className="hero-fade-in-delayed-5 pointer-events-auto absolute bottom-8 inset-x-0 mx-auto w-fit z-20 hidden flex-col items-center gap-3 md:flex font-body text-[10px] font-light uppercase tracking-[0.34em] text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.6)]"
+        className="hero-fade-in-delayed-5 pointer-events-auto absolute bottom-8 inset-x-0 mx-auto w-fit z-20 hidden flex-col items-center gap-3 md:flex font-body text-[10px] font-light uppercase tracking-[0.34em] text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.6)] before:absolute before:-inset-x-4 before:-inset-y-2.5 before:-z-10 before:rounded-sm before:bg-black/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]"
       >
         <div className="inline-flex items-center gap-3">
           <button
