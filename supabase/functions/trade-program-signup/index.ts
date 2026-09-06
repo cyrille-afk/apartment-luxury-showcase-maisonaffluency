@@ -84,6 +84,41 @@ Deno.serve(async (req) => {
     signupId = data.id
   }
 
+  // Step 3: store the uploaded credential document in the private bucket.
+  if (step === 3 && signupId) {
+    const doc = body.document as { name?: unknown; contentType?: unknown; data?: unknown } | undefined
+    if (doc && typeof doc.data === 'string' && doc.data.length > 0) {
+      const base64 = doc.data
+      const contentType = typeof doc.contentType === 'string' && doc.contentType
+        ? doc.contentType.slice(0, 120)
+        : 'application/octet-stream'
+      const rawName = typeof doc.name === 'string' && doc.name ? doc.name : 'credential.pdf'
+      const safeName = rawName.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-120)
+      // Rough base64 size guard: ~15 MB decoded
+      if (base64.length <= 21 * 1024 * 1024) {
+        try {
+          const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))
+          const path = `hero-signups/${signupId}/${Date.now()}-${safeName}`
+          const { error: upErr } = await supabase.storage
+            .from('trade-credentials')
+            .upload(path, bytes, { contentType })
+          if (upErr) {
+            console.error('credential upload failed', upErr)
+          } else {
+            await supabase
+              .from('trade_program_signups')
+              .update({ credential_document_path: path })
+              .eq('id', signupId)
+          }
+        } catch (e) {
+          console.error('credential decode failed', e)
+        }
+      } else {
+        console.error('credential document too large')
+      }
+    }
+  }
+
   // Fire the invitation email once, on the first submission.
   let emailSent = Boolean(existing?.invite_email_sent_at)
   if (!emailSent) {
