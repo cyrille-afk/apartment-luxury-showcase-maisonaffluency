@@ -1078,7 +1078,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                   {isMobilePillActive ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                 </span>
               </button>
-              <div id={`gallery-section-${originalSectionIndex}`} ref={el => { sectionRefs.current[originalSectionIndex] = el; }} className={`md:mb-16 lg:mb-20 ${originalSectionIndex === 0 ? 'pt-2 md:pt-0' : ''} ${!isMobilePillActive ? 'hidden md:block' : 'pt-3 mb-8'}`}>
+              <div id={`gallery-section-${originalSectionIndex}`} ref={el => { sectionRefs.current[originalSectionIndex] = el; }} className={`md:mb-28 lg:mb-32 ${originalSectionIndex === 0 ? 'pt-2 md:pt-0' : ''} ${!isMobilePillActive ? 'hidden md:block' : 'pt-5 mb-16'}`}>
               {originalSectionIndex === 0 && <div id="sociable-environment" className="scroll-header-offset" style={{ pointerEvents: "none" }} aria-hidden="true" />}
               <motion.div initial={{
             opacity: 0,
@@ -1089,7 +1089,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           } : {}} transition={{
             duration: 0.6,
             delay: originalSectionIndex * 0.2
-          }} className="mb-8 md:mb-10 lg:mb-12">
+          }} className="mb-12 md:mb-20 lg:mb-24">
                 {/* Desktop/tablet only: mobile/PWA uses the accordion header as the section title. */}
                 {!isMobile && originalSectionIndex === 0 ? (
                   <>
@@ -1105,7 +1105,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       </span>
                     </div>
                     {/* Row 2: Title centred */}
-                    <div className="hidden md:flex flex-col items-center text-center mt-10 lg:mt-12">
+                    <div className="hidden md:flex flex-col items-center text-center mt-16 lg:mt-20">
                       <div className="flex items-center gap-3">
                         <h3 className="font-serif text-xl font-normal leading-relaxed tracking-wide text-gallery-ink md:text-2xl">
                           {section.experience}
@@ -1143,7 +1143,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 ) : !isMobile ? (
                   <>
                     {/* Desktop: centred title, centred subtitle */}
-                    <div className="hidden md:flex flex-col items-center text-center pt-10 lg:pt-12">
+                    <div className="hidden md:flex flex-col items-center text-center pt-20 lg:pt-24">
                       <h3 className="font-serif text-xl font-normal leading-relaxed tracking-wide text-gallery-ink md:text-2xl">
                         {section.experience}
                       </h3>
