@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Quote, Sparkles } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -104,7 +104,15 @@ const TradeLanding = () => {
   const [isUKVariant, setIsUKVariant] = useState<boolean>(
     regionParam === "uk" || regionParam === "gb",
   );
-  
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
+
+  const handleJoinSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = (formData.get("email") as string) || "";
+    if (!email) return;
+    setEmailSubmitted(true);
+  };
 
   // Overridable 3D Studio images from HeroManager
   const [studioBeforeImg, setStudioBeforeImg] = useState(studioBeforeImgFallback);
@@ -326,34 +334,69 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 style={{ y: mobileFormRise }}
                 className="relative z-30 mx-auto mt-6 w-full bg-background px-4 py-5 shadow-[0_12px_35px_hsl(var(--foreground)/0.08)] md:mx-0 md:bg-transparent md:p-0 md:shadow-none md:!transform-none"
               >
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const formData = new FormData(e.currentTarget);
-                    const email = (formData.get("email") as string) || "";
-                    navigate(`/trade/apply${email ? `?email=${encodeURIComponent(email)}` : ""}`);
-                  }}
-                  className="mx-auto flex w-full max-w-lg flex-col items-stretch gap-3 md:mx-0 md:flex-row md:items-center"
-                >
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Your work email"
-                    className="w-full border border-border/60 bg-card px-5 py-3.5 font-body text-xs uppercase tracking-[0.15em] text-foreground outline-none transition-colors duration-300 placeholder:text-muted-foreground/60 focus:border-accent focus:ring-1 focus:ring-accent/30 md:flex-1"
-                  />
-                  <button
-                    type="submit"
-                    className="min-w-[120px] w-full border border-gold bg-gold px-6 py-3.5 text-center font-body text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground transition-colors duration-300 hover:bg-gold/90 md:w-auto"
-                  >
-                    Join Now
-                  </button>
-                </form>
-                <p className="mt-4 text-center font-body text-[11px] tracking-wide text-muted-foreground md:text-left md:text-xs">
-                  Already registered?{" "}
-                  <Link to="/trade/login" className="text-foreground underline underline-offset-2 hover:text-foreground/80 transition-colors">
-                    Sign in
-                  </Link>
-                </p>
+                <AnimatePresence mode="wait" initial={false}>
+                  {!emailSubmitted ? (
+                    <motion.div
+                      key="join-form"
+                      initial={{ opacity: 1 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.35, ease: "easeInOut" }}
+                    >
+                      <form
+                        onSubmit={handleJoinSubmit}
+                        className="mx-auto flex w-full max-w-lg flex-col items-stretch gap-3 md:mx-0 md:flex-row md:items-center"
+                      >
+                        <input
+                          type="email"
+                          name="email"
+                          required
+                          placeholder="Your work email"
+                          className="w-full border border-border/60 bg-card px-5 py-3.5 font-body text-xs uppercase tracking-[0.15em] text-foreground outline-none transition-colors duration-300 placeholder:text-muted-foreground/60 focus:border-accent focus:ring-1 focus:ring-accent/30 md:flex-1"
+                        />
+                        <button
+                          type="submit"
+                          className="min-w-[120px] w-full border border-gold bg-gold px-6 py-3.5 text-center font-body text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground transition-colors duration-300 hover:bg-gold/90 md:w-auto"
+                        >
+                          Join Now
+                        </button>
+                      </form>
+                      <p className="mt-4 text-center font-body text-[11px] tracking-wide text-muted-foreground md:text-left md:text-xs">
+                        Already registered?{" "}
+                        <Link to="/trade/login" className="text-foreground underline underline-offset-2 hover:text-foreground/80 transition-colors">
+                          Sign in
+                        </Link>
+                      </p>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="join-success"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.45, ease: "easeOut", delay: 0.15 }}
+                      className="flex flex-col items-center justify-center py-4 text-center md:items-start md:text-left"
+                    >
+                      <svg
+                        className="mb-4 h-7 w-7 text-accent"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.25"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M4.5 12.5l5 5L19.5 6" />
+                      </svg>
+                      <p className="font-display text-xl text-foreground sm:text-2xl">
+                        Thank You for Your Interest.
+                      </p>
+                      <p className="mt-2 max-w-xs font-body text-[11px] leading-relaxed text-muted-foreground sm:text-xs md:max-w-sm">
+                        An invitation link has been sent to your work email. Our team will review your credentials shortly.
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             </motion.div>
           </div>

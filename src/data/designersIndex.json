@@ -40,6 +40,10 @@
     "name": "Tristan Auer"
   },
   {
+    "slug": "tristan-auer-veronese",
+    "name": "Tristan Auer"
+  },
+  {
     "slug": "autoban",
     "name": "Autoban"
   },
@@ -74,6 +78,10 @@
   {
     "slug": "michel-boyer",
     "name": "Michel Boyer"
+  },
+  {
+    "slug": "laurence-brabant",
+    "name": "Laurence Brabant"
   },
   {
     "slug": "bieke-casteleyn",
@@ -152,12 +160,16 @@
     "name": "Théorème Editions"
   },
   {
+    "slug": "bruno-moinard-editions",
+    "name": "Bruno Moinard Editions"
+  },
+  {
     "slug": "marta-sala-editions",
     "name": "Marta Sala Éditions"
   },
   {
-    "slug": "bruno-moinard-editions",
-    "name": "Bruno Moinard Editions"
+    "slug": "piet-hein-eek",
+    "name": "Piet Hein Eek"
   },
   {
     "slug": "entrelacs",
@@ -188,12 +200,20 @@
     "name": "Poltrona Frau"
   },
   {
+    "slug": "olivier-gagnere",
+    "name": "Olivier Gagnère"
+  },
+  {
     "slug": "forest-giaconia",
     "name": "Forest & Giaconia"
   },
   {
     "slug": "matthieu-gicquel",
     "name": "Matthieu Gicquel"
+  },
+  {
+    "slug": "didier-gomez",
+    "name": "Didier Gomez"
   },
   {
     "slug": "eileen-gray",
@@ -228,12 +248,24 @@
     "name": "Gounot & Jähnke"
   },
   {
+    "slug": "fredie-jochimek",
+    "name": "Fredie Jochimek"
+  },
+  {
+    "slug": "patrick-jouin",
+    "name": "Patrick Jouin"
+  },
+  {
     "slug": "kerstens",
     "name": "Kerstens"
   },
   {
     "slug": "alexander-lamont",
     "name": "Alexander Lamont"
+  },
+  {
+    "slug": "galante-lancman",
+    "name": "M. Galante & T. Lancman"
   },
   {
     "slug": "damien-langlois-meurinne",
@@ -272,8 +304,16 @@
     "name": "Victoria Magniant"
   },
   {
+    "slug": "wegener-masquida",
+    "name": "Wegener & Masquida"
+  },
+  {
     "slug": "manuel-aires-mateus",
     "name": "Manuel Aires Mateus"
+  },
+  {
+    "slug": "hilton-mcconnico",
+    "name": "Hilton McConnico"
   },
   {
     "slug": "mernoe",
@@ -302,6 +342,14 @@
   {
     "slug": "serge-mouille",
     "name": "Serge Mouille"
+  },
+  {
+    "slug": "patrick-e-naggar",
+    "name": "Patrick E. Naggar"
+  },
+  {
+    "slug": "raphael-navot",
+    "name": "Raphael Navot"
   },
   {
     "slug": "luca-nichetto",
@@ -368,6 +416,10 @@
     "name": "Robicara"
   },
   {
+    "slug": "pierre-yves-rochon",
+    "name": "Pierre-Yves Rochon"
+  },
+  {
     "slug": "pierre-augustin-rose",
     "name": "Pierre Augustin Rose"
   },
@@ -400,6 +452,10 @@
     "name": "Studioilse"
   },
   {
+    "slug": "yves-taralon",
+    "name": "Yves Taralon"
+  },
+  {
     "slug": "osvaldo-tenorio-man-of-parts",
     "name": "Osvaldo Tenório"
   },
@@ -430,6 +486,10 @@
   {
     "slug": "jeremy-maxwell-wintrebert",
     "name": "Jeremy Maxwell Wintrebert"
+  },
+  {
+    "slug": "dan-yeffet",
+    "name": "Dan Yeffet"
   },
   {
     "slug": "nathalie-ziegler",
