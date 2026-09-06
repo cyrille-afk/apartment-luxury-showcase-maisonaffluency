@@ -323,22 +323,22 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   const email = (formData.get("email") as string) || "";
                   navigate(`/trade/apply${email ? `?email=${encodeURIComponent(email)}` : ""}`);
                 }}
-                className="flex items-center gap-3 mt-6 w-full max-w-lg"
+                className="flex flex-col md:flex-row items-stretch md:items-center gap-3 mt-6 w-full max-w-lg"
               >
                 <input
                   type="email"
                   name="email"
                   placeholder="Your work email"
-                  className="flex-1 bg-white border border-border/30 focus:border-border/60 text-foreground placeholder:text-muted-foreground/60 px-5 py-3 font-body text-xs uppercase tracking-[0.15em] rounded-none transition-all duration-300 outline-none focus:ring-1 focus:ring-border/30"
+                  className="w-full md:flex-1 bg-white border border-border/30 focus:border-border/60 text-foreground placeholder:text-muted-foreground/60 px-5 py-3 font-body text-xs uppercase tracking-[0.15em] rounded-none transition-all duration-300 outline-none focus:ring-1 focus:ring-border/30"
                 />
                 <button
                   type="submit"
-                  className="bg-[hsl(var(--gold))] hover:bg-[hsl(var(--gold)/0.9)] text-white border border-[hsl(var(--gold))] px-6 py-3 font-body text-xs uppercase tracking-[0.2em] rounded-none transition-all duration-300 font-bold min-w-[120px] text-center whitespace-nowrap"
+                  className="w-full md:w-auto bg-[hsl(var(--gold))] hover:bg-[hsl(var(--gold)/0.9)] text-white border border-[hsl(var(--gold))] px-6 py-3 font-body text-xs uppercase tracking-[0.2em] rounded-none transition-all duration-300 font-bold min-w-[120px] text-center whitespace-nowrap"
                 >
                   Join Now
                 </button>
               </form>
-              <p className="mt-5 font-body text-xs text-muted-foreground tracking-wide">
+              <p className="mt-4 text-center font-body text-xs text-muted-foreground tracking-wide">
                 Already registered?{" "}
                 <Link to="/trade/login" className="text-foreground underline underline-offset-2 hover:text-foreground/80 transition-colors">
                   Sign in
@@ -363,7 +363,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
                   window.open(waUrl, "_blank", "noopener,noreferrer");
                 }}
-                className="flex items-center justify-center w-11 h-11 rounded-full bg-background text-foreground border border-border/60 shadow-[0_2px_10px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_4px_14px_rgba(0,0,0,0.12)] hover:scale-105 touch-manipulation"
+                className="flex items-center justify-center w-11 h-11 rounded-full bg-background text-foreground/80 border border-border/60 shadow-[0_2px_10px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_4px_14px_rgba(0,0,0,0.12)] hover:scale-105 touch-manipulation"
                 aria-label="Share on WhatsApp"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">

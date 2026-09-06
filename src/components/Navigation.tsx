@@ -428,7 +428,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             <div className="flex justify-center min-w-0 px-2">
               <div className="flex flex-col items-center max-w-full overflow-hidden">
                 <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap truncate">
-                  <span className="font-brand text-[1.9rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+                  <span className="font-brand text-[1.65rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                     <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
                   </span>
                 </button>
@@ -440,24 +440,43 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </div>
             </div>
 
-            {/* User + cart — far right group, 16px spacing */}
-            <div className="flex items-center gap-4">
-              <button
-                type="button"
-                onClick={() => {
-                  if (user) {
-                    navigate("/trade");
-                  } else {
-                    setAuthGateMode("login");
-                    setAuthGateOpen(true);
-                  }
-                }}
-                aria-label={user ? "My account" : "Sign in"}
-                className="relative flex items-center justify-center w-10 h-10 text-foreground hover:text-primary transition-colors"
-              >
-                <User className="w-[20px] h-[20px]" strokeWidth={1.5} />
-              </button>
-              <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
+            {/* Right-side group: location + cart on trade-program, user + cart elsewhere */}
+            <div
+              className={cn(
+                "flex items-center",
+                location.pathname === "/trade-program" ? "gap-3 pr-4" : "gap-4"
+              )}
+            >
+              {location.pathname === "/trade-program" ? (
+                <>
+                  <ShippingDestinationSwitcher
+                    compact
+                    showIso
+                    flagClassName="text-base leading-none"
+                    className="text-foreground"
+                  />
+                  <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (user) {
+                        navigate("/trade");
+                      } else {
+                        setAuthGateMode("login");
+                        setAuthGateOpen(true);
+                      }
+                    }}
+                    aria-label={user ? "My account" : "Sign in"}
+                    className="relative flex items-center justify-center w-10 h-10 text-foreground hover:text-primary transition-colors"
+                  >
+                    <User className="w-[20px] h-[20px]" strokeWidth={1.5} />
+                  </button>
+                  <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
+                </>
+              )}
             </div>
 
             <SheetContent side="left" className="w-full overflow-y-auto flex flex-col" aria-describedby={undefined}>
