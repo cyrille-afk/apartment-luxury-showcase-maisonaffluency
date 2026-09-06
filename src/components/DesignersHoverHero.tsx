@@ -272,7 +272,7 @@ const MOBILE_BG_OVERRIDES: Record<string, string> = {
   // floating inset card with black bands above and below. Use the full-bleed
   // portrait straw-marquetry close-up instead — same fix as jean-michel-frank.
   "alexander-lamont":
-    "https://res.cloudinary.com/dif1oamtj/image/upload/v1776570740/Casque-Bar-Cabinet-Amethyst-Ombr%C3%A9-Havana_02_alexander-lamont_teido4.jpg",
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1776570740/Casque-Bar-Cabinet-Amethyst-Ombre%CC%81-Havana_02_alexander-lamont_teido4.jpg",
   // Jean-Michel Frank's raw pick is a square studio shot with a baked-in black
   // ceiling and gray floor; as a full-viewport background it reads as an
   // unanchored floating image. Use the pre-cropped full-bleed straw-marquetry
