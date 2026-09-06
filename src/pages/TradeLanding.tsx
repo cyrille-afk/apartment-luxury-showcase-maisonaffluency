@@ -14,6 +14,7 @@ import Navigation from "@/components/Navigation";
 
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
 const TRADE_PROGRAM_SHARE_URL = "https://www.maisonaffluency.com/trade-program-share-v4.html";
+const TRADE_PROGRAM_SHARE_IMAGE = "https://www.maisonaffluency.com/trade-program-hero-whatsapp.jpg";
 
 // Browser country inference moved to src/lib/inferCountry.ts and is now consumed
 // directly by TradeRegistrationForm and QuoteRequestDialog as their default value.
@@ -354,6 +355,8 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               <ShareMenu
                 url={TRADE_PROGRAM_SHARE_URL}
                 message={`Maison Affluency — Trade Program: ${TRADE_PROGRAM_SHARE_URL}`}
+                imageUrl={TRADE_PROGRAM_SHARE_IMAGE}
+                imageName="maison-affluency-trade-program"
               />
             </div>
           </div>
