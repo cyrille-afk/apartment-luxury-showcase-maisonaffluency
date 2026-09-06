@@ -929,21 +929,21 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: "url('https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto,f_auto,c_fill,g_auto/v1773968016/ImgWeb_S25_PDW_Newsletter001_Article_03_1120x600_image002_Factory-_C2_A9GregSevaz_0_m5hi1i')" }}
           />
-          <div className="absolute inset-0 bg-foreground/20" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.8 }}
-            className="relative z-10 max-w-3xl mx-auto px-6 py-14 md:py-24 text-center"
+            className="relative z-10 max-w-3xl mx-auto px-8 pt-16 pb-[max(4rem,env(safe-area-inset-bottom)+3rem)] md:py-24 text-center"
           >
-            <h2 className="font-display text-2xl md:text-3xl text-background mb-4">
+            <h2 className="font-display text-2xl md:text-3xl text-white mb-5">
               Ready to Get Started?
             </h2>
             <p className="font-body text-sm md:text-base text-white mb-10 max-w-xl mx-auto leading-relaxed font-medium">
               Join a community of architects and interior designers who trust Maison Affluency for their most ambitious projects.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
               <button
                 onClick={() => navigate("/trade/apply")}
                 className="inline-flex items-center px-8 py-3 bg-[hsl(var(--gold))] hover:bg-[hsl(var(--gold)/0.9)] text-white border border-[hsl(var(--gold))] font-body text-xs uppercase tracking-[0.2em] rounded-none transition-all duration-300 font-bold min-w-[160px] justify-center"
