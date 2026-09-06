@@ -152,7 +152,7 @@ const Hero = () => {
       }`}>
 
         <div className="w-full max-w-xl md:max-w-4xl md:text-left">
-          <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
+          <h1 className="font-display text-4xl font-normal leading-[1.08] tracking-[0.01em] text-hero-text md:text-5xl lg:text-6xl">
             Modern Masters.<br />
             Iconic Design.
           </h1>
@@ -195,7 +195,7 @@ const Hero = () => {
               trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
               scrollToSection("apartment-tour-heading");
             }}
-            className="font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
+            className="font-body text-[11px] font-light uppercase tracking-[0.25em] text-hero-text drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
           >
             Singapore Gallery Preview
           </button>
@@ -203,10 +203,10 @@ const Hero = () => {
           <button
             type="button"
             onClick={openTour}
-            className="group flex flex-col items-center font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
+            className="group flex flex-col items-center font-body text-[11px] font-light uppercase tracking-[0.25em] text-hero-text drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
           >
             <span>Book Private Appointment</span>
-            <span className="text-[9px] font-bold normal-case italic tracking-widest text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]">(trade only)</span>
+            <span className="text-[9px] font-light normal-case italic tracking-widest text-hero-text/80 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]">(trade only)</span>
           </button>
         </nav>
 
@@ -217,7 +217,7 @@ const Hero = () => {
       {/* Desktop — secondary CTAs lowered to the bottom, centred, same ghost UI */}
       <nav
         aria-label="Hero secondary actions"
-        className="hero-fade-in-delayed-5 pointer-events-auto absolute bottom-8 inset-x-0 mx-auto w-fit z-20 hidden flex-col items-center gap-3 md:flex font-body text-[10px] font-light uppercase tracking-[0.34em] text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.6)] before:absolute before:-inset-x-4 before:-inset-y-2.5 before:-z-10 before:rounded-sm before:bg-black/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]"
+        className="hero-fade-in-delayed-5 pointer-events-auto absolute inset-x-0 bottom-8 z-20 mx-auto hidden w-fit flex-col items-center gap-3 font-body text-[10px] font-light uppercase tracking-[0.34em] text-hero-text [text-shadow:0_1px_5px_rgba(0,0,0,0.7)] md:flex"
       >
         <div className="inline-flex items-center gap-3">
           <button
@@ -237,7 +237,7 @@ const Hero = () => {
             className="transition-opacity duration-300 hover:opacity-70"
           >
             Book Private Appointment{" "}
-            <span className="ml-2 tracking-[0.2em] text-white/70">(Trade Only)</span>
+            <span className="ml-2 tracking-[0.2em] text-hero-text/70">(Trade Only)</span>
           </button>
         </div>
       </nav>
