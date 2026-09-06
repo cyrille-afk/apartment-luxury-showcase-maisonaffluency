@@ -553,7 +553,7 @@ const TradeRegistrationForm = ({
         </p>
         <label
           htmlFor="credential-upload"
-          className={`flex flex-col items-center justify-center gap-1 w-full py-7 px-4 border border-dashed border-border rounded-lg transition-colors text-center ${
+          className={`flex flex-col items-center justify-center gap-1 w-full py-7 px-4 border border-dashed border-border rounded-none transition-colors text-center ${
             uploading ? "opacity-60 pointer-events-none" : "cursor-pointer hover:border-foreground/40"
           }`}
         >
@@ -689,7 +689,7 @@ const TradeRegistrationForm = ({
       </div>
 
       <button type="submit" disabled={loading || uploading}
-        className="w-full py-3 bg-[hsl(var(--gold))] text-white font-body text-sm uppercase tracking-[0.2em] rounded-full hover:bg-[hsl(var(--gold)/0.9)] transition-all disabled:opacity-50 font-bold inline-flex items-center justify-center gap-2">
+        className="w-full py-3 bg-[hsl(var(--gold))] text-white font-body text-sm uppercase tracking-[0.2em] rounded-none hover:bg-[hsl(var(--gold)/0.9)] transition-all disabled:opacity-50 font-bold inline-flex items-center justify-center gap-2">
         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
         {uploading ? "Uploading document…" : loading ? "Submitting..." : "Submit Application"}
       </button>

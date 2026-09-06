@@ -45,7 +45,7 @@ const TradeApply = () => {
             </Link>
             <Link
               to="/trade/login"
-              className="px-5 py-2 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:opacity-90 transition-opacity"
+              className="px-5 py-2 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-none hover:opacity-90 transition-opacity"
             >
               Sign In
             </Link>
