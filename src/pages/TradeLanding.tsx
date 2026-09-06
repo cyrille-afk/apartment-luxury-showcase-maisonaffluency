@@ -93,6 +93,328 @@ const testimonials = [
   },
 ];
 
+/* ─── Mobile Benefits Carousel ─── */
+const MobileBenefitsCarousel = ({ benefits }: { benefits: { title: string; description: string; image: string; objectPosition?: string }[] }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const scrollLeft = el.scrollLeft;
+    const cardWidth = el.offsetWidth * 0.85;
+    setActiveIndex(Math.round(scrollLeft / cardWidth));
+  }, []);
+
+  return (
+    <div className="md:hidden mt-6 pb-10">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-5"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
+        {benefits.map((benefit, index) => (
+          <div
+            key={index}
+            className="snap-center shrink-0 w-[85%] rounded-sm overflow-hidden border border-border bg-background"
+          >
+            <div className="aspect-[4/3] overflow-hidden">
+              <img
+                src={benefit.image}
+                alt={benefit.title}
+                className={`w-full h-full object-cover ${benefit.objectPosition ? `object-${benefit.objectPosition}` : 'object-bottom'}`}
+                loading="lazy"
+              />
+            </div>
+            <div className="p-4">
+              <p className="font-body text-[9px] tracking-[0.25em] uppercase text-accent mb-2">Trade Program Benefits</p>
+              <h3 className="font-display text-sm text-foreground mb-1.5">{benefit.title}</h3>
+              <p className="font-body text-xs leading-relaxed text-muted-foreground text-justify">{benefit.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Dots */}
+      <div className="flex justify-center gap-2 mt-6">
+        {benefits.map((_, i) => (
+          <span key={i} className={`w-1.5 h-1.5 rounded-full transition-colors ${i === activeIndex ? "bg-accent" : "bg-border"}`} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ─── Mobile Testimonials (truncated) ─── */
+const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; name: string; title: string; location: string }[] }) => {
+  const [showAll, setShowAll] = useState(false);
+  const visible = showAll ? testimonials : testimonials.slice(0, 1);
+
+  return (
+    <>
+      {/* Desktop: full grid */}
+      <div className="hidden md:grid grid-cols-3 gap-8">
+        {testimonials.map((t, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.6, delay: i * 0.15 }}
+            className="relative bg-background border border-border rounded-sm p-8 flex flex-col"
+          >
+            <Quote className="w-5 h-5 text-accent/50 mb-4 shrink-0" />
+            <p className="font-body text-sm leading-relaxed text-muted-foreground flex-1 text-justify">"{t.quote}"</p>
+            <div className="mt-6 pt-4 border-t border-border">
+              <p className="font-display text-sm text-foreground">{t.name}</p>
+              <p className="font-body text-xs text-muted-foreground mt-0.5">{t.title} · {t.location}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Mobile: truncated */}
+      <div className="md:hidden space-y-4">
+        {visible.map((t, i) => (
+          <div key={i} className="bg-background border border-border rounded-sm p-6 flex flex-col">
+            <Quote className="w-5 h-5 text-accent/50 mb-4 shrink-0" />
+            <p className="font-body text-sm leading-relaxed text-muted-foreground flex-1">"{t.quote}"</p>
+            <div className="mt-4 pt-3 border-t border-border">
+              <p className="font-display text-sm text-foreground">{t.name}</p>
+              <p className="font-body text-xs text-muted-foreground mt-0.5">{t.title} · {t.location}</p>
+            </div>
+          </div>
+        ))}
+        {!showAll && testimonials.length > 1 && (
+          <button
+            onClick={() => setShowAll(true)}
+            className="w-full py-3 font-body text-xs tracking-[0.15em] uppercase text-accent border border-accent/30 rounded-sm hover:bg-accent/5 transition-colors"
+          >
+            Show {testimonials.length - 1} more reviews
+          </button>
+        )}
+        {showAll && testimonials.length > 1 && (
+          <button
+            onClick={() => setShowAll(false)}
+            className="w-full py-3 font-body text-xs tracking-[0.15em] uppercase text-muted-foreground border border-border rounded-sm hover:bg-muted/30 transition-colors"
+          >
+            Show less
+          </button>
+        )}
+      </div>
+    </>
+  );
+};
+
+/* ─── Hero Join Form ─── */
+interface HeroJoinFormProps {
+  ghost?: boolean;
+  joinStep: 1 | 2 | 3 | 4;
+  joinLoading: boolean;
+  joinError: string | null;
+  joinCredentialFile: File | null;
+  setJoinCredentialFile: (f: File | null) => void;
+  handleJoinSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  handleStudioSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  handleCredentialsSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+}
+
+const HeroJoinForm = ({
+  ghost = false,
+  joinStep,
+  joinLoading,
+  joinError,
+  joinCredentialFile,
+  setJoinCredentialFile,
+  handleJoinSubmit,
+  handleStudioSubmit,
+  handleCredentialsSubmit,
+}: HeroJoinFormProps) => {
+  const credentialFileRef = useRef<HTMLInputElement>(null);
+  const labelCls = cn(
+    "mb-1.5 block text-left font-body text-[10px] uppercase tracking-[0.22em]",
+    ghost ? "text-white/85" : "text-muted-foreground"
+  );
+  const inputCls = cn(
+    "w-full px-5 py-3 font-body text-xs uppercase tracking-[0.15em] text-foreground outline-none transition-colors duration-300 placeholder:text-muted-foreground/60 focus:border-accent focus:ring-1 focus:ring-accent/30",
+    ghost
+      ? "border border-white/50 bg-white/90 backdrop-blur-sm"
+      : "border border-border/60 bg-card"
+  );
+  const goldBtn =
+    "w-full border border-gold bg-gold px-6 py-3 text-center font-body text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground transition-colors duration-300 hover:bg-gold/90 disabled:opacity-60";
+
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      {joinStep === 1 ? (
+        <motion.div
+          key="join-step-1"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.35, ease: "easeInOut" }}
+        >
+          <form
+            onSubmit={handleJoinSubmit}
+            className={cn(
+              "mx-auto flex w-full flex-col items-stretch gap-2.5",
+              ghost ? "max-w-md" : "max-w-lg md:mx-0 md:flex-row md:items-center"
+            )}
+          >
+            <input
+              type="email"
+              name="email"
+              required
+              placeholder="Your work email"
+              className={cn(inputCls, !ghost && "md:flex-1")}
+            />
+            <button type="submit" disabled={joinLoading} className={cn(goldBtn, "min-w-[120px] md:w-auto")}>
+              {joinLoading ? "Sending…" : "Join Now"}
+            </button>
+          </form>
+          {joinError && (
+            <p className={cn("mt-2 text-center font-body text-[11px] md:text-left", ghost ? "text-white" : "text-destructive")}>
+              {joinError}
+            </p>
+          )}
+          <p className={cn("mt-2 text-center font-body text-[11px] tracking-wide md:text-left md:text-xs", ghost ? "text-white/95 drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]" : "text-muted-foreground")}>
+            Already registered?{" "}
+            <Link
+              to="/trade/login"
+              className={cn("underline underline-offset-2 transition-colors", ghost ? "text-white hover:text-white/80" : "text-foreground hover:text-foreground/80")}
+            >
+              Sign in
+            </Link>
+          </p>
+        </motion.div>
+      ) : joinStep === 2 ? (
+        <motion.div
+          key="join-step-2"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className={cn("mx-auto w-full", ghost ? "max-w-md" : "max-w-lg md:mx-0")}
+        >
+          <p className={cn("font-display text-sm italic sm:text-base", ghost ? "text-white" : "text-foreground")}>
+            Step 2 of 3 · Studio Details
+          </p>
+          <div className={cn("mt-2 mb-4 h-px w-full", ghost ? "bg-white/30" : "bg-border")}>
+            <div className="h-px w-2/3 bg-gold" />
+          </div>
+
+          <form onSubmit={handleStudioSubmit} className="flex w-full flex-col gap-3">
+            <div>
+              <label htmlFor="company" className={labelCls}>Company / Firm Name</label>
+              <input id="company" name="company" required placeholder="Studio name" className={inputCls} />
+            </div>
+            <div>
+              <label htmlFor="website" className={labelCls}>Website or Portfolio Link</label>
+              <input id="website" name="website" placeholder="www.yourstudio.com" className={inputCls} />
+            </div>
+            <button type="submit" disabled={joinLoading} className={cn(goldBtn, "mt-1")}>
+              {joinLoading ? "Saving…" : "Continue"}
+            </button>
+          </form>
+          {joinError && (
+            <p className={cn("mt-2 text-center font-body text-[11px]", ghost ? "text-white" : "text-destructive")}>
+              {joinError}
+            </p>
+          )}
+        </motion.div>
+      ) : joinStep === 3 ? (
+        <motion.div
+          key="join-step-3"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className={cn("mx-auto w-full", ghost ? "max-w-md" : "max-w-lg md:mx-0")}
+        >
+          <p className={cn("font-display text-sm italic sm:text-base", ghost ? "text-white" : "text-foreground")}>
+            Step 3 of 3 · Professional Verification
+          </p>
+          <div className={cn("mt-2 mb-4 h-px w-full", ghost ? "bg-white/30" : "bg-border")}>
+            <div className="h-px w-full bg-gold" />
+          </div>
+
+          <form onSubmit={handleCredentialsSubmit} className="flex w-full flex-col gap-3">
+            <div>
+              <label htmlFor="regNumber" className={labelCls}>Business Registration Number / Tax ID</label>
+              <input id="regNumber" name="regNumber" placeholder="e.g. UEN, VAT, EIN" className={inputCls} />
+            </div>
+            <div>
+              <span className={labelCls}>Professional Certification or Portfolio</span>
+              <input
+                ref={credentialFileRef}
+                type="file"
+                accept="application/pdf,image/*"
+                className="hidden"
+                onChange={(e) => {
+                  setJoinCredentialFile(e.target.files?.[0] ?? null);
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => credentialFileRef.current?.click()}
+                className={cn(
+                  "flex w-full items-center justify-between px-5 py-3 font-body text-xs uppercase tracking-[0.15em] transition-colors duration-300",
+                  ghost
+                    ? "border border-dashed border-white/50 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20"
+                    : "border border-dashed border-border/60 bg-card text-muted-foreground hover:border-accent/50 hover:text-foreground"
+                )}
+              >
+                <span className="truncate">
+                  {joinCredentialFile ? joinCredentialFile.name : "Upload certification or portfolio PDF"}
+                </span>
+                <Upload className="ml-3 h-3.5 w-3.5 shrink-0" />
+              </button>
+            </div>
+            <button type="submit" disabled={joinLoading} className={cn(goldBtn, "mt-1")}>
+              {joinLoading ? "Submitting…" : "Submit Application"}
+            </button>
+          </form>
+          {joinError && (
+            <p className={cn("mt-2 text-center font-body text-[11px]", ghost ? "text-white" : "text-destructive")}>
+              {joinError}
+            </p>
+          )}
+        </motion.div>
+      ) : (
+        <motion.div
+          key="join-success"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: "easeOut", delay: 0.15 }}
+          className={cn(
+            "flex flex-col items-center justify-center py-2 text-center md:items-start md:text-left",
+            ghost && "drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]"
+          )}
+        >
+          <svg
+            className={cn("mb-3 h-6 w-6", ghost ? "text-white" : "text-accent")}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.25"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M4.5 12.5l5 5L19.5 6" />
+          </svg>
+          <p className={cn("font-display text-lg sm:text-2xl", ghost ? "text-white" : "text-foreground")}>
+            Thank You for Your Interest.
+          </p>
+          <p className={cn("mt-1.5 max-w-xs font-body text-[11px] leading-relaxed sm:text-xs md:max-w-sm", ghost ? "text-white/90" : "text-muted-foreground")}>
+            An invitation link has been sent to your work email. Our team will review your credentials shortly.
+          </p>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 const TradeLanding = () => {
   useEffect(() => {
     setImageIosChrome(TRADE_PROGRAM_HERO_IMAGE);
