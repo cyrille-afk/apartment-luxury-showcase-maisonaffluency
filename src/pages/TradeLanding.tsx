@@ -158,7 +158,7 @@ const MobileBenefitsCarousel = ({ benefits }: { benefits: typeof import("./Trade
   }, []);
 
   return (
-    <div className="md:hidden pb-8">
+    <div className="md:hidden mt-6 pb-10">
       <div
         ref={scrollRef}
         onScroll={handleScroll}
@@ -187,7 +187,7 @@ const MobileBenefitsCarousel = ({ benefits }: { benefits: typeof import("./Trade
         ))}
       </div>
       {/* Dots */}
-      <div className="flex justify-center gap-2 mt-4">
+      <div className="flex justify-center gap-2 mt-6">
         {benefits.map((_: any, i: number) => (
           <span key={i} className={`w-1.5 h-1.5 rounded-full transition-colors ${i === activeIndex ? "bg-accent" : "bg-border"}`} />
         ))}
