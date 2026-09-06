@@ -436,7 +436,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
             />
 
             {/* Mobile form overlay — floats just below the chandelier globe and above the table */}
-            <div className="absolute inset-x-0 top-[43%] z-30 px-5 md:hidden">
+            <div className="absolute inset-x-0 top-[31%] z-30 px-5 md:hidden">
               <div className="mx-auto w-[85%] max-w-md">
                 <HeroJoinForm ghost />
               </div>
