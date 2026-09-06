@@ -1032,7 +1032,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     minDistance: minSwipeDistance,
   });
   return <>
-       <section id="gallery" ref={ref} className="pt-0 pb-4 md:pt-0 md:pb-24 bg-white scroll-header-offset">
+       <section id="gallery" ref={ref} className="pt-0 pb-4 md:pt-0 md:pb-24 bg-gallery-canvas text-gallery-ink scroll-header-offset">
         <div className="mx-auto max-w-7xl px-6 md:px-12">
           <motion.div initial={{
           opacity: 0,
@@ -1069,16 +1069,16 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     pinElementBelowHeader(btn);
                   }
                 }}
-                className="md:hidden w-full flex items-center justify-between gap-3 py-5 text-left"
+                className="md:hidden w-full flex items-center justify-between gap-3 py-8 text-left"
                 aria-expanded={isMobilePillActive}
                 aria-controls={`gallery-section-${originalSectionIndex}`}
               >
-                <span className="font-serif text-base text-foreground">{section.experience}</span>
-                <span className="shrink-0 w-7 h-7 rounded-full border border-foreground/40 flex items-center justify-center text-foreground">
+                <span className="font-serif text-base font-normal leading-relaxed tracking-wide text-gallery-ink">{section.experience}</span>
+                <span className="shrink-0 w-7 h-7 rounded-full border border-gallery-ink/30 flex items-center justify-center text-gallery-ink">
                   {isMobilePillActive ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                 </span>
               </button>
-              <div id={`gallery-section-${originalSectionIndex}`} ref={el => { sectionRefs.current[originalSectionIndex] = el; }} className={`md:mb-10 ${originalSectionIndex === 0 ? 'pt-2 md:pt-0' : ''} ${!isMobilePillActive ? 'hidden md:block' : 'pt-3 mb-2'}`}>
+              <div id={`gallery-section-${originalSectionIndex}`} ref={el => { sectionRefs.current[originalSectionIndex] = el; }} className={`md:mb-16 lg:mb-20 ${originalSectionIndex === 0 ? 'pt-2 md:pt-0' : ''} ${!isMobilePillActive ? 'hidden md:block' : 'pt-3 mb-8'}`}>
               {originalSectionIndex === 0 && <div id="sociable-environment" className="scroll-header-offset" style={{ pointerEvents: "none" }} aria-hidden="true" />}
               <motion.div initial={{
             opacity: 0,
@@ -1089,14 +1089,14 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           } : {}} transition={{
             duration: 0.6,
             delay: originalSectionIndex * 0.2
-          }} className="mb-4 md:mb-6">
+          }} className="mb-8 md:mb-10 lg:mb-12">
                 {/* Desktop/tablet only: mobile/PWA uses the accordion header as the section title. */}
                 {!isMobile && originalSectionIndex === 0 ? (
                   <>
                     {/* Row 1: Interactive Gallery (left) with icon on right */}
                     <div className="hidden md:block mt-1" />
                     <div className="hidden md:flex items-center mb-0">
-                      <span className="inline-flex items-center gap-3 font-serif text-sm md:text-base text-foreground font-light tracking-wide">
+                      <span className="inline-flex items-center gap-3 font-serif text-sm md:text-base font-normal leading-relaxed tracking-wide text-gallery-ink/85">
                         Interactive Gallery
                         <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-black/70 border border-primary/70">
                           <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
@@ -1105,16 +1105,16 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       </span>
                     </div>
                     {/* Row 2: Title centred */}
-                    <div className="hidden md:flex flex-col items-center text-center mb-3">
+                    <div className="hidden md:flex flex-col items-center text-center mt-10 lg:mt-12">
                       <div className="flex items-center gap-3">
-                        <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-primary">
+                        <h3 className="font-serif text-xl font-normal leading-relaxed tracking-wide text-gallery-ink md:text-2xl">
                           {section.experience}
                         </h3>
                       </div>
                       {/* Subtitle centred, grid icons right-aligned on same row */}
-                      <div className="flex items-center w-full mt-1">
+                      <div className="flex items-center w-full mt-2">
                         <div className="flex-1" />
-                        <p className="text-sm md:text-base text-muted-foreground font-body italic">
+                        <p className="font-body text-sm font-light italic leading-relaxed tracking-wide text-gallery-caption md:text-base">
                           {section.subtitle}
                         </p>
                         <div className="flex-1 flex justify-end">
@@ -1143,11 +1143,11 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 ) : !isMobile ? (
                   <>
                     {/* Desktop: centred title, centred subtitle */}
-                    <div className="hidden md:flex flex-col items-center text-center mb-3">
-                      <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-primary">
+                    <div className="hidden md:flex flex-col items-center text-center pt-10 lg:pt-12">
+                      <h3 className="font-serif text-xl font-normal leading-relaxed tracking-wide text-gallery-ink md:text-2xl">
                         {section.experience}
                       </h3>
-                      <p className="text-sm md:text-base text-muted-foreground font-body italic mt-1">
+                      <p className="mt-2 font-body text-sm font-light italic leading-relaxed tracking-wide text-gallery-caption md:text-base">
                         {section.subtitle}
                       </p>
                     </div>

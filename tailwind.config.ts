@@ -64,6 +64,11 @@ export default {
           bright: "hsl(var(--gold-bright))",
         },
         cream: "hsl(var(--cream))",
+        gallery: {
+          canvas: "hsl(var(--gallery-canvas))",
+          ink: "hsl(var(--gallery-ink))",
+          caption: "hsl(var(--gallery-caption))",
+        },
         whatsapp: "hsl(var(--whatsapp))",
         "pdf-red": "hsl(var(--pdf-red))",
         success: "hsl(var(--success))",
