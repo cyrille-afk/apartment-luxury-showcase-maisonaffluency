@@ -424,7 +424,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
           </div>
 
           {/* Right Side / Mobile Image */}
-          <div className="relative min-h-[68%] flex-1 w-full bg-muted md:h-full md:w-1/2 md:flex-none">
+          <div className="relative min-h-[68%] flex-1 w-full bg-transparent md:h-full md:w-1/2 md:flex-none">
             <img
               src={cloudinaryUrl("dining-room_ey0bu5", { width: 1200, quality: "auto:good" })}
               alt="Maison Affluency Trade Program"
@@ -432,8 +432,8 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
               data-pin-nopin="true"
             />
 
-            {/* Mobile form overlay */}
-            <div className="absolute inset-x-0 bottom-8 z-30 px-5 md:hidden">
+            {/* Mobile form overlay — floats just below the chandelier globe and above the table */}
+            <div className="absolute inset-x-0 top-[56%] z-30 px-5 md:hidden">
               <div className="mx-auto w-[85%] max-w-md">
                 <HeroJoinForm ghost />
               </div>
@@ -441,7 +441,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
 
 
             {/* WhatsApp share — direct deep link */}
-            <div className="absolute bottom-5 right-5 md:bottom-6 md:right-6 z-40">
+            <div className="absolute bottom-6 right-6 md:bottom-7 md:right-7 z-40">
               <button
                 onClick={() => {
                   const message = `Explore Maison Affluency's exclusive Trade Program for design professionals: ${TRADE_PROGRAM_SHARE_URL}`;
