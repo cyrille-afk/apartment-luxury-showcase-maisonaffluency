@@ -35,14 +35,13 @@ const Email = ({ email, companyName }: Props) => (
         </Text>
 
         <Text style={paragraph}>
-          To complete your enrolment and unlock trade pricing, bespoke quotations,
-          project folders and our full library of ateliers and collectible design,
-          continue your application below.
+          Our curation team is currently reviewing your professional credentials.
+          You will receive an update regarding your trade account status within 24–48 hours.
         </Text>
 
         <Section style={{ margin: '28px 0' }}>
-          <Button href={`${SITE_URL}/trade/apply`} style={button}>
-            Complete Your Application
+          <Button href={`${SITE_URL}/trade-dashboard`} style={button}>
+            Go to Your Dashboard
           </Button>
         </Section>
 
