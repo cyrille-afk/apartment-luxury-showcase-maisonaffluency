@@ -278,7 +278,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
               className={cn(
                 "w-full px-5 py-3 font-body text-xs uppercase tracking-[0.15em] text-foreground outline-none transition-colors duration-300 placeholder:text-muted-foreground/60 focus:border-accent focus:ring-1 focus:ring-accent/30",
                 ghost
-                  ? "border border-white/50 bg-white/80 backdrop-blur-sm"
+                  ? "border border-white/50 bg-white/90 backdrop-blur-sm"
                   : "border border-border/60 bg-card md:flex-1"
 
               )}
@@ -290,7 +290,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
               Join Now
             </button>
           </form>
-          <p className={cn("mt-2 text-center font-body text-[11px] tracking-wide md:text-left md:text-xs", ghost ? "text-white/90" : "text-muted-foreground")}>
+          <p className={cn("mt-2 text-center font-body text-[11px] tracking-wide md:text-left md:text-xs", ghost ? "text-white/95 drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]" : "text-muted-foreground")}>
             Already registered?{" "}
 
             <Link
@@ -307,10 +307,13 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: "easeOut", delay: 0.15 }}
-          className="flex flex-col items-center justify-center py-2 text-center md:items-start md:text-left"
+          className={cn(
+            "flex flex-col items-center justify-center py-2 text-center md:items-start md:text-left",
+            ghost && "drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]"
+          )}
         >
           <svg
-            className="mb-3 h-6 w-6 text-accent"
+            className={cn("mb-3 h-6 w-6", ghost ? "text-white" : "text-accent")}
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -321,10 +324,10 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
           >
             <path d="M4.5 12.5l5 5L19.5 6" />
           </svg>
-          <p className="font-display text-lg text-foreground sm:text-2xl">
+          <p className={cn("font-display text-lg sm:text-2xl", ghost ? "text-white" : "text-foreground")}>
             Thank You for Your Interest.
           </p>
-          <p className="mt-1.5 max-w-xs font-body text-[11px] leading-relaxed text-muted-foreground sm:text-xs md:max-w-sm">
+          <p className={cn("mt-1.5 max-w-xs font-body text-[11px] leading-relaxed sm:text-xs md:max-w-sm", ghost ? "text-white/90" : "text-muted-foreground")}>
             An invitation link has been sent to your work email. Our team will review your credentials shortly.
           </p>
         </motion.div>
@@ -424,7 +427,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
           </div>
 
           {/* Right Side / Mobile Image */}
-          <div className="relative min-h-[68%] flex-1 w-full bg-muted md:h-full md:w-1/2 md:flex-none">
+          <div className="relative min-h-[68%] flex-1 w-full bg-transparent md:h-full md:w-1/2 md:flex-none">
             <img
               src={cloudinaryUrl("dining-room_ey0bu5", { width: 1200, quality: "auto:good" })}
               alt="Maison Affluency Trade Program"
@@ -432,8 +435,8 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
               data-pin-nopin="true"
             />
 
-            {/* Mobile form overlay */}
-            <div className="absolute inset-x-0 bottom-8 z-30 px-5 md:hidden">
+            {/* Mobile form overlay — floats just below the chandelier globe and above the table */}
+            <div className="absolute inset-x-0 top-[56%] z-30 px-5 md:hidden">
               <div className="mx-auto w-[85%] max-w-md">
                 <HeroJoinForm ghost />
               </div>
@@ -441,7 +444,7 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
 
 
             {/* WhatsApp share — direct deep link */}
-            <div className="absolute bottom-5 right-5 md:bottom-6 md:right-6 z-40">
+            <div className="absolute bottom-6 right-6 md:bottom-7 md:right-7 z-40">
               <button
                 onClick={() => {
                   const message = `Explore Maison Affluency's exclusive Trade Program for design professionals: ${TRADE_PROGRAM_SHARE_URL}`;
