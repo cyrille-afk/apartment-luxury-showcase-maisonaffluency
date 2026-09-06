@@ -344,7 +344,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               className="w-full max-w-xl ml-auto md:pr-12 lg:pr-16"
             >
               <h1 className="font-display text-2xl sm:text-3xl lg:text-5xl text-foreground tracking-wide">
-                Welcome To Maison Affluency
+                Welcome To<br />Maison&nbsp;Affluency
               </h1>
               <p className="font-display text-2xl sm:text-3xl lg:text-5xl text-foreground mt-3 tracking-widest font-light">
                 Trade Program
