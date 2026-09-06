@@ -5,6 +5,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
 import { cloudinaryUrl } from "@/lib/cloudinary";
+import { supabase } from "@/integrations/supabase/client";
 import { clearDarkIosChrome, setImageIosChrome } from "@/lib/iosChrome";
 
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
@@ -519,7 +520,12 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
 
             {/* Mobile form overlay — floats just below the chandelier globe and above the table */}
             <div className="absolute inset-x-0 top-[31%] z-30 px-5 md:hidden">
-              <div className="mx-auto w-[85%] max-w-md">
+              {/* Readability underlay — blends into the photograph */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 -top-10 -bottom-12 bg-gradient-to-b from-black/0 via-black/40 to-black/0"
+              />
+              <div className="relative mx-auto w-[85%] max-w-md">
                 <HeroJoinForm ghost />
               </div>
             </div>
