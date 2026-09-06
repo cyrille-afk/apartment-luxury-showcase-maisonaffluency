@@ -601,19 +601,9 @@ const TradeLanding = () => {
         })}</script>
       </Helmet>
 
-      <div className="min-h-[100dvh] scroll-smooth bg-transparent md:bg-background">
-        {/* Global hero backdrop — fixed full-bleed canvas behind everything (mobile only; desktop uses split-screen) */}
-        <div aria-hidden className="fixed inset-0 z-0 h-[100dvh] w-screen md:hidden">
-          <img
-            src={TRADE_PROGRAM_HERO_IMAGE}
-            alt=""
-            className="h-full w-full object-cover object-bottom"
-            data-pin-nopin="true"
-          />
-        </div>
-
-        {/* Scrolling content layer above the backdrop */}
+      <div className="min-h-[100dvh] scroll-smooth bg-background">
         <div className="relative z-10 w-full min-h-[100dvh] bg-transparent">
+
         {/* Full official site header (fixed) */}
         <Navigation />
         {/* Spacer reserving the fixed header's footprint */}
@@ -654,12 +644,12 @@ const TradeLanding = () => {
             </motion.div>
           </div>
 
-          {/* Right Side (desktop image; mobile uses the fixed global backdrop) */}
-          <div className="relative min-h-[68%] flex-1 w-full bg-transparent md:h-full md:w-1/2 md:flex-none">
+          {/* Right Side: hero photograph (inline on mobile and desktop) */}
+          <div className="relative min-h-[68%] flex-1 w-full bg-background md:h-full md:w-1/2 md:flex-none">
             <img
               src={TRADE_PROGRAM_HERO_IMAGE}
               alt="Maison Affluency Trade Program"
-              className="absolute inset-0 hidden h-full w-full object-cover object-bottom md:block md:object-contain"
+              className="absolute inset-0 h-full w-full object-cover object-bottom md:object-contain"
               data-pin-nopin="true"
             />
 
