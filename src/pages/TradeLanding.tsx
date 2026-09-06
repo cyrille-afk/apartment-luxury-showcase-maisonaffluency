@@ -654,12 +654,12 @@ const TradeLanding = () => {
             </motion.div>
           </div>
 
-          {/* Right Side / Mobile Image */}
+          {/* Right Side (desktop image; mobile uses the fixed global backdrop) */}
           <div className="relative min-h-[68%] flex-1 w-full bg-transparent md:h-full md:w-1/2 md:flex-none">
             <img
               src={TRADE_PROGRAM_HERO_IMAGE}
               alt="Maison Affluency Trade Program"
-              className="absolute inset-0 h-full w-full object-cover object-bottom md:object-contain"
+              className="absolute inset-0 hidden h-full w-full object-cover object-bottom md:block md:object-contain"
               data-pin-nopin="true"
             />
 
