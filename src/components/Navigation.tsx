@@ -415,31 +415,33 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
 
       <div className="mx-auto max-w-7xl px-6 md:px-12">
         {/* Mobile: single row */}
-          <div className="flex h-24 items-center md:hidden relative justify-between">
-           <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
-            {/* Burger — left edge, vertically centered with flag */}
+        <div className="grid grid-cols-[auto_1fr_auto] h-24 items-center md:hidden">
+          <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
+            {/* Burger — far left */}
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="h-12 w-12 -ml-2 text-primary" aria-label="Toggle menu">
                 {isOpen ? <X className="h-8 w-8" strokeWidth={3} /> : <Menu className="h-8 w-8" strokeWidth={3} />}
               </Button>
             </SheetTrigger>
 
-            {/* Brand — centered horizontally */}
-            <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center">
-            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
-              <span className="font-brand text-[1.9rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
-                <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
-              </span>
-            </button>
-              <div className="flex items-center gap-2 -mt-0.5 brand-lockup">
-                <span className="h-px w-5 bg-foreground" />
-                <span className="font-body text-[7px] uppercase tracking-[0.3em] text-foreground font-bold">Est. 2017</span>
-                <span className="h-px w-5 bg-foreground" />
+            {/* Brand — centered, constrained so it never overlaps the side groups */}
+            <div className="flex justify-center min-w-0 px-2">
+              <div className="flex flex-col items-center max-w-full overflow-hidden">
+                <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap truncate">
+                  <span className="font-brand text-[1.9rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+                    <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
+                  </span>
+                </button>
+                <div className="flex items-center gap-2 -mt-0.5 brand-lockup">
+                  <span className="h-px w-5 bg-foreground" />
+                  <span className="font-body text-[7px] uppercase tracking-[0.3em] text-foreground font-bold">Est. 2017</span>
+                  <span className="h-px w-5 bg-foreground" />
+                </div>
               </div>
             </div>
 
-            {/* User + cart — right edge, vertically centered with burger */}
-            <div className="flex items-center gap-5 pr-2">
+            {/* User + cart — far right group, 16px spacing */}
+            <div className="flex items-center gap-4">
               <button
                 type="button"
                 onClick={() => {
@@ -457,8 +459,6 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </button>
               <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
             </div>
-
-
 
             <SheetContent side="left" className="w-full overflow-y-auto flex flex-col" aria-describedby={undefined}>
               <div className="sr-only">
