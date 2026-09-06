@@ -23,15 +23,16 @@ const MUTED = "rgba(27, 27, 25, 0.5)";
 
 const serif = "'Instrument Serif', 'Cormorant Garamond', Georgia, serif";
 const sans = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+const labelSans = "'Work Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 
 const studioBeforeFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773976063/Screen_Shot_2026-03-20_at_11.05.23_AM_fo0aaz.png";
 const studioAfterFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773975478/Screen_Shot_2026-03-20_at_10.57.13_AM_yiqv4q.png";
 
 const METRICS = [
-  { value: "300+", label: "DESIGNERS & ATELIERS" },
-  { value: "15+", label: "COUNTRIES SERVED" },
-  { value: "100%", label: "INSURED SHIPPING" },
-  { value: "24h", label: "QUOTE TURNAROUND" },
+  { value: "300+", label: "designers & ateliers" },
+  { value: "15+", label: "countries served" },
+  { value: "100%", label: "insured shipping" },
+  { value: "24h", label: "quote turnaround" },
 ];
 
 const BENEFITS = [
@@ -160,7 +161,7 @@ export default function TradeProgramLanding() {
         />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@300;400;500&display=swap"
         />
       </Helmet>
 
@@ -334,36 +335,45 @@ export default function TradeProgramLanding() {
         }
         .ma-tpl-link:hover { color: ${GOLD}; }
 
-        /* ─── Provenance strip ─── */
+        /* ─── Provenance + Metrics strip (bounded to header width) ─── */
+        .ma-tpl-metrics-wrap {
+          max-width: 1280px;
+          margin: 0 auto;
+          padding: 0 20px;
+          border-bottom: 1px solid ${LINE};
+        }
         .ma-tpl-provenance {
           border-bottom: 1px solid ${LINE};
           text-align: center;
           padding: 11px 24px;
-          font-size: 11px;
-          letter-spacing: 0.18em;
+          font-size: 10.5px;
+          font-weight: 400;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
           color: ${MUTED};
         }
 
         /* ─── Metrics strip ─── */
         .ma-tpl-bar {
-          border-bottom: 1px solid ${LINE};
           display: grid;
           grid-template-columns: repeat(4, 1fr);
         }
-        .ma-tpl-stat { text-align: center; padding: 34px 16px; border-right: 1px solid ${LINE}; }
+        .ma-tpl-stat { text-align: center; padding: clamp(28px, 3.5vw, 48px) 16px; border-right: 1px solid ${LINE}; }
         .ma-tpl-stat:last-child { border-right: none; }
         .ma-tpl-stat-num {
           font-family: ${serif};
-          font-size: clamp(28px, 3vw, 42px);
+          font-size: clamp(44px, 5vw, 72px);
+          font-weight: 300;
           color: ${INK};
           line-height: 1;
           margin: 0 0 10px 0;
         }
         .ma-tpl-stat-label {
-          font-size: 10px;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
+          font-family: ${labelSans};
+          font-size: 9px;
+          font-weight: 300;
+          letter-spacing: 0.24em;
+          text-transform: lowercase;
           color: ${MUTED};
           margin: 0;
         }
@@ -751,22 +761,23 @@ export default function TradeProgramLanding() {
         </div>
       </main>
 
-      {/* ─── Provenance strip ─── */}
-      <p className="ma-tpl-provenance">
-        {isUKVariant
-          ? "Shipping to the UK from European ateliers — France, Italy & beyond"
-          : "Shipping worldwide from European ateliers — France, Italy & beyond"}
-      </p>
+      {/* ─── Provenance + Metrics strip ─── */}
+      <div className="ma-tpl-metrics-wrap">
+        <p className="ma-tpl-provenance">
+          {isUKVariant
+            ? "Shipping to the UK from European ateliers — France, Italy & beyond"
+            : "Shipping worldwide from European ateliers — France, Italy & beyond"}
+        </p>
 
-      {/* ─── 3. Metrics strip ─── */}
-      <section className="ma-tpl-bar" aria-label="Programme metrics">
-        {METRICS.map((stat) => (
-          <div key={stat.label} className="ma-tpl-stat">
-            <p className="ma-tpl-stat-num">{stat.value}</p>
-            <p className="ma-tpl-stat-label">{stat.label}</p>
-          </div>
-        ))}
-      </section>
+        <section className="ma-tpl-bar" aria-label="Programme metrics">
+          {METRICS.map((stat) => (
+            <div key={stat.label} className="ma-tpl-stat">
+              <p className="ma-tpl-stat-num">{stat.value}</p>
+              <p className="ma-tpl-stat-label">{stat.label}</p>
+            </div>
+          ))}
+        </section>
+      </div>
 
       {/* ─── 4. Benefits & overview copy ─── */}
       <section className="ma-tpl-overview">
