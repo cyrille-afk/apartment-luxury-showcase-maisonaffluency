@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ChevronDown, Heart, MapPin, Quote, Search, ShoppingBag, Sparkles, UserRound } from "lucide-react";
+import { Quote, Sparkles } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { withOgCacheBust } from "@/lib/whatsapp-share";
 import ShareMenu from "@/components/ShareMenu";
+import TradeEditorialHeader from "@/components/TradeEditorialHeader";
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
 import projectFoldersImg from "@/assets/benefit-project-folders.jpg";
 const studioBeforeImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773976063/Screen_Shot_2026-03-20_at_11.05.23_AM_fo0aaz.png";
@@ -289,40 +290,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
       </Helmet>
 
       <div className="min-h-screen bg-background">
-        {/* Editorial two-tier navigation */}
-        <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/95 backdrop-blur-md pt-[env(safe-area-inset-top)]">
-          <div className="mx-auto grid min-h-14 max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-4 md:px-10">
-            <div role="group" aria-label="Choose region" className="flex items-center gap-2 justify-self-start font-body text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
-              <MapPin className="h-3 w-3 text-accent" aria-hidden="true" />
-              <button type="button" onClick={() => setIsUKVariant(false)} aria-pressed={!isUKVariant} className={!isUKVariant ? "text-foreground" : "transition-colors hover:text-foreground"}>Worldwide</button>
-              <span aria-hidden="true" className="text-border">/</span>
-              <button type="button" onClick={() => setIsUKVariant(true)} aria-pressed={isUKVariant} className={isUKVariant ? "text-foreground" : "transition-colors hover:text-foreground"}>UK</button>
-            </div>
-
-            <Link to="/" aria-label="Maison Affluency home" className="justify-self-center whitespace-nowrap font-display text-[22px] uppercase text-foreground md:text-[31px]">
-              <span className="tracking-[0.12em] md:tracking-[0.2em]">Maison Affluency</span>
-            </Link>
-
-            <div className="flex items-center justify-self-end gap-3 text-foreground md:gap-4">
-              <Link to="/contact" className="hidden font-body text-[9px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground md:block">Contact us</Link>
-              <Link to="/designers" aria-label="Search designers"><Search className="h-3.5 w-3.5" /></Link>
-              <Link to="/trade/login" aria-label="Account"><UserRound className="h-3.5 w-3.5" /></Link>
-              <Link to="/favorites" aria-label="Favorites" className="hidden sm:block"><Heart className="h-3.5 w-3.5" /></Link>
-              <Link to="/cart" aria-label="Shopping bag" className="hidden sm:block"><ShoppingBag className="h-3.5 w-3.5" /></Link>
-            </div>
-          </div>
-
-          <nav aria-label="Main navigation" className="overflow-x-auto border-t border-border/50 px-4 scrollbar-hide">
-            <div className="mx-auto flex min-w-max max-w-4xl items-center justify-center gap-7 py-3 font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground md:gap-10 md:text-[10px]">
-              <Link to="/new-in" className="transition-colors hover:text-foreground">New in</Link>
-              <Link to="/products-category/furniture" className="inline-flex items-center gap-1 transition-colors hover:text-foreground">Categories <ChevronDown className="h-3 w-3" /></Link>
-              <Link to="/designers" className="transition-colors hover:text-foreground">Designers</Link>
-              <Link to="/gallery" className="transition-colors hover:text-foreground">Interactive gallery</Link>
-              <Link to="/journal" className="transition-colors hover:text-foreground">Journal</Link>
-              <span className="border-b border-accent pb-1 font-medium text-foreground">Trade program</span>
-            </div>
-          </nav>
-        </header>
+        <TradeEditorialHeader isUKVariant={isUKVariant} onRegionChange={setIsUKVariant} />
 
         {/* ─── Editorial Trade Hero ─── */}
         <section className="mx-auto grid w-full max-w-7xl items-stretch px-5 py-8 md:grid-cols-[0.9fr_1.1fr] md:gap-12 md:px-10 md:py-12 lg:gap-20 lg:py-16">
