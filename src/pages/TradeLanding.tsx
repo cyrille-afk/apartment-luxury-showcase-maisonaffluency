@@ -728,7 +728,7 @@ const TradeLanding = () => {
         {/* Featured Issue download banner removed — AD issue no longer offered as free download in the trade area. */}
 
         {/* Full Trade Program content */}
-        <div>
+        <div className="bg-background">
 
 
         {/* ─── Intro text block ─── */}
