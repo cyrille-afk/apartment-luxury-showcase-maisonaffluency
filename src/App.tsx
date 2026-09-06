@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // on every non-home route (e.g. /designers), where it is dead weight.
 const Index = lazy(() => import("./pages/Index"));
 import { CompareProvider } from "@/contexts/CompareContext";
+import { TradeCopilotProvider } from "@/contexts/TradeCopilotContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { StudioProvider } from "@/hooks/useStudio";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
@@ -30,6 +31,7 @@ const TradeLanding = lazy(() => import("./pages/TradeLanding"));
 const TradeApply = lazy(() => import("./pages/TradeApply"));
 const TradeProcessing = lazy(() => import("./pages/TradeProcessing"));
 const TradeClientDashboard = lazy(() => import("./pages/TradeClientDashboard"));
+const TradeOnboarding = lazy(() => import("./pages/TradeOnboarding"));
 const TradeDemoPage = lazy(() => import("./pages/TradeDemoPage"));
 const Studios = lazy(() => import("./pages/Studios"));
 const StudioSubmit = lazy(() => import("./pages/StudioSubmit"));
@@ -597,6 +599,7 @@ const App = () => {
                   <Route path="*" element={<Suspense fallback={null}><ComingSoon /></Suspense>} />
                 </Routes>
               ) : (
+                <TradeCopilotProvider>
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/products-category/:categorySlug" element={<Suspense fallback={<PageLoadingSkeleton />}><CategoryRoute /></Suspense>} />
@@ -608,6 +611,7 @@ const App = () => {
                   <Route path="/trade/apply" element={<Suspense fallback={null}><TradeApply /></Suspense>} />
                   <Route path="/trade/processing" element={<Suspense fallback={null}><TradeProcessing /></Suspense>} />
                   <Route path="/trade-dashboard" element={<Suspense fallback={null}><TradeClientDashboard /></Suspense>} />
+                  <Route path="/trade-onboarding" element={<Suspense fallback={null}><TradeOnboarding /></Suspense>} />
                   <Route path="/trade-demo" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeDemoPage /></Suspense>} />
                   <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
                   <Route path="/collector-signup" element={<Suspense fallback={null}><CollectorSignup /></Suspense>} />
@@ -774,6 +778,7 @@ const App = () => {
                   <Route path="/unsubscribe" element={<Suspense fallback={null}><Unsubscribe /></Suspense>} />
                   <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
                 </Routes>
+                </TradeCopilotProvider>
               )}
 
               {/* Deferred UI: toasts + analytics mount after hero is painted */}
