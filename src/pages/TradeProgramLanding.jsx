@@ -28,10 +28,10 @@ const studioBeforeFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/
 const studioAfterFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773975478/Screen_Shot_2026-03-20_at_10.57.13_AM_yiqv4q.png";
 
 const METRICS = [
-  { value: "300+", label: "DESIGNERS & ATELIERS" },
-  { value: "15+", label: "COUNTRIES SERVED" },
-  { value: "100%", label: "INSURED SHIPPING" },
-  { value: "24h", label: "QUOTE TURNAROUND" },
+  { value: "300+", label: "designers & ateliers" },
+  { value: "15+", label: "countries served" },
+  { value: "100%", label: "insured shipping" },
+  { value: "24h", label: "quote turnaround" },
 ];
 
 const BENEFITS = [
