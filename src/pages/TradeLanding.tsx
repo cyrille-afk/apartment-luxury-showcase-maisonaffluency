@@ -341,7 +341,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1 }}
-              className="w-full max-w-xl"
+              className="w-full max-w-xl ml-auto md:pr-12 lg:pr-16"
             >
               <h1 className="font-display text-2xl sm:text-3xl lg:text-5xl text-foreground tracking-wide">
                 Welcome To Maison Affluency
