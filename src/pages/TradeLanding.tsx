@@ -250,6 +250,87 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
   );
 };
 
+const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      {!emailSubmitted ? (
+        <motion.div
+          key="join-form"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.35, ease: "easeInOut" }}
+        >
+          <form
+            onSubmit={handleJoinSubmit}
+            className={cn(
+              "mx-auto flex w-full flex-col items-stretch gap-2.5",
+              ghost
+                ? "max-w-md"
+                : "max-w-lg md:mx-0 md:flex-row md:items-center"
+            )}
+          >
+            <input
+              type="email"
+              name="email"
+              required
+              placeholder="Your work email"
+              className={cn(
+                "w-full px-5 py-3 font-body text-xs uppercase tracking-[0.15em] text-foreground outline-none transition-colors duration-300 placeholder:text-muted-foreground/60 focus:border-accent focus:ring-1 focus:ring-accent/30",
+                ghost
+                  ? "border border-white/50 bg-white/50 backdrop-blur-sm"
+                  : "border border-border/60 bg-card md:flex-1"
+              )}
+            />
+            <button
+              type="submit"
+              className="min-w-[120px] w-full border border-gold bg-gold px-6 py-3 text-center font-body text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground transition-colors duration-300 hover:bg-gold/90 md:w-auto"
+            >
+              Join Now
+            </button>
+          </form>
+          <p className="mt-2 text-center font-body text-[11px] tracking-wide text-muted-foreground md:text-left md:text-xs">
+            Already registered?{" "}
+            <Link
+              to="/trade/login"
+              className="text-foreground underline underline-offset-2 hover:text-foreground/80 transition-colors"
+            >
+              Sign in
+            </Link>
+          </p>
+        </motion.div>
+      ) : (
+        <motion.div
+          key="join-success"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: "easeOut", delay: 0.15 }}
+          className="flex flex-col items-center justify-center py-2 text-center md:items-start md:text-left"
+        >
+          <svg
+            className="mb-3 h-6 w-6 text-accent"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.25"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M4.5 12.5l5 5L19.5 6" />
+          </svg>
+          <p className="font-display text-lg text-foreground sm:text-2xl">
+            Thank You for Your Interest.
+          </p>
+          <p className="mt-1.5 max-w-xs font-body text-[11px] leading-relaxed text-muted-foreground sm:text-xs md:max-w-sm">
+            An invitation link has been sent to your work email. Our team will review your credentials shortly.
+          </p>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
   return (
     <>
       <Helmet>
