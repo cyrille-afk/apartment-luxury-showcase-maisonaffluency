@@ -333,26 +333,20 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
           </div>
         </div>
 
-        {/* ─── Full-width Hero ─── */}
-        <div className="relative w-full h-[35svh] md:h-[50vh] overflow-hidden">
-          <img
-            src={cloudinaryUrl("v1772085848/intimate-dining_ux4pee", { width: 1920, height: 1080, quality: "auto:good", crop: "fill", gravity: "auto" })}
-            alt="Maison Affluency Trade Program"
-            className="w-full h-full object-cover"
-            data-pin-nopin="true"
-          />
-          <div className="absolute inset-0 bg-foreground/20" />
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
-            className="absolute inset-0 flex flex-col items-center justify-center text-center px-6"
-          >
-            <div className="flex flex-col items-center">
-              <h1 className="font-display text-2xl sm:text-3xl lg:text-5xl text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.6)] tracking-wide">
+        {/* ─── Split-screen Hero ─── */}
+        <div className="relative w-full min-h-[calc(100svh-3.5rem)] flex flex-col md:flex-row">
+          {/* Left Side */}
+          <div className="w-full md:w-1/2 flex items-center justify-start px-6 md:px-12 lg:px-16 py-16 md:py-0 bg-background">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1 }}
+              className="w-full max-w-xl"
+            >
+              <h1 className="font-display text-2xl sm:text-3xl lg:text-5xl text-foreground tracking-wide">
                 Welcome To Maison Affluency
               </h1>
-              <p className="font-display text-2xl sm:text-3xl lg:text-5xl text-white mt-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-widest font-light">
+              <p className="font-display text-2xl sm:text-3xl lg:text-5xl text-foreground mt-3 tracking-widest font-light">
                 Trade Program
               </p>
               <form
@@ -362,7 +356,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   const email = (formData.get("email") as string) || "";
                   navigate(`/trade/apply${email ? `?email=${encodeURIComponent(email)}` : ""}`);
                 }}
-                className="flex items-center gap-3 mt-6 w-full max-w-lg px-4"
+                className="flex items-center gap-3 mt-6 w-full max-w-lg"
               >
                 <input
                   type="email"
@@ -377,21 +371,30 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   Join Now
                 </button>
               </form>
-              <p className="mt-5 font-body text-xs text-white/70 tracking-wide">
+              <p className="mt-5 font-body text-xs text-muted-foreground tracking-wide">
                 Already registered?{" "}
-                <Link to="/trade/login" className="text-white underline underline-offset-2 hover:text-white/90 transition-colors">
+                <Link to="/trade/login" className="text-foreground underline underline-offset-2 hover:text-foreground/80 transition-colors">
                   Sign in
                 </Link>
               </p>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
 
-          {/* Share button — bottom right of hero */}
-          <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 z-10">
-            <ShareMenu
-              url={TRADE_PROGRAM_SHARE_URL}
-              message={`Maison Affluency — Trade Program: ${TRADE_PROGRAM_SHARE_URL}`}
+          {/* Right Side */}
+          <div className="w-full md:w-1/2 relative min-h-[40vh] md:min-h-0">
+            <img
+              src={cloudinaryUrl("dining-room_ey0bu5", { width: 1200, height: 1600, quality: "auto:good", crop: "fill", gravity: "auto" })}
+              alt="Maison Affluency Trade Program"
+              className="absolute inset-0 w-full h-full object-cover"
+              data-pin-nopin="true"
             />
+            {/* Share button — bottom right of hero */}
+            <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 z-10">
+              <ShareMenu
+                url={TRADE_PROGRAM_SHARE_URL}
+                message={`Maison Affluency — Trade Program: ${TRADE_PROGRAM_SHARE_URL}`}
+              />
+            </div>
           </div>
         </div>
 
