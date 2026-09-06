@@ -11,7 +11,7 @@ const utilityLinkClass =
   "inline-flex h-10 w-10 items-center justify-center text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
 const navLinkClass =
-  "whitespace-nowrap font-body text-[11px] font-light uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:text-foreground md:text-sm lg:text-[15px]";
+  "whitespace-nowrap font-body text-[10px] font-normal uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:text-foreground md:text-[11px]";
 
 export default function TradeEditorialHeader({
   isUKVariant,
@@ -68,7 +68,7 @@ export default function TradeEditorialHeader({
         <div className="flex flex-shrink-0 items-center gap-0.5 justify-self-end sm:gap-2">
           <Link
             to="/contact"
-            className="mr-2 hidden whitespace-nowrap font-body text-[9px] font-normal uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground md:block lg:text-[13px]"
+            className="mr-2 hidden whitespace-nowrap font-body text-[10px] font-normal uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground md:block"
           >
             Contact us
           </Link>
