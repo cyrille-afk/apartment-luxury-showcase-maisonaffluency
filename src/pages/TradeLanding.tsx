@@ -432,9 +432,9 @@ const HeroJoinForm = ({ ghost = false }: { ghost?: boolean }) => {
               data-pin-nopin="true"
             />
 
-            {/* Mobile ghost form overlay */}
+            {/* Mobile form overlay */}
             <div className="absolute inset-x-0 bottom-8 z-30 px-5 md:hidden">
-              <div className="mx-auto w-[85%] max-w-md rounded-sm border border-white/20 bg-white/5 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.12)] backdrop-blur-lg">
+              <div className="mx-auto w-[85%] max-w-md">
                 <HeroJoinForm ghost />
               </div>
             </div>
