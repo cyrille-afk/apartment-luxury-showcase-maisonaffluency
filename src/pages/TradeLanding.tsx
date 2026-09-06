@@ -612,7 +612,7 @@ const TradeLanding = () => {
         {/* ─── Split-screen Hero ─── */}
         <div ref={heroRef} className="relative flex h-[calc(100dvh-6rem)] min-h-[580px] w-full flex-col md:h-[calc(100vh-256px)] md:min-h-0 md:flex-row">
           {/* Left Side: title (mobile) / title + form (desktop) */}
-          <div className="relative z-20 flex shrink-0 h-auto w-full items-center justify-center bg-background px-6 pb-4 pt-2 md:h-auto md:w-1/2 md:justify-start md:px-12 md:py-12 lg:px-16">
+          <div className="relative z-20 flex shrink-0 h-auto w-full items-start justify-start bg-background px-6 pb-4 pt-2 md:h-auto md:w-1/2 md:items-center md:justify-start md:px-12 md:py-12 lg:px-16">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
