@@ -288,7 +288,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         })}</script>
       </Helmet>
 
-      <div className="min-h-screen md:h-screen md:overflow-hidden bg-background md:flex md:flex-col">
+      <div className="min-h-screen md:h-screen md:overflow-hidden bg-background md:grid md:grid-rows-[auto_minmax(0,1fr)_auto_auto]">
         {/* Sticky top nav */}
         <div className="w-full border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
           <div className="max-w-7xl mx-auto px-4 md:px-12 py-3 flex items-center justify-between">
