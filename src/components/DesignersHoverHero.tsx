@@ -271,8 +271,6 @@ const MOBILE_BG_OVERRIDES: Record<string, string> = {
   // ceiling and gray floor; as a full-viewport background it reads as an
   // unanchored floating image. Use the pre-cropped full-bleed straw-marquetry
   // texture portrait instead.
-  "alexander-lamont":
-    "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/designers/alexander-lamont/hero-mobile-casque-texture.jpg",
   "jean-michel-frank":
     "https://res.cloudinary.com/dif1oamtj/image/upload/v1777428180/JMF_1935_Round_Table__02_Portrait_BD_1_aozicg.jpg",
   "hamrei":
@@ -1949,11 +1947,11 @@ const DesignersHoverHero = () => {
         {/* Directory label — pinned to the svh frame bottom on mobile only.
             Lowered slightly so it sits closer to the bottom edge. */}
         {isMobileBrowser && directoryLabels(cn(
-          "absolute flex items-center text-white w-full min-w-[320px] max-w-[340px] pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center bottom-[calc(1.5rem+env(safe-area-inset-bottom))]"
+          "absolute flex items-center text-white left-6 right-6 pointer-events-auto md:hidden z-30 bottom-[calc(1rem+env(safe-area-inset-bottom))]"
         ), directoryRef, "left")}
 
         {isStandalone && directoryLabels(cn(
-          "absolute flex items-center text-white w-full min-w-[320px] max-w-[340px] pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center bottom-[calc(1rem+env(safe-area-inset-bottom))]"
+          "absolute flex items-center text-white left-6 right-6 pointer-events-auto md:hidden z-30 bottom-[calc(0.75rem+env(safe-area-inset-bottom))]"
         ), directoryRef, "left")}
 
 
