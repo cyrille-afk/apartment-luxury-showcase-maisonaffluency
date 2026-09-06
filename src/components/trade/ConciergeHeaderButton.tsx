@@ -6,8 +6,8 @@ import { loadName } from "@/components/trade/conciergeGreeting";
  * Header pill that opens the AI Concierge. Rendered globally in TradeLayout so
  * Felix is reachable from every trade page in a consistent location.
  *
- * It triggers the hidden sr-only button rendered by AIConcierge — that button
- * owns the open/close state.
+ * It emits an explicit open event so an already-mounted, minimized concierge
+ * is restored as well as a fully closed concierge.
  */
 export function ConciergeHeaderButton() {
   const [name, setName] = useState<string>(() => loadName());
@@ -23,8 +23,7 @@ export function ConciergeHeaderButton() {
   }, []);
 
   const open = () => {
-    const btn = document.querySelector<HTMLButtonElement>('[aria-label="Open AI Concierge"]');
-    if (btn) btn.click();
+    window.dispatchEvent(new CustomEvent("concierge:open"));
   };
 
   return (

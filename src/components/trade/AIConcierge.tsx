@@ -1717,13 +1717,16 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // overlaps the page being highlighted (especially the Tools step).
   useEffect(() => {
     const close = () => { markDismissed(); setOpen(false); setMinimized(false); };
+    const reopen = () => { clearDismissed(); setMinimized(false); setOpen(true); };
     window.addEventListener("trade-tour:start", close);
     window.addEventListener("concierge:close", close);
+    window.addEventListener("concierge:open", reopen);
     return () => {
       window.removeEventListener("trade-tour:start", close);
       window.removeEventListener("concierge:close", close);
+      window.removeEventListener("concierge:open", reopen);
     };
-  }, []);
+  }, [clearDismissed, markDismissed]);
 
   // Sync concierge name with the user's profile so it follows them across devices.
   useEffect(() => {
