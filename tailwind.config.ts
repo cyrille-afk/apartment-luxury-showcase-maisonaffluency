@@ -69,6 +69,13 @@ export default {
           ink: "hsl(var(--gallery-ink))",
           caption: "hsl(var(--gallery-caption))",
         },
+        hero: {
+          text: "hsl(var(--hero-text))",
+        },
+        trade: {
+          banner: "hsl(var(--trade-banner))",
+          "banner-line": "hsl(var(--trade-banner-line))",
+        },
         whatsapp: "hsl(var(--whatsapp))",
         "pdf-red": "hsl(var(--pdf-red))",
         success: "hsl(var(--success))",
