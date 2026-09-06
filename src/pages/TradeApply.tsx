@@ -1,9 +1,9 @@
 import { Helmet } from "react-helmet-async";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import TradeFaq from "@/components/trade/TradeFaq";
 import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
+import Navigation from "@/components/Navigation";
 
 /* Dedicated application page — FAQ (left) + registration form (right). */
 const TradeApply = () => {
