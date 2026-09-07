@@ -139,7 +139,17 @@ function ScrollLockedDesigners({
     const html = document.documentElement;
     const body = document.body;
     const updateLockedViewport = () => {
-      const viewportHeight = window.visualViewport?.height || window.innerHeight;
+      // Never let iOS/PWA's transient visualViewport measurement shorten the
+      // landing canvas. During launch and browser-bar transitions it can report
+      // only the unobscured middle of the screen, which clipped the hero at the
+      // Directory row and exposed a large black block underneath. innerHeight /
+      // clientHeight retain the full CSS viewport while visualViewport remains
+      // useful only when it is larger.
+      const viewportHeight = Math.max(
+        window.innerHeight,
+        document.documentElement.clientHeight,
+        window.visualViewport?.height ?? 0,
+      );
       html.style.setProperty("--designers-landing-vh", `${Math.round(viewportHeight)}px`);
     };
     // iOS ignores body overflow alone during toolbar/rubber-band gestures. Pin
