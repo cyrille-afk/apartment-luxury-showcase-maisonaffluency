@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-type Audience = "trade" | "retail";
+export type Audience = "trade" | "retail";
 
 export interface TradeFirstCtaProps {
   /** Path to return to after trade sign-in */
@@ -13,6 +13,8 @@ export interface TradeFirstCtaProps {
   onRequestQuote: () => void;
   /** When true the visitor is already authenticated — tabs are hidden */
   signedIn?: boolean;
+  /** Notifies the parent whenever the active tab changes (and on mount). */
+  onAudienceChange?: (audience: Audience) => void;
   className?: string;
 }
 
