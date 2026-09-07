@@ -178,7 +178,7 @@ export default function ProductCommerceCta({
   const setQuantity = productConfig ? productConfig.setQuantity : setLocalQuantity;
   const [miniCartOpen, setMiniCartOpen] = useState(false);
   const cartItems = useCart();
-  const [manualForm, setManualForm] = useState(false);
+  
   const { clientSafe } = useClientSafeMode();
   const { data: pricing } = useTradeProductPricing(productId, tradeApproved);
   const { discountPct, apply } = useTradeDiscount();

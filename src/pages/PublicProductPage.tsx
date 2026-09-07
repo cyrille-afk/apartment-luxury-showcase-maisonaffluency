@@ -2585,7 +2585,6 @@ const PublicProductPageContent: React.FC = () => {
                         onPlaceOrder={handleDirectCheckout}
                         onAddToCart={addConfiguredToCart}
                         placingOrder={checkoutLoading}
-                        onRequestQuote={() => setQuoteRequestOpen(true)}
                         selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                         redirectTo={location.pathname + location.search}
@@ -2608,7 +2607,6 @@ const PublicProductPageContent: React.FC = () => {
                         leadTime={product.lead_time}
                         onPlaceOrder={handleDirectCheckout}
                         placingOrder={checkoutLoading}
-                        onRequestQuote={() => setQuoteRequestOpen(true)}
                         selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                         redirectTo={location.pathname + location.search}
@@ -2679,7 +2677,6 @@ const PublicProductPageContent: React.FC = () => {
                   onPlaceOrder={handleDirectCheckout}
                   onAddToCart={addConfiguredToCart}
                   placingOrder={checkoutLoading}
-                  onRequestQuote={() => setQuoteRequestOpen(true)}
                   selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                   redirectTo={location.pathname + location.search}
@@ -2701,7 +2698,6 @@ const PublicProductPageContent: React.FC = () => {
                   leadTime={product.lead_time}
                   onPlaceOrder={handleDirectCheckout}
                   placingOrder={checkoutLoading}
-                  onRequestQuote={() => setQuoteRequestOpen(true)}
                   selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                   redirectTo={location.pathname + location.search}
@@ -2761,7 +2757,6 @@ const PublicProductPageContent: React.FC = () => {
                       dockOnly
                       onPlaceOrder={handleDirectCheckout}
                       placingOrder={checkoutLoading}
-                      onRequestQuote={() => setQuoteRequestOpen(true)}
                       selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                       redirectTo={returnTo}
