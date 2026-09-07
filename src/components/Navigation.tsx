@@ -173,8 +173,12 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   const programmaticScrollActive = useProgrammaticScrollActive();
   const navHidden =
     location.pathname !== "/trade-program" &&
-    ((scrollDirection === "down" && navScrollY > 240 && !programmaticScrollActive) ||
-      stickyProductBarActive) &&
+    // While the product mini bar is docked below the header, the header
+    // stays pinned so the bar never floats in empty space.
+    !stickyProductBarActive &&
+    scrollDirection === "down" &&
+    navScrollY > 240 &&
+    !programmaticScrollActive &&
     !isOpen &&
     !megaMenuOpen;
 

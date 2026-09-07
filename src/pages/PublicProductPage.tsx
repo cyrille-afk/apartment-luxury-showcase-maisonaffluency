@@ -1244,7 +1244,16 @@ const PublicProductPageContent: React.FC = () => {
   // the top of the viewport and the global header steps aside entirely.
   const showStickyBar = stickyBarArmed;
 
+  // Active TRADE/RETAIL tab from TradeFirstCta. On the TRADE tab the mobile
+  // sticky "Place Order" dock hides so the trade sign-in panel owns the
+  // bottom of the screen; RETAIL restores the dock. Signed-in visitors have
+  // no tabs, so their dock is untouched.
+  const [ctaAudience, setCtaAudience] = useState<"trade" | "retail">("trade");
+  const publicDockVisible = !!user || ctaAudience === "retail";
+
   // Mobile/PWA only: tell the global nav to stay hidden while this bar owns the top.
+  // While the mini bar is docked below the header, pin the global nav so the
+  // two bars stack cleanly instead of the bar masking the navigation.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const isSmall = window.matchMedia("(max-width: 767px)").matches;
@@ -2019,16 +2028,17 @@ const PublicProductPageContent: React.FC = () => {
       <div className="min-h-[100dvh] bg-background text-foreground">
         <Navigation borderless />
 
-        {/* Mobile sticky mini bar — replaces the global header once the product
-             image has scrolled out of view. */}
+        {/* Mobile sticky mini bar — slides in directly below the AFFLUENCY
+             header once the product image has scrolled out of view. The
+             header stays visible above it (z-50 > z-40), so nothing masks
+             or breaks the navigation layout. */}
         <div
           className={cn(
-            "md:hidden fixed left-0 right-0 top-0 z-[60] bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-transform duration-300 ease-out",
+            "md:hidden fixed left-0 right-0 top-[var(--header-h)] z-40 bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-transform duration-300 ease-out",
             !showStickyBar && "pointer-events-none"
           )}
           style={{
-            paddingTop: "env(safe-area-inset-top, 0px)",
-            transform: showStickyBar ? "translateY(0)" : "translateY(-100%)",
+            transform: showStickyBar ? "translateY(0)" : "translateY(calc(-100% - var(--header-h)))",
           }}
           aria-hidden={!showStickyBar}
         >
@@ -2373,6 +2383,7 @@ const PublicProductPageContent: React.FC = () => {
                       rrpLabel={publicRrpLabel}
                       onRequestQuote={() => setQuoteRequestOpen(true)}
                       signedIn={!!user && !authLoading}
+                      onAudienceChange={setCtaAudience}
                     />
                   </div>
 
@@ -2574,6 +2585,7 @@ const PublicProductPageContent: React.FC = () => {
                       <ProductCommerceCta
                         productId={product.id}
                         rrpLabel={publicRrpLabel}
+                        dock={publicDockVisible}
                         productTitle={product.title}
                         designerName={designerDisplay}
                         imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
@@ -2666,6 +2678,7 @@ const PublicProductPageContent: React.FC = () => {
                 <ProductCommerceCta
                   productId={product.id}
                   rrpLabel={publicRrpLabel}
+                  dock={publicDockVisible}
                   dockOnly
                   productTitle={product.title}
                   designerName={designerDisplay}

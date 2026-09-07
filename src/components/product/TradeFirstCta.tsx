@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-type Audience = "trade" | "retail";
+export type Audience = "trade" | "retail";
 
 export interface TradeFirstCtaProps {
   /** Path to return to after trade sign-in */
@@ -13,6 +13,8 @@ export interface TradeFirstCtaProps {
   onRequestQuote: () => void;
   /** When true the visitor is already authenticated — tabs are hidden */
   signedIn?: boolean;
+  /** Notifies the parent whenever the active tab changes (and on mount). */
+  onAudienceChange?: (audience: Audience) => void;
   className?: string;
 }
 
@@ -29,9 +31,21 @@ export default function TradeFirstCta({
   rrpLabel,
   onRequestQuote,
   signedIn = false,
+  onAudienceChange,
   className,
 }: TradeFirstCtaProps) {
-  const [audience, setAudience] = useState<Audience>("trade");
+  const [audience, setAudienceState] = useState<Audience>("trade");
+
+  // Parent surfaces (e.g. the mobile sticky bottom dock) mirror the active
+  // tab so they never compete with the trade sign-in panel.
+  const setAudience = (next: Audience) => {
+    setAudienceState(next);
+    onAudienceChange?.(next);
+  };
+  useEffect(() => {
+    onAudienceChange?.("trade");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const q = new URLSearchParams();
   if (redirectTo) q.set("redirect", redirectTo);
