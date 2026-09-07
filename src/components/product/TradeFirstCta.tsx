@@ -129,20 +129,10 @@ export default function TradeFirstCta({
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {rrpLabel && (
-            <p className="font-body font-light text-sm tabular-nums text-muted-foreground">
-              {rrpLabel}
-              <span className="ml-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
-                Excl. shipping &amp; duties
-              </span>
-            </p>
-          )}
-          <button type="button" onClick={onPlaceOrder} className={primaryBtn}>
-            Place an Order
-          </button>
           {secureNote}
         </div>
       )}
+
     </div>
   );
 }

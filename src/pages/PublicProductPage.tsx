@@ -2055,15 +2055,6 @@ const PublicProductPageContent: React.FC = () => {
               </p>
             </div>
 
-            <div className="mt-2">
-              <button
-                type="button"
-                onClick={openSelectionDrawer}
-                className="flex w-full items-center justify-center px-3 py-2.5 rounded-luxury-micro bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
-              >
-                Place an Order
-              </button>
-            </div>
           </div>
 
         </div>
