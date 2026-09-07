@@ -340,8 +340,8 @@ export default function ProductCommerceCta({
             "px-4 pt-3.5 pb-[max(1rem,env(safe-area-inset-bottom))]"
           )}
         >
-          <div className="flex items-center gap-3">
-            <div className="min-w-0 shrink-0 max-w-[45%]">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0 flex-1">
               {tradeApproved && netLabel ? (
                 <div className="flex flex-col">
                   <span className="font-body text-[9px] tracking-[0.04em] text-muted-foreground truncate">
@@ -350,31 +350,26 @@ export default function ProductCommerceCta({
                   <span className="font-display text-base leading-tight truncate">{netLabel}</span>
                 </div>
               ) : (
-                <span className="font-display text-base leading-tight truncate block">
-                  {rrpLabel ?? retailLabel ?? "Price upon Request"}
-                </span>
+                <div className="flex flex-col">
+                  <span className="font-display text-base leading-tight truncate block">
+                    {rrpLabel ?? retailLabel ?? "Price upon Request"}
+                  </span>
+                  <span className="font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground/80 truncate">
+                    Excl. shipping &amp; duties
+                  </span>
+                </div>
               )}
             </div>
-            {tradeApproved ? (
-              <button
-                type="button"
-                onClick={() => onPlaceOrder(quantity)}
-                disabled={placingOrder}
-                className={cn(primaryBtn, "h-11 flex-1")}
-              >
-                {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : primaryLabel}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => primaryAction()}
-                disabled={placingOrder}
-                className={cn(primaryBtn, "h-11 flex-1")}
-              >
-                {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : primaryLabel}
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => (tradeApproved ? onPlaceOrder(quantity) : primaryAction())}
+              disabled={placingOrder}
+              className={cn(primaryBtn, "h-11 shrink-0 w-auto px-7")}
+            >
+              {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : primaryLabel}
+            </button>
           </div>
+
         </div>
       )}
 
