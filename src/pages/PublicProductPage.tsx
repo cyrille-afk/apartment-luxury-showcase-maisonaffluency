@@ -1096,14 +1096,23 @@ const PublicProductPageContent: React.FC = () => {
     top: null,
     size: null,
   });
-  const publicRrpLabel = catalogueRrpLabel
+  // Once the visitor has chosen a finish configuration, drop the catalogue
+  // "From" prefix everywhere — both in the main price block and next to the
+  // PLACE ORDER button / sticky bar.
+  const hasSelectedVariant = selectedRrp != null || selectedVariantPrice != null;
+  let displayRrpLabel = catalogueRrpLabel
     ? (selectedRrp
         ? formatPublicRrpCents(selectedRrp.cents, publicRrpRow, selectedRrp.exact ? "" : undefined) ||
           catalogueRrpLabel
         : catalogueRrpLabel)
     : null;
+  if (displayRrpLabel && hasSelectedVariant) {
+    displayRrpLabel = displayRrpLabel.replace(/^From\s+/i, "");
+  }
+
 
   // ---- Dev role-preview state (mock auth) -------------------------------
+
   // Until the dev dropdown is used, real auth drives the effective role.
   const { role: devRole, overridden: roleOverridden } = useUserRole();
   const { discountPct: tierDiscountPct, tierLabel: tradeTierLabel } = useTradeDiscount();
@@ -1135,7 +1144,7 @@ const PublicProductPageContent: React.FC = () => {
     // Real assigned tier discount (trade_tier_config) — never a mock rate.
     tradeDiscountMultiplier: tierDiscountPct || 0,
   };
-  const hasFromPrefix = /^From\s+/i.test(publicRrpLabel || "");
+  const hasFromPrefix = /^From\s+/i.test(displayRrpLabel || "");
   const priceCurrency = (publicRrpRow?.currency || "USD").toUpperCase();
 
   // Publish the current selection's base rate + currency into the container so
@@ -1164,7 +1173,8 @@ const PublicProductPageContent: React.FC = () => {
       ? toDisplay(productData.baseRetailPriceCents)
       : null) ??
     pricing.retailFootnoteLabel ??
-    (publicRrpLabel ? publicRrpLabel.replace(/^From\s+/i, "") : null);
+    (displayRrpLabel ? displayRrpLabel : null);
+
 
 
   // Commerce block visibility under the (possibly mocked) role.
@@ -1274,6 +1284,8 @@ const PublicProductPageContent: React.FC = () => {
   // injected into Felix's product context.
   const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
   // Swatch names currently DISPLAYED in the finish accordions (colourways).
+
+
   // Order lines merge these with the variant axis references so the basket
   // reads exactly what the shopper sees on the page.
   const [displayedFinishes, setDisplayedFinishes] = useState<{
@@ -2069,7 +2081,7 @@ const PublicProductPageContent: React.FC = () => {
             image={images[0]}
             title={product.title}
             designer={designerDisplay}
-            price={isTradeVerifiedView && mockNetDisplay ? mockNetDisplay : publicRrpLabel}
+            price={isTradeVerifiedView && mockNetDisplay ? mockNetDisplay : displayRrpLabel}
             currencyCode={isTradeVerifiedView && mockNetDisplay ? "Net Trade" : undefined}
             primaryLabel={isTradeVerifiedView ? "Add to Co-Pilot Workspace & Order" : "Place Order"}
             secondaryLabel={null}
@@ -2319,14 +2331,14 @@ const PublicProductPageContent: React.FC = () => {
                           )}
                           <ShippingDetailsAccordion />
                         </div>
-                      ) : publicRrpLabel && (
+                      ) : displayRrpLabel && (
                         <div className="mt-6">
                           <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
                             {(() => {
-                              const spaceIdx = publicRrpLabel.indexOf(" ");
-                              if (spaceIdx === -1) return <span className="text-foreground">{publicRrpLabel}</span>;
-                              const prefix = publicRrpLabel.slice(0, spaceIdx);
-                              const rest = publicRrpLabel.slice(spaceIdx + 1);
+                              const spaceIdx = displayRrpLabel.indexOf(" ");
+                              if (spaceIdx === -1) return <span className="text-foreground">{displayRrpLabel}</span>;
+                              const prefix = displayRrpLabel.slice(0, spaceIdx);
+                              const rest = displayRrpLabel.slice(spaceIdx + 1);
                               return (
                                 <>
                                   <span className="text-muted-foreground text-[11px] uppercase tracking-[0.22em] align-middle mr-2">{prefix}</span>
@@ -2363,7 +2375,7 @@ const PublicProductPageContent: React.FC = () => {
                   <div className="order-3 md:order-4">
                     <TradeFirstCta
                       redirectTo={location.pathname + location.search}
-                      rrpLabel={publicRrpLabel}
+                      rrpLabel={displayRrpLabel}
                       onPlaceOrder={openSelectionDrawer}
                       signedIn={!!user && !authLoading}
                       onAudienceChange={setCtaAudience}
@@ -2494,14 +2506,14 @@ const PublicProductPageContent: React.FC = () => {
                         )}
                         <ShippingDetailsAccordion />
                       </div>
-                    ) : publicRrpLabel && (
+                    ) : displayRrpLabel && (
                       <div className="mt-6">
                         <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
                           {(() => {
-                            const spaceIdx = publicRrpLabel.indexOf(" ");
-                            if (spaceIdx === -1) return <span className="text-foreground">{publicRrpLabel}</span>;
-                            const prefix = publicRrpLabel.slice(0, spaceIdx);
-                            const rest = publicRrpLabel.slice(spaceIdx + 1);
+                            const spaceIdx = displayRrpLabel.indexOf(" ");
+                            if (spaceIdx === -1) return <span className="text-foreground">{displayRrpLabel}</span>;
+                            const prefix = displayRrpLabel.slice(0, spaceIdx);
+                            const rest = displayRrpLabel.slice(spaceIdx + 1);
                             return (
                               <>
                                 <span className="text-muted-foreground text-[11px] uppercase tracking-[0.22em] align-middle mr-2">{prefix}</span>
@@ -2556,7 +2568,7 @@ const PublicProductPageContent: React.FC = () => {
                     {showPublicCommerce && (
                       <ProductCommerceCta
                         productId={product.id}
-                        rrpLabel={publicRrpLabel}
+                        rrpLabel={displayRrpLabel}
                         dock={publicDockVisible}
                         productTitle={product.title}
                         designerName={designerDisplay}
@@ -2577,7 +2589,7 @@ const PublicProductPageContent: React.FC = () => {
                     {showMockTradeCommerce && (
                       <ProductCommerceCta
                         productId={product.id}
-                        rrpLabel={publicRrpLabel}
+                        rrpLabel={displayRrpLabel}
                         tradeApproved
                         netLabelOverride={mockNetLabel}
                         retailLabelOverride={retailPlainLabel}
@@ -2647,7 +2659,7 @@ const PublicProductPageContent: React.FC = () => {
               {showPublicCommerce && (
                 <ProductCommerceCta
                   productId={product.id}
-                  rrpLabel={publicRrpLabel}
+                  rrpLabel={displayRrpLabel}
                   dock={publicDockVisible}
                   dockOnly
                   productTitle={product.title}
@@ -2667,7 +2679,7 @@ const PublicProductPageContent: React.FC = () => {
               {showMockTradeCommerce && (
                 <ProductCommerceCta
                   productId={product.id}
-                  rrpLabel={publicRrpLabel}
+                  rrpLabel={displayRrpLabel}
                   tradeApproved
                   dockOnly
                   netLabelOverride={mockNetLabel}
@@ -2732,7 +2744,7 @@ const PublicProductPageContent: React.FC = () => {
                     />
                     <ProductCommerceCta
                       productId={product.id}
-                      rrpLabel={publicRrpLabel}
+                      rrpLabel={displayRrpLabel}
                       tradeApproved
                       dockOnly
                       onPlaceOrder={handleDirectCheckout}
