@@ -15,12 +15,12 @@ export interface StickyPurchaseBarProps {
   currencyCode?: string | null;
   /** Primary image URL (unused in the single-line layout, kept for compat) */
   image?: string | null;
-  onRequestQuote: () => void;
+  onRequestQuote?: () => void;
   /** Direct Stripe checkout for the current product + selected finish */
   onPlaceOrder?: () => void;
-  /** Role-driven label overrides (default: Place Order / Request a Quote…) */
+  /** Role-driven label overrides (default: Place Order); null hides the secondary action */
   primaryLabel?: string;
-  secondaryLabel?: string;
+  secondaryLabel?: string | null;
   /** Shows a spinner while the checkout session is being created */
   placingOrder?: boolean;
   /** Element whose bottom edge leaving the viewport arms the bar */
@@ -43,7 +43,7 @@ export function StickyPurchaseBar({
   onRequestQuote,
   onPlaceOrder,
   primaryLabel = "Place Order",
-  secondaryLabel = "Request a Quote or Customisation",
+  secondaryLabel = null,
   placingOrder = false,
   triggerId = "main-product-image-container",
   topOffset,
@@ -161,17 +161,19 @@ export function StickyPurchaseBar({
                 <span>{placingOrder ? "Opening checkout…" : primaryLabel}</span>
               </button>
             )}
-            <button
-              type="button"
-              onClick={handleRequestQuote}
-              className={cn(
-                "inline-flex items-center h-8 px-4 rounded-none",
-                "border border-foreground bg-background text-foreground font-body text-[10px] uppercase tracking-widest",
-                "transition-colors hover:bg-muted/60"
-              )}
-            >
-              {secondaryLabel}
-            </button>
+            {secondaryLabel ? (
+              <button
+                type="button"
+                onClick={handleRequestQuote}
+                className={cn(
+                  "inline-flex items-center h-8 px-4 rounded-none",
+                  "border border-foreground bg-background text-foreground font-body text-[10px] uppercase tracking-widest",
+                  "transition-colors hover:bg-muted/60"
+                )}
+              >
+                {secondaryLabel}
+              </button>
+            ) : null}
           </div>
           <p className="mt-1 font-body text-[9px] font-light uppercase tracking-widest text-muted-foreground/60 leading-none whitespace-nowrap">
             White-Glove Delivery&ensp;·&ensp;Secure Checkout by Stripe

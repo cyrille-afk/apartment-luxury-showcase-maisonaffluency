@@ -9,8 +9,8 @@ export interface TradeFirstCtaProps {
   redirectTo?: string;
   /** Formatted public retail price, e.g. "From $33,000" */
   rrpLabel?: string | null;
-  /** Opens the enquiry / quote dialog */
-  onRequestQuote: () => void;
+  /** Starts the direct checkout path ("Place an Order") */
+  onPlaceOrder: () => void;
   /** When true the visitor is already authenticated — tabs are hidden */
   signedIn?: boolean;
   /** Notifies the parent whenever the active tab changes (and on mount). */
@@ -29,7 +29,7 @@ export interface TradeFirstCtaProps {
 export default function TradeFirstCta({
   redirectTo,
   rrpLabel,
-  onRequestQuote,
+  onPlaceOrder,
   signedIn = false,
   onAudienceChange,
   className,
@@ -68,8 +68,8 @@ export default function TradeFirstCta({
   if (signedIn) {
     return (
       <div className={cn("flex flex-col gap-3", className)}>
-        <button type="button" onClick={onRequestQuote} className={primaryBtn}>
-          Inquire to Purchase
+        <button type="button" onClick={onPlaceOrder} className={primaryBtn}>
+          Place an Order
         </button>
         {secureNote}
       </div>
@@ -137,8 +137,8 @@ export default function TradeFirstCta({
               </span>
             </p>
           )}
-          <button type="button" onClick={onRequestQuote} className={primaryBtn}>
-            Inquire to Purchase
+          <button type="button" onClick={onPlaceOrder} className={primaryBtn}>
+            Place an Order
           </button>
           {secureNote}
         </div>

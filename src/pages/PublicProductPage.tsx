@@ -86,7 +86,7 @@ import { setStickyProductBarActive } from "@/lib/stickyProductBar";
 
 import TradePendingReviewCard from "@/components/product/TradePendingReviewCard";
 
-import QuoteRequestDialog from "@/components/QuoteRequestDialog";
+
 import { addToCart, setQuantity as setCartQuantity } from "@/lib/cart";
 import { usePublicRrp, usePublicRrpMap, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
@@ -1268,7 +1268,7 @@ const PublicProductPageContent: React.FC = () => {
 
 
 
-  const [quoteRequestOpen, setQuoteRequestOpen] = useState(false);
+  
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   // Finish/size selection surfaced in the authenticated Trade Workspace and
   // injected into Felix's product context.
@@ -2055,20 +2055,13 @@ const PublicProductPageContent: React.FC = () => {
               </p>
             </div>
 
-            <div className="mt-2 grid grid-cols-2 gap-2">
+            <div className="mt-2">
               <button
                 type="button"
                 onClick={openSelectionDrawer}
-                className="flex items-center justify-center px-3 py-2.5 rounded-luxury-micro bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
+                className="flex w-full items-center justify-center px-3 py-2.5 rounded-luxury-micro bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
               >
                 Place an Order
-              </button>
-              <button
-                type="button"
-                onClick={() => setQuoteRequestOpen(true)}
-                className="flex items-center justify-center px-3 py-2.5 rounded-luxury-micro border border-foreground/30 text-foreground font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
-              >
-                Request a Quote
               </button>
             </div>
           </div>
@@ -2088,8 +2081,7 @@ const PublicProductPageContent: React.FC = () => {
             price={isTradeVerifiedView && mockNetDisplay ? mockNetDisplay : publicRrpLabel}
             currencyCode={isTradeVerifiedView && mockNetDisplay ? "Net Trade" : undefined}
             primaryLabel={isTradeVerifiedView ? "Add to Co-Pilot Workspace & Order" : "Place Order"}
-            secondaryLabel={isTradeVerifiedView ? "Open Axonometric Studio" : "Request a Quote or Customisation"}
-            onRequestQuote={() => setQuoteRequestOpen(true)}
+            secondaryLabel={null}
             onPlaceOrder={isTradeVerifiedView ? handleDirectCheckout : openSelectionDrawer}
             placingOrder={checkoutLoading}
           />
@@ -2381,7 +2373,7 @@ const PublicProductPageContent: React.FC = () => {
                     <TradeFirstCta
                       redirectTo={location.pathname + location.search}
                       rrpLabel={publicRrpLabel}
-                      onRequestQuote={() => setQuoteRequestOpen(true)}
+                      onPlaceOrder={openSelectionDrawer}
                       signedIn={!!user && !authLoading}
                       onAudienceChange={setCtaAudience}
                     />
@@ -2418,17 +2410,6 @@ const PublicProductPageContent: React.FC = () => {
                   </div>
 
                   <div className="order-6 md:order-6 flex flex-col items-center gap-3 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setQuoteRequestOpen(true)}
-                      className="font-body text-[11px] tracking-[0.06em] text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      Need project assistance?{" "}
-                      <span className="underline underline-offset-4 decoration-border">
-                        Speak with an Advisor
-                      </span>
-                    </button>
-
                     <button
                       type="button"
                       onClick={() => handleDirectCheckout()}
@@ -2593,7 +2574,6 @@ const PublicProductPageContent: React.FC = () => {
                         onPlaceOrder={handleDirectCheckout}
                         onAddToCart={addConfiguredToCart}
                         placingOrder={checkoutLoading}
-                        onRequestQuote={() => setQuoteRequestOpen(true)}
                         selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                         redirectTo={location.pathname + location.search}
@@ -2616,7 +2596,6 @@ const PublicProductPageContent: React.FC = () => {
                         leadTime={product.lead_time}
                         onPlaceOrder={handleDirectCheckout}
                         placingOrder={checkoutLoading}
-                        onRequestQuote={() => setQuoteRequestOpen(true)}
                         selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                         redirectTo={location.pathname + location.search}
@@ -2687,7 +2666,6 @@ const PublicProductPageContent: React.FC = () => {
                   onPlaceOrder={handleDirectCheckout}
                   onAddToCart={addConfiguredToCart}
                   placingOrder={checkoutLoading}
-                  onRequestQuote={() => setQuoteRequestOpen(true)}
                   selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                   redirectTo={location.pathname + location.search}
@@ -2709,7 +2687,6 @@ const PublicProductPageContent: React.FC = () => {
                   leadTime={product.lead_time}
                   onPlaceOrder={handleDirectCheckout}
                   placingOrder={checkoutLoading}
-                  onRequestQuote={() => setQuoteRequestOpen(true)}
                   selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                   redirectTo={location.pathname + location.search}
@@ -2769,7 +2746,6 @@ const PublicProductPageContent: React.FC = () => {
                       dockOnly
                       onPlaceOrder={handleDirectCheckout}
                       placingOrder={checkoutLoading}
-                      onRequestQuote={() => setQuoteRequestOpen(true)}
                       selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                       redirectTo={returnTo}
@@ -2782,21 +2758,15 @@ const PublicProductPageContent: React.FC = () => {
                   <div className="mt-2 space-y-2">
                     <button
                       type="button"
-                      onClick={() => setQuoteRequestOpen(true)}
+                      onClick={openSelectionDrawer}
                       className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-luxury-micro font-body text-[11px] md:text-xs uppercase tracking-[0.12em] transition-all w-full text-center bg-foreground text-background hover:bg-foreground/90"
                     >
-                      Inquire for Pricing
+                      Place an Order
                     </button>
                   </div>
                 );
               })()}
 
-              <QuoteRequestDialog
-                open={quoteRequestOpen}
-                onOpenChange={setQuoteRequestOpen}
-                productName={product.title}
-                designerName={designerDisplay}
-              />
 
               {/* Signed-out spec sheet explainer — points back to the trade card. */}
               <Dialog open={specSheetLocked} onOpenChange={setSpecSheetLocked}>
