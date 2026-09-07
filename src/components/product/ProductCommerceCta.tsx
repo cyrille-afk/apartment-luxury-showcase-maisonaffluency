@@ -3,8 +3,6 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getCart, shouldUseFullPageCart, useCart } from "@/lib/cart";
 import { Loader2, Minus, Plus } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import QuoteBriefIntake from "@/components/product/QuoteBriefIntake";
 import SelectionDrawer, { type PaymentMethod } from "@/components/product/SelectionDrawer";
 
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
@@ -15,9 +13,9 @@ import { cn } from "@/lib/utils";
 /**
  * Multi-tier product commerce CTA.
  *
- * STATE A (public / logged out): retail price + "Place Order" + "Request a
- * Quote or Customisation" — the latter opens the Trade Exclusive Access card
- * in a modal.
+ * STATE A (public / logged out): quantity stepper + a single "Place Order"
+ * action that adds the configured piece to the cart / selection drawer.
+ * Strictly transactional — no quote or enquiry paths.
  *
  * STATE B (verified trade): two-line price (Retail / Net Trade Price) +
  * quantity stepper + "Proceed to Order" (direct checkout at the net trade
