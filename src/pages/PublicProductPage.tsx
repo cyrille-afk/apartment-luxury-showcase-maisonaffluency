@@ -1252,12 +1252,12 @@ const PublicProductPageContent: React.FC = () => {
   const publicDockVisible = !!user || ctaAudience === "retail";
 
   // Mobile/PWA only: tell the global nav to stay hidden while this bar owns the top.
+  // The mini bar now docks directly below the AFFLUENCY header instead of
+  // replacing it, so the global nav must stay visible while it is shown.
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const isSmall = window.matchMedia("(max-width: 767px)").matches;
-    setStickyProductBarActive(isSmall && showStickyBar);
+    setStickyProductBarActive(false);
     return () => setStickyProductBarActive(false);
-  }, [showStickyBar]);
+  }, []);
 
 
 
@@ -2026,16 +2026,17 @@ const PublicProductPageContent: React.FC = () => {
       <div className="min-h-[100dvh] bg-background text-foreground">
         <Navigation borderless />
 
-        {/* Mobile sticky mini bar — replaces the global header once the product
-             image has scrolled out of view. */}
+        {/* Mobile sticky mini bar — slides in directly below the AFFLUENCY
+             header once the product image has scrolled out of view. The
+             header stays visible above it (z-50 > z-40), so nothing masks
+             or breaks the navigation layout. */}
         <div
           className={cn(
-            "md:hidden fixed left-0 right-0 top-0 z-[60] bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-transform duration-300 ease-out",
+            "md:hidden fixed left-0 right-0 top-[var(--header-h)] z-40 bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-transform duration-300 ease-out",
             !showStickyBar && "pointer-events-none"
           )}
           style={{
-            paddingTop: "env(safe-area-inset-top, 0px)",
-            transform: showStickyBar ? "translateY(0)" : "translateY(-100%)",
+            transform: showStickyBar ? "translateY(0)" : "translateY(calc(-100% - var(--header-h)))",
           }}
           aria-hidden={!showStickyBar}
         >
