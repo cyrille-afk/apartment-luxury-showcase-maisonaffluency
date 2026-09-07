@@ -382,7 +382,7 @@ export default function ProductCommerceCta({
           title={productTitle}
           configuration={orderFinishLabel || (selectedFinishes.length ? selectedFinishes.join(" / ") : null)}
           leadTime={leadTime}
-          priceLabel={(retailLabel || rrpLabel) ? `From ${(retailLabel ?? rrpLabel ?? "").replace(/^From\s+/i, "")}` : null}
+          priceLabel={retailLabel || rrpLabel || null}
           imageUrl={imageUrl}
           quantity={quantity}
           onQuantityChange={handleDrawerQuantity}
@@ -390,6 +390,7 @@ export default function ProductCommerceCta({
           placing={placingOrder}
         />
       )}
+
 
     </>
   );
