@@ -601,8 +601,8 @@ const TradeLanding = () => {
         })}</script>
       </Helmet>
 
-      <div className="min-h-[100dvh] scroll-smooth bg-background">
-        <div className="relative z-10 w-full min-h-[100dvh] bg-transparent">
+      <div className="min-h-[100dvh] w-screen overflow-x-hidden scroll-smooth bg-background">
+        <div className="relative z-10 flex w-full min-h-[100dvh] flex-col overflow-x-hidden bg-transparent">
 
         {/* Full official site header (fixed) */}
         <Navigation />
@@ -646,7 +646,7 @@ const TradeLanding = () => {
             <img
               src={TRADE_PROGRAM_HERO_IMAGE}
               alt="Maison Affluency Trade Program"
-              className="absolute inset-0 h-full w-full object-cover object-[50%_20%] md:object-contain md:object-center"
+              className="pointer-events-none absolute inset-0 h-full w-full touch-none object-cover object-[50%_20%] md:object-contain md:object-center"
               data-pin-nopin="true"
             />
 
