@@ -323,13 +323,12 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
 
 
-          {/* Top-left corner action. On desktop it is a single, unambiguous
-              "Presentation" button — one click opens the fullscreen viewer.
-              On mobile it still hosts the extra menu items (e.g. Share). */}
-          <div className="absolute top-4 left-4 z-30">
+          {/* Presentation action — desktop top-left; mobile/PWA bottom-right
+              (swapped with the share anchor for thumb reachability). */}
+          <div className={cn("z-30", isMobileOrPwa ? "absolute bottom-4 right-4" : "absolute top-4 left-4")}>
             {isMobileOrPwa && mobileMenuItems ? (
               <DropdownMenu>
-                <CornerTooltip label="Presentation" side="bottom" align="start">
+                <CornerTooltip label="Presentation" side="top" align="end">
                   <DropdownMenuTrigger
                     aria-label="Presentation and more actions"
                     className="w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 flex items-center justify-center touch-manipulation"
@@ -338,7 +337,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                     <Images size={20} strokeWidth={1.5} className="text-foreground/80" />
                   </DropdownMenuTrigger>
                 </CornerTooltip>
-                <DropdownMenuContent align="start" className="min-w-[190px]">
+                <DropdownMenuContent align="end" className="min-w-[190px]">
                   <DropdownMenuItem onSelect={() => setPresentOpen(true)} className="gap-2.5 font-body text-[11px] uppercase tracking-[0.16em]">
                     <Expand size={16} strokeWidth={1.5} /> Presentation
                   </DropdownMenuItem>
@@ -346,7 +345,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <CornerTooltip label="Presentation" side="bottom" align="start">
+              <CornerTooltip label="Presentation" side={isMobileOrPwa ? "top" : "bottom"} align={isMobileOrPwa ? "end" : "start"}>
                 <button
                   type="button"
                   aria-label="Presentation"
@@ -361,6 +360,10 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               </CornerTooltip>
             )}
           </div>
+
+
+
+
 
 
 
@@ -382,7 +385,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             </div>
           )}
           {bottomRightOverlay && (
-            <div className={cn("absolute z-20 pointer-events-none", isMobileOrPwa ? "bottom-4 right-4" : "bottom-3 right-3")}>
+            <div className={cn("absolute z-20 pointer-events-none", isMobileOrPwa ? "top-4 left-4" : "bottom-3 right-3")}>
               <div className="pointer-events-auto">{bottomRightOverlay}</div>
             </div>
           )}
