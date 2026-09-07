@@ -2582,6 +2582,7 @@ const PublicProductPageContent: React.FC = () => {
                       <ProductCommerceCta
                         productId={product.id}
                         rrpLabel={publicRrpLabel}
+                        dock={publicDockVisible}
                         productTitle={product.title}
                         designerName={designerDisplay}
                         imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
@@ -2674,6 +2675,7 @@ const PublicProductPageContent: React.FC = () => {
                 <ProductCommerceCta
                   productId={product.id}
                   rrpLabel={publicRrpLabel}
+                  dock={publicDockVisible}
                   dockOnly
                   productTitle={product.title}
                   designerName={designerDisplay}
