@@ -385,7 +385,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             </div>
           )}
           {bottomRightOverlay && (
-            <div className={cn("absolute z-20 pointer-events-none", isMobileOrPwa ? "bottom-4 right-4" : "bottom-3 right-3")}>
+            <div className={cn("absolute z-20 pointer-events-none", isMobileOrPwa ? "top-4 left-4" : "bottom-3 right-3")}>
               <div className="pointer-events-auto">{bottomRightOverlay}</div>
             </div>
           )}
