@@ -43,7 +43,7 @@ export function StickyPurchaseBar({
   onRequestQuote,
   onPlaceOrder,
   primaryLabel = "Place Order",
-  secondaryLabel = "Request a Quote or Customisation",
+  secondaryLabel = null,
   placingOrder = false,
   triggerId = "main-product-image-container",
   topOffset,
@@ -161,17 +161,19 @@ export function StickyPurchaseBar({
                 <span>{placingOrder ? "Opening checkout…" : primaryLabel}</span>
               </button>
             )}
-            <button
-              type="button"
-              onClick={handleRequestQuote}
-              className={cn(
-                "inline-flex items-center h-8 px-4 rounded-none",
-                "border border-foreground bg-background text-foreground font-body text-[10px] uppercase tracking-widest",
-                "transition-colors hover:bg-muted/60"
-              )}
-            >
-              {secondaryLabel}
-            </button>
+            {secondaryLabel ? (
+              <button
+                type="button"
+                onClick={handleRequestQuote}
+                className={cn(
+                  "inline-flex items-center h-8 px-4 rounded-none",
+                  "border border-foreground bg-background text-foreground font-body text-[10px] uppercase tracking-widest",
+                  "transition-colors hover:bg-muted/60"
+                )}
+              >
+                {secondaryLabel}
+              </button>
+            ) : null}
           </div>
           <p className="mt-1 font-body text-[9px] font-light uppercase tracking-widest text-muted-foreground/60 leading-none whitespace-nowrap">
             White-Glove Delivery&ensp;·&ensp;Secure Checkout by Stripe
