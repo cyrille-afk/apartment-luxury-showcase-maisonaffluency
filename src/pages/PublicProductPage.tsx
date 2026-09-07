@@ -2055,20 +2055,13 @@ const PublicProductPageContent: React.FC = () => {
               </p>
             </div>
 
-            <div className="mt-2 grid grid-cols-2 gap-2">
+            <div className="mt-2">
               <button
                 type="button"
                 onClick={openSelectionDrawer}
-                className="flex items-center justify-center px-3 py-2.5 rounded-luxury-micro bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
+                className="flex w-full items-center justify-center px-3 py-2.5 rounded-luxury-micro bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
               >
                 Place an Order
-              </button>
-              <button
-                type="button"
-                onClick={() => setQuoteRequestOpen(true)}
-                className="flex items-center justify-center px-3 py-2.5 rounded-luxury-micro border border-foreground/30 text-foreground font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
-              >
-                Request a Quote
               </button>
             </div>
           </div>
@@ -2381,7 +2374,7 @@ const PublicProductPageContent: React.FC = () => {
                     <TradeFirstCta
                       redirectTo={location.pathname + location.search}
                       rrpLabel={publicRrpLabel}
-                      onRequestQuote={() => setQuoteRequestOpen(true)}
+                      onPlaceOrder={openSelectionDrawer}
                       signedIn={!!user && !authLoading}
                       onAudienceChange={setCtaAudience}
                     />
