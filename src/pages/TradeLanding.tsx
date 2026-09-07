@@ -620,7 +620,9 @@ const TradeLanding = () => {
               className="relative w-[85%] max-w-xl text-justify md:ml-auto md:w-full md:pr-12 md:text-left lg:pr-16"
             >
               <h1 className="font-display whitespace-nowrap text-[1.4rem] leading-[1.2] text-foreground sm:text-3xl lg:text-5xl tracking-wide md:whitespace-normal">
-                Welcome to Our <span className="text-accent">Trade Program</span>
+                <span className="hidden md:block">Welcome to</span>
+                <span className="hidden md:block">Our <span className="text-accent">Trade Program</span></span>
+                <span className="md:hidden">Welcome to Our <span className="text-accent">Trade Program</span></span>
               </h1>
               <motion.div
                 style={{ y: mobileFormRise }}
