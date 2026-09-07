@@ -2380,6 +2380,7 @@ const PublicProductPageContent: React.FC = () => {
                       rrpLabel={publicRrpLabel}
                       onRequestQuote={() => setQuoteRequestOpen(true)}
                       signedIn={!!user && !authLoading}
+                      onAudienceChange={setCtaAudience}
                     />
                   </div>
 
