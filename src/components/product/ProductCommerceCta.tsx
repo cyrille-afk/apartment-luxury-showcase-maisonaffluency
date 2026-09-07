@@ -48,7 +48,6 @@ export interface ProductCommerceCtaProps {
   /** Persists the configured piece into the shared cart state (no navigation) */
   onAddToCart?: (quantity: number) => boolean | void;
   placingOrder?: boolean;
-  onRequestQuote: () => void;
   /** Trade: finish selection carried to the workspace */
   selectedFinishes?: string[];
   /** Display-accurate finish label (axis reference merged with swatch colourway). */
