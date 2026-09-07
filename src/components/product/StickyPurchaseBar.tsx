@@ -15,12 +15,12 @@ export interface StickyPurchaseBarProps {
   currencyCode?: string | null;
   /** Primary image URL (unused in the single-line layout, kept for compat) */
   image?: string | null;
-  onRequestQuote: () => void;
+  onRequestQuote?: () => void;
   /** Direct Stripe checkout for the current product + selected finish */
   onPlaceOrder?: () => void;
-  /** Role-driven label overrides (default: Place Order / Request a Quote…) */
+  /** Role-driven label overrides (default: Place Order); null hides the secondary action */
   primaryLabel?: string;
-  secondaryLabel?: string;
+  secondaryLabel?: string | null;
   /** Shows a spinner while the checkout session is being created */
   placingOrder?: boolean;
   /** Element whose bottom edge leaving the viewport arms the bar */

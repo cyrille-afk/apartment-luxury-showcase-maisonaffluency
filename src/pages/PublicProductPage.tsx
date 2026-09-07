@@ -2081,8 +2081,7 @@ const PublicProductPageContent: React.FC = () => {
             price={isTradeVerifiedView && mockNetDisplay ? mockNetDisplay : publicRrpLabel}
             currencyCode={isTradeVerifiedView && mockNetDisplay ? "Net Trade" : undefined}
             primaryLabel={isTradeVerifiedView ? "Add to Co-Pilot Workspace & Order" : "Place Order"}
-            secondaryLabel={isTradeVerifiedView ? "Open Axonometric Studio" : "Request a Quote or Customisation"}
-            onRequestQuote={() => setQuoteRequestOpen(true)}
+            secondaryLabel={null}
             onPlaceOrder={isTradeVerifiedView ? handleDirectCheckout : openSelectionDrawer}
             placingOrder={checkoutLoading}
           />
