@@ -9,8 +9,8 @@ export interface TradeFirstCtaProps {
   redirectTo?: string;
   /** Formatted public retail price, e.g. "From $33,000" */
   rrpLabel?: string | null;
-  /** Opens the enquiry / quote dialog */
-  onRequestQuote: () => void;
+  /** Starts the direct checkout path ("Place an Order") */
+  onPlaceOrder: () => void;
   /** When true the visitor is already authenticated — tabs are hidden */
   signedIn?: boolean;
   /** Notifies the parent whenever the active tab changes (and on mount). */
