@@ -642,13 +642,11 @@ input, select, textarea {
     background-size: 100% 100%;
   }
 
-  /* The Trade Program hero reaches the physical bottom edge. Paint the iOS
-     browser/PWA backing canvas with that same photograph so the toolbar's
-     translucent safe area reveals the image instead of the default white.
-     The root underlay is pure black so any exposed viewport buffer can never
-     flash white. */
+  /* The Trade Program hero reaches the physical bottom edge. The root
+     underlay is solid white so the native iOS panel area defaults to white
+     and never flashes black beneath the photograph. */
   html.ios-chrome-image {
-    background-color: #000000;
+    background-color: #ffffff;
     background-image: none;
   }
 
