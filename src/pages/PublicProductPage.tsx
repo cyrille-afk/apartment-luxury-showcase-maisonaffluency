@@ -1244,6 +1244,13 @@ const PublicProductPageContent: React.FC = () => {
   // the top of the viewport and the global header steps aside entirely.
   const showStickyBar = stickyBarArmed;
 
+  // Active TRADE/RETAIL tab from TradeFirstCta. On the TRADE tab the mobile
+  // sticky "Place Order" dock hides so the trade sign-in panel owns the
+  // bottom of the screen; RETAIL restores the dock. Signed-in visitors have
+  // no tabs, so their dock is untouched.
+  const [ctaAudience, setCtaAudience] = useState<"trade" | "retail">("trade");
+  const publicDockVisible = !!user || ctaAudience === "retail";
+
   // Mobile/PWA only: tell the global nav to stay hidden while this bar owns the top.
   useEffect(() => {
     if (typeof window === "undefined") return;
