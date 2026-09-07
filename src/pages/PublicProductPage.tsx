@@ -1252,12 +1252,14 @@ const PublicProductPageContent: React.FC = () => {
   const publicDockVisible = !!user || ctaAudience === "retail";
 
   // Mobile/PWA only: tell the global nav to stay hidden while this bar owns the top.
-  // The mini bar now docks directly below the AFFLUENCY header instead of
-  // replacing it, so the global nav must stay visible while it is shown.
+  // While the mini bar is docked below the header, pin the global nav so the
+  // two bars stack cleanly instead of the bar masking the navigation.
   useEffect(() => {
-    setStickyProductBarActive(false);
+    if (typeof window === "undefined") return;
+    const isSmall = window.matchMedia("(max-width: 767px)").matches;
+    setStickyProductBarActive(isSmall && showStickyBar);
     return () => setStickyProductBarActive(false);
-  }, []);
+  }, [showStickyBar]);
 
 
 
