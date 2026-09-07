@@ -610,7 +610,7 @@ const TradeLanding = () => {
         <div aria-hidden className="h-24 md:h-[120px] pt-[env(safe-area-inset-top)]" />
 
         {/* ─── Split-screen Hero ─── */}
-        <div ref={heroRef} className="relative flex h-[calc(100dvh-6rem-3.5rem-env(safe-area-inset-bottom))] min-h-[580px] w-full flex-col md:h-[calc(100vh-256px)] md:min-h-0 md:flex-row">
+        <div ref={heroRef} className="relative flex h-[calc(100dvh-6rem)] min-h-[580px] w-full flex-col md:h-[calc(100vh-256px)] md:min-h-0 md:flex-row">
           {/* Left Side: title (mobile) / title + form (desktop) */}
           <div className="relative z-20 flex shrink-0 h-auto w-full items-center justify-center bg-background px-6 pb-4 pt-2 md:h-auto md:w-1/2 md:justify-start md:px-12 md:py-12 lg:px-16">
             <motion.div
@@ -694,12 +694,6 @@ const TradeLanding = () => {
           </div>
         </div>
 
-        {/* ─── Solid white base strip (mobile/PWA) — wraps behind the iOS home indicator; hero photo terminates at its top edge ─── */}
-        <div
-          aria-hidden
-          className="w-full shrink-0 bg-background md:hidden"
-          style={{ height: "calc(3.5rem + env(safe-area-inset-bottom))" }}
-        />
 
         {/* ─── Provenance Trust Strip ─── */}
         <div className="hidden w-full bg-background border-b border-border md:block">
