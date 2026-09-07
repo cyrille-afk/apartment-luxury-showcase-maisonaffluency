@@ -158,7 +158,6 @@ export default function ProductCommerceCta({
   onPlaceOrder,
   onAddToCart,
   placingOrder = false,
-  onRequestQuote,
   selectedFinishes = [],
   orderFinishLabel = null,
   redirectTo,
