@@ -170,7 +170,6 @@ export default function ProductCommerceCta({
   utilityLinks,
 }: ProductCommerceCtaProps) {
   const navigate = useNavigate();
-  const [accessOpen, setAccessOpen] = useState(false);
   // Quantity lives in the container engine so both layout variants share it;
   // falls back to local state when rendered outside ProductPageContainer.
   const productConfig = useProductConfigOptional();
@@ -211,11 +210,9 @@ export default function ProductCommerceCta({
   const workspaceHref = `/trade/products/${productId}${finishQuery}`;
 
   const primaryLabel = tradeApproved ? "Proceed to Order" : "Place Order";
-  const secondaryLabel = "Request a Quote or Customisation";
 
   // Public: PLACE ORDER writes the configured piece into the shared cart state
   // and slides open the "Your Selection" drawer — never the account wall.
-  // Secondary (both states) opens the brief-upload portal (QuoteBriefIntake).
   // Display-routing controller (price-agnostic): a single-item cart stays in
   // the drawer; 2+ items route to the full-page /cart layout.
   const openSelection = () => {
@@ -234,7 +231,6 @@ export default function ProductCommerceCta({
     setMiniCartOpen(true);
   };
   const primaryAction = tradeApproved ? undefined : openSelection;
-  const secondaryAction = () => setAccessOpen(true);
 
   // Sticky banners dispatch this instead of navigating to /cart. Only the
   // instance matching the current breakpoint reacts, so one drawer opens.
@@ -322,9 +318,6 @@ export default function ProductCommerceCta({
               {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
               {placingOrder ? "Opening checkout…" : primaryLabel}
             </button>
-            <button type="button" data-commerce-secondary onClick={secondaryAction} className={secondaryBtn}>
-              {secondaryLabel}
-            </button>
           </>
         )}
 
@@ -402,21 +395,6 @@ export default function ProductCommerceCta({
           placing={placingOrder}
         />
       )}
-
-      {/* Quote / customisation → frictionless brief intake (State A) */}
-      <Dialog open={accessOpen} onOpenChange={(o) => { setAccessOpen(o); if (!o) setManualForm(false); }}>
-        <DialogContent className="flex w-[95vw] max-w-lg md:max-w-4xl lg:max-w-5xl h-auto max-h-[92vh] flex-col overflow-hidden rounded-none p-0 border-border/60">
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-            <QuoteBriefIntake
-              productTitle={productTitle}
-              designerName={designerName}
-              redirectTo={redirectTo}
-              onDone={() => { setAccessOpen(false); setManualForm(false); }}
-            />
-          </div>
-
-        </DialogContent>
-      </Dialog>
 
     </>
   );
