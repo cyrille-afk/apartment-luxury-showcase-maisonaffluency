@@ -1856,7 +1856,10 @@ const PublicDesignerProfile = () => {
                       gridClass,
                       isEmmanuelBabled ? "gap-x-4 gap-y-4 md:gap-x-6 md:gap-y-12" : "gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10"
                     )}>
-                {visiblePicks.map((pick) => {
+                {visiblePicks.map((pick, index) => {
+                  // Alternating mobile rhythm: row 1 left tall/right short,
+                  // row 2 left short/right tall, so baselines never lock.
+                  const isMobileTall = index % 4 === 0 || index % 4 === 3;
 
                   const ap = pick as AttributedCuratorPick;
                   // Primary: attribution row on grouped picks (child designer rows).
