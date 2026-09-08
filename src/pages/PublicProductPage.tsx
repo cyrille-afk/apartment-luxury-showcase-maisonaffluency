@@ -2176,7 +2176,7 @@ const PublicProductPageContent: React.FC = () => {
 
                 overlay={
                   /* Favorite / studio save stays top-right. */
-                  <div className="hidden md:flex items-center gap-3">
+                  <div className="flex items-center gap-3">
                     {user && hasTradeAccess ? (
                       <CornerTooltip label="Save to Studio" side="bottom" align="end">
                         <StudioSaveButton
