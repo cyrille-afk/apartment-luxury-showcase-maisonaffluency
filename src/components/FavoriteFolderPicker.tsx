@@ -107,10 +107,22 @@ const FavoriteFolderPicker = ({ pickId, children, align = "end", side = "bottom"
       >
         {children}
       </PopoverTrigger>
+
+      {/* Backdrop: closes the menu on tap/scroll and provides a subtle dimmed blur. */}
+      {open && typeof document !== "undefined" &&
+        createPortal(
+          <div
+            aria-hidden="true"
+            className="fixed inset-0 z-[119] bg-black/[0.04] backdrop-blur-[2px] transition-opacity duration-200"
+            onPointerDown={() => setOpen(false)}
+          />,
+          document.body
+        )}
+
       <PopoverContent
         align={align}
         side={side}
-        className="w-72 p-0 bg-background border-border z-[120]"
+        className="w-72 p-0 bg-background border border-border shadow-[0_22px_60px_-20px_rgba(0,0,0,0.12)] z-[120] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:duration-200 data-[state=closed]:duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
