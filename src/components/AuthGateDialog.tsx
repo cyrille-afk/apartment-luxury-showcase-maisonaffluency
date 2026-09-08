@@ -64,7 +64,13 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
       if (result.redirected) return; // browser is navigating to Google
       if (result.error) {
         toast({ title: "Google Sign-In Failed", description: result.error.message, variant: "destructive" });
+        return;
       }
+      // Popup flow: tokens are set, so close the dialog and refresh the page
+      // so the signed-in state (and any gated content) is applied.
+      onClose();
+      window.location.reload();
+
     } catch (err) {
       toast({ title: "Google Sign-In Failed", description: err instanceof Error ? err.message : "Unexpected error", variant: "destructive" });
     } finally {
