@@ -473,12 +473,16 @@ html {
   -ms-text-size-adjust: 100%;
   /* Keep pinch-zoom enabled; only suppress double-tap delay. */
   touch-action: manipulation;
-  /* Lock global horizontal swipe — prevents sideways leaks / phantom columns on touch. */
+  /* Lock global horizontal swipe — prevents sideways leaks / phantom columns on touch.
+     `clip` keeps the lock without turning the root into a scroll container,
+     which would break position: sticky (mobile product image dock). */
   overflow-x: hidden;
+  overflow-x: clip;
   width: 100vw;
 }
 body {
   overflow-x: hidden;
+  overflow-x: clip;
   width: 100vw;
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
@@ -719,12 +723,17 @@ input, select, textarea {
    tall flagship screens get an elegant 3:4 portrait capped at 50vh. */
 .product-image-frame {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: auto;
+  height: min(45svh, 100vw);
   max-height: 45svh;
+  /* Smooth shrink/expand as the sticky image docks under the header. */
+  transition: height 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    max-height 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: height;
 }
 @media screen and (min-width: 410px) and (min-height: 850px) {
   .product-image-frame {
-    aspect-ratio: 3 / 4;
+    height: min(45svh, 133vw);
     max-height: 45svh;
   }
 }
@@ -732,6 +741,11 @@ input, select, textarea {
   aspect-ratio: auto;
   height: 20svh;
   max-height: 20svh;
+}
+@media (prefers-reduced-motion: reduce) {
+  .product-image-frame {
+    transition: none;
+  }
 }
 @media (min-width: 768px) {
   .product-image-frame,

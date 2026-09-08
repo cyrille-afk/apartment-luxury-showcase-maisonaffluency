@@ -55,7 +55,7 @@ export default function LegendDisclosure({
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "flex items-center gap-5 w-full py-4 text-left",
+          "flex items-center gap-5 w-full py-2.5 md:py-4 text-left",
           "font-body text-sm text-foreground font-medium",
           "focus:outline-none focus-visible:ring-0",
           "hover:text-foreground transition-colors"
@@ -73,7 +73,7 @@ export default function LegendDisclosure({
         />
       </button>
       {open && bodyLines.length > 0 && (
-        <div className="pb-4 pl-[44px] pr-2 flex flex-col gap-1">
+        <div className="pb-3 md:pb-4 pl-[44px] pr-2 flex flex-col gap-1">
           {bodyLines.map((line, i) => (
             <p
               key={i}

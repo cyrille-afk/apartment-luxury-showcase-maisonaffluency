@@ -142,7 +142,7 @@ export default function ExpandableSpec({
 
   // Shared row wrapper — borderless list with hairline dividers
   const rowClasses =
-    "flex items-center gap-5 w-full py-4 border-b border-border/60";
+    "flex items-center gap-5 w-full py-2.5 md:py-4 border-b border-border/60";
 
 
   // Single value → plain row
@@ -192,7 +192,7 @@ export default function ExpandableSpec({
     const activeLabel = selectedIdx != null && selectedIdx >= 0 ? lines[selectedIdx] : null;
 
     return (
-      <div className="border-b border-border/60 py-4">
+      <div className="border-b border-border/60 py-2.5 md:py-4">
         <div className="flex items-baseline justify-between gap-4">
           <span className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             {placeholder.replace(/^select your\s+/i, "")}
@@ -378,7 +378,7 @@ export default function ExpandableSpec({
           onClick={() => (open ? closeList(false) : openList())}
           onKeyDown={onTriggerKey}
           className={cn(
-            "flex items-center gap-5 w-full py-4 text-left",
+            "flex items-center gap-5 w-full py-2.5 md:py-4 text-left",
             "font-body text-sm",
             "focus:outline-none focus-visible:ring-0",
             "hover:text-foreground transition-colors",
