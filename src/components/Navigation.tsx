@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
+import { useWishlist } from "@/contexts/WishlistContext";
 import { useCompare } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
 import { trackCTA } from "@/lib/analytics";
@@ -105,23 +106,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   const { items: pinItems, setIsComparing } = useCompare();
   const [authGateOpen, setAuthGateOpen] = useState(false);
   const [authGateMode, setAuthGateMode] = useState<"prompt" | "signup" | "login">("prompt");
-  // localStorage-backed favorite count
-  const [favCount, setFavCount] = useState(0);
-  useEffect(() => {
-    const read = () => {
-      try {
-        const raw = localStorage.getItem("public_favorites");
-        setFavCount(raw ? JSON.parse(raw).length : 0);
-      } catch { setFavCount(0); }
-    };
-    read();
-    const onStorage = (e: StorageEvent) => { if (e.key === "public_favorites") read(); };
-    window.addEventListener("storage", onStorage);
-    // Also listen for same-tab changes via a custom event
-    const onLocal = () => read();
-    window.addEventListener("public_favorites_changed", onLocal);
-    return () => { window.removeEventListener("storage", onStorage); window.removeEventListener("public_favorites_changed", onLocal); };
-  }, []);
+  // Global wishlist state (localStorage-backed, shared via WishlistProvider)
+  const { count: favCount } = useWishlist();
   const navigate = useNavigate();
   const location = useLocation();
   const isOnCategoryRoute = location.pathname.startsWith("/products-category/");

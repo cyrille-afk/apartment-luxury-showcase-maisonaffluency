@@ -48,7 +48,7 @@ import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
-import { addFavorite, isFavorited as isFavoritedPick, removeFavorite } from "@/lib/favoriteFolders";
+import { useWishlist } from "@/contexts/WishlistContext";
 import { Button } from "@/components/ui/button";
 import { lastNameInitial } from "@/lib/nameFormat";
 import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
@@ -456,7 +456,7 @@ const PublicDesignerProfile = () => {
   const isChildDesigner = isChildBrandDesigner(designer);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
-  const [, setFavoriteRevision] = useState(0);
+  const { isFavorited: isFavoritedPick, toggleWishlist } = useWishlist();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const [shareCopied, setShareCopied] = useState(false);
   const newInBioRef = useRef<HTMLDivElement>(null);
@@ -2073,9 +2073,11 @@ const PublicDesignerProfile = () => {
                                 requireAuth(() => undefined, "save pieces to your favorites");
                                 return;
                               }
-                              if (isFavorite) removeFavorite(pick.id);
-                              else addFavorite(pick.id);
-                              setFavoriteRevision((value) => value + 1);
+                              toggleWishlist(pick.id, {
+                                title: displayTitle,
+                                designer: cardBrandLabel,
+                                imageUrl: responsiveCloudinaryUrl(pick.image_url, 160),
+                              });
                             }}
                             className="h-8 w-8 rounded-full border border-border/60 bg-background/90 text-foreground shadow-sm backdrop-blur-sm transition-all duration-300 ease-in-out active:scale-110"
                           >
