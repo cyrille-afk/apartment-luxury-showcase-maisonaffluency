@@ -2348,18 +2348,8 @@ const PublicProductPageContent: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    <div className="order-7 md:order-5 flex flex-col gap-5">
-                      <VariantFinishSelectors section="supplemental" renderMaterialsDescription={false} />
-                      {finishesMissingImages.length > 0 && (
-                        <p className="font-body text-[11px] text-muted-foreground italic mt-1">
-                          No reference image on file for{" "}
-                          <span className="text-foreground">{finishesMissingImages.join(", ")}</span>.
-                          We'll note this on your enquiry so our concierge can confirm visuals.
-                        </p>
-                      )}
-                    </div>
 
-                    <div className="flex flex-col gap-5 order-4 md:order-5">
+                    <div className="flex flex-col gap-5 order-5 md:order-5">
                       <VariantDimensionsPanel />
                     </div>
                   </VariantSelectorsProvider>
