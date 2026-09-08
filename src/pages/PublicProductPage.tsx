@@ -1284,9 +1284,11 @@ const PublicProductPageContent: React.FC = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const isSmall = window.matchMedia("(max-width: 767px)").matches;
-    setStickyProductBarActive(isSmall && showStickyBar);
+    // Also pin the header while the product image is docked beneath it —
+    // otherwise the nav slides away and the sticky image looks unanchored.
+    setStickyProductBarActive(isSmall && (showStickyBar || galleryCompact));
     return () => setStickyProductBarActive(false);
-  }, [showStickyBar]);
+  }, [showStickyBar, galleryCompact]);
 
 
 
