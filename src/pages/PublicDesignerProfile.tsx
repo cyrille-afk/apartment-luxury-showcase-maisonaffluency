@@ -1281,7 +1281,7 @@ const PublicDesignerProfile = () => {
           </div>
 
           {designer.hero_photo_credit && (
-            <p className="mt-1 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
+            <p className="hidden md:block mt-1 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
               Photo: {designer.hero_photo_credit}
             </p>
           )}
