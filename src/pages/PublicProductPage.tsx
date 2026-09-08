@@ -2293,9 +2293,9 @@ const PublicProductPageContent: React.FC = () => {
                         >
                           {designerDisplay}
                         </Link>
-                        <div className="mt-2 w-8 md:w-10 h-px bg-foreground/20" aria-hidden="true" />
+                        <div className="mt-1 w-8 md:w-10 h-px bg-foreground/20" aria-hidden="true" />
                       </div>
-                      <h1 className="font-display font-normal text-[1.5rem] md:text-[1.85rem] mt-4 leading-[1.15] tracking-[-0.01em]">
+                      <h1 className="font-display font-normal text-[1.5rem] md:text-[1.85rem] mt-2 leading-[1.15] tracking-[-0.01em]">
                         {product.title}
                         {(() => {
                           const editionLabel = formatEditionLabel(product as any);
@@ -2315,44 +2315,6 @@ const PublicProductPageContent: React.FC = () => {
                       {isTradeVerifiedView && (
                         <div className="mt-4 flex justify-start">
                           <CurrencyToggle compact value={displayCurrency} onChange={setDisplayCurrency} />
-                        </div>
-                      )}
-                      {isTradeVerifiedView && mockNetDisplay ? (
-                        <div className="mt-6">
-                          <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
-                            {hasFromPrefix && (
-                              <span className="text-muted-foreground text-[11px] uppercase tracking-[0.22em] align-middle mr-2">From</span>
-                            )}
-                            <span className="text-foreground align-middle">{mockNetLabel}</span>
-                            <span className="ml-2 align-middle font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Net Trade Price</span>
-                          </p>
-                          {retailPlainLabel && (
-                            <p className="mt-1 font-body text-[11px] tracking-[0.04em] text-muted-foreground">
-                              <span className="line-through decoration-muted-foreground/50">Retail: {retailPlainLabel}</span>
-                            </p>
-                          )}
-                        </div>
-                      ) : displayRrpLabel && (
-                        <div className="mt-6">
-                          <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
-                            {(() => {
-                              const spaceIdx = displayRrpLabel.indexOf(" ");
-                              if (spaceIdx === -1) return <span className="text-foreground">{displayRrpLabel}</span>;
-                              const prefix = displayRrpLabel.slice(0, spaceIdx);
-                              const rest = displayRrpLabel.slice(spaceIdx + 1);
-                              return (
-                                <>
-                                  <span className="text-muted-foreground text-[11px] uppercase tracking-[0.22em] align-middle mr-2">{prefix}</span>
-                                  <span className="text-foreground align-middle">{rest}</span>
-                                </>
-                              );
-                            })()}
-                          </p>
-                          {isTradeUnverifiedView && (
-                            <p className="mt-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-amber-600">
-                              Trade Program Verification Pending
-                            </p>
-                          )}
                         </div>
                       )}
                     </div>
