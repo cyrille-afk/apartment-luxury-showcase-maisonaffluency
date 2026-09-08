@@ -119,9 +119,10 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
             key={src + i}
             src={src}
             alt={i === index ? alt : ""}
-            draggable
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()}
             className={cn(
-              "absolute max-w-full max-h-full object-contain transition-opacity duration-500 ease-out",
+              "absolute max-w-full max-h-full object-contain transition-opacity duration-500 ease-out select-none [-webkit-touch-callout:none] touch-pan-y",
               i === index ? "opacity-100" : "opacity-0 pointer-events-none"
             )}
           />
