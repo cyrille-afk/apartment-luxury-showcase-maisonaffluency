@@ -2151,7 +2151,14 @@ const PublicProductPageContent: React.FC = () => {
 
 
           <div className="flex flex-col lg:grid lg:grid-cols-2 gap-3 md:gap-8 lg:gap-16">
-            <div id="main-product-image-container" className="relative -mx-4 md:mx-0 sticky top-[var(--header-h)] md:top-[calc(var(--header-h)+1rem)] h-fit self-stretch lg:self-start z-30 bg-background transition-all duration-500 ease-out transform" ref={galleryScrollRef}>
+            <div
+              id="main-product-image-container"
+              className={cn(
+                "relative -mx-4 md:mx-0 sticky top-[var(--header-h)] md:top-[calc(var(--header-h)+1rem)] h-fit self-stretch lg:self-start z-30 bg-background transition-all duration-500 ease-out transform",
+                galleryCompact && "border-b border-border/40 shadow-[0_8px_30px_rgba(0,0,0,0.05)]"
+              )}
+              ref={galleryScrollRef}
+            >
               <ProductImageGallery
                 images={visibleImages}
                 alt={product.title}
