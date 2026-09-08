@@ -2355,7 +2355,7 @@ const PublicProductPageContent: React.FC = () => {
                   </VariantSelectorsProvider>
 
 
-                  <div className="order-5 md:order-6">
+                  <div className="order-6 md:order-6">
                     {(() => {
                       const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                       if (!handcrafted) return null;
