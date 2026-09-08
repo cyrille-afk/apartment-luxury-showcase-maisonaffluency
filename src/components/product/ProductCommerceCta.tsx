@@ -1,5 +1,5 @@
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getCart, shouldUseFullPageCart, useCart } from "@/lib/cart";
 import { Loader2, Minus, Plus } from "lucide-react";
@@ -8,7 +8,7 @@ import SelectionDrawer, { type PaymentMethod } from "@/components/product/Select
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
-import { setStickyCommerceDockActive } from "@/lib/stickyCommerceDock";
+import { setStickyCommerceDockHeight } from "@/lib/stickyCommerceDock";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { cn } from "@/lib/utils";
 
@@ -381,6 +381,7 @@ export default function ProductCommerceCta({
       {/* Mobile sticky bottom dock */}
       {dock && (
         <div
+          ref={dockRef}
           className={cn(
             "md:hidden fixed bottom-0 left-0 right-0 z-[70]",
             "bg-background/95 backdrop-blur-md border-t border-border/60",
