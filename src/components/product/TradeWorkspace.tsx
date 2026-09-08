@@ -310,7 +310,7 @@ export default function TradeWorkspace({
           </p>
           <dl className="mt-4">
             {dimensions && (
-              <div className="flex items-baseline justify-between gap-8 py-3.5 border-b border-border/60 first:border-t">
+              <div className="flex items-baseline justify-between gap-8 py-3.5 border-b border-border/60">
                 <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground shrink-0">
                   Dimensions
                 </dt>
