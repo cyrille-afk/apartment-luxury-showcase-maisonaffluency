@@ -1924,7 +1924,7 @@ const PublicProductPageContent: React.FC = () => {
 
     return (
       <div className={cn("flex flex-wrap items-center justify-center gap-x-10 gap-y-2 px-2", extraClass)}>
-        <FavoriteFolderPicker pickId={product.id} align="start" side="top">
+        <FavoriteFolderPicker pickId={product.id} align="start" side="top" requireAuth={requireAuth}>
           <button
             onClick={(e) => e.stopPropagation()}
             className={cn(
@@ -2187,7 +2187,7 @@ const PublicProductPageContent: React.FC = () => {
                       </CornerTooltip>
                     ) : (
                       <CornerTooltip label={favorited ? "Saved to Favorites" : "Save to Favorites"} side="bottom" align="end">
-                        <FavoriteFolderPicker pickId={product.id} align="end" side="bottom">
+                        <FavoriteFolderPicker pickId={product.id} align="end" side="bottom" requireAuth={requireAuth}>
                           <button
                             onClick={(e) => e.stopPropagation()}
                             aria-label={favorited ? "Saved to favorites" : "Add to favorites"}

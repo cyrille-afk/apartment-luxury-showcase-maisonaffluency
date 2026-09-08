@@ -24,9 +24,24 @@ interface Props {
   side?: "top" | "right" | "bottom" | "left";
   /** Called whenever favorite state or folder assignments change. */
   onChange?: () => void;
+  /**
+   * Optional auth interception. The menu stays browsable for signed-out users;
+   * only when they trigger an action do we hand off to this gate.
+   */
+  requireAuth?: (callback: () => void, actionLabel?: string) => void;
+  /** Extra classes for the popover surface (e.g. positioning tweaks). */
+  contentClassName?: string;
 }
 
-const FavoriteFolderPicker = ({ pickId, children, align = "end", side = "bottom", onChange }: Props) => {
+const FavoriteFolderPicker = ({
+  pickId,
+  children,
+  align = "end",
+  side = "bottom",
+  onChange,
+  requireAuth,
+  contentClassName,
+}: Props) => {
   const [open, setOpen] = useState(false);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
@@ -67,20 +82,32 @@ const FavoriteFolderPicker = ({ pickId, children, align = "end", side = "bottom"
     };
   }, [open]);
 
-  const handleToggleFavorite = () => {
+  /** Runs the action, or hands off to the auth gate for signed-out visitors. */
+  const gate = useCallback(
+    (action: () => void, label: string) => {
+      if (!requireAuth) { action(); return; }
+      let allowed = false;
+      requireAuth(() => { allowed = true; }, label);
+      if (allowed) action();
+      else setOpen(false);
+    },
+    [requireAuth]
+  );
+
+  const handleToggleFavorite = () => gate(() => {
     if (favorited) removeFavorite(pickId);
     else addFavorite(pickId);
     refresh();
     onChange?.();
-  };
+  }, "save pieces to your favorites");
 
-  const handleToggleFolder = (folderId: string) => {
+  const handleToggleFolder = (folderId: string) => gate(() => {
     togglePickInFolder(pickId, folderId);
     refresh();
     onChange?.();
-  };
+  }, "organise favorites into folders");
 
-  const handleCreateFolder = () => {
+  const handleCreateFolder = () => gate(() => {
     const name = newName.trim();
     if (!name) { setCreating(false); return; }
     const f = createFolder(name);
@@ -89,7 +116,7 @@ const FavoriteFolderPicker = ({ pickId, children, align = "end", side = "bottom"
     setCreating(false);
     refresh();
     onChange?.();
-  };
+  }, "create a folder");
 
   const handleDeleteFolder = (folderId: string, e: React.MouseEvent) => {
     e.stopPropagation();
