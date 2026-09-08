@@ -8,6 +8,8 @@ import SelectionDrawer, { type PaymentMethod } from "@/components/product/Select
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
+import { setStickyCommerceDockActive } from "@/lib/stickyCommerceDock";
+import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { cn } from "@/lib/utils";
 
 /**
@@ -195,6 +197,22 @@ export default function ProductCommerceCta({
       window.removeEventListener("resize", handleScroll);
     };
   }, []);
+
+  // Notify floating action buttons (e.g., the image-gallery presentation menu)
+  // that the mobile commerce dock owns the bottom of the viewport.
+  useEffect(() => {
+    const mql = window.matchMedia("(max-width: 767px)");
+    const update = () => {
+      const mobileOrPwa = mql.matches || isPwaStandaloneDisplay();
+      setStickyCommerceDockActive(dock && !isAtBottom && mobileOrPwa);
+    };
+    update();
+    mql.addEventListener("change", update);
+    return () => {
+      mql.removeEventListener("change", update);
+      setStickyCommerceDockActive(false);
+    };
+  }, [dock, isAtBottom]);
   
   const { clientSafe } = useClientSafeMode();
   const { data: pricing } = useTradeProductPricing(productId, tradeApproved);
