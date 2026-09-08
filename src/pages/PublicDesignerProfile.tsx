@@ -53,6 +53,7 @@ import { Button } from "@/components/ui/button";
 import { lastNameInitial } from "@/lib/nameFormat";
 import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
 import NewInSpotlight from "@/components/NewInSpotlight";
+import SwipeAlternateProductImage from "@/components/product/SwipeAlternateProductImage";
 // Collectible profiles are public; product-page gating lives in PublicProductPage.
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
@@ -1938,6 +1939,9 @@ const PublicDesignerProfile = () => {
                   // We're already on Madsen's own portrait — no "by Arnold Madsen" needed.
                   const cardSubtitle = isArnoldClamChair ? undefined : pick.subtitle;
                   const isFavorite = isFavoritedPick(pick.id);
+                  const alternateImage = pick.hover_image_url
+                    || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
+                    || null;
                   const handleCardClick = (e: React.MouseEvent) => {
                     if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || (e as any).button === 1) {
                       return;
@@ -2013,38 +2017,18 @@ const PublicDesignerProfile = () => {
                         className={cn(
                           "w-full bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer",
                           "md:aspect-[4/5]",
-                          isMobileTall ? "aspect-[3/4]" : "aspect-square"
+                          isMobileTall ? "aspect-[4/5]" : "aspect-square"
                         )}
                       >
-                        <img
-                          src={responsiveCloudinaryUrl(pick.image_url, 600)}
-                          srcSet={pickSrcSet(pick.image_url)}
+                        <SwipeAlternateProductImage
+                          primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
+                          primarySrcSet={pickSrcSet(pick.image_url)}
+                          alternateSrc={alternateImage ? responsiveCloudinaryUrl(alternateImage, 600) : null}
+                          alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                           sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
-                          className={cn(
-                            "absolute inset-0 w-full h-full object-contain md:object-cover rounded-luxury-sharp transition-all duration-700",
-                            pick.hover_image_url
-                              ? "opacity-100 group-hover:opacity-0 group-hover:scale-105"
-                              : "group-hover:scale-105"
-                          )}
-                          loading="lazy"
+                          alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
                         />
-                        {pick.hover_image_url && (
-                          <>
-                            <img
-                              src={responsiveCloudinaryUrl(pick.hover_image_url, 600)}
-                              srcSet={pickSrcSet(pick.hover_image_url)}
-                          sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
-                              alt={`${pick.title} alternate finish`}
-                              className={cn(
-                                "absolute inset-0 w-full h-full object-contain md:object-cover rounded-luxury-sharp transition-all duration-700",
-                                "opacity-0 group-hover:opacity-100 group-hover:scale-105"
-                              )}
-                              style={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
-                              loading="lazy"
-                            />
-                          </>
-                        )}
                         {/* Micro-tags — sharp rectangles, top-left of the frame */}
                         {(() => {
                           const tags: string[] = pick.tags || [];
@@ -2134,12 +2118,12 @@ const PublicDesignerProfile = () => {
                           <Link
                             to={`/designers/${cardBrandSlug || parentBrandSlug}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.16em] md:tracking-[0.18em] text-foreground leading-relaxed md:leading-tight line-clamp-1 hover:text-foreground/70 transition-colors"
+                            className="block font-display text-[11px] md:text-sm font-medium uppercase tracking-widest md:tracking-[0.18em] text-muted-foreground md:text-foreground leading-relaxed md:leading-tight line-clamp-1 hover:text-foreground/70 transition-colors"
                           >
                             {cardBrandLabel || parentBrandName}
                           </Link>
                         ) : (
-                          <span className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.16em] md:tracking-[0.18em] text-foreground leading-relaxed md:leading-tight line-clamp-1">
+                          <span className="block font-display text-[11px] md:text-sm font-medium uppercase tracking-widest md:tracking-[0.18em] text-muted-foreground md:text-foreground leading-relaxed md:leading-tight line-clamp-1">
                             {cardBrandLabel || parentBrandName || designer.name}
                           </span>
                         )}
