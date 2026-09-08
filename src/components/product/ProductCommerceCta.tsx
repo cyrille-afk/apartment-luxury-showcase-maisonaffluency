@@ -280,6 +280,26 @@ export default function ProductCommerceCta({
   };
   const primaryAction = tradeApproved ? undefined : openSelection;
 
+  // Mobile: PLACE ORDER opens the conversational 3-step intake sheet first;
+  // its completion hands off to the existing selection / checkout flow.
+  const handleMobilePrimary = () => {
+    if (tradeApproved) {
+      onPlaceOrder(quantity);
+      return;
+    }
+    setIntakeOpen(true);
+  };
+
+  const handleIntakeComplete = (details: OrderIntakeDetails) => {
+    try {
+      sessionStorage.setItem("ma_order_intake", JSON.stringify({ ...details, productId }));
+    } catch {
+      /* private mode — intake is a soft capture, never blocks the order */
+    }
+    setIntakeOpen(false);
+    openSelection();
+  };
+
   // Sticky banners dispatch this instead of navigating to /cart. Only the
   // instance matching the current breakpoint reacts, so one drawer opens.
   useEffect(() => {
