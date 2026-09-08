@@ -170,6 +170,40 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
   const thumbsRef = useRef<HTMLDivElement>(null);
 
+  // Mobile snap-scroll carousel: tracks the scroll container and whether the
+  // latest index change originated from the user's swipe (so we don't fight
+  // the gesture by programmatically scrolling back).
+  const mobileScrollRef = useRef<HTMLDivElement>(null);
+  const fromScrollRef = useRef(false);
+
+  const handleMobileScroll = useCallback(() => {
+    const el = mobileScrollRef.current;
+    if (!el) return;
+    const w = el.clientWidth || 1;
+    const idx = Math.max(0, Math.min(images.length - 1, Math.round(el.scrollLeft / w)));
+    if (idx !== activeIndex) {
+      fromScrollRef.current = true;
+      setActiveIndex(idx);
+      onIndexChange?.(idx);
+    }
+  }, [activeIndex, images.length, onIndexChange]);
+
+  // When the index changes externally (finish/variant selection, presentation
+  // mode close), glide the mobile carousel to the matching frame.
+  useEffect(() => {
+    if (!isMobileOrPwa) return;
+    if (fromScrollRef.current) {
+      fromScrollRef.current = false;
+      return;
+    }
+    const el = mobileScrollRef.current;
+    if (!el) return;
+    const target = activeIndex * el.clientWidth;
+    if (Math.abs(el.scrollLeft - target) > 2) {
+      el.scrollTo({ left: target, behavior: "smooth" });
+    }
+  }, [activeIndex, isMobileOrPwa]);
+
   // Swipe support for the inline main image.
   const inlineSwipeRef = useRef<HTMLDivElement>(null);
   const noZoomRef = useRef(false); // gallery doesn't pinch-zoom; required by hook signature.
@@ -194,7 +228,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
   useLightboxSwipe({
     containerRef: inlineSwipeRef,
-    enabled: images.length > 1,
+    // On touch devices the native snap-scroll carousel handles swipes.
+    enabled: images.length > 1 && !isMobileOrPwa,
     imageZoomedRef: noZoomRef,
     onSwipeLeft: () => goTo(activeIndex + 1),
     onSwipeRight: () => goTo(activeIndex - 1),
@@ -317,9 +352,34 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
         >
           {/* Main image — presentation mode is the only fullscreen viewer.
               Double-tap / double-click opens it for grain-level inspection. */}
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit]">
-            <CrossfadeImage src={images[activeIndex]} alt={alt} />
-          </div>
+          {isMobileOrPwa && images.length > 1 ? (
+            /* Mobile: native snap-scroll carousel — every frame is mounted so
+               swiping is instant, and the counter tracks scroll position. */
+            <div
+              ref={mobileScrollRef}
+              onScroll={handleMobileScroll}
+              className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory overscroll-x-contain scrollbar-hide touch-pan-y"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
+            >
+              {images.map((img, i) => (
+                <div key={i} className="w-full h-full shrink-0 snap-center snap-always flex items-center justify-center">
+                  <img
+                    src={img}
+                    alt={i === 0 ? alt : `${alt} — view ${i + 1}`}
+                    draggable={false}
+                    loading={i <= 1 ? "eager" : "lazy"}
+                    fetchPriority={i === 0 ? "high" : "auto"}
+                    decoding="async"
+                    className="max-w-full max-h-full object-contain rounded-luxury-sharp"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit]">
+              <CrossfadeImage src={images[activeIndex]} alt={alt} />
+            </div>
+          )}
 
 
 
@@ -383,7 +443,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           {/* Fractional gallery counter — clean numerals in the lower-left corner. */}
           {images.length > 1 && (
             <div className={cn("absolute z-20 pointer-events-none transition-all duration-500 ease-out", compact ? "bottom-1.5 left-1.5" : "bottom-4 left-4")}>
-              <span className="inline-block px-2 py-1 rounded-luxury-micro bg-background/45 backdrop-blur-md font-body text-[11px] font-light tracking-[0.14em] text-foreground/80 tabular-nums">
+              <span className="inline-block px-2.5 py-1 rounded-full bg-white/70 backdrop-blur-sm font-body text-[11px] font-light tracking-widest text-neutral-600 tabular-nums">
                 {activeIndex + 1} / {images.length}
               </span>
             </div>
