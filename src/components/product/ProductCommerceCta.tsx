@@ -385,15 +385,15 @@ export default function ProductCommerceCta({
           ref={dockRef}
           className={cn(
             "md:hidden fixed bottom-0 left-0 right-0 z-[70]",
-            "bg-background/95 backdrop-blur-md border-t border-border/60",
-            "px-4 pt-3.5 pb-[max(1rem,env(safe-area-inset-bottom))]",
+            "bg-white/95 backdrop-blur-md border-t border-neutral-100",
+            "px-4 pt-3.5 pb-[env(safe-area-inset-bottom)]",
             "transition-all duration-300 ease-in-out",
             isAtBottom
               ? "opacity-0 translate-y-4 pointer-events-none"
               : "opacity-100 translate-y-0"
           )}
         >
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-3 pb-3">
             <div className="min-w-0 flex-1">
               {tradeApproved && netLabel ? (
                 <div className="flex flex-col">
@@ -417,7 +417,11 @@ export default function ProductCommerceCta({
               type="button"
               onClick={() => (tradeApproved ? onPlaceOrder(quantity) : primaryAction())}
               disabled={placingOrder}
-              className={cn(primaryBtn, "h-11 shrink-0 w-auto px-7")}
+              className={cn(
+                primaryBtn,
+                "h-11 shrink-0 w-auto px-7",
+                "active:scale-[0.98] transition-transform duration-150"
+              )}
             >
               {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : primaryLabel}
             </button>
