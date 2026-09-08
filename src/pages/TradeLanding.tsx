@@ -16,6 +16,7 @@ import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/Section
 import Navigation from "@/components/Navigation";
 
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
+import { getTradeProgramShareUrl, TRADE_PROGRAM_SHARE_IMAGE } from "@/lib/tradeShareUrl";
 // Guarded share URL: falls back to the static OG bridge unless the clean route is
 // verified to serve Trade Program tags to crawlers (see src/lib/tradeShareUrl.ts).
 const TRADE_PROGRAM_SHARE_URL = getTradeProgramShareUrl();
