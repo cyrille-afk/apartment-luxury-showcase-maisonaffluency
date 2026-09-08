@@ -654,7 +654,7 @@ const TradeLanding = () => {
           </div>
 
           {/* Right Side: hero photograph (inline on mobile and desktop) */}
-          <div className="relative min-h-[68%] flex-1 w-full bg-background md:col-start-7 md:col-span-6 md:h-full">
+          <div className="relative min-h-[68%] flex-1 w-full bg-background md:col-start-7 md:col-span-5 md:h-full">
             <img
               src={TRADE_PROGRAM_HERO_IMAGE}
               alt="Maison Affluency Trade Program"
