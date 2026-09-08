@@ -352,9 +352,34 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
         >
           {/* Main image — presentation mode is the only fullscreen viewer.
               Double-tap / double-click opens it for grain-level inspection. */}
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit]">
-            <CrossfadeImage src={images[activeIndex]} alt={alt} />
-          </div>
+          {isMobileOrPwa && images.length > 1 ? (
+            /* Mobile: native snap-scroll carousel — every frame is mounted so
+               swiping is instant, and the counter tracks scroll position. */
+            <div
+              ref={mobileScrollRef}
+              onScroll={handleMobileScroll}
+              className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory overscroll-x-contain scrollbar-hide touch-pan-y"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
+            >
+              {images.map((img, i) => (
+                <div key={i} className="w-full h-full shrink-0 snap-center snap-always flex items-center justify-center">
+                  <img
+                    src={img}
+                    alt={i === 0 ? alt : `${alt} — view ${i + 1}`}
+                    draggable={false}
+                    loading={i <= 1 ? "eager" : "lazy"}
+                    fetchPriority={i === 0 ? "high" : "auto"}
+                    decoding="async"
+                    className="max-w-full max-h-full object-contain rounded-luxury-sharp"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit]">
+              <CrossfadeImage src={images[activeIndex]} alt={alt} />
+            </div>
+          )}
 
 
 
