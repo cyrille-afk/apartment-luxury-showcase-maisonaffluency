@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 import ActiveSwatchCaption from "./ActiveSwatchCaption";
 
 interface PresentationModeProps {
@@ -52,8 +53,7 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
     if (!open) return;
     setChromeVisible(true);
     scheduleHide();
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    lockBodyScroll();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
       const len = images.length;
@@ -61,9 +61,17 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
       if (e.key === "ArrowRight") onIndexChange(wrap(index + 1));
       if (e.key === "ArrowLeft") onIndexChange(wrap(index - 1));
     };
+    // Freeze all touch scrolling inside the presentation surface so the
+    // page behind (and the viewer itself) can't rubber-band while swiping.
+    // Horizontal swipes still resolve to next/previous via touchstart/end.
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.cancelable) e.preventDefault();
+    };
+    document.addEventListener("touchmove", onTouchMove, { passive: false });
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = prevOverflow;
+      unlockBodyScroll();
+      document.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("keydown", onKey);
       if (hideTimer.current) window.clearTimeout(hideTimer.current);
     };
@@ -83,7 +91,7 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 h-[100dvh] z-[9999] bg-black flex flex-col"
+      className="fixed inset-0 h-[100dvh] z-[9999] bg-black flex flex-col overscroll-none touch-none"
       role="dialog"
       aria-modal="true"
       aria-label={`${title || alt} — presentation`}
@@ -122,7 +130,7 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
             draggable={false}
             onDragStart={(e) => e.preventDefault()}
             className={cn(
-              "absolute max-w-full max-h-full object-contain transition-opacity duration-500 ease-out select-none [-webkit-touch-callout:none] touch-pan-y",
+              "absolute max-w-full max-h-full object-contain transition-opacity duration-500 ease-out select-none [-webkit-touch-callout:none] touch-none",
               i === index ? "opacity-100" : "opacity-0 pointer-events-none"
             )}
           />
