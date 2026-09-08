@@ -1151,15 +1151,16 @@ export default function FinishSelector({ pickId, className, productTitle, produc
                     aria-pressed={isSelected}
                     title={option.supplier ? `${option.supplier} — ${option.name}` : option.name}
                     className={cn(
-                      "w-11 h-11 rounded-full border-2 flex-shrink-0 snap-start transition-all p-0.5",
-                      isSelected ? "border-neutral-900 scale-105" : "border-neutral-200"
+                      "w-12 h-12 flex-shrink-0 snap-start transition-all overflow-hidden",
+                      isSelected ? "ring-1 ring-inset ring-foreground" : "ring-1 ring-inset ring-border/60"
                     )}
                   >
                     <div
-                      className="w-full h-full rounded-full bg-cover bg-center"
+                      className="w-full h-full bg-cover bg-center bg-muted/40"
                       style={{ backgroundImage: `url(${option.image_url || ""})` }}
                     />
                   </button>
+
                 );
               })}
             </div>
