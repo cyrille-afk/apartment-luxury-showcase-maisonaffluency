@@ -43,7 +43,6 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
   const hideTimer = useRef<number | null>(null);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
-  const swipeLocked = useRef<"horizontal" | "vertical" | null>(null);
 
   const scheduleHide = useCallback(() => {
     if (hideTimer.current) window.clearTimeout(hideTimer.current);
@@ -99,14 +98,12 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
       onTouchStart={(e) => {
         touchStartX.current = e.touches[0].clientX;
         touchStartY.current = e.touches[0].clientY;
-        swipeLocked.current = null;
       }}
       onTouchEnd={(e) => {
         const sx = touchStartX.current;
         const sy = touchStartY.current;
         touchStartX.current = null;
         touchStartY.current = null;
-        swipeLocked.current = null;
         if (sx == null || sy == null) return;
         const dx = e.changedTouches[0].clientX - sx;
         const dy = e.changedTouches[0].clientY - sy;
