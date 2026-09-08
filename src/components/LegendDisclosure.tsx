@@ -49,7 +49,7 @@ export default function LegendDisclosure({
   if (!label && bodyLines.length === 0) return null;
 
   return (
-    <div className="border-b border-border/60 first:border-t">
+    <div className="border-b border-border/60">
       <button
         type="button"
         aria-expanded={open}

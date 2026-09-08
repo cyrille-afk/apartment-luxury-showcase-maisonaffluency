@@ -74,7 +74,7 @@ interface SpecTableProps {
 }
 
 const Row = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex items-baseline gap-4 py-2 border-b border-border/50 last:border-0">
+  <div className="flex items-baseline gap-4 py-2 border-b border-border/60 last:border-0">
     <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground w-32 shrink-0">
       {label}
     </dt>
