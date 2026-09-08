@@ -194,7 +194,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
   useLightboxSwipe({
     containerRef: inlineSwipeRef,
-    enabled: images.length > 1,
+    // On touch devices the native snap-scroll carousel handles swipes.
+    enabled: images.length > 1 && !isMobileOrPwa,
     imageZoomedRef: noZoomRef,
     onSwipeLeft: () => goTo(activeIndex + 1),
     onSwipeRight: () => goTo(activeIndex - 1),
