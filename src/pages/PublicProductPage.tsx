@@ -1760,6 +1760,35 @@ const PublicProductPageContent: React.FC = () => {
   };
 
   /**
+   * Every selectable finish combination for this product — feeds the quote
+   * form's finish selector so the client can change the preselected finish
+   * without leaving the drawer. Dimension-like axis values are excluded.
+   */
+  const finishOptions = (() => {
+    const variants = (product?.size_variants || []) as Array<{ label?: string; base?: string; top?: string }>;
+    const opts: string[] = [];
+    const seen = new Set<string>();
+    const push = (v: string) => {
+      const k = v.toLowerCase();
+      if (!seen.has(k)) {
+        seen.add(k);
+        opts.push(v);
+      }
+    };
+    for (const v of variants) {
+      const parts = [v.base, v.top]
+        .map((s) => (s || "").trim())
+        .filter((s) => s && !looksLikeDimension(s));
+      if (parts.length) push(parts.join(" / "));
+      else {
+        const label = (v.label || "").trim();
+        if (label && !looksLikeDimension(label)) push(label);
+      }
+    }
+    return opts;
+  })();
+
+  /**
    * Writes the currently configured piece (finishes + quantity) into the
    * shared cart state without navigating — used by "Place Order", which then
    * slides open the "Your Selection" drawer. Returns false when the piece has
@@ -2519,6 +2548,7 @@ const PublicProductPageContent: React.FC = () => {
                         placingOrder={checkoutLoading}
                         selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
+                  finishOptions={finishOptions}
                         redirectTo={location.pathname + location.search}
                         utilityLinks={renderUtilityLinks()}
                       />
@@ -2541,6 +2571,7 @@ const PublicProductPageContent: React.FC = () => {
                         placingOrder={checkoutLoading}
                         selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
+                  finishOptions={finishOptions}
                         redirectTo={location.pathname + location.search}
                         utilityLinks={renderUtilityLinks()}
                       />
@@ -2610,6 +2641,7 @@ const PublicProductPageContent: React.FC = () => {
                   placingOrder={checkoutLoading}
                   selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
+                  finishOptions={finishOptions}
                   redirectTo={location.pathname + location.search}
                 />
               )}
@@ -2631,6 +2663,7 @@ const PublicProductPageContent: React.FC = () => {
                   placingOrder={checkoutLoading}
                   selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
+                  finishOptions={finishOptions}
                   redirectTo={location.pathname + location.search}
                 />
               )}
@@ -2690,6 +2723,7 @@ const PublicProductPageContent: React.FC = () => {
                       placingOrder={checkoutLoading}
                       selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
+                  finishOptions={finishOptions}
                       redirectTo={returnTo}
                     />
                     </div>
