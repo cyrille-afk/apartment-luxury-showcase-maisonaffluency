@@ -2295,7 +2295,7 @@ const PublicProductPageContent: React.FC = () => {
                         </Link>
                         <div className="mt-1 w-8 md:w-10 h-px bg-foreground/20" aria-hidden="true" />
                       </div>
-                      <h1 className="font-display font-normal text-[1.5rem] md:text-[1.85rem] mt-4 leading-[1.15] tracking-[-0.01em]">
+                      <h1 className="font-display font-normal text-[1.5rem] md:text-[1.85rem] mt-2 leading-[1.15] tracking-[-0.01em]">
                         {product.title}
                         {(() => {
                           const editionLabel = formatEditionLabel(product as any);
