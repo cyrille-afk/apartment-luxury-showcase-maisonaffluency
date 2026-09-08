@@ -2,19 +2,24 @@ import { cn } from "@/lib/utils";
 
 interface MobileProductCardSkeletonProps {
   className?: string;
+  /** Must mirror the real card's aspect ratio exactly to avoid layout shift. */
+  aspectClassName?: string;
 }
 
 /** Premium skeleton card that mirrors the mobile 2-column product card. */
-export const MobileProductCardSkeleton = ({ className }: MobileProductCardSkeletonProps) => (
+export const MobileProductCardSkeleton = ({
+  className,
+  aspectClassName = "aspect-square",
+}: MobileProductCardSkeletonProps) => (
   <div
     className={cn(
       "relative overflow-hidden rounded-lg border border-border/40 bg-background",
       className
     )}
   >
-    {/* Luxury vertical image placeholder */}
+    {/* Image placeholder — same aspect ratio as the loaded card image */}
     <div
-      className="aspect-[3/4] w-full animate-pulse bg-neutral-100"
+      className={cn("w-full animate-pulse bg-neutral-100", aspectClassName)}
       style={{ willChange: "opacity" }}
     />
 
