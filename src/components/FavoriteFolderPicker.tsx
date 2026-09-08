@@ -55,6 +55,18 @@ const FavoriteFolderPicker = ({ pickId, children, align = "end", side = "bottom"
 
   useEffect(() => { if (open) refresh(); }, [open, refresh]);
 
+  // Close the menu when the user scrolls the page or resizes the viewport.
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    window.addEventListener("scroll", close, { passive: true });
+    window.addEventListener("resize", close);
+    return () => {
+      window.removeEventListener("scroll", close);
+      window.removeEventListener("resize", close);
+    };
+  }, [open]);
+
   const handleToggleFavorite = () => {
     if (favorited) removeFavorite(pickId);
     else addFavorite(pickId);
