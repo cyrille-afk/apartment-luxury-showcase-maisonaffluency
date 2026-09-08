@@ -180,6 +180,7 @@ export default function ProductCommerceCta({
   const setQuantity = productConfig ? productConfig.setQuantity : setLocalQuantity;
   const [miniCartOpen, setMiniCartOpen] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
+  const dockRef = useRef<HTMLDivElement | null>(null);
   const cartItems = useCart();
 
   // Fade out the sticky mobile dock when the user reaches the footer zone
