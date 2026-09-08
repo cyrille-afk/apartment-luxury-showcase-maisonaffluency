@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
-import { useStickyCommerceDockActive } from "@/lib/stickyCommerceDock";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import PresentationMode from "@/components/product/PresentationMode";
 import CornerTooltip from "@/components/product/CornerTooltip";
@@ -154,7 +153,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
   const isMobile = useIsMobile();
   const isPwa = isPwaStandaloneDisplay();
   const isMobileOrPwa = isMobile || isPwa;
-  const stickyCommerceDockActive = useStickyCommerceDockActive();
 
   const [activeIndex, setActiveIndex] = useState(controlledIndex ?? 0);
 
