@@ -1297,9 +1297,15 @@ const PublicDesignerProfile = () => {
                   <button
                     type="button"
                     onClick={openPortrait}
-                    className="md:hidden block mt-1 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="View the full designer portrait"
+                    className="group/portrait-link md:hidden inline-flex items-center gap-2 mt-2 px-1 py-3.5 min-h-[44px] font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-all duration-300"
                   >
-                    View full portrait
+                    View Full Portrait
+                    <ArrowRight
+                      className="h-3.5 w-3.5 transition-transform duration-300 group-hover/portrait-link:translate-x-1"
+                      strokeWidth={1.5}
+                      aria-hidden="true"
+                    />
                   </button>
                 </div>
               )}
@@ -1746,7 +1752,7 @@ const PublicDesignerProfile = () => {
                 return (
                   <>
                     {/* ── STICKY MOBILE / PWA FILTER & SORT BAR ── */}
-                    <div className="mobile-filter-bar md:hidden sticky top-0 z-40 flex items-center justify-between border-b border-border/60 bg-background py-4 px-5 -mx-4 shadow-[0_1px_0_0_hsl(var(--border)/0.05)]">
+                    <div className="mobile-filter-bar md:hidden sticky top-0 z-40 flex items-center justify-between border-b border-border/40 bg-background/80 backdrop-blur-md py-4 px-5 -mx-4 shadow-[0_1px_0_0_hsl(var(--border)/0.05)]">
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           disabled={categories.length === 0}
