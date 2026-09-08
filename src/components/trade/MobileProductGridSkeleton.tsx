@@ -44,16 +44,19 @@ export const MobileProductCardSkeleton = ({
 interface MobileProductGridSkeletonProps {
   count?: number;
   className?: string;
+  /** Aspect ratio of the real cards being replaced. */
+  aspectClassName?: string;
 }
 
 /** Full-screen mobile grid skeleton for the trade showroom. */
 export const MobileProductGridSkeleton = ({
   count = 8,
   className,
+  aspectClassName = "aspect-square",
 }: MobileProductGridSkeletonProps) => (
   <div className={cn("grid grid-cols-2 gap-4", className)}>
     {Array.from({ length: count }).map((_, i) => (
-      <MobileProductCardSkeleton key={i} />
+      <MobileProductCardSkeleton key={i} aspectClassName={aspectClassName} />
     ))}
   </div>
 );
