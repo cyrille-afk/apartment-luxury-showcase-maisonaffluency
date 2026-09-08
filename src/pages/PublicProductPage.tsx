@@ -472,7 +472,22 @@ const VariantSelectorsProvider: React.FC<{
   );
 };
 
-const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | "all" }> = ({ section = "all" }) => {
+const MaterialsDescriptionBlock: React.FC = () => {
+  const { product, hasLinkedFabrics } = useVariantSelectorsContext();
+  if (!product?.materials_description?.trim()) return null;
+  if (!isRugCategory(product.category) && (hasLinkedFabrics || isProductUpholstered(product))) return null;
+  return (
+    <LegendDisclosure
+      icon={specIcon("⬗")}
+      text={product.materials_description.trim()}
+    />
+  );
+};
+
+const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | "all"; renderMaterialsDescription?: boolean }> = ({ 
+  section = "all",
+  renderMaterialsDescription = true,
+}) => {
   const ctx = useVariantSelectorsContext();
   const {
     product,
@@ -751,7 +766,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
         })()
       ) : null}
 
-      {product.materials_description?.trim() && (isRugCategory(product.category) || (!hasLinkedFabrics && !isProductUpholstered(product))) && (
+      {renderMaterialsDescription && product.materials_description?.trim() && (isRugCategory(product.category) || (!hasLinkedFabrics && !isProductUpholstered(product))) && (
         <LegendDisclosure
           icon={specIcon("⬗")}
           text={product.materials_description.trim()}
@@ -2284,6 +2299,21 @@ const PublicProductPageContent: React.FC = () => {
                       <VariantFinishSelectors section="primary" />
                     </div>
 
+                    <div className="flex flex-col gap-5 order-3 md:order-5">
+                      <VariantFinishSelectors section="supplemental" renderMaterialsDescription={false} />
+                      {finishesMissingImages.length > 0 && (
+                        <p className="font-body text-[11px] text-muted-foreground italic mt-1">
+                          No reference image on file for{" "}
+                          <span className="text-foreground">{finishesMissingImages.join(", ")}</span>.
+                          We'll note this on your enquiry so our concierge can confirm visuals.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col gap-5 order-4">
+                      <MaterialsDescriptionBlock />
+                    </div>
+
                     <div className="min-w-0 pt-0 pb-1 md:py-5 order-1">
                       <div className="flex flex-col items-start">
                         <Link
@@ -2318,24 +2348,14 @@ const PublicProductPageContent: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    <div className="order-7 md:order-5 flex flex-col gap-5">
-                      <VariantFinishSelectors section="supplemental" />
-                      {finishesMissingImages.length > 0 && (
-                        <p className="font-body text-[11px] text-muted-foreground italic mt-1">
-                          No reference image on file for{" "}
-                          <span className="text-foreground">{finishesMissingImages.join(", ")}</span>.
-                          We'll note this on your enquiry so our concierge can confirm visuals.
-                        </p>
-                      )}
-                    </div>
 
-                    <div className="flex flex-col gap-5 order-4 md:order-5">
+                    <div className="flex flex-col gap-5 order-5 md:order-5">
                       <VariantDimensionsPanel />
                     </div>
                   </VariantSelectorsProvider>
 
 
-                  <div className="order-5 md:order-6">
+                  <div className="order-6 md:order-6">
                     {(() => {
                       const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                       if (!handcrafted) return null;
@@ -2368,7 +2388,7 @@ const PublicProductPageContent: React.FC = () => {
                     })()}
                   </div>
 
-                  <div className="flex flex-col gap-5 order-8 md:order-6">
+                  <div className="flex flex-col gap-5 order-7 md:order-7">
                     {(() => {
                       const variants = (product.size_variants || []) as any[];
                       const upholstery = Array.from(
