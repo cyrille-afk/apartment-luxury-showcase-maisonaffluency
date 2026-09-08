@@ -255,7 +255,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
           return (
             <div
               key={pick.id}
-              className="group flex flex-col cursor-pointer"
+              className="mb-10 md:mb-0 group flex flex-col cursor-pointer"
               onClick={() => {
                 const item = lightboxItems.find((li) => li.id === pick.id);
                 if (item) setLightboxItem(item);
