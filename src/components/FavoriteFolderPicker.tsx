@@ -24,9 +24,24 @@ interface Props {
   side?: "top" | "right" | "bottom" | "left";
   /** Called whenever favorite state or folder assignments change. */
   onChange?: () => void;
+  /**
+   * Optional auth interception. The menu stays browsable for signed-out users;
+   * only when they trigger an action do we hand off to this gate.
+   */
+  requireAuth?: (callback: () => void, actionLabel?: string) => void;
+  /** Extra classes for the popover surface (e.g. positioning tweaks). */
+  contentClassName?: string;
 }
 
-const FavoriteFolderPicker = ({ pickId, children, align = "end", side = "bottom", onChange }: Props) => {
+const FavoriteFolderPicker = ({
+  pickId,
+  children,
+  align = "end",
+  side = "bottom",
+  onChange,
+  requireAuth,
+  contentClassName,
+}: Props) => {
   const [open, setOpen] = useState(false);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
