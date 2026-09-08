@@ -1098,15 +1098,18 @@ const PublicProductPageContent: React.FC = () => {
   });
   // Once the visitor has chosen a finish configuration, drop the catalogue
   // "From" prefix everywhere — both in the main price block and next to the
-  // PLACE ORDER button / sticky bar.
+  // PLACE ORDER button / sticky bar. Only strip when the selection resolves
+  // to a single price; a partial selection still spans multiple variants and
+  // must keep "From <min>".
   const hasSelectedVariant = selectedRrp != null || selectedVariantPrice != null;
+  const selectionIsExact = selectedRrp ? selectedRrp.exact : !!selectedVariantPrice?.exact;
   let displayRrpLabel = catalogueRrpLabel
     ? (selectedRrp
         ? formatPublicRrpCents(selectedRrp.cents, publicRrpRow, selectedRrp.exact ? "" : undefined) ||
           catalogueRrpLabel
         : catalogueRrpLabel)
     : null;
-  if (displayRrpLabel && hasSelectedVariant) {
+  if (displayRrpLabel && hasSelectedVariant && selectionIsExact) {
     displayRrpLabel = displayRrpLabel.replace(/^From\s+/i, "");
   }
 
