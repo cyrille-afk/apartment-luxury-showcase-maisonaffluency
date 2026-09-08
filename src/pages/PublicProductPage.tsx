@@ -79,7 +79,7 @@ import TradeWorkspace from "@/components/product/TradeWorkspace";
 import ProductCommerceCta from "@/components/product/ProductCommerceCta";
 import CurrencyToggle, { formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
-import TradeFirstCta from "@/components/product/TradeFirstCta";
+
 
 import StickyPurchaseBar from "@/components/product/StickyPurchaseBar";
 import { setStickyProductBarActive } from "@/lib/stickyProductBar";
@@ -1184,8 +1184,11 @@ const PublicProductPageContent: React.FC = () => {
   // Verified trade — mocked OR real auth — renders the exact same commerce
   // template. Non-trade signed-out visitors keep the public CTA.
   const showMockTradeCommerce = isTradeVerifiedView;
+  // The sticky dock is the single commerce surface: retail buyers (signed out
+  // OR signed in) see the standard RPP / "Price upon Request"; verified trade
+  // accounts see their net trade price via showMockTradeCommerce instead.
   const showPublicCommerce =
-    !isTradeVerifiedView && (roleOverridden ? true : !user && !authLoading);
+    !isTradeVerifiedView && (roleOverridden ? true : !authLoading);
 
   // On landing we intentionally show the catalogue-wide minimum ("From $X"),
   // not the price of the finish in the first photo — this encourages visitors
@@ -1257,12 +1260,8 @@ const PublicProductPageContent: React.FC = () => {
   // the top of the viewport and the global header steps aside entirely.
   const showStickyBar = stickyBarArmed;
 
-  // Active TRADE/RETAIL tab from TradeFirstCta. On the TRADE tab the mobile
-  // sticky "Place Order" dock hides so the trade sign-in panel owns the
-  // bottom of the screen; RETAIL restores the dock. Signed-in visitors have
-  // no tabs, so their dock is untouched.
-  const [ctaAudience, setCtaAudience] = useState<"trade" | "retail">("trade");
-  const publicDockVisible = !!user || ctaAudience === "retail";
+  // The TRADE/RETAIL tab section was removed — the sticky bottom dock now
+  // owns pricing/ordering for every audience, so it is always visible.
 
   // Mobile/PWA only: tell the global nav to stay hidden while this bar owns the top.
   // While the mini bar is docked below the header, pin the global nav so the
@@ -2375,15 +2374,6 @@ const PublicProductPageContent: React.FC = () => {
                     </div>
                   </VariantSelectorsProvider>
 
-                  <div className="order-3 md:order-4">
-                    <TradeFirstCta
-                      redirectTo={location.pathname + location.search}
-                      rrpLabel={displayRrpLabel}
-                      onPlaceOrder={openSelectionDrawer}
-                      signedIn={!!user && !authLoading}
-                      onAudienceChange={setCtaAudience}
-                    />
-                  </div>
 
                   <div className="order-5 md:order-6">
                     {(() => {
