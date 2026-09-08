@@ -291,7 +291,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   const [selectedTopId, setSelectedTopId] = useState<string | null>(null);
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null);
   const [selectedRugComponentIds, setSelectedRugComponentIds] = useState<Record<string, string>>({});
-  const [mobileBaseOpen, setMobileBaseOpen] = useState(false);
+  const [mobileBaseOpen, setMobileBaseOpen] = useState(true);
   const [mobileTopOpen, setMobileTopOpen] = useState(false);
   // Images the gallery is *locked* onto (last clicked swatch). Hover previews
   // are transient; leaving the selector restores this locked view.
@@ -879,7 +879,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     );
   };
 
-  const [openWood, setOpenWood] = useState(false);
+  const [openWood, setOpenWood] = useState(true);
   const [openTop, setOpenTop] = useState(false);
   const [openCover, setOpenCover] = useState(false);
   const isMobile = useIsMobile();
