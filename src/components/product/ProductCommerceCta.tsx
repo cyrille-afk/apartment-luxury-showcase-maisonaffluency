@@ -354,7 +354,11 @@ export default function ProductCommerceCta({
           className={cn(
             "md:hidden fixed bottom-0 left-0 right-0 z-[70]",
             "bg-background/95 backdrop-blur-md border-t border-border/60",
-            "px-4 pt-3.5 pb-[max(1rem,env(safe-area-inset-bottom))]"
+            "px-4 pt-3.5 pb-[max(1rem,env(safe-area-inset-bottom))]",
+            "transition-all duration-300 ease-in-out",
+            isAtBottom
+              ? "opacity-0 translate-y-4 pointer-events-none"
+              : "opacity-100 translate-y-0"
           )}
         >
           <div className="flex items-center justify-between gap-3">
