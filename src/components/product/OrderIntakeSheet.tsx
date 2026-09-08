@@ -49,6 +49,7 @@ export default function OrderIntakeSheet({
   productTitle,
   designerName,
   priceLabel,
+  finishLabel,
   submitting = false,
 }: Props) {
   const [mounted, setMounted] = useState(false);
