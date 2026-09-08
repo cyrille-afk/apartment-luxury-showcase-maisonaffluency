@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { Globe, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * Single-line logistics trigger beneath the price, opening a premium
- * detail modal. Replaces the previous inline accordion disclosure.
+ * Logistics trigger. "inline" sits beneath the price with a sentence of
+ * context; "row" presents a clean technical-row button that lives with the
+ * spec block, keeping fulfillment separate from pricing.
  */
-export default function ShippingDetailsAccordion({ className }: { className?: string }) {
+export default function ShippingDetailsAccordion({
+  className,
+  variant = "inline",
+}: {
+  className?: string;
+  variant?: "inline" | "row";
+}) {
   const [open, setOpen] = useState(false);
 
   // Lock body scroll while the modal is open.
@@ -24,18 +31,38 @@ export default function ShippingDetailsAccordion({ className }: { className?: st
     };
   }, [open]);
 
+  const button = (
+    <button
+      type="button"
+      onClick={() => setOpen(true)}
+      className="uppercase tracking-wider text-foreground font-medium underline underline-offset-4 decoration-[0.5px] transition-opacity hover:opacity-60"
+    >
+      View Logistics
+    </button>
+  );
+
   return (
-    <div className={cn("mt-2", className)}>
-      <p className="font-body text-xs leading-relaxed text-muted-foreground">
-        White-glove delivery &amp; professional installation available worldwide.{" "}
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="uppercase tracking-wider text-foreground font-medium underline underline-offset-4 decoration-[0.5px] transition-opacity hover:opacity-60"
-        >
-          View Logistics
-        </button>
-      </p>
+    <>
+      {variant === "row" ? (
+        <div className={cn("border-b border-border/60 pb-3 flex items-start gap-5", className)}>
+          <span
+            className="inline-flex h-5 w-5 shrink-0 items-center justify-center text-gold mt-0.5"
+            aria-hidden="true"
+          >
+            <Globe className="h-[18px] w-[18px]" strokeWidth={1.75} />
+          </span>
+          <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+            {button}
+          </div>
+        </div>
+      ) : (
+        <div className={cn("mt-2", className)}>
+          <p className="font-body text-xs leading-relaxed text-muted-foreground">
+            White-glove delivery &amp; professional installation available worldwide.{" "}
+            {button}
+          </p>
+        </div>
+      )}
 
       {open && (
         <div
@@ -117,6 +144,6 @@ export default function ShippingDetailsAccordion({ className }: { className?: st
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
