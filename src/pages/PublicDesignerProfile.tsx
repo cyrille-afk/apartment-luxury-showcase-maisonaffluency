@@ -1989,7 +1989,7 @@ const PublicDesignerProfile = () => {
                         }
                       }}
                       className={cn(
-                        "group flex flex-col transition-all duration-700",
+                        "mb-10 md:mb-0 group flex flex-col transition-all duration-700",
                         highlightId === pick.id && "ring-2 ring-primary rounded-luxury-sharp ring-offset-2 ring-offset-background animate-pulse"
                       )}
                     >
