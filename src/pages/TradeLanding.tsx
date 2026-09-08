@@ -622,7 +622,7 @@ const TradeLanding = () => {
             </div>
           )}
           {/* Left Side: title (mobile) / title + form (desktop) */}
-          <div className="relative z-20 flex shrink-0 h-auto w-full items-center justify-center bg-background px-6 pb-4 pt-2 md:col-start-2 md:col-span-4 md:h-auto md:justify-start md:px-0 md:py-12">
+          <div className="relative z-20 flex shrink-0 h-auto w-full items-center justify-center bg-background px-6 pb-4 pt-2 md:col-start-3 md:col-span-4 md:h-auto md:justify-start md:px-0 md:py-12">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
