@@ -48,6 +48,7 @@ import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
+import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { Button } from "@/components/ui/button";
 import { lastNameInitial } from "@/lib/nameFormat";
