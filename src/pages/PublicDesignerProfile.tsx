@@ -2060,34 +2060,30 @@ const PublicDesignerProfile = () => {
                           );
                         })()}
 
-                        <div className="absolute right-2 top-2 z-20 md:hidden">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            aria-label={isFavorite ? `Remove ${displayTitle} from favorites` : `Save ${displayTitle} to favorites`}
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              if (!user) {
-                                requireAuth(() => undefined, "save pieces to your favorites");
-                                return;
-                              }
-                              toggleWishlist(pick.id, {
-                                title: displayTitle,
-                                designer: cardBrandLabel,
-                                imageUrl: responsiveCloudinaryUrl(pick.image_url, 160),
-                              });
-                            }}
-                            className="h-8 w-8 rounded-full border border-border/60 bg-background/90 text-foreground shadow-sm backdrop-blur-sm transition-all duration-300 ease-in-out active:scale-110"
+                        <div className="absolute right-2 top-2 z-50 md:hidden">
+                          <FavoriteFolderPicker
+                            pickId={pick.id}
+                            align="end"
+                            side="bottom"
+                            requireAuth={requireAuth}
                           >
-                            <Heart
-                              className={cn(
-                                "h-4 w-4 transition-all duration-300 ease-in-out",
-                                isFavorite && "fill-neutral-800 text-neutral-800 scale-110"
-                              )}
-                              strokeWidth={1.4}
-                            />
-                          </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              aria-label={isFavorite ? `Remove ${displayTitle} from favorites` : `Save ${displayTitle} to favorites`}
+                              onClick={(event) => event.stopPropagation()}
+                              className="h-8 w-8 rounded-full border border-border/60 bg-background/90 text-foreground shadow-sm backdrop-blur-sm transition-all duration-300 ease-in-out active:scale-110"
+                            >
+                              <Heart
+                                className={cn(
+                                  "h-4 w-4 transition-all duration-300 ease-in-out",
+                                  isFavorite && "fill-neutral-800 text-neutral-800 scale-110"
+                                )}
+                                strokeWidth={1.4}
+                              />
+                            </Button>
+                          </FavoriteFolderPicker>
                         </div>
 
                         <div className="hidden md:block absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
