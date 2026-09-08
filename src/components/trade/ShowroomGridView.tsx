@@ -721,6 +721,11 @@ const ShowroomGridView = ({
       </p>
 
       {/* Content */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+      >
       {filtered.length === 0 ? (
         <div className="border border-dashed border-border rounded-lg p-16 text-center">
           <p className="font-body text-sm text-muted-foreground">No products match your search criteria.</p>
@@ -922,6 +927,7 @@ const ShowroomGridView = ({
           })}
         </div>
       )}
+      </motion.div>
     </>
   );
 };
