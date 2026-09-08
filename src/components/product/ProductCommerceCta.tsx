@@ -261,6 +261,14 @@ export default function ProductCommerceCta({
 
   const primaryLabel = tradeApproved ? "Proceed to Order" : "Place Order";
 
+  // Public mobile dock: pieces without a displayed RRP move from a direct
+  // order CTA to a quote & customization request, while keeping the same
+  // single-tap action path.
+  const isUnpriced =
+    !tradeApproved &&
+    (!rrpLabel || rrpLabel.trim().toLowerCase() === "price upon request");
+  const mobilePrimaryLabel = isUnpriced ? "Request Quote & Customization" : primaryLabel;
+
   // Public: PLACE ORDER writes the configured piece into the shared cart state
   // and slides open the "Your Selection" drawer — never the account wall.
   // Display-routing controller (price-agnostic): a single-item cart stays in
@@ -441,11 +449,12 @@ export default function ProductCommerceCta({
               disabled={placingOrder}
               className={cn(
                 primaryBtn,
-                "h-11 shrink-0 w-auto px-7",
+                "h-11 shrink-0 w-auto px-7 whitespace-nowrap",
+                isUnpriced && "px-4 text-[11px] tracking-wide",
                 "active:scale-[0.98] transition-transform duration-150"
               )}
             >
-              {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : primaryLabel}
+              {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : mobilePrimaryLabel}
             </button>
           </div>
 
