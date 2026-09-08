@@ -2299,7 +2299,18 @@ const PublicProductPageContent: React.FC = () => {
                       <VariantFinishSelectors section="primary" />
                     </div>
 
-                    <div className="flex flex-col gap-5 order-3">
+                    <div className="flex flex-col gap-5 order-3 md:order-5">
+                      <VariantFinishSelectors section="supplemental" renderMaterialsDescription={false} />
+                      {finishesMissingImages.length > 0 && (
+                        <p className="font-body text-[11px] text-muted-foreground italic mt-1">
+                          No reference image on file for{" "}
+                          <span className="text-foreground">{finishesMissingImages.join(", ")}</span>.
+                          We'll note this on your enquiry so our concierge can confirm visuals.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col gap-5 order-4">
                       <MaterialsDescriptionBlock />
                     </div>
 
