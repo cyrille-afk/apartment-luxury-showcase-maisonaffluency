@@ -539,8 +539,8 @@ body {
     margin-bottom: 2px !important;
   }
   .mobile-filter-bar {
-    padding-top: 6px !important;
-    padding-bottom: 6px !important;
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
     margin-top: 0px !important;
   }
   .bio-description-mobile {
