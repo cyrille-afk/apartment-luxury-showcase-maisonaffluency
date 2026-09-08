@@ -437,7 +437,7 @@ export default function ProductCommerceCta({
             </div>
             <button
               type="button"
-              onClick={() => (tradeApproved ? onPlaceOrder(quantity) : primaryAction())}
+              onClick={handleMobilePrimary}
               disabled={placingOrder}
               className={cn(
                 primaryBtn,
@@ -470,7 +470,18 @@ export default function ProductCommerceCta({
         />
       )}
 
-
+      {/* Mobile 3-step order intake bottom sheet */}
+      {!tradeApproved && (
+        <OrderIntakeSheet
+          isOpen={intakeOpen}
+          onClose={() => setIntakeOpen(false)}
+          onComplete={handleIntakeComplete}
+          productTitle={productTitle}
+          designerName={designerName}
+          priceLabel={retailLabel || rrpLabel || null}
+          submitting={placingOrder}
+        />
+      )}
     </>
   );
 }
