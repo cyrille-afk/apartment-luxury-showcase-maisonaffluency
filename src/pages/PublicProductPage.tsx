@@ -2331,7 +2331,6 @@ const PublicProductPageContent: React.FC = () => {
                               <span className="line-through decoration-muted-foreground/50">Retail: {retailPlainLabel}</span>
                             </p>
                           )}
-                          <ShippingDetailsAccordion />
                         </div>
                       ) : displayRrpLabel && (
                         <div className="mt-6">
@@ -2354,7 +2353,6 @@ const PublicProductPageContent: React.FC = () => {
                               Trade Program Verification Pending
                             </p>
                           )}
-                          <ShippingDetailsAccordion />
                         </div>
                       )}
                     </div>
@@ -2393,14 +2391,17 @@ const PublicProductPageContent: React.FC = () => {
                         }
                       }
                       return (
-                        <div className="border-b border-border/60 pb-3 flex items-start gap-5">
-                          {specIcon("✦", "mt-0.5")}
-                          <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
-                            <OriginStoryDrawer label={originLine} maker={designerDisplay} />
+                        <>
+                          <div className="border-b border-border/60 pb-3 flex items-start gap-5">
+                            {specIcon("✦", "mt-0.5")}
+                            <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+                              <OriginStoryDrawer label={originLine} maker={designerDisplay} />
 
-                            {leadLine && <p className="mt-0.5">{leadLine}</p>}
+                              {leadLine && <p className="mt-0.5">{leadLine}</p>}
+                            </div>
                           </div>
-                        </div>
+                          <ShippingDetailsAccordion variant="row" />
+                        </>
                       );
                     })()}
                   </div>
@@ -2477,7 +2478,6 @@ const PublicProductPageContent: React.FC = () => {
                             <span className="line-through decoration-muted-foreground/50">Retail: {retailPlainLabel}</span>
                           </p>
                         )}
-                        <ShippingDetailsAccordion />
                       </div>
                     ) : displayRrpLabel && (
                       <div className="mt-6">
@@ -2500,7 +2500,6 @@ const PublicProductPageContent: React.FC = () => {
                             Trade Program Verification Pending
                           </p>
                         )}
-                        <ShippingDetailsAccordion />
                       </div>
                     )}
                   </div>
@@ -2589,12 +2588,15 @@ const PublicProductPageContent: React.FC = () => {
                     const handcrafted = formatHandcrafted(product.origin, null);
                     if (!handcrafted) return null;
                     return (
-                      <div className="border-b border-border/60 pb-3 flex items-start gap-5">
-                        {specIcon("✦", "mt-0.5")}
-                        <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
-                          <p>{handcrafted}</p>
+                      <>
+                        <div className="border-b border-border/60 pb-3 flex items-start gap-5">
+                          {specIcon("✦", "mt-0.5")}
+                          <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+                            <p>{handcrafted}</p>
+                          </div>
                         </div>
-                      </div>
+                        <ShippingDetailsAccordion variant="row" />
+                      </>
                     );
                   })()}
 

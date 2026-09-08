@@ -4,6 +4,7 @@ import { FileDown, Loader2, Laptop, Check } from "lucide-react";
 import { toast } from "sonner";
 import SpecSheetButton from "@/components/trade/SpecSheetButton";
 import ClientSafeToggle from "@/components/trade/ClientSafeToggle";
+import ShippingDetailsAccordion from "@/components/product/ShippingDetailsAccordion";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { supabase } from "@/integrations/supabase/client";
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
@@ -351,6 +352,7 @@ export default function TradeWorkspace({
               </div>
             )}
           </dl>
+          <ShippingDetailsAccordion variant="row" className="pt-4" />
         </div>
       </div>
     </section>
