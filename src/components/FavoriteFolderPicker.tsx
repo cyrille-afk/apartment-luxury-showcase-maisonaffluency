@@ -82,20 +82,32 @@ const FavoriteFolderPicker = ({
     };
   }, [open]);
 
-  const handleToggleFavorite = () => {
+  /** Runs the action, or hands off to the auth gate for signed-out visitors. */
+  const gate = useCallback(
+    (action: () => void, label: string) => {
+      if (!requireAuth) { action(); return; }
+      let allowed = false;
+      requireAuth(() => { allowed = true; }, label);
+      if (allowed) action();
+      else setOpen(false);
+    },
+    [requireAuth]
+  );
+
+  const handleToggleFavorite = () => gate(() => {
     if (favorited) removeFavorite(pickId);
     else addFavorite(pickId);
     refresh();
     onChange?.();
-  };
+  }, "save pieces to your favorites");
 
-  const handleToggleFolder = (folderId: string) => {
+  const handleToggleFolder = (folderId: string) => gate(() => {
     togglePickInFolder(pickId, folderId);
     refresh();
     onChange?.();
-  };
+  }, "organise favorites into folders");
 
-  const handleCreateFolder = () => {
+  const handleCreateFolder = () => gate(() => {
     const name = newName.trim();
     if (!name) { setCreating(false); return; }
     const f = createFolder(name);
