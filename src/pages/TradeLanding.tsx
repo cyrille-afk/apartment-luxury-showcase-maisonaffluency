@@ -16,10 +16,9 @@ import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/Section
 import Navigation from "@/components/Navigation";
 
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
-// Keep the static bridge URL until crawler routing is live on the custom domain.
-// Sharing the clean route currently falls back to the homepage OG metadata.
-const TRADE_PROGRAM_SHARE_URL = "https://www.maisonaffluency.com/trade-program-share-v4.html";
-const TRADE_PROGRAM_SHARE_IMAGE = "https://www.maisonaffluency.com/trade-program-hero-authentic-v3.jpg";
+// Guarded share URL: falls back to the static OG bridge unless the clean route is
+// verified to serve Trade Program tags to crawlers (see src/lib/tradeShareUrl.ts).
+const TRADE_PROGRAM_SHARE_URL = getTradeProgramShareUrl();
 const TRADE_PROGRAM_HERO_IMAGE = cloudinaryUrl("dining-room_ey0bu5", { width: 1200, quality: "auto:good" });
 
 // Browser country inference moved to src/lib/inferCountry.ts and is now consumed
