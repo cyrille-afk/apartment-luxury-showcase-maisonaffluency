@@ -2154,7 +2154,7 @@ const PublicProductPageContent: React.FC = () => {
             <div
               id="main-product-image-container"
               className={cn(
-                "relative -mx-4 md:mx-0 sticky top-[var(--header-h)] md:top-[calc(var(--header-h)+1rem)] h-fit self-stretch lg:self-start z-30 bg-background transition-all duration-500 ease-out transform",
+                "relative -mx-4 md:mx-0 sticky top-[var(--header-h)] md:top-[calc(var(--header-h)+1rem)] h-fit self-stretch lg:self-start z-30 bg-background transition-all duration-500 ease-out transform will-change-transform",
                 galleryCompact && "border-b border-border/40 shadow-[0_8px_30px_rgba(0,0,0,0.05)]"
               )}
               ref={galleryScrollRef}
