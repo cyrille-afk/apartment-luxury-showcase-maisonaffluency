@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useStickyCommerceDockActive } from "@/lib/stickyCommerceDock";
+import { useStickyCommerceDockHeight } from "@/lib/stickyCommerceDock";
 
 
 
@@ -56,7 +56,8 @@ export default function GalleryDetailsFloatingNav({
   const [isMobileOrPwa, setIsMobileOrPwa] = useState(false);
   const revealedByElementRef = useRef(showImmediately);
   const navigate = useNavigate();
-  const dockActive = useStickyCommerceDockActive();
+  const dockHeight = useStickyCommerceDockHeight();
+  const dockActive = dockHeight > 0;
 
   useEffect(() => {
     const mobileMql = window.matchMedia("(max-width: 767px)");
@@ -173,10 +174,14 @@ export default function GalleryDetailsFloatingNav({
     <div
       className={cn(
         "fixed right-4 print:hidden transition-all duration-300 ease-in-out",
-        dockActive ? "bottom-24 z-50" : "z-[10000]",
+        dockActive ? "z-50" : "z-[10000]",
         className
       )}
-      style={!dockActive ? { bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" } : undefined}
+      style={{
+        bottom: dockActive
+          ? `calc(${dockHeight}px + 0.75rem)`
+          : "calc(env(safe-area-inset-bottom, 0px) + 1rem)",
+      }}
     >
       {isExpanded ? (
         <div

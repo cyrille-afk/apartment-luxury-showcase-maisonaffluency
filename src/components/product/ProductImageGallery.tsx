@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
-import { useStickyCommerceDockActive } from "@/lib/stickyCommerceDock";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import PresentationMode from "@/components/product/PresentationMode";
 import CornerTooltip from "@/components/product/CornerTooltip";
@@ -154,7 +153,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
   const isMobile = useIsMobile();
   const isPwa = isPwaStandaloneDisplay();
   const isMobileOrPwa = isMobile || isPwa;
-  const stickyCommerceDockActive = useStickyCommerceDockActive();
 
   const [activeIndex, setActiveIndex] = useState(controlledIndex ?? 0);
 
@@ -327,16 +325,15 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
           {/* Presentation action — desktop top-left; mobile/PWA bottom-right
               (swapped with the share anchor for thumb reachability).
-              Bump upward when the sticky commerce dock is active so it never
-              overlaps the PLACE ORDER bar. */}
+              It is absolutely positioned INSIDE the photo frame, so it must
+              never be bumped by the commerce dock: doing so stranded the icon
+              in the middle of the picture once the image expanded again. */}
           <div
             className={cn(
               "z-50",
               "transition-all duration-500 ease-out",
               isMobileOrPwa
-                ? `absolute ${compact ? "right-1.5" : "right-4"} ${
-                    stickyCommerceDockActive && !compact ? "bottom-24" : compact ? "bottom-1.5" : "bottom-4"
-                  }`
+                ? `absolute ${compact ? "right-1.5 bottom-1.5" : "right-4 bottom-4"}`
                 : "absolute top-4 left-4"
             )}
           >

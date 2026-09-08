@@ -1,5 +1,5 @@
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getCart, shouldUseFullPageCart, useCart } from "@/lib/cart";
 import { Loader2, Minus, Plus } from "lucide-react";
@@ -8,7 +8,7 @@ import SelectionDrawer, { type PaymentMethod } from "@/components/product/Select
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
-import { setStickyCommerceDockActive } from "@/lib/stickyCommerceDock";
+import { setStickyCommerceDockHeight } from "@/lib/stickyCommerceDock";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { cn } from "@/lib/utils";
 
@@ -180,6 +180,7 @@ export default function ProductCommerceCta({
   const setQuantity = productConfig ? productConfig.setQuantity : setLocalQuantity;
   const [miniCartOpen, setMiniCartOpen] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
+  const dockRef = useRef<HTMLDivElement | null>(null);
   const cartItems = useCart();
 
   // Fade out the sticky mobile dock when the user reaches the footer zone
@@ -199,20 +200,32 @@ export default function ProductCommerceCta({
   }, []);
 
   // Notify floating action buttons (e.g., the image-gallery presentation menu)
-  // that the mobile commerce dock owns the bottom of the viewport.
+  // how much of the bottom of the viewport the mobile commerce dock owns.
+  // Measured, not hardcoded: iOS Safari's collapsing toolbar and multi-line
+  // price copy both change the dock's real height.
   useEffect(() => {
     const mql = window.matchMedia("(max-width: 767px)");
     const update = () => {
       const mobileOrPwa = mql.matches || isPwaStandaloneDisplay();
-      setStickyCommerceDockActive(dock && !isAtBottom && mobileOrPwa);
+      const visible = dock && !isAtBottom && mobileOrPwa;
+      const el = dockRef.current;
+      setStickyCommerceDockHeight(visible && el ? el.getBoundingClientRect().height : 0);
     };
     update();
     mql.addEventListener("change", update);
+    window.addEventListener("resize", update, { passive: true });
+    window.visualViewport?.addEventListener("resize", update);
+    const ro = dockRef.current ? new ResizeObserver(update) : null;
+    if (ro && dockRef.current) ro.observe(dockRef.current);
     return () => {
       mql.removeEventListener("change", update);
-      setStickyCommerceDockActive(false);
+      window.removeEventListener("resize", update);
+      window.visualViewport?.removeEventListener("resize", update);
+      ro?.disconnect();
+      setStickyCommerceDockHeight(0);
     };
   }, [dock, isAtBottom]);
+
   
   const { clientSafe } = useClientSafeMode();
   const { data: pricing } = useTradeProductPricing(productId, tradeApproved);
@@ -369,6 +382,7 @@ export default function ProductCommerceCta({
       {/* Mobile sticky bottom dock */}
       {dock && (
         <div
+          ref={dockRef}
           className={cn(
             "md:hidden fixed bottom-0 left-0 right-0 z-[70]",
             "bg-background/95 backdrop-blur-md border-t border-border/60",
