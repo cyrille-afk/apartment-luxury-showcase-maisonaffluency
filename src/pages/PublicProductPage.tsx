@@ -2599,10 +2599,6 @@ const PublicProductPageContent: React.FC = () => {
                   })()}
 
                   <div className="flex flex-col gap-5">
-                    {/* Utility links moved into the main action panel on
-                        desktop; compact standalone row on mobile. */}
-                    <div className="md:hidden">{renderUtilityLinks()}</div>
-
                     {!isTradeVerifiedView && (() => {
                       const variants = (product.size_variants || []) as any[];
                       const upholstery = Array.from(
