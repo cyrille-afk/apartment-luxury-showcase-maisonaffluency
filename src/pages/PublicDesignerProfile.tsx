@@ -1745,14 +1745,14 @@ const PublicDesignerProfile = () => {
 
                 return (
                   <>
-                    {/* ── STICKY MOBILE / PWA UTILITY BAR ── */}
-                    <div className="mobile-filter-bar md:hidden sticky top-0 z-40 flex h-10 max-h-10 items-center justify-between border-y border-border bg-background/95 backdrop-blur-md py-0 px-4 -mx-4 mb-0">
+                    {/* ── STICKY MOBILE / PWA FILTER & SORT BAR ── */}
+                    <div className="mobile-filter-bar md:hidden sticky top-0 z-40 flex items-center justify-between border-b border-border/60 bg-background py-3 px-5 -mx-4 shadow-[0_1px_0_0_hsl(var(--border)/0.05)]">
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           disabled={categories.length === 0}
-                          className="inline-flex items-center gap-2 font-body text-[11px] uppercase tracking-[0.14em] text-foreground focus:outline-none disabled:opacity-40"
+                          className="inline-flex items-center gap-2 font-body text-[10px] uppercase tracking-widest text-foreground focus:outline-none disabled:opacity-40"
                         >
-                          <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
+                          <SlidersHorizontal className="h-3 w-3" strokeWidth={1.5} aria-hidden="true" />
                           Filter
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" className="rounded-none">
@@ -1763,8 +1763,7 @@ const PublicDesignerProfile = () => {
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           aria-label="Sort products"
-                          className="inline-flex items-center gap-1 font-body uppercase tracking-[0.14em] text-foreground focus:outline-none"
-                          style={{ fontSize: "11px", lineHeight: "1.2" }}
+                          className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-widest text-foreground focus:outline-none"
                         >
                           <span className="max-w-[38vw] truncate">
                             {sortMode === "price-asc"
