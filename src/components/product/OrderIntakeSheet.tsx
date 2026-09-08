@@ -227,10 +227,19 @@ export default function OrderIntakeSheet({
               <label className={cn(labelCls, "mt-5")} htmlFor="intake-notes">
                 Requested Material Finish / Customization notes
               </label>
+              {finishLabel && (
+                <p className="mb-2 inline-flex items-center gap-2 border border-border/60 px-3 py-1.5 font-body text-[11px] tracking-wide text-foreground">
+                  <Check className="h-3 w-3" strokeWidth={1.75} />
+                  {finishLabel}
+                </p>
+              )}
               <textarea
                 id="intake-notes"
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                onChange={(e) => {
+                  setNotesEdited(true);
+                  setNotes(e.target.value);
+                }}
                 rows={4}
                 placeholder="Optional — finishes, dimensions, timeline"
                 className={cn(inputCls, "h-auto py-3 leading-relaxed")}
