@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getCart, shouldUseFullPageCart, useCart } from "@/lib/cart";
 import { Loader2, Minus, Plus } from "lucide-react";
 import SelectionDrawer, { type PaymentMethod } from "@/components/product/SelectionDrawer";
+import OrderIntakeSheet, { type OrderIntakeDetails } from "@/components/product/OrderIntakeSheet";
 
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
@@ -179,6 +180,7 @@ export default function ProductCommerceCta({
   const quantity = productConfig ? productConfig.quantity : localQuantity;
   const setQuantity = productConfig ? productConfig.setQuantity : setLocalQuantity;
   const [miniCartOpen, setMiniCartOpen] = useState(false);
+  const [intakeOpen, setIntakeOpen] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
   const dockRef = useRef<HTMLDivElement | null>(null);
   const cartItems = useCart();
@@ -279,6 +281,26 @@ export default function ProductCommerceCta({
     setMiniCartOpen(true);
   };
   const primaryAction = tradeApproved ? undefined : openSelection;
+
+  // Mobile: PLACE ORDER opens the conversational 3-step intake sheet first;
+  // its completion hands off to the existing selection / checkout flow.
+  const handleMobilePrimary = () => {
+    if (tradeApproved) {
+      onPlaceOrder(quantity);
+      return;
+    }
+    setIntakeOpen(true);
+  };
+
+  const handleIntakeComplete = (details: OrderIntakeDetails) => {
+    try {
+      sessionStorage.setItem("ma_order_intake", JSON.stringify({ ...details, productId }));
+    } catch {
+      /* private mode — intake is a soft capture, never blocks the order */
+    }
+    setIntakeOpen(false);
+    openSelection();
+  };
 
   // Sticky banners dispatch this instead of navigating to /cart. Only the
   // instance matching the current breakpoint reacts, so one drawer opens.
@@ -415,7 +437,7 @@ export default function ProductCommerceCta({
             </div>
             <button
               type="button"
-              onClick={() => (tradeApproved ? onPlaceOrder(quantity) : primaryAction())}
+              onClick={handleMobilePrimary}
               disabled={placingOrder}
               className={cn(
                 primaryBtn,
@@ -448,7 +470,18 @@ export default function ProductCommerceCta({
         />
       )}
 
-
+      {/* Mobile 3-step order intake bottom sheet */}
+      {!tradeApproved && (
+        <OrderIntakeSheet
+          isOpen={intakeOpen}
+          onClose={() => setIntakeOpen(false)}
+          onComplete={handleIntakeComplete}
+          productTitle={productTitle}
+          designerName={designerName}
+          priceLabel={retailLabel || rrpLabel || null}
+          submitting={placingOrder}
+        />
+      )}
     </>
   );
 }
