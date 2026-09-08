@@ -2317,44 +2317,6 @@ const PublicProductPageContent: React.FC = () => {
                           <CurrencyToggle compact value={displayCurrency} onChange={setDisplayCurrency} />
                         </div>
                       )}
-                      {isTradeVerifiedView && mockNetDisplay ? (
-                        <div className="mt-6">
-                          <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
-                            {hasFromPrefix && (
-                              <span className="text-muted-foreground text-[11px] uppercase tracking-[0.22em] align-middle mr-2">From</span>
-                            )}
-                            <span className="text-foreground align-middle">{mockNetLabel}</span>
-                            <span className="ml-2 align-middle font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Net Trade Price</span>
-                          </p>
-                          {retailPlainLabel && (
-                            <p className="mt-1 font-body text-[11px] tracking-[0.04em] text-muted-foreground">
-                              <span className="line-through decoration-muted-foreground/50">Retail: {retailPlainLabel}</span>
-                            </p>
-                          )}
-                        </div>
-                      ) : displayRrpLabel && (
-                        <div className="mt-6">
-                          <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
-                            {(() => {
-                              const spaceIdx = displayRrpLabel.indexOf(" ");
-                              if (spaceIdx === -1) return <span className="text-foreground">{displayRrpLabel}</span>;
-                              const prefix = displayRrpLabel.slice(0, spaceIdx);
-                              const rest = displayRrpLabel.slice(spaceIdx + 1);
-                              return (
-                                <>
-                                  <span className="text-muted-foreground text-[11px] uppercase tracking-[0.22em] align-middle mr-2">{prefix}</span>
-                                  <span className="text-foreground align-middle">{rest}</span>
-                                </>
-                              );
-                            })()}
-                          </p>
-                          {isTradeUnverifiedView && (
-                            <p className="mt-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-amber-600">
-                              Trade Program Verification Pending
-                            </p>
-                          )}
-                        </div>
-                      )}
                     </div>
                     <div className="order-7 md:order-5 flex flex-col gap-5">
                       <VariantFinishSelectors section="supplemental" />
