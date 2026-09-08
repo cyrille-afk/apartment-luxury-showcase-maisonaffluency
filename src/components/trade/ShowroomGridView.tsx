@@ -22,6 +22,8 @@ import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useToast } from "@/hooks/use-toast";
 import { ProductCardSkeleton } from "@/components/trade/skeletons";
+import { MobileProductGridSkeleton } from "@/components/trade/MobileProductGridSkeleton";
+import { motion } from "framer-motion";
 import { useFavorites } from "@/hooks/useFavorites";
 import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
 import { createActiveDraftQuote } from "@/lib/activeProjectId";
