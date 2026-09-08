@@ -1856,7 +1856,12 @@ const PublicDesignerProfile = () => {
                       gridClass,
                       isEmmanuelBabled ? "gap-x-4 gap-y-4 md:gap-x-6 md:gap-y-12" : "gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10"
                     )}>
-                {visiblePicks.map((pick) => {
+                {visiblePicks.map((pick, index) => {
+                  // Alternating mobile rhythm for the 2-column mobile grid:
+                  // row 1 left tall/right short, row 2 left short/right tall,
+                  // so row baselines are deliberately offset.
+                  const isMobileTwoCol = pickCols !== "one";
+                  const isMobileTall = isMobileTwoCol && (index % 4 === 0 || index % 4 === 3);
 
                   const ap = pick as AttributedCuratorPick;
                   // Primary: attribution row on grouped picks (child designer rows).
@@ -2005,7 +2010,11 @@ const PublicDesignerProfile = () => {
                           }
                         }}
                         aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
-                        className="aspect-[4/5] w-full bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer"
+                        className={cn(
+                          "w-full bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer",
+                          "md:aspect-[4/5]",
+                          isMobileTall ? "aspect-[3/4]" : "aspect-square"
+                        )}
                       >
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
