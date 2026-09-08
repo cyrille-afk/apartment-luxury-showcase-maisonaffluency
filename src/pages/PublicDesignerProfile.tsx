@@ -2160,18 +2160,7 @@ const PublicDesignerProfile = () => {
                           <p className="font-body text-[11px] md:text-xs leading-relaxed text-muted-foreground tracking-wide">
                             {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon Request"}
                           </p>
-                          {editionNote && !/^re-?edition$/i.test(editionNote) && (
-                            <p className="hidden md:block font-body italic text-[10px] md:text-[11px] text-muted-foreground/70 tracking-wide mt-0.5">
-                              *{editionNote}
-                            </p>
-                          )}
                         </div>
-
-                        {(/re-?edition/i.test(pick.edition || "") || (pick.tags || []).some((t: string) => /re-?edition/i.test(t))) && (
-                          <span className="hidden md:block font-body text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-foreground/45 leading-tight mt-0.5">
-                            * Reedition
-                          </span>
-                        )}
                       </div>
                     </div>
                   );
