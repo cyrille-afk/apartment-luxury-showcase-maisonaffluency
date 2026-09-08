@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link, useLocation, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, Pin, FileText, Layers, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2, ShoppingBag } from "lucide-react";
+import { Heart, Pin, FileText, Layers, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2 } from "lucide-react";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
@@ -2405,27 +2405,7 @@ const PublicProductPageContent: React.FC = () => {
                     })()}
                   </div>
 
-                  <div className="order-6 md:order-6 flex flex-col items-center gap-3 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => handleDirectCheckout()}
-                      disabled={checkoutLoading}
-                      className="flex items-center justify-center gap-2 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 underline underline-offset-4 decoration-border hover:text-foreground transition-colors disabled:opacity-60"
-                    >
-                      {checkoutLoading ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : (
-                        <ShoppingBag className="h-3 w-3" />
-                      )}
-                      {checkoutLoading ? "Opening checkout…" : "Or complete secure checkout"}
-                    </button>
-                  </div>
-
                   <div className="flex flex-col gap-5 order-8 md:order-6">
-                    {/* Desktop: utility links moved into the main action panel.
-                        Mobile keeps a standalone compact row here. */}
-                    <div className="md:hidden">{renderUtilityLinks()}</div>
-
                     {(() => {
                       const variants = (product.size_variants || []) as any[];
                       const upholstery = Array.from(
