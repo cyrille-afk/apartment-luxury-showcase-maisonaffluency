@@ -2,19 +2,24 @@ import { cn } from "@/lib/utils";
 
 interface MobileProductCardSkeletonProps {
   className?: string;
+  /** Must mirror the real card's aspect ratio exactly to avoid layout shift. */
+  aspectClassName?: string;
 }
 
 /** Premium skeleton card that mirrors the mobile 2-column product card. */
-export const MobileProductCardSkeleton = ({ className }: MobileProductCardSkeletonProps) => (
+export const MobileProductCardSkeleton = ({
+  className,
+  aspectClassName = "aspect-square",
+}: MobileProductCardSkeletonProps) => (
   <div
     className={cn(
       "relative overflow-hidden rounded-lg border border-border/40 bg-background",
       className
     )}
   >
-    {/* Luxury vertical image placeholder */}
+    {/* Image placeholder — same aspect ratio as the loaded card image */}
     <div
-      className="aspect-[3/4] w-full animate-pulse bg-neutral-100"
+      className={cn("w-full animate-pulse bg-neutral-100", aspectClassName)}
       style={{ willChange: "opacity" }}
     />
 
@@ -39,16 +44,19 @@ export const MobileProductCardSkeleton = ({ className }: MobileProductCardSkelet
 interface MobileProductGridSkeletonProps {
   count?: number;
   className?: string;
+  /** Aspect ratio of the real cards being replaced. */
+  aspectClassName?: string;
 }
 
 /** Full-screen mobile grid skeleton for the trade showroom. */
 export const MobileProductGridSkeleton = ({
   count = 8,
   className,
+  aspectClassName = "aspect-square",
 }: MobileProductGridSkeletonProps) => (
   <div className={cn("grid grid-cols-2 gap-4", className)}>
     {Array.from({ length: count }).map((_, i) => (
-      <MobileProductCardSkeleton key={i} />
+      <MobileProductCardSkeleton key={i} aspectClassName={aspectClassName} />
     ))}
   </div>
 );
