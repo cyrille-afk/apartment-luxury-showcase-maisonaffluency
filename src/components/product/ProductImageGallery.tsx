@@ -170,6 +170,40 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
   const thumbsRef = useRef<HTMLDivElement>(null);
 
+  // Mobile snap-scroll carousel: tracks the scroll container and whether the
+  // latest index change originated from the user's swipe (so we don't fight
+  // the gesture by programmatically scrolling back).
+  const mobileScrollRef = useRef<HTMLDivElement>(null);
+  const fromScrollRef = useRef(false);
+
+  const handleMobileScroll = useCallback(() => {
+    const el = mobileScrollRef.current;
+    if (!el) return;
+    const w = el.clientWidth || 1;
+    const idx = Math.max(0, Math.min(images.length - 1, Math.round(el.scrollLeft / w)));
+    if (idx !== activeIndex) {
+      fromScrollRef.current = true;
+      setActiveIndex(idx);
+      onIndexChange?.(idx);
+    }
+  }, [activeIndex, images.length, onIndexChange]);
+
+  // When the index changes externally (finish/variant selection, presentation
+  // mode close), glide the mobile carousel to the matching frame.
+  useEffect(() => {
+    if (!isMobileOrPwa) return;
+    if (fromScrollRef.current) {
+      fromScrollRef.current = false;
+      return;
+    }
+    const el = mobileScrollRef.current;
+    if (!el) return;
+    const target = activeIndex * el.clientWidth;
+    if (Math.abs(el.scrollLeft - target) > 2) {
+      el.scrollTo({ left: target, behavior: "smooth" });
+    }
+  }, [activeIndex, isMobileOrPwa]);
+
   // Swipe support for the inline main image.
   const inlineSwipeRef = useRef<HTMLDivElement>(null);
   const noZoomRef = useRef(false); // gallery doesn't pinch-zoom; required by hook signature.
