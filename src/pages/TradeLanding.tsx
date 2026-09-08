@@ -611,6 +611,16 @@ const TradeLanding = () => {
 
         {/* ─── Split-screen Hero ─── */}
         <div ref={heroRef} className="relative flex h-[calc(100dvh-6rem)] min-h-[580px] w-full flex-col md:grid md:grid-cols-12 md:h-[calc(100vh-256px)] md:min-h-0">
+          {/* Debug 12-column overlay (desktop only) — add ?debug-grid to the URL to show */}
+          {typeof window !== "undefined" && new URLSearchParams(window.location.search).has("debug-grid") && (
+            <div aria-hidden className="pointer-events-none absolute inset-0 z-[80] hidden md:grid md:grid-cols-12">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <div key={i} className="relative border-x border-red-500/50 bg-red-500/10">
+                  <span className="absolute top-1 left-1 text-[10px] font-mono text-red-600">{i + 1}</span>
+                </div>
+              ))}
+            </div>
+          )}
           {/* Left Side: title (mobile) / title + form (desktop) */}
           <div className="relative z-20 flex shrink-0 h-auto w-full items-center justify-center bg-background px-6 pb-4 pt-2 md:col-start-2 md:col-span-4 md:h-auto md:justify-start md:px-0 md:py-12">
             <motion.div
