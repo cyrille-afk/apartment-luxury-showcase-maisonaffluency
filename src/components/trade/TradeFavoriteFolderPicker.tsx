@@ -310,9 +310,19 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
           })}
         </div>
 
-        <div className="border-t border-border">
-          {creating ? (
-            <div className="flex items-center gap-2 px-3 py-2">
+        <div className="border-t border-border overflow-hidden">
+          {!creating ? (
+            <button
+              onClick={() => setCreating(true)}
+              disabled={busy}
+              className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-muted/50 transition-colors animate-in slide-in-from-bottom-2 fade-in duration-200 disabled:opacity-50"
+            >
+              <FolderPlus size={14} className="text-foreground" />
+              <span className="font-body text-xs text-foreground">New folder</span>
+            </button>
+          ) : (
+            <div className="px-4 py-3 animate-in slide-in-from-bottom-4 fade-in duration-200">
+              <p className="font-display text-xs tracking-wide text-foreground mb-2">New folder</p>
               <input
                 autoFocus
                 value={newName}
@@ -321,32 +331,26 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
                   if (e.key === "Enter") handleCreateFolder();
                   if (e.key === "Escape") { setCreating(false); setNewName(""); }
                 }}
-                placeholder="Folder name"
+                placeholder="e.g., Bel Air Living Room"
                 maxLength={60}
-                className="flex-1 bg-transparent border-b border-border focus:border-foreground outline-none font-body text-xs py-1"
+                className="w-full bg-transparent border-b border-border focus:border-foreground outline-none font-body text-xs py-1 placeholder:font-serif placeholder:italic placeholder:text-xs placeholder:text-muted-foreground/60"
               />
-              <button
-                onClick={handleCreateFolder}
-                disabled={busy}
-                className="font-body text-[10px] uppercase tracking-wider text-foreground hover:text-primary disabled:opacity-50"
-              >
-                Add
-              </button>
-              <button
-                onClick={() => { setCreating(false); setNewName(""); }}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <X size={12} />
-              </button>
+              <div className="mt-3 flex items-center gap-3">
+                <button
+                  onClick={handleCreateFolder}
+                  disabled={busy || !newName.trim()}
+                  className="font-body text-[11px] uppercase tracking-wider text-background bg-foreground px-3 py-1.5 rounded-sm hover:bg-foreground/85 transition-colors disabled:opacity-40"
+                >
+                  Create
+                </button>
+                <button
+                  onClick={() => { setCreating(false); setNewName(""); }}
+                  className="font-body text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
-          ) : (
-            <button
-              onClick={() => setCreating(true)}
-              className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-muted/50 transition-colors"
-            >
-              <FolderPlus size={14} className="text-foreground" />
-              <span className="font-body text-xs text-foreground">New folder</span>
-            </button>
           )}
         </div>
       </PopoverContent>
