@@ -457,7 +457,7 @@ const PublicDesignerProfile = () => {
   const isChildDesigner = isChildBrandDesigner(designer);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
-  const [favoriteRevision, setFavoriteRevision] = useState(0);
+  const [, setFavoriteRevision] = useState(0);
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const [shareCopied, setShareCopied] = useState(false);
   const newInBioRef = useRef<HTMLDivElement>(null);
