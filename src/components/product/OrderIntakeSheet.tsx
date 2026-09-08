@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, Check, Loader2, X } from "lucide-react";
+import { ArrowLeft, Check, ChevronDown, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 
@@ -24,6 +24,8 @@ interface Props {
   priceLabel?: string | null;
   /** Finish / configuration chosen on the product page — prefilled into notes. */
   finishLabel?: string | null;
+  /** Every selectable finish for the product — enables the inline finish selector. */
+  finishOptions?: string[];
   submitting?: boolean;
 }
 
@@ -50,6 +52,7 @@ export default function OrderIntakeSheet({
   designerName,
   priceLabel,
   finishLabel,
+  finishOptions,
   submitting = false,
 }: Props) {
   const [mounted, setMounted] = useState(false);
@@ -60,13 +63,24 @@ export default function OrderIntakeSheet({
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [notesEdited, setNotesEdited] = useState(false);
+  const [finish, setFinish] = useState<string | null>(null);
+  const [finishOpen, setFinishOpen] = useState(false);
 
-  // Carry the finish chosen on the product page straight into the notes so the
-  // client never retypes it. Left editable; untouched notes stay in sync.
+  // Carry the finish chosen on the product page straight into the sheet so the
+  // client never retypes it. The selector opens preselected; changing it keeps
+  // untouched notes in sync. Manually edited notes are never overwritten.
   useEffect(() => {
-    if (!isOpen || notesEdited) return;
-    setNotes(finishLabel ? `Selected finish: ${finishLabel}` : "");
-  }, [isOpen, finishLabel, notesEdited]);
+    if (!isOpen) return;
+    setFinish(finishLabel ?? null);
+    setFinishOpen(false);
+    if (!notesEdited) setNotes(finishLabel ? `Selected finish: ${finishLabel}` : "");
+  }, [isOpen, finishLabel]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const selectFinish = (opt: string) => {
+    setFinish(opt);
+    setFinishOpen(false);
+    if (!notesEdited) setNotes(`Selected finish: ${opt}`);
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -228,12 +242,49 @@ export default function OrderIntakeSheet({
               <label className={cn(labelCls, "mt-5")} htmlFor="intake-notes">
                 Requested Material Finish / Customization notes
               </label>
-              {finishLabel && (
+              {finishOptions && finishOptions.length > 0 ? (
+                <div className="mb-3">
+                  <button
+                    type="button"
+                    onClick={() => setFinishOpen((o) => !o)}
+                    aria-expanded={finishOpen}
+                    className="flex h-12 w-full items-center justify-between border border-border/60 bg-background px-4 font-body text-sm text-foreground transition-colors focus:border-foreground focus:outline-none"
+                  >
+                    <span className={cn("truncate", !finish && "text-muted-foreground/50")}>
+                      {finish || "Select a finish"}
+                    </span>
+                    <ChevronDown
+                      className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200", finishOpen && "rotate-180")}
+                      strokeWidth={1.5}
+                    />
+                  </button>
+                  {finishOpen && (
+                    <div className="mt-1 max-h-56 overflow-y-auto border border-border/60 bg-background shadow-[0_16px_40px_-20px_rgba(0,0,0,0.35)] animate-in fade-in slide-in-from-top-1 duration-200">
+                      {finishOptions.map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => selectFinish(opt)}
+                          className={cn(
+                            "flex w-full items-center justify-between gap-3 px-4 py-3 text-left font-body text-sm transition-colors",
+                            finish === opt
+                              ? "bg-muted/60 text-foreground"
+                              : "text-foreground/80 hover:bg-muted/40"
+                          )}
+                        >
+                          <span className="leading-snug">{opt}</span>
+                          {finish === opt && <Check className="h-4 w-4 shrink-0" strokeWidth={1.75} />}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : finish ? (
                 <p className="mb-2 inline-flex items-center gap-2 border border-border/60 px-3 py-1.5 font-body text-[11px] tracking-wide text-foreground">
                   <Check className="h-3 w-3" strokeWidth={1.75} />
-                  {finishLabel}
+                  {finish}
                 </p>
-              )}
+              ) : null}
               <textarea
                 id="intake-notes"
                 value={notes}

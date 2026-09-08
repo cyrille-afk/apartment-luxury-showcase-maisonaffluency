@@ -55,6 +55,8 @@ export interface ProductCommerceCtaProps {
   selectedFinishes?: string[];
   /** Display-accurate finish label (axis reference merged with swatch colourway). */
   orderFinishLabel?: string | null;
+  /** All selectable finishes — enables the quote sheet's finish selector. */
+  finishOptions?: string[];
   redirectTo?: string;
   /** Mobile-only sticky bottom dock */
   dock?: boolean;
@@ -163,6 +165,7 @@ export default function ProductCommerceCta({
   placingOrder = false,
   selectedFinishes = [],
   orderFinishLabel = null,
+  finishOptions,
   redirectTo,
   dock = true,
   dockOnly = false,
@@ -491,6 +494,7 @@ export default function ProductCommerceCta({
           finishLabel={
             orderFinishLabel || (selectedFinishes.length ? selectedFinishes.join(" / ") : null)
           }
+          finishOptions={finishOptions}
           submitting={placingOrder}
         />
       )}
