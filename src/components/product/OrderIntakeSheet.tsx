@@ -59,6 +59,14 @@ export default function OrderIntakeSheet({
   const [notes, setNotes] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [notesEdited, setNotesEdited] = useState(false);
+
+  // Carry the finish chosen on the product page straight into the notes so the
+  // client never retypes it. Left editable; untouched notes stay in sync.
+  useEffect(() => {
+    if (!isOpen || notesEdited) return;
+    setNotes(finishLabel ? `Selected finish: ${finishLabel}` : "");
+  }, [isOpen, finishLabel, notesEdited]);
 
   useEffect(() => {
     if (isOpen) {
