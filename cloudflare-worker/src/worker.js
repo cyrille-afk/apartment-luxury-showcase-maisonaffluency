@@ -97,7 +97,7 @@ function tradeProgramShareHtml() {
   const title = "Trade Program — Maison Affluency";
   const description = "Exclusive benefits for architects, interior designers, and luxury hospitality professionals.";
   const canonical = "https://www.maisonaffluency.com/trade-program";
-  const image = "https://www.maisonaffluency.com/trade-program-hero-whatsapp.jpg";
+  const image = "https://www.maisonaffluency.com/trade-program-hero-authentic-v3.jpg";
   return `<!doctype html><html lang="en"><head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
