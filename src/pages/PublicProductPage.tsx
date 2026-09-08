@@ -2388,7 +2388,7 @@ const PublicProductPageContent: React.FC = () => {
                     })()}
                   </div>
 
-                  <div className="flex flex-col gap-5 order-8 md:order-6">
+                  <div className="flex flex-col gap-5 order-7 md:order-7">
                     {(() => {
                       const variants = (product.size_variants || []) as any[];
                       const upholstery = Array.from(
