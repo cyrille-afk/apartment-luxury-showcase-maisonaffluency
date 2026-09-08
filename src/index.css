@@ -758,6 +758,7 @@ input, select, textarea {
     aspect-ratio: 1 / 1;
     height: auto;
     max-height: none;
+    width: 100%;
   }
 }
 
