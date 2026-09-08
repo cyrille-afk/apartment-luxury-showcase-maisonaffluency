@@ -743,6 +743,9 @@ input, select, textarea {
   aspect-ratio: auto;
   height: 20svh;
   max-height: 20svh;
+  /* Hug the shrunken photo so the corner actions stay tight to its edges
+     instead of floating out at the screen margins. */
+  width: min(78%, 30svh);
 }
 @media (prefers-reduced-motion: reduce) {
   .product-image-frame {
