@@ -18,6 +18,7 @@ import { renderParagraph } from "@/components/EditorialBiography";
 import { composeTitle, splitTitleAttribution } from "@/lib/curatorPickLegend";
 import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
 import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
+import SwipeAlternateProductImage from "@/components/product/SwipeAlternateProductImage";
 
 const transition: Transition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] };
 
@@ -233,6 +234,9 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
           // row 2 left short/right tall, so baselines never lock.
           const isMobileTwoCol = mobileGridCols === 2;
           const isMobileTall = isMobileTwoCol && (index % 4 === 0 || index % 4 === 3);
+          const alternateImage = pick.hover_image_url
+            || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
+            || null;
           const hasEdition = !!pick.edition;
           const tags: string[] = (pick as any).tags || [];
           const filtered = hasEdition ? tags.filter(t => !/^limited-edition$/i.test(t)) : tags;
@@ -264,29 +268,16 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
               <div className={cn(
                 "bg-muted/20 rounded-none overflow-hidden mb-2 relative flex items-center justify-center",
                 "md:aspect-[4/5]",
-                isMobileTall ? "aspect-[3/4]" : "aspect-square"
+                isMobileTall ? "aspect-[4/5]" : "aspect-square"
               )}>
-                <img
-                  src={responsiveCloudinaryUrl(pick.image_url, 600)}
-                  srcSet={pickSrcSet(pick.image_url)}
+                <SwipeAlternateProductImage
+                  primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
+                  primarySrcSet={pickSrcSet(pick.image_url)}
+                  alternateSrc={alternateImage ? responsiveCloudinaryUrl(alternateImage, 600) : null}
+                  alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                   sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                   alt={pick.title}
-                  className={cn(
-                    "absolute inset-0 w-full h-full transition-all duration-700 object-cover",
-                    pick.hover_image_url ? "opacity-100 group-hover:opacity-0 group-hover:scale-105" : "group-hover:scale-105"
-                  )}
-                  loading="lazy"
                 />
-                {pick.hover_image_url && (
-                  <img
-                    src={responsiveCloudinaryUrl(pick.hover_image_url, 600)}
-                    srcSet={pickSrcSet(pick.hover_image_url)}
-                    sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
-                    alt={`${pick.title} alternate finish`}
-                    className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
-                    loading="lazy"
-                  />
-                )}
                 {visibleTags.length > 0 && (
                   <div className="absolute top-2 left-2 flex flex-wrap gap-1">
                     {visibleTags.map((tag, i) => (
@@ -372,12 +363,12 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                           <Link
                             to={`/designers/${brandSlug}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1 hover:underline underline-offset-4 decoration-foreground/40 transition-colors"
+                            className="block font-display text-[11px] md:text-sm font-medium uppercase tracking-widest md:tracking-[0.18em] text-muted-foreground md:text-foreground leading-tight line-clamp-1 hover:underline underline-offset-4 decoration-foreground/40 transition-colors"
                           >
                             {brandLine}
                           </Link>
                         ) : (
-                          <span className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1">
+                          <span className="block font-display text-[11px] md:text-sm font-medium uppercase tracking-widest md:tracking-[0.18em] text-muted-foreground md:text-foreground leading-tight line-clamp-1">
                             {brandLine}
                           </span>
                         )
