@@ -28,7 +28,11 @@ const PublicSignupForm = () => {
       if (result.redirected) return; // browser is navigating to Google
       if (result.error) {
         toast({ title: "Google Sign-In Failed", description: result.error.message, variant: "destructive" });
+        return;
       }
+      // Session set — land on the trade workspace.
+      navigate("/trade");
+
     } catch (err) {
       toast({ title: "Google Sign-In Failed", description: err instanceof Error ? err.message : "Unexpected error", variant: "destructive" });
     } finally {
