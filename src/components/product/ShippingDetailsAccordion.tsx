@@ -144,6 +144,6 @@ export default function ShippingDetailsAccordion({
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
