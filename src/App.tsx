@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // on every non-home route (e.g. /designers), where it is dead weight.
 const Index = lazy(() => import("./pages/Index"));
 import { CompareProvider } from "@/contexts/CompareContext";
+import { WishlistProvider } from "@/contexts/WishlistContext";
 import { TradeCopilotProvider } from "@/contexts/TradeCopilotContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { StudioProvider } from "@/hooks/useStudio";
@@ -589,6 +590,7 @@ const App = () => {
         <AuthProvider>
         <StudioProvider>
         <CompareProvider>
+        <WishlistProvider>
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
               <HomeRouteSync />
@@ -804,6 +806,7 @@ const App = () => {
               )}
             </BrowserRouter>
           </QueryClientProvider>
+        </WishlistProvider>
         </CompareProvider>
         </StudioProvider>
         </AuthProvider>
