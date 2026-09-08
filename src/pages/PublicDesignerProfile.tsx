@@ -2062,33 +2062,31 @@ const PublicDesignerProfile = () => {
                         })()}
 
                         <div className="absolute right-2 top-2 z-20 md:hidden">
-                          {user ? (
-                            <FavoriteFolderPicker pickId={pick.id} onChange={() => setFavoriteRevision((value) => value + 1)}>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                aria-label={isFavorite ? `Manage ${displayTitle} in favorites` : `Save ${displayTitle} to favorites`}
-                                className="h-8 w-8 rounded-full border border-border/60 bg-background/90 text-foreground shadow-sm backdrop-blur-sm"
-                              >
-                                <Heart className={cn("h-4 w-4", isFavorite && "fill-current")} strokeWidth={1.4} />
-                              </Button>
-                            </FavoriteFolderPicker>
-                          ) : (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              aria-label={`Save ${displayTitle} to favorites`}
-                              onClick={(event) => {
-                                event.stopPropagation();
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            aria-label={isFavorite ? `Remove ${displayTitle} from favorites` : `Save ${displayTitle} to favorites`}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              if (!user) {
                                 requireAuth(() => undefined, "save pieces to your favorites");
-                              }}
-                              className="h-8 w-8 rounded-full border border-border/60 bg-background/90 text-foreground shadow-sm backdrop-blur-sm"
-                            >
-                              <Heart className="h-4 w-4" strokeWidth={1.4} />
-                            </Button>
-                          )}
+                                return;
+                              }
+                              if (isFavorite) removeFavorite(pick.id);
+                              else addFavorite(pick.id);
+                              setFavoriteRevision((value) => value + 1);
+                            }}
+                            className="h-8 w-8 rounded-full border border-border/60 bg-background/90 text-foreground shadow-sm backdrop-blur-sm transition-all duration-300 ease-in-out active:scale-110"
+                          >
+                            <Heart
+                              className={cn(
+                                "h-4 w-4 transition-all duration-300 ease-in-out",
+                                isFavorite && "fill-neutral-800 text-neutral-800 scale-110"
+                              )}
+                              strokeWidth={1.4}
+                            />
+                          </Button>
                         </div>
 
                         <div className="hidden md:block absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
