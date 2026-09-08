@@ -9,7 +9,7 @@ import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal, Square, Grid2X2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal, Square, Grid2X2, Heart } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,10 +43,14 @@ import { consumeProductBackRef } from "@/lib/designerBackRef";
 import { isChildBrandDesigner, isParentBrandDesigner } from "@/lib/designerHierarchy";
 import { ParentHouseOverview } from "@/components/ParentHouseOverview";
 import { toOgImage } from "@/lib/ogImage";
-import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { sortCuratorPicks, interleaveBySubcategory } from "@/lib/curatorPickSort";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuthGate } from "@/hooks/useAuthGate";
+import AuthGateDialog from "@/components/AuthGateDialog";
+import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
+import { isFavorited as isFavoritedPick } from "@/lib/favoriteFolders";
+import { Button } from "@/components/ui/button";
 import { lastNameInitial } from "@/lib/nameFormat";
 import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
 import NewInSpotlight from "@/components/NewInSpotlight";
@@ -453,7 +457,8 @@ const PublicDesignerProfile = () => {
   const isChildDesigner = isChildBrandDesigner(designer);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
-  const [mobileRevealedPickId, setMobileRevealedPickId] = useState<string | null>(null);
+  const [favoriteRevision, setFavoriteRevision] = useState(0);
+  const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const [shareCopied, setShareCopied] = useState(false);
   const newInBioRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLDivElement>(null);
@@ -523,10 +528,6 @@ const PublicDesignerProfile = () => {
       setLightboxItem(null);
     }
   };
-
-  useEffect(() => {
-    setMobileRevealedPickId(null);
-  }, [slug]);
 
   useEffect(() => {
     // Prevent browser from restoring previous scroll position
@@ -697,7 +698,6 @@ const PublicDesignerProfile = () => {
   const useChildHeroLayout = false;
 
   // Installed PWA has no iOS Safari chrome, so we can afford a taller hero.
-  const [isPwaStandalone] = useState(() => isPwaStandaloneDisplay());
 
   if (isLoading) {
     return (
@@ -1265,26 +1265,7 @@ const PublicDesignerProfile = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
-          {/* Compact mobile hero — taller in the installed PWA (no Safari chrome) */}
-          <div className={cn("relative w-screen left-1/2 -ml-[50vw] bg-muted overflow-hidden", isPwaStandalone ? "h-56" : "h-36")}>
-            {(wideHeroImage || heroImage) && (
-              <>
-                <img
-                  src={wideHeroImage || heroImage}
-                  alt={`${name} interior`}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  loading="eager"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
-              </>
-            )}
-          </div>
-
-          {designer.hero_photo_credit && (
-            <p className="hidden md:block mt-1 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
-              Photo: {designer.hero_photo_credit}
-            </p>
-          )}
+          {/* The mobile profile begins with the designer narrative and products. */}
         </motion.div>
 
         {/* Narrative column */}
@@ -1405,7 +1386,7 @@ const PublicDesignerProfile = () => {
         <Navigation />
 
         <div className={cn(
-          "mx-auto pt-[var(--header-h)] pb-20 space-y-1 md:space-y-1.5",
+          "mx-auto pt-[var(--header-h)] pb-[max(5rem,calc(env(safe-area-inset-bottom)+4rem))] md:pb-20 space-y-1 md:space-y-1.5",
           useNewInSpotlightFormat
             ? "w-full max-w-7xl px-6 md:px-12 bg-transparent"
             : "px-4 max-w-6xl md:max-w-7xl md:px-12 lg:px-12"
@@ -1486,7 +1467,7 @@ const PublicDesignerProfile = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={transition}
-                className="relative -mx-4 md:mx-auto w-full max-w-none md:max-w-[720px] rounded-none md:rounded-xl overflow-hidden shrink-0"
+                className="relative hidden md:block md:mx-auto w-full max-w-none md:max-w-[720px] rounded-none md:rounded-xl overflow-hidden shrink-0"
               >
                 <div className="aspect-[4/3] sm:aspect-[3/2] md:aspect-[16/10] lg:aspect-[16/9] max-h-[75vh]">
                   {heroImage && (
@@ -1535,6 +1516,22 @@ const PublicDesignerProfile = () => {
                   </p>
                 )}
               </motion.div>
+
+              <div className="md:hidden flex items-start justify-between gap-3 pt-1 pb-1">
+                <div className="min-w-0">
+                  <h1 className="font-display text-2xl tracking-wide text-foreground">{name}</h1>
+                  {designer.specialty && (
+                    <p className="mt-1 font-body text-xs leading-relaxed tracking-wide text-muted-foreground">{designer.specialty}</p>
+                  )}
+                </div>
+                <ShareMenu
+                  url={designerOgUrl}
+                  message={`${designer.name} — Maison Affluency: ${designerOgUrl}`}
+                  className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-foreground/5 text-foreground/70 hover:bg-foreground/10 transition-colors"
+                  iconSize="w-4 h-4"
+                  showLabel={false}
+                />
+              </div>
 
               {biographySection}
               {isParentBrand && (
@@ -1970,7 +1967,7 @@ const PublicDesignerProfile = () => {
                   const cardBrandSlug = isArnoldClamChair ? "dagmar-london" : designerSlug;
                   // We're already on Madsen's own portrait — no "by Arnold Madsen" needed.
                   const cardSubtitle = isArnoldClamChair ? undefined : pick.subtitle;
-                  const isMobilePickRevealed = mobileRevealedPickId === pick.id;
+                  const isFavorite = isFavoritedPick(pick.id);
                   const handleCardClick = (e: React.MouseEvent) => {
                     if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || (e as any).button === 1) {
                       return;
@@ -2043,7 +2040,7 @@ const PublicDesignerProfile = () => {
                           }
                         }}
                         aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
-                        className="aspect-[4/5] w-full bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer"
+                        className="aspect-[4/5] w-full bg-muted/30 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer"
                       >
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
@@ -2051,11 +2048,9 @@ const PublicDesignerProfile = () => {
                           sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
                           className={cn(
-                            "absolute inset-0 w-full h-full object-cover rounded-luxury-sharp transition-all duration-700",
+                            "absolute inset-0 w-full h-full object-contain md:object-cover rounded-luxury-sharp transition-all duration-700",
                             pick.hover_image_url
-                              ? isMobilePickRevealed
-                                ? "opacity-0 scale-105 md:opacity-100 md:group-hover:opacity-0"
-                                : "opacity-100 group-hover:opacity-0 group-hover:scale-105"
+                              ? "opacity-100 group-hover:opacity-0 group-hover:scale-105"
                               : "group-hover:scale-105"
                           )}
                           loading="lazy"
@@ -2068,10 +2063,8 @@ const PublicDesignerProfile = () => {
                           sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                               alt={`${pick.title} alternate finish`}
                               className={cn(
-                                "absolute inset-0 w-full h-full object-cover rounded-luxury-sharp transition-all duration-700",
-                                isMobilePickRevealed
-                                  ? "opacity-100 scale-105 md:opacity-0 md:group-hover:opacity-100"
-                                  : "opacity-0 group-hover:opacity-100 group-hover:scale-105"
+                                "absolute inset-0 w-full h-full object-contain md:object-cover rounded-luxury-sharp transition-all duration-700",
+                                "opacity-0 group-hover:opacity-100 group-hover:scale-105"
                               )}
                               style={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
                               loading="lazy"
@@ -2083,6 +2076,7 @@ const PublicDesignerProfile = () => {
                           const tags: string[] = pick.tags || [];
                           const micro: string[] = [];
                           if (tags.some((t) => /available[-\s]?now|in[-\s]?stock/i.test(t))) micro.push("Available Now");
+                           if (/re-?edition/i.test(pick.edition || "") || tags.some((t) => /re-?edition/i.test(t))) micro.push("Reedition");
                           
                           if (!micro.length) return null;
                           return (
@@ -2098,6 +2092,36 @@ const PublicDesignerProfile = () => {
                             </div>
                           );
                         })()}
+
+                        <div className="absolute right-2 top-2 z-20 md:hidden">
+                          {user ? (
+                            <FavoriteFolderPicker pickId={pick.id} onChange={() => setFavoriteRevision((value) => value + 1)}>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                aria-label={isFavorite ? `Manage ${displayTitle} in favorites` : `Save ${displayTitle} to favorites`}
+                                className="h-8 w-8 rounded-full border border-border/60 bg-background/90 text-foreground shadow-sm backdrop-blur-sm"
+                              >
+                                <Heart className={cn("h-4 w-4", isFavorite && "fill-current")} strokeWidth={1.4} />
+                              </Button>
+                            </FavoriteFolderPicker>
+                          ) : (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              aria-label={`Save ${displayTitle} to favorites`}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                requireAuth(() => undefined, "save pieces to your favorites");
+                              }}
+                              className="h-8 w-8 rounded-full border border-border/60 bg-background/90 text-foreground shadow-sm backdrop-blur-sm"
+                            >
+                              <Heart className="h-4 w-4" strokeWidth={1.4} />
+                            </Button>
+                          )}
+                        </div>
 
                         <div className="hidden md:block absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
@@ -2127,24 +2151,24 @@ const PublicDesignerProfile = () => {
 
 
                       {/* Editorial text block — designer / product / price hierarchy */}
-                      <div className="flex flex-col flex-1 text-center items-center">
+                      <div className="flex flex-col flex-1 items-center text-center leading-relaxed">
                         {/* Designer / brand label — top, prominent */}
                         {cardBrandSlug || parentBrandSlug ? (
                           <Link
                             to={`/designers/${cardBrandSlug || parentBrandSlug}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="block font-display text-sm font-medium uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1 hover:text-foreground/70 transition-colors"
+                            className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.16em] md:tracking-[0.18em] text-foreground leading-relaxed line-clamp-1 hover:text-foreground/70 transition-colors"
                           >
                             {cardBrandLabel || parentBrandName}
                           </Link>
                         ) : (
-                          <span className="block font-display text-sm font-medium uppercase tracking-[0.18em] text-foreground leading-tight line-clamp-1">
+                          <span className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.16em] md:tracking-[0.18em] text-foreground leading-relaxed line-clamp-1">
                             {cardBrandLabel || parentBrandName || designer.name}
                           </span>
                         )}
 
                         {/* Product name — secondary, elegant */}
-                        <h3 className="mt-1 font-body text-[15px] italic font-normal text-foreground/80 leading-snug line-clamp-2">
+                        <h3 className="mt-1 font-body text-[13px] md:text-[15px] italic font-normal text-foreground/80 leading-relaxed line-clamp-2">
                           <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground transition-colors">
                             {displayTitle}
                           </Link>
@@ -2164,7 +2188,7 @@ const PublicDesignerProfile = () => {
 
                         {/* Price slot — bottom */}
                         <div className="mt-1">
-                          <p className="font-body text-xs text-muted-foreground tracking-wide">
+                          <p className="font-body text-[11px] md:text-xs leading-relaxed text-muted-foreground tracking-wide">
                             {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon Request"}
                           </p>
                           {editionNote && !/^re-?edition$/i.test(editionNote) && (
@@ -2235,6 +2259,7 @@ const PublicDesignerProfile = () => {
         onClose={closeLightbox}
         onSelectRelated={(item) => setLightboxItem(item)}
       />
+      <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
     </>
   );
 };
