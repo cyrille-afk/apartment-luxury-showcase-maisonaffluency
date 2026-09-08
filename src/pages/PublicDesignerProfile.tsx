@@ -1746,7 +1746,7 @@ const PublicDesignerProfile = () => {
                 return (
                   <>
                     {/* ── STICKY MOBILE / PWA FILTER & SORT BAR ── */}
-                    <div className="mobile-filter-bar md:hidden sticky top-0 z-40 flex items-center justify-between border-b border-border/60 bg-background py-3 px-5 -mx-4 shadow-[0_1px_0_0_hsl(var(--border)/0.05)]">
+                    <div className="mobile-filter-bar md:hidden sticky top-0 z-40 flex items-center justify-between border-b border-border/60 bg-background py-4 px-5 -mx-4 shadow-[0_1px_0_0_hsl(var(--border)/0.05)]">
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           disabled={categories.length === 0}
