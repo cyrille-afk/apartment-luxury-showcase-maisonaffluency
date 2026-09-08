@@ -1,4 +1,4 @@
-import { useRef, useState, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { cn } from "@/lib/utils";
 
 interface SwipeAlternateProductImageProps {
@@ -26,6 +26,16 @@ export default function SwipeAlternateProductImage({
   alternateStyle,
 }: SwipeAlternateProductImageProps) {
   const [showAlternate, setShowAlternate] = useState(false);
+  const [primaryLoaded, setPrimaryLoaded] = useState(false);
+  const [alternateLoaded, setAlternateLoaded] = useState(false);
+  const primaryRef = useRef<HTMLImageElement | null>(null);
+  const alternateRef = useRef<HTMLImageElement | null>(null);
+
+  // Cached images can complete before React attaches onLoad.
+  useEffect(() => {
+    if (primaryRef.current?.complete) setPrimaryLoaded(true);
+    if (alternateRef.current?.complete) setAlternateLoaded(true);
+  }, [primarySrc, alternateSrc]);
   const pointerStart = useRef<{ id: number; x: number; y: number } | null>(null);
   const suppressClick = useRef(false);
 
@@ -64,7 +74,17 @@ export default function SwipeAlternateProductImage({
         suppressClick.current = false;
       }}
     >
+      <div
+        aria-hidden
+        className={cn(
+          "absolute inset-0 bg-neutral-100 transition-opacity duration-500 ease-out",
+          primaryLoaded ? "opacity-0" : "opacity-100 animate-pulse"
+        )}
+      />
       <img
+        ref={primaryRef}
+        onLoad={() => setPrimaryLoaded(true)}
+        onError={() => setPrimaryLoaded(true)}
         src={primarySrc}
         srcSet={primarySrcSet}
         sizes={sizes}
@@ -72,7 +92,7 @@ export default function SwipeAlternateProductImage({
         className={cn(
           "absolute inset-0 h-full w-full object-contain p-3 transition-all duration-500 ease-out md:p-0 md:object-cover md:duration-700",
           alternateSrc && "md:group-hover:scale-105 md:group-hover:opacity-0",
-          showAlternate ? "opacity-0" : "opacity-100",
+          showAlternate || !primaryLoaded ? "opacity-0" : "opacity-100",
           primaryClassName
         )}
         loading="lazy"
@@ -80,13 +100,16 @@ export default function SwipeAlternateProductImage({
       />
       {alternateSrc && (
         <img
+          ref={alternateRef}
+          onLoad={() => setAlternateLoaded(true)}
+          onError={() => setAlternateLoaded(true)}
           src={alternateSrc}
           srcSet={alternateSrcSet}
           sizes={sizes}
           alt={`${alt} alternate view`}
           className={cn(
             "absolute inset-0 h-full w-full object-contain p-3 transition-all duration-500 ease-out md:p-0 md:object-cover md:opacity-0 md:duration-700 md:group-hover:scale-105 md:group-hover:opacity-100",
-            showAlternate ? "opacity-100" : "opacity-0",
+            showAlternate && alternateLoaded ? "opacity-100" : "opacity-0",
             alternateClassName
           )}
           style={alternateStyle}
