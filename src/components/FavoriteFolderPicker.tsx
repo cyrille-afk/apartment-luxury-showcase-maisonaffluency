@@ -116,7 +116,7 @@ const FavoriteFolderPicker = ({
     setCreating(false);
     refresh();
     onChange?.();
-  };
+  }, "create a folder");
 
   const handleDeleteFolder = (folderId: string, e: React.MouseEvent) => {
     e.stopPropagation();
