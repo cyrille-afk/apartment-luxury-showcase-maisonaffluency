@@ -102,6 +102,18 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
     };
   }, [open, refresh]);
 
+  // Close the menu when the user scrolls the page or resizes the viewport.
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    window.addEventListener("scroll", close, { passive: true });
+    window.addEventListener("resize", close);
+    return () => {
+      window.removeEventListener("scroll", close);
+      window.removeEventListener("resize", close);
+    };
+  }, [open]);
+
   /** Ensure a trade_favorites row exists for this product; return its id. */
   const ensureFavoriteRow = useCallback(async (): Promise<string | null> => {
     if (!user) return null;
