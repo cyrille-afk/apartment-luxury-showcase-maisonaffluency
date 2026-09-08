@@ -723,13 +723,15 @@ input, select, textarea {
    tall flagship screens get an elegant 3:4 portrait capped at 50vh. */
 .product-image-frame {
   width: 100%;
+  margin-inline: auto;
   aspect-ratio: auto;
   height: min(45svh, 100vw);
   max-height: 45svh;
   /* Smooth shrink/expand as the sticky image docks under the header. */
   transition: height 500ms cubic-bezier(0.22, 1, 0.36, 1),
-    max-height 500ms cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: height;
+    max-height 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: height, width;
 }
 @media screen and (min-width: 410px) and (min-height: 850px) {
   .product-image-frame {
@@ -741,6 +743,9 @@ input, select, textarea {
   aspect-ratio: auto;
   height: 20svh;
   max-height: 20svh;
+  /* Hug the shrunken photo so the corner actions stay tight to its edges
+     instead of floating out at the screen margins. */
+  width: min(78%, 30svh);
 }
 @media (prefers-reduced-motion: reduce) {
   .product-image-frame {
@@ -753,6 +758,7 @@ input, select, textarea {
     aspect-ratio: 1 / 1;
     height: auto;
     max-height: none;
+    width: 100%;
   }
 }
 

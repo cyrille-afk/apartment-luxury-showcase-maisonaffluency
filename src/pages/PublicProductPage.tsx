@@ -2154,7 +2154,7 @@ const PublicProductPageContent: React.FC = () => {
             <div
               id="main-product-image-container"
               className={cn(
-                "relative -mx-4 md:mx-0 sticky top-[var(--header-h)] md:top-[calc(var(--header-h)+1rem)] h-fit self-stretch lg:self-start z-30 bg-background transition-all duration-500 ease-out transform",
+                "relative -mx-4 md:mx-0 sticky top-[var(--header-h)] md:top-[calc(var(--header-h)+1rem)] h-fit self-stretch lg:self-start z-30 bg-background transition-all duration-500 ease-out transform will-change-transform",
                 galleryCompact && "border-b border-border/40 shadow-[0_8px_30px_rgba(0,0,0,0.05)]"
               )}
               ref={galleryScrollRef}
@@ -2222,8 +2222,19 @@ const PublicProductPageContent: React.FC = () => {
 
 
               {/* Mobile-only image overlay: share + favorite / studio save, top-right */}
-              <div className="md:hidden pointer-events-none absolute inset-x-0 top-0 z-40" style={{ height: galleryCompact ? "20vh" : "45vh" }}>
-                <div className="absolute top-4 right-4 flex items-center gap-3 pointer-events-auto">
+              <div
+                className="md:hidden pointer-events-none absolute inset-x-0 top-0 z-40 mx-auto transition-all duration-500 ease-out"
+                style={{
+                  height: galleryCompact ? "20svh" : "45svh",
+                  width: galleryCompact ? "min(78%, 30svh)" : "100%",
+                }}
+              >
+                <div
+                  className={cn(
+                    "absolute flex items-center gap-3 pointer-events-auto transition-all duration-500 ease-out",
+                    galleryCompact ? "top-1.5 right-1.5" : "top-4 right-4"
+                  )}
+                >
                   {user && hasTradeAccess ? (
                     // Trade members get the studio "drop" anchor instead of the
                     // retail heart: one tap → bottom sheet → project.
