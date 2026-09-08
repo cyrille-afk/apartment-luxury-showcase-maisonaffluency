@@ -488,6 +488,9 @@ export default function ProductCommerceCta({
           productTitle={productTitle}
           designerName={designerName}
           priceLabel={retailLabel || rrpLabel || null}
+          finishLabel={
+            orderFinishLabel || (selectedFinishes.length ? selectedFinishes.join(" / ") : null)
+          }
           submitting={placingOrder}
         />
       )}

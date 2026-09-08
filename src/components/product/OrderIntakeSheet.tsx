@@ -22,6 +22,8 @@ interface Props {
   productTitle?: string | null;
   designerName?: string | null;
   priceLabel?: string | null;
+  /** Finish / configuration chosen on the product page — prefilled into notes. */
+  finishLabel?: string | null;
   submitting?: boolean;
 }
 
@@ -47,6 +49,7 @@ export default function OrderIntakeSheet({
   productTitle,
   designerName,
   priceLabel,
+  finishLabel,
   submitting = false,
 }: Props) {
   const [mounted, setMounted] = useState(false);
@@ -56,6 +59,14 @@ export default function OrderIntakeSheet({
   const [notes, setNotes] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [notesEdited, setNotesEdited] = useState(false);
+
+  // Carry the finish chosen on the product page straight into the notes so the
+  // client never retypes it. Left editable; untouched notes stay in sync.
+  useEffect(() => {
+    if (!isOpen || notesEdited) return;
+    setNotes(finishLabel ? `Selected finish: ${finishLabel}` : "");
+  }, [isOpen, finishLabel, notesEdited]);
 
   useEffect(() => {
     if (isOpen) {
@@ -66,6 +77,7 @@ export default function OrderIntakeSheet({
       const t = window.setTimeout(() => {
         setMounted(false);
         setStep(0);
+        setNotesEdited(false);
       }, 320);
       return () => window.clearTimeout(t);
     }
@@ -216,10 +228,19 @@ export default function OrderIntakeSheet({
               <label className={cn(labelCls, "mt-5")} htmlFor="intake-notes">
                 Requested Material Finish / Customization notes
               </label>
+              {finishLabel && (
+                <p className="mb-2 inline-flex items-center gap-2 border border-border/60 px-3 py-1.5 font-body text-[11px] tracking-wide text-foreground">
+                  <Check className="h-3 w-3" strokeWidth={1.75} />
+                  {finishLabel}
+                </p>
+              )}
               <textarea
                 id="intake-notes"
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                onChange={(e) => {
+                  setNotesEdited(true);
+                  setNotes(e.target.value);
+                }}
                 rows={4}
                 placeholder="Optional — finishes, dimensions, timeline"
                 className={cn(inputCls, "h-auto py-3 leading-relaxed")}
