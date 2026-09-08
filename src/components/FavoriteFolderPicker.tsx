@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Check, FolderPlus, Heart, Trash2, X } from "lucide-react";
+import { Check, FolderPlus, Heart, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   FAV_EVENT,
