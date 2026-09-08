@@ -199,20 +199,32 @@ export default function ProductCommerceCta({
   }, []);
 
   // Notify floating action buttons (e.g., the image-gallery presentation menu)
-  // that the mobile commerce dock owns the bottom of the viewport.
+  // how much of the bottom of the viewport the mobile commerce dock owns.
+  // Measured, not hardcoded: iOS Safari's collapsing toolbar and multi-line
+  // price copy both change the dock's real height.
   useEffect(() => {
     const mql = window.matchMedia("(max-width: 767px)");
     const update = () => {
       const mobileOrPwa = mql.matches || isPwaStandaloneDisplay();
-      setStickyCommerceDockActive(dock && !isAtBottom && mobileOrPwa);
+      const visible = dock && !isAtBottom && mobileOrPwa;
+      const el = dockRef.current;
+      setStickyCommerceDockHeight(visible && el ? el.getBoundingClientRect().height : 0);
     };
     update();
     mql.addEventListener("change", update);
+    window.addEventListener("resize", update, { passive: true });
+    window.visualViewport?.addEventListener("resize", update);
+    const ro = dockRef.current ? new ResizeObserver(update) : null;
+    if (ro && dockRef.current) ro.observe(dockRef.current);
     return () => {
       mql.removeEventListener("change", update);
-      setStickyCommerceDockActive(false);
+      window.removeEventListener("resize", update);
+      window.visualViewport?.removeEventListener("resize", update);
+      ro?.disconnect();
+      setStickyCommerceDockHeight(0);
     };
   }, [dock, isAtBottom]);
+
   
   const { clientSafe } = useClientSafeMode();
   const { data: pricing } = useTradeProductPricing(productId, tradeApproved);
