@@ -2040,7 +2040,7 @@ const PublicDesignerProfile = () => {
                           }
                         }}
                         aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
-                        className="aspect-[4/5] w-full bg-muted/30 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer"
+                        className="aspect-[4/5] w-full bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer"
                       >
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
@@ -2084,7 +2084,10 @@ const PublicDesignerProfile = () => {
                               {micro.map((m) => (
                                 <span
                                   key={m}
-                                  className="inline-flex items-center border border-foreground/80 bg-background/90 px-1.5 py-[3px] font-body text-[9px] uppercase tracking-[0.12em] text-foreground leading-none"
+                                   className={cn(
+                                     "items-center border border-foreground/80 bg-background/90 px-1.5 py-[3px] font-body text-[9px] uppercase tracking-[0.12em] text-foreground leading-none",
+                                     m === "Reedition" ? "inline-flex md:hidden" : "inline-flex"
+                                   )}
                                 >
                                   {m}
                                 </span>
@@ -2157,18 +2160,18 @@ const PublicDesignerProfile = () => {
                           <Link
                             to={`/designers/${cardBrandSlug || parentBrandSlug}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.16em] md:tracking-[0.18em] text-foreground leading-relaxed line-clamp-1 hover:text-foreground/70 transition-colors"
+                            className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.16em] md:tracking-[0.18em] text-foreground leading-relaxed md:leading-tight line-clamp-1 hover:text-foreground/70 transition-colors"
                           >
                             {cardBrandLabel || parentBrandName}
                           </Link>
                         ) : (
-                          <span className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.16em] md:tracking-[0.18em] text-foreground leading-relaxed line-clamp-1">
+                          <span className="block font-display text-[12px] md:text-sm font-medium uppercase tracking-[0.16em] md:tracking-[0.18em] text-foreground leading-relaxed md:leading-tight line-clamp-1">
                             {cardBrandLabel || parentBrandName || designer.name}
                           </span>
                         )}
 
                         {/* Product name — secondary, elegant */}
-                        <h3 className="mt-1 font-body text-[13px] md:text-[15px] italic font-normal text-foreground/80 leading-relaxed line-clamp-2">
+                        <h3 className="mt-1 font-body text-[13px] md:text-[15px] italic font-normal text-foreground/80 leading-relaxed md:leading-snug line-clamp-2">
                           <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground transition-colors">
                             {displayTitle}
                           </Link>
