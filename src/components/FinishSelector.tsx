@@ -748,13 +748,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       }
     };
 
-    // Compact circular swatch used in the always-visible rail beneath a
+    // Compact square swatch used in the always-visible rail beneath a
     // collapsed accordion header — lets clients scan finishes without
     // opening a secondary menu.
-    if (shape === "circle") {
-      // Center both circles through the same grid alignment context. Fixed,
-      // even-pixel diameters avoid WebKit positioning each absolute inset on a
-      // different device-pixel boundary.
+    if (shape === "square") {
       return (
         <button
           key={`c-${f.id}`}
@@ -766,21 +763,12 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           aria-pressed={isSelected}
           title={f.supplier ? `${f.supplier} — ${f.name}` : f.name}
           className={cn(
-            "grid shrink-0 appearance-none place-items-center rounded-full border-0 bg-transparent p-0 touch-manipulation",
+            "relative flex shrink-0 appearance-none items-center justify-center overflow-hidden border-0 bg-transparent p-0 touch-manipulation",
             isMobile || isPwa ? "h-[54px] w-[54px]" : "h-[46px] w-[46px]",
+            isSelected ? "ring-1 ring-inset ring-foreground" : "ring-1 ring-inset ring-border/60"
           )}
         >
-          <span
-            aria-hidden="true"
-            className={cn(
-              "pointer-events-none col-start-1 row-start-1 h-full w-full box-border rounded-full border transition-colors duration-200",
-              isSelected ? "border-foreground" : "border-border/60",
-            )}
-          />
-          <span className={cn(
-            "col-start-1 row-start-1 block overflow-hidden rounded-full bg-muted/40",
-            isMobile || isPwa ? "h-[46px] w-[46px]" : "h-[38px] w-[38px]",
-          )}>
+          <span className="block h-full w-full overflow-hidden bg-muted/40">
             {f.image_url ? (
               <img src={f.image_url} alt={f.name} loading="lazy" className="block h-full w-full object-cover" />
             ) : (
@@ -792,6 +780,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         </button>
       );
     }
+
 
 
     const tileButton = (
