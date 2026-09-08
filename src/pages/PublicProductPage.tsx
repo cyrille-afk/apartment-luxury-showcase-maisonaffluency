@@ -1284,9 +1284,11 @@ const PublicProductPageContent: React.FC = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const isSmall = window.matchMedia("(max-width: 767px)").matches;
-    setStickyProductBarActive(isSmall && showStickyBar);
+    // Also pin the header while the product image is docked beneath it —
+    // otherwise the nav slides away and the sticky image looks unanchored.
+    setStickyProductBarActive(isSmall && (showStickyBar || galleryCompact));
     return () => setStickyProductBarActive(false);
-  }, [showStickyBar]);
+  }, [showStickyBar, galleryCompact]);
 
 
 
@@ -2174,7 +2176,7 @@ const PublicProductPageContent: React.FC = () => {
 
                 overlay={
                   /* Favorite / studio save stays top-right. */
-                  <div className="hidden md:flex items-center gap-3">
+                  <div className="flex items-center gap-3">
                     {user && hasTradeAccess ? (
                       <CornerTooltip label="Save to Studio" side="bottom" align="end">
                         <StudioSaveButton
@@ -2221,42 +2223,9 @@ const PublicProductPageContent: React.FC = () => {
 
 
 
-              {/* Mobile-only image overlay: share + favorite / studio save, top-right */}
-              <div
-                className="md:hidden pointer-events-none absolute inset-x-0 top-0 z-40 mx-auto transition-all duration-500 ease-out"
-                style={{
-                  height: galleryCompact ? "20svh" : "45svh",
-                  width: galleryCompact ? "min(78%, 30svh)" : "100%",
-                }}
-              >
-                <div
-                  className={cn(
-                    "absolute flex items-center gap-3 pointer-events-auto transition-all duration-500 ease-out",
-                    galleryCompact ? "top-1.5 right-1.5" : "top-4 right-4"
-                  )}
-                >
-                  {user && hasTradeAccess ? (
-                    // Trade members get the studio "drop" anchor instead of the
-                    // retail heart: one tap → bottom sheet → project.
-                    <StudioSaveButton
-                      pickId={product.id}
-                      productTitle={product.title}
-                      finishes={selectedFinishes}
-                    />
-                  ) : (
-                    <FavoriteFolderPicker pickId={product.id} align="end" side="bottom">
-                      <button
-                        onClick={(e) => e.stopPropagation()}
-                        aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
-                        className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25"
-                      >
-                        <Heart size={20} strokeWidth={1.5} className={cn(favorited ? "fill-destructive text-destructive" : "text-foreground/80")} />
-                      </button>
-                    </FavoriteFolderPicker>
-                  )}
-                </div>
+              {/* Mobile favourite/studio-save now rides inside the gallery frame
+                  (see `overlay` above) so it can never detach from the photo. */}
 
-              </div>
 
 
               {/* Inline "Shown in" caption — hidden on mobile/PWA; shown in presentation mode instead. */}
@@ -2289,7 +2258,7 @@ const PublicProductPageContent: React.FC = () => {
             </div>
 
 
-            <div className="relative flex flex-col gap-2 md:gap-6">
+            <div className="relative z-0 flex flex-col gap-2 md:gap-6">
               {isMobileOrPwa ? (
                 <>
                   {/* Mobile/PWA: Trade-first flow with finish selector below image. */}

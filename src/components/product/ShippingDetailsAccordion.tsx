@@ -44,7 +44,7 @@ export default function ShippingDetailsAccordion({
   return (
     <>
       {variant === "row" ? (
-        <div className={cn("border-b border-border/60 pb-2.5 md:pb-3 flex items-start gap-5", className)}>
+        <div className={cn("border-b border-border/60 pt-3 pb-2.5 md:pb-3 flex items-start gap-5", className)}>
           <span
             className="inline-flex h-5 w-5 shrink-0 items-center justify-center text-gold mt-0.5"
             aria-hidden="true"
