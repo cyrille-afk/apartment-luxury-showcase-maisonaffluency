@@ -261,7 +261,11 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 if (item) setLightboxItem(item);
               }}
             >
-              <div className="aspect-[4/5] bg-muted/20 rounded-none overflow-hidden mb-2 relative flex items-center justify-center">
+              <div className={cn(
+                "bg-muted/20 rounded-none overflow-hidden mb-2 relative flex items-center justify-center",
+                "md:aspect-[4/5]",
+                isMobileTall ? "aspect-[3/4]" : "aspect-square"
+              )}>
                 <img
                   src={responsiveCloudinaryUrl(pick.image_url, 600)}
                   srcSet={pickSrcSet(pick.image_url)}
