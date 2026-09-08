@@ -177,7 +177,24 @@ export default function ProductCommerceCta({
   const quantity = productConfig ? productConfig.quantity : localQuantity;
   const setQuantity = productConfig ? productConfig.setQuantity : setLocalQuantity;
   const [miniCartOpen, setMiniCartOpen] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(false);
   const cartItems = useCart();
+
+  // Fade out the sticky mobile dock when the user reaches the footer zone
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollBottom = window.scrollY + window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+      setIsAtBottom(docHeight - scrollBottom < 100);
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, []);
   
   const { clientSafe } = useClientSafeMode();
   const { data: pricing } = useTradeProductPricing(productId, tradeApproved);
