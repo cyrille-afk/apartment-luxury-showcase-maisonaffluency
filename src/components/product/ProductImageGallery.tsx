@@ -174,35 +174,46 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
   // latest index change originated from the user's swipe (so we don't fight
   // the gesture by programmatically scrolling back).
   const mobileScrollRef = useRef<HTMLDivElement>(null);
-  const fromScrollRef = useRef(false);
+  // True while WE are scrolling the carousel programmatically. Without this
+  // guard the smooth scroll fires onScroll, which sets the index, which
+  // re-triggers the scroll — the loop that made presentation photos flicker
+  // and killed the native swipe feel.
+  const programmaticRef = useRef(false);
+  const programmaticTimer = useRef<number | null>(null);
 
   const handleMobileScroll = useCallback(() => {
+    if (programmaticRef.current || presentOpen) return;
     const el = mobileScrollRef.current;
     if (!el) return;
     const w = el.clientWidth || 1;
     const idx = Math.max(0, Math.min(images.length - 1, Math.round(el.scrollLeft / w)));
     if (idx !== activeIndex) {
-      fromScrollRef.current = true;
       setActiveIndex(idx);
       onIndexChange?.(idx);
     }
-  }, [activeIndex, images.length, onIndexChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeIndex, images.length, onIndexChange, presentOpen]);
 
   // When the index changes externally (finish/variant selection, presentation
-  // mode close), glide the mobile carousel to the matching frame.
+  // mode close), glide the mobile carousel to the matching frame. Never runs
+  // while presentation mode is open — the overlay owns navigation there.
   useEffect(() => {
-    if (!isMobileOrPwa) return;
-    if (fromScrollRef.current) {
-      fromScrollRef.current = false;
-      return;
-    }
+    if (!isMobileOrPwa || presentOpen) return;
     const el = mobileScrollRef.current;
     if (!el) return;
     const target = activeIndex * el.clientWidth;
-    if (Math.abs(el.scrollLeft - target) > 2) {
-      el.scrollTo({ left: target, behavior: "smooth" });
-    }
-  }, [activeIndex, isMobileOrPwa]);
+    if (Math.abs(el.scrollLeft - target) <= 2) return;
+    programmaticRef.current = true;
+    if (programmaticTimer.current) window.clearTimeout(programmaticTimer.current);
+    el.scrollTo({ left: target, behavior: "smooth" });
+    programmaticTimer.current = window.setTimeout(() => {
+      programmaticRef.current = false;
+    }, 500);
+  }, [activeIndex, isMobileOrPwa, presentOpen]);
+
+  useEffect(() => () => {
+    if (programmaticTimer.current) window.clearTimeout(programmaticTimer.current);
+  }, []);
 
   // Swipe support for the inline main image.
   const inlineSwipeRef = useRef<HTMLDivElement>(null);
