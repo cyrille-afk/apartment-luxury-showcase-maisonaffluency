@@ -332,8 +332,11 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           <div
             className={cn(
               "z-50",
+              "transition-all duration-500 ease-out",
               isMobileOrPwa
-                ? `absolute right-4 ${stickyCommerceDockActive ? "bottom-24" : "bottom-4"}`
+                ? `absolute ${compact ? "right-1.5" : "right-4"} ${
+                    stickyCommerceDockActive && !compact ? "bottom-24" : compact ? "bottom-1.5" : "bottom-4"
+                  }`
                 : "absolute top-4 left-4"
             )}
           >
