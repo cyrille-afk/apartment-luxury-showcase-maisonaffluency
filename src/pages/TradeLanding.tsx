@@ -16,8 +16,8 @@ import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/Section
 import Navigation from "@/components/Navigation";
 
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
-// Static OG bridge: WhatsApp scrapers get baked tags + hero image; real users redirect to /trade-program
-const TRADE_PROGRAM_SHARE_URL = "https://www.maisonaffluency.com/trade-program-share-v4.html";
+// Clean URL shared with users; the Cloudflare crawler Worker serves the OG bridge HTML to WhatsApp/etc.
+const TRADE_PROGRAM_SHARE_URL = "https://www.maisonaffluency.com/trade-program";
 const TRADE_PROGRAM_SHARE_IMAGE = "https://www.maisonaffluency.com/trade-program-hero-authentic-v3.jpg";
 const TRADE_PROGRAM_HERO_IMAGE = cloudinaryUrl("dining-room_ey0bu5", { width: 1200, quality: "auto:good" });
 
