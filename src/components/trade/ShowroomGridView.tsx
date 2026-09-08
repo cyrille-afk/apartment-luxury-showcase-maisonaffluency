@@ -22,6 +22,8 @@ import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useToast } from "@/hooks/use-toast";
 import { ProductCardSkeleton } from "@/components/trade/skeletons";
+import { MobileProductGridSkeleton } from "@/components/trade/MobileProductGridSkeleton";
+import { motion } from "framer-motion";
 import { useFavorites } from "@/hooks/useFavorites";
 import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
 import { createActiveDraftQuote } from "@/lib/activeProjectId";
@@ -594,11 +596,16 @@ const ShowroomGridView = ({
 
   if (loading) {
     return (
-        <div className={gridClass}>
+      <>
+        <div className="md:hidden">
+          <MobileProductGridSkeleton count={8} />
+        </div>
+        <div className={cn("hidden md:grid", gridClass)}>
           {Array.from({ length: 6 }).map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
         </div>
+      </>
     );
   }
 
@@ -714,6 +721,11 @@ const ShowroomGridView = ({
       </p>
 
       {/* Content */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+      >
       {filtered.length === 0 ? (
         <div className="border border-dashed border-border rounded-lg p-16 text-center">
           <p className="font-body text-sm text-muted-foreground">No products match your search criteria.</p>
@@ -915,6 +927,7 @@ const ShowroomGridView = ({
           })}
         </div>
       )}
+      </motion.div>
     </>
   );
 };
