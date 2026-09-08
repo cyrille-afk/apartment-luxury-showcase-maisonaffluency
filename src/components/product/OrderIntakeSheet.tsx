@@ -22,6 +22,8 @@ interface Props {
   productTitle?: string | null;
   designerName?: string | null;
   priceLabel?: string | null;
+  /** Finish / configuration chosen on the product page — prefilled into notes. */
+  finishLabel?: string | null;
   submitting?: boolean;
 }
 
