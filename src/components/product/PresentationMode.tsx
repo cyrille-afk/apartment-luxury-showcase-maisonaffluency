@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 import ActiveSwatchCaption from "./ActiveSwatchCaption";
 
 interface PresentationModeProps {
@@ -42,6 +43,7 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
   const hideTimer = useRef<number | null>(null);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
+  const swipeLocked = useRef<"horizontal" | "vertical" | null>(null);
 
   const scheduleHide = useCallback(() => {
     if (hideTimer.current) window.clearTimeout(hideTimer.current);
