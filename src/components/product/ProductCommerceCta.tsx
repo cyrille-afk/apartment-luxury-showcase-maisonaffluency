@@ -449,11 +449,12 @@ export default function ProductCommerceCta({
               disabled={placingOrder}
               className={cn(
                 primaryBtn,
-                "h-11 shrink-0 w-auto px-7",
+                "h-11 shrink-0 w-auto px-7 whitespace-nowrap",
+                isUnpriced && "px-4 text-[11px] tracking-wide",
                 "active:scale-[0.98] transition-transform duration-150"
               )}
             >
-              {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : primaryLabel}
+              {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : mobilePrimaryLabel}
             </button>
           </div>
 
