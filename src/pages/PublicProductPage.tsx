@@ -2258,7 +2258,7 @@ const PublicProductPageContent: React.FC = () => {
             </div>
 
 
-            <div className="relative flex flex-col gap-2 md:gap-6">
+            <div className="relative z-0 flex flex-col gap-2 md:gap-6">
               {isMobileOrPwa ? (
                 <>
                   {/* Mobile/PWA: Trade-first flow with finish selector below image. */}
