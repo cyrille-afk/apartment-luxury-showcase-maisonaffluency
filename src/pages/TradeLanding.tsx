@@ -610,14 +610,14 @@ const TradeLanding = () => {
         <div aria-hidden className="h-24 md:h-[120px] pt-[env(safe-area-inset-top)]" />
 
         {/* ─── Split-screen Hero ─── */}
-        <div ref={heroRef} className="relative flex h-[calc(100dvh-6rem)] min-h-[580px] w-full flex-col md:h-[calc(100vh-256px)] md:min-h-0 md:flex-row">
+        <div ref={heroRef} className="relative flex h-[calc(100dvh-6rem)] min-h-[580px] w-full flex-col md:grid md:grid-cols-12 md:h-[calc(100vh-256px)] md:min-h-0">
           {/* Left Side: title (mobile) / title + form (desktop) */}
-          <div className="relative z-20 flex shrink-0 h-auto w-full items-center justify-center bg-background px-6 pb-4 pt-2 md:h-auto md:w-1/2 md:justify-start md:px-12 md:py-12 lg:px-16">
+          <div className="relative z-20 flex shrink-0 h-auto w-full items-center justify-center bg-background px-6 pb-4 pt-2 md:col-start-2 md:col-span-4 md:h-auto md:justify-start md:px-0 md:py-12">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1 }}
-              className="relative w-[85%] max-w-xl text-justify md:ml-auto md:w-full md:pr-6 md:text-left lg:pr-8"
+              className="relative w-[85%] max-w-xl text-justify md:w-full md:pr-8 md:text-left lg:pr-12"
             >
               <h1 className="font-display whitespace-nowrap text-[1.4rem] leading-[1.2] text-foreground sm:text-3xl lg:text-4xl tracking-wide md:whitespace-normal">
                 <span className="hidden md:block md:whitespace-nowrap">Welcome to</span>
@@ -644,7 +644,7 @@ const TradeLanding = () => {
           </div>
 
           {/* Right Side: hero photograph (inline on mobile and desktop) */}
-          <div className="relative min-h-[68%] flex-1 w-full bg-background md:h-full md:w-1/2 md:flex-none">
+          <div className="relative min-h-[68%] flex-1 w-full bg-background md:col-start-7 md:col-span-6 md:h-full">
             <img
               src={TRADE_PROGRAM_HERO_IMAGE}
               alt="Maison Affluency Trade Program"
