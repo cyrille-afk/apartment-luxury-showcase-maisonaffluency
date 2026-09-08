@@ -879,7 +879,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     );
   };
 
-  const [openWood, setOpenWood] = useState(false);
+  const [openWood, setOpenWood] = useState(true);
   const [openTop, setOpenTop] = useState(false);
   const [openCover, setOpenCover] = useState(false);
   const isMobile = useIsMobile();
