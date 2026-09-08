@@ -2150,8 +2150,8 @@ const PublicProductPageContent: React.FC = () => {
           </div>
 
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-8 lg:gap-16">
-            <div id="main-product-image-container" className="relative -mx-4 md:mx-0 md:sticky md:top-[calc(var(--header-h)+1rem)] h-fit self-start z-30 bg-background" ref={galleryScrollRef}>
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-3 md:gap-8 lg:gap-16">
+            <div id="main-product-image-container" className="relative -mx-4 md:mx-0 sticky top-[var(--header-h)] md:top-[calc(var(--header-h)+1rem)] h-fit self-stretch lg:self-start z-30 bg-background transition-all duration-500 ease-out transform" ref={galleryScrollRef}>
               <ProductImageGallery
                 images={visibleImages}
                 alt={product.title}
@@ -2271,7 +2271,7 @@ const PublicProductPageContent: React.FC = () => {
             </div>
 
 
-            <div className="relative flex flex-col gap-3 md:gap-6">
+            <div className="relative flex flex-col gap-2 md:gap-6">
               {isMobileOrPwa ? (
                 <>
                   {/* Mobile/PWA: Trade-first flow with finish selector below image. */}
@@ -2295,11 +2295,11 @@ const PublicProductPageContent: React.FC = () => {
                     onDisplayedFinishesChange={setDisplayedFinishes}
                     onFinishGroupingResolved={() => setFinishGroupingPending(false)}
                   >
-                    <div className="flex flex-col gap-5 order-2">
+                    <div className="flex flex-col gap-3 md:gap-5 order-2">
                       <VariantFinishSelectors section="primary" />
                     </div>
 
-                    <div className="flex flex-col gap-5 order-3 md:order-5">
+                    <div className="flex flex-col gap-3 md:gap-5 order-3 md:order-5">
                       <VariantFinishSelectors section="supplemental" renderMaterialsDescription={false} />
                       {finishesMissingImages.length > 0 && (
                         <p className="font-body text-[11px] text-muted-foreground italic mt-1">
@@ -2310,7 +2310,7 @@ const PublicProductPageContent: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="flex flex-col gap-5 order-4">
+                    <div className="flex flex-col gap-3 md:gap-5 order-4">
                       <MaterialsDescriptionBlock />
                     </div>
 
@@ -2349,7 +2349,7 @@ const PublicProductPageContent: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="flex flex-col gap-5 order-5 md:order-5">
+                    <div className="flex flex-col gap-3 md:gap-5 order-5 md:order-5">
                       <VariantDimensionsPanel />
                     </div>
                   </VariantSelectorsProvider>
@@ -2374,7 +2374,7 @@ const PublicProductPageContent: React.FC = () => {
                       }
                       return (
                         <>
-                          <div className="border-b border-border/60 pb-3 flex items-start gap-5">
+                          <div className="border-b border-border/60 pb-2.5 md:pb-3 flex items-start gap-5">
                             {specIcon("✦", "mt-0.5")}
                             <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
                               <OriginStoryDrawer label={originLine} maker={designerDisplay} />
@@ -2388,7 +2388,7 @@ const PublicProductPageContent: React.FC = () => {
                     })()}
                   </div>
 
-                  <div className="flex flex-col gap-5 order-7 md:order-7">
+                  <div className="flex flex-col gap-3 md:gap-5 order-7 md:order-7">
                     {(() => {
                       const variants = (product.size_variants || []) as any[];
                       const upholstery = Array.from(
