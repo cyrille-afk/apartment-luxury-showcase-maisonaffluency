@@ -443,7 +443,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           {/* Fractional gallery counter — clean numerals in the lower-left corner. */}
           {images.length > 1 && (
             <div className={cn("absolute z-20 pointer-events-none transition-all duration-500 ease-out", compact ? "bottom-1.5 left-1.5" : "bottom-4 left-4")}>
-              <span className="inline-block px-2 py-1 rounded-luxury-micro bg-background/45 backdrop-blur-md font-body text-[11px] font-light tracking-[0.14em] text-foreground/80 tabular-nums">
+              <span className="inline-block px-2.5 py-1 rounded-full bg-white/70 backdrop-blur-sm font-body text-[11px] font-light tracking-widest text-neutral-600 tabular-nums">
                 {activeIndex + 1} / {images.length}
               </span>
             </div>
