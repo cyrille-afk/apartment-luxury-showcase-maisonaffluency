@@ -596,11 +596,16 @@ const ShowroomGridView = ({
 
   if (loading) {
     return (
-        <div className={gridClass}>
+      <>
+        <div className="md:hidden">
+          <MobileProductGridSkeleton count={8} />
+        </div>
+        <div className={cn("hidden md:grid", gridClass)}>
           {Array.from({ length: 6 }).map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
         </div>
+      </>
     );
   }
 
