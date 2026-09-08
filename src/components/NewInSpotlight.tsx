@@ -383,7 +383,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 })()}
                 {/* Price — muted, bottom */}
                 <div className="mt-1">
-                  <p className="font-body text-[11px] md:text-xs text-muted-foreground tracking-wide">
+                  <p className="font-body text-xs italic tracking-wide text-neutral-400">
                     {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon Request"}
                   </p>
                 </div>
