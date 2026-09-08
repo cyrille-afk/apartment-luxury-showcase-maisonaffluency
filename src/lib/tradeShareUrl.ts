@@ -26,7 +26,7 @@ export const TRADE_PROGRAM_CLEAN_URL =
 
 /** Static OG bridge — always serves the Trade Program title/description/image. */
 export const TRADE_PROGRAM_BRIDGE_URL =
-  "https://www.maisonaffluency.com/trade-program-share-v4.html";
+  "https://www.maisonaffluency.com/trade-program-share.html";
 
 export const TRADE_PROGRAM_SHARE_IMAGE =
   "https://www.maisonaffluency.com/trade-program-hero-authentic-v3.jpg";
