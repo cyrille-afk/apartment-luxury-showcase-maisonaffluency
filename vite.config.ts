@@ -266,16 +266,11 @@ export default defineConfig(({ mode }) => {
   },
   build: {
     target: "es2020",
-    minify: "terser",
-    terserOptions: {
-      compress: {
-        passes: 2,
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ["console.debug", "console.info"],
-      },
-      format: { comments: false },
-    },
+    // esbuild minification: ~1% larger output than terser's 2-pass compress,
+    // but seconds instead of minutes. The terser config pushed the production
+    // build past Playwright's webServer timeout in CI.
+    minify: "esbuild",
+
     cssMinify: true,
     rollupOptions: {
       output: {
