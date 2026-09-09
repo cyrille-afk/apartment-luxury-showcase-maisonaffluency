@@ -187,6 +187,7 @@ const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ defaul
 const Sonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
 const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
 const TradeAdminDuplicates = lazy(() => import("./pages/TradeAdminDuplicates"));
+const TradeAdminWhatsAppAlerts = lazy(() => import("./pages/TradeAdminWhatsAppAlerts"));
 const TradeAdminAxonometricCadQa = lazy(() => import("./pages/TradeAdminAxonometricCadQa"));
 const CookieConsent = lazy(() => import("@/components/CookieConsent"));
 
@@ -745,6 +746,7 @@ const App = () => {
                     <Route path="admin/taxonomy-audit" element={<TradeAdminTaxonomyAudit />} />
                     <Route path="admin/descriptor-taxonomy" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminDescriptorTaxonomy /></Suspense>} />
                     <Route path="admin/duplicates" element={<TradeAdminDuplicates />} />
+                    <Route path="admin/whatsapp-alerts" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminWhatsAppAlerts /></Suspense>} />
                     <Route path="admin/axonometric-cad-qa" element={<TradeAdminAxonometricCadQa />} />
                     <Route path="admin/sync-status" element={<TradeAdminSyncStatus />} />
                     <Route path="admin/brand-lead-times" element={<TradeAdminBrandLeadTimes />} />
