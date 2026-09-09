@@ -21,7 +21,7 @@ import {
   type RegionTier,
   type TradePaymentChannel,
 } from "@/config/tradePaymentChannels";
-import { buildProformaInvoicePdf, type ProformaLine } from "@/lib/proformaInvoicePdf";
+import type { ProformaLine } from "@/lib/proformaInvoicePdf";
 import { computeTaxCents, resolveTaxRule, taxRowLabel } from "@/config/taxRules";
 
 export interface RegionalPaymentPanelProps {
