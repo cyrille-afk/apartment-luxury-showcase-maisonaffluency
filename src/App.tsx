@@ -586,7 +586,7 @@ const App = () => {
 
   return (
     <Suspense fallback={null}>
-      <LazyHelmetProvider>
+      <HelmetProvider>
         <AuthProvider>
         <StudioProvider>
         <CompareProvider>
@@ -810,7 +810,7 @@ const App = () => {
         </CompareProvider>
         </StudioProvider>
         </AuthProvider>
-      </LazyHelmetProvider>
+      </HelmetProvider>
     </Suspense>
   );
 };
