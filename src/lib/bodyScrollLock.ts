@@ -15,6 +15,18 @@ let previousBodyStyles: Partial<Record<
 >> = {};
 let previousHtmlOverscroll = "";
 
+function restoreScrollPosition(scrollY: number) {
+  window.scrollTo(0, scrollY);
+  // Sticky product imagery and the mobile commerce dock reflow after the body
+  // is unfixed. Re-apply after that layout settles so Safari cannot clamp the
+  // initial restoration to a temporarily shorter document.
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      if (locks === 0) window.scrollTo(0, scrollY);
+    });
+  });
+}
+
 export function lockBodyScroll() {
   if (typeof document === "undefined") return;
   if (locks === 0) {
@@ -54,7 +66,7 @@ export function unlockBodyScroll() {
     previousBodyStyles = {};
     previousHtmlOverscroll = "";
     lockedScrollY = 0;
-    window.scrollTo(0, restoreY);
+    restoreScrollPosition(restoreY);
   }
 }
 
@@ -73,5 +85,5 @@ export function releaseBodyScroll() {
   previousBodyStyles = {};
   previousHtmlOverscroll = "";
   lockedScrollY = 0;
-  window.scrollTo(0, restoreY);
+  restoreScrollPosition(restoreY);
 }
