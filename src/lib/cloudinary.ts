@@ -19,6 +19,27 @@ export function withVersion(publicId: string): string {
   return VERSION_RE.test(clean) ? clean : `v1/${clean}`;
 }
 
+/**
+ * Mobile payload guard.
+ *
+ * Desktop-sized transforms (w_1200 / w_1600 / w_2400) were being served to
+ * phones, which is the single biggest contributor to the ~6MB mobile page
+ * weight measured by PageSpeed. Any requested width is clamped to a
+ * mobile-friendly ceiling when the viewport is a phone. `raw: true` opts out
+ * (used by PDF/document generation, which needs print-resolution assets).
+ */
+const MOBILE_MAX_WIDTH = 800;
+
+function isMobileViewport(): boolean {
+  if (typeof window === "undefined" || !window.matchMedia) return false;
+  return window.matchMedia("(max-width: 767px)").matches;
+}
+
+function clampWidth(width: number, raw?: boolean): number {
+  if (raw) return width;
+  return isMobileViewport() ? Math.min(width, MOBILE_MAX_WIDTH) : width;
+}
+
 export interface CloudinaryTransform {
   width?: number;
   height?: number;
@@ -28,7 +49,10 @@ export interface CloudinaryTransform {
   gravity?: "auto" | "face" | "center" | "north" | "south" | "east" | "west";
   dpr?: "auto" | number;
   blur?: number;
+  /** Skip the mobile width clamp (print/PDF assets). */
+  raw?: boolean;
 }
+
 
 /**
  * Build a Cloudinary URL with transformations
