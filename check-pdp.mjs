@@ -6,10 +6,10 @@ const browser = await chromium.launch({ headless: true });
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
 const page = await ctx.newPage();
 page.on('pageerror', e => console.log('PAGEERROR', e.message));
-await page.goto('http://localhost:8080/product/angelo-m-h-high-table', { waitUntil: 'domcontentloaded' }).catch(()=>{});
+await page.goto('http://localhost:8080/designers/alinea/angelo-m-h-high-table', { waitUntil: 'domcontentloaded' }).catch(()=>{});
 // find a product link
 await page.waitForTimeout(4000);
-const href = '/product/angelo-m-h-high-table'; const _unused = await page.evaluate(() => {
+const href = '/designers/alinea/angelo-m-h-high-table'; const _unused = await page.evaluate(() => {
   const a = document.querySelector('a[href*="/product/"]');
   return null;
 });
