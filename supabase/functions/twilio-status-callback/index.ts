@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
         .eq("provider_message_id", sid);
     }
 
-    return new Response("", { status: 204 });
+    return new Response(null, { status: 204 });
   } catch (err) {
     console.error("twilio-status-callback error:", err);
     return new Response("Error", { status: 500 });
