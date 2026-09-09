@@ -57,9 +57,47 @@ const TWILIO_GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
 const QUOTE_TEMPLATE_SID = Deno.env.get("TWILIO_WHATSAPP_QUOTE_TEMPLATE_SID")
   ?? "HXd883a51839c6572cbe49532461adc4d5";
 
+// Cached template approval state. WhatsApp only accepts a template send once
+// Meta has approved it, so we ask Twilio for the live approval status and only
+// switch away from freeform when it reports "approved".
+let templateApproval: { approved: boolean; status: string; checkedAt: number } | null = null;
+const APPROVAL_TTL_MS = 10 * 60 * 1000;
+
+async function isTemplateApproved(lovableKey: string, twilioKey: string) {
+  if (!QUOTE_TEMPLATE_SID) return { approved: false, status: "no_template_sid" };
+  if (templateApproval && Date.now() - templateApproval.checkedAt < APPROVAL_TTL_MS) {
+    return { approved: templateApproval.approved, status: templateApproval.status };
+  }
+  try {
+    const res = await fetch(
+      `${TWILIO_GATEWAY_URL}/content/v1/Content/${QUOTE_TEMPLATE_SID}/ApprovalRequests`,
+      {
+        headers: {
+          "Authorization": `Bearer ${lovableKey}`,
+          "X-Connection-Api-Key": twilioKey,
+        },
+      },
+    );
+    if (!res.ok) {
+      const txt = await res.text();
+      console.error(`Template approval lookup failed [${res.status}]: ${txt.slice(0, 500)}`);
+      return { approved: false, status: `lookup_${res.status}` };
+    }
+    const json = await res.json();
+    const status = String(json?.whatsapp?.status ?? "unknown").toLowerCase();
+    const approved = status === "approved";
+    templateApproval = { approved, status, checkedAt: Date.now() };
+    return { approved, status };
+  } catch (err) {
+    console.error("Template approval lookup error:", err);
+    return { approved: false, status: "lookup_error" };
+  }
+}
+
 // Fire-and-forget WhatsApp alert for product quote requests. Uses the same
 // Twilio connector gateway as the trade-application alerts; delivery failures
 // are logged to admin_alert_log so no lead is ever silently lost.
+
 async function sendQuoteWhatsAppAlert(
   supabase: any,
   inquiry: { id: string; name: string; email: string; phone: string; company?: string; productName?: string; selectedFinish?: string },
