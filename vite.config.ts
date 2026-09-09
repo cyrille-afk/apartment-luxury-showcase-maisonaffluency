@@ -282,7 +282,13 @@ export default defineConfig(({ mode }) => {
     rollupOptions: {
       output: {
         manualChunks: (id) => {
+          // Vite's dynamic-import preload helper is shared by every lazy
+          // route. Left unassigned, Rollup parks it inside whichever big
+          // vendor chunk claims it first (it landed in vendor-docs), which
+          // forces the entry to statically import that multi-MB chunk.
+          if (id.includes('vite/preload-helper')) return 'vendor-misc';
           if (!id.includes("node_modules")) return;
+
 
           // Bundle every lucide icon into one chunk. Otherwise each icon
           // ships as its own 500-1500 byte file and a mobile page opens
