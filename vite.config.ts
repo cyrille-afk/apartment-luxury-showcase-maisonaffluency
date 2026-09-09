@@ -58,7 +58,7 @@ function optimizeHtmlPlugin(buildId: string): Plugin {
         // hero image win the bandwidth race on throttled PSI mobile runs
         // is worth ~200-400ms of LCP. React still loads (main entry imports
         // it) — just at lower priority so it doesn't compete with the LCP image.
-        const DEFER = /(vendor-motion|vendor-radix|vendor-react|vendor-query)/;
+        const DEFER = /(vendor-motion|vendor-radix|vendor-react|vendor-router|vendor-query|vendor-forms|vendor-charts|vendor-pdf|vendor-docs|vendor-3d|vendor-markdown|vendor-date|vendor-carousel|vendor-stripe|vendor-icons-extra)/;
         const eager = modulepreloads.filter(h => !DEFER.test(h));
         const deferred = modulepreloads.filter(h => DEFER.test(h));
         const hints = [
@@ -265,19 +265,82 @@ export default defineConfig(({ mode }) => {
     },
   },
   build: {
+    target: "es2020",
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        passes: 2,
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ["console.debug", "console.info"],
+      },
+      format: { comments: false },
+    },
+    cssMinify: true,
     rollupOptions: {
       output: {
         manualChunks: (id) => {
+          if (!id.includes("node_modules")) return;
+
           // Bundle every lucide icon into one chunk. Otherwise each icon
           // ships as its own 500-1500 byte file and a mobile page opens
           // 15+ additional HTTP round-trips just for icons — the single
           // biggest source of "takes forever to load" on 4G/PWA.
           if (id.includes('node_modules/lucide-react/')) return 'vendor-icons';
-          if (id.includes('node_modules/react-router')) return 'vendor-react';
-          if (id.includes('node_modules/react-dom')) return 'vendor-react';
-          if (id.includes('node_modules/react/')) return 'vendor-react';
-          if (id.includes('node_modules/framer-motion')) return 'vendor-motion';
+          if (id.includes('node_modules/react-icons/')) return 'vendor-icons-extra';
+
+          // Core runtime: react + react-dom only, so it stays small and
+          // hash-stable (long-term cacheable across deploys).
+          if (
+            id.includes('node_modules/react-dom') ||
+            id.includes('node_modules/react/') ||
+            id.includes('node_modules/scheduler/')
+          ) return 'vendor-react';
+          if (id.includes('node_modules/react-router')) return 'vendor-router';
+
+          if (id.includes('node_modules/framer-motion') || id.includes('node_modules/motion-')) return 'vendor-motion';
           if (id.includes('node_modules/@tanstack/react-query')) return 'vendor-query';
+          if (id.includes('node_modules/@supabase/')) return 'vendor-supabase';
+
+          // Forms + validation are only reached from lazy drawers/dialogs.
+          if (
+            id.includes('node_modules/react-hook-form') ||
+            id.includes('node_modules/@hookform/') ||
+            id.includes('node_modules/zod')
+          ) return 'vendor-forms';
+
+          // Heavy async-only libraries — never part of a landing page paint.
+          if (
+            id.includes('node_modules/recharts') ||
+            id.includes('node_modules/d3-') ||
+            id.includes('node_modules/victory-')
+          ) return 'vendor-charts';
+          if (
+            id.includes('node_modules/jspdf') ||
+            id.includes('node_modules/@react-pdf/') ||
+            id.includes('node_modules/pdfjs-dist')
+          ) return 'vendor-pdf';
+          if (
+            id.includes('node_modules/exceljs') ||
+            id.includes('node_modules/pptxgenjs') ||
+            id.includes('node_modules/jszip')
+          ) return 'vendor-docs';
+          if (
+            id.includes('node_modules/three') ||
+            id.includes('node_modules/konva')
+          ) return 'vendor-3d';
+          if (
+            id.includes('node_modules/react-markdown') ||
+            id.includes('node_modules/remark-') ||
+            id.includes('node_modules/micromark') ||
+            id.includes('node_modules/mdast-') ||
+            id.includes('node_modules/hast-') ||
+            id.includes('node_modules/unified')
+          ) return 'vendor-markdown';
+          if (id.includes('node_modules/date-fns')) return 'vendor-date';
+          if (id.includes('node_modules/embla-carousel')) return 'vendor-carousel';
+          if (id.includes('node_modules/@stripe/')) return 'vendor-stripe';
+
           // Split @radix-ui per primitive so pages that don't use Dialog,
           // Popover, Select, etc. don't drag in the entire 170KB radix
           // bundle on first paint. Each primitive becomes its own small
@@ -294,5 +357,6 @@ export default defineConfig(({ mode }) => {
     assetsInlineLimit: 1024,
     chunkSizeWarningLimit: 1500,
   },
+
   };
 });
