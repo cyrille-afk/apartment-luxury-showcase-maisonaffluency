@@ -167,6 +167,7 @@ export default function OrderIntakeSheet({
           subject: `Quote Request — ${productTitle ?? "Product"}`,
           productName: productTitle ?? undefined,
           designerName: designerName ?? undefined,
+           selectedFinish: finish ?? undefined,
           productId: productId ?? undefined,
           source: "public_product",
            turnstileToken,
