@@ -221,44 +221,11 @@
       })();
     </script>
 
-    <!-- Homepage: preload "Tour Our Gallery" video poster at low priority so
-         it lands after the hero LCP but before the user scrolls to it. -->
-    <script>
-      (function(){
-        if (window.location.pathname !== "/") return;
-        // These are all BELOW the fold. Queue them only once the page has
-        // loaded and the main thread is idle, so they never share throttled
-        // mobile bandwidth with the hero LCP image ("low" priority is still
-        // in-flight bytes on Slow 4G).
-        function warm() {
-          var base = "https://res.cloudinary.com/dif1oamtj/image/upload";
-          var isMobile = window.matchMedia("(max-width: 767px)").matches;
-          var w = isMobile ? 780 : 1280;
-          // Must match the URL the poster <img> requests, otherwise the
-          // prefetch is a second download instead of a cache hit.
-          var hrefs = [base + "/w_" + w + ",q_auto:good,c_fill,g_auto,f_auto/bespoke-sofa_gxidtx"];
-          // Founder avatars render at 80-96px — 128px is plenty.
-          ["IMG_2542_1_kc4fvs", "Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs"].forEach(function(fid){
-            hrefs.push(base + "/w_128,c_fill,q_auto,f_auto/" + fid);
-          });
+    <!-- Below-the-fold homepage images are lazy-loaded by their components.
+         The old idle "warm" prefetch block was removed: its URLs did not match
+         the transforms the components request, so it downloaded every asset a
+         second time (~90KB wasted on mobile). -->
 
-          hrefs.forEach(function(href){
-            var l = document.createElement("link");
-            l.rel = "prefetch";
-            l.as = "image";
-            l.href = href;
-            l.setAttribute("fetchpriority", "low");
-            document.head.appendChild(l);
-          });
-        }
-        function schedule() {
-          if (window.requestIdleCallback) window.requestIdleCallback(warm, { timeout: 4000 });
-          else setTimeout(warm, 2500);
-        }
-        if (document.readyState === "complete") schedule();
-        else window.addEventListener("load", schedule, { once: true });
-      })();
-    </script>
 
 
 
