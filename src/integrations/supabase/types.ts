@@ -8255,6 +8255,45 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_delivery_events: {
+        Row: {
+          channel: string
+          created_at: string
+          error_code: number | null
+          error_message: string | null
+          from_number: string | null
+          id: string
+          message_sid: string
+          message_status: string | null
+          raw: Json
+          to_number: string | null
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          error_code?: number | null
+          error_message?: string | null
+          from_number?: string | null
+          id?: string
+          message_sid: string
+          message_status?: string | null
+          raw?: Json
+          to_number?: string | null
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          error_code?: number | null
+          error_message?: string | null
+          from_number?: string | null
+          id?: string
+          message_sid?: string
+          message_status?: string | null
+          raw?: Json
+          to_number?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       fabrics_public: {
