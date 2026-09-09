@@ -6,40 +6,37 @@ const browser = await chromium.launch({ headless: true });
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
 const page = await ctx.newPage();
 page.on('pageerror', e => console.log('PAGEERROR', e.message));
-await page.goto('http://localhost:8080/designers/alinea/angelo-m-h-high-table', { waitUntil: 'domcontentloaded' }).catch(()=>{});
-// find a product link
-await page.waitForTimeout(4000);
-const href = '/designers/alinea/angelo-m-h-high-table'; const _unused = await page.evaluate(() => {
-  const a = document.querySelector('a[href*="/product/"]');
-  return null;
-});
-console.log('product href:', href);
-await page.goto('http://localhost:8080' + href, { waitUntil: 'domcontentloaded' });
-await page.waitForTimeout(4500);
+await page.goto('http://localhost:8080/designers/alinea/angelo-m-h-high-table', { waitUntil: 'domcontentloaded' });
+await page.waitForTimeout(5000);
+// dismiss cookie banner
+const accept = page.getByRole('button', { name: /^accept$/i });
+if (await accept.count()) { await accept.first().click().catch(()=>{}); await page.waitForTimeout(500); }
 await page.screenshot({ path: '/tmp/browser/pdp/1_top.png' });
-// scroll to trigger compact + sticky bar
-await page.evaluate(() => window.scrollTo({ top: 1400, behavior: 'instant' }));
-await page.waitForTimeout(1200);
+// scroll progressively with wheel-like steps
+for (let i = 0; i < 10; i++) { await page.mouse.wheel(0, 400); await page.waitForTimeout(250); }
+await page.waitForTimeout(900);
 await page.screenshot({ path: '/tmp/browser/pdp/2_compact.png' });
-await page.evaluate(() => window.scrollTo({ top: 2600, behavior: 'instant' }));
-await page.waitForTimeout(1000);
+for (let i = 0; i < 8; i++) { await page.mouse.wheel(0, 500); await page.waitForTimeout(200); }
+await page.waitForTimeout(900);
 await page.screenshot({ path: '/tmp/browser/pdp/3_deep.png' });
-// click the mini bar CTA
-const btn = page.locator('button', { hasText: /Request Quote|Place Order|Proceed to Order/i }).first();
-const ctaInfo = await page.evaluate(() => {
-  const bar = document.querySelector('.fixed.top-\\[var\\(--header-h\\)\\]');
-  return bar ? bar.textContent.slice(0,120) : 'no bar found';
+const barInfo = await page.evaluate(() => {
+  const bars = [...document.querySelectorAll('div.fixed')].filter(d => d.className.includes('top-[var(--header-h)]') && d.className.includes('md:hidden'));
+  const b = bars[0];
+  if (!b) return 'no bar';
+  const r = b.getBoundingClientRect();
+  return JSON.stringify({ text: b.textContent.slice(0,100), top: r.top, visible: r.height > 0 && r.top >= 0 && r.top < 200, transform: getComputedStyle(b).transform });
 });
-console.log('mini bar text:', ctaInfo);
-// click specifically inside the fixed mini bar
-const miniBtn = await page.evaluateHandle(() => {
-  const bars = [...document.querySelectorAll('div.fixed')].filter(d => d.className.includes('top-[var(--header-h)]'));
-  return bars[0]?.querySelector('button') || null;
+console.log('mini bar:', barInfo);
+// click the CTA via DOM to avoid overlay interception issues
+const clicked = await page.evaluate(() => {
+  const bars = [...document.querySelectorAll('div.fixed')].filter(d => d.className.includes('top-[var(--header-h)]') && d.className.includes('md:hidden'));
+  const btn = bars[0]?.querySelector('button');
+  if (!btn) return false;
+  btn.click();
+  return true;
 });
-console.log('miniBtn found:', !!miniBtn); if (miniBtn && miniBtn.asElement()) {
-  await miniBtn.asElement().click();
-  await page.waitForTimeout(1500);
-  await page.screenshot({ path: '/tmp/browser/pdp/4_sheet.png' });
-  console.log('sheet open:', await page.evaluate(() => document.body.textContent.includes('Your Details') || document.body.textContent.includes('Contact') || document.body.textContent.includes('Intent')));
-}
+console.log('clicked:', clicked);
+await page.waitForTimeout(1600);
+await page.screenshot({ path: '/tmp/browser/pdp/4_sheet.png' });
+console.log('sheet visible:', await page.evaluate(() => /intent|delivery|contact|quote/i.test(document.body.textContent)));
 await browser.close();
