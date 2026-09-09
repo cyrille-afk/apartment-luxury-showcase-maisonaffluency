@@ -138,8 +138,8 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
     navigate("/trade/login", { state: { returnTo: window.location.pathname + window.location.search } });
   };
 
-  const buildPdf = () =>
-    buildProformaInvoicePdf({
+  const buildPdf = async () =>
+    (await import("@/lib/proformaInvoicePdf")).buildProformaInvoicePdf({
       orderRef,
       currency,
       buyer,
