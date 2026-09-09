@@ -1,0 +1,13 @@
+import { chromium } from '@playwright/test';
+const b = await chromium.launch();
+const c = await b.newContext({ viewport:{width:390,height:844}, deviceScaleFactor:3, isMobile:true, hasTouch:true });
+const pg = await c.newPage();
+const cdp = await c.newCDPSession(pg);
+await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+await pg.addInitScript(() => { window.__lt=[]; new PerformanceObserver(l=>{for(const e of l.getEntries())window.__lt.push({d:Math.round(e.duration),s:Math.round(e.startTime)})}).observe({type:'longtask',buffered:true}); });
+await pg.goto('http://localhost:4321/', { waitUntil:'load' });
+await pg.waitForTimeout(6000);
+const lt = await pg.evaluate(() => window.__lt);
+console.log(JSON.stringify(lt));
+console.log('total', lt.reduce((a,x)=>a+x.d,0), 'max', Math.max(0,...lt.map(x=>x.d)));
+await b.close();

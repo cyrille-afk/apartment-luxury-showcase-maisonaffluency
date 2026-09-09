@@ -6,8 +6,15 @@ import BuildUpdateBanner from "./components/BuildUpdateBanner";
 import { isPwaStandaloneDisplay } from "./lib/pwaMode";
 import { loadOgBridgeIndex } from "./lib/ogBridgeResolver";
 
-// Warm the OG bridge manifest so share links resolve to real files, never 404 guesses.
-void loadOgBridgeIndex();
+// Warm the OG bridge manifest so share links resolve to real files, never 404
+// guesses. Deferred to idle: the manifest is ~84 KB of JSON and parsing it on
+// the critical path added a long main-thread task on mobile.
+const __warmOgBridgeIndex = () => { void loadOgBridgeIndex(); };
+if (typeof (window as any).requestIdleCallback === "function") {
+  (window as any).requestIdleCallback(__warmOgBridgeIndex, { timeout: 5000 });
+} else {
+  setTimeout(__warmOgBridgeIndex, 2500);
+}
 
 
 const CACHE_RESET_KEY = "__ma_frontend_cache_reset_v2";
