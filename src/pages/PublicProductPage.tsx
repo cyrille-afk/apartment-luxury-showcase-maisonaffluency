@@ -1345,7 +1345,12 @@ const PublicProductPageContent: React.FC = () => {
       hasInteractedRef.current = true;
       if (galleryCompactRef.current) compactCanExpandRef.current = true;
     };
-    const onScroll = () => {
+    // One layout read + one state pass per animation frame. Reading
+    // getBoundingClientRect on every raw scroll tick forced a synchronous
+    // reflow dozens of times per second on mobile.
+    let ticking = false;
+    const measure = () => {
+      ticking = false;
       const y = window.scrollY;
       const el = galleryScrollRef.current;
       // Hysteresis: collapse once the user has genuinely started reading,
@@ -1374,10 +1379,13 @@ const PublicProductPageContent: React.FC = () => {
       } else {
         setStickyBarArmed(false);
       }
-
-
     };
-    onScroll();
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(measure);
+    };
+    measure();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("touchstart", armExpansion, { passive: true });
     window.addEventListener("touchmove", armExpansion, { passive: true });
@@ -2204,7 +2212,7 @@ const PublicProductPageContent: React.FC = () => {
             <div
               id="main-product-image-container"
               className={cn(
-                "relative -mx-4 md:mx-0 sticky top-[var(--header-h)] md:top-[calc(var(--header-h)+1rem)] h-fit self-stretch lg:self-start z-30 bg-background transition-all duration-500 ease-out transform will-change-transform",
+                "relative -mx-4 md:mx-0 sticky top-[var(--header-h)] md:top-[calc(var(--header-h)+1rem)] h-fit self-stretch lg:self-start z-30 bg-background transition-[box-shadow,border-color] duration-300 ease-out transform-gpu will-change-transform",
                 // Seal the sliver between the header bottom and --header-h so
                 // page text can never bleed through while the image compacts.
                 "before:absolute before:inset-x-0 before:bottom-full before:h-4 before:bg-background before:content-[''] md:before:content-none",

@@ -727,11 +727,15 @@ input, select, textarea {
   aspect-ratio: auto;
   height: min(45svh, 100vw);
   max-height: 45svh;
-  /* Smooth shrink/expand as the sticky image docks under the header. */
-  transition: height 500ms cubic-bezier(0.22, 1, 0.36, 1),
-    max-height 500ms cubic-bezier(0.22, 1, 0.36, 1),
-    width 500ms cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: height, width;
+  /* Smooth shrink/expand as the sticky image docks under the header.
+     Shortened and paint/layout-contained so the reflow cannot cascade into
+     the rest of the document on low-power mobile CPUs. */
+  transition: height 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    max-height 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  contain: layout paint;
+  will-change: transform;
+  transform: translateZ(0);
 }
 @media screen and (min-width: 410px) and (min-height: 850px) {
   .product-image-frame {
