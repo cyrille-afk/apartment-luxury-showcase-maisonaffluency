@@ -15,10 +15,16 @@ const POSTER_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
 const POSTER_ID = "bespoke-sofa_gxidtx";
 const posterAt = (w: number) =>
   `${POSTER_BASE}/w_${w},q_auto:good,c_fill,g_auto,f_auto/${POSTER_ID}`;
-const POSTER_URL = posterAt(
-  typeof window !== "undefined" && window.matchMedia?.("(max-width: 767px)").matches ? 780 : 1280
-);
-const POSTER_SRCSET = [480, 780, 1280].map((w) => `${posterAt(w)} ${w}w`).join(", ");
+const IS_MOBILE_VIEWPORT =
+  typeof window !== "undefined" && !!window.matchMedia?.("(max-width: 767px)").matches;
+const POSTER_URL = posterAt(IS_MOBILE_VIEWPORT ? 780 : 1280);
+// Mobile srcset is capped at 780w — with DPR ~2.6 phones, a 1280w candidate in
+// the srcset gets picked and downloads ~2.7× the bytes for no visible gain.
+// Desktop keeps 1280w only. Both variants share POSTER_URL as `src` so the
+// video poster + <img> resolve to a single cached request.
+const POSTER_SRCSET = (IS_MOBILE_VIEWPORT ? [480, 780] : [780, 1280])
+  .map((w) => `${posterAt(w)} ${w}w`)
+  .join(", ");
 
 
 const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {

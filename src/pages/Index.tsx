@@ -420,7 +420,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
                     <ApartmentTourInterlude compact />
                   </Suspense>
                 </LazyOnVisible>
-                <LazyOnVisible id="gallery" className="scroll-header-offset" minHeight="100vh" rootMargin="600px 0px">
+                <LazyOnVisible id="gallery" className="scroll-header-offset" minHeight="100vh" rootMargin="120px 0px">
                   <Suspense fallback={<SectionFallback />}>
                     <Gallery />
                   </Suspense>
