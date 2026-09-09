@@ -29,6 +29,13 @@ interface Props {
   /** Every selectable finish for the product — enables the inline finish selector. */
   finishOptions?: string[];
   submitting?: boolean;
+  /**
+   * "order" → hands off to the cart / checkout flow.
+   * "quote" → submits an inquiry to the backend and shows a thank-you screen
+   * inside the drawer. Never routes to the trade account form.
+   */
+  mode?: "order" | "quote";
+  productId?: string | null;
 }
 
 const inputCls =
