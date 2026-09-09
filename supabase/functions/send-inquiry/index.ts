@@ -186,7 +186,7 @@ View details in the dashboard.`;
       event: "quote_request",
       status: errorCode ? "failed" : "sent",
       provider_message_id: sid,
-      payload: { inquiry_id: inquiry.id, to, from, message: body, used_template: usedTemplate, twilio_status: status },
+      payload: { inquiry_id: inquiry.id, to, from, message: body, used_template: usedTemplate, template_status: approval.status, twilio_status: status },
       error: errorCode ? `Twilio error_code ${errorCode}` : firstError,
     });
   } catch (err) {
