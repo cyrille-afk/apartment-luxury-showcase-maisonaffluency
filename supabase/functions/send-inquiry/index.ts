@@ -57,9 +57,47 @@ const TWILIO_GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
 const QUOTE_TEMPLATE_SID = Deno.env.get("TWILIO_WHATSAPP_QUOTE_TEMPLATE_SID")
   ?? "HXd883a51839c6572cbe49532461adc4d5";
 
+// Cached template approval state. WhatsApp only accepts a template send once
+// Meta has approved it, so we ask Twilio for the live approval status and only
+// switch away from freeform when it reports "approved".
+let templateApproval: { approved: boolean; status: string; checkedAt: number } | null = null;
+const APPROVAL_TTL_MS = 10 * 60 * 1000;
+
+async function isTemplateApproved(lovableKey: string, twilioKey: string) {
+  if (!QUOTE_TEMPLATE_SID) return { approved: false, status: "no_template_sid" };
+  if (templateApproval && Date.now() - templateApproval.checkedAt < APPROVAL_TTL_MS) {
+    return { approved: templateApproval.approved, status: templateApproval.status };
+  }
+  try {
+    const res = await fetch(
+      `${TWILIO_GATEWAY_URL}/content/v1/Content/${QUOTE_TEMPLATE_SID}/ApprovalRequests`,
+      {
+        headers: {
+          "Authorization": `Bearer ${lovableKey}`,
+          "X-Connection-Api-Key": twilioKey,
+        },
+      },
+    );
+    if (!res.ok) {
+      const txt = await res.text();
+      console.error(`Template approval lookup failed [${res.status}]: ${txt.slice(0, 500)}`);
+      return { approved: false, status: `lookup_${res.status}` };
+    }
+    const json = await res.json();
+    const status = String(json?.whatsapp?.status ?? "unknown").toLowerCase();
+    const approved = status === "approved";
+    templateApproval = { approved, status, checkedAt: Date.now() };
+    return { approved, status };
+  } catch (err) {
+    console.error("Template approval lookup error:", err);
+    return { approved: false, status: "lookup_error" };
+  }
+}
+
 // Fire-and-forget WhatsApp alert for product quote requests. Uses the same
 // Twilio connector gateway as the trade-application alerts; delivery failures
 // are logged to admin_alert_log so no lead is ever silently lost.
+
 async function sendQuoteWhatsAppAlert(
   supabase: any,
   inquiry: { id: string; name: string; email: string; phone: string; company?: string; productName?: string; selectedFinish?: string },
@@ -99,20 +137,24 @@ View details in the dashboard.`;
     });
 
   try {
-    // 1) Template send — works inside and outside the 24h session window.
-    let res = QUOTE_TEMPLATE_SID
-      ? await post({ ContentSid: QUOTE_TEMPLATE_SID, ContentVariables: JSON.stringify(vars) })
-      : null;
-    let usedTemplate = true;
-    let firstError: string | null = null;
+    // Only use the template once Meta/WhatsApp has approved it; otherwise the
+    // template send is rejected and wastes a request. Freeform stays the path
+    // until approval flips to "approved".
+    const approval = await isTemplateApproved(lovableKey, twilioKey);
+    let usedTemplate = approval.approved;
+    let firstError: string | null = approval.approved ? null : `template not used (status: ${approval.status})`;
 
-    // 2) Template unavailable / not yet approved → freeform (delivers only if
-    //    the operator replied on WhatsApp within the last 24h).
-    if (!res || !res.ok) {
-      if (res) firstError = `template ${res.status}: ${(await res.text()).slice(0, 800)}`;
+    let res = approval.approved
+      ? await post({ ContentSid: QUOTE_TEMPLATE_SID, ContentVariables: JSON.stringify(vars) })
+      : await post({ Body: body });
+
+    // Template send rejected despite approval → fall back to freeform.
+    if (!res.ok && usedTemplate) {
+      firstError = `template ${res.status}: ${(await res.text()).slice(0, 800)}`;
       usedTemplate = false;
       res = await post({ Body: body });
     }
+
 
     if (!res.ok) {
       const errBody = await res.text();
@@ -144,7 +186,7 @@ View details in the dashboard.`;
       event: "quote_request",
       status: errorCode ? "failed" : "sent",
       provider_message_id: sid,
-      payload: { inquiry_id: inquiry.id, to, from, message: body, used_template: usedTemplate, twilio_status: status },
+      payload: { inquiry_id: inquiry.id, to, from, message: body, used_template: usedTemplate, template_status: approval.status, twilio_status: status },
       error: errorCode ? `Twilio error_code ${errorCode}` : firstError,
     });
   } catch (err) {
