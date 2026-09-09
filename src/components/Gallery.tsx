@@ -1188,6 +1188,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         return (
                           <MobileGalleryImageCard
                             key={`${item.title}-${index}-mobile`}
+                            index={index}
+                            activeIndex={activeIdx}
                             item={item}
                             isHotspotSection={isHotspotSection}
                             hotspots={itemHotspots}
