@@ -45,6 +45,7 @@ const InquirySchema = z.object({
   productSlug: z.string().trim().max(200).optional(),
   productName: z.string().trim().max(200).optional(),
   designerName: z.string().trim().max(200).optional(),
+  selectedFinish: z.string().trim().max(500).optional(),
   source: z.enum(["public_product", "concierge_lead", "contact_form"]).optional(),
 });
 
@@ -101,7 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const {
       name, firm, company, email, phone, message, subject, turnstileToken,
-      productId, productSlug, productName, designerName, source,
+      productId, productSlug, productName, designerName, selectedFinish, source,
     } = parsed.data;
 
     // Signed-in callers (e.g. the trade registration form, which submits right
@@ -153,11 +154,15 @@ const handler = async (req: Request): Promise<Response> => {
       product_slug: productSlug || null,
       product_name: productName || null,
       designer_name: designerName || null,
+      selected_finish: selectedFinish || null,
       status: "new",
       ip_address: clientIp === "unknown" ? null : clientIp,
       user_agent: userAgent,
     });
-    if (insertErr) console.error("Inquiry insert failed:", insertErr);
+    if (insertErr) {
+      console.error("Inquiry insert failed:", insertErr);
+      throw new Error(`Inquiry insert failed: ${insertErr.message}`);
+    }
 
 
 

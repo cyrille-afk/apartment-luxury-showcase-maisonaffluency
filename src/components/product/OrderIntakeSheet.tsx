@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import Turnstile from "@/components/Turnstile";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -77,6 +78,7 @@ export default function OrderIntakeSheet({
   const [notes, setNotes] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
   const [notesEdited, setNotesEdited] = useState(false);
   const [finish, setFinish] = useState<string | null>(null);
   const [finishOpen, setFinishOpen] = useState(false);
@@ -109,6 +111,7 @@ export default function OrderIntakeSheet({
         setNotesEdited(false);
         setSent(false);
         setSending(false);
+        setTurnstileToken("");
       }, 320);
       return () => window.clearTimeout(t);
     }
@@ -131,6 +134,14 @@ export default function OrderIntakeSheet({
   /** Quote flow: persist the inquiry, then show the in-drawer thank-you. */
   const submitQuote = async () => {
     if (sending) return;
+    if (!turnstileToken) {
+      toast({
+        title: "Security check is still loading",
+        description: "Please wait a moment, then submit your request again.",
+        variant: "destructive",
+      });
+      return;
+    }
     setSending(true);
     const d = details();
     const message = [
@@ -156,14 +167,28 @@ export default function OrderIntakeSheet({
           subject: `Quote Request — ${productTitle ?? "Product"}`,
           productName: productTitle ?? undefined,
           designerName: designerName ?? undefined,
+           selectedFinish: finish ?? undefined,
           productId: productId ?? undefined,
           source: "public_product",
+           turnstileToken,
         },
       });
       if (error) throw error;
       setSent(true);
       onComplete(d);
-    } catch {
+    } catch (error) {
+      let responseBody: string | undefined;
+      if (error && typeof error === "object" && "context" in error) {
+        const context = (error as { context?: unknown }).context;
+        if (context instanceof Response) {
+          try {
+            responseBody = await context.clone().text();
+          } catch {
+            responseBody = undefined;
+          }
+        }
+      }
+      console.error("Quote request submission failed:", { error, responseBody });
       toast({
         title: "Could not send your request",
         description: "Please try again in a moment.",
@@ -459,6 +484,13 @@ export default function OrderIntakeSheet({
                 placeholder="+65 0000 0000"
                 className={inputCls}
               />
+              {isQuote && (
+                <Turnstile
+                  onVerify={setTurnstileToken}
+                  onExpire={() => setTurnstileToken("")}
+                  className="mt-5 min-h-[65px]"
+                />
+              )}
             </div>
           )}
         </div>
@@ -468,7 +500,7 @@ export default function OrderIntakeSheet({
           <button
             type="button"
             onClick={next}
-            disabled={!canAdvance || submitting || sending}
+            disabled={!canAdvance || submitting || sending || (isQuote && step === 2 && !turnstileToken)}
             className={cn(
               "mb-3 inline-flex h-12 w-full items-center justify-center rounded-none bg-foreground px-5 font-body text-xs uppercase tracking-widest text-background",
               "transition-transform duration-150 active:scale-[0.98] disabled:opacity-40"
