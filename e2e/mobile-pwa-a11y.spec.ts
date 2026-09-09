@@ -14,10 +14,17 @@ import { test, expect, devices } from "@playwright/test";
  */
 
 const ROUTES = ["/", "/trade/login"];
+// The homepage pulls heavy third-party imagery; waiting for the full `load`
+// event makes navigation flaky in CI. DOMContentLoaded + a visible body is the
+// contract these checks actually need.
+const gotoApp = async (page: import("@playwright/test").Page, route = "/") => {
+  await page.goto(route, { waitUntil: "domcontentloaded" });
+};
 const waitForAppReady = async (page: import("@playwright/test").Page) => {
   await page.waitForLoadState("domcontentloaded");
   await page.locator("body").waitFor({ state: "visible" });
 };
+
 
 // Keep this aligned with playwright.config.ts; CI runs inside the official
 // Playwright image so Chromium and its Linux shared libraries are present.
@@ -25,7 +32,7 @@ test.use({ ...devices["Pixel 5"] });
 
 test.describe("Mobile PWA & accessibility", () => {
   test("viewport meta allows user-scalable + viewport-fit=cover", async ({ page }) => {
-    await page.goto("/");
+    await gotoApp(page);
     const content = await page
       .locator('meta[name="viewport"]')
       .getAttribute("content");
@@ -38,7 +45,7 @@ test.describe("Mobile PWA & accessibility", () => {
   });
 
   test("manifest is reachable and has core PWA fields", async ({ page, request }) => {
-    await page.goto("/");
+    await gotoApp(page);
     const href = await page.locator('link[rel="manifest"]').getAttribute("href");
     expect(href, "manifest link must exist").toBeTruthy();
     const res = await request.get(href!);
@@ -51,7 +58,7 @@ test.describe("Mobile PWA & accessibility", () => {
   });
 
   test("manifest passes installability rules (display, scope, icons ≥192 + maskable)", async ({ page, request }) => {
-    await page.goto("/");
+    await gotoApp(page);
     const href = await page.locator('link[rel="manifest"]').getAttribute("href");
     const json = await (await request.get(href!)).json();
 
@@ -109,7 +116,7 @@ test.describe("Mobile PWA & accessibility", () => {
       /self\.registration\.unregister\s*\(/,
     );
 
-    await page.goto("/");
+    await gotoApp(page);
     await waitForAppReady(page);
 
     // Give the activate handler a moment to run if anything registered it.
@@ -134,7 +141,7 @@ test.describe("Mobile PWA & accessibility", () => {
 
   for (const route of ROUTES) {
     test(`no horizontal overflow on ${route}`, async ({ page }) => {
-      await page.goto(route);
+      await gotoApp(page, route);
       await waitForAppReady(page);
       const { scrollW, clientW } = await page.evaluate(() => ({
         scrollW: document.documentElement.scrollWidth,
@@ -145,7 +152,7 @@ test.describe("Mobile PWA & accessibility", () => {
     });
 
     test(`primary tap targets are ≥40px on ${route}`, async ({ page }) => {
-      await page.goto(route);
+      await gotoApp(page, route);
       await waitForAppReady(page);
       // Sample interactive elements visible above the fold.
       const undersized = await page.evaluate(() => {
@@ -181,7 +188,7 @@ test.describe("Mobile PWA & accessibility", () => {
   }
 
   test("html applies text-size-adjust and touch-action: manipulation", async ({ page }) => {
-    await page.goto("/");
+    await gotoApp(page);
     const { cssText, ta } = await page.evaluate(async () => {
       const cs = getComputedStyle(document.documentElement);
 
@@ -205,7 +212,7 @@ test.describe("Mobile PWA & accessibility", () => {
   });
 
   test("header respects safe-area-inset-top", async ({ page }) => {
-    await page.goto("/");
+    await gotoApp(page);
     await waitForAppReady(page);
     // The homepage Navigation is lazy-loaded (code-split chunk mounted after an
     // effect) — wait for it to attach or the evaluate below races an empty DOM.

@@ -84,7 +84,7 @@ export default function CartNavButton({
       <button
         onClick={handleClick}
         aria-label={count > 0 ? `Your selection, ${count} item${count > 1 ? "s" : ""}` : "Your selection"}
-        className={cn("relative p-1 transition-colors hover:text-foreground", className)}
+        className={cn("relative flex min-h-[40px] min-w-[40px] items-center justify-center p-1 transition-colors hover:text-foreground", className)}
       >
         <ShoppingBag className={cn("w-[16px] h-[16px] text-muted-foreground", iconClassName)} strokeWidth={1.25} />
         {count > 0 && (
