@@ -13,6 +13,9 @@ interface Props {
   phone?: string
   message?: string
   subject?: string
+  productName?: string
+  designerName?: string
+  selectedFinish?: string
 }
 
 const Row = ({ label, value }: { label: string; value?: string }) => (
@@ -22,7 +25,7 @@ const Row = ({ label, value }: { label: string; value?: string }) => (
   </tr>
 )
 
-const InquiryNotificationEmail = ({ name, company, email, phone, message }: Props) => (
+const InquiryNotificationEmail = ({ name, company, email, phone, message, productName, designerName, selectedFinish }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>New inquiry from {name || 'a visitor'}</Preview>
@@ -36,6 +39,9 @@ const InquiryNotificationEmail = ({ name, company, email, phone, message }: Prop
             <Row label="Firm / Studio" value={company} />
             <Row label="Email" value={email} />
             <Row label="Phone" value={phone} />
+            {productName ? <Row label="Product" value={productName} /> : null}
+            {designerName ? <Row label="Designer" value={designerName} /> : null}
+            {selectedFinish ? <Row label="Selected finish" value={selectedFinish} /> : null}
           </tbody>
         </table>
 
@@ -67,6 +73,9 @@ export const template = {
     company: 'Studio Chen',
     email: 'alexandra@studiochen.com',
     phone: '+65 9123 4567',
+    productName: 'Orion Pendant',
+    designerName: 'Garnier & Linker',
+    selectedFinish: 'Patinated bronze',
     message: 'I would love to learn more about the Garnier & Linker Orion pendant for a residential project in Singapore.',
   },
 } satisfies TemplateEntry
