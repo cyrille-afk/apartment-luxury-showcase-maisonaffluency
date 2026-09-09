@@ -198,7 +198,11 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                   >
                     <img
                       src={POSTER_URL}
+                      srcSet={POSTER_SRCSET}
+                      sizes="(max-width: 767px) 100vw, 55vw"
                       alt="Apartment tour preview"
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
@@ -280,7 +284,11 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               >
                 <img
                   src={POSTER_URL}
+                  srcSet={POSTER_SRCSET}
+                  sizes="100vw"
                   alt="Apartment tour preview"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
                 {/* Gradient overlay */}

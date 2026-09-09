@@ -233,11 +233,15 @@
         function warm() {
           var base = "https://res.cloudinary.com/dif1oamtj/image/upload";
           var isMobile = window.matchMedia("(max-width: 767px)").matches;
-          var w = isMobile ? 780 : 1600;
+          var w = isMobile ? 780 : 1280;
+          // Must match the URL the poster <img> requests, otherwise the
+          // prefetch is a second download instead of a cache hit.
           var hrefs = [base + "/w_" + w + ",q_auto:good,c_fill,g_auto,f_auto/bespoke-sofa_gxidtx"];
+          // Founder avatars render at 80-96px — 128px is plenty.
           ["IMG_2542_1_kc4fvs", "Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs"].forEach(function(fid){
-            hrefs.push(base + "/w_800,c_fill,q_auto,f_auto/" + fid);
+            hrefs.push(base + "/w_128,c_fill,q_auto,f_auto/" + fid);
           });
+
           hrefs.forEach(function(href){
             var l = document.createElement("link");
             l.rel = "prefetch";
