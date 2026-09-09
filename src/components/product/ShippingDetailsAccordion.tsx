@@ -77,7 +77,7 @@ export default function ShippingDetailsAccordion({
 
       {open && (
         <div
-          className="fixed inset-0 z-[90] flex items-center justify-center p-4 md:p-8"
+          className="fixed inset-0 z-[90] flex items-center justify-center p-4 md:p-8 overscroll-none touch-none"
           role="dialog"
           aria-modal="true"
           aria-label="Logistics & White-Glove Installation"
