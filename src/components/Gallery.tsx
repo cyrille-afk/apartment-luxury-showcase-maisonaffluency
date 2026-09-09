@@ -1294,7 +1294,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     })()}
                   </div>
                 );
-              })())}
+              }())}
 
               {/* Desktop: single-column = horizontal carousel with dots; multi-column = grid.
                   Mounted only on non-mobile viewports — `hidden md:*` containers
