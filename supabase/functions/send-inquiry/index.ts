@@ -123,7 +123,7 @@ async function sendQuoteWhatsAppAlert(
 • *Client Email:* ${vars["4"]}
 • *Client Phone:* ${vars["5"]}
 
-View details in the dashboard.`;
+View details: https://www.maisonaffluency.com/trade/admin/inquiries`;
 
   // Ask Twilio to POST delivery updates back to us so the admin page has a
   // real history instead of only on-demand lookups.
