@@ -70,12 +70,24 @@ export function cloudinaryUrl(
     gravity,
     dpr,
     blur,
+    raw,
   } = transforms;
+
+  // Clamp oversized widths on phones; scale a paired height by the same
+  // ratio so c_fill crops keep their aspect ratio.
+  let outWidth = width;
+  let outHeight = height;
+  if (width) {
+    outWidth = clampWidth(width, raw);
+    if (height && outWidth !== width) {
+      outHeight = Math.round((height * outWidth) / width);
+    }
+  }
 
   const parts: string[] = [];
 
-  if (width) parts.push(`w_${width}`);
-  if (height) parts.push(`h_${height}`);
+  if (outWidth) parts.push(`w_${outWidth}`);
+  if (outHeight) parts.push(`h_${outHeight}`);
   if (crop) parts.push(`c_${crop}`);
   if (gravity) parts.push(`g_${gravity}`);
   if (quality) parts.push(`q_${quality}`);
@@ -101,16 +113,25 @@ export function cloudinaryBlurPlaceholder(publicId: string): string {
   });
 }
 
+/** Largest srcSet candidate a phone is allowed to download (covers 2x DPR). */
+const MOBILE_MAX_SRCSET_WIDTH = 1080;
+
 /**
- * Generate srcSet for responsive images
+ * Generate srcSet for responsive images. On phones the oversized candidates
+ * are dropped entirely so a high-DPR device can never pick a 1600px file.
  */
 export function cloudinarySrcSet(
   publicId: string,
   widths: number[] = [400, 800, 1200, 1600],
   transforms: Omit<CloudinaryTransform, "width"> = {}
 ): string {
-  return widths
-    .map((w) => `${cloudinaryUrl(publicId, { ...transforms, width: w })} ${w}w`)
+  let list = widths;
+  if (isMobileViewport() && !transforms.raw) {
+    const capped = widths.filter((w) => w <= MOBILE_MAX_SRCSET_WIDTH);
+    list = capped.length ? capped : [Math.min(...widths)];
+  }
+  return list
+    .map((w) => `${cloudinaryUrl(publicId, { ...transforms, width: w, raw: true })} ${w}w`)
     .join(", ");
 }
 
