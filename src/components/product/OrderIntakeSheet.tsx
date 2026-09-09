@@ -468,7 +468,7 @@ export default function OrderIntakeSheet({
           <button
             type="button"
             onClick={next}
-            disabled={!canAdvance || submitting}
+            disabled={!canAdvance || submitting || sending}
             className={cn(
               "mb-3 inline-flex h-12 w-full items-center justify-center rounded-none bg-foreground px-5 font-body text-xs uppercase tracking-widest text-background",
               "transition-transform duration-150 active:scale-[0.98] disabled:opacity-40"
