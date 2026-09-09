@@ -189,6 +189,67 @@ export default function OrderIntakeSheet({
 
   const progress = ((step + (canAdvance ? 1 : 0.35)) / STEPS.length) * 100;
 
+  if (sent) {
+    return createPortal(
+      <div className="fixed inset-0 z-[130]">
+        <button
+          type="button"
+          aria-label="Close"
+          onClick={onClose}
+          className={cn(
+            "absolute inset-0 bg-foreground/40 backdrop-blur-[2px] transition-opacity duration-300",
+            isOpen ? "opacity-100" : "opacity-0"
+          )}
+        />
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Quote request sent"
+          className={cn(
+            "absolute inset-x-0 bottom-0 flex flex-col bg-background shadow-[0_-24px_60px_-24px_rgba(0,0,0,0.35)]",
+            "md:left-1/2 md:right-auto md:w-[440px] md:-translate-x-1/2",
+            "transition-transform duration-300 ease-out will-change-transform",
+            isOpen ? "translate-y-0" : "translate-y-full"
+          )}
+        >
+          <div className="flex justify-end px-5 pt-4">
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={onClose}
+              className="flex h-8 w-8 items-center justify-center text-muted-foreground"
+            >
+              <X className="h-4 w-4" strokeWidth={1.5} />
+            </button>
+          </div>
+          <div className="px-5 pb-8 pt-2 text-center">
+            <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full border border-border/60">
+              <Check className="h-5 w-5" strokeWidth={1.5} />
+            </div>
+            <p className="font-display text-2xl leading-snug text-foreground">Thank You!</p>
+            <p className="mx-auto mt-3 max-w-[19rem] font-body text-sm leading-relaxed text-muted-foreground">
+              We have received your quote request and will reply shortly.
+            </p>
+            {(productTitle || finish) && (
+              <p className="mt-4 font-body text-[10px] uppercase tracking-widest text-muted-foreground/80">
+                {[productTitle, finish].filter(Boolean).join(" · ")}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="mt-7 inline-flex h-12 w-full items-center justify-center rounded-none bg-foreground px-5 font-body text-xs uppercase tracking-widest text-background transition-transform duration-150 active:scale-[0.98]"
+            >
+              Close
+            </button>
+          </div>
+          <div className="pb-[env(safe-area-inset-bottom)]" />
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
   return createPortal(
     <div className="fixed inset-0 z-[130] md:items-center md:justify-center">
       {/* Scrim */}
