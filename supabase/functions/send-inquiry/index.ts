@@ -137,20 +137,24 @@ View details in the dashboard.`;
     });
 
   try {
-    // 1) Template send — works inside and outside the 24h session window.
-    let res = QUOTE_TEMPLATE_SID
-      ? await post({ ContentSid: QUOTE_TEMPLATE_SID, ContentVariables: JSON.stringify(vars) })
-      : null;
-    let usedTemplate = true;
-    let firstError: string | null = null;
+    // Only use the template once Meta/WhatsApp has approved it; otherwise the
+    // template send is rejected and wastes a request. Freeform stays the path
+    // until approval flips to "approved".
+    const approval = await isTemplateApproved(lovableKey, twilioKey);
+    let usedTemplate = approval.approved;
+    let firstError: string | null = approval.approved ? null : `template not used (status: ${approval.status})`;
 
-    // 2) Template unavailable / not yet approved → freeform (delivers only if
-    //    the operator replied on WhatsApp within the last 24h).
-    if (!res || !res.ok) {
-      if (res) firstError = `template ${res.status}: ${(await res.text()).slice(0, 800)}`;
+    let res = approval.approved
+      ? await post({ ContentSid: QUOTE_TEMPLATE_SID, ContentVariables: JSON.stringify(vars) })
+      : await post({ Body: body });
+
+    // Template send rejected despite approval → fall back to freeform.
+    if (!res.ok && usedTemplate) {
+      firstError = `template ${res.status}: ${(await res.text()).slice(0, 800)}`;
       usedTemplate = false;
       res = await post({ Body: body });
     }
+
 
     if (!res.ok) {
       const errBody = await res.text();
