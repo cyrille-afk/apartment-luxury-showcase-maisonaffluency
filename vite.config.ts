@@ -59,14 +59,8 @@ function optimizeHtmlPlugin(buildId: string): Plugin {
         // is worth ~200-400ms of LCP. React still loads (main entry imports
         // it) — just at lower priority so it doesn't compete with the LCP image.
         const DEFER = /(vendor-motion|vendor-radix|vendor-react|vendor-router|vendor-query|vendor-forms|vendor-date|vendor-carousel|vendor-icons-extra)/;
-        // Never hint these at all: multi-MB export engines (PDF/XLSX/PPTX),
-        // 3D, charts, markdown and Stripe are reached only from lazy admin /
-        // trade / export code paths. `prefetch` still downloads the full file,
-        // so hinting them costs storefront visitors megabytes of unused JS.
-        const NEVER = /(vendor-pdf|vendor-docs|vendor-3d|vendor-charts|vendor-markdown|vendor-stripe)/;
-        const hinted = modulepreloads.filter(h => !NEVER.test(h));
-        const eager = hinted.filter(h => !DEFER.test(h));
-        const deferred = hinted.filter(h => DEFER.test(h));
+        const eager = modulepreloads.filter(h => !DEFER.test(h));
+        const deferred = modulepreloads.filter(h => DEFER.test(h));
         const hints = [
           ...eager.map(href => `<link rel="modulepreload" href="${href}">`),
           ...deferred.map(href => `<link rel="prefetch" as="script" href="${href}">`),
