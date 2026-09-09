@@ -4,7 +4,7 @@ import { z } from "https://esm.sh/zod@3.22.4";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const ADMIN_EMAIL = "concierge@myaffluency.com";
+const ADMIN_EMAILS = ["concierge@myaffluency.com", "cyrille@maisonaffluency.com"];
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -166,26 +166,31 @@ const handler = async (req: Request): Promise<Response> => {
 
 
 
-    // 1. Admin notification → concierge inbox
-    const { error: notifyErr } = await supabase.functions.invoke(
-      "send-transactional-email",
-      {
-        body: {
-          templateName: "inquiry-notification",
-          recipientEmail: ADMIN_EMAIL,
-          idempotencyKey: `inquiry-notify-${idStem}`,
-          templateData: {
-            name,
-            company: companyName,
-            email,
-            phone,
-            message,
-            subject,
+    // 1. Admin notification → concierge + owner inbox
+    for (const adminEmail of ADMIN_EMAILS) {
+      const { error: notifyErr } = await supabase.functions.invoke(
+        "send-transactional-email",
+        {
+          body: {
+            templateName: "inquiry-notification",
+            recipientEmail: adminEmail,
+            idempotencyKey: `inquiry-notify-${idStem}-${adminEmail}`,
+            templateData: {
+              name,
+              company: companyName,
+              email,
+              phone,
+              message,
+              subject,
+              productName,
+              designerName,
+              selectedFinish,
+            },
           },
-        },
-      }
-    );
-    if (notifyErr) console.error("Notification enqueue failed:", notifyErr);
+        }
+      );
+      if (notifyErr) console.error(`Notification enqueue failed for ${adminEmail}:`, notifyErr);
+    }
 
     // 2. Confirmation → visitor
     const { error: confirmErr } = await supabase.functions.invoke(
