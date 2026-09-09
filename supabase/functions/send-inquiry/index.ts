@@ -49,6 +49,76 @@ const InquirySchema = z.object({
   source: z.enum(["public_product", "concierge_lead", "contact_form"]).optional(),
 });
 
+const TWILIO_GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
+
+// Fire-and-forget WhatsApp alert for product quote requests. Uses the same
+// Twilio connector gateway as the trade-application alerts; delivery failures
+// are logged to admin_alert_log so no lead is ever silently lost.
+async function sendQuoteWhatsAppAlert(
+  supabase: any,
+  inquiry: { id: string; name: string; email: string; phone: string; productName?: string; selectedFinish?: string },
+) {
+  const to = Deno.env.get("ADMIN_WHATSAPP_TO");
+  const from = Deno.env.get("TWILIO_WHATSAPP_FROM");
+  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+  const twilioKey = Deno.env.get("TWILIO_API_KEY");
+  if (!to || !from || !lovableKey || !twilioKey) return;
+
+  const body = `🚨 *New Quote Request on Maison Affluency!*
+• *Product:* ${inquiry.productName || "(unknown)"}
+• *Finish:* ${inquiry.selectedFinish || "Not specified"}
+• *Client:* ${inquiry.name}
+• *Client Email:* ${inquiry.email}
+• *Client Phone:* ${inquiry.phone || "Not provided"}
+
+View details in the dashboard.`;
+
+  try {
+    const res = await fetch(`${TWILIO_GATEWAY_URL}/Messages.json`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${lovableKey}`,
+        "X-Connection-Api-Key": twilioKey,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ To: to, From: from, Body: body }),
+    });
+    if (!res.ok) {
+      const errBody = await res.text();
+      console.error(`Quote WhatsApp alert failed [${res.status}]: ${errBody}`);
+      await supabase.from("admin_alert_log").insert({
+        channel: "twilio_whatsapp",
+        event: "quote_request",
+        status: "failed",
+        payload: { inquiry_id: inquiry.id, product: inquiry.productName, email: inquiry.email },
+        error: `Twilio ${res.status}: ${String(errBody).slice(0, 2000)}`,
+      });
+      return;
+    }
+    let sid: string | null = null;
+    try { sid = (await res.json())?.sid ?? null; } catch (_) { /* non-JSON */ }
+    await supabase.from("admin_alert_log").insert({
+      channel: "twilio_whatsapp",
+      event: "quote_request",
+      status: "sent",
+      provider_message_id: sid,
+      payload: { inquiry_id: inquiry.id, to, from, message: body },
+      error: null,
+    });
+  } catch (err) {
+    console.error("Quote WhatsApp alert error:", err);
+    try {
+      await supabase.from("admin_alert_log").insert({
+        channel: "twilio_whatsapp",
+        event: "quote_request",
+        status: "failed",
+        payload: { inquiry_id: inquiry.id, product: inquiry.productName, email: inquiry.email },
+        error: String(err instanceof Error ? err.message : err).slice(0, 2000),
+      });
+    } catch (_) { /* non-fatal */ }
+  }
+}
+
 async function verifyTurnstile(token: string | undefined, ip: string): Promise<boolean> {
   const secret = Deno.env.get("TURNSTILE_SECRET_KEY");
   if (!secret) {
