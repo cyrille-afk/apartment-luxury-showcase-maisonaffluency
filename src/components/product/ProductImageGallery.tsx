@@ -357,7 +357,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       <div className="flex-1 flex flex-col gap-3 min-w-0">
         <div className="relative group" ref={inlineSwipeRef}>
         <div
-          className={cn("product-image-frame md:aspect-square md:h-auto bg-cream rounded-luxury-sharp overflow-hidden relative touch-pan-y md:transition-[height,aspect-ratio] md:duration-300 md:ease-out", compact && "product-image-frame--compact")}
+          className={cn("product-image-frame md:aspect-square md:h-auto bg-cream rounded-luxury-sharp overflow-hidden relative md:transition-[height,aspect-ratio] md:duration-300 md:ease-out", compact && "product-image-frame--compact")}
+          style={{ touchAction: "pan-x pan-y" }}
           onDoubleClick={() => setPresentOpen(true)}
           onTouchEnd={handleTouchEndForDoubleTap}
         >
@@ -369,8 +370,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             <div
               ref={mobileScrollRef}
               onScroll={handleMobileScroll}
-              className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory overscroll-x-contain scrollbar-hide touch-pan-y"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
+              className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory overscroll-x-contain scrollbar-hide"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch", touchAction: "pan-x pan-y" }}
             >
               {images.map((img, i) => (
                 <div key={i} className="w-full h-full shrink-0 snap-center snap-always flex items-center justify-center">
