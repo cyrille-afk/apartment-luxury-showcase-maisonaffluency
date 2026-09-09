@@ -8,44 +8,18 @@
  * This shared counter guarantees the lock is released exactly once.
  */
 let locks = 0;
-let lockedScrollY = 0;
-let previousBodyStyles: Partial<Record<
-  "overflow" | "position" | "top" | "left" | "right" | "width",
-  string
->> = {};
+let previousBodyOverflow = "";
+let previousHtmlOverflow = "";
 let previousHtmlOverscroll = "";
-
-function restoreScrollPosition(scrollY: number) {
-  window.scrollTo(0, scrollY);
-  // Sticky product imagery and the mobile commerce dock reflow after the body
-  // is unfixed. Re-apply after that layout settles so Safari cannot clamp the
-  // initial restoration to a temporarily shorter document.
-  window.requestAnimationFrame(() => {
-    window.requestAnimationFrame(() => {
-      if (locks === 0) window.scrollTo(0, scrollY);
-    });
-  });
-}
 
 export function lockBodyScroll() {
   if (typeof document === "undefined") return;
   if (locks === 0) {
-    lockedScrollY = window.scrollY;
-    previousBodyStyles = {
-      overflow: document.body.style.overflow,
-      position: document.body.style.position,
-      top: document.body.style.top,
-      left: document.body.style.left,
-      right: document.body.style.right,
-      width: document.body.style.width,
-    };
+    previousBodyOverflow = document.body.style.overflow;
+    previousHtmlOverflow = document.documentElement.style.overflow;
     previousHtmlOverscroll = document.documentElement.style.overscrollBehavior;
     document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${lockedScrollY}px`;
-    document.body.style.left = "0";
-    document.body.style.right = "0";
-    document.body.style.width = "100%";
+    document.documentElement.style.overflow = "hidden";
     document.documentElement.style.overscrollBehavior = "none";
   }
   locks += 1;
@@ -55,35 +29,23 @@ export function unlockBodyScroll() {
   if (typeof document === "undefined") return;
   locks = Math.max(0, locks - 1);
   if (locks === 0) {
-    const restoreY = lockedScrollY;
-    document.body.style.overflow = previousBodyStyles.overflow ?? "";
-    document.body.style.position = previousBodyStyles.position ?? "";
-    document.body.style.top = previousBodyStyles.top ?? "";
-    document.body.style.left = previousBodyStyles.left ?? "";
-    document.body.style.right = previousBodyStyles.right ?? "";
-    document.body.style.width = previousBodyStyles.width ?? "";
+    document.body.style.overflow = previousBodyOverflow;
+    document.documentElement.style.overflow = previousHtmlOverflow;
     document.documentElement.style.overscrollBehavior = previousHtmlOverscroll;
-    previousBodyStyles = {};
+    previousBodyOverflow = "";
+    previousHtmlOverflow = "";
     previousHtmlOverscroll = "";
-    lockedScrollY = 0;
-    restoreScrollPosition(restoreY);
   }
 }
 
 /** Emergency release — used on route changes so no overlay can strand the page. */
 export function releaseBodyScroll() {
   if (typeof document === "undefined") return;
-  const restoreY = locks > 0 ? lockedScrollY : window.scrollY;
   locks = 0;
-  document.body.style.overflow = previousBodyStyles.overflow ?? "";
-  document.body.style.position = previousBodyStyles.position ?? "";
-  document.body.style.top = previousBodyStyles.top ?? "";
-  document.body.style.left = previousBodyStyles.left ?? "";
-  document.body.style.right = previousBodyStyles.right ?? "";
-  document.body.style.width = previousBodyStyles.width ?? "";
+  document.body.style.overflow = previousBodyOverflow;
+  document.documentElement.style.overflow = previousHtmlOverflow;
   document.documentElement.style.overscrollBehavior = previousHtmlOverscroll;
-  previousBodyStyles = {};
+  previousBodyOverflow = "";
+  previousHtmlOverflow = "";
   previousHtmlOverscroll = "";
-  lockedScrollY = 0;
-  restoreScrollPosition(restoreY);
 }
