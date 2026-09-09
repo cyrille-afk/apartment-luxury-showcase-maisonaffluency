@@ -434,14 +434,15 @@ export default function ProductCommerceCta({
         <div
           ref={dockRef}
           className={cn(
-            "md:hidden fixed bottom-0 left-0 right-0 z-[70]",
-            "bg-white/95 backdrop-blur-md border-t border-neutral-100",
+            "md:hidden fixed inset-x-0 bottom-0 z-[70] w-full max-w-none isolate",
+            "bg-white border-t border-neutral-100 shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
             "px-4 pt-3.5 pb-[env(safe-area-inset-bottom)]",
-            "transition-all duration-300 ease-in-out",
+            "transition-opacity duration-200 ease-out",
             isAtBottom
-              ? "opacity-0 translate-y-4 pointer-events-none"
-              : "opacity-100 translate-y-0"
+              ? "invisible opacity-0 pointer-events-none"
+              : "visible opacity-100"
           )}
+          style={{ position: "fixed", insetInline: 0, bottom: 0 }}
         >
           <div className="flex items-center justify-between gap-3 pb-3">
             <div className="min-w-0 flex-1">
