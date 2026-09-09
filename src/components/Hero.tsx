@@ -73,8 +73,12 @@ const Hero = () => {
   }, []);
 
   useEffect(() => {
-    const isAppleWebKit = /AppleWebKit/i.test(navigator.userAgent) && !/(CriOS|FxiOS|EdgiOS)/i.test(navigator.userAgent);
-    if (isAppleWebKit) setShowImageFallback(true);
+    // NOTE: no proactive UA-based fallback. Every Chromium UA also contains
+    // "AppleWebKit", so the old check made *all* browsers download a second
+    // high-priority JPEG hero (~150 KB) on top of the preloaded AVIF/WebP —
+    // a duplicate LCP candidate that pushed mobile LCP past 7 s. The
+    // error/naturalWidth verification below still recovers real WebKit
+    // decode failures, and only then pays for the JPEG.
 
     const copy = document.getElementById("static-hero-copy");
     if (copy) copy.style.display = "none";
