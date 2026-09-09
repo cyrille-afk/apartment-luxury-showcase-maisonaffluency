@@ -159,7 +159,10 @@ const handler = async (req: Request): Promise<Response> => {
       ip_address: clientIp === "unknown" ? null : clientIp,
       user_agent: userAgent,
     });
-    if (insertErr) console.error("Inquiry insert failed:", insertErr);
+    if (insertErr) {
+      console.error("Inquiry insert failed:", insertErr);
+      throw new Error(`Inquiry insert failed: ${insertErr.message}`);
+    }
 
 
 

@@ -177,7 +177,18 @@ export default function OrderIntakeSheet({
       setSent(true);
       onComplete(d);
     } catch (error) {
-      console.error("Quote request submission failed:", error);
+      let responseBody: string | undefined;
+      if (error && typeof error === "object" && "context" in error) {
+        const context = (error as { context?: unknown }).context;
+        if (context instanceof Response) {
+          try {
+            responseBody = await context.clone().text();
+          } catch {
+            responseBody = undefined;
+          }
+        }
+      }
+      console.error("Quote request submission failed:", { error, responseBody });
       toast({
         title: "Could not send your request",
         description: "Please try again in a moment.",
