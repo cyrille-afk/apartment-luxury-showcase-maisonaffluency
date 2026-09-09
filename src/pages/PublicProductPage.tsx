@@ -2212,7 +2212,7 @@ const PublicProductPageContent: React.FC = () => {
             <div
               id="main-product-image-container"
               className={cn(
-                "relative -mx-4 md:mx-0 sticky top-[var(--header-h)] md:top-[calc(var(--header-h)+1rem)] h-fit self-stretch lg:self-start z-30 bg-background transition-all duration-500 ease-out transform will-change-transform",
+                "relative -mx-4 md:mx-0 sticky top-[var(--header-h)] md:top-[calc(var(--header-h)+1rem)] h-fit self-stretch lg:self-start z-30 bg-background transition-[box-shadow,border-color] duration-300 ease-out transform-gpu will-change-transform",
                 // Seal the sliver between the header bottom and --header-h so
                 // page text can never bleed through while the image compacts.
                 "before:absolute before:inset-x-0 before:bottom-full before:h-4 before:bg-background before:content-[''] md:before:content-none",
