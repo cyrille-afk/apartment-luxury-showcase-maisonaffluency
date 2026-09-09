@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { ArrowLeft, Check, ChevronDown, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -27,6 +29,13 @@ interface Props {
   /** Every selectable finish for the product — enables the inline finish selector. */
   finishOptions?: string[];
   submitting?: boolean;
+  /**
+   * "order" → hands off to the cart / checkout flow.
+   * "quote" → submits an inquiry to the backend and shows a thank-you screen
+   * inside the drawer. Never routes to the trade account form.
+   */
+  mode?: "order" | "quote";
+  productId?: string | null;
 }
 
 const inputCls =
@@ -54,7 +63,13 @@ export default function OrderIntakeSheet({
   finishLabel,
   finishOptions,
   submitting = false,
+  mode = "order",
+  productId,
 }: Props) {
+  const { toast } = useToast();
+  const isQuote = mode === "quote";
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState(0);
   const [profile, setProfile] = useState<"designer" | "private" | null>(null);
@@ -92,6 +107,8 @@ export default function OrderIntakeSheet({
         setMounted(false);
         setStep(0);
         setNotesEdited(false);
+        setSent(false);
+        setSending(false);
       }, 320);
       return () => window.clearTimeout(t);
     }
@@ -103,22 +120,135 @@ export default function OrderIntakeSheet({
   const canAdvance =
     step === 0 ? Boolean(profile) : step === 1 ? city.trim().length > 1 : EMAIL_RE.test(email.trim());
 
+  const details = (): OrderIntakeDetails => ({
+    profile: profile as "designer" | "private",
+    city: city.trim(),
+    notes: notes.trim(),
+    email: email.trim(),
+    phone: phone.trim(),
+  });
+
+  /** Quote flow: persist the inquiry, then show the in-drawer thank-you. */
+  const submitQuote = async () => {
+    if (sending) return;
+    setSending(true);
+    const d = details();
+    const message = [
+      productTitle ? `Product: ${productTitle}` : "",
+      designerName ? `Designer: ${designerName}` : "",
+      finish ? `Selected finish: ${finish}` : "",
+      `Client type: ${d.profile === "designer" ? "Interior Designer / Architect" : "Private Client"}`,
+      d.city ? `Project location: ${d.city}` : "",
+      d.phone ? `Phone: ${d.phone}` : "",
+      "",
+      d.notes || "Quote requested from the product page.",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    try {
+      const { error } = await supabase.functions.invoke("send-inquiry", {
+        body: {
+          name: d.email.split("@")[0] || "Website visitor",
+          email: d.email,
+          phone: d.phone,
+          message,
+          subject: `Quote Request — ${productTitle ?? "Product"}`,
+          productName: productTitle ?? undefined,
+          designerName: designerName ?? undefined,
+          productId: productId ?? undefined,
+          source: "public_product",
+        },
+      });
+      if (error) throw error;
+      setSent(true);
+      onComplete(d);
+    } catch {
+      toast({
+        title: "Could not send your request",
+        description: "Please try again in a moment.",
+        variant: "destructive",
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
   const next = () => {
     if (!canAdvance) return;
     if (step < 2) {
       setStep((s) => s + 1);
       return;
     }
-    onComplete({
-      profile: profile as "designer" | "private",
-      city: city.trim(),
-      notes: notes.trim(),
-      email: email.trim(),
-      phone: phone.trim(),
-    });
+    if (isQuote) {
+      void submitQuote();
+      return;
+    }
+    onComplete(details());
   };
 
   const progress = ((step + (canAdvance ? 1 : 0.35)) / STEPS.length) * 100;
+
+  if (sent) {
+    return createPortal(
+      <div className="fixed inset-0 z-[130]">
+        <button
+          type="button"
+          aria-label="Close"
+          onClick={onClose}
+          className={cn(
+            "absolute inset-0 bg-foreground/40 backdrop-blur-[2px] transition-opacity duration-300",
+            isOpen ? "opacity-100" : "opacity-0"
+          )}
+        />
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Quote request sent"
+          className={cn(
+            "absolute inset-x-0 bottom-0 flex flex-col bg-background shadow-[0_-24px_60px_-24px_rgba(0,0,0,0.35)]",
+            "md:left-1/2 md:right-auto md:w-[440px] md:-translate-x-1/2",
+            "transition-transform duration-300 ease-out will-change-transform",
+            isOpen ? "translate-y-0" : "translate-y-full"
+          )}
+        >
+          <div className="flex justify-end px-5 pt-4">
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={onClose}
+              className="flex h-8 w-8 items-center justify-center text-muted-foreground"
+            >
+              <X className="h-4 w-4" strokeWidth={1.5} />
+            </button>
+          </div>
+          <div className="px-5 pb-8 pt-2 text-center">
+            <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full border border-border/60">
+              <Check className="h-5 w-5" strokeWidth={1.5} />
+            </div>
+            <p className="font-display text-2xl leading-snug text-foreground">Thank You!</p>
+            <p className="mx-auto mt-3 max-w-[19rem] font-body text-sm leading-relaxed text-muted-foreground">
+              We have received your quote request and will reply shortly.
+            </p>
+            {(productTitle || finish) && (
+              <p className="mt-4 font-body text-[10px] uppercase tracking-widest text-muted-foreground/80">
+                {[productTitle, finish].filter(Boolean).join(" · ")}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="mt-7 inline-flex h-12 w-full items-center justify-center rounded-none bg-foreground px-5 font-body text-xs uppercase tracking-widest text-background transition-transform duration-150 active:scale-[0.98]"
+            >
+              Close
+            </button>
+          </div>
+          <div className="pb-[env(safe-area-inset-bottom)]" />
+        </div>
+      </div>,
+      document.body
+    );
+  }
 
   return createPortal(
     <div className="fixed inset-0 z-[130] md:items-center md:justify-center">
@@ -338,14 +468,14 @@ export default function OrderIntakeSheet({
           <button
             type="button"
             onClick={next}
-            disabled={!canAdvance || submitting}
+            disabled={!canAdvance || submitting || sending}
             className={cn(
               "mb-3 inline-flex h-12 w-full items-center justify-center rounded-none bg-foreground px-5 font-body text-xs uppercase tracking-widest text-background",
               "transition-transform duration-150 active:scale-[0.98] disabled:opacity-40"
             )}
           >
-            {submitting && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-            {step < 2 ? "Next" : "Place Order"}
+            {(submitting || sending) && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+            {step < 2 ? "Next" : isQuote ? "Submit Quote Request" : "Place Order"}
           </button>
         </div>
       </div>
