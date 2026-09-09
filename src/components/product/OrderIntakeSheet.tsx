@@ -474,8 +474,8 @@ export default function OrderIntakeSheet({
               "transition-transform duration-150 active:scale-[0.98] disabled:opacity-40"
             )}
           >
-            {submitting && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-            {step < 2 ? "Next" : "Place Order"}
+            {(submitting || sending) && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+            {step < 2 ? "Next" : isQuote ? "Submit Quote Request" : "Place Order"}
           </button>
         </div>
       </div>
