@@ -16,6 +16,7 @@ export default function ShippingDetailsAccordion({
   variant?: "inline" | "row";
 }) {
   const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   // Lock body scroll while the modal is open (shared ref-counted lock so
   // overlapping overlays can't strand or prematurely release the page).
