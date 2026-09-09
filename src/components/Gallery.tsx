@@ -1191,8 +1191,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 ) : null}
               </motion.div>
 
-              {/* Mobile: swipeable carousel like Instagram */}
-              {(() => {
+              {/* Mobile: swipeable carousel like Instagram — mounted only on
+                  mobile viewports; CSS-hidden subtrees still download images. */}
+              {isMobile && (() => {
                 const isHotspotSection = !section.items.some(item => item.description);
                 const activeIdx = activeScrollIndices[originalSectionIndex] || 0;
                 return (
