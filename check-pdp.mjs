@@ -36,7 +36,7 @@ const miniBtn = await page.evaluateHandle(() => {
   const bars = [...document.querySelectorAll('div.fixed')].filter(d => d.className.includes('top-[var(--header-h)]'));
   return bars[0]?.querySelector('button') || null;
 });
-if (miniBtn) {
+console.log('miniBtn found:', !!miniBtn); if (miniBtn && miniBtn.asElement()) {
   await miniBtn.asElement().click();
   await page.waitForTimeout(1500);
   await page.screenshot({ path: '/tmp/browser/pdp/4_sheet.png' });
