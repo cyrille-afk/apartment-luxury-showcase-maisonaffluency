@@ -9,7 +9,17 @@ import { trackVideoEvent, attachMilestoneTracking } from "@/lib/videoTracking";
 import { APARTMENT_TOUR_VIDEO_URL } from "@/lib/apartmentTourVideo";
 
 const VIDEO_URL = APARTMENT_TOUR_VIDEO_URL;
-const POSTER_URL = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,c_fill,g_auto/bespoke-sofa_gxidtx";
+// Below-the-fold video poster. f_auto (AVIF/WebP) + a phone-sized render:
+// the old URL was a 1600px JPEG with no f_auto — ~220KB on mobile.
+const POSTER_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
+const POSTER_ID = "bespoke-sofa_gxidtx";
+const posterAt = (w: number) =>
+  `${POSTER_BASE}/w_${w},q_auto:good,c_fill,g_auto,f_auto/${POSTER_ID}`;
+const POSTER_URL = posterAt(
+  typeof window !== "undefined" && window.matchMedia?.("(max-width: 767px)").matches ? 780 : 1280
+);
+const POSTER_SRCSET = [480, 780, 1280].map((w) => `${posterAt(w)} ${w}w`).join(", ");
+
 
 const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
   const ref = useRef(null);
@@ -188,7 +198,11 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                   >
                     <img
                       src={POSTER_URL}
+                      srcSet={POSTER_SRCSET}
+                      sizes="(max-width: 767px) 100vw, 55vw"
                       alt="Apartment tour preview"
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
@@ -270,7 +284,11 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               >
                 <img
                   src={POSTER_URL}
+                  srcSet={POSTER_SRCSET}
+                  sizes="100vw"
                   alt="Apartment tour preview"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
                 {/* Gradient overlay */}

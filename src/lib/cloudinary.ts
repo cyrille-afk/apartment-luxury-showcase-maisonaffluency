@@ -19,6 +19,27 @@ export function withVersion(publicId: string): string {
   return VERSION_RE.test(clean) ? clean : `v1/${clean}`;
 }
 
+/**
+ * Mobile payload guard.
+ *
+ * Desktop-sized transforms (w_1200 / w_1600 / w_2400) were being served to
+ * phones, which is the single biggest contributor to the ~6MB mobile page
+ * weight measured by PageSpeed. Any requested width is clamped to a
+ * mobile-friendly ceiling when the viewport is a phone. `raw: true` opts out
+ * (used by PDF/document generation, which needs print-resolution assets).
+ */
+const MOBILE_MAX_WIDTH = 800;
+
+function isMobileViewport(): boolean {
+  if (typeof window === "undefined" || !window.matchMedia) return false;
+  return window.matchMedia("(max-width: 767px)").matches;
+}
+
+function clampWidth(width: number, raw?: boolean): number {
+  if (raw) return width;
+  return isMobileViewport() ? Math.min(width, MOBILE_MAX_WIDTH) : width;
+}
+
 export interface CloudinaryTransform {
   width?: number;
   height?: number;
@@ -28,7 +49,10 @@ export interface CloudinaryTransform {
   gravity?: "auto" | "face" | "center" | "north" | "south" | "east" | "west";
   dpr?: "auto" | number;
   blur?: number;
+  /** Skip the mobile width clamp (print/PDF assets). */
+  raw?: boolean;
 }
+
 
 /**
  * Build a Cloudinary URL with transformations
@@ -46,12 +70,24 @@ export function cloudinaryUrl(
     gravity,
     dpr,
     blur,
+    raw,
   } = transforms;
+
+  // Clamp oversized widths on phones; scale a paired height by the same
+  // ratio so c_fill crops keep their aspect ratio.
+  let outWidth = width;
+  let outHeight = height;
+  if (width) {
+    outWidth = clampWidth(width, raw);
+    if (height && outWidth !== width) {
+      outHeight = Math.round((height * outWidth) / width);
+    }
+  }
 
   const parts: string[] = [];
 
-  if (width) parts.push(`w_${width}`);
-  if (height) parts.push(`h_${height}`);
+  if (outWidth) parts.push(`w_${outWidth}`);
+  if (outHeight) parts.push(`h_${outHeight}`);
   if (crop) parts.push(`c_${crop}`);
   if (gravity) parts.push(`g_${gravity}`);
   if (quality) parts.push(`q_${quality}`);
@@ -77,16 +113,25 @@ export function cloudinaryBlurPlaceholder(publicId: string): string {
   });
 }
 
+/** Largest srcSet candidate a phone is allowed to download (covers 2x DPR). */
+const MOBILE_MAX_SRCSET_WIDTH = 1080;
+
 /**
- * Generate srcSet for responsive images
+ * Generate srcSet for responsive images. On phones the oversized candidates
+ * are dropped entirely so a high-DPR device can never pick a 1600px file.
  */
 export function cloudinarySrcSet(
   publicId: string,
   widths: number[] = [400, 800, 1200, 1600],
   transforms: Omit<CloudinaryTransform, "width"> = {}
 ): string {
-  return widths
-    .map((w) => `${cloudinaryUrl(publicId, { ...transforms, width: w })} ${w}w`)
+  let list = widths;
+  if (isMobileViewport() && !transforms.raw) {
+    const capped = widths.filter((w) => w <= MOBILE_MAX_SRCSET_WIDTH);
+    list = capped.length ? capped : [Math.min(...widths)];
+  }
+  return list
+    .map((w) => `${cloudinaryUrl(publicId, { ...transforms, width: w, raw: true })} ${w}w`)
     .join(", ");
 }
 
@@ -228,7 +273,12 @@ export function cldResponsiveImg(
   if (!url) return { src: "" };
   const target = CLD_RE.test(url) ? url : toCloudinaryFetch(url);
   if (!CLD_RE.test(target)) return { src: url };
-  const widths = opts.widths ?? [320, 480, 640, 960, 1280];
+  const requested = opts.widths ?? [320, 480, 640, 960, 1280];
+  const widths = isMobileViewport()
+    ? (requested.filter((w) => w <= MOBILE_MAX_SRCSET_WIDTH).length
+        ? requested.filter((w) => w <= MOBILE_MAX_SRCSET_WIDTH)
+        : [Math.min(...requested)])
+    : requested;
   const quality = opts.quality ?? "auto:eco";
   const src = toResponsiveCloudinary(target, { width: widths[Math.min(2, widths.length - 1)], quality });
   const srcSet = widths

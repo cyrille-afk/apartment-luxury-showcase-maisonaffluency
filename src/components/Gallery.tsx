@@ -400,10 +400,41 @@ type MobileGalleryImageCardProps = {
   isHotspotSection: boolean;
   hotspots: GalleryHotspotPosition[];
   onHotspotActivate: (hotspot: GalleryHotspotPosition) => void;
+  /** Position within the horizontal strip. */
+  index: number;
+  /** Currently visible slide of the strip. */
+  activeIndex: number;
 };
 
-const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, onHotspotActivate }: MobileGalleryImageCardProps) => {
+const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, onHotspotActivate, index, activeIndex }: MobileGalleryImageCardProps) => {
   const [naturalAspect, setNaturalAspect] = useState(16 / 10);
+
+  // Native loading="lazy" does not defer siblings that are only horizontally
+  // off-screen inside a scroll strip, and Chromium's lazy threshold is large
+  // enough that every section's first slide also downloaded on first paint
+  // (~1.6MB on mobile). Gate on a tight IntersectionObserver plus the strip's
+  // active slide (+1 ahead), and keep loaded slides mounted.
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [nearViewport, setNearViewport] = useState(false);
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el || nearViewport) return;
+    if (typeof IntersectionObserver === "undefined") { setNearViewport(true); return; }
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        setNearViewport(true);
+        io.disconnect();
+      }
+    }, { rootMargin: "300px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [nearViewport]);
+
+  const [maxLoaded, setMaxLoaded] = useState(1);
+  useEffect(() => {
+    setMaxLoaded((prev) => Math.max(prev, activeIndex + 1));
+  }, [activeIndex]);
+  const shouldLoad = nearViewport && index <= maxLoaded;
 
   const handleImageLoad = useCallback((event: React.SyntheticEvent<HTMLImageElement>) => {
     const img = event.currentTarget;
@@ -412,17 +443,22 @@ const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, onHotspotAct
     }
   }, []);
 
+  const imgProps = shouldLoad ? galleryImg(item.image, "100vw", [320, 480, 640, 800, 1080]) : {};
+
   return (
     <div
-      className={`relative flex-none w-full snap-center overflow-hidden rounded-2xl ${isHotspotSection ? '' : 'aspect-[3/4]'}`}
+      ref={wrapperRef}
+      className={`relative flex-none w-full snap-center overflow-hidden rounded-2xl bg-muted/40 ${isHotspotSection ? '' : 'aspect-[3/4]'}`}
       style={isHotspotSection ? { aspectRatio: naturalAspect } : undefined}
     >
+
       <img
-        {...galleryImg(item.image, "100vw", [480, 640, 828, 1080, 1600])}
+        {...imgProps}
         alt={item.title}
         className={`${isHotspotSection ? 'absolute inset-0 h-full w-full object-fill' : 'h-full w-full object-cover'} brightness-[1.05] contrast-[1.08] saturate-[1.05] ${item.image === bespokeSofaImage && !isHotspotSection ? "object-[center_35%]" : ""}`}
         loading="lazy"
         decoding="async"
+
         width={isHotspotSection ? 1600 : 900}
         height={isHotspotSection ? Math.round(1600 / naturalAspect) : 1200}
         onLoad={handleImageLoad}
@@ -1171,6 +1207,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         return (
                           <MobileGalleryImageCard
                             key={`${item.title}-${index}-mobile`}
+                            index={index}
+                            activeIndex={activeIdx}
                             item={item}
                             isHotspotSection={isHotspotSection}
                             hotspots={itemHotspots}
@@ -1396,7 +1434,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         <div key={i} className="flex-[0_0_100%] min-w-0 flex items-center justify-center">
                           <div className="relative w-full">
                            <img
-                             {...galleryImg(item.image, "100vw", [640, 828, 1080, 1440, 1920])}
+                             {...galleryImg(item.image, "100vw", [480, 640, 800, 1080, 1440, 1920])}
                              alt={item.title}
                              className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[70dvh]"
                              loading={Math.abs(i - currentItemIndex) <= 1 ? "eager" : "lazy"}
