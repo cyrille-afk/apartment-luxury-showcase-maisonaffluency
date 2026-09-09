@@ -1,5 +1,6 @@
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
 import { getCart, shouldUseFullPageCart, useCart } from "@/lib/cart";
 import { Loader2, Minus, Plus } from "lucide-react";
@@ -413,7 +414,7 @@ export default function ProductCommerceCta({
       )}
 
       {/* Mobile sticky bottom dock */}
-      {dock && (
+      {dock && typeof document !== "undefined" && createPortal(
         <div
           ref={dockRef}
           className={cn(
@@ -460,8 +461,8 @@ export default function ProductCommerceCta({
               {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : mobilePrimaryLabel}
             </button>
           </div>
-
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Slide-out mini-cart drawer (State A order confirmation) */}
