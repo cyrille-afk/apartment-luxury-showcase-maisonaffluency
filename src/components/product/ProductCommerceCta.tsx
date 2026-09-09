@@ -310,6 +310,9 @@ export default function ProductCommerceCta({
     } catch {
       /* private mode — intake is a soft capture, never blocks the order */
     }
+    // Quote requests are already submitted by the sheet, which then shows its
+    // own thank-you screen. Never hand those off to cart / account flows.
+    if (isUnpriced) return;
     setIntakeOpen(false);
     openSelection();
   };
