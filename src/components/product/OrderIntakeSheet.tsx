@@ -63,7 +63,13 @@ export default function OrderIntakeSheet({
   finishLabel,
   finishOptions,
   submitting = false,
+  mode = "order",
+  productId,
 }: Props) {
+  const { toast } = useToast();
+  const isQuote = mode === "quote";
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState(0);
   const [profile, setProfile] = useState<"designer" | "private" | null>(null);
