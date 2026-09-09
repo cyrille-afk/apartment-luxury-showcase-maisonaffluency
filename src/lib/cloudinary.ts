@@ -273,7 +273,12 @@ export function cldResponsiveImg(
   if (!url) return { src: "" };
   const target = CLD_RE.test(url) ? url : toCloudinaryFetch(url);
   if (!CLD_RE.test(target)) return { src: url };
-  const widths = opts.widths ?? [320, 480, 640, 960, 1280];
+  const requested = opts.widths ?? [320, 480, 640, 960, 1280];
+  const widths = isMobileViewport()
+    ? (requested.filter((w) => w <= MOBILE_MAX_SRCSET_WIDTH).length
+        ? requested.filter((w) => w <= MOBILE_MAX_SRCSET_WIDTH)
+        : [Math.min(...requested)])
+    : requested;
   const quality = opts.quality ?? "auto:eco";
   const src = toResponsiveCloudinary(target, { width: widths[Math.min(2, widths.length - 1)], quality });
   const srcSet = widths

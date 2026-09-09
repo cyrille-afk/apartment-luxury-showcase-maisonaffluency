@@ -8,16 +8,22 @@
  */
 
 const CLOUD_NAME = "dif1oamtj";
-// w_1600 + dpr_auto + c_limit: serves crisp images on retina without upscaling
-// past the source dimensions. c_limit prevents enlarging smaller originals.
-const DEFAULT_TRANSFORMS = "f_auto,q_auto,w_1600,dpr_auto,c_limit";
+// f_auto + q_auto always; width is viewport-aware so phones never pull a
+// 1600px desktop render. c_limit prevents enlarging smaller originals.
+const isMobileViewport = () =>
+  typeof window !== "undefined" &&
+  !!window.matchMedia &&
+  window.matchMedia("(max-width: 767px)").matches;
+
+const DEFAULT_TRANSFORMS = () =>
+  `f_auto,q_auto,w_${isMobileViewport() ? 800 : 1600},dpr_auto,c_limit`;
 
 const UPLOAD_RE = /^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.*)/;
 const HAS_TRANSFORMS_RE = /^(w_|q_|f_|c_|h_|e_|ar_|g_|dpr_)/;
 
 export function optimizeImageUrl(
   url: string,
-  transforms = DEFAULT_TRANSFORMS
+  transforms = DEFAULT_TRANSFORMS()
 ): string {
   if (!url) return url;
 
