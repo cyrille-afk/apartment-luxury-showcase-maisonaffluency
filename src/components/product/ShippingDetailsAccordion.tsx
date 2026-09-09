@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Globe, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
@@ -75,7 +76,7 @@ export default function ShippingDetailsAccordion({
         </div>
       )}
 
-      {open && (
+      {open && typeof document !== "undefined" && createPortal(
         <div
           className="fixed inset-0 z-[90] flex items-center justify-center p-4 md:p-8 overscroll-none touch-none"
           role="dialog"
@@ -156,7 +157,8 @@ export default function ShippingDetailsAccordion({
               </p>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
