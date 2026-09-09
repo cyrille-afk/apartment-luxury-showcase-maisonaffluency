@@ -64,8 +64,9 @@ export default function BiographyPdfButton({ className, ...input }: BiographyPdf
     setPreviewBlob(null);
   };
 
-  const handleDownloadFromPreview = () => {
+  const handleDownloadFromPreview = async () => {
     if (!previewBlob) return;
+    const { downloadBlob } = await loadBiographyPdfEngine();
     downloadBlob(previewBlob, fileName);
     trackDownload(undefined, `Biography PDF — ${input.designerName}`);
   };
