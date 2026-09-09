@@ -220,7 +220,7 @@ export default function SelectionDrawer({
             type="button"
             aria-label="Close"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+            className="flex h-10 w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
           >
             <X className="h-4 w-4" strokeWidth={1.5} />
           </button>

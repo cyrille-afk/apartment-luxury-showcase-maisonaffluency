@@ -199,7 +199,7 @@ const Hero = () => {
               trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
               scrollToSection("apartment-tour-heading");
             }}
-            className="font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
+            className="flex min-h-[44px] items-center justify-center font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
           >
             Singapore Gallery Preview
           </button>
@@ -207,7 +207,7 @@ const Hero = () => {
           <button
             type="button"
             onClick={openTour}
-            className="group flex flex-col items-center font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
+            className="group flex min-h-[44px] flex-col items-center justify-center font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
           >
             <span>Book Private Appointment</span>
             <span className="text-[9px] font-bold normal-case italic tracking-widest text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]">(trade only)</span>
