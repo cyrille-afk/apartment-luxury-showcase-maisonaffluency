@@ -77,6 +77,7 @@ export default function FinishesPdfButton({
         return;
       }
 
+      const { buildFinishesSelectionPdf, finishesPdfFileName } = await loadFinishesPdf();
       const doc = await buildFinishesSelectionPdf({ productName, brandName, swatches });
       doc.save(finishesPdfFileName(productName));
     } catch (err) {
