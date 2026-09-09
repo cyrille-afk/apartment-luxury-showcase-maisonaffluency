@@ -15,6 +15,7 @@ export interface OrderIntakeDetails {
   notes: string;
   email: string;
   phone: string;
+  company: string;
 }
 
 interface Props {
@@ -78,6 +79,7 @@ export default function OrderIntakeSheet({
   const [notes, setNotes] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [company, setCompany] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
   const [notesEdited, setNotesEdited] = useState(false);
   const [finish, setFinish] = useState<string | null>(null);
