@@ -91,7 +91,10 @@ export default function ShippingDetailsAccordion({
           />
 
           {/* Modal panel */}
-          <div className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-none bg-background text-foreground shadow-2xl animate-in fade-in zoom-in-95 duration-300">
+          <div
+            ref={panelRef}
+            className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto overscroll-contain touch-pan-y rounded-none bg-background text-foreground shadow-2xl animate-in fade-in zoom-in-95 duration-300"
+          >
             {/* Close */}
             <button
               type="button"
