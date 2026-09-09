@@ -500,6 +500,8 @@ export default function ProductCommerceCta({
           }
           finishOptions={finishOptions}
           submitting={placingOrder}
+          mode={isUnpriced ? "quote" : "order"}
+          productId={productId}
         />
       )}
     </>
