@@ -114,6 +114,7 @@ export default function OrderIntakeSheet({
         setSent(false);
         setSending(false);
         setTurnstileToken("");
+        setCompany("");
       }, 320);
       return () => window.clearTimeout(t);
     }
