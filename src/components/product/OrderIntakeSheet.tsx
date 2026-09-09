@@ -107,6 +107,8 @@ export default function OrderIntakeSheet({
         setMounted(false);
         setStep(0);
         setNotesEdited(false);
+        setSent(false);
+        setSending(false);
       }, 320);
       return () => window.clearTimeout(t);
     }
