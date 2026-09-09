@@ -65,9 +65,9 @@ async function sendQuoteWhatsAppAlert(
   if (!to || !from || !lovableKey || !twilioKey) return;
 
   const body = `🚨 *New Quote Request on Maison Affluency!*
+• *Company:* ${inquiry.company || "Not provided"}
 • *Product:* ${inquiry.productName || "(unknown)"}
 • *Finish:* ${inquiry.selectedFinish || "Not specified"}
-• *Client:* ${inquiry.name}
 • *Client Email:* ${inquiry.email}
 • *Client Phone:* ${inquiry.phone || "Not provided"}
 
