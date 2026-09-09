@@ -75,3 +75,5 @@ project_id = "dcrauiygaezoduwdjmsm"
     verify_jwt = false
   [functions.trade-program-signup]
     verify_jwt = false
+  [functions.twilio-status-callback]
+    verify_jwt = false

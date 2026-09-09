@@ -42,12 +42,36 @@ function statusTone(status?: string | null, errorCode?: number | null) {
   }
 }
 
+type DeliveryEvent = {
+  id: string;
+  message_sid: string;
+  message_status: string | null;
+  error_code: number | null;
+  error_message: string | null;
+  created_at: string;
+};
+
 export default function TradeAdminWhatsAppAlerts() {
   const { isAdmin, loading } = useAuth();
   const { toast } = useToast();
   const [rows, setRows] = useState<AlertRow[]>([]);
   const [live, setLive] = useState<Record<string, LiveStatus>>({});
+  const [events, setEvents] = useState<Record<string, DeliveryEvent[]>>({});
   const [busy, setBusy] = useState(false);
+
+  const loadEvents = useCallback(async (sids: string[]) => {
+    if (!sids.length) return;
+    const { data } = await supabase
+      .from("whatsapp_delivery_events")
+      .select("id, message_sid, message_status, error_code, error_message, created_at")
+      .in("message_sid", sids)
+      .order("created_at", { ascending: true });
+    const map: Record<string, DeliveryEvent[]> = {};
+    for (const e of (data ?? []) as DeliveryEvent[]) {
+      (map[e.message_sid] ??= []).push(e);
+    }
+    setEvents(map);
+  }, []);
 
   const load = useCallback(async () => {
     setBusy(true);
@@ -68,6 +92,7 @@ export default function TradeAdminWhatsAppAlerts() {
 
     const sids = list.map((r) => r.provider_message_id).filter(Boolean) as string[];
     if (sids.length) {
+      await loadEvents(sids);
       const { data: res, error: fnErr } = await supabase.functions.invoke("whatsapp-alert-status", {
         body: { sids },
       });
@@ -84,11 +109,30 @@ export default function TradeAdminWhatsAppAlerts() {
       }
     }
     setBusy(false);
-  }, [toast]);
+  }, [toast, loadEvents]);
 
   useEffect(() => {
     if (isAdmin) load();
   }, [isAdmin, load]);
+
+  // Real-time: new Twilio webhook events append to the history without a refresh.
+  useEffect(() => {
+    if (!isAdmin) return;
+    const channel = supabase
+      .channel("whatsapp-delivery-events")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "whatsapp_delivery_events" },
+        (payload) => {
+          const e = payload.new as DeliveryEvent;
+          setEvents((prev) => ({ ...prev, [e.message_sid]: [...(prev[e.message_sid] ?? []), e] }));
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAdmin]);
 
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
@@ -162,6 +206,28 @@ export default function TradeAdminWhatsAppAlerts() {
                     </div>
                   )}
                 </dl>
+                {(() => {
+                  const hist = r.provider_message_id ? events[r.provider_message_id] ?? [] : [];
+                  if (!hist.length) return null;
+                  return (
+                    <ol className="mt-3 space-y-1 border-t border-border pt-3 text-xs">
+                      {hist.map((e) => (
+                        <li key={e.id} className="flex flex-wrap items-baseline gap-2">
+                          <span className="text-muted-foreground">{fmt(e.created_at)}</span>
+                          <span className={`uppercase tracking-[0.12em] ${statusTone(e.message_status, e.error_code)}`}>
+                            {e.message_status ?? "update"}
+                          </span>
+                          {e.error_code ? (
+                            <span className="text-destructive">
+                              error {e.error_code}
+                              {e.error_message ? ` · ${e.error_message}` : ""}
+                            </span>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ol>
+                  );
+                })()}
               </div>
             );
           })}

@@ -125,6 +125,13 @@ async function sendQuoteWhatsAppAlert(
 
 View details in the dashboard.`;
 
+  // Ask Twilio to POST delivery updates back to us so the admin page has a
+  // real history instead of only on-demand lookups.
+  const callbackSecret = Deno.env.get("TWILIO_STATUS_CALLBACK_SECRET");
+  const statusCallback = callbackSecret
+    ? `${Deno.env.get("SUPABASE_URL")}/functions/v1/twilio-status-callback?s=${encodeURIComponent(callbackSecret)}`
+    : null;
+
   const post = (params: Record<string, string>) =>
     fetch(`${TWILIO_GATEWAY_URL}/Messages.json`, {
       method: "POST",
@@ -133,7 +140,12 @@ View details in the dashboard.`;
         "X-Connection-Api-Key": twilioKey,
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: new URLSearchParams({ To: to, From: from, ...params }),
+      body: new URLSearchParams({
+        To: to,
+        From: from,
+        ...(statusCallback ? { StatusCallback: statusCallback } : {}),
+        ...params,
+      }),
     });
 
   try {
