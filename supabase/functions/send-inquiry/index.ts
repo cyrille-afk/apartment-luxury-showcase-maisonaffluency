@@ -234,6 +234,20 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Inquiry insert failed: ${insertErr.message}`);
     }
 
+    // WhatsApp alert for product quote requests — intentionally not awaited so
+    // the visitor sees the thank-you state instantly.
+    if (resolvedSource === "public_product" || productId || productName) {
+      sendQuoteWhatsAppAlert(supabase, {
+        id: idStem,
+        name,
+        email,
+        phone,
+        productName,
+        selectedFinish,
+      }).catch((err) => console.error("Quote WhatsApp alert unhandled:", err));
+    }
+
+
 
 
     // 1. Admin notification → concierge + owner inbox
