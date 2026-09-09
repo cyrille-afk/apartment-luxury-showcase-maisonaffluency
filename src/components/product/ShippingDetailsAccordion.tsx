@@ -17,17 +17,26 @@ export default function ShippingDetailsAccordion({
 }) {
   const [open, setOpen] = useState(false);
 
-  // Lock body scroll while the modal is open.
+  // Lock body scroll while the modal is open (shared ref-counted lock so
+  // overlapping overlays can't strand or prematurely release the page).
   useEffect(() => {
     if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    lockBodyScroll();
+    // On touch devices the backdrop must swallow scroll gestures so the page
+    // beneath never moves when the user drags outside the panel.
+    const stopTouch = (e: TouchEvent) => {
+      const panel = panelRef.current;
+      if (panel && panel.contains(e.target as Node)) return;
+      e.preventDefault();
+    };
+    document.addEventListener("touchmove", stopTouch, { passive: false });
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = prev;
+      unlockBodyScroll();
+      document.removeEventListener("touchmove", stopTouch);
       window.removeEventListener("keydown", onKey);
     };
   }, [open]);
