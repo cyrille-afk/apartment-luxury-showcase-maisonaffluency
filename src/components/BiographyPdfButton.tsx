@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Download, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import {
-  generateDesignerBiographyPdf,
-  downloadBlob,
-  type DesignerBiographyPdfInput,
-  type PdfProgress,
+import type {
+  DesignerBiographyPdfInput,
+  PdfProgress,
 } from "@/lib/generateDesignerBiographyPdf";
+
+// The jsPDF engine (~2MB) must never be part of the public route bundle —
+// it is fetched only when the visitor actually asks for the PDF.
+const loadBiographyPdfEngine = () => import("@/lib/generateDesignerBiographyPdf");
 import { trackDownload } from "@/lib/trackDownload";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import { useAuth } from "@/hooks/useAuth";
