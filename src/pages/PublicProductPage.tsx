@@ -1274,6 +1274,13 @@ const PublicProductPageContent: React.FC = () => {
   // Once the product image has scrolled past, the mobile action bar takes over
   // the top of the viewport and the global header steps aside entirely.
   const showStickyBar = stickyBarArmed;
+  // Compact action inside the sticky mini bar: quote for unpriced pieces,
+  // order for priced ones — mirrors the bottom dock's primary CTA.
+  const stickyBarCtaLabel = isTradeVerifiedView
+    ? "Proceed to Order"
+    : !displayRrpLabel || displayRrpLabel.trim().toLowerCase() === "price upon request"
+      ? "Request Quote"
+      : "Place Order";
 
   // The TRADE/RETAIL tab section was removed — the sticky bottom dock now
   // owns pricing/ordering for every audience, so it is always visible.
@@ -2094,7 +2101,10 @@ const PublicProductPageContent: React.FC = () => {
              or breaks the navigation layout. */}
         <div
           className={cn(
-            "md:hidden fixed left-0 right-0 top-[var(--header-h)] z-40 bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-transform duration-300 ease-out",
+            "md:hidden fixed left-0 right-0 top-[var(--header-h)] z-40 bg-background border-b border-border shadow-sm transition-transform duration-300 ease-out",
+            // Opaque filler sealing the sliver between the header bottom and
+            // --header-h so scrolling text can never bleed through the gap.
+            "before:absolute before:inset-x-0 before:bottom-full before:h-4 before:bg-background before:content-['']",
             !showStickyBar && "pointer-events-none"
           )}
           style={{
@@ -2104,15 +2114,24 @@ const PublicProductPageContent: React.FC = () => {
         >
 
 
-          <div className="px-3 pt-2 pb-2.5">
-            <div className="flex items-center justify-center gap-1.5 min-w-0 text-center">
-              <p className="font-display text-[13px] leading-tight text-foreground truncate">
-                {product.title}
-              </p>
-              <span className="text-muted-foreground/60 text-[11px] shrink-0">by</span>
-              <p className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground truncate max-w-[45%]">
-                {designerDisplay}
-              </p>
+          <div className="px-3 py-2">
+            <div className="flex items-center justify-between gap-3 min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <p className="font-display text-[13px] leading-tight text-foreground truncate">
+                  {product.title}
+                </p>
+                <span className="text-muted-foreground/60 text-[11px] shrink-0">by</span>
+                <p className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground truncate">
+                  {designerDisplay}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event("ma:open-intake"))}
+                className="shrink-0 inline-flex h-9 items-center justify-center px-4 bg-foreground text-background font-body text-[10px] uppercase tracking-[0.14em] transition-all hover:bg-foreground/85 active:scale-[0.97]"
+              >
+                {stickyBarCtaLabel}
+              </button>
             </div>
 
           </div>
@@ -2186,6 +2205,9 @@ const PublicProductPageContent: React.FC = () => {
               id="main-product-image-container"
               className={cn(
                 "relative -mx-4 md:mx-0 sticky top-[var(--header-h)] md:top-[calc(var(--header-h)+1rem)] h-fit self-stretch lg:self-start z-30 bg-background transition-all duration-500 ease-out transform will-change-transform",
+                // Seal the sliver between the header bottom and --header-h so
+                // page text can never bleed through while the image compacts.
+                "before:absolute before:inset-x-0 before:bottom-full before:h-4 before:bg-background before:content-[''] md:before:content-none",
                 galleryCompact && "border-b border-border/40 shadow-[0_8px_30px_rgba(0,0,0,0.05)]"
               )}
               ref={galleryScrollRef}

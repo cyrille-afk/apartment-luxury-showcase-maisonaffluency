@@ -332,6 +332,19 @@ export default function ProductCommerceCta({
     return () => window.removeEventListener("ma:open-selection", handler);
   });
 
+  // The mobile sticky mini bar's compact CTA dispatches this event; only the
+  // dock instance (mobile) reacts, opening the same intake/quote sheet as the
+  // bottom dock's primary button (or direct checkout for verified trade).
+  useEffect(() => {
+    const handler = () => {
+      if (typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches) return;
+      if (!dock) return;
+      handleMobilePrimary();
+    };
+    window.addEventListener("ma:open-intake", handler);
+    return () => window.removeEventListener("ma:open-intake", handler);
+  });
+
   // Safety net: if the cart reaches 2+ lines while the drawer is open (a write
   // that landed after the click, or another tab), hand off to the full page.
   useEffect(() => {
