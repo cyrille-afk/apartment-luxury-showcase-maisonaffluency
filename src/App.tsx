@@ -1,10 +1,11 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation, useNavigate, useNavigationType } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-// Index is the homepage. Lazy-loading it keeps ~200KB of homepage-only code
-// (Hero, Index shell, and its transitive imports) out of the initial bundle
-// on every non-home route (e.g. /designers), where it is dead weight.
-const Index = lazy(() => import("./pages/Index"));
+import { HelmetProvider } from "react-helmet-async";
+// Index is the homepage and is loaded synchronously: lazy-loading it created
+// a sequential chunk waterfall (main → Index → Hero) that delayed LCP on
+// throttled mobile. Below-fold homepage sections stay lazy inside Index.
+import Index from "./pages/Index";
 import { CompareProvider } from "@/contexts/CompareContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { TradeCopilotProvider } from "@/contexts/TradeCopilotContext";
@@ -14,10 +15,9 @@ import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import { releaseDesignersLandingScrollLock } from "@/lib/designersScrollLock";
 import { clearDarkIosChrome } from "@/lib/iosChrome";
 
-// Defer react-helmet-async — all critical meta tags are already in index.html
-const LazyHelmetProvider = lazy(() =>
-  import("react-helmet-async").then(m => ({ default: m.HelmetProvider }))
-);
+// react-helmet-async is imported synchronously — wrapping the whole app in a
+// lazy provider with Suspense fallback={null} blocked ALL React rendering on a
+// separate chunk, which delayed every page's first paint.
 
 // Lazy-load non-landing pages and non-critical UI
 const NotFound = lazy(() => import("./pages/NotFound"));
