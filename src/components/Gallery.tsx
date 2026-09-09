@@ -418,7 +418,7 @@ const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, onHotspotAct
       style={isHotspotSection ? { aspectRatio: naturalAspect } : undefined}
     >
       <img
-        {...galleryImg(item.image, "100vw", [480, 640, 828, 1080, 1600])}
+        {...galleryImg(item.image, "100vw", [320, 480, 640, 800, 1080, 1600])}
         alt={item.title}
         className={`${isHotspotSection ? 'absolute inset-0 h-full w-full object-fill' : 'h-full w-full object-cover'} brightness-[1.05] contrast-[1.08] saturate-[1.05] ${item.image === bespokeSofaImage && !isHotspotSection ? "object-[center_35%]" : ""}`}
         loading="lazy"
@@ -1396,7 +1396,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         <div key={i} className="flex-[0_0_100%] min-w-0 flex items-center justify-center">
                           <div className="relative w-full">
                            <img
-                             {...galleryImg(item.image, "100vw", [640, 828, 1080, 1440, 1920])}
+                             {...galleryImg(item.image, "100vw", [480, 640, 800, 1080, 1440, 1920])}
                              alt={item.title}
                              className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[70dvh]"
                              loading={Math.abs(i - currentItemIndex) <= 1 ? "eager" : "lazy"}
