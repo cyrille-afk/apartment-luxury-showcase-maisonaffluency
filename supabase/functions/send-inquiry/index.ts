@@ -51,6 +51,12 @@ const InquirySchema = z.object({
 
 const TWILIO_GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
 
+// Approved WhatsApp template used for out-of-session alerts. WhatsApp rejects
+// freeform business-initiated messages sent more than 24h after the last
+// inbound reply (Twilio error 63016) — a template is the only reliable path.
+const QUOTE_TEMPLATE_SID = Deno.env.get("TWILIO_WHATSAPP_QUOTE_TEMPLATE_SID")
+  ?? "HXd883a51839c6572cbe49532461adc4d5";
+
 // Fire-and-forget WhatsApp alert for product quote requests. Uses the same
 // Twilio connector gateway as the trade-application alerts; delivery failures
 // are logged to admin_alert_log so no lead is ever silently lost.
@@ -64,25 +70,50 @@ async function sendQuoteWhatsAppAlert(
   const twilioKey = Deno.env.get("TWILIO_API_KEY");
   if (!to || !from || !lovableKey || !twilioKey) return;
 
+  const vars = {
+    "1": inquiry.company || "Not provided",
+    "2": inquiry.productName || "(unknown)",
+    "3": inquiry.selectedFinish || "Not specified",
+    "4": inquiry.email,
+    "5": inquiry.phone || "Not provided",
+  };
+
   const body = `🚨 *New Quote Request on Maison Affluency!*
-• *Company:* ${inquiry.company || "Not provided"}
-• *Product:* ${inquiry.productName || "(unknown)"}
-• *Finish:* ${inquiry.selectedFinish || "Not specified"}
-• *Client Email:* ${inquiry.email}
-• *Client Phone:* ${inquiry.phone || "Not provided"}
+• *Company:* ${vars["1"]}
+• *Product:* ${vars["2"]}
+• *Finish:* ${vars["3"]}
+• *Client Email:* ${vars["4"]}
+• *Client Phone:* ${vars["5"]}
 
 View details in the dashboard.`;
 
-  try {
-    const res = await fetch(`${TWILIO_GATEWAY_URL}/Messages.json`, {
+  const post = (params: Record<string, string>) =>
+    fetch(`${TWILIO_GATEWAY_URL}/Messages.json`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${lovableKey}`,
         "X-Connection-Api-Key": twilioKey,
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: new URLSearchParams({ To: to, From: from, Body: body }),
+      body: new URLSearchParams({ To: to, From: from, ...params }),
     });
+
+  try {
+    // 1) Template send — works inside and outside the 24h session window.
+    let res = QUOTE_TEMPLATE_SID
+      ? await post({ ContentSid: QUOTE_TEMPLATE_SID, ContentVariables: JSON.stringify(vars) })
+      : null;
+    let usedTemplate = true;
+    let firstError: string | null = null;
+
+    // 2) Template unavailable / not yet approved → freeform (delivers only if
+    //    the operator replied on WhatsApp within the last 24h).
+    if (!res || !res.ok) {
+      if (res) firstError = `template ${res.status}: ${(await res.text()).slice(0, 800)}`;
+      usedTemplate = false;
+      res = await post({ Body: body });
+    }
+
     if (!res.ok) {
       const errBody = await res.text();
       console.error(`Quote WhatsApp alert failed [${res.status}]: ${errBody}`);
@@ -90,20 +121,31 @@ View details in the dashboard.`;
         channel: "twilio_whatsapp",
         event: "quote_request",
         status: "failed",
-        payload: { inquiry_id: inquiry.id, product: inquiry.productName, email: inquiry.email },
-        error: `Twilio ${res.status}: ${String(errBody).slice(0, 2000)}`,
+        payload: { inquiry_id: inquiry.id, product: inquiry.productName, email: inquiry.email, used_template: usedTemplate },
+        error: [firstError, `Twilio ${res.status}: ${String(errBody).slice(0, 1200)}`].filter(Boolean).join(" | "),
       });
       return;
     }
+
     let sid: string | null = null;
-    try { sid = (await res.json())?.sid ?? null; } catch (_) { /* non-JSON */ }
+    let status: string | null = null;
+    let errorCode: number | null = null;
+    try {
+      const json = await res.json();
+      sid = json?.sid ?? null;
+      status = json?.status ?? null;
+      errorCode = json?.error_code ?? null;
+    } catch (_) { /* non-JSON */ }
+
+    // Twilio accepts the request (HTTP 201) even when WhatsApp later refuses
+    // it, so record the queued status and any immediate error code.
     await supabase.from("admin_alert_log").insert({
       channel: "twilio_whatsapp",
       event: "quote_request",
-      status: "sent",
+      status: errorCode ? "failed" : "sent",
       provider_message_id: sid,
-      payload: { inquiry_id: inquiry.id, to, from, message: body },
-      error: null,
+      payload: { inquiry_id: inquiry.id, to, from, message: body, used_template: usedTemplate, twilio_status: status },
+      error: errorCode ? `Twilio error_code ${errorCode}` : firstError,
     });
   } catch (err) {
     console.error("Quote WhatsApp alert error:", err);
@@ -118,6 +160,7 @@ View details in the dashboard.`;
     } catch (_) { /* non-fatal */ }
   }
 }
+
 
 async function verifyTurnstile(token: string | undefined, ip: string): Promise<boolean> {
   const secret = Deno.env.get("TURNSTILE_SECRET_KEY");
