@@ -206,6 +206,28 @@ export default function TradeAdminWhatsAppAlerts() {
                     </div>
                   )}
                 </dl>
+                {(() => {
+                  const hist = r.provider_message_id ? events[r.provider_message_id] ?? [] : [];
+                  if (!hist.length) return null;
+                  return (
+                    <ol className="mt-3 space-y-1 border-t border-border pt-3 text-xs">
+                      {hist.map((e) => (
+                        <li key={e.id} className="flex flex-wrap items-baseline gap-2">
+                          <span className="text-muted-foreground">{fmt(e.created_at)}</span>
+                          <span className={`uppercase tracking-[0.12em] ${statusTone(e.message_status, e.error_code)}`}>
+                            {e.message_status ?? "update"}
+                          </span>
+                          {e.error_code ? (
+                            <span className="text-destructive">
+                              error {e.error_code}
+                              {e.error_message ? ` · ${e.error_message}` : ""}
+                            </span>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ol>
+                  );
+                })()}
               </div>
             );
           })}
