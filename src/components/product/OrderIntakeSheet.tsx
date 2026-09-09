@@ -480,6 +480,18 @@ export default function OrderIntakeSheet({
                 placeholder="you@studio.com"
                 className={inputCls}
               />
+              <label className={cn(labelCls, "mt-5")} htmlFor="intake-company">
+                Company / Studio Name
+              </label>
+              <input
+                id="intake-company"
+                type="text"
+                autoComplete="organization"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder="Your studio or company"
+                className={inputCls}
+              />
               <label className={cn(labelCls, "mt-5")} htmlFor="intake-phone">
                 Phone Number (optional)
               </label>
