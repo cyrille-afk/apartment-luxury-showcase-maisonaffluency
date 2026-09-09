@@ -123,7 +123,11 @@ export default function OrderIntakeSheet({
   if (!mounted && !isOpen) return null;
 
   const canAdvance =
-    step === 0 ? Boolean(profile) : step === 1 ? city.trim().length > 1 : EMAIL_RE.test(email.trim());
+    step === 0
+      ? Boolean(profile)
+      : step === 1
+        ? city.trim().length > 1
+        : EMAIL_RE.test(email.trim()) && company.trim().length > 0;
 
   const details = (): OrderIntakeDetails => ({
     profile: profile as "designer" | "private",
@@ -131,6 +135,7 @@ export default function OrderIntakeSheet({
     notes: notes.trim(),
     email: email.trim(),
     phone: phone.trim(),
+    company: company.trim(),
   });
 
   /** Quote flow: persist the inquiry, then show the in-drawer thank-you. */
