@@ -58,13 +58,20 @@ function optimizeHtmlPlugin(buildId: string): Plugin {
         // hero image win the bandwidth race on throttled PSI mobile runs
         // is worth ~200-400ms of LCP. React still loads (main entry imports
         // it) — just at lower priority so it doesn't compete with the LCP image.
-        const DEFER = /(vendor-motion|vendor-radix|vendor-react|vendor-router|vendor-query|vendor-forms|vendor-charts|vendor-pdf|vendor-docs|vendor-3d|vendor-markdown|vendor-date|vendor-carousel|vendor-stripe|vendor-icons-extra)/;
-        const eager = modulepreloads.filter(h => !DEFER.test(h));
-        const deferred = modulepreloads.filter(h => DEFER.test(h));
+        const DEFER = /(vendor-motion|vendor-radix|vendor-react|vendor-router|vendor-query|vendor-forms|vendor-date|vendor-carousel|vendor-icons-extra)/;
+        // Never hint these at all: multi-MB export engines (PDF/XLSX/PPTX),
+        // 3D, charts, markdown and Stripe are reached only from lazy admin /
+        // trade / export code paths. `prefetch` still downloads the full file,
+        // so hinting them costs storefront visitors megabytes of unused JS.
+        const NEVER = /(vendor-pdf|vendor-docs|vendor-3d|vendor-charts|vendor-markdown|vendor-stripe)/;
+        const hinted = modulepreloads.filter(h => !NEVER.test(h));
+        const eager = hinted.filter(h => !DEFER.test(h));
+        const deferred = hinted.filter(h => DEFER.test(h));
         const hints = [
           ...eager.map(href => `<link rel="modulepreload" href="${href}">`),
           ...deferred.map(href => `<link rel="prefetch" as="script" href="${href}">`),
         ].join('\n    ');
+
         html = html.replace('<meta charset="UTF-8" />', `<meta charset="UTF-8" />\n    ${hints}`);
       }
 
@@ -275,7 +282,13 @@ export default defineConfig(({ mode }) => {
     rollupOptions: {
       output: {
         manualChunks: (id) => {
+          // Vite's dynamic-import preload helper is shared by every lazy
+          // route. Left unassigned, Rollup parks it inside whichever big
+          // vendor chunk claims it first (it landed in vendor-docs), which
+          // forces the entry to statically import that multi-MB chunk.
+          if (id.includes('vite/preload-helper') || id.includes('commonjsHelpers') || id.includes('commonjs-dynamic-modules')) return 'vendor-misc';
           if (!id.includes("node_modules")) return;
+
 
           // Bundle every lucide icon into one chunk. Otherwise each icon
           // ships as its own 500-1500 byte file and a mobile page opens
@@ -345,7 +358,21 @@ export default defineConfig(({ mode }) => {
             const m = id.match(/node_modules\/@radix-ui\/([^/]+)/);
             return m ? `vendor-radix-${m[1].replace(/^react-/, '')}` : 'vendor-radix';
           }
+
+          // Small shared utilities used by both the shell and lazy routes.
+          // Pinning them here stops Rollup folding them into a heavy chunk
+          // (they were landing in vendor-docs/vendor-charts, which forced the
+          // entry to statically import megabytes of export libraries).
+          if (
+            id.includes('node_modules/clsx') ||
+            id.includes('node_modules/tailwind-merge') ||
+            id.includes('node_modules/class-variance-authority') ||
+            id.includes('node_modules/@babel/runtime') ||
+            id.includes('node_modules/tslib')
+          ) return 'vendor-misc';
+
         },
+
 
       },
     },
