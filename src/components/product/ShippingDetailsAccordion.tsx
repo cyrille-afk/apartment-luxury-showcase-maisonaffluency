@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Globe, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 
 /**
  * Logistics trigger. "inline" sits beneath the price with a sentence of
@@ -15,18 +16,28 @@ export default function ShippingDetailsAccordion({
   variant?: "inline" | "row";
 }) {
   const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
-  // Lock body scroll while the modal is open.
+  // Lock body scroll while the modal is open (shared ref-counted lock so
+  // overlapping overlays can't strand or prematurely release the page).
   useEffect(() => {
     if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    lockBodyScroll();
+    // On touch devices the backdrop must swallow scroll gestures so the page
+    // beneath never moves when the user drags outside the panel.
+    const stopTouch = (e: TouchEvent) => {
+      const panel = panelRef.current;
+      if (panel && panel.contains(e.target as Node)) return;
+      e.preventDefault();
+    };
+    document.addEventListener("touchmove", stopTouch, { passive: false });
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = prev;
+      unlockBodyScroll();
+      document.removeEventListener("touchmove", stopTouch);
       window.removeEventListener("keydown", onKey);
     };
   }, [open]);
@@ -66,7 +77,7 @@ export default function ShippingDetailsAccordion({
 
       {open && (
         <div
-          className="fixed inset-0 z-[90] flex items-center justify-center p-4 md:p-8"
+          className="fixed inset-0 z-[90] flex items-center justify-center p-4 md:p-8 overscroll-none touch-none"
           role="dialog"
           aria-modal="true"
           aria-label="Logistics & White-Glove Installation"
@@ -80,7 +91,10 @@ export default function ShippingDetailsAccordion({
           />
 
           {/* Modal panel */}
-          <div className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-none bg-background text-foreground shadow-2xl animate-in fade-in zoom-in-95 duration-300">
+          <div
+            ref={panelRef}
+            className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto overscroll-contain touch-pan-y rounded-none bg-background text-foreground shadow-2xl animate-in fade-in zoom-in-95 duration-300"
+          >
             {/* Close */}
             <button
               type="button"
