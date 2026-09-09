@@ -79,6 +79,7 @@ export default function BiographyPdfButton({ className, ...input }: BiographyPdf
     // the PDF is being assembled (can take several seconds for long bios).
     setPreviewOpen(true);
     try {
+      const { generateDesignerBiographyPdf } = await loadBiographyPdfEngine();
       const blob = await generateDesignerBiographyPdf({
         ...input,
         recipientName,
