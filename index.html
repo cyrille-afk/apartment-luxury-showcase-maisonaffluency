@@ -226,25 +226,33 @@
     <script>
       (function(){
         if (window.location.pathname !== "/") return;
-        var base = "https://res.cloudinary.com/dif1oamtj/image/upload";
-        var id = "bespoke-sofa_gxidtx";
-        var isMobile = window.matchMedia("(max-width: 767px)").matches;
-        var w = isMobile ? 780 : 1600;
-        var l = document.createElement("link");
-        l.rel = "preload";
-        l.as = "image";
-        l.href = base + "/w_" + w + ",q_auto:good,c_fill,g_auto,f_auto/" + id;
-        l.setAttribute("fetchpriority", "low");
-        document.head.appendChild(l);
-        // Founders portraits (below-fold) — low priority preload
-        ["IMG_2542_1_kc4fvs", "Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs"].forEach(function(fid){
-          var fl = document.createElement("link");
-          fl.rel = "preload";
-          fl.as = "image";
-          fl.href = base + "/w_800,c_fill,q_auto,f_auto/" + fid;
-          fl.setAttribute("fetchpriority", "low");
-          document.head.appendChild(fl);
-        });
+        // These are all BELOW the fold. Queue them only once the page has
+        // loaded and the main thread is idle, so they never share throttled
+        // mobile bandwidth with the hero LCP image ("low" priority is still
+        // in-flight bytes on Slow 4G).
+        function warm() {
+          var base = "https://res.cloudinary.com/dif1oamtj/image/upload";
+          var isMobile = window.matchMedia("(max-width: 767px)").matches;
+          var w = isMobile ? 780 : 1600;
+          var hrefs = [base + "/w_" + w + ",q_auto:good,c_fill,g_auto,f_auto/bespoke-sofa_gxidtx"];
+          ["IMG_2542_1_kc4fvs", "Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs"].forEach(function(fid){
+            hrefs.push(base + "/w_800,c_fill,q_auto,f_auto/" + fid);
+          });
+          hrefs.forEach(function(href){
+            var l = document.createElement("link");
+            l.rel = "prefetch";
+            l.as = "image";
+            l.href = href;
+            l.setAttribute("fetchpriority", "low");
+            document.head.appendChild(l);
+          });
+        }
+        function schedule() {
+          if (window.requestIdleCallback) window.requestIdleCallback(warm, { timeout: 4000 });
+          else setTimeout(warm, 2500);
+        }
+        if (document.readyState === "complete") schedule();
+        else window.addEventListener("load", schedule, { once: true });
       })();
     </script>
 
