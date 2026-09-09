@@ -400,10 +400,24 @@ type MobileGalleryImageCardProps = {
   isHotspotSection: boolean;
   hotspots: GalleryHotspotPosition[];
   onHotspotActivate: (hotspot: GalleryHotspotPosition) => void;
+  /** Position within the horizontal strip. */
+  index: number;
+  /** Currently visible slide of the strip. */
+  activeIndex: number;
 };
 
-const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, onHotspotActivate }: MobileGalleryImageCardProps) => {
+const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, onHotspotActivate, index, activeIndex }: MobileGalleryImageCardProps) => {
   const [naturalAspect, setNaturalAspect] = useState(16 / 10);
+
+  // Native loading="lazy" does NOT defer siblings that are only horizontally
+  // off-screen inside a scroll strip, so every slide of every section was
+  // downloading on first paint (~2MB on mobile). Load the current slide plus
+  // one ahead, and keep what has already been loaded mounted.
+  const [maxLoaded, setMaxLoaded] = useState(1);
+  useEffect(() => {
+    setMaxLoaded((prev) => Math.max(prev, activeIndex + 1));
+  }, [activeIndex]);
+  const shouldLoad = index <= maxLoaded;
 
   const handleImageLoad = useCallback((event: React.SyntheticEvent<HTMLImageElement>) => {
     const img = event.currentTarget;
@@ -412,17 +426,20 @@ const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, onHotspotAct
     }
   }, []);
 
+  const imgProps = shouldLoad ? galleryImg(item.image, "100vw", [320, 480, 640, 800, 1080]) : {};
+
   return (
     <div
-      className={`relative flex-none w-full snap-center overflow-hidden rounded-2xl ${isHotspotSection ? '' : 'aspect-[3/4]'}`}
+      className={`relative flex-none w-full snap-center overflow-hidden rounded-2xl bg-muted/40 ${isHotspotSection ? '' : 'aspect-[3/4]'}`}
       style={isHotspotSection ? { aspectRatio: naturalAspect } : undefined}
     >
       <img
-        {...galleryImg(item.image, "100vw", [320, 480, 640, 800, 1080, 1600])}
+        {...imgProps}
         alt={item.title}
         className={`${isHotspotSection ? 'absolute inset-0 h-full w-full object-fill' : 'h-full w-full object-cover'} brightness-[1.05] contrast-[1.08] saturate-[1.05] ${item.image === bespokeSofaImage && !isHotspotSection ? "object-[center_35%]" : ""}`}
         loading="lazy"
         decoding="async"
+
         width={isHotspotSection ? 1600 : 900}
         height={isHotspotSection ? Math.round(1600 / naturalAspect) : 1200}
         onLoad={handleImageLoad}
