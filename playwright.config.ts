@@ -58,6 +58,6 @@ export default defineConfig({
         command: `npm run build && npm run preview -- --port ${PORT} --strictPort`,
         url: BASE_URL,
         reuseExistingServer: true,
-        timeout: 180_000,
+        timeout: 420_000,
       },
 });
