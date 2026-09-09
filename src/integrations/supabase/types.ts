@@ -3287,6 +3287,7 @@ export type Database = {
           product_id: string | null
           product_name: string | null
           product_slug: string | null
+          selected_finish: string | null
           source: string | null
           status: string
           subject: string | null
@@ -3310,6 +3311,7 @@ export type Database = {
           product_id?: string | null
           product_name?: string | null
           product_slug?: string | null
+          selected_finish?: string | null
           source?: string | null
           status?: string
           subject?: string | null
@@ -3333,6 +3335,7 @@ export type Database = {
           product_id?: string | null
           product_name?: string | null
           product_slug?: string | null
+          selected_finish?: string | null
           source?: string | null
           status?: string
           subject?: string | null
