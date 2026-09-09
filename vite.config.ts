@@ -359,13 +359,18 @@ export default defineConfig(({ mode }) => {
             return m ? `vendor-radix-${m[1].replace(/^react-/, '')}` : 'vendor-radix';
           }
 
-          // Everything else (clsx, tailwind-merge, CJS interop shims, …) goes
-          // into one small shared chunk. Without this, Rollup folds those tiny
-          // shared helpers into whichever big manual chunk happens to claim
-          // them — which made the entry statically import vendor-docs and
-          // vendor-charts, dragging megabytes of export libraries into the
-          // landing page graph.
-          return 'vendor-misc';
+          // Small shared utilities used by both the shell and lazy routes.
+          // Pinning them here stops Rollup folding them into a heavy chunk
+          // (they were landing in vendor-docs/vendor-charts, which forced the
+          // entry to statically import megabytes of export libraries).
+          if (
+            id.includes('node_modules/clsx') ||
+            id.includes('node_modules/tailwind-merge') ||
+            id.includes('node_modules/class-variance-authority') ||
+            id.includes('node_modules/@babel/runtime') ||
+            id.includes('node_modules/tslib')
+          ) return 'vendor-misc';
+
         },
 
 
