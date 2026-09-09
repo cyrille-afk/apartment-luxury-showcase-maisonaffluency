@@ -120,19 +120,71 @@ export default function OrderIntakeSheet({
   const canAdvance =
     step === 0 ? Boolean(profile) : step === 1 ? city.trim().length > 1 : EMAIL_RE.test(email.trim());
 
+  const details = (): OrderIntakeDetails => ({
+    profile: profile as "designer" | "private",
+    city: city.trim(),
+    notes: notes.trim(),
+    email: email.trim(),
+    phone: phone.trim(),
+  });
+
+  /** Quote flow: persist the inquiry, then show the in-drawer thank-you. */
+  const submitQuote = async () => {
+    if (sending) return;
+    setSending(true);
+    const d = details();
+    const message = [
+      productTitle ? `Product: ${productTitle}` : "",
+      designerName ? `Designer: ${designerName}` : "",
+      finish ? `Selected finish: ${finish}` : "",
+      `Client type: ${d.profile === "designer" ? "Interior Designer / Architect" : "Private Client"}`,
+      d.city ? `Project location: ${d.city}` : "",
+      d.phone ? `Phone: ${d.phone}` : "",
+      "",
+      d.notes || "Quote requested from the product page.",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    try {
+      const { error } = await supabase.functions.invoke("send-inquiry", {
+        body: {
+          name: d.email.split("@")[0] || "Website visitor",
+          email: d.email,
+          phone: d.phone,
+          message,
+          subject: `Quote Request — ${productTitle ?? "Product"}`,
+          productName: productTitle ?? undefined,
+          designerName: designerName ?? undefined,
+          productId: productId ?? undefined,
+          source: "public_product",
+        },
+      });
+      if (error) throw error;
+      setSent(true);
+      onComplete(d);
+    } catch {
+      toast({
+        title: "Could not send your request",
+        description: "Please try again in a moment.",
+        variant: "destructive",
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
   const next = () => {
     if (!canAdvance) return;
     if (step < 2) {
       setStep((s) => s + 1);
       return;
     }
-    onComplete({
-      profile: profile as "designer" | "private",
-      city: city.trim(),
-      notes: notes.trim(),
-      email: email.trim(),
-      phone: phone.trim(),
-    });
+    if (isQuote) {
+      void submitQuote();
+      return;
+    }
+    onComplete(details());
   };
 
   const progress = ((step + (canAdvance ? 1 : 0.35)) / STEPS.length) * 100;
