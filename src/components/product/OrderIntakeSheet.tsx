@@ -15,6 +15,7 @@ export interface OrderIntakeDetails {
   notes: string;
   email: string;
   phone: string;
+  company: string;
 }
 
 interface Props {
@@ -78,6 +79,7 @@ export default function OrderIntakeSheet({
   const [notes, setNotes] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [company, setCompany] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
   const [notesEdited, setNotesEdited] = useState(false);
   const [finish, setFinish] = useState<string | null>(null);
@@ -112,6 +114,7 @@ export default function OrderIntakeSheet({
         setSent(false);
         setSending(false);
         setTurnstileToken("");
+        setCompany("");
       }, 320);
       return () => window.clearTimeout(t);
     }
@@ -121,7 +124,11 @@ export default function OrderIntakeSheet({
   if (!mounted && !isOpen) return null;
 
   const canAdvance =
-    step === 0 ? Boolean(profile) : step === 1 ? city.trim().length > 1 : EMAIL_RE.test(email.trim());
+    step === 0
+      ? Boolean(profile)
+      : step === 1
+        ? city.trim().length > 1
+        : EMAIL_RE.test(email.trim()) && company.trim().length > 0;
 
   const details = (): OrderIntakeDetails => ({
     profile: profile as "designer" | "private",
@@ -129,6 +136,7 @@ export default function OrderIntakeSheet({
     notes: notes.trim(),
     email: email.trim(),
     phone: phone.trim(),
+    company: company.trim(),
   });
 
   /** Quote flow: persist the inquiry, then show the in-drawer thank-you. */
@@ -148,6 +156,7 @@ export default function OrderIntakeSheet({
       productTitle ? `Product: ${productTitle}` : "",
       designerName ? `Designer: ${designerName}` : "",
       finish ? `Selected finish: ${finish}` : "",
+      `Company: ${d.company}`,
       `Client type: ${d.profile === "designer" ? "Interior Designer / Architect" : "Private Client"}`,
       d.city ? `Project location: ${d.city}` : "",
       d.phone ? `Phone: ${d.phone}` : "",
@@ -163,6 +172,7 @@ export default function OrderIntakeSheet({
           name: d.email.split("@")[0] || "Website visitor",
           email: d.email,
           phone: d.phone,
+          company: d.company,
           message,
           subject: `Quote Request — ${productTitle ?? "Product"}`,
           productName: productTitle ?? undefined,
@@ -469,6 +479,18 @@ export default function OrderIntakeSheet({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@studio.com"
+                className={inputCls}
+              />
+              <label className={cn(labelCls, "mt-5")} htmlFor="intake-company">
+                Company / Studio Name
+              </label>
+              <input
+                id="intake-company"
+                type="text"
+                autoComplete="organization"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder="Your studio or company"
                 className={inputCls}
               />
               <label className={cn(labelCls, "mt-5")} htmlFor="intake-phone">

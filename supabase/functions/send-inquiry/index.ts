@@ -56,7 +56,7 @@ const TWILIO_GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
 // are logged to admin_alert_log so no lead is ever silently lost.
 async function sendQuoteWhatsAppAlert(
   supabase: any,
-  inquiry: { id: string; name: string; email: string; phone: string; productName?: string; selectedFinish?: string },
+  inquiry: { id: string; name: string; email: string; phone: string; company?: string; productName?: string; selectedFinish?: string },
 ) {
   const to = Deno.env.get("ADMIN_WHATSAPP_TO");
   const from = Deno.env.get("TWILIO_WHATSAPP_FROM");
@@ -65,9 +65,9 @@ async function sendQuoteWhatsAppAlert(
   if (!to || !from || !lovableKey || !twilioKey) return;
 
   const body = `🚨 *New Quote Request on Maison Affluency!*
+• *Company:* ${inquiry.company || "Not provided"}
 • *Product:* ${inquiry.productName || "(unknown)"}
 • *Finish:* ${inquiry.selectedFinish || "Not specified"}
-• *Client:* ${inquiry.name}
 • *Client Email:* ${inquiry.email}
 • *Client Phone:* ${inquiry.phone || "Not provided"}
 
@@ -242,6 +242,7 @@ const handler = async (req: Request): Promise<Response> => {
         name,
         email,
         phone,
+        company: companyName,
         productName,
         selectedFinish,
       }).catch((err) => console.error("Quote WhatsApp alert unhandled:", err));
