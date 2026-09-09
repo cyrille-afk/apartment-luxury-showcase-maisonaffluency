@@ -514,20 +514,47 @@ const App = () => {
   restorePreviewLocationBeforeRouter();
   const [showDeferredUi, setShowDeferredUi] = useState(false);
 
-  // Block Pinterest browser extension globally
+  // Block Pinterest browser extension globally.
+  // Deferred to idle and rAF-batched: running full-document querySelectorAll on
+  // every mutation during mount was one of the long startup tasks on mobile.
   useEffect(() => {
+    const win = window as any;
+    let observer: MutationObserver | null = null;
+    let scheduled = false;
+    let idleId: number | null = null;
+    let timeoutId: number | null = null;
+
     const blockPinterest = () => {
-      // Remove any Pinterest-injected elements
+      scheduled = false;
       document.querySelectorAll('[data-pin-log], [class*="PinIt"], [class*="pinterest"]').forEach(el => el.remove());
-      // Mark ALL images as non-pinnable so the extension never shows hover buttons
       document.querySelectorAll('img:not([data-pin-nopin])').forEach(img => {
         img.setAttribute('data-pin-nopin', 'true');
       });
     };
-    blockPinterest();
-    const observer = new MutationObserver(blockPinterest);
-    observer.observe(document.body, { childList: true, subtree: true });
-    return () => observer.disconnect();
+
+    const schedule = () => {
+      if (scheduled) return;
+      scheduled = true;
+      requestAnimationFrame(blockPinterest);
+    };
+
+    const start = () => {
+      blockPinterest();
+      observer = new MutationObserver(schedule);
+      observer.observe(document.body, { childList: true, subtree: true });
+    };
+
+    if (typeof win.requestIdleCallback === "function") {
+      idleId = win.requestIdleCallback(start, { timeout: 3000 });
+    } else {
+      timeoutId = window.setTimeout(start, 1500);
+    }
+
+    return () => {
+      if (idleId !== null) win.cancelIdleCallback?.(idleId);
+      if (timeoutId !== null) window.clearTimeout(timeoutId);
+      observer?.disconnect();
+    };
   }, []);
 
   useEffect(() => {

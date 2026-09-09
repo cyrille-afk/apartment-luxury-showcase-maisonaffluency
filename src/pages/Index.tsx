@@ -111,9 +111,41 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
   const needsScrollRestore = useRef(false);
   const skipNextScrollRestore = useRef(false);
   const mainRef = useRef<HTMLElement>(null);
+  // Non-critical overlays (featured-read banner, floating navs, compare drawer,
+  // trade CTA, scroll progress). They pull framer-motion chunks that used to be
+  // evaluated during the first paint, producing long main-thread tasks on
+  // throttled mobile. Mounted once the browser is idle after first paint.
+  const [showOverlays, setShowOverlays] = useState(false);
 
   // Track scroll depth for GA4 engagement
   useScrollDepthTracking();
+
+  useEffect(() => {
+    const win = window as any;
+    let idleId: number | null = null;
+    let timeoutId: number | null = null;
+    const reveal = () => setShowOverlays(true);
+    const start = () => {
+      if (typeof win.requestIdleCallback === "function") {
+        idleId = win.requestIdleCallback(reveal, { timeout: 2500 });
+      } else {
+        timeoutId = window.setTimeout(reveal, 1200);
+      }
+    };
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+    // Any scroll intent mounts them immediately so nothing feels missing.
+    const onIntent = () => reveal();
+    window.addEventListener("scroll", onIntent, { once: true, passive: true });
+    window.addEventListener("touchmove", onIntent, { once: true, passive: true });
+    return () => {
+      window.removeEventListener("load", start);
+      window.removeEventListener("scroll", onIntent);
+      window.removeEventListener("touchmove", onIntent);
+      if (idleId !== null) win.cancelIdleCallback?.(idleId);
+      if (timeoutId !== null) window.clearTimeout(timeoutId);
+    };
+  }, []);
 
   const unlockPageScroll = useCallback(() => {
     document.documentElement.style.overflow = "";
@@ -384,7 +416,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
         <meta name="twitter:description" content="Discover exceptional collectible furniture, bespoke interiors, and contemporary design by world-renowned designers and ateliers. Based in Singapore." />
         <meta name="twitter:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772516480/WhatsApp_Image_2026-03-03_at_1.40.10_PM_cs23b7.jpg" />
       </Helmet>
-      {showScrollProgress && (
+      {showScrollProgress && showOverlays && (
         <Suspense fallback={null}>
           <ScrollProgress />
         </Suspense>
@@ -392,7 +424,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
 
       {showNavigation && <Navigation />}
 
-      {showBelowFoldSections && (
+      {showBelowFoldSections && showOverlays && (
         <Suspense fallback={null}>
           <FeaturedReadBanner />
         </Suspense>
@@ -451,7 +483,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
         ) : null}
       </main>
 
-      {showBelowFoldSections && !routeIsCategory && (
+      {showBelowFoldSections && showOverlays && !routeIsCategory && (
         <Suspense fallback={null}>
           <GalleryDetailsFloatingNav showAfterElementId="gallery-section-6" />
         </Suspense>
@@ -460,7 +492,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
 
       {/* ExitIntentBanner "Chat with us" pill removed per user request. */}
 
-      {showBelowFoldSections && (
+      {showBelowFoldSections && showOverlays && (
         <Suspense fallback={null}>
           <CompareFab />
           <CompareDrawer />
