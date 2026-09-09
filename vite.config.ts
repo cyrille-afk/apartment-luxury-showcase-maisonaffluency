@@ -286,7 +286,7 @@ export default defineConfig(({ mode }) => {
           // route. Left unassigned, Rollup parks it inside whichever big
           // vendor chunk claims it first (it landed in vendor-docs), which
           // forces the entry to statically import that multi-MB chunk.
-          if (id.includes('vite/preload-helper')) return 'vendor-misc';
+          if (id.includes('vite/preload-helper') || id.includes('commonjsHelpers') || id.includes('commonjs-dynamic-modules')) return 'vendor-misc';
           if (!id.includes("node_modules")) return;
 
 
