@@ -1345,7 +1345,12 @@ const PublicProductPageContent: React.FC = () => {
       hasInteractedRef.current = true;
       if (galleryCompactRef.current) compactCanExpandRef.current = true;
     };
-    const onScroll = () => {
+    // One layout read + one state pass per animation frame. Reading
+    // getBoundingClientRect on every raw scroll tick forced a synchronous
+    // reflow dozens of times per second on mobile.
+    let ticking = false;
+    const measure = () => {
+      ticking = false;
       const y = window.scrollY;
       const el = galleryScrollRef.current;
       // Hysteresis: collapse once the user has genuinely started reading,
@@ -1374,10 +1379,13 @@ const PublicProductPageContent: React.FC = () => {
       } else {
         setStickyBarArmed(false);
       }
-
-
     };
-    onScroll();
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(measure);
+    };
+    measure();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("touchstart", armExpansion, { passive: true });
     window.addEventListener("touchmove", armExpansion, { passive: true });
