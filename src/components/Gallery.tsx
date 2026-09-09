@@ -1191,8 +1191,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 ) : null}
               </motion.div>
 
-              {/* Mobile: swipeable carousel like Instagram */}
-              {(() => {
+              {/* Mobile: swipeable carousel like Instagram — mounted only on
+                  mobile viewports; CSS-hidden subtrees still download images. */}
+              {isMobile && (() => {
                 const isHotspotSection = !section.items.some(item => item.description);
                 const activeIdx = activeScrollIndices[originalSectionIndex] || 0;
                 return (
@@ -1295,8 +1296,11 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 );
               })()}
 
-              {/* Desktop: single-column = horizontal carousel with dots; multi-column = grid */}
-              {gridCols === 1 ? (
+              {/* Desktop: single-column = horizontal carousel with dots; multi-column = grid.
+                  Mounted only on non-mobile viewports — `hidden md:*` containers
+                  still trigger image downloads on phones (display:none disables
+                  native lazy-loading). */}
+              {!isMobile && (gridCols === 1 ? (
                 <DesktopCarouselStrip
                   section={section}
                   originalSectionIndex={originalSectionIndex}
@@ -1366,7 +1370,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                   );
                 })}
               </div>
-              )}
+              ))}
             </div>
             </React.Fragment>;
           });

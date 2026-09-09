@@ -393,9 +393,9 @@
       pathname matches /designers. DesignersHoverHero removes it after mount.
     -->
     <picture id="static-designers-hero" style="display:none;position:absolute;top:0;left:0;width:100vw;height:100lvh;z-index:0;background:#0a0a0a;pointer-events:none;">
-      <source media="(max-width: 767px)" srcset="https://res.cloudinary.com/dif1oamtj/image/upload/w_960/q_auto:eco/f_auto/v1772160681/Casque-Bar-Cabinet_10_alexander-lamont_1_ydnjp2.jpg" />
+      <source media="(max-width: 767px)" data-srcset="https://res.cloudinary.com/dif1oamtj/image/upload/w_960/q_auto:eco/f_auto/v1772160681/Casque-Bar-Cabinet_10_alexander-lamont_1_ydnjp2.jpg" />
       <img
-        src="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600/q_auto:eco/f_auto/v1772160681/Casque-Bar-Cabinet_10_alexander-lamont_1_ydnjp2.jpg"
+        data-src="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600/q_auto:eco/f_auto/v1772160681/Casque-Bar-Cabinet_10_alexander-lamont_1_ydnjp2.jpg"
         alt=""
         aria-hidden="true"
         fetchpriority="high"
@@ -411,7 +411,15 @@
         if (!/^\/designers(\/)?($|\?|#)/.test(window.location.pathname)) return;
         var p = document.getElementById('static-designers-hero');
         var o = document.getElementById('static-designers-hero-overlay');
-        if (p) p.style.display = 'block';
+        if (p) {
+          // Hydrate src/srcset only on /designers — with data-* attrs elsewhere
+          // the hidden hero image is never fetched on other routes.
+          var s = p.querySelector('source');
+          var im = p.querySelector('img');
+          if (s && s.dataset.srcset) s.srcset = s.dataset.srcset;
+          if (im && im.dataset.src) im.src = im.dataset.src;
+          p.style.display = 'block';
+        }
         if (o) o.style.display = 'block';
       })();
     </script>
