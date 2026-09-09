@@ -4,7 +4,7 @@ const c = await b.newContext({ viewport:{width:390,height:844}, isMobile:true, h
 const pg = await c.newPage();
 const errs=[]; pg.on('pageerror',e=>errs.push(String(e)));
 await pg.goto('http://localhost:4321/', { waitUntil:'load' });
-await pg.waitForTimeout(4000);
+await pg.waitForTimeout(9000);
 await pg.screenshot({path:'/tmp/browser/lt/home.png'});
 console.log('banner', await pg.locator('[data-featured-read-banner]').count());
 console.log('nav', await pg.locator('nav').count());
