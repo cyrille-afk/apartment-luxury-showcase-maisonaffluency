@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Download, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import {
-  generateDesignerBiographyPdf,
-  downloadBlob,
-  type DesignerBiographyPdfInput,
-  type PdfProgress,
+import type {
+  DesignerBiographyPdfInput,
+  PdfProgress,
 } from "@/lib/generateDesignerBiographyPdf";
+
+// The jsPDF engine (~2MB) must never be part of the public route bundle —
+// it is fetched only when the visitor actually asks for the PDF.
+const loadBiographyPdfEngine = () => import("@/lib/generateDesignerBiographyPdf");
 import { trackDownload } from "@/lib/trackDownload";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import { useAuth } from "@/hooks/useAuth";
@@ -62,8 +64,9 @@ export default function BiographyPdfButton({ className, ...input }: BiographyPdf
     setPreviewBlob(null);
   };
 
-  const handleDownloadFromPreview = () => {
+  const handleDownloadFromPreview = async () => {
     if (!previewBlob) return;
+    const { downloadBlob } = await loadBiographyPdfEngine();
     downloadBlob(previewBlob, fileName);
     trackDownload(undefined, `Biography PDF — ${input.designerName}`);
   };
@@ -76,6 +79,7 @@ export default function BiographyPdfButton({ className, ...input }: BiographyPdf
     // the PDF is being assembled (can take several seconds for long bios).
     setPreviewOpen(true);
     try {
+      const { generateDesignerBiographyPdf } = await loadBiographyPdfEngine();
       const blob = await generateDesignerBiographyPdf({
         ...input,
         recipientName,

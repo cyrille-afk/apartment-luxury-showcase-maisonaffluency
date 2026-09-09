@@ -21,7 +21,7 @@ import {
   type RegionTier,
   type TradePaymentChannel,
 } from "@/config/tradePaymentChannels";
-import { buildProformaInvoicePdf, type ProformaLine } from "@/lib/proformaInvoicePdf";
+import type { ProformaLine } from "@/lib/proformaInvoicePdf";
 import { computeTaxCents, resolveTaxRule, taxRowLabel } from "@/config/taxRules";
 
 export interface RegionalPaymentPanelProps {
@@ -138,8 +138,8 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
     navigate("/trade/login", { state: { returnTo: window.location.pathname + window.location.search } });
   };
 
-  const buildPdf = () =>
-    buildProformaInvoicePdf({
+  const buildPdf = async () =>
+    (await import("@/lib/proformaInvoicePdf")).buildProformaInvoicePdf({
       orderRef,
       currency,
       buyer,

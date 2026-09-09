@@ -2,11 +2,10 @@ import { useState } from "react";
 import { Layers, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import {
-  buildFinishesSelectionPdf,
-  finishesPdfFileName,
-  type FinishSwatch,
-} from "@/lib/finishesSelectionPdf";
+import type { FinishSwatch } from "@/lib/finishesSelectionPdf";
+
+// jsPDF stays out of the public product bundle — loaded on click only.
+const loadFinishesPdf = () => import("@/lib/finishesSelectionPdf");
 
 interface Props {
   /** designer_curator_picks.id */
@@ -78,6 +77,7 @@ export default function FinishesPdfButton({
         return;
       }
 
+      const { buildFinishesSelectionPdf, finishesPdfFileName } = await loadFinishesPdf();
       const doc = await buildFinishesSelectionPdf({ productName, brandName, swatches });
       doc.save(finishesPdfFileName(productName));
     } catch (err) {
