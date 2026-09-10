@@ -2042,7 +2042,7 @@ const PublicDesignerProfile = () => {
                         }}
                         aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
                         className={cn(
-                          "w-full bg-[hsl(var(--canvas))] rounded-sm overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer aspect-[4/3] p-6"
+                          "w-full bg-[hsl(var(--canvas))] rounded-sm overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer aspect-[4/3] max-h-full max-w-full p-8"
                         )}
                       >
                         <SwipeAlternateProductImage
@@ -2052,8 +2052,9 @@ const PublicDesignerProfile = () => {
                           alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                           sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
-                          primaryClassName="object-contain p-0"
-                          alternateClassName="object-contain p-0"
+                          contain
+                          primaryClassName="max-h-full max-w-full object-contain p-0"
+                          alternateClassName="max-h-full max-w-full object-contain p-0"
                           alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
                         />
                         {/* Inventory badges — lower-left of the frame */}
