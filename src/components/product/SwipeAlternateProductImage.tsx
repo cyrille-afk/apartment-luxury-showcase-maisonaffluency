@@ -11,6 +11,10 @@ interface SwipeAlternateProductImageProps {
   primaryClassName?: string;
   alternateClassName?: string;
   alternateStyle?: React.CSSProperties;
+  /** Scale images down-to-fit without stretching to fill the frame. Useful for
+   *  grids where tall/narrow pieces (e.g. lamps) should not dominate wide
+   *  furniture cards. */
+  contain?: boolean;
 }
 
 /** Mobile swipe reveals the alternate view; desktop retains the established hover reveal. */
@@ -24,6 +28,7 @@ export default function SwipeAlternateProductImage({
   primaryClassName,
   alternateClassName,
   alternateStyle,
+  contain = false,
 }: SwipeAlternateProductImageProps) {
   const [showAlternate, setShowAlternate] = useState(false);
   const [primaryLoaded, setPrimaryLoaded] = useState(false);
