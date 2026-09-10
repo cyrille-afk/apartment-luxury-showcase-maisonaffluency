@@ -5,7 +5,7 @@ import { Check } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { copyTextToClipboard } from "@/lib/clipboard";
 import { DEFAULT_BANK_WIRE_CONFIG, buildPaymentReference } from "@/config/bankWire";
-import { formatCurrency } from "@/lib/currency";
+import { formatMoney } from "@/lib/cart";
 
 interface CopyableRowProps {
   label: string;
