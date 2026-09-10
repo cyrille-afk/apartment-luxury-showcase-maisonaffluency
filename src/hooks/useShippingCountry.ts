@@ -113,4 +113,4 @@ export function useEstimatedShipping(
 
 
 export const ESTIMATED_SHIPPING_NOTE =
-  "Estimated Base Freight (Final quote verified by Advisor)";
+  "Estimated Base Freight — Excludes Destination Duties & GST (Final quote verified by Advisor)";
