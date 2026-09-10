@@ -1018,6 +1018,15 @@ function WireForm({
         )}
         <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone" type="tel" inputMode="tel" autoComplete="tel" className={field} />
         <textarea value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Delivery address" rows={3} className="w-full rounded-none border border-neutral-200 bg-background p-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground" />
+
+        {sgB2BApplicable && (
+          <BuyerTypeSection
+            buyerType={buyerType}
+            setBuyerType={setBuyerType}
+            buyerGstNumber={buyerGstNumber}
+            setBuyerGstNumber={setBuyerGstNumber}
+          />
+        )}
       </section>
 
       {optionsSlot}
