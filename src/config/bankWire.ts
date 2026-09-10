@@ -9,21 +9,35 @@ export interface BankWireConfig {
   beneficiaryBank: string;
   beneficiaryBankAddress?: string;
   swiftBic: string;
-  iban: string;
+  intermediaryBic?: string;
+  accountNumber?: string;
+  iban?: string;
   referencePrefix: string;
+  currency: string;
+  transferNote?: string;
 }
 
 export const DEFAULT_BANK_WIRE_CONFIG: BankWireConfig = {
-  beneficiaryName: "Maison Affluency Pte. Ltd.",
-  beneficiaryBank: "Banque Neuflize OBC",
-  beneficiaryBankAddress: "3 avenue Hoche, 75008 Paris, France",
-  swiftBic: "NOFBFRPPXXX",
-  iban: "FR76 3000 3017 4500 0007 8901 234",
+  beneficiaryName: "AFFLUENCY ETC PTE LTD",
+  beneficiaryBank: "Revolut Technologies Singapore Pte. Ltd",
+  beneficiaryBankAddress:
+    "6 Battery Road, Floor 6-01, 049909, Singapore, Singapore",
+  swiftBic: "REVOSGS2",
+  intermediaryBic: "BARCGB22",
+  accountNumber: "885111609218375",
   referencePrefix: "MAW-",
+  currency: "USD",
+  transferNote:
+    "Please make your transfer in USD. Using a different currency may send the funds to the company's other account. Transfers may take 3–5 business days to arrive.",
 };
 
-export function buildPaymentReference(orderRef: string, config = DEFAULT_BANK_WIRE_CONFIG): string {
+export function buildPaymentReference(
+  orderRef: string,
+  config = DEFAULT_BANK_WIRE_CONFIG
+): string {
   const clean = orderRef.replace(/^#/, "").trim();
   if (!clean) return `${config.referencePrefix}PENDING`;
-  return clean.startsWith(config.referencePrefix) ? clean : `${config.referencePrefix}${clean}`;
+  return clean.startsWith(config.referencePrefix)
+    ? clean
+    : `${config.referencePrefix}${clean}`;
 }

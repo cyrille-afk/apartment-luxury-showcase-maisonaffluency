@@ -120,7 +120,9 @@ export default function BankWireInstructions() {
         ["Beneficiary Bank", config.beneficiaryBank],
         ["Bank Address", config.beneficiaryBankAddress || ""],
         ["SWIFT / BIC Code", config.swiftBic],
-        ["IBAN Account", config.iban],
+        ["Intermediary BIC", config.intermediaryBic || ""],
+        ["Account Number", config.accountNumber || ""],
+        ["IBAN Account", config.iban || ""],
         ["Payment Reference", paymentReference],
       ];
 
@@ -151,7 +153,7 @@ export default function BankWireInstructions() {
       doc.setFontSize(7.5);
       doc.setTextColor(150, 150, 150);
       doc.text(
-        "Maison Affluency Pte. Ltd. · maisonaffluency.com · hello@maisonaffluency.com",
+        `${config.beneficiaryName} · maisonaffluency.com · hello@maisonaffluency.com`,
         pageW / 2,
         doc.internal.pageSize.getHeight() - 18,
         { align: "center" }
@@ -238,9 +240,22 @@ export default function BankWireInstructions() {
             </div>
 
             <CopyableRow label="Swift / BIC Code" value={config.swiftBic} />
-            <CopyableRow label="IBAN Account" value={config.iban} />
+            {config.intermediaryBic && (
+              <CopyableRow label="Intermediary BIC" value={config.intermediaryBic} />
+            )}
+            {config.accountNumber && (
+              <CopyableRow label="Account Number" value={config.accountNumber} />
+            )}
+            {config.iban && (
+              <CopyableRow label="IBAN Account" value={config.iban} />
+            )}
             <CopyableRow label="Payment Reference" value={paymentReference} />
           </div>
+          {config.transferNote && (
+            <p className="mt-4 border-t border-zinc-100 pt-4 text-[11px] font-light leading-relaxed text-zinc-500">
+              {config.transferNote}
+            </p>
+          )}
         </div>
 
         <div className="mt-10 space-y-2">
