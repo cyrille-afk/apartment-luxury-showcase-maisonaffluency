@@ -111,15 +111,18 @@ export const DEFAULT_ITEM_MODIFIER = DEFAULT_ITEM_CBM / REFERENCE_CBM;
 
 /** Keyword hints, ordered — first match wins. */
 const CLASS_HINTS: [ShippingItemClass, RegExp][] = [
+  // Lighting first: "Lantern Table Lamp" / "Console Floor Light" must never be
+  // priced as a dining table — that misread was inflating freight ~4×.
+  ["lighting", /\b(lamp|lamps|light|lights|sconce|chandelier|pendant|lantern|luminaire)\b/i],
   ["sofa", /\b(sofa|settee|couch|daybed|chaise|banquette|modular)\b/i],
   ["cabinet", /\b(cabinet|sideboard|credenza|armoire|bookcase|dresser|commode|shelving|wardrobe)\b/i],
   ["bed", /\b(bed|headboard)\b/i],
   ["table", /\b(table|desk|console|bureau)\b/i],
   ["armchair", /\b(armchair|lounge chair|club chair|bergère|bergere|wing chair|swivel)\b/i],
   ["chair", /\b(chair|stool|bench|ottoman|pouf|footstool)\b/i],
-  ["lighting", /\b(lamp|light|sconce|chandelier|pendant|lantern)\b/i],
   ["accessory", /\b(mirror|tray|vase|box|rug|cushion|object|sculpture|screen)\b/i],
 ];
+
 
 /** Infers an item class from a product title / category string. */
 export function inferItemClass(text?: string | null): ShippingItemClass | null {
