@@ -131,7 +131,8 @@ export default function OrderIntakeSheet({
       ? Boolean(profile)
       : step === 1
         ? city.trim().length > 1
-        : EMAIL_RE.test(email.trim()) && company.trim().length > 0;
+        : EMAIL_RE.test(email.trim()) &&
+          (buyerType === "individual" || company.trim().length > 0);
 
   const details = (): OrderIntakeDetails => ({
     profile: profile as "designer" | "private",
@@ -139,7 +140,8 @@ export default function OrderIntakeSheet({
     notes: notes.trim(),
     email: email.trim(),
     phone: phone.trim(),
-    company: company.trim(),
+    company: buyerType === "business" ? company.trim() : "",
+    buyerType,
   });
 
   /** Quote flow: persist the inquiry, then show the in-drawer thank-you. */
