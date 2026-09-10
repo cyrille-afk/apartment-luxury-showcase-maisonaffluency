@@ -153,7 +153,7 @@ export default function BankWireInstructions() {
       doc.setFontSize(7.5);
       doc.setTextColor(150, 150, 150);
       doc.text(
-        "Maison Affluency Pte. Ltd. · maisonaffluency.com · hello@maisonaffluency.com",
+        `${config.beneficiaryName} · maisonaffluency.com · hello@maisonaffluency.com`,
         pageW / 2,
         doc.internal.pageSize.getHeight() - 18,
         { align: "center" }
