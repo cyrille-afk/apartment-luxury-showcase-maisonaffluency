@@ -1585,24 +1585,12 @@ const PublicProductPageContent: React.FC = () => {
     : Array.from(new Set([product.image_url, product.hover_image_url].filter(Boolean)))
   ) as string[];
 
-  // Finish-scoped view of the reel. `visibleImageIndices` holds the absolute
-  // (0-based) positions currently on show, so we can translate between the
-  // gallery's local index and the product's canonical image index.
-  const visibleImageIndices: number[] | null = (() => {
-    if (!swatchImageIndices || swatchImageIndices.length === 0) return null;
-    const abs = Array.from(new Set(swatchImageIndices.map((i) => i - 1)))
-      .filter((i) => i >= 0 && i < images.length)
-      .sort((a, b) => a - b);
-    return abs.length ? abs : null;
-  })();
-  const visibleImages = visibleImageIndices
-    ? visibleImageIndices.map((i) => images[i])
-    : finishGroupingPending && images.length > 1
-    ? images.slice(0, 1)
-    : images;
-  const visibleActiveIndex = visibleImageIndices
-    ? Math.max(0, visibleImageIndices.indexOf(galleryActiveIndex ?? visibleImageIndices[0]))
-    : galleryActiveIndex;
+  // The reel is never pruned by finish selection: the thumbnail track always
+  // keeps the full master asset list. Selecting a finish simply slides the
+  // main viewport to that variant's mapped index.
+  const visibleImageIndices: number[] | null = null;
+  const visibleImages = images;
+  const visibleActiveIndex = galleryActiveIndex;
 
 
 
@@ -2390,9 +2378,9 @@ const PublicProductPageContent: React.FC = () => {
                         setSwatchImageIndices(null);
                         return;
                       }
-                      // Rugs keep the full thumbnail rail visible; picking a
-                      // finish jumps to its photo instead of pruning the reel.
-                      setSwatchImageIndices(meta?.jumpOnly ? null : indices);
+                      // The thumbnail rail always keeps every asset; picking a
+                      // finish only jumps to its mapped photo.
+                      setSwatchImageIndices(null);
                       setGalleryActiveIndex(Math.max(0, indices[0] - 1));
                       setGalleryJumpNonce((n) => n + 1);
                     }}
@@ -2600,9 +2588,9 @@ const PublicProductPageContent: React.FC = () => {
                         setSwatchImageIndices(null);
                         return;
                       }
-                      // Rugs keep the full thumbnail rail visible; picking a
-                      // finish jumps to its photo instead of pruning the reel.
-                      setSwatchImageIndices(meta?.jumpOnly ? null : indices);
+                      // The thumbnail rail always keeps every asset; picking a
+                      // finish only jumps to its mapped photo.
+                      setSwatchImageIndices(null);
                       setGalleryActiveIndex(Math.max(0, indices[0] - 1));
                       setGalleryJumpNonce((n) => n + 1);
                     }}
