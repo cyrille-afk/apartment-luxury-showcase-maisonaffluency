@@ -128,8 +128,25 @@ serve(async (req) => {
     const shippingCountry =
       typeof body?.shippingCountry === "string" ? body.shippingCountry.trim().toUpperCase() : "";
     const taxRule = resolveTaxRule(shippingCountry, currency);
-    const taxCents = computeTaxCents(goodsAmount, shippingCents, taxRule);
-    const taxLabel = taxRule ? taxRowLabel(taxRule) : null;
+
+    // B2B Singapore zero-rating: a GST-registered business supplying a valid
+    // Singapore UEN is not charged GST on the invoice.
+    const buyerType =
+      typeof body?.buyerType === "string" ? body.buyerType.toLowerCase() : "private";
+    const buyerGstNumber =
+      typeof body?.buyerGstNumber === "string" ? body.buyerGstNumber.trim().toUpperCase() : "";
+    const isB2BZeroRated =
+      buyerType === "business" &&
+      isSingaporeUenValid(buyerGstNumber) &&
+      taxRule !== null &&
+      taxRule.country === "SG";
+
+    const taxCents = isB2BZeroRated
+      ? 0
+      : computeTaxCents(goodsAmount, shippingCents, taxRule);
+    const taxLabel = isB2BZeroRated
+      ? B2B_TAX_LABEL
+      : (taxRule ? taxRowLabel(taxRule) : null);
 
     const amount = goodsAmount + shippingCents + taxCents;
     if (amount < 100 || amount > 100_000_00 * 100) return json({ error: "Price out of range." }, 400);
