@@ -74,6 +74,15 @@ const money = (cents: number, currency: string) =>
     maximumFractionDigits: 0,
   }).format(Math.round(cents / 100));
 
+/** Explicit two-decimal currency display for zero-rated B2B tax lines. */
+const moneyDecimal = (cents: number, currency: string) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: (currency || "usd").toUpperCase(),
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Math.round(cents) / 100);
+
 
 /* ------------------------------------------------------------------ */
 /* Order summary math — gross prices, one cart-level discount row      */
