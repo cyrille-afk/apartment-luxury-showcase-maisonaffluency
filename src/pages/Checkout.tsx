@@ -650,6 +650,16 @@ function PaymentForm({
             className="h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground"
           />
         )}
+
+        {sgB2BApplicable && (
+          <BuyerTypeSection
+            buyerType={buyerType}
+            setBuyerType={setBuyerType}
+            buyerGstNumber={buyerGstNumber}
+            setBuyerGstNumber={setBuyerGstNumber}
+          />
+        )}
+
         <AddressElement
           // Remount when the header/modal destination changes so the
           // "Country or Region" field snaps to the newly saved country.
