@@ -12,6 +12,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { convertCentsWithFallback, getFxRates } from "@/lib/fxRates";
+import {
+  isManualDestination,
+  useShippingDestination,
+} from "@/lib/shippingDestination";
 
 export type MinimalLine = {
   currency?: string | null;
@@ -22,8 +26,26 @@ export type MinimalLine = {
 const qty = (l: MinimalLine) => Math.max(1, Math.floor(l.quantity ?? 1));
 const code = (c?: string | null) => (c || "USD").toUpperCase();
 
+/**
+ * Settlement currency locked by the header "Shipping destination & currency"
+ * modal. Returns null until the shopper has explicitly picked a destination,
+ * so IP-detected visitors keep the catalogue currency.
+ */
+export function useSettlementCurrency(): string | null {
+  const dest = useShippingDestination();
+  const [manual, setManual] = useState(() => isManualDestination());
+  useEffect(() => {
+    setManual(isManualDestination());
+  }, [dest.iso]);
+  return manual ? dest.currency.toUpperCase() : null;
+}
+
 /** Currency every amount on the screen is expressed in. */
-export function resolveBaseCurrency(lines: MinimalLine[] | null | undefined): string {
+export function resolveBaseCurrency(
+  lines: MinimalLine[] | null | undefined,
+  preferredBase?: string | null,
+): string {
+  if (preferredBase) return preferredBase.toUpperCase();
   if (!lines?.length) return "USD";
   const totals = new Map<string, number>();
   for (const l of lines) {
@@ -77,8 +99,12 @@ export type NormalizedLine<T> = T & {
  */
 export function useCurrencyNormalizedLines<T extends MinimalLine>(
   lines: T[] | null,
+  preferredBase?: string | null,
 ): { base: string; lines: NormalizedLine<T>[] | null; mixed: boolean } {
-  const base = useMemo(() => resolveBaseCurrency(lines), [lines]);
+  const base = useMemo(
+    () => resolveBaseCurrency(lines, preferredBase),
+    [lines, preferredBase],
+  );
   const rates = useFxToBase(lines, base);
   const mixed = useMemo(
     () => new Set((lines ?? []).map((l) => code(l.currency))).size > 1,

@@ -14,6 +14,7 @@ import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";
 import { releaseBodyScroll } from "@/lib/bodyScrollLock";
 import { useEstimatedShipping, ESTIMATED_SHIPPING_NOTE } from "@/hooks/useShippingCountry";
 import { useShippingDestination } from "@/lib/shippingDestination";
+import { useCurrencyNormalizedLines, useSettlementCurrency } from "@/lib/checkout/multiCurrency";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 
 import {
@@ -63,13 +64,32 @@ export default function CartIdentify() {
     if (!items.length) navigate("/cart", { replace: true });
   }, [items.length, navigate]);
 
-  const currency = items[0]?.currency || "USD";
-  const subtotal = useMemo(() => cartSubtotalCents(items), [items]);
+  // Currency locked by the header destination modal — every figure here and
+  // downstream settles in it.
+  const settlementCurrency = useSettlementCurrency();
+  const priceableItems = useMemo(
+    () => items.map((i) => ({ ...i, unitCents: i.unitPriceCents })),
+    [items],
+  );
+  const { base: currency, lines: convertedLines } = useCurrencyNormalizedLines(
+    priceableItems,
+    settlementCurrency,
+  );
+  const displayItems = useMemo(
+    () =>
+      (convertedLines ?? []).map((l) => ({
+        ...(l as unknown as CartItem),
+        unitPriceCents: l.unitCents,
+        currency: l.currency ?? currency,
+      })),
+    [convertedLines, currency],
+  );
+  const subtotal = useMemo(() => cartSubtotalCents(displayItems), [displayItems]);
   // Tier discount for the authenticated account (admin / verified trade).
   const discount = useAccountDiscount();
   const shipDest = useShippingDestination();
   const freightEstimate = useEstimatedShipping(
-    items,
+    displayItems,
     shipDest.iso,
     currency,
     discount.totalFor(subtotal),
@@ -85,7 +105,7 @@ export default function CartIdentify() {
     if (method === "card") {
       navigate("/checkout", {
         state: {
-          lines: items.map((i: CartItem) => ({
+          lines: displayItems.map((i: CartItem) => ({
             title: i.title,
             designer: i.designerName,
             finishLabel: i.finishLabel,
@@ -108,6 +128,7 @@ export default function CartIdentify() {
       const { data, error } = await supabase.functions.invoke("create-cart-checkout", {
         body: {
           method,
+          currency: currency.toLowerCase(),
           email: contactEmail || undefined,
           fullName: fullName || undefined,
           items: items.map((i: CartItem) => ({
@@ -386,7 +407,7 @@ export default function CartIdentify() {
               </div>
 
               <ul className="mt-6 space-y-4">
-                {items.map((item) => (
+                {displayItems.map((item) => (
                   <li key={item.key} className="flex gap-4 border-b border-border/60 pb-4 last:border-0 last:pb-0">
                     <div className="w-16 shrink-0 bg-cream">
                       {item.imageUrl ? (

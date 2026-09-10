@@ -42,7 +42,7 @@ import { isHighTicketEuropeanFulfillment } from "@/lib/europeanLogistics";
 import { useUsdToSgdRate } from "@/hooks/useUsdToSgdRate";
 import { convertCents, useFxRates } from "@/components/trade/CurrencyToggle";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
-import { useCurrencyNormalizedLines } from "@/lib/checkout/multiCurrency";
+import { useCurrencyNormalizedLines, useSettlementCurrency } from "@/lib/checkout/multiCurrency";
 
 
 const CONCIERGE_WHATSAPP = "https://wa.me/6591393850";
@@ -75,24 +75,39 @@ const lineSubtotal = (line: CheckoutLine) => lineTotalCents(line);
 const orderSubtotal = (lines: CheckoutLine[]) => buildVerifiedTotals(lines).totalCents;
 const orderCurrency = (lines: CheckoutLine[]) => lines[0]?.currency || "usd";
 
+/* Intl already prefixes the ISO code for currencies without a unique symbol
+ * (SGD, AED…) — don't print it twice. */
+const withIso = (formatted: string, code: string) =>
+  formatted.startsWith(code) ? formatted : `${code} ${formatted}`;
+
 /* Clean integers with an explicit ISO code so USD and SGD never look alike. */
-const money = (cents: number, currency: string) =>
-  `${(currency || "usd").toUpperCase()} ${new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: (currency || "usd").toUpperCase(),
-    currencyDisplay: "symbol",
-    maximumFractionDigits: 0,
-  }).format(Math.round(cents / 100))}`;
+const money = (cents: number, currency: string) => {
+  const code = (currency || "usd").toUpperCase();
+  return withIso(
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: code,
+      currencyDisplay: "symbol",
+      maximumFractionDigits: 0,
+    }).format(Math.round(cents / 100)),
+    code,
+  );
+};
 
 /** Explicit two-decimal currency display for zero-rated B2B tax lines. */
-const moneyDecimal = (cents: number, currency: string) =>
-  `${(currency || "usd").toUpperCase()} ${new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: (currency || "usd").toUpperCase(),
-    currencyDisplay: "symbol",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(Math.round(cents) / 100)}`;
+const moneyDecimal = (cents: number, currency: string) => {
+  const code = (currency || "usd").toUpperCase();
+  return withIso(
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: code,
+      currencyDisplay: "symbol",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(Math.round(cents) / 100),
+    code,
+  );
+};
 
 
 /* ------------------------------------------------------------------ */
@@ -1287,7 +1302,11 @@ export default function Checkout() {
   const [rawLines, setLines] = useState<CheckoutLine[] | null>(null);
   // A mixed-currency cart (EUR chair + USD lamp) is converted into one base
   // currency with live FX before any subtotal / freight / tax / charge maths.
-  const { lines: grossLines } = useCurrencyNormalizedLines(rawLines);
+  // The header "Shipping destination & currency" modal locks the settlement
+  // currency: pick Singapore/SGD and every figure — and the charge itself —
+  // is converted into SGD before any subtotal / freight / tax maths runs.
+  const settlementCurrency = useSettlementCurrency();
+  const { lines: grossLines } = useCurrencyNormalizedLines(rawLines, settlementCurrency);
   // Account-level tier discount. The hook drives the first paint; the value
   // returned by the PaymentIntent is authoritative once it arrives, so the
   // displayed total always equals the amount Stripe will charge.
@@ -1303,9 +1322,21 @@ export default function Checkout() {
   // drives the estimated base freight row in the Order Summary.
   // Defaults to the globally chosen shipping destination so tax is resolved
   // even in wire mode, where no Stripe address element sets this.
+  const checkoutForm = useCheckoutForm();
   const [formCountry, setFormCountry] = useState<string | null>(
-    () => getCurrentDestination()?.iso ?? null,
+    () => checkoutForm.projectCountry || getCurrentDestination()?.iso || null,
   );
+  // Country stated earlier in the funnel is authoritative and sticky — the
+  // shopper never specifies their project location twice.
+  useEffect(() => {
+    if (checkoutForm.projectCountry) setFormCountry(checkoutForm.projectCountry);
+  }, [checkoutForm.projectCountry]);
+  // Any country picked here (Stripe address element, wire mode) writes back.
+  useEffect(() => {
+    if (formCountry && formCountry !== checkoutForm.projectCountry) {
+      checkoutForm.setProjectCountry(formCountry);
+    }
+  }, [formCountry]); // eslint-disable-line react-hooks/exhaustive-deps
   // Signed-in account — replaces blank email/name inputs with a confirmation.
   const { user, isAdmin, isSuperAdmin, isTradeUser, profile, tradeStatus } = useAuth();
   const tradeApproved = tradeStatus === "approved" || isTradeUser;
@@ -1432,7 +1463,6 @@ export default function Checkout() {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   // Email is global checkout state: typed once on the identity step, it
   // pre-fills here and stays in sync so it reaches the purchase payload.
-  const checkoutForm = useCheckoutForm();
   const [email, setEmailLocal] = useState(checkoutForm.email);
   // If the email arrives after mount (restored session, identify step racing
   // a redirect) adopt it as long as the buyer hasn't typed anything.

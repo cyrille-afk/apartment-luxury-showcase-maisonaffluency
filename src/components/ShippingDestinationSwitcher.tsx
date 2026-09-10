@@ -28,6 +28,7 @@ import {
   setDestination,
   useShippingDestination,
 } from "@/lib/shippingDestination";
+import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 
 interface Props {
   className?: string;
@@ -40,6 +41,7 @@ interface Props {
 
 export default function ShippingDestinationSwitcher({ className, compact, flagClassName, showIso }: Props) {
   const current = useShippingDestination();
+  const checkoutForm = useCheckoutForm();
   const [open, setOpen] = useState(false);
   const [pendingIso, setPendingIso] = useState(current.iso);
 
@@ -50,6 +52,9 @@ export default function ShippingDestinationSwitcher({ className, compact, flagCl
 
   const handleSave = () => {
     setDestination(pendingIso);
+    // One location of record: the destination is also the project country used
+    // by the checkout forms further down the funnel.
+    checkoutForm.setProjectCountry(pendingIso);
     setOpen(false);
   };
 
