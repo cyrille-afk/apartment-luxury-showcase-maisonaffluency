@@ -58,6 +58,8 @@ export interface ProductCommerceCtaProps {
   orderFinishLabel?: string | null;
   /** All selectable finishes — enables the quote sheet's finish selector. */
   finishOptions?: string[];
+  /** Per-finish price + image, powering live re-pricing inside the intake sheet. */
+  finishVariants?: { label: string; priceLabel?: string | null; imageUrl?: string | null }[];
   redirectTo?: string;
   /** Mobile-only sticky bottom dock */
   dock?: boolean;
@@ -513,6 +515,8 @@ export default function ProductCommerceCta({
             orderFinishLabel || (selectedFinishes.length ? selectedFinishes.join(" / ") : null)
           }
           finishOptions={finishOptions}
+          finishVariants={finishVariants}
+          baseImageUrl={imageUrl}
           submitting={placingOrder}
           mode={isUnpriced ? "quote" : "order"}
           productId={productId}
