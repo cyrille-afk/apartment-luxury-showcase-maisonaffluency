@@ -426,7 +426,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <CornerTooltip label="Presentation" side={isMobileOrPwa ? "top" : "bottom"} align={isMobileOrPwa ? "end" : "start"}>
+              <CornerTooltip label="Presentation" side="top" align="end">
                 <button
                   type="button"
                   aria-label="Presentation"
