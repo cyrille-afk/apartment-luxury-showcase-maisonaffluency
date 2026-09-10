@@ -407,6 +407,11 @@ function OrderSummary({
             <p className="mt-2 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
               (Equivalent to Approx. {money(sgdEquivalentCents, "SGD")} based on current rates)
             </p>
+            {sgImportGstThreshold && !sgImportGstThreshold.isLowValueGoods && (
+              <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                Because this item value exceeds the S$400 threshold upon SGD conversion, Singapore Import GST (9%) must be settled via the courier during border customs clearance rather than collected at checkout.
+              </p>
+            )}
             {isB2BZeroRated ? (
               <p className="mt-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
                 Buyer GST / UEN: {buyerGstNumber.trim().toUpperCase()}
