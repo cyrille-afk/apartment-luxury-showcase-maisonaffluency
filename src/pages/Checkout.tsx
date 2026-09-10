@@ -38,6 +38,7 @@ import {
   reconcileBackendAmount,
 } from "@/lib/checkoutGuardrails";
 import { checkSgdThreshold } from "@/lib/checkout/checkSgdThreshold";
+import { isHighTicketEuropeanFulfillment } from "@/lib/europeanLogistics";
 import { useUsdToSgdRate } from "@/hooks/useUsdToSgdRate";
 import { convertCents, useFxRates } from "@/components/trade/CurrencyToggle";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
