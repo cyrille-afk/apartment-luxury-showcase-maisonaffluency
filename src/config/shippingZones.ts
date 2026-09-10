@@ -111,15 +111,18 @@ export const DEFAULT_ITEM_MODIFIER = DEFAULT_ITEM_CBM / REFERENCE_CBM;
 
 /** Keyword hints, ordered — first match wins. */
 const CLASS_HINTS: [ShippingItemClass, RegExp][] = [
+  // Lighting first: "Lantern Table Lamp" / "Console Floor Light" must never be
+  // priced as a dining table — that misread was inflating freight ~4×.
+  ["lighting", /\b(lamp|lamps|light|lights|sconce|chandelier|pendant|lantern|luminaire)\b/i],
   ["sofa", /\b(sofa|settee|couch|daybed|chaise|banquette|modular)\b/i],
   ["cabinet", /\b(cabinet|sideboard|credenza|armoire|bookcase|dresser|commode|shelving|wardrobe)\b/i],
   ["bed", /\b(bed|headboard)\b/i],
   ["table", /\b(table|desk|console|bureau)\b/i],
   ["armchair", /\b(armchair|lounge chair|club chair|bergère|bergere|wing chair|swivel)\b/i],
   ["chair", /\b(chair|stool|bench|ottoman|pouf|footstool)\b/i],
-  ["lighting", /\b(lamp|light|sconce|chandelier|pendant|lantern)\b/i],
   ["accessory", /\b(mirror|tray|vase|box|rug|cushion|object|sculpture|screen)\b/i],
 ];
+
 
 /** Infers an item class from a product title / category string. */
 export function inferItemClass(text?: string | null): ShippingItemClass | null {
@@ -160,15 +163,99 @@ export function getItemShippingModifier(item: ShippingEstimateItem): number {
   return getItemCbm(item) / REFERENCE_CBM;
 }
 
-/** Total crated volume of the cart, scaled by quantity. */
+/**
+ * Share of the crated volume that each ADDITIONAL identical unit adds.
+ *
+ * The published per-class CBM is a single crated piece: net product volume
+ * plus crate tare (timber frame, corner blocking, foam void). When several
+ * units of the same line ship together they are consolidated into one crate
+ * or nested onto one pallet, so the tare is paid once — not per unit.
+ * Fragile small pieces (lighting, accessories) nest far better than case
+ * goods, hence the lower factors.
+ */
+export const CONSOLIDATION_FACTOR: Record<ShippingItemClass, number> = {
+  sofa: 0.85,
+  cabinet: 0.85,
+  bed: 0.85,
+  table: 0.8,
+  armchair: 0.75,
+  chair: 0.65,
+  lighting: 0.55,
+  accessory: 0.5,
+};
+
+/** Applied when the item class cannot be inferred. */
+export const DEFAULT_CONSOLIDATION_FACTOR = 0.75;
+
+/** Resolves the class used for consolidation (null when unknown). */
+export function resolveItemClass(item: ShippingEstimateItem): ShippingItemClass | null {
+  return item.itemClass ?? inferItemClass(item.category) ?? inferItemClass(item.title);
+}
+
+/**
+ * Billable crated volume of one cart line, quantity included.
+ * First unit at full crate volume, each additional unit at its consolidation
+ * factor — so two lamps never carry two full container tares.
+ */
+export function getLineCbm(item: ShippingEstimateItem): number {
+  const qty = Math.max(1, Math.round(item.quantity ?? 1));
+  const unit = getItemCbm(item);
+  if (qty === 1) return unit;
+  const cls = resolveItemClass(item);
+  const factor = cls ? CONSOLIDATION_FACTOR[cls] : DEFAULT_CONSOLIDATION_FACTOR;
+  return unit + unit * factor * (qty - 1);
+}
+
+/** Total crated volume of the cart, consolidated per line. */
 export function getCartCbm(items?: ShippingEstimateItem[] | null): number {
   if (!items?.length) return 0;
-  const total = items.reduce((sum, item) => {
-    const qty = Math.max(1, Math.round(item.quantity ?? 1));
-    return sum + getItemCbm(item) * qty;
-  }, 0);
+  const total = items.reduce((sum, item) => sum + getLineCbm(item), 0);
   return total > 0 ? Math.max(MIN_SHIPMENT_CBM, Number(total.toFixed(2))) : 0;
 }
+
+/* ------------------------------------------------------------------ */
+/* Freight safety cap                                                  */
+/* ------------------------------------------------------------------ */
+
+/** Freight is never displayed above this share of the order value. */
+export const FREIGHT_CAP_RATIO = 0.15;
+
+export const FREIGHT_CAP_NOTICE =
+  "Oversized shipping quote requires advisor validation. Initial freight deposit shown below.";
+
+export interface CappedFreight {
+  /** Freight to display, in minor units. */
+  cents: number;
+  /** Raw engine output before the cap, in minor units. */
+  uncappedCents: number;
+  capped: boolean;
+  /** Advisor-validation copy when capped, otherwise null. */
+  notice: string | null;
+}
+
+/**
+ * Caps a freight figure at {@link FREIGHT_CAP_RATIO} of the order value.
+ * Above the cap the shown amount becomes an initial freight deposit and the
+ * order is routed to an advisor for validation.
+ */
+export function applyFreightCap(
+  freightCents: number,
+  orderValueCents: number,
+): CappedFreight {
+  const freight = Math.max(0, Math.round(freightCents || 0));
+  const value = Math.max(0, Math.round(orderValueCents || 0));
+  const ceiling = Math.round(value * FREIGHT_CAP_RATIO);
+  if (freight <= 0 || value <= 0 || freight <= ceiling) {
+    return { cents: freight, uncappedCents: freight, capped: false, notice: null };
+  }
+  return {
+    cents: ceiling,
+    uncappedCents: freight,
+    capped: true,
+    notice: FREIGHT_CAP_NOTICE,
+  };
+}
+
 
 /**
  * Estimated freight for a country.

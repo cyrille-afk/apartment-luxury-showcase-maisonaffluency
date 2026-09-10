@@ -68,7 +68,12 @@ export default function CartIdentify() {
   // Tier discount for the authenticated account (admin / verified trade).
   const discount = useAccountDiscount();
   const shipDest = useShippingDestination();
-  const freightEstimate = useEstimatedShipping(items, shipDest.iso);
+  const freightEstimate = useEstimatedShipping(
+    items,
+    shipDest.iso,
+    currency,
+    discount.totalFor(subtotal),
+  );
   const orderTotal = discount.totalFor(subtotal) + freightEstimate.cents;
 
 
@@ -438,6 +443,11 @@ export default function CartIdentify() {
                       <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
                     )}
                   </div>
+                  {freightEstimate.capped && freightEstimate.notice && (
+                    <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-foreground">
+                      {freightEstimate.notice}
+                    </p>
+                  )}
                   {freightEstimate.cents > 0 && (
                     <p className="mt-1.5 font-light italic text-[10px] tracking-[0.06em] text-muted-foreground">
                       {ESTIMATED_SHIPPING_NOTE}

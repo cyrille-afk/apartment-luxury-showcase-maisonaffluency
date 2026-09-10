@@ -102,6 +102,10 @@ export type CheckoutSummary = {
   shippingLabel: string | null;
   /** Base freight estimated from the buyer's country. 0 when unknown. */
   estimatedShippingCents: number;
+  /** True when freight was capped at 15% of the order value. */
+  freightCapped: boolean;
+  /** Advisor-validation copy shown when the freight cap applied. */
+  freightNotice: string | null;
   /** Display name of the matched shipping zone (e.g. "Asia Pacific"). */
   shippingZoneLabel: string | null;
   /** Consumption tax (GST/VAT) due per the configurable rules. 0 otherwise. */
@@ -373,6 +377,11 @@ function OrderSummary({
                 <dd className="whitespace-nowrap text-right text-muted-foreground">To be Quoted by Advisor</dd>
               )}
             </div>
+            {summary.freightCapped && summary.freightNotice && (
+              <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-foreground">
+                {summary.freightNotice}
+              </p>
+            )}
             {summary.shippingCents === 0 && summary.estimatedShippingCents > 0 && (
               <p className="mt-1.5 italic font-light text-[10px] tracking-[0.06em] text-muted-foreground">
                 {ESTIMATED_SHIPPING_NOTE}
@@ -1266,6 +1275,16 @@ export default function Checkout() {
     })),
     formCountry,
     orderCurrency(grossLines ?? []),
+    // Cap freight at 15% of the discounted goods value.
+    grossLines?.length
+      ? Math.max(
+          0,
+          orderSubtotal(grossLines) -
+            (effectiveDiscountPct > 0
+              ? Math.round(orderSubtotal(grossLines) * effectiveDiscountPct)
+              : 0),
+        )
+      : 0,
   );
   const [buyerType, setBuyerType] = useState<BuyerType>("private");
   const [buyerGstNumber, setBuyerGstNumber] = useState("");
@@ -1330,6 +1349,8 @@ export default function Checkout() {
       shippingCents,
       shippingLabel: shipping?.label ?? null,
       estimatedShippingCents,
+      freightCapped: estimatedShippingCents > 0 && estimate.capped,
+      freightNotice: estimatedShippingCents > 0 ? estimate.notice : null,
       shippingZoneLabel: estimate.zoneLabel ?? null,
       taxCents,
       taxLabel: b2bZeroRated
@@ -1347,7 +1368,7 @@ export default function Checkout() {
       totalCents: chargeTotalCents + estimatedShippingCents + estimatedTaxCents,
       chargeTotalCents,
     };
-  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, formCountry, serverTax, buyerType, buyerGstNumber]);
+  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, estimate.capped, estimate.notice, formCountry, serverTax, buyerType, buyerGstNumber]);
 
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);

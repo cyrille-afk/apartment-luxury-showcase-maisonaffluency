@@ -59,7 +59,14 @@ export default function Cart() {
   // Delivery is quoted by the advisor post-purchase, so the displayed total
   // is the goods subtotal less any tier discount (no invented shipping figure).
   const destination = useShippingDestination();
-  const freightEstimate = useEstimatedShipping(items, destination.iso, currency);
+  // Freight is capped at 15% of the discounted goods value; above that the
+  // figure shown is an initial deposit pending advisor validation.
+  const freightEstimate = useEstimatedShipping(
+    items,
+    destination.iso,
+    currency,
+    discount.totalFor(subtotal),
+  );
   // Geo-targeted WhatsApp direct line — show only the number relevant to the
   // visitor's region to keep narrow mobile layouts uncluttered.
   const directLine = useMemo(() => {
@@ -414,6 +421,11 @@ export default function Cart() {
                         <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
                       )}
                     </div>
+                    {freightEstimate.capped && freightEstimate.notice && (
+                      <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-foreground">
+                        {freightEstimate.notice}
+                      </p>
+                    )}
                     {freightEstimate.cents > 0 && (
                       <p className="mt-1.5 font-light italic text-[10px] tracking-[0.06em] text-muted-foreground">
                         {ESTIMATED_SHIPPING_NOTE}
