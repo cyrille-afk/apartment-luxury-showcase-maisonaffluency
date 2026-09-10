@@ -4074,6 +4074,8 @@ export type Database = {
       orders: {
         Row: {
           amount_total: number
+          buyer_gst_number: string | null
+          buyer_type: string | null
           created_at: string
           currency: string
           customer_email: string | null
@@ -4087,6 +4089,8 @@ export type Database = {
         }
         Insert: {
           amount_total?: number
+          buyer_gst_number?: string | null
+          buyer_type?: string | null
           created_at?: string
           currency?: string
           customer_email?: string | null
@@ -4100,6 +4104,8 @@ export type Database = {
         }
         Update: {
           amount_total?: number
+          buyer_gst_number?: string | null
+          buyer_type?: string | null
           created_at?: string
           currency?: string
           customer_email?: string | null
