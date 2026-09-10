@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Minus, Plus, Loader2, Heart, ChevronRight } from "lucide-react";
+import { looksLikeDimension } from "@/lib/rugPricing";
 import Navigation from "@/components/Navigation";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
 import { Button } from "@/components/ui/button";
@@ -288,9 +289,27 @@ export default function Cart() {
                         </Link>
                       </h2>
                       {item.finishLabel && (
-                        <p className="font-body text-sm text-muted-foreground mt-2 leading-relaxed">
-                          {item.finishLabel}
-                        </p>
+                        <>
+                          {(() => {
+                            const parts = item.finishLabel.split(" / ").map((s) => s.trim()).filter(Boolean);
+                            const finishParts = parts.filter((p) => !looksLikeDimension(p));
+                            const dimParts = parts.filter((p) => looksLikeDimension(p));
+                            return (
+                              <>
+                                {finishParts.length > 0 && (
+                                  <p className="font-body text-sm text-muted-foreground mt-2 leading-relaxed">
+                                    {finishParts.join(" / ")}
+                                  </p>
+                                )}
+                                {dimParts.length > 0 && (
+                                  <p className="font-body text-xs text-zinc-500 mt-1 leading-relaxed">
+                                    {dimParts.join(" / ")}
+                                  </p>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </>
                       )}
                       {item.leadTime && (
                         <p className="mt-4 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -394,18 +413,27 @@ export default function Cart() {
                   <div>
                     <dt className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Direct Line</dt>
                     <dd className="mt-2">
+                      <span className="text-muted-foreground">
+                        Chat with an Advisor on WhatsApp
+                      </span>
+                    </dd>
+                    <dd className="mt-1 text-muted-foreground space-y-0.5">
                       <a
                         href="https://wa.me/6591393850"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="hover:text-[hsl(var(--gold))] transition-colors"
+                        className="block hover:text-[hsl(var(--gold))] transition-colors"
                       >
-                        Chat with an Advisor on WhatsApp
+                        • Singapore: +65 9139 3850
                       </a>
-                    </dd>
-                    <dd className="mt-1 text-muted-foreground">
-                      <span className="block">• Singapore: +65 9139 3850</span>
-                      <span className="block">• Paris &amp; EU: +33 6 1623 7460</span>
+                      <a
+                        href="https://wa.me/33616237460"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block hover:text-[hsl(var(--gold))] transition-colors"
+                      >
+                        • Paris &amp; EU: +33 6 1623 7460
+                      </a>
                     </dd>
                     <dd className="mt-2">
                       <Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
