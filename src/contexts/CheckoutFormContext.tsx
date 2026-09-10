@@ -33,10 +33,9 @@ const STORAGE_KEY = "ma_checkout_form";
 
 const EMPTY: CheckoutFormState = { email: "", guestName: "" };
 
-function load(): CheckoutFormState {
+function parse(raw: string | null): CheckoutFormState {
+  if (!raw) return EMPTY;
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
-    if (!raw) return EMPTY;
     const parsed = JSON.parse(raw);
     return {
       email: typeof parsed.email === "string" ? parsed.email : "",
@@ -47,12 +46,27 @@ function load(): CheckoutFormState {
   }
 }
 
+function load(): CheckoutFormState {
+  try {
+    // sessionStorage first (current tab), localStorage as the durable
+    // fallback so a direct visit or a new tab still pre-fills the email.
+    const session = parse(sessionStorage.getItem(STORAGE_KEY));
+    if (session.email || session.guestName) return session;
+    return parse(localStorage.getItem(STORAGE_KEY));
+  } catch {
+    return EMPTY;
+  }
+}
+
 function persist(state: CheckoutFormState) {
   try {
     if (!state.email && !state.guestName) {
       sessionStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_KEY);
     } else {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      const raw = JSON.stringify(state);
+      sessionStorage.setItem(STORAGE_KEY, raw);
+      localStorage.setItem(STORAGE_KEY, raw);
     }
   } catch {
     /* private mode — in-memory state still works */
