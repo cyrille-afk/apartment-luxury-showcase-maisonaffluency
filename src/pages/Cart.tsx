@@ -291,10 +291,10 @@ export default function Cart() {
                           src={item.imageUrl}
                           alt={item.title}
                           loading="lazy"
-                          className="w-full h-36 object-contain"
+                          className="w-full h-auto object-contain"
                         />
                       ) : (
-                        <div className="h-36" />
+                        <div className="aspect-square" />
                       )}
                     </div>
 
