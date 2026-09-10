@@ -2439,6 +2439,7 @@ const PublicProductPageContent: React.FC = () => {
 
                     <div className="flex flex-col gap-3 md:gap-5 order-5 md:order-5">
                       <MotionAndDimensionsPanel />
+                      <ShippingDetailsAccordion variant="row" />
                     </div>
                   </VariantSelectorsProvider>
 
@@ -2469,7 +2470,6 @@ const PublicProductPageContent: React.FC = () => {
                               {leadLine && <p className="mt-0.5">{leadLine}</p>}
                             </div>
                           </div>
-                          <ShippingDetailsAccordion variant="row" />
                         </>
                       );
                     })()}
