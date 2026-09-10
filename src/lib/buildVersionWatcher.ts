@@ -125,7 +125,7 @@ export function startBuildVersionWatcher() {
   if (started) return;
   started = true;
   if (shouldSkipBuildWatcher()) return;
-  if (isProtectedPath()) return;
+  
   currentBuildId = readMetaBuildId();
   // No build id stamped → likely dev server. Nothing to watch.
   if (!currentBuildId) return;
