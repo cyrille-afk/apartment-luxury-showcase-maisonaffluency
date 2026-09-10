@@ -1762,6 +1762,7 @@ const TradeProductPage: React.FC = () => {
       sourceCurrency: didConvert ? srcCcy : null,
       sourceUnitPriceCents: didConvert ? unit : null,
       fxRate: didConvert ? fxRates[`${srcCcy}_${tgtCcy}`] ?? converted / unit : null,
+      origin: product.origin,
     });
     navigate("/cart");
   };

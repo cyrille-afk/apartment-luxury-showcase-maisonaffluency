@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Minus, Plus, Loader2, Heart, ChevronRight } from "lucide-react";
 import { looksLikeDimension } from "@/lib/rugPricing";
+import { isHighTicketEuropeanFulfillment } from "@/lib/europeanLogistics";
 import Navigation from "@/components/Navigation";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
 import { Button } from "@/components/ui/button";
@@ -126,6 +127,20 @@ export default function Cart() {
   // otherwise (freight to be quoted) fall back to the goods total.
   const estimatedTotal = freightEstimate.cents > 0 ? estimatedGrandTotal : total;
 
+  /** Show the Paris logistics advisory when a high-ticket European piece is in the cart. */
+  const showEuropeanLogisticsNotice = useMemo(
+    () =>
+      items.some((item) =>
+        isHighTicketEuropeanFulfillment(
+          item.unitPriceCents,
+          item.origin,
+          item.pickupCountry,
+          item.sourceCurrency,
+        ),
+      ),
+    [items],
+  );
+
   const sgdRate = useUsdToSgdRate();
   const sgdEquivalent = useMemo(() => {
     if (currency !== "USD") return null;
@@ -181,6 +196,8 @@ export default function Cart() {
                 ? `/designers/${i.designerSlug}/${i.productSlug}`
                 : null,
             quantity: i.quantity,
+            origin: i.origin ?? null,
+            pickupCountry: i.pickupCountry ?? null,
           })),
         },
       });
@@ -494,6 +511,11 @@ export default function Cart() {
                     {freightEstimate.capped && freightEstimate.notice && (
                       <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-foreground">
                         {freightEstimate.notice}
+                      </p>
+                    )}
+                    {showEuropeanLogisticsNotice && (
+                      <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500 italic">
+                        Note: For European fulfillments, this shipping fee serves as an initial transit deposit. Our Paris logistics team manually reviews every order within 24 hours to secure the optimal white-glove courier route and transit pricing for your specific pieces.
                       </p>
                     )}
                   </div>

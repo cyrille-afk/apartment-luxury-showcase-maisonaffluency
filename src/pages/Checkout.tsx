@@ -38,6 +38,7 @@ import {
   reconcileBackendAmount,
 } from "@/lib/checkoutGuardrails";
 import { checkSgdThreshold } from "@/lib/checkout/checkSgdThreshold";
+import { isHighTicketEuropeanFulfillment } from "@/lib/europeanLogistics";
 import { useUsdToSgdRate } from "@/hooks/useUsdToSgdRate";
 import { convertCents, useFxRates } from "@/components/trade/CurrencyToggle";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
@@ -62,6 +63,9 @@ export type CheckoutLine = {
   /** Freight class hints — drive the shipping estimate multiplier. */
   category?: string | null;
   shippingModifier?: number | null;
+  /** Product provenance — used to trigger region-specific logistics copy. */
+  origin?: string | null;
+  pickupCountry?: string | null;
 };
 
 /* All amounts below are derived only from cart line items — see checkoutGuardrails. */
@@ -295,6 +299,15 @@ function OrderSummary({
   /** SG-bound, over the S$400 low-value threshold — GST settled at the border. */
   const sgBorderGst = Boolean(sgImportGstThreshold && !sgImportGstThreshold.isLowValueGoods);
 
+  /** Paris logistics advisory for high-ticket European pieces in the basket. */
+  const showEuropeanLogisticsNotice = useMemo(
+    () =>
+      lines.some((line) =>
+        isHighTicketEuropeanFulfillment(line.unitCents, line.origin, line.pickupCountry),
+      ),
+    [lines],
+  );
+
   return (
     <aside className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] h-fit">
       <div className="border border-border/70 px-7 py-8">
@@ -390,6 +403,11 @@ function OrderSummary({
             {summary.shippingCents === 0 && summary.estimatedShippingCents > 0 && (
               <p className="mt-1.5 italic font-light text-[10px] tracking-[0.06em] text-muted-foreground">
                 {ESTIMATED_SHIPPING_NOTE}
+              </p>
+            )}
+            {showEuropeanLogisticsNotice && (
+              <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500 italic">
+                Note: For European fulfillments, this shipping fee serves as an initial transit deposit. Our Paris logistics team manually reviews every order within 24 hours to secure the optimal white-glove courier route and transit pricing for your specific pieces.
               </p>
             )}
             <RegionalLogisticsNote compact className="mt-2" />
@@ -1504,6 +1522,8 @@ export default function Checkout() {
           ? `/designers/${item.designerSlug}/${item.productSlug}`
           : null,
         quantity: item.quantity,
+        origin: item.origin ?? null,
+        pickupCountry: item.pickupCountry ?? null,
       })).filter(valid);
       if (fallback.length) {
         sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify(fallback));
