@@ -77,6 +77,13 @@ import {
 } from "@/components/product/PublicSpecTable";
 import TradeWorkspace from "@/components/product/TradeWorkspace";
 import ProductCommerceCta from "@/components/product/ProductCommerceCta";
+import ProductMotionSelector from "@/components/product/ProductMotionSelector";
+import {
+  motionValueFromVariantLabel,
+  resolveProductMotionOptions,
+  variantLabelForMotion,
+  type ProductMotionValue,
+} from "@/lib/productMotionOptions";
 import CurrencyToggle, { formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 
@@ -1028,6 +1035,48 @@ const VariantDimensionsPanel: React.FC = () => {
           disabledIndices={disabledBaseIdx}
         />
       )}
+    </div>
+  );
+};
+
+const MotionAndDimensionsPanel: React.FC = () => {
+  const { product, selBase, selTop, onMaterialChange } = useVariantSelectorsContext();
+  const motionOptions = React.useMemo(
+    () => resolveProductMotionOptions(product.size_variants),
+    [product.size_variants],
+  );
+  const [motion, setMotion] = useState<ProductMotionValue>(() =>
+    motionValueFromVariantLabel(
+      typeof window === "undefined"
+        ? null
+        : (() => {
+            try {
+              const raw = sessionStorage.getItem(`ma_variant_sel_${product?.id ?? "unknown"}`);
+              return raw ? (JSON.parse(raw) as { dualSize?: string | null }).dualSize : null;
+            } catch {
+              return null;
+            }
+          })(),
+    ),
+  );
+
+  useEffect(() => {
+    if (!motionOptions) return;
+    onMaterialChange?.(variantLabelForMotion(motionOptions, motion), {
+      base: selBase,
+      top: selTop,
+      size: variantLabelForMotion(motionOptions, motion),
+    });
+  }, [motionOptions, motion, onMaterialChange, selBase, selTop]);
+
+  if (!motionOptions) return <VariantDimensionsPanel />;
+
+  return (
+    <div className="flex flex-col gap-4">
+      <ProductMotionSelector value={motion} onChange={setMotion} />
+      <p className="font-body text-xs tracking-wide text-muted-foreground">
+        {withImperialPerLine(motionOptions.dimensions)}
+      </p>
     </div>
   );
 };
