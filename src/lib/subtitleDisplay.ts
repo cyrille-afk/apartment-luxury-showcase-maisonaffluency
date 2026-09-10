@@ -12,6 +12,10 @@ const FINISH_WORDS = [
   "brass", "bronze", "steel", "chrome", "nickel", "copper", "iron", "aluminium", "aluminum",
   "marble", "travertine", "onyx", "stone", "granite", "glass", "ceramic", "resin",
   "black", "white", "natural", "matte", "matt", "gloss", "polished", "brushed", "patinated",
+  "clear", "frosted", "smoked", "smoke", "amber", "bronzed", "silver", "silvered", "gold",
+  "gilded", "tarnished", "aged", "antique", "alabaster", "plaster", "shagreen", "parchment",
+  "straw", "lacquer", "crystal", "quartz", "gesso", "eggshell", "rattan", "cane", "horn",
+  "mother-of-pearl", "pearl", "opaque", "translucent", "verre", "églomisé", "eglomise",
 ];
 
 export function isFinishSubtitle(subtitle?: string | null): boolean {

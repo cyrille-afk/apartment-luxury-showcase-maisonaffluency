@@ -17,6 +17,7 @@ import { useFounderIsBrand } from "@/hooks/useFounderIsBrand";
 import { cn } from "@/lib/utils";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { composeTitle, splitTitleAttribution } from "@/lib/curatorPickLegend";
+import { isFinishSubtitle } from "@/lib/subtitleDisplay";
 import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePublicRrp";
 import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import SwipeAlternateProductImage from "@/components/product/SwipeAlternateProductImage";
@@ -331,12 +332,15 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                     ? (composed.remainingSubtitle || pick.subtitle || "").trim().match(/^(for|by)\s+.+/i)?.[0] || ""
                     : "";
 
+                  // A finish/material subtitle ("Clear", "Tarnished Silver") is a variant,
+                  // never a brand — it must not replace the maker on the brand line.
+                  const subtitleIsFinish = isFinishSubtitle(pick.subtitle);
                   const brandLine = (
                     brandLabelOverride
                     || attributedDesigner
                     || parentBrand
-                    || (editorSuffix ? "" : composed.remainingSubtitle)
-                    || (editorSuffix ? "" : pick.subtitle)
+                    || (editorSuffix || subtitleIsFinish ? "" : composed.remainingSubtitle)
+                    || (editorSuffix || subtitleIsFinish ? "" : pick.subtitle)
                     || displayName
                     || designer.name
                     || ""
