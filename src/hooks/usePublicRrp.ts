@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { convertCentsWithFallback, FALLBACK_RATES } from "@/lib/fxRates";
 
 export interface PublicRrpRow {
   rrp_price_cents: number | null;
