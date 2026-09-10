@@ -33,6 +33,15 @@ export default function ProductMotionSelector({
               role="radio"
               aria-checked={selected}
               onClick={() => onChange(option.value)}
+              onKeyDown={(event) => {
+                if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+                event.preventDefault();
+                const nextValue: ProductMotionValue = option.value === "swivel" ? "fixed" : "swivel";
+                onChange(nextValue);
+                const group = event.currentTarget.parentElement;
+                const next = group?.querySelector<HTMLElement>(`[role="radio"][aria-checked="false"]`);
+                window.requestAnimationFrame(() => next?.focus());
+              }}
               className={cn(
                 "h-11 min-w-0 rounded-none px-2 font-body text-[10px] uppercase tracking-[0.12em]",
                 selected
