@@ -1266,6 +1266,16 @@ export default function Checkout() {
     })),
     formCountry,
     orderCurrency(grossLines ?? []),
+    // Cap freight at 15% of the discounted goods value.
+    grossLines?.length
+      ? Math.max(
+          0,
+          orderSubtotal(grossLines) -
+            (effectiveDiscountPct > 0
+              ? Math.round(orderSubtotal(grossLines) * effectiveDiscountPct)
+              : 0),
+        )
+      : 0,
   );
   const [buyerType, setBuyerType] = useState<BuyerType>("private");
   const [buyerGstNumber, setBuyerGstNumber] = useState("");
