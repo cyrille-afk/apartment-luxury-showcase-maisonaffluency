@@ -614,7 +614,7 @@ function PaymentForm({
   setBuyerGstNumber,
 }: {
   summary: CheckoutSummary;
-  account: { email: string; role: string } | null;
+  account: { email: string; role: string; company?: string } | null;
   email: string;
   setEmail: (v: string) => void;
   onPaid: (ref: string) => void;
@@ -686,7 +686,7 @@ function PaymentForm({
           Contact & delivery
         </h2>
         {account ? (
-          <AccountBlock email={account.email} role={account.role} />
+          <AccountBlock email={account.email} role={account.role} company={account.company} />
         ) : (
           <input
             type="email"
@@ -969,7 +969,7 @@ function WireForm({
 }: {
   lines: CheckoutLine[];
   summary: CheckoutSummary;
-  account: { email: string; role: string } | null;
+  account: { email: string; role: string; company?: string } | null;
   email: string;
   setEmail: (v: string) => void;
   onDone: (ref: string) => void;
@@ -1059,7 +1059,7 @@ function WireForm({
           Bank wire — contact & delivery
         </h2>
         {account ? (
-          <AccountBlock email={account.email} role={account.role} />
+          <AccountBlock email={account.email} role={account.role} company={account.company} />
         ) : (
           <>
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" autoComplete="name" className={field} />
