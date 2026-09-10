@@ -75,24 +75,39 @@ const lineSubtotal = (line: CheckoutLine) => lineTotalCents(line);
 const orderSubtotal = (lines: CheckoutLine[]) => buildVerifiedTotals(lines).totalCents;
 const orderCurrency = (lines: CheckoutLine[]) => lines[0]?.currency || "usd";
 
+/* Intl already prefixes the ISO code for currencies without a unique symbol
+ * (SGD, AED…) — don't print it twice. */
+const withIso = (formatted: string, code: string) =>
+  formatted.startsWith(code) ? formatted : `${code} ${formatted}`;
+
 /* Clean integers with an explicit ISO code so USD and SGD never look alike. */
-const money = (cents: number, currency: string) =>
-  `${(currency || "usd").toUpperCase()} ${new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: (currency || "usd").toUpperCase(),
-    currencyDisplay: "symbol",
-    maximumFractionDigits: 0,
-  }).format(Math.round(cents / 100))}`;
+const money = (cents: number, currency: string) => {
+  const code = (currency || "usd").toUpperCase();
+  return withIso(
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: code,
+      currencyDisplay: "symbol",
+      maximumFractionDigits: 0,
+    }).format(Math.round(cents / 100)),
+    code,
+  );
+};
 
 /** Explicit two-decimal currency display for zero-rated B2B tax lines. */
-const moneyDecimal = (cents: number, currency: string) =>
-  `${(currency || "usd").toUpperCase()} ${new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: (currency || "usd").toUpperCase(),
-    currencyDisplay: "symbol",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(Math.round(cents) / 100)}`;
+const moneyDecimal = (cents: number, currency: string) => {
+  const code = (currency || "usd").toUpperCase();
+  return withIso(
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: code,
+      currencyDisplay: "symbol",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(Math.round(cents) / 100),
+    code,
+  );
+};
 
 
 /* ------------------------------------------------------------------ */
