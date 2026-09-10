@@ -357,9 +357,20 @@ function OrderSummary({
                   Qty {lineQty(line)}
                 </p>
               </div>
-              <p className="font-body text-sm tabular-nums shrink-0">
-                {money(lineSubtotal(line), line.currency)}
-              </p>
+              <div className="shrink-0 text-right">
+                <p className="font-body text-sm tabular-nums whitespace-nowrap">
+                  {money(lineSubtotal(line), line.currency)}
+                </p>
+                {(line as any).sourceCurrency && (
+                  <p className="font-body text-[10px] italic text-muted-foreground mt-1 whitespace-nowrap">
+                    Converted from{" "}
+                    {money(
+                      Math.round((line as any).sourceUnitCents ?? 0) * lineQty(line),
+                      (line as any).sourceCurrency,
+                    )}
+                  </p>
+                )}
+              </div>
             </li>
           ))}
         </ul>
