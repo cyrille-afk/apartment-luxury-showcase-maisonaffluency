@@ -19,6 +19,7 @@ import { useUsdToSgdRate } from "@/hooks/useUsdToSgdRate";
 import { useShippingDestination } from "@/lib/shippingDestination";
 import { ShippingCountryIndicator } from "@/components/checkout/ShippingCountryIndicator";
 import { getFxRates, convertCentsWithFallback } from "@/lib/fxRates";
+import { resolveBaseCurrency } from "@/lib/checkout/multiCurrency";
 
 
 
