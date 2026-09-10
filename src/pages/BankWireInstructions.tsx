@@ -120,7 +120,9 @@ export default function BankWireInstructions() {
         ["Beneficiary Bank", config.beneficiaryBank],
         ["Bank Address", config.beneficiaryBankAddress || ""],
         ["SWIFT / BIC Code", config.swiftBic],
-        ["IBAN Account", config.iban],
+        ["Intermediary BIC", config.intermediaryBic || ""],
+        ["Account Number", config.accountNumber || ""],
+        ["IBAN Account", config.iban || ""],
         ["Payment Reference", paymentReference],
       ];
 
