@@ -232,8 +232,23 @@ function BuyerTypeSection({
 /* Order summary — persistent sidebar showing the true unit prices,    */
 /* the subtotal, one explicit discount row, and the final total.       */
 /* ------------------------------------------------------------------ */
-function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: CheckoutSummary }) {
+function OrderSummary({
+  lines,
+  summary,
+  buyerType,
+  buyerGstNumber,
+}: {
+  lines: CheckoutLine[];
+  summary: CheckoutSummary;
+  buyerType: BuyerType;
+  buyerGstNumber: string;
+}) {
   const { currency } = summary;
+  const isB2BZeroRated =
+    buyerType === "business" &&
+    isSingaporeUenValid(buyerGstNumber) &&
+    summary.taxCountry === "SG" &&
+    currency.toLowerCase() === "sgd";
 
   return (
     <aside className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] h-fit">
