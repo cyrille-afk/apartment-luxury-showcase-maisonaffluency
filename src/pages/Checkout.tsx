@@ -906,7 +906,19 @@ function CopyButton({ value, label }: { value: string; label: string }) {
 /* ------------------------------------------------------------------ */
 /* Bank wire — payment by transfer, no card data collected             */
 /* ------------------------------------------------------------------ */
-function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlot }: {
+function WireForm({
+  lines,
+  summary,
+  account,
+  email,
+  setEmail,
+  onDone,
+  optionsSlot,
+  buyerType,
+  setBuyerType,
+  buyerGstNumber,
+  setBuyerGstNumber,
+}: {
   lines: CheckoutLine[];
   summary: CheckoutSummary;
   account: { email: string; role: string } | null;
@@ -914,7 +926,13 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
   setEmail: (v: string) => void;
   onDone: (ref: string) => void;
   optionsSlot: React.ReactNode;
+  buyerType: BuyerType;
+  setBuyerType: (v: BuyerType) => void;
+  buyerGstNumber: string;
+  setBuyerGstNumber: (v: string) => void;
 }) {
+  const sgB2BApplicable =
+    summary.taxCountry === "SG" && summary.currency.toLowerCase() === "sgd";
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
