@@ -70,17 +70,21 @@ export default function Cart() {
     if (EU_ISOS.has(destination.iso)) return { label: "France & EU", number: "+33 6 16 23 74 60" };
     return { label: "International", number: "+33 6 16 23 74 60" };
   }, [destination.iso]);
-  // Payable now = goods less tier discount. The freight figure is indicative
-  // only (advisor-verified) and is never charged, so it is shown separately
-  // rather than folded into the amount the customer is asked to pay.
+  // Payable now = goods less tier discount. The Estimated Total adds the
+  // indicative freight figure (advisor-verified, invoiced separately) so the
+  // headline number is the true landed-estimate: subtotal + delivery.
   const total = discount.totalFor(subtotal);
   const estimatedGrandTotal = total + freightEstimate.cents;
+  // Headline figure: when a freight estimate exists it is the full sum;
+  // otherwise (freight to be quoted) fall back to the goods total.
+  const estimatedTotal = freightEstimate.cents > 0 ? estimatedGrandTotal : total;
 
   const sgdRate = useUsdToSgdRate();
   const sgdEquivalent = useMemo(() => {
     if (currency !== "USD") return null;
-    return Math.round((total / 100) * sgdRate.rate);
-  }, [total, sgdRate.rate, currency]);
+    // Convert the true estimated total (subtotal + shipping), not the subtotal.
+    return Math.round((estimatedTotal / 100) * sgdRate.rate);
+  }, [estimatedTotal, sgdRate.rate, currency]);
 
   const formatUsd = (cents: number, code = currency) =>
     code === "USD" ? `USD ${formatMoney(cents, code)}` : formatMoney(cents, code);
@@ -420,9 +424,9 @@ export default function Cart() {
 
 
                   <div className="border-t border-border pt-4">
-                    <div className="flex items-baseline justify-between">
+                    <div className="flex items-baseline justify-between gap-6">
                       <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Estimated Total (USD)</dt>
-                      <dd className="tabular-nums font-medium text-base">{formatUsd(total)}</dd>
+                      <dd className="tabular-nums font-medium text-base whitespace-nowrap">{formatUsd(estimatedTotal)}</dd>
                     </div>
                     {sgdEquivalent !== null && (
                       <p className="mt-1.5 font-body text-xs text-muted-foreground tabular-nums">
@@ -430,12 +434,13 @@ export default function Cart() {
                       </p>
                     )}
                     <p className="mt-1.5 font-body text-[10px] text-muted-foreground leading-relaxed">
-                      Final settlement will be in USD. Local import taxes may apply upon delivery.
+                      Final settlement will be in USD. Local import duties and GST are not included —
+                      they will be assessed separately upon customs entry{destination.iso === "SG" ? " to Singapore" : " at destination"}.
                     </p>
                     {freightEstimate.cents > 0 && (
                       <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-                        Payable now. With estimated freight ·{" "}
-                        {formatUsd(estimatedGrandTotal)} — freight invoiced separately once
+                        Payable now · {formatUsd(total)}. Estimated freight ·{" "}
+                        {formatUsd(freightEstimate.cents)} — invoiced separately once
                         confirmed by your advisor.
                       </p>
                     )}
