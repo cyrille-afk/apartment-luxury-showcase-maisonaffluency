@@ -133,13 +133,21 @@ export const isTaxableOrder = (country: string | null, currency: string) =>
 
 
 /* Signed-in account confirmation — replaces blank email/name inputs.  */
-function AccountBlock({ email, role }: { email: string; role: string }) {
+function AccountBlock({ email, role, company }: { email: string; role: string; company?: string }) {
   return (
-    <div className="flex items-center justify-between gap-4 border border-border bg-muted/30 px-4 py-3">
-      <span className="text-[11px] font-light uppercase tracking-[0.24em] text-muted-foreground">Account</span>
-      <span className="truncate text-sm">
-        {email} <span className="text-muted-foreground">({role})</span>
-      </span>
+    <div className="border border-border bg-muted/30 px-4 py-3">
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-[11px] font-light uppercase tracking-[0.24em] text-muted-foreground">Account</span>
+        <span className="truncate text-sm">
+          {email} <span className="text-muted-foreground">({role})</span>
+        </span>
+      </div>
+      {company && (
+        <div className="mt-2 flex items-center justify-between gap-4">
+          <span className="text-[11px] font-light uppercase tracking-[0.24em] text-muted-foreground">Business</span>
+          <span className="truncate text-sm text-muted-foreground">{company}</span>
+        </div>
+      )}
     </div>
   );
 }
