@@ -1730,7 +1730,7 @@ export default function Checkout() {
         </div>
 
         {/* Right — persistent order summary */}
-        <OrderSummary lines={grossLines} summary={summary} />
+        <OrderSummary lines={grossLines} summary={summary} buyerType={buyerType} buyerGstNumber={buyerGstNumber} />
         </div>
       </main>
     </div>
