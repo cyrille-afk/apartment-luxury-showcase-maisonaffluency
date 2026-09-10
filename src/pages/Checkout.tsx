@@ -1521,6 +1521,8 @@ export default function Checkout() {
           ? `/designers/${item.designerSlug}/${item.productSlug}`
           : null,
         quantity: item.quantity,
+        origin: item.origin ?? null,
+        pickupCountry: item.pickupCountry ?? null,
       })).filter(valid);
       if (fallback.length) {
         sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify(fallback));
