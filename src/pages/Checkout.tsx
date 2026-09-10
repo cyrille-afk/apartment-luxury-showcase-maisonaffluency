@@ -435,7 +435,7 @@ function OrderSummary({
                     ? moneyDecimal(0, currency)
                     : summary.taxApplied
                       ? money(summary.taxCents, currency)
-                      : money(0, currency)}
+                      : <span className="text-muted-foreground">—</span>}
                 </dd>
               </div>
             )}
