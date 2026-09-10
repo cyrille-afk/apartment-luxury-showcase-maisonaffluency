@@ -2469,7 +2469,7 @@ const PublicProductPageContent: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col gap-3 md:gap-5 order-5 md:order-5">
-                      <VariantDimensionsPanel />
+                      <MotionAndDimensionsPanel />
                     </div>
                   </VariantSelectorsProvider>
 
