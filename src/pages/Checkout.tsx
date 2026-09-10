@@ -300,13 +300,13 @@ function OrderSummary({
   const sgBorderGst = Boolean(sgImportGstThreshold && !sgImportGstThreshold.isLowValueGoods);
 
   /** Paris logistics advisory for high-ticket European pieces in the basket. */
-  const showEuropeanLogisticsNotice = useMemo(() => {
-    const thresholdCents = 500_000; // $/€ 5,000
-    return lines.some(
-      (line) =>
-        (line.currency || "USD").toUpperCase() === "EUR" && line.unitCents >= thresholdCents,
-    );
-  }, [lines]);
+  const showEuropeanLogisticsNotice = useMemo(
+    () =>
+      lines.some((line) =>
+        isHighTicketEuropeanFulfillment(line.unitCents, line.origin, line.pickupCountry),
+      ),
+    [lines],
+  );
 
   return (
     <aside className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] h-fit">
