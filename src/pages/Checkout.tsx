@@ -79,7 +79,7 @@ const money = (cents: number, currency: string) =>
   `${(currency || "usd").toUpperCase()} ${new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: (currency || "usd").toUpperCase(),
-    currencyDisplay: "narrowSymbol",
+    currencyDisplay: "symbol",
     maximumFractionDigits: 0,
   }).format(Math.round(cents / 100))}`;
 
@@ -88,7 +88,7 @@ const moneyDecimal = (cents: number, currency: string) =>
   `${(currency || "usd").toUpperCase()} ${new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: (currency || "usd").toUpperCase(),
-    currencyDisplay: "narrowSymbol",
+    currencyDisplay: "symbol",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(Math.round(cents) / 100)}`;
@@ -396,7 +396,7 @@ function OrderSummary({
               )}
             </div>
             {summary.freightCapped && summary.freightNotice && (
-              <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-foreground">
+              <p className="mt-1.5 font-light text-[10px] leading-relaxed tracking-[0.06em] text-foreground">
                 {summary.freightNotice}
               </p>
             )}
@@ -435,7 +435,7 @@ function OrderSummary({
                     ? moneyDecimal(0, currency)
                     : summary.taxApplied
                       ? money(summary.taxCents, currency)
-                      : money(0, currency)}
+                      : <span className="text-muted-foreground">—</span>}
                 </dd>
               </div>
             )}
@@ -1885,6 +1885,65 @@ export default function Checkout() {
         {/* Right — persistent order summary */}
         <OrderSummary lines={grossLines} summary={summary} buyerType={buyerType} buyerGstNumber={buyerGstNumber} />
         </div>
+
+        {/* Need Help? — support channels at the base of checkout */}
+        <section className="mt-16 border border-border/70 bg-cream px-6 py-10 sm:px-8">
+          <h2 className="font-display text-xl">Need Help?</h2>
+          <p className="mt-3 font-body text-sm text-muted-foreground max-w-md leading-relaxed">
+            A private advisor can assist with configuration, lead times, delivery planning and
+            payment arrangements before you confirm your order.
+          </p>
+          <dl className="mt-8 grid gap-6 sm:grid-cols-3 font-body text-sm">
+            <div>
+              <dt className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Concierge</dt>
+              <dd className="mt-2">
+                <a href="mailto:concierge@maisonaffluency.com" className="hover:text-[hsl(var(--gold))] transition-colors">
+                  concierge@maisonaffluency.com
+                </a>
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Trade Program</dt>
+              <dd className="mt-2">
+                <a href="mailto:trade@maisonaffluency.com" className="hover:text-[hsl(var(--gold))] transition-colors">
+                  trade@maisonaffluency.com
+                </a>
+              </dd>
+              <dd className="mt-1">
+                <Link to="/trade" className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors">
+                  Discover the Trade Program
+                </Link>
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Direct Line</dt>
+              <dd className="mt-2 text-muted-foreground">Chat with an Advisor on WhatsApp</dd>
+              <dd className="mt-1 text-muted-foreground space-y-0.5">
+                <a
+                  href="https://wa.me/6591393850"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block hover:text-[hsl(var(--gold))] transition-colors"
+                >
+                  • Singapore: +65 9139 3850
+                </a>
+                <a
+                  href="https://wa.me/33616237460"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block hover:text-[hsl(var(--gold))] transition-colors"
+                >
+                  • Paris &amp; EU: +33 6 1623 7460
+                </a>
+              </dd>
+              <dd className="mt-2">
+                <a href="mailto:hello@maisonaffluency.com" className="text-muted-foreground hover:text-foreground transition-colors">
+                  hello@maisonaffluency.com
+                </a>
+              </dd>
+            </div>
+          </dl>
+        </section>
       </main>
     </div>
   );
