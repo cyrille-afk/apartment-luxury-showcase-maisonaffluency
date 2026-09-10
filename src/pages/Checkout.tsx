@@ -38,6 +38,7 @@ import {
   reconcileBackendAmount,
 } from "@/lib/checkoutGuardrails";
 import { checkSgdThreshold } from "@/lib/checkout/checkSgdThreshold";
+import { useUsdToSgdRate } from "@/hooks/useUsdToSgdRate";
 import { convertCents, useFxRates } from "@/components/trade/CurrencyToggle";
 
 
@@ -410,6 +411,11 @@ function OrderSummary({
             </p>
             <p className="mt-2 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
               (Equivalent to Approx. {money(sgdEquivalentCents, "SGD")} based on current rates)
+            </p>
+            <p className="mt-1 font-light text-[9px] tracking-[0.06em] text-muted-foreground/70">
+              {usdSgd.source === "live"
+                ? "Rates updated live via https://er-api.com"
+                : "Live rates unavailable — using baseline rate of 1.35 USD→SGD"}
             </p>
             {sgImportGstThreshold && !sgImportGstThreshold.isLowValueGoods && (
               <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
