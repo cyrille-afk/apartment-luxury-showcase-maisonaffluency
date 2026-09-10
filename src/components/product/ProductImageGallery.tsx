@@ -395,7 +395,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
 
 
-          {/* Presentation action — desktop top-left; mobile/PWA bottom-right
+          {/* Presentation action — desktop bottom-right; mobile/PWA top-left
               (swapped with the share anchor for thumb reachability).
               It is absolutely positioned INSIDE the photo frame, so it must
               never be bumped by the commerce dock: doing so stranded the icon
@@ -404,9 +404,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             className={cn(
               "z-50",
               "transition-all duration-500 ease-out",
-              isMobileOrPwa
-                ? `absolute ${compact ? "right-1.5 bottom-1.5" : "right-4 bottom-4"}`
-                : "absolute top-4 left-4"
+              `absolute ${compact ? "right-1.5 bottom-1.5" : "right-4 bottom-4"}`
             )}
           >
             {isMobileOrPwa && mobileMenuItems ? (
@@ -428,7 +426,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <CornerTooltip label="Presentation" side={isMobileOrPwa ? "top" : "bottom"} align={isMobileOrPwa ? "end" : "start"}>
+              <CornerTooltip label="Presentation" side="top" align="end">
                 <button
                   type="button"
                   aria-label="Presentation"
@@ -468,7 +466,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             </div>
           )}
           {bottomRightOverlay && (
-            <div className={cn("absolute z-20 pointer-events-none transition-all duration-500 ease-out", isMobileOrPwa ? (compact ? "top-1.5 left-1.5" : "top-4 left-4") : "bottom-3 right-3")}>
+            <div className={cn("absolute z-20 pointer-events-none transition-all duration-500 ease-out", compact ? "top-1.5 left-1.5" : "top-4 left-4")}>
               <div className="pointer-events-auto">{bottomRightOverlay}</div>
             </div>
           )}

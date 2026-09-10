@@ -1959,7 +1959,7 @@ const TradeProductPage: React.FC = () => {
                 // Bridge filenames use the raw designer name, not the shortened display name.
                 const shareUrl = buildPieceOgUrl(designer.name, product.title, product.subtitle);
                 return (
-                  <CornerTooltip label="Share" side="top" align="end">
+                  <CornerTooltip label="Share" side="bottom" align="start">
                     <ShareMenu
                       url={shareUrl}
                       message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
