@@ -405,7 +405,7 @@ export default function Cart() {
                     <dt className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Direct Line</dt>
                     <dd className="mt-2">
                       <a
-                        href={`https://wa.me/${directLine.number.replace(/\D/g, "")}`}
+                        href="https://wa.me/6591393850"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="hover:text-[hsl(var(--gold))] transition-colors"
@@ -414,9 +414,10 @@ export default function Cart() {
                       </a>
                     </dd>
                     <dd className="mt-1 text-muted-foreground">
-                      {directLine.label}: {directLine.number}
+                      <span className="block">• Singapore: +65 9139 3850</span>
+                      <span className="block">• Paris &amp; EU: +33 6 1623 7460</span>
                     </dd>
-                    <dd className="mt-1">
+                    <dd className="mt-2">
                       <Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
                         Request a call back
                       </Link>
