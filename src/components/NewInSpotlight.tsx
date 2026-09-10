@@ -17,9 +17,10 @@ import { useFounderIsBrand } from "@/hooks/useFounderIsBrand";
 import { cn } from "@/lib/utils";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { composeTitle, splitTitleAttribution } from "@/lib/curatorPickLegend";
-import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
+import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePublicRrp";
 import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import SwipeAlternateProductImage from "@/components/product/SwipeAlternateProductImage";
+import { useShippingDestination } from "@/lib/shippingDestination";
 
 const transition: Transition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] };
 
@@ -91,8 +92,9 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
 
   const { data: publicRrpMap = {} } = usePublicRrpMap(picks.map((p) => p.id));
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer.id);
+  const dest = useShippingDestination();
   const isUnderlaid = variant === "underlaid";
-  const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const [gridCols, setGridCols] = useState<3 | 4>(3);
   const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
   const [ctaPressed, setCtaPressed] = useState(false);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
@@ -252,7 +254,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
         </div>
       </div>
 
-      <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
+      <div className={cn("grid gap-x-4 gap-y-5 md:gap-x-8 md:gap-y-12", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
         {picks.map((pick) => {
           const alternateImage = pick.hover_image_url
             || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
@@ -268,7 +270,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
               }}
             >
               <div className={cn(
-                "bg-muted/20 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer aspect-[4/3]"
+                "bg-[hsl(var(--canvas))] rounded-sm overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer aspect-[4/3] p-6"
               )}>
                 <SwipeAlternateProductImage
                   primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
@@ -277,8 +279,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                   sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                   alt={pick.title}
-                  primaryClassName="object-contain p-4 md:p-6 md:object-contain"
-                  alternateClassName="object-contain p-4 md:p-6 md:object-contain"
+                  primaryClassName="object-contain p-0"
+                  alternateClassName="object-contain p-0"
                 />
                 {/* Inventory badges — lower-left of the frame */}
                 <InventoryBadgeStack
@@ -373,8 +375,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 })()}
                 {/* Price — muted, bottom */}
                 <div className="mt-1">
-                  <p className="font-body text-xs font-light tracking-wide text-zinc-500">
-                    {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon Request"}
+                  <p className="font-body text-xs font-light tracking-wide text-muted-foreground">
+                    {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
                   </p>
                 </div>
               </div>
