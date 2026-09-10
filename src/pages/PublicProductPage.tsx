@@ -77,6 +77,13 @@ import {
 } from "@/components/product/PublicSpecTable";
 import TradeWorkspace from "@/components/product/TradeWorkspace";
 import ProductCommerceCta from "@/components/product/ProductCommerceCta";
+import ProductMotionSelector from "@/components/product/ProductMotionSelector";
+import {
+  motionValueFromVariantLabel,
+  resolveProductMotionOptions,
+  variantLabelForMotion,
+  type ProductMotionValue,
+} from "@/lib/productMotionOptions";
 import CurrencyToggle, { formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 
@@ -1028,6 +1035,46 @@ const VariantDimensionsPanel: React.FC = () => {
           disabledIndices={disabledBaseIdx}
         />
       )}
+    </div>
+  );
+};
+
+const MotionAndDimensionsPanel: React.FC = () => {
+  const { product, selBase, selTop, selDualSize, setSelDualSize, onMaterialChange } = useVariantSelectorsContext();
+  const motionOptions = React.useMemo(
+    () => resolveProductMotionOptions(product.size_variants),
+    [product.size_variants],
+  );
+  const motion = motionValueFromVariantLabel(selDualSize);
+  const initializedMotion = useRef(false);
+
+  useEffect(() => {
+    if (!motionOptions || initializedMotion.current) return;
+    initializedMotion.current = true;
+    const initialLabel = selDualSize || variantLabelForMotion(motionOptions, motion);
+    if (!selDualSize) setSelDualSize(initialLabel);
+    onMaterialChange?.(initialLabel, {
+      base: selBase,
+      top: selTop,
+      size: initialLabel,
+    });
+  }, [motionOptions, motion, onMaterialChange, selBase, selDualSize, selTop, setSelDualSize]);
+
+  if (!motionOptions) return <VariantDimensionsPanel />;
+
+  return (
+    <div className="flex flex-col gap-4">
+      <ProductMotionSelector
+        value={motion}
+        onChange={(nextMotion) => {
+          const label = variantLabelForMotion(motionOptions, nextMotion);
+          setSelDualSize(label);
+          onMaterialChange?.(label, { base: selBase, top: selTop, size: label });
+        }}
+      />
+      <p className="font-body text-xs tracking-wide text-muted-foreground">
+        {withImperialPerLine(motionOptions.dimensions)}
+      </p>
     </div>
   );
 };
@@ -2422,7 +2469,7 @@ const PublicProductPageContent: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col gap-3 md:gap-5 order-5 md:order-5">
-                      <VariantDimensionsPanel />
+                      <MotionAndDimensionsPanel />
                     </div>
                   </VariantSelectorsProvider>
 
@@ -2588,8 +2635,9 @@ const PublicProductPageContent: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Action block sits directly beneath the finish selector,
-                        ahead of the supporting technical details. */}
+                    <MotionAndDimensionsPanel />
+
+                    {/* Actions follow the complete finish, motion, and dimensions stack. */}
                     {showPublicCommerce && (
                       <ProductCommerceCta
                         productId={product.id}
@@ -2634,9 +2682,6 @@ const PublicProductPageContent: React.FC = () => {
                       />
                     )}
 
-                    <div className="flex flex-col gap-5">
-                      <VariantDimensionsPanel />
-                    </div>
                   </VariantSelectorsProvider>
 
                   {!isTradeVerifiedView && (() => {
