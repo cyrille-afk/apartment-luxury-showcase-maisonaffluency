@@ -160,17 +160,56 @@ function orderPlaced(): boolean {
   }
 }
 
+function userEmptied(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(EMPTIED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function setUserEmptied(flag: boolean) {
+  if (typeof window === "undefined") return;
+  try {
+    if (flag) window.localStorage.setItem(EMPTIED_KEY, "1");
+    else window.localStorage.removeItem(EMPTIED_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 /** Hydrate from durable storage on module load — never start empty blindly. */
 function hydrate(): CartItem[] {
   if (typeof window === "undefined") return [];
   if (orderPlaced()) return [];
   const primary = readPrimary();
   if (primary.length) return primary;
+  // A deliberately emptied basket must stay empty — never resurrect the mirror.
+  if (userEmptied()) return [];
   return readBackup();
 }
 
 let items: CartItem[] = hydrate();
 const listeners = new Set<() => void>();
+
+/** Map cart lines onto the checkout basket shape so both caches stay identical. */
+function toCheckoutLines(list: CartItem[]) {
+  return list.map((i) => ({
+    title: i.title,
+    designer: i.designerName,
+    finishLabel: i.finishLabel,
+    imageUrl: i.imageUrl,
+    unitCents: i.unitPriceCents,
+    currency: i.currency,
+    leadTime: i.leadTime,
+    productPath:
+      i.designerSlug && i.productSlug ? `/designers/${i.designerSlug}/${i.productSlug}` : null,
+    quantity: i.quantity,
+    origin: i.origin ?? null,
+    pickupCountry: i.pickupCountry ?? null,
+  }));
+}
 
 function writeEnvelope(next: CartItem[], region?: CartRegionMeta) {
   const envelope: CartEnvelope = { v: 1, lines: next, region, savedAt: Date.now() };
@@ -186,9 +225,32 @@ function writeEnvelope(next: CartItem[], region?: CartRegionMeta) {
 }
 
 function commit(next: CartItem[]) {
-  items = next;
-  writeEnvelope(next, captureRegion());
+  // Always replace the array reference (never mutate in place) so every
+  // subscriber re-renders — Chrome's deletion "lock" was a stale mirror, not
+  // a stale reference, but both are covered here.
+  items = [...next];
+  writeEnvelope(items, captureRegion());
   listeners.forEach((l) => l());
+}
+
+/** Deliberate mutation: mirror the exact result into the checkout basket too. */
+function commitExplicit(next: CartItem[]) {
+  setUserEmptied(next.length === 0);
+  if (next.length) {
+    try {
+      window.localStorage.setItem(BACKUP_KEY, JSON.stringify({ v: 1, lines: next, region: captureRegion(), savedAt: Date.now() }));
+    } catch {
+      /* ignore */
+    }
+  } else {
+    try {
+      window.localStorage.removeItem(BACKUP_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+  commit(next);
+  overwriteSecureBasket(toCheckoutLines(next));
 }
 
 function commitWithRegion(next: CartItem[], region: CartRegionMeta | undefined) {
