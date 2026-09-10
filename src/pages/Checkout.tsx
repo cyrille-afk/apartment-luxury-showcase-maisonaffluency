@@ -1262,6 +1262,14 @@ export default function Checkout() {
   );
   const [buyerType, setBuyerType] = useState<BuyerType>("private");
   const [buyerGstNumber, setBuyerGstNumber] = useState("");
+  // Approved trade profiles are corporate buyers by definition.
+  const businessPrefilled = useRef(false);
+  useEffect(() => {
+    if (tradeCompany && !businessPrefilled.current) {
+      businessPrefilled.current = true;
+      setBuyerType("business");
+    }
+  }, [tradeCompany]);
   const summary = useMemo<CheckoutSummary | null>(() => {
     if (!grossLines?.length) return null;
     const currency = orderCurrency(grossLines);
