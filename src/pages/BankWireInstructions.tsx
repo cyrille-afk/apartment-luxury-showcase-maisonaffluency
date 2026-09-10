@@ -5,7 +5,7 @@ import { Check } from "lucide-react";
 import { jsPDF } from "jspdf";
 import Navigation from "@/components/Navigation";
 import { copyTextToClipboard } from "@/lib/clipboard";
-import { DEFAULT_BANK_WIRE_CONFIG, buildPaymentReference } from "@/config/bankWire";
+import { buildPaymentReference, getBankWireConfigForCurrency } from "@/config/bankWire";
 import { formatMoney } from "@/lib/cart";
 
 interface CopyableRowProps {
@@ -72,7 +72,10 @@ export default function BankWireInstructions() {
     return formatMoney(amountCents, currency);
   }, [amountCents, currency]);
 
-  const config = DEFAULT_BANK_WIRE_CONFIG;
+  const config = useMemo(
+    () => getBankWireConfigForCurrency(currency),
+    [currency]
+  );
 
   const handleDownloadPdf = useCallback(() => {
     setDownloading(true);
