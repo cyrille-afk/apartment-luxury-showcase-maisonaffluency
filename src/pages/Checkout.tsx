@@ -1584,14 +1584,25 @@ export default function Checkout() {
   // must never surface an emptied checkout.
   useEffect(() => {
     const revive = () => resolveLines(false);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") revive();
+    };
     window.addEventListener("pageshow", revive);
     window.addEventListener("focus", revive);
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") revive();
-    });
+    document.addEventListener("visibilitychange", onVisible);
+    // Safari restores tabs and modal states without firing focus, so listen for
+    // basket writes made anywhere else in the browser session and re-sync.
+    const unsubscribeStorage = subscribeSecureBasketStorage(revive);
+    const onCartStorage = (e: StorageEvent) => {
+      if (e.key === null || (e.key && e.key.startsWith("ma_cart"))) revive();
+    };
+    window.addEventListener("storage", onCartStorage);
     return () => {
       window.removeEventListener("pageshow", revive);
       window.removeEventListener("focus", revive);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("storage", onCartStorage);
+      unsubscribeStorage();
     };
   }, [resolveLines]);
 
