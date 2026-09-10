@@ -1415,6 +1415,9 @@ export default function Checkout() {
           paymentIntentId: intentIdRef.current || undefined,
           // Destination country — drives Singapore GST server-side.
           shippingCountry: formCountry ?? "",
+          // B2B zero-rating: only applies to SG GST-registered businesses.
+          buyerType,
+          buyerGstNumber,
           // PayNow needs its own PaymentIntent: the payment method type is
           // fixed at creation and cannot be swapped on an existing intent.
           paymentMethod: intentMethod,
