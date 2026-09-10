@@ -472,6 +472,31 @@ export default function OrderIntakeSheet({
           {step === 2 && (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-200">
               <p className="mb-4 font-display text-xl leading-snug text-foreground">Where shall we reply?</p>
+
+              <fieldset className="mb-5">
+                <legend className={cn(labelCls, "mb-3")}>I am purchasing as</legend>
+                <div className="grid grid-cols-2 gap-3">
+                  {([
+                    { key: "individual", label: "Individual / Private Buyer" },
+                    { key: "business", label: "Business / Studio" },
+                  ] as const).map((opt) => (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => setBuyerType(opt.key)}
+                      className={cn(
+                        "flex h-12 items-center justify-center border px-2 text-center font-body text-xs transition-all duration-200",
+                        buyerType === opt.key
+                          ? "border-foreground bg-foreground text-background"
+                          : "border-border/60 bg-background text-foreground hover:border-foreground/50"
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+
               <label className={labelCls} htmlFor="intake-email">
                 Email Address
               </label>
@@ -486,18 +511,22 @@ export default function OrderIntakeSheet({
                 placeholder="you@studio.com"
                 className={inputCls}
               />
-              <label className={cn(labelCls, "mt-5")} htmlFor="intake-company">
-                Company / Studio Name
-              </label>
-              <input
-                id="intake-company"
-                type="text"
-                autoComplete="organization"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-                placeholder="Your studio or company"
-                className={inputCls}
-              />
+              {buyerType === "business" && (
+                <>
+                  <label className={cn(labelCls, "mt-5")} htmlFor="intake-company">
+                    Company / Studio Name
+                  </label>
+                  <input
+                    id="intake-company"
+                    type="text"
+                    autoComplete="organization"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                    placeholder="Your studio or company"
+                    className={inputCls}
+                  />
+                </>
+              )}
               <label className={cn(labelCls, "mt-5")} htmlFor="intake-phone">
                 Phone Number (optional)
               </label>
