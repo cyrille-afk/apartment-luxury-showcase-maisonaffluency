@@ -418,10 +418,10 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             </SheetTrigger>
 
             {/* Brand — absolutely centered in the viewport */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center min-w-0 max-w-[calc(100vw-10rem)] px-2">
+            <div className="relative flex flex-1 min-w-0 justify-center px-2 min-[380px]:absolute min-[380px]:left-1/2 min-[380px]:top-1/2 min-[380px]:flex-none min-[380px]:max-w-[calc(100vw-10rem)] min-[380px]:-translate-x-1/2 min-[380px]:-translate-y-1/2">
               <div className="flex flex-col items-center max-w-full overflow-hidden">
                 <button onClick={scrollToTop} className="group flex min-h-[44px] cursor-pointer items-center whitespace-nowrap truncate">
-                  <span className="font-brand text-[1.2rem] min-[360px]:text-[1.4rem] min-[390px]:text-[1.65rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+                  <span className="font-brand text-[1.15rem] min-[360px]:text-[1.4rem] min-[390px]:text-[1.65rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                     <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
                   </span>
                 </button>
