@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Minus, Plus, Loader2, Heart } from "lucide-react";
+import { Minus, Plus, Loader2, Heart, ChevronRight } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ import { useEstimatedShipping, ESTIMATED_SHIPPING_NOTE } from "@/hooks/useShippi
 import { useUsdToSgdRate } from "@/hooks/useUsdToSgdRate";
 import { useShippingDestination } from "@/lib/shippingDestination";
 import { ShippingCountryIndicator } from "@/components/checkout/ShippingCountryIndicator";
+import { getFxRates, convertCentsWithFallback } from "@/lib/fxRates";
+
 
 
 import {
@@ -23,7 +25,7 @@ import {
   setQuantity,
   removeFromCart,
   clearCart,
-  cartSubtotalCents,
+  
   formatMoney,
   refreshCartFx,
 } from "@/lib/cart";
@@ -51,8 +53,55 @@ export default function Cart() {
     }
   }, [params]);
 
-  const currency = items[0]?.currency || "USD";
-  const subtotal = useMemo(() => cartSubtotalCents(items), [items]);
+  // Display currency: a single-currency cart keeps its own currency; a mixed
+  // cart (e.g. a USD lamp + a EUR armchair) is normalised to USD so the
+  // subtotal is a real converted sum, never a raw addition of two currencies.
+  const currency = useMemo(() => {
+    const codes = new Set(items.map((i) => (i.currency || "USD").toUpperCase()));
+    if (codes.size === 0) return "USD";
+    if (codes.size === 1) return [...codes][0];
+    return "USD";
+  }, [items]);
+
+  // Live FX rates for every line currency → display currency.
+  const [fxRates, setFxRates] = useState<Record<string, number>>({});
+  const fxPairsKey = useMemo(
+    () =>
+      [...new Set(items.map((i) => (i.currency || "USD").toUpperCase()))]
+        .filter((c) => c !== currency)
+        .sort()
+        .join(","),
+    [items, currency],
+  );
+  useEffect(() => {
+    let cancelled = false;
+    const srcs = fxPairsKey ? fxPairsKey.split(",") : [];
+    if (srcs.length === 0) {
+      setFxRates({});
+      return;
+    }
+    getFxRates(srcs.map((src) => ({ src, tgt: currency }))).then((r) => {
+      if (!cancelled) setFxRates(r);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [fxPairsKey, currency]);
+
+  /** Convert a line amount into the display currency (safe fallback table). */
+  const toDisplay = (cents: number, code?: string | null) =>
+    convertCentsWithFallback(cents, (code || currency).toUpperCase(), currency, fxRates);
+
+  const subtotal = useMemo(
+    () =>
+      items.reduce(
+        (sum, i) => sum + toDisplay(i.unitPriceCents * i.quantity, i.currency),
+        0,
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [items, currency, fxRates],
+  );
+
   // Account-level tier discount (admin / verified trade), resolved from the
   // backend and re-applied server-side before payment.
   const discount = useAccountDiscount();
@@ -301,26 +350,24 @@ export default function Cart() {
                       </div>
                     </div>
 
-                    {/* Col 4 — price */}
+                    {/* Col 4 — price (always shown in the cart display currency) */}
                     <div className="text-left sm:text-right">
                       <p className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Total</p>
-                      <p className="font-display text-lg tabular-nums mt-1">
-                        {formatUsd(item.unitPriceCents * item.quantity, item.currency)}
+                      <p className="font-display text-lg tabular-nums mt-1 whitespace-nowrap">
+                        {formatUsd(toDisplay(item.unitPriceCents * item.quantity, item.currency))}
                       </p>
                        {item.quantity > 1 && (
                          <p className="font-body text-[11px] text-muted-foreground mt-1 tabular-nums">
-                           {formatUsd(item.unitPriceCents, item.currency)} each
+                           {formatUsd(toDisplay(item.unitPriceCents, item.currency))} each
                          </p>
                        )}
-                       {item.sourceCurrency && item.fxRate ? (
+                       {(item.currency || "USD").toUpperCase() !== currency && (
                          <p className="font-body text-[10px] italic text-muted-foreground mt-1 tabular-nums">
-                           Converted from {formatMoney(
-                             (item.sourceUnitPriceCents || 0) * item.quantity,
-                             item.sourceCurrency,
-                           )} · 1 {item.sourceCurrency} = {item.fxRate.toFixed(4)} {item.currency}
+                           Converted from {formatMoney(item.unitPriceCents * item.quantity, item.currency)}
                          </p>
-                       ) : null}
+                       )}
                     </div>
+
                   </li>
                 ))}
               </ul>
@@ -406,19 +453,23 @@ export default function Cart() {
                     </div>
                   )}
                   <div>
-                    <div className="flex items-baseline justify-between gap-6">
-                      <dt className="flex flex-wrap items-baseline gap-2 text-muted-foreground">
-                        Front Door Premium Delivery
+                    <div className="flex items-start justify-between gap-4">
+                      <dt className="min-w-0 text-muted-foreground">
+                        <span className="block">Front Door Premium Delivery</span>
                         {freightEstimate.cents > 0 && freightEstimate.zoneLabel && (
-                          <span className="border border-border/70 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
+                          <span className="mt-1.5 inline-block border border-border/70 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
                             {freightEstimate.zoneLabel}
                           </span>
                         )}
                       </dt>
                       {freightEstimate.cents > 0 ? (
-                        <dd className="tabular-nums">{formatUsd(freightEstimate.cents)}</dd>
+                        <dd className="shrink-0 tabular-nums whitespace-nowrap">
+                          {formatUsd(freightEstimate.cents)}
+                        </dd>
                       ) : (
-                        <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
+                        <dd className="shrink-0 text-right text-muted-foreground whitespace-nowrap">
+                          To be Quoted by Advisor
+                        </dd>
                       )}
                     </div>
                     {freightEstimate.capped && freightEstimate.notice && (
@@ -426,18 +477,14 @@ export default function Cart() {
                         {freightEstimate.notice}
                       </p>
                     )}
-                    {freightEstimate.cents > 0 && (
-                      <p className="mt-1.5 font-light italic text-[10px] tracking-[0.06em] text-muted-foreground">
-                        {ESTIMATED_SHIPPING_NOTE}
-                      </p>
-                    )}
-                    <ShippingCountryIndicator className="mt-2" />
                   </div>
 
 
                   <div className="border-t border-border pt-4">
                     <div className="flex items-baseline justify-between gap-6">
-                      <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Estimated Total (USD)</dt>
+                      <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">
+                        Estimated Total ({currency})
+                      </dt>
                       <dd className="tabular-nums font-medium text-base whitespace-nowrap">{formatUsd(estimatedTotal)}</dd>
                     </div>
                     {sgdEquivalent !== null && (
@@ -445,18 +492,33 @@ export default function Cart() {
                         (Approx. SGD ${sgdEquivalent.toLocaleString("en-US")})
                       </p>
                     )}
-                    <p className="mt-1.5 font-body text-[10px] text-muted-foreground leading-relaxed">
-                      Final settlement will be in USD. Local import duties and GST are not included —
-                      they will be assessed separately upon customs entry{destination.iso === "SG" ? " to Singapore" : " at destination"}.
-                    </p>
-                    {freightEstimate.cents > 0 && (
-                      <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-                        Payable now · {formatUsd(total)}. Estimated freight ·{" "}
-                        {formatUsd(freightEstimate.cents)} — invoiced separately once
-                        confirmed by your advisor.
-                      </p>
-                    )}
+
+                    {/* All fine print consolidated into one quiet disclosure. */}
+                    <details className="group mt-3 border-t border-border/60 pt-3">
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors">
+                        View Shipping &amp; Import Tax Details
+                        <ChevronRight className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-open:rotate-90" />
+                      </summary>
+                      <div className="mt-3 space-y-2 font-body text-[10px] leading-relaxed text-muted-foreground">
+                        {freightEstimate.cents > 0 && <p className="italic">{ESTIMATED_SHIPPING_NOTE}</p>}
+                        <ShippingCountryIndicator />
+                        <p>
+                          Final settlement will be in {currency}. Local import duties and GST are not
+                          included — they will be assessed separately upon customs entry
+                          {destination.iso === "SG" ? " to Singapore" : " at destination"}.
+                        </p>
+                        {freightEstimate.cents > 0 && (
+                          <p>
+                            Payable now · {formatUsd(total)}. Estimated freight ·{" "}
+                            {formatUsd(freightEstimate.cents)} — invoiced separately once confirmed by
+                            your advisor.
+                          </p>
+                        )}
+                      </div>
+                    </details>
                   </div>
+
+
                 </dl>
 
 
@@ -481,9 +543,10 @@ export default function Cart() {
                       "Pay via Bank Wire Transfer"
                     )}
                   </Button>
-                  <p className="text-center font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  <p className="pt-1 text-center font-body text-[10px] tracking-widest text-zinc-400">
                     Preferred for Trade &amp; Corporate Accounts
                   </p>
+
                 </div>
 
                 {/* Payment methods — monochrome marks, borderless */}
