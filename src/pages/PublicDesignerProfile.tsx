@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
+import { InventoryBadgeStack } from "@/components/ui/InventoryBadge";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import { useDesigner, useDesignerByName, useDesignerPicks, useGroupedDesignerPicks, useAllDesigners } from "@/hooks/useDesigner";
@@ -98,6 +99,29 @@ function displayName(name: string): string {
     return `${brand.trim()} — ${rest.join(" - ").trim()}`;
   }
   return name;
+}
+
+/**
+ * Derive small inventory badges for a curator-pick card.
+ * Matches tags/edition strings to "Available Now" or "Exclusive" labels shown
+ * in the lower-left corner of product thumbnails.
+ */
+function inventoryBadgesForPick(pick: AttributedCuratorPick): string[] {
+  const tags = (pick.tags || []).map((t) => t.toLowerCase());
+  const edition = (pick.edition || "").toLowerCase();
+  const badges: string[] = [];
+  if (tags.some((t) => /available[-\s]?now|in[-\s]?stock/.test(t))) {
+    badges.push("Available Now");
+  }
+  if (
+    edition.includes("exclusive") ||
+    edition.includes("limited edition") ||
+    edition.includes("unique piece") ||
+    tags.some((t) => /exclusive|limited[-\s]?edition|unique[-\s]?piece/.test(t))
+  ) {
+    badges.push("Exclusive");
+  }
+  return badges;
 }
 
 // Per-slug overrides for pages where the algorithmic title collides with a
@@ -1864,13 +1888,7 @@ const PublicDesignerProfile = () => {
                       gridClass,
                       isEmmanuelBabled ? "gap-x-4 gap-y-4 md:gap-x-6 md:gap-y-12" : "gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10"
                     )}>
-                {visiblePicks.map((pick, index) => {
-                  // Alternating mobile rhythm for the 2-column mobile grid:
-                  // row 1 left tall/right short, row 2 left short/right tall,
-                  // so row baselines are deliberately offset.
-                  const isMobileTwoCol = pickCols !== "one";
-                  const isMobileTall = isMobileTwoCol && (index % 4 === 0 || index % 4 === 3);
-
+                {visiblePicks.map((pick) => {
                   const ap = pick as AttributedCuratorPick;
                   // Primary: attribution row on grouped picks (child designer rows).
                   const rawDesignerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name ? ap.designer_name : undefined;
@@ -2022,9 +2040,7 @@ const PublicDesignerProfile = () => {
                         }}
                         aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
                         className={cn(
-                          "w-full bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer",
-                          "md:aspect-[4/5]",
-                          isMobileTall ? "aspect-[4/5]" : "aspect-square"
+                          "w-full bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer aspect-[4/3]"
                         )}
                       >
                         <SwipeAlternateProductImage
@@ -2034,32 +2050,15 @@ const PublicDesignerProfile = () => {
                           alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                           sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
+                          primaryClassName="object-contain p-4 md:p-6 md:object-contain"
+                          alternateClassName="object-contain p-4 md:p-6 md:object-contain"
                           alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
                         />
-                        {/* Micro-tags — sharp rectangles, top-left of the frame */}
-                        {(() => {
-                          const tags: string[] = pick.tags || [];
-                          const micro: string[] = [];
-                          if (tags.some((t) => /available[-\s]?now|in[-\s]?stock/i.test(t))) micro.push("Available Now");
-                           if (/re-?edition/i.test(pick.edition || "") || tags.some((t) => /re-?edition/i.test(t))) micro.push("Reedition");
-                          
-                          if (!micro.length) return null;
-                          return (
-                            <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1.5">
-                              {micro.map((m) => (
-                                <span
-                                  key={m}
-                                   className={cn(
-                                     "items-center border border-foreground/80 bg-background/90 px-1.5 py-[3px] font-body text-[9px] uppercase tracking-[0.12em] text-foreground leading-none",
-                                     m === "Reedition" ? "inline-flex md:hidden" : "inline-flex"
-                                   )}
-                                >
-                                  {m}
-                                </span>
-                              ))}
-                            </div>
-                          );
-                        })()}
+                        {/* Inventory badges — lower-left of the frame */}
+                        <InventoryBadgeStack
+                          badges={inventoryBadgesForPick(pick as AttributedCuratorPick)}
+                          className="absolute bottom-3 left-3 z-10"
+                        />
 
                         <div className="absolute right-2 top-2 z-50 md:hidden">
                           <FavoriteFolderPicker
@@ -2087,7 +2086,7 @@ const PublicDesignerProfile = () => {
                           </FavoriteFolderPicker>
                         </div>
 
-                        <div className="hidden md:block absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="hidden md:block absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
                             <Maximize2 className="h-3 w-3" />
                           </div>
@@ -2115,7 +2114,7 @@ const PublicDesignerProfile = () => {
 
 
                       {/* Editorial text block — designer / product / price hierarchy */}
-                      <div className="flex flex-col flex-1 items-center text-center leading-relaxed">
+                      <div className="flex flex-col flex-1 items-start text-left leading-relaxed">
                         {/* Designer / brand label — top, prominent */}
                         {cardBrandSlug || parentBrandSlug ? (
                           <Link
@@ -2152,7 +2151,7 @@ const PublicDesignerProfile = () => {
 
                         {/* Price slot — bottom */}
                         <div className="mt-1">
-                          <p className="font-body text-xs italic tracking-wide text-neutral-400">
+                          <p className="font-body text-xs font-light tracking-wide text-zinc-500">
                             {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon Request"}
                           </p>
                         </div>
