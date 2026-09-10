@@ -72,7 +72,10 @@ export default function BankWireInstructions() {
     return formatMoney(amountCents, currency);
   }, [amountCents, currency]);
 
-  const config = DEFAULT_BANK_WIRE_CONFIG;
+  const config = useMemo(
+    () => getBankWireConfigForCurrency(currency),
+    [currency]
+  );
 
   const handleDownloadPdf = useCallback(() => {
     setDownloading(true);
