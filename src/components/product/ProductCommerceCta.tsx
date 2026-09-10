@@ -420,11 +420,12 @@ export default function ProductCommerceCta({
               {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
               {placingOrder ? "Opening checkout…" : primaryLabel}
             </button>
-            {/* Gallery-style secondary: bespoke quote / customisation enquiry. */}
+            {/* Secondary: high-touch / contract buyers — routes explicitly to
+                the Trade Account inquiry form. */}
             <button
               type="button"
               data-commerce-quote
-              onClick={() => setQuoteOpen(true)}
+              onClick={goToTradeInquiry}
               className={secondaryBtn}
             >
               Request a Bespoke Quote / Customisation
