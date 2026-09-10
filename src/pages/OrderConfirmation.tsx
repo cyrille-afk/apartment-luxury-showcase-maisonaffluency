@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import Navigation from "@/components/Navigation";
 import { clearCart } from "@/lib/cart";
+import { clearSecureBasket } from "@/lib/checkout/secureBasket";
 
 export default function OrderConfirmation() {
   const [params] = useSearchParams();
@@ -11,7 +12,7 @@ export default function OrderConfirmation() {
   const bank = status === "bank_transfer";
 
   useEffect(() => {
-    if (status === "paid") clearCart();
+    if (status === "paid") { clearCart(); clearSecureBasket("order"); }
   }, [status]);
 
   return (
