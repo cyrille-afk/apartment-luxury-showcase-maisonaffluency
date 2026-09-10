@@ -251,7 +251,7 @@ export const ROSTER: readonly RosterEntry[] = [
   {"name": "Studioformart", "specialty": "Architecture & Design"},
   {"name": "Studioilse", "specialty": "Interior & Furniture Design"},
   {"name": "Studiopepe", "specialty": "Contemporary rugs, textiles"},
-  {"name": "Stéphane CG", "specialty": "Fine Art Photography · Diasec Prints · Contemporary Art"},
+  {"name": "Steph GC", "specialty": "Fine Art Photography · Diasec Prints · Contemporary Art"},
   {"name": "Stéphane Parmentier", "specialty": "Furniture"},
   {"name": "SUNNEI", "specialty": "Contemporary rugs, textiles"},
   {"name": "Sybille de Margerie", "specialty": "Interior & Furniture Design"},
