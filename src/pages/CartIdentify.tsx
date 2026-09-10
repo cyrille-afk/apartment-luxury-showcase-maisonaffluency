@@ -207,9 +207,9 @@ export default function CartIdentify() {
         <div className="pt-8">
           <Link
             to="/cart"
-            className="inline-flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors"
+            className="-my-2 inline-flex min-h-[44px] min-w-[44px] items-center gap-2 py-2 pr-3 font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors"
           >
-            <ArrowLeft className="h-3 w-3" />
+            <ArrowLeft className="h-3 w-3 shrink-0" />
             Back to cart
           </Link>
         </div>
