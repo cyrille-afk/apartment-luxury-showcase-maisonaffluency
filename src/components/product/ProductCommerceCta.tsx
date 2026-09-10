@@ -298,6 +298,36 @@ export default function ProductCommerceCta({
   };
   const primaryAction = tradeApproved ? undefined : openSelection;
 
+  /**
+   * Secondary CTA: bespoke / contract enquiries go to the Trade Account
+   * inquiry form. The primary PLACE ORDER path never touches this route.
+   */
+  const goToTradeInquiry = () => {
+    navigate(
+      `/contact?${new URLSearchParams({
+        subject: `Bespoke Quote / Customisation — ${productTitle || "Product"}${designerName ? ` by ${designerName}` : ""}`,
+        productId,
+        productName: productTitle || "",
+        designerName: designerName || "",
+        back: typeof window !== "undefined" ? window.location.pathname + window.location.search : "",
+      }).toString()}#contact`,
+    );
+  };
+
+  // Unpriced pieces: the page asks for the in-page quote sheet rather than
+  // sending a shopper to the corporate Trade Account form.
+  useEffect(() => {
+    const handler = () => {
+      if (tradeApproved) return;
+      const isDesktop =
+        typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+      if (dockOnly === isDesktop) return;
+      setQuoteOpen(true);
+    };
+    window.addEventListener("ma:open-quote", handler);
+    return () => window.removeEventListener("ma:open-quote", handler);
+  });
+
   // Mobile: PLACE ORDER opens the conversational 3-step intake sheet first;
   // its completion hands off to the existing selection / checkout flow.
   const handleMobilePrimary = () => {
@@ -420,11 +450,12 @@ export default function ProductCommerceCta({
               {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
               {placingOrder ? "Opening checkout…" : primaryLabel}
             </button>
-            {/* Gallery-style secondary: bespoke quote / customisation enquiry. */}
+            {/* Secondary: high-touch / contract buyers — routes explicitly to
+                the Trade Account inquiry form. */}
             <button
               type="button"
               data-commerce-quote
-              onClick={() => setQuoteOpen(true)}
+              onClick={goToTradeInquiry}
               className={secondaryBtn}
             >
               Request a Bespoke Quote / Customisation
