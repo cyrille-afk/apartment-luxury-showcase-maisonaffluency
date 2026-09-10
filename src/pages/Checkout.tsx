@@ -20,7 +20,7 @@ import { getCurrentDestination, useShippingDestination } from "@/lib/shippingDes
 import RegionalLogisticsNote from "@/components/trade/RegionalLogisticsNote";
 import RegionalPaymentPanel from "@/components/checkout/RegionalPaymentPanel";
 import { useRegionalLogistics, mapCountryToRegionTier } from "@/hooks/useRegionalLogistics";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 import {
   resolveTaxRule,
   computeTaxCents,
@@ -390,86 +390,107 @@ function OrderSummary({
             <RegionalLogisticsNote compact className="mt-2" />
           </div>
           <div className="border-t border-border/60 pt-4">
-            <div className="flex items-baseline justify-between gap-6">
-              <dt className="text-muted-foreground">
-                {isB2BZeroRated
-                  ? B2B_TAX_LABEL
-                  : summary.taxLabel || (summary.taxApplied ? "Tax" : "Tax (zero-rated)")}
-              </dt>
-              <dd className="tabular-nums">
-                {isB2BZeroRated
-                  ? moneyDecimal(0, currency)
-                  : summary.taxApplied
-                    ? money(summary.taxCents, currency)
-                    : money(0, currency)}
-              </dd>
-            </div>
-            <dl className="mt-2 space-y-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-              <div className="flex items-baseline justify-between gap-6">
-                <dt>Rate</dt>
-                <dd className="tabular-nums">
-                  {isB2BZeroRated
-                    ? "0% — B2B zero-rated"
-                    : summary.taxApplied
-                      ? `${Number((summary.taxRate * 100).toFixed(2))}%`
-                      : "0% — zero-rated"}
-                </dd>
-              </div>
-              <div className="flex items-baseline justify-between gap-6">
-                <dt>Taxable base{summary.taxApplied && summary.taxShipping ? " (goods + delivery)" : summary.taxApplied ? " (goods)" : ""}</dt>
-                <dd className="tabular-nums">{money(summary.taxableBaseCents, currency)}</dd>
-              </div>
-              <div className="flex items-baseline justify-between gap-6">
-                <dt>Destination</dt>
-                <dd>{summary.taxCountry ?? "—"} · {currency.toUpperCase()}</dd>
-              </div>
-            </dl>
-            <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-              {isB2BZeroRated
-                ? "B2B zero-rated for GST-registered Singapore businesses. You may claim the input tax on your GST return."
-                : summary.taxStatusNote}
-            </p>
-            <p className="mt-2 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-              (Equivalent to Approx. {money(sgdEquivalentCents, "SGD")} based on current rates)
-            </p>
-            <p className="mt-1 font-light text-[9px] tracking-[0.06em] text-muted-foreground/70">
-              {usdSgd.source === "live"
-                ? "Rates updated live via https://er-api.com"
-                : "Live rates unavailable — using baseline rate of 1.35 USD→SGD"}
-            </p>
-            {sgImportGstThreshold && !sgImportGstThreshold.isLowValueGoods && (
+            {sgBorderGst ? (
               <>
-                <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-                  Because this item value exceeds the S$400 threshold upon SGD conversion, Singapore Import GST (9%) must be settled via the courier during border customs clearance rather than collected at checkout.
-                </p>
-                <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-                  Please note: The 9% Singapore Import GST applies to both the value of the imported merchandise and the international freight charges, to be billed collectively by your customs broker upon border declaration.
+                <div className="flex items-baseline justify-between gap-6">
+                  <dt className="text-muted-foreground">Tax (Import GST)</dt>
+                  <dd className="text-right font-medium">Handled at Border Customs</dd>
+                </div>
+                <p className="mt-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                  Value exceeds S$400 threshold
                 </p>
               </>
+            ) : (
+              <div className="flex items-baseline justify-between gap-6">
+                <dt className="text-muted-foreground">
+                  {isB2BZeroRated
+                    ? B2B_TAX_LABEL
+                    : summary.taxLabel || (summary.taxApplied ? "Tax" : "Tax (zero-rated)")}
+                </dt>
+                <dd className="tabular-nums font-medium">
+                  {isB2BZeroRated
+                    ? moneyDecimal(0, currency)
+                    : summary.taxApplied
+                      ? money(summary.taxCents, currency)
+                      : money(0, currency)}
+                </dd>
+              </div>
             )}
-            {isB2BZeroRated ? (
-              <p className="mt-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-                Buyer GST / UEN: {buyerGstNumber.trim().toUpperCase()}
-              </p>
-            ) : summary.taxRegistrationLine ? (
-              <p className="mt-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-                {summary.taxRegistrationLine}
-              </p>
-            ) : null}
+            <details className="group mt-2">
+              <summary className="flex cursor-pointer list-none items-center justify-between font-light text-[10px] uppercase tracking-[0.14em] text-muted-foreground [&::-webkit-details-marker]:hidden">
+                Rates &amp; customs details
+                <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" aria-hidden="true" />
+              </summary>
+              <div className="mt-2 space-y-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                {!sgBorderGst && (
+                  <dl className="space-y-1">
+                    <div className="flex items-baseline justify-between gap-6">
+                      <dt>Rate</dt>
+                      <dd className="tabular-nums">
+                        {isB2BZeroRated
+                          ? "0% — B2B zero-rated"
+                          : summary.taxApplied
+                            ? `${Number((summary.taxRate * 100).toFixed(2))}%`
+                            : "0% — zero-rated"}
+                      </dd>
+                    </div>
+                    <div className="flex items-baseline justify-between gap-6">
+                      <dt>Taxable base{summary.taxApplied && summary.taxShipping ? " (goods + delivery)" : summary.taxApplied ? " (goods)" : ""}</dt>
+                      <dd className="tabular-nums">{money(summary.taxableBaseCents, currency)}</dd>
+                    </div>
+                    <div className="flex items-baseline justify-between gap-6">
+                      <dt>Destination</dt>
+                      <dd>{summary.taxCountry ?? "—"} · {currency.toUpperCase()}</dd>
+                    </div>
+                  </dl>
+                )}
+                <p>
+                  {isB2BZeroRated
+                    ? "B2B zero-rated for GST-registered Singapore businesses. You may claim the input tax on your GST return."
+                    : summary.taxStatusNote}
+                </p>
+                <p>
+                  (Equivalent to Approx. {money(sgdEquivalentCents, "SGD")} based on current rates)
+                </p>
+                <p className="text-muted-foreground/70">
+                  {usdSgd.source === "live"
+                    ? "Rates updated live via https://er-api.com"
+                    : "Live rates unavailable — using baseline rate of 1.35 USD→SGD"}
+                </p>
+                {sgBorderGst && (
+                  <>
+                    <p>
+                      Because this item value exceeds the S$400 threshold upon SGD conversion, Singapore Import GST (9%) must be settled via the courier during border customs clearance rather than collected at checkout.
+                    </p>
+                    <p>
+                      Please note: The 9% Singapore Import GST applies to both the value of the imported merchandise and the international freight charges, to be billed collectively by your customs broker upon border declaration.
+                    </p>
+                  </>
+                )}
+                {isB2BZeroRated ? (
+                  <p>Buyer GST / UEN: {buyerGstNumber.trim().toUpperCase()}</p>
+                ) : summary.taxRegistrationLine ? (
+                  <p>{summary.taxRegistrationLine}</p>
+                ) : null}
+              </div>
+            </details>
           </div>
           <div className="border-t border-border pt-4">
 
             <div className="flex items-baseline justify-between">
               <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
               <dd className="tabular-nums font-medium text-base">
-                {money(summary.chargeTotalCents, currency)}
+                {money(
+                  summary.estimatedShippingCents > 0
+                    ? summary.totalCents
+                    : summary.chargeTotalCents,
+                  currency,
+                )}
               </dd>
             </div>
             {summary.estimatedShippingCents > 0 && (
               <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-                Payable now. With estimated freight ·{" "}
-                {money(summary.totalCents, currency)} — freight invoiced separately once confirmed by
-                your advisor.
+                Includes estimated freight deposit — final freight confirmed by your advisor.
               </p>
             )}
           </div>
