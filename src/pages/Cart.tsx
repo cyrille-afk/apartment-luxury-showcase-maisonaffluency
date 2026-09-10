@@ -289,9 +289,27 @@ export default function Cart() {
                         </Link>
                       </h2>
                       {item.finishLabel && (
-                        <p className="font-body text-sm text-muted-foreground mt-2 leading-relaxed">
-                          {item.finishLabel}
-                        </p>
+                        <>
+                          {(() => {
+                            const parts = item.finishLabel.split(" / ").map((s) => s.trim()).filter(Boolean);
+                            const finishParts = parts.filter((p) => !looksLikeDimension(p));
+                            const dimParts = parts.filter((p) => looksLikeDimension(p));
+                            return (
+                              <>
+                                {finishParts.length > 0 && (
+                                  <p className="font-body text-sm text-muted-foreground mt-2 leading-relaxed">
+                                    {finishParts.join(" / ")}
+                                  </p>
+                                )}
+                                {dimParts.length > 0 && (
+                                  <p className="font-body text-xs text-zinc-500 mt-1 leading-relaxed">
+                                    {dimParts.join(" / ")}
+                                  </p>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </>
                       )}
                       {item.leadTime && (
                         <p className="mt-4 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
