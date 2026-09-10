@@ -39,7 +39,7 @@ ROOMS = [
             "Garnier &amp; Linker", "Gianfranco Frattini for Poltrona Frau",
             "Haas Brothers for L'Objet", "Iksel", "Jean-Michel Frank",
             "Jindrich Halabala", "Leo Sentou", "Maarten Vrolijk", "Matthieu Gicquel",
-            "Olivia Cognet", "Robicara", "Stéphane CG", "Thierry Lemaire",
+            "Olivia Cognet", "Robicara", "Steph GC", "Thierry Lemaire",
         ],
     },
     {

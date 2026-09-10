@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { BrowserRouter, Routes, Route, useLocation, useNavigate, useNavigationType } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route, useLocation, useNavigate, useNavigationType, useParams } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 // Index is the homepage and is loaded synchronously: lazy-loading it created
@@ -26,6 +26,11 @@ const MobilePreviewShareButton = lazy(() => import("./components/MobilePreviewSh
 const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 const DesignerUpload = lazy(() => import("./pages/DesignerUpload"));
 const TradePurgeCache = lazy(() => import("./pages/TradePurgeCache"));
+
+function LegacyStephGcRedirect() {
+  const { productSlug } = useParams();
+  return <Navigate to={`/designers/steph-gc${productSlug ? `/${productSlug}` : ""}`} replace />;
+}
 
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
@@ -659,6 +664,8 @@ const App = () => {
                   <Route path="/designer/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><DesignerProfile /></Suspense>} />
                   {/* Public designers directory — hidden from nav until all data is populated */}
                   <Route path="/designers" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesigners /></Suspense>} />
+                  <Route path="/designers/stephane-cg" element={<LegacyStephGcRedirect />} />
+                  <Route path="/designers/stephane-cg/:productSlug" element={<LegacyStephGcRedirect />} />
                   <Route path="/designers/:slug/biography" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesignerBiography /></Suspense>} />
                   <Route path="/designers/:slug/:productSlug" element={<Suspense fallback={<PageLoadingSkeleton />}><ProductPageContainer isInsideTradePortal={false} /></Suspense>} />
 

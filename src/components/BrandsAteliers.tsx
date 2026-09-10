@@ -170,7 +170,7 @@ import ozoneBrasiliaPl from "@/assets/curators-picks/ozone-brasilia-pl.jpg";
 
 // Atelier-only Curators' Picks data (for brands not in FeaturedDesigners or Collectibles)
 export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick[] }> = {
-  "stephane-cg": {
+  "steph-gc": {
     name: "Steph GC",
     curatorPicks: [
       {
@@ -1490,7 +1490,7 @@ const partnerBrands = [
     instagram: "https://www.instagram.com/paulinpaulinpaulin/?hl=en",
   },
   {
-    id: "stephane-cg",
+    id: "steph-gc",
     name: "Steph GC",
     category: "Art",
     subcategory: "Photography",
@@ -1840,7 +1840,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Haymann Editions": "haymann-editions",
   "Atelier DeMichelis": "atelier-demichelis",
   "De La Espada": "de-la-espada",
-  "Steph GC": "stephane-cg",
+  "Steph GC": "steph-gc",
   "Marta Sala Éditions": "marta-sala-editions",
   "Ozone": "ozone-light",
   "Victoria Magniant": "victoria-magniant",
