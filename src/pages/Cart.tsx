@@ -543,9 +543,10 @@ export default function Cart() {
                       "Pay via Bank Wire Transfer"
                     )}
                   </Button>
-                  <p className="text-center font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  <p className="pt-1 text-center font-body text-[10px] tracking-widest text-zinc-400">
                     Preferred for Trade &amp; Corporate Accounts
                   </p>
+
                 </div>
 
                 {/* Payment methods — monochrome marks, borderless */}
