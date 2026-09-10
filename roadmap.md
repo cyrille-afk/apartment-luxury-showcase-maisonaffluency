@@ -8,3 +8,4 @@
 - [x] Verify the redesigned mobile Trade Program hero and 2×2 metrics layout
 - [x] Refine mobile collection cards: contained imagery, touch alternate view, and editorial metadata hierarchy
 - [x] Repair mobile quote submission: secure verification token, database delivery, exact error logging, and in-drawer success state
+- [x] Clarify USD/SGD amounts in checkout and show the SGD equivalent in the Tax block

@@ -37,6 +37,7 @@ import {
   lineTotalCents,
   reconcileBackendAmount,
 } from "@/lib/checkoutGuardrails";
+import { convertCents, useFxRates } from "@/components/trade/CurrencyToggle";
 
 
 const CONCIERGE_WHATSAPP = "https://wa.me/6591393850";
@@ -66,22 +67,24 @@ const lineSubtotal = (line: CheckoutLine) => lineTotalCents(line);
 const orderSubtotal = (lines: CheckoutLine[]) => buildVerifiedTotals(lines).totalCents;
 const orderCurrency = (lines: CheckoutLine[]) => lines[0]?.currency || "usd";
 
-/* Clean integers, no decimals — identical to the cart / sign-in pages. */
+/* Clean integers with an explicit ISO code so USD and SGD never look alike. */
 const money = (cents: number, currency: string) =>
-  new Intl.NumberFormat("en-US", {
+  `${(currency || "usd").toUpperCase()} ${new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: (currency || "usd").toUpperCase(),
+    currencyDisplay: "narrowSymbol",
     maximumFractionDigits: 0,
-  }).format(Math.round(cents / 100));
+  }).format(Math.round(cents / 100))}`;
 
 /** Explicit two-decimal currency display for zero-rated B2B tax lines. */
 const moneyDecimal = (cents: number, currency: string) =>
-  new Intl.NumberFormat("en-US", {
+  `${(currency || "usd").toUpperCase()} ${new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: (currency || "usd").toUpperCase(),
+    currencyDisplay: "narrowSymbol",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(Math.round(cents) / 100);
+  }).format(Math.round(cents) / 100)}`;
 
 
 /* ------------------------------------------------------------------ */
@@ -244,6 +247,13 @@ function OrderSummary({
   buyerGstNumber: string;
 }) {
   const { currency } = summary;
+  const fxRates = useFxRates();
+  const sgdEquivalentCents = convertCents(
+    summary.chargeTotalCents,
+    currency.toUpperCase(),
+    "SGD",
+    fxRates,
+  );
   const isB2BZeroRated =
     buyerType === "business" &&
     isSingaporeUenValid(buyerGstNumber) &&
@@ -381,6 +391,9 @@ function OrderSummary({
               {isB2BZeroRated
                 ? "B2B zero-rated for GST-registered Singapore businesses. You may claim the input tax on your GST return."
                 : summary.taxStatusNote}
+            </p>
+            <p className="mt-2 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+              (Equivalent to Approx. {money(sgdEquivalentCents, "SGD")} based on current rates)
             </p>
             {isB2BZeroRated ? (
               <p className="mt-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
