@@ -79,7 +79,7 @@ const money = (cents: number, currency: string) =>
   `${(currency || "usd").toUpperCase()} ${new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: (currency || "usd").toUpperCase(),
-    currencyDisplay: "narrowSymbol",
+    currencyDisplay: "symbol",
     maximumFractionDigits: 0,
   }).format(Math.round(cents / 100))}`;
 
@@ -88,7 +88,7 @@ const moneyDecimal = (cents: number, currency: string) =>
   `${(currency || "usd").toUpperCase()} ${new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: (currency || "usd").toUpperCase(),
-    currencyDisplay: "narrowSymbol",
+    currencyDisplay: "symbol",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(Math.round(cents) / 100)}`;
