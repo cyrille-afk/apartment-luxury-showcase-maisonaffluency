@@ -68,6 +68,13 @@ export const toIsoCountry = (raw: string | null | undefined, fallback = "FR"): s
 
 /** Conservative default packing per product line when nothing is entered. */
 export const DEFAULT_LINE_CBM = 0.5;
+/**
+ * Volume/weight share added by each additional identical unit on a line.
+ * The first unit carries the full crate (net product + tare); consolidated
+ * units 2+ only add their packed product, so quantities never multiply the
+ * container tare.
+ */
+export const LINE_CONSOLIDATION_FACTOR = 0.85;
 const KG_PER_CBM: Record<ShipmentMode, number> = {
   sea_lcl: 350, sea_fcl: 750, air: 167, road: 333, courier: 200,
 };
