@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
-import { convertCents, SETTLEMENT_CURRENCIES } from "../_shared/fxConvert.ts";
+import { convertCents, SETTLEMENT_CURRENCIES } from "./fxConvert.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
