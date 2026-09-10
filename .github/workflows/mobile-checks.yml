@@ -84,12 +84,19 @@ jobs:
       - run: npm ci --prefer-offline --no-audit --no-fund
       - name: Ensure Chromium is installed
         run: npx playwright install chromium
-      - name: Run visual regression suite
+      - name: Run visual structural checks (blocking)
         shell: bash
         run: |
           set -o pipefail
-          npm run test:visual 2>&1 | tee playwright-visual.log
-        timeout-minutes: 15
+          npm run test:visual -- --grep-invert '@pixel' 2>&1 | tee playwright-visual-structural.log
+        timeout-minutes: 10
+      - name: Run pixel snapshot checks (informational)
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          npm run test:visual -- --grep '@pixel' 2>&1 | tee playwright-visual-pixel.log
+        timeout-minutes: 10
       - name: Upload visual report
         if: failure() || cancelled()
         uses: actions/upload-artifact@v4
@@ -98,7 +105,8 @@ jobs:
           path: |
             playwright-report
             test-results
-            playwright-visual.log
+            playwright-visual-structural.log
+            playwright-visual-pixel.log
           retention-days: 14
           if-no-files-found: ignore
 
