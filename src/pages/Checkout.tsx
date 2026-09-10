@@ -261,6 +261,17 @@ function OrderSummary({
     summary.taxCountry === "SG" &&
     currency.toLowerCase() === "sgd";
 
+  const sgImportGstThreshold = useMemo(() => {
+    if (summary.taxCountry !== "SG" || isB2BZeroRated || summary.taxApplied) return null;
+    const usdAmount =
+      currency.toUpperCase() === "USD"
+        ? summary.subtotalCents / 100
+        : currency.toUpperCase() === "SGD"
+          ? (summary.subtotalCents / 100) / 1.35
+          : 0;
+    return checkSgdThreshold(usdAmount, 1.35);
+  }, [summary, isB2BZeroRated, currency]);
+
   return (
     <aside className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] h-fit">
       <div className="border border-border/70 px-7 py-8">
