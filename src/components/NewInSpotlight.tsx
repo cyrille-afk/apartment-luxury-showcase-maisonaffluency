@@ -34,6 +34,29 @@ function pickSrcSet(url: string): string {
   return [300, 400, 600, 800].map((w) => `${responsiveCloudinaryUrl(url, w)} ${w}w`).join(", ");
 }
 
+/**
+ * Derive small inventory badges for a curator-pick card.
+ * Matches tags/edition strings to "Available Now" or "Exclusive" labels shown
+ * in the lower-left corner of product thumbnails.
+ */
+function inventoryBadgesForPick(pick: DesignerCuratorPick): string[] {
+  const tags = (pick.tags || []).map((t) => t.toLowerCase());
+  const edition = ((pick as any).edition || "").toLowerCase();
+  const badges: string[] = [];
+  if (tags.some((t) => /available[-\s]?now|in[-\s]?stock/.test(t))) {
+    badges.push("Available Now");
+  }
+  if (
+    edition.includes("exclusive") ||
+    edition.includes("limited edition") ||
+    edition.includes("unique piece") ||
+    tags.some((t) => /exclusive|limited[-\s]?edition|unique[-\s]?piece/.test(t))
+  ) {
+    badges.push("Exclusive");
+  }
+  return badges;
+}
+
 interface NewInSpotlightProps {
   designer: Designer;
   showEyebrow?: boolean;
