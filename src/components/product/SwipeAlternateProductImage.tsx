@@ -95,8 +95,10 @@ export default function SwipeAlternateProductImage({
         sizes={sizes}
         alt={alt}
         className={cn(
-          "absolute inset-0 h-full w-full object-contain p-3 transition-all duration-500 ease-out md:p-0 md:object-cover md:duration-700",
-          alternateSrc && "md:group-hover:scale-105 md:group-hover:opacity-0",
+          contain
+            ? "absolute left-1/2 top-1/2 max-h-full max-w-full -translate-x-1/2 -translate-y-1/2 object-contain p-3 transition-all duration-500 ease-out md:duration-700"
+            : "absolute inset-0 h-full w-full object-contain p-3 transition-all duration-500 ease-out md:p-0 md:object-cover md:duration-700",
+          alternateSrc && !contain && "md:group-hover:scale-105 md:group-hover:opacity-0",
           showAlternate || !primaryLoaded ? "opacity-0" : "opacity-100",
           primaryClassName
         )}
@@ -113,7 +115,10 @@ export default function SwipeAlternateProductImage({
           sizes={sizes}
           alt={`${alt} alternate view`}
           className={cn(
-            "absolute inset-0 h-full w-full object-contain p-3 transition-all duration-500 ease-out md:p-0 md:object-cover md:opacity-0 md:duration-700 md:group-hover:scale-105 md:group-hover:opacity-100",
+            contain
+              ? "absolute left-1/2 top-1/2 max-h-full max-w-full -translate-x-1/2 -translate-y-1/2 object-contain p-3 transition-all duration-500 ease-out md:duration-700"
+              : "absolute inset-0 h-full w-full object-contain p-3 transition-all duration-500 ease-out md:p-0 md:object-cover md:opacity-0 md:duration-700 md:group-hover:scale-105 md:group-hover:opacity-100",
+            !contain && "md:opacity-0 md:group-hover:opacity-100",
             showAlternate && alternateLoaded ? "opacity-100" : "opacity-0",
             alternateClassName
           )}
