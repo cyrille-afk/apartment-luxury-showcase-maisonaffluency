@@ -133,13 +133,21 @@ export const isTaxableOrder = (country: string | null, currency: string) =>
 
 
 /* Signed-in account confirmation — replaces blank email/name inputs.  */
-function AccountBlock({ email, role }: { email: string; role: string }) {
+function AccountBlock({ email, role, company }: { email: string; role: string; company?: string }) {
   return (
-    <div className="flex items-center justify-between gap-4 border border-border bg-muted/30 px-4 py-3">
-      <span className="text-[11px] font-light uppercase tracking-[0.24em] text-muted-foreground">Account</span>
-      <span className="truncate text-sm">
-        {email} <span className="text-muted-foreground">({role})</span>
-      </span>
+    <div className="border border-border bg-muted/30 px-4 py-3">
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-[11px] font-light uppercase tracking-[0.24em] text-muted-foreground">Account</span>
+        <span className="truncate text-sm">
+          {email} <span className="text-muted-foreground">({role})</span>
+        </span>
+      </div>
+      {company && (
+        <div className="mt-2 flex items-center justify-between gap-4">
+          <span className="text-[11px] font-light uppercase tracking-[0.24em] text-muted-foreground">Business</span>
+          <span className="truncate text-sm text-muted-foreground">{company}</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -606,7 +614,7 @@ function PaymentForm({
   setBuyerGstNumber,
 }: {
   summary: CheckoutSummary;
-  account: { email: string; role: string } | null;
+  account: { email: string; role: string; company?: string } | null;
   email: string;
   setEmail: (v: string) => void;
   onPaid: (ref: string) => void;
@@ -678,7 +686,7 @@ function PaymentForm({
           Contact & delivery
         </h2>
         {account ? (
-          <AccountBlock email={account.email} role={account.role} />
+          <AccountBlock email={account.email} role={account.role} company={account.company} />
         ) : (
           <input
             type="email"
@@ -961,7 +969,7 @@ function WireForm({
 }: {
   lines: CheckoutLine[];
   summary: CheckoutSummary;
-  account: { email: string; role: string } | null;
+  account: { email: string; role: string; company?: string } | null;
   email: string;
   setEmail: (v: string) => void;
   onDone: (ref: string) => void;
@@ -1051,7 +1059,7 @@ function WireForm({
           Bank wire — contact & delivery
         </h2>
         {account ? (
-          <AccountBlock email={account.email} role={account.role} />
+          <AccountBlock email={account.email} role={account.role} company={account.company} />
         ) : (
           <>
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" autoComplete="name" className={field} />
@@ -1225,11 +1233,14 @@ export default function Checkout() {
     () => getCurrentDestination()?.iso ?? null,
   );
   // Signed-in account — replaces blank email/name inputs with a confirmation.
-  const { user, isAdmin, isSuperAdmin, isTradeUser } = useAuth();
+  const { user, isAdmin, isSuperAdmin, isTradeUser, profile, tradeStatus } = useAuth();
+  const tradeApproved = tradeStatus === "approved" || isTradeUser;
+  const tradeCompany = tradeApproved ? profile?.company?.trim() || "" : "";
   const account = user?.email
     ? {
         email: user.email,
         role: isAdmin || isSuperAdmin ? "Admin" : isTradeUser ? "Trade" : "Member",
+        company: tradeCompany || undefined,
       }
     : null;
   // Signed-in buyers never retype their email.
@@ -1251,6 +1262,14 @@ export default function Checkout() {
   );
   const [buyerType, setBuyerType] = useState<BuyerType>("private");
   const [buyerGstNumber, setBuyerGstNumber] = useState("");
+  // Approved trade profiles are corporate buyers by definition.
+  const businessPrefilled = useRef(false);
+  useEffect(() => {
+    if (tradeCompany && !businessPrefilled.current) {
+      businessPrefilled.current = true;
+      setBuyerType("business");
+    }
+  }, [tradeCompany]);
   const summary = useMemo<CheckoutSummary | null>(() => {
     if (!grossLines?.length) return null;
     const currency = orderCurrency(grossLines);
