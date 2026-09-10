@@ -198,6 +198,42 @@ export function writeSecureBasket<T>(lines: T[]) {
 }
 
 /**
+ * Authoritative write used after a deliberate basket mutation (line removal,
+ * quantity change). Unlike `writeSecureBasket` this accepts an empty array and
+ * genuinely clears both caches, so a removed line can never be revived from a
+ * stale mirror when the checkout page re-hydrates.
+ */
+export function overwriteSecureBasket<T>(lines: T[]) {
+  if (typeof window === "undefined") return;
+  const payload = lines as unknown[];
+  if (!payload.length) {
+    try {
+      window.sessionStorage.removeItem(SESSION_KEY);
+      window.localStorage.removeItem(DURABLE_KEY);
+    } catch {
+      /* ignore */
+    }
+    return;
+  }
+  writeSession(payload);
+  writeDurable(payload);
+}
+
+/**
+ * Cross-tab / cross-modal re-sync hook (Safari in particular restores tabs
+ * without firing focus). Calls back whenever another context mutates the
+ * durable basket or marks an order as placed.
+ */
+export function subscribeSecureBasketStorage(cb: () => void) {
+  if (typeof window === "undefined") return () => {};
+  const handler = (e: StorageEvent) => {
+    if (e.key === null || e.key === DURABLE_KEY || e.key === ORDER_PLACED_KEY) cb();
+  };
+  window.addEventListener("storage", handler);
+  return () => window.removeEventListener("storage", handler);
+}
+
+/**
  * Empties the secure checkout basket. Only an actual order (`reason: "order"`)
  * marks the basket as purchased and wipes the durable mirror.
  */
