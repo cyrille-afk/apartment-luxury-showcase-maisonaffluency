@@ -16,6 +16,7 @@ export interface OrderIntakeDetails {
   email: string;
   phone: string;
   company: string;
+  buyerType?: "individual" | "business";
 }
 
 interface Props {
