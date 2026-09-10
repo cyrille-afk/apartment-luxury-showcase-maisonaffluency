@@ -56,6 +56,10 @@ serve(async (req) => {
     const phone = typeof body?.phone === "string" ? body.phone.trim().slice(0, 60) : "";
     const address = typeof body?.address === "string" ? body.address.trim().slice(0, 600) : "";
     const amountCents = Math.round(Number(body?.amountCents));
+    const buyerType =
+      typeof body?.buyerType === "string" ? body.buyerType.toLowerCase() : "private";
+    const buyerGstNumber =
+      typeof body?.buyerGstNumber === "string" ? body.buyerGstNumber.trim().toUpperCase() : "";
 
     if (!title) return json({ error: "Product is required." }, 400);
     if (!name || !email) return json({ error: "Name and email are required." }, 400);
@@ -79,6 +83,8 @@ serve(async (req) => {
       amount_total: amountCents,
       currency: (typeof body?.currency === "string" ? body.currency : "usd").toLowerCase(),
       status: "wire_pending",
+      buyer_type: buyerType,
+      buyer_gst_number: buyerGstNumber,
     });
     if (insertErr) {
       console.error("[request-wire-transfer] insert failed", insertErr);
@@ -104,6 +110,8 @@ serve(async (req) => {
             <p><strong>Product:</strong> ${escapeHtml(designer)} ${escapeHtml(title)}<br/>
             <strong>Finish:</strong> ${escapeHtml(finish || "—")}<br/>
             <strong>Total (incl. 1.5% concierge discount):</strong> ${escapeHtml(amountLabel)}</p>
+            <p><strong>Buyer type:</strong> ${escapeHtml(buyerType === "business" ? "GST-Registered Business" : "Private Consumer")}</p>
+            ${buyerType === "business" && buyerGstNumber ? `<p><strong>Singapore GST / UEN:</strong> ${escapeHtml(buyerGstNumber)}</p>` : ""}
             <p><strong>Client:</strong> ${escapeHtml(name)}<br/>
             ${escapeHtml(email)}<br/>${escapeHtml(phone || "—")}</p>
             <p><strong>Delivery address:</strong><br/>${escapeHtml(address || "—")}</p>

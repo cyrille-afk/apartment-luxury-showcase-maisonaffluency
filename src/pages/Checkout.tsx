@@ -21,7 +21,15 @@ import RegionalLogisticsNote from "@/components/trade/RegionalLogisticsNote";
 import RegionalPaymentPanel from "@/components/checkout/RegionalPaymentPanel";
 import { useRegionalLogistics, mapCountryToRegionTier } from "@/hooks/useRegionalLogistics";
 import { ArrowLeft } from "lucide-react";
-import { resolveTaxRule, computeTaxCents, taxRowLabel, taxRegistrationLine } from "@/config/taxRules";
+import {
+  resolveTaxRule,
+  computeTaxCents,
+  taxRowLabel,
+  taxRegistrationLine,
+  isSingaporeUenValid,
+  B2B_TAX_LABEL,
+  type BuyerType,
+} from "@/config/taxRules";
 import {
   assertCheckoutCopy,
   buildVerifiedTotals,
@@ -65,6 +73,15 @@ const money = (cents: number, currency: string) =>
     currency: (currency || "usd").toUpperCase(),
     maximumFractionDigits: 0,
   }).format(Math.round(cents / 100));
+
+/** Explicit two-decimal currency display for zero-rated B2B tax lines. */
+const moneyDecimal = (cents: number, currency: string) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: (currency || "usd").toUpperCase(),
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Math.round(cents) / 100);
 
 
 /* ------------------------------------------------------------------ */
@@ -123,11 +140,115 @@ function AccountBlock({ email, role }: { email: string; role: string }) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Buyer type — Singapore B2B zero-rating toggle                       */
+/* ------------------------------------------------------------------ */
+function BuyerTypeSection({
+  buyerType,
+  setBuyerType,
+  buyerGstNumber,
+  setBuyerGstNumber,
+}: {
+  buyerType: BuyerType;
+  setBuyerType: (v: BuyerType) => void;
+  buyerGstNumber: string;
+  setBuyerGstNumber: (v: string) => void;
+}) {
+  const business = buyerType === "business";
+  const valid = business && isSingaporeUenValid(buyerGstNumber);
+  const field =
+    "h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground";
+
+  return (
+    <div className="space-y-3">
+      <p className="text-[11px] font-light uppercase tracking-[0.24em] text-muted-foreground">
+        Buyer type
+      </p>
+      <div
+        role="radiogroup"
+        aria-label="Buyer type"
+        className="grid w-full grid-cols-2 border border-neutral-200"
+      >
+        {[
+          { id: "private" as BuyerType, label: "Private Consumer" },
+          { id: "business" as BuyerType, label: "GST-Registered Business" },
+        ].map((opt, i) => {
+          const active = buyerType === opt.id;
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => setBuyerType(opt.id)}
+              className={cn(
+                "flex flex-col items-start gap-1 px-4 py-4 text-left transition-colors",
+                i > 0 && "border-l border-neutral-200",
+                active ? "bg-foreground text-background" : "hover:bg-muted/40",
+              )}
+            >
+              <span className="flex items-center gap-2 text-[11px] font-light uppercase tracking-[0.18em]">
+                <span
+                  className={cn(
+                    "h-2.5 w-2.5 flex-none rounded-full border",
+                    active ? "border-background bg-background" : "border-border",
+                  )}
+                />
+                {opt.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {business && (
+        <div className="space-y-1">
+          <input
+            type="text"
+            inputMode="text"
+            autoCapitalize="characters"
+            maxLength={20}
+            value={buyerGstNumber}
+            onChange={(e) => setBuyerGstNumber(e.target.value.toUpperCase())}
+            placeholder="Singapore GST / UEN Number"
+            className={field}
+          />
+          <p
+            className={cn(
+              "text-[10px] font-light tracking-[0.04em]",
+              valid ? "text-foreground" : "text-muted-foreground",
+            )}
+          >
+            {valid
+              ? "Valid UEN — tax will be B2B zero-rated."
+              : "Enter a valid Singapore UEN (e.g., 201717288Z)."}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Order summary — persistent sidebar showing the true unit prices,    */
 /* the subtotal, one explicit discount row, and the final total.       */
 /* ------------------------------------------------------------------ */
-function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: CheckoutSummary }) {
+function OrderSummary({
+  lines,
+  summary,
+  buyerType,
+  buyerGstNumber,
+}: {
+  lines: CheckoutLine[];
+  summary: CheckoutSummary;
+  buyerType: BuyerType;
+  buyerGstNumber: string;
+}) {
   const { currency } = summary;
+  const isB2BZeroRated =
+    buyerType === "business" &&
+    isSingaporeUenValid(buyerGstNumber) &&
+    summary.taxCountry === "SG" &&
+    currency.toLowerCase() === "sgd";
 
   return (
     <aside className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] h-fit">
@@ -224,17 +345,27 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
           <div className="border-t border-border/60 pt-4">
             <div className="flex items-baseline justify-between gap-6">
               <dt className="text-muted-foreground">
-                {summary.taxLabel || (summary.taxApplied ? "Tax" : "Tax (zero-rated)")}
+                {isB2BZeroRated
+                  ? B2B_TAX_LABEL
+                  : summary.taxLabel || (summary.taxApplied ? "Tax" : "Tax (zero-rated)")}
               </dt>
               <dd className="tabular-nums">
-                {summary.taxApplied ? money(summary.taxCents, currency) : money(0, currency)}
+                {isB2BZeroRated
+                  ? moneyDecimal(0, currency)
+                  : summary.taxApplied
+                    ? money(summary.taxCents, currency)
+                    : money(0, currency)}
               </dd>
             </div>
             <dl className="mt-2 space-y-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
               <div className="flex items-baseline justify-between gap-6">
                 <dt>Rate</dt>
                 <dd className="tabular-nums">
-                  {summary.taxApplied ? `${Number((summary.taxRate * 100).toFixed(2))}%` : "0% — zero-rated"}
+                  {isB2BZeroRated
+                    ? "0% — B2B zero-rated"
+                    : summary.taxApplied
+                      ? `${Number((summary.taxRate * 100).toFixed(2))}%`
+                      : "0% — zero-rated"}
                 </dd>
               </div>
               <div className="flex items-baseline justify-between gap-6">
@@ -247,13 +378,19 @@ function OrderSummary({ lines, summary }: { lines: CheckoutLine[]; summary: Chec
               </div>
             </dl>
             <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-              {summary.taxStatusNote}
+              {isB2BZeroRated
+                ? "B2B zero-rated for GST-registered Singapore businesses. You may claim the input tax on your GST return."
+                : summary.taxStatusNote}
             </p>
-            {summary.taxRegistrationLine && (
+            {isB2BZeroRated ? (
+              <p className="mt-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                Buyer GST / UEN: {buyerGstNumber.trim().toUpperCase()}
+              </p>
+            ) : summary.taxRegistrationLine ? (
               <p className="mt-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
                 {summary.taxRegistrationLine}
               </p>
-            )}
+            ) : null}
           </div>
           <div className="border-t border-border pt-4">
 
@@ -423,6 +560,10 @@ function PaymentForm({
   method,
   optionsSlot,
   onCountryChange,
+  buyerType,
+  setBuyerType,
+  buyerGstNumber,
+  setBuyerGstNumber,
 }: {
   summary: CheckoutSummary;
   account: { email: string; role: string } | null;
@@ -432,7 +573,13 @@ function PaymentForm({
   method: PaymentMethod;
   optionsSlot: React.ReactNode;
   onCountryChange?: (code: string | null) => void;
+  buyerType: BuyerType;
+  setBuyerType: (v: BuyerType) => void;
+  buyerGstNumber: string;
+  setBuyerGstNumber: (v: string) => void;
 }) {
+  const sgB2BApplicable =
+    summary.taxCountry === "SG" && summary.currency.toLowerCase() === "sgd";
   const stripe = useStripe();
   const elements = useElements();
   // Header / "Shipping destination & currency" modal selection. Saving there
@@ -503,6 +650,16 @@ function PaymentForm({
             className="h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground"
           />
         )}
+
+        {sgB2BApplicable && (
+          <BuyerTypeSection
+            buyerType={buyerType}
+            setBuyerType={setBuyerType}
+            buyerGstNumber={buyerGstNumber}
+            setBuyerGstNumber={setBuyerGstNumber}
+          />
+        )}
+
         <AddressElement
           // Remount when the header/modal destination changes so the
           // "Country or Region" field snaps to the newly saved country.
@@ -749,7 +906,19 @@ function CopyButton({ value, label }: { value: string; label: string }) {
 /* ------------------------------------------------------------------ */
 /* Bank wire — payment by transfer, no card data collected             */
 /* ------------------------------------------------------------------ */
-function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlot }: {
+function WireForm({
+  lines,
+  summary,
+  account,
+  email,
+  setEmail,
+  onDone,
+  optionsSlot,
+  buyerType,
+  setBuyerType,
+  buyerGstNumber,
+  setBuyerGstNumber,
+}: {
   lines: CheckoutLine[];
   summary: CheckoutSummary;
   account: { email: string; role: string } | null;
@@ -757,7 +926,13 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
   setEmail: (v: string) => void;
   onDone: (ref: string) => void;
   optionsSlot: React.ReactNode;
+  buyerType: BuyerType;
+  setBuyerType: (v: BuyerType) => void;
+  buyerGstNumber: string;
+  setBuyerGstNumber: (v: string) => void;
 }) {
+  const sgB2BApplicable =
+    summary.taxCountry === "SG" && summary.currency.toLowerCase() === "sgd";
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -813,6 +988,8 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
           email: account ? account.email : email,
           phone,
           address,
+          buyerType,
+          buyerGstNumber,
         },
       });
       if (error) throw error;
@@ -843,6 +1020,15 @@ function WireForm({ lines, summary, account, email, setEmail, onDone, optionsSlo
         )}
         <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone" type="tel" inputMode="tel" autoComplete="tel" className={field} />
         <textarea value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Delivery address" rows={3} className="w-full rounded-none border border-neutral-200 bg-background p-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground" />
+
+        {sgB2BApplicable && (
+          <BuyerTypeSection
+            buyerType={buyerType}
+            setBuyerType={setBuyerType}
+            buyerGstNumber={buyerGstNumber}
+            setBuyerGstNumber={setBuyerGstNumber}
+          />
+        )}
       </section>
 
       {optionsSlot}
@@ -1023,6 +1209,8 @@ export default function Checkout() {
     formCountry,
     orderCurrency(grossLines ?? []),
   );
+  const [buyerType, setBuyerType] = useState<BuyerType>("private");
+  const [buyerGstNumber, setBuyerGstNumber] = useState("");
   const summary = useMemo<CheckoutSummary | null>(() => {
     if (!grossLines?.length) return null;
     const currency = orderCurrency(grossLines);
@@ -1036,13 +1224,24 @@ export default function Checkout() {
     const netCents = subtotalCents - discountCents + shippingCents;
     // Tax follows the configurable rules (destination + currency must match).
     const rule = resolveTaxRule(formCountry, currency);
-    const localTaxCents = computeTaxCents(subtotalCents - discountCents, shippingCents, rule);
+    const b2bZeroRated =
+      buyerType === "business" &&
+      isSingaporeUenValid(buyerGstNumber) &&
+      rule &&
+      formCountry?.toUpperCase() === "SG" &&
+      currency.toLowerCase() === "sgd";
+    const localTaxCents = b2bZeroRated
+      ? 0
+      : computeTaxCents(subtotalCents - discountCents, shippingCents, rule);
     // The PaymentIntent is authoritative: once the server has priced the order
     // the displayed tax and total equal the amount actually charged.
     const taxCents = serverTax !== null ? serverTax.cents : localTaxCents;
     const chargeTotalCents = netCents + taxCents;
-    const estimatedTaxCents =
-      rule && rule.taxShipping ? Math.round(estimatedShippingCents * rule.rate) : 0;
+    const estimatedTaxCents = b2bZeroRated
+      ? 0
+      : rule && rule.taxShipping
+        ? Math.round(estimatedShippingCents * rule.rate)
+        : 0;
     // Breakdown inputs: the base the rate is applied to, plus a plain-language
     // explanation of why the order is taxed or zero-rated.
     const taxableBaseCents = rule
@@ -1050,11 +1249,13 @@ export default function Checkout() {
         (rule.taxShipping ? Math.max(0, shippingCents) : 0)
       : 0;
     const destination = (formCountry || "").trim().toUpperCase() || null;
-    const taxStatusNote = rule
-      ? `${rule.name} charged on ${rule.taxShipping ? "goods and delivery" : "goods"} for ${destination} orders billed in ${currency.toUpperCase()}.`
-      : !destination
-        ? "Select a destination country to see whether tax applies."
-        : `Zero-rated — no ${currency.toUpperCase()} tax rule applies to shipments to ${destination}.`;
+    const taxStatusNote = b2bZeroRated
+      ? "B2B zero-rated for GST-registered Singapore businesses. You may claim the input tax on your GST return."
+      : rule
+        ? `${rule.name} charged on ${rule.taxShipping ? "goods and delivery" : "goods"} for ${destination} orders billed in ${currency.toUpperCase()}.`
+        : !destination
+          ? "Select a destination country to see whether tax applies."
+          : `Zero-rated — no ${currency.toUpperCase()} tax rule applies to shipments to ${destination}.`;
     return {
       currency,
       subtotalCents,
@@ -1065,18 +1266,22 @@ export default function Checkout() {
       estimatedShippingCents,
       shippingZoneLabel: estimate.zoneLabel ?? null,
       taxCents,
-      taxLabel: taxCents > 0 ? (serverTax?.label ?? (rule ? taxRowLabel(rule) : null)) : null,
+      taxLabel: b2bZeroRated
+        ? B2B_TAX_LABEL
+        : taxCents > 0
+          ? (serverTax?.label ?? (rule ? taxRowLabel(rule) : null))
+          : null,
       taxRegistrationLine: taxCents > 0 ? taxRegistrationLine(rule) : null,
-      taxRate: rule?.rate ?? 0,
+      taxRate: b2bZeroRated ? 0 : (rule?.rate ?? 0),
       taxableBaseCents,
-      taxApplied: Boolean(rule),
+      taxApplied: b2bZeroRated ? true : Boolean(rule),
       taxStatusNote,
       taxCountry: destination,
       taxShipping: Boolean(rule?.taxShipping),
       totalCents: chargeTotalCents + estimatedShippingCents + estimatedTaxCents,
       chargeTotalCents,
     };
-  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, formCountry, serverTax]);
+  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, formCountry, serverTax, buyerType, buyerGstNumber]);
 
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -1210,6 +1415,9 @@ export default function Checkout() {
           paymentIntentId: intentIdRef.current || undefined,
           // Destination country — drives Singapore GST server-side.
           shippingCountry: formCountry ?? "",
+          // B2B zero-rating: only applies to SG GST-registered businesses.
+          buyerType,
+          buyerGstNumber,
           // PayNow needs its own PaymentIntent: the payment method type is
           // fixed at creation and cannot be swapped on an existing intent.
           paymentMethod: intentMethod,
@@ -1477,6 +1685,10 @@ export default function Checkout() {
                   setEmail={setEmail}
                   onDone={completeOrder}
                   optionsSlot={optionsSlot}
+                  buyerType={buyerType}
+                  setBuyerType={setBuyerType}
+                  buyerGstNumber={buyerGstNumber}
+                  setBuyerGstNumber={setBuyerGstNumber}
                 />
               );
             }
@@ -1499,6 +1711,10 @@ export default function Checkout() {
                     onCountryChange={setFormCountry}
                     method={method}
                     optionsSlot={optionsSlot}
+                    buyerType={buyerType}
+                    setBuyerType={setBuyerType}
+                    buyerGstNumber={buyerGstNumber}
+                    setBuyerGstNumber={setBuyerGstNumber}
                   />
                 </Elements>
               );
@@ -1514,7 +1730,7 @@ export default function Checkout() {
         </div>
 
         {/* Right — persistent order summary */}
-        <OrderSummary lines={grossLines} summary={summary} />
+        <OrderSummary lines={grossLines} summary={summary} buyerType={buyerType} buyerGstNumber={buyerGstNumber} />
         </div>
       </main>
     </div>

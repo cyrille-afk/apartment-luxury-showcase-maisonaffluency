@@ -6,6 +6,10 @@
  * Keep this file in sync with `supabase/functions/_shared/taxRules.ts`,
  * which the payment function uses to compute the amount actually charged.
  */
+export type BuyerType = "private" | "business";
+
+export const B2B_TAX_LABEL = "Tax (B2B Zero-Rated)";
+
 export interface TaxRule {
   /** ISO 3166-1 alpha-2 destination country the rule applies to. */
   country: string;
@@ -63,3 +67,17 @@ export const computeTaxCents = (
 /** Line printed on receipts, e.g. "GST Reg. No. UEN 201717288Z". */
 export const taxRegistrationLine = (rule: TaxRule | null | undefined): string | null =>
   rule?.registrationNumber ? `${rule.name} Reg. No. ${rule.registrationNumber}` : null;
+
+/** Accepts ACRA UEN (9 digits + letter) or other entity UEN (10 chars). */
+const SG_UEN_RE = /^(\d{9}[A-Z]|[TSPR]\d{2}[A-Z]{2}\d{4}[A-Z])$/;
+
+export const isSingaporeUenValid = (uen: string | null | undefined): boolean => {
+  if (!uen) return false;
+  return SG_UEN_RE.test(uen.trim().toUpperCase());
+};
+
+export const formatSingaporeUen = (uen: string | null | undefined): string | null => {
+  if (!uen) return null;
+  const formatted = uen.trim().toUpperCase();
+  return isSingaporeUenValid(formatted) ? formatted : null;
+};
