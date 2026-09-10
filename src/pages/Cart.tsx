@@ -350,26 +350,24 @@ export default function Cart() {
                       </div>
                     </div>
 
-                    {/* Col 4 — price */}
+                    {/* Col 4 — price (always shown in the cart display currency) */}
                     <div className="text-left sm:text-right">
                       <p className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Total</p>
-                      <p className="font-display text-lg tabular-nums mt-1">
-                        {formatUsd(item.unitPriceCents * item.quantity, item.currency)}
+                      <p className="font-display text-lg tabular-nums mt-1 whitespace-nowrap">
+                        {formatUsd(toDisplay(item.unitPriceCents * item.quantity, item.currency))}
                       </p>
                        {item.quantity > 1 && (
                          <p className="font-body text-[11px] text-muted-foreground mt-1 tabular-nums">
-                           {formatUsd(item.unitPriceCents, item.currency)} each
+                           {formatUsd(toDisplay(item.unitPriceCents, item.currency))} each
                          </p>
                        )}
-                       {item.sourceCurrency && item.fxRate ? (
+                       {(item.currency || "USD").toUpperCase() !== currency && (
                          <p className="font-body text-[10px] italic text-muted-foreground mt-1 tabular-nums">
-                           Converted from {formatMoney(
-                             (item.sourceUnitPriceCents || 0) * item.quantity,
-                             item.sourceCurrency,
-                           )} · 1 {item.sourceCurrency} = {item.fxRate.toFixed(4)} {item.currency}
+                           Converted from {formatMoney(item.unitPriceCents * item.quantity, item.currency)}
                          </p>
-                       ) : null}
+                       )}
                     </div>
+
                   </li>
                 ))}
               </ul>
