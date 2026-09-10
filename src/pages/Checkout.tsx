@@ -429,9 +429,14 @@ function OrderSummary({
                 : "Live rates unavailable — using baseline rate of 1.35 USD→SGD"}
             </p>
             {sgImportGstThreshold && !sgImportGstThreshold.isLowValueGoods && (
-              <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-                Because this item value exceeds the S$400 threshold upon SGD conversion, Singapore Import GST (9%) must be settled via the courier during border customs clearance rather than collected at checkout.
-              </p>
+              <>
+                <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                  Because this item value exceeds the S$400 threshold upon SGD conversion, Singapore Import GST (9%) must be settled via the courier during border customs clearance rather than collected at checkout.
+                </p>
+                <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                  Please note: The 9% Singapore Import GST applies to both the value of the imported merchandise and the international freight charges, to be billed collectively by your customs broker upon border declaration.
+                </p>
+              </>
             )}
             {isB2BZeroRated ? (
               <p className="mt-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
