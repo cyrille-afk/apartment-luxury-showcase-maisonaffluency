@@ -336,7 +336,20 @@ export default function Cart() {
                   <div>
                     <dt className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Direct Line</dt>
                     <dd className="mt-2">
-                      <Link to="/contact" className="hover:text-[hsl(var(--gold))] transition-colors">
+                      <a
+                        href={`https://wa.me/${directLine.number.replace(/\D/g, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-[hsl(var(--gold))] transition-colors"
+                      >
+                        Chat with an Advisor on WhatsApp
+                      </a>
+                    </dd>
+                    <dd className="mt-1 text-muted-foreground">
+                      {directLine.label}: {directLine.number}
+                    </dd>
+                    <dd className="mt-1">
+                      <Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
                         Request a call back
                       </Link>
                     </dd>
