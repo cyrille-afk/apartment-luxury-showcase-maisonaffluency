@@ -354,21 +354,23 @@ function OrderSummary({
             </div>
           )}
           <div>
-            <div className="flex items-baseline justify-between gap-6">
-              <dt className="text-muted-foreground flex items-baseline gap-2">
-                <span>{summary.shippingLabel || "Front Door Premium Delivery"}</span>
-                {summary.shippingZoneLabel && (
-                  <span className="shrink-0 border border-border/70 px-1.5 py-px text-[9px] font-light uppercase tracking-[0.18em] text-muted-foreground/80">
-                    {summary.shippingZoneLabel}
-                  </span>
-                )}
+            <div className="flex items-start justify-between gap-4">
+              <dt className="text-muted-foreground">
+                <span className="inline-flex flex-wrap items-baseline gap-2">
+                  <span>{summary.shippingLabel || "Front Door Premium Delivery"}</span>
+                  {summary.shippingZoneLabel && (
+                    <span className="shrink-0 border border-border/70 px-1.5 py-px text-[9px] font-light uppercase tracking-[0.18em] text-muted-foreground/80">
+                      {summary.shippingZoneLabel}
+                    </span>
+                  )}
+                </span>
               </dt>
               {summary.shippingCents > 0 ? (
-                <dd className="tabular-nums">{money(summary.shippingCents, currency)}</dd>
+                <dd className="whitespace-nowrap tabular-nums">{money(summary.shippingCents, currency)}</dd>
               ) : summary.estimatedShippingCents > 0 ? (
-                <dd className="tabular-nums">{money(summary.estimatedShippingCents, currency)}</dd>
+                <dd className="whitespace-nowrap tabular-nums">{money(summary.estimatedShippingCents, currency)}</dd>
               ) : (
-                <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
+                <dd className="whitespace-nowrap text-right text-muted-foreground">To be Quoted by Advisor</dd>
               )}
             </div>
             {summary.shippingCents === 0 && summary.estimatedShippingCents > 0 && (
