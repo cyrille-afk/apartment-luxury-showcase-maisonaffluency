@@ -442,12 +442,20 @@ function OrderSummary({
                 </dd>
               </div>
             )}
+            {/* Every freight / customs / FX explanation lives behind one link. */}
             <details className="group mt-2">
               <summary className="flex cursor-pointer list-none items-center justify-between font-light text-[10px] uppercase tracking-[0.14em] text-muted-foreground [&::-webkit-details-marker]:hidden">
-                Rates &amp; customs details
+                View Shipping &amp; Import Tax Details
                 <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" aria-hidden="true" />
               </summary>
-              <div className="mt-2 space-y-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+              <div className="mt-2 space-y-1.5 font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
+                {summary.freightCapped && summary.freightNotice && (
+                  <p className="text-foreground">{summary.freightNotice}</p>
+                )}
+                {summary.shippingCents === 0 && summary.estimatedShippingCents > 0 && (
+                  <p className="italic">{ESTIMATED_SHIPPING_NOTE}</p>
+                )}
+                <RegionalLogisticsNote compact />
                 {!sgBorderGst && (
                   <dl className="space-y-1">
                     <div className="flex items-baseline justify-between gap-6">
