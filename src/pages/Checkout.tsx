@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getCart, clearCart, rehydrateCart } from "@/lib/cart";
-import { readSecureBasket, writeSecureBasket, clearSecureBasket } from "@/lib/checkout/secureBasket";
+import { readSecureBasket, writeSecureBasket, clearSecureBasket, subscribeSecureBasketStorage } from "@/lib/checkout/secureBasket";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
 import { useAuth } from "@/hooks/useAuth";
 import { Helmet } from "react-helmet-async";
