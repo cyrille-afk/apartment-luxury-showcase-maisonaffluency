@@ -366,6 +366,7 @@ export function getCart() {
 export function addToCart(item: Omit<CartItem, "key" | "quantity"> & { quantity?: number }) {
   const key = lineKey(item.pickId, item.finishLabel ?? null);
   const qty = Math.max(1, item.quantity ?? 1);
+  setUserEmptied(false);
   const existing = items.find((i) => i.key === key);
   if (existing) {
     commit(items.map((i) => (i.key === key ? { ...i, quantity: i.quantity + qty } : i)));
@@ -377,11 +378,68 @@ export function addToCart(item: Omit<CartItem, "key" | "quantity"> & { quantity?
 
 export function setQuantity(key: string, quantity: number) {
   if (quantity <= 0) return removeFromCart(key);
-  commit(items.map((i) => (i.key === key ? { ...i, quantity } : i)));
+  commitExplicit(items.map((i) => (i.key === key ? { ...i, quantity } : i)));
 }
 
+/**
+ * Deletion never mutates the live array: a filter callback produces a brand
+ * new array which replaces the store, then every persistent cache (primary,
+ * durable mirror and the secure checkout basket) is rewritten in the same
+ * tick, so the removed line cannot be revived by a rehydrate.
+ */
 export function removeFromCart(key: string) {
-  commit(items.filter((i) => i.key !== key));
+  const currentCart = getCart();
+  const updatedCart = currentCart.filter((item) => item.key !== key);
+  commitExplicit(updatedCart);
+}
+
+/**
+ * Public → Trade elevation merge.
+ *
+ * Called when a session gains an authenticated (trade) identity. The
+ * unauthenticated basket held in localStorage is read back and merged into the
+ * live cart array — matching lines have their quantities summed, new lines are
+ * appended — and the unified array is written to every active store. Nothing
+ * is ever isolated or overwritten by the newly initialised trade context.
+ */
+export function mergeGuestCartIntoSession(): CartItem[] {
+  if (typeof window === "undefined") return items;
+
+  const guestLines = [...readPrimary(), ...readBackup()];
+  if (!guestLines.length && !items.length) return items;
+
+  const merged = new Map<string, CartItem>();
+  const absorb = (line: CartItem, sumQuantities: boolean) => {
+    if (!line || !line.key) return;
+    const existing = merged.get(line.key);
+    if (!existing) {
+      merged.set(line.key, { ...line, quantity: Math.max(1, line.quantity || 1) });
+      return;
+    }
+    if (sumQuantities) {
+      merged.set(line.key, {
+        ...existing,
+        quantity: existing.quantity + Math.max(1, line.quantity || 1),
+      });
+    }
+  };
+
+  // In-memory (trade) lines first, then the stored guest basket. Duplicate
+  // stored copies (primary + backup mirror) must not inflate quantities.
+  items.forEach((line) => absorb(line, false));
+  const seenGuestKeys = new Set<string>();
+  guestLines.forEach((line) => {
+    if (!line?.key || seenGuestKeys.has(line.key)) return;
+    seenGuestKeys.add(line.key);
+    absorb(line, merged.has(line.key) && !items.some((i) => i.key === line.key));
+  });
+
+  const unified = Array.from(merged.values());
+  if (unified.length) {
+    setUserEmptied(false);
+    commitExplicit(unified);
+  }
+  return unified;
 }
 
 /**
