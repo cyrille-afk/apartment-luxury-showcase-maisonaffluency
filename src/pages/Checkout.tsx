@@ -140,6 +140,95 @@ function AccountBlock({ email, role }: { email: string; role: string }) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Buyer type — Singapore B2B zero-rating toggle                       */
+/* ------------------------------------------------------------------ */
+function BuyerTypeSection({
+  buyerType,
+  setBuyerType,
+  buyerGstNumber,
+  setBuyerGstNumber,
+}: {
+  buyerType: BuyerType;
+  setBuyerType: (v: BuyerType) => void;
+  buyerGstNumber: string;
+  setBuyerGstNumber: (v: string) => void;
+}) {
+  const business = buyerType === "business";
+  const valid = business && isSingaporeUenValid(buyerGstNumber);
+  const field =
+    "h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground";
+
+  return (
+    <div className="space-y-3">
+      <p className="text-[11px] font-light uppercase tracking-[0.24em] text-muted-foreground">
+        Buyer type
+      </p>
+      <div
+        role="radiogroup"
+        aria-label="Buyer type"
+        className="grid w-full grid-cols-2 border border-neutral-200"
+      >
+        {[
+          { id: "private" as BuyerType, label: "Private Consumer" },
+          { id: "business" as BuyerType, label: "GST-Registered Business" },
+        ].map((opt, i) => {
+          const active = buyerType === opt.id;
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => setBuyerType(opt.id)}
+              className={cn(
+                "flex flex-col items-start gap-1 px-4 py-4 text-left transition-colors",
+                i > 0 && "border-l border-neutral-200",
+                active ? "bg-foreground text-background" : "hover:bg-muted/40",
+              )}
+            >
+              <span className="flex items-center gap-2 text-[11px] font-light uppercase tracking-[0.18em]">
+                <span
+                  className={cn(
+                    "h-2.5 w-2.5 flex-none rounded-full border",
+                    active ? "border-background bg-background" : "border-border",
+                  )}
+                />
+                {opt.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {business && (
+        <div className="space-y-1">
+          <input
+            type="text"
+            inputMode="text"
+            autoCapitalize="characters"
+            maxLength={20}
+            value={buyerGstNumber}
+            onChange={(e) => setBuyerGstNumber(e.target.value.toUpperCase())}
+            placeholder="Singapore GST / UEN Number"
+            className={field}
+          />
+          <p
+            className={cn(
+              "text-[10px] font-light tracking-[0.04em]",
+              valid ? "text-foreground" : "text-muted-foreground",
+            )}
+          >
+            {valid
+              ? "Valid UEN — tax will be B2B zero-rated."
+              : "Enter a valid Singapore UEN (e.g., 201717288Z)."}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Order summary — persistent sidebar showing the true unit prices,    */
 /* the subtotal, one explicit discount row, and the final total.       */
 /* ------------------------------------------------------------------ */
