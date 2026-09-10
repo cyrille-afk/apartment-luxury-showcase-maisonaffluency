@@ -2635,8 +2635,9 @@ const PublicProductPageContent: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Action block sits directly beneath the finish selector,
-                        ahead of the supporting technical details. */}
+                    <MotionAndDimensionsPanel />
+
+                    {/* Actions follow the complete finish, motion, and dimensions stack. */}
                     {showPublicCommerce && (
                       <ProductCommerceCta
                         productId={product.id}
@@ -2681,9 +2682,6 @@ const PublicProductPageContent: React.FC = () => {
                       />
                     )}
 
-                    <div className="flex flex-col gap-5">
-                      <VariantDimensionsPanel />
-                    </div>
                   </VariantSelectorsProvider>
 
                   {!isTradeVerifiedView && (() => {
