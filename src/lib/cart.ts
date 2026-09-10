@@ -52,6 +52,13 @@ const STORAGE_KEY = "ma_cart_v1";
 const BACKUP_KEY = "ma_cart_v1_backup";
 /** Set once an order is actually placed, so a purchased basket never returns. */
 const ORDER_PLACED_KEY = "ma_cart_order_placed";
+/**
+ * Set when the shopper deliberately empties the basket (removing the last line
+ * or dropping its quantity to zero). Without it the durable backup instantly
+ * resurrects the deleted line on the next rehydrate — the "cannot delete"
+ * lock seen in Chrome.
+ */
+const EMPTIED_KEY = "ma_cart_v1_emptied";
 
 // Mirrors keys in src/lib/shippingDestination.ts so the basket record carries
 // the active destination / settlement currency (e.g. Switzerland → CHF) and can
