@@ -377,6 +377,11 @@ function OrderSummary({
                 <dd className="whitespace-nowrap text-right text-muted-foreground">To be Quoted by Advisor</dd>
               )}
             </div>
+            {summary.freightCapped && summary.freightNotice && (
+              <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-foreground">
+                {summary.freightNotice}
+              </p>
+            )}
             {summary.shippingCents === 0 && summary.estimatedShippingCents > 0 && (
               <p className="mt-1.5 italic font-light text-[10px] tracking-[0.06em] text-muted-foreground">
                 {ESTIMATED_SHIPPING_NOTE}
