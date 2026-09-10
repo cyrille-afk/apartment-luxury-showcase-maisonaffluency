@@ -117,6 +117,7 @@ export default function OrderIntakeSheet({
         setSending(false);
         setTurnstileToken("");
         setCompany("");
+        setBuyerType("individual");
       }, 320);
       return () => window.clearTimeout(t);
     }
