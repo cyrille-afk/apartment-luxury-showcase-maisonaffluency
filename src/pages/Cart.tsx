@@ -116,16 +116,6 @@ export default function Cart() {
     currency,
     discount.totalFor(subtotal),
   );
-  // Geo-targeted WhatsApp direct line — show only the number relevant to the
-  // visitor's region to keep narrow mobile layouts uncluttered.
-  const directLine = useMemo(() => {
-    const EU_ISOS = new Set([
-      "FR", "DE", "IT", "ES", "NL", "BE", "IE", "PT", "AT", "LU", "MC", "GR", "CH", "GB",
-    ]);
-    if (destination.iso === "SG") return { label: "Singapore", number: "+65 9139 3850" };
-    if (EU_ISOS.has(destination.iso)) return { label: "France & EU", number: "+33 6 16 23 74 60" };
-    return { label: "International", number: "+33 6 16 23 74 60" };
-  }, [destination.iso]);
   // Payable now = goods less tier discount. The Estimated Total adds the
   // indicative freight figure (advisor-verified, invoiced separately) so the
   // headline number is the true landed-estimate: subtotal + delivery.
