@@ -165,11 +165,23 @@ export default function BuildUpdateBanner() {
           },
         },
       });
+    }
+
+    const onAvailable = () => {
+      if (armed.current) return;
+      pending = true;
+      tryShow();
+      if (pending && !retry) {
+        retry = setInterval(tryShow, 15_000);
+        window.addEventListener("popstate", tryShow);
+        window.addEventListener("focus", tryShow);
+      }
     };
 
     window.addEventListener("app:build-update-available", onAvailable);
     return () => {
       window.removeEventListener("app:build-update-available", onAvailable);
+      stopRetry();
     };
   }, []);
 
