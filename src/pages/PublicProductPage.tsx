@@ -2378,9 +2378,9 @@ const PublicProductPageContent: React.FC = () => {
                         setSwatchImageIndices(null);
                         return;
                       }
-                      // Rugs keep the full thumbnail rail visible; picking a
-                      // finish jumps to its photo instead of pruning the reel.
-                      setSwatchImageIndices(meta?.jumpOnly ? null : indices);
+                      // The thumbnail rail always keeps every asset; picking a
+                      // finish only jumps to its mapped photo.
+                      setSwatchImageIndices(null);
                       setGalleryActiveIndex(Math.max(0, indices[0] - 1));
                       setGalleryJumpNonce((n) => n + 1);
                     }}
@@ -2588,9 +2588,9 @@ const PublicProductPageContent: React.FC = () => {
                         setSwatchImageIndices(null);
                         return;
                       }
-                      // Rugs keep the full thumbnail rail visible; picking a
-                      // finish jumps to its photo instead of pruning the reel.
-                      setSwatchImageIndices(meta?.jumpOnly ? null : indices);
+                      // The thumbnail rail always keeps every asset; picking a
+                      // finish only jumps to its mapped photo.
+                      setSwatchImageIndices(null);
                       setGalleryActiveIndex(Math.max(0, indices[0] - 1));
                       setGalleryJumpNonce((n) => n + 1);
                     }}
