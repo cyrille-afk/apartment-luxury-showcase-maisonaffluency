@@ -474,29 +474,32 @@ export default function OrderIntakeSheet({
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-200">
               <p className="mb-4 font-display text-xl leading-snug text-foreground">Where shall we reply?</p>
 
-              <fieldset className="mb-5">
-                <legend className={cn(labelCls, "mb-3")}>I am purchasing as</legend>
-                <div className="grid grid-cols-2 gap-3">
-                  {([
-                    { key: "individual", label: "Individual / Private Buyer" },
-                    { key: "business", label: "Business / Studio" },
-                  ] as const).map((opt) => (
-                    <button
-                      key={opt.key}
-                      type="button"
-                      onClick={() => setBuyerType(opt.key)}
-                      className={cn(
-                        "flex h-12 items-center justify-center border px-2 text-center font-body text-xs transition-all duration-200",
-                        buyerType === opt.key
-                          ? "border-foreground bg-foreground text-background"
-                          : "border-border/60 bg-background text-foreground hover:border-foreground/50"
-                      )}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
+              <label className={cn(labelCls, "mb-3")} htmlFor="intake-buying-for-company">
+                I am an interior designer, architect, or buying on behalf of a company.
+              </label>
+              <button
+                id="intake-buying-for-company"
+                type="button"
+                role="checkbox"
+                aria-checked={buyerType === "business"}
+                onClick={() => setBuyerType((t) => (t === "business" ? "individual" : "business"))}
+                className={cn(
+                  "mb-5 flex h-12 w-full items-center gap-3 border px-4 font-body text-xs transition-all duration-200",
+                  buyerType === "business"
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border/60 bg-background text-foreground hover:border-foreground/50"
+                )}
+              >
+                <span
+                  className={cn(
+                    "flex h-4 w-4 shrink-0 items-center justify-center border transition-colors",
+                    buyerType === "business" ? "border-background bg-background text-foreground" : "border-current bg-transparent"
+                  )}
+                >
+                  {buyerType === "business" && <Check className="h-3 w-3" strokeWidth={2} />}
+                </span>
+                <span>Business / studio purchase</span>
+              </button>
 
               <label className={labelCls} htmlFor="intake-email">
                 Email Address
