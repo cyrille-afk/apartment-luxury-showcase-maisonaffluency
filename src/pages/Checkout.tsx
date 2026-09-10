@@ -290,6 +290,9 @@ function OrderSummary({
     return checkSgdThreshold(usdAmount, usdSgd.rate);
   }, [summary, isB2BZeroRated, currency, usdSgd.rate]);
 
+  /** SG-bound, over the S$400 low-value threshold — GST settled at the border. */
+  const sgBorderGst = Boolean(sgImportGstThreshold && !sgImportGstThreshold.isLowValueGoods);
+
   return (
     <aside className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] h-fit">
       <div className="border border-border/70 px-7 py-8">
