@@ -413,18 +413,27 @@ export default function Cart() {
                   <div>
                     <dt className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Direct Line</dt>
                     <dd className="mt-2">
+                      <span className="text-muted-foreground">
+                        Chat with an Advisor on WhatsApp
+                      </span>
+                    </dd>
+                    <dd className="mt-1 text-muted-foreground space-y-0.5">
                       <a
                         href="https://wa.me/6591393850"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="hover:text-[hsl(var(--gold))] transition-colors"
+                        className="block hover:text-[hsl(var(--gold))] transition-colors"
                       >
-                        Chat with an Advisor on WhatsApp
+                        • Singapore: +65 9139 3850
                       </a>
-                    </dd>
-                    <dd className="mt-1 text-muted-foreground">
-                      <span className="block">• Singapore: +65 9139 3850</span>
-                      <span className="block">• Paris &amp; EU: +33 6 1623 7460</span>
+                      <a
+                        href="https://wa.me/33616237460"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block hover:text-[hsl(var(--gold))] transition-colors"
+                      >
+                        • Paris &amp; EU: +33 6 1623 7460
+                      </a>
                     </dd>
                     <dd className="mt-2">
                       <Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
