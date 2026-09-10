@@ -1573,6 +1573,9 @@ export default function Checkout() {
         return;
       }
     }
+    // Nothing anywhere: reflect the genuinely empty basket instead of holding
+    // stale lines that were deleted in this or another tab.
+    setLines([]);
     if (allowRedirect) navigate("/", { replace: true });
   }, [location.state, navigate]);
 
