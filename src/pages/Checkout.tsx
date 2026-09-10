@@ -40,6 +40,7 @@ import {
 import { checkSgdThreshold } from "@/lib/checkout/checkSgdThreshold";
 import { useUsdToSgdRate } from "@/hooks/useUsdToSgdRate";
 import { convertCents, useFxRates } from "@/components/trade/CurrencyToggle";
+import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 
 
 const CONCIERGE_WHATSAPP = "https://wa.me/6591393850";
@@ -1344,7 +1345,20 @@ export default function Checkout() {
 
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [email, setEmail] = useState("");
+  // Email is global checkout state: typed once on the identity step, it
+  // pre-fills here and stays in sync so it reaches the purchase payload.
+  const checkoutForm = useCheckoutForm();
+  const [email, setEmailLocal] = useState(checkoutForm.email);
+  const setEmail = useCallback(
+    (v: string | ((prev: string) => string)) => {
+      setEmailLocal((prev) => {
+        const next = typeof v === "function" ? v(prev) : v;
+        checkoutForm.setEmail(next);
+        return next;
+      });
+    },
+    [checkoutForm],
+  );
   // Wire mode can be pre-selected by the "Your Selection" drawer
   // ("Proceed to Wire Instructions") via a one-shot sessionStorage flag.
   const [method, setMethod] = useState<PaymentMethod>(() => {
