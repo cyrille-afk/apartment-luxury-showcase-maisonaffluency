@@ -25,6 +25,7 @@ import { template as collectorRejection } from './collector-rejection.tsx'
 import { template as cnDirectorBrief } from './cn-director-brief.tsx'
 import { template as proformaInvoice } from './proforma-invoice.tsx'
 import { template as orderPaymentConfirmed } from './order-payment-confirmed.tsx'
+import { template as orderReceived } from './order-received.tsx'
 import { template as tradeProgramInvitation } from './trade-program-invitation.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
@@ -44,5 +45,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'cn-director-brief': cnDirectorBrief,
   'proforma-invoice': proformaInvoice,
   'order-payment-confirmed': orderPaymentConfirmed,
+  'order-received': orderReceived,
   'trade-program-invitation': tradeProgramInvitation,
 }

@@ -31,6 +31,14 @@ interface IncomingItem {
 /** Every price on this platform is quoted and charged in USD. */
 const CHECKOUT_CURRENCY = "usd";
 
+const CURRENCY_SYMBOLS: Record<string, string> = { usd: "$", eur: "€", gbp: "£", sgd: "S$", hkd: "HK$" };
+/** "USD $18,923.25" — ISO code + symbol so currencies are never ambiguous in email. */
+const fmtMoney = (cents: number, cur: string) => {
+  const c = (cur || "usd").toLowerCase();
+  const amount = ((cents ?? 0) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return `${c.toUpperCase()} ${CURRENCY_SYMBOLS[c] ?? ""}${amount}`;
+};
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -239,6 +247,36 @@ serve(async (req) => {
     if (itemsErr) console.error("[create-cart-checkout] item insert failed", itemsErr);
 
     if (method === "bank_transfer") {
+      // Order-received confirmation — card orders get it from the Stripe
+      // webhook once payment clears; bank orders are confirmed at reservation.
+      try {
+        const { error: mailErr } = await supabaseAdmin.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "order-received",
+            recipientEmail: buyerEmail,
+            idempotencyKey: `order-received-${order.order_ref}`,
+            templateData: {
+              recipientName: fullName ?? "",
+              orderRef: order.order_ref,
+              firstItemTitle: lines[0]?.title ?? "Order",
+              items: lines.map((l: any) => ({
+                title: l.title,
+                designerName: l.designer_name,
+                configuration: l.finish_label,
+                quantity: l.quantity,
+                priceFormatted: fmtMoney(l.unit_price_cents, currency),
+              })),
+              subtotalFormatted: fmtMoney(grossSubtotal, currency),
+              shippingFormatted: shipping > 0 ? fmtMoney(shipping, currency) : null,
+              taxLineFormatted: `${fmtMoney(0, currency)} (Zero-rated at checkout / Deferred to Border Customs)`,
+              totalFormatted: fmtMoney(total, currency),
+            },
+          },
+        });
+        if (mailErr) console.error("[create-cart-checkout] order-received email failed:", mailErr);
+      } catch (e) {
+        console.error("[create-cart-checkout] order-received email error:", e);
+      }
       return json({ orderRef: order.order_ref, mode: "bank_transfer" });
     }
 
