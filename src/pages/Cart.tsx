@@ -453,19 +453,23 @@ export default function Cart() {
                     </div>
                   )}
                   <div>
-                    <div className="flex items-baseline justify-between gap-6">
-                      <dt className="flex flex-wrap items-baseline gap-2 text-muted-foreground">
-                        Front Door Premium Delivery
+                    <div className="flex items-start justify-between gap-4">
+                      <dt className="min-w-0 text-muted-foreground">
+                        <span className="block">Front Door Premium Delivery</span>
                         {freightEstimate.cents > 0 && freightEstimate.zoneLabel && (
-                          <span className="border border-border/70 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
+                          <span className="mt-1.5 inline-block border border-border/70 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
                             {freightEstimate.zoneLabel}
                           </span>
                         )}
                       </dt>
                       {freightEstimate.cents > 0 ? (
-                        <dd className="tabular-nums">{formatUsd(freightEstimate.cents)}</dd>
+                        <dd className="shrink-0 tabular-nums whitespace-nowrap">
+                          {formatUsd(freightEstimate.cents)}
+                        </dd>
                       ) : (
-                        <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
+                        <dd className="shrink-0 text-right text-muted-foreground whitespace-nowrap">
+                          To be Quoted by Advisor
+                        </dd>
                       )}
                     </div>
                     {freightEstimate.capped && freightEstimate.notice && (
@@ -473,18 +477,14 @@ export default function Cart() {
                         {freightEstimate.notice}
                       </p>
                     )}
-                    {freightEstimate.cents > 0 && (
-                      <p className="mt-1.5 font-light italic text-[10px] tracking-[0.06em] text-muted-foreground">
-                        {ESTIMATED_SHIPPING_NOTE}
-                      </p>
-                    )}
-                    <ShippingCountryIndicator className="mt-2" />
                   </div>
 
 
                   <div className="border-t border-border pt-4">
                     <div className="flex items-baseline justify-between gap-6">
-                      <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Estimated Total (USD)</dt>
+                      <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">
+                        Estimated Total ({currency})
+                      </dt>
                       <dd className="tabular-nums font-medium text-base whitespace-nowrap">{formatUsd(estimatedTotal)}</dd>
                     </div>
                     {sgdEquivalent !== null && (
@@ -492,17 +492,32 @@ export default function Cart() {
                         (Approx. SGD ${sgdEquivalent.toLocaleString("en-US")})
                       </p>
                     )}
-                    <p className="mt-1.5 font-body text-[10px] text-muted-foreground leading-relaxed">
-                      Final settlement will be in USD. Local import duties and GST are not included —
-                      they will be assessed separately upon customs entry{destination.iso === "SG" ? " to Singapore" : " at destination"}.
-                    </p>
-                    {freightEstimate.cents > 0 && (
-                      <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-                        Payable now · {formatUsd(total)}. Estimated freight ·{" "}
-                        {formatUsd(freightEstimate.cents)} — invoiced separately once
-                        confirmed by your advisor.
-                      </p>
-                    )}
+
+                    {/* All fine print consolidated into one quiet disclosure. */}
+                    <details className="group mt-3 border-t border-border/60 pt-3">
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors">
+                        View Shipping &amp; Import Tax Details
+                        <ChevronRight className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-open:rotate-90" />
+                      </summary>
+                      <div className="mt-3 space-y-2 font-body text-[10px] leading-relaxed text-muted-foreground">
+                        {freightEstimate.cents > 0 && <p className="italic">{ESTIMATED_SHIPPING_NOTE}</p>}
+                        <ShippingCountryIndicator />
+                        <p>
+                          Final settlement will be in {currency}. Local import duties and GST are not
+                          included — they will be assessed separately upon customs entry
+                          {destination.iso === "SG" ? " to Singapore" : " at destination"}.
+                        </p>
+                        {freightEstimate.cents > 0 && (
+                          <p>
+                            Payable now · {formatUsd(total)}. Estimated freight ·{" "}
+                            {formatUsd(freightEstimate.cents)} — invoiced separately once confirmed by
+                            your advisor.
+                          </p>
+                        )}
+                      </div>
+                    </details>
+                  </div>
+
                   </div>
                 </dl>
 
