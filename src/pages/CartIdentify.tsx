@@ -145,6 +145,31 @@ export default function CartIdentify() {
 
   };
 
+  /**
+   * Trade profile sign-in. On return the session is restored, roles are
+   * re-read, and the signed-in branch takes over: the guest form disappears
+   * and the approved tier discount is applied to the summary.
+   */
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.redirected) return; // browser is navigating to Google
+      if (result.error) {
+        toast.error(result.error.message || "We couldn't sign you in with Google.");
+        return;
+      }
+      await refreshRoles?.();
+      toast.success("Signed in — trade pricing will apply if your account is approved.");
+    } catch (err: any) {
+      toast.error(err?.message || "We couldn't sign you in with Google.");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
   const handleGuest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!/^\S+@\S+\.\S+$/.test(guestEmail)) {
