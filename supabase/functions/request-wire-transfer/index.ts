@@ -83,10 +83,8 @@ serve(async (req) => {
       amount_total: amountCents,
       currency: (typeof body?.currency === "string" ? body.currency : "usd").toLowerCase(),
       status: "wire_pending",
-      metadata: {
-        buyer_type: buyerType,
-        buyer_gst_number: buyerGstNumber,
-      },
+      buyer_type: buyerType,
+      buyer_gst_number: buyerGstNumber,
     });
     if (insertErr) {
       console.error("[request-wire-transfer] insert failed", insertErr);
