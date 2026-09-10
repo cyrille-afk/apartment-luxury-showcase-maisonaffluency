@@ -68,7 +68,12 @@ export default function CartIdentify() {
   // Tier discount for the authenticated account (admin / verified trade).
   const discount = useAccountDiscount();
   const shipDest = useShippingDestination();
-  const freightEstimate = useEstimatedShipping(items, shipDest.iso);
+  const freightEstimate = useEstimatedShipping(
+    items,
+    shipDest.iso,
+    currency,
+    discount.totalFor(subtotal),
+  );
   const orderTotal = discount.totalFor(subtotal) + freightEstimate.cents;
 
 
