@@ -23,12 +23,26 @@ export const USD_BANK_WIRE_CONFIG: BankWireConfig = {
   beneficiaryBankAddress:
     "6 Battery Road, Floor 6-01, 049909, Singapore, Singapore",
   swiftBic: "REVOSGS2",
-  intermediaryBic: "BARCDEFF",
+  intermediaryBic: "BARCGB22",
   accountNumber: "885111609218375",
   referencePrefix: "MAW-",
   currency: "USD",
   transferNote:
     "Please make your transfer in USD. Using a different currency may send the funds to the company's other account. International SWIFT transfers may take 3–5 business days to arrive.",
+};
+
+export const GBP_BANK_WIRE_CONFIG: BankWireConfig = {
+  beneficiaryName: "AFFLUENCY ETC PTE LTD",
+  beneficiaryBank: "Revolut Technologies Singapore Pte. Ltd",
+  beneficiaryBankAddress:
+    "6 Battery Road, Floor 6-01, 049909, Singapore, Singapore",
+  swiftBic: "REVOSGS2",
+  intermediaryBic: "BARCGB22",
+  accountNumber: "885111609218375",
+  referencePrefix: "MAW-",
+  currency: "GBP",
+  transferNote:
+    "Please make your transfer in GBP. Using a different currency may send the funds to the company's other account. International SWIFT transfers may take 3–5 business days to arrive.",
 };
 
 export const EUR_BANK_WIRE_CONFIG: BankWireConfig = {
@@ -45,10 +59,14 @@ export const EUR_BANK_WIRE_CONFIG: BankWireConfig = {
 
 export const DEFAULT_BANK_WIRE_CONFIG = USD_BANK_WIRE_CONFIG;
 
+const CURRENCY_CONFIG_MAP: Record<string, BankWireConfig> = {
+  USD: USD_BANK_WIRE_CONFIG,
+  EUR: EUR_BANK_WIRE_CONFIG,
+  GBP: GBP_BANK_WIRE_CONFIG,
+};
+
 export function getBankWireConfigForCurrency(currency: string): BankWireConfig {
-  return currency?.toUpperCase() === "EUR"
-    ? EUR_BANK_WIRE_CONFIG
-    : USD_BANK_WIRE_CONFIG;
+  return CURRENCY_CONFIG_MAP[currency?.toUpperCase() || "USD"] ?? USD_BANK_WIRE_CONFIG;
 }
 
 export function buildPaymentReference(
