@@ -501,6 +501,7 @@ const PublicDesignerProfile = () => {
   };
 
   const isMobile = useIsMobile();
+  const dest = useShippingDestination();
   const isMobileProductPickMode = isMobile || (
     typeof window !== "undefined" &&
     (window.matchMedia("(max-width: 767px)").matches || window.matchMedia("(pointer: coarse)").matches)
@@ -1732,7 +1733,7 @@ const PublicDesignerProfile = () => {
 
                 const gridClass = (() => {
                   if (pickCols === "one") {
-                    return "grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5";
+                    return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3";
                   }
                   if (forceTwoCol) {
                     return "grid-cols-2 sm:grid-cols-2 md:grid-cols-2";
@@ -1746,7 +1747,7 @@ const PublicDesignerProfile = () => {
                   if (isEmmanuelBabled) {
                     return "grid-cols-2 sm:grid-cols-2 md:grid-cols-2";
                   }
-                  return "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
+                  return "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3";
                 })();
 
 
@@ -1887,7 +1888,7 @@ const PublicDesignerProfile = () => {
                     <div className={cn(
                       "grid w-full",
                       gridClass,
-                      isEmmanuelBabled ? "gap-x-4 gap-y-4 md:gap-x-6 md:gap-y-12" : "gap-x-4 gap-y-4 md:gap-x-5 md:gap-y-10"
+                      "gap-x-4 gap-y-4 md:gap-x-8 md:gap-y-12"
                     )}>
                 {visiblePicks.map((pick) => {
                   const ap = pick as AttributedCuratorPick;
@@ -2041,7 +2042,7 @@ const PublicDesignerProfile = () => {
                         }}
                         aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
                         className={cn(
-                          "w-full bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer aspect-[4/3]"
+                          "w-full bg-[hsl(var(--canvas))] rounded-sm overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer aspect-[4/3] p-6"
                         )}
                       >
                         <SwipeAlternateProductImage
@@ -2051,8 +2052,8 @@ const PublicDesignerProfile = () => {
                           alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                           sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
-                          primaryClassName="object-contain p-4 md:p-6 md:object-contain"
-                          alternateClassName="object-contain p-4 md:p-6 md:object-contain"
+                          primaryClassName="object-contain p-0"
+                          alternateClassName="object-contain p-0"
                           alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
                         />
                         {/* Inventory badges — lower-left of the frame */}
@@ -2152,8 +2153,8 @@ const PublicDesignerProfile = () => {
 
                         {/* Price slot — bottom */}
                         <div className="mt-1">
-                          <p className="font-body text-xs font-light tracking-wide text-zinc-500">
-                            {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon Request"}
+                          <p className="font-body text-xs font-light tracking-wide text-muted-foreground">
+                            {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
                           </p>
                         </div>
                       </div>
