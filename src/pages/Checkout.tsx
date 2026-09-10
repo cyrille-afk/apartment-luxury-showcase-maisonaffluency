@@ -396,7 +396,7 @@ function OrderSummary({
               )}
             </div>
             {summary.freightCapped && summary.freightNotice && (
-              <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-foreground">
+              <p className="mt-1.5 font-light text-[10px] leading-relaxed tracking-[0.06em] text-foreground">
                 {summary.freightNotice}
               </p>
             )}
