@@ -1209,6 +1209,8 @@ export default function Checkout() {
     formCountry,
     orderCurrency(grossLines ?? []),
   );
+  const [buyerType, setBuyerType] = useState<BuyerType>("private");
+  const [buyerGstNumber, setBuyerGstNumber] = useState("");
   const summary = useMemo<CheckoutSummary | null>(() => {
     if (!grossLines?.length) return null;
     const currency = orderCurrency(grossLines);
