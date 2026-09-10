@@ -1355,6 +1355,13 @@ export default function Checkout() {
   // pre-fills here and stays in sync so it reaches the purchase payload.
   const checkoutForm = useCheckoutForm();
   const [email, setEmailLocal] = useState(checkoutForm.email);
+  // If the email arrives after mount (restored session, identify step racing
+  // a redirect) adopt it as long as the buyer hasn't typed anything.
+  useEffect(() => {
+    if (checkoutForm.email) {
+      setEmailLocal((prev) => (prev ? prev : checkoutForm.email));
+    }
+  }, [checkoutForm.email]);
   const setEmail = useCallback(
     (v: string | ((prev: string) => string)) => {
       setEmailLocal((prev) => {
