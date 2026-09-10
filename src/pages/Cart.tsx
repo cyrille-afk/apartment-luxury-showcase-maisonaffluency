@@ -128,19 +128,18 @@ export default function Cart() {
   const estimatedTotal = freightEstimate.cents > 0 ? estimatedGrandTotal : total;
 
   /** Show the Paris logistics advisory when a high-ticket European piece is in the cart. */
-  const showEuropeanLogisticsNotice = useMemo(() => {
-    const thresholdCents = 500_000; // $/€ 5,000
-    return items.some((item) => {
-      const isEuropean =
-        (item.currency || "USD").toUpperCase() === "EUR" ||
-        (item.sourceCurrency || "").toUpperCase() === "EUR";
-      const displayPrice = item.unitPriceCents;
-      const sourcePrice = item.sourceUnitPriceCents ?? 0;
-      const highTicket =
-        displayPrice >= thresholdCents || (sourcePrice > 0 && sourcePrice >= thresholdCents);
-      return isEuropean && highTicket;
-    });
-  }, [items]);
+  const showEuropeanLogisticsNotice = useMemo(
+    () =>
+      items.some((item) =>
+        isHighTicketEuropeanFulfillment(
+          item.unitPriceCents,
+          item.origin,
+          item.pickupCountry,
+          item.sourceCurrency,
+        ),
+      ),
+    [items],
+  );
 
   const sgdRate = useUsdToSgdRate();
   const sgdEquivalent = useMemo(() => {
