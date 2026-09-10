@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import {
+  applyFreightCap,
   getCartCbm,
   getEstimatedShipping,
   getShippingZone,
