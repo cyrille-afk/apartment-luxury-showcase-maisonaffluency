@@ -142,13 +142,17 @@ export const resolveLine = (
   // When packing data exists we keep the prior backfill behaviour.
   // When both are missing we return zero so the estimator flags it as unavailable
   // rather than silently pricing a 0.5 cbm fabrication.
+  // Consolidation: the crate/pallet tare is paid once per line, so the second
+  // and subsequent units of the same product add only their net packed volume
+  // and weight — never a fresh full tare.
+  const units = 1 + LINE_CONSOLIDATION_FACTOR * (Math.max(1, raw.qty) - 1);
   const cbm = missingPacking
     ? 0
-    : Math.max(0.01, Number(raw.shipCbm ?? DEFAULT_LINE_CBM) * Math.max(1, raw.qty));
+    : Math.max(0.01, Number(raw.shipCbm ?? DEFAULT_LINE_CBM) * units);
   const kg = missingPacking
     ? 0
     : hasKg
-      ? Number(raw.shipWeightKg) * Math.max(1, raw.qty)
+      ? Math.round(Number(raw.shipWeightKg) * units)
       : Math.round(cbm * KG_PER_CBM[mode]);
   return { ...raw, origin, mode, cbm, kg, missingPacking };
 };
