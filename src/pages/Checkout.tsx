@@ -323,16 +323,17 @@ function OrderSummary({
               key={`${line.title}-${line.finishLabel || ""}-${i}`}
               className="flex gap-4 border-b border-border/60 pb-4 last:border-0 last:pb-0"
             >
-              <div className="w-16 shrink-0 bg-cream">
+              {/* No fixed height — tall pieces (table lamps) are never cropped. */}
+              <div className="w-16 shrink-0 self-start bg-cream">
                 {line.imageUrl ? (
                   <img
                     src={line.imageUrl}
                     alt={line.title}
                     loading="lazy"
-                    className="w-16 h-16 object-contain"
+                    className="w-full h-auto object-contain"
                   />
                 ) : (
-                  <div className="w-16 h-16" />
+                  <div className="w-full aspect-square" />
                 )}
               </div>
               <div className="min-w-0 flex-1">
