@@ -264,11 +264,13 @@ function OrderSummary({
   const { currency } = summary;
   const fxRates = useFxRates();
   const usdSgd = useUsdToSgdRate();
+  const displayedTotalCents =
+    summary.estimatedShippingCents > 0 ? summary.totalCents : summary.chargeTotalCents;
   const sgdEquivalentCents =
     currency.toUpperCase() === "USD"
-      ? Math.round(summary.chargeTotalCents * usdSgd.rate)
+      ? Math.round(displayedTotalCents * usdSgd.rate)
       : convertCents(
-          summary.chargeTotalCents,
+          displayedTotalCents,
           currency.toUpperCase(),
           "SGD",
           fxRates,
@@ -350,7 +352,7 @@ function OrderSummary({
         <dl className="mt-7 space-y-4 font-body text-sm border-t border-border pt-6">
           <div className="flex items-baseline justify-between">
             <dt className="text-muted-foreground">Subtotal</dt>
-            <dd className="tabular-nums">{money(summary.subtotalCents, currency)}</dd>
+            <dd className="tabular-nums font-medium">{money(summary.subtotalCents, currency)}</dd>
           </div>
           {summary.discountCents > 0 && summary.discountLabel && (
             <div className="flex items-baseline justify-between gap-6">
@@ -373,9 +375,9 @@ function OrderSummary({
                 </span>
               </dt>
               {summary.shippingCents > 0 ? (
-                <dd className="whitespace-nowrap tabular-nums">{money(summary.shippingCents, currency)}</dd>
+                <dd className="whitespace-nowrap tabular-nums font-medium">{money(summary.shippingCents, currency)}</dd>
               ) : summary.estimatedShippingCents > 0 ? (
-                <dd className="whitespace-nowrap tabular-nums">{money(summary.estimatedShippingCents, currency)}</dd>
+                <dd className="whitespace-nowrap tabular-nums font-medium">{money(summary.estimatedShippingCents, currency)}</dd>
               ) : (
                 <dd className="whitespace-nowrap text-right text-muted-foreground">To be Quoted by Advisor</dd>
               )}
