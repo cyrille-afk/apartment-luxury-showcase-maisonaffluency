@@ -50,7 +50,7 @@ import OriginStoryDrawer from "@/components/product/OriginStoryDrawer";
 import ActiveSwatchCaption from "@/components/product/ActiveSwatchCaption";
 import { isProductUpholstered } from "@/lib/upholstery";
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
-import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
+import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex, variantImageKey } from "@/lib/variantImageMap";
 import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
