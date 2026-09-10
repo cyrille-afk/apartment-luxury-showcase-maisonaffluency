@@ -837,6 +837,7 @@ const App = () => {
               )}
             </BrowserRouter>
           </QueryClientProvider>
+        </CheckoutFormProvider>
         </WishlistProvider>
         </CompareProvider>
         </StudioProvider>
