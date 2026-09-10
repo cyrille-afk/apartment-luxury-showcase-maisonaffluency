@@ -1922,16 +1922,9 @@ const PublicProductPageContent: React.FC = () => {
   const handlePlaceOrder = () => {
     const unit = selectedRrp?.cents || Number(publicRrpRow?.rrp_price_cents) || 0;
     if (!unit) {
-      navigate(
-        `/contact?${new URLSearchParams({
-          subject: `Place an Order — ${product.title} by ${designerDisplay}`,
-          productId: product.id,
-          productSlug: productSlug || "",
-          productName: product.title || "",
-          designerName: designerDisplay || "",
-          back: location.pathname + location.search,
-        }).toString()}#contact`,
-      );
+      // No public price on this configuration: open the in-page quote sheet.
+      // Place Order must never redirect to the Trade Account inquiry form.
+      window.dispatchEvent(new CustomEvent("ma:open-quote"));
       return;
     }
     // Finish shown on the cart line: the user's explicit selection first, then
