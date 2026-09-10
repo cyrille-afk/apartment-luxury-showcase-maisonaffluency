@@ -1286,8 +1286,6 @@ export default function Checkout() {
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [email, setEmail] = useState("");
-  const [buyerType, setBuyerType] = useState<BuyerType>("private");
-  const [buyerGstNumber, setBuyerGstNumber] = useState("");
   // Wire mode can be pre-selected by the "Your Selection" drawer
   // ("Proceed to Wire Instructions") via a one-shot sessionStorage flag.
   const [method, setMethod] = useState<PaymentMethod>(() => {
