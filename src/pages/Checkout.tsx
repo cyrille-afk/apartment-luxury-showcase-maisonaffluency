@@ -345,17 +345,27 @@ function OrderSummary({
           <div className="border-t border-border/60 pt-4">
             <div className="flex items-baseline justify-between gap-6">
               <dt className="text-muted-foreground">
-                {summary.taxLabel || (summary.taxApplied ? "Tax" : "Tax (zero-rated)")}
+                {isB2BZeroRated
+                  ? B2B_TAX_LABEL
+                  : summary.taxLabel || (summary.taxApplied ? "Tax" : "Tax (zero-rated)")}
               </dt>
               <dd className="tabular-nums">
-                {summary.taxApplied ? money(summary.taxCents, currency) : money(0, currency)}
+                {isB2BZeroRated
+                  ? moneyDecimal(0, currency)
+                  : summary.taxApplied
+                    ? money(summary.taxCents, currency)
+                    : money(0, currency)}
               </dd>
             </div>
             <dl className="mt-2 space-y-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
               <div className="flex items-baseline justify-between gap-6">
                 <dt>Rate</dt>
                 <dd className="tabular-nums">
-                  {summary.taxApplied ? `${Number((summary.taxRate * 100).toFixed(2))}%` : "0% — zero-rated"}
+                  {isB2BZeroRated
+                    ? "0% — B2B zero-rated"
+                    : summary.taxApplied
+                      ? `${Number((summary.taxRate * 100).toFixed(2))}%`
+                      : "0% — zero-rated"}
                 </dd>
               </div>
               <div className="flex items-baseline justify-between gap-6">
@@ -368,13 +378,19 @@ function OrderSummary({
               </div>
             </dl>
             <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-              {summary.taxStatusNote}
+              {isB2BZeroRated
+                ? "B2B zero-rated for GST-registered Singapore businesses. You may claim the input tax on your GST return."
+                : summary.taxStatusNote}
             </p>
-            {summary.taxRegistrationLine && (
+            {isB2BZeroRated ? (
+              <p className="mt-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                Buyer GST / UEN: {buyerGstNumber.trim().toUpperCase()}
+              </p>
+            ) : summary.taxRegistrationLine ? (
               <p className="mt-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
                 {summary.taxRegistrationLine}
               </p>
-            )}
+            ) : null}
           </div>
           <div className="border-t border-border pt-4">
 
