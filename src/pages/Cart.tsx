@@ -284,11 +284,11 @@ export default function Cart() {
                     <div className="text-left sm:text-right">
                       <p className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Total</p>
                       <p className="font-display text-lg tabular-nums mt-1">
-                        {formatMoney(item.unitPriceCents * item.quantity, item.currency)}
+                        {formatUsd(item.unitPriceCents * item.quantity, item.currency)}
                       </p>
                        {item.quantity > 1 && (
                          <p className="font-body text-[11px] text-muted-foreground mt-1 tabular-nums">
-                           {formatMoney(item.unitPriceCents, item.currency)} each
+                           {formatUsd(item.unitPriceCents, item.currency)} each
                          </p>
                        )}
                        {item.sourceCurrency && item.fxRate ? (
