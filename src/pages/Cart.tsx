@@ -13,6 +13,7 @@ import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";
 import { releaseBodyScroll } from "@/lib/bodyScrollLock";
 import { VisaMark, MastercardMark, BankTransferMark } from "@/components/checkout/PaymentMarks";
 import { useEstimatedShipping, ESTIMATED_SHIPPING_NOTE } from "@/hooks/useShippingCountry";
+import { useUsdToSgdRate } from "@/hooks/useUsdToSgdRate";
 import { useShippingDestination } from "@/lib/shippingDestination";
 import { ShippingCountryIndicator } from "@/components/checkout/ShippingCountryIndicator";
 
@@ -64,6 +65,15 @@ export default function Cart() {
   // rather than folded into the amount the customer is asked to pay.
   const total = discount.totalFor(subtotal);
   const estimatedGrandTotal = total + freightEstimate.cents;
+
+  const sgdRate = useUsdToSgdRate();
+  const sgdEquivalent = useMemo(() => {
+    if (currency !== "USD") return null;
+    return Math.round((total / 100) * sgdRate.rate);
+  }, [total, sgdRate.rate, currency]);
+
+  const formatUsd = (cents: number, code = currency) =>
+    code === "USD" ? `USD ${formatMoney(cents, code)}` : formatMoney(cents, code);
 
 
   // "Continue Selection" returns to the curator's picks of the designer whose
@@ -274,11 +284,11 @@ export default function Cart() {
                     <div className="text-left sm:text-right">
                       <p className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Total</p>
                       <p className="font-display text-lg tabular-nums mt-1">
-                        {formatMoney(item.unitPriceCents * item.quantity, item.currency)}
+                        {formatUsd(item.unitPriceCents * item.quantity, item.currency)}
                       </p>
                        {item.quantity > 1 && (
                          <p className="font-body text-[11px] text-muted-foreground mt-1 tabular-nums">
-                           {formatMoney(item.unitPriceCents, item.currency)} each
+                           {formatUsd(item.unitPriceCents, item.currency)} each
                          </p>
                        )}
                        {item.sourceCurrency && item.fxRate ? (
@@ -351,13 +361,13 @@ export default function Cart() {
                 <dl className="mt-7 space-y-4 font-body text-sm">
                   <div className="flex items-baseline justify-between">
                     <dt className="text-muted-foreground">Subtotal</dt>
-                    <dd className="tabular-nums">{formatMoney(subtotal, currency)}</dd>
+                    <dd className="tabular-nums">{formatUsd(subtotal)}</dd>
                   </div>
                   {discount.eligible && (
                     <div className="flex items-baseline justify-between gap-6">
                       <dt className="text-muted-foreground">{discount.label}</dt>
                       <dd className="tabular-nums text-foreground">
-                        −{formatMoney(discount.amountFor(subtotal), currency)}
+                        −{formatUsd(discount.amountFor(subtotal))}
                       </dd>
                     </div>
                   )}
@@ -372,7 +382,7 @@ export default function Cart() {
                         )}
                       </dt>
                       {freightEstimate.cents > 0 ? (
-                        <dd className="tabular-nums">{formatMoney(freightEstimate.cents, currency)}</dd>
+                        <dd className="tabular-nums">{formatUsd(freightEstimate.cents)}</dd>
                       ) : (
                         <dd className="text-right text-muted-foreground">To be Quoted by Advisor</dd>
                       )}
@@ -388,13 +398,21 @@ export default function Cart() {
 
                   <div className="border-t border-border pt-4">
                     <div className="flex items-baseline justify-between">
-                      <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
-                      <dd className="tabular-nums font-medium text-base">{formatMoney(total, currency)}</dd>
+                      <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Estimated Total (USD)</dt>
+                      <dd className="tabular-nums font-medium text-base">{formatUsd(total)}</dd>
                     </div>
+                    {sgdEquivalent !== null && (
+                      <p className="mt-1.5 font-body text-xs text-muted-foreground tabular-nums">
+                        (Approx. SGD ${sgdEquivalent.toLocaleString("en-US")})
+                      </p>
+                    )}
+                    <p className="mt-1.5 font-body text-[10px] text-muted-foreground leading-relaxed">
+                      Final settlement will be in USD. Local import taxes may apply upon delivery.
+                    </p>
                     {freightEstimate.cents > 0 && (
                       <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
                         Payable now. With estimated freight ·{" "}
-                        {formatMoney(estimatedGrandTotal, currency)} — freight invoiced separately once
+                        {formatUsd(estimatedGrandTotal)} — freight invoiced separately once
                         confirmed by your advisor.
                       </p>
                     )}
