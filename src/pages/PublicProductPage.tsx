@@ -2605,6 +2605,7 @@ const PublicProductPageContent: React.FC = () => {
                         selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                   finishOptions={finishOptions}
+                  finishVariants={finishVariantEntries}
                         redirectTo={location.pathname + location.search}
                         utilityLinks={renderUtilityLinks()}
                       />
@@ -2628,6 +2629,7 @@ const PublicProductPageContent: React.FC = () => {
                         selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                   finishOptions={finishOptions}
+                  finishVariants={finishVariantEntries}
                         redirectTo={location.pathname + location.search}
                         utilityLinks={renderUtilityLinks()}
                       />
@@ -2698,6 +2700,7 @@ const PublicProductPageContent: React.FC = () => {
                   selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                   finishOptions={finishOptions}
+                  finishVariants={finishVariantEntries}
                   redirectTo={location.pathname + location.search}
                 />
               )}
@@ -2720,6 +2723,7 @@ const PublicProductPageContent: React.FC = () => {
                   selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                   finishOptions={finishOptions}
+                  finishVariants={finishVariantEntries}
                   redirectTo={location.pathname + location.search}
                 />
               )}
@@ -2780,6 +2784,7 @@ const PublicProductPageContent: React.FC = () => {
                       selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                   finishOptions={finishOptions}
+                  finishVariants={finishVariantEntries}
                       redirectTo={returnTo}
                     />
                     </div>
