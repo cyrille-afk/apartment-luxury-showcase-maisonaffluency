@@ -295,6 +295,15 @@ function OrderSummary({
   /** SG-bound, over the S$400 low-value threshold — GST settled at the border. */
   const sgBorderGst = Boolean(sgImportGstThreshold && !sgImportGstThreshold.isLowValueGoods);
 
+  /** Paris logistics advisory for high-ticket European pieces in the basket. */
+  const showEuropeanLogisticsNotice = useMemo(() => {
+    const thresholdCents = 500_000; // $/€ 5,000
+    return lines.some(
+      (line) =>
+        (line.currency || "USD").toUpperCase() === "EUR" && line.unitCents >= thresholdCents,
+    );
+  }, [lines]);
+
   return (
     <aside className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] h-fit">
       <div className="border border-border/70 px-7 py-8">
