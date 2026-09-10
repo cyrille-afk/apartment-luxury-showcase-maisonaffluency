@@ -12,10 +12,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { convertCentsWithFallback, getFxRates } from "@/lib/fxRates";
-import {
-  isManualDestination,
-  useShippingDestination,
-} from "@/lib/shippingDestination";
+import { useShippingDestination } from "@/lib/shippingDestination";
 
 export type MinimalLine = {
   currency?: string | null;
@@ -28,17 +25,16 @@ const code = (c?: string | null) => (c || "USD").toUpperCase();
 
 /**
  * Settlement currency locked by the header "Shipping destination & currency"
- * modal. Returns null until the shopper has explicitly picked a destination,
- * so IP-detected visitors keep the catalogue currency.
+ * modal. Whatever destination the shopper is shown in the header flag — picked
+ * manually or resolved from their region — is the currency the whole funnel
+ * prices and settles in, so the summary never contradicts the header.
  */
 export function useSettlementCurrency(): string | null {
   const dest = useShippingDestination();
-  const [manual, setManual] = useState(() => isManualDestination());
-  useEffect(() => {
-    setManual(isManualDestination());
-  }, [dest.iso]);
-  return manual ? dest.currency.toUpperCase() : null;
+  return dest.currency ? dest.currency.toUpperCase() : null;
 }
+
+
 
 /** Currency every amount on the screen is expressed in. */
 export function resolveBaseCurrency(

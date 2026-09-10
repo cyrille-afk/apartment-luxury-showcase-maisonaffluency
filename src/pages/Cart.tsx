@@ -20,6 +20,7 @@ import { useShippingDestination } from "@/lib/shippingDestination";
 import { ShippingCountryIndicator } from "@/components/checkout/ShippingCountryIndicator";
 import { getFxRates, convertCentsWithFallback } from "@/lib/fxRates";
 import { resolveBaseCurrency, useSettlementCurrency } from "@/lib/checkout/multiCurrency";
+import { getCustomsRegion } from "@/lib/checkout/customsRegions";
 
 
 
@@ -31,6 +32,7 @@ import {
   
   formatMoney,
   refreshCartFx,
+  rehydrateCart,
 } from "@/lib/cart";
 
 export default function Cart() {
@@ -44,6 +46,8 @@ export default function Cart() {
   // scroll lock from a drawer that was open when we navigated.
   useEffect(() => {
     releaseBodyScroll();
+    // Recover the basket if a navigation or overlay teardown wiped it.
+    rehydrateCart();
     // Re-price any converted lines with the current live FX rate — stored
     // lines may carry a stale/offline rate from add-to-cart time.
     refreshCartFx();
@@ -556,11 +560,16 @@ export default function Cart() {
                       <div className="mt-3 space-y-2 font-body text-[10px] leading-relaxed text-muted-foreground">
                         {freightEstimate.cents > 0 && <p className="italic">{ESTIMATED_SHIPPING_NOTE}</p>}
                         <ShippingCountryIndicator />
-                        <p>
-                          Final settlement will be in {currency}. Local import duties and GST are not
-                          included — they will be assessed separately upon customs entry
-                          {destination.iso === "SG" ? " to Singapore" : " at destination"}.
-                        </p>
+                        {getCustomsRegion(destination.iso) ? (
+                          <p>{getCustomsRegion(destination.iso)!.notice}</p>
+                        ) : (
+                          <p>
+                            Final settlement will be in {currency}. Local import duties and GST are not
+                            included — they will be assessed separately upon customs entry
+                            {destination.iso === "SG" ? " to Singapore" : " at destination"}.
+                          </p>
+                        )}
+
                         {freightEstimate.cents > 0 && (
                           <p>
                             Payable now · {formatUsd(total)}. Estimated freight ·{" "}

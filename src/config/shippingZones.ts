@@ -23,10 +23,19 @@ export const SHIPPING_ZONES: Record<string, ShippingZone> = {
     currency: "EUR",
     countries: [
       "FR", "DE", "IT", "ES", "NL", "BE", "IE", "PT", "AT",
-      "LU", "MC", "GR", "CH", "GB",
+      "LU", "MC", "GR", "GB",
     ],
     label: "Domestic EU",
   },
+  // Switzerland sits outside the EU customs union: shipments cross a third-
+  // country border and are cleared, taxed and duty-assessed on entry.
+  switzerland: {
+    baseRate: 1600,
+    currency: "CHF",
+    countries: ["CH", "LI"],
+    label: "International Shipping (Switzerland)",
+  },
+
   northAmerica: {
     baseRate: 5132,
     currency: "USD",

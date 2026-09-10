@@ -43,6 +43,7 @@ import { useUsdToSgdRate } from "@/hooks/useUsdToSgdRate";
 import { convertCents, useFxRates } from "@/components/trade/CurrencyToggle";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 import { useCurrencyNormalizedLines, useSettlementCurrency } from "@/lib/checkout/multiCurrency";
+import { getCustomsRegion } from "@/lib/checkout/customsRegions";
 
 
 const CONCIERGE_WHATSAPP = "https://wa.me/6591393850";
@@ -471,6 +472,10 @@ function OrderSummary({
                   <p className="italic">{ESTIMATED_SHIPPING_NOTE}</p>
                 )}
                 <RegionalLogisticsNote compact />
+                {getCustomsRegion(summary.taxCountry) && (
+                  <p className="text-foreground">{getCustomsRegion(summary.taxCountry)!.notice}</p>
+                )}
+
                 {!sgBorderGst && (
                   <dl className="space-y-1">
                     <div className="flex items-baseline justify-between gap-6">

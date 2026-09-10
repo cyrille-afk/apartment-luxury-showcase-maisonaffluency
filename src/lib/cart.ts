@@ -31,6 +31,10 @@ export interface CartItem {
 }
 
 const STORAGE_KEY = "ma_cart_v1";
+/** Durable mirror of the last non-empty basket — survives accidental wipes. */
+const BACKUP_KEY = "ma_cart_v1_backup";
+/** Set once an order is actually placed, so a purchased basket never returns. */
+const ORDER_PLACED_KEY = "ma_cart_order_placed";
 
 let items: CartItem[] = read();
 const listeners = new Set<() => void>();
@@ -46,14 +50,56 @@ function read(): CartItem[] {
   }
 }
 
+function readBackup(): CartItem[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(BACKUP_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 function commit(next: CartItem[]) {
   items = next;
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    if (next.length) {
+      window.localStorage.setItem(BACKUP_KEY, JSON.stringify(next));
+      window.localStorage.removeItem(ORDER_PLACED_KEY);
+    }
   } catch {
     /* quota / private mode — cart stays in memory */
   }
   listeners.forEach((l) => l());
+}
+
+/**
+ * Re-syncs the in-memory basket with persistent storage.
+ * If storage was wiped (navigation, overlay teardown, another tab) while the
+ * basket is still live, the in-memory copy — or the durable backup — is
+ * written back so items are never silently evicted.
+ */
+export function rehydrateCart() {
+  if (typeof window === "undefined") return;
+  const stored = read();
+  if (stored.length) {
+    if (JSON.stringify(stored) !== JSON.stringify(items)) {
+      items = stored;
+      listeners.forEach((l) => l());
+    }
+    return;
+  }
+  let orderPlaced = false;
+  try {
+    orderPlaced = window.localStorage.getItem(ORDER_PLACED_KEY) === "1";
+  } catch {
+    /* ignore */
+  }
+  if (orderPlaced) return;
+  const recovery = items.length ? items : readBackup();
+  if (recovery.length) commit(recovery);
 }
 
 if (typeof window !== "undefined") {
@@ -62,6 +108,12 @@ if (typeof window !== "undefined") {
       items = read();
       listeners.forEach((l) => l());
     }
+  });
+  // Returning from a modal, a back/forward navigation or a restored tab must
+  // never surface an empty basket.
+  window.addEventListener("pageshow", rehydrateCart);
+  window.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") rehydrateCart();
   });
 }
 
@@ -94,9 +146,22 @@ export function removeFromCart(key: string) {
   commit(items.filter((i) => i.key !== key));
 }
 
-export function clearCart() {
+/**
+ * Empties the basket. Only an actual order (`reason: "order"`) marks the
+ * basket as purchased; any other clear can still be recovered on rehydrate.
+ */
+export function clearCart(reason: "order" | "manual" = "order") {
+  try {
+    if (reason === "order") {
+      window.localStorage.setItem(ORDER_PLACED_KEY, "1");
+      window.localStorage.removeItem(BACKUP_KEY);
+    }
+  } catch {
+    /* ignore */
+  }
   commit([]);
 }
+
 
 /**
  * Re-price converted lines against fresh FX rates. Lines store the rate
