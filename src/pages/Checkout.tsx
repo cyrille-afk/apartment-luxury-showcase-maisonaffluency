@@ -560,6 +560,10 @@ function PaymentForm({
   method,
   optionsSlot,
   onCountryChange,
+  buyerType,
+  setBuyerType,
+  buyerGstNumber,
+  setBuyerGstNumber,
 }: {
   summary: CheckoutSummary;
   account: { email: string; role: string } | null;
@@ -569,7 +573,13 @@ function PaymentForm({
   method: PaymentMethod;
   optionsSlot: React.ReactNode;
   onCountryChange?: (code: string | null) => void;
+  buyerType: BuyerType;
+  setBuyerType: (v: BuyerType) => void;
+  buyerGstNumber: string;
+  setBuyerGstNumber: (v: string) => void;
 }) {
+  const sgB2BApplicable =
+    summary.taxCountry === "SG" && summary.currency.toLowerCase() === "sgd";
   const stripe = useStripe();
   const elements = useElements();
   // Header / "Shipping destination & currency" modal selection. Saving there
