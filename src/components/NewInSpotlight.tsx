@@ -304,7 +304,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 )}
               </div>
 
-              <div className="flex flex-col flex-1 text-center items-center">
+              <div className="flex flex-col flex-1 items-start text-left leading-relaxed">
                 {(() => {
                   const composed = composeTitle(pick.title, pick.subtitle);
                   // Editor brands (e.g. De La Espada) embed the author in the title:
