@@ -395,7 +395,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
 
 
-          {/* Presentation action — desktop top-left; mobile/PWA bottom-right
+          {/* Presentation action — desktop bottom-right; mobile/PWA top-left
               (swapped with the share anchor for thumb reachability).
               It is absolutely positioned INSIDE the photo frame, so it must
               never be bumped by the commerce dock: doing so stranded the icon
@@ -404,9 +404,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             className={cn(
               "z-50",
               "transition-all duration-500 ease-out",
-              isMobileOrPwa
-                ? `absolute ${compact ? "right-1.5 bottom-1.5" : "right-4 bottom-4"}`
-                : "absolute top-4 left-4"
+              `absolute ${compact ? "right-1.5 bottom-1.5" : "right-4 bottom-4"}`
             )}
           >
             {isMobileOrPwa && mobileMenuItems ? (
