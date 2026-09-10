@@ -48,7 +48,6 @@ import { getCustomsRegion } from "@/lib/checkout/customsRegions";
 
 
 const CONCIERGE_WHATSAPP = "https://wa.me/6591393850";
-const CHECKOUT_KEY = "ma_checkout_line";
 
 
 export type ConfirmedShipping = { cents: number; label: string };

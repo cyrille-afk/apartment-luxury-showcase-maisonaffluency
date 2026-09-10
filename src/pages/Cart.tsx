@@ -244,6 +244,7 @@ export default function Cart() {
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
       clearCart();
+      clearSecureBasket("order");
       navigate(`/order-confirmation?ref=${(data as any).orderRef}&status=bank_transfer`);
     } catch (e: any) {
       toast.error(e?.message || "We couldn't start your checkout. Please try again.");
