@@ -50,7 +50,7 @@ import OriginStoryDrawer from "@/components/product/OriginStoryDrawer";
 import ActiveSwatchCaption from "@/components/product/ActiveSwatchCaption";
 import { isProductUpholstered } from "@/lib/upholstery";
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
-import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
+import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex, variantImageKey } from "@/lib/variantImageMap";
 import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
@@ -1779,29 +1779,55 @@ const PublicProductPageContent: React.FC = () => {
    * form's finish selector so the client can change the preselected finish
    * without leaving the drawer. Dimension-like axis values are excluded.
    */
-  const finishOptions = (() => {
-    const variants = (product?.size_variants || []) as Array<{ label?: string; base?: string; top?: string }>;
-    const opts: string[] = [];
+  const finishVariantEntries = (() => {
+    const variants = (product?.size_variants || []) as Array<{
+      label?: string;
+      base?: string;
+      top?: string;
+      price_cents?: number;
+    }>;
+    const out: { label: string; priceLabel: string | null; imageUrl: string | null }[] = [];
     const seen = new Set<string>();
-    const push = (v: string) => {
-      const k = v.toLowerCase();
-      if (!seen.has(k)) {
-        seen.add(k);
-        opts.push(v);
-      }
-    };
     for (const v of variants) {
       const parts = [v.base, v.top]
         .map((s) => (s || "").trim())
         .filter((s) => s && !looksLikeDimension(s));
-      if (parts.length) push(parts.join(" / "));
-      else {
-        const label = (v.label || "").trim();
-        if (label && !looksLikeDimension(label)) push(label);
+      const label = parts.length
+        ? parts.join(" / ")
+        : (v.label || "").trim() && !looksLikeDimension((v.label || "").trim())
+          ? (v.label || "").trim()
+          : "";
+      if (!label) continue;
+      const k = label.toLowerCase();
+      if (seen.has(k)) continue;
+      seen.add(k);
+
+      const cents = Number(v.price_cents);
+      const priceLabel =
+        Number.isFinite(cents) && cents > 0
+          ? formatPublicRrpCents(cents, publicRrpRow, "") || null
+          : null;
+
+      let imgIdx: number | undefined;
+      if (productFinishMap) {
+        const composite = variantImageKey(v.base, v.top, v.label);
+        const mapped = productFinishMap[composite];
+        if (typeof mapped === "number" && mapped >= 0 && mapped < images.length) imgIdx = mapped;
+        if (imgIdx === undefined)
+          imgIdx = resolveFinishImageIndex(productFinishMap, label, images.length);
       }
+
+      out.push({
+        label,
+        priceLabel,
+        imageUrl: imgIdx !== undefined ? images[imgIdx] ?? null : null,
+      });
     }
-    return opts;
+    return out;
   })();
+
+  const finishOptions = finishVariantEntries.map((f) => f.label);
+
 
   /**
    * Writes the currently configured piece (finishes + quantity) into the
@@ -2579,6 +2605,7 @@ const PublicProductPageContent: React.FC = () => {
                         selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                   finishOptions={finishOptions}
+                  finishVariants={finishVariantEntries}
                         redirectTo={location.pathname + location.search}
                         utilityLinks={renderUtilityLinks()}
                       />
@@ -2602,6 +2629,7 @@ const PublicProductPageContent: React.FC = () => {
                         selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                   finishOptions={finishOptions}
+                  finishVariants={finishVariantEntries}
                         redirectTo={location.pathname + location.search}
                         utilityLinks={renderUtilityLinks()}
                       />
@@ -2672,6 +2700,7 @@ const PublicProductPageContent: React.FC = () => {
                   selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                   finishOptions={finishOptions}
+                  finishVariants={finishVariantEntries}
                   redirectTo={location.pathname + location.search}
                 />
               )}
@@ -2694,6 +2723,7 @@ const PublicProductPageContent: React.FC = () => {
                   selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                   finishOptions={finishOptions}
+                  finishVariants={finishVariantEntries}
                   redirectTo={location.pathname + location.search}
                 />
               )}
@@ -2754,6 +2784,7 @@ const PublicProductPageContent: React.FC = () => {
                       selectedFinishes={selectedFinishes}
                   orderFinishLabel={buildOrderFinishLabel()}
                   finishOptions={finishOptions}
+                  finishVariants={finishVariantEntries}
                       redirectTo={returnTo}
                     />
                     </div>

@@ -31,6 +31,10 @@ interface Props {
   finishLabel?: string | null;
   /** Every selectable finish for the product — enables the inline finish selector. */
   finishOptions?: string[];
+  /** Per-finish price label + image, used to re-price / re-image the preview live. */
+  finishVariants?: { label: string; priceLabel?: string | null; imageUrl?: string | null }[];
+  /** Product hero image — fallback when the chosen finish has no dedicated asset. */
+  baseImageUrl?: string | null;
   submitting?: boolean;
   /**
    * "order" → hands off to the cart / checkout flow.
@@ -65,6 +69,8 @@ export default function OrderIntakeSheet({
   priceLabel,
   finishLabel,
   finishOptions,
+  finishVariants,
+  baseImageUrl,
   submitting = false,
   mode = "order",
   productId,
@@ -102,6 +108,16 @@ export default function OrderIntakeSheet({
     setFinishOpen(false);
     if (!notesEdited) setNotes(`Selected finish: ${opt}`);
   };
+
+  // Live variant resolution: the chosen finish drives both the displayed price
+  // and the preview image. Missing assets degrade to the hero shot + caption.
+  const activeVariant =
+    (finishVariants || []).find(
+      (v) => v.label.trim().toLowerCase() === (finish || "").trim().toLowerCase(),
+    ) || null;
+  const activePriceLabel = activeVariant?.priceLabel || priceLabel || null;
+  const previewImage = activeVariant?.imageUrl || baseImageUrl || null;
+  const usingFallbackImage = Boolean(previewImage) && !activeVariant?.imageUrl && Boolean(finish);
 
   useEffect(() => {
     if (isOpen) {
@@ -361,8 +377,28 @@ export default function OrderIntakeSheet({
               {productTitle && (
                 <p className="mt-1 font-display text-lg leading-snug text-foreground">{productTitle}</p>
               )}
-              {priceLabel && (
-                <p className="mt-1 font-body text-xs tracking-wide text-muted-foreground">{priceLabel}</p>
+              {activePriceLabel && (
+                <p className="mt-1 font-body text-xs tracking-wide text-muted-foreground transition-opacity duration-200">
+                  {activePriceLabel}
+                </p>
+              )}
+              {previewImage && (
+                <div className="mt-3">
+                  <div className="overflow-hidden bg-muted/30">
+                    <img
+                      key={previewImage}
+                      src={previewImage}
+                      alt={[productTitle, finish].filter(Boolean).join(" — ") || "Product"}
+                      loading="lazy"
+                      className="h-32 w-full object-cover animate-in fade-in duration-300"
+                    />
+                  </div>
+                  {usingFallbackImage && (
+                    <p className="mt-1.5 font-body text-[10px] italic tracking-wide text-muted-foreground/70">
+                      Custom finish selection shown.
+                    </p>
+                  )}
+                </div>
               )}
             </div>
           )}
