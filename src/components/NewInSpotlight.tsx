@@ -17,9 +17,10 @@ import { useFounderIsBrand } from "@/hooks/useFounderIsBrand";
 import { cn } from "@/lib/utils";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { composeTitle, splitTitleAttribution } from "@/lib/curatorPickLegend";
-import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
+import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePublicRrp";
 import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import SwipeAlternateProductImage from "@/components/product/SwipeAlternateProductImage";
+import { useShippingDestination } from "@/lib/shippingDestination";
 
 const transition: Transition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] };
 
