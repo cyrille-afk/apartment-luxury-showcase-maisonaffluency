@@ -6,6 +6,7 @@ import {
   setDestination,
   useShippingDestination,
 } from "@/lib/shippingDestination";
+import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 
 /** Key destinations surfaced first in the compact cart selector. */
 const PRIORITY_ISO = ["US", "GB", "FR", "DE", "IT", "CH", "AE", "SG", "HK", "AU"];
@@ -17,6 +18,7 @@ const PRIORITY_ISO = ["US", "GB", "FR", "DE", "IT", "CH", "AE", "SG", "HK", "AU"
  */
 export function ShippingCountryIndicator({ className = "" }: { className?: string }) {
   const dest = useShippingDestination();
+  const checkoutForm = useCheckoutForm();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -70,6 +72,7 @@ export function ShippingCountryIndicator({ className = "" }: { className?: strin
                 aria-selected={active}
                 onClick={() => {
                   setDestination(c.iso);
+                  checkoutForm.setProjectCountry(c.iso);
                   setOpen(false);
                 }}
                 className={`flex w-full items-center gap-2 px-3 py-2 text-left font-body text-[11px] tracking-[0.04em] transition-colors hover:bg-muted/60 ${

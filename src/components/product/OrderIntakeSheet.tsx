@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Turnstile from "@/components/Turnstile";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
+import { getCurrentDestination } from "@/lib/shippingDestination";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -83,8 +84,10 @@ export default function OrderIntakeSheet({
   const [sent, setSent] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState(0);
-  const [profile, setProfile] = useState<"designer" | "private" | null>(null);
-  const [city, setCity] = useState("");
+  const [profile, setProfile] = useState<"designer" | "private" | null>(
+    checkoutForm.buyerProfile,
+  );
+  const [city, setCity] = useState(checkoutForm.projectCity);
   const [notes, setNotes] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -103,8 +106,27 @@ export default function OrderIntakeSheet({
     setFinish(finishLabel ?? null);
     setFinishOpen(false);
     setEmail((current) => current || checkoutForm.email);
+    // Project profile + location are global: stated once, pre-filled forever.
+    setProfile((current) => current ?? checkoutForm.buyerProfile);
+    setCity((current) => current || checkoutForm.projectCity);
     if (!notesEdited) setNotes(finishLabel ? `Selected finish: ${finishLabel}` : "");
   }, [isOpen, finishLabel, checkoutForm.email]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /** Studio vs private client — written straight into global state. */
+  const chooseProfile = (next: "designer" | "private") => {
+    setProfile(next);
+    checkoutForm.setBuyerProfile(next);
+  };
+
+  /** Project location is sticky across the whole funnel. */
+  const changeCity = (next: string) => {
+    setCity(next);
+    checkoutForm.setProjectCity(next.trim());
+    if (!checkoutForm.projectCountry) {
+      const iso = getCurrentDestination()?.iso;
+      if (iso) checkoutForm.setProjectCountry(iso);
+    }
+  };
 
   const selectFinish = (opt: string) => {
     setFinish(opt);
@@ -246,6 +268,10 @@ export default function OrderIntakeSheet({
     }
     const confirmedDetails = details();
     checkoutForm.setEmail(confirmedDetails.email);
+    checkoutForm.update({
+      projectCity: confirmedDetails.city,
+      buyerProfile: confirmedDetails.profile,
+    });
     onComplete(confirmedDetails);
   };
 
@@ -421,7 +447,7 @@ export default function OrderIntakeSheet({
                   <button
                     key={opt.key}
                     type="button"
-                    onClick={() => setProfile(opt.key)}
+                    onClick={() => chooseProfile(opt.key)}
                     className={cn(
                       "flex h-14 w-full items-center justify-between border px-4 font-body text-sm transition-all duration-200",
                       profile === opt.key
@@ -447,7 +473,7 @@ export default function OrderIntakeSheet({
                 id="intake-city"
                 autoFocus
                 value={city}
-                onChange={(e) => setCity(e.target.value)}
+                onChange={(e) => changeCity(e.target.value)}
                 placeholder="e.g., Singapore"
                 className={inputCls}
               />

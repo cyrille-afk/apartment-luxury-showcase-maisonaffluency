@@ -19,7 +19,7 @@ import { useUsdToSgdRate } from "@/hooks/useUsdToSgdRate";
 import { useShippingDestination } from "@/lib/shippingDestination";
 import { ShippingCountryIndicator } from "@/components/checkout/ShippingCountryIndicator";
 import { getFxRates, convertCentsWithFallback } from "@/lib/fxRates";
-import { resolveBaseCurrency } from "@/lib/checkout/multiCurrency";
+import { resolveBaseCurrency, useSettlementCurrency } from "@/lib/checkout/multiCurrency";
 
 
 
@@ -59,6 +59,9 @@ export default function Cart() {
   // Display currency: a single-currency cart keeps its own currency; a mixed
   // cart (e.g. a USD lamp + a EUR armchair) is normalised to USD so the
   // subtotal is a real converted sum, never a raw addition of two currencies.
+  // A destination locked in the header modal (Singapore → SGD) overrides
+  // everything: the whole basket is converted and settled in that currency.
+  const settlementCurrency = useSettlementCurrency();
   const currency = useMemo(
     () =>
       resolveBaseCurrency(
@@ -67,8 +70,9 @@ export default function Cart() {
           unitCents: i.unitPriceCents,
           quantity: i.quantity,
         })),
+        settlementCurrency,
       ),
-    [items],
+    [items, settlementCurrency],
   );
 
   // Live FX rates for every line currency → display currency.
@@ -154,8 +158,11 @@ export default function Cart() {
     return Math.round((estimatedTotal / 100) * sgdRate.rate);
   }, [estimatedTotal, sgdRate.rate, currency]);
 
+  // "$" alone is ambiguous between USD and SGD — always prefix the ISO code.
   const formatUsd = (cents: number, code = currency) =>
-    code === "USD" ? `USD ${formatMoney(cents, code)}` : formatMoney(cents, code);
+    code === "USD" || code === "SGD"
+      ? `${code} ${formatMoney(cents, code)}`
+      : formatMoney(cents, code);
 
 
   // "Continue Selection" returns to the curator's picks of the designer whose

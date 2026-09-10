@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
+import { convertCents, SETTLEMENT_CURRENCIES } from "../_shared/fxConvert.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,8 +29,8 @@ interface IncomingItem {
   quantity?: number;
 }
 
-/** Every price on this platform is quoted and charged in USD. */
-const CHECKOUT_CURRENCY = "usd";
+/** Fallback settlement currency when the shopper has locked none. */
+const DEFAULT_CURRENCY = "usd";
 
 const CURRENCY_SYMBOLS: Record<string, string> = { usd: "$", eur: "€", gbp: "£", sgd: "S$", hkd: "HK$" };
 /** "USD $18,923.25" — ISO code + symbol so currencies are never ambiguous in email. */
@@ -49,6 +50,12 @@ serve(async (req) => {
     const method: "card" | "bank_transfer" = body?.method === "bank_transfer" ? "bank_transfer" : "card";
     const email: string | null = typeof body?.email === "string" ? body.email.trim() : null;
     const fullName: string | null = typeof body?.fullName === "string" ? body.fullName.trim() : null;
+    // Settlement currency locked in the header "Shipping destination &
+    // currency" modal. Catalogue prices are converted into it below.
+    const requestedCurrency = String(body?.currency || DEFAULT_CURRENCY).toLowerCase();
+    const CHECKOUT_CURRENCY = (SETTLEMENT_CURRENCIES as readonly string[]).includes(requestedCurrency)
+      ? requestedCurrency
+      : DEFAULT_CURRENCY;
     const notes: string | null = typeof body?.notes === "string" ? body.notes.slice(0, 2000) : null;
 
     if (!rawItems.length) return json({ error: "Your cart is empty." }, 400);
@@ -102,7 +109,7 @@ serve(async (req) => {
     //     rejected rather than charged at the cheapest base price.
     const mismatched: string[] = [];
 
-    const lines = rawItems.map((item) => {
+    const rawLines = rawItems.map((item) => {
       const row = byPick.get(String(item.pickId));
       if (!row) return null;
       const qty = Math.min(50, Math.max(1, Math.round(Number(item.quantity) || 1)));
@@ -171,9 +178,20 @@ serve(async (req) => {
         quantity: qty,
         unit_price_cents: unit,
         line_total_cents: unit * qty,
+        source_currency: String(row.currency || DEFAULT_CURRENCY).toLowerCase(),
         currency: CHECKOUT_CURRENCY,
       };
     }).filter(Boolean) as any[];
+
+    // Convert every resolved catalogue price into the settlement currency.
+    const lines = await Promise.all(
+      rawLines.map(async (l: any) => {
+        const { source_currency, ...rest } = l;
+        if (source_currency === CHECKOUT_CURRENCY) return rest;
+        const unit = await convertCents(rest.unit_price_cents, source_currency, CHECKOUT_CURRENCY);
+        return { ...rest, unit_price_cents: unit, line_total_cents: unit * rest.quantity };
+      }),
+    );
 
     if (mismatched.length) {
       console.error("[create-cart-checkout] price/finish mismatch", mismatched);
