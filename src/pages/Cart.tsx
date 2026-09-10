@@ -60,6 +60,16 @@ export default function Cart() {
   // is the goods subtotal less any tier discount (no invented shipping figure).
   const destination = useShippingDestination();
   const freightEstimate = useEstimatedShipping(items, destination.iso, currency);
+  // Geo-targeted WhatsApp direct line — show only the number relevant to the
+  // visitor's region to keep narrow mobile layouts uncluttered.
+  const directLine = useMemo(() => {
+    const EU_ISOS = new Set([
+      "FR", "DE", "IT", "ES", "NL", "BE", "IE", "PT", "AT", "LU", "MC", "GR", "CH", "GB",
+    ]);
+    if (destination.iso === "SG") return { label: "Singapore", number: "+65 9139 3850" };
+    if (EU_ISOS.has(destination.iso)) return { label: "France & EU", number: "+33 6 16 23 74 60" };
+    return { label: "International", number: "+33 6 16 23 74 60" };
+  }, [destination.iso]);
   // Payable now = goods less tier discount. The freight figure is indicative
   // only (advisor-verified) and is never charged, so it is shown separately
   // rather than folded into the amount the customer is asked to pay.
