@@ -25,7 +25,9 @@ export interface CartItem {
   /** Freight class hints — drive the shipping estimate multiplier. */
   category?: string | null;
   shippingModifier?: number | null;
-
+  /** Product provenance / pickup location — used for regional logistics copy. */
+  origin?: string | null;
+  pickupCountry?: string | null;
 }
 
 const STORAGE_KEY = "ma_cart_v1";
