@@ -6,6 +6,7 @@ import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Turnstile from "@/components/Turnstile";
+import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -76,6 +77,7 @@ export default function OrderIntakeSheet({
   productId,
 }: Props) {
   const { toast } = useToast();
+  const checkoutForm = useCheckoutForm();
   const isQuote = mode === "quote";
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -100,8 +102,9 @@ export default function OrderIntakeSheet({
     if (!isOpen) return;
     setFinish(finishLabel ?? null);
     setFinishOpen(false);
+    setEmail((current) => current || checkoutForm.email);
     if (!notesEdited) setNotes(finishLabel ? `Selected finish: ${finishLabel}` : "");
-  }, [isOpen, finishLabel]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOpen, finishLabel, checkoutForm.email]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectFinish = (opt: string) => {
     setFinish(opt);
@@ -241,7 +244,9 @@ export default function OrderIntakeSheet({
       void submitQuote();
       return;
     }
-    onComplete(details());
+    const confirmedDetails = details();
+    checkoutForm.setEmail(confirmedDetails.email);
+    onComplete(confirmedDetails);
   };
 
   const progress = ((step + (canAdvance ? 1 : 0.35)) / STEPS.length) * 100;
@@ -547,7 +552,10 @@ export default function OrderIntakeSheet({
                 inputMode="email"
                 autoComplete="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  checkoutForm.setEmail(e.target.value);
+                }}
                 placeholder="you@studio.com"
                 className={inputCls}
               />
