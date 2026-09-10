@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { SHIPPING_COUNTRIES } from "@/lib/shippingDestination";
+import { overwriteSecureBasket } from "@/lib/checkout/secureBasket";
 
 export interface CartItem {
   /** Stable line key — pick id + finish label. */
