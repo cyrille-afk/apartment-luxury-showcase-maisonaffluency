@@ -1711,6 +1711,10 @@ export default function Checkout() {
                     onCountryChange={setFormCountry}
                     method={method}
                     optionsSlot={optionsSlot}
+                    buyerType={buyerType}
+                    setBuyerType={setBuyerType}
+                    buyerGstNumber={buyerGstNumber}
+                    setBuyerGstNumber={setBuyerGstNumber}
                   />
                 </Elements>
               );
