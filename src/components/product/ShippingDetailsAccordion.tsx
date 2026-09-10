@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 
@@ -56,10 +56,16 @@ export default function ShippingDetailsAccordion({
   return (
     <>
       {variant === "row" ? (
-        <div className={cn("border-b border-border/60 pt-3 pb-2.5 md:pb-3 flex items-start", className)}>
-          <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
-            {button}
-          </div>
+        <div className={cn("border-b border-border/60", className)}>
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-haspopup="dialog"
+            className="flex items-center w-full py-2.5 md:py-4 text-left font-body text-sm text-foreground font-medium transition-colors hover:text-foreground/80 focus:outline-none focus-visible:ring-0"
+          >
+            <span className="flex-1 min-w-0">View Logistics</span>
+            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60" aria-hidden="true" />
+          </button>
         </div>
       ) : (
         <div className={cn("mt-2", className)}>
