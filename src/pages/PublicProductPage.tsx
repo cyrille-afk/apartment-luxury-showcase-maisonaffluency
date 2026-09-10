@@ -1040,40 +1040,38 @@ const VariantDimensionsPanel: React.FC = () => {
 };
 
 const MotionAndDimensionsPanel: React.FC = () => {
-  const { product, selBase, selTop, onMaterialChange } = useVariantSelectorsContext();
+  const { product, selBase, selTop, selDualSize, setSelDualSize, onMaterialChange } = useVariantSelectorsContext();
   const motionOptions = React.useMemo(
     () => resolveProductMotionOptions(product.size_variants),
     [product.size_variants],
   );
-  const [motion, setMotion] = useState<ProductMotionValue>(() =>
-    motionValueFromVariantLabel(
-      typeof window === "undefined"
-        ? null
-        : (() => {
-            try {
-              const raw = sessionStorage.getItem(`ma_variant_sel_${product?.id ?? "unknown"}`);
-              return raw ? (JSON.parse(raw) as { dualSize?: string | null }).dualSize : null;
-            } catch {
-              return null;
-            }
-          })(),
-    ),
-  );
+  const motion = motionValueFromVariantLabel(selDualSize);
+  const initializedMotion = useRef(false);
 
   useEffect(() => {
-    if (!motionOptions) return;
-    onMaterialChange?.(variantLabelForMotion(motionOptions, motion), {
+    if (!motionOptions || initializedMotion.current) return;
+    initializedMotion.current = true;
+    const initialLabel = selDualSize || variantLabelForMotion(motionOptions, motion);
+    if (!selDualSize) setSelDualSize(initialLabel);
+    onMaterialChange?.(initialLabel, {
       base: selBase,
       top: selTop,
-      size: variantLabelForMotion(motionOptions, motion),
+      size: initialLabel,
     });
-  }, [motionOptions, motion, onMaterialChange, selBase, selTop]);
+  }, [motionOptions, motion, onMaterialChange, selBase, selDualSize, selTop, setSelDualSize]);
 
   if (!motionOptions) return <VariantDimensionsPanel />;
 
   return (
     <div className="flex flex-col gap-4">
-      <ProductMotionSelector value={motion} onChange={setMotion} />
+      <ProductMotionSelector
+        value={motion}
+        onChange={(nextMotion) => {
+          const label = variantLabelForMotion(motionOptions, nextMotion);
+          setSelDualSize(label);
+          onMaterialChange?.(label, { base: selBase, top: selTop, size: label });
+        }}
+      />
       <p className="font-body text-xs tracking-wide text-muted-foreground">
         {withImperialPerLine(motionOptions.dimensions)}
       </p>
