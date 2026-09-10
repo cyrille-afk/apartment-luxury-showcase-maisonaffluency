@@ -196,6 +196,8 @@ export default function Cart() {
                 ? `/designers/${i.designerSlug}/${i.productSlug}`
                 : null,
             quantity: i.quantity,
+            origin: i.origin ?? null,
+            pickupCountry: i.pickupCountry ?? null,
           })),
         },
       });
