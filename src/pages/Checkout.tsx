@@ -401,6 +401,11 @@ function OrderSummary({
                 {ESTIMATED_SHIPPING_NOTE}
               </p>
             )}
+            {showEuropeanLogisticsNotice && (
+              <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500 italic">
+                Note: For European fulfillments, this shipping fee serves as an initial transit deposit. Our Paris logistics team manually reviews every order within 24 hours to secure the optimal white-glove courier route and transit pricing for your specific pieces.
+              </p>
+            )}
             <RegionalLogisticsNote compact className="mt-2" />
           </div>
           <div className="border-t border-border/60 pt-4">
