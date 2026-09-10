@@ -55,7 +55,9 @@ test.describe("Landing page", () => {
     await expect(page.getByRole("heading", { name: /designers?/i }).first()).toBeVisible({ timeout: 10_000 });
   });
 
-  test("visual: above-the-fold hero snapshot", async ({ page }, testInfo) => {
+  test("visual: above-the-fold hero snapshot", {
+    tag: ["@pixel"],
+  }, async ({ page }, testInfo) => {
     // Hide the hero image to avoid Cloudinary variance (focus diff on layout/text/CTAs).
     await page.addStyleTag({
       content: `picture img{visibility:hidden!important}`,
