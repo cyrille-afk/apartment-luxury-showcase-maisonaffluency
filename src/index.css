@@ -55,6 +55,7 @@ All colors MUST be HSL.
     /* Brighter bronze-gold used for text over dark hero imagery */
     --gold-bright: 38 70% 72%;
     --cream: 32 20% 97%;
+    --canvas: 0 0% 97.6%;
     --warm-gray: 32 10% 50%;
     --spec-dimension-icon: 207 24% 68%;
 
