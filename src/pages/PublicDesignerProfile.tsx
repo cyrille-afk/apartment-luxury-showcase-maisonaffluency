@@ -53,9 +53,10 @@ import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { Button } from "@/components/ui/button";
 import { lastNameInitial } from "@/lib/nameFormat";
-import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
+import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePublicRrp";
 import NewInSpotlight from "@/components/NewInSpotlight";
 import SwipeAlternateProductImage from "@/components/product/SwipeAlternateProductImage";
+import { useShippingDestination } from "@/lib/shippingDestination";
 // Collectible profiles are public; product-page gating lives in PublicProductPage.
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
