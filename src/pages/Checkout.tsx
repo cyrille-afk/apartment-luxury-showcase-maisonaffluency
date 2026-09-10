@@ -42,6 +42,7 @@ import { isHighTicketEuropeanFulfillment } from "@/lib/europeanLogistics";
 import { useUsdToSgdRate } from "@/hooks/useUsdToSgdRate";
 import { convertCents, useFxRates } from "@/components/trade/CurrencyToggle";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
+import { useCurrencyNormalizedLines } from "@/lib/checkout/multiCurrency";
 
 
 const CONCIERGE_WHATSAPP = "https://wa.me/6591393850";
