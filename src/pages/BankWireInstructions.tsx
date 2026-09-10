@@ -67,7 +67,7 @@ export default function BankWireInstructions() {
 
   const displayTotal = useMemo(() => {
     if (!amountCents || amountCents <= 0) return `${currency} —`;
-    return formatCurrency(amountCents, currency);
+    return formatMoney(amountCents, currency);
   }, [amountCents, currency]);
 
   const config = DEFAULT_BANK_WIRE_CONFIG;
