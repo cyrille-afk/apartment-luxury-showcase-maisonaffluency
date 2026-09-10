@@ -116,16 +116,6 @@ export default function Cart() {
     currency,
     discount.totalFor(subtotal),
   );
-  // Geo-targeted WhatsApp direct line — show only the number relevant to the
-  // visitor's region to keep narrow mobile layouts uncluttered.
-  const directLine = useMemo(() => {
-    const EU_ISOS = new Set([
-      "FR", "DE", "IT", "ES", "NL", "BE", "IE", "PT", "AT", "LU", "MC", "GR", "CH", "GB",
-    ]);
-    if (destination.iso === "SG") return { label: "Singapore", number: "+65 9139 3850" };
-    if (EU_ISOS.has(destination.iso)) return { label: "France & EU", number: "+33 6 16 23 74 60" };
-    return { label: "International", number: "+33 6 16 23 74 60" };
-  }, [destination.iso]);
   // Payable now = goods less tier discount. The Estimated Total adds the
   // indicative freight figure (advisor-verified, invoiced separately) so the
   // headline number is the true landed-estimate: subtotal + delivery.
@@ -405,7 +395,7 @@ export default function Cart() {
                     <dt className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Direct Line</dt>
                     <dd className="mt-2">
                       <a
-                        href={`https://wa.me/${directLine.number.replace(/\D/g, "")}`}
+                        href="https://wa.me/6591393850"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="hover:text-[hsl(var(--gold))] transition-colors"
@@ -414,9 +404,10 @@ export default function Cart() {
                       </a>
                     </dd>
                     <dd className="mt-1 text-muted-foreground">
-                      {directLine.label}: {directLine.number}
+                      <span className="block">• Singapore: +65 9139 3850</span>
+                      <span className="block">• Paris &amp; EU: +33 6 1623 7460</span>
                     </dd>
-                    <dd className="mt-1">
+                    <dd className="mt-2">
                       <Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
                         Request a call back
                       </Link>
