@@ -37,6 +37,7 @@ import {
   lineTotalCents,
   reconcileBackendAmount,
 } from "@/lib/checkoutGuardrails";
+import { checkSgdThreshold } from "@/lib/checkout/checkSgdThreshold";
 import { convertCents, useFxRates } from "@/components/trade/CurrencyToggle";
 
 
@@ -260,6 +261,17 @@ function OrderSummary({
     summary.taxCountry === "SG" &&
     currency.toLowerCase() === "sgd";
 
+  const sgImportGstThreshold = useMemo(() => {
+    if (summary.taxCountry !== "SG" || isB2BZeroRated || summary.taxApplied) return null;
+    const usdAmount =
+      currency.toUpperCase() === "USD"
+        ? summary.subtotalCents / 100
+        : currency.toUpperCase() === "SGD"
+          ? (summary.subtotalCents / 100) / 1.35
+          : 0;
+    return checkSgdThreshold(usdAmount, 1.35);
+  }, [summary, isB2BZeroRated, currency]);
+
   return (
     <aside className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] h-fit">
       <div className="border border-border/70 px-7 py-8">
@@ -395,6 +407,11 @@ function OrderSummary({
             <p className="mt-2 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
               (Equivalent to Approx. {money(sgdEquivalentCents, "SGD")} based on current rates)
             </p>
+            {sgImportGstThreshold && !sgImportGstThreshold.isLowValueGoods && (
+              <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                Because this item value exceeds the S$400 threshold upon SGD conversion, Singapore Import GST (9%) must be settled via the courier during border customs clearance rather than collected at checkout.
+              </p>
+            )}
             {isB2BZeroRated ? (
               <p className="mt-1 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
                 Buyer GST / UEN: {buyerGstNumber.trim().toUpperCase()}
