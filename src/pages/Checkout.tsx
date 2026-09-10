@@ -249,12 +249,16 @@ function OrderSummary({
 }) {
   const { currency } = summary;
   const fxRates = useFxRates();
-  const sgdEquivalentCents = convertCents(
-    summary.chargeTotalCents,
-    currency.toUpperCase(),
-    "SGD",
-    fxRates,
-  );
+  const usdSgd = useUsdToSgdRate();
+  const sgdEquivalentCents =
+    currency.toUpperCase() === "USD"
+      ? Math.round(summary.chargeTotalCents * usdSgd.rate)
+      : convertCents(
+          summary.chargeTotalCents,
+          currency.toUpperCase(),
+          "SGD",
+          fxRates,
+        );
   const isB2BZeroRated =
     buyerType === "business" &&
     isSingaporeUenValid(buyerGstNumber) &&
@@ -267,10 +271,10 @@ function OrderSummary({
       currency.toUpperCase() === "USD"
         ? summary.subtotalCents / 100
         : currency.toUpperCase() === "SGD"
-          ? (summary.subtotalCents / 100) / 1.35
+          ? (summary.subtotalCents / 100) / usdSgd.rate
           : 0;
-    return checkSgdThreshold(usdAmount, 1.35);
-  }, [summary, isB2BZeroRated, currency]);
+    return checkSgdThreshold(usdAmount, usdSgd.rate);
+  }, [summary, isB2BZeroRated, currency, usdSgd.rate]);
 
   return (
     <aside className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] h-fit">
