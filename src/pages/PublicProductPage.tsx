@@ -1902,6 +1902,7 @@ const PublicProductPageContent: React.FC = () => {
       leadTime: product.lead_time || null,
       unitPriceCents: unit,
       currency: (publicRrpRow?.currency || "USD").toUpperCase(),
+      origin: product.origin,
     });
     setCartQuantity(key, Math.max(1, qty));
     return true;
