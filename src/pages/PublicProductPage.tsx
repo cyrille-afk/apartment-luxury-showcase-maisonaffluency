@@ -47,7 +47,7 @@ import ShippingDetailsAccordion from "@/components/product/ShippingDetailsAccord
 import OriginStoryDrawer from "@/components/product/OriginStoryDrawer";
 
 
-import ActiveSwatchCaption from "@/components/product/ActiveSwatchCaption";
+
 import { isProductUpholstered } from "@/lib/upholstery";
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex, variantImageKey } from "@/lib/variantImageMap";
@@ -2360,20 +2360,6 @@ const PublicProductPageContent: React.FC = () => {
 
 
 
-              {/* Inline "Shown in" caption — hidden on mobile/PWA; shown in presentation mode instead. */}
-              {!isMobileOrPwa && (
-                <div className="md:border-0 md:shadow-none border-b border-border/60 shadow-[0_6px_10px_-8px_rgba(0,0,0,0.35)] pb-2">
-                  <ActiveSwatchCaption
-                    pickId={product.id}
-                    activeIndex={galleryActiveIndex ?? 0}
-                    selectedNames={[
-                      displayedFinishes.upholstery,
-                      displayedFinishes.base,
-                      displayedFinishes.top,
-                    ]}
-                  />
-                </div>
-              )}
 
               {/* "The Creation" — desktop only. */}
               {!isMobileOrPwa && product.description && product.description.trim().length > 0 && (

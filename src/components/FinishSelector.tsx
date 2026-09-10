@@ -851,14 +851,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           tileButton
         )}
         <p className="font-body text-[12px] leading-snug text-foreground/85">
-          {f.supplier ? (
-            <>
-              <span className="font-medium">{f.supplier}</span>
-              <span className="text-foreground/60"> — {f.name}</span>
-            </>
-          ) : (
-            f.name
-          )}
+          {f.name}
         </p>
         {tierCaption && (
           <p className="font-body text-[10px] tracking-wider uppercase text-muted-foreground -mt-1">
