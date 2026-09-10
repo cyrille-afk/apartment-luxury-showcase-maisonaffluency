@@ -334,7 +334,7 @@ export default function ExpandableSpec({
 
           <ChevronRight
             className={cn(
-              "h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform",
+              "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
               open && "rotate-90"
             )}
           />
