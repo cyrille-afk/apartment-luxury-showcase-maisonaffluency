@@ -2446,8 +2446,7 @@ const PublicProductPageContent: React.FC = () => {
                       }
                       return (
                         <>
-                          <div className="border-b border-border/60 pb-2.5 md:pb-3 flex items-start gap-5">
-                            {specIcon("✦", "mt-0.5")}
+                          <div className="border-b border-border/60 pb-2.5 md:pb-3 flex items-start">
                             <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
                               <OriginStoryDrawer label={originLine} maker={designerDisplay} />
 
@@ -2647,8 +2646,7 @@ const PublicProductPageContent: React.FC = () => {
                     if (!handcrafted) return null;
                     return (
                       <>
-                        <div className="border-b border-border/60 pb-3 flex items-start gap-5">
-                          {specIcon("✦", "mt-0.5")}
+                        <div className="border-b border-border/60 pb-3 flex items-start">
                           <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
                             <p>{handcrafted}</p>
                           </div>

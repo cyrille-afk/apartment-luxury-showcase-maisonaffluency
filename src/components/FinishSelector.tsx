@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, ZoomIn, X, ImageOff } from "lucide-react";
+import { ChevronRight, ZoomIn, X, ImageOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import SpecGlyph from "@/components/product/SpecGlyph";
+
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import {
@@ -972,23 +972,20 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           type="button"
           onClick={args.onToggle}
           aria-expanded={args.isOpen}
-          className="w-full py-4 flex items-center gap-5 text-left border-b border-border/60"
+          className="w-full py-4 flex items-center text-left border-b border-border/60"
         >
-          <span className="shrink-0">
-            <SpecGlyph symbol={args.glyph} />
-          </span>
           <span className="font-body text-sm tracking-wide text-muted-foreground flex-1">
             {args.label}
           </span>
           {args.selectedName && (
-            <span className="font-body text-sm text-foreground/85 truncate max-w-[55%] text-right">
+            <span className="font-body text-sm text-foreground/85 truncate max-w-[55%] text-right mr-3">
               {args.selectedName}
             </span>
           )}
-          <ChevronDown
+          <ChevronRight
             className={cn(
               "w-4 h-4 text-muted-foreground transition-transform shrink-0",
-              args.isOpen && "rotate-180"
+              args.isOpen && "rotate-90"
             )}
             aria-hidden="true"
           />
@@ -1123,13 +1120,13 @@ export default function FinishSelector({ pickId, className, productTitle, produc
             <span className="text-xs text-neutral-400 font-medium truncate max-w-[180px]">
               {selectedItem?.name ?? ""}
             </span>
-            <ChevronDown
-              className={cn(
-                "w-4 h-4 text-neutral-400 transition-transform duration-300 shrink-0",
-                isOpen && "rotate-180"
-              )}
-              aria-hidden="true"
-            />
+             <ChevronRight
+               className={cn(
+                 "w-4 h-4 text-neutral-400 transition-transform duration-300 shrink-0",
+                 isOpen && "rotate-90"
+               )}
+               aria-hidden="true"
+             />
           </div>
         </button>
         <div
@@ -1185,19 +1182,18 @@ export default function FinishSelector({ pickId, className, productTitle, produc
             type="button"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
-            className="w-full py-4 flex items-center gap-5 text-left border-b border-border/60"
+            className="w-full py-4 flex items-center text-left border-b border-border/60"
           >
-            <span className="shrink-0"><SpecGlyph symbol="fabric" /></span>
             <span className="font-body text-sm tracking-wide text-muted-foreground flex-1">
               Select Your Rug Finish
             </span>
             {selectedRugSummary && (
-              <span className="font-body text-sm text-foreground/85 truncate max-w-[55%] text-right">
+              <span className="font-body text-sm text-foreground/85 truncate max-w-[55%] text-right mr-3">
                 {selectedRugSummary}
               </span>
             )}
-            <ChevronDown
-              className={cn("w-4 h-4 text-muted-foreground transition-transform shrink-0", open && "rotate-180")}
+            <ChevronRight
+              className={cn("w-4 h-4 text-muted-foreground transition-transform shrink-0", open && "rotate-90")}
               aria-hidden="true"
             />
           </button>
