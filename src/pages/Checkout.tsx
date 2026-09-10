@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getCart, clearCart, rehydrateCart } from "@/lib/cart";
-import { readSecureBasket, writeSecureBasket, clearSecureBasket } from "@/lib/checkout/secureBasket";
+import { readSecureBasket, writeSecureBasket, clearSecureBasket, subscribeSecureBasketStorage } from "@/lib/checkout/secureBasket";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
 import { useAuth } from "@/hooks/useAuth";
 import { Helmet } from "react-helmet-async";
@@ -1573,6 +1573,9 @@ export default function Checkout() {
         return;
       }
     }
+    // Nothing anywhere: reflect the genuinely empty basket instead of holding
+    // stale lines that were deleted in this or another tab.
+    setLines([]);
     if (allowRedirect) navigate("/", { replace: true });
   }, [location.state, navigate]);
 
@@ -1584,14 +1587,25 @@ export default function Checkout() {
   // must never surface an emptied checkout.
   useEffect(() => {
     const revive = () => resolveLines(false);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") revive();
+    };
     window.addEventListener("pageshow", revive);
     window.addEventListener("focus", revive);
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") revive();
-    });
+    document.addEventListener("visibilitychange", onVisible);
+    // Safari restores tabs and modal states without firing focus, so listen for
+    // basket writes made anywhere else in the browser session and re-sync.
+    const unsubscribeStorage = subscribeSecureBasketStorage(revive);
+    const onCartStorage = (e: StorageEvent) => {
+      if (e.key === null || (e.key && e.key.startsWith("ma_cart"))) revive();
+    };
+    window.addEventListener("storage", onCartStorage);
     return () => {
       window.removeEventListener("pageshow", revive);
       window.removeEventListener("focus", revive);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("storage", onCartStorage);
+      unsubscribeStorage();
     };
   }, [resolveLines]);
 

@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { SHIPPING_COUNTRIES } from "@/lib/shippingDestination";
+import { overwriteSecureBasket } from "@/lib/checkout/secureBasket";
 
 export interface CartItem {
   /** Stable line key — pick id + finish label. */
@@ -51,6 +52,13 @@ const STORAGE_KEY = "ma_cart_v1";
 const BACKUP_KEY = "ma_cart_v1_backup";
 /** Set once an order is actually placed, so a purchased basket never returns. */
 const ORDER_PLACED_KEY = "ma_cart_order_placed";
+/**
+ * Set when the shopper deliberately empties the basket (removing the last line
+ * or dropping its quantity to zero). Without it the durable backup instantly
+ * resurrects the deleted line on the next rehydrate — the "cannot delete"
+ * lock seen in Chrome.
+ */
+const EMPTIED_KEY = "ma_cart_v1_emptied";
 
 // Mirrors keys in src/lib/shippingDestination.ts so the basket record carries
 // the active destination / settlement currency (e.g. Switzerland → CHF) and can
@@ -152,17 +160,56 @@ function orderPlaced(): boolean {
   }
 }
 
+function userEmptied(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(EMPTIED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function setUserEmptied(flag: boolean) {
+  if (typeof window === "undefined") return;
+  try {
+    if (flag) window.localStorage.setItem(EMPTIED_KEY, "1");
+    else window.localStorage.removeItem(EMPTIED_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 /** Hydrate from durable storage on module load — never start empty blindly. */
 function hydrate(): CartItem[] {
   if (typeof window === "undefined") return [];
   if (orderPlaced()) return [];
   const primary = readPrimary();
   if (primary.length) return primary;
+  // A deliberately emptied basket must stay empty — never resurrect the mirror.
+  if (userEmptied()) return [];
   return readBackup();
 }
 
 let items: CartItem[] = hydrate();
 const listeners = new Set<() => void>();
+
+/** Map cart lines onto the checkout basket shape so both caches stay identical. */
+function toCheckoutLines(list: CartItem[]) {
+  return list.map((i) => ({
+    title: i.title,
+    designer: i.designerName,
+    finishLabel: i.finishLabel,
+    imageUrl: i.imageUrl,
+    unitCents: i.unitPriceCents,
+    currency: i.currency,
+    leadTime: i.leadTime,
+    productPath:
+      i.designerSlug && i.productSlug ? `/designers/${i.designerSlug}/${i.productSlug}` : null,
+    quantity: i.quantity,
+    origin: i.origin ?? null,
+    pickupCountry: i.pickupCountry ?? null,
+  }));
+}
 
 function writeEnvelope(next: CartItem[], region?: CartRegionMeta) {
   const envelope: CartEnvelope = { v: 1, lines: next, region, savedAt: Date.now() };
@@ -178,9 +225,32 @@ function writeEnvelope(next: CartItem[], region?: CartRegionMeta) {
 }
 
 function commit(next: CartItem[]) {
-  items = next;
-  writeEnvelope(next, captureRegion());
+  // Always replace the array reference (never mutate in place) so every
+  // subscriber re-renders — Chrome's deletion "lock" was a stale mirror, not
+  // a stale reference, but both are covered here.
+  items = [...next];
+  writeEnvelope(items, captureRegion());
   listeners.forEach((l) => l());
+}
+
+/** Deliberate mutation: mirror the exact result into the checkout basket too. */
+function commitExplicit(next: CartItem[]) {
+  setUserEmptied(next.length === 0);
+  if (next.length) {
+    try {
+      window.localStorage.setItem(BACKUP_KEY, JSON.stringify({ v: 1, lines: next, region: captureRegion(), savedAt: Date.now() }));
+    } catch {
+      /* ignore */
+    }
+  } else {
+    try {
+      window.localStorage.removeItem(BACKUP_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+  commit(next);
+  overwriteSecureBasket(toCheckoutLines(next));
 }
 
 function commitWithRegion(next: CartItem[], region: CartRegionMeta | undefined) {
@@ -226,6 +296,7 @@ export function rehydrateCart() {
   // arrived from a just-completed add-to-cart before the storage event fired),
   // then fall back to the durable mirror. Either way, write the canonical copy
   // back to primary storage so the next render is never empty.
+  if (userEmptied() && !items.length) return;
   const recovery = items.length ? items : readBackup();
   if (recovery.length) {
     items = recovery;
@@ -253,9 +324,20 @@ if (typeof window !== "undefined") {
         items = stored;
         listeners.forEach((l) => l());
         restoreRegion(readRegion(e.newValue));
+      } else if (userEmptied()) {
+        // Another tab deliberately emptied the basket — mirror that here.
+        if (items.length) {
+          items = [];
+          listeners.forEach((l) => l());
+        }
       } else {
         rehydrateCart();
       }
+    }
+    // A deliberate empty flag set elsewhere must also settle this tab.
+    if (e.key === EMPTIED_KEY && e.newValue === "1" && items.length) {
+      items = [];
+      listeners.forEach((l) => l());
     }
   });
 
@@ -284,6 +366,7 @@ export function getCart() {
 export function addToCart(item: Omit<CartItem, "key" | "quantity"> & { quantity?: number }) {
   const key = lineKey(item.pickId, item.finishLabel ?? null);
   const qty = Math.max(1, item.quantity ?? 1);
+  setUserEmptied(false);
   const existing = items.find((i) => i.key === key);
   if (existing) {
     commit(items.map((i) => (i.key === key ? { ...i, quantity: i.quantity + qty } : i)));
@@ -295,11 +378,68 @@ export function addToCart(item: Omit<CartItem, "key" | "quantity"> & { quantity?
 
 export function setQuantity(key: string, quantity: number) {
   if (quantity <= 0) return removeFromCart(key);
-  commit(items.map((i) => (i.key === key ? { ...i, quantity } : i)));
+  commitExplicit(items.map((i) => (i.key === key ? { ...i, quantity } : i)));
 }
 
+/**
+ * Deletion never mutates the live array: a filter callback produces a brand
+ * new array which replaces the store, then every persistent cache (primary,
+ * durable mirror and the secure checkout basket) is rewritten in the same
+ * tick, so the removed line cannot be revived by a rehydrate.
+ */
 export function removeFromCart(key: string) {
-  commit(items.filter((i) => i.key !== key));
+  const currentCart = getCart();
+  const updatedCart = currentCart.filter((item) => item.key !== key);
+  commitExplicit(updatedCart);
+}
+
+/**
+ * Public → Trade elevation merge.
+ *
+ * Called when a session gains an authenticated (trade) identity. The
+ * unauthenticated basket held in localStorage is read back and merged into the
+ * live cart array — matching lines have their quantities summed, new lines are
+ * appended — and the unified array is written to every active store. Nothing
+ * is ever isolated or overwritten by the newly initialised trade context.
+ */
+export function mergeGuestCartIntoSession(): CartItem[] {
+  if (typeof window === "undefined") return items;
+
+  const guestLines = [...readPrimary(), ...readBackup()];
+  if (!guestLines.length && !items.length) return items;
+
+  const merged = new Map<string, CartItem>();
+  const absorb = (line: CartItem, sumQuantities: boolean) => {
+    if (!line || !line.key) return;
+    const existing = merged.get(line.key);
+    if (!existing) {
+      merged.set(line.key, { ...line, quantity: Math.max(1, line.quantity || 1) });
+      return;
+    }
+    if (sumQuantities) {
+      merged.set(line.key, {
+        ...existing,
+        quantity: existing.quantity + Math.max(1, line.quantity || 1),
+      });
+    }
+  };
+
+  // In-memory (trade) lines first, then the stored guest basket. Duplicate
+  // stored copies (primary + backup mirror) must not inflate quantities.
+  items.forEach((line) => absorb(line, false));
+  const seenGuestKeys = new Set<string>();
+  guestLines.forEach((line) => {
+    if (!line?.key || seenGuestKeys.has(line.key)) return;
+    seenGuestKeys.add(line.key);
+    absorb(line, merged.has(line.key) && !items.some((i) => i.key === line.key));
+  });
+
+  const unified = Array.from(merged.values());
+  if (unified.length) {
+    setUserEmptied(false);
+    commitExplicit(unified);
+  }
+  return unified;
 }
 
 /**

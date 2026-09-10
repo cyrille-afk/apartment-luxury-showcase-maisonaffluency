@@ -204,6 +204,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // periodically (and on tab focus) — flipping `loading` there causes
         // gated routes (like the designer editor) to unmount mid-edit.
         if (event === "SIGNED_IN") {
+          // Session elevation (e.g. Trade Program login) must never isolate or
+          // discard the basket built while signed out — merge it forward.
+          import("@/lib/cart")
+            .then((m) => m.mergeGuestCartIntoSession())
+            .catch(() => {
+              /* basket merge is best-effort */
+            });
           setLoading(true);
           setTimeout(async () => {
             await fetchUserData(sess.user.id, sbClient);
