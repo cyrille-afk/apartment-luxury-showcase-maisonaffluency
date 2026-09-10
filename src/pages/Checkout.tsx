@@ -41,6 +41,7 @@ import {
 import { checkSgdThreshold } from "@/lib/checkout/checkSgdThreshold";
 import { isHighTicketEuropeanFulfillment } from "@/lib/europeanLogistics";
 import { useUsdToSgdRate } from "@/hooks/useUsdToSgdRate";
+import { CORPORATE_IDENTITY } from "@/config/tradePaymentChannels";
 import { convertCents, useFxRates } from "@/components/trade/CurrencyToggle";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 import { useCurrencyNormalizedLines, useSettlementCurrency } from "@/lib/checkout/multiCurrency";
