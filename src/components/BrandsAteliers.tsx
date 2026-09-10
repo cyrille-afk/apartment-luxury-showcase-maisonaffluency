@@ -145,7 +145,7 @@ const delaEspadaOrionTable = cloudinaryUrl("Screen_Shot_2026-02-23_at_12.10.28_P
 const delaEspadaElliottTable = cloudinaryUrl("Screen_Shot_2026-02-23_at_12.13.34_PM_kcok7r", { width: 1200, quality: "auto:good", crop: "fill" });
 const delaEspadaTaiDanConsole = cloudinaryUrl("Screen_Shot_2026-02-23_at_12.17.23_PM_wpmpjx", { width: 1200, quality: "auto:good", crop: "fill" });
 
-// Stéphane CG Curators' Picks images
+// Steph GC Curators' Picks images
 const stephaneCgOrsay = cloudinaryUrl("PHOTO-2023-09-14-13-51-05_1_iyi99i", { width: 1200, quality: "auto:good", crop: "fill" });
 const stephaneCgLouvre = cloudinaryUrl("PHOTO-2023-09-14-13-51-02_egaxpk", { width: 1200, quality: "auto:good", crop: "fill" });
 const stephaneCgWingedVictory = cloudinaryUrl("PHOTO-2023-09-14-13-51-00_cjed3b", { width: 1200, quality: "auto:good", crop: "fill" });
@@ -171,7 +171,7 @@ import ozoneBrasiliaPl from "@/assets/curators-picks/ozone-brasilia-pl.jpg";
 // Atelier-only Curators' Picks data (for brands not in FeaturedDesigners or Collectibles)
 export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick[] }> = {
   "stephane-cg": {
-    name: "Stéphane CG",
+    name: "Steph GC",
     curatorPicks: [
       {
         image: stephaneCgOrsay,
@@ -1491,7 +1491,7 @@ const partnerBrands = [
   },
   {
     id: "stephane-cg",
-    name: "Stéphane CG",
+    name: "Steph GC",
     category: "Art",
     subcategory: "Photography",
     origin: "France",
@@ -1766,7 +1766,7 @@ const brandBgMap: Record<string, string> = {
   "Martin Massé": martinMasseBg,
   "Mernøe": mernoeBg,
   "Paulin Paulin Paulin": paulinPaulinPaulinBg,
-  "Stéphane CG": stephaneCgBg,
+  "Steph GC": stephaneCgBg,
   "Andrea Claire Studio": andreaClaireBg,
   "Michel Amar Studio": michelAmarBg,
   "Arredoluce": arredoluceBg,
@@ -1840,7 +1840,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Haymann Editions": "haymann-editions",
   "Atelier DeMichelis": "atelier-demichelis",
   "De La Espada": "de-la-espada",
-  "Stéphane CG": "stephane-cg",
+  "Steph GC": "stephane-cg",
   "Marta Sala Éditions": "marta-sala-editions",
   "Ozone": "ozone-light",
   "Victoria Magniant": "victoria-magniant",
