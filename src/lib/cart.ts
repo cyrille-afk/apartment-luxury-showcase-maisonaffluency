@@ -296,6 +296,7 @@ export function rehydrateCart() {
   // arrived from a just-completed add-to-cart before the storage event fired),
   // then fall back to the durable mirror. Either way, write the canonical copy
   // back to primary storage so the next render is never empty.
+  if (userEmptied() && !items.length) return;
   const recovery = items.length ? items : readBackup();
   if (recovery.length) {
     items = recovery;
