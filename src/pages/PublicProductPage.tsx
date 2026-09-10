@@ -2606,6 +2606,8 @@ const PublicProductPageContent: React.FC = () => {
 
                     <MotionAndDimensionsPanel />
 
+                    {!isTradeVerifiedView && <ShippingDetailsAccordion variant="row" />}
+
                     {/* Actions follow the complete finish, motion, and dimensions stack. */}
                     {showPublicCommerce && (
                       <ProductCommerceCta
@@ -2665,7 +2667,6 @@ const PublicProductPageContent: React.FC = () => {
                             <p>{handcrafted}</p>
                           </div>
                         </div>
-                        <ShippingDetailsAccordion variant="row" />
                       </>
                     );
                   })()}
