@@ -44,6 +44,7 @@ export default function CartIdentify() {
   const [guestEmail, setGuestEmail] = useState("");
   const [guestName, setGuestName] = useState("");
   const [signingIn, setSigningIn] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
