@@ -19,6 +19,7 @@ import { useUsdToSgdRate } from "@/hooks/useUsdToSgdRate";
 import { useShippingDestination } from "@/lib/shippingDestination";
 import { ShippingCountryIndicator } from "@/components/checkout/ShippingCountryIndicator";
 import { getFxRates, convertCentsWithFallback } from "@/lib/fxRates";
+import { resolveBaseCurrency } from "@/lib/checkout/multiCurrency";
 
 
 
@@ -58,12 +59,17 @@ export default function Cart() {
   // Display currency: a single-currency cart keeps its own currency; a mixed
   // cart (e.g. a USD lamp + a EUR armchair) is normalised to USD so the
   // subtotal is a real converted sum, never a raw addition of two currencies.
-  const currency = useMemo(() => {
-    const codes = new Set(items.map((i) => (i.currency || "USD").toUpperCase()));
-    if (codes.size === 0) return "USD";
-    if (codes.size === 1) return [...codes][0];
-    return "USD";
-  }, [items]);
+  const currency = useMemo(
+    () =>
+      resolveBaseCurrency(
+        items.map((i) => ({
+          currency: i.currency,
+          unitCents: i.unitPriceCents,
+          quantity: i.quantity,
+        })),
+      ),
+    [items],
+  );
 
   // Live FX rates for every line currency → display currency.
   const [fxRates, setFxRates] = useState<Record<string, number>>({});
@@ -285,10 +291,10 @@ export default function Cart() {
                           src={item.imageUrl}
                           alt={item.title}
                           loading="lazy"
-                          className="w-full h-36 object-contain"
+                          className="w-full h-auto object-contain"
                         />
                       ) : (
-                        <div className="h-36" />
+                        <div className="aspect-square" />
                       )}
                     </div>
 

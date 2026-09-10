@@ -42,6 +42,7 @@ import { isHighTicketEuropeanFulfillment } from "@/lib/europeanLogistics";
 import { useUsdToSgdRate } from "@/hooks/useUsdToSgdRate";
 import { convertCents, useFxRates } from "@/components/trade/CurrencyToggle";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
+import { useCurrencyNormalizedLines } from "@/lib/checkout/multiCurrency";
 
 
 const CONCIERGE_WHATSAPP = "https://wa.me/6591393850";
@@ -322,16 +323,17 @@ function OrderSummary({
               key={`${line.title}-${line.finishLabel || ""}-${i}`}
               className="flex gap-4 border-b border-border/60 pb-4 last:border-0 last:pb-0"
             >
-              <div className="w-16 shrink-0 bg-cream">
+              {/* No fixed height — tall pieces (table lamps) are never cropped. */}
+              <div className="w-16 shrink-0 self-start bg-cream">
                 {line.imageUrl ? (
                   <img
                     src={line.imageUrl}
                     alt={line.title}
                     loading="lazy"
-                    className="w-16 h-16 object-contain"
+                    className="w-full h-auto object-contain"
                   />
                 ) : (
-                  <div className="w-16 h-16" />
+                  <div className="w-full aspect-square" />
                 )}
               </div>
               <div className="min-w-0 flex-1">
@@ -355,9 +357,20 @@ function OrderSummary({
                   Qty {lineQty(line)}
                 </p>
               </div>
-              <p className="font-body text-sm tabular-nums shrink-0">
-                {money(lineSubtotal(line), line.currency)}
-              </p>
+              <div className="shrink-0 text-right">
+                <p className="font-body text-sm tabular-nums whitespace-nowrap">
+                  {money(lineSubtotal(line), line.currency)}
+                </p>
+                {(line as any).sourceCurrency && (
+                  <p className="font-body text-[10px] italic text-muted-foreground mt-1 whitespace-nowrap">
+                    Converted from{" "}
+                    {money(
+                      Math.round((line as any).sourceUnitCents ?? 0) * lineQty(line),
+                      (line as any).sourceCurrency,
+                    )}
+                  </p>
+                )}
+              </div>
             </li>
           ))}
         </ul>
@@ -376,8 +389,9 @@ function OrderSummary({
             </div>
           )}
           <div>
-            <div className="flex items-start justify-between gap-4">
-              <dt className="text-muted-foreground">
+            {/* Label + badge on the left, the amount as one unbreakable unit. */}
+            <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+              <dt className="min-w-0 flex-1 text-muted-foreground">
                 <span className="inline-flex flex-wrap items-baseline gap-2">
                   <span>{summary.shippingLabel || "Front Door Premium Delivery"}</span>
                   {summary.shippingZoneLabel && (
@@ -388,29 +402,18 @@ function OrderSummary({
                 </span>
               </dt>
               {summary.shippingCents > 0 ? (
-                <dd className="whitespace-nowrap tabular-nums font-medium">{money(summary.shippingCents, currency)}</dd>
+                <dd className="shrink-0 whitespace-nowrap tabular-nums font-medium">{money(summary.shippingCents, currency)}</dd>
               ) : summary.estimatedShippingCents > 0 ? (
-                <dd className="whitespace-nowrap tabular-nums font-medium">{money(summary.estimatedShippingCents, currency)}</dd>
+                <dd className="shrink-0 whitespace-nowrap tabular-nums font-medium">{money(summary.estimatedShippingCents, currency)}</dd>
               ) : (
-                <dd className="whitespace-nowrap text-right text-muted-foreground">To be Quoted by Advisor</dd>
+                <dd className="shrink-0 whitespace-nowrap text-right text-muted-foreground">To be Quoted by Advisor</dd>
               )}
             </div>
-            {summary.freightCapped && summary.freightNotice && (
-              <p className="mt-1.5 font-light text-[10px] leading-relaxed tracking-[0.06em] text-foreground">
-                {summary.freightNotice}
-              </p>
-            )}
-            {summary.shippingCents === 0 && summary.estimatedShippingCents > 0 && (
-              <p className="mt-1.5 italic font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-                {ESTIMATED_SHIPPING_NOTE}
-              </p>
-            )}
             {showEuropeanLogisticsNotice && (
               <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500 italic">
-                Note: For European fulfillments, this shipping fee serves as an initial transit deposit. Our Paris logistics team manually reviews every order within 24 hours to secure the optimal white-glove courier route and transit pricing for your specific pieces.
+                Note: For European fulfillments, this shipping fee serves as an initial transit deposit. Our Paris logistics team manually reviews every order within 24 hours to secure optimal white-glove courier routing.
               </p>
             )}
-            <RegionalLogisticsNote compact className="mt-2" />
           </div>
           <div className="border-t border-border/60 pt-4">
             {sgBorderGst ? (
@@ -439,12 +442,20 @@ function OrderSummary({
                 </dd>
               </div>
             )}
+            {/* Every freight / customs / FX explanation lives behind one link. */}
             <details className="group mt-2">
               <summary className="flex cursor-pointer list-none items-center justify-between font-light text-[10px] uppercase tracking-[0.14em] text-muted-foreground [&::-webkit-details-marker]:hidden">
-                Rates &amp; customs details
+                View Shipping &amp; Import Tax Details
                 <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" aria-hidden="true" />
               </summary>
-              <div className="mt-2 space-y-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+              <div className="mt-2 space-y-1.5 font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
+                {summary.freightCapped && summary.freightNotice && (
+                  <p className="text-foreground">{summary.freightNotice}</p>
+                )}
+                {summary.shippingCents === 0 && summary.estimatedShippingCents > 0 && (
+                  <p className="italic">{ESTIMATED_SHIPPING_NOTE}</p>
+                )}
+                <RegionalLogisticsNote compact />
                 {!sgBorderGst && (
                   <dl className="space-y-1">
                     <div className="flex items-baseline justify-between gap-6">
@@ -1273,7 +1284,10 @@ function ShippingQuoteCard({
 export default function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [grossLines, setLines] = useState<CheckoutLine[] | null>(null);
+  const [rawLines, setLines] = useState<CheckoutLine[] | null>(null);
+  // A mixed-currency cart (EUR chair + USD lamp) is converted into one base
+  // currency with live FX before any subtotal / freight / tax / charge maths.
+  const { lines: grossLines } = useCurrencyNormalizedLines(rawLines);
   // Account-level tier discount. The hook drives the first paint; the value
   // returned by the PaymentIntent is authoritative once it arrives, so the
   // displayed total always equals the amount Stripe will charge.
