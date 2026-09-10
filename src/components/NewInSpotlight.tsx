@@ -439,7 +439,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
               </div>
 
               {igWithImages.length > 0 && (
-                <div className="w-full border-t border-neutral-100 pt-4 mt-4">
+                <div className="w-full border-t border-neutral-100 pt-4 mt-6">
                   <div className="w-fit mx-auto flex flex-col items-center gap-2">
                     <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-neutral-400 font-normal">
                       <Instagram className="w-3.5 h-3.5" strokeWidth={1.5} />
