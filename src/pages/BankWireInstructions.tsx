@@ -2,6 +2,7 @@ import { useMemo, useState, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Check } from "lucide-react";
+import { jsPDF } from "jspdf";
 import Navigation from "@/components/Navigation";
 import { copyTextToClipboard } from "@/lib/clipboard";
 import { DEFAULT_BANK_WIRE_CONFIG, buildPaymentReference } from "@/config/bankWire";
@@ -54,6 +55,7 @@ function CopyableRow({ label, value }: CopyableRowProps) {
 
 export default function BankWireInstructions() {
   const [params] = useSearchParams();
+  const [downloading, setDownloading] = useState(false);
 
   const orderRef = params.get("ref") || "";
   const amountParam = params.get("amount");
@@ -72,6 +74,95 @@ export default function BankWireInstructions() {
 
   const config = DEFAULT_BANK_WIRE_CONFIG;
 
+  const handleDownloadPdf = useCallback(() => {
+    setDownloading(true);
+    try {
+      const doc = new jsPDF({ unit: "pt", format: "a4", orientation: "portrait" });
+      const pageW = doc.internal.pageSize.getWidth();
+      const M = 54;
+      const right = pageW - M;
+      let y = M;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.text("MAISON AFFLUENCY", right, y, { align: "right" });
+      y += 14;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(22);
+      doc.setTextColor(24, 24, 24);
+      doc.text("Pro-forma Invoice / Wire Instructions", M, y);
+      y += 28;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Order Reference: ${orderRef || "—"}`, M, y);
+      doc.text(`Total Due: ${displayTotal}`, right, y, { align: "right" });
+      y += 18;
+
+      doc.setDrawColor(214, 212, 206);
+      doc.setLineWidth(0.5);
+      doc.line(M, y, pageW - M, y);
+      y += 22;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(24, 24, 24);
+      doc.text("Bank Wire Details", M, y);
+      y += 18;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      const details = [
+        ["Beneficiary Name", config.beneficiaryName],
+        ["Beneficiary Bank", config.beneficiaryBank],
+        ["Bank Address", config.beneficiaryBankAddress || ""],
+        ["SWIFT / BIC Code", config.swiftBic],
+        ["IBAN Account", config.iban],
+        ["Payment Reference", paymentReference],
+      ];
+
+      for (const [label, value] of details) {
+        if (!value) continue;
+        doc.setTextColor(120, 120, 120);
+        doc.setFontSize(8);
+        doc.text(label, M, y);
+        y += 12;
+        doc.setTextColor(24, 24, 24);
+        doc.setFontSize(10);
+        doc.text(value, M, y);
+        y += 22;
+      }
+
+      y += 8;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      const note =
+        "Your pieces are reserved. Inventory allocations remain securely held for 5 business days " +
+        "pending remittance clearance. Please initiate the wire transfer using the exact details above " +
+        "and quote the payment reference so our treasury team can match your deposit instantly.";
+      const split = doc.splitTextToSize(note, pageW - 2 * M);
+      doc.text(split, M, y);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(150, 150, 150);
+      doc.text(
+        "Maison Affluency Pte. Ltd. · maisonaffluency.com · hello@maisonaffluency.com",
+        pageW / 2,
+        doc.internal.pageSize.getHeight() - 18,
+        { align: "center" }
+      );
+
+      doc.save(`maison-affluency-proforma-${orderRef || "instructions"}.pdf`);
+    } finally {
+      setDownloading(false);
+    }
+  }, [orderRef, displayTotal, paymentReference, config]);
+
   const pageTitle = orderRef
     ? `Bank Wire Instructions — Order ${orderRef}`
     : "Bank Wire Instructions — Maison Affluency";
@@ -87,7 +178,8 @@ export default function BankWireInstructions() {
 
       <main className="mx-auto max-w-2xl px-6 py-12 font-sans text-zinc-900 antialiased">
         <div className="text-center">
-          <span className="mb-4 inline-block rounded-sm border border-emerald-100 bg-emerald-50/60 px-3 py-1.5 text-xs font-medium uppercase tracking-widest text-emerald-800">
+          <span className="mb-4 inline-flex items-center gap-1.5 rounded-sm border border-emerald-100 bg-emerald-50/60 px-3 py-1.5 text-xs font-medium uppercase tracking-widest text-emerald-800">
+            <Check className="h-3 w-3" />
             Order Commission Reserved
           </span>
         </div>
@@ -152,15 +244,14 @@ export default function BankWireInstructions() {
         </div>
 
         <div className="mt-10 space-y-2">
-          <a
-            href={`data:text/plain;charset=utf-8,${encodeURIComponent(
-              `Maison Affluency Bank Wire Instructions\nReference: ${paymentReference}\nTotal Due: ${displayTotal}\nBank: ${config.beneficiaryBank}\nSWIFT/BIC: ${config.swiftBic}\nIBAN: ${config.iban}`
-            )}`}
-            download={`maison-affluency-wire-${orderRef || "instructions"}.txt`}
-            className="inline-block w-full bg-black py-4 px-6 text-center text-xs font-semibold uppercase tracking-widest text-white shadow-xs transition-colors hover:bg-zinc-800"
+          <button
+            type="button"
+            onClick={handleDownloadPdf}
+            disabled={downloading}
+            className="w-full bg-black py-4 px-6 text-center text-xs font-semibold uppercase tracking-widest text-white shadow-xs transition-colors hover:bg-zinc-800 disabled:opacity-50"
           >
-            Download PDF Proforma Invoice
-          </a>
+            {downloading ? "Generating PDF…" : "Download PDF Proforma Invoice"}
+          </button>
           <Link
             to="/designers"
             className="inline-block w-full border border-zinc-300 bg-white py-4 px-6 text-center text-xs font-semibold uppercase tracking-widest text-zinc-700 transition-colors hover:border-zinc-400 hover:text-black"
