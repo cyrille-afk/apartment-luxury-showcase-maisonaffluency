@@ -487,6 +487,7 @@ const MaterialsDescriptionBlock: React.FC = () => {
     <LegendDisclosure
       icon={specIcon("⬗")}
       text={product.materials_description.trim()}
+      defaultOpen
     />
   );
 };
@@ -777,6 +778,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
         <LegendDisclosure
           icon={specIcon("⬗")}
           text={product.materials_description.trim()}
+          defaultOpen
         />
       )}
       <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" /></>}
@@ -2437,6 +2439,7 @@ const PublicProductPageContent: React.FC = () => {
 
                     <div className="flex flex-col gap-3 md:gap-5 order-5 md:order-5">
                       <MotionAndDimensionsPanel />
+                      <ShippingDetailsAccordion variant="row" />
                     </div>
                   </VariantSelectorsProvider>
 
@@ -2467,7 +2470,6 @@ const PublicProductPageContent: React.FC = () => {
                               {leadLine && <p className="mt-0.5">{leadLine}</p>}
                             </div>
                           </div>
-                          <ShippingDetailsAccordion variant="row" />
                         </>
                       );
                     })()}
@@ -2604,6 +2606,8 @@ const PublicProductPageContent: React.FC = () => {
 
                     <MotionAndDimensionsPanel />
 
+                    {!isTradeVerifiedView && <ShippingDetailsAccordion variant="row" />}
+
                     {/* Actions follow the complete finish, motion, and dimensions stack. */}
                     {showPublicCommerce && (
                       <ProductCommerceCta
@@ -2663,7 +2667,6 @@ const PublicProductPageContent: React.FC = () => {
                             <p>{handcrafted}</p>
                           </div>
                         </div>
-                        <ShippingDetailsAccordion variant="row" />
                       </>
                     );
                   })()}
