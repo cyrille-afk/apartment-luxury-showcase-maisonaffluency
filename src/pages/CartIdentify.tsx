@@ -14,6 +14,7 @@ import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";
 import { releaseBodyScroll } from "@/lib/bodyScrollLock";
 import { useEstimatedShipping, ESTIMATED_SHIPPING_NOTE } from "@/hooks/useShippingCountry";
 import { useShippingDestination } from "@/lib/shippingDestination";
+import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 
 import {
   useCart,
@@ -43,10 +44,13 @@ export default function CartIdentify() {
 
   const method: Method = params.get("method") === "bank_transfer" ? "bank_transfer" : "card";
 
-  const [email, setEmail] = useState("");
+  // Global checkout form state — the email typed here pre-fills every later
+  // stage (contact, shipping, billing, review) and the final payload.
+  const checkoutForm = useCheckoutForm();
+  const [email, setEmail] = useState(checkoutForm.email);
   const [password, setPassword] = useState("");
-  const [guestEmail, setGuestEmail] = useState("");
-  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState(checkoutForm.email);
+  const [guestName, setGuestName] = useState(checkoutForm.guestName);
   const [signingIn, setSigningIn] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [pending, setPending] = useState(false);
@@ -258,7 +262,10 @@ export default function CartIdentify() {
                       autoComplete="email"
                       placeholder="Email address"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        checkoutForm.setEmail(e.target.value);
+                      }}
                       className="rounded-none"
                     />
                     <Input
@@ -334,14 +341,20 @@ export default function CartIdentify() {
                         autoComplete="email"
                         placeholder="Email address"
                         value={guestEmail}
-                        onChange={(e) => setGuestEmail(e.target.value)}
+                        onChange={(e) => {
+                          setGuestEmail(e.target.value);
+                          checkoutForm.setEmail(e.target.value);
+                        }}
                         className="rounded-none bg-background"
                       />
                       <Input
                         autoComplete="name"
                         placeholder="Full name (optional)"
                         value={guestName}
-                        onChange={(e) => setGuestName(e.target.value)}
+                        onChange={(e) => {
+                          setGuestName(e.target.value);
+                          checkoutForm.setGuestName(e.target.value);
+                        }}
                         className="rounded-none bg-background"
                       />
                     </div>
