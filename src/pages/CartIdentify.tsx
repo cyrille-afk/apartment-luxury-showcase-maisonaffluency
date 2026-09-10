@@ -224,6 +224,11 @@ export default function CartIdentify() {
                 <p className="mt-4 font-body text-sm">
                   Continuing as <span className="text-foreground">{user.email}</span>
                 </p>
+                {tradeCompany && (
+                  <p className="mt-2 font-body text-sm text-muted-foreground">
+                    {tradeCompany}
+                  </p>
+                )}
                 {discount.eligible && (
                   <p className="mt-2 font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                     {discount.label} applied to this order
