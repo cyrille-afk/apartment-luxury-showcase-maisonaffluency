@@ -8,6 +8,7 @@ import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
 import { CompareProvider } from "@/contexts/CompareContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
+import { CheckoutFormProvider } from "@/contexts/CheckoutFormContext";
 import { TradeCopilotProvider } from "@/contexts/TradeCopilotContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { StudioProvider } from "@/hooks/useStudio";
@@ -619,6 +620,7 @@ const App = () => {
         <StudioProvider>
         <CompareProvider>
         <WishlistProvider>
+        <CheckoutFormProvider>
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
               <HomeRouteSync />
@@ -835,6 +837,7 @@ const App = () => {
               )}
             </BrowserRouter>
           </QueryClientProvider>
+        </CheckoutFormProvider>
         </WishlistProvider>
         </CompareProvider>
         </StudioProvider>
