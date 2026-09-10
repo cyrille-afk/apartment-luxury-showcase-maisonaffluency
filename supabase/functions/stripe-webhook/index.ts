@@ -49,6 +49,54 @@ serve(async (req) => {
           .eq("id", orderId);
         if (orderErr) console.error("[STRIPE-WEBHOOK] shop order update failed:", orderErr);
         else console.log(`[STRIPE-WEBHOOK] Shop order ${orderId} marked as paid`);
+
+        // Order-received confirmation ("Under Review by Paris Logistics").
+        // Idempotent via the order_ref key — Stripe retries cannot duplicate it.
+        try {
+          const { data: order } = await supabase
+            .from("shop_orders")
+            .select("order_ref, email, full_name, currency, subtotal_cents, shipping_cents, total_cents")
+            .eq("id", orderId)
+            .single();
+          const { data: items } = await supabase
+            .from("shop_order_items")
+            .select("title, designer_name, finish_label, quantity, unit_price_cents")
+            .eq("order_id", orderId);
+
+          if (order?.email) {
+            const symbols: Record<string, string> = { usd: "$", eur: "€", gbp: "£", sgd: "S$", hkd: "HK$" };
+            const cur = (order.currency || "usd").toLowerCase();
+            const fmt = (cents: number) =>
+              `${cur.toUpperCase()} ${symbols[cur] ?? ""}${((cents ?? 0) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            const { error: mailErr } = await supabase.functions.invoke("send-transactional-email", {
+              body: {
+                templateName: "order-received",
+                recipientEmail: order.email,
+                idempotencyKey: `order-received-${order.order_ref}`,
+                templateData: {
+                  recipientName: order.full_name ?? "",
+                  orderRef: order.order_ref,
+                  firstItemTitle: items?.[0]?.title ?? "Order",
+                  items: (items ?? []).map((l: any) => ({
+                    title: l.title,
+                    designerName: l.designer_name,
+                    configuration: l.finish_label,
+                    quantity: l.quantity,
+                    priceFormatted: fmt(l.unit_price_cents),
+                  })),
+                  subtotalFormatted: fmt(order.subtotal_cents),
+                  shippingFormatted: Number(order.shipping_cents) > 0 ? fmt(order.shipping_cents) : null,
+                  taxLineFormatted: `${fmt(0)} (Zero-rated at checkout / Deferred to Border Customs)`,
+                  totalFormatted: fmt(order.total_cents),
+                },
+              },
+            });
+            if (mailErr) console.error("[STRIPE-WEBHOOK] order-received email failed:", mailErr);
+          }
+        } catch (e) {
+          console.error("[STRIPE-WEBHOOK] order-received email error:", e);
+        }
       }
       return new Response(JSON.stringify({ received: true }), {
         headers: { "Content-Type": "application/json" }, status: 200,
