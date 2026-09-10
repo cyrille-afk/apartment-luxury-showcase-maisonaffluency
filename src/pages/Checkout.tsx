@@ -102,6 +102,10 @@ export type CheckoutSummary = {
   shippingLabel: string | null;
   /** Base freight estimated from the buyer's country. 0 when unknown. */
   estimatedShippingCents: number;
+  /** True when freight was capped at 15% of the order value. */
+  freightCapped: boolean;
+  /** Advisor-validation copy shown when the freight cap applied. */
+  freightNotice: string | null;
   /** Display name of the matched shipping zone (e.g. "Asia Pacific"). */
   shippingZoneLabel: string | null;
   /** Consumption tax (GST/VAT) due per the configurable rules. 0 otherwise. */
