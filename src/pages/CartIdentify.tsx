@@ -36,7 +36,10 @@ export default function CartIdentify() {
   const items = useCart();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const { user, refreshRoles } = useAuth();
+  const { user, refreshRoles, profile, tradeStatus, isTradeUser } = useAuth();
+  // Approved trade profiles carry their corporate identity into checkout.
+  const tradeApproved = tradeStatus === "approved" || isTradeUser;
+  const tradeCompany = tradeApproved ? profile?.company?.trim() || "" : "";
 
   const method: Method = params.get("method") === "bank_transfer" ? "bank_transfer" : "card";
 
