@@ -37,6 +37,7 @@ import {
   lineTotalCents,
   reconcileBackendAmount,
 } from "@/lib/checkoutGuardrails";
+import { checkSgdThreshold } from "@/lib/checkout/checkSgdThreshold";
 import { convertCents, useFxRates } from "@/components/trade/CurrencyToggle";
 
 
