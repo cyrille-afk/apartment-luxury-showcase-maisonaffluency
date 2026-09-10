@@ -169,6 +169,7 @@ export default function ProductCommerceCta({
   selectedFinishes = [],
   orderFinishLabel = null,
   finishOptions,
+  finishVariants,
   redirectTo,
   dock = true,
   dockOnly = false,
