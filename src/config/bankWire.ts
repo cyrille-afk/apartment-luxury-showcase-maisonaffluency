@@ -17,19 +17,39 @@ export interface BankWireConfig {
   transferNote?: string;
 }
 
-export const DEFAULT_BANK_WIRE_CONFIG: BankWireConfig = {
+export const USD_BANK_WIRE_CONFIG: BankWireConfig = {
   beneficiaryName: "AFFLUENCY ETC PTE LTD",
   beneficiaryBank: "Revolut Technologies Singapore Pte. Ltd",
   beneficiaryBankAddress:
     "6 Battery Road, Floor 6-01, 049909, Singapore, Singapore",
   swiftBic: "REVOSGS2",
-  intermediaryBic: "BARCGB22",
+  intermediaryBic: "BARCDEFF",
   accountNumber: "885111609218375",
   referencePrefix: "MAW-",
   currency: "USD",
   transferNote:
-    "Please make your transfer in USD. Using a different currency may send the funds to the company's other account. Transfers may take 3–5 business days to arrive.",
+    "Please make your transfer in USD. Using a different currency may send the funds to the company's other account. International SWIFT transfers may take 3–5 business days to arrive.",
 };
+
+export const EUR_BANK_WIRE_CONFIG: BankWireConfig = {
+  beneficiaryName: "AFFLUENCY ETC PTE LTD",
+  beneficiaryBank: "Revolut Bank UAB",
+  beneficiaryBankAddress: "Konstitucijos ave. 21B, 08130, Vilnius, Lithuania",
+  swiftBic: "REVOLT21",
+  iban: "LT73 3250 0692 1856 8740",
+  referencePrefix: "MAW-",
+  currency: "EUR",
+  transferNote:
+    "Please make your transfer in EUR. Using a different currency may send the funds to the company's other account. Transfers from European banks may arrive instantly or within 2 business days.",
+};
+
+export const DEFAULT_BANK_WIRE_CONFIG = USD_BANK_WIRE_CONFIG;
+
+export function getBankWireConfigForCurrency(currency: string): BankWireConfig {
+  return currency?.toUpperCase() === "EUR"
+    ? EUR_BANK_WIRE_CONFIG
+    : USD_BANK_WIRE_CONFIG;
+}
 
 export function buildPaymentReference(
   orderRef: string,
