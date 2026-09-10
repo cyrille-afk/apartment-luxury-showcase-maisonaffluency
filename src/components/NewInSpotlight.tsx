@@ -253,32 +253,10 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
       </div>
 
       <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
-        {picks.map((pick, index) => {
-          // Alternating mobile rhythm: row 1 left tall/right short,
-          // row 2 left short/right tall, so baselines never lock.
-          const isMobileTwoCol = mobileGridCols === 2;
-          const isMobileTall = isMobileTwoCol && (index % 4 === 0 || index % 4 === 3);
+        {picks.map((pick) => {
           const alternateImage = pick.hover_image_url
             || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
             || null;
-          const hasEdition = !!pick.edition;
-          const tags: string[] = (pick as any).tags || [];
-          const filtered = hasEdition ? tags.filter(t => !/^limited-edition$/i.test(t)) : tags;
-          const specialTags = filtered.filter((t) =>
-            /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t)
-          );
-          if (pick.edition && !specialTags.some(t => t.toLowerCase() === pick.edition!.toLowerCase())) {
-            specialTags.unshift(pick.edition);
-          }
-          // On a child-designer page the parent house is already labelled under
-          // the picture (e.g. MARTA SALA ÉDITIONS), so a bare "Edition" badge is
-          // redundant there. Parent-house pages keep it, and non-edition
-          // distinctions (Couture, Unique, …) always stay visible.
-          const parentBrandShown = !isParentBrand && founderIsBrand && !!designer.founder
-            && ![designer.name, designer.display_name].includes(designer.founder);
-          const visibleTags = parentBrandShown
-            ? specialTags.filter((t) => !/^(limited[-\s])?(re-)?edition$/i.test(t) && t !== pick.edition)
-            : specialTags;
 
           return (
             <div
@@ -290,9 +268,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
               }}
             >
               <div className={cn(
-                "bg-muted/20 rounded-none overflow-hidden mb-2 relative flex items-center justify-center",
-                "md:aspect-[4/5]",
-                isMobileTall ? "aspect-[4/5]" : "aspect-square"
+                "bg-muted/20 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer aspect-[4/3]"
               )}>
                 <SwipeAlternateProductImage
                   primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
@@ -301,24 +277,15 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                   sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                   alt={pick.title}
+                  primaryClassName="object-contain p-4 md:p-6 md:object-contain"
+                  alternateClassName="object-contain p-4 md:p-6 md:object-contain"
                 />
-                {visibleTags.length > 0 && (
-                  <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-                    {visibleTags.map((tag, i) => (
-                      <span
-                        key={i}
-                        className={cn(
-                          "inline-block uppercase",
-                          "px-2 py-0.5 text-[8px] md:text-[9px] tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm",
-                          "md:px-2 md:py-[3px] md:text-[9px] md:font-sans md:font-medium md:tracking-[0.2em] md:bg-background md:text-foreground md:rounded-none md:border-0 md:backdrop-blur-none"
-                        )}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                {/* Inventory badges — lower-left of the frame */}
+                <InventoryBadgeStack
+                  badges={inventoryBadgesForPick(pick)}
+                  className="absolute bottom-3 left-3 z-10"
+                />
+                <div className="hidden md:block absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
                     <Maximize2 className="h-3 w-3" />
                   </div>
