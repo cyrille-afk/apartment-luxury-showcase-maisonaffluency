@@ -1513,11 +1513,7 @@ export default function Checkout() {
   // rebuild — and re-charge — the same order.
   const completeOrder = useCallback((reference: string) => {
     clearCart();
-    try {
-      sessionStorage.removeItem(CHECKOUT_KEY);
-    } catch {
-      /* private mode */
-    }
+    clearSecureBasket("order");
     setConfirmed(reference);
   }, []);
   const [error, setError] = useState<string | null>(null);
@@ -1525,10 +1521,11 @@ export default function Checkout() {
   const intentIdRef = useRef<string>("");
   const [syncing, setSyncing] = useState(false);
 
-  // Resolve the order from router state, then sessionStorage, then the saved
-  // cart — so Place Order, Go to Checkout and a direct URL all load the same
+  // Resolve the order from router state, then the persisted secure basket
+  // (session + durable localStorage mirror), then the saved cart — so Place
+  // Order, Go to Checkout, a re-opened tab and a direct URL all load the same
   // contents instead of bouncing to the homepage.
-  useEffect(() => {
+  const resolveLines = useCallback((allowRedirect: boolean) => {
     const valid = (l: any): l is CheckoutLine => !!l && Number(l.unitCents) > 0;
 
     const fromState = (location.state as any)?.line as CheckoutLine | undefined;
@@ -1537,26 +1534,20 @@ export default function Checkout() {
       ? fromStateMany!.filter(valid)
       : valid(fromState) ? [fromState!] : [];
     if (stateLines.length) {
-      sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify(stateLines));
+      writeSecureBasket(stateLines);
       setLines(stateLines);
       return;
     }
 
-    try {
-      const raw = sessionStorage.getItem(CHECKOUT_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        const stored: CheckoutLine[] = Array.isArray(parsed)
-          ? parsed.filter(valid)
-          : valid(parsed) ? [parsed] : [];
-        if (stored.length) {
-          setLines(stored);
-          return;
-        }
-      }
-    } catch { /* ignore */ }
+    const stored = readSecureBasket<CheckoutLine>(valid);
+    if (stored.length) {
+      writeSecureBasket(stored);
+      setLines(stored);
+      return;
+    }
 
     // Direct visit / new tab: rebuild the FULL cart, not just the first line.
+    rehydrateCart();
     const cart = getCart();
     if (cart.length) {
       const fallback: CheckoutLine[] = cart.map((item) => ({
@@ -1575,13 +1566,33 @@ export default function Checkout() {
         pickupCountry: item.pickupCountry ?? null,
       })).filter(valid);
       if (fallback.length) {
-        sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify(fallback));
+        writeSecureBasket(fallback);
         setLines(fallback);
         return;
       }
     }
-    navigate("/", { replace: true });
+    if (allowRedirect) navigate("/", { replace: true });
   }, [location.state, navigate]);
+
+  useEffect(() => {
+    resolveLines(true);
+  }, [resolveLines]);
+
+  // Returning from a background tab, a bfcache restore or another tab's write
+  // must never surface an emptied checkout.
+  useEffect(() => {
+    const revive = () => resolveLines(false);
+    window.addEventListener("pageshow", revive);
+    window.addEventListener("focus", revive);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") revive();
+    });
+    return () => {
+      window.removeEventListener("pageshow", revive);
+      window.removeEventListener("focus", revive);
+    };
+  }, [resolveLines]);
+
 
 
   // Creates (or re-prices) the PaymentIntent. Re-runs whenever the buyer
