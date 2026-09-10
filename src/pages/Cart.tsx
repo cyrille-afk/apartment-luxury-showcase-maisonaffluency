@@ -51,8 +51,55 @@ export default function Cart() {
     }
   }, [params]);
 
-  const currency = items[0]?.currency || "USD";
-  const subtotal = useMemo(() => cartSubtotalCents(items), [items]);
+  // Display currency: a single-currency cart keeps its own currency; a mixed
+  // cart (e.g. a USD lamp + a EUR armchair) is normalised to USD so the
+  // subtotal is a real converted sum, never a raw addition of two currencies.
+  const currency = useMemo(() => {
+    const codes = new Set(items.map((i) => (i.currency || "USD").toUpperCase()));
+    if (codes.size === 0) return "USD";
+    if (codes.size === 1) return [...codes][0];
+    return "USD";
+  }, [items]);
+
+  // Live FX rates for every line currency → display currency.
+  const [fxRates, setFxRates] = useState<Record<string, number>>({});
+  const fxPairsKey = useMemo(
+    () =>
+      [...new Set(items.map((i) => (i.currency || "USD").toUpperCase()))]
+        .filter((c) => c !== currency)
+        .sort()
+        .join(","),
+    [items, currency],
+  );
+  useEffect(() => {
+    let cancelled = false;
+    const srcs = fxPairsKey ? fxPairsKey.split(",") : [];
+    if (srcs.length === 0) {
+      setFxRates({});
+      return;
+    }
+    getFxRates(srcs.map((src) => ({ src, tgt: currency }))).then((r) => {
+      if (!cancelled) setFxRates(r);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [fxPairsKey, currency]);
+
+  /** Convert a line amount into the display currency (safe fallback table). */
+  const toDisplay = (cents: number, code?: string | null) =>
+    convertCentsWithFallback(cents, (code || currency).toUpperCase(), currency, fxRates);
+
+  const subtotal = useMemo(
+    () =>
+      items.reduce(
+        (sum, i) => sum + toDisplay(i.unitPriceCents * i.quantity, i.currency),
+        0,
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [items, currency, fxRates],
+  );
+
   // Account-level tier discount (admin / verified trade), resolved from the
   // backend and re-applied server-side before payment.
   const discount = useAccountDiscount();
