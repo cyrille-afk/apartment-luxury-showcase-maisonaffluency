@@ -1233,11 +1233,14 @@ export default function Checkout() {
     () => getCurrentDestination()?.iso ?? null,
   );
   // Signed-in account — replaces blank email/name inputs with a confirmation.
-  const { user, isAdmin, isSuperAdmin, isTradeUser } = useAuth();
+  const { user, isAdmin, isSuperAdmin, isTradeUser, profile, tradeStatus } = useAuth();
+  const tradeApproved = tradeStatus === "approved" || isTradeUser;
+  const tradeCompany = tradeApproved ? profile?.company?.trim() || "" : "";
   const account = user?.email
     ? {
         email: user.email,
         role: isAdmin || isSuperAdmin ? "Admin" : isTradeUser ? "Trade" : "Member",
+        company: tradeCompany || undefined,
       }
     : null;
   // Signed-in buyers never retype their email.
