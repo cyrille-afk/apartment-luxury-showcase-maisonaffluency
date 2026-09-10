@@ -131,13 +131,23 @@ export default function BuildUpdateBanner() {
     if (shouldSkipUpdateUi()) return;
 
 
-    const onAvailable = () => {
-      if (armed.current) return;
-      armed.current = true;
+    let pending = false;
+    let retry: ReturnType<typeof setInterval> | null = null;
 
-      // In creative tools, never surface a refresh action mid-work. The update
-      // remains pending until the user hard-refreshes manually when ready.
+    const stopRetry = () => {
+      if (retry) { clearInterval(retry); retry = null; }
+      window.removeEventListener("popstate", tryShow);
+      window.removeEventListener("focus", tryShow);
+    };
+
+    function tryShow() {
+      if (!pending || armed.current) return;
+      // In creative tools / mid-edit, hold the notice back and retry later —
+      // it surfaces as soon as the user leaves the editor.
       if (isProtectedPath() || hasFabricWorkInProgress()) return;
+      armed.current = true;
+      pending = false;
+      stopRetry();
 
       // Show at top-center so mobile/PWA users see it above the iOS home
       // indicator (default bottom-right sits under the system nav bar and is
@@ -155,11 +165,23 @@ export default function BuildUpdateBanner() {
           },
         },
       });
+    }
+
+    const onAvailable = () => {
+      if (armed.current) return;
+      pending = true;
+      tryShow();
+      if (pending && !retry) {
+        retry = setInterval(tryShow, 15_000);
+        window.addEventListener("popstate", tryShow);
+        window.addEventListener("focus", tryShow);
+      }
     };
 
     window.addEventListener("app:build-update-available", onAvailable);
     return () => {
       window.removeEventListener("app:build-update-available", onAvailable);
+      stopRetry();
     };
   }, []);
 
