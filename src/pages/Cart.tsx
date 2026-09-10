@@ -518,7 +518,7 @@ export default function Cart() {
                     </details>
                   </div>
 
-                  </div>
+
                 </dl>
 
 
