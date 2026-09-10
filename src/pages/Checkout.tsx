@@ -1344,6 +1344,8 @@ export default function Checkout() {
       shippingCents,
       shippingLabel: shipping?.label ?? null,
       estimatedShippingCents,
+      freightCapped: estimatedShippingCents > 0 && estimate.capped,
+      freightNotice: estimatedShippingCents > 0 ? estimate.notice : null,
       shippingZoneLabel: estimate.zoneLabel ?? null,
       taxCents,
       taxLabel: b2bZeroRated
