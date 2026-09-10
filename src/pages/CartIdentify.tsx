@@ -24,6 +24,7 @@ import {
   formatMoney,
   type CartItem,
 } from "@/lib/cart";
+import { clearSecureBasket } from "@/lib/checkout/secureBasket";
 
 type Method = "card" | "bank_transfer";
 

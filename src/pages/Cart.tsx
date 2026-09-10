@@ -35,6 +35,7 @@ import {
   rehydrateCart,
 } from "@/lib/cart";
 
+import { clearSecureBasket } from "@/lib/checkout/secureBasket";
 export default function Cart() {
   const items = useCart();
   const navigate = useNavigate();
