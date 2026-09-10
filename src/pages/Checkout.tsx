@@ -21,7 +21,15 @@ import RegionalLogisticsNote from "@/components/trade/RegionalLogisticsNote";
 import RegionalPaymentPanel from "@/components/checkout/RegionalPaymentPanel";
 import { useRegionalLogistics, mapCountryToRegionTier } from "@/hooks/useRegionalLogistics";
 import { ArrowLeft } from "lucide-react";
-import { resolveTaxRule, computeTaxCents, taxRowLabel, taxRegistrationLine } from "@/config/taxRules";
+import {
+  resolveTaxRule,
+  computeTaxCents,
+  taxRowLabel,
+  taxRegistrationLine,
+  isSingaporeUenValid,
+  B2B_TAX_LABEL,
+  type BuyerType,
+} from "@/config/taxRules";
 import {
   assertCheckoutCopy,
   buildVerifiedTotals,
