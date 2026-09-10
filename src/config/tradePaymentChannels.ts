@@ -1,14 +1,13 @@
 /**
  * Region-specific B2B payment channels for the Maison Affluency Trade Program.
  *
- * ASEAN (Singapore-hubbed) buyers settle locally through Corporate PayNow or a
- * FAST bank transfer; GCC and Rest-of-World buyers settle by international
- * SWIFT wire with intermediary routing.
+ * All trade settlements route through the live Revolut corporate SWIFT account.
+ * Legacy DBS dummy coordinates have been removed.
  */
 
 export type RegionTier = "ASEAN" | "GCC" | "ROW";
 
-export type PaymentChannelId = "paynow" | "fast" | "swift";
+export type PaymentChannelId = "swift";
 
 export interface PaymentDetailRow {
   label: string;
@@ -26,71 +25,36 @@ export interface TradePaymentChannel {
   instructions: string[];
 }
 
-const BENEFICIARY = "Maison Affluency Pte. Ltd.";
-const CORPORATE_UEN = "202441283K";
-const BANK_NAME = "DBS Bank Ltd";
-const BANK_ADDRESS = "12 Marina Boulevard, Marina Bay Financial Centre Tower 3, Singapore 018982";
-const SWIFT_CODE = "DBSSSGSGXXX";
-const ACCOUNT_NUMBER = "072-905-8841";
-const IBAN = "SG72DBSS0729058841";
-
-export const PAYNOW: TradePaymentChannel = {
-  id: "paynow",
-  label: "Corporate PayNow",
-  hint: "Instant settlement · Singapore corporate accounts",
-  rows: [
-    { label: "PayNow UEN", value: CORPORATE_UEN, copyable: true },
-    { label: "Registered Entity", value: BENEFICIARY },
-    { label: "Bank", value: BANK_NAME },
-  ],
-  instructions: [
-    "Open your corporate banking app and choose PayNow → UEN.",
-    "Enter the UEN above; the registered entity name must read “Maison Affluency Pte. Ltd.” before you approve.",
-    "Quote the Order ID in the transfer reference so our treasury can match the payment instantly.",
-  ],
-};
-
-export const FAST: TradePaymentChannel = {
-  id: "fast",
-  label: "Local Bank Transfer (FAST)",
-  hint: "Same-day clearing within Singapore",
-  rows: [
-    { label: "Beneficiary Name", value: BENEFICIARY },
-    { label: "Bank", value: BANK_NAME },
-    { label: "Account Number", value: ACCOUNT_NUMBER, copyable: true },
-    { label: "Corporate UEN", value: CORPORATE_UEN, copyable: true },
-    { label: "Bank Address", value: BANK_ADDRESS },
-  ],
-  instructions: [
-    "Select FAST (not GIRO) for same-day clearing.",
-    "Payments above your bank's FAST ceiling should be sent by MEPS or split across two transfers.",
-    "Quote the Order ID in the transfer reference field.",
-  ],
-};
+const BENEFICIARY = "AFFLUENCY ETC PTE LTD";
+const CORPORATE_UEN = "201717288Z";
+const BANK_NAME = "Revolut Technologies Singapore Pte. Ltd";
+const BANK_ADDRESS = "6 Battery Road, Floor 6-01, 049909, Singapore, Singapore";
+const SWIFT_CODE = "REVOSGS2";
+const ACCOUNT_NUMBER = "885111609218375";
+const INTERMEDIARY_BIC = "BARCDEFF";
 
 export const SWIFT: TradePaymentChannel = {
   id: "swift",
   label: "International Wire Transfer (SWIFT)",
-  hint: "2–3 business days · all charges OUR",
+  hint: "3–5 business days · all charges OUR",
   rows: [
     { label: "Beneficiary Name", value: BENEFICIARY },
     { label: "Beneficiary Bank", value: BANK_NAME },
     { label: "Bank Address", value: BANK_ADDRESS },
-    { label: "IBAN", value: IBAN, copyable: true },
     { label: "Account Number", value: ACCOUNT_NUMBER, copyable: true },
     { label: "SWIFT / BIC", value: SWIFT_CODE, copyable: true },
+    { label: "Intermediary BIC", value: INTERMEDIARY_BIC, copyable: true },
     { label: "Corporate UEN", value: CORPORATE_UEN, copyable: true },
   ],
   instructions: [
-    "Intermediary bank (USD): JPMorgan Chase Bank N.A., New York — SWIFT CHASUS33.",
-    "Intermediary bank (EUR): Deutsche Bank AG, Frankfurt — SWIFT DEUTDEFF.",
+    "Please make your transfer in the invoiced currency. Using a different currency may send the funds to the company's other account.",
     "Instruct your bank to send charges as OUR so the invoiced amount arrives in full.",
     "Quote the Order ID in field 70 (remittance information).",
   ],
 };
 
-export function channelsForRegion(region: RegionTier): TradePaymentChannel[] {
-  return region === "ASEAN" ? [PAYNOW, FAST] : [SWIFT];
+export function channelsForRegion(_region: RegionTier): TradePaymentChannel[] {
+  return [SWIFT];
 }
 
 /** Regional tax treatment shown on the pro-forma invoice. */
@@ -114,6 +78,6 @@ export const CORPORATE_IDENTITY = {
   bank: BANK_NAME,
   bankAddress: BANK_ADDRESS,
   swift: SWIFT_CODE,
-  iban: IBAN,
   accountNumber: ACCOUNT_NUMBER,
+  intermediaryBic: INTERMEDIARY_BIC,
 };

@@ -41,6 +41,7 @@ import {
 import { checkSgdThreshold } from "@/lib/checkout/checkSgdThreshold";
 import { isHighTicketEuropeanFulfillment } from "@/lib/europeanLogistics";
 import { useUsdToSgdRate } from "@/hooks/useUsdToSgdRate";
+import { CORPORATE_IDENTITY } from "@/config/tradePaymentChannels";
 import { convertCents, useFxRates } from "@/components/trade/CurrencyToggle";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 import { useCurrencyNormalizedLines, useSettlementCurrency } from "@/lib/checkout/multiCurrency";
@@ -962,11 +963,12 @@ function StickyTotals({
 /* Bank details — replace placeholder values with live credentials.    */
 /* ------------------------------------------------------------------ */
 const BANK_DETAILS: { label: string; value: string; copyable?: boolean }[] = [
-  { label: "Beneficiary Name", value: "Maison Affluency Pte. Ltd." },
-  { label: "Bank Name", value: "DBS Bank" },
-  { label: "Bank Address", value: "12 Marina Boulevard, Marina Bay Financial Centre, Singapore 018982" },
-  { label: "Account Number / IBAN", value: "000-000-000-0", copyable: true },
-  { label: "SWIFT / BIC Code", value: "DBSSSGSGXXX", copyable: true },
+  { label: "Beneficiary Name", value: CORPORATE_IDENTITY.beneficiary },
+  { label: "Beneficiary Bank", value: CORPORATE_IDENTITY.bank },
+  { label: "Bank Address", value: CORPORATE_IDENTITY.bankAddress },
+  { label: "Account Number", value: CORPORATE_IDENTITY.accountNumber, copyable: true },
+  { label: "SWIFT / BIC Code", value: CORPORATE_IDENTITY.swift, copyable: true },
+  { label: "Intermediary BIC", value: CORPORATE_IDENTITY.intermediaryBic, copyable: true },
 ];
 
 function WireDetailsGrid({ reference }: { reference: string }) {
