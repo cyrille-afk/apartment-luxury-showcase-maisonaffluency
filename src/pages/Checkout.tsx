@@ -62,6 +62,9 @@ export type CheckoutLine = {
   /** Freight class hints — drive the shipping estimate multiplier. */
   category?: string | null;
   shippingModifier?: number | null;
+  /** Product provenance — used to trigger region-specific logistics copy. */
+  origin?: string | null;
+  pickupCountry?: string | null;
 };
 
 /* All amounts below are derived only from cart line items — see checkoutGuardrails. */
