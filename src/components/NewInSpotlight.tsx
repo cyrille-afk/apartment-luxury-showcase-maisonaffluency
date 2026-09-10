@@ -331,12 +331,15 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                     ? (composed.remainingSubtitle || pick.subtitle || "").trim().match(/^(for|by)\s+.+/i)?.[0] || ""
                     : "";
 
+                  // A finish/material subtitle ("Clear", "Tarnished Silver") is a variant,
+                  // never a brand — it must not replace the maker on the brand line.
+                  const subtitleIsFinish = isFinishSubtitle(pick.subtitle);
                   const brandLine = (
                     brandLabelOverride
                     || attributedDesigner
                     || parentBrand
-                    || (editorSuffix ? "" : composed.remainingSubtitle)
-                    || (editorSuffix ? "" : pick.subtitle)
+                    || (editorSuffix || subtitleIsFinish ? "" : composed.remainingSubtitle)
+                    || (editorSuffix || subtitleIsFinish ? "" : pick.subtitle)
                     || displayName
                     || designer.name
                     || ""
