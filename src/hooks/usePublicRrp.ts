@@ -44,12 +44,28 @@ export function usePublicRrp(pickId: string | null | undefined) {
   });
 }
 
-const SYMBOLS: Record<string, string> = { USD: "$", EUR: "€", GBP: "£", SGD: "S$", HKD: "HK$" };
+const SYMBOLS: Record<string, string> = { USD: "$", EUR: "€", GBP: "£", SGD: "S$", HKD: "HK$", CHF: "CHF" };
 
 /** "From $3,450" — rounded to whole currency units, no decimals. */
 export function formatPublicRrp(row: PublicRrpRow | null | undefined): string | null {
   if (!row?.rrp_price_cents || row.rrp_price_cents <= 0) return null;
   return formatPublicRrpCents(row.rrp_price_cents, row);
+}
+
+/**
+ * Convert a public RRP to the shopper's destination currency and format it.
+ * Falls back to the bundled FX table so cards never block on a live-rate fetch.
+ */
+export function formatPublicRrpForDestination(
+  row: PublicRrpRow | null | undefined,
+  destinationCurrency: string | undefined,
+): string | null {
+  if (!row?.rrp_price_cents || row.rrp_price_cents <= 0) return null;
+  const src = (row.currency || "USD").toUpperCase();
+  const tgt = (destinationCurrency || src).toUpperCase();
+  if (src === tgt) return formatPublicRrp(row);
+  const convertedCents = convertCentsWithFallback(row.rrp_price_cents, src, tgt, FALLBACK_RATES);
+  return formatPublicRrpCents(convertedCents, { ...row, currency: tgt });
 }
 
 /**
