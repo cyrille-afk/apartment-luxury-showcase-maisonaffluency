@@ -1274,7 +1274,10 @@ function ShippingQuoteCard({
 export default function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [grossLines, setLines] = useState<CheckoutLine[] | null>(null);
+  const [rawLines, setLines] = useState<CheckoutLine[] | null>(null);
+  // A mixed-currency cart (EUR chair + USD lamp) is converted into one base
+  // currency with live FX before any subtotal / freight / tax / charge maths.
+  const { lines: grossLines } = useCurrencyNormalizedLines(rawLines);
   // Account-level tier discount. The hook drives the first paint; the value
   // returned by the PaymentIntent is authoritative once it arrives, so the
   // displayed total always equals the amount Stripe will charge.
