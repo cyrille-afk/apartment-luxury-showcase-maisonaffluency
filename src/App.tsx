@@ -175,6 +175,7 @@ const CartIdentifyPage = lazy(() => import("./pages/CartIdentify"));
 const OrderConfirmationPage = lazy(() => import("./pages/OrderConfirmation"));
 const SuccessPage = lazy(() => import("./pages/Success"));
 const CheckoutPage = lazy(() => import("./pages/Checkout"));
+const BankWireInstructionsPage = lazy(() => import("./pages/BankWireInstructions"));
 const ConciergePage = lazy(() => import("./pages/ConciergePage"));
 const ProductPageContainer = lazy(() => import("./pages/ProductPageContainer"));
 const CategoryRoute = lazy(() => import("./pages/CategoryRoute"));
