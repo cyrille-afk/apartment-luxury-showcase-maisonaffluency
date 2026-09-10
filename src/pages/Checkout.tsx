@@ -389,8 +389,9 @@ function OrderSummary({
             </div>
           )}
           <div>
-            <div className="flex items-start justify-between gap-4">
-              <dt className="text-muted-foreground">
+            {/* Label + badge on the left, the amount as one unbreakable unit. */}
+            <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+              <dt className="min-w-0 flex-1 text-muted-foreground">
                 <span className="inline-flex flex-wrap items-baseline gap-2">
                   <span>{summary.shippingLabel || "Front Door Premium Delivery"}</span>
                   {summary.shippingZoneLabel && (
@@ -401,29 +402,18 @@ function OrderSummary({
                 </span>
               </dt>
               {summary.shippingCents > 0 ? (
-                <dd className="whitespace-nowrap tabular-nums font-medium">{money(summary.shippingCents, currency)}</dd>
+                <dd className="shrink-0 whitespace-nowrap tabular-nums font-medium">{money(summary.shippingCents, currency)}</dd>
               ) : summary.estimatedShippingCents > 0 ? (
-                <dd className="whitespace-nowrap tabular-nums font-medium">{money(summary.estimatedShippingCents, currency)}</dd>
+                <dd className="shrink-0 whitespace-nowrap tabular-nums font-medium">{money(summary.estimatedShippingCents, currency)}</dd>
               ) : (
-                <dd className="whitespace-nowrap text-right text-muted-foreground">To be Quoted by Advisor</dd>
+                <dd className="shrink-0 whitespace-nowrap text-right text-muted-foreground">To be Quoted by Advisor</dd>
               )}
             </div>
-            {summary.freightCapped && summary.freightNotice && (
-              <p className="mt-1.5 font-light text-[10px] leading-relaxed tracking-[0.06em] text-foreground">
-                {summary.freightNotice}
-              </p>
-            )}
-            {summary.shippingCents === 0 && summary.estimatedShippingCents > 0 && (
-              <p className="mt-1.5 italic font-light text-[10px] tracking-[0.06em] text-muted-foreground">
-                {ESTIMATED_SHIPPING_NOTE}
-              </p>
-            )}
             {showEuropeanLogisticsNotice && (
               <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500 italic">
-                Note: For European fulfillments, this shipping fee serves as an initial transit deposit. Our Paris logistics team manually reviews every order within 24 hours to secure the optimal white-glove courier route and transit pricing for your specific pieces.
+                Note: For European fulfillments, this shipping fee serves as an initial transit deposit. Our Paris logistics team manually reviews every order within 24 hours to secure optimal white-glove courier routing.
               </p>
             )}
-            <RegionalLogisticsNote compact className="mt-2" />
           </div>
           <div className="border-t border-border/60 pt-4">
             {sgBorderGst ? (
