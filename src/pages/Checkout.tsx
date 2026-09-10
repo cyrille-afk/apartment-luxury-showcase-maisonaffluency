@@ -1685,6 +1685,10 @@ export default function Checkout() {
                   setEmail={setEmail}
                   onDone={completeOrder}
                   optionsSlot={optionsSlot}
+                  buyerType={buyerType}
+                  setBuyerType={setBuyerType}
+                  buyerGstNumber={buyerGstNumber}
+                  setBuyerGstNumber={setBuyerGstNumber}
                 />
               );
             }
