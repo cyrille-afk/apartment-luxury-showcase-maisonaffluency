@@ -324,9 +324,20 @@ if (typeof window !== "undefined") {
         items = stored;
         listeners.forEach((l) => l());
         restoreRegion(readRegion(e.newValue));
+      } else if (userEmptied()) {
+        // Another tab deliberately emptied the basket — mirror that here.
+        if (items.length) {
+          items = [];
+          listeners.forEach((l) => l());
+        }
       } else {
         rehydrateCart();
       }
+    }
+    // A deliberate empty flag set elsewhere must also settle this tab.
+    if (e.key === EMPTIED_KEY && e.newValue === "1" && items.length) {
+      items = [];
+      listeners.forEach((l) => l());
     }
   });
 
