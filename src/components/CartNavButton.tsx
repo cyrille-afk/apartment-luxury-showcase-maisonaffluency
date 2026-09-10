@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,7 @@ import {
   setQuantity,
   removeFromCart,
   formatMoney,
+  rehydrateCart,
 } from "@/lib/cart";
 
 
@@ -31,6 +32,11 @@ export default function CartNavButton({
   const items = useCart();
   const count = cartItemCount(items);
   const [open, setOpen] = useState(false);
+  // The basket lives in persistent storage; re-sync on every mount so closing
+  // a checkout overlay or navigating back never surfaces an empty cart.
+  useEffect(() => {
+    rehydrateCart();
+  }, []);
 
   const handleClick = () => {
     if (items.length === 0) {

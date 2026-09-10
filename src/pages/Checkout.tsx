@@ -471,6 +471,10 @@ function OrderSummary({
                   <p className="italic">{ESTIMATED_SHIPPING_NOTE}</p>
                 )}
                 <RegionalLogisticsNote compact />
+                {getCustomsRegion(summary.taxCountry) && (
+                  <p className="text-foreground">{getCustomsRegion(summary.taxCountry)!.notice}</p>
+                )}
+
                 {!sgBorderGst && (
                   <dl className="space-y-1">
                     <div className="flex items-baseline justify-between gap-6">
