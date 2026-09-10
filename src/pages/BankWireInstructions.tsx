@@ -240,9 +240,22 @@ export default function BankWireInstructions() {
             </div>
 
             <CopyableRow label="Swift / BIC Code" value={config.swiftBic} />
-            <CopyableRow label="IBAN Account" value={config.iban} />
+            {config.intermediaryBic && (
+              <CopyableRow label="Intermediary BIC" value={config.intermediaryBic} />
+            )}
+            {config.accountNumber && (
+              <CopyableRow label="Account Number" value={config.accountNumber} />
+            )}
+            {config.iban && (
+              <CopyableRow label="IBAN Account" value={config.iban} />
+            )}
             <CopyableRow label="Payment Reference" value={paymentReference} />
           </div>
+          {config.transferNote && (
+            <p className="mt-4 border-t border-zinc-100 pt-4 text-[11px] font-light leading-relaxed text-zinc-500">
+              {config.transferNote}
+            </p>
+          )}
         </div>
 
         <div className="mt-10 space-y-2">
