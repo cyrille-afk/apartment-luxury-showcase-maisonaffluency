@@ -20,6 +20,7 @@ import { useShippingDestination } from "@/lib/shippingDestination";
 import { ShippingCountryIndicator } from "@/components/checkout/ShippingCountryIndicator";
 import { getFxRates, convertCentsWithFallback } from "@/lib/fxRates";
 import { resolveBaseCurrency, useSettlementCurrency } from "@/lib/checkout/multiCurrency";
+import { getCustomsRegion } from "@/lib/checkout/customsRegions";
 
 
 
