@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Minus, Plus, Loader2, Heart, ChevronRight } from "lucide-react";
+import { looksLikeDimension } from "@/lib/rugPricing";
 import Navigation from "@/components/Navigation";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
 import { Button } from "@/components/ui/button";
