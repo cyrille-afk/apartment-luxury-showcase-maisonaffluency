@@ -26,11 +26,10 @@ const DO_NOT_INTERRUPT = [
 let started = false;
 let currentBuildId: string | null = null;
 
-function isProtectedPath(): boolean {
-  if (typeof window === "undefined") return false;
-  const p = window.location.pathname;
-  return DO_NOT_INTERRUPT.some((r) => p === r || p.startsWith(r + "/"));
-}
+// NOTE: DO_NOT_INTERRUPT is enforced by the UI layer (BuildUpdateBanner), not
+// here. The watcher must always run: it may boot on an admin route and the
+// user can navigate away later, at which point the notice should appear.
+void DO_NOT_INTERRUPT;
 
 function shouldSkipBuildWatcher(): boolean {
   if (import.meta.env.DEV) return true;
