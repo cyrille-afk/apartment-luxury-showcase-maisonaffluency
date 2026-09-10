@@ -188,6 +188,7 @@ export default function ProductCommerceCta({
   const setQuantity = productConfig ? productConfig.setQuantity : setLocalQuantity;
   const [miniCartOpen, setMiniCartOpen] = useState(false);
   const [intakeOpen, setIntakeOpen] = useState(false);
+  const [quoteOpen, setQuoteOpen] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
   const dockRef = useRef<HTMLDivElement | null>(null);
   const cartItems = useCart();
@@ -419,6 +420,15 @@ export default function ProductCommerceCta({
               {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
               {placingOrder ? "Opening checkout…" : primaryLabel}
             </button>
+            {/* Gallery-style secondary: bespoke quote / customisation enquiry. */}
+            <button
+              type="button"
+              data-commerce-quote
+              onClick={() => setQuoteOpen(true)}
+              className={secondaryBtn}
+            >
+              Request a Bespoke Quote / Customisation
+            </button>
           </>
         )}
 
@@ -500,6 +510,30 @@ export default function ProductCommerceCta({
           onQuantityChange={handleDrawerQuantity}
           onCheckout={handleCheckout}
           placing={placingOrder}
+        />
+      )}
+
+      {/* Bespoke quote sheet (secondary white button — any breakpoint). The
+          sheet handles submission + its own thank-you state; no cart handoff. */}
+      {!tradeApproved && (
+        <OrderIntakeSheet
+          isOpen={quoteOpen}
+          onClose={() => setQuoteOpen(false)}
+          onComplete={() => {
+            /* Quote requests end on the sheet's thank-you screen. */
+          }}
+          productTitle={productTitle}
+          designerName={designerName}
+          priceLabel={retailLabel || rrpLabel || null}
+          finishLabel={
+            orderFinishLabel || (selectedFinishes.length ? selectedFinishes.join(" / ") : null)
+          }
+          finishOptions={finishOptions}
+          finishVariants={finishVariants}
+          baseImageUrl={imageUrl}
+          submitting={placingOrder}
+          mode="quote"
+          productId={productId}
         />
       )}
 

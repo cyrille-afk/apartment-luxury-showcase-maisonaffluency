@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Globe, X } from "lucide-react";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 
@@ -56,13 +56,7 @@ export default function ShippingDetailsAccordion({
   return (
     <>
       {variant === "row" ? (
-        <div className={cn("border-b border-border/60 pt-3 pb-2.5 md:pb-3 flex items-start gap-5", className)}>
-          <span
-            className="inline-flex h-5 w-5 shrink-0 items-center justify-center text-gold mt-0.5"
-            aria-hidden="true"
-          >
-            <Globe className="h-[18px] w-[18px]" strokeWidth={1.75} />
-          </span>
+        <div className={cn("border-b border-border/60 pt-3 pb-2.5 md:pb-3 flex items-start", className)}>
           <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
             {button}
           </div>

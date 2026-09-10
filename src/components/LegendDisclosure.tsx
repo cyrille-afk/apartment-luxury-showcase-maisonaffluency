@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface LegendDisclosureProps {
@@ -55,25 +55,24 @@ export default function LegendDisclosure({
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "flex items-center gap-5 w-full py-2.5 md:py-4 text-left",
+          "flex items-center w-full py-2.5 md:py-4 text-left",
           "font-body text-sm text-foreground font-medium",
           "focus:outline-none focus-visible:ring-0",
           "hover:text-foreground transition-colors"
         )}
       >
-        <span className="shrink-0">{icon}</span>
         <span className="flex-1 min-w-0 whitespace-normal break-words leading-relaxed">
           {label}
         </span>
-        <ChevronDown
+        <ChevronRight
           className={cn(
             "h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform",
-            open && "rotate-180"
+            open && "rotate-90"
           )}
         />
       </button>
       {open && bodyLines.length > 0 && (
-        <div className="pb-3 md:pb-4 pl-[44px] pr-2 flex flex-col gap-1">
+        <div className="pb-3 md:pb-4 pr-2 flex flex-col gap-1">
           {bodyLines.map((line, i) => (
             <p
               key={i}

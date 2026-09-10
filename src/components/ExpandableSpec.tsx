@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { parseMaterialsFallback } from "@/lib/parseSizeVariants";
@@ -140,9 +140,10 @@ export default function ExpandableSpec({
     emphasized ? "text-foreground font-medium" : "text-muted-foreground"
   );
 
-  // Shared row wrapper — borderless list with hairline dividers
+  // Shared row wrapper — gallery-style hairline dividers, no utility icons.
+  void icon;
   const rowClasses =
-    "flex items-center gap-5 w-full py-2.5 md:py-4 border-b border-border/60";
+    "flex items-center w-full py-2.5 md:py-4 border-b border-border/60";
 
 
   // Single value → plain row
@@ -151,7 +152,6 @@ export default function ExpandableSpec({
     const display = label ? `${label}: ${lines[0]}` : lines[0];
     return (
       <div className={rowClasses}>
-        <span className="shrink-0">{icon}</span>
         <div className="flex-1 min-w-0">
           {diameterHint}
           <p className={textClasses}>
@@ -316,7 +316,7 @@ export default function ExpandableSpec({
           onClick={() => (open ? closeList(false) : openList())}
           onKeyDown={onTriggerKey}
           className={cn(
-            "flex items-center gap-5 w-full py-2.5 md:py-4 text-left",
+            "flex items-center w-full py-2.5 md:py-4 text-left",
             "font-body text-sm",
             "focus:outline-none focus-visible:ring-0",
             "hover:text-foreground transition-colors",
@@ -327,16 +327,15 @@ export default function ExpandableSpec({
               : "text-foreground"
           )}
         >
-          <span className="shrink-0">{icon}</span>
           <span className="flex-1 min-w-0 whitespace-normal break-words leading-relaxed">
             {diameterHint}
             {hasSelection ? lines[selectedIdx ?? 0] : placeholder}
           </span>
 
-          <ChevronDown
+          <ChevronRight
             className={cn(
               "h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform",
-              open && "rotate-180"
+              open && "rotate-90"
             )}
           />
         </button>
@@ -346,7 +345,7 @@ export default function ExpandableSpec({
             role="listbox"
             tabIndex={-1}
             onKeyDown={onListKey}
-            className="pb-3 pl-[44px] pr-2 flex flex-col focus:outline-none"
+            className="pb-3 pr-2 flex flex-col focus:outline-none"
           >
             {optionNodes}
           </ul>
@@ -381,7 +380,7 @@ export default function ExpandableSpec({
 
         {showAutoHint && (
           <p
-            className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 pb-3 pl-[44px]"
+            className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 pb-3"
             role="note"
           >
             Finishes auto-detected — please confirm at quote
@@ -389,7 +388,7 @@ export default function ExpandableSpec({
         )}
         {helperText && (
           <p
-            className="font-body text-[10px] tracking-wide text-muted-foreground/80 pb-3 pl-[44px] italic"
+            className="font-body text-[10px] tracking-wide text-muted-foreground/80 pb-3 italic"
             role="note"
           >
             {helperText}
@@ -402,7 +401,6 @@ export default function ExpandableSpec({
   // Multi, no placeholder → full descriptive copy inside the same hairline row.
   return (
     <div className={cn(rowClasses, "items-start")}>
-      <span className="mt-0.5 shrink-0">{icon}</span>
       <div className="flex-1 min-w-0 flex flex-col gap-0.5">
         {lines.map((line, i) => (
           <p key={i} className={textClasses}>{line}</p>
