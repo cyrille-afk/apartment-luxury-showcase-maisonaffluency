@@ -112,6 +112,8 @@ serve(async (req) => {
             <p><strong>Product:</strong> ${escapeHtml(designer)} ${escapeHtml(title)}<br/>
             <strong>Finish:</strong> ${escapeHtml(finish || "—")}<br/>
             <strong>Total (incl. 1.5% concierge discount):</strong> ${escapeHtml(amountLabel)}</p>
+            <p><strong>Buyer type:</strong> ${escapeHtml(buyerType === "business" ? "GST-Registered Business" : "Private Consumer")}</p>
+            ${buyerType === "business" && buyerGstNumber ? `<p><strong>Singapore GST / UEN:</strong> ${escapeHtml(buyerGstNumber)}</p>` : ""}
             <p><strong>Client:</strong> ${escapeHtml(name)}<br/>
             ${escapeHtml(email)}<br/>${escapeHtml(phone || "—")}</p>
             <p><strong>Delivery address:</strong><br/>${escapeHtml(address || "—")}</p>
