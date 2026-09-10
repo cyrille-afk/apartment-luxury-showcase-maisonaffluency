@@ -487,6 +487,7 @@ const MaterialsDescriptionBlock: React.FC = () => {
     <LegendDisclosure
       icon={specIcon("⬗")}
       text={product.materials_description.trim()}
+      defaultOpen
     />
   );
 };
@@ -777,6 +778,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
         <LegendDisclosure
           icon={specIcon("⬗")}
           text={product.materials_description.trim()}
+          defaultOpen
         />
       )}
       <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" /></>}
