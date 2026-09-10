@@ -988,6 +988,8 @@ function WireForm({
           email: account ? account.email : email,
           phone,
           address,
+          buyerType,
+          buyerGstNumber,
         },
       });
       if (error) throw error;
