@@ -66,6 +66,15 @@ export default function Cart() {
   const total = discount.totalFor(subtotal);
   const estimatedGrandTotal = total + freightEstimate.cents;
 
+  const sgdRate = useUsdToSgdRate();
+  const sgdEquivalent = useMemo(() => {
+    if (currency !== "USD") return null;
+    return Math.round((total / 100) * sgdRate.rate);
+  }, [total, sgdRate.rate, currency]);
+
+  const formatUsd = (cents: number, code = currency) =>
+    code === "USD" ? `USD ${formatMoney(cents, code)}` : formatMoney(cents, code);
+
 
   // "Continue Selection" returns to the curator's picks of the designer whose
   // piece was added last, rather than the generic designers landing page.
