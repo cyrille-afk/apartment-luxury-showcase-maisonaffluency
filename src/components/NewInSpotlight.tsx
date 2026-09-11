@@ -256,15 +256,17 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
       </div>
 
       <div className={cn("grid gap-x-4 gap-y-5 md:gap-x-8 md:gap-y-12", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
-        {picks.map((pick) => {
+        {picks.map((pick, pickIndex) => {
           const alternateImage = pick.hover_image_url
             || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
             || null;
+          // Editorial staggered rhythm on mobile: every second card drops down.
+          const mobileStagger = mobileGridCols === 2 && pickIndex % 2 === 1 ? "mt-10 md:mt-0" : "";
 
           return (
             <div
               key={pick.id}
-              className="mb-10 md:mb-0 group flex flex-col cursor-pointer"
+              className={cn("mb-10 md:mb-0 group flex flex-col cursor-pointer", mobileStagger)}
               onClick={() => {
                 const item = lightboxItems.find((li) => li.id === pick.id);
                 if (item) setLightboxItem(item);
