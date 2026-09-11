@@ -1965,7 +1965,7 @@ const PublicDesignerProfile = () => {
                   // We're already on Madsen's own portrait — no "by Arnold Madsen" needed.
                   const cardSubtitle = isArnoldClamChair ? undefined : pick.subtitle;
                   const isFavorite = isFavoritedPick(pick.id);
-                  const preserveFullProductImage = designer.slug === "amelie-vermersch";
+                  const preserveFullProductImage = designer.id === "b8c3578b-31f7-4b89-835e-10e70ade9c21";
                   const alternateImage = pick.hover_image_url
                     || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
                     || null;
@@ -2055,27 +2055,33 @@ const PublicDesignerProfile = () => {
                           className="md:hidden w-full h-auto object-contain"
                           loading="lazy"
                         />
-                        {/* Desktop: swipe / hover reveal */}
-                        <div className="hidden md:block absolute inset-0">
-                          <SwipeAlternateProductImage
-                            primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
-                            primarySrcSet={pickSrcSet(pick.image_url)}
-                            alternateSrc={alternateImage ? responsiveCloudinaryUrl(alternateImage, 600) : null}
-                            alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
-                            sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
+                        {/* Desktop: Amélie's portrait product photography must remain fully visible. */}
+                        {preserveFullProductImage ? (
+                          <img
+                            src={responsiveCloudinaryUrl(pick.image_url, 600)}
+                            srcSet={pickSrcSet(pick.image_url)}
+                            sizes="(max-width: 1024px) 30vw, 25vw"
                             alt={pick.title}
-                            contain
-                            primaryClassName={cn(
-                              "max-h-full max-w-full object-contain p-0",
-                              preserveFullProductImage && "h-full w-full object-top"
-                            )}
-                            alternateClassName={cn(
-                              "max-h-full max-w-full object-contain p-0",
-                              preserveFullProductImage && "h-full w-full object-top"
-                            )}
-                            alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
+                            className="hidden md:block absolute inset-0 h-full w-full object-contain object-top"
+                            loading="lazy"
+                            draggable={false}
                           />
-                        </div>
+                        ) : (
+                          <div className="hidden md:block absolute inset-0">
+                            <SwipeAlternateProductImage
+                              primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
+                              primarySrcSet={pickSrcSet(pick.image_url)}
+                              alternateSrc={alternateImage ? responsiveCloudinaryUrl(alternateImage, 600) : null}
+                              alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
+                              sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
+                              alt={pick.title}
+                              contain
+                              primaryClassName="max-h-full max-w-full object-contain p-0"
+                              alternateClassName="max-h-full max-w-full object-contain p-0"
+                              alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
+                            />
+                          </div>
+                        )}
                         {/* Inventory badges — lower-left of the frame */}
                         <InventoryBadgeStack
                           badges={inventoryBadgesForPick(pick as AttributedCuratorPick)}
