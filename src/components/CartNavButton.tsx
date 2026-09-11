@@ -1,8 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
-import SelectionDrawer, { type PaymentMethod } from "@/components/product/SelectionDrawer";
+import type { PaymentMethod } from "@/components/product/SelectionDrawer";
+
+// The mini-cart sheet is only reachable after a click, so it stays out of the
+// initial bundle (it pulls the whole checkout/payment UI with it).
+const SelectionDrawer = lazy(() => import("@/components/product/SelectionDrawer"));
 import {
   useCart,
   cartItemCount,
