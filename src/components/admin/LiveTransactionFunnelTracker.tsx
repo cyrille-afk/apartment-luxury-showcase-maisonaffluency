@@ -104,6 +104,14 @@ const luxuryValue = (bias: number) => {
   return Math.min(LUXURY_MAX, Math.max(LUXURY_MIN, raw));
 };
 
+const pickRegion = (selected: Region): Exclude<Region, "global"> => {
+  if (selected !== "global") return selected;
+  const roll = Math.random();
+  if (roll < 0.38) return "na";
+  if (roll < 0.72) return "eu";
+  return "apac";
+};
+
 export default function LiveTransactionFunnelTracker() {
   const [running, setRunning] = useState(true);
   const [trafficVolume, setTrafficVolume] = useState(25); // req/s
