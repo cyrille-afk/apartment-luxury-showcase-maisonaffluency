@@ -244,7 +244,9 @@ try {
     const reportPaths = [];
     for (let run = 1; run <= RUNS; run++) {
       const outBase = join(outDir, `report-${slug}-run${run}`);
+      log(`→ audit run ${run}/${RUNS}`);
       await audit(url, outBase);
+      log(`✓ audit run ${run}/${RUNS} done`);
       reportPaths.push(`${outBase}.report.json`);
     }
     assertRoute(url, collect(reportPaths));
