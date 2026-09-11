@@ -278,17 +278,8 @@ export default function LiveTransactionFunnelTracker() {
       }
       particlesRef.current = alive;
 
-      if (spawned || cart || checkout || purchases) {
-        setCounts((c) => ({
-          views: c.views + spawned,
-          cart: c.cart + cart,
-          checkout: c.checkout + checkout,
-          purchases: c.purchases + purchases,
-        }));
-      }
       if (purchases) {
         const value = purchases * luxuryValue(regionMeta.aovBias);
-        setRevenue((r) => r + value);
         if (Math.random() < 0.4) {
           pushLog({ tone: "success", text: `Trigger: Order verified ($${(value / purchases).toFixed(0)})` });
         }
