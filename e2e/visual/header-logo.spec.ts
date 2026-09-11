@@ -9,10 +9,10 @@ import { test, expect, devices } from "@playwright/test";
  * locked reference; changing them must be a deliberate edit to this spec.
  *
  * Source: src/components/Navigation.tsx
- *   text-[1.45rem] min-[360px]:text-[1.65rem]
+ *   text-[1.05rem] xs:text-[1.65rem]
  */
 
-const SMALL = 23.2; // 1.45rem
+const SMALL = 16.8; // 1.05rem
 const FULL = 26.4; // 1.65rem
 
 const BREAKPOINTS = [
