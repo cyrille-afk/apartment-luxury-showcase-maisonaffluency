@@ -29,8 +29,10 @@ import {
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { categoryUrl } from "@/lib/categorySlugs";
-import AuthGateDialog from "@/components/AuthGateDialog";
-import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
+// Interaction-only surfaces: loaded on demand so the header does not drag the
+// auth/OAuth + hover-preview code into the first-paint bundle.
+const AuthGateDialog = React.lazy(() => import("@/components/AuthGateDialog"));
+const GalleryDetailsFloatingNav = React.lazy(() => import("@/components/GalleryDetailsFloatingNav"));
 
 import { supabase } from "@/integrations/supabase/client";
 // useFeaturedPublicDocument import removed — AD free-download flow discontinued.
