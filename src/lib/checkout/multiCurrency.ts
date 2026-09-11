@@ -57,6 +57,7 @@ export function resolveBaseCurrency(
 /** Live rates for every foreign currency present → base. */
 export function useFxToBase(lines: MinimalLine[] | null | undefined, base: string) {
   const [rates, setRates] = useState<Record<string, number>>({});
+  const [resolvedPairsKey, setResolvedPairsKey] = useState("");
   const pairsKey = useMemo(
     () =>
       [...new Set((lines ?? []).map((l) => code(l.currency)))]
@@ -70,16 +71,20 @@ export function useFxToBase(lines: MinimalLine[] | null | undefined, base: strin
     const srcs = pairsKey ? pairsKey.split(",") : [];
     if (!srcs.length) {
       setRates({});
+      setResolvedPairsKey("");
       return;
     }
     getFxRates(srcs.map((src) => ({ src, tgt: base }))).then((r) => {
-      if (!cancelled) setRates(r);
+      if (!cancelled) {
+        setRates(r);
+        setResolvedPairsKey(pairsKey);
+      }
     });
     return () => {
       cancelled = true;
     };
   }, [pairsKey, base]);
-  return rates;
+  return { rates, ready: resolvedPairsKey === pairsKey };
 }
 
 export type NormalizedLine<T> = T & {
@@ -101,7 +106,7 @@ export function useCurrencyNormalizedLines<T extends MinimalLine>(
     () => resolveBaseCurrency(lines, preferredBase),
     [lines, preferredBase],
   );
-  const rates = useFxToBase(lines, base);
+  const { rates, ready } = useFxToBase(lines, base);
   const mixed = useMemo(
     () => new Set((lines ?? []).map((l) => code(l.currency))).size > 1,
     [lines],
@@ -120,5 +125,5 @@ export function useCurrencyNormalizedLines<T extends MinimalLine>(
       } as NormalizedLine<T>;
     });
   }, [lines, base, rates]);
-  return { base, lines: normalized, mixed };
+  return { base, lines: normalized, mixed, ready };
 }

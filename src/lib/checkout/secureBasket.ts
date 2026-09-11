@@ -120,6 +120,15 @@ function markOrderPlaced() {
   }
 }
 
+function clearOrderPlacedMarker() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(ORDER_PLACED_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 function readSessionLines(): unknown[] {
   if (typeof window === "undefined") return [];
   const parsed = parse(window.sessionStorage.getItem(SESSION_KEY));
@@ -192,6 +201,7 @@ export function readSecureBasket<T>(isValid: (l: unknown) => l is T): T[] {
  */
 export function writeSecureBasket<T>(lines: T[]) {
   if (typeof window === "undefined" || !lines.length) return;
+  clearOrderPlacedMarker();
   const payload = lines as unknown[];
   writeSession(payload);
   writeDurable(payload);
@@ -215,6 +225,7 @@ export function overwriteSecureBasket<T>(lines: T[]) {
     }
     return;
   }
+  clearOrderPlacedMarker();
   writeSession(payload);
   writeDurable(payload);
 }
