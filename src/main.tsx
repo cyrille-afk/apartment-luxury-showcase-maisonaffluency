@@ -1,8 +1,11 @@
-import { createRoot } from "react-dom/client";
+import { createRoot, } from "react-dom/client";
+import { lazy, Suspense } from "react";
 import App from "./App.tsx";
 import "./index.css";
 import HmrStatusBanner from "./components/dev/HmrStatusBanner";
-import BuildUpdateBanner from "./components/BuildUpdateBanner";
+// Lazy: the banner pulls in the toast library, which otherwise lands in the
+// main bundle and costs main-thread time before first paint.
+const BuildUpdateBanner = lazy(() => import("./components/BuildUpdateBanner"));
 import { isPwaStandaloneDisplay } from "./lib/pwaMode";
 import { loadOgBridgeIndex } from "./lib/ogBridgeResolver";
 
