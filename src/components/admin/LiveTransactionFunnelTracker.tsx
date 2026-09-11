@@ -190,8 +190,6 @@ export default function LiveTransactionFunnelTracker() {
       };
 
       setStream((prev) => [event, ...prev].slice(0, 30));
-      setCounts((c) => ({ ...c, [action]: c[action] + 1 }));
-      if (action === "purchases" && valueUsd) setRevenue((r) => r + valueUsd);
 
       // Inject a matching scatter node constrained to the correct funnel zone.
       const zone = STAGE_ZONES[action];
