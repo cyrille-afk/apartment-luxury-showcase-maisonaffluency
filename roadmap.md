@@ -13,3 +13,4 @@
 - [x] Re-enable secure basket persistence when a returning customer starts a new order
 - [x] Verify immutable cart removal and region-preserving cache rewrites across Cart/Checkout
 - [x] Add Chromium/WebKit latency coverage for cart removal and Swiss basket rehydration
+- [x] Blocking Lighthouse mobile CI gate: median-of-3 runs, FCP/LCP/CLS/TBT budgets + perf/a11y scores
