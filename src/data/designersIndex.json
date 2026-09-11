@@ -92,10 +92,6 @@
     "name": "CC-Tapis"
   },
   {
-    "slug": "steph-gc",
-    "name": "Steph GC"
-  },
-  {
     "slug": "francois-champsaur",
     "name": "François Champsaur"
   },
@@ -202,6 +198,10 @@
   {
     "slug": "olivier-gagnere",
     "name": "Olivier Gagnère"
+  },
+  {
+    "slug": "steph-gc",
+    "name": "Steph GC"
   },
   {
     "slug": "forest-giaconia",

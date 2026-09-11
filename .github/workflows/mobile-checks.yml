@@ -113,10 +113,11 @@ jobs:
   lighthouse-mobile:
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    # Decoupled from playwright-mobile so a flaky e2e run doesn't mask
-    # the real Lighthouse signal. Both jobs report independently.
-    # `continue-on-error` on the audit step keeps the pipeline green when
-    # Lighthouse silently hangs — the report is still uploaded for inspection.
+    # Blocking mobile performance gate: median of 3 Lighthouse runs per route
+    # under simulated mobile 4G. Fails the build when FCP / LCP / CLS / TBT or
+    # the performance / accessibility scores breach the budgets in
+    # scripts/lighthouse-mobile.mjs. Decoupled from playwright-mobile so a
+    # flaky e2e run doesn't mask the Lighthouse signal.
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -125,15 +126,28 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
-      - name: Run mobile Lighthouse routes
+      - name: Run mobile Lighthouse routes (blocking)
         shell: bash
-        continue-on-error: true
         run: |
           set -o pipefail
-          ROUTES="/,/trade/login" LH_AUDIT_TIMEOUT_MS=180000 npm run lighthouse:mobile 2>&1 | tee lighthouse-mobile.log
-        timeout-minutes: 15
+          ROUTES="/,/trade/login" \
+          LH_RUNS=3 \
+          LH_THROTTLING=simulate \
+          LH_AUDIT_TIMEOUT_MS=180000 \
+          npm run lighthouse:mobile 2>&1 | tee lighthouse-mobile.log
+        timeout-minutes: 35
+      - name: Summarise Core Web Vitals
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "### Lighthouse mobile (median of 3 runs)"
+            echo '```'
+            grep -E '^(▸|  [✓✗])' lighthouse-mobile.log || echo "no metrics captured"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload Lighthouse report
-        if: failure() || cancelled()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-report
