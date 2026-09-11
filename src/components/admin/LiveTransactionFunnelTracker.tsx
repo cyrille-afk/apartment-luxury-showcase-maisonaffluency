@@ -96,6 +96,7 @@ export default function LiveTransactionFunnelTracker() {
   const [counts, setCounts] = useState({ views: 0, cart: 0, checkout: 0, purchases: 0 });
   const [revenue, setRevenue] = useState(0);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [stream, setStream] = useState<StreamEvent[]>([]);
   const [, forceTick] = useState(0);
 
   const particlesRef = useRef<Particle[]>([]);
