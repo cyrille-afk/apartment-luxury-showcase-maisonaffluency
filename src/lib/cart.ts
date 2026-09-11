@@ -389,8 +389,8 @@ export function setQuantity(key: string, quantity: number) {
  */
 export function removeFromCart(key: string) {
   const currentCart = getCart();
-  const updatedCart = currentCart.filter((item) => item.key !== key);
-  commitExplicit(updatedCart);
+  const verifiedNewCart = currentCart.filter((item) => item.key !== key);
+  commitExplicit(verifiedNewCart);
 }
 
 /**

@@ -11,3 +11,4 @@
 - [x] Clarify USD/SGD amounts in checkout and show the SGD equivalent in the Tax block
 - [x] Prevent PaymentIntent creation until checkout FX rates are resolved
 - [x] Re-enable secure basket persistence when a returning customer starts a new order
+- [x] Verify immutable cart removal and region-preserving cache rewrites across Cart/Checkout
