@@ -45,7 +45,10 @@ export function CldPicture({
 }: CldPictureProps) {
   const loading = priority ? "eager" : "lazy";
   const fetchPriority = priority ? "high" : "auto";
-  const resolvedDecoding = decoding ?? (priority ? "sync" : "async");
+  // Async decoding for every image (including the LCP hero) keeps heavy image
+  // decode off the main JS initialization thread; fetchpriority still marks
+  // above-the-fold assets as urgent.
+  const resolvedDecoding = decoding ?? "async";
 
   if (!src) return null;
 
