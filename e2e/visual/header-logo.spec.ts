@@ -62,13 +62,17 @@ test.describe("Mobile header logo", () => {
           expect(box!.x).toBeGreaterThanOrEqual(-1);
           expect(box!.x + box!.width).toBeLessThanOrEqual(bp.width + 1);
 
-          // 3. It must not be visually truncated by its clipping container.
+          // 3. It must not be cut off by a clipping ancestor in the header
+          //    (the wordmark sits inside truncate / overflow-hidden wrappers).
           const truncated = await logo.evaluate((el) => {
-            let node: HTMLElement | null = el as HTMLElement;
-            while (node) {
-              if (node.scrollWidth > node.clientWidth + 1) return true;
-              node = node.parentElement;
-              if (node?.tagName === "BODY") break;
+            const rect = el.getBoundingClientRect();
+            let node = el.parentElement;
+            for (let depth = 0; node && depth < 4; depth++, node = node.parentElement) {
+              const style = getComputedStyle(node);
+              if (style.overflowX === "hidden" || style.overflowX === "clip") {
+                const clip = node.getBoundingClientRect();
+                if (rect.left < clip.left - 1 || rect.right > clip.right + 1) return true;
+              }
             }
             return false;
           });
