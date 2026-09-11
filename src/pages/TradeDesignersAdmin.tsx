@@ -2538,7 +2538,9 @@ const TradeDesignersAdmin = () => {
 
                       {/* Hero Image Override */}
                       {(() => {
-                        const currentHero = (editBuffer[d.id]?.hero_image_url ?? d.hero_image_url) || "";
+                        // Use key presence (not ??) so an explicit null from "Clear hero" wins
+                        const heroEdited = editBuffer[d.id] && "hero_image_url" in editBuffer[d.id]!;
+                        const currentHero = (heroEdited ? editBuffer[d.id]!.hero_image_url : d.hero_image_url) || "";
                         return (
                           <div>
                             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
