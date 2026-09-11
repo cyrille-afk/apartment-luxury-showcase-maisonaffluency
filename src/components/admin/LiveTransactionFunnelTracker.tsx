@@ -32,6 +32,7 @@ type Particle = {
   speed: number;
   r: number;
   dropAt: number | null; // x at which the session abandons
+  region: Exclude<Region, "global">;
   zone?: { min: number; max: number }; // when set, particle is a fixed scatter node inside this stage zone
 };
 
@@ -103,36 +104,67 @@ const luxuryValue = (bias: number) => {
   return Math.min(LUXURY_MAX, Math.max(LUXURY_MIN, raw));
 };
 
+const pickRegion = (selected: Region): Exclude<Region, "global"> => {
+  if (selected !== "global") return selected;
+  const roll = Math.random();
+  if (roll < 0.38) return "na";
+  if (roll < 0.72) return "eu";
+  return "apac";
+};
+
 export default function LiveTransactionFunnelTracker() {
   const [running, setRunning] = useState(true);
   const [trafficVolume, setTrafficVolume] = useState(25); // req/s
   const [dropOff, setDropOff] = useState(40); // %
   const [region, setRegion] = useState<Region>("global");
 
-  const [counts, setCounts] = useState({ views: 0, cart: 0, checkout: 0, purchases: 0 });
-  const [revenue, setRevenue] = useState(0);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [stream, setStream] = useState<StreamEvent[]>([]);
-  const [, forceTick] = useState(0);
+  const [tick, forceTick] = useState(0);
 
   const particlesRef = useRef<Particle[]>([]);
   const idRef = useRef(0);
   const spawnDebtRef = useRef(0);
   const rafRef = useRef<number | null>(null);
   const lastRef = useRef<number>(0);
+  const historyRef = useRef<StreamEvent[]>([]);
 
   const regionMeta = REGIONS.find((r) => r.id === region)!;
+
+  // Regional filtering applies to both the stream table and the summary metrics.
+  const filteredStream = useMemo(
+    () => stream.filter((e) => region === "global" || e.region === region),
+    [stream, region]
+  );
+
+  // Metrics are computed from the full event history (webhook + particle simulation)
+  // so the traffic/drop-off sliders still drive the numbers, but region selection
+  // instantly slices the dataset.
+  const { stageCounts, convRate, avgOrderVal, abandonRate, revenue } = useMemo(() => {
+    const filtered = historyRef.current.filter((e) => region === "global" || e.region === region);
+    const c = { views: 0, cart: 0, checkout: 0, purchases: 0 };
+    for (const e of filtered) c[e.action] += 1;
+    const purchaseEvents = filtered.filter((e) => e.action === "purchases" && e.valueUsd);
+    const rev = purchaseEvents.reduce((sum, e) => sum + (e.valueUsd ?? 0), 0);
+    const aov = purchaseEvents.length ? rev / purchaseEvents.length : 0;
+    const conversion = c.views ? (c.purchases / c.views) * 100 : 0;
+    const abandon = c.cart ? Math.max(0, (1 - c.purchases / c.cart) * 100) : 0;
+    return { stageCounts: c, convRate: conversion, avgOrderVal: aov, abandonRate: abandon, revenue: rev };
+  }, [region, tick]);
 
   const pushLog = useCallback((entry: Omit<LogEntry, "id">) => {
     setLogs((prev) => [{ ...entry, id: idRef.current++ }, ...prev].slice(0, 3));
   }, []);
 
+  const pushHistory = useCallback((event: Omit<StreamEvent, "id">) => {
+    historyRef.current = [{ ...event, id: idRef.current++ }, ...historyRef.current].slice(0, 500);
+  }, []);
+
   const reset = useCallback(() => {
     particlesRef.current = [];
-    setCounts({ views: 0, cart: 0, checkout: 0, purchases: 0 });
-    setRevenue(0);
     setLogs([]);
     setStream([]);
+    historyRef.current = [];
   }, []);
 
   // Mock webhook hub: mimics an SSE / WebSocket push stream from the backend.
@@ -164,8 +196,7 @@ export default function LiveTransactionFunnelTracker() {
       };
 
       setStream((prev) => [event, ...prev].slice(0, 30));
-      setCounts((c) => ({ ...c, [action]: c[action] + 1 }));
-      if (action === "purchases" && valueUsd) setRevenue((r) => r + valueUsd);
+      pushHistory(event);
 
       // Inject a matching scatter node constrained to the correct funnel zone.
       const zone = STAGE_ZONES[action];
@@ -177,6 +208,7 @@ export default function LiveTransactionFunnelTracker() {
           speed: 0,
           r: rand(3.5, 7),
           dropAt: null,
+          region: evtRegion,
           zone,
         });
       }
@@ -213,6 +245,7 @@ export default function LiveTransactionFunnelTracker() {
         spawnDebtRef.current -= 1;
         spawned += 1;
         const abandons = Math.random() < dropOff / 100;
+        const pRegion = pickRegion(region);
         particlesRef.current.push({
           id: idRef.current++,
           x: 0,
@@ -220,12 +253,15 @@ export default function LiveTransactionFunnelTracker() {
           speed: rand(0.09, 0.2) * (reduced ? 0.4 : 1),
           r: rand(2.5, 6),
           dropAt: abandons ? rand(0.2, 0.92) : null,
+          region: pRegion,
         });
+        pushHistory({ at: Date.now(), action: "views", valueUsd: null, region: pRegion, token: makeToken() });
       }
 
       let cart = 0;
       let checkout = 0;
       let purchases = 0;
+      let purchaseValueThisFrame = 0;
       const alive: Particle[] = [];
       for (const p of particlesRef.current) {
         if (p.zone) {
@@ -242,29 +278,29 @@ export default function LiveTransactionFunnelTracker() {
         p.y = Math.max(-1, Math.min(1, p.y));
 
         if (p.dropAt !== null && p.x >= p.dropAt) continue; // abandoned
-        if (prevX < 0.33 && p.x >= 0.33) cart += 1;
-        if (prevX < 0.66 && p.x >= 0.66) checkout += 1;
+        const bias = REGIONS.find((r) => r.id === p.region)!.aovBias;
+        if (prevX < 0.33 && p.x >= 0.33) {
+          cart += 1;
+          pushHistory({ at: Date.now(), action: "cart", valueUsd: null, region: p.region, token: makeToken() });
+        }
+        if (prevX < 0.66 && p.x >= 0.66) {
+          checkout += 1;
+          pushHistory({ at: Date.now(), action: "checkout", valueUsd: luxuryValue(bias), region: p.region, token: makeToken() });
+        }
         if (p.x >= 1) {
           purchases += 1;
+          const val = luxuryValue(bias);
+          purchaseValueThisFrame += val;
+          pushHistory({ at: Date.now(), action: "purchases", valueUsd: val, region: p.region, token: makeToken() });
           continue;
         }
         alive.push(p);
       }
       particlesRef.current = alive;
 
-      if (spawned || cart || checkout || purchases) {
-        setCounts((c) => ({
-          views: c.views + spawned,
-          cart: c.cart + cart,
-          checkout: c.checkout + checkout,
-          purchases: c.purchases + purchases,
-        }));
-      }
       if (purchases) {
-        const value = purchases * luxuryValue(regionMeta.aovBias);
-        setRevenue((r) => r + value);
         if (Math.random() < 0.4) {
-          pushLog({ tone: "success", text: `Trigger: Order verified ($${(value / purchases).toFixed(0)})` });
+          pushLog({ tone: "success", text: `Trigger: Order verified ($${(purchaseValueThisFrame / purchases).toFixed(0)})` });
         }
       } else if (Math.random() < dt * 0.35) {
         pushLog({ tone: "info", text: "Trigger: Dynamic load balanced" });
@@ -280,10 +316,6 @@ export default function LiveTransactionFunnelTracker() {
       rafRef.current = null;
     };
   }, [running, trafficVolume, dropOff, regionMeta, pushLog]);
-
-  const convRate = counts.views ? (counts.purchases / counts.views) * 100 : 0;
-  const avgOrderVal = counts.purchases ? revenue / counts.purchases : 0;
-  const abandonRate = counts.cart ? Math.max(0, (1 - counts.purchases / counts.cart) * 100) : 0;
 
   const particles = particlesRef.current;
 
@@ -331,7 +363,7 @@ export default function LiveTransactionFunnelTracker() {
               <span className="font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{s.label}</span>
             </div>
             <div className="mt-1 text-sm font-semibold tabular-nums text-foreground">
-              {counts[s.key as keyof typeof counts].toLocaleString()}
+              {stageCounts[s.key as keyof typeof stageCounts].toLocaleString()}
             </div>
           </div>
         ))}
@@ -365,6 +397,7 @@ export default function LiveTransactionFunnelTracker() {
             const halfHeight = 88 - p.x * 58;
             const y = 130 + p.y * halfHeight * 0.55;
             const dropping = p.dropAt !== null && p.x > p.dropAt - 0.05;
+            const dimmed = region !== "global" && p.region !== region;
             return (
               <circle
                 key={p.id}
@@ -372,7 +405,7 @@ export default function LiveTransactionFunnelTracker() {
                 cy={dropping ? y + 46 * ((p.x - (p.dropAt ?? 0) + 0.05) / 0.05) : y}
                 r={p.r}
                 fill={dropping ? "#f87171" : stageColorFor(p.x)}
-                opacity={dropping ? 0.4 : 0.85}
+                opacity={dropping ? (dimmed ? 0.08 : 0.4) : dimmed ? 0.2 : 0.85}
               />
             );
           })}
@@ -408,7 +441,7 @@ export default function LiveTransactionFunnelTracker() {
             <h3 className="font-body text-[11px] uppercase tracking-[0.16em] text-foreground">Live Transaction Stream</h3>
           </div>
           <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-            {running ? "streaming" : "paused"} · {stream.length}/30
+            {running ? "streaming" : "paused"} · {filteredStream.length}/30
           </span>
         </div>
 
@@ -424,14 +457,14 @@ export default function LiveTransactionFunnelTracker() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/70">
-              {stream.length === 0 && (
+              {filteredStream.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-4 py-8 text-center font-body text-xs text-muted-foreground">
                     Awaiting webhook payloads…
                   </td>
                 </tr>
               )}
-              {stream.map((e, i) => {
+              {filteredStream.map((e, i) => {
                 const meta = ACTION_META[e.action];
                 return (
                   <tr
