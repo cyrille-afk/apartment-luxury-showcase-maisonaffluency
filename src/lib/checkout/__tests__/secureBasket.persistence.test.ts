@@ -67,6 +67,14 @@ describe("secure basket persistence", () => {
     expect(localStorage.getItem(DURABLE_KEY)).toContain("Tarnished Silver");
   });
 
+  it("re-arms persistence when a returning buyer starts a new basket", async () => {
+    localStorage.setItem(ORDER_PLACED_KEY, "1");
+    const { writeSecureBasket, readSecureBasket } = await importFresh();
+    writeSecureBasket([sampleLine]);
+    expect(localStorage.getItem(ORDER_PLACED_KEY)).toBeNull();
+    expect(readSecureBasket(isLine)).toEqual([sampleLine]);
+  });
+
   it("records destination / settlement currency metadata", async () => {
     localStorage.setItem(REGION_COUNTRY_KEY, "CH");
     localStorage.setItem(REGION_CURRENCY_KEY, "CHF");

@@ -1313,7 +1313,7 @@ export default function Checkout() {
   // currency: pick Singapore/SGD and every figure — and the charge itself —
   // is converted into SGD before any subtotal / freight / tax maths runs.
   const settlementCurrency = useSettlementCurrency();
-  const { lines: grossLines } = useCurrencyNormalizedLines(rawLines, settlementCurrency);
+  const { lines: grossLines, ready: fxReady } = useCurrencyNormalizedLines(rawLines, settlementCurrency);
   // Account-level tier discount. The hook drives the first paint; the value
   // returned by the PaymentIntent is authoritative once it arrives, so the
   // displayed total always equals the amount Stripe will charge.
@@ -1711,11 +1711,15 @@ export default function Checkout() {
 
 
   useEffect(() => {
-    if (!grossLines?.length || initialised.current) return;
+    // Do not create the PaymentIntent from approximate first-render rates.
+    // `fxReady` becomes true only after every required live provider request
+    // has resolved (including the deliberate offline fallback path), keeping
+    // Stripe's amount identical to the first payable total shown to the buyer.
+    if (!fxReady || !grossLines?.length || initialised.current) return;
     initialised.current = true;
     void syncIntent(null, method === "paynow" ? "paynow" : "card");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [grossLines, syncIntent]);
+  }, [fxReady, grossLines, syncIntent]);
 
   // The destination country changes the GST due, so the PaymentIntent must be
   // re-priced whenever it changes after the first sync.
