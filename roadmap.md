@@ -9,3 +9,5 @@
 - [x] Refine mobile collection cards: contained imagery, touch alternate view, and editorial metadata hierarchy
 - [x] Repair mobile quote submission: secure verification token, database delivery, exact error logging, and in-drawer success state
 - [x] Clarify USD/SGD amounts in checkout and show the SGD equivalent in the Tax block
+- [x] Prevent PaymentIntent creation until checkout FX rates are resolved
+- [x] Re-enable secure basket persistence when a returning customer starts a new order
