@@ -288,10 +288,6 @@ function OrderSummary({
   buyerGstNumber: string;
   isLoading?: boolean;
 }) {
-  if (isLoading) {
-    return <OrderSummarySkeleton />;
-  }
-
   const { currency } = summary;
   const fxRates = useFxRates();
   const usdSgd = useUsdToSgdRate();
