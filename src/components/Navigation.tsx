@@ -408,7 +408,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
 
       <div className="mx-auto max-w-7xl px-6 md:px-12">
         {/* Mobile: single row */}
-        <div className="relative flex h-20 min-[380px]:h-24 items-center justify-between md:hidden">
+        <div className="relative flex h-20 xsp:h-24 items-center justify-between md:hidden">
           <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
             {/* Burger — far left */}
             <SheetTrigger asChild>
@@ -418,10 +418,10 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             </SheetTrigger>
 
             {/* Brand — absolutely centered in the viewport */}
-            <div className="relative flex flex-1 min-w-0 justify-center px-2 min-[380px]:absolute min-[380px]:left-1/2 min-[380px]:top-1/2 min-[380px]:flex-none min-[380px]:max-w-[calc(100vw-10rem)] min-[380px]:-translate-x-1/2 min-[380px]:-translate-y-1/2">
+            <div className="relative flex flex-1 min-w-0 justify-center">
               <div className="flex flex-col items-center max-w-full overflow-hidden">
                 <button onClick={scrollToTop} className="group flex min-h-[44px] cursor-pointer items-center whitespace-nowrap truncate">
-                  <span className="font-brand text-[1.45rem] min-[360px]:text-[1.65rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+                  <span data-testid="mobile-brand-logo" className="font-brand text-[1.1rem] xs:text-[1.45rem] xsp:text-[1.65rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                     <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
                   </span>
                 </button>

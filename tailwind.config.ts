@@ -14,6 +14,11 @@ export default {
     },
     extend: {
       screens: {
+        // Named narrow-phone breakpoints. Tailwind silently DROPS arbitrary
+        // `min-[360px]:` / `min-[380px]:` variants in this project because the
+        // `short` raw screen below breaks variant sorting — use these instead.
+        xs: "360px",
+        xsp: "390px",
         short: { raw: "(max-height: 780px)" },
       },
       colors: {
