@@ -422,7 +422,7 @@ export default function LiveTransactionFunnelTracker() {
             <h3 className="font-body text-[11px] uppercase tracking-[0.16em] text-foreground">Live Transaction Stream</h3>
           </div>
           <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-            {running ? "streaming" : "paused"} · {stream.length}/30
+            {running ? "streaming" : "paused"} · {filteredStream.length}/30
           </span>
         </div>
 
@@ -438,14 +438,14 @@ export default function LiveTransactionFunnelTracker() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/70">
-              {stream.length === 0 && (
+              {filteredStream.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-4 py-8 text-center font-body text-xs text-muted-foreground">
                     Awaiting webhook payloads…
                   </td>
                 </tr>
               )}
-              {stream.map((e, i) => {
+              {filteredStream.map((e, i) => {
                 const meta = ACTION_META[e.action];
                 return (
                   <tr
