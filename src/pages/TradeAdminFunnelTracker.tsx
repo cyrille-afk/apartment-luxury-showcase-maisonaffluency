@@ -1,7 +1,12 @@
+import { Suspense, lazy } from "react";
 import { Helmet } from "react-helmet-async";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import LiveTransactionFunnelTracker from "@/components/admin/LiveTransactionFunnelTracker";
+import AdminPanelSkeleton from "@/components/admin/AdminPanelSkeleton";
+
+const LiveTransactionFunnelTracker = lazy(
+  () => import("@/components/admin/LiveTransactionFunnelTracker")
+);
 
 export default function TradeAdminFunnelTracker() {
   const { isAdmin, loading } = useAuth();
@@ -21,7 +26,9 @@ export default function TradeAdminFunnelTracker() {
             Model views, cart adds, checkout and purchases across markets.
           </p>
         </div>
-        <LiveTransactionFunnelTracker />
+        <Suspense fallback={<AdminPanelSkeleton rows={4} height="h-56" />}>
+          <LiveTransactionFunnelTracker />
+        </Suspense>
       </div>
     </>
   );
