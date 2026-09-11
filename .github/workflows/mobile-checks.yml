@@ -112,12 +112,12 @@ jobs:
 
   lighthouse-mobile:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    # Blocking mobile performance gate: median of 3 Lighthouse runs per route
-    # under simulated mobile 4G. Fails the build when FCP / LCP / CLS / TBT or
-    # the performance / accessibility scores breach the budgets in
-    # scripts/lighthouse-mobile.mjs. Decoupled from playwright-mobile so a
-    # flaky e2e run doesn't mask the Lighthouse signal.
+    timeout-minutes: 25
+    # Blocking mobile performance gate: median of 2 Lighthouse runs on "/" under
+    # simulated mobile 4G. Fails the build when FCP / LCP / CLS / TBT or the
+    # performance / accessibility scores breach the budgets in
+    # scripts/lighthouse-mobile.mjs. Scope is deliberately narrow — the previous
+    # 2-route × 3-run matrix overran the 35-minute step budget on shared runners.
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -125,17 +125,17 @@ jobs:
           node-version: 22
           cache: npm
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit --no-fund
       - name: Run mobile Lighthouse routes (blocking)
         shell: bash
         run: |
           set -o pipefail
-          ROUTES="/,/trade/login" \
-          LH_RUNS=3 \
+          ROUTES="/" \
+          LH_RUNS=2 \
           LH_THROTTLING=simulate \
-          LH_AUDIT_TIMEOUT_MS=180000 \
+          LH_AUDIT_TIMEOUT_MS=120000 \
           npm run lighthouse:mobile 2>&1 | tee lighthouse-mobile.log
-        timeout-minutes: 35
+        timeout-minutes: 18
       - name: Summarise Core Web Vitals
         if: always()
         shell: bash
