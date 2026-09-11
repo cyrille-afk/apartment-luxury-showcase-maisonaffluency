@@ -48,30 +48,30 @@ export function OrderSummarySkeleton() {
 
         {/* Total row */}
         <div className="mt-6 border-t-2 border-foreground pt-5">
-          <div className="flex items-baseline justify-between">
-            <span className="font-medium uppercase text-[11px] tracking-[0.2em] text-black">
-              Total Due
-            </span>
-            <div className="h-5 w-28 animate-pulse rounded-xs bg-zinc-300" />
+            <div className="flex items-baseline justify-between">
+              <span className="font-medium uppercase text-[11px] tracking-[0.2em] text-black">
+                Total Due
+              </span>
+              <div className="h-5 w-28 animate-pulse rounded-sm bg-zinc-300" />
+            </div>
+          </div>
+
+          {/* Payment method marks */}
+          <div className="mt-8 flex items-center justify-center gap-10">
+            <div className="h-6 w-10 animate-pulse rounded-sm bg-zinc-200/80" />
+            <div className="h-6 w-10 animate-pulse rounded-sm bg-zinc-200/80" />
+            <div className="h-6 w-10 animate-pulse rounded-sm bg-zinc-200/80" />
           </div>
         </div>
-
-        {/* Payment method marks */}
-        <div className="mt-8 flex items-center justify-center gap-10">
-          <div className="h-6 w-10 animate-pulse rounded-sm bg-zinc-200/80" />
-          <div className="h-6 w-10 animate-pulse rounded-sm bg-zinc-200/80" />
-          <div className="h-6 w-10 animate-pulse rounded-sm bg-zinc-200/80" />
-        </div>
+      </aside>
+    );
+  }
+  
+  function SummaryRow({ label }: { label: string }) {
+    return (
+      <div className="flex items-baseline justify-between">
+        <dt className="text-muted-foreground">{label}</dt>
+        <dd className="h-4 w-20 animate-pulse rounded-sm bg-zinc-200/80" aria-hidden="true" />
       </div>
-    </aside>
-  );
-}
-
-function SummaryRow({ label }: { label: string }) {
-  return (
-    <div className="flex items-baseline justify-between">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="h-4 w-20 animate-pulse rounded-xs bg-zinc-200/80" aria-hidden="true" />
-    </div>
-  );
-}
+    );
+  }
