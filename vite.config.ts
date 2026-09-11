@@ -58,7 +58,7 @@ function optimizeHtmlPlugin(buildId: string): Plugin {
         // hero image win the bandwidth race on throttled PSI mobile runs
         // is worth ~200-400ms of LCP. React still loads (main entry imports
         // it) — just at lower priority so it doesn't compete with the LCP image.
-        const DEFER = /(vendor-motion|vendor-radix|vendor-react|vendor-router|vendor-query|vendor-forms|vendor-date|vendor-carousel|vendor-icons-extra|charts-vendor)/;
+        const DEFER = /(vendor-motion|vendor-radix|vendor-react|vendor-router|vendor-query|vendor-forms|vendor-date|vendor-carousel|vendor-icons-extra|analytics-vendor|core-vendor)/;
         const eager = modulepreloads.filter(h => !DEFER.test(h));
         const deferred = modulepreloads.filter(h => DEFER.test(h));
         const hints = [
