@@ -51,6 +51,14 @@ export default defineConfig({
         },
       },
     },
+    {
+      name: "cart-webkit",
+      testMatch: /cart-multi-browser-persistence\.spec\.ts/,
+      use: {
+        ...devices["Desktop Safari"],
+        viewport: { width: 1280, height: 800 },
+      },
+    },
   ],
   webServer: process.env.PW_BASE_URL
     ? undefined
