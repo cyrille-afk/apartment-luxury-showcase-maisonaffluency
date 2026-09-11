@@ -1883,14 +1883,13 @@ const PublicDesignerProfile = () => {
 
 
                     <div className={cn(
-                      "grid w-full",
+                      "w-full columns-2 gap-4 space-y-4 md:grid md:space-y-0",
                       gridClass,
-                      "gap-x-4 gap-y-4 md:gap-x-8 md:gap-y-12"
+                      "md:gap-x-8 md:gap-y-12"
                     )}>
                 {visiblePicks.map((pick, pickIndex) => {
                   // Editorial mobile rhythm: on two-column mobile grids every
                   // second card drops down. Desktop layout is untouched.
-                  const mobileStagger = pickCols !== "one" && pickIndex % 2 === 1;
                   const ap = pick as AttributedCuratorPick;
                   // Primary: attribution row on grouped picks (child designer rows).
                   const rawDesignerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name ? ap.designer_name : undefined;
@@ -2020,8 +2019,7 @@ const PublicDesignerProfile = () => {
                         }
                       }}
                       className={cn(
-                        "mb-10 md:mb-0 group flex flex-col transition-all duration-700",
-                        mobileStagger && "mt-10 md:mt-0",
+                        "w-full break-inside-avoid inline-block md:flex md:flex-col group transition-all duration-700",
                         highlightId === pick.id && "ring-2 ring-primary rounded-luxury-sharp ring-offset-2 ring-offset-background animate-pulse"
                       )}
                     >
