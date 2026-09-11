@@ -45,6 +45,18 @@ export default function TradeAdminTools() {
           <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
         </Link>
 
+        <Link
+          to="/trade/admin/funnel-tracker"
+          className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border hover:border-foreground/30 transition-all group"
+        >
+          <Sparkles className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <div className="flex-1">
+            <span className="font-display text-sm text-foreground">Live Transaction Funnel Tracker</span>
+            <p className="font-body text-[10px] text-muted-foreground">Animated views → cart → checkout → purchase stream with traffic, drop-off and regional controls</p>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+        </Link>
+
         <InstagramAuditCard />
 
         <Link
