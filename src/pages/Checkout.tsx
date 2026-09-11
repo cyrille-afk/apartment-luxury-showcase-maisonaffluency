@@ -272,7 +272,7 @@ function BuyerTypeSection({
 /* Order summary — persistent sidebar showing the true unit prices,    */
 /* the subtotal, one explicit discount row, and the final total.       */
 /* ------------------------------------------------------------------ */
-import { OrderSummarySkeleton } from "@/components/checkout/OrderSummarySkeleton";
+
 
 function OrderSummary({
   lines,
