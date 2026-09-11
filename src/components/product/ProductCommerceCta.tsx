@@ -482,7 +482,7 @@ export default function ProductCommerceCta({
           ref={dockRef}
           className={cn(
             "md:hidden fixed inset-x-0 bottom-0 z-[70] w-full max-w-none isolate",
-            "bg-background/92 backdrop-blur-md border-t border-border/50 shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
+            "bg-background/95 backdrop-blur-md border-t border-border/50 shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
             "px-4 pt-3.5 pb-[env(safe-area-inset-bottom)]",
             "transition-opacity duration-200 ease-out",
             isAtBottom
