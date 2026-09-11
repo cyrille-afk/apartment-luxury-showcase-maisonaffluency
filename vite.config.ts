@@ -101,10 +101,10 @@ function inlineCriticalCssPlugin(): Plugin {
       const beasties = new Beasties({
         path: outDir,
         publicPath: "/",
-        // Inline rules matching the static HTML and remove those same rules
-        // from the emitted sheet — they are already in the document, so the
-        // deferred stylesheet only carries what first paint did not need.
-        pruneSource: true,
+        // Inline rules matching the static HTML; everything else is deferred.
+        // (pruneSource was measured: it removed nothing from the emitted sheet
+        // while risking missing styles, so it stays off.)
+        pruneSource: false,
         // Keep the full sheet as a swap-on-load preload (non render-blocking).
         preload: "swap",
         inlineFonts: false,
