@@ -1319,33 +1319,18 @@ const PublicProductPageContent: React.FC = () => {
 
   // Mobile/PWA: shrink the product image once the user scrolls past a small threshold.
   const [galleryCompact, setGalleryCompact] = useState(false);
-  const [stickyBarArmed, setStickyBarArmed] = useState(false);
   const { direction: scrollDir, scrollY } = useScrollDirection({ threshold: 6, topOffset: 80 });
-  // Once the product image has scrolled past, the mobile action bar takes over
-  // the top of the viewport and the global header steps aside entirely.
-  const showStickyBar = stickyBarArmed;
-  // Compact action inside the sticky mini bar: quote for unpriced pieces,
-  // order for priced ones — mirrors the bottom dock's primary CTA.
-  const stickyBarCtaLabel = isTradeVerifiedView
-    ? "Proceed to Order"
-    : !displayRrpLabel || displayRrpLabel.trim().toLowerCase() === "price upon request"
-      ? "Request Quote"
-      : "Place Order";
 
   // The TRADE/RETAIL tab section was removed — the sticky bottom dock now
   // owns pricing/ordering for every audience, so it is always visible.
 
-  // Mobile/PWA only: tell the global nav to stay hidden while this bar owns the top.
-  // While the mini bar is docked below the header, pin the global nav so the
-  // two bars stack cleanly instead of the bar masking the navigation.
+  // Keep the global header pinned while the compact product image is docked.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const isSmall = window.matchMedia("(max-width: 767px)").matches;
-    // Also pin the header while the product image is docked beneath it —
-    // otherwise the nav slides away and the sticky image looks unanchored.
-    setStickyProductBarActive(isSmall && (showStickyBar || galleryCompact));
+    setStickyProductBarActive(isSmall && galleryCompact);
     return () => setStickyProductBarActive(false);
-  }, [showStickyBar, galleryCompact]);
+  }, [galleryCompact]);
 
 
 
@@ -1425,9 +1410,6 @@ const PublicProductPageContent: React.FC = () => {
         const rect = el.getBoundingClientRect();
         // Arm as soon as the product image has scrolled past the top edge.
         // (A header-relative threshold would oscillate, because arming hides the header.)
-        setStickyBarArmed(rect.bottom <= 8);
-      } else {
-        setStickyBarArmed(false);
       }
     };
     const onScroll = () => {
@@ -2162,49 +2144,6 @@ const PublicProductPageContent: React.FC = () => {
       <div className="min-h-[100dvh] bg-background text-foreground">
         <Navigation borderless />
 
-        {/* Mobile sticky mini bar — slides in directly below the AFFLUENCY
-             header once the product image has scrolled out of view. The
-             header stays visible above it (z-50 > z-40), so nothing masks
-             or breaks the navigation layout. */}
-        <div
-          className={cn(
-            "md:hidden fixed left-0 right-0 top-[var(--header-h)] z-40 bg-background border-b border-border shadow-sm transition-transform duration-300 ease-out",
-            // Opaque filler sealing the sliver between the header bottom and
-            // --header-h so scrolling text can never bleed through the gap.
-            "before:absolute before:inset-x-0 before:bottom-full before:h-4 before:bg-background before:content-['']",
-            !showStickyBar && "pointer-events-none"
-          )}
-          style={{
-            transform: showStickyBar ? "translateY(0)" : "translateY(calc(-100% - var(--header-h)))",
-          }}
-          aria-hidden={!showStickyBar}
-        >
-
-
-          <div className="px-3 py-2">
-            <div className="flex items-center justify-between gap-3 min-w-0">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <p className="font-display text-[13px] leading-tight text-foreground truncate">
-                  {product.title}
-                </p>
-                <span className="text-muted-foreground/60 text-[11px] shrink-0">by</span>
-                <p className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground truncate">
-                  {designerDisplay}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => window.dispatchEvent(new Event("ma:open-intake"))}
-                className="shrink-0 inline-flex h-9 items-center justify-center px-4 bg-foreground text-background font-body text-[10px] uppercase tracking-[0.14em] transition-all hover:bg-foreground/85 active:scale-[0.97]"
-              >
-                {stickyBarCtaLabel}
-              </button>
-            </div>
-
-          </div>
-
-        </div>
-
         {/* Desktop slim sticky purchase bar — price + button labels follow the
             effective role so it stays in sync with the sidebar action block.
             Hidden for verified trade: the full-width workspace strip below the
@@ -2231,7 +2170,7 @@ const PublicProductPageContent: React.FC = () => {
 
 
 
-        <div className="pt-[var(--header-h)] pb-[calc(env(safe-area-inset-bottom,0px)+5rem)] md:pb-20 max-w-7xl mx-auto px-4 md:px-5 lg:px-8">
+        <div className="pt-[var(--header-h)] pb-0 md:pb-20 max-w-7xl mx-auto px-4 md:px-5 lg:px-8">
           <button
             type="button"
             onClick={() => navigate(fromPath || fallbackGridPath)}
