@@ -31,6 +31,8 @@ export default defineConfig({
   projects: [
     {
       name: "mobile-chrome",
+      // The cart persistence matrix has its own dedicated projects.
+      testIgnore: /cart-multi-browser-persistence\.spec\.ts/,
       use: {
         ...devices["Pixel 5"],
         viewport: { width: 390, height: 844 },
