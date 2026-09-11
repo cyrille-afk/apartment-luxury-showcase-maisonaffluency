@@ -1,0 +1,22 @@
+name: Secure Checkout E2E Automated Validation Matrix
+on: [push, pull_request]
+
+jobs:
+  test:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Project Dependencies
+        run: npm ci
+
+      # CRITICAL STEP: Download the designated browser engines for Playwright
+      - name: Install Playwright Target Engine Binaries
+        run: npx playwright install --with-deps
+
+      - name: Execute Latency Persistence Matrix Tests
+        run: npx playwright test e2e/cart-multi-browser-persistence.spec.ts
