@@ -96,6 +96,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer.id);
   const dest = useShippingDestination();
   const isUnderlaid = variant === "underlaid";
+  const preserveFullProductImage = designer.id === "b8c3578b-31f7-4b89-835e-10e70ade9c21";
   const [gridCols, setGridCols] = useState<3 | 4>(3);
   const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
   const [ctaPressed, setCtaPressed] = useState(false);
@@ -274,7 +275,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
               }}
             >
               <div className={cn(
-                "bg-[hsl(var(--canvas))] rounded-sm overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer aspect-[4/3] p-6"
+                "bg-[hsl(var(--canvas))] rounded-sm overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer p-6",
+                preserveFullProductImage ? "aspect-[3/4]" : "aspect-[4/3]"
               )}>
                 <SwipeAlternateProductImage
                   primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
@@ -283,8 +285,9 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                   sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                   alt={pick.title}
-                  primaryClassName="object-contain p-0"
-                  alternateClassName="object-contain p-0"
+                  contain={preserveFullProductImage}
+                  primaryClassName={cn("object-contain p-0", preserveFullProductImage && "object-top")}
+                  alternateClassName={cn("object-contain p-0", preserveFullProductImage && "object-top")}
                 />
                 {/* Inventory badges — lower-left of the frame */}
                 <InventoryBadgeStack
