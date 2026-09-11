@@ -332,6 +332,7 @@ function OrderSummary({
   );
 
   return (
+    <OrderSummarySkeleton isLoading={Boolean(isLoading)}>
     <aside className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] h-fit">
       <div className="border border-border/70 px-7 py-8">
         <div className="flex items-center justify-between gap-3">
