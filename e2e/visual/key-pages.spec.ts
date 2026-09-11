@@ -50,6 +50,29 @@ test.describe("Designers index", () => {
 });
 
 test.describe("Sample public product page", () => {
+  test("mobile has one bottom commerce dock and no duplicate top CTA", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile-chrome", "mobile-only layout guard");
+
+    await page.addInitScript(() => {
+      window.localStorage.setItem("cookie_consent", "declined");
+    });
+    await page.goto("/designers/dagmar-london/clam-chair", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: /clam chair/i }).first()).toBeVisible({ timeout: 15_000 });
+
+    await page.evaluate(() => window.scrollTo(0, Math.floor(document.documentElement.scrollHeight * 0.55)));
+    await page.waitForTimeout(500);
+
+    const visibleOrderButtons = page.getByRole("button", { name: /^place order$/i }).filter({ visible: true });
+    await expect(visibleOrderButtons, "only the bottom commerce dock may show Place Order").toHaveCount(1);
+    const dockBox = await visibleOrderButtons.first().boundingBox();
+    expect(dockBox, "bottom commerce dock button must have a layout box").not.toBeNull();
+    expect(dockBox?.y ?? 0, "Place Order must remain in the lower half of the viewport").toBeGreaterThan(420);
+
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await page.waitForTimeout(500);
+    await expect(page.getByRole("button", { name: /^place order$/i }).filter({ visible: true })).toHaveCount(0);
+  });
+
   test("first designer card links to a working product page", async ({ page }) => {
     await page.goto("/designers", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle").catch(() => {});
