@@ -759,7 +759,9 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           {/* ROW 1 — slim utility ribbon with imposing centered brand lockup */}
           <div className="grid grid-cols-3 items-center justify-items-center pt-6 pb-2 border-b border-neutral-100">
             <div className="flex items-center justify-self-start">
-              <ShippingDestinationSwitcher compact showIso className="min-h-8 justify-center" />
+              <React.Suspense fallback={<span className="inline-block h-8 w-24" aria-hidden="true" />}>
+                <ShippingDestinationSwitcher compact showIso className="min-h-8 justify-center" />
+              </React.Suspense>
             </div>
 
             <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap inline-flex items-center">
