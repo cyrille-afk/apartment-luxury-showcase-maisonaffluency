@@ -344,7 +344,7 @@ export default function LiveTransactionFunnelTracker() {
               <span className="font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{s.label}</span>
             </div>
             <div className="mt-1 text-sm font-semibold tabular-nums text-foreground">
-              {counts[s.key as keyof typeof counts].toLocaleString()}
+              {stageCounts[s.key as keyof typeof stageCounts].toLocaleString()}
             </div>
           </div>
         ))}
