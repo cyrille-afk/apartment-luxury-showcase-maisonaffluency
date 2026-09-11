@@ -64,6 +64,10 @@ const heroPrimaryCtaClass =
 const Hero = () => {
   const navigate = useNavigate();
   const [tourOpen, setTourOpen] = useState(false);
+  const [tourMounted, setTourMounted] = useState(false);
+  useEffect(() => {
+    if (tourOpen) setTourMounted(true);
+  }, [tourOpen]);
   const [showImageFallback, setShowImageFallback] = useState(false);
   const isPwa = isPwaStandaloneDisplay();
 
