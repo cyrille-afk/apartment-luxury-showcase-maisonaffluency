@@ -141,7 +141,7 @@ jobs:
         shell: bash
         run: |
           {
-            echo "### Lighthouse mobile (median of 3 runs)"
+            echo "### Lighthouse mobile (median of 2 runs)"
             echo '```'
             grep -E '^(▸|  [✓✗])' lighthouse-mobile.log || echo "no metrics captured"
             echo '```'
