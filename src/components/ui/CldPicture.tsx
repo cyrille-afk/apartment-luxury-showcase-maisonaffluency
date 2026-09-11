@@ -39,7 +39,7 @@ export function CldPicture({
   mobileWidths = [480, 640],
   sizes = "100vw",
   className,
-  pictureClassName,
+  pictureClassName = "contents",
   decoding,
   ...imgProps
 }: CldPictureProps) {
