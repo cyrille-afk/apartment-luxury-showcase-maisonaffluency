@@ -1972,7 +1972,13 @@ export default function Checkout() {
         </div>
 
         {/* Right — persistent order summary */}
-        <OrderSummary lines={grossLines} summary={summary} buyerType={buyerType} buyerGstNumber={buyerGstNumber} />
+        <OrderSummary
+          lines={grossLines}
+          summary={summary}
+          buyerType={buyerType}
+          buyerGstNumber={buyerGstNumber}
+          isLoading={!fxReady || rawLines === null || syncing}
+        />
         </div>
 
         {/* Need Help? — support channels at the base of checkout */}
