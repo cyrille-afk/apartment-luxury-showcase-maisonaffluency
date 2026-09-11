@@ -815,20 +815,11 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <FavoritesHoverPreview favCount={favCount}>
-                <button
-                  onClick={() => navigate("/favorites")}
-                  aria-label="Wishlist"
-                  className="relative group p-1 transition-colors hover:text-foreground"
-                >
-                  <Heart className="w-[16px] h-[16px] text-muted-foreground" strokeWidth={1.25} />
-                  {favCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] leading-none px-1">
-                      {favCount}
-                    </span>
-                  )}
-                </button>
-              </FavoritesHoverPreview>
+              <React.Suspense fallback={favoritesButton}>
+                <FavoritesHoverPreview favCount={favCount}>
+                  {favoritesButton}
+                </FavoritesHoverPreview>
+              </React.Suspense>
 
               <CartNavButton />
             </div>
