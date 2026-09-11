@@ -1,4 +1,3 @@
-import { motion, AnimatePresence } from "framer-motion";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { X, Layers, MessageSquareQuote, ShoppingCart, Trash2, Loader2 } from "lucide-react";
 import { useCompare } from "@/contexts/CompareContext";
@@ -113,14 +112,10 @@ const CompareDrawer = () => {
 
   return (
     <>
-      <AnimatePresence>
+      <>
         {isComparing && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex flex-col"
+          <div
+            className="animate-fade-in fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
@@ -165,12 +160,10 @@ const CompareDrawer = () => {
             <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8">
               <div className={`grid ${colClass} gap-6 md:gap-8 mx-auto items-stretch`}>
                 {items.map((item, idx) => (
-                  <motion.div
+                  <div
                     key={`${item.designerId}-${item.pick.title}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: idx * 0.1 }}
-                    className="flex h-full flex-col"
+                    style={{ animationDelay: `${idx * 0.1}s` }}
+                    className="animate-fade-in flex h-full flex-col"
                   >
                     {/* Image */}
                     <CompareImage item={item} />
@@ -289,13 +282,13 @@ const CompareDrawer = () => {
                         )}
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+      </>
 
       <QuoteRequestDialog
         open={quoteOpen}
