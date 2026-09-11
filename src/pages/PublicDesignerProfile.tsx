@@ -2024,6 +2024,7 @@ const PublicDesignerProfile = () => {
                       }}
                       className={cn(
                         "mb-10 md:mb-0 group flex flex-col transition-all duration-700",
+                        mobileStagger && "mt-10 md:mt-0",
                         highlightId === pick.id && "ring-2 ring-primary rounded-luxury-sharp ring-offset-2 ring-offset-background animate-pulse"
                       )}
                     >
