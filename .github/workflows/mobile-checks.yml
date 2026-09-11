@@ -113,7 +113,7 @@ jobs:
   lighthouse-mobile:
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    # Blocking mobile performance gate: median of 2 Lighthouse runs on "/" under
+    # Blocking mobile performance gate: 1 Lighthouse run on "/" under
     # simulated mobile 4G. Fails the build when FCP / LCP / CLS / TBT or the
     # performance / accessibility scores breach the budgets in
     # scripts/lighthouse-mobile.mjs. Scope is deliberately narrow — the previous
@@ -142,7 +142,7 @@ jobs:
         shell: bash
         run: |
           {
-            echo "### Lighthouse mobile (median of 2 runs)"
+            echo "### Lighthouse mobile"
             echo '```'
             grep -E '^(▸|  [✓✗])' lighthouse-mobile.log || echo "no metrics captured"
             echo '```'
