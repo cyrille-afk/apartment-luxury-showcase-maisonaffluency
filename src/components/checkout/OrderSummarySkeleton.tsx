@@ -1,5 +1,3 @@
-import { cn } from "@/lib/utils";
-
 /**
  * Premium editorial skeleton for the Checkout Order Summary panel.
  *
