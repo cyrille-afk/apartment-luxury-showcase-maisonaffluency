@@ -1,4 +1,3 @@
-import { motion, useInView } from "framer-motion";
 import { CldPicture } from "@/components/ui/CldPicture";
 import { useRef, useState, useEffect } from "react";
 import { Share as ShareIos, Play, Search } from "lucide-react";
@@ -25,8 +24,31 @@ const POSTER_URL = posterAt(IS_MOBILE_VIEWPORT ? 780 : 1280);
 
 
 const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const ref = useRef<HTMLElement>(null);
+  const [isInView, setIsInView] = useState(false);
+
+  // Plain IntersectionObserver instead of framer-motion's useInView: this
+  // section sits just below the fold, so importing the animation runtime here
+  // pulled a ~90ms script-evaluation task into the page-load window.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setIsInView(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "-100px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isMobile = useIsMobile();
@@ -82,11 +104,8 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
     return (
       <section ref={ref} id="apartment-tour" className="pt-8 md:pt-16 pb-8 md:pb-12 bg-white scroll-header-offset">
         <div className="mx-auto max-w-6xl px-4 md:px-12 lg:px-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
-            className="flex flex-col md:flex-row gap-2 md:gap-8 items-stretch md:items-start"
+          <div
+            className={`flex flex-col md:flex-row gap-2 md:gap-8 items-stretch md:items-start transition-all duration-[600ms] ease-out ${isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}`}
           >
             {/* Title — above video on mobile, left side on desktop */}
             <div
@@ -233,7 +252,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               </div>
 
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
     );
@@ -242,10 +261,8 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
   return (
     <section ref={ref} id="apartment-tour" className="pt-8 md:pt-12 pb-2 md:pb-4 bg-white scroll-header-offset">
       <div className="mx-auto max-w-6xl px-4 md:px-12 lg:px-20">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
+        <div
+          className={`transition-all duration-[800ms] ease-out ${isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
           {/* Header */}
           <div className="flex flex-col items-center text-center mb-6 md:mb-10">
@@ -371,7 +388,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               ))}
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
