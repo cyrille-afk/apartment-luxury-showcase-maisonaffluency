@@ -245,6 +245,7 @@ export default function LiveTransactionFunnelTracker() {
         spawnDebtRef.current -= 1;
         spawned += 1;
         const abandons = Math.random() < dropOff / 100;
+        const pRegion = pickRegion(region);
         particlesRef.current.push({
           id: idRef.current++,
           x: 0,
@@ -252,13 +253,15 @@ export default function LiveTransactionFunnelTracker() {
           speed: rand(0.09, 0.2) * (reduced ? 0.4 : 1),
           r: rand(2.5, 6),
           dropAt: abandons ? rand(0.2, 0.92) : null,
-          region: pickRegion(region),
+          region: pRegion,
         });
+        pushHistory({ at: Date.now(), action: "views", valueUsd: null, region: pRegion, token: makeToken() });
       }
 
       let cart = 0;
       let checkout = 0;
       let purchases = 0;
+      let purchaseValueThisFrame = 0;
       const alive: Particle[] = [];
       for (const p of particlesRef.current) {
         if (p.zone) {
@@ -275,10 +278,20 @@ export default function LiveTransactionFunnelTracker() {
         p.y = Math.max(-1, Math.min(1, p.y));
 
         if (p.dropAt !== null && p.x >= p.dropAt) continue; // abandoned
-        if (prevX < 0.33 && p.x >= 0.33) cart += 1;
-        if (prevX < 0.66 && p.x >= 0.66) checkout += 1;
+        const bias = REGIONS.find((r) => r.id === p.region)!.aovBias;
+        if (prevX < 0.33 && p.x >= 0.33) {
+          cart += 1;
+          pushHistory({ at: Date.now(), action: "cart", valueUsd: null, region: p.region, token: makeToken() });
+        }
+        if (prevX < 0.66 && p.x >= 0.66) {
+          checkout += 1;
+          pushHistory({ at: Date.now(), action: "checkout", valueUsd: luxuryValue(bias), region: p.region, token: makeToken() });
+        }
         if (p.x >= 1) {
           purchases += 1;
+          const val = luxuryValue(bias);
+          purchaseValueThisFrame += val;
+          pushHistory({ at: Date.now(), action: "purchases", valueUsd: val, region: p.region, token: makeToken() });
           continue;
         }
         alive.push(p);
@@ -286,9 +299,8 @@ export default function LiveTransactionFunnelTracker() {
       particlesRef.current = alive;
 
       if (purchases) {
-        const value = purchases * luxuryValue(regionMeta.aovBias);
         if (Math.random() < 0.4) {
-          pushLog({ tone: "success", text: `Trigger: Order verified ($${(value / purchases).toFixed(0)})` });
+          pushLog({ tone: "success", text: `Trigger: Order verified ($${(purchaseValueThisFrame / purchases).toFixed(0)})` });
         }
       } else if (Math.random() < dt * 0.35) {
         pushLog({ tone: "info", text: "Trigger: Dynamic load balanced" });
