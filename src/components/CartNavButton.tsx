@@ -110,35 +110,40 @@ export default function CartNavButton({
         )}
       </button>
 
-      <SelectionDrawer
-        isOpen={open && items.length > 0}
-        onClose={() => setOpen(false)}
-        lines={items.map((i) => ({
-          key: i.key,
-          brand: i.designerName,
-          title: i.title,
-          configuration: i.finishLabel,
-          leadTime: i.leadTime,
-          imageUrl: i.imageUrl,
-          quantity: i.quantity,
-          priceLabel:
-            i.unitPriceCents > 0
-              ? formatMoney(i.unitPriceCents * i.quantity, i.currency)
-              : "Price upon Request",
-        }))}
-        subtotalLabel={
-          items.some((i) => i.unitPriceCents > 0)
-            ? formatMoney(cartSubtotalCents(items), items[0]?.currency)
-            : null
-        }
-        onLineQuantityChange={handleQuantity}
-        onRemoveLine={(key) => removeFromCart(key)}
-        onViewCart={() => {
-          setOpen(false);
-          navigate("/cart");
-        }}
-        onCheckout={handleCheckout}
-      />
+      {drawerMounted && (
+        <Suspense fallback={null}>
+          <SelectionDrawer
+            isOpen={open && items.length > 0}
+            onClose={() => setOpen(false)}
+            lines={items.map((i) => ({
+              key: i.key,
+              brand: i.designerName,
+              title: i.title,
+              configuration: i.finishLabel,
+              leadTime: i.leadTime,
+              imageUrl: i.imageUrl,
+              quantity: i.quantity,
+              priceLabel:
+                i.unitPriceCents > 0
+                  ? formatMoney(i.unitPriceCents * i.quantity, i.currency)
+                  : "Price upon Request",
+            }))}
+            subtotalLabel={
+              items.some((i) => i.unitPriceCents > 0)
+                ? formatMoney(cartSubtotalCents(items), items[0]?.currency)
+                : null
+            }
+            onLineQuantityChange={handleQuantity}
+            onRemoveLine={(key) => removeFromCart(key)}
+            onViewCart={() => {
+              setOpen(false);
+              navigate("/cart");
+            }}
+            onCheckout={handleCheckout}
+          />
+        </Suspense>
+      )}
+
 
     </>
   );
