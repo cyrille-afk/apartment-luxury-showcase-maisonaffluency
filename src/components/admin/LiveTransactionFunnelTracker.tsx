@@ -27,11 +27,12 @@ const STAGES = [
 
 type Particle = {
   id: number;
-  x: number; // 0..1 progress along the stream
+  x: number; // 0..1 progress along the stream, or fixed zone center for scatter nodes
   y: number; // -1..1 vertical jitter
   speed: number;
   r: number;
   dropAt: number | null; // x at which the session abandons
+  zone?: { min: number; max: number }; // when set, particle is a fixed scatter node inside this stage zone
 };
 
 type LogEntry = { id: number; tone: "success" | "info"; text: string };
