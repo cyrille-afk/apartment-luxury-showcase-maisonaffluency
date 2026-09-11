@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect, createContext, useContext } from "react";
+import { CldPicture } from "@/components/ui/CldPicture";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useDesignerFinishFamilies } from "@/hooks/useDesignerFinishFamilies";
@@ -1357,23 +1358,19 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
 
         {pick.image_url ? (
           <>
-            <img
+            <CldPicture
               src={pick.image_url}
               alt={pick.title}
               className={cn(
                 "w-full h-full object-cover object-center transition-all duration-700 group-hover:scale-[1.03]",
                 pick.hover_image_url && "group-hover:opacity-0"
-              )}
-              loading="lazy"
-            />
+              )} />
             {pick.hover_image_url && (
-              <img
+              <CldPicture
                 src={pick.hover_image_url}
                 alt=""
                 aria-hidden="true"
-                className="absolute inset-0 w-full h-full object-cover object-center opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                loading="lazy"
-              />
+                className="absolute inset-0 w-full h-full object-cover object-center opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             )}
           </>
         ) : (
@@ -1909,12 +1906,10 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
             >
               <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center">
                 <div className="hidden md:block w-[320px] flex-shrink-0 aspect-[4/3] bg-muted/20 rounded-lg overflow-hidden">
-                  <img
+                  <CldPicture
                     src={hero ? hero.image : "https://res.cloudinary.com/dif1oamtj/image/upload/w_640,q_auto,f_auto,c_fill/v1774537853/02travel-look-samuel-tmagArticle_ocja5c.jpg"}
                     alt={hero ? hero.title : "Designers & Makers"}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
+                    className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 w-full">
                   <div className="flex items-start justify-between gap-3 mb-1.5 md:mb-2">

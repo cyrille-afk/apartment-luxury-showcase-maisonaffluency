@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { CldPicture } from "@/components/ui/CldPicture";
 import { useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { scrollToSection } from "@/lib/scrollToSection";
@@ -70,11 +71,10 @@ const CuratingTeam = () => {
                     onClick={() => setSelectedMember(member)}
                   >
                     {member.image ? (
-                      <img
+                      <CldPicture
                         src={member.image}
                         alt={member.name}
-                        className="w-full h-full object-cover"
-                      />
+                        className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-primary/30">
                         <svg
@@ -105,11 +105,10 @@ const CuratingTeam = () => {
                 <div className="flex flex-col items-center p-6 pt-14">
                   {member.image ? (
                     <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden mb-6 border-2 border-primary/20">
-                      <img
+                      <CldPicture
                         src={member.image}
                         alt={member.name}
-                        className="w-full h-full object-cover"
-                      />
+                        className="w-full h-full object-cover" />
                     </div>
                   ) : (
                     <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden mb-6 bg-primary/5 border-2 border-primary/20 flex items-center justify-center">

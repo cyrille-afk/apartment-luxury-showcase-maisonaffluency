@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { CldPicture } from "@/components/ui/CldPicture";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 import { ChevronRight } from "lucide-react";
@@ -130,16 +131,14 @@ const Overview = () => {
                   aria-label="Meet The Curating Team"
                 >
                   <div className="flex -space-x-2 relative z-10 -ml-3">
-                    <img
+                    <CldPicture
                       src={cloudinaryUrl("IMG_2542_1_kc4fvs", { width: 128, quality: "auto", crop: "fill" })}
                       alt="Cyrille Delval"
-                      className="w-16 h-16 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
-                    />
-                    <img
+                      className="w-16 h-16 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300" />
+                    <CldPicture
                       src={cloudinaryUrl("Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs", { width: 128, quality: "auto", crop: "fill" })}
                       alt="Elsa Lemarignier"
-                      className="w-16 h-16 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
-                    />
+                      className="w-16 h-16 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300" />
                   </div>
                   <span className="bg-white hover:bg-white/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] group-hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] transition-all duration-300 text-base rounded-full pl-4 pr-5 py-1.5 font-body">
                     Meet The Curating Team
@@ -178,16 +177,14 @@ const Overview = () => {
                 aria-label="Meet The Curating Team"
               >
                 <div className="flex -space-x-3 relative z-10 -mr-4">
-                  <img
+                  <CldPicture
                     src={cloudinaryUrl("IMG_2542_1_kc4fvs", { width: 160, quality: "auto", crop: "fill" })}
                     alt="Cyrille Delval"
-                    className="w-20 h-20 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
-                  />
-                  <img
+                    className="w-20 h-20 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300" />
+                  <CldPicture
                     src={cloudinaryUrl("Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs", { width: 160, quality: "auto", crop: "fill" })}
                     alt="Elsa Lemarignier"
-                    className="w-20 h-20 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
-                  />
+                    className="w-20 h-20 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300" />
                 </div>
                 <span className="bg-white hover:bg-white/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] group-hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] transition-all duration-300 text-sm rounded-full pl-5 pr-4 py-2.5 font-body">
                   Meet The Curating Team

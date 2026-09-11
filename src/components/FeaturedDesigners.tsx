@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { CldPicture } from "@/components/ui/CldPicture";
 import { Link, useNavigate } from "react-router-dom";
 import CuratorPicksLegend from "./CuratorPicksLegend";
 import { useAuthGate } from "@/hooks/useAuthGate";
@@ -2207,7 +2208,7 @@ const FeaturedDesigners = () => {
           <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center">
             {/* Hero image placeholder — will be replaced with Cloudinary URL */}
             <div className="hidden md:block w-[320px] flex-shrink-0 aspect-[4/3] bg-muted/20 rounded-lg overflow-hidden">
-              <img src="https://res.cloudinary.com/dif1oamtj/image/upload/w_640,q_auto,f_auto,c_fill/v1774537853/02travel-look-samuel-tmagArticle_ocja5c.jpg" alt="Designers & Makers" className="w-full h-full object-cover" loading="lazy" />
+              <CldPicture src="https://res.cloudinary.com/dif1oamtj/image/upload/w_640,q_auto,f_auto,c_fill/v1774537853/02travel-look-samuel-tmagArticle_ocja5c.jpg" alt="Designers & Makers" className="w-full h-full object-cover" />
             </div>
             <div className="flex-1">
               <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
@@ -2513,12 +2514,10 @@ const FeaturedDesigners = () => {
                   >
                     <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
                       {pick.image ? (
-                        <img
+                        <CldPicture
                           src={pick.image}
                           alt={pick.title}
-                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
-                          loading="lazy"
-                        />
+                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
                           <span className="font-display text-3xl text-muted-foreground/20">
@@ -2563,13 +2562,11 @@ const FeaturedDesigners = () => {
                   const cardContent = (
                     <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
                       {designer.image ? (
-                        <img
+                        <CldPicture
                           src={designer.image}
                           alt={designer.name}
                           className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
-                          style={(designer as any).imagePosition ? { objectPosition: (designer as any).imagePosition } : undefined}
-                          loading="lazy"
-                        />
+                          style={(designer as any).imagePosition ? { objectPosition: (designer as any).imagePosition } : undefined} />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
                           <span className="font-display text-3xl text-muted-foreground/20">
@@ -2623,7 +2620,7 @@ const FeaturedDesigners = () => {
                                 }, 400);
                               }}
                             >
-                              <img src={thumb.image} alt="" className="w-full h-full object-cover" loading="lazy" />
+                              <CldPicture src={thumb.image} alt="" className="w-full h-full object-cover" />
                               <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3.5 h-3.5 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
                                 <Plus className="w-2 h-2 text-white" />
                               </span>
@@ -2697,12 +2694,10 @@ const FeaturedDesigners = () => {
                   >
                     <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
                       {pick.image ? (
-                        <img
+                        <CldPicture
                           src={pick.image}
                           alt={pick.title}
-                          className="w-full h-full object-cover transition-all duration-700"
-                          loading="lazy"
-                        />
+                          className="w-full h-full object-cover transition-all duration-700" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-muted/10">
                           <span className="font-display text-3xl text-muted-foreground/20">
@@ -2736,13 +2731,11 @@ const FeaturedDesigners = () => {
                   const cardContent = (
                     <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
                       {designer.image ? (
-                        <img
+                        <CldPicture
                           src={designer.image}
                           alt={designer.name}
                           className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
-                          style={(designer as any).imagePosition ? { objectPosition: (designer as any).imagePosition } : undefined}
-                          loading="lazy"
-                        />
+                          style={(designer as any).imagePosition ? { objectPosition: (designer as any).imagePosition } : undefined} />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
                           <span className="font-display text-3xl text-muted-foreground/20">
@@ -2776,7 +2769,7 @@ const FeaturedDesigners = () => {
                                 }, 400);
                               }}
                             >
-                              <img src={thumb.image} alt="" className="w-full h-full object-cover" loading="lazy" />
+                              <CldPicture src={thumb.image} alt="" className="w-full h-full object-cover" />
                               <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
                                 <Plus className="w-1.5 h-1.5 text-white" />
                               </span>
@@ -2908,23 +2901,20 @@ const FeaturedDesigners = () => {
                         const isFiltered = !pickMatchesFilter(currentPick);
                         return (
                           <>
-                            <img
+                            <CldPicture
                               src={currentPick?.image}
                               alt={currentPick?.title || "Curator's pick"}
                               sizes="(max-width: 767px) 90vw, (max-width: 1024px) 80vw, 60vw"
                               className={`rounded-lg shadow-2xl cursor-zoom-in object-contain ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'} ${isFiltered ? 'blur-sm opacity-40 transition-[filter,opacity] duration-300' : ''} ${picksHovered && currentPick?.hoverImage ? 'opacity-0 transition-opacity duration-500' : 'opacity-100 transition-opacity duration-500'}`}
                               decoding="sync"
-                              loading="eager"
-                              fetchPriority="high"
                               onClick={() => setIsZoomed(!isZoomed)}
-                            />
+ priority />
                             {currentPick?.hoverImage && (
-                              <img
+                              <CldPicture
                                 src={currentPick.hoverImage}
                                 alt={`${currentPick?.title} - alternate view`}
                                 className={`absolute inset-0 w-full h-full object-contain rounded-lg select-none pointer-events-none transition-opacity duration-500 ${picksHovered ? 'opacity-100' : 'opacity-0'} ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'}`}
-                                draggable={false}
-                              />
+                                draggable={false} />
                             )}
                           </>
                         );
@@ -3161,12 +3151,11 @@ const FeaturedDesigners = () => {
                                 onClick={() => setCuratorPickIndex(idx)}
                                 className={`flex-shrink-0 rounded-md overflow-hidden border-2 transition-all duration-200 ${idx === curatorPickIndex ? 'border-white/80 scale-105' : 'border-transparent opacity-50 hover:opacity-80'} ${!matches ? 'blur-[2px] opacity-30' : ''}`}
                               >
-                                <img
+                                <CldPicture
                                   src={pick.image}
                                   alt={pick.title || `Pick ${idx + 1}`}
                                   sizes="(max-width: 767px) 48px, 56px"
-                                  className="w-12 h-12 md:w-14 md:h-14 object-cover"
-                                />
+                                  className="w-12 h-12 md:w-14 md:h-14 object-cover" />
                               </button>
                               );
                             })}

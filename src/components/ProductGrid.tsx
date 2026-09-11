@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { CldPicture } from "@/components/ui/CldPicture";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, FileDown, ChevronLeft, ChevronRight, ArrowUp, Maximize2, Minimize2, MessageSquareQuote, Search, Scale } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
@@ -755,7 +756,7 @@ function singularizeSub(s: string): string {
                       onZoomChange={setIsZoomed}
                     />
                     {currentItem.pick.hoverImage && (
-                      <img
+                      <CldPicture
                         src={currentItem.pick.hoverImage}
                         alt={`${currentItem.pick.title} - alternate view`}
                         className={cn(
@@ -763,8 +764,7 @@ function singularizeSub(s: string): string {
                           isZoomed ? "max-h-[88vh] max-w-[90vw]" : "max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]",
                           lightboxHovered ? "opacity-100" : "opacity-0"
                         )}
-                        draggable={false}
-                      />
+                        draggable={false} />
                     )}
 
                     {/* Desktop hover overlay — click to enlarge/minimize */}

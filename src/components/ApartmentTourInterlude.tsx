@@ -1,4 +1,5 @@
 import { motion, useInView } from "framer-motion";
+import { CldPicture } from "@/components/ui/CldPicture";
 import { useRef, useState, useEffect } from "react";
 import { Share as ShareIos, Play, Search } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -18,13 +19,9 @@ const posterAt = (w: number) =>
 const IS_MOBILE_VIEWPORT =
   typeof window !== "undefined" && !!window.matchMedia?.("(max-width: 767px)").matches;
 const POSTER_URL = posterAt(IS_MOBILE_VIEWPORT ? 780 : 1280);
-// Mobile srcset is capped at 780w — with DPR ~2.6 phones, a 1280w candidate in
-// the srcset gets picked and downloads ~2.7× the bytes for no visible gain.
-// Desktop keeps 1280w only. Both variants share POSTER_URL as `src` so the
-// video poster + <img> resolve to a single cached request.
-const POSTER_SRCSET = (IS_MOBILE_VIEWPORT ? [480, 780] : [780, 1280])
-  .map((w) => `${posterAt(w)} ${w}w`)
-  .join(", ");
+// Responsive candidates for the poster now come from <CldPicture>, which caps
+// phones at 640w with q_auto:eco; POSTER_URL stays the shared `src`/video
+// poster so both resolve to a single cached request.
 
 
 const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
@@ -154,11 +151,10 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                     <DialogTrigger asChild>
                       <button className="flex flex-col items-center text-center group cursor-pointer">
                         <div className="relative">
-                          <img
+                          <CldPicture
                             src={member.image}
                             alt={member.name}
-                            className="w-20 h-20 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
-                          />
+                            className="w-20 h-20 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300" />
                           <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-background border border-[hsl(var(--gold))]/40 flex items-center justify-center shadow-sm">
                             <Search className="w-2.5 h-2.5 text-muted-foreground" />
                           </div>
@@ -178,11 +174,10 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                     </DialogTrigger>
                     <DialogContent className="max-w-md p-0 overflow-hidden rounded-xl bg-background border-primary/20 [&>button]:absolute [&>button]:top-3 [&>button]:right-3 [&>button]:z-50 [&>button]:bg-background/80 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:w-9 [&>button]:h-9 [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:shadow-md [&>button]:border [&>button]:border-primary/20 [&>button]:text-foreground">
                       <div className="flex flex-col items-center p-6 pt-10">
-                        <img
+                        <CldPicture
                           src={member.image}
                           alt={member.name}
-                          className="w-24 h-24 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-lg mb-4"
-                        />
+                          className="w-24 h-24 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-lg mb-4" />
                         <h3 className="font-display text-lg text-primary font-semibold">{member.name}</h3>
                         <p className="text-xs text-muted-foreground tracking-[0.15em] uppercase font-body mb-4">{member.role}</p>
                         <p className="text-sm text-muted-foreground font-body text-justify max-w-sm">{member.bio}</p>
@@ -202,15 +197,12 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                     className="absolute inset-0 w-full h-full group cursor-pointer z-10"
                     aria-label="Play apartment tour video"
                   >
-                    <img
+                    <CldPicture
                       src={POSTER_URL}
-                      srcSet={POSTER_SRCSET}
                       sizes="(max-width: 767px) 100vw, 55vw"
                       alt="Apartment tour preview"
-                      loading="lazy"
                       decoding="async"
-                      className="w-full h-full object-cover"
-                    />
+                      className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#d4bea0]/20 backdrop-blur-none border border-[#d4bea0]/30 flex items-center justify-center group-hover:bg-[#d4bea0]/30 transition-colors">
@@ -288,15 +280,12 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                 className="absolute inset-0 w-full h-full group cursor-pointer z-10"
                 aria-label="Play apartment tour video"
               >
-                <img
+                <CldPicture
                   src={POSTER_URL}
-                  srcSet={POSTER_SRCSET}
                   sizes="100vw"
                   alt="Apartment tour preview"
-                  loading="lazy"
                   decoding="async"
-                  className="w-full h-full object-cover"
-                />
+                  className="w-full h-full object-cover" />
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
                 {/* Play button */}
@@ -346,11 +335,10 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                   <DialogTrigger asChild>
                     <button className="flex flex-col items-center text-center group cursor-pointer">
                       <div className="relative">
-                        <img
+                        <CldPicture
                           src={member.image}
                           alt={member.name}
-                          className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
-                        />
+                          className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300" />
                         <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-background border border-[hsl(var(--gold))]/40 flex items-center justify-center shadow-sm">
                           <Search className="w-2.5 h-2.5 text-muted-foreground" />
                         </div>
@@ -370,11 +358,10 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                   </DialogTrigger>
                   <DialogContent className="max-w-md p-0 overflow-hidden rounded-xl bg-background border-primary/20 [&>button]:absolute [&>button]:top-3 [&>button]:right-3 [&>button]:z-50 [&>button]:bg-background/80 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:w-9 [&>button]:h-9 [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:shadow-md [&>button]:border [&>button]:border-primary/20 [&>button]:text-foreground">
                     <div className="flex flex-col items-center p-6 pt-10">
-                      <img
+                      <CldPicture
                         src={member.image}
                         alt={member.name}
-                        className="w-24 h-24 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-lg mb-4"
-                      />
+                        className="w-24 h-24 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-lg mb-4" />
                       <h3 className="font-display text-lg text-primary font-semibold">{member.name}</h3>
                       <p className="text-xs text-muted-foreground tracking-[0.15em] uppercase font-body mb-4">{member.role}</p>
                       <p className="text-sm text-muted-foreground font-body text-justify max-w-sm">{member.bio}</p>
