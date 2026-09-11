@@ -473,13 +473,16 @@ export default function ProductCommerceCta({
       </div>
       )}
 
-      {/* Mobile sticky bottom dock */}
+      {/* Mobile sticky bottom dock — canvas-matched translucent backdrop so
+          the bar floats over the continuous page scroll instead of reading as
+          a separate white compartment. Fully collapses (invisible) near the
+          footer so no empty block remains. */}
       {dock && typeof document !== "undefined" && createPortal(
         <div
           ref={dockRef}
           className={cn(
             "md:hidden fixed inset-x-0 bottom-0 z-[70] w-full max-w-none isolate",
-            "bg-white border-t border-neutral-100 shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
+            "bg-background/92 backdrop-blur-md border-t border-border/50 shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
             "px-4 pt-3.5 pb-[env(safe-area-inset-bottom)]",
             "transition-opacity duration-200 ease-out",
             isAtBottom
