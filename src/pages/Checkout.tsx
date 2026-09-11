@@ -272,17 +272,25 @@ function BuyerTypeSection({
 /* Order summary — persistent sidebar showing the true unit prices,    */
 /* the subtotal, one explicit discount row, and the final total.       */
 /* ------------------------------------------------------------------ */
+import { OrderSummarySkeleton } from "@/components/checkout/OrderSummarySkeleton";
+
 function OrderSummary({
   lines,
   summary,
   buyerType,
   buyerGstNumber,
+  isLoading,
 }: {
   lines: CheckoutLine[];
   summary: CheckoutSummary;
   buyerType: BuyerType;
   buyerGstNumber: string;
+  isLoading?: boolean;
 }) {
+  if (isLoading) {
+    return <OrderSummarySkeleton />;
+  }
+
   const { currency } = summary;
   const fxRates = useFxRates();
   const usdSgd = useUsdToSgdRate();
