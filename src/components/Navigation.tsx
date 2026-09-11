@@ -960,7 +960,11 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
         )}
       </div>
     </nav>
-    <AuthGateDialog open={authGateOpen} onClose={() => setAuthGateOpen(false)} action="access your account" initialMode={authGateMode} />
+    {authGateMounted && (
+      <React.Suspense fallback={null}>
+        <AuthGateDialog open={authGateOpen} onClose={() => setAuthGateOpen(false)} action="access your account" initialMode={authGateMode} />
+      </React.Suspense>
+    )}
     </>;
 };
 export default Navigation;
