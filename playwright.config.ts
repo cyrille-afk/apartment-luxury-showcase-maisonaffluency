@@ -5,6 +5,7 @@ const BASE_URL = process.env.PW_BASE_URL ?? `http://localhost:${PORT}`;
 const CHROMIUM_EXECUTABLE_PATH =
   process.env.PW_CHROMIUM_EXECUTABLE_PATH ||
   process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+const WEBKIT_EXECUTABLE_PATH = process.env.PW_WEBKIT_EXECUTABLE_PATH;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -42,12 +43,25 @@ export default defineConfig({
     },
     {
       name: "desktop-chrome",
+      grepInvert: /WebKit/,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1280, height: 800 },
         launchOptions: {
           args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"],
           ...(CHROMIUM_EXECUTABLE_PATH ? { executablePath: CHROMIUM_EXECUTABLE_PATH } : {}),
+        },
+      },
+    },
+    {
+      name: "cart-webkit",
+      testMatch: /cart-multi-browser-persistence\.spec\.ts/,
+      grep: /WebKit/,
+      use: {
+        ...devices["Desktop Safari"],
+        viewport: { width: 1280, height: 800 },
+        launchOptions: {
+          ...(WEBKIT_EXECUTABLE_PATH ? { executablePath: WEBKIT_EXECUTABLE_PATH } : {}),
         },
       },
     },

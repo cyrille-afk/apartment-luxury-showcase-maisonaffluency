@@ -12,3 +12,4 @@
 - [x] Prevent PaymentIntent creation until checkout FX rates are resolved
 - [x] Re-enable secure basket persistence when a returning customer starts a new order
 - [x] Verify immutable cart removal and region-preserving cache rewrites across Cart/Checkout
+- [x] Add Chromium/WebKit latency coverage for cart removal and Swiss basket rehydration
