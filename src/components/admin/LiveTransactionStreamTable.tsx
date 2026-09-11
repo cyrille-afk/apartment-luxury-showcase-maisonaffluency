@@ -1,26 +1,24 @@
 import type { Region, StreamAction, StreamEvent } from "./LiveTransactionFunnelTracker";
 
-// Badge colors use scoped `.ft-badge-*` classes (funnel-tracker.css), which
-// ship in the lazy chunk's own CSS file instead of the global stylesheet.
 const ACTION_META: Record<StreamAction, { label: string; badge: string; dot: string }> = {
   views: {
     label: "View",
-    badge: "ft-badge-view",
+    badge: "border-zinc-400/40 bg-zinc-500/10 text-zinc-600 dark:text-zinc-300",
     dot: "bg-zinc-400",
   },
   cart: {
     label: "Cart Add",
-    badge: "ft-badge-cart",
+    badge: "border-blue-700/50 bg-blue-500/10 text-blue-600 dark:text-blue-300",
     dot: "bg-blue-500",
   },
   checkout: {
     label: "Checkout",
-    badge: "ft-badge-checkout",
+    badge: "border-amber-600/50 bg-amber-500/10 text-amber-700 dark:text-amber-300",
     dot: "bg-amber-500",
   },
   purchases: {
     label: "Purchase",
-    badge: "ft-badge-purchase",
+    badge: "border-emerald-800/60 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
     dot: "bg-emerald-500 shadow-[0_0_8px_2px_rgba(16,185,129,0.55)]",
   },
 };
@@ -94,7 +92,7 @@ export default function LiveTransactionStreamTable({
                   </td>
                   <td className="px-4 py-2">
                     <span
-                      className={`ft-badge ${meta.badge}`}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider ${meta.badge}`}
                     >
                       <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
                       {meta.label}
