@@ -114,6 +114,22 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   const [authGateMode, setAuthGateMode] = useState<"prompt" | "signup" | "login">("prompt");
   // Global wishlist state (localStorage-backed, shared via WishlistProvider)
   const { count: favCount } = useWishlist();
+  // Rendered both as the Suspense fallback and as the hover-preview trigger so
+  // the wishlist icon is never missing while its preview chunk loads.
+  const favoritesButton = (
+    <button
+      onClick={() => navigate("/favorites")}
+      aria-label="Wishlist"
+      className="relative group p-1 transition-colors hover:text-foreground"
+    >
+      <Heart className="w-[16px] h-[16px] text-muted-foreground" strokeWidth={1.25} />
+      {favCount > 0 && (
+        <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] leading-none px-1">
+          {favCount}
+        </span>
+      )}
+    </button>
+  );
   const navigate = useNavigate();
   const location = useLocation();
   const isOnCategoryRoute = location.pathname.startsWith("/products-category/");
