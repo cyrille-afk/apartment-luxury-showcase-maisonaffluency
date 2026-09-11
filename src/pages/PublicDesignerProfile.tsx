@@ -729,7 +729,7 @@ const PublicDesignerProfile = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-dvh bg-background flex items-center justify-center">
         <DotCircleLoader size="md" />
       </div>
     );
@@ -1228,7 +1228,7 @@ const PublicDesignerProfile = () => {
         ) : (
           <>
             {wideHeroImage && (
-              <div className="relative w-screen left-1/2 -ml-[50vw] h-[72vh] max-h-[calc(100vh-22rem)] min-h-[320px] overflow-hidden bg-muted">
+              <div className="relative w-screen left-1/2 -ml-[50vw] h-[72dvh] max-h-[calc(100dvh-22rem)] min-h-[320px] overflow-hidden bg-muted">
                 <CldPicture
                   src={wideHeroImage}
                   alt={`${name} interior`}
@@ -1414,11 +1414,11 @@ const PublicDesignerProfile = () => {
         );
       })()}
 
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-dvh bg-background text-foreground">
         <Navigation />
 
         <div className={cn(
-          "mx-auto pt-[var(--header-h)] pb-[max(5rem,calc(env(safe-area-inset-bottom)+4rem))] md:pb-20 space-y-1 md:space-y-1.5",
+          "mx-auto pt-[var(--header-h)] pb-[calc(env(safe-area-inset-bottom,0px)+3rem)] md:pb-20 space-y-1 md:space-y-1.5",
           useNewInSpotlightFormat
             ? "w-full max-w-7xl px-6 md:px-12 bg-transparent"
             : "px-4 max-w-6xl md:max-w-7xl md:px-12 lg:px-12"
