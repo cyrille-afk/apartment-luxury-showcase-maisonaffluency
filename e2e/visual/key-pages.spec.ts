@@ -59,9 +59,6 @@ test.describe("Sample public product page", () => {
     await page.goto("/designers/dagmar-london/clam-chair", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: /clam chair/i }).first()).toBeVisible({ timeout: 15_000 });
 
-    await page.evaluate(() => window.scrollTo(0, Math.floor(document.documentElement.scrollHeight * 0.55)));
-    await page.waitForTimeout(500);
-
     const visibleOrderButtons = page.getByRole("button", { name: /^place order$/i }).filter({ visible: true });
     await expect(visibleOrderButtons, "only the bottom commerce dock may show Place Order").toHaveCount(1);
     const dockBox = await visibleOrderButtons.first().boundingBox();
