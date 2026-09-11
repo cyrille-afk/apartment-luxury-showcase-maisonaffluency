@@ -4,7 +4,9 @@ import { scrollToSection } from "@/lib/scrollToSection";
 import { trackEvent, trackCTA } from "@/lib/analytics";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { setDarkIosChrome, clearDarkIosChrome } from "@/lib/iosChrome";
-import PrivateTourDialog from "@/components/PrivateTourDialog";
+// Appointment dialog (plus its Turnstile widget) is click-only: keep it out of
+// the homepage critical path.
+const PrivateTourDialog = lazy(() => import("@/components/PrivateTourDialog"));
 
 const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
 const HERO_ID = "v1781920000/AffluencySG_194-22.jpg_macpwj";
