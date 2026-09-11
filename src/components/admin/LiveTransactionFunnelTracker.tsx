@@ -230,6 +230,7 @@ export default function LiveTransactionFunnelTracker() {
           speed: rand(0.09, 0.2) * (reduced ? 0.4 : 1),
           r: rand(2.5, 6),
           dropAt: abandons ? rand(0.2, 0.92) : null,
+          region: pickRegion(region),
         });
       }
 
