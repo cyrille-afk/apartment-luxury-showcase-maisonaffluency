@@ -36,6 +36,21 @@ type Particle = {
 
 type LogEntry = { id: number; tone: "success" | "info"; text: string };
 
+type StreamAction = "views" | "cart" | "checkout" | "purchases";
+
+type StreamEvent = {
+  id: number;
+  at: number;
+  action: StreamAction;
+  valueUsd: number | null;
+  region: Exclude<Region, "global">;
+  token: string;
+};
+
+const ACTION_META: Record<StreamAction, { label: string; badge: string }> = {
+  views: "" as never,
+} as never;
+
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
 
 export default function LiveTransactionFunnelTracker() {
