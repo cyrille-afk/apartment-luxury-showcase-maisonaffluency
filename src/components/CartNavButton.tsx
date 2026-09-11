@@ -1,8 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
-import SelectionDrawer, { type PaymentMethod } from "@/components/product/SelectionDrawer";
+import type { PaymentMethod } from "@/components/product/SelectionDrawer";
+
+// The mini-cart sheet is only reachable after a click, so it stays out of the
+// initial bundle (it pulls the whole checkout/payment UI with it).
+const SelectionDrawer = lazy(() => import("@/components/product/SelectionDrawer"));
 import {
   useCart,
   cartItemCount,
@@ -32,6 +36,12 @@ export default function CartNavButton({
   const items = useCart();
   const count = cartItemCount(items);
   const [open, setOpen] = useState(false);
+  // Keeps the drawer chunk mounted once it has been opened, so its open/close
+  // transitions behave exactly as before.
+  const [drawerMounted, setDrawerMounted] = useState(false);
+  useEffect(() => {
+    if (open) setDrawerMounted(true);
+  }, [open]);
   // The basket lives in persistent storage; re-sync on every mount so closing
   // a checkout overlay or navigating back never surfaces an empty cart.
   useEffect(() => {
@@ -100,35 +110,40 @@ export default function CartNavButton({
         )}
       </button>
 
-      <SelectionDrawer
-        isOpen={open && items.length > 0}
-        onClose={() => setOpen(false)}
-        lines={items.map((i) => ({
-          key: i.key,
-          brand: i.designerName,
-          title: i.title,
-          configuration: i.finishLabel,
-          leadTime: i.leadTime,
-          imageUrl: i.imageUrl,
-          quantity: i.quantity,
-          priceLabel:
-            i.unitPriceCents > 0
-              ? formatMoney(i.unitPriceCents * i.quantity, i.currency)
-              : "Price upon Request",
-        }))}
-        subtotalLabel={
-          items.some((i) => i.unitPriceCents > 0)
-            ? formatMoney(cartSubtotalCents(items), items[0]?.currency)
-            : null
-        }
-        onLineQuantityChange={handleQuantity}
-        onRemoveLine={(key) => removeFromCart(key)}
-        onViewCart={() => {
-          setOpen(false);
-          navigate("/cart");
-        }}
-        onCheckout={handleCheckout}
-      />
+      {drawerMounted && (
+        <Suspense fallback={null}>
+          <SelectionDrawer
+            isOpen={open && items.length > 0}
+            onClose={() => setOpen(false)}
+            lines={items.map((i) => ({
+              key: i.key,
+              brand: i.designerName,
+              title: i.title,
+              configuration: i.finishLabel,
+              leadTime: i.leadTime,
+              imageUrl: i.imageUrl,
+              quantity: i.quantity,
+              priceLabel:
+                i.unitPriceCents > 0
+                  ? formatMoney(i.unitPriceCents * i.quantity, i.currency)
+                  : "Price upon Request",
+            }))}
+            subtotalLabel={
+              items.some((i) => i.unitPriceCents > 0)
+                ? formatMoney(cartSubtotalCents(items), items[0]?.currency)
+                : null
+            }
+            onLineQuantityChange={handleQuantity}
+            onRemoveLine={(key) => removeFromCart(key)}
+            onViewCart={() => {
+              setOpen(false);
+              navigate("/cart");
+            }}
+            onCheckout={handleCheckout}
+          />
+        </Suspense>
+      )}
+
 
     </>
   );

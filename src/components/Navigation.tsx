@@ -29,12 +29,14 @@ import {
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { categoryUrl } from "@/lib/categorySlugs";
-import AuthGateDialog from "@/components/AuthGateDialog";
-import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
+// Interaction-only surfaces: loaded on demand so the header does not drag the
+// auth/OAuth + hover-preview code into the first-paint bundle.
+const AuthGateDialog = React.lazy(() => import("@/components/AuthGateDialog"));
+const GalleryDetailsFloatingNav = React.lazy(() => import("@/components/GalleryDetailsFloatingNav"));
 
 import { supabase } from "@/integrations/supabase/client";
 // useFeaturedPublicDocument import removed — AD free-download flow discontinued.
-import FavoritesHoverPreview from "@/components/FavoritesHoverPreview";
+const FavoritesHoverPreview = React.lazy(() => import("@/components/FavoritesHoverPreview"));
 import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitcher";
 import CartNavButton from "@/components/CartNavButton";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
@@ -105,9 +107,29 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
     : leftNavItems.filter((item) => item.href !== "/collectibles");
   const { items: pinItems, setIsComparing } = useCompare();
   const [authGateOpen, setAuthGateOpen] = useState(false);
+  const [authGateMounted, setAuthGateMounted] = useState(false);
+  useEffect(() => {
+    if (authGateOpen) setAuthGateMounted(true);
+  }, [authGateOpen]);
   const [authGateMode, setAuthGateMode] = useState<"prompt" | "signup" | "login">("prompt");
   // Global wishlist state (localStorage-backed, shared via WishlistProvider)
   const { count: favCount } = useWishlist();
+  // Rendered both as the Suspense fallback and as the hover-preview trigger so
+  // the wishlist icon is never missing while its preview chunk loads.
+  const favoritesButton = (
+    <button
+      onClick={() => navigate("/favorites")}
+      aria-label="Wishlist"
+      className="relative group p-1 transition-colors hover:text-foreground"
+    >
+      <Heart className="w-[16px] h-[16px] text-muted-foreground" strokeWidth={1.25} />
+      {favCount > 0 && (
+        <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] leading-none px-1">
+          {favCount}
+        </span>
+      )}
+    </button>
+  );
   const navigate = useNavigate();
   const location = useLocation();
   const isOnCategoryRoute = location.pathname.startsWith("/products-category/");
@@ -714,13 +736,15 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 </div>
 
                 {/* Floating quick-actions — bottom-right of the categories panel */}
-                <GalleryDetailsFloatingNav
-                  showImmediately
-                  forceDisplay
-                  azHref="/designers"
-                  onAllCategoriesClick={closeMobileMenu}
-                  className="md:hidden"
-                />
+                <React.Suspense fallback={null}>
+                  <GalleryDetailsFloatingNav
+                    showImmediately
+                    forceDisplay
+                    azHref="/designers"
+                    onAllCategoriesClick={closeMobileMenu}
+                    className="md:hidden"
+                  />
+                </React.Suspense>
               </div>
             </SheetContent>
           </Sheet>
@@ -809,20 +833,11 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <FavoritesHoverPreview favCount={favCount}>
-                <button
-                  onClick={() => navigate("/favorites")}
-                  aria-label="Wishlist"
-                  className="relative group p-1 transition-colors hover:text-foreground"
-                >
-                  <Heart className="w-[16px] h-[16px] text-muted-foreground" strokeWidth={1.25} />
-                  {favCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] leading-none px-1">
-                      {favCount}
-                    </span>
-                  )}
-                </button>
-              </FavoritesHoverPreview>
+              <React.Suspense fallback={favoritesButton}>
+                <FavoritesHoverPreview favCount={favCount}>
+                  {favoritesButton}
+                </FavoritesHoverPreview>
+              </React.Suspense>
 
               <CartNavButton />
             </div>
@@ -945,7 +960,11 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
         )}
       </div>
     </nav>
-    <AuthGateDialog open={authGateOpen} onClose={() => setAuthGateOpen(false)} action="access your account" initialMode={authGateMode} />
+    {authGateMounted && (
+      <React.Suspense fallback={null}>
+        <AuthGateDialog open={authGateOpen} onClose={() => setAuthGateOpen(false)} action="access your account" initialMode={authGateMode} />
+      </React.Suspense>
+    )}
     </>;
 };
 export default Navigation;
