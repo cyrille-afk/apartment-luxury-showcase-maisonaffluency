@@ -36,6 +36,12 @@ export default function CartNavButton({
   const items = useCart();
   const count = cartItemCount(items);
   const [open, setOpen] = useState(false);
+  // Keeps the drawer chunk mounted once it has been opened, so its open/close
+  // transitions behave exactly as before.
+  const [drawerMounted, setDrawerMounted] = useState(false);
+  useEffect(() => {
+    if (open) setDrawerMounted(true);
+  }, [open]);
   // The basket lives in persistent storage; re-sync on every mount so closing
   // a checkout overlay or navigating back never surfaces an empty cart.
   useEffect(() => {
