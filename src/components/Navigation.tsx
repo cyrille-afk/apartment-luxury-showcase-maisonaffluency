@@ -34,7 +34,6 @@ import { categoryUrl } from "@/lib/categorySlugs";
 const AuthGateDialog = React.lazy(() => import("@/components/AuthGateDialog"));
 const GalleryDetailsFloatingNav = React.lazy(() => import("@/components/GalleryDetailsFloatingNav"));
 
-import { supabase } from "@/integrations/supabase/client";
 // useFeaturedPublicDocument import removed — AD free-download flow discontinued.
 const FavoritesHoverPreview = React.lazy(() => import("@/components/FavoritesHoverPreview"));
 import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitcher";
@@ -796,7 +795,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }}
+                        onClick={async () => { const { supabase } = await import("@/integrations/supabase/client"); await supabase.auth.signOut(); window.location.reload(); }}
                         className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors text-destructive"
                       >
                         <LogOut className="h-4 w-4" />

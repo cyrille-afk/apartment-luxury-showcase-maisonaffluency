@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, ReactNode, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+// The Supabase SDK is imported on demand: pulling it in statically put ~100 KB
+// of JS into the entry bundle and lengthened the first main-thread task.
+const getSupabase = async () => (await import("@/integrations/supabase/client")).supabase;
 import { useAuth } from "@/hooks/useAuth";
 
 export type StudioRole = "owner" | "admin" | "editor" | "viewer";
@@ -49,6 +51,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       return;
     }
     if (showLoading) setLoading(true);
+    const supabase = await getSupabase();
     const { data, error } = await supabase
       .from("studio_members")
       .select("role, studio:studios(id, name, slug, logo_url, billing_email, created_by)")
@@ -73,16 +76,26 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   // Background refresh when studio memberships change for this user
   useEffect(() => {
     if (!user) return;
-    const channel = supabase
-      .channel("studio-memberships-" + user.id)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "studio_members", filter: `user_id=eq.${user.id}` },
-        () => fetchStudios(false)
-      )
-      .subscribe();
+    let cleanup: (() => void) | null = null;
+    let cancelled = false;
+
+    void (async () => {
+      const supabase = await getSupabase();
+      if (cancelled) return;
+      const channel = supabase
+        .channel("studio-memberships-" + user.id)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "studio_members", filter: `user_id=eq.${user.id}` },
+          () => fetchStudios(false)
+        )
+        .subscribe();
+      cleanup = () => { supabase.removeChannel(channel); };
+    })();
+
     return () => {
-      supabase.removeChannel(channel);
+      cancelled = true;
+      cleanup?.();
     };
   }, [user, fetchStudios]);
 
