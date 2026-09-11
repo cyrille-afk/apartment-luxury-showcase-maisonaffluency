@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { CldPicture } from "@/components/ui/CldPicture";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
@@ -82,12 +83,10 @@ const JournalTeaser = () => {
                 <Link to={`/journal/${articles[0].slug}`} className="group block">
                   {articles[0].cover_image_url && (
                     <div className="aspect-[16/10] overflow-hidden rounded-sm mb-4">
-                      <img
+                      <CldPicture
                         src={articles[0].cover_image_url}
                         alt={articles[0].title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        loading="lazy"
-                      />
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                     </div>
                   )}
                   <div className="flex items-center gap-2">
@@ -127,12 +126,10 @@ const JournalTeaser = () => {
                     <Link to={`/journal/${article.slug}`} className="group flex gap-4">
                       {article.cover_image_url && (
                         <div className="w-28 md:w-36 aspect-[4/3] overflow-hidden rounded-sm shrink-0">
-                          <img
+                          <CldPicture
                             src={article.cover_image_url}
                             alt={article.title}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            loading="lazy"
-                          />
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">

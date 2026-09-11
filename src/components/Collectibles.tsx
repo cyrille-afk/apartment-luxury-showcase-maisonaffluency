@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { CldPicture } from "@/components/ui/CldPicture";
 import { useNavigate } from "react-router-dom";
 import CuratorPicksLegend from "./CuratorPicksLegend";
 import { useAuthGate } from "@/hooks/useAuthGate";
@@ -751,7 +752,7 @@ const Collectibles = () => {
           >
             <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center">
               <div className="hidden md:block w-[320px] flex-shrink-0 aspect-[4/3] bg-muted/20 rounded-lg overflow-hidden">
-                <img src="https://design-milk.com/images/2024/02/draga-aurel-flare-collection-15.jpg" alt="Collectible Design" className="w-full h-full object-contain" loading="lazy" />
+                <CldPicture src="https://design-milk.com/images/2024/02/draga-aurel-flare-collection-15.jpg" alt="Collectible Design" className="w-full h-full object-contain" />
               </div>
               <div className="flex-1">
                 <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
@@ -1012,7 +1013,7 @@ const Collectibles = () => {
                     >
                       <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
                         {pick.image ? (
-                          <img src={pick.image} alt={pick.title} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="lazy" />
+                          <CldPicture src={pick.image} alt={pick.title} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-muted/10"><span className="font-display text-3xl text-muted-foreground/20">{pick.title.charAt(0)}</span></div>
                         )}
@@ -1051,7 +1052,7 @@ const Collectibles = () => {
                         >
                           <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
                             {heroProduct?.image ? (
-                              <img src={heroProduct.image} alt={heroProduct.title} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="lazy" />
+                              <CldPicture src={heroProduct.image} alt={heroProduct.title} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center bg-muted/10"><span className="font-display text-3xl text-muted-foreground/20">{designer.name.charAt(0)}</span></div>
                             )}
@@ -1075,7 +1076,7 @@ const Collectibles = () => {
                              {/* Designer portrait thumbnail + IG handle — bottom-right */}
                              <div className="absolute bottom-3 right-3 z-10 flex flex-col items-end gap-1">
                                <div className="w-24 h-24 md:w-28 md:h-28 rounded overflow-hidden border-2 border-white backdrop-blur-sm shadow-md">
-                                 <img src={designer.image} alt={designer.name} className="w-full h-full object-cover" loading="lazy" />
+                                 <CldPicture src={designer.image} alt={designer.name} className="w-full h-full object-cover" />
                                </div>
                                {(() => {
                                  const igLink = designer.links?.find(l => l.type === "Instagram" && l.url);
@@ -1146,7 +1147,7 @@ const Collectibles = () => {
                     className="group block w-full text-left rounded-xl overflow-hidden border border-border bg-background"
                   >
                     <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
-                      {pick.image && <img src={pick.image} alt={pick.title} className="w-full h-full object-cover" loading="lazy" />}
+                      {pick.image && <CldPicture src={pick.image} alt={pick.title} className="w-full h-full object-cover" />}
                       <div className="absolute inset-x-0 bottom-0 px-3 pt-8 pb-3 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
                         <p className="font-display text-xs text-white tracking-wide leading-tight drop-shadow-sm">{pick.title}</p>
                         <p className="font-body text-[8px] text-white/50 mt-0.5 uppercase tracking-wider">
@@ -1175,7 +1176,7 @@ const Collectibles = () => {
                       >
                         <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
                           {heroProduct?.image ? (
-                            <img src={heroProduct.image} alt={heroProduct.title} className="w-full h-full object-cover" loading="lazy" />
+                            <CldPicture src={heroProduct.image} alt={heroProduct.title} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-muted/10"><span className="font-display text-2xl text-muted-foreground/20">{designer.name.charAt(0)}</span></div>
                           )}
@@ -1189,7 +1190,7 @@ const Collectibles = () => {
                            {/* Designer portrait + IG handle — bottom-right */}
                            <div className="absolute bottom-2 right-2 z-10 flex flex-col items-end gap-1">
                              <div className="w-20 h-20 rounded overflow-hidden border-2 border-white backdrop-blur-sm shadow-md">
-                               <img src={designer.image} alt={designer.name} className="w-full h-full object-cover" loading="lazy" />
+                               <CldPicture src={designer.image} alt={designer.name} className="w-full h-full object-cover" />
                              </div>
                              {(() => {
                                const igLink = designer.links?.find(l => l.type === "Instagram" && l.url);
@@ -1334,12 +1335,11 @@ const Collectibles = () => {
                             onZoomChange={(z) => { imageZoomedRef.current = z; }}
                           />
                           {currentPick?.hoverImage && (
-                            <img
+                            <CldPicture
                               src={currentPick.hoverImage}
                               alt={`${currentPick?.title} - alternate view`}
                               className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 select-none pointer-events-none ${picksHovered ? 'opacity-100' : 'opacity-0'} ${isZoomed ? 'max-w-none' : ''}`}
-                              draggable={false}
-                            />
+                              draggable={false} />
                           )}
                         </>
                       );
@@ -1514,7 +1514,7 @@ const Collectibles = () => {
                               : 'ring-1 ring-white/20 opacity-50 hover:opacity-90 hover:ring-white/50'
                           } ${!matches ? 'blur-[2px] opacity-30' : ''}`}
                         >
-                          <img src={pick.image} alt={pick.title} sizes="(max-width: 767px) 40px, 48px" className="w-full h-full object-cover" loading="lazy" />
+                          <CldPicture src={pick.image} alt={pick.title} sizes="(max-width: 767px) 40px, 48px" className="w-full h-full object-cover" />
                         </button>
                         );
                       })}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { CldPicture } from "@/components/ui/CldPicture";
 import { useParams, useNavigate, Link, useLocation, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Heart, Pin, FileText, Layers, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2 } from "lucide-react";
@@ -2955,12 +2956,10 @@ const PublicProductPageContent: React.FC = () => {
                             productSlug={rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}
                           />
                           <div className="relative aspect-square rounded-luxury-sharp overflow-hidden bg-muted/30 border border-border">
-                            <img
+                            <CldPicture
                               src={rp.image_url}
                               alt={rp.title}
-                              className="absolute inset-0 w-full h-full object-cover"
-                              loading="lazy"
-                            />
+                              className="absolute inset-0 w-full h-full object-cover" />
                           </div>
                           <div className="mt-2 text-center">
                             {rp.subtitle && (
@@ -2997,22 +2996,18 @@ const PublicProductPageContent: React.FC = () => {
                           productSlug={rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}
                         />
                         <div className="relative aspect-square rounded-luxury-sharp overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/40 transition-colors">
-                          <img
+                          <CldPicture
                             src={rp.image_url}
                             alt={rp.title}
                             className={cn(
                               "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
                               rp.hover_image_url ? "group-hover:opacity-0" : "group-hover:scale-105"
-                            )}
-                            loading="lazy"
-                          />
+                            )} />
                           {rp.hover_image_url && (
-                            <img
+                            <CldPicture
                               src={rp.hover_image_url}
                               alt={rp.title}
-                              className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                              loading="lazy"
-                            />
+                              className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                           )}
                         </div>
                         <div className="mt-3 text-center">

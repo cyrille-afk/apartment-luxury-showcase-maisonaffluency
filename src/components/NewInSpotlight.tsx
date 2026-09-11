@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { CldPicture } from "@/components/ui/CldPicture";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, type Transition } from "framer-motion";
 import { ArrowRight, FileText, Maximize2, Instagram } from "lucide-react";
@@ -401,11 +402,10 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
           <div className="grid grid-cols-12 gap-x-8 items-stretch w-full mb-8">
             {/* Left Column — Hero Landscape Image */}
             <div className="col-span-4 aspect-[4/3] w-full overflow-hidden">
-              <img
+              <CldPicture
                 src={portraitImage}
                 alt={`${displayName} portrait`}
-                className="w-full h-full object-cover object-center"
-              />
+                className="w-full h-full object-cover object-center" />
             </div>
 
             {/* Right Column — Full Stacked Typography & Studio Row */}
@@ -460,12 +460,10 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                           rel="noopener noreferrer"
                           className="group relative block h-full flex-shrink-0 overflow-hidden"
                         >
-                          <img
+                          <CldPicture
                             src={post.image_url!}
                             alt={post.caption || `${displayName} — From the Studio`}
-                            className="h-full aspect-square object-cover bg-neutral-50 flex-shrink-0 transition-transform duration-700 ease-out group-hover:scale-105"
-                            loading="lazy"
-                          />
+                            className="h-full aspect-square object-cover bg-neutral-50 flex-shrink-0 transition-transform duration-700 ease-out group-hover:scale-105" />
                           <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
                             <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           </div>
@@ -506,11 +504,10 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
             className="w-full md:w-[38%] flex-shrink-0"
           >
             <div className="aspect-[3/2] md:aspect-[4/5] overflow-hidden rounded-none bg-muted relative">
-              <img
+              <CldPicture
                 src={portraitImage}
                 alt={`${displayName} portrait`}
-                className="w-full h-full object-cover"
-              />
+                className="w-full h-full object-cover" />
             </div>
           </motion.div>
 
@@ -608,12 +605,10 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                       rel="noopener noreferrer"
                       className={`group relative block aspect-square overflow-hidden bg-muted ${index >= 3 ? "hidden md:block" : ""}`}
                     >
-                      <img
+                      <CldPicture
                         src={post.image_url!}
                         alt={post.caption || `${displayName} — From the Studio`}
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                        loading="lazy"
-                      />
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
                       <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
                         <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import { CldPicture } from "@/components/ui/CldPicture";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import { useParentBrandDesignerCountsFiltered } from "@/hooks/useParentBrandDesignerCounts";
@@ -2123,12 +2124,10 @@ function ParentBrandSubDesignersGrid({ config, onClose }: { config: ParentBrandC
               >
                 <div className="aspect-[3/4] relative bg-muted/10 overflow-hidden">
                   {d.image ? (
-                    <img
+                    <CldPicture
                       src={d.image}
                       alt={d.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110"
-                      loading="lazy"
-                    />
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-muted/5">
                       <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
@@ -2357,14 +2356,12 @@ function AlphaStrip({
                 className="group flex-none w-[80vw] md:w-[340px] snap-start border border-primary/40 ring-1 ring-primary/20 rounded-lg hover:border-primary/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer relative overflow-hidden h-[280px] md:h-[300px]"
               >
                 {bg && (
-                  <img
+                  <CldPicture
                     src={bg}
                     alt={brand.name}
-                    loading="lazy"
                     aria-hidden="true"
                     className="absolute inset-0 w-full h-full pointer-events-none select-none object-cover"
-                    style={{ objectPosition: objectPos }}
-                  />
+                    style={{ objectPosition: objectPos }} />
                 )}
                 <div className={`absolute inset-0 transition-all duration-300 ${hasBg ? "bg-black/20 group-hover:bg-black/15" : "bg-card/80"}`} />
 
@@ -2476,11 +2473,10 @@ function EcartAccordion({ onOpenPicks }: { onOpenPicks: (name: string) => void }
         className="w-full flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors text-left"
       >
         <div className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 border border-border/30">
-          <img
+          <CldPicture
             src={ecartSubDesigners[0].image}
             alt="Ecart"
-            className="w-full h-full object-cover"
-          />
+            className="w-full h-full object-cover" />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-display text-sm tracking-wide text-foreground">
@@ -2515,12 +2511,10 @@ function EcartAccordion({ onOpenPicks }: { onOpenPicks: (name: string) => void }
                   >
                     <div className="aspect-[3/4] relative bg-muted/10 overflow-hidden">
                       {d.image ? (
-                        <img
+                        <CldPicture
                           src={d.image}
                           alt={d.name}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110"
-                          loading="lazy"
-                        />
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-muted/5">
                           <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
@@ -3396,18 +3390,16 @@ const BrandsAteliers = () => {
                               </div>
                             )}
                             {isMobile ? (
-                              <img
+                              <CldPicture
                                 key={picksIndex}
                                 src={picksDesigner.curatorPicks[picksIndex]?.image}
                                 alt={picksDesigner.curatorPicks[picksIndex]?.title}
                                 className={`object-contain select-none transition-all duration-300 ${picksImageLoaded ? '' : 'absolute opacity-0 pointer-events-none'} ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh]'}`}
                                 draggable={false}
                                 decoding="sync"
-                                loading="eager"
-                                fetchPriority="high"
                                 onLoad={() => setPicksImageLoaded(true)}
                                 style={{ userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'pan-y' }}
-                              />
+ priority />
                             ) : (
                               <>
                                 <PinchZoomImage
@@ -3423,12 +3415,11 @@ const BrandsAteliers = () => {
                                   onZoomChange={(z) => { imageZoomedRef.current = z; }}
                                 />
                                 {picksDesigner.curatorPicks[picksIndex]?.hoverImage && (
-                                  <img
+                                  <CldPicture
                                     src={picksDesigner.curatorPicks[picksIndex].hoverImage}
                                     alt={`${picksDesigner.curatorPicks[picksIndex]?.title} - alternate view`}
                                     className={`absolute inset-0 w-full h-full object-contain select-none transition-opacity duration-500 pointer-events-none ${picksHovered ? 'opacity-100' : 'opacity-0'} ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-[70vw] max-h-[60vh]'}`}
-                                    draggable={false}
-                                  />
+                                    draggable={false} />
                                 )}
                               </>
                             )}
@@ -3653,7 +3644,7 @@ const BrandsAteliers = () => {
                               <button key={idx} onClick={() => { setPicksIndex(idx); setPicksZoomed(false); }} aria-label={`View ${pick.title}`}
                                 className={`flex-shrink-0 rounded-md overflow-hidden border-2 transition-all duration-200 ${picksIndex === idx ? 'border-white/80 scale-105' : 'border-transparent opacity-50 hover:opacity-80'}`}>
                                 {pick.image ? (
-                                  <img src={pick.image} alt={pick.title} className="w-12 h-12 md:w-14 md:h-14 object-cover" loading="lazy" decoding="async" />
+                                  <CldPicture src={pick.image} alt={pick.title} className="w-12 h-12 md:w-14 md:h-14 object-cover" decoding="async" />
                                 ) : (
                                   <div className="w-12 h-12 md:w-14 md:h-14 bg-white/10 flex items-center justify-center">
                                     <span className="text-white/40 text-[6px] text-center leading-tight px-0.5">{pick.title}</span>

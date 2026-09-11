@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from "react";
+import { CldPicture } from "@/components/ui/CldPicture";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { prefetchPublicProductPage } from "@/lib/publicProductPageQuery";
 import ProductPrefetchOnVisible from "@/components/ProductPrefetchOnVisible";
@@ -1177,12 +1178,11 @@ const PublicDesignerProfile = () => {
         {/* Left — reduced lifestyle image */}
         <div className="col-span-3 aspect-[4/3] w-full overflow-hidden bg-neutral-50">
           {(wideHeroImage || heroImage) && (
-            <img
+            <CldPicture
               src={wideHeroImage || heroImage}
               alt={`${name} interior`}
               className="w-full h-full object-cover"
-              loading="eager"
-            />
+ priority />
           )}
         </div>
 
@@ -1229,12 +1229,11 @@ const PublicDesignerProfile = () => {
           <>
             {wideHeroImage && (
               <div className="relative w-screen left-1/2 -ml-[50vw] h-[72vh] max-h-[calc(100vh-22rem)] min-h-[320px] overflow-hidden bg-muted">
-                <img
+                <CldPicture
                   src={wideHeroImage}
                   alt={`${name} interior`}
                   className="absolute inset-0 w-full h-full object-cover"
-                  loading="eager"
-                />
+ priority />
               </div>
             )}
 
@@ -1504,13 +1503,12 @@ const PublicDesignerProfile = () => {
               >
                 <div className="aspect-[4/3] sm:aspect-[3/2] md:aspect-[16/10] lg:aspect-[16/9] max-h-[75vh]">
                   {heroImage && (
-                    <img
+                    <CldPicture
                       src={heroImage}
                       alt={name}
                       className="absolute inset-0 w-full h-full object-cover"
                       style={{ objectPosition: "center bottom" }}
-                      loading="eager"
-                    />
+ priority />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
                   {/* Mobile share icon inside hero */}
@@ -1651,12 +1649,11 @@ const PublicDesignerProfile = () => {
                 <div className="col-span-12 lg:col-span-7">
                   <div className="relative overflow-hidden bg-muted">
                     {heroImage && (
-                      <img
+                      <CldPicture
                         src={heroImage}
                         alt={name}
                         className="w-full h-auto object-contain"
-                        loading="eager"
-                      />
+ priority />
                     )}
                   </div>
                   {designer.hero_photo_credit && (

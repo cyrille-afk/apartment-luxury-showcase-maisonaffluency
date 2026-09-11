@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { CldPicture } from "@/components/ui/CldPicture";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Heart, Trash2 } from "lucide-react";
@@ -341,12 +342,10 @@ const PublicFavorites = () => {
                         if (item) setLightboxItem(item);
                       }}
                     >
-                      <img
+                      <CldPicture
                         src={pick.image_url}
                         alt={pick.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                      />
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                       <ProductCardDescriptionOverlay description={pick.description} />
                     </div>
 
