@@ -58,7 +58,7 @@ function optimizeHtmlPlugin(buildId: string): Plugin {
         // hero image win the bandwidth race on throttled PSI mobile runs
         // is worth ~200-400ms of LCP. React still loads (main entry imports
         // it) — just at lower priority so it doesn't compete with the LCP image.
-        const DEFER = /(vendor-motion|vendor-radix|vendor-react|vendor-router|vendor-query|vendor-forms|vendor-date|vendor-carousel|vendor-icons-extra|charts-vendor)/;
+        const DEFER = /(vendor-motion|vendor-radix|vendor-react|vendor-router|vendor-query|vendor-forms|vendor-date|vendor-carousel|vendor-icons-extra|analytics-vendor|core-vendor)/;
         const eager = modulepreloads.filter(h => !DEFER.test(h));
         const deferred = modulepreloads.filter(h => DEFER.test(h));
         const hints = [
@@ -281,8 +281,14 @@ export default defineConfig(({ mode }) => {
       output: {
         manualChunks(id: string) {
           if (!id.includes("node_modules")) return;
+          // Heavy charting libs (admin funnel dashboard only) → own chunk.
           if (/node_modules\/(recharts|victory-vendor|d3-[^/]+|d3)\//.test(id)) {
-            return "charts-vendor";
+            return "analytics-vendor";
+          }
+          // Framework core (react, router, query) → dedicated vendor chunk so
+          // it stays cache-stable across deploys of app code.
+          if (/node_modules\/(react|react-dom|scheduler|react-router|react-router-dom|@remix-run|@tanstack)\//.test(id)) {
+            return "core-vendor";
           }
         },
       },
