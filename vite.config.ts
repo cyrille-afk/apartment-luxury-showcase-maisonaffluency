@@ -58,7 +58,7 @@ function optimizeHtmlPlugin(buildId: string): Plugin {
         // hero image win the bandwidth race on throttled PSI mobile runs
         // is worth ~200-400ms of LCP. React still loads (main entry imports
         // it) — just at lower priority so it doesn't compete with the LCP image.
-        const DEFER = /(vendor-motion|vendor-radix|vendor-react|vendor-router|vendor-query|vendor-forms|vendor-date|vendor-carousel|vendor-icons-extra)/;
+        const DEFER = /(vendor-motion|vendor-radix|vendor-react|vendor-router|vendor-query|vendor-forms|vendor-date|vendor-carousel|vendor-icons-extra|charts-vendor)/;
         const eager = modulepreloads.filter(h => !DEFER.test(h));
         const deferred = modulepreloads.filter(h => DEFER.test(h));
         const hints = [
@@ -273,9 +273,20 @@ export default defineConfig(({ mode }) => {
     minify: "esbuild",
 
     cssMinify: true,
-    // Standard Rollup chunking. Custom manualChunks caused a network
-    // bottleneck during initial page init; code splitting is handled purely
-    // by route-level React.lazy() + dynamic import() of heavy engines.
+    // Route-level React.lazy() handles most splitting. The only manual rule
+    // is charting: recharts/d3/victory-vendor are heavy and only ever reached
+    // from lazy admin dashboards, so they get their own chunk and never land
+    // in the primary index bundle.
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (!id.includes("node_modules")) return;
+          if (/node_modules\/(recharts|victory-vendor|d3-[^/]+|d3)\//.test(id)) {
+            return "charts-vendor";
+          }
+        },
+      },
+    },
     assetsInlineLimit: 1024,
     chunkSizeWarningLimit: 1500,
   },
