@@ -47,9 +47,43 @@ type StreamEvent = {
   token: string;
 };
 
-const ACTION_META: Record<StreamAction, { label: string; badge: string }> = {
-  views: "" as never,
-} as never;
+const ACTION_META: Record<StreamAction, { label: string; badge: string; dot: string }> = {
+  views: {
+    label: "View",
+    badge: "border-zinc-400/40 bg-zinc-500/10 text-zinc-600 dark:text-zinc-300",
+    dot: "bg-zinc-400",
+  },
+  cart: {
+    label: "Cart Add",
+    badge: "border-blue-700/50 bg-blue-500/10 text-blue-600 dark:text-blue-300",
+    dot: "bg-blue-500",
+  },
+  checkout: {
+    label: "Checkout",
+    badge: "border-amber-600/50 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+    dot: "bg-amber-500",
+  },
+  purchases: {
+    label: "Purchase",
+    badge: "border-emerald-800/60 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+    dot: "bg-emerald-500 shadow-[0_0_8px_2px_rgba(16,185,129,0.55)]",
+  },
+};
+
+const REGION_SHORT: Record<Exclude<Region, "global">, string> = {
+  na: "NA",
+  eu: "EU",
+  apac: "APAC",
+};
+
+const makeToken = () =>
+  `sess_${Math.random().toString(36).slice(2, 8)}${Math.random().toString(36).slice(2, 6)}`.toUpperCase();
+
+const formatClock = (ms: number) => {
+  const d = new Date(ms);
+  const pad = (n: number, l = 2) => String(n).padStart(l, "0");
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
+};
 
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
 
