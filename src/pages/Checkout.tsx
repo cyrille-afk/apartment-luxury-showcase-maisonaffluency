@@ -1568,7 +1568,7 @@ export default function Checkout() {
         taxCents: summary.taxCents,
         freightDepositCents: summary.shippingCents || summary.estimatedShippingCents || 0,
         paymentMethod: method,
-        lineCount: grossLines.length,
+        lineCount: grossLines?.length ?? 0,
       });
     } catch {
       /* telemetry must never break order completion */
@@ -1585,7 +1585,7 @@ export default function Checkout() {
     pageDestination.iso,
     pageDestination.name,
     method,
-    grossLines.length,
+    grossLines?.length,
   ]);
   const [error, setError] = useState<string | null>(null);
   const initialised = useRef(false);
