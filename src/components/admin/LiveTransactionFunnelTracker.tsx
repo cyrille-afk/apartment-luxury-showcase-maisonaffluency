@@ -27,11 +27,12 @@ const STAGES = [
 
 type Particle = {
   id: number;
-  x: number; // 0..1 progress along the stream
+  x: number; // 0..1 progress along the stream, or fixed zone center for scatter nodes
   y: number; // -1..1 vertical jitter
   speed: number;
   r: number;
   dropAt: number | null; // x at which the session abandons
+  zone?: { min: number; max: number }; // when set, particle is a fixed scatter node inside this stage zone
 };
 
 type LogEntry = { id: number; tone: "success" | "info"; text: string };
@@ -87,6 +88,21 @@ const formatClock = (ms: number) => {
 
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
 
+const LUXURY_MIN = 2500;
+const LUXURY_MAX = 15000;
+
+const STAGE_ZONES: Record<StreamAction, { min: number; max: number }> = {
+  views: { min: 0, max: 0.25 },
+  cart: { min: 0.25, max: 0.5 },
+  checkout: { min: 0.5, max: 0.75 },
+  purchases: { min: 0.75, max: 1 },
+};
+
+const luxuryValue = (bias: number) => {
+  const raw = rand(LUXURY_MIN, LUXURY_MAX) * bias;
+  return Math.min(LUXURY_MAX, Math.max(LUXURY_MIN, raw));
+};
+
 export default function LiveTransactionFunnelTracker() {
   const [running, setRunning] = useState(true);
   const [trafficVolume, setTrafficVolume] = useState(25); // req/s
@@ -136,11 +152,7 @@ export default function LiveTransactionFunnelTracker() {
           : (region as Exclude<Region, "global">);
       const bias = REGIONS.find((r) => r.id === evtRegion)!.aovBias;
       const valueUsd =
-        action === "purchases"
-          ? rand(2200, 18500) * bias
-          : action === "checkout"
-            ? rand(1800, 15000) * bias
-            : null;
+        action === "purchases" || action === "checkout" ? luxuryValue(bias) : null;
 
       const event: StreamEvent = {
         id: idRef.current++,
@@ -155,16 +167,17 @@ export default function LiveTransactionFunnelTracker() {
       setCounts((c) => ({ ...c, [action]: c[action] + 1 }));
       if (action === "purchases" && valueUsd) setRevenue((r) => r + valueUsd);
 
-      // Inject a matching particle at the stage the webhook reports.
-      const startX = action === "views" ? 0 : action === "cart" ? 0.34 : action === "checkout" ? 0.67 : 0.9;
+      // Inject a matching scatter node constrained to the correct funnel zone.
+      const zone = STAGE_ZONES[action];
       if (particlesRef.current.length < 160) {
         particlesRef.current.push({
           id: idRef.current++,
-          x: startX,
+          x: rand(zone.min, zone.max),
           y: rand(-1, 1),
-          speed: rand(0.09, 0.2),
+          speed: 0,
           r: rand(3.5, 7),
           dropAt: null,
+          zone,
         });
       }
 
@@ -215,6 +228,14 @@ export default function LiveTransactionFunnelTracker() {
       let purchases = 0;
       const alive: Particle[] = [];
       for (const p of particlesRef.current) {
+        if (p.zone) {
+          // Fixed scatter nodes: keep inside the assigned stage zone and only drift vertically.
+          p.y += Math.sin((now / 900 + p.id) % (Math.PI * 2)) * dt * 0.25;
+          p.y = Math.max(-1, Math.min(1, p.y));
+          alive.push(p);
+          continue;
+        }
+
         const prevX = p.x;
         p.x += p.speed * dt;
         p.y += Math.sin((now / 900 + p.id) % (Math.PI * 2)) * dt * 0.25;
@@ -240,7 +261,7 @@ export default function LiveTransactionFunnelTracker() {
         }));
       }
       if (purchases) {
-        const value = purchases * rand(28, 46) * regionMeta.aovBias;
+        const value = purchases * luxuryValue(regionMeta.aovBias);
         setRevenue((r) => r + value);
         if (Math.random() < 0.4) {
           pushLog({ tone: "success", text: `Trigger: Order verified ($${(value / purchases).toFixed(0)})` });
