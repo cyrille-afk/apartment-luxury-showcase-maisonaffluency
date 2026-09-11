@@ -1520,11 +1520,71 @@ export default function Checkout() {
   // Once payment (card or wire) succeeds the basket must be emptied, otherwise
   // the header bag keeps the purchased lines and re-entering /checkout would
   // rebuild — and re-charge — the same order.
+  // Live transaction telemetry inputs (never allowed to affect the charge).
+  const usdSgdForTelemetry = useUsdToSgdRate();
+  const { tierLabel: telemetryTierLabel } = useTradeDiscount();
   const completeOrder = useCallback((reference: string) => {
     clearCart();
     clearSecureBasket("order");
     setConfirmed(reference);
-  }, []);
+
+    // Analytics is strictly best-effort: any failure here must never block or
+    // delay the confirmation route.
+    try {
+      const isTrade = Boolean(
+        account && (isTradeUser || tradeStatus === "approved" || isAdmin || isSuperAdmin),
+      );
+      const accountGroup = isTrade
+        ? `Trade Partner ${isAdmin || isSuperAdmin ? "Administrator" : telemetryTierLabel}`
+        : "B2C Private";
+
+      // Singapore low-value threshold: above S$400 the 9% import GST is
+      // settled by the courier at the border rather than at checkout.
+      let taxDeferred = false;
+      if (summary.taxCountry === "SG" && !summary.taxApplied) {
+        const code = summary.currency.toUpperCase();
+        const usdAmount =
+          code === "USD"
+            ? summary.subtotalCents / 100
+            : code === "SGD"
+              ? summary.subtotalCents / 100 / usdSgdForTelemetry.rate
+              : 0;
+        taxDeferred = !checkSgdThreshold(usdAmount, usdSgdForTelemetry.rate).isLowValueGoods;
+      } else if (!summary.taxApplied && summary.taxCents === 0 && summary.taxCountry) {
+        taxDeferred = true;
+      }
+
+      trackOrderFinalized({
+        orderReference: reference,
+        currency: summary.currency,
+        grossCents:
+          summary.estimatedShippingCents > 0 ? summary.totalCents : summary.chargeTotalCents,
+        accountGroup,
+        destinationIso: summary.taxCountry ?? pageDestination.iso ?? null,
+        destinationName: pageDestination.name ?? null,
+        isTaxDeferredToBorder: taxDeferred,
+        taxCents: summary.taxCents,
+        freightDepositCents: summary.shippingCents || summary.estimatedShippingCents || 0,
+        paymentMethod: method,
+        lineCount: grossLines.length,
+      });
+    } catch {
+      /* telemetry must never break order completion */
+    }
+  }, [
+    summary,
+    account,
+    isTradeUser,
+    tradeStatus,
+    isAdmin,
+    isSuperAdmin,
+    telemetryTierLabel,
+    usdSgdForTelemetry.rate,
+    pageDestination.iso,
+    pageDestination.name,
+    method,
+    grossLines.length,
+  ]);
   const [error, setError] = useState<string | null>(null);
   const initialised = useRef(false);
   const intentIdRef = useRef<string>("");
