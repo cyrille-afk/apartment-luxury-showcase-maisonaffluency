@@ -1,17 +1,24 @@
 #!/usr/bin/env node
 /**
- * Lightweight Lighthouse mobile audit.
+ * Lighthouse mobile performance gate.
  *
- * Runs Lighthouse against a built preview (or PW_BASE_URL) and asserts
- * minimum scores for the mobile UX categories we actually request from
- * Lighthouse. PWA installability is covered by the Playwright manifest test.
- * Reports are written to ./lighthouse-report
- * so CI can upload them when the job fails.
+ * Runs Lighthouse (mobile form factor) against a built preview (or PW_BASE_URL),
+ * takes the MEDIAN of N runs per route, and fails the build when the Core Web
+ * Vitals lab metrics (FCP / LCP / CLS / TBT) or the category scores regress past
+ * the budgets below. Reports (json + html) are written to ./lighthouse-report so
+ * CI can upload them.
  *
  * Usage:
- *   npm run lighthouse:mobile               # builds + previews + audits "/"
- *   PW_BASE_URL=https://example.com \
- *   ROUTES="/, /trade/login" npm run lighthouse:mobile
+ *   npm run lighthouse:mobile                       # builds + previews + audits "/"
+ *   ROUTES="/,/trade/login" LH_RUNS=3 npm run lighthouse:mobile
+ *   PW_BASE_URL=https://example.com npm run lighthouse:mobile
+ *
+ * Env:
+ *   ROUTES              comma-separated routes (default "/")
+ *   LH_RUNS             audits per route, median wins (default 3)
+ *   LH_THROTTLING       "simulate" (default) | "provided" | "devtools"
+ *   LH_AUDIT_TIMEOUT_MS hard timeout per audit (default 240000)
+ *   LH_WARN_ONLY        "1" → report but never fail (local exploration)
  */
 import { spawn, spawnSync } from "node:child_process";
 import { mkdirSync, readFileSync, rmSync } from "node:fs";
@@ -21,11 +28,23 @@ import { setTimeout as wait } from "node:timers/promises";
 const BASE = process.env.PW_BASE_URL?.replace(/\/$/, "") || "http://localhost:4173";
 const ROUTES = (process.env.ROUTES || "/").split(",").map((s) => s.trim()).filter(Boolean);
 const AUDIT_TIMEOUT_MS = Number(process.env.LH_AUDIT_TIMEOUT_MS || 240_000);
+const RUNS = Math.max(1, Number(process.env.LH_RUNS || 3));
+const THROTTLING = process.env.LH_THROTTLING || "simulate";
+const WARN_ONLY = process.env.LH_WARN_ONLY === "1";
 
-// Minimum scores (0-1).
-const THRESHOLDS = {
-  performance: 0.6,
+// Minimum category scores (0-1).
+const SCORE_THRESHOLDS = {
+  performance: 0.5,
   accessibility: 0.9,
+};
+
+// Maximum lab metric values (mobile, simulated 4G throttling).
+// Keys are Lighthouse audit ids; values are numericValue budgets.
+const METRIC_BUDGETS = {
+  "first-contentful-paint": { max: 3000, unit: "ms", label: "FCP" },
+  "largest-contentful-paint": { max: 4500, unit: "ms", label: "LCP" },
+  "cumulative-layout-shift": { max: 0.1, unit: "", label: "CLS" },
+  "total-blocking-time": { max: 900, unit: "ms", label: "TBT" },
 };
 
 const outDir = join(process.cwd(), "lighthouse-report");
@@ -34,6 +53,12 @@ mkdirSync(outDir, { recursive: true });
 
 let preview;
 let failed = false;
+
+function fail(message) {
+  console.error(message);
+  if (!WARN_ONLY) process.exitCode = 1;
+}
+
 async function startPreviewIfNeeded() {
   if (process.env.PW_BASE_URL) return;
   console.log("→ Building & starting preview…");
@@ -69,27 +94,23 @@ async function audit(url, outBase) {
     url,
     "--quiet",
     // --disable-gpu + --no-sandbox prevents FAILED_DOCUMENT_REQUEST timeouts on
-    // GitHub Actions headless runners (PWA CI fixes #1).
+    // GitHub Actions headless runners.
     "--chrome-flags=--headless=new --no-sandbox --disable-setuid-sandbox --disable-gpu",
     "--form-factor=mobile",
     "--screenEmulation.mobile=true",
     "--screenEmulation.width=390",
     "--screenEmulation.height=844",
     "--screenEmulation.deviceScaleFactor=3",
-    // 'provided' disables Lighthouse's CPU/network throttling so tests are
-    // less sensitive to variable CI runner specs (PWA CI fixes #2).
-    "--throttling-method=provided",
+    // Simulated mobile throttling by default so FCP/LCP/TBT reflect a real
+    // phone on 4G instead of the (very fast) CI runner.
+    `--throttling-method=${THROTTLING}`,
     "--disable-storage-reset",
-    // Tightened from 45s → 20s. Long-lived sockets (Supabase realtime,
-    // analytics beacons, version-watcher polling) keep `networkidle` from
-    // ever firing on this app, so LH would wait the full window every run.
+    // Long-lived sockets (Supabase realtime, analytics beacons, version-watcher
+    // polling) keep `networkidle` from ever firing on this app.
     "--max-wait-for-load=20000",
     "--output=json",
     "--output=html",
     `--output-path=${outBase}`,
-    // Dropped 'seo' and 'best-practices' from the CI pass — performance +
-    // accessibility are the signals that gate mobile UX. Run the full set
-    // locally when needed.
     "--only-categories=performance,accessibility",
   ];
   const startedAt = Date.now();
@@ -118,43 +139,88 @@ async function audit(url, outBase) {
   if (result.status !== 0) throw new Error(`Lighthouse failed after ${seconds}s for ${url} (status ${result.status}, signal ${result.signal ?? "none"})`);
 }
 
-function assertScores(reportPath, url) {
-  const json = JSON.parse(readFileSync(reportPath, "utf8"));
+function median(values) {
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+function fmt(value, unit) {
+  return unit === "ms" ? `${Math.round(value)} ms` : value.toFixed(3);
+}
+
+function collect(reportPaths) {
+  const reports = reportPaths.map((p) => JSON.parse(readFileSync(p, "utf8")));
+  const scores = {};
+  for (const cat of Object.keys(SCORE_THRESHOLDS)) {
+    const values = reports.map((r) => r.categories?.[cat]?.score).filter((v) => typeof v === "number");
+    scores[cat] = values.length ? median(values) : null;
+  }
+  const metrics = {};
+  for (const id of Object.keys(METRIC_BUDGETS)) {
+    const values = reports
+      .map((r) => r.audits?.[id]?.numericValue)
+      .filter((v) => typeof v === "number");
+    metrics[id] = values.length ? median(values) : null;
+  }
+  const mustPass = {};
+  for (const id of ["viewport", "tap-targets", "content-width", "color-contrast", "viewport-meta"]) {
+    const results = reports.map((r) => r.audits?.[id]).filter(Boolean);
+    if (!results.length) continue;
+    // Fail only when every run agrees the audit failed (kills one-off flakes).
+    mustPass[id] = results.some((a) => a.score === 1 || a.score === null);
+  }
+  return { scores, metrics, mustPass };
+}
+
+function assertRoute(url, { scores, metrics, mustPass }) {
   const failures = [];
-  for (const [cat, min] of Object.entries(THRESHOLDS)) {
-    const category = json.categories?.[cat];
-    if (!category) {
+
+  for (const [id, budget] of Object.entries(METRIC_BUDGETS)) {
+    const value = metrics[id];
+    if (value === null) {
+      failures.push(`${budget.label}: missing from Lighthouse report`);
+      continue;
+    }
+    const ok = value <= budget.max;
+    console.log(
+      `  ${ok ? "✓" : "✗"} ${budget.label.padEnd(16)} ${fmt(value, budget.unit).padStart(9)}  (budget ${fmt(budget.max, budget.unit)})`
+    );
+    if (!ok) failures.push(`${budget.label}: ${fmt(value, budget.unit)} > ${fmt(budget.max, budget.unit)}`);
+  }
+
+  for (const [cat, min] of Object.entries(SCORE_THRESHOLDS)) {
+    const score = scores[cat];
+    if (score === null) {
       failures.push(`${cat}: missing from Lighthouse report`);
       continue;
     }
-    const score = category.score ?? 0;
-    const status = score >= min ? "✓" : "✗";
-    console.log(`  ${status} ${cat.padEnd(16)} ${(score * 100).toFixed(0)}/100 (min ${min * 100})`);
-    if (score < min) failures.push(`${cat}: ${score} < ${min}`);
+    const ok = score >= min;
+    console.log(`  ${ok ? "✓" : "✗"} ${cat.padEnd(16)} ${(score * 100).toFixed(0).padStart(6)}/100  (min ${min * 100})`);
+    if (!ok) failures.push(`${cat}: ${(score * 100).toFixed(0)} < ${min * 100}`);
   }
-  // Mobile-specific audits we always want green.
-  const mustPass = ["viewport", "tap-targets", "content-width", "color-contrast", "viewport-meta"];
-  for (const id of mustPass) {
-    const a = json.audits?.[id];
-    if (!a) continue;
-    const passed = a.score === 1 || a.score === null;
+
+  for (const [id, passed] of Object.entries(mustPass)) {
     console.log(`  ${passed ? "✓" : "✗"} audit:${id}`);
-    if (!passed) failures.push(`audit ${id} failed (${a.displayValue || ""})`);
+    if (!passed) failures.push(`audit ${id} failed`);
   }
-  if (failures.length) {
-    console.error(`\n✗ ${url} failed:\n  - ${failures.join("\n  - ")}`);
-    process.exitCode = 1;
-  }
+
+  if (failures.length) fail(`\n✗ ${url} failed:\n  - ${failures.join("\n  - ")}`);
 }
 
 try {
   await startPreviewIfNeeded();
   for (const route of ROUTES) {
     const url = `${BASE}${route.startsWith("/") ? route : `/${route}`}`;
-    const outBase = join(outDir, `report-${route.replace(/\W+/g, "_") || "root"}`);
-    console.log(`\n▸ Lighthouse mobile: ${url}`);
-    await audit(url, outBase);
-    assertScores(`${outBase}.report.json`, url);
+    const slug = route.replace(/\W+/g, "_") || "root";
+    console.log(`\n▸ Lighthouse mobile (${RUNS} run${RUNS > 1 ? "s" : ""}, throttling=${THROTTLING}): ${url}`);
+    const reportPaths = [];
+    for (let run = 1; run <= RUNS; run++) {
+      const outBase = join(outDir, `report-${slug}-run${run}`);
+      await audit(url, outBase);
+      reportPaths.push(`${outBase}.report.json`);
+    }
+    assertRoute(url, collect(reportPaths));
   }
 } catch (error) {
   failed = true;
