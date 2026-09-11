@@ -2041,21 +2041,33 @@ const PublicDesignerProfile = () => {
                         }}
                         aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
                         className={cn(
-                          "w-full bg-[hsl(var(--canvas))] rounded-sm overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer aspect-[3/4] md:aspect-[4/3] max-h-full max-w-full p-6 md:p-8"
+                          "w-full bg-[hsl(var(--canvas))] rounded-sm overflow-hidden relative flex items-center justify-center cursor-pointer max-h-full max-w-full p-6 md:p-8 md:aspect-[4/3]"
                         )}
                       >
-                        <SwipeAlternateProductImage
-                          primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
-                          primarySrcSet={pickSrcSet(pick.image_url)}
-                          alternateSrc={alternateImage ? responsiveCloudinaryUrl(alternateImage, 600) : null}
-                          alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
-                          sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
+                        {/* Mobile masonry: natural aspect ratio image */}
+                        <img
+                          src={responsiveCloudinaryUrl(pick.image_url, 480)}
+                          srcSet={pickSrcSet(pick.image_url)}
+                          sizes="(max-width: 640px) 45vw, 100vw"
                           alt={pick.title}
-                          contain
-                          primaryClassName="max-h-full max-w-full object-contain p-0"
-                          alternateClassName="max-h-full max-w-full object-contain p-0"
-                          alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
+                          className="md:hidden w-full h-auto object-contain"
+                          loading="lazy"
                         />
+                        {/* Desktop: swipe / hover reveal */}
+                        <div className="hidden md:block absolute inset-0">
+                          <SwipeAlternateProductImage
+                            primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
+                            primarySrcSet={pickSrcSet(pick.image_url)}
+                            alternateSrc={alternateImage ? responsiveCloudinaryUrl(alternateImage, 600) : null}
+                            alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
+                            sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
+                            alt={pick.title}
+                            contain
+                            primaryClassName="max-h-full max-w-full object-contain p-0"
+                            alternateClassName="max-h-full max-w-full object-contain p-0"
+                            alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
+                          />
+                        </div>
                         {/* Inventory badges — lower-left of the frame */}
                         <InventoryBadgeStack
                           badges={inventoryBadgesForPick(pick as AttributedCuratorPick)}
