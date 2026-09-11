@@ -54,6 +54,37 @@ function parseDeepLink(hash: string) {
  */
 const TRACKED_SECTIONS = ["home", "overview", "gallery"] as const;
 
+type IdleWindow = Window & {
+  scheduler?: {
+    postTask: (callback: () => void, options?: { priority?: "background" | "user-visible" }) => Promise<unknown>;
+  };
+};
+
+/** Yield non-critical homepage work until after the browser can paint. */
+const scheduleBackgroundTask = (callback: () => void) => {
+  const win = window as IdleWindow;
+  let cancelled = false;
+  let idleId: number | null = null;
+  let timeoutId: number | null = null;
+  const run = () => {
+    if (!cancelled) callback();
+  };
+
+  if (typeof win.scheduler?.postTask === "function") {
+    void win.scheduler.postTask(run, { priority: "background" });
+  } else if (typeof window.requestIdleCallback === "function") {
+    idleId = window.requestIdleCallback(run, { timeout: 2500 });
+  } else {
+    timeoutId = window.setTimeout(run, 0);
+  }
+
+  return () => {
+    cancelled = true;
+    if (idleId !== null) window.cancelIdleCallback?.(idleId);
+    if (timeoutId !== null) window.clearTimeout(timeoutId);
+  };
+};
+
 /**
  * Parse a simple section hash like #brands, #designers (not deep-links).
  */
@@ -121,16 +152,10 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
   useScrollDepthTracking();
 
   useEffect(() => {
-    const win = window as any;
-    let idleId: number | null = null;
-    let timeoutId: number | null = null;
+    let cancelScheduledTask: (() => void) | null = null;
     const reveal = () => setShowOverlays(true);
     const start = () => {
-      if (typeof win.requestIdleCallback === "function") {
-        idleId = win.requestIdleCallback(reveal, { timeout: 2500 });
-      } else {
-        timeoutId = window.setTimeout(reveal, 1200);
-      }
+      cancelScheduledTask = scheduleBackgroundTask(reveal);
     };
     if (document.readyState === "complete") start();
     else window.addEventListener("load", start, { once: true });
@@ -142,8 +167,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
       window.removeEventListener("load", start);
       window.removeEventListener("scroll", onIntent);
       window.removeEventListener("touchmove", onIntent);
-      if (idleId !== null) win.cancelIdleCallback?.(idleId);
-      if (timeoutId !== null) window.clearTimeout(timeoutId);
+      cancelScheduledTask?.();
     };
   }, []);
 
@@ -332,20 +356,20 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
 
     if (sectionEls.length === 0) return;
 
-    const observer = new IntersectionObserver(
-      () => {
-        // Intentionally keep homepage URLs clean — no section hashes.
-      },
-      { rootMargin: "-20% 0px -60% 0px", threshold: 0 }
-    );
-
-    const timerId = setTimeout(() => {
+    let observer: IntersectionObserver | null = null;
+    const cancelScheduledTask = scheduleBackgroundTask(() => {
+      observer = new IntersectionObserver(
+        () => {
+          // Intentionally keep homepage URLs clean — no section hashes.
+        },
+        { rootMargin: "-20% 0px -60% 0px", threshold: 0 }
+      );
       sectionEls.forEach(el => observer.observe(el));
-    }, 500);
+    });
 
     return () => {
-      clearTimeout(timerId);
-      observer.disconnect();
+      cancelScheduledTask();
+      observer?.disconnect();
     };
   }, [showBelowFoldSections]);
 
@@ -446,13 +470,13 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
         {showBelowFoldSections ? (
           <>
             {!routeIsCategory && (
-              <div className="bg-white">
-                <LazyOnVisible id="overview" className="scroll-header-offset" minHeight="60vh" rootMargin="400px 0px">
+              <div className="home-below-fold bg-white">
+                <LazyOnVisible id="overview" className="home-deferred-section scroll-header-offset" minHeight="60vh" rootMargin="400px 0px">
                   <Suspense fallback={null}>
                     <ApartmentTourInterlude compact />
                   </Suspense>
                 </LazyOnVisible>
-                <LazyOnVisible id="gallery" className="scroll-header-offset" minHeight="100vh" rootMargin="120px 0px">
+                <LazyOnVisible id="gallery" className="home-deferred-section scroll-header-offset" minHeight="100vh" rootMargin="120px 0px">
                   <Suspense fallback={<SectionFallback />}>
                     <Gallery />
                   </Suspense>
@@ -467,14 +491,14 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
             )}
 
             {!routeIsCategory && (
-              <LazyOnVisible minHeight="40vh" rootMargin="600px 0px">
+              <LazyOnVisible className="home-deferred-section" minHeight="40vh" rootMargin="600px 0px">
                 <Suspense fallback={null}>
                   <InstagramFeed />
                 </Suspense>
               </LazyOnVisible>
             )}
 
-            <LazyOnVisible minHeight="200px" rootMargin="400px 0px">
+            <LazyOnVisible className="home-deferred-section" minHeight="200px" rootMargin="400px 0px">
               <Suspense fallback={null}>
                 <Footer />
               </Suspense>

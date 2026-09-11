@@ -707,6 +707,15 @@ input, select, textarea {
   }
 }
 
+/* Skip layout and paint work for homepage sections until they approach the
+   mobile viewport. Intrinsic sizing preserves document height and scroll restore. */
+@media (max-width: 767px) {
+  .home-deferred-section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 900px;
+  }
+}
+
 
 /* Respect users who request reduced motion — but never disable zoom. */
 @media (prefers-reduced-motion: reduce) {

@@ -11,6 +11,9 @@ const useScrollDepthTracking = () => {
   useEffect(() => {
     const thresholds = [25, 50, 75, 90];
     const fired = new Set<number>();
+    let idleId: number | null = null;
+    let timeoutId: number | null = null;
+    let listening = false;
 
     const handleScroll = () => {
       const scrollTop = window.scrollY;
@@ -31,8 +34,25 @@ const useScrollDepthTracking = () => {
       }
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    const startListening = () => {
+      if (listening) return;
+      listening = true;
+      window.addEventListener("scroll", handleScroll, { passive: true });
+    };
+
+    // Engagement analytics must not compete with the homepage's first paint.
+    // Start during idle time, with a bounded fallback for older mobile browsers.
+    if (typeof window.requestIdleCallback === "function") {
+      idleId = window.requestIdleCallback(startListening, { timeout: 2500 });
+    } else {
+      timeoutId = window.setTimeout(startListening, 1200);
+    }
+
+    return () => {
+      if (idleId !== null) window.cancelIdleCallback?.(idleId);
+      if (timeoutId !== null) window.clearTimeout(timeoutId);
+      if (listening) window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 };
 
