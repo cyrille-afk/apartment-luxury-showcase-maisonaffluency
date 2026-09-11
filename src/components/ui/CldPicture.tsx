@@ -65,8 +65,11 @@ export function CldPicture({
     );
   }
 
+  // Above-the-fold / zoomable imagery keeps a higher quality floor; everything
+  // else uses eco compression to cut mobile payload.
+  const mobileQuality = priority ? "auto:good" : "auto:eco";
   const mobileSrcSet = mobileWidths
-    .map((w) => `${toResponsiveCloudinary(target, { width: Math.min(w, 640), quality: "auto:eco", crop: "scale" })} ${w}w`)
+    .map((w) => `${toResponsiveCloudinary(target, { width: Math.min(w, 640), quality: mobileQuality, crop: "scale" })} ${w}w`)
     .join(", ");
 
   const desktopSrcSet = widths
