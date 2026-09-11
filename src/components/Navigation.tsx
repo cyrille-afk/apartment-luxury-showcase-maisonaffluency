@@ -736,13 +736,15 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 </div>
 
                 {/* Floating quick-actions — bottom-right of the categories panel */}
-                <GalleryDetailsFloatingNav
-                  showImmediately
-                  forceDisplay
-                  azHref="/designers"
-                  onAllCategoriesClick={closeMobileMenu}
-                  className="md:hidden"
-                />
+                <React.Suspense fallback={null}>
+                  <GalleryDetailsFloatingNav
+                    showImmediately
+                    forceDisplay
+                    azHref="/designers"
+                    onAllCategoriesClick={closeMobileMenu}
+                    className="md:hidden"
+                  />
+                </React.Suspense>
               </div>
             </SheetContent>
           </Sheet>
