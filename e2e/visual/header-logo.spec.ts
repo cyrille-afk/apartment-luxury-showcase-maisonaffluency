@@ -9,16 +9,17 @@ import { test, expect, devices } from "@playwright/test";
  * locked reference; changing them must be a deliberate edit to this spec.
  *
  * Source: src/components/Navigation.tsx
- *   text-[1.05rem] xs:text-[1.65rem]
+ *   text-[1.1rem] xs:text-[1.45rem] xsp:text-[1.65rem]
  */
 
-const SMALL = 16.8; // 1.05rem
+const SMALL = 17.6; // 1.1rem
+const MID = 23.2; // 1.45rem
 const FULL = 26.4; // 1.65rem
 
 const BREAKPOINTS = [
   { width: 320, height: 568, label: "iPhone SE (1st gen)", fontPx: SMALL },
-  { width: 360, height: 800, label: "Android baseline", fontPx: FULL },
-  { width: 375, height: 667, label: "iPhone SE / mini", fontPx: FULL },
+  { width: 360, height: 800, label: "Android baseline", fontPx: MID },
+  { width: 375, height: 667, label: "iPhone SE / mini", fontPx: MID },
   { width: 390, height: 844, label: "iPhone 14/15", fontPx: FULL },
   { width: 414, height: 896, label: "iPhone Plus/Max", fontPx: FULL },
   { width: 430, height: 932, label: "iPhone Pro Max", fontPx: FULL },

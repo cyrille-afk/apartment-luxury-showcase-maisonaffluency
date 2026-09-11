@@ -18,7 +18,7 @@ export default {
         // `min-[360px]:` / `min-[380px]:` variants in this project because the
         // `short` raw screen below breaks variant sorting — use these instead.
         xs: "360px",
-        xsp: "380px",
+        xsp: "390px",
         short: { raw: "(max-height: 780px)" },
       },
       colors: {
