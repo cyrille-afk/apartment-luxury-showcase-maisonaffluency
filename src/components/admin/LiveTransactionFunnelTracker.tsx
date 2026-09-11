@@ -229,6 +229,14 @@ export default function LiveTransactionFunnelTracker() {
       let purchases = 0;
       const alive: Particle[] = [];
       for (const p of particlesRef.current) {
+        if (p.zone) {
+          // Fixed scatter nodes: keep inside the assigned stage zone and only drift vertically.
+          p.y += Math.sin((now / 900 + p.id) % (Math.PI * 2)) * dt * 0.25;
+          p.y = Math.max(-1, Math.min(1, p.y));
+          alive.push(p);
+          continue;
+        }
+
         const prevX = p.x;
         p.x += p.speed * dt;
         p.y += Math.sin((now / 900 + p.id) % (Math.PI * 2)) * dt * 0.25;
@@ -254,7 +262,7 @@ export default function LiveTransactionFunnelTracker() {
         }));
       }
       if (purchases) {
-        const value = purchases * rand(28, 46) * regionMeta.aovBias;
+        const value = purchases * luxuryValue(regionMeta.aovBias);
         setRevenue((r) => r + value);
         if (Math.random() < 0.4) {
           pushLog({ tone: "success", text: `Trigger: Order verified ($${(value / purchases).toFixed(0)})` });
