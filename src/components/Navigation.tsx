@@ -37,7 +37,11 @@ const GalleryDetailsFloatingNav = React.lazy(() => import("@/components/GalleryD
 import { supabase } from "@/integrations/supabase/client";
 // useFeaturedPublicDocument import removed — AD free-download flow discontinued.
 const FavoritesHoverPreview = React.lazy(() => import("@/components/FavoritesHoverPreview"));
-import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitcher";
+// Lazy: this control drags in the Radix Select + floating-ui stack, which was
+// landing in the main bundle and blocking the main thread before first paint.
+const ShippingDestinationSwitcher = React.lazy(
+  () => import("@/components/ShippingDestinationSwitcher")
+);
 import CartNavButton from "@/components/CartNavButton";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 

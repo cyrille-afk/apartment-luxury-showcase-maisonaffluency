@@ -114,7 +114,9 @@ if (rootElement) {
   createRoot(rootElement).render(
     <>
       <App />
-      <BuildUpdateBanner />
+      <Suspense fallback={null}>
+        <BuildUpdateBanner />
+      </Suspense>
       <HmrStatusBanner />
     </>
   );
