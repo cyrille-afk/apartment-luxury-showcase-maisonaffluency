@@ -568,6 +568,7 @@ function OrderSummary({
 
       </div>
     </aside>
+    </OrderSummarySkeleton>
   );
 }
 
