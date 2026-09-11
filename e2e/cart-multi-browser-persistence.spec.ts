@@ -77,8 +77,7 @@ async function seedBasket(page: Page) {
 }
 
 test.describe("Maison Affluency multi-browser cart persistence under latency", () => {
-  test("Chromium removes a line and immediately rewrites persistent storage", async ({ page, browserName }, testInfo) => {
-    test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop-chrome");
+  test("Chromium removes a line and immediately rewrites persistent storage", async ({ page }) => {
     await addLatency(page, 400);
     await seedBasket(page);
 
@@ -102,8 +101,7 @@ test.describe("Maison Affluency multi-browser cart persistence under latency", (
     expect(storage.secure).toBeNull();
   });
 
-  test("WebKit restores the basket and Switzerland/CHF across navigation", async ({ page, browserName }) => {
-    test.skip(browserName !== "webkit");
+  test("WebKit restores the basket and Switzerland/CHF across navigation", async ({ page }) => {
     await addLatency(page, 500);
     await seedBasket(page);
 
