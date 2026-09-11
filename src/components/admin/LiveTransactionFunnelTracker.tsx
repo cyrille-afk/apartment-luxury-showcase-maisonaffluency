@@ -156,10 +156,15 @@ export default function LiveTransactionFunnelTracker() {
     setLogs((prev) => [{ ...entry, id: idRef.current++ }, ...prev].slice(0, 3));
   }, []);
 
+  const pushHistory = useCallback((event: Omit<StreamEvent, "id">) => {
+    historyRef.current = [{ ...event, id: idRef.current++ }, ...historyRef.current].slice(0, 500);
+  }, []);
+
   const reset = useCallback(() => {
     particlesRef.current = [];
     setLogs([]);
     setStream([]);
+    historyRef.current = [];
   }, []);
 
   // Mock webhook hub: mimics an SSE / WebSocket push stream from the backend.
