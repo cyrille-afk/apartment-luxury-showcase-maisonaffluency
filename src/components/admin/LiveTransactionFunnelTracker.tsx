@@ -87,7 +87,6 @@ const formatClock = (ms: number) => {
 };
 
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
-const randInt = (min: number, max: number) => Math.floor(rand(min, max + 1));
 
 const LUXURY_MIN = 2500;
 const LUXURY_MAX = 15000;
