@@ -2019,7 +2019,7 @@ const PublicDesignerProfile = () => {
                         }
                       }}
                       className={cn(
-                        "w-full break-inside-avoid inline-block md:flex md:flex-col group transition-all duration-700",
+                        "w-full break-inside-avoid inline-block mb-4 sm:flex sm:flex-col group transition-all duration-700",
                         highlightId === pick.id && "ring-2 ring-primary rounded-luxury-sharp ring-offset-2 ring-offset-background animate-pulse"
                       )}
                     >
