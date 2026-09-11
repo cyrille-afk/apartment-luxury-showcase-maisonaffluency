@@ -102,6 +102,8 @@ function inlineCriticalCssPlugin(): Plugin {
         path: outDir,
         publicPath: "/",
         // Inline rules matching the static HTML; everything else is deferred.
+        // (pruneSource was measured: it removed nothing from the emitted sheet
+        // while risking missing styles, so it stays off.)
         pruneSource: false,
         // Keep the full sheet as a swap-on-load preload (non render-blocking).
         preload: "swap",
@@ -265,6 +267,17 @@ export default defineConfig(({ mode }) => {
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Aggressive dead-code elimination at minification time. esbuild already
+  // tree-shakes ESM, but these flags make the behaviour explicit and strip
+  // dev-only logging/asserts from the production payload.
+  esbuild: {
+    treeShaking: true,
+    minifyIdentifiers: true,
+    minifySyntax: true,
+    minifyWhitespace: true,
+    legalComments: "none",
+    ...(mode === "production" ? { drop: ["console", "debugger"] as ("console" | "debugger")[] } : {}),
+  },
   build: {
     target: "es2020",
     // esbuild minification: ~1% larger output than terser's 2-pass compress,
@@ -279,6 +292,14 @@ export default defineConfig(({ mode }) => {
     // blocks the initial paint.
     assetsInlineLimit: 1024,
     chunkSizeWarningLimit: 1500,
+    rollupOptions: {
+      treeshake: {
+        preset: "recommended",
+        moduleSideEffects: true,
+        propertyReadSideEffects: false,
+        tryCatchDeoptimization: false,
+      },
+    },
   },
 
 
