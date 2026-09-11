@@ -1965,7 +1965,7 @@ const PublicDesignerProfile = () => {
                   // We're already on Madsen's own portrait — no "by Arnold Madsen" needed.
                   const cardSubtitle = isArnoldClamChair ? undefined : pick.subtitle;
                   const isFavorite = isFavoritedPick(pick.id);
-                  const preserveFullProductImage = slug === "amelie-vermersch";
+                  const preserveFullProductImage = designer.id === "b8c3578b-31f7-4b89-835e-10e70ade9c21";
                   const alternateImage = pick.hover_image_url
                     || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
                     || null;
