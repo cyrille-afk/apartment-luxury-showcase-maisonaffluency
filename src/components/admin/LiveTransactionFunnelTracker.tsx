@@ -118,8 +118,6 @@ export default function LiveTransactionFunnelTracker() {
   const [dropOff, setDropOff] = useState(40); // %
   const [region, setRegion] = useState<Region>("global");
 
-  const [counts, setCounts] = useState({ views: 0, cart: 0, checkout: 0, purchases: 0 });
-  const [revenue, setRevenue] = useState(0);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [stream, setStream] = useState<StreamEvent[]>([]);
   const [, forceTick] = useState(0);
@@ -132,14 +130,33 @@ export default function LiveTransactionFunnelTracker() {
 
   const regionMeta = REGIONS.find((r) => r.id === region)!;
 
+  // Regional filtering applies to both the stream table and the summary metrics.
+  const filteredStream = useMemo(
+    () => stream.filter((e) => region === "global" || e.region === region),
+    [stream, region]
+  );
+
+  const stageCounts = useMemo(() => {
+    const c = { views: 0, cart: 0, checkout: 0, purchases: 0 };
+    for (const e of filteredStream) c[e.action] += 1;
+    return c;
+  }, [filteredStream]);
+
+  const { convRate, avgOrderVal, abandonRate, revenue } = useMemo(() => {
+    const purchaseEvents = filteredStream.filter((e) => e.action === "purchases" && e.valueUsd);
+    const rev = purchaseEvents.reduce((sum, e) => sum + (e.valueUsd ?? 0), 0);
+    const aov = purchaseEvents.length ? rev / purchaseEvents.length : 0;
+    const conversion = stageCounts.views ? (stageCounts.purchases / stageCounts.views) * 100 : 0;
+    const abandon = stageCounts.cart ? Math.max(0, (1 - stageCounts.purchases / stageCounts.cart) * 100) : 0;
+    return { convRate: conversion, avgOrderVal: aov, abandonRate: abandon, revenue: rev };
+  }, [filteredStream, stageCounts]);
+
   const pushLog = useCallback((entry: Omit<LogEntry, "id">) => {
     setLogs((prev) => [{ ...entry, id: idRef.current++ }, ...prev].slice(0, 3));
   }, []);
 
   const reset = useCallback(() => {
     particlesRef.current = [];
-    setCounts({ views: 0, cart: 0, checkout: 0, purchases: 0 });
-    setRevenue(0);
     setLogs([]);
     setStream([]);
   }, []);
