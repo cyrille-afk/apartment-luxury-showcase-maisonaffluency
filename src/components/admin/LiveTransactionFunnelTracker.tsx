@@ -120,13 +120,14 @@ export default function LiveTransactionFunnelTracker() {
 
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [stream, setStream] = useState<StreamEvent[]>([]);
-  const [, forceTick] = useState(0);
+  const [tick, forceTick] = useState(0);
 
   const particlesRef = useRef<Particle[]>([]);
   const idRef = useRef(0);
   const spawnDebtRef = useRef(0);
   const rafRef = useRef<number | null>(null);
   const lastRef = useRef<number>(0);
+  const historyRef = useRef<StreamEvent[]>([]);
 
   const regionMeta = REGIONS.find((r) => r.id === region)!;
 
@@ -136,20 +137,20 @@ export default function LiveTransactionFunnelTracker() {
     [stream, region]
   );
 
-  const stageCounts = useMemo(() => {
+  // Metrics are computed from the full event history (webhook + particle simulation)
+  // so the traffic/drop-off sliders still drive the numbers, but region selection
+  // instantly slices the dataset.
+  const { stageCounts, convRate, avgOrderVal, abandonRate, revenue } = useMemo(() => {
+    const filtered = historyRef.current.filter((e) => region === "global" || e.region === region);
     const c = { views: 0, cart: 0, checkout: 0, purchases: 0 };
-    for (const e of filteredStream) c[e.action] += 1;
-    return c;
-  }, [filteredStream]);
-
-  const { convRate, avgOrderVal, abandonRate, revenue } = useMemo(() => {
-    const purchaseEvents = filteredStream.filter((e) => e.action === "purchases" && e.valueUsd);
+    for (const e of filtered) c[e.action] += 1;
+    const purchaseEvents = filtered.filter((e) => e.action === "purchases" && e.valueUsd);
     const rev = purchaseEvents.reduce((sum, e) => sum + (e.valueUsd ?? 0), 0);
     const aov = purchaseEvents.length ? rev / purchaseEvents.length : 0;
-    const conversion = stageCounts.views ? (stageCounts.purchases / stageCounts.views) * 100 : 0;
-    const abandon = stageCounts.cart ? Math.max(0, (1 - stageCounts.purchases / stageCounts.cart) * 100) : 0;
-    return { convRate: conversion, avgOrderVal: aov, abandonRate: abandon, revenue: rev };
-  }, [filteredStream, stageCounts]);
+    const conversion = c.views ? (c.purchases / c.views) * 100 : 0;
+    const abandon = c.cart ? Math.max(0, (1 - c.purchases / c.cart) * 100) : 0;
+    return { stageCounts: c, convRate: conversion, avgOrderVal: aov, abandonRate: abandon, revenue: rev };
+  }, [region, tick]);
 
   const pushLog = useCallback((entry: Omit<LogEntry, "id">) => {
     setLogs((prev) => [{ ...entry, id: idRef.current++ }, ...prev].slice(0, 3));
