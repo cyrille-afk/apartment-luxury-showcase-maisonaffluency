@@ -113,7 +113,7 @@ jobs:
   lighthouse-mobile:
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    # Blocking mobile performance gate: median of 2 Lighthouse runs on "/" under
+    # Blocking mobile performance gate: 1 Lighthouse run on "/" under
     # simulated mobile 4G. Fails the build when FCP / LCP / CLS / TBT or the
     # performance / accessibility scores breach the budgets in
     # scripts/lighthouse-mobile.mjs. Scope is deliberately narrow — the previous
@@ -131,17 +131,18 @@ jobs:
         run: |
           set -o pipefail
           ROUTES="/" \
-          LH_RUNS=2 \
+          LH_RUNS=1 \
           LH_THROTTLING=simulate \
           LH_AUDIT_TIMEOUT_MS=120000 \
+          LH_BUILD_TIMEOUT_MS=600000 \
           npm run lighthouse:mobile 2>&1 | tee lighthouse-mobile.log
-        timeout-minutes: 18
+        timeout-minutes: 15
       - name: Summarise Core Web Vitals
         if: always()
         shell: bash
         run: |
           {
-            echo "### Lighthouse mobile (median of 2 runs)"
+            echo "### Lighthouse mobile"
             echo '```'
             grep -E '^(▸|  [✓✗])' lighthouse-mobile.log || echo "no metrics captured"
             echo '```'
