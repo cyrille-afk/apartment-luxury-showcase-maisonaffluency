@@ -203,7 +203,6 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                   >
                     <CldPicture
                       src={POSTER_URL}
-                      srcSet={POSTER_SRCSET}
                       sizes="(max-width: 767px) 100vw, 55vw"
                       alt="Apartment tour preview"
                       decoding="async"
@@ -287,7 +286,6 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               >
                 <CldPicture
                   src={POSTER_URL}
-                  srcSet={POSTER_SRCSET}
                   sizes="100vw"
                   alt="Apartment tour preview"
                   decoding="async"
