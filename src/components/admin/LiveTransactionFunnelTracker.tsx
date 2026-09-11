@@ -196,6 +196,7 @@ export default function LiveTransactionFunnelTracker() {
       };
 
       setStream((prev) => [event, ...prev].slice(0, 30));
+      pushHistory(event);
 
       // Inject a matching scatter node constrained to the correct funnel zone.
       const zone = STAGE_ZONES[action];
