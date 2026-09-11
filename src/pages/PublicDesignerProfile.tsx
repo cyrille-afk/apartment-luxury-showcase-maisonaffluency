@@ -1883,7 +1883,7 @@ const PublicDesignerProfile = () => {
 
 
                     <div className={cn(
-                      "w-full columns-2 gap-4 space-y-4 sm:grid sm:columns-auto sm:space-y-0",
+                      "w-full columns-2 gap-4 sm:grid sm:columns-auto",
                       gridClass,
                       "md:gap-x-8 md:gap-y-12"
                     )}>
