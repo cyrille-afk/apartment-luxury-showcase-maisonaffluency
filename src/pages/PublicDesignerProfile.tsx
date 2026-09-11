@@ -2046,7 +2046,7 @@ const PublicDesignerProfile = () => {
                         }}
                         aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
                         className={cn(
-                          "w-full bg-[hsl(var(--canvas))] rounded-sm overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer aspect-[4/3] max-h-full max-w-full p-8"
+                          "w-full bg-[hsl(var(--canvas))] rounded-sm overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer aspect-[3/4] md:aspect-[4/3] max-h-full max-w-full p-6 md:p-8"
                         )}
                       >
                         <SwipeAlternateProductImage
