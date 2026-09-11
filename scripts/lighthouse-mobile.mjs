@@ -62,11 +62,35 @@ function fail(message) {
   if (!WARN_ONLY) process.exitCode = 1;
 }
 
+const T0 = Date.now();
+const stamp = () => `${((Date.now() - T0) / 1000).toFixed(1)}s`;
+const log = (msg) => console.log(`[${stamp()}] ${msg}`);
+
+// Hard cap on the production build so a wedged pre-build data script can never
+// eat the whole CI step budget silently (it used to hang past 18 minutes).
+const BUILD_TIMEOUT_MS = Number(process.env.LH_BUILD_TIMEOUT_MS || 600_000);
+
+async function runBuild() {
+  log("→ Building production bundle…");
+  const child = spawn("npm", ["run", "build"], { stdio: "inherit", detached: true });
+  const result = await new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      killProcessTree(child);
+      resolve({ timedOut: true, status: null });
+    }, BUILD_TIMEOUT_MS);
+    child.once("error", (error) => { clearTimeout(timer); resolve({ error }); });
+    child.once("exit", (status) => { clearTimeout(timer); resolve({ status }); });
+  });
+  if (result.timedOut) throw new Error(`Production build hard-timed-out after ${stamp()}`);
+  if (result.error) throw result.error;
+  if (result.status !== 0) throw new Error(`Production build failed (status ${result.status}) after ${stamp()}`);
+  log("✓ Build complete");
+}
+
 async function startPreviewIfNeeded() {
   if (process.env.PW_BASE_URL) return;
-  console.log("→ Building & starting preview…");
-  const build = spawnSync("npm", ["run", "build"], { stdio: "inherit" });
-  if (build.status !== 0) process.exit(build.status ?? 1);
+  await runBuild();
+  log("→ Starting preview server…");
   preview = spawn("npm", ["run", "preview", "--", "--port", "4173", "--strictPort"], {
     stdio: ["ignore", "pipe", "inherit"],
   });
@@ -74,7 +98,7 @@ async function startPreviewIfNeeded() {
   for (let i = 0; i < 30; i++) {
     try {
       const r = await fetch(BASE);
-      if (r.ok) return;
+      if (r.ok) { log("✓ Preview reachable"); return; }
     } catch {}
     await wait(1000);
   }
