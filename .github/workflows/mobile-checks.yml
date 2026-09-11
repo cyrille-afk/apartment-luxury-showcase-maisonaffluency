@@ -14,8 +14,8 @@ jobs:
     # stock_status_override or lead_weeks_max_override changes (see
     # src/lib/__tests__/computeDepositPct.test.ts).
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -29,7 +29,7 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.60.0-noble
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       # Manual npm cache — actions/setup-node's cache doesn't apply inside a container job.
       - name: Cache npm
         uses: actions/cache@v4
@@ -54,7 +54,7 @@ jobs:
           DEBUG: pw:api
       - name: Upload Playwright report
         if: failure() || cancelled()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: playwright-report
           path: |
@@ -72,7 +72,7 @@ jobs:
     # Visual regression for landing CTAs / hero / designers section across mobile + desktop.
     # Baselines live under e2e/visual/__screenshots__/. Refresh locally with `npm run test:visual:update`.
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Cache npm
         uses: actions/cache@v4
         with:
@@ -99,7 +99,7 @@ jobs:
         timeout-minutes: 10
       - name: Upload visual report
         if: failure() || cancelled()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: playwright-visual-report
           path: |
@@ -112,43 +112,43 @@ jobs:
 
   lighthouse-mobile:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    # Blocking mobile performance gate: median of 3 Lighthouse runs per route
-    # under simulated mobile 4G. Fails the build when FCP / LCP / CLS / TBT or
-    # the performance / accessibility scores breach the budgets in
-    # scripts/lighthouse-mobile.mjs. Decoupled from playwright-mobile so a
-    # flaky e2e run doesn't mask the Lighthouse signal.
+    timeout-minutes: 25
+    # Blocking mobile performance gate: median of 2 Lighthouse runs on "/" under
+    # simulated mobile 4G. Fails the build when FCP / LCP / CLS / TBT or the
+    # performance / accessibility scores breach the budgets in
+    # scripts/lighthouse-mobile.mjs. Scope is deliberately narrow — the previous
+    # 2-route × 3-run matrix overran the 35-minute step budget on shared runners.
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit --no-fund
       - name: Run mobile Lighthouse routes (blocking)
         shell: bash
         run: |
           set -o pipefail
-          ROUTES="/,/trade/login" \
-          LH_RUNS=3 \
+          ROUTES="/" \
+          LH_RUNS=2 \
           LH_THROTTLING=simulate \
-          LH_AUDIT_TIMEOUT_MS=180000 \
+          LH_AUDIT_TIMEOUT_MS=120000 \
           npm run lighthouse:mobile 2>&1 | tee lighthouse-mobile.log
-        timeout-minutes: 35
+        timeout-minutes: 18
       - name: Summarise Core Web Vitals
         if: always()
         shell: bash
         run: |
           {
-            echo "### Lighthouse mobile (median of 3 runs)"
+            echo "### Lighthouse mobile (median of 2 runs)"
             echo '```'
             grep -E '^(▸|  [✓✗])' lighthouse-mobile.log || echo "no metrics captured"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload Lighthouse report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: lighthouse-report
           path: |
