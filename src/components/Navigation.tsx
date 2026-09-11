@@ -418,7 +418,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             </SheetTrigger>
 
             {/* Brand — absolutely centered in the viewport */}
-            <div className="relative flex flex-1 min-w-0 justify-center px-2 xs:absolute xs:left-1/2 xs:top-1/2 xs:flex-none xs:max-w-[calc(100vw-10rem)] xs:-translate-x-1/2 xs:-translate-y-1/2">
+            <div className="relative flex flex-1 min-w-0 justify-center px-2 xs:absolute xs:left-1/2 xs:top-1/2 xs:flex-none xs:max-w-[calc(100vw-9rem)] xs:-translate-x-1/2 xs:-translate-y-1/2">
               <div className="flex flex-col items-center max-w-full overflow-hidden">
                 <button onClick={scrollToTop} className="group flex min-h-[44px] cursor-pointer items-center whitespace-nowrap truncate">
                   <span data-testid="mobile-brand-logo" className="font-brand text-[1.05rem] xs:text-[1.65rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
