@@ -32,6 +32,7 @@ type Particle = {
   speed: number;
   r: number;
   dropAt: number | null; // x at which the session abandons
+  region: Exclude<Region, "global">;
   zone?: { min: number; max: number }; // when set, particle is a fixed scatter node inside this stage zone
 };
 
