@@ -103,6 +103,35 @@ describe("cart persistence", () => {
     expect(localStorage.getItem(REGION_MANUAL_KEY)).toBe("1");
   });
 
+  it("removes a line immutably and immediately rewrites every persistent basket", async () => {
+    localStorage.setItem(REGION_COUNTRY_KEY, "CH");
+    localStorage.setItem(REGION_CURRENCY_KEY, "CHF");
+    localStorage.setItem(REGION_MANUAL_KEY, "1");
+    const { addToCart, getCart, removeFromCart } = await importFresh();
+    addToCart({ ...sampleLine, key: "ignored" } as any);
+    addToCart({
+      ...sampleLine,
+      pickId: "pick-2",
+      productSlug: "second-piece",
+      title: "Second Piece",
+      finishLabel: "Aged Brass",
+      key: "ignored",
+    } as any);
+
+    const before = getCart();
+    const removedKey = before[0].key;
+    removeFromCart(removedKey);
+
+    expect(getCart()).not.toBe(before);
+    expect(getCart().map((line) => line.key)).not.toContain(removedKey);
+    for (const key of [STORAGE_KEY, BACKUP_KEY, "ma_secure_basket"]) {
+      const persisted = JSON.parse(localStorage.getItem(key) || "{}");
+      expect(persisted.lines).toHaveLength(1);
+      expect(persisted.lines[0].title).toBe("Second Piece");
+      expect(persisted.region).toMatchObject({ countryIso: "CH", currency: "CHF", manual: true });
+    }
+  });
+
   it("clears the live basket and marks order placed", async () => {
     localStorage.setItem(STORAGE_KEY, envelope([sampleLine]));
     localStorage.setItem(BACKUP_KEY, envelope([sampleLine]));
