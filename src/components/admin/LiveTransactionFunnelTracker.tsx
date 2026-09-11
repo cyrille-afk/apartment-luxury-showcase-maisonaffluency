@@ -87,6 +87,22 @@ const formatClock = (ms: number) => {
 };
 
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
+const randInt = (min: number, max: number) => Math.floor(rand(min, max + 1));
+
+const LUXURY_MIN = 2500;
+const LUXURY_MAX = 15000;
+
+const STAGE_ZONES: Record<StreamAction, { min: number; max: number }> = {
+  views: { min: 0, max: 0.25 },
+  cart: { min: 0.25, max: 0.5 },
+  checkout: { min: 0.5, max: 0.75 },
+  purchases: { min: 0.75, max: 1 },
+};
+
+const luxuryValue = (bias: number) => {
+  const raw = rand(LUXURY_MIN, LUXURY_MAX) * bias;
+  return Math.min(LUXURY_MAX, Math.max(LUXURY_MIN, raw));
+};
 
 export default function LiveTransactionFunnelTracker() {
   const [running, setRunning] = useState(true);
