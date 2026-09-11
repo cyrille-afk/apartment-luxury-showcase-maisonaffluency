@@ -401,11 +401,11 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
         <section className="hidden md:block w-full bg-transparent">
           <div className="grid grid-cols-12 gap-x-8 items-stretch w-full mb-8">
             {/* Left Column — Hero Landscape Image */}
-            <div className="col-span-4 aspect-[4/3] w-full overflow-hidden">
+            <div className="col-span-4 aspect-[3/4] w-full overflow-hidden">
               <CldPicture
                 src={portraitImage}
                 alt={`${displayName} portrait`}
-                className="w-full h-full object-cover object-center" />
+                className="w-full h-full object-cover object-bottom" />
             </div>
 
             {/* Right Column — Full Stacked Typography & Studio Row */}
