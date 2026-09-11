@@ -47,7 +47,14 @@ function envelope(lines: unknown[]) {
 
 async function addLatency(page: Page, delayMs: number) {
   await page.route("**/*", async (route) => {
-    await new Promise((resolve) => setTimeout(resolve, delayMs));
+    // Delay page/API round trips without serially delaying every JS, font and
+    // image request. Delaying all lazy chunks can leave WebKit's route fallback
+    // on screen until Playwright's global timeout, which tests asset volume
+    // rather than basket persistence.
+    const type = route.request().resourceType();
+    if (type === "document" || type === "fetch" || type === "xhr") {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
     await route.continue();
   });
 }
@@ -102,6 +109,7 @@ test.describe("Maison Affluency multi-browser cart persistence under latency", (
   });
 
   test("WebKit restores the basket and Switzerland/CHF across navigation", async ({ page }) => {
+    test.setTimeout(60_000);
     await addLatency(page, 500);
     await seedBasket(page);
 
