@@ -186,6 +186,7 @@ export default function LiveTransactionFunnelTracker() {
           speed: 0,
           r: rand(3.5, 7),
           dropAt: null,
+          region: evtRegion,
           zone,
         });
       }
