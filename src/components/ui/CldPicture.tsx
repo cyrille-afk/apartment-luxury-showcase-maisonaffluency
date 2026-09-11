@@ -59,7 +59,7 @@ export function CldPicture({
         alt={alt}
         className={className}
         loading={loading}
-        fetchPriority={fetchPriority}
+        {...{ fetchpriority: fetchPriority }}
         decoding={resolvedDecoding}
       />
     );
@@ -91,7 +91,7 @@ export function CldPicture({
         alt={alt}
         className={className}
         loading={loading}
-        fetchPriority={fetchPriority}
+        {...{ fetchpriority: fetchPriority }}
         decoding={resolvedDecoding}
       />
     </picture>
