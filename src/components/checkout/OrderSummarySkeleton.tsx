@@ -1,75 +1,48 @@
-/**
- * Premium editorial skeleton for the Checkout Order Summary panel.
- *
- * Mirrors the real financial summary block with shape blocks and a soft
- * Tailwind pulse shimmer while product assets, FX multipliers and trade
- * discount calculations settle into local context.
- */
-export function OrderSummarySkeleton() {
+import React from 'react';
+
+export function OrderSummarySkeleton({ isLoading, children }: { isLoading: boolean; children: React.ReactNode }) {
+  // If the asynchronous API data parsing is complete, reveal real interactive features seamlessly
+  if (!isLoading) return <>{children}</>;
+
   return (
-    <aside className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] h-fit">
-      <div className="border border-border/70 bg-zinc-50 px-7 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between gap-3">
-          <div className="h-6 w-40 animate-pulse rounded-sm bg-zinc-200/80" />
-          <div className="h-5 w-16 animate-pulse rounded-sm bg-zinc-200/80" />
-        </div>
-
-        {/* Product line placeholders */}
-        <ul className="mt-6 space-y-4">
-          {[1, 2].map((i) => (
-            <li
-              key={i}
-              className="flex gap-4 border-b border-border/60 pb-4 last:border-0 last:pb-0"
-            >
-              <div className="w-16 shrink-0 self-start">
-                <div className="aspect-square w-full animate-pulse rounded-sm bg-zinc-200/80" />
-              </div>
-              <div className="min-w-0 flex-1 space-y-2">
-                <div className="h-3 w-20 animate-pulse rounded-sm bg-zinc-200/80" />
-                <div className="h-4 w-3/4 animate-pulse rounded-sm bg-zinc-200/80" />
-                <div className="h-3 w-1/2 animate-pulse rounded-sm bg-zinc-200/80" />
-              </div>
-              <div className="shrink-0 space-y-2 text-right">
-                <div className="h-4 w-20 animate-pulse rounded-sm bg-zinc-200/80" />
-              </div>
-            </li>
-          ))}
-        </ul>
-
-        {/* Financial rows */}
-        <dl className="mt-7 space-y-4 border-t border-border pt-6 font-body text-sm">
-          <SummaryRow label="Subtotal" />
-          <SummaryRow label="Front Door Premium Delivery" />
-          <SummaryRow label="Taxes" />
-        </dl>
-
-        {/* Total row */}
-        <div className="mt-6 border-t-2 border-foreground pt-5">
-            <div className="flex items-baseline justify-between">
-              <span className="font-medium uppercase text-[11px] tracking-[0.2em] text-black">
-                Total Due
-              </span>
-              <div className="h-5 w-28 animate-pulse rounded-sm bg-zinc-300" />
-            </div>
+    <div className="w-full max-w-sm mx-auto bg-white border border-zinc-100 p-6 space-y-6 font-sans antialiased animate-pulse">
+      {/* 1. Header Placement Placeholder */}
+      <div className="border-b border-zinc-100 pb-4">
+        <div className="h-3 bg-zinc-200 w-24 rounded-sm mb-2 uppercase tracking-widest" />
+        <div className="space-y-2 mt-4">
+          <div className="flex justify-between items-center">
+            <div className="h-4 bg-zinc-200 w-44 rounded-sm" />
+            <div className="h-4 bg-zinc-200 w-16 rounded-sm" />
           </div>
-
-          {/* Payment method marks */}
-          <div className="mt-8 flex items-center justify-center gap-10">
-            <div className="h-6 w-10 animate-pulse rounded-sm bg-zinc-200/80" />
-            <div className="h-6 w-10 animate-pulse rounded-sm bg-zinc-200/80" />
-            <div className="h-6 w-10 animate-pulse rounded-sm bg-zinc-200/80" />
-          </div>
+          <div className="h-3 bg-zinc-100 w-32 rounded-sm" />
         </div>
-      </aside>
-    );
-  }
-  
-  function SummaryRow({ label }: { label: string }) {
-    return (
-      <div className="flex items-baseline justify-between">
-        <dt className="text-muted-foreground">{label}</dt>
-        <dd className="h-4 w-20 animate-pulse rounded-sm bg-zinc-200/80" aria-hidden="true" />
       </div>
-    );
-  }
+
+      {/* 2. Structured Line Items Shimmer Matrix */}
+      <div className="space-y-4 border-b border-zinc-100 pb-4">
+        {[
+          { label: "Subtotal", width: "w-16" },
+          { label: "Front Door Premium Delivery", width: "w-20" },
+          { label: "Taxes (Import GST / VAT)", width: "w-12" }
+        ].map((row, idx) => (
+          <div key={idx} className="flex justify-between items-center text-xs">
+            <span className="text-zinc-400 font-light">{row.label}</span>
+            <div className={`h-3.5 bg-zinc-200/80 rounded-sm ${row.width}`} />
+          </div>
+        ))}
+      </div>
+
+      {/* 3. The Grand Final Total Placement */}
+      <div className="space-y-3 pt-2">
+        <div className="flex justify-between items-baseline">
+          <span className="text-xs uppercase tracking-wider font-semibold text-zinc-800">Total Due</span>
+          <div className="h-5 bg-zinc-300 w-28 rounded-sm" />
+        </div>
+        <div className="h-3 bg-zinc-100 w-36 rounded-sm mt-1" />
+      </div>
+
+      {/* 4. Action CTA Block Shimmer */}
+      <div className="w-full bg-zinc-200 h-12 rounded-sm mt-4" />
+    </div>
+  );
+}
