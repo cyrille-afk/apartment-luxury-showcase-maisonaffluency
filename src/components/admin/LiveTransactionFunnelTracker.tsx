@@ -378,6 +378,7 @@ export default function LiveTransactionFunnelTracker() {
             const halfHeight = 88 - p.x * 58;
             const y = 130 + p.y * halfHeight * 0.55;
             const dropping = p.dropAt !== null && p.x > p.dropAt - 0.05;
+            const dimmed = region !== "global" && p.region !== region;
             return (
               <circle
                 key={p.id}
@@ -385,7 +386,7 @@ export default function LiveTransactionFunnelTracker() {
                 cy={dropping ? y + 46 * ((p.x - (p.dropAt ?? 0) + 0.05) / 0.05) : y}
                 r={p.r}
                 fill={dropping ? "#f87171" : stageColorFor(p.x)}
-                opacity={dropping ? 0.4 : 0.85}
+                opacity={dropping ? (dimmed ? 0.08 : 0.4) : dimmed ? 0.2 : 0.85}
               />
             );
           })}
