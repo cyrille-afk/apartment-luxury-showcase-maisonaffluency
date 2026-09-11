@@ -1228,11 +1228,11 @@ const PublicDesignerProfile = () => {
         ) : (
           <>
             {wideHeroImage && (
-              <div className="relative w-screen left-1/2 -ml-[50vw] h-[72dvh] max-h-[calc(100dvh-22rem)] min-h-[320px] overflow-hidden bg-muted">
+              <div className="relative w-screen left-1/2 -ml-[50vw] h-auto min-h-[480px] max-h-[85dvh] overflow-hidden bg-muted">
                 <CldPicture
                   src={wideHeroImage}
                   alt={`${name} interior`}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="w-full h-auto object-contain object-bottom"
  priority />
               </div>
             )}
