@@ -273,23 +273,14 @@ export default defineConfig(({ mode }) => {
     minify: "esbuild",
 
     cssMinify: true,
-    // Route-level React.lazy() handles most splitting. The only manual rule
-    // is charting: recharts/d3/victory-vendor are heavy and only ever reached
-    // from lazy admin dashboards, so they get their own chunk and never land
-    // in the primary index bundle.
-    rollupOptions: {
-      output: {
-        manualChunks(id: string) {
-          if (!id.includes("node_modules")) return;
-          if (/node_modules\/(recharts|victory-vendor|d3-[^/]+|d3)\//.test(id)) {
-            return "charts-vendor";
-          }
-        },
-      },
-    },
+    // Default Vite vendor chunking handles node_modules splitting; no custom
+    // manualChunks rules so charting/math libraries stay inside their consuming
+    // route chunks and never create an extra, eagerly-fetched vendor file that
+    // blocks the initial paint.
     assetsInlineLimit: 1024,
     chunkSizeWarningLimit: 1500,
   },
+
 
   };
 });
