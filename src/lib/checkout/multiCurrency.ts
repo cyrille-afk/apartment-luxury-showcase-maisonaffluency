@@ -101,7 +101,7 @@ export type NormalizedLine<T> = T & {
 export function useCurrencyNormalizedLines<T extends MinimalLine>(
   lines: T[] | null,
   preferredBase?: string | null,
-): { base: string; lines: NormalizedLine<T>[] | null; mixed: boolean } {
+): { base: string; lines: NormalizedLine<T>[] | null; mixed: boolean; ready: boolean } {
   const base = useMemo(
     () => resolveBaseCurrency(lines, preferredBase),
     [lines, preferredBase],
