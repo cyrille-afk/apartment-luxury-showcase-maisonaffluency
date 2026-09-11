@@ -19,13 +19,9 @@ const posterAt = (w: number) =>
 const IS_MOBILE_VIEWPORT =
   typeof window !== "undefined" && !!window.matchMedia?.("(max-width: 767px)").matches;
 const POSTER_URL = posterAt(IS_MOBILE_VIEWPORT ? 780 : 1280);
-// Mobile srcset is capped at 780w — with DPR ~2.6 phones, a 1280w candidate in
-// the srcset gets picked and downloads ~2.7× the bytes for no visible gain.
-// Desktop keeps 1280w only. Both variants share POSTER_URL as `src` so the
-// video poster + <img> resolve to a single cached request.
-const POSTER_SRCSET = (IS_MOBILE_VIEWPORT ? [480, 780] : [780, 1280])
-  .map((w) => `${posterAt(w)} ${w}w`)
-  .join(", ");
+// Responsive candidates for the poster now come from <CldPicture>, which caps
+// phones at 640w with q_auto:eco; POSTER_URL stays the shared `src`/video
+// poster so both resolve to a single cached request.
 
 
 const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
