@@ -281,8 +281,14 @@ export default defineConfig(({ mode }) => {
       output: {
         manualChunks(id: string) {
           if (!id.includes("node_modules")) return;
+          // Heavy charting libs (admin funnel dashboard only) → own chunk.
           if (/node_modules\/(recharts|victory-vendor|d3-[^/]+|d3)\//.test(id)) {
-            return "charts-vendor";
+            return "analytics-vendor";
+          }
+          // Framework core (react, router, query) → dedicated vendor chunk so
+          // it stays cache-stable across deploys of app code.
+          if (/node_modules\/(react|react-dom|scheduler|react-router|react-router-dom|@remix-run|@tanstack)\//.test(id)) {
+            return "core-vendor";
           }
         },
       },
