@@ -252,7 +252,11 @@ const Hero = () => {
         </div>
       </nav>
 
-      <PrivateTourDialog open={tourOpen} onOpenChange={setTourOpen} />
+      {tourMounted && (
+        <Suspense fallback={null}>
+          <PrivateTourDialog open={tourOpen} onOpenChange={setTourOpen} />
+        </Suspense>
+      )}
     </section>
   );
 };
