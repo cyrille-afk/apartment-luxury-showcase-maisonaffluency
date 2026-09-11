@@ -786,6 +786,7 @@ const App = () => {
                     <Route path="admin/descriptor-taxonomy" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminDescriptorTaxonomy /></Suspense>} />
                     <Route path="admin/duplicates" element={<TradeAdminDuplicates />} />
                     <Route path="admin/whatsapp-alerts" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminWhatsAppAlerts /></Suspense>} />
+                    <Route path="admin/funnel-tracker" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminFunnelTracker /></Suspense>} />
                     <Route path="admin/axonometric-cad-qa" element={<TradeAdminAxonometricCadQa />} />
                     <Route path="admin/sync-status" element={<TradeAdminSyncStatus />} />
                     <Route path="admin/brand-lead-times" element={<TradeAdminBrandLeadTimes />} />
