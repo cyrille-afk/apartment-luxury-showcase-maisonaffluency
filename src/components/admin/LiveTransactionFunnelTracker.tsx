@@ -116,7 +116,67 @@ export default function LiveTransactionFunnelTracker() {
     setCounts({ views: 0, cart: 0, checkout: 0, purchases: 0 });
     setRevenue(0);
     setLogs([]);
+    setStream([]);
   }, []);
+
+  // Mock webhook hub: mimics an SSE / WebSocket push stream from the backend.
+  // Each payload lands at the head of the log, feeds the scorecards and injects
+  // a matching node into the particle plot without touching its layout state.
+  useEffect(() => {
+    if (!running || typeof window === "undefined") return;
+    let timer: number | undefined;
+
+    const emit = () => {
+      const roll = Math.random();
+      const action: StreamAction =
+        roll < 0.46 ? "views" : roll < 0.72 ? "cart" : roll < 0.89 ? "checkout" : "purchases";
+      const evtRegion =
+        region === "global"
+          ? (["na", "eu", "apac"] as const)[Math.floor(Math.random() * 3)]
+          : (region as Exclude<Region, "global">);
+      const bias = REGIONS.find((r) => r.id === evtRegion)!.aovBias;
+      const valueUsd =
+        action === "purchases"
+          ? rand(2200, 18500) * bias
+          : action === "checkout"
+            ? rand(1800, 15000) * bias
+            : null;
+
+      const event: StreamEvent = {
+        id: idRef.current++,
+        at: Date.now(),
+        action,
+        valueUsd,
+        region: evtRegion,
+        token: makeToken(),
+      };
+
+      setStream((prev) => [event, ...prev].slice(0, 30));
+      setCounts((c) => ({ ...c, [action]: c[action] + 1 }));
+      if (action === "purchases" && valueUsd) setRevenue((r) => r + valueUsd);
+
+      // Inject a matching particle at the stage the webhook reports.
+      const startX = action === "views" ? 0 : action === "cart" ? 0.34 : action === "checkout" ? 0.67 : 0.9;
+      if (particlesRef.current.length < 160) {
+        particlesRef.current.push({
+          id: idRef.current++,
+          x: startX,
+          y: rand(-1, 1),
+          speed: rand(0.09, 0.2),
+          r: rand(3.5, 7),
+          dropAt: null,
+        });
+      }
+
+      timer = window.setTimeout(emit, rand(1500, 3000));
+    };
+
+    timer = window.setTimeout(emit, rand(1500, 3000));
+    return () => {
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [running, region]);
+
 
   // Animation + simulation loop
   useEffect(() => {
