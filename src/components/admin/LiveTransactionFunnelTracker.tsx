@@ -153,11 +153,7 @@ export default function LiveTransactionFunnelTracker() {
           : (region as Exclude<Region, "global">);
       const bias = REGIONS.find((r) => r.id === evtRegion)!.aovBias;
       const valueUsd =
-        action === "purchases"
-          ? rand(2200, 18500) * bias
-          : action === "checkout"
-            ? rand(1800, 15000) * bias
-            : null;
+        action === "purchases" || action === "checkout" ? luxuryValue(bias) : null;
 
       const event: StreamEvent = {
         id: idRef.current++,
@@ -172,16 +168,17 @@ export default function LiveTransactionFunnelTracker() {
       setCounts((c) => ({ ...c, [action]: c[action] + 1 }));
       if (action === "purchases" && valueUsd) setRevenue((r) => r + valueUsd);
 
-      // Inject a matching particle at the stage the webhook reports.
-      const startX = action === "views" ? 0 : action === "cart" ? 0.34 : action === "checkout" ? 0.67 : 0.9;
+      // Inject a matching scatter node constrained to the correct funnel zone.
+      const zone = STAGE_ZONES[action];
       if (particlesRef.current.length < 160) {
         particlesRef.current.push({
           id: idRef.current++,
-          x: startX,
+          x: rand(zone.min, zone.max),
           y: rand(-1, 1),
-          speed: rand(0.09, 0.2),
+          speed: 0,
           r: rand(3.5, 7),
           dropAt: null,
+          zone,
         });
       }
 
