@@ -1965,6 +1965,7 @@ const PublicDesignerProfile = () => {
                   // We're already on Madsen's own portrait — no "by Arnold Madsen" needed.
                   const cardSubtitle = isArnoldClamChair ? undefined : pick.subtitle;
                   const isFavorite = isFavoritedPick(pick.id);
+                  const preserveFullProductImage = designer.slug === "amelie-vermersch";
                   const alternateImage = pick.hover_image_url
                     || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
                     || null;
@@ -2041,7 +2042,8 @@ const PublicDesignerProfile = () => {
                         }}
                         aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
                         className={cn(
-                          "w-full bg-[hsl(var(--canvas))] rounded-sm overflow-hidden relative flex items-center justify-center cursor-pointer max-h-full max-w-full p-6 md:p-8 md:aspect-[4/3]"
+                          "w-full bg-[hsl(var(--canvas))] rounded-sm overflow-hidden relative flex items-center justify-center cursor-pointer max-h-full max-w-full p-6 md:p-8",
+                          preserveFullProductImage ? "md:aspect-[3/4]" : "md:aspect-[4/3]"
                         )}
                       >
                         {/* Mobile masonry: natural aspect ratio image */}
@@ -2063,8 +2065,14 @@ const PublicDesignerProfile = () => {
                             sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                             alt={pick.title}
                             contain
-                            primaryClassName="max-h-full max-w-full object-contain p-0"
-                            alternateClassName="max-h-full max-w-full object-contain p-0"
+                            primaryClassName={cn(
+                              "max-h-full max-w-full object-contain p-0",
+                              preserveFullProductImage && "h-full w-full object-top"
+                            )}
+                            alternateClassName={cn(
+                              "max-h-full max-w-full object-contain p-0",
+                              preserveFullProductImage && "h-full w-full object-top"
+                            )}
                             alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
                           />
                         </div>
