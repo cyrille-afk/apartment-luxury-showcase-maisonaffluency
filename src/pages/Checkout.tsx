@@ -14,6 +14,7 @@ import { Helmet } from "react-helmet-async";
 import Navigation from "@/components/Navigation";
 import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";
 import StripeBankTransferPanel from "@/components/checkout/StripeBankTransferPanel";
+import { OrderSummarySkeleton } from "@/components/checkout/OrderSummarySkeleton";
 import { VisaMark, MastercardMark, BankTransferMark } from "@/components/checkout/PaymentMarks";
 import { TransferReferenceNote } from "@/components/checkout/TransferReferenceNote";
 import { useEstimatedShipping, ESTIMATED_SHIPPING_NOTE } from "@/hooks/useShippingCountry";
@@ -272,17 +273,25 @@ function BuyerTypeSection({
 /* Order summary — persistent sidebar showing the true unit prices,    */
 /* the subtotal, one explicit discount row, and the final total.       */
 /* ------------------------------------------------------------------ */
+
+
 function OrderSummary({
   lines,
   summary,
   buyerType,
   buyerGstNumber,
+  isLoading,
 }: {
   lines: CheckoutLine[];
   summary: CheckoutSummary;
   buyerType: BuyerType;
   buyerGstNumber: string;
+  isLoading?: boolean;
 }) {
+  if (isLoading) {
+    return <OrderSummarySkeleton />;
+  }
+
   const { currency } = summary;
   const fxRates = useFxRates();
   const usdSgd = useUsdToSgdRate();
@@ -1963,7 +1972,13 @@ export default function Checkout() {
         </div>
 
         {/* Right — persistent order summary */}
-        <OrderSummary lines={grossLines} summary={summary} buyerType={buyerType} buyerGstNumber={buyerGstNumber} />
+        <OrderSummary
+          lines={grossLines}
+          summary={summary}
+          buyerType={buyerType}
+          buyerGstNumber={buyerGstNumber}
+          isLoading={!fxReady || rawLines === null || syncing}
+        />
         </div>
 
         {/* Need Help? — support channels at the base of checkout */}
