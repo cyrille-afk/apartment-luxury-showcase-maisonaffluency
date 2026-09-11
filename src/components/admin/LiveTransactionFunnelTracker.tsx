@@ -298,10 +298,6 @@ export default function LiveTransactionFunnelTracker() {
     };
   }, [running, trafficVolume, dropOff, regionMeta, pushLog]);
 
-  const convRate = counts.views ? (counts.purchases / counts.views) * 100 : 0;
-  const avgOrderVal = counts.purchases ? revenue / counts.purchases : 0;
-  const abandonRate = counts.cart ? Math.max(0, (1 - counts.purchases / counts.cart) * 100) : 0;
-
   const particles = particlesRef.current;
 
   const stageColorFor = (x: number) =>
