@@ -20,7 +20,7 @@
  *   LH_AUDIT_TIMEOUT_MS hard timeout per audit (default 240000)
  *   LH_WARN_ONLY        "1" → report but never fail (local exploration)
  */
-import { spawn, spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { setTimeout as wait } from "node:timers/promises";
