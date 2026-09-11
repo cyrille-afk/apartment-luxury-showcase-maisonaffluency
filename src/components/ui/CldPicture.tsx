@@ -13,7 +13,7 @@ export interface CldPictureProps
   widths?: number[];
   /** Desktop `sizes` hint. */
   sizes?: string;
-  /** Mobile (<=640px) candidate widths. Capped at 640 by design. */
+  /** Mobile (<=640px) candidate widths. Hard-capped at 480px. */
   mobileWidths?: number[];
   /** Class applied to the <img>. */
   className?: string;
@@ -26,8 +26,8 @@ const isCloudinary = (url: string) => CLD_RE.test(url);
 /**
  * Responsive Cloudinary <picture>.
  *
- * Phones (<=640px) get their own <source> with `f_auto,q_auto:eco` and a hard
- * width ceiling of 640px — chosen by the browser from CSS media queries, not
+ * Phones (<=640px) get their own <source> with `c_scale,w_480,q_auto:eco,f_auto`
+ * and a hard width ceiling of 480px — chosen by the browser from CSS media queries, not
  * from JS viewport sniffing, so it is correct on first paint and after resize.
  * Non-Cloudinary URLs fall through to a plain <img> with the same loading rules.
  */
@@ -36,7 +36,7 @@ export function CldPicture({
   alt,
   priority = false,
   widths = [640, 960, 1280, 1600],
-  mobileWidths = [480, 640],
+  mobileWidths = [320, 480],
   sizes = "100vw",
   className,
   pictureClassName = "contents",
@@ -69,7 +69,7 @@ export function CldPicture({
   // else uses eco compression to cut mobile payload.
   const mobileQuality = priority ? "auto:good" : "auto:eco";
   const mobileSrcSet = mobileWidths
-    .map((w) => `${toResponsiveCloudinary(target, { width: Math.min(w, 640), quality: mobileQuality, crop: "scale" })} ${w}w`)
+    .map((w) => `${toResponsiveCloudinary(target, { width: Math.min(w, 480), quality: mobileQuality, crop: "scale" })} ${w}w`)
     .join(", ");
 
   const desktopSrcSet = widths
