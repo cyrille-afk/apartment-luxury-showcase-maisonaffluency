@@ -10,12 +10,24 @@ const PrivateTourDialog = lazy(() => import("@/components/PrivateTourDialog"));
 
 const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
 const HERO_ID = "v1781920000/AffluencySG_194-22.jpg_macpwj";
-// The responsive srcsets live on the static hero in index.html (the real LCP
-// candidate): mobile caps at c_scale,w_480, desktop at c_scale,w_1440.
-// Safari/WebKit JPEG recovery. Landscape c_scale for both breakpoints; CSS
-// object-fit handles the crop.
-const HERO_SAFARI_FALLBACK = `${HERO_BASE}/c_scale,w_480,q_auto:eco,f_jpg/${HERO_ID}`;
-const HERO_SAFARI_FALLBACK_DESKTOP = `${HERO_BASE}/c_scale,w_1440,q_auto:good,f_jpg/${HERO_ID}`;
+// Desktop / landscape variants — q_auto:good (not eco) so the hero clears
+// Chrome's 0.05 bpp LCP threshold and is eligible as the LCP candidate.
+const HERO_DESKTOP = `${HERO_BASE}/w_1280,c_fill,q_auto:good,f_webp/${HERO_ID}`;
+const HERO_DESKTOP_SRCSET = [828, 1280, 1600, 1920]
+  .map((w) => `${HERO_BASE}/w_${w},c_fill,q_auto:good,f_webp/${HERO_ID} ${w}w`)
+  .join(", ");
+// Mobile portrait variants — cropped to ~9:19.5 so object-cover doesn't shrink LCP score
+const HERO_MOBILE_SRCSET = [
+  { w: 390, h: 844 },
+  { w: 480, h: 1040 },
+  { w: 780, h: 1688 }, // 2x for DPR 2/3
+]
+  .map(({ w, h }) => `${HERO_BASE}/w_${w},h_${h},c_fill,g_auto,q_auto:good,f_webp/${HERO_ID} ${w}w`)
+  .join(", ");
+// Safari/WebKit JPEG recovery. Portrait crop for phones, landscape for
+// desktop — a portrait crop stretched across a wide viewport zooms the hero.
+const HERO_SAFARI_FALLBACK = `${HERO_BASE}/w_780,h_1688,c_fill,g_auto,q_auto:good,f_jpg/${HERO_ID}`;
+const HERO_SAFARI_FALLBACK_DESKTOP = `${HERO_BASE}/w_1920,c_fill,q_auto:good,f_jpg/${HERO_ID}`;
 
 // Warm the /designers route chunk (and its lazy hero) before the user taps the
 // CTA — the biggest chunk of perceived latency was code-splitting on click.
