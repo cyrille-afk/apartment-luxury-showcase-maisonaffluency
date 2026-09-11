@@ -10,18 +10,8 @@ const PrivateTourDialog = lazy(() => import("@/components/PrivateTourDialog"));
 
 const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
 const HERO_ID = "v1781920000/AffluencySG_194-22.jpg_macpwj";
-// Desktop / landscape variants — q_auto:good (not eco) so the hero clears
-// Chrome's 0.05 bpp LCP threshold and is eligible as the LCP candidate.
-// Capped at 1440w (c_scale) per the responsive-delivery audit.
-const HERO_DESKTOP = `${HERO_BASE}/c_scale,w_1440,q_auto:good,f_webp/${HERO_ID}`;
-const HERO_DESKTOP_SRCSET = [768, 1280, 1440]
-  .map((w) => `${HERO_BASE}/c_scale,w_${w},q_auto:good,f_webp/${HERO_ID} ${w}w`)
-  .join(", ");
-// Mobile variants — hard-capped at 480w (c_scale) so phones never pull a
-// tablet/desktop-sized hero file (Lighthouse "improve image delivery").
-const HERO_MOBILE_SRCSET = [320, 480]
-  .map((w) => `${HERO_BASE}/c_scale,w_${w},q_auto:eco,f_webp/${HERO_ID} ${w}w`)
-  .join(", ");
+// The responsive srcsets live on the static hero in index.html (the real LCP
+// candidate): mobile caps at c_scale,w_480, desktop at c_scale,w_1440.
 // Safari/WebKit JPEG recovery. Landscape c_scale for both breakpoints; CSS
 // object-fit handles the crop.
 const HERO_SAFARI_FALLBACK = `${HERO_BASE}/c_scale,w_480,q_auto:eco,f_jpg/${HERO_ID}`;
