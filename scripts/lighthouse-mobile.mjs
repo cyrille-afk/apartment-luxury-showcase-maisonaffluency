@@ -57,6 +57,17 @@ mkdirSync(outDir, { recursive: true });
 let preview;
 let failed = false;
 
+// Global watchdog: the whole gate (build + preview + audits) must finish inside
+// this budget or we abort ourselves with a clear message instead of letting the
+// CI step die silently at its own timeout.
+const TOTAL_TIMEOUT_MS = Number(process.env.LH_TOTAL_TIMEOUT_MS || 13 * 60_000);
+const watchdog = setTimeout(() => {
+  console.error(`\n✗ Lighthouse gate exceeded its total budget (${Math.round(TOTAL_TIMEOUT_MS / 1000)}s) — aborting.`);
+  if (preview) killProcessTree(preview);
+  process.exit(1);
+}, TOTAL_TIMEOUT_MS);
+watchdog.unref();
+
 function fail(message) {
   console.error(message);
   if (!WARN_ONLY) process.exitCode = 1;
