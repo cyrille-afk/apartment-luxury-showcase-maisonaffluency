@@ -118,7 +118,7 @@ const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: b
 
 
   const base = cn(
-    "max-w-full max-h-full object-contain rounded-luxury-sharp",
+    "w-full h-full object-cover object-center rounded-luxury-sharp",
     pointerEventsNone && "pointer-events-none"
   );
 
@@ -357,7 +357,10 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       <div className="flex-1 flex flex-col gap-3 min-w-0">
         <div className="relative group" ref={inlineSwipeRef}>
         <div
-          className={cn("product-image-frame md:aspect-square md:h-auto bg-cream rounded-luxury-sharp overflow-hidden relative md:transition-[height,aspect-ratio] md:duration-300 md:ease-out", compact && "product-image-frame--compact")}
+          className={cn(
+            "product-image-frame relative aspect-[4/5] md:aspect-square w-full mx-auto bg-cream rounded-luxury-sharp overflow-hidden",
+            compact && "product-image-frame--compact"
+          )}
           style={{ touchAction: "pan-x pan-y" }}
           onDoubleClick={() => setPresentOpen(true)}
           onTouchEnd={handleTouchEndForDoubleTap}
@@ -382,7 +385,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                     loading={i <= 1 ? "eager" : "lazy"}
                     fetchPriority={i === 0 ? "high" : "auto"}
                     decoding="async"
-                    className="max-w-full max-h-full object-contain rounded-luxury-sharp"
+                    className="w-full h-full object-cover object-center rounded-luxury-sharp"
                   />
                 </div>
               ))}
