@@ -203,7 +203,7 @@ export default function ProductCommerceCta({
     const mql = window.matchMedia("(max-width: 767px)");
     const update = () => {
       const mobileOrPwa = mql.matches || isPwaStandaloneDisplay();
-      const visible = dock && !isAtBottom && mobileOrPwa;
+      const visible = dock && mobileOrPwa;
       const el = dockRef.current;
       setStickyCommerceDockHeight(visible && el ? el.getBoundingClientRect().height : 0);
     };
@@ -220,7 +220,7 @@ export default function ProductCommerceCta({
       ro?.disconnect();
       setStickyCommerceDockHeight(0);
     };
-  }, [dock, isAtBottom]);
+  }, [dock]);
 
   
   const { clientSafe } = useClientSafeMode();
