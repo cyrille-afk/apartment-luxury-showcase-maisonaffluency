@@ -12,8 +12,8 @@ const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
 const HERO_ID = "v1781920000/AffluencySG_194-22.jpg_macpwj";
 // Safari/WebKit JPEG recovery. Portrait crop for phones, landscape for
 // desktop — a portrait crop stretched across a wide viewport zooms the hero.
-const HERO_SAFARI_FALLBACK = `${HERO_BASE}/c_scale,w_960,q_auto:eco,f_jpg/${HERO_ID}`;
-const HERO_SAFARI_FALLBACK_DESKTOP = `${HERO_BASE}/c_scale,w_2560,q_auto:good,f_jpg/${HERO_ID}`;
+const HERO_SAFARI_FALLBACK = `${HERO_BASE}/c_scale,w_480,q_auto:eco,f_jpg/${HERO_ID}`;
+const HERO_SAFARI_FALLBACK_DESKTOP = `${HERO_BASE}/c_scale,w_1440,q_auto:good,f_jpg/${HERO_ID}`;
 
 // Warm the /designers route chunk (and its lazy hero) before the user taps the
 // CTA — the biggest chunk of perceived latency was code-splitting on click.
