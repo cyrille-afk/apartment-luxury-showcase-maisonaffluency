@@ -26,8 +26,6 @@ const heroDefaults: Record<string, { id: string; gravity?: "auto" | "face" | "ce
 const CLD_UPLOAD_RE = /^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload)\/(.+)$/i;
 const HERO_WIDTHS = [480, 768, 1024, 1440, 1920];
 const HERO_RATIO = 600 / 1600;
-const DESIGNERS_OVERRIDE_URL =
-  "https://res.cloudinary.com/dif1oamtj/image/upload/e_upscale/c_fill,w_1600,h_600,g_auto/e_sharpen:100/q_auto:good/f_auto/v1789135737/Screen_Shot_2026-09-11_at_10.08.05_PM_jrlket.png";
 
 function isTransformToken(segment: string): boolean {
   return segment
