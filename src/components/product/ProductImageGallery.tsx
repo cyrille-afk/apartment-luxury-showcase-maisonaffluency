@@ -118,7 +118,7 @@ const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: b
 
 
   const base = cn(
-    "max-w-full max-h-full object-contain rounded-luxury-sharp",
+    "w-full h-full object-cover object-center rounded-luxury-sharp",
     pointerEventsNone && "pointer-events-none"
   );
 
@@ -357,7 +357,10 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       <div className="flex-1 flex flex-col gap-3 min-w-0">
         <div className="relative group" ref={inlineSwipeRef}>
         <div
-          className={cn("product-image-frame md:aspect-square md:h-auto bg-cream rounded-luxury-sharp overflow-hidden relative md:transition-[height,aspect-ratio] md:duration-300 md:ease-out", compact && "product-image-frame--compact")}
+          className={cn(
+            "product-image-frame relative aspect-[4/5] md:aspect-square w-full mx-auto bg-cream rounded-luxury-sharp overflow-hidden",
+            compact && "product-image-frame--compact"
+          )}
           style={{ touchAction: "pan-x pan-y" }}
           onDoubleClick={() => setPresentOpen(true)}
           onTouchEnd={handleTouchEndForDoubleTap}
@@ -382,7 +385,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                     loading={i <= 1 ? "eager" : "lazy"}
                     fetchPriority={i === 0 ? "high" : "auto"}
                     decoding="async"
-                    className="max-w-full max-h-full object-contain rounded-luxury-sharp"
+                    className="w-full h-full object-cover object-center rounded-luxury-sharp"
                   />
                 </div>
               ))}
@@ -403,8 +406,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           <div
             className={cn(
               "z-50",
-              "transition-all duration-500 ease-out",
-              `absolute ${compact ? "right-1.5 bottom-1.5" : "right-4 bottom-4"}`
+              "transition-opacity duration-300 ease-out",
+              "absolute right-4 bottom-4"
             )}
           >
             {isMobileOrPwa && mobileMenuItems ? (
@@ -452,7 +455,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
           {/* Fractional gallery counter — clean numerals in the lower-left corner. */}
           {images.length > 1 && (
-            <div className={cn("absolute z-20 pointer-events-none transition-all duration-500 ease-out", compact ? "bottom-1.5 left-1.5" : "bottom-4 left-4")}>
+            <div className="absolute bottom-4 left-4 z-20 pointer-events-none">
               <span className="inline-block px-2.5 py-1 rounded-full bg-white/70 backdrop-blur-sm font-body text-[11px] font-light tracking-widest text-neutral-600 tabular-nums">
                 {activeIndex + 1} / {images.length}
               </span>
@@ -461,12 +464,12 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
 
           {overlay && (
-            <div className={cn("absolute z-20 pointer-events-none transition-all duration-500 ease-out", compact ? "top-1.5 right-1.5" : "top-3 right-3")}>
+            <div className="absolute top-3 right-3 z-20 pointer-events-none">
               <div className="pointer-events-auto">{overlay}</div>
             </div>
           )}
           {bottomRightOverlay && (
-            <div className={cn("absolute z-20 pointer-events-none transition-all duration-500 ease-out", compact ? "top-1.5 left-1.5" : "top-4 left-4")}>
+            <div className="absolute top-4 left-4 z-20 pointer-events-none">
               <div className="pointer-events-auto">{bottomRightOverlay}</div>
             </div>
           )}
