@@ -114,6 +114,16 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
 
   const effectiveGravity = override ? override.gravity : (entry.gravity || "auto");
 
+  // Per-device renditions: the browser picks the closest width from srcSet.
+  const candidates = HERO_WIDTHS
+    .map((w) => {
+      const u = heroRendition(imageUrl, w, effectiveGravity);
+      return u ? `${u} ${w}w` : null;
+    })
+    .filter(Boolean) as string[];
+  const srcSet = candidates.length === HERO_WIDTHS.length ? candidates.join(", ") : undefined;
+  const displaySrc = (srcSet && heroRendition(imageUrl, 1440, effectiveGravity)) || imageUrl;
+
   const objectPositionClass =
     effectiveGravity === "east" ? "object-right" :
     effectiveGravity === "west" ? "object-left" :
