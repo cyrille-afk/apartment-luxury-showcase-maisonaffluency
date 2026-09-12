@@ -189,25 +189,11 @@ export default function ProductCommerceCta({
   const [miniCartOpen, setMiniCartOpen] = useState(false);
   const [intakeOpen, setIntakeOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
-  const [isAtBottom, setIsAtBottom] = useState(false);
   const dockRef = useRef<HTMLDivElement | null>(null);
   const cartItems = useCart();
 
-  // Fade out the sticky mobile dock when the user reaches the footer zone
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollBottom = window.scrollY + window.innerHeight;
-      const docHeight = document.documentElement.scrollHeight;
-      setIsAtBottom(docHeight - scrollBottom < 100);
-    };
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-    };
-  }, []);
+  // The mobile dock stays fixed at the viewport bottom for the full product
+  // journey; it must never tuck behind cookie banners, footers, or content.
 
   // Notify floating action buttons (e.g., the image-gallery presentation menu)
   // how much of the bottom of the viewport the mobile commerce dock owns.
@@ -217,7 +203,7 @@ export default function ProductCommerceCta({
     const mql = window.matchMedia("(max-width: 767px)");
     const update = () => {
       const mobileOrPwa = mql.matches || isPwaStandaloneDisplay();
-      const visible = dock && !isAtBottom && mobileOrPwa;
+      const visible = dock && mobileOrPwa;
       const el = dockRef.current;
       setStickyCommerceDockHeight(visible && el ? el.getBoundingClientRect().height : 0);
     };
@@ -234,7 +220,7 @@ export default function ProductCommerceCta({
       ro?.disconnect();
       setStickyCommerceDockHeight(0);
     };
-  }, [dock, isAtBottom]);
+  }, [dock]);
 
   
   const { clientSafe } = useClientSafeMode();
@@ -481,13 +467,10 @@ export default function ProductCommerceCta({
         <div
           ref={dockRef}
           className={cn(
-            "md:hidden fixed inset-x-0 bottom-0 z-[70] w-full max-w-none isolate",
+            "md:hidden fixed inset-x-0 bottom-0 z-50 w-full max-w-none isolate",
             "bg-background/95 backdrop-blur-md border-t border-border/50 shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
             "px-4 pt-3.5 pb-[env(safe-area-inset-bottom)]",
-            "transition-opacity duration-200 ease-out",
-            isAtBottom
-              ? "invisible opacity-0 pointer-events-none"
-              : "visible opacity-100"
+            "visible opacity-100"
           )}
           style={{ position: "fixed", insetInline: 0, bottom: 0 }}
         >

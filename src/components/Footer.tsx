@@ -5,7 +5,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   return (
     <footer
-      className="bg-background px-4 md:px-8 py-12 md:py-16 pb-[calc(env(safe-area-inset-bottom)+2rem)]"
+      className="bg-background px-4 md:px-8 py-12 md:py-16"
     >
       <div className="mx-auto max-w-7xl space-y-8">
         {/* Floating privacy / cookie banner */}
