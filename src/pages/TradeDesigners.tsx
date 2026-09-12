@@ -10,6 +10,7 @@ import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 import BrandCarousel from "@/components/trade/BrandCarousel";
 import SectionHero from "@/components/trade/SectionHero";
 import { cldResponsiveImg } from "@/lib/cloudinary";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /** Extract short discipline tags from a specialty string */
 function extractTags(specialty: string): string[] {
@@ -122,6 +123,7 @@ const DesignerCard = ({ brand, navigate }: { brand: EnrichedDesigner; navigate: 
 
 const TradeDesigners = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [searchParams] = useSearchParams();
   const { data: designers = [], isLoading } = useAllDesigners({ includeTradeOnly: true });
   const [search, setSearch] = useState("");
@@ -344,7 +346,7 @@ const TradeDesigners = () => {
         {/* Carousels below title */}
         {(atelierCarouselEntries.length > 0 || designerCarouselEntries.length > 0) && (
           <>
-            <div className="hidden sm:block space-y-4">
+            {!isMobile ? <div className="space-y-4">
               {atelierCarouselEntries.length > 0 && (
                 <BrandCarousel
                   brands={atelierCarouselEntries}
@@ -385,9 +387,9 @@ const TradeDesigners = () => {
                   }
                 />
               )}
-            </div>
+            </div> : null}
 
-            <div className="sm:hidden space-y-3">
+            {isMobile ? <div className="space-y-3">
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setMobileCarouselMode("ateliers")}
@@ -425,7 +427,7 @@ const TradeDesigners = () => {
                   });
                 }}
               />
-            </div>
+            </div> : null}
           </>
         )}
 
