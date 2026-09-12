@@ -16,6 +16,42 @@ const heroDefaults: Record<string, { id: string; gravity?: "auto" | "face" | "ce
   boards: { id: "v1773726568/AffluencySG_081_dk5rn7" },
 };
 
+/**
+ * Responsive hero renditions.
+ *
+ * Any Cloudinary hero (default or DB override) is rebuilt from its bare public
+ * id so each viewport gets a correctly-sized 8:3 crop instead of one fixed
+ * desktop rendition being up/down-scaled by the browser.
+ */
+const CLD_UPLOAD_RE = /^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload)\/(.+)$/i;
+const HERO_WIDTHS = [480, 768, 1024, 1440, 1920];
+const HERO_RATIO = 600 / 1600;
+
+function isTransformToken(segment: string): boolean {
+  return segment
+    .split(",")
+    .every((t) => /^[a-z]+(_|:)/i.test(t) && !/\.[a-z0-9]{2,5}$/i.test(t));
+}
+
+function heroRendition(url: string, width: number, gravity: string): string | null {
+  const m = url.match(CLD_UPLOAD_RE);
+  if (!m) return null;
+  const [, base, rest] = m;
+  const parts = rest.split("/");
+  const hadUpscale = parts.some((p) => p.includes("e_upscale"));
+  // Drop every existing transform segment; keep version + public id.
+  while (parts.length > 1 && isTransformToken(parts[0])) parts.shift();
+  const publicId = parts.join("/");
+  const height = Math.round(width * HERO_RATIO);
+  const chain = [
+    ...(hadUpscale ? ["e_upscale"] : []),
+    `c_fill,w_${width},h_${height},g_${gravity || "auto"}`,
+    "q_auto:good",
+    "f_auto",
+  ];
+  return `${base}/${chain.join("/")}/${publicId}`;
+}
+
 interface SectionHeroProps {
   section: keyof typeof heroDefaults;
   title: string;
