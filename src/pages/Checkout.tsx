@@ -2037,7 +2037,9 @@ export default function Checkout() {
           summary={summary}
           buyerType={buyerType}
           buyerGstNumber={buyerGstNumber}
-          isLoading={!fxReady || rawLines === null || syncing}
+          // Initial load only — re-syncing a PaymentIntent (payment method /
+          // destination change) must never hide the totals the buyer is reading.
+          isLoading={!fxReady || rawLines === null}
         />
         </div>
 
