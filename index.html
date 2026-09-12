@@ -177,13 +177,14 @@
     <link rel="preload" as="font" type="font/woff2" href="/fonts/Cinzel-Bold.woff2" crossorigin fetchpriority="high" />
 
 
-    <!-- Mobile hero preload — capped at 480px; desktop is capped at 1440px. -->
+    <!-- Mobile hero preload — includes Retina candidates so high-DPR phones
+         never upscale the 480px rendition across a full-width hero. -->
     <link
       rel="preload"
       as="image"
       type="image/avif"
-      href="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_480%2Cq_auto:eco%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj"
-      imagesrcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_320%2Cq_auto:eco%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 320w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_480%2Cq_auto:eco%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 480w"
+      href="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_960%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj"
+      imagesrcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_480%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 480w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_780%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 780w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_960%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 960w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1280%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 1280w"
       imagesizes="100vw"
       media="(max-width: 640px)"
       fetchpriority="high"
@@ -318,18 +319,18 @@
       a pinned background. Removed entirely on non-home routes by the inline script.
     -->
     <picture id="static-hero" style="position:absolute;inset:0;width:100vw;height:100vh;z-index:0;display:block;background:#111;pointer-events:none;">
-      <!-- Mobile AVIF (preferred), hard-capped at 480px -->
+      <!-- Mobile AVIF (preferred), with Retina-width candidates -->
       <source
         type="image/avif"
         media="(max-width: 640px)"
-        srcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_320%2Cq_auto:eco%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 320w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_480%2Cq_auto:eco%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 480w"
+        srcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_480%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 480w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_780%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 780w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_960%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 960w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1280%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 1280w"
         sizes="100vw"
       />
       <!-- Mobile WebP fallback -->
       <source
         type="image/webp"
         media="(max-width: 640px)"
-        srcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_320%2Cq_auto:eco%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 320w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_480%2Cq_auto:eco%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 480w"
+        srcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_480%2Cq_auto:good%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 480w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_780%2Cq_auto:good%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 780w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_960%2Cq_auto:good%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 960w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1280%2Cq_auto:good%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 1280w"
         sizes="100vw"
       />
       <!-- Desktop AVIF (preferred) -->
