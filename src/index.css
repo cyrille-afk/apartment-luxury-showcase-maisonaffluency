@@ -728,26 +728,46 @@ input, select, textarea {
 }
 
 
-/* Product image frame — fixed aspect-ratio container (mobile/PWA first).
-   A fixed ratio keeps the photo from deforming or shifting right when the
-   sticky header scroll state changes. The image fills the frame with
-   object-cover/object-center, and corner actions are absolute to this outer
-   container so they never drift. */
+/* Product image frame — responsive aspect ratio (mobile/PWA only).
+   Short screens keep the image within the landing viewport; taller screens
+   retain a portrait presentation without letting the frame consume the page. */
 .product-image-frame {
   width: 100%;
   margin-inline: auto;
+  aspect-ratio: auto;
+  height: min(45svh, 100vw);
+  max-height: 45svh;
+  transition: height 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    max-height 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 320ms cubic-bezier(0.22, 1, 0.36, 1);
   contain: layout paint;
   will-change: transform;
   transform: translateZ(0);
 }
-/* Compact is now a visual-only state: the frame keeps its fixed aspect ratio
-   and stays centered, so icons remain locked to the outer corners. */
+@media screen and (min-width: 410px) and (min-height: 850px) {
+  .product-image-frame {
+    height: min(45svh, 133vw);
+    max-height: 45svh;
+  }
+}
 .product-image-frame--compact {
-  /* dimensions are governed by Tailwind aspect utilities on the element */
+  aspect-ratio: auto;
+  height: 20svh;
+  max-height: 20svh;
+  width: min(78%, 30svh);
 }
 @media (prefers-reduced-motion: reduce) {
   .product-image-frame {
     transition: none;
+  }
+}
+@media (min-width: 768px) {
+  .product-image-frame,
+  .product-image-frame--compact {
+    aspect-ratio: 1 / 1;
+    height: auto;
+    max-height: none;
+    width: 100%;
   }
 }
 

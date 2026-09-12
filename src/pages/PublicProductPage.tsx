@@ -2141,7 +2141,7 @@ const PublicProductPageContent: React.FC = () => {
         );
       })()}
 
-      <div className="min-h-[100dvh] bg-background text-foreground">
+      <div className="flex min-h-[100dvh] flex-col bg-background text-foreground">
         <Navigation borderless />
 
         {/* Desktop slim sticky purchase bar — price + button labels follow the
@@ -2170,7 +2170,7 @@ const PublicProductPageContent: React.FC = () => {
 
 
 
-        <div className="pt-[var(--header-h)] pb-0 md:pb-20 max-w-7xl mx-auto px-4 md:px-5 lg:px-8">
+        <main className="flex-1 w-full pt-[var(--header-h)] pb-0 md:pb-20 max-w-7xl mx-auto px-4 md:px-5 lg:px-8">
           <button
             type="button"
             onClick={() => navigate(fromPath || fallbackGridPath)}
@@ -3065,7 +3065,7 @@ const PublicProductPageContent: React.FC = () => {
               </div>
             </div>
           )}
-        </div>
+        </main>
 
         <Footer />
       </div>
