@@ -135,7 +135,7 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
   return (
     <div className="relative rounded-lg overflow-hidden mb-6">
       <div className="absolute inset-0">
-        {(loaded || section === "designers") && (
+        {loaded && (
           <img
             src={displaySrc}
             srcSet={srcSet}
