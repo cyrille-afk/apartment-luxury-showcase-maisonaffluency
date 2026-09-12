@@ -186,8 +186,8 @@ const CookieConsent = () => {
   return (
     <>
       {visible && (
-        <div className="fixed bottom-0 left-0 right-0 z-[9999] p-4 md:p-6 pointer-events-none animate-slide-up-in">
-          <div className="pointer-events-auto max-w-2xl mx-auto bg-card/95 backdrop-blur-md border border-border/50 rounded-lg shadow-2xl px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="fixed bottom-0 left-0 right-0 z-40 p-0 pointer-events-none animate-slide-up-in">
+          <div className="pointer-events-auto max-w-2xl mx-auto m-4 md:m-6 bg-card/95 backdrop-blur-md border border-border/50 rounded-lg shadow-2xl px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
 
             {/* Close/decline via X */}
             <button
