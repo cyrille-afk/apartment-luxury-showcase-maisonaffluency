@@ -9,6 +9,7 @@ import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 import BrandCarousel from "@/components/trade/BrandCarousel";
 import SectionHero from "@/components/trade/SectionHero";
+import { cldResponsiveImg } from "@/lib/cloudinary";
 
 /** Extract short discipline tags from a specialty string */
 function extractTags(specialty: string): string[] {
@@ -65,7 +66,18 @@ const DesignerCard = ({ brand, navigate }: { brand: EnrichedDesigner; navigate: 
     >
       <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
         {brand.image_url ? (
-          <img src={brand.image_url} alt={brand.name} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="lazy" />
+          <img
+            {...cldResponsiveImg(brand.image_url, {
+              widths: [240, 360, 480, 720],
+              sizes: "(max-width: 639px) 46vw, (max-width: 1023px) 31vw, 23vw",
+              quality: "auto:eco",
+            })}
+            alt={brand.name}
+            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
+            loading="lazy"
+            decoding="async"
+            fetchPriority="low"
+          />
         ) : (
           <div className={cn(
             "w-full h-full flex items-center justify-center transition-colors",

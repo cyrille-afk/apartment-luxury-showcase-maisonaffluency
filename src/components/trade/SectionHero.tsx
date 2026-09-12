@@ -26,6 +26,8 @@ const heroDefaults: Record<string, { id: string; gravity?: "auto" | "face" | "ce
 const CLD_UPLOAD_RE = /^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload)\/(.+)$/i;
 const HERO_WIDTHS = [480, 768, 1024, 1440, 1920];
 const HERO_RATIO = 600 / 1600;
+const DESIGNERS_OVERRIDE_URL =
+  "https://res.cloudinary.com/dif1oamtj/image/upload/e_upscale/c_fill,w_1600,h_600,g_auto/e_sharpen:100/q_auto:good/f_auto/v1789135737/Screen_Shot_2026-09-11_at_10.08.05_PM_jrlket.png";
 
 function isTransformToken(segment: string): boolean {
   return segment
@@ -46,7 +48,8 @@ function heroRendition(url: string, width: number, gravity: string): string | nu
   const chain = [
     ...(hadUpscale ? ["e_upscale"] : []),
     `c_fill,w_${width},h_${height},g_${gravity || "auto"}`,
-    "q_auto:good",
+    ...(hadUpscale ? ["e_sharpen:200"] : []),
+    hadUpscale ? "q_auto:best" : "q_auto:good",
     "f_auto",
   ];
   return `${base}/${chain.join("/")}/${publicId}`;
@@ -104,7 +107,10 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
   const entry = heroDefaults[section] || heroDefaults.gallery;
 
   // Use DB override if available, otherwise Cloudinary default
-  const imageUrl = override?.image_url || entry.rawUrl || cloudinaryUrl(entry.id, {
+  // The current Designers image is also the immediate fallback. This prevents
+  // its LCP request from waiting for the section_heroes round trip.
+  const immediateUrl = section === "designers" ? DESIGNERS_OVERRIDE_URL : entry.rawUrl;
+  const imageUrl = override?.image_url || immediateUrl || cloudinaryUrl(entry.id, {
     width: 1600,
     height: 600,
     quality: "auto",
@@ -134,7 +140,7 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
   return (
     <div className="relative rounded-lg overflow-hidden mb-6">
       <div className="absolute inset-0">
-        {loaded && (
+        {(loaded || section === "designers") && (
           <img
             src={displaySrc}
             srcSet={srcSet}
