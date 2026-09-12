@@ -91,9 +91,14 @@ async function startPreviewIfNeeded() {
   if (process.env.PW_BASE_URL) return;
   await runBuild();
   log("→ Starting preview server…");
+  // Detached so the whole npm → vite process group can be killed at the end.
+  // Without this, `npm run preview` dies but the vite child survives, keeps the
+  // inherited pipes open and the CI step hangs until the job timeout.
   preview = spawn("npm", ["run", "preview", "--", "--port", "4173", "--strictPort"], {
-    stdio: ["ignore", "pipe", "inherit"],
+    stdio: ["ignore", "ignore", "inherit"],
+    detached: true,
   });
+  preview.unref();
   // Wait for preview to be reachable.
   for (let i = 0; i < 30; i++) {
     try {
