@@ -134,7 +134,8 @@ jobs:
           LH_RUNS=1 \
           LH_THROTTLING=simulate \
           LH_AUDIT_TIMEOUT_MS=120000 \
-          LH_BUILD_TIMEOUT_MS=600000 \
+          LH_BUILD_TIMEOUT_MS=420000 \
+          LH_TOTAL_TIMEOUT_MS=780000 \
           npm run lighthouse:mobile 2>&1 | tee lighthouse-mobile.log
         timeout-minutes: 15
       - name: Summarise Core Web Vitals
