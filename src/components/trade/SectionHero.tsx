@@ -104,11 +104,8 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
 
   const entry = heroDefaults[section] || heroDefaults.gallery;
 
-  // Use DB override if available, otherwise Cloudinary default
-  // The current Designers image is also the immediate fallback. This prevents
-  // its LCP request from waiting for the section_heroes round trip.
-  const immediateUrl = section === "designers" ? DESIGNERS_OVERRIDE_URL : entry.rawUrl;
-  const imageUrl = override?.image_url || immediateUrl || cloudinaryUrl(entry.id, {
+  // Use DB override if available, otherwise the configured Cloudinary default.
+  const imageUrl = override?.image_url || entry.rawUrl || cloudinaryUrl(entry.id, {
     width: 1600,
     height: 600,
     quality: "auto",
