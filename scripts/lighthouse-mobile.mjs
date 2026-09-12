@@ -261,11 +261,14 @@ try {
   console.error(error);
   process.exitCode = 1;
 } finally {
-  if (preview) preview.kill("SIGTERM");
+  if (preview) killProcessTree(preview);
   // Keep reports on failure for inspection.
   if (failed || process.exitCode === 1) {
     console.log(`\nReports kept at: ${outDir}`);
   } else {
     rmSync(outDir, { recursive: true, force: true });
   }
+  clearTimeout(watchdog);
+  // Force exit: stray Chrome/vite handles must never keep CI hanging.
+  process.exit(process.exitCode ?? 0);
 }
