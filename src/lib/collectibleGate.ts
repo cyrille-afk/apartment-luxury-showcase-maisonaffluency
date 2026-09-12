@@ -11,6 +11,7 @@ import { collectibleDesigners } from "@/components/Collectibles";
 /** Collectible designer slugs that are publicly accessible (exceptions to the gate). */
 export const PUBLIC_COLLECTIBLE_SLUGS: ReadonlySet<string> = new Set([
   "pierre-bonnefille",
+  "christopher-boots",
 ]);
 
 export const COLLECTIBLE_SLUGS: ReadonlySet<string> = new Set(
