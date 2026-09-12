@@ -189,25 +189,11 @@ export default function ProductCommerceCta({
   const [miniCartOpen, setMiniCartOpen] = useState(false);
   const [intakeOpen, setIntakeOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
-  const [isAtBottom, setIsAtBottom] = useState(false);
   const dockRef = useRef<HTMLDivElement | null>(null);
   const cartItems = useCart();
 
-  // Fade out the sticky mobile dock when the user reaches the footer zone
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollBottom = window.scrollY + window.innerHeight;
-      const docHeight = document.documentElement.scrollHeight;
-      setIsAtBottom(docHeight - scrollBottom < 100);
-    };
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-    };
-  }, []);
+  // The mobile dock stays fixed at the viewport bottom for the full product
+  // journey; it must never tuck behind cookie banners, footers, or content.
 
   // Notify floating action buttons (e.g., the image-gallery presentation menu)
   // how much of the bottom of the viewport the mobile commerce dock owns.
