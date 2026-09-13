@@ -179,9 +179,17 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const { direction: scrollDirection, scrollY: navScrollY } = useScrollDirection();
   const stickyProductBarActive = useStickyProductBarActive();
   const programmaticScrollActive = useProgrammaticScrollActive();
+  // The contact view is a destination form — the header must stay pinned
+  // there so the user always has a way back out.
+  const isContactRoute = location.pathname === "/contact";
+  const closeContactView = () => {
+    if (window.history.length > 1) navigate(-1);
+    else navigate("/");
+  };
   const navHidden =
     !alwaysVisible &&
     location.pathname !== "/trade-program" &&
+    !isContactRoute &&
     // While the product mini bar is docked below the header, the header
     // stays pinned so the bar never floats in empty space.
     !stickyProductBarActive &&
