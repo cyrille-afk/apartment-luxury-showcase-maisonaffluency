@@ -66,7 +66,7 @@ export default function GalleryDetailsFloatingNav({
     const updateMode = () => {
       const isStandalone =
         standaloneMql?.matches ||
-        (window.navigator as any).standalone === true ||
+        (window.navigator as Navigator & { standalone?: boolean }).standalone === true ||
         new URLSearchParams(window.location.search).get("source") === "pwa";
       setIsMobileOrPwa(mobileMql.matches || isStandalone);
     };
