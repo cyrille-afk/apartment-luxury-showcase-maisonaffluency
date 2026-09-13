@@ -265,7 +265,11 @@ export default function ProductCommerceCta({
   const isUnpriced =
     !tradeApproved &&
     (!rrpLabel || rrpLabel.trim().toLowerCase() === "price upon request");
-  const mobilePrimaryLabel = isUnpriced ? "Request Quote & Customization" : primaryLabel;
+  const mobilePrimaryLabel = finishSelectionRequired
+    ? "Choose Finishes"
+    : isUnpriced
+      ? "Request Quote & Customization"
+      : primaryLabel;
 
   // Public: PLACE ORDER writes the configured piece into the shared cart state
   // and slides open the "Your Selection" drawer — never the account wall.
@@ -504,12 +508,21 @@ export default function ProductCommerceCta({
                 </div>
               ) : (
                 <div className="flex flex-col">
-                  <span className="font-display text-base leading-tight truncate block">
-                    {rrpLabel ?? retailLabel ?? "Price upon Request"}
+                  <span
+                    className={cn(
+                      "font-display leading-tight truncate block",
+                      finishSelectionRequired ? "text-sm" : "text-base"
+                    )}
+                  >
+                    {finishSelectionRequired
+                      ? "Select Finishes for Pricing"
+                      : rrpLabel ?? retailLabel ?? "Price upon Request"}
                   </span>
-                  <span className="font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground/80 truncate">
-                    Excl. shipping &amp; duties
-                  </span>
+                  {!finishSelectionRequired && (
+                    <span className="font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground/80 truncate">
+                      Excl. shipping &amp; duties
+                    </span>
+                  )}
                 </div>
               )}
             </div>
