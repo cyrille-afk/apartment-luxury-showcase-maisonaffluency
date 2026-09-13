@@ -483,7 +483,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 <button
                   type="button"
                   aria-label="Presentation"
-                  className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/90 shadow-sm backdrop-blur-sm touch-manipulation"
+                  className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/90 shadow-sm backdrop-blur-sm touch-manipulation animate-gallery-icon-pulse"
                   onClick={(e) => {
                     e.stopPropagation();
                     setPresentOpen(true);
