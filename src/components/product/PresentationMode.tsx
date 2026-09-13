@@ -52,8 +52,10 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
   });
   const indexRef = useRef(index);
   const onIndexChangeRef = useRef(onIndexChange);
+  const onCloseRef = useRef(onClose);
   indexRef.current = index;
   onIndexChangeRef.current = onIndexChange;
+  onCloseRef.current = onClose;
 
   const scheduleHide = useCallback(() => {
     if (hideTimer.current) window.clearTimeout(hideTimer.current);
@@ -66,11 +68,11 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
     scheduleHide();
     lockBodyScroll();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
       const len = images.length;
       const wrap = (i: number) => ((i % len) + len) % len;
-      if (e.key === "ArrowRight") onIndexChange(wrap(index + 1));
-      if (e.key === "ArrowLeft") onIndexChange(wrap(index - 1));
+      if (e.key === "ArrowRight") onIndexChangeRef.current(wrap(indexRef.current + 1));
+      if (e.key === "ArrowLeft") onIndexChangeRef.current(wrap(indexRef.current - 1));
     };
     window.addEventListener("keydown", onKey);
     return () => {
@@ -78,7 +80,7 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
       window.removeEventListener("keydown", onKey);
       if (hideTimer.current) window.clearTimeout(hideTimer.current);
     };
-  }, [open, index, images.length, onClose, onIndexChange, scheduleHide]);
+  }, [open, images.length, scheduleHide]);
 
   useEffect(() => {
     if (!emblaApi || !open) return;
@@ -86,7 +88,7 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
       const next = emblaApi.selectedScrollSnap();
       if (next !== indexRef.current) onIndexChangeRef.current(next);
     };
-    emblaApi.scrollTo(index, true);
+    emblaApi.scrollTo(indexRef.current, true);
     emblaApi.on("select", syncFromCarousel);
     emblaApi.on("reInit", syncFromCarousel);
     return () => {
