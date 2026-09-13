@@ -488,64 +488,61 @@ export default function ProductCommerceCta({
       </div>
       )}
 
-      {/* Isolated small-viewport shell: iOS Safari may enlarge the visual
-          viewport as its toolbar retracts, but this frame never moves with it. */}
+      {/* Rigid small-viewport dock: fixed directly to the viewport glass with a
+          hardware-accelerated transform so iOS Safari repaints it in real time
+          even when the bottom browser panel retracts or expands. */}
       {dock && typeof document !== "undefined" && createPortal(
-        <div
-          data-mobile-commerce-shell
-          className="pointer-events-none fixed bottom-0 left-0 z-[100] block h-[100svh] min-h-[100svh] w-full md:hidden"
-        >
         <div
           ref={dockRef}
           data-mobile-commerce-dock
-          className="pointer-events-auto absolute bottom-0 left-0 block w-full border-t border-border/50 bg-foreground pb-[env(safe-area-inset-bottom,16px)] shadow-[0_-6px_18px_rgba(0,0,0,0.06)]"
+          className="pointer-events-auto fixed bottom-0 left-0 z-[100] block w-full pb-[calc(12px+env(safe-area-inset-bottom,0px))] md:hidden border-t border-border/50 bg-foreground shadow-[0_-6px_18px_rgba(0,0,0,0.06)] will-change-transform"
+          style={{ transform: "translate3d(0,0,0)" }}
         >
           <div className="bg-background px-4 pb-3 pt-3.5">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              {tradeApproved && netLabel ? (
-                <div className="flex flex-col">
-                  <span className="font-body text-[9px] tracking-[0.04em] text-muted-foreground truncate">
-                    Retail: {retailLabel ?? "—"}
-                  </span>
-                  <span className="font-display text-base leading-tight truncate">{netLabel}</span>
-                </div>
-              ) : (
-                <div className="flex flex-col">
-                  <span
-                    className={cn(
-                      "font-display leading-tight truncate block",
-                      finishSelectionRequired ? "text-sm" : "text-base"
-                    )}
-                  >
-                    {finishSelectionRequired
-                      ? "Select Finishes for Pricing"
-                      : rrpLabel ?? retailLabel ?? "Price upon Request"}
-                  </span>
-                  {!finishSelectionRequired && (
-                    <span className="font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground/80 truncate">
-                      Excl. shipping &amp; duties
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                {tradeApproved && netLabel ? (
+                  <div className="flex flex-col">
+                    <span className="font-body text-[9px] tracking-[0.04em] text-muted-foreground truncate">
+                      Retail: {retailLabel ?? "—"}
                     </span>
-                  )}
-                </div>
-              )}
+                    <span className="font-display text-base leading-tight truncate">{netLabel}</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col">
+                    <span
+                      className={cn(
+                        "font-display leading-tight truncate block",
+                        finishSelectionRequired ? "text-sm" : "text-base"
+                      )}
+                    >
+                      {finishSelectionRequired
+                        ? "Select Finishes for Pricing"
+                        : rrpLabel ?? retailLabel ?? "Price upon Request"}
+                    </span>
+                    {!finishSelectionRequired && (
+                      <span className="font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground/80 truncate">
+                        Excl. shipping &amp; duties
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleMobilePrimary}
+                disabled={placingOrder}
+                className={cn(
+                  primaryBtn,
+                  "h-11 shrink-0 w-auto px-7 whitespace-nowrap",
+                  isUnpriced && "px-4 text-[11px] tracking-wide",
+                  "active:scale-[0.98] transition-transform duration-150"
+                )}
+              >
+                {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : mobilePrimaryLabel}
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={handleMobilePrimary}
-              disabled={placingOrder}
-              className={cn(
-                primaryBtn,
-                "h-11 shrink-0 w-auto px-7 whitespace-nowrap",
-                isUnpriced && "px-4 text-[11px] tracking-wide",
-                "active:scale-[0.98] transition-transform duration-150"
-              )}
-            >
-              {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : mobilePrimaryLabel}
-            </button>
           </div>
-          </div>
-        </div>
         </div>,
         document.body
       )}
