@@ -709,29 +709,6 @@ input, select, textarea {
     min-height: 100dvh;
   }
 
-  /* Product commerce owns the viewport directly. Neutralize legacy root
-     stacking/containing contexts while this route is mounted so iOS Safari
-     cannot reinterpret fixed descendants during toolbar collapse. */
-  html.product-page-active,
-  html.product-page-active body {
-    transform: none !important;
-    filter: none !important;
-    perspective: none !important;
-    contain: none !important;
-    isolation: auto !important;
-  }
-
-  html.product-page-active #root,
-  html.product-page-active .product-page-root {
-    position: static !important;
-    z-index: auto !important;
-    transform: none !important;
-    filter: none !important;
-    perspective: none !important;
-    contain: none !important;
-    isolation: auto !important;
-    overflow: visible !important;
-  }
 }
 
 @media (max-width: 767px) and (display-mode: standalone) {

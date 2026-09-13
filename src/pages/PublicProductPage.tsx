@@ -1274,14 +1274,6 @@ const PublicProductPageContent: React.FC = () => {
   const showPublicCommerce =
     !isTradeVerifiedView && (roleOverridden ? true : !authLoading);
 
-  // The mobile commerce dock is portaled to document.body, but the route marker
-  // also removes legacy iOS root stacking contexts while this page is mounted.
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    document.documentElement.classList.add("product-page-active");
-    return () => document.documentElement.classList.remove("product-page-active");
-  }, []);
-
   // On landing we intentionally show the catalogue-wide minimum ("From $X"),
   // not the price of the finish in the first photo — this encourages visitors
   // to browse the finishes to discover the full price range.

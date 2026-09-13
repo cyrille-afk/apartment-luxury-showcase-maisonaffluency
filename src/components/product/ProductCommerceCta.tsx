@@ -209,18 +209,30 @@ export default function ProductCommerceCta({
       const mobileOrPwa = mql.matches || isPwaStandaloneDisplay();
       const visible = dock && mobileOrPwa;
       const el = dockRef.current;
+      if (el) {
+        // iOS Safari can leave part of the layout viewport behind its expanding
+        // bottom toolbar. Lift the dock by exactly that obscured amount instead
+        // of relying on a nested fixed-position containing block.
+        const viewport = window.visualViewport;
+        const obscuredBottom = viewport
+          ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
+          : 0;
+        el.style.bottom = `${Math.round(obscuredBottom)}px`;
+      }
       setStickyCommerceDockHeight(visible && el ? el.getBoundingClientRect().height : 0);
     };
     update();
     mql.addEventListener("change", update);
     window.addEventListener("resize", update, { passive: true });
     window.visualViewport?.addEventListener("resize", update);
+    window.visualViewport?.addEventListener("scroll", update);
     const ro = dockRef.current ? new ResizeObserver(update) : null;
     if (ro && dockRef.current) ro.observe(dockRef.current);
     return () => {
       mql.removeEventListener("change", update);
       window.removeEventListener("resize", update);
       window.visualViewport?.removeEventListener("resize", update);
+      window.visualViewport?.removeEventListener("scroll", update);
       ro?.disconnect();
       setStickyCommerceDockHeight(0);
     };
@@ -499,9 +511,9 @@ export default function ProductCommerceCta({
           ref={dockRef}
           data-mobile-commerce-dock
           className={cn(
-            "fixed bottom-0 bottom-[env(safe-area-inset-bottom,0px)] left-0 z-[9999] block w-full md:hidden",
+            "fixed bottom-0 left-0 z-[9999] block w-full md:hidden",
             "border-t border-border/50 bg-background shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
-            "px-4 pb-3 pt-3.5"
+            "px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] pt-3.5"
           )}
         >
           <div className="flex items-center justify-between gap-3">
