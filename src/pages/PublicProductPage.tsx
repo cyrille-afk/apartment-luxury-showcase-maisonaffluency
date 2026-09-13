@@ -1274,6 +1274,14 @@ const PublicProductPageContent: React.FC = () => {
   const showPublicCommerce =
     !isTradeVerifiedView && (roleOverridden ? true : !authLoading);
 
+  // The mobile commerce dock is portaled to document.body, but the route marker
+  // also removes legacy iOS root stacking contexts while this page is mounted.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.classList.add("product-page-active");
+    return () => document.documentElement.classList.remove("product-page-active");
+  }, []);
+
   // On landing we intentionally show the catalogue-wide minimum ("From $X"),
   // not the price of the finish in the first photo — this encourages visitors
   // to browse the finishes to discover the full price range.
@@ -2169,7 +2177,7 @@ const PublicProductPageContent: React.FC = () => {
         );
       })()}
 
-      <div className="flex min-h-[100dvh] flex-col bg-background text-foreground">
+      <div className="product-page-root flex min-h-[100dvh] flex-col bg-background text-foreground">
         <Navigation borderless />
 
         {/* Desktop slim sticky purchase bar — price + button labels follow the
@@ -2583,6 +2591,7 @@ const PublicProductPageContent: React.FC = () => {
                       <ProductCommerceCta
                         productId={product.id}
                         rrpLabel={displayRrpLabel}
+                        dock={false}
                         productTitle={product.title}
                         designerName={designerDisplay}
                         imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
@@ -2607,6 +2616,7 @@ const PublicProductPageContent: React.FC = () => {
                         productId={product.id}
                         rrpLabel={displayRrpLabel}
                         tradeApproved
+                        dock={false}
                         netLabelOverride={mockNetLabel}
                         retailLabelOverride={retailPlainLabel}
                         productTitle={product.title}
@@ -2666,53 +2676,6 @@ const PublicProductPageContent: React.FC = () => {
                 </>
               )}
 
-              {/* Mobile/PWA sticky bottom dock for signed-out visitors —
-                  the in-flow panel lives in the desktop branch above. */}
-              {showPublicCommerce && (
-                <ProductCommerceCta
-                  productId={product.id}
-                  rrpLabel={displayRrpLabel}
-                  
-                  dockOnly
-                  productTitle={product.title}
-                  designerName={designerDisplay}
-                  imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
-                  leadTime={product.lead_time}
-                  onPlaceOrder={handleDirectCheckout}
-                  onAddToCart={addConfiguredToCart}
-                  placingOrder={checkoutLoading}
-                  selectedFinishes={selectedFinishes}
-                  finishSelectionRequired={needsFinishSelection}
-                  orderFinishLabel={buildOrderFinishLabel()}
-                  finishOptions={finishOptions}
-                  finishVariants={finishVariantEntries}
-                  redirectTo={location.pathname + location.search}
-                />
-              )}
-
-              {/* Dev role preview — verified trade mobile dock */}
-              {showMockTradeCommerce && (
-                <ProductCommerceCta
-                  productId={product.id}
-                  rrpLabel={displayRrpLabel}
-                  tradeApproved
-                  dockOnly
-                  netLabelOverride={mockNetLabel}
-                  retailLabelOverride={retailPlainLabel}
-                  productTitle={product.title}
-                  designerName={designerDisplay}
-                  imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
-                  leadTime={product.lead_time}
-                  onPlaceOrder={handleDirectCheckout}
-                  placingOrder={checkoutLoading}
-                  selectedFinishes={selectedFinishes}
-                  orderFinishLabel={buildOrderFinishLabel()}
-                  finishOptions={finishOptions}
-                  finishVariants={finishVariantEntries}
-                  redirectTo={location.pathname + location.search}
-                />
-              )}
-
               {/* Signed-in visitors. Verified trade members get the full
                   workspace (net pricing, availability, spec sheet + Felix);
                   everyone else signed in keeps the enquiry CTA. */}
@@ -2758,19 +2721,6 @@ const PublicProductPageContent: React.FC = () => {
                       pdfUrls={product.pdf_urls}
                       inquireHref={inquireHref}
                       felixUrl={typeof window !== "undefined" ? window.location.href : undefined}
-                    />
-                    <ProductCommerceCta
-                      productId={product.id}
-                      rrpLabel={displayRrpLabel}
-                      tradeApproved
-                      dockOnly
-                      onPlaceOrder={handleDirectCheckout}
-                      placingOrder={checkoutLoading}
-                      selectedFinishes={selectedFinishes}
-                  orderFinishLabel={buildOrderFinishLabel()}
-                  finishOptions={finishOptions}
-                  finishVariants={finishVariantEntries}
-                      redirectTo={returnTo}
                     />
                     </div>
                   );
@@ -3099,6 +3049,50 @@ const PublicProductPageContent: React.FC = () => {
 
         <Footer />
       </div>
+
+      {/* One authoritative mobile dock, outside the product layout and footer.
+          ProductCommerceCta portals its fixed surface directly to document.body. */}
+      {showPublicCommerce && (
+        <ProductCommerceCta
+          productId={product.id}
+          rrpLabel={displayRrpLabel}
+          dockOnly
+          productTitle={product.title}
+          designerName={designerDisplay}
+          imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
+          leadTime={product.lead_time}
+          onPlaceOrder={handleDirectCheckout}
+          onAddToCart={addConfiguredToCart}
+          placingOrder={checkoutLoading}
+          selectedFinishes={selectedFinishes}
+          finishSelectionRequired={needsFinishSelection}
+          orderFinishLabel={buildOrderFinishLabel()}
+          finishOptions={finishOptions}
+          finishVariants={finishVariantEntries}
+          redirectTo={location.pathname + location.search}
+        />
+      )}
+      {showMockTradeCommerce && (
+        <ProductCommerceCta
+          productId={product.id}
+          rrpLabel={displayRrpLabel}
+          tradeApproved
+          dockOnly
+          netLabelOverride={mockNetLabel}
+          retailLabelOverride={retailPlainLabel}
+          productTitle={product.title}
+          designerName={designerDisplay}
+          imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
+          leadTime={product.lead_time}
+          onPlaceOrder={handleDirectCheckout}
+          placingOrder={checkoutLoading}
+          selectedFinishes={selectedFinishes}
+          orderFinishLabel={buildOrderFinishLabel()}
+          finishOptions={finishOptions}
+          finishVariants={finishVariantEntries}
+          redirectTo={location.pathname + location.search}
+        />
+      )}
       <GalleryDetailsFloatingNav
         showAfterElementId="related-picks-section"
         azHref="/designers"

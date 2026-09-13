@@ -15,3 +15,4 @@
 - [x] Add Chromium/WebKit latency coverage for cart removal and Swiss basket rehydration
 - [x] Blocking Lighthouse mobile CI gate: median-of-3 runs, FCP/LCP/CLS/TBT budgets + perf/a11y scores
 - [x] Fix iOS Safari product CTA and floating-action safe-area positioning
+- [x] Isolate the mobile product CTA at body level above every page and footer layer

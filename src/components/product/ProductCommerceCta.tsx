@@ -497,9 +497,10 @@ export default function ProductCommerceCta({
       {dock && typeof document !== "undefined" && createPortal(
         <div
           ref={dockRef}
+          data-mobile-commerce-dock
           className={cn(
-            "md:hidden fixed bottom-[env(safe-area-inset-bottom,0px)] left-0 z-[100] w-full",
-            "bg-background border-t border-border/50 shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
+            "fixed bottom-0 bottom-[env(safe-area-inset-bottom,0px)] left-0 z-[9999] block w-full md:hidden",
+            "border-t border-border/50 bg-background shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
             "px-4 pb-3 pt-3.5"
           )}
         >
