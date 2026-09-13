@@ -108,7 +108,7 @@ const Hero = () => {
   return (
     <section
       className={`relative flex w-full flex-col justify-between md:h-screen md:overflow-hidden ${
-        isPwa ? "min-h-screen" : "h-[100svh] min-h-[100svh] overflow-hidden"
+        isPwa ? "min-h-[100dvh]" : "h-[100svh] min-h-[100svh] overflow-hidden"
       }`}
     >
       {/* Hero image is rendered by the static <picture id="static-hero"> in
