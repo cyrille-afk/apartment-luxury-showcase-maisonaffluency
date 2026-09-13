@@ -130,11 +130,7 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         hideClose
-        className="max-w-2xl w-[95vw] max-h-[calc(100dvh-2rem)] md:max-h-[90vh] overflow-y-auto p-0 border border-border bg-background rounded-xl"
-        style={{
-          marginTop: "max(1rem, env(safe-area-inset-top))",
-          marginBottom: "max(1rem, env(safe-area-inset-bottom))",
-        }}
+        className="max-w-2xl w-[95vw] max-h-[calc(100dvh-1.5rem)] md:max-h-[90vh] flex flex-col overflow-hidden p-0 border border-border bg-background rounded-xl"
         aria-describedby={undefined}
       >
         <VisuallyHidden><DialogTitle>Request a Private Tour</DialogTitle></VisuallyHidden>
