@@ -466,9 +466,9 @@ export default function ProductCommerceCta({
         <div
           ref={dockRef}
           className={cn(
-            "md:hidden fixed bottom-0 left-0 w-full z-[100]",
-            "bg-background/95 backdrop-blur-md border-t border-border/50 shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
-            "px-4 pt-3.5 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+            "md:hidden fixed bottom-[env(safe-area-inset-bottom,0px)] left-0 z-[100] w-full",
+            "bg-background border-t border-border/50 shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
+            "px-4 pb-3 pt-3.5"
           )}
         >
           <div className="flex items-center justify-between gap-3">
