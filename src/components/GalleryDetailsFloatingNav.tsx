@@ -181,7 +181,7 @@ export default function GalleryDetailsFloatingNav({
         ...(dockActive
           ? {
               top: "auto",
-              bottom: `calc(${dockHeight}px + 1rem)`,
+              bottom: `calc(var(--mobile-product-viewport-gap, 0px) + ${dockHeight}px + 1rem)`,
             }
           : {
               top: "auto",
