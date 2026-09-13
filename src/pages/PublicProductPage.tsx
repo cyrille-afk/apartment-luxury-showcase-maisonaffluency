@@ -1168,7 +1168,7 @@ const PublicProductPageContent: React.FC = () => {
   const { data: publicRrpRow } = usePublicRrp(data?.product?.id);
   const { data: relatedRrpMap = {} } = usePublicRrpMap((data?.relatedPicks || []).map((p: any) => p.id));
   // Display currency follows the header flag globally (listing ↔ detail parity).
-  const { displayRow: displayRrpRow, toDisplayCents, displayCurrency } = usePublicRrpDisplay(publicRrpRow);
+  const { displayRow: displayRrpRow, toDisplayCents, displayCurrency: rrpDisplayCurrency } = usePublicRrpDisplay(publicRrpRow);
   const catalogueRrpLabel = formatPublicRrp(displayRrpRow);
   // Price of the size/finish combination the visitor has currently selected.
   // `exact` = a single variant matched, so we drop the "From" prefix.
@@ -2884,7 +2884,7 @@ const PublicProductPageContent: React.FC = () => {
                               {rp.title}
                             </p>
                             <p className="font-body text-[10px] text-muted-foreground tracking-wide mt-1">
-                              {formatPublicRrpForDestination((relatedRrpMap as any)[rp.id], displayCurrency) || "Price upon Request"}
+                              {formatPublicRrpForDestination((relatedRrpMap as any)[rp.id], rrpDisplayCurrency) || "Price upon Request"}
                             </p>
                           </div>
                         </Link>
@@ -2933,7 +2933,7 @@ const PublicProductPageContent: React.FC = () => {
                             {rp.title}
                           </p>
                           <p className="font-body text-xs text-muted-foreground tracking-wide mt-1">
-                            {formatPublicRrpForDestination((relatedRrpMap as any)[rp.id], displayCurrency) || "Price upon Request"}
+                            {formatPublicRrpForDestination((relatedRrpMap as any)[rp.id], rrpDisplayCurrency) || "Price upon Request"}
                           </p>
                         </div>
                       </Link>
