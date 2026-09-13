@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import useEmblaCarousel from "embla-carousel-react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
@@ -41,8 +42,20 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
 }) => {
   const [chromeVisible, setChromeVisible] = useState(true);
   const hideTimer = useRef<number | null>(null);
-  const touchStartX = useRef<number | null>(null);
-  const touchStartY = useRef<number | null>(null);
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: images.length > 1,
+    align: "start",
+    containScroll: false,
+    slidesToScroll: 1,
+    dragFree: false,
+    duration: 24,
+  });
+  const indexRef = useRef(index);
+  const onIndexChangeRef = useRef(onIndexChange);
+  const onCloseRef = useRef(onClose);
+  indexRef.current = index;
+  onIndexChangeRef.current = onIndexChange;
+  onCloseRef.current = onClose;
 
   const scheduleHide = useCallback(() => {
     if (hideTimer.current) window.clearTimeout(hideTimer.current);
@@ -55,33 +68,47 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
     scheduleHide();
     lockBodyScroll();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
       const len = images.length;
       const wrap = (i: number) => ((i % len) + len) % len;
-      if (e.key === "ArrowRight") onIndexChange(wrap(index + 1));
-      if (e.key === "ArrowLeft") onIndexChange(wrap(index - 1));
+      if (e.key === "ArrowRight") onIndexChangeRef.current(wrap(indexRef.current + 1));
+      if (e.key === "ArrowLeft") onIndexChangeRef.current(wrap(indexRef.current - 1));
     };
-    // Freeze all touch scrolling inside the presentation surface so the
-    // page behind (and the viewer itself) can't rubber-band while swiping.
-    // Horizontal swipes still resolve to next/previous via touchstart/end.
-    const onTouchMove = (e: TouchEvent) => {
-      if (e.cancelable) e.preventDefault();
-    };
-    document.addEventListener("touchmove", onTouchMove, { passive: false });
     window.addEventListener("keydown", onKey);
     return () => {
       unlockBodyScroll();
-      document.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("keydown", onKey);
       if (hideTimer.current) window.clearTimeout(hideTimer.current);
     };
-  }, [open, index, images.length, onClose, onIndexChange, scheduleHide]);
+  }, [open, images.length, scheduleHide]);
+
+  useEffect(() => {
+    if (!emblaApi || !open) return;
+    const syncFromCarousel = () => {
+      const next = emblaApi.selectedScrollSnap();
+      if (next !== indexRef.current) onIndexChangeRef.current(next);
+    };
+    emblaApi.scrollTo(indexRef.current, true);
+    emblaApi.on("select", syncFromCarousel);
+    emblaApi.on("reInit", syncFromCarousel);
+    return () => {
+      emblaApi.off("select", syncFromCarousel);
+      emblaApi.off("reInit", syncFromCarousel);
+    };
+  }, [emblaApi, open]);
+
+  useEffect(() => {
+    if (!emblaApi || !open || emblaApi.selectedScrollSnap() === index) return;
+    emblaApi.scrollTo(index);
+  }, [emblaApi, index, open]);
 
   if (!open || typeof document === "undefined" || images.length === 0) return null;
 
   const go = (i: number) => {
     const len = images.length;
-    onIndexChange(((i % len) + len) % len);
+    const next = ((i % len) + len) % len;
+    onIndexChange(next);
+    emblaApi?.scrollTo(next);
   };
 
   const revealChrome = () => {
@@ -91,50 +118,34 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 h-[100dvh] z-[9999] bg-black flex flex-col overscroll-none touch-none"
+      className="fixed inset-0 z-[10000] flex h-[100dvh] flex-col overflow-hidden overscroll-none bg-foreground isolate"
       role="dialog"
       aria-modal="true"
       aria-label={`${title || alt} — presentation`}
-      onTouchStart={(e) => {
-        touchStartX.current = e.touches[0].clientX;
-        touchStartY.current = e.touches[0].clientY;
-      }}
-      onTouchEnd={(e) => {
-        const sx = touchStartX.current;
-        const sy = touchStartY.current;
-        touchStartX.current = null;
-        touchStartY.current = null;
-        if (sx == null || sy == null) return;
-        const dx = e.changedTouches[0].clientX - sx;
-        const dy = e.changedTouches[0].clientY - sy;
-        if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) {
-          go(dx < 0 ? index + 1 : index - 1);
-        } else if (Math.abs(dx) < 12 && Math.abs(dy) < 12) {
-          revealChrome();
-        }
-      }}
       onClick={revealChrome}
     >
       <div
-        className="relative flex-1 flex items-center justify-center overflow-hidden"
+        className="relative min-h-0 flex-1 overflow-hidden"
         style={{
           paddingTop: "max(1rem, env(safe-area-inset-top))",
           paddingBottom: "max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem))",
         }}
       >
-        {images.map((src, i) => (
-          <img
-            key={src + i}
-            src={src}
-            alt={i === index ? alt : ""}
-            draggable={false}
-            onDragStart={(e) => e.preventDefault()}
-            className={cn(
-              "absolute max-w-full max-h-full object-contain transition-opacity duration-500 ease-out select-none [-webkit-touch-callout:none] touch-none",
-              i === index ? "opacity-100" : "opacity-0 pointer-events-none"
-            )}
-          />
-        ))}
+        <div ref={emblaRef} className="absolute inset-0 overflow-hidden" style={{ touchAction: "pan-y pinch-zoom" }}>
+          <div className="flex h-full touch-pan-y">
+            {images.map((src, i) => (
+              <div key={`${src}-${i}`} className="flex h-full min-w-0 flex-[0_0_100%] items-center justify-center">
+                <img
+                  src={src}
+                  alt={i === index ? alt : ""}
+                  draggable={false}
+                  onDragStart={(e) => e.preventDefault()}
+                  className="max-h-full max-w-full select-none object-contain [-webkit-touch-callout:none]"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Desktop: persistent close control, top-right — never fades */}
         <button
