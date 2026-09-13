@@ -173,6 +173,7 @@ export default function ProductCommerceCta({
   orderFinishLabel = null,
   finishOptions,
   finishVariants,
+  finishSelectionRequired = false,
   redirectTo,
   dock = true,
   dockOnly = false,
@@ -317,9 +318,27 @@ export default function ProductCommerceCta({
     return () => window.removeEventListener("ma:open-quote", handler);
   });
 
+  // No finish chosen yet: the primary action becomes a gentle guide that
+  // smooth-scrolls straight to the finish swatches instead of ordering.
+  const scrollToFinishes = () => {
+    const el = document.getElementById("finish-selectors");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    // Fallback: first swatch control anywhere on the page.
+    document
+      .querySelector<HTMLElement>("[data-finish-selectors], [aria-label*='finish' i]")
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
   // Mobile: PLACE ORDER opens the conversational 3-step intake sheet first;
   // its completion hands off to the existing selection / checkout flow.
   const handleMobilePrimary = () => {
+    if (finishSelectionRequired) {
+      scrollToFinishes();
+      return;
+    }
     if (tradeApproved) {
       onPlaceOrder(quantity);
       return;
