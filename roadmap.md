@@ -24,3 +24,4 @@
 - [x] Keep the checkout total visible in a sticky, collapsible mobile order summary
 - [x] Redirect checkout to /designers when cart becomes empty (initial or reactive)
 - [x] Freeze the iOS product purchase bar at its landing position and restore all three intake steps
+- [x] Remove the regressed fixed-height iOS shell and anchor the complete commerce bar to the live visible viewport
