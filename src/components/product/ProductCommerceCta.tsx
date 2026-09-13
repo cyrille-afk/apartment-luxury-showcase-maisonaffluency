@@ -488,14 +488,13 @@ export default function ProductCommerceCta({
       </div>
       )}
 
-      {/* Rigid small-viewport dock: fixed directly to the viewport glass with a
-          hardware-accelerated transform so iOS Safari repaints it in real time
-          even when the bottom browser panel retracts or expands. */}
+      {/* Rigid small-viewport dock: mounted in App's root overlay host, outside
+          every product-page wrapper and footer. */}
       {dock && typeof document !== "undefined" && createPortal(
         <div
           ref={dockRef}
           data-mobile-commerce-dock
-          className="pointer-events-auto fixed bottom-0 left-0 z-[100] block w-full pb-[calc(12px+env(safe-area-inset-bottom,0px))] md:hidden border-t border-border/50 bg-foreground shadow-[0_-6px_18px_rgba(0,0,0,0.06)] will-change-transform"
+          className="pointer-events-auto fixed bottom-0 left-0 z-[9999] block w-full border-t border-border/50 bg-background pb-[calc(12px+env(safe-area-inset-bottom,0px))] shadow-[0_-6px_18px_hsl(var(--foreground)/0.06)] will-change-transform md:hidden"
           style={{ transform: "translate3d(0,0,0)" }}
         >
           <div className="bg-background px-4 pb-3 pt-3.5">
@@ -544,7 +543,7 @@ export default function ProductCommerceCta({
             </div>
           </div>
         </div>,
-        document.body
+        document.getElementById("product-root-overlays") ?? document.body
       )}
 
       {/* Slide-out mini-cart drawer (State A order confirmation) */}
