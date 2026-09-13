@@ -488,13 +488,9 @@ export default function ProductCommerceCta({
         <div
           ref={dockRef}
           data-mobile-commerce-dock
-          className={cn(
-            "pointer-events-auto fixed bottom-0 left-0 z-50 block h-auto w-full overflow-visible",
-            "border-t border-border/50 bg-background shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
-            "px-4 pb-[calc(16px+env(safe-area-inset-bottom,0px))] pt-4 md:hidden"
-          )}
+          className="fixed bottom-0 left-0 z-50 flex h-[76px] w-full items-center justify-between border-t border-gray-100 bg-white px-6 py-4 md:hidden"
         >
-          <div className="flex min-h-11 items-center justify-between gap-3">
+          <div className="flex w-full items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
                 {tradeApproved && netLabel ? (
                   <div className="flex flex-col">
