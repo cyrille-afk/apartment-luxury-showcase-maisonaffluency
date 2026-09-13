@@ -931,8 +931,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // gallery, so the closed accordion header reads the same finish as the
   // "Shown in" caption on landing. No pricing/selection callbacks fire here.
   useEffect(() => {
+    noteGalleryIndex(currentGalleryIndex);
     if (isRugProduct) return;
     if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
+    if (!galleryInteractedRef.current) return;
     const oneBased = currentGalleryIndex + 1;
     if (isSharedSlide(oneBased)) return;
     const hit = (list: Fabric[]) =>
