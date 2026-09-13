@@ -343,9 +343,10 @@ export default function OrderIntakeSheet({
   }
 
   return createPortal(
-    // Mobile owns the complete visible area below the fixed navigation. Keeping
-    // that geometry on the root portal avoids inheriting any product-page height.
-    <div className="fixed left-0 top-[var(--mobile-nav-height)] z-[10001] h-[calc(100dvh-var(--mobile-nav-height))] w-full md:inset-0 md:h-[100dvh]">
+    // Full-viewport overlay: covers the global header so the modal reads as an
+    // independent surface. Geometry is self-contained (no product-page inputs).
+    <div className="fixed inset-0 left-0 top-0 z-[10001] h-[100dvh] w-full">
+
       {/* Scrim */}
       <button
         type="button"
