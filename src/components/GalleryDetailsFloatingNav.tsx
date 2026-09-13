@@ -174,13 +174,19 @@ export default function GalleryDetailsFloatingNav({
   const floatingControl = (
     <div
       className={cn(
-        "fixed right-4 z-[100] print:hidden transition-all duration-300 ease-in-out",
+        "fixed right-4 z-[10000] print:hidden transition-all duration-300 ease-in-out",
         className
       )}
       style={{
-        bottom: dockActive
-          ? "calc(env(safe-area-inset-bottom, 0px) + 70px)"
-          : "calc(env(safe-area-inset-bottom, 0px) + 1rem)",
+        ...(dockActive
+          ? {
+              top: `calc(var(--mobile-commerce-anchor-height, 100svh) - ${dockHeight}px - 4rem)`,
+              bottom: "auto",
+            }
+          : {
+              top: "auto",
+              bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)",
+            }),
       }}
     >
       {isExpanded ? (

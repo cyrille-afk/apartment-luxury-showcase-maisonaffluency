@@ -23,3 +23,4 @@
 - [x] Restore the mobile product CTA as a plain root-level fixed bar without viewport offsets
 - [x] Keep the checkout total visible in a sticky, collapsible mobile order summary
 - [x] Redirect checkout to /designers when cart becomes empty (initial or reactive)
+- [x] Freeze the iOS product purchase bar at its landing position and restore all three intake steps
