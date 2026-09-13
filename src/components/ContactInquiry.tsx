@@ -512,18 +512,37 @@ const ContactInquiry = () => {
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="mt-16 border-t border-border pt-12 text-center"
+          className="mt-16 border-t border-border pt-12"
         >
-          <p className="font-body text-sm uppercase tracking-wider text-muted-foreground">
+          <p className="mb-8 text-center font-body text-sm uppercase tracking-wider text-muted-foreground">
             For immediate inquiries
           </p>
-          <a
-            href="mailto:concierge@myaffluency.com"
-            className="mt-2 inline-block font-body text-lg text-primary hover:text-primary/80"
-            onClick={() => trackCTA.email("Contact Section")}
-          >
-            concierge@myaffluency.com
-          </a>
+          <div className="grid gap-8 md:grid-cols-2">
+            <div className="text-center">
+              <p className="mb-2 font-body text-xs uppercase tracking-wider text-muted-foreground">
+                General & Private Clients
+              </p>
+              <a
+                href="mailto:concierge@maisonaffluency.com"
+                className="inline-block font-body text-lg text-primary hover:text-primary/80"
+                onClick={() => trackCTA.email("Contact Section — Concierge")}
+              >
+                concierge@maisonaffluency.com
+              </a>
+            </div>
+            <div className="text-center">
+              <p className="mb-2 font-body text-xs uppercase tracking-wider text-muted-foreground">
+                Trade Program Members
+              </p>
+              <a
+                href="mailto:trade@maisonaffluency.com"
+                className="inline-block font-body text-lg text-primary hover:text-primary/80"
+                onClick={() => trackCTA.email("Contact Section — Trade")}
+              >
+                trade@maisonaffluency.com
+              </a>
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>
