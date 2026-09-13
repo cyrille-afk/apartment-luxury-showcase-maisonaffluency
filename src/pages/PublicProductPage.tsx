@@ -341,15 +341,29 @@ const VariantSelectorsProvider: React.FC<{
   }, [persistKey, selBase, selTop, selDualSize, selMat, selSize]);
 
 
-  // Skip the gallery's initial mount report so NO finish swatch is
-  // pre-selected on landing; only genuine visitor navigation links back.
+  // Arm the gallery→finish link only after a genuine visitor gesture, so NO
+  // finish swatch is pre-selected on landing by the gallery's initial mount
+  // report (or any data-loading re-fire of this effect).
   const galleryLinkArmedRef = useRef(false);
   useEffect(() => {
-    if (galleryActiveIndex === undefined || !finishMap) return;
-    if (!galleryLinkArmedRef.current) {
+    if (typeof window === "undefined") return;
+    const arm = () => {
       galleryLinkArmedRef.current = true;
-      return;
-    }
+    };
+    window.addEventListener("pointerdown", arm, { passive: true });
+    window.addEventListener("touchstart", arm, { passive: true });
+    window.addEventListener("wheel", arm, { passive: true });
+    window.addEventListener("keydown", arm);
+    return () => {
+      window.removeEventListener("pointerdown", arm);
+      window.removeEventListener("touchstart", arm);
+      window.removeEventListener("wheel", arm);
+      window.removeEventListener("keydown", arm);
+    };
+  }, []);
+  useEffect(() => {
+    if (galleryActiveIndex === undefined || !finishMap) return;
+    if (!galleryLinkArmedRef.current) return;
     const variants = (product.size_variants || []) as { label?: string; base?: string; top?: string }[];
     const match = findVariantForImageIndex(finishMap, variants, galleryActiveIndex);
     if (!match) return;
