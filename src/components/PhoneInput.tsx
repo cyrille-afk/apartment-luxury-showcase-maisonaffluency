@@ -117,14 +117,13 @@ export function PhoneInput({
           <SelectValue placeholder="+65">{selectedDial}</SelectValue>
         </SelectTrigger>
         <SelectContent>
-          {COUNTRY_DIAL_OPTIONS.map((o) => (
+          {DIAL_OPTIONS.map((o) => (
             <SelectItem
-              key={o.country}
+              key={o.dial}
               value={o.dial}
               className="font-body text-sm"
             >
-              <span className="mr-2 inline-block w-5 text-center">{o.flag}</span>
-              <span className="mr-1">{o.country}</span>
+              <span className="mr-1">{o.labels.join(" / ")}</span>
               <span className="text-muted-foreground">{o.dial}</span>
             </SelectItem>
           ))}
