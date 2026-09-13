@@ -341,8 +341,15 @@ const VariantSelectorsProvider: React.FC<{
   }, [persistKey, selBase, selTop, selDualSize, selMat, selSize]);
 
 
+  // Skip the gallery's initial mount report so NO finish swatch is
+  // pre-selected on landing; only genuine visitor navigation links back.
+  const galleryLinkArmedRef = useRef(false);
   useEffect(() => {
     if (galleryActiveIndex === undefined || !finishMap) return;
+    if (!galleryLinkArmedRef.current) {
+      galleryLinkArmedRef.current = true;
+      return;
+    }
     const variants = (product.size_variants || []) as { label?: string; base?: string; top?: string }[];
     const match = findVariantForImageIndex(finishMap, variants, galleryActiveIndex);
     if (!match) return;
