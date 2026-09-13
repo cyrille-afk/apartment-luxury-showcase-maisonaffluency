@@ -168,6 +168,20 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
   const [presentOpen, setPresentOpen] = useState(false);
 
+  // Landing engagement cue: a minimal "View Editorial Gallery" label sits next
+  // to the presentation icon for 3s, then fades out and unmounts; the icon
+  // itself carries a delicate 3-beat pulse (see index.css) that stops on its own.
+  const [galleryHintVisible, setGalleryHintVisible] = useState(true);
+  const [galleryHintMounted, setGalleryHintMounted] = useState(true);
+  useEffect(() => {
+    const fadeTimer = window.setTimeout(() => setGalleryHintVisible(false), 3000);
+    const unmountTimer = window.setTimeout(() => setGalleryHintMounted(false), 3900);
+    return () => {
+      window.clearTimeout(fadeTimer);
+      window.clearTimeout(unmountTimer);
+    };
+  }, []);
+
   const thumbsRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const expandedFrameHeightRef = useRef(0);
@@ -432,12 +446,26 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               "transition-[transform,opacity] duration-300 ease-out",
             )}
           >
+            {isMobileOrPwa && galleryHintMounted && (
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "pointer-events-none absolute right-full top-1/2 mr-2.5 -translate-y-1/2 whitespace-nowrap",
+                  "rounded-full border border-border/40 bg-background/90 px-2.5 py-1 shadow-sm backdrop-blur-sm",
+                  "font-body text-[9px] uppercase tracking-[0.18em] text-foreground/70",
+                  "transition-opacity duration-700 ease-out",
+                  galleryHintVisible ? "opacity-100" : "opacity-0",
+                )}
+              >
+                View Editorial Gallery
+              </span>
+            )}
             {isMobileOrPwa && mobileMenuItems ? (
               <DropdownMenu>
                 <CornerTooltip label="Presentation" side="top" align="end">
                   <DropdownMenuTrigger
                     aria-label="Presentation and more actions"
-                    className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/90 shadow-sm backdrop-blur-sm touch-manipulation"
+                    className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/90 shadow-sm backdrop-blur-sm touch-manipulation animate-gallery-icon-pulse"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Images size={20} strokeWidth={1.5} className="text-foreground/80" />
@@ -455,7 +483,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 <button
                   type="button"
                   aria-label="Presentation"
-                  className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/90 shadow-sm backdrop-blur-sm touch-manipulation"
+                  className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/90 shadow-sm backdrop-blur-sm touch-manipulation animate-gallery-icon-pulse"
                   onClick={(e) => {
                     e.stopPropagation();
                     setPresentOpen(true);

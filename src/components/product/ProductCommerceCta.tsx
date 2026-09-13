@@ -60,6 +60,9 @@ export interface ProductCommerceCtaProps {
   finishOptions?: string[];
   /** Per-finish price + image, powering live re-pricing inside the intake sheet. */
   finishVariants?: { label: string; priceLabel?: string | null; imageUrl?: string | null }[];
+  /** Public priced pieces with no finish chosen yet: the CTA invites a finish
+      choice and smooth-scrolls to the swatches instead of placing an order. */
+  finishSelectionRequired?: boolean;
   redirectTo?: string;
   /** Mobile-only sticky bottom dock */
   dock?: boolean;
@@ -170,6 +173,7 @@ export default function ProductCommerceCta({
   orderFinishLabel = null,
   finishOptions,
   finishVariants,
+  finishSelectionRequired = false,
   redirectTo,
   dock = true,
   dockOnly = false,
@@ -261,7 +265,11 @@ export default function ProductCommerceCta({
   const isUnpriced =
     !tradeApproved &&
     (!rrpLabel || rrpLabel.trim().toLowerCase() === "price upon request");
-  const mobilePrimaryLabel = isUnpriced ? "Request Quote & Customization" : primaryLabel;
+  const mobilePrimaryLabel = finishSelectionRequired
+    ? "Choose Finishes"
+    : isUnpriced
+      ? "Request Quote & Customization"
+      : primaryLabel;
 
   // Public: PLACE ORDER writes the configured piece into the shared cart state
   // and slides open the "Your Selection" drawer — never the account wall.
@@ -314,9 +322,27 @@ export default function ProductCommerceCta({
     return () => window.removeEventListener("ma:open-quote", handler);
   });
 
+  // No finish chosen yet: the primary action becomes a gentle guide that
+  // smooth-scrolls straight to the finish swatches instead of ordering.
+  const scrollToFinishes = () => {
+    const el = document.getElementById("finish-selectors");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    // Fallback: first swatch control anywhere on the page.
+    document
+      .querySelector<HTMLElement>("[data-finish-selectors], [aria-label*='finish' i]")
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
   // Mobile: PLACE ORDER opens the conversational 3-step intake sheet first;
   // its completion hands off to the existing selection / checkout flow.
   const handleMobilePrimary = () => {
+    if (finishSelectionRequired) {
+      scrollToFinishes();
+      return;
+    }
     if (tradeApproved) {
       onPlaceOrder(quantity);
       return;
@@ -432,9 +458,15 @@ export default function ProductCommerceCta({
         ) : (
           <>
             <QuantitySelector value={quantity} onChange={setQuantity} />
-            <button type="button" data-commerce-primary onClick={() => primaryAction()} disabled={placingOrder} className={primaryBtn}>
+            <button
+              type="button"
+              data-commerce-primary
+              onClick={() => (finishSelectionRequired ? scrollToFinishes() : primaryAction())}
+              disabled={placingOrder}
+              className={primaryBtn}
+            >
               {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
-              {placingOrder ? "Opening checkout…" : primaryLabel}
+              {placingOrder ? "Opening checkout…" : finishSelectionRequired ? "Choose Finishes" : primaryLabel}
             </button>
             {/* Secondary: high-touch / contract buyers — routes explicitly to
                 the Trade Account inquiry form. */}
@@ -482,12 +514,21 @@ export default function ProductCommerceCta({
                 </div>
               ) : (
                 <div className="flex flex-col">
-                  <span className="font-display text-base leading-tight truncate block">
-                    {rrpLabel ?? retailLabel ?? "Price upon Request"}
+                  <span
+                    className={cn(
+                      "font-display leading-tight truncate block",
+                      finishSelectionRequired ? "text-sm" : "text-base"
+                    )}
+                  >
+                    {finishSelectionRequired
+                      ? "Select Finishes for Pricing"
+                      : rrpLabel ?? retailLabel ?? "Price upon Request"}
                   </span>
-                  <span className="font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground/80 truncate">
-                    Excl. shipping &amp; duties
-                  </span>
+                  {!finishSelectionRequired && (
+                    <span className="font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground/80 truncate">
+                      Excl. shipping &amp; duties
+                    </span>
+                  )}
                 </div>
               )}
             </div>
