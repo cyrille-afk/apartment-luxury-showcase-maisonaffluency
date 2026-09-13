@@ -574,6 +574,68 @@ function OrderSummary({
   );
 }
 
+function MobileCheckoutSummary({
+  lines,
+  summary,
+  buyerType,
+  buyerGstNumber,
+  isLoading,
+}: {
+  lines: CheckoutLine[];
+  summary: CheckoutSummary;
+  buyerType: BuyerType;
+  buyerGstNumber: string;
+  isLoading: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const displayedTotalCents =
+    summary.estimatedShippingCents > 0 ? summary.totalCents : summary.chargeTotalCents;
+
+  return (
+    <section className="sticky top-[var(--header-h)] z-40 border-b border-border bg-background lg:hidden">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls="mobile-checkout-summary"
+        onClick={() => setOpen((current) => !current)}
+        className="flex min-h-14 w-full items-center justify-between gap-5 px-4 text-left sm:px-8"
+      >
+        <span className="inline-flex items-center gap-2 font-body text-[11px] font-light uppercase tracking-[0.18em]">
+          {open ? "Hide Summary" : "Show Summary"}
+          <ChevronDown
+            className={cn("h-4 w-4 transition-transform duration-300", open && "rotate-180")}
+            aria-hidden="true"
+          />
+        </span>
+        <span className="shrink-0 font-body text-sm font-medium tabular-nums">
+          {isLoading ? "—" : money(displayedTotalCents, summary.currency)}
+        </span>
+      </button>
+
+      <div
+        id="mobile-checkout-summary"
+        aria-hidden={!open}
+        className={cn(
+          "absolute inset-x-0 top-full overflow-y-auto overscroll-contain border-b border-border bg-background shadow-lg transition-[max-height,opacity] duration-300 ease-out",
+          open
+            ? "max-h-[calc(100dvh-var(--header-h)-3.5rem)] opacity-100"
+            : "pointer-events-none max-h-0 opacity-0",
+        )}
+      >
+        <div className="px-4 pb-5 sm:px-8">
+          <OrderSummary
+            lines={lines}
+            summary={summary}
+            buyerType={buyerType}
+            buyerGstNumber={buyerGstNumber}
+            isLoading={isLoading}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 
 /* ------------------------------------------------------------------ */
 /* Conditional charges — shown so nothing is a surprise later          */
@@ -1945,7 +2007,15 @@ export default function Checkout() {
 
       <Navigation borderless />
 
-      <main className="pt-[var(--header-h)] pb-24 max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
+      <MobileCheckoutSummary
+        lines={grossLines}
+        summary={summary}
+        buyerType={buyerType}
+        buyerGstNumber={buyerGstNumber}
+        isLoading={!fxReady || rawLines === null}
+      />
+
+      <main className="pb-24 max-w-7xl mx-auto px-4 pt-[var(--header-h)] sm:px-8 lg:px-12">
         <div className="pt-8">
           <Link
             to="/cart"
@@ -2032,15 +2102,17 @@ export default function Checkout() {
         </div>
 
         {/* Right — persistent order summary */}
-        <OrderSummary
-          lines={grossLines}
-          summary={summary}
-          buyerType={buyerType}
-          buyerGstNumber={buyerGstNumber}
-          // Initial load only — re-syncing a PaymentIntent (payment method /
-          // destination change) must never hide the totals the buyer is reading.
-          isLoading={!fxReady || rawLines === null}
-        />
+        <div className="hidden lg:block">
+          <OrderSummary
+            lines={grossLines}
+            summary={summary}
+            buyerType={buyerType}
+            buyerGstNumber={buyerGstNumber}
+            // Initial load only — re-syncing a PaymentIntent (payment method /
+            // destination change) must never hide the totals the buyer is reading.
+            isLoading={!fxReady || rawLines === null}
+          />
+        </div>
         </div>
 
         {/* Need Help? — support channels at the base of checkout */}
