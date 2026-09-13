@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
+import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight, Expand, Images } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -210,50 +211,39 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
     return () => observer.disconnect();
   }, [compact]);
 
-  // Mobile snap-scroll carousel: tracks the scroll container and whether the
-  // latest index change originated from the user's swipe (so we don't fight
-  // the gesture by programmatically scrolling back).
-  const mobileScrollRef = useRef<HTMLDivElement>(null);
-  // True while WE are scrolling the carousel programmatically. Without this
-  // guard the smooth scroll fires onScroll, which sets the index, which
-  // re-triggers the scroll — the loop that made presentation photos flicker
-  // and killed the native swipe feel.
-  const programmaticRef = useRef(false);
-  const programmaticTimer = useRef<number | null>(null);
+  // Embla owns only the physical track position. The logical image index stays
+  // in React state and is never derived from the compact frame's changing CSS
+  // dimensions, preventing resize/scroll transitions from corrupting a swipe.
+  const [mobileEmblaRef, mobileEmblaApi] = useEmblaCarousel({
+    loop: images.length > 1,
+    align: "start",
+    containScroll: false,
+    slidesToScroll: 1,
+    dragFree: false,
+    duration: 24,
+  });
+  const activeIndexRef = useRef(activeIndex);
+  const onIndexChangeRef = useRef(onIndexChange);
+  activeIndexRef.current = activeIndex;
+  onIndexChangeRef.current = onIndexChange;
 
-  const handleMobileScroll = useCallback(() => {
-    if (programmaticRef.current || presentOpen) return;
-    const el = mobileScrollRef.current;
-    if (!el) return;
-    const w = el.clientWidth || 1;
-    const idx = Math.max(0, Math.min(images.length - 1, Math.round(el.scrollLeft / w)));
-    if (idx !== activeIndex) {
-      setActiveIndex(idx);
-      onIndexChange?.(idx);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeIndex, images.length, onIndexChange, presentOpen]);
-
-  // When the index changes externally (finish/variant selection, presentation
-  // mode close), glide the mobile carousel to the matching frame. Never runs
-  // while presentation mode is open — the overlay owns navigation there.
   useEffect(() => {
-    if (!isMobileOrPwa || presentOpen) return;
-    const el = mobileScrollRef.current;
-    if (!el) return;
-    const target = activeIndex * el.clientWidth;
-    if (Math.abs(el.scrollLeft - target) <= 2) return;
-    programmaticRef.current = true;
-    if (programmaticTimer.current) window.clearTimeout(programmaticTimer.current);
-    el.scrollTo({ left: target, behavior: "smooth" });
-    programmaticTimer.current = window.setTimeout(() => {
-      programmaticRef.current = false;
-    }, 500);
-  }, [activeIndex, isMobileOrPwa, presentOpen]);
-
-  useEffect(() => () => {
-    if (programmaticTimer.current) window.clearTimeout(programmaticTimer.current);
-  }, []);
+    if (!mobileEmblaApi) return;
+    const syncFromCarousel = () => {
+      const next = mobileEmblaApi.selectedScrollSnap();
+      if (next === activeIndexRef.current) return;
+      activeIndexRef.current = next;
+      setActiveIndex(next);
+      onIndexChangeRef.current?.(next);
+    };
+    syncFromCarousel();
+    mobileEmblaApi.on("select", syncFromCarousel);
+    mobileEmblaApi.on("reInit", syncFromCarousel);
+    return () => {
+      mobileEmblaApi.off("select", syncFromCarousel);
+      mobileEmblaApi.off("reInit", syncFromCarousel);
+    };
+  }, [mobileEmblaApi]);
 
   // Swipe support for the inline main image.
   const inlineSwipeRef = useRef<HTMLDivElement>(null);
@@ -273,9 +263,58 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
     // Wrap around so the last image loops back to the first (and vice versa).
     const next = ((i % len) + len) % len;
     if (opts?.fromThumbStrip) suppressThumbAutoScrollRef.current = true;
+    activeIndexRef.current = next;
     setActiveIndex(next);
     onIndexChange?.(next);
-  }, [images.length, onIndexChange]);
+    if (isMobileOrPwa && !presentOpen) mobileEmblaApi?.scrollTo(next);
+  }, [images.length, isMobileOrPwa, mobileEmblaApi, onIndexChange, presentOpen]);
+
+  // External finish/variant changes use the same logical index, then ask Embla
+  // to move its physical track. Compact sizing never participates in indexing.
+  useEffect(() => {
+    if (!mobileEmblaApi || !isMobileOrPwa || presentOpen) return;
+    if (mobileEmblaApi.selectedScrollSnap() !== activeIndex) {
+      mobileEmblaApi.scrollTo(activeIndex);
+    }
+  }, [activeIndex, isMobileOrPwa, mobileEmblaApi, presentOpen]);
+
+  // Re-measure after the compact frame's width transition without changing the
+  // logical index. The immediate snap prevents a half-visible slide at either
+  // end while Safari is recomputing the sticky frame.
+  useEffect(() => {
+    if (!mobileEmblaApi || !isMobileOrPwa) return;
+    const settle = () => {
+      mobileEmblaApi.reInit();
+      mobileEmblaApi.scrollTo(activeIndexRef.current, true);
+    };
+    const frame = window.requestAnimationFrame(settle);
+    const timer = window.setTimeout(settle, 360);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, [compact, isMobileOrPwa, mobileEmblaApi]);
+
+  // A real return to the page's absolute top resets both state and track. This
+  // runs only after the visitor has scrolled away, so finish-driven image jumps
+  // made while already at the top are preserved.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let wasAwayFromTop = window.scrollY > 2;
+    const resetAtTop = () => {
+      const atTop = window.scrollY === 0;
+      if (atTop && wasAwayFromTop) {
+        suppressThumbAutoScrollRef.current = true;
+        activeIndexRef.current = 0;
+        setActiveIndex(0);
+        onIndexChangeRef.current?.(0);
+        mobileEmblaApi?.scrollTo(0, true);
+      }
+      wasAwayFromTop = !atTop;
+    };
+    window.addEventListener("scroll", resetAtTop, { passive: true });
+    return () => window.removeEventListener("scroll", resetAtTop);
+  }, [mobileEmblaApi]);
 
   useLightboxSwipe({
     containerRef: inlineSwipeRef,
@@ -406,27 +445,28 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           {/* Main image — presentation mode is the only fullscreen viewer.
               Double-tap / double-click opens it for grain-level inspection. */}
           {isMobileOrPwa && images.length > 1 ? (
-            /* Mobile: native snap-scroll carousel — every frame is mounted so
-               swiping is instant, and the counter tracks scroll position. */
+            /* Mobile/PWA: a looped Embla track keeps 8 → 1 moving forward
+               instead of rewinding across every intermediate image. */
             <div
-              ref={mobileScrollRef}
-              onScroll={handleMobileScroll}
-              className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory overscroll-x-contain scrollbar-hide"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch", touchAction: "pan-x pan-y" }}
+              ref={mobileEmblaRef}
+              className="absolute inset-0 overflow-hidden overscroll-x-contain"
+              style={{ touchAction: "pan-y pinch-zoom" }}
             >
-              {images.map((img, i) => (
-                <div key={i} className="w-full h-full shrink-0 snap-center snap-always flex items-center justify-center">
-                  <img
-                    src={img}
-                    alt={i === 0 ? alt : `${alt} — view ${i + 1}`}
-                    draggable={false}
-                    loading={i <= 1 ? "eager" : "lazy"}
-                    fetchPriority={i === 0 ? "high" : "auto"}
-                    decoding="async"
-                    className="max-w-full max-h-full object-contain rounded-luxury-sharp"
-                  />
-                </div>
-              ))}
+              <div className="flex h-full touch-pan-y">
+                {images.map((img, i) => (
+                  <div key={`${img}-${i}`} className="flex h-full min-w-0 flex-[0_0_100%] items-center justify-center">
+                    <img
+                      src={img}
+                      alt={i === 0 ? alt : `${alt} — view ${i + 1}`}
+                      draggable={false}
+                      loading={i <= 1 ? "eager" : "lazy"}
+                      fetchPriority={i === 0 ? "high" : "auto"}
+                      decoding="async"
+                      className="max-h-full max-w-full select-none object-contain rounded-luxury-sharp"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit]">
@@ -626,8 +666,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
         isMobileOrPwa={isMobileOrPwa}
         onClose={() => {
           setPresentOpen(false);
-          // Reset the gallery back to the first image after the modal closes.
-          setTimeout(() => goTo(0, { fromThumbStrip: true }), 100);
+          // Preserve the selected frame; the page-top listener owns resets.
+          window.requestAnimationFrame(() => mobileEmblaApi?.scrollTo(activeIndexRef.current, true));
         }}
       />
 
