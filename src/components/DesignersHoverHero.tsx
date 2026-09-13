@@ -21,11 +21,11 @@ import { motion } from "framer-motion";
 import SilentLink from "@/components/SilentLink";
 import { Search, X, ImageIcon } from "lucide-react";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { useAllDesignersLite } from "@/hooks/useDesigner";
+import { designerPicksQueryOptions, designerQueryOptions, useAllDesignersLite } from "@/hooks/useDesigner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { applyCuratorPickOrder } from "@/lib/curatorPickSort";
 import { sortNameKey, lastNameInitial, displayDesignerName } from "@/lib/nameFormat";
@@ -148,6 +148,8 @@ function DesignerGridCard({
   /** Use the designer's own card photo (studio/portrait) instead of the first curator pick. */
   useCardPhoto?: boolean;
 }) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const baseRaw = useCardPhoto
     ? (MOBILE_BG_OVERRIDES[designer.slug] || designer.image_url || designer.hero_image_url || pickGridImage(designer))
     : pickGridImage(designer);
@@ -160,17 +162,32 @@ function DesignerGridCard({
   const rememberLetter = () => {
     rememberDesignersAzLetter(lastNameInitial(designer.name));
   };
+  const warmProfile = async () => {
+    const [, profile] = await Promise.all([
+      import("../pages/PublicDesignerProfile"),
+      queryClient.ensureQueryData(designerQueryOptions(designer.slug, false)),
+    ]);
+    if (profile?.id) {
+      await queryClient.ensureQueryData(designerPicksQueryOptions(profile.id, true));
+    }
+  };
   return (
     <SilentLink
       to={`/designers/${designer.slug}`}
       state={{ fromDesignersHero: true, fromDesignersAZ: true }}
       data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
-      onClick={() => {
+      onClick={(event) => {
+        event.preventDefault();
         rememberLetter();
         onNavigate?.();
+        void warmProfile().then(() => {
+          navigate(`/designers/${designer.slug}`, {
+            state: { fromDesignersHero: true, fromDesignersAZ: true },
+          });
+        });
       }}
-      onTouchStart={() => { import("../pages/PublicDesignerProfile").catch(() => {}); }}
-      onMouseEnter={() => { import("../pages/PublicDesignerProfile").catch(() => {}); }}
+      onTouchStart={() => { void warmProfile(); }}
+      onMouseEnter={() => { void warmProfile(); }}
       className="group relative block w-full aspect-[4/5] rounded-none overflow-hidden bg-neutral-800 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-gold/60"
       aria-label={`View ${displayName}`}
       style={
@@ -544,6 +561,21 @@ function HeroBgLayer({
 
 const DesignersHoverHero = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const warmProfile = async (slug: string) => {
+    const [, profile] = await Promise.all([
+      import("../pages/PublicDesignerProfile"),
+      queryClient.ensureQueryData(designerQueryOptions(slug, false)),
+    ]);
+    if (profile?.id) {
+      await queryClient.ensureQueryData(designerPicksQueryOptions(profile.id, true));
+    }
+  };
+  const openProfile = (slug: string) => {
+    void warmProfile(slug).then(() => {
+      navigate(`/designers/${slug}`, { state: { fromDesignersHero: true } });
+    });
+  };
   const { data: designers } = useFeaturedDesigners();
   const { data: allDesigners = [] } = useAllDesignersLite();
   const { data: firstPickMap } = useAllFirstPickImages();
@@ -1820,9 +1852,8 @@ const DesignersHoverHero = () => {
                                  type="button"
                                  data-featured-designer-slug={d.slug}
                                  data-nav-state={JSON.stringify({ fromDesignersHero: true })}
-                                 onClick={() =>
-                                   navigate(`/designers/${d.slug}`, { state: { fromDesignersHero: true } })
-                                 }
+                                 onClick={() => openProfile(d.slug)}
+                                 onTouchStart={() => { void warmProfile(d.slug); }}
                                  onMouseEnter={() => {
                                    setActiveSlug(d.slug);
                                  }}
@@ -1899,9 +1930,8 @@ const DesignersHoverHero = () => {
                                 type="button"
                                 data-featured-designer-slug={d.slug}
                                 data-nav-state={JSON.stringify({ fromDesignersHero: true })}
-                                onClick={() =>
-                                  navigate(`/designers/${d.slug}`, { state: { fromDesignersHero: true } })
-                                }
+                                onClick={() => openProfile(d.slug)}
+                                onTouchStart={() => { void warmProfile(d.slug); }}
                                 onMouseEnter={() => {
                                   setActiveSlug(d.slug);
                                 }}
@@ -2047,9 +2077,16 @@ const DesignersHoverHero = () => {
               state={{ fromDesignersHero: true }}
               data-nav-state={JSON.stringify({ fromDesignersHero: true })}
               aria-label={`View ${active.name}'s profile`}
+              onClick={(event) => {
+                event.preventDefault();
+                openProfile(active.slug);
+              }}
+              onMouseEnter={() => {
+                setShowPortalCursor(true);
+                void warmProfile(active.slug);
+              }}
               className="hidden md:block absolute right-0 top-0 h-full w-1/2 z-30 pointer-events-auto group"
               style={{ cursor: "none" }}
-              onMouseEnter={() => setShowPortalCursor(true)}
               onMouseLeave={() => setShowPortalCursor(false)}
               onMouseMove={handlePortalMove}
             >
@@ -2082,6 +2119,11 @@ const DesignersHoverHero = () => {
               state={{ fromDesignersHero: true }}
               data-nav-state={JSON.stringify({ fromDesignersHero: true })}
               aria-label={`View ${active.name}'s full collection`}
+              onClick={(event) => {
+                event.preventDefault();
+                openProfile(active.slug);
+              }}
+              onMouseEnter={() => { void warmProfile(active.slug); }}
               className="hidden md:block absolute right-20 lg:right-40 z-40 pointer-events-auto cursor-pointer group"
               style={activeTitleTop != null ? { top: activeTitleTop } : { bottom: 96 }}
             >
@@ -2099,7 +2141,7 @@ const DesignersHoverHero = () => {
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate(`/designers/${active.slug}`, { state: { fromDesignersHero: true } });
+                    openProfile(active.slug);
                   }}
                   initial={{ backgroundColor: "rgba(255, 255, 255, 0)" }}
                   whileTap={{ scale: 0.98, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
