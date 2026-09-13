@@ -580,10 +580,25 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     return mapped.length > 1 && mapped.every((f) => f.image_indices!.includes(oneBased));
   };
 
+  // Landing must show NO pre-selected swatch — the gallery-driven highlight
+  // only engages after the visitor actually swipes/navigates the gallery.
+  const initialGalleryIndexRef = useRef<number | null>(null);
+  const galleryInteractedRef = useRef(false);
+  const noteGalleryIndex = (idx: number | undefined | null) => {
+    if (idx === undefined || idx === null) return;
+    if (initialGalleryIndexRef.current === null) {
+      initialGalleryIndexRef.current = idx;
+      return;
+    }
+    if (idx !== initialGalleryIndexRef.current) galleryInteractedRef.current = true;
+  };
+
   useEffect(() => {
+    noteGalleryIndex(currentGalleryIndex);
     if (isRugProduct) return;
     if (fabrics.length === 0) return;
     if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
+    if (!galleryInteractedRef.current) return;
     const oneBased = currentGalleryIndex + 1;
     if (isSharedSlide(oneBased)) return;
     const match = fabrics.find(
