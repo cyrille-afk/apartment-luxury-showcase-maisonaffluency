@@ -482,18 +482,19 @@ export default function ProductCommerceCta({
       </div>
       )}
 
-      {/* Mobile dock: intrinsic content height plus native iOS safe-area padding. */}
+      {/* Mobile dock: portaled directly under body, outside every product/layout
+          wrapper. Its position and height never depend on page scroll state. */}
       {dock && typeof document !== "undefined" && createPortal(
         <div
           ref={dockRef}
           data-mobile-commerce-dock
           className={cn(
-            "pointer-events-auto fixed bottom-0 left-0 z-[9999] block h-auto w-full overflow-visible",
+            "pointer-events-auto fixed bottom-0 left-0 z-50 block h-auto w-full overflow-visible",
             "border-t border-border/50 bg-background shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
-            "px-4 pb-[env(safe-area-inset-bottom,12px)] pt-3 md:hidden"
+            "px-4 pb-[calc(16px+env(safe-area-inset-bottom,0px))] pt-4 md:hidden"
           )}
         >
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex min-h-11 items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
                 {tradeApproved && netLabel ? (
                   <div className="flex flex-col">
