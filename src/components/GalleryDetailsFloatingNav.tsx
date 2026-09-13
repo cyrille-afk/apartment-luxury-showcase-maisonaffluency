@@ -175,10 +175,12 @@ export default function GalleryDetailsFloatingNav({
     <div
       className={cn(
         "fixed right-4 print:hidden transition-all duration-300 ease-in-out",
-        dockActive ? "z-[10000] bottom-[calc(env(safe-area-inset-bottom,0px)+70px)]" : "z-[101]",
+        dockActive ? "z-[10000]" : "z-[101]",
         className
       )}
-      style={dockActive ? undefined : { bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
+      style={dockActive
+        ? { bottom: `calc(var(--mobile-visual-bottom-inset, 0px) + ${dockHeight}px + 1rem)` }
+        : { bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
     >
       {isExpanded ? (
         <div
