@@ -592,7 +592,7 @@ function MobileCheckoutSummary({
     summary.estimatedShippingCents > 0 ? summary.totalCents : summary.chargeTotalCents;
 
   return (
-    <section className="fixed left-0 top-[var(--mobile-nav-height)] z-40 w-full border-b border-border bg-background lg:hidden">
+    <section className="fixed left-0 top-[var(--mobile-nav-height)] z-40 w-full border-b border-border bg-background md:top-[var(--header-h)] lg:hidden">
       <button
         type="button"
         aria-expanded={open}
@@ -2026,7 +2026,7 @@ export default function Checkout() {
         isLoading={!fxReady || rawLines === null}
       />
 
-      <main className="mx-auto max-w-7xl px-4 pb-24 pt-[calc(var(--mobile-nav-height)+3.5rem)] sm:px-8 lg:px-12 lg:pt-[var(--header-h)]">
+      <main className="mx-auto max-w-7xl px-4 pb-24 pt-[calc(var(--mobile-nav-height)+3.5rem)] sm:px-8 md:pt-[calc(var(--header-h)+3.5rem)] lg:px-12 lg:pt-[var(--header-h)]">
         <div className="pt-8">
           <Link
             to="/cart"
