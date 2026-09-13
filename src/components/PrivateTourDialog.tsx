@@ -136,7 +136,7 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
         <VisuallyHidden><DialogTitle>Request a Private Tour</DialogTitle></VisuallyHidden>
 
         <div
-          className="sticky top-0 z-20 flex justify-end pr-2 md:pr-3 bg-background/80 backdrop-blur-sm"
+          className="shrink-0 z-20 flex justify-end pr-2 md:pr-3 bg-background"
           style={{ paddingTop: "max(0.5rem, env(safe-area-inset-top))" }}
         >
           <button
@@ -152,19 +152,20 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
           onSubmit={handleSubmit}
           onFocus={() => setInteracted(true)}
           onPointerDown={() => setInteracted(true)}
-          className="px-5 md:px-10 pb-8 md:pb-10 -mt-6 md:-mt-4"
+          className="flex-1 overflow-y-auto px-5 md:px-10 -mt-4 md:-mt-4"
+          style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
         >
-          <div className="flex items-center justify-center gap-2 mb-2">
+          <div className="flex items-center justify-center gap-2 mb-1.5">
             <CalendarDays className="h-5 w-5 text-primary" />
             <h2 className="font-display text-xl md:text-2xl text-foreground text-center">
               Request a Private Tour
             </h2>
           </div>
-          <p className="font-body text-xs md:text-sm text-muted-foreground text-center mb-6 md:mb-8">
+          <p className="font-body text-xs md:text-sm text-muted-foreground text-center mb-4 md:mb-8">
             Visit our Singapore showroom by appointment
           </p>
 
-          <div className="space-y-5">
+          <div className="space-y-4 md:space-y-5">
             {/* Honeypot: hidden from humans, tempting to bots */}
             <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", top: "auto", width: 1, height: 1, overflow: "hidden" }}>
               <label htmlFor="website">Website</label>
