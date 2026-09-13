@@ -29,3 +29,4 @@
 - [x] Unify the public product page's iOS overscroll canvas with the dark commerce backing
 - [x] Add mobile visual regression coverage for the product canvas during scroll and panel open/close
 - [x] Eliminate the designer landing-to-profile flicker by warming profile data before navigation
+- [x] Remove fixed-height iOS commerce shells and use intrinsic safe-area dock sizing
