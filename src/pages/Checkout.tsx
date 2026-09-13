@@ -1378,6 +1378,7 @@ export default function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [rawLines, setLines] = useState<CheckoutLine[] | null>(null);
+  const cartItems = useCart();
   // A mixed-currency cart (EUR chair + USD lamp) is converted into one base
   // currency with live FX before any subtotal / freight / tax / charge maths.
   // The header "Shipping destination & currency" modal locks the settlement
