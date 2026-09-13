@@ -1842,9 +1842,8 @@ const DesignersHoverHero = () => {
                                  type="button"
                                  data-featured-designer-slug={d.slug}
                                  data-nav-state={JSON.stringify({ fromDesignersHero: true })}
-                                 onClick={() =>
-                                   navigate(`/designers/${d.slug}`, { state: { fromDesignersHero: true } })
-                                 }
+                                 onClick={() => openProfile(d.slug)}
+                                 onTouchStart={() => { void warmProfile(d.slug); }}
                                  onMouseEnter={() => {
                                    setActiveSlug(d.slug);
                                  }}
@@ -1921,9 +1920,8 @@ const DesignersHoverHero = () => {
                                 type="button"
                                 data-featured-designer-slug={d.slug}
                                 data-nav-state={JSON.stringify({ fromDesignersHero: true })}
-                                onClick={() =>
-                                  navigate(`/designers/${d.slug}`, { state: { fromDesignersHero: true } })
-                                }
+                                onClick={() => openProfile(d.slug)}
+                                onTouchStart={() => { void warmProfile(d.slug); }}
                                 onMouseEnter={() => {
                                   setActiveSlug(d.slug);
                                 }}
