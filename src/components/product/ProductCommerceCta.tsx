@@ -195,24 +195,45 @@ export default function ProductCommerceCta({
   const dockRef = useRef<HTMLDivElement | null>(null);
   const cartItems = useCart();
 
-  // Publish only the dock's intrinsic height so the separate floating control
-  // can sit above it. Positioning belongs entirely to the root-level dock.
+  // Keep the body-level dock attached to Safari's visible viewport. On iOS,
+  // `position: fixed; bottom: 0` follows the larger layout viewport while the
+  // browser toolbar retracts, which pushes the dock below the glass. The
+  // covered distance is applied as a bottom inset without changing dock height.
   useEffect(() => {
     const mql = window.matchMedia("(max-width: 767px)");
+    let frame = 0;
     const update = () => {
       const visible = dock && mql.matches;
       const el = dockRef.current;
+      const viewport = window.visualViewport;
+      const coveredBottom = visible && viewport
+        ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
+        : 0;
+      document.documentElement.style.setProperty(
+        "--mobile-visual-bottom-inset",
+        `${Math.round(coveredBottom)}px`,
+      );
       setStickyCommerceDockHeight(visible && el ? el.getBoundingClientRect().height : 0);
     };
-    update();
-    mql.addEventListener("change", update);
-    window.addEventListener("resize", update, { passive: true });
+    const scheduleUpdate = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(update);
+    };
+    scheduleUpdate();
+    mql.addEventListener("change", scheduleUpdate);
+    window.addEventListener("resize", scheduleUpdate, { passive: true });
+    window.visualViewport?.addEventListener("resize", scheduleUpdate, { passive: true });
+    window.visualViewport?.addEventListener("scroll", scheduleUpdate, { passive: true });
     const ro = dockRef.current ? new ResizeObserver(update) : null;
     if (ro && dockRef.current) ro.observe(dockRef.current);
     return () => {
-      mql.removeEventListener("change", update);
-      window.removeEventListener("resize", update);
+      window.cancelAnimationFrame(frame);
+      mql.removeEventListener("change", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      window.visualViewport?.removeEventListener("resize", scheduleUpdate);
+      window.visualViewport?.removeEventListener("scroll", scheduleUpdate);
       ro?.disconnect();
+      document.documentElement.style.removeProperty("--mobile-visual-bottom-inset");
       setStickyCommerceDockHeight(0);
     };
   }, [dock]);
@@ -489,10 +510,11 @@ export default function ProductCommerceCta({
           ref={dockRef}
           data-mobile-commerce-dock
           className={cn(
-            "pointer-events-auto fixed bottom-0 left-0 z-50 block h-auto w-full overflow-visible",
+            "pointer-events-auto fixed left-0 z-[9999] block h-auto w-full overflow-visible",
             "border-t border-border/50 bg-background shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
             "px-4 pb-[calc(16px+env(safe-area-inset-bottom,0px))] pt-4 md:hidden"
           )}
+          style={{ bottom: "var(--mobile-visual-bottom-inset, 0px)" }}
         >
           <div className="flex min-h-11 items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
