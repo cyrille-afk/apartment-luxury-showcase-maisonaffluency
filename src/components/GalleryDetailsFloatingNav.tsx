@@ -180,8 +180,8 @@ export default function GalleryDetailsFloatingNav({
       style={{
         ...(dockActive
           ? {
-              top: `calc(var(--mobile-commerce-anchor-height, 100svh) - ${dockHeight}px - 4rem)`,
-              bottom: "auto",
+              top: "auto",
+              bottom: `calc(${dockHeight}px + 1rem)`,
             }
           : {
               top: "auto",

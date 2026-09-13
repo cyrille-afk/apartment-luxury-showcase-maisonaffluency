@@ -193,16 +193,7 @@ export default function ProductCommerceCta({
   const [intakeOpen, setIntakeOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const dockRef = useRef<HTMLDivElement | null>(null);
-  const initialMobileViewportHeightRef = useRef<number | null>(null);
   const cartItems = useCart();
-
-  // Freeze Safari's landing viewport height. The root shell is pinned from
-  // the top, so its bottom edge cannot chase the retracting browser toolbar.
-  if (typeof window !== "undefined" && initialMobileViewportHeightRef.current === null) {
-    initialMobileViewportHeightRef.current = Math.round(
-      window.visualViewport?.height ?? window.innerHeight,
-    );
-  }
 
   // Publish only the dock's intrinsic height so the separate floating control
   // can sit above it. Positioning belongs entirely to the root-level dock.
@@ -212,12 +203,6 @@ export default function ProductCommerceCta({
       const visible = dock && mql.matches;
       const el = dockRef.current;
       setStickyCommerceDockHeight(visible && el ? el.getBoundingClientRect().height : 0);
-      if (visible && initialMobileViewportHeightRef.current !== null) {
-        document.documentElement.style.setProperty(
-          "--mobile-commerce-anchor-height",
-          `${initialMobileViewportHeightRef.current}px`,
-        );
-      }
     };
     update();
     mql.addEventListener("change", update);
@@ -229,7 +214,6 @@ export default function ProductCommerceCta({
       window.removeEventListener("resize", update);
       ro?.disconnect();
       setStickyCommerceDockHeight(0);
-      document.documentElement.style.removeProperty("--mobile-commerce-anchor-height");
     };
   }, [dock]);
 
@@ -498,33 +482,18 @@ export default function ProductCommerceCta({
       </div>
       )}
 
-      {/* Mobile dock: preserve the original iOS-safe viewport anchoring. */}
+      {/* Mobile dock: intrinsic content height plus native iOS safe-area padding. */}
       {dock && typeof document !== "undefined" && createPortal(
-        <>
-          <div
-            aria-hidden="true"
-            data-mobile-commerce-backing
-            className="pointer-events-none fixed inset-x-0 bottom-0 z-[9998] block bg-gradient-to-b from-foreground/75 to-foreground md:hidden"
-            style={{
-              top: `${initialMobileViewportHeightRef.current ?? 0}px`,
-            }}
-          />
-          <div
-            data-mobile-commerce-shell
-            className="pointer-events-none fixed left-0 top-0 z-[9999] block w-full overflow-visible md:hidden"
-            style={{ height: `${initialMobileViewportHeightRef.current ?? 0}px` }}
-          >
-            <div
-              ref={dockRef}
-              data-mobile-commerce-dock
-              className={cn(
-                "pointer-events-auto absolute bottom-0 left-0 block w-full overflow-visible",
-                "border-t border-border/50 bg-background shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
-                "px-4 pb-[calc(12px+env(safe-area-inset-bottom,0px))] pt-3.5",
-                "transform-gpu will-change-transform"
-              )}
-            >
-              <div className="flex items-center justify-between gap-3">
+        <div
+          ref={dockRef}
+          data-mobile-commerce-dock
+          className={cn(
+            "pointer-events-auto fixed bottom-0 left-0 z-[9999] block h-auto w-full overflow-visible",
+            "border-t border-border/50 bg-background shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
+            "px-4 pb-[env(safe-area-inset-bottom,12px)] pt-3 md:hidden"
+          )}
+        >
+          <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
                 {tradeApproved && netLabel ? (
                   <div className="flex flex-col">
@@ -566,10 +535,8 @@ export default function ProductCommerceCta({
               >
                 {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : mobilePrimaryLabel}
               </button>
-              </div>
-            </div>
           </div>
-        </>,
+        </div>,
         document.body
       )}
 
