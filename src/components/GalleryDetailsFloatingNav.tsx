@@ -180,8 +180,8 @@ export default function GalleryDetailsFloatingNav({
     <div
       className={cn(
         commerceShell
-          ? "pointer-events-auto absolute right-4 z-[1]"
-          : "fixed right-4 z-[100]",
+          ? "pointer-events-auto absolute right-4 z-[101]"
+          : "fixed right-4 z-[101]",
         "print:hidden transition-all duration-300 ease-in-out",
         className
       )}
