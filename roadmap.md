@@ -27,3 +27,4 @@
 - [x] Expand the mobile purchasing intent sheet below the navigation and expose both profile choices
 - [x] Lock the mobile checkout navigation and summary bar above the scrolling form
 - [x] Unify the public product page's iOS overscroll canvas with the dark commerce backing
+- [x] Add mobile visual regression coverage for the product canvas during scroll and panel open/close
