@@ -11,7 +11,6 @@ import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { setStickyCommerceDockHeight } from "@/lib/stickyCommerceDock";
-import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { cn } from "@/lib/utils";
 
 /**
@@ -196,44 +195,24 @@ export default function ProductCommerceCta({
   const dockRef = useRef<HTMLDivElement | null>(null);
   const cartItems = useCart();
 
-  // The mobile dock stays fixed at the viewport bottom for the full product
-  // journey; it must never tuck behind cookie banners, footers, or content.
-
-  // Keep the complete dock above Safari's retracting bottom toolbar. On iOS,
-  // `position: fixed; bottom: 0` is resolved against the layout viewport while
-  // the visible viewport can temporarily end higher during toolbar animation.
+  // Publish only the dock's intrinsic height so the separate floating control
+  // can sit above it. Positioning belongs entirely to the root-level dock.
   useEffect(() => {
     const mql = window.matchMedia("(max-width: 767px)");
     const update = () => {
-      const mobileOrPwa = mql.matches || isPwaStandaloneDisplay();
-      const visible = dock && mobileOrPwa;
+      const visible = dock && mql.matches;
       const el = dockRef.current;
-      const viewport = window.visualViewport;
-      const coveredBottom = viewport
-        ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
-        : 0;
-      document.documentElement.style.setProperty(
-        "--mobile-visual-bottom-inset",
-        `${Math.round(coveredBottom)}px`
-      );
       setStickyCommerceDockHeight(visible && el ? el.getBoundingClientRect().height : 0);
     };
     update();
     mql.addEventListener("change", update);
     window.addEventListener("resize", update, { passive: true });
-    window.addEventListener("scroll", update, { passive: true });
-    window.visualViewport?.addEventListener("resize", update, { passive: true });
-    window.visualViewport?.addEventListener("scroll", update, { passive: true });
     const ro = dockRef.current ? new ResizeObserver(update) : null;
     if (ro && dockRef.current) ro.observe(dockRef.current);
     return () => {
       mql.removeEventListener("change", update);
       window.removeEventListener("resize", update);
-      window.removeEventListener("scroll", update);
-      window.visualViewport?.removeEventListener("resize", update);
-      window.visualViewport?.removeEventListener("scroll", update);
       ro?.disconnect();
-      document.documentElement.style.removeProperty("--mobile-visual-bottom-inset");
       setStickyCommerceDockHeight(0);
     };
   }, [dock]);
@@ -503,16 +482,14 @@ export default function ProductCommerceCta({
       </div>
       )}
 
-      {/* Rigid small-viewport dock: mounted in App's root overlay host, outside
-          every product-page wrapper and footer. */}
+      {/* Root-level mobile dock: outside every route main, product wrapper and footer. */}
       {dock && typeof document !== "undefined" && createPortal(
         <div
           ref={dockRef}
           data-mobile-commerce-dock
-          className="pointer-events-auto fixed left-0 z-[9999] block h-auto w-full overflow-visible border-t border-border/50 bg-background pb-[calc(12px+env(safe-area-inset-bottom,0px))] shadow-[0_-6px_18px_hsl(var(--foreground)/0.06)] md:hidden"
-          style={{ bottom: "var(--mobile-visual-bottom-inset, 0px)" }}
+          className="fixed bottom-0 left-0 z-50 w-full border-t border-gray-100 bg-white pb-[env(safe-area-inset-bottom,16px)] md:hidden"
         >
-          <div className="bg-background px-4 pb-3 pt-3.5">
+          <div className="px-4 py-3">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
                 {tradeApproved && netLabel ? (
