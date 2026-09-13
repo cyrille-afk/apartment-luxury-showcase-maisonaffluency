@@ -169,6 +169,32 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
   const [presentOpen, setPresentOpen] = useState(false);
 
   const thumbsRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
+  const expandedFrameHeightRef = useRef(0);
+
+  // Keep the visual controls proportional to the live frame throughout its
+  // compact transition. The fixed wrappers remain corner anchors; only their
+  // centered visual contents scale, so icons never drift toward the artwork.
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame || typeof ResizeObserver === "undefined") return;
+
+    const updateScale = () => {
+      const frameHeight = frame.getBoundingClientRect().height;
+      if (!compact) {
+        expandedFrameHeightRef.current = Math.max(expandedFrameHeightRef.current, frameHeight);
+      }
+      const expandedHeight = expandedFrameHeightRef.current || frameHeight;
+      const scale = Math.max(0.55, Math.min(1, frameHeight / Math.max(expandedHeight, 1)));
+      frame.style.setProperty("--gallery-control-scale", scale.toFixed(3));
+      frame.style.setProperty("--gallery-control-offset", `${Math.round(16 * scale)}px`);
+    };
+
+    updateScale();
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, [compact]);
 
   // Mobile snap-scroll carousel: tracks the scroll container and whether the
   // latest index change originated from the user's swipe (so we don't fight
@@ -357,7 +383,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       <div className="flex-1 flex flex-col gap-3 min-w-0">
         <div className="relative group" ref={inlineSwipeRef}>
         <div
-          className={cn("product-image-frame md:aspect-square md:h-auto bg-cream rounded-luxury-sharp overflow-hidden relative md:transition-[height,aspect-ratio] md:duration-300 md:ease-out", compact && "product-image-frame--compact")}
+          ref={frameRef}
+          className={cn("product-image-frame md:aspect-square md:h-auto bg-cream rounded-luxury-sharp overflow-hidden relative transition-[height,width,aspect-ratio] duration-300 ease-out", compact && "product-image-frame--compact")}
           style={{ touchAction: "pan-x pan-y" }}
           onDoubleClick={() => setPresentOpen(true)}
           onTouchEnd={handleTouchEndForDoubleTap}
@@ -395,13 +422,14 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
 
 
-          {/* Presentation action — anchored to the frame itself so resizing the
-              photo changes its position, never the control's dimensions. */}
+          {/* Presentation action — its outer edge stays locked to the frame
+              while the complete button scales with the live frame height. */}
           <div
             className={cn(
-              "absolute bottom-4 right-4 z-50 h-10 w-10 shrink-0",
+              "absolute z-50 h-10 w-10 shrink-0 origin-bottom-right scale-[var(--gallery-control-scale,1)]",
+              "bottom-[var(--gallery-control-offset,1rem)] right-[var(--gallery-control-offset,1rem)]",
               "[&_button]:!h-10 [&_button]:!w-10 [&_button]:!min-h-10 [&_button]:!min-w-10 [&_button]:!shrink-0",
-              "transition-opacity duration-300 ease-out",
+              "transition-[transform,opacity] duration-300 ease-out",
             )}
           >
             {isMobileOrPwa && mobileMenuItems ? (
@@ -449,7 +477,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
           {/* Fractional gallery counter — clean numerals in the lower-left corner. */}
           {images.length > 1 && (
-            <div className="absolute bottom-4 left-4 z-20 pointer-events-none">
+            <div className="absolute bottom-[var(--gallery-control-offset,1rem)] left-[var(--gallery-control-offset,1rem)] z-20 origin-bottom-left scale-[var(--gallery-control-scale,1)] pointer-events-none transition-transform duration-300 ease-out">
               <span className="inline-block px-2.5 py-1 rounded-full bg-white/70 backdrop-blur-sm font-body text-[11px] font-light tracking-widest text-neutral-600 tabular-nums">
                 {activeIndex + 1} / {images.length}
               </span>
@@ -458,12 +486,12 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
 
           {overlay && (
-            <div className="absolute top-4 right-4 z-50 h-10 w-10 shrink-0 pointer-events-none">
+            <div className="absolute top-[var(--gallery-control-offset,1rem)] right-[var(--gallery-control-offset,1rem)] z-50 h-10 w-10 shrink-0 origin-top-right scale-[var(--gallery-control-scale,1)] pointer-events-none transition-transform duration-300 ease-out">
               <div className="pointer-events-auto h-10 w-10 shrink-0 [&_button]:!h-10 [&_button]:!w-10 [&_button]:!min-h-10 [&_button]:!min-w-10 [&_button]:!shrink-0 [&_button]:!border-border/50 [&_button]:!bg-background/90 [&_button]:!shadow-sm [&_button]:!backdrop-blur-sm">{overlay}</div>
             </div>
           )}
           {bottomRightOverlay && (
-            <div className="absolute top-4 left-4 z-50 h-10 w-10 shrink-0 pointer-events-none">
+            <div className="absolute top-[var(--gallery-control-offset,1rem)] left-[var(--gallery-control-offset,1rem)] z-50 h-10 w-10 shrink-0 origin-top-left scale-[var(--gallery-control-scale,1)] pointer-events-none transition-transform duration-300 ease-out">
               <div className="pointer-events-auto h-10 w-10 shrink-0 [&_button]:!h-10 [&_button]:!w-10 [&_button]:!min-h-10 [&_button]:!min-w-10 [&_button]:!shrink-0 [&_button]:!border-border/50 [&_button]:!bg-background/90 [&_button]:!shadow-sm [&_button]:!backdrop-blur-sm">{bottomRightOverlay}</div>
             </div>
           )}
