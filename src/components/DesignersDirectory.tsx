@@ -1323,6 +1323,7 @@ function pickSlugify(s: string) {
 
 const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: PickItem; onFavorite?: (id: string) => void; isFavorited?: boolean; rrp?: PublicRrpRow | null; hideFavorite?: boolean }) => {
   const navigate = useNavigate();
+  const destinationCurrency = useShippingDestination().currency;
   const productSlug = pickSlugify(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""));
   return (
     <button
