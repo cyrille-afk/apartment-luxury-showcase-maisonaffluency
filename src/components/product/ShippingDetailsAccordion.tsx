@@ -96,12 +96,12 @@ export default function ShippingDetailsAccordion({
             ref={panelRef}
             className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto overscroll-contain touch-pan-y rounded-none bg-background text-foreground shadow-2xl animate-in fade-in zoom-in-95 duration-300"
           >
-            {/* Close */}
+            {/* Close — bottom-right on mobile, top-right on desktop */}
             <button
               type="button"
               onClick={() => setOpen(false)}
               aria-label="Close"
-              className="absolute right-4 top-4 p-1 text-muted-foreground transition-colors hover:text-foreground"
+              className="absolute right-4 bottom-4 md:bottom-auto md:top-4 z-10 p-1 text-muted-foreground transition-colors hover:text-foreground"
             >
               <X className="h-4 w-4" strokeWidth={1.25} />
             </button>
