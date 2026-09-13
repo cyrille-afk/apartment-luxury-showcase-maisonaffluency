@@ -173,7 +173,7 @@ export default function GalleryDetailsFloatingNav({
   return (
     <div
       className={cn(
-        "fixed right-4 z-50 print:hidden transition-all duration-300 ease-in-out",
+        "fixed right-4 z-[105] print:hidden transition-all duration-300 ease-in-out",
         className
       )}
       style={{
