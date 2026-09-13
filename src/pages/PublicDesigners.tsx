@@ -8,6 +8,15 @@ import { markDesignersLandingScrollLock, releaseDesignersLandingScrollLock } fro
 
 import { ChevronUp } from "lucide-react";
 import { useState, useEffect, useLayoutEffect } from "react";
+
+// Warm the lazy designer-profile chunk as soon as the landing mounts so
+// tapping a designer never hits a download gap (white skeleton flash).
+let profileChunkWarmed = false;
+function warmDesignerProfileChunk() {
+  if (profileChunkWarmed) return;
+  profileChunkWarmed = true;
+  void import("./PublicDesignerProfile");
+}
 import Navigation from "@/components/Navigation";
 import DesignersHoverHero from "@/components/DesignersHoverHero";
 
@@ -221,6 +230,11 @@ function ScrollLockedDesigners({
       window.removeEventListener("keydown", stopReset);
     };
   }, [locked]);
+
+  // Prefetch the profile route chunk so designer taps render instantly.
+  useEffect(() => {
+    warmDesignerProfileChunk();
+  }, []);
 
   // Desktop handoff only. Mobile/PWA intentionally remains a fixed hero with
   // the searchable thumbnail directory sheet, not the card directory below.
