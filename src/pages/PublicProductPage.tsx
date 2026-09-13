@@ -2339,7 +2339,7 @@ const PublicProductPageContent: React.FC = () => {
                     onDisplayedFinishesChange={setDisplayedFinishes}
                     onFinishGroupingResolved={() => setFinishGroupingPending(false)}
                   >
-                    <div className="flex flex-col gap-3 md:gap-5 order-2">
+                    <div id="finish-selectors" className="flex flex-col gap-3 md:gap-5 order-2 scroll-mt-28">
                       <VariantFinishSelectors section="primary" />
                     </div>
 
@@ -2549,7 +2549,7 @@ const PublicProductPageContent: React.FC = () => {
                     onDisplayedFinishesChange={setDisplayedFinishes}
                     onFinishGroupingResolved={() => setFinishGroupingPending(false)}
                   >
-                    <div className="flex flex-col gap-5">
+                    <div id="finish-selectors" className="flex flex-col gap-5 scroll-mt-28">
                       <VariantFinishSelectors />
                       {finishesMissingImages.length > 0 && (
                         <p className="font-body text-[11px] text-muted-foreground italic mt-1">
