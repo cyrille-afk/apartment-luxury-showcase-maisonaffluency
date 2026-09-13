@@ -1708,7 +1708,7 @@ export default function Checkout() {
     // Nothing anywhere: reflect the genuinely empty basket instead of holding
     // stale lines that were deleted in this or another tab.
     setLines([]);
-    if (allowRedirect) navigate("/", { replace: true });
+    if (allowRedirect) navigate("/designers", { replace: true });
   }, [location.state, navigate]);
 
   useEffect(() => {
