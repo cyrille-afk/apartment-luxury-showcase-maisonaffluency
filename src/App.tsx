@@ -340,10 +340,12 @@ function RouteScrollLockFailsafe() {
   const location = useLocation();
 
   useLayoutEffect(() => {
+    const isPublicProductDetail = /^\/designers\/[^/]+\/[^/]+\/?$/.test(location.pathname);
     const isProductDetail =
-      /^\/designers\/[^/]+\/[^/]+\/?$/.test(location.pathname) ||
+      isPublicProductDetail ||
       /^\/trade\/products\/[^/]+(?:\/[^/]+)?\/?$/.test(location.pathname);
     document.documentElement.classList.toggle("product-detail-root", isProductDetail);
+    document.documentElement.classList.toggle("public-product-canvas", isPublicProductDetail);
     if (location.pathname !== "/designers") releaseDesignersLandingScrollLock();
     // Dark iOS chrome is opt-in for the hero + designers landing only. Any
     // other route must clear it, otherwise a leftover black canvas shows
@@ -356,7 +358,10 @@ function RouteScrollLockFailsafe() {
     ) {
       clearDarkIosChrome();
     }
-    return () => document.documentElement.classList.remove("product-detail-root");
+    return () => {
+      document.documentElement.classList.remove("product-detail-root");
+      document.documentElement.classList.remove("public-product-canvas");
+    };
   }, [location.pathname]);
 
   return null;

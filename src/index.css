@@ -56,6 +56,7 @@ All colors MUST be HSL.
     --gold-bright: 38 70% 72%;
     --cream: 32 20% 97%;
     --canvas: 0 0% 97.6%;
+    --product-canvas-dark: 0 0% 10.2%;
     --warm-gray: 32 10% 50%;
     --spec-dimension-icon: 207 24% 68%;
 
@@ -283,6 +284,20 @@ html.product-detail-root body,
 html.product-detail-root #root,
 html.product-detail-root .product-page-root {
   min-height: 100dvh;
+}
+
+/* The public product surface remains light, while its outer document canvas is
+   dark so iOS elastic scrolling and retracting browser chrome reveal no white gap. */
+html.public-product-canvas,
+html.public-product-canvas body,
+html.public-product-canvas #root,
+html.public-product-canvas .product-configurator-canvas {
+  background-color: hsl(var(--product-canvas-dark));
+}
+
+html.public-product-canvas .product-page-root,
+html.public-product-canvas .product-page-root > main {
+  background-color: hsl(var(--background));
 }
 
 #product-root-overlays {
