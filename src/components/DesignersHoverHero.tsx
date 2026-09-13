@@ -2067,9 +2067,16 @@ const DesignersHoverHero = () => {
               state={{ fromDesignersHero: true }}
               data-nav-state={JSON.stringify({ fromDesignersHero: true })}
               aria-label={`View ${active.name}'s profile`}
+              onClick={(event) => {
+                event.preventDefault();
+                openProfile(active.slug);
+              }}
+              onMouseEnter={() => {
+                setShowPortalCursor(true);
+                void warmProfile(active.slug);
+              }}
               className="hidden md:block absolute right-0 top-0 h-full w-1/2 z-30 pointer-events-auto group"
               style={{ cursor: "none" }}
-              onMouseEnter={() => setShowPortalCursor(true)}
               onMouseLeave={() => setShowPortalCursor(false)}
               onMouseMove={handlePortalMove}
             >
@@ -2102,6 +2109,11 @@ const DesignersHoverHero = () => {
               state={{ fromDesignersHero: true }}
               data-nav-state={JSON.stringify({ fromDesignersHero: true })}
               aria-label={`View ${active.name}'s full collection`}
+              onClick={(event) => {
+                event.preventDefault();
+                openProfile(active.slug);
+              }}
+              onMouseEnter={() => { void warmProfile(active.slug); }}
               className="hidden md:block absolute right-20 lg:right-40 z-40 pointer-events-auto cursor-pointer group"
               style={activeTitleTop != null ? { top: activeTitleTop } : { bottom: 96 }}
             >
@@ -2119,7 +2131,7 @@ const DesignersHoverHero = () => {
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate(`/designers/${active.slug}`, { state: { fromDesignersHero: true } });
+                    openProfile(active.slug);
                   }}
                   initial={{ backgroundColor: "rgba(255, 255, 255, 0)" }}
                   whileTap={{ scale: 0.98, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
