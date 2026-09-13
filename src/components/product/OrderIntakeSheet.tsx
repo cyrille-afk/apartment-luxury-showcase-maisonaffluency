@@ -405,7 +405,7 @@ export default function OrderIntakeSheet({
 
         <div className="px-6 py-4 md:min-h-0 md:flex-1 md:overflow-y-auto md:px-5 md:pb-4 md:pt-0">
           {(productTitle || designerName) && (
-            <div className="mb-5 border-b border-border/50 pb-4">
+            <div className="mb-5 border-b border-border/50 pb-4 short:mb-3 short:pb-2">
               {designerName && (
                 <p className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
                   {designerName}
@@ -420,14 +420,14 @@ export default function OrderIntakeSheet({
                 </p>
               )}
               {previewImage && (
-                <div className="mt-3">
+                <div className="mt-3 short:mt-2">
                   <div className="overflow-hidden bg-muted/30">
                     <img
                       key={previewImage}
                       src={previewImage}
                       alt={[productTitle, finish].filter(Boolean).join(" — ") || "Product"}
                       loading="lazy"
-                      className="max-h-[26dvh] w-full object-contain animate-in fade-in duration-300 short:max-h-[14dvh] md:max-h-none md:h-auto"
+                      className="max-h-[26dvh] w-full object-contain animate-in fade-in duration-300 short:max-h-[10dvh] md:max-h-none md:h-auto"
                     />
                   </div>
                   {usingFallbackImage && (
@@ -442,10 +442,10 @@ export default function OrderIntakeSheet({
 
           {step === 0 && (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-200">
-              <p className="mb-4 font-display text-xl leading-snug text-foreground">
+              <p className="mb-4 font-display text-xl leading-snug text-foreground short:mb-3">
                 Are you an Interior Designer / Architect, or a Private Client?
               </p>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 short:gap-2">
                 {([
                   { key: "designer", label: "Interior Designer / Architect" },
                   { key: "private", label: "Private Client" },
