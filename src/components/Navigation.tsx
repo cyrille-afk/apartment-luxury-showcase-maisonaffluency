@@ -183,7 +183,9 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   // there so the user always has a way back out.
   const isContactRoute = location.pathname === "/contact";
   const closeContactView = () => {
-    if (window.history.length > 1) navigate(-1);
+    // "default" key = this page is the first entry of the SPA session, so
+    // there is nothing in-app to go back to — send the visitor home.
+    if (location.key !== "default" && window.history.length > 1) navigate(-1);
     else navigate("/");
   };
   const navHidden =
