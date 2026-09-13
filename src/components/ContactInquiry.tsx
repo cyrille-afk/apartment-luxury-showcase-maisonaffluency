@@ -370,13 +370,16 @@ const ContactInquiry = () => {
               <label htmlFor="phone" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
                 Phone
               </label>
-              <Input
+              <PhoneInput
                 id="phone"
-                type="tel"
-                placeholder={phonePlaceholder}
-                className={`border-border bg-background font-body rounded-lg ${errors.phone ? "border-destructive" : ""}`}
                 value={formData.phone}
-                onChange={handleInputChange}
+                onChange={(value) => {
+                  setFormData(prev => ({ ...prev, phone: value }));
+                  if (errors.phone) setErrors(prev => { const n = { ...prev }; delete n.phone; return n; });
+                }}
+                inferredCountry={inferredCountry}
+                placeholder="Phone number"
+                hasError={!!errors.phone}
               />
               {errors.phone && <p className="font-body text-[10px] text-destructive mt-1">{errors.phone}</p>}
             </div>
