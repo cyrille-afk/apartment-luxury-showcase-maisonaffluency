@@ -154,8 +154,8 @@ export function useDesignerByName(
 
 
 /** Fetch curator picks for a designer */
-export function useDesignerPicks(designerId: string | undefined, { publicOnly = false }: { publicOnly?: boolean } = {}) {
-  return useQuery({
+export function designerPicksQueryOptions(designerId: string | undefined, publicOnly = false) {
+  return queryOptions({
     queryKey: queryKeys.designerPicks(designerId, publicOnly),
     queryFn: async () => {
       if (!designerId) return [];
@@ -193,6 +193,11 @@ export function useDesignerPicks(designerId: string | undefined, { publicOnly = 
     },
     enabled: !!designerId,
   });
+}
+
+/** Fetch curator picks for a designer */
+export function useDesignerPicks(designerId: string | undefined, { publicOnly = false }: { publicOnly?: boolean } = {}) {
+  return useQuery(designerPicksQueryOptions(designerId, publicOnly));
 }
 
 /** Pick with designer attribution */

@@ -25,7 +25,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { designerQueryOptions, useAllDesignersLite } from "@/hooks/useDesigner";
+import { designerPicksQueryOptions, designerQueryOptions, useAllDesignersLite } from "@/hooks/useDesigner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { applyCuratorPickOrder } from "@/lib/curatorPickSort";
 import { sortNameKey, lastNameInitial, displayDesignerName } from "@/lib/nameFormat";
@@ -162,10 +162,15 @@ function DesignerGridCard({
   const rememberLetter = () => {
     rememberDesignersAzLetter(lastNameInitial(designer.name));
   };
-  const warmProfile = () => Promise.all([
-    import("../pages/PublicDesignerProfile"),
-    queryClient.ensureQueryData(designerQueryOptions(designer.slug, false)),
-  ]);
+  const warmProfile = async () => {
+    const [, profile] = await Promise.all([
+      import("../pages/PublicDesignerProfile"),
+      queryClient.ensureQueryData(designerQueryOptions(designer.slug, false)),
+    ]);
+    if (profile?.id) {
+      await queryClient.ensureQueryData(designerPicksQueryOptions(profile.id, true));
+    }
+  };
   return (
     <SilentLink
       to={`/designers/${designer.slug}`}
@@ -557,10 +562,15 @@ function HeroBgLayer({
 const DesignersHoverHero = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const warmProfile = (slug: string) => Promise.all([
-    import("../pages/PublicDesignerProfile"),
-    queryClient.ensureQueryData(designerQueryOptions(slug, false)),
-  ]);
+  const warmProfile = async (slug: string) => {
+    const [, profile] = await Promise.all([
+      import("../pages/PublicDesignerProfile"),
+      queryClient.ensureQueryData(designerQueryOptions(slug, false)),
+    ]);
+    if (profile?.id) {
+      await queryClient.ensureQueryData(designerPicksQueryOptions(profile.id, true));
+    }
+  };
   const openProfile = (slug: string) => {
     void warmProfile(slug).then(() => {
       navigate(`/designers/${slug}`, { state: { fromDesignersHero: true } });
