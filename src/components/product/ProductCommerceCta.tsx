@@ -193,7 +193,17 @@ export default function ProductCommerceCta({
   const [intakeOpen, setIntakeOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const dockRef = useRef<HTMLDivElement | null>(null);
+  const initialMobileBottomInsetRef = useRef<number | null>(null);
   const cartItems = useCart();
+
+  // Capture Safari's landing viewport once. The dock must not chase the
+  // visualViewport while the browser toolbar retracts during a scroll.
+  if (typeof window !== "undefined" && initialMobileBottomInsetRef.current === null) {
+    const viewport = window.visualViewport;
+    initialMobileBottomInsetRef.current = viewport
+      ? Math.max(0, Math.round(window.innerHeight - viewport.height - viewport.offsetTop))
+      : 0;
+  }
 
   // Publish only the dock's intrinsic height so the separate floating control
   // can sit above it. Positioning belongs entirely to the root-level dock.
@@ -484,16 +494,28 @@ export default function ProductCommerceCta({
 
       {/* Mobile dock: preserve the original iOS-safe viewport anchoring. */}
       {dock && typeof document !== "undefined" && createPortal(
-        <div
-          ref={dockRef}
-          data-mobile-commerce-dock
-          className={cn(
-            "fixed bottom-0 bottom-[env(safe-area-inset-bottom,0px)] left-0 z-[9999] block w-full md:hidden",
-            "border-t border-border/50 bg-background shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
-            "px-4 pb-3 pt-3.5"
-          )}
-        >
-          <div className="flex items-center justify-between gap-3">
+        <>
+          <div
+            aria-hidden="true"
+            data-mobile-commerce-backing
+            className="pointer-events-none fixed bottom-0 left-0 z-[9998] hidden w-full bg-gradient-to-b from-foreground/75 to-foreground md:hidden"
+            style={{
+              display: "block",
+              height: `calc(${initialMobileBottomInsetRef.current ?? 0}px + env(safe-area-inset-bottom, 0px) + 18px)`,
+            }}
+          />
+          <div
+            ref={dockRef}
+            data-mobile-commerce-dock
+            className={cn(
+              "fixed left-0 z-[9999] block w-full overflow-visible md:hidden",
+              "border-t border-border/50 bg-background shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
+              "px-4 pb-[calc(12px+env(safe-area-inset-bottom,0px))] pt-3.5",
+              "transform-gpu will-change-transform"
+            )}
+            style={{ bottom: `${initialMobileBottomInsetRef.current ?? 0}px` }}
+          >
+            <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
                 {tradeApproved && netLabel ? (
                   <div className="flex flex-col">
@@ -535,8 +557,9 @@ export default function ProductCommerceCta({
               >
                 {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : mobilePrimaryLabel}
               </button>
+            </div>
           </div>
-        </div>,
+        </>,
         document.body
       )}
 
