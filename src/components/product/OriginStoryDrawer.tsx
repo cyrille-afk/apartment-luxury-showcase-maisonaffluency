@@ -53,7 +53,7 @@ export default function OriginStoryDrawer({ label, maker }: OriginStoryDrawerPro
       {open && typeof document !== "undefined" && createPortal(
         <div role="presentation">
           <div
-            className="fixed inset-0 z-[60] bg-foreground/40 backdrop-blur-sm"
+            className="fixed inset-0 z-[110] bg-foreground/40 backdrop-blur-sm"
             aria-hidden="true"
             onClick={() => setOpen(false)}
           />
@@ -61,7 +61,7 @@ export default function OriginStoryDrawer({ label, maker }: OriginStoryDrawerPro
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="fixed bottom-0 left-0 z-[70] max-h-[85vh] w-full overflow-y-auto rounded-t-2xl bg-card pb-24 shadow-2xl transition-transform duration-300 ease-out"
+            className="fixed bottom-0 left-0 z-[120] max-h-[85vh] w-full overflow-y-auto rounded-t-2xl bg-card pb-24 shadow-2xl transition-transform duration-300 ease-out"
           >
             <div className="sticky top-0 z-10 bg-card px-5 pb-2 pt-3">
               <div className="mx-auto mb-3 h-1 w-12 rounded-full bg-muted" />
