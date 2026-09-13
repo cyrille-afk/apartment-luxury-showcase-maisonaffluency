@@ -269,6 +269,26 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
     if (isMobileOrPwa && !presentOpen) mobileEmblaApi?.scrollTo(next);
   }, [images.length, isMobileOrPwa, mobileEmblaApi, onIndexChange, presentOpen]);
 
+  const closePresentationAt = useCallback((galleryIndex: number) => {
+    const len = images.length;
+    if (len === 0) return;
+    const next = ((galleryIndex % len) + len) % len;
+
+    // Commit the modal's final frame to the same logical state used by the
+    // inline carousel and its parent before the fullscreen portal unmounts.
+    activeIndexRef.current = next;
+    setActiveIndex(next);
+    onIndexChangeRef.current?.(next);
+    setPresentOpen(false);
+
+    // Safari may have resized the compact frame while body scroll was locked.
+    // Re-measure first, then snap the inline track to the exact closing frame.
+    window.requestAnimationFrame(() => {
+      mobileEmblaApi?.reInit();
+      mobileEmblaApi?.scrollTo(next, true);
+    });
+  }, [images.length, mobileEmblaApi]);
+
   // External finish/variant changes use the same logical index, then ask Embla
   // to move its physical track. Compact sizing never participates in indexing.
   useEffect(() => {
@@ -664,11 +684,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
         onIndexChange={goTo}
         pickId={pickId}
         isMobileOrPwa={isMobileOrPwa}
-        onClose={() => {
-          setPresentOpen(false);
-          // Preserve the selected frame; the page-top listener owns resets.
-          window.requestAnimationFrame(() => mobileEmblaApi?.scrollTo(activeIndexRef.current, true));
-        }}
+        onClose={closePresentationAt}
       />
 
     </div>
