@@ -477,7 +477,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </button>
               {/* Currency / shipping-destination flag — between account and bag,
                   mirroring the desktop header. */}
-              <ShippingDestinationSwitcher compact className="min-h-10 min-w-10 px-0 shrink-0" flagClassName="text-lg" />
+              <ShippingDestinationSwitcher compact className="hidden xsp:flex min-h-10 min-w-10 px-0 shrink-0" flagClassName="text-lg" />
               <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
             </div>
 
