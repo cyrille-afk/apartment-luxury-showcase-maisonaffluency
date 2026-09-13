@@ -30,6 +30,34 @@ const DIAL_CODES: Record<string, string> = {
   Vietnam: "+84",
 };
 
+// Simple flag mapping for the regional selector.
+const FLAG_BY_COUNTRY: Record<string, string> = {
+  Singapore: "🇸🇬",
+  Australia: "🇦🇺",
+  Canada: "🇨🇦",
+  China: "🇨🇳",
+  France: "🇫🇷",
+  Germany: "🇩🇪",
+  "Hong Kong": "🇭🇰",
+  India: "🇮🇳",
+  Indonesia: "🇮🇩",
+  Italy: "🇮🇹",
+  Japan: "🇯🇵",
+  Malaysia: "🇲🇾",
+  Netherlands: "🇳🇱",
+  "New Zealand": "🇳🇿",
+  Philippines: "🇵🇭",
+  "South Korea": "🇰🇷",
+  Spain: "🇪🇸",
+  Switzerland: "🇨🇭",
+  Taiwan: "🇹🇼",
+  Thailand: "🇹🇭",
+  "United Arab Emirates": "🇦🇪",
+  "United Kingdom": "🇬🇧",
+  "United States": "🇺🇸",
+  Vietnam: "🇻🇳",
+};
+
 export interface CountryDialOption {
   country: string;
   dial: string;
@@ -61,35 +89,3 @@ export const getPhonePlaceholder = (country?: string | null): string => {
 
 export const getDialCode = (country?: string | null): string | null =>
   (country && DIAL_CODES[country]) || null;
-
-// Simple flag mapping for the regional selector.
-function getFlagMapping(): Record<string, string> {
-  return {
-    Singapore: "🇸🇬",
-    Australia: "🇦🇺",
-    Canada: "🇨🇦",
-    China: "🇨🇳",
-    France: "🇫🇷",
-    Germany: "🇩🇪",
-    "Hong Kong": "🇭🇰",
-    India: "🇮🇳",
-    Indonesia: "🇮🇩",
-    Italy: "🇮🇹",
-    Japan: "🇯🇵",
-    Malaysia: "🇲🇾",
-    Netherlands: "🇳🇱",
-    "New Zealand": "🇳🇿",
-    Philippines: "🇵🇭",
-    "South Korea": "🇰🇷",
-    Spain: "🇪🇸",
-    Switzerland: "🇨🇭",
-    Taiwan: "🇹🇼",
-    Thailand: "🇹🇭",
-    "United Arab Emirates": "🇦🇪",
-    "United Kingdom": "🇬🇧",
-    "United States": "🇺🇸",
-    Vietnam: "🇻🇳",
-  };
-}
-
-const FLAG_BY_COUNTRY: Record<string, string> = getFlagMapping();
