@@ -199,40 +199,25 @@ export default function ProductCommerceCta({
   // The mobile dock stays fixed at the viewport bottom for the full product
   // journey; it must never tuck behind cookie banners, footers, or content.
 
-  // Notify floating action buttons (e.g., the image-gallery presentation menu)
-  // how much of the bottom of the viewport the mobile commerce dock owns.
-  // Measured, not hardcoded: iOS Safari's collapsing toolbar and multi-line
-  // price copy both change the dock's real height.
+  // Notify floating controls how much space the CTA itself occupies. The dock
+  // shell is locked to Safari's small viewport and never follows visualViewport
+  // offsets while the browser chrome expands or retracts.
   useEffect(() => {
     const mql = window.matchMedia("(max-width: 767px)");
     const update = () => {
       const mobileOrPwa = mql.matches || isPwaStandaloneDisplay();
       const visible = dock && mobileOrPwa;
       const el = dockRef.current;
-      if (el) {
-        // iOS Safari can leave part of the layout viewport behind its expanding
-        // bottom toolbar. Lift the dock by exactly that obscured amount instead
-        // of relying on a nested fixed-position containing block.
-        const viewport = window.visualViewport;
-        const obscuredBottom = viewport
-          ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
-          : 0;
-        el.style.bottom = `${Math.round(obscuredBottom)}px`;
-      }
       setStickyCommerceDockHeight(visible && el ? el.getBoundingClientRect().height : 0);
     };
     update();
     mql.addEventListener("change", update);
     window.addEventListener("resize", update, { passive: true });
-    window.visualViewport?.addEventListener("resize", update);
-    window.visualViewport?.addEventListener("scroll", update);
     const ro = dockRef.current ? new ResizeObserver(update) : null;
     if (ro && dockRef.current) ro.observe(dockRef.current);
     return () => {
       mql.removeEventListener("change", update);
       window.removeEventListener("resize", update);
-      window.visualViewport?.removeEventListener("resize", update);
-      window.visualViewport?.removeEventListener("scroll", update);
       ro?.disconnect();
       setStickyCommerceDockHeight(0);
     };
@@ -503,19 +488,19 @@ export default function ProductCommerceCta({
       </div>
       )}
 
-      {/* Mobile sticky bottom dock — anchored to the viewport window so it
-          always floats above page content, technical specs, footer, and any
-          translucent background blocks while scrolling. */}
+      {/* Isolated small-viewport shell: iOS Safari may enlarge the visual
+          viewport as its toolbar retracts, but this frame never moves with it. */}
       {dock && typeof document !== "undefined" && createPortal(
+        <div
+          data-mobile-commerce-shell
+          className="pointer-events-none fixed bottom-0 left-0 z-[9999] block h-[100svh] min-h-[100svh] w-full md:hidden"
+        >
         <div
           ref={dockRef}
           data-mobile-commerce-dock
-          className={cn(
-            "fixed bottom-0 left-0 z-[9999] block w-full md:hidden",
-            "border-t border-border/50 bg-background shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
-            "px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] pt-3.5"
-          )}
+          className="pointer-events-auto absolute bottom-0 left-0 block w-full border-t border-border/50 bg-foreground pb-[env(safe-area-inset-bottom,16px)] shadow-[0_-6px_18px_rgba(0,0,0,0.06)]"
         >
+          <div className="bg-background px-4 pb-3 pt-3.5">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               {tradeApproved && netLabel ? (
@@ -559,6 +544,8 @@ export default function ProductCommerceCta({
               {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : mobilePrimaryLabel}
             </button>
           </div>
+          </div>
+        </div>
         </div>,
         document.body
       )}

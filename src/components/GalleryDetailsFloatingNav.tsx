@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   ArrowDownAZ,
   ChevronDown,
@@ -54,10 +55,15 @@ export default function GalleryDetailsFloatingNav({
   const [expanded, setExpanded] = useState(false);
   const [visible, setVisible] = useState(showImmediately);
   const [isMobileOrPwa, setIsMobileOrPwa] = useState(false);
+  const [commerceShell, setCommerceShell] = useState<HTMLElement | null>(null);
   const revealedByElementRef = useRef(showImmediately);
   const navigate = useNavigate();
   const dockHeight = useStickyCommerceDockHeight();
   const dockActive = dockHeight > 0;
+
+  useEffect(() => {
+    setCommerceShell(document.querySelector<HTMLElement>("[data-mobile-commerce-shell]"));
+  }, []);
 
   useEffect(() => {
     const mobileMql = window.matchMedia("(max-width: 767px)");
@@ -170,15 +176,18 @@ export default function GalleryDetailsFloatingNav({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  return (
+  const floatingNav = (
     <div
       className={cn(
-        "fixed right-4 z-[100] print:hidden transition-all duration-300 ease-in-out",
+        commerceShell
+          ? "pointer-events-auto absolute right-4 z-[1]"
+          : "fixed right-4 z-[100]",
+        "print:hidden transition-all duration-300 ease-in-out",
         className
       )}
       style={{
         bottom: dockActive
-          ? "calc(env(safe-area-inset-bottom, 0px) + 70px)"
+          ? `calc(${dockHeight}px + 1rem)`
           : "calc(env(safe-area-inset-bottom, 0px) + 1rem)",
       }}
     >
@@ -222,4 +231,6 @@ export default function GalleryDetailsFloatingNav({
       )}
     </div>
   );
+
+  return commerceShell ? createPortal(floatingNav, commerceShell) : floatingNav;
 }
