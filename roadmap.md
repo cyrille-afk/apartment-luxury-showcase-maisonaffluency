@@ -22,3 +22,4 @@
 - [x] Keep Editorial Gallery controls visible and synchronize its closing frame with the product carousel
 - [x] Restore the mobile product CTA as a plain root-level fixed bar without viewport offsets
 - [x] Keep the checkout total visible in a sticky, collapsible mobile order summary
+- [x] Redirect checkout to /designers when cart becomes empty (initial or reactive)
