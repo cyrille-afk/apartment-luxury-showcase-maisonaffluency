@@ -434,6 +434,12 @@ body[data-tour-step="procurement"] [data-tour-target="procurement"] {
    ───────────────────────────────────────────── */
 :root {
   --header-h: 6.5rem;   /* mobile: 96px nav + small breathing room */
+  --mobile-nav-height: calc(5rem + env(safe-area-inset-top, 0px));
+}
+@media (min-width: 390px) and (max-width: 767px) {
+  :root {
+    --mobile-nav-height: calc(6rem + env(safe-area-inset-top, 0px));
+  }
 }
 @media (min-width: 768px) {
   :root {
