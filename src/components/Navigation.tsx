@@ -475,6 +475,9 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               >
                 <User className="w-[20px] h-[20px]" strokeWidth={1.5} />
               </button>
+              {/* Currency / shipping-destination flag — between account and bag,
+                  mirroring the desktop header. */}
+              <ShippingDestinationSwitcher compact className="min-h-10 min-w-8" flagClassName="text-xl" />
               <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
             </div>
 
