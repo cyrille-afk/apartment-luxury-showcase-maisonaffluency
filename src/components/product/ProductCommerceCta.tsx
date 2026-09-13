@@ -482,15 +482,18 @@ export default function ProductCommerceCta({
       </div>
       )}
 
-      {/* Root-level mobile dock: outside every route main, product wrapper and footer. */}
+      {/* Mobile dock: preserve the original iOS-safe viewport anchoring. */}
       {dock && typeof document !== "undefined" && createPortal(
         <div
           ref={dockRef}
           data-mobile-commerce-dock
-          className="fixed bottom-0 left-0 z-50 w-full border-t border-gray-100 bg-white pb-[env(safe-area-inset-bottom,16px)] md:hidden"
+          className={cn(
+            "fixed bottom-0 bottom-[env(safe-area-inset-bottom,0px)] left-0 z-[9999] block w-full md:hidden",
+            "border-t border-border/50 bg-background shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
+            "px-4 pb-3 pt-3.5"
+          )}
         >
-          <div className="px-4 py-3">
-            <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
                 {tradeApproved && netLabel ? (
                   <div className="flex flex-col">
@@ -532,10 +535,9 @@ export default function ProductCommerceCta({
               >
                 {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : mobilePrimaryLabel}
               </button>
-            </div>
           </div>
         </div>,
-        document.getElementById("product-root-overlays") ?? document.body
+        document.body
       )}
 
       {/* Slide-out mini-cart drawer (State A order confirmation) */}
