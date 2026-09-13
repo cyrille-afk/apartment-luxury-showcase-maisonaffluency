@@ -96,9 +96,10 @@ const navItems = [...leftNavItems, ...rightNavItems];
 
 interface NavigationProps {
   borderless?: boolean;
+  alwaysVisible?: boolean;
 }
 
-const Navigation = ({ borderless = false }: NavigationProps) => {
+const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationProps) => {
   const { user, isTradeUser } = useAuth();
   // Trade-only visibility: hide the "Collectibles" nav item from public visitors.
   const visibleLeftNavItems = isTradeUser
@@ -179,6 +180,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   const stickyProductBarActive = useStickyProductBarActive();
   const programmaticScrollActive = useProgrammaticScrollActive();
   const navHidden =
+    !alwaysVisible &&
     location.pathname !== "/trade-program" &&
     // While the product mini bar is docked below the header, the header
     // stays pinned so the bar never floats in empty space.

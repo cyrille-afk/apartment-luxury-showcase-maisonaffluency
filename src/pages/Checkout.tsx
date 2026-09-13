@@ -592,7 +592,7 @@ function MobileCheckoutSummary({
     summary.estimatedShippingCents > 0 ? summary.totalCents : summary.chargeTotalCents;
 
   return (
-    <section className="sticky top-[var(--header-h)] z-40 border-b border-border bg-background lg:hidden">
+    <section className="fixed left-0 top-[var(--mobile-nav-height)] z-40 w-full border-b border-border bg-background lg:hidden">
       <button
         type="button"
         aria-expanded={open}
@@ -2016,7 +2016,7 @@ export default function Checkout() {
         <meta name="robots" content="noindex,nofollow" />
       </Helmet>
 
-      <Navigation borderless />
+      <Navigation borderless alwaysVisible />
 
       <MobileCheckoutSummary
         lines={grossLines}
@@ -2026,7 +2026,7 @@ export default function Checkout() {
         isLoading={!fxReady || rawLines === null}
       />
 
-      <main className="pb-24 max-w-7xl mx-auto px-4 pt-[var(--header-h)] sm:px-8 lg:px-12">
+      <main className="mx-auto max-w-7xl px-4 pb-24 pt-[calc(var(--mobile-nav-height)+3.5rem)] sm:px-8 lg:px-12 lg:pt-[var(--header-h)]">
         <div className="pt-8">
           <Link
             to="/cart"
