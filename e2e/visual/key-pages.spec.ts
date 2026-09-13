@@ -65,9 +65,15 @@ test.describe("Sample public product page", () => {
     expect(dockBox, "bottom commerce dock button must have a layout box").not.toBeNull();
     expect(dockBox?.y ?? 0, "Place Order must remain in the lower half of the viewport").toBeGreaterThan(420);
 
+    // The dock is a root-level fixed bar: it must stay pinned and single at the
+    // bottom of the page too (previous behaviour hid it near the footer).
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     await page.waitForTimeout(500);
-    await expect(page.getByRole("button", { name: /^place order$/i }).filter({ visible: true })).toHaveCount(0);
+    const bottomOrderButtons = page.getByRole("button", { name: /^place order$/i }).filter({ visible: true });
+    await expect(bottomOrderButtons, "the commerce dock must remain pinned at page bottom").toHaveCount(1);
+    const bottomBox = await bottomOrderButtons.first().boundingBox();
+    expect(bottomBox, "pinned dock button must have a layout box").not.toBeNull();
+    expect(bottomBox?.y ?? 0, "pinned dock must stay in the lower half of the viewport").toBeGreaterThan(420);
   });
 
   test("first designer card links to a working product page", async ({ page }) => {
