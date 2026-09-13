@@ -459,7 +459,7 @@ export default function ProductCommerceCta({
       {dock && typeof document !== "undefined" && createPortal(
         <div
           data-mobile-commerce-dock
-          className="fixed bottom-0 left-0 w-full z-50 bg-white border-t border-gray-100 flex justify-between items-center px-6 py-4 h-[76px]"
+          className="fixed bottom-0 left-0 w-full z-50 bg-white border-t border-gray-100 flex justify-between items-center px-6 py-4 h-[76px] pb-[calc(16px+env(safe-area-inset-bottom,0px))]"
         >
           <div className="flex w-full items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
