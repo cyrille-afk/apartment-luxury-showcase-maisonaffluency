@@ -32,3 +32,4 @@
 - [x] Remove fixed-height iOS commerce shells and use intrinsic safe-area dock sizing
 - [x] Remove the blank profile-entry frame after navigating from the designers landing
 - [x] Rebuild the mobile product CTA as a body-level fixed dock with a 16px safe-area buffer
+- [x] Restore the body-level 76px product CTA, preserve the three-step funnel, and add mobile content clearance
