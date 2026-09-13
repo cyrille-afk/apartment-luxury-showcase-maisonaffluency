@@ -457,7 +457,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             {/* Right-side group: location + cart on trade-program, user + cart elsewhere */}
             <div
               className={cn(
-                "flex items-center justify-end gap-4"
+                "flex items-center justify-end gap-2.5"
               )}
             >
               <button
@@ -477,7 +477,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </button>
               {/* Currency / shipping-destination flag — between account and bag,
                   mirroring the desktop header. */}
-              <ShippingDestinationSwitcher compact className="min-h-10 min-w-8" flagClassName="text-xl" />
+              <ShippingDestinationSwitcher compact className="min-h-10 min-w-8 shrink-0" flagClassName="text-lg" />
               <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
             </div>
 
