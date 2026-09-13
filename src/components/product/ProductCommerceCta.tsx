@@ -458,9 +458,15 @@ export default function ProductCommerceCta({
         ) : (
           <>
             <QuantitySelector value={quantity} onChange={setQuantity} />
-            <button type="button" data-commerce-primary onClick={() => primaryAction()} disabled={placingOrder} className={primaryBtn}>
+            <button
+              type="button"
+              data-commerce-primary
+              onClick={() => (finishSelectionRequired ? scrollToFinishes() : primaryAction())}
+              disabled={placingOrder}
+              className={primaryBtn}
+            >
               {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
-              {placingOrder ? "Opening checkout…" : primaryLabel}
+              {placingOrder ? "Opening checkout…" : finishSelectionRequired ? "Choose Finishes" : primaryLabel}
             </button>
             {/* Secondary: high-touch / contract buyers — routes explicitly to
                 the Trade Account inquiry form. */}
