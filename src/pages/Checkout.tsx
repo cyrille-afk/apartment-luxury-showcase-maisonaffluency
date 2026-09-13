@@ -1741,6 +1741,16 @@ export default function Checkout() {
     };
   }, [resolveLines]);
 
+  // Reactive cart guard: if the basket is emptied while the checkout is open
+  // (e.g. the user removes the last line from the order summary), leave the
+  // orphaned form and redirect back to the designer landing page.
+  useEffect(() => {
+    if (rawLines === null) return;
+    if (cartItems.length === 0) {
+      navigate("/designers", { replace: true });
+    }
+  }, [rawLines, cartItems.length, navigate]);
+
 
 
   // Creates (or re-prices) the PaymentIntent. Re-runs whenever the buyer
