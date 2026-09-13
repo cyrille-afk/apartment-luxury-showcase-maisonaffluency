@@ -55,15 +55,10 @@ export default function GalleryDetailsFloatingNav({
   const [expanded, setExpanded] = useState(false);
   const [visible, setVisible] = useState(showImmediately);
   const [isMobileOrPwa, setIsMobileOrPwa] = useState(false);
-  const [commerceShell, setCommerceShell] = useState<HTMLElement | null>(null);
   const revealedByElementRef = useRef(showImmediately);
   const navigate = useNavigate();
   const dockHeight = useStickyCommerceDockHeight();
   const dockActive = dockHeight > 0;
-
-  useEffect(() => {
-    setCommerceShell(document.querySelector<HTMLElement>("[data-mobile-commerce-shell]"));
-  }, []);
 
   useEffect(() => {
     const mobileMql = window.matchMedia("(max-width: 767px)");
