@@ -493,7 +493,7 @@ export default function ProductCommerceCta({
       {dock && typeof document !== "undefined" && createPortal(
         <div
           data-mobile-commerce-shell
-          className="pointer-events-none fixed left-0 top-0 z-[9999] hidden h-[100svh] min-h-[100svh] w-full md:hidden"
+          className="pointer-events-none fixed bottom-0 left-0 z-[9999] block h-[100svh] min-h-[100svh] w-full md:hidden"
         >
         <div
           ref={dockRef}
