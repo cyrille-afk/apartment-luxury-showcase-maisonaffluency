@@ -5,7 +5,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   return (
     <footer
-      className="bg-background px-4 md:px-8 py-12 md:py-16"
+      className="relative z-0 mb-0 bg-background px-4 pb-0 pt-12 md:px-8 md:pb-0 md:pt-16"
     >
       <div className="mx-auto max-w-7xl space-y-8">
         {/* Floating privacy / cookie banner */}
@@ -43,7 +43,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-border pt-8 flex flex-col items-center gap-3">
-          <p className="mb-8 font-body text-xs text-muted-foreground text-center">
+          <p className="mb-0 font-body text-xs text-muted-foreground text-center">
             <span className="block">© {currentYear} Affluency ETC Pte Ltd.</span>
             <span className="block">All rights reserved.</span>
             <span className="block">For professional use only.</span>
