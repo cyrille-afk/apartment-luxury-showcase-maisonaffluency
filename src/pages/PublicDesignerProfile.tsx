@@ -999,7 +999,7 @@ const PublicDesignerProfile = () => {
 
   const biographySection = (displayBiography || thinContentFallback) ? (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={fromDesignersHero ? false : { opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ ...transition, delay: 0.2 }}
       className="mt-4 md:grid md:grid-cols-12 md:gap-10 lg:gap-16 md:items-start flex flex-col"
@@ -1287,7 +1287,7 @@ const PublicDesignerProfile = () => {
       <div className={portraitOpen ? "hidden" : "grid grid-cols-1 gap-2 items-start pt-0 md:hidden"} aria-hidden={portraitOpen}>
 
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
+          initial={fromDesignersHero ? false : { opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
@@ -1297,7 +1297,7 @@ const PublicDesignerProfile = () => {
         {/* Narrative column */}
 
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
+              initial={fromDesignersHero ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...transition, delay: 0.2 }}
               className="flex flex-col justify-start w-full"
@@ -1496,7 +1496,7 @@ const PublicDesignerProfile = () => {
             /* Designer profile: portrait hero, then the same editorial biography flow as the parent */
             <div className="flex flex-col gap-0">
               <motion.div
-                initial={{ opacity: 0 }}
+                initial={fromDesignersHero ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={transition}
                 className="relative hidden md:block md:mx-auto w-full max-w-none md:max-w-[720px] rounded-none md:rounded-xl overflow-hidden shrink-0"
@@ -1603,14 +1603,14 @@ const PublicDesignerProfile = () => {
                 />
               </div>
               <motion.div
-                initial={{ opacity: 0 }}
+                initial={fromDesignersHero ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={transition}
                 className="hidden md:grid grid-cols-12 gap-10 lg:gap-16 items-center py-8 lg:py-12"
               >
                 {/* Left: editorial title block */}
                 <motion.div
-                  initial={{ opacity: 0, y: 16 }}
+                  initial={fromDesignersHero ? false : { opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={reveal}
                   className="col-span-12 lg:col-span-5"
@@ -1687,7 +1687,7 @@ const PublicDesignerProfile = () => {
             <motion.div
               id="curators-picks"
               ref={picksSectionRef}
-              initial={{ opacity: 0, y: 16 }}
+              initial={fromDesignersHero ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...transition, delay: 0.25 }}
               className="md:hidden mt-[2px] pt-1 border-t border-border/40"
