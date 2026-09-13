@@ -459,12 +459,12 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
           {overlay && (
             <div className="absolute top-4 right-4 z-50 h-10 w-10 shrink-0 pointer-events-none">
-              <div className="pointer-events-auto h-10 w-10 shrink-0 [&_button]:!h-10 [&_button]:!w-10 [&_button]:!min-h-10 [&_button]:!min-w-10 [&_button]:!shrink-0">{overlay}</div>
+              <div className="pointer-events-auto h-10 w-10 shrink-0 [&_button]:!h-10 [&_button]:!w-10 [&_button]:!min-h-10 [&_button]:!min-w-10 [&_button]:!shrink-0 [&_button]:!border-border/50 [&_button]:!bg-background/90 [&_button]:!shadow-sm [&_button]:!backdrop-blur-sm">{overlay}</div>
             </div>
           )}
           {bottomRightOverlay && (
             <div className="absolute top-4 left-4 z-50 h-10 w-10 shrink-0 pointer-events-none">
-              <div className="pointer-events-auto h-10 w-10 shrink-0 [&_button]:!h-10 [&_button]:!w-10 [&_button]:!min-h-10 [&_button]:!min-w-10 [&_button]:!shrink-0">{bottomRightOverlay}</div>
+              <div className="pointer-events-auto h-10 w-10 shrink-0 [&_button]:!h-10 [&_button]:!w-10 [&_button]:!min-h-10 [&_button]:!min-w-10 [&_button]:!shrink-0 [&_button]:!border-border/50 [&_button]:!bg-background/90 [&_button]:!shadow-sm [&_button]:!backdrop-blur-sm">{bottomRightOverlay}</div>
             </div>
           )}
           {firstImageBadge && activeIndex === 0 && (
