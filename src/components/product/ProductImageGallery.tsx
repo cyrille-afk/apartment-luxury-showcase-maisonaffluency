@@ -395,16 +395,13 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
 
 
-          {/* Presentation action — desktop bottom-right; mobile/PWA top-left
-              (swapped with the share anchor for thumb reachability).
-              It is absolutely positioned INSIDE the photo frame, so it must
-              never be bumped by the commerce dock: doing so stranded the icon
-              in the middle of the picture once the image expanded again. */}
+          {/* Presentation action — anchored to the frame itself so resizing the
+              photo changes its position, never the control's dimensions. */}
           <div
             className={cn(
-              "z-50",
+              "absolute bottom-4 right-4 z-50 h-10 w-10 shrink-0",
+              "[&_button]:!h-10 [&_button]:!w-10 [&_button]:!min-h-10 [&_button]:!min-w-10 [&_button]:!shrink-0",
               "transition-opacity duration-300 ease-out",
-              "absolute right-4 bottom-4"
             )}
           >
             {isMobileOrPwa && mobileMenuItems ? (
@@ -412,7 +409,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 <CornerTooltip label="Presentation" side="top" align="end">
                   <DropdownMenuTrigger
                     aria-label="Presentation and more actions"
-                    className="w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 flex items-center justify-center touch-manipulation"
+                    className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/90 shadow-sm backdrop-blur-sm touch-manipulation"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Images size={20} strokeWidth={1.5} className="text-foreground/80" />
@@ -430,7 +427,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 <button
                   type="button"
                   aria-label="Presentation"
-                  className="w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 flex items-center justify-center touch-manipulation"
+                  className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/90 shadow-sm backdrop-blur-sm touch-manipulation"
                   onClick={(e) => {
                     e.stopPropagation();
                     setPresentOpen(true);
@@ -461,13 +458,13 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
 
           {overlay && (
-            <div className="absolute top-3 right-3 z-20 pointer-events-none">
-              <div className="pointer-events-auto">{overlay}</div>
+            <div className="absolute top-4 right-4 z-50 h-10 w-10 shrink-0 pointer-events-none">
+              <div className="pointer-events-auto h-10 w-10 shrink-0 [&_button]:!h-10 [&_button]:!w-10 [&_button]:!min-h-10 [&_button]:!min-w-10 [&_button]:!shrink-0 [&_button]:!border-border/50 [&_button]:!bg-background/90 [&_button]:!shadow-sm [&_button]:!backdrop-blur-sm">{overlay}</div>
             </div>
           )}
           {bottomRightOverlay && (
-            <div className="absolute top-4 left-4 z-20 pointer-events-none">
-              <div className="pointer-events-auto">{bottomRightOverlay}</div>
+            <div className="absolute top-4 left-4 z-50 h-10 w-10 shrink-0 pointer-events-none">
+              <div className="pointer-events-auto h-10 w-10 shrink-0 [&_button]:!h-10 [&_button]:!w-10 [&_button]:!min-h-10 [&_button]:!min-w-10 [&_button]:!shrink-0 [&_button]:!border-border/50 [&_button]:!bg-background/90 [&_button]:!shadow-sm [&_button]:!backdrop-blur-sm">{bottomRightOverlay}</div>
             </div>
           )}
           {firstImageBadge && activeIndex === 0 && (
