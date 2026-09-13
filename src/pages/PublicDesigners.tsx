@@ -231,6 +231,11 @@ function ScrollLockedDesigners({
     };
   }, [locked]);
 
+  // Prefetch the profile route chunk so designer taps render instantly.
+  useEffect(() => {
+    warmDesignerProfileChunk();
+  }, []);
+
   // Desktop handoff only. Mobile/PWA intentionally remains a fixed hero with
   // the searchable thumbnail directory sheet, not the card directory below.
   useEffect(() => {
