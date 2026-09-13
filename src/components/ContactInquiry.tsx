@@ -302,13 +302,52 @@ const ContactInquiry = () => {
               <h2 className="mb-6 font-display text-4xl text-foreground md:text-5xl">
                 Visit Us By Appointment
               </h2>
-              <p className="font-body text-sm text-muted-foreground mb-4">
-                1 Grange Garden, Singapore 249631
-              </p>
-              <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto text-justify">
+              <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
                 For architects, interior designers, and design connoisseurs interested
                 in detailed and custom specifications, material sourcing, and/or collaborative opportunities.
               </p>
+              <div className="mt-10 grid gap-8 md:grid-cols-2 md:gap-12">
+                <div className="text-center md:text-left">
+                  <h3 className="mb-2 font-body text-xs uppercase tracking-[0.2em] text-primary">
+                    Singapore Atelier
+                  </h3>
+                  <p className="font-body text-sm text-muted-foreground">
+                    1 Grange Garden, Singapore 249631
+                  </p>
+                  <p className="mt-1 font-body text-sm text-muted-foreground">
+                    WhatsApp:{" "}
+                    <a
+                      href="https://wa.me/6591393850"
+                      className="text-foreground hover:text-primary transition-colors"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackCTA.whatsapp("Contact Section — Singapore")}
+                    >
+                      +65 9139 3850
+                    </a>
+                  </p>
+                </div>
+                <div className="text-center md:text-left">
+                  <h3 className="mb-2 font-body text-xs uppercase tracking-[0.2em] text-primary">
+                    Paris Atelier
+                  </h3>
+                  <p className="font-body text-sm text-muted-foreground">
+                    Paris, France (By Appointment Only)
+                  </p>
+                  <p className="mt-1 font-body text-sm text-muted-foreground">
+                    WhatsApp:{" "}
+                    <a
+                      href="https://wa.me/33616237460"
+                      className="text-foreground hover:text-primary transition-colors"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackCTA.whatsapp("Contact Section — Paris")}
+                    >
+                      +33 6 1623 7460
+                    </a>
+                  </p>
+                </div>
+              </div>
             </>
           )}
         </motion.div>
