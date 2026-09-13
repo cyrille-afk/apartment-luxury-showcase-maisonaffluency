@@ -108,7 +108,7 @@ export function PhoneInput({
         <SelectContent>
           {COUNTRY_DIAL_OPTIONS.map((o) => (
             <SelectItem
-              key={o.dial}
+              key={o.country}
               value={o.dial}
               className="font-body text-sm"
             >
