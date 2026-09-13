@@ -6,7 +6,7 @@ import { Lock, Check, Loader2, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { getCart, clearCart, rehydrateCart } from "@/lib/cart";
+import { getCart, clearCart, rehydrateCart, useCart } from "@/lib/cart";
 import { readSecureBasket, writeSecureBasket, clearSecureBasket, subscribeSecureBasketStorage } from "@/lib/checkout/secureBasket";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
 import { useAuth } from "@/hooks/useAuth";
@@ -1378,6 +1378,7 @@ export default function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [rawLines, setLines] = useState<CheckoutLine[] | null>(null);
+  const cartItems = useCart();
   // A mixed-currency cart (EUR chair + USD lamp) is converted into one base
   // currency with live FX before any subtotal / freight / tax / charge maths.
   // The header "Shipping destination & currency" modal locks the settlement
@@ -1707,7 +1708,7 @@ export default function Checkout() {
     // Nothing anywhere: reflect the genuinely empty basket instead of holding
     // stale lines that were deleted in this or another tab.
     setLines([]);
-    if (allowRedirect) navigate("/", { replace: true });
+    if (allowRedirect) navigate("/designers", { replace: true });
   }, [location.state, navigate]);
 
   useEffect(() => {
@@ -1739,6 +1740,16 @@ export default function Checkout() {
       unsubscribeStorage();
     };
   }, [resolveLines]);
+
+  // Reactive cart guard: if the basket is emptied while the checkout is open
+  // (e.g. the user removes the last line from the order summary), leave the
+  // orphaned form and redirect back to the designer landing page.
+  useEffect(() => {
+    if (rawLines === null) return;
+    if (cartItems.length === 0) {
+      navigate("/designers", { replace: true });
+    }
+  }, [rawLines, cartItems.length, navigate]);
 
 
 
