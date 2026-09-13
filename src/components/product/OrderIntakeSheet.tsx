@@ -633,13 +633,14 @@ export default function OrderIntakeSheet({
         </div>
 
         {/* Natural-flow mobile action; desktop retains its docked sheet action. */}
-        <div className="mt-auto shrink-0 border-t border-border/50 bg-background/95 px-6 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md md:sticky md:bottom-0 md:px-5 md:pb-[env(safe-area-inset-bottom)]">
+        {/* Mobile: button flows with the content. Desktop keeps its docked action. */}
+        <div className="px-6 pb-[calc(3rem+env(safe-area-inset-bottom))] pt-0 md:sticky md:bottom-0 md:mt-auto md:shrink-0 md:border-t md:border-border/50 md:bg-background/95 md:px-5 md:pb-[env(safe-area-inset-bottom)] md:pt-3 md:backdrop-blur-md">
           <button
             type="button"
             onClick={next}
             disabled={!canAdvance || submitting || sending || (isQuote && step === 2 && !turnstileToken)}
             className={cn(
-              "mb-3 inline-flex h-12 w-full items-center justify-center rounded-none bg-foreground px-5 font-body text-xs uppercase tracking-widest text-background",
+              "mt-6 inline-flex w-full items-center justify-center rounded-none bg-foreground px-5 py-4 font-body text-xs uppercase tracking-widest text-background md:mb-3 md:mt-0 md:h-12 md:py-0",
               "transition-transform duration-150 active:scale-[0.98] disabled:opacity-40"
             )}
           >
