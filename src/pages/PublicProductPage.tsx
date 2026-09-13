@@ -2577,6 +2577,7 @@ const PublicProductPageContent: React.FC = () => {
                         onAddToCart={addConfiguredToCart}
                         placingOrder={checkoutLoading}
                         selectedFinishes={selectedFinishes}
+                        finishSelectionRequired={needsFinishSelection}
                   orderFinishLabel={buildOrderFinishLabel()}
                   finishOptions={finishOptions}
                   finishVariants={finishVariantEntries}
@@ -2667,6 +2668,7 @@ const PublicProductPageContent: React.FC = () => {
                   onAddToCart={addConfiguredToCart}
                   placingOrder={checkoutLoading}
                   selectedFinishes={selectedFinishes}
+                  finishSelectionRequired={needsFinishSelection}
                   orderFinishLabel={buildOrderFinishLabel()}
                   finishOptions={finishOptions}
                   finishVariants={finishVariantEntries}
