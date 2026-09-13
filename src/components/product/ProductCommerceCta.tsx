@@ -60,6 +60,9 @@ export interface ProductCommerceCtaProps {
   finishOptions?: string[];
   /** Per-finish price + image, powering live re-pricing inside the intake sheet. */
   finishVariants?: { label: string; priceLabel?: string | null; imageUrl?: string | null }[];
+  /** Public priced pieces with no finish chosen yet: the CTA invites a finish
+      choice and smooth-scrolls to the swatches instead of placing an order. */
+  finishSelectionRequired?: boolean;
   redirectTo?: string;
   /** Mobile-only sticky bottom dock */
   dock?: boolean;
