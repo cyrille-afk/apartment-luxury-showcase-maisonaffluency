@@ -179,9 +179,19 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const { direction: scrollDirection, scrollY: navScrollY } = useScrollDirection();
   const stickyProductBarActive = useStickyProductBarActive();
   const programmaticScrollActive = useProgrammaticScrollActive();
+  // The contact view is a destination form — the header must stay pinned
+  // there so the user always has a way back out.
+  const isContactRoute = location.pathname === "/contact";
+  const closeContactView = () => {
+    // "default" key = this page is the first entry of the SPA session, so
+    // there is nothing in-app to go back to — send the visitor home.
+    if (location.key !== "default" && window.history.length > 1) navigate(-1);
+    else navigate("/");
+  };
   const navHidden =
     !alwaysVisible &&
     location.pathname !== "/trade-program" &&
+    !isContactRoute &&
     // While the product mini bar is docked below the header, the header
     // stays pinned so the bar never floats in empty space.
     !stickyProductBarActive &&
@@ -481,6 +491,16 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   mirroring the desktop header. */}
               <ShippingDestinationSwitcher compact className="hidden xsp:flex min-h-10 min-w-10 px-0 shrink-0" flagClassName="text-lg" />
               <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
+              {isContactRoute && (
+                <button
+                  type="button"
+                  onClick={closeContactView}
+                  aria-label="Close contact view and go back"
+                  className="relative flex items-center justify-center w-10 h-10 text-foreground hover:text-primary transition-colors"
+                >
+                  <X className="w-[20px] h-[20px]" strokeWidth={1.5} />
+                </button>
+              )}
             </div>
 
             <SheetContent side="left" className="w-full overflow-y-auto flex flex-col" aria-describedby={undefined}>
@@ -773,12 +793,23 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
             </button>
 
             <div className="flex items-center gap-5 justify-self-end">
-              <button
-                onClick={() => { setMegaMenuOpen(false); handleNavClick("/contact"); }}
-                className="font-body text-[10px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
-              >
-                Contact Us
-              </button>
+              {isContactRoute ? (
+                <button
+                  type="button"
+                  onClick={closeContactView}
+                  aria-label="Close contact view and go back"
+                  className="group p-1 outline-none"
+                >
+                  <X className="w-[16px] h-[16px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
+                </button>
+              ) : (
+                <button
+                  onClick={() => { setMegaMenuOpen(false); handleNavClick("/contact"); }}
+                  className="font-body text-[10px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+                >
+                  Contact Us
+                </button>
+              )}
 
               <DropdownMenu>
                 <DropdownMenuTrigger aria-label="Account menu" title="Account" className="relative group p-1 outline-none">
