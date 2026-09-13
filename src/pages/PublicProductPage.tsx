@@ -1853,6 +1853,15 @@ const PublicProductPageContent: React.FC = () => {
 
   const finishOptions = finishVariantEntries.map((f) => f.label);
 
+  // Priced pieces with selectable finishes land with NO swatch chosen: the
+  // sticky CTA invites a finish choice ("Select Finishes for Pricing" /
+  // "Choose Finishes") until the visitor actually picks one.
+  const needsFinishSelection =
+    !isTradeVerifiedView &&
+    !!displayRrpLabel &&
+    finishOptions.length > 0 &&
+    selectedFinishes.length === 0;
+
 
   /**
    * Writes the currently configured piece (finishes + quantity) into the
