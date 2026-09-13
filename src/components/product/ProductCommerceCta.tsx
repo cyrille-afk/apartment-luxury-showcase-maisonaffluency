@@ -1,5 +1,5 @@
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
 import { getCart, shouldUseFullPageCart, useCart } from "@/lib/cart";
@@ -10,7 +10,6 @@ import OrderIntakeSheet, { type OrderIntakeDetails } from "@/components/product/
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
-import { setStickyCommerceDockHeight } from "@/lib/stickyCommerceDock";
 import { cn } from "@/lib/utils";
 
 /**
@@ -192,30 +191,7 @@ export default function ProductCommerceCta({
   const [miniCartOpen, setMiniCartOpen] = useState(false);
   const [intakeOpen, setIntakeOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
-  const dockRef = useRef<HTMLDivElement | null>(null);
   const cartItems = useCart();
-
-  // Publish only the dock's intrinsic height so the separate floating control
-  // can sit above it. Positioning belongs entirely to the root-level dock.
-  useEffect(() => {
-    const mql = window.matchMedia("(max-width: 767px)");
-    const update = () => {
-      const visible = dock && mql.matches;
-      const el = dockRef.current;
-      setStickyCommerceDockHeight(visible && el ? el.getBoundingClientRect().height : 0);
-    };
-    update();
-    mql.addEventListener("change", update);
-    window.addEventListener("resize", update, { passive: true });
-    const ro = dockRef.current ? new ResizeObserver(update) : null;
-    if (ro && dockRef.current) ro.observe(dockRef.current);
-    return () => {
-      mql.removeEventListener("change", update);
-      window.removeEventListener("resize", update);
-      ro?.disconnect();
-      setStickyCommerceDockHeight(0);
-    };
-  }, [dock]);
 
   
   const { clientSafe } = useClientSafeMode();
@@ -486,9 +462,8 @@ export default function ProductCommerceCta({
           wrapper. Its position and height never depend on page scroll state. */}
       {dock && typeof document !== "undefined" && createPortal(
         <div
-          ref={dockRef}
           data-mobile-commerce-dock
-          className="fixed bottom-0 left-0 z-50 flex h-[76px] w-full items-center justify-between border-t border-gray-100 bg-white px-6 py-4 md:hidden"
+          className="fixed bottom-0 left-0 w-full z-50 bg-white border-t border-gray-100 flex justify-between items-center px-6 py-4 h-[76px]"
         >
           <div className="flex w-full items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
