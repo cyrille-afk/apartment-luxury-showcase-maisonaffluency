@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { trackCTA } from "@/lib/analytics";
 import { inferCountryFromBrowser } from "@/lib/inferCountry";
-import { getPhonePlaceholder, getDialCode } from "@/lib/phonePlaceholder";
+import { PhoneInput } from "@/components/PhoneInput";
 import { z } from "zod";
 import Turnstile from "@/components/Turnstile";
 import { X } from "lucide-react";
