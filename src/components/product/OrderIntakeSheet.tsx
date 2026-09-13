@@ -428,7 +428,7 @@ export default function OrderIntakeSheet({
                       src={previewImage}
                       alt={[productTitle, finish].filter(Boolean).join(" — ") || "Product"}
                       loading="lazy"
-                      className="max-h-[26dvh] w-full object-contain animate-in fade-in duration-300 short:max-h-[10dvh] md:max-h-none md:h-auto"
+                      className="h-auto w-full object-contain animate-in fade-in duration-300"
                     />
                   </div>
                   {usingFallbackImage && (
