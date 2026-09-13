@@ -168,6 +168,20 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
   const [presentOpen, setPresentOpen] = useState(false);
 
+  // Landing engagement cue: a minimal "View Editorial Gallery" label sits next
+  // to the presentation icon for 3s, then fades out and unmounts; the icon
+  // itself carries a delicate 3-beat pulse (see index.css) that stops on its own.
+  const [galleryHintVisible, setGalleryHintVisible] = useState(true);
+  const [galleryHintMounted, setGalleryHintMounted] = useState(true);
+  useEffect(() => {
+    const fadeTimer = window.setTimeout(() => setGalleryHintVisible(false), 3000);
+    const unmountTimer = window.setTimeout(() => setGalleryHintMounted(false), 3900);
+    return () => {
+      window.clearTimeout(fadeTimer);
+      window.clearTimeout(unmountTimer);
+    };
+  }, []);
+
   const thumbsRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const expandedFrameHeightRef = useRef(0);
