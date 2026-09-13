@@ -498,9 +498,8 @@ export default function ProductCommerceCta({
           <div
             aria-hidden="true"
             data-mobile-commerce-backing
-            className="pointer-events-none fixed bottom-0 left-0 z-[9998] hidden w-full bg-gradient-to-b from-foreground/75 to-foreground md:hidden"
+            className="pointer-events-none fixed bottom-0 left-0 z-[9998] block w-full bg-gradient-to-b from-foreground/75 to-foreground md:hidden"
             style={{
-              display: "block",
               height: `calc(${initialMobileBottomInsetRef.current ?? 0}px + env(safe-area-inset-bottom, 0px) + 18px)`,
             }}
           />
