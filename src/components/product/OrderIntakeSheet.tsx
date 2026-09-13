@@ -279,7 +279,11 @@ export default function OrderIntakeSheet({
 
   if (sent) {
     return createPortal(
-      <div className="fixed inset-0 z-[130]">
+      // h-[100dvh]: on iOS Safari `inset-0` resolves to the layout viewport
+      // (toolbars retracted), pinning bottom-0 children behind the browser
+      // chrome. dvh tracks the live visual viewport so the sheet's docked
+      // action is always reachable.
+      <div className="fixed inset-0 z-[130] h-[100dvh]">
         <button
           type="button"
           aria-label="Close"
@@ -339,7 +343,10 @@ export default function OrderIntakeSheet({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[130] md:items-center md:justify-center">
+    // h-[100dvh]: anchors the sheet's bottom edge to the *visible* viewport
+    // on iOS Safari, so the Next / Submit bar never slips behind the browser
+    // toolbar when it expands (inset-0 alone uses the layout viewport).
+    <div className="fixed inset-0 z-[130] h-[100dvh] md:items-center md:justify-center">
       {/* Scrim */}
       <button
         type="button"
