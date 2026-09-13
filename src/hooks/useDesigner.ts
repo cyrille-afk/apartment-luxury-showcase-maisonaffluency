@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
@@ -93,13 +93,11 @@ export interface DesignerCuratorPick {
   variant_image_map?: Record<string, number> | null;
 }
 
-/** Fetch a single designer by slug. Trade-only designers are excluded unless
- *  `includeTradeOnly` is true (set this in Trade Program routes). */
-export function useDesigner(
+export function designerQueryOptions(
   slug: string | undefined,
-  { includeTradeOnly = false }: { includeTradeOnly?: boolean } = {},
+  includeTradeOnly = false,
 ) {
-  return useQuery({
+  return queryOptions({
     queryKey: queryKeys.designer(slug, includeTradeOnly),
     queryFn: async () => {
       if (!slug) return null;
@@ -117,6 +115,15 @@ export function useDesigner(
     },
     enabled: !!slug,
   });
+}
+
+/** Fetch a single designer by slug. Trade-only designers are excluded unless
+ *  `includeTradeOnly` is true (set this in Trade Program routes). */
+export function useDesigner(
+  slug: string | undefined,
+  { includeTradeOnly = false }: { includeTradeOnly?: boolean } = {},
+) {
+  return useQuery(designerQueryOptions(slug, includeTradeOnly));
 }
 
 /** Fetch a single designer by exact name. Trade-only designers are excluded

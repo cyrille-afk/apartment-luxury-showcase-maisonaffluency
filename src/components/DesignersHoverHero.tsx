@@ -21,11 +21,11 @@ import { motion } from "framer-motion";
 import SilentLink from "@/components/SilentLink";
 import { Search, X, ImageIcon } from "lucide-react";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { useAllDesignersLite } from "@/hooks/useDesigner";
+import { designerQueryOptions, useAllDesignersLite } from "@/hooks/useDesigner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { applyCuratorPickOrder } from "@/lib/curatorPickSort";
 import { sortNameKey, lastNameInitial, displayDesignerName } from "@/lib/nameFormat";
@@ -148,6 +148,8 @@ function DesignerGridCard({
   /** Use the designer's own card photo (studio/portrait) instead of the first curator pick. */
   useCardPhoto?: boolean;
 }) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const baseRaw = useCardPhoto
     ? (MOBILE_BG_OVERRIDES[designer.slug] || designer.image_url || designer.hero_image_url || pickGridImage(designer))
     : pickGridImage(designer);
@@ -160,17 +162,27 @@ function DesignerGridCard({
   const rememberLetter = () => {
     rememberDesignersAzLetter(lastNameInitial(designer.name));
   };
+  const warmProfile = () => Promise.all([
+    import("../pages/PublicDesignerProfile"),
+    queryClient.ensureQueryData(designerQueryOptions(designer.slug, false)),
+  ]);
   return (
     <SilentLink
       to={`/designers/${designer.slug}`}
       state={{ fromDesignersHero: true, fromDesignersAZ: true }}
       data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
-      onClick={() => {
+      onClick={(event) => {
+        event.preventDefault();
         rememberLetter();
         onNavigate?.();
+        void warmProfile().then(() => {
+          navigate(`/designers/${designer.slug}`, {
+            state: { fromDesignersHero: true, fromDesignersAZ: true },
+          });
+        });
       }}
-      onTouchStart={() => { import("../pages/PublicDesignerProfile").catch(() => {}); }}
-      onMouseEnter={() => { import("../pages/PublicDesignerProfile").catch(() => {}); }}
+      onTouchStart={() => { void warmProfile(); }}
+      onMouseEnter={() => { void warmProfile(); }}
       className="group relative block w-full aspect-[4/5] rounded-none overflow-hidden bg-neutral-800 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-gold/60"
       aria-label={`View ${displayName}`}
       style={
@@ -544,6 +556,16 @@ function HeroBgLayer({
 
 const DesignersHoverHero = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const warmProfile = (slug: string) => Promise.all([
+    import("../pages/PublicDesignerProfile"),
+    queryClient.ensureQueryData(designerQueryOptions(slug, false)),
+  ]);
+  const openProfile = (slug: string) => {
+    void warmProfile(slug).then(() => {
+      navigate(`/designers/${slug}`, { state: { fromDesignersHero: true } });
+    });
+  };
   const { data: designers } = useFeaturedDesigners();
   const { data: allDesigners = [] } = useAllDesignersLite();
   const { data: firstPickMap } = useAllFirstPickImages();
