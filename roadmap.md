@@ -20,3 +20,4 @@
 - [x] Move product CTA and three-dot control into the app-root overlay layer
 - [x] Anchor the complete mobile commerce bar to Safari's visible viewport during toolbar resizing
 - [x] Keep Editorial Gallery controls visible and synchronize its closing frame with the product carousel
+- [x] Restore the mobile product CTA as a plain root-level fixed bar without viewport offsets

@@ -179,7 +179,7 @@ export default function GalleryDetailsFloatingNav({
         className
       )}
       style={dockActive
-        ? { bottom: `calc(var(--mobile-visual-bottom-inset, 0px) + ${dockHeight}px + 1rem)` }
+        ? { bottom: `calc(${dockHeight}px + 1rem)` }
         : { bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
     >
       {isExpanded ? (
