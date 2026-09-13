@@ -1,5 +1,5 @@
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
 import { getCart, shouldUseFullPageCart, useCart } from "@/lib/cart";
@@ -192,13 +192,48 @@ export default function ProductCommerceCta({
   const [miniCartOpen, setMiniCartOpen] = useState(false);
   const [intakeOpen, setIntakeOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const dockRef = useRef<HTMLDivElement | null>(null);
   const cartItems = useCart();
 
-  // Publish the dock's fixed structural height for the separate floating
-  // control. Safari's visible-viewport correction is CSS-only.
+  // Keep the body-level dock attached to Safari's visible viewport. On iOS,
+  // `position: fixed; bottom: 0` follows the larger layout viewport while the
+  // browser toolbar retracts, which pushes the dock below the glass. The
+  // covered distance is applied as a bottom inset without changing dock height.
   useEffect(() => {
-    setStickyCommerceDockHeight(dock ? 76 : 0);
+    const mql = window.matchMedia("(max-width: 767px)");
+    let frame = 0;
+    const update = () => {
+      const visible = dock && mql.matches;
+      const el = dockRef.current;
+      const viewport = window.visualViewport;
+      const coveredBottom = visible && viewport
+        ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
+        : 0;
+      document.documentElement.style.setProperty(
+        "--mobile-visual-bottom-inset",
+        `${Math.round(coveredBottom)}px`,
+      );
+      setStickyCommerceDockHeight(visible && el ? el.getBoundingClientRect().height : 0);
+    };
+    const scheduleUpdate = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(update);
+    };
+    scheduleUpdate();
+    mql.addEventListener("change", scheduleUpdate);
+    window.addEventListener("resize", scheduleUpdate, { passive: true });
+    window.visualViewport?.addEventListener("resize", scheduleUpdate, { passive: true });
+    window.visualViewport?.addEventListener("scroll", scheduleUpdate, { passive: true });
+    const ro = dockRef.current ? new ResizeObserver(update) : null;
+    if (ro && dockRef.current) ro.observe(dockRef.current);
     return () => {
+      window.cancelAnimationFrame(frame);
+      mql.removeEventListener("change", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      window.visualViewport?.removeEventListener("resize", scheduleUpdate);
+      window.visualViewport?.removeEventListener("scroll", scheduleUpdate);
+      ro?.disconnect();
+      document.documentElement.style.removeProperty("--mobile-visual-bottom-inset");
       setStickyCommerceDockHeight(0);
     };
   }, [dock]);
@@ -468,15 +503,20 @@ export default function ProductCommerceCta({
       </div>
       )}
 
-      {/* Mobile dock: portaled directly under body with a rigid height. The
-          CSS-only vh/dvh correction keeps it on Safari's visible glass without
-          coupling it to product scroll state or JavaScript viewport events. */}
+      {/* Mobile dock: portaled directly under body, outside every product/layout
+          wrapper. Its position and height never depend on page scroll state. */}
       {dock && typeof document !== "undefined" && createPortal(
         <div
+          ref={dockRef}
           data-mobile-commerce-dock
-          className="mobile-product-commerce-dock pointer-events-auto fixed left-0 z-[9999] block h-[76px] w-full border-t border-gray-100 bg-white px-4 py-3 md:hidden"
+          className={cn(
+            "pointer-events-auto fixed left-0 z-[9999] block h-auto w-full overflow-visible",
+            "border-t border-border/50 bg-background shadow-[0_-6px_18px_rgba(0,0,0,0.06)]",
+            "px-4 pb-[calc(16px+env(safe-area-inset-bottom,0px))] pt-4 md:hidden"
+          )}
+          style={{ bottom: "var(--mobile-visual-bottom-inset, 0px)" }}
         >
-          <div className="flex h-full items-center justify-between gap-3">
+          <div className="flex min-h-11 items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
                 {tradeApproved && netLabel ? (
                   <div className="flex flex-col">

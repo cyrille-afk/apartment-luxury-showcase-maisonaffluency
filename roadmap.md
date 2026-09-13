@@ -33,5 +33,3 @@
 - [x] Remove the blank profile-entry frame after navigating from the designers landing
 - [x] Rebuild the mobile product CTA as a body-level fixed dock with a 16px safe-area buffer
 - [x] Re-anchor the body-level product dock to Safari's visible viewport during toolbar retraction
-- [x] Replace the mobile product dock with a rigid 76px body-level fixed bar
-- [x] Keep the body-level product dock inside Safari's live visible viewport using CSS viewport units

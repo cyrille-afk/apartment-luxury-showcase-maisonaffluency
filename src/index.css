@@ -286,18 +286,6 @@ html.product-detail-root .product-page-root {
   min-height: 100dvh;
 }
 
-/* iOS Safari keeps fixed elements relative to its larger layout viewport while
-   the bottom toolbar is expanded. The difference between vh (layout viewport)
-   and dvh (currently visible viewport) is the hidden strip. Keeping this in
-   CSS lets Safari update the dock every frame without a scroll listener. */
-html.product-detail-root {
-  --mobile-product-viewport-gap: max(0px, calc(100vh - 100dvh));
-}
-
-.mobile-product-commerce-dock {
-  bottom: var(--mobile-product-viewport-gap, 0px);
-}
-
 /* The public product surface remains light, while its outer document canvas is
    dark so iOS elastic scrolling and retracting browser chrome reveal no white gap. */
 html.public-product-canvas,
