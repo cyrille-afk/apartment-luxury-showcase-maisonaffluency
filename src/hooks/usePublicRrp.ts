@@ -1,6 +1,8 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { convertCentsWithFallback, FALLBACK_RATES } from "@/lib/fxRates";
+import { convertCentsWithFallback, getFxRates, FALLBACK_RATES } from "@/lib/fxRates";
+import { useShippingDestination } from "@/lib/shippingDestination";
 
 export interface PublicRrpRow {
   rrp_price_cents: number | null;
@@ -117,4 +119,50 @@ export function usePublicRrpMap(pickIds: (string | null | undefined)[]) {
       return map;
     },
   });
+}
+
+/**
+ * Display-currency layer for public RRPs.
+ *
+ * The shopper's chosen destination (header flag, persisted in localStorage via
+ * `shippingDestination`) is the single source of truth for which currency every
+ * public price is *shown* in. Listing pages and product detail pages both read
+ * this hook, so navigating between them never reverts to the source currency.
+ *
+ * Conversion is display-only: the underlying row keeps its source currency for
+ * cart/checkout maths, where the settlement currency is resolved separately.
+ */
+export function usePublicRrpDisplay(row: PublicRrpRow | null | undefined) {
+  const dest = useShippingDestination();
+  const src = (row?.currency || "USD").toUpperCase();
+  const tgt = (dest.currency || src).toUpperCase();
+  const [rates, setRates] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    if (src === tgt) return;
+    let cancelled = false;
+    getFxRates([{ src, tgt }]).then((r) => {
+      if (!cancelled) setRates(r);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [src, tgt]);
+
+  const toDisplayCents = useCallback(
+    (cents: number) =>
+      src === tgt ? cents : convertCentsWithFallback(cents, src, tgt, rates),
+    [src, tgt, rates],
+  );
+
+  const displayRow = useMemo<PublicRrpRow | null | undefined>(() => {
+    if (!row || src === tgt) return row;
+    return {
+      ...row,
+      currency: tgt,
+      rrp_price_cents: row.rrp_price_cents ? toDisplayCents(row.rrp_price_cents) : row.rrp_price_cents,
+    };
+  }, [row, src, tgt, toDisplayCents]);
+
+  return { displayRow, toDisplayCents, displayCurrency: tgt };
 }

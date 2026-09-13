@@ -26,7 +26,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP, normalizeCategory, normalizeSubcategory } from "@/lib/productTaxonomy";
 import { pickMatchesCategoryFilter } from "@/lib/pickCategoryFilter";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
-import { usePublicRrpMap, formatPublicRrp, type PublicRrpRow } from "@/hooks/usePublicRrp";
+import { useShippingDestination } from "@/lib/shippingDestination";
+import { usePublicRrpMap, formatPublicRrp, formatPublicRrpForDestination, type PublicRrpRow } from "@/hooks/usePublicRrp";
 import { withOgCacheBust } from "@/lib/whatsapp-share";
 import ShareMenu from "./ShareMenu";
 import { cldResponsiveImg } from "@/lib/cloudinary";
@@ -1323,6 +1324,7 @@ function pickSlugify(s: string) {
 
 const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: PickItem; onFavorite?: (id: string) => void; isFavorited?: boolean; rrp?: PublicRrpRow | null; hideFavorite?: boolean }) => {
   const navigate = useNavigate();
+  const destinationCurrency = useShippingDestination().currency;
   const productSlug = pickSlugify(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""));
   return (
     <button
@@ -1446,7 +1448,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
           );
         })()}
         <p className="font-display text-sm mt-1 text-foreground/70">
-          {formatPublicRrp(rrp) || "Price upon Request"}
+          {formatPublicRrpForDestination(rrp, destinationCurrency) || "Price upon Request"}
         </p>
       </div>
 

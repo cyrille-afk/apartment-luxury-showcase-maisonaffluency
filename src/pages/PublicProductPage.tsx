@@ -96,7 +96,7 @@ import TradePendingReviewCard from "@/components/product/TradePendingReviewCard"
 
 
 import { addToCart, setQuantity as setCartQuantity } from "@/lib/cart";
-import { usePublicRrp, usePublicRrpMap, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
+import { usePublicRrp, usePublicRrpMap, usePublicRrpDisplay, formatPublicRrp, formatPublicRrpForDestination, formatPublicRrpCents } from "@/hooks/usePublicRrp";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
 import { computeDisplayPrice } from "@/lib/productPricing";
@@ -1167,7 +1167,9 @@ const PublicProductPageContent: React.FC = () => {
   const { data, isLoading } = useProductBySlug(designerSlug, productSlug);
   const { data: publicRrpRow } = usePublicRrp(data?.product?.id);
   const { data: relatedRrpMap = {} } = usePublicRrpMap((data?.relatedPicks || []).map((p: any) => p.id));
-  const catalogueRrpLabel = formatPublicRrp(publicRrpRow);
+  // Display currency follows the header flag globally (listing ↔ detail parity).
+  const { displayRow: displayRrpRow, toDisplayCents, displayCurrency: rrpDisplayCurrency } = usePublicRrpDisplay(publicRrpRow);
+  const catalogueRrpLabel = formatPublicRrp(displayRrpRow);
   // Price of the size/finish combination the visitor has currently selected.
   // `exact` = a single variant matched, so we drop the "From" prefix.
   const [selectedRrp, setSelectedRrp] = useState<{ cents: number; exact: boolean } | null>(null);
@@ -1189,7 +1191,7 @@ const PublicProductPageContent: React.FC = () => {
   const selectionIsExact = selectedRrp ? selectedRrp.exact : !!selectedVariantPrice?.exact;
   let displayRrpLabel = catalogueRrpLabel
     ? (selectedRrp
-        ? formatPublicRrpCents(selectedRrp.cents, publicRrpRow, selectedRrp.exact ? "" : undefined) ||
+        ? formatPublicRrpCents(toDisplayCents(selectedRrp.cents), displayRrpRow, selectedRrp.exact ? "" : undefined) ||
           catalogueRrpLabel
         : catalogueRrpLabel)
     : null;
@@ -1844,7 +1846,7 @@ const PublicProductPageContent: React.FC = () => {
       const cents = Number(v.price_cents);
       const priceLabel =
         Number.isFinite(cents) && cents > 0
-          ? formatPublicRrpCents(cents, publicRrpRow, "") || null
+          ? formatPublicRrpCents(toDisplayCents(cents), displayRrpRow, "") || null
           : null;
 
       let imgIdx: number | undefined;
@@ -2882,7 +2884,7 @@ const PublicProductPageContent: React.FC = () => {
                               {rp.title}
                             </p>
                             <p className="font-body text-[10px] text-muted-foreground tracking-wide mt-1">
-                              {formatPublicRrp((relatedRrpMap as any)[rp.id]) || "Price upon Request"}
+                              {formatPublicRrpForDestination((relatedRrpMap as any)[rp.id], rrpDisplayCurrency) || "Price upon Request"}
                             </p>
                           </div>
                         </Link>
@@ -2931,7 +2933,7 @@ const PublicProductPageContent: React.FC = () => {
                             {rp.title}
                           </p>
                           <p className="font-body text-xs text-muted-foreground tracking-wide mt-1">
-                            {formatPublicRrp((relatedRrpMap as any)[rp.id]) || "Price upon Request"}
+                            {formatPublicRrpForDestination((relatedRrpMap as any)[rp.id], rrpDisplayCurrency) || "Price upon Request"}
                           </p>
                         </div>
                       </Link>
