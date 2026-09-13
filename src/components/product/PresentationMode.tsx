@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import useEmblaCarousel from "embla-carousel-react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
@@ -23,8 +23,8 @@ interface PresentationModeProps {
  *
  * Full-bleed, chrome-free gallery for handing the phone to a client: no
  * pricing, no dimensions, no headers, no navigation. Swipe (or tap the
- * edges) to move between frames. Metadata and exit controls remain anchored,
- * dimming only while a manual swipe is actively moving the track.
+ * edges) to move between frames. Metadata and exit controls remain anchored
+ * and fully visible throughout every swipe.
  *
  * Images stay long-pressable so a designer can save straight to the camera
  * roll (their studio library).
@@ -40,7 +40,6 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
   pickId,
   isMobileOrPwa,
 }) => {
-  const [isSwiping, setIsSwiping] = useState(false);
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: images.length > 1,
     align: "start",
@@ -65,7 +64,6 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
 
   useEffect(() => {
     if (!open) return;
-    setIsSwiping(false);
     lockBodyScroll();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeAtCurrentIndex();
@@ -87,20 +85,16 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
       const next = emblaApi.selectedScrollSnap();
       if (next !== indexRef.current) onIndexChangeRef.current(next);
     };
-    const beginSwipe = () => setIsSwiping(true);
     const finishSwipe = () => {
       syncFromCarousel();
-      setIsSwiping(false);
     };
     emblaApi.scrollTo(indexRef.current, true);
     emblaApi.on("select", syncFromCarousel);
     emblaApi.on("reInit", syncFromCarousel);
-    emblaApi.on("pointerDown", beginSwipe);
     emblaApi.on("settle", finishSwipe);
     return () => {
       emblaApi.off("select", syncFromCarousel);
       emblaApi.off("reInit", syncFromCarousel);
-      emblaApi.off("pointerDown", beginSwipe);
       emblaApi.off("settle", finishSwipe);
     };
   }, [emblaApi, open]);
@@ -187,23 +181,16 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
       {/* Mobile/PWA: active finish caption — moved here from below the inline image */}
       {isMobileOrPwa && pickId && (
         <div
-          className={cn(
-            "absolute left-0 right-0 z-10 px-5 transition-opacity ease-out",
-            isSwiping ? "opacity-40 duration-200" : "opacity-100 duration-0"
-          )}
+          className="absolute left-0 right-0 z-10 px-5 opacity-100"
           style={{ bottom: "max(4.5rem, calc(env(safe-area-inset-bottom) + 3.25rem))" }}
         >
           <ActiveSwatchCaption pickId={pickId} activeIndex={index} variant="light" />
         </div>
       )}
 
-      {/* Progress, counter, and close remain available throughout the gallery.
-          They softly dim during a manual swipe and restore as soon as it settles. */}
+      {/* Progress, counter, and close remain fully visible throughout the gallery. */}
       <div
-        className={cn(
-          "absolute left-0 right-0 z-10 flex items-center gap-4 px-5 transition-opacity ease-out",
-          isSwiping ? "opacity-40 duration-200" : "opacity-100 duration-0"
-        )}
+        className="absolute left-0 right-0 z-10 flex items-center gap-4 px-5 opacity-100"
         style={{ bottom: "max(1.25rem, calc(env(safe-area-inset-bottom) + 0.5rem))" }}
       >
         {images.length > 1 && (
