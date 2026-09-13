@@ -195,7 +195,7 @@ export default function ProductCommerceCta({
   const cartItems = useCart();
 
   // Publish the dock's fixed structural height for the separate floating
-  // control. The dock itself has no viewport, scroll, or safe-area tracking.
+  // control. Safari's visible-viewport correction is CSS-only.
   useEffect(() => {
     setStickyCommerceDockHeight(dock ? 76 : 0);
     return () => {
@@ -468,12 +468,13 @@ export default function ProductCommerceCta({
       </div>
       )}
 
-      {/* Mobile dock: portaled directly under body with a rigid viewport-fixed
-          height. It has no scroll, visual-viewport, or safe-area calculations. */}
+      {/* Mobile dock: portaled directly under body with a rigid height. The
+          CSS-only vh/dvh correction keeps it on Safari's visible glass without
+          coupling it to product scroll state or JavaScript viewport events. */}
       {dock && typeof document !== "undefined" && createPortal(
         <div
           data-mobile-commerce-dock
-          className="pointer-events-auto fixed bottom-0 left-0 z-50 block h-[76px] w-full border-t border-gray-100 bg-white px-4 py-3 md:hidden"
+          className="mobile-product-commerce-dock pointer-events-auto fixed left-0 z-[9999] block h-[76px] w-full border-t border-gray-100 bg-white px-4 py-3 md:hidden"
         >
           <div className="flex h-full items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
