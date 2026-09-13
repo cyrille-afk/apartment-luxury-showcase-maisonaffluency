@@ -457,7 +457,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             {/* Right-side group: location + cart on trade-program, user + cart elsewhere */}
             <div
               className={cn(
-                "flex items-center justify-end gap-2"
+                "flex items-center justify-end gap-1"
               )}
             >
               <button
@@ -471,13 +471,13 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   }
                 }}
                 aria-label={user ? "My account" : "Sign in"}
-                className="relative flex items-center justify-center w-8 h-10 text-foreground hover:text-primary transition-colors"
+                className="relative flex items-center justify-center w-10 h-10 text-foreground hover:text-primary transition-colors"
               >
                 <User className="w-[20px] h-[20px]" strokeWidth={1.5} />
               </button>
               {/* Currency / shipping-destination flag — between account and bag,
                   mirroring the desktop header. */}
-              <ShippingDestinationSwitcher compact className="min-h-10 min-w-0 px-0 shrink-0" flagClassName="text-lg" />
+              <ShippingDestinationSwitcher compact className="min-h-10 min-w-10 px-0 shrink-0" flagClassName="text-lg" />
               <CartNavButton iconClassName="w-[20px] h-[20px] text-foreground" />
             </div>
 
