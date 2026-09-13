@@ -30,3 +30,4 @@
 - [x] Add mobile visual regression coverage for the product canvas during scroll and panel open/close
 - [x] Eliminate the designer landing-to-profile flicker by warming profile data before navigation
 - [x] Remove fixed-height iOS commerce shells and use intrinsic safe-area dock sizing
+- [x] Remove the blank profile-entry frame after navigating from the designers landing
