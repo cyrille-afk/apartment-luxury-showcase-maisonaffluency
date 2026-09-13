@@ -2246,7 +2246,7 @@ const PublicProductPageContent: React.FC = () => {
                           <button
                             onClick={(e) => e.stopPropagation()}
                             aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
-                            className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25"
+                            className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/90 shadow-sm backdrop-blur-sm"
                           >
                             <Heart size={20} strokeWidth={1.5} className={cn(favorited ? "fill-destructive text-destructive" : "text-foreground/80")} />
                           </button>
@@ -2264,7 +2264,7 @@ const PublicProductPageContent: React.FC = () => {
                       <ShareMenu
                         url={shareUrl}
                         message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
-                        className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 text-foreground/80"
+                        className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/90 shadow-sm backdrop-blur-sm text-foreground/80"
                         iconSize="w-[18px] h-[18px]"
                         iconVariant="ios"
                         showLabel={false}
