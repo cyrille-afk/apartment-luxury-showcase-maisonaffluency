@@ -21,12 +21,23 @@ interface PhoneInputProps {
 
 const cleanNational = (raw: string) => raw.replace(/[^\d\s\-\(\)\.]/g, "");
 
+// Countries that share a dial code are collapsed into one selectable option.
+const DIAL_OPTIONS = Object.values(
+  COUNTRY_DIAL_OPTIONS.reduce<Record<string, { dial: string; labels: string[] }>>((acc, o) => {
+    const existing = acc[o.dial];
+    if (existing) {
+      existing.labels.push(`${o.flag} ${o.country}`);
+    } else {
+      acc[o.dial] = { dial: o.dial, labels: [`${o.flag} ${o.country}`] };
+    }
+    return acc;
+  }, {})
+).sort((a, b) => a.dial.localeCompare(b.dial));
+
 const detectDialCode = (value: string): string | null => {
   const trimmed = value.trim();
   // Prefer longest matching prefix so +1 doesn't beat +44.
-  const sorted = [...COUNTRY_DIAL_OPTIONS].sort(
-    (a, b) => b.dial.length - a.dial.length
-  );
+  const sorted = [...DIAL_OPTIONS].sort((a, b) => b.dial.length - a.dial.length);
   return sorted.find((o) => trimmed.startsWith(o.dial))?.dial ?? null;
 };
 
