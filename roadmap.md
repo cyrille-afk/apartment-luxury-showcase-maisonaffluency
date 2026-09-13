@@ -26,3 +26,4 @@
 - [x] Freeze the iOS product purchase bar at its landing position and restore all three intake steps
 - [x] Expand the mobile purchasing intent sheet below the navigation and expose both profile choices
 - [x] Lock the mobile checkout navigation and summary bar above the scrolling form
+- [x] Unify the public product page's iOS overscroll canvas with the dark commerce backing

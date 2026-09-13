@@ -2104,7 +2104,7 @@ const PublicProductPageContent: React.FC = () => {
   };
 
   return (
-    <div className="motion-safe:animate-fade-in">
+    <div className="product-configurator-canvas min-h-[100dvh] motion-safe:animate-fade-in">
       {(() => {
         const canonical = `https://www.maisonaffluency.com/designers/${designer.slug}/${productSlug}`;
         const ogImg = toOgImage(product.image_url || images[0] || null);
