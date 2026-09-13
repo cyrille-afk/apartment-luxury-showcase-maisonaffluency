@@ -306,10 +306,6 @@ export default function ProductCommerceCta({
   // Mobile: PLACE ORDER opens the conversational 3-step intake sheet first;
   // its completion hands off to the existing selection / checkout flow.
   const handleMobilePrimary = () => {
-    if (finishSelectionRequired) {
-      scrollToFinishes();
-      return;
-    }
     if (tradeApproved) {
       onPlaceOrder(quantity);
       return;
