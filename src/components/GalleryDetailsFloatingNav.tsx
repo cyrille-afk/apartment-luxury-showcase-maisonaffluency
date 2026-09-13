@@ -171,13 +171,10 @@ export default function GalleryDetailsFloatingNav({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const floatingNav = (
+  return (
     <div
       className={cn(
-        commerceShell
-          ? "pointer-events-auto absolute right-4 z-[101]"
-          : "fixed right-4 z-[101]",
-        "print:hidden transition-all duration-300 ease-in-out",
+        "fixed right-4 z-[101] print:hidden transition-all duration-300 ease-in-out",
         className
       )}
       style={{
@@ -226,6 +223,4 @@ export default function GalleryDetailsFloatingNav({
       )}
     </div>
   );
-
-  return commerceShell ? createPortal(floatingNav, commerceShell) : floatingNav;
 }
