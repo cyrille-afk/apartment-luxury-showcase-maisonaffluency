@@ -23,7 +23,7 @@ import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { supabase } from "@/integrations/supabase/client";
 import SpecGlyph from "@/components/product/SpecGlyph";
-import { usePublicRrp, formatPublicRrp } from "@/hooks/usePublicRrp";
+import { usePublicRrp, usePublicRrpDisplay, formatPublicRrp } from "@/hooks/usePublicRrp";
 import { FadeInImage } from "@/components/ui/FadeInImage";
 
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage. */
@@ -317,7 +317,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
   // Publicly visible RRP (only for products flagged public_rrp_visible, e.g. Apparatus).
   const { data: publicRrp } = usePublicRrp(product?.id);
-  const publicPriceLabel = formatPublicRrp(publicRrp);
+  const { displayRow: publicRrpDisplayRow } = usePublicRrpDisplay(publicRrp);
+  const publicPriceLabel = formatPublicRrp(publicRrpDisplayRow);
 
   // Reset per-product state when the product changes (incl. selected finish).
   const [selectedBaseIdx, setSelectedBaseIdx] = useState<number | null>(null);

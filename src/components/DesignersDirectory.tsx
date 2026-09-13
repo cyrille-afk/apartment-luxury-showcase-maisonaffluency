@@ -26,7 +26,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP, normalizeCategory, normalizeSubcategory } from "@/lib/productTaxonomy";
 import { pickMatchesCategoryFilter } from "@/lib/pickCategoryFilter";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
-import { usePublicRrpMap, formatPublicRrp, type PublicRrpRow } from "@/hooks/usePublicRrp";
+import { usePublicRrpMap, formatPublicRrp, formatPublicRrpForDestination, type PublicRrpRow } from "@/hooks/usePublicRrp";
 import { withOgCacheBust } from "@/lib/whatsapp-share";
 import ShareMenu from "./ShareMenu";
 import { cldResponsiveImg } from "@/lib/cloudinary";
@@ -1446,7 +1446,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
           );
         })()}
         <p className="font-display text-sm mt-1 text-foreground/70">
-          {formatPublicRrp(rrp) || "Price upon Request"}
+          {formatPublicRrpForDestination(rrp, destinationCurrency) || "Price upon Request"}
         </p>
       </div>
 
