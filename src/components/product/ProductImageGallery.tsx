@@ -446,12 +446,26 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               "transition-[transform,opacity] duration-300 ease-out",
             )}
           >
+            {isMobileOrPwa && galleryHintMounted && (
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "pointer-events-none absolute right-full top-1/2 mr-2.5 -translate-y-1/2 whitespace-nowrap",
+                  "rounded-full border border-border/40 bg-background/90 px-2.5 py-1 shadow-sm backdrop-blur-sm",
+                  "font-body text-[9px] uppercase tracking-[0.18em] text-foreground/70",
+                  "transition-opacity duration-700 ease-out",
+                  galleryHintVisible ? "opacity-100" : "opacity-0",
+                )}
+              >
+                View Editorial Gallery
+              </span>
+            )}
             {isMobileOrPwa && mobileMenuItems ? (
               <DropdownMenu>
                 <CornerTooltip label="Presentation" side="top" align="end">
                   <DropdownMenuTrigger
                     aria-label="Presentation and more actions"
-                    className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/90 shadow-sm backdrop-blur-sm touch-manipulation"
+                    className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/90 shadow-sm backdrop-blur-sm touch-manipulation animate-gallery-icon-pulse"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Images size={20} strokeWidth={1.5} className="text-foreground/80" />
