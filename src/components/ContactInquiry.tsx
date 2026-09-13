@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { trackCTA } from "@/lib/analytics";
 import { inferCountryFromBrowser } from "@/lib/inferCountry";
-import { getPhonePlaceholder, getDialCode } from "@/lib/phonePlaceholder";
+import { PhoneInput } from "@/components/PhoneInput";
 import { z } from "zod";
 import Turnstile from "@/components/Turnstile";
 import { X } from "lucide-react";
@@ -71,19 +71,15 @@ const ContactInquiry = () => {
   // (saves ~21KB of third-party JS on initial LCP for visitors who never submit).
   const [interacted, setInteracted] = useState(false);
   const inferredCountry = inferCountryFromBrowser();
-  const inferredDialCode = getDialCode(inferredCountry);
   const EMPTY_FORM = {
     name: "",
     firm: "",
     email: "",
-    phone: inferredDialCode ? `${inferredDialCode} ` : "",
+    phone: "",
     profession: "",
     message: "",
   };
   const [formData, setFormData] = useState(EMPTY_FORM);
-  // Phone placeholder reflects the visitor's likely region (e.g. "+44 …" for UK)
-  // so the form doesn't read as Singapore-only. Falls back to a multi-region hint.
-  const [phonePlaceholder] = useState(() => getPhonePlaceholder(inferredCountry));
 
   // Stable draft key per inquiry context — keyed by `studio` param when present
   // so different studio introductions don't share a draft, otherwise by the
@@ -306,13 +302,52 @@ const ContactInquiry = () => {
               <h2 className="mb-6 font-display text-4xl text-foreground md:text-5xl">
                 Visit Us By Appointment
               </h2>
-              <p className="font-body text-sm text-muted-foreground mb-4">
-                1 Grange Garden, Singapore 249631
-              </p>
-              <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto text-justify">
+              <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
                 For architects, interior designers, and design connoisseurs interested
                 in detailed and custom specifications, material sourcing, and/or collaborative opportunities.
               </p>
+              <div className="mt-10 grid gap-8 md:grid-cols-2 md:gap-12">
+                <div className="text-center md:text-left">
+                  <h3 className="mb-2 font-body text-xs uppercase tracking-[0.2em] text-primary">
+                    Singapore Atelier
+                  </h3>
+                  <p className="font-body text-sm text-muted-foreground">
+                    1 Grange Garden, Singapore 249631
+                  </p>
+                  <p className="mt-1 font-body text-sm text-muted-foreground">
+                    WhatsApp:{" "}
+                    <a
+                      href="https://wa.me/6591393850"
+                      className="text-foreground hover:text-primary transition-colors"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackCTA.whatsapp("Contact Section — Singapore")}
+                    >
+                      +65 9139 3850
+                    </a>
+                  </p>
+                </div>
+                <div className="text-center md:text-left">
+                  <h3 className="mb-2 font-body text-xs uppercase tracking-[0.2em] text-primary">
+                    Paris Atelier
+                  </h3>
+                  <p className="font-body text-sm text-muted-foreground">
+                    Paris, France (By Appointment Only)
+                  </p>
+                  <p className="mt-1 font-body text-sm text-muted-foreground">
+                    WhatsApp:{" "}
+                    <a
+                      href="https://wa.me/33616237460"
+                      className="text-foreground hover:text-primary transition-colors"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackCTA.whatsapp("Contact Section — Paris")}
+                    >
+                      +33 6 1623 7460
+                    </a>
+                  </p>
+                </div>
+              </div>
             </>
           )}
         </motion.div>
@@ -374,13 +409,16 @@ const ContactInquiry = () => {
               <label htmlFor="phone" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
                 Phone
               </label>
-              <Input
+              <PhoneInput
                 id="phone"
-                type="tel"
-                placeholder={phonePlaceholder}
-                className={`border-border bg-background font-body rounded-lg ${errors.phone ? "border-destructive" : ""}`}
                 value={formData.phone}
-                onChange={handleInputChange}
+                onChange={(value) => {
+                  setFormData(prev => ({ ...prev, phone: value }));
+                  if (errors.phone) setErrors(prev => { const n = { ...prev }; delete n.phone; return n; });
+                }}
+                inferredCountry={inferredCountry}
+                placeholder="Phone number"
+                hasError={!!errors.phone}
               />
               {errors.phone && <p className="font-body text-[10px] text-destructive mt-1">{errors.phone}</p>}
             </div>
@@ -474,18 +512,37 @@ const ContactInquiry = () => {
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="mt-16 border-t border-border pt-12 text-center"
+          className="mt-16 border-t border-border pt-12"
         >
-          <p className="font-body text-sm uppercase tracking-wider text-muted-foreground">
+          <p className="mb-8 text-center font-body text-sm uppercase tracking-wider text-muted-foreground">
             For immediate inquiries
           </p>
-          <a
-            href="mailto:concierge@myaffluency.com"
-            className="mt-2 inline-block font-body text-lg text-primary hover:text-primary/80"
-            onClick={() => trackCTA.email("Contact Section")}
-          >
-            concierge@myaffluency.com
-          </a>
+          <div className="grid gap-8 md:grid-cols-2">
+            <div className="text-center">
+              <p className="mb-2 font-body text-xs uppercase tracking-wider text-muted-foreground">
+                General & Private Clients
+              </p>
+              <a
+                href="mailto:concierge@maisonaffluency.com"
+                className="inline-block font-body text-lg text-primary hover:text-primary/80"
+                onClick={() => trackCTA.email("Contact Section — Concierge")}
+              >
+                concierge@maisonaffluency.com
+              </a>
+            </div>
+            <div className="text-center">
+              <p className="mb-2 font-body text-xs uppercase tracking-wider text-muted-foreground">
+                Trade Program Members
+              </p>
+              <a
+                href="mailto:trade@maisonaffluency.com"
+                className="inline-block font-body text-lg text-primary hover:text-primary/80"
+                onClick={() => trackCTA.email("Contact Section — Trade")}
+              >
+                trade@maisonaffluency.com
+              </a>
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>

@@ -1,0 +1,142 @@
+import { useEffect, useMemo, useState } from "react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { COUNTRY_DIAL_OPTIONS, getDialCode } from "@/lib/phonePlaceholder";
+
+interface PhoneInputProps {
+  id?: string;
+  value: string;
+  onChange: (value: string) => void;
+  inferredCountry?: string | null;
+  placeholder?: string;
+  className?: string;
+  hasError?: boolean;
+}
+
+const cleanNational = (raw: string) => raw.replace(/[^\d\s\-\(\)\.]/g, "");
+
+// Countries that share a dial code are collapsed into one selectable option.
+const DIAL_OPTIONS = Object.values(
+  COUNTRY_DIAL_OPTIONS.reduce<Record<string, { dial: string; labels: string[] }>>((acc, o) => {
+    const existing = acc[o.dial];
+    if (existing) {
+      existing.labels.push(`${o.flag} ${o.country}`);
+    } else {
+      acc[o.dial] = { dial: o.dial, labels: [`${o.flag} ${o.country}`] };
+    }
+    return acc;
+  }, {})
+).sort((a, b) => a.dial.localeCompare(b.dial));
+
+const detectDialCode = (value: string): string | null => {
+  const trimmed = value.trim();
+  // Prefer longest matching prefix so +1 doesn't beat +44.
+  const sorted = [...DIAL_OPTIONS].sort((a, b) => b.dial.length - a.dial.length);
+  return sorted.find((o) => trimmed.startsWith(o.dial))?.dial ?? null;
+};
+
+export function PhoneInput({
+  id,
+  value,
+  onChange,
+  inferredCountry,
+  placeholder = "Phone number",
+  className,
+  hasError,
+}: PhoneInputProps) {
+  const inferredDial = getDialCode(inferredCountry);
+
+  const [selectedDial, setSelectedDial] = useState<string>(() => {
+    const matched = detectDialCode(value);
+    return matched || inferredDial || "+65";
+  });
+
+  // Keep the selected dial code in sync if the user pastes a full international number.
+  useEffect(() => {
+    const matched = detectDialCode(value);
+    if (matched && matched !== selectedDial) {
+      setSelectedDial(matched);
+    }
+  }, [value, selectedDial]);
+
+  const nationalNumber = useMemo(() => {
+    const trimmed = value.trim();
+    if (trimmed.startsWith(selectedDial)) {
+      return trimmed.slice(selectedDial.length).trim();
+    }
+    return cleanNational(trimmed);
+  }, [value, selectedDial]);
+
+  const handleDialChange = (dial: string) => {
+    setSelectedDial(dial);
+    const currentNational = value
+      .trim()
+      .replace(/^\+[\d]+\s*/, "")
+      .trim();
+    onChange(currentNational ? `${dial} ${currentNational}` : dial);
+  };
+
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let raw = e.target.value;
+
+    // Allow a full international paste (e.g. +33 6 16 23 74 60).
+    if (raw.trim().startsWith("+")) {
+      const matched = detectDialCode(raw.trim());
+      if (matched) {
+        onChange(raw.trim());
+        return;
+      }
+    }
+
+    raw = cleanNational(raw);
+    onChange(raw ? `${selectedDial} ${raw}` : selectedDial);
+  };
+
+  const borderClasses = hasError
+    ? "border-destructive focus-within:border-destructive"
+    : "border-border focus-within:border-foreground";
+
+  return (
+    <div
+      className={`flex items-center rounded-lg bg-background overflow-hidden transition-colors ${borderClasses} ${
+        className || ""
+      }`}
+    >
+      <Select value={selectedDial} onValueChange={handleDialChange}>
+        <SelectTrigger
+          id={id ? `${id}-dial` : undefined}
+          aria-label="Country code"
+          className="h-11 w-[5.75rem] shrink-0 rounded-none border-0 border-r border-border bg-transparent pl-3 pr-2 font-body text-sm focus:ring-0 focus:ring-offset-0"
+        >
+          <SelectValue placeholder="+65">{selectedDial}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {DIAL_OPTIONS.map((o) => (
+            <SelectItem
+              key={o.dial}
+              value={o.dial}
+              className="font-body text-sm"
+            >
+              <span className="mr-1">{o.labels.join(" / ")}</span>
+              <span className="text-muted-foreground">{o.dial}</span>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Input
+        id={id}
+        type="tel"
+        value={nationalNumber}
+        onChange={handleNumberChange}
+        placeholder={placeholder}
+        className="h-11 flex-1 rounded-none border-0 bg-transparent px-3 font-body text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
+      />
+    </div>
+  );
+}

@@ -15,7 +15,7 @@ const ContactPage = () => {
         <title>Contact — Maison Affluency</title>
         <meta
           name="description"
-          content="Contact Maison Affluency in Singapore — by-appointment concierge for bespoke inquiries, custom specs, and designer collaborations."
+          content="Contact Maison Affluency by appointment in Singapore and Paris. Private concierge for bespoke inquiries, custom specifications, and designer collaborations."
         />
         <link rel="canonical" href="https://maisonaffluency.com/contact" />
         <meta property="og:type" content="website" />
@@ -23,13 +23,13 @@ const ContactPage = () => {
         <meta property="og:site_name" content="Maison Affluency" />
         <meta property="og:url" content="https://maisonaffluency.com/contact" />
         <meta property="og:title" content="Contact — Maison Affluency" />
-        <meta property="og:description" content="Visit Maison Affluency by appointment in Singapore. Contact our concierge for bespoke inquiries, custom specifications, and design collaborations." />
+        <meta property="og:description" content="Visit Maison Affluency by appointment in Singapore and Paris. Contact our concierge for bespoke inquiries, custom specifications, and design collaborations." />
         <meta property="og:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Contact — Maison Affluency" />
-        <meta name="twitter:description" content="Visit Maison Affluency by appointment at 1 Grange Garden, Singapore 249631." />
+        <meta name="twitter:description" content="Visit Maison Affluency by appointment in Singapore and Paris." />
         <meta name="twitter:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg" />
       </Helmet>
 

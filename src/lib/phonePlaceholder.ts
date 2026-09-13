@@ -30,6 +30,52 @@ const DIAL_CODES: Record<string, string> = {
   Vietnam: "+84",
 };
 
+// Simple flag mapping for the regional selector.
+const FLAG_BY_COUNTRY: Record<string, string> = {
+  Singapore: "🇸🇬",
+  Australia: "🇦🇺",
+  Canada: "🇨🇦",
+  China: "🇨🇳",
+  France: "🇫🇷",
+  Germany: "🇩🇪",
+  "Hong Kong": "🇭🇰",
+  India: "🇮🇳",
+  Indonesia: "🇮🇩",
+  Italy: "🇮🇹",
+  Japan: "🇯🇵",
+  Malaysia: "🇲🇾",
+  Netherlands: "🇳🇱",
+  "New Zealand": "🇳🇿",
+  Philippines: "🇵🇭",
+  "South Korea": "🇰🇷",
+  Spain: "🇪🇸",
+  Switzerland: "🇨🇭",
+  Taiwan: "🇹🇼",
+  Thailand: "🇹🇭",
+  "United Arab Emirates": "🇦🇪",
+  "United Kingdom": "🇬🇧",
+  "United States": "🇺🇸",
+  Vietnam: "🇻🇳",
+};
+
+export interface CountryDialOption {
+  country: string;
+  dial: string;
+  flag: string;
+}
+
+/**
+ * Sorted list of countries with their dial codes and flag emojis.
+ * Used by the phone-input regional selector.
+ */
+export const COUNTRY_DIAL_OPTIONS: CountryDialOption[] = Object.entries(DIAL_CODES)
+  .map(([country, dial]) => ({
+    country,
+    dial,
+    flag: FLAG_BY_COUNTRY[country] ?? "",
+  }))
+  .sort((a, b) => a.country.localeCompare(b.country));
+
 /**
  * Returns a phone-input placeholder appropriate for the given country.
  * Falls back to a neutral, multi-region hint when country is unknown.
@@ -39,7 +85,6 @@ export const getPhonePlaceholder = (country?: string | null): string => {
     return `${DIAL_CODES[country]} …`;
   }
   return "+65 …";
-
 };
 
 export const getDialCode = (country?: string | null): string | null =>
