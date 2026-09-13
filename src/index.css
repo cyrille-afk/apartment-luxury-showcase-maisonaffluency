@@ -268,6 +268,33 @@ All colors MUST be HSL.
   }
 }
 
+/* Product controls live in App's root overlay host. Keep the document and the
+   product route free of clipping or fixed-height containing blocks on iOS. */
+html.product-detail-root,
+html.product-detail-root body,
+html.product-detail-root #root,
+html.product-detail-root .product-page-root,
+html.product-detail-root .product-page-root > main {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+html.product-detail-root,
+html.product-detail-root body,
+html.product-detail-root #root,
+html.product-detail-root .product-page-root {
+  min-height: 100dvh;
+}
+
+#product-root-overlays {
+  position: static;
+  overflow: visible;
+  transform: none;
+  contain: none;
+  isolation: auto;
+}
+
 /* Print styles for quote PDF export */
 @media print {
   /* Hide all navigation, sidebar, and UI chrome */

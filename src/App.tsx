@@ -340,6 +340,10 @@ function RouteScrollLockFailsafe() {
   const location = useLocation();
 
   useLayoutEffect(() => {
+    const isProductDetail =
+      /^\/designers\/[^/]+\/[^/]+\/?$/.test(location.pathname) ||
+      /^\/trade\/products\/[^/]+(?:\/[^/]+)?\/?$/.test(location.pathname);
+    document.documentElement.classList.toggle("product-detail-root", isProductDetail);
     if (location.pathname !== "/designers") releaseDesignersLandingScrollLock();
     // Dark iOS chrome is opt-in for the hero + designers landing only. Any
     // other route must clear it, otherwise a leftover black canvas shows
@@ -352,6 +356,7 @@ function RouteScrollLockFailsafe() {
     ) {
       clearDarkIosChrome();
     }
+    return () => document.documentElement.classList.remove("product-detail-root");
   }, [location.pathname]);
 
   return null;
@@ -828,6 +833,10 @@ const App = () => {
                 </Routes>
                 </TradeCopilotProvider>
               )}
+
+              {/* Viewport-level product controls mount here, outside every
+                  route, page wrapper, main content region, and footer. */}
+              <div id="product-root-overlays" className="contents" />
 
               {/* Deferred UI: toasts + analytics mount after hero is painted */}
               {showDeferredUi && (

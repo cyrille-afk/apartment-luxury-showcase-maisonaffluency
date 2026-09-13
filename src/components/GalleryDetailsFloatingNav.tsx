@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   ArrowDownAZ,
   ChevronDown,
@@ -65,7 +66,7 @@ export default function GalleryDetailsFloatingNav({
     const updateMode = () => {
       const isStandalone =
         standaloneMql?.matches ||
-        (window.navigator as any).standalone === true ||
+        (window.navigator as Navigator & { standalone?: boolean }).standalone === true ||
         new URLSearchParams(window.location.search).get("source") === "pwa";
       setIsMobileOrPwa(mobileMql.matches || isStandalone);
     };
@@ -170,17 +171,14 @@ export default function GalleryDetailsFloatingNav({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  return (
+  const floatingControl = (
     <div
       className={cn(
-        "fixed right-4 z-[101] print:hidden transition-all duration-300 ease-in-out",
+        "fixed right-4 print:hidden transition-all duration-300 ease-in-out",
+        dockActive ? "z-[10000] bottom-[calc(env(safe-area-inset-bottom,0px)+70px)]" : "z-[101]",
         className
       )}
-      style={{
-        bottom: dockActive
-          ? `calc(${dockHeight}px + 1rem)`
-          : "calc(env(safe-area-inset-bottom, 0px) + 1rem)",
-      }}
+      style={dockActive ? undefined : { bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
     >
       {isExpanded ? (
         <div
@@ -221,5 +219,11 @@ export default function GalleryDetailsFloatingNav({
         </button>
       )}
     </div>
+  );
+
+  if (typeof document === "undefined") return floatingControl;
+  return createPortal(
+    floatingControl,
+    document.getElementById("product-root-overlays") ?? document.body,
   );
 }

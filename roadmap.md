@@ -17,3 +17,4 @@
 - [x] Fix iOS Safari product CTA and floating-action safe-area positioning
 - [x] Isolate the mobile product CTA at body level above every page and footer layer
 - [x] Repair product image carousel looping, fullscreen gallery layering, and top-scroll reset
+- [x] Move product CTA and three-dot control into the app-root overlay layer
