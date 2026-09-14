@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, FileText, Clock, CheckCircle, Send, Trash2, ShoppingCart, ChevronRight, CreditCard, XCircle, FolderOpen } from "lucide-react";
 import { QuoteCardSkeleton } from "@/components/trade/skeletons";
 import QuoteDetail from "@/components/trade/QuoteDetail";
+import { InvoiceStatusDrawer } from "@/components/trade/InvoiceStatusDrawer";
 
 import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
