@@ -36,6 +36,7 @@ type PersistedSandbox = {
 const STORAGE_KEY = "trade-visualiser-sandbox-v2";
 const MIN_OBJECT_SCALE = 0.4;
 const MAX_OBJECT_SCALE = 2.5;
+const CUTOUT_TRANSFORMS = "f_png,q_auto,w_1600,dpr_auto,c_limit,e_make_transparent:10";
 
 type CanvasGesture =
   | { mode: "move"; id: string; offsetX: number; offsetY: number }
@@ -43,14 +44,14 @@ type CanvasGesture =
 
 const scaledDimensionLabel = (object: CanvasObject) => {
   const dimensions = resolveDimensions(object);
-  if (!dimensions) return dimensionBadgeLabel(object);
+  const scale = `${Math.round(object.scale * 100)}% [1:${Math.max(1, Math.round(10 / object.scale))} PERSPECTIVE]`;
+  if (!dimensions) return `${dimensionBadgeLabel(object)} // SCALE ${scale}`;
   const scaled = {
     w: Math.round(dimensions.w * object.scale),
     d: Math.round(dimensions.d * object.scale),
     h: Math.round(dimensions.h * object.scale),
   };
-  const perspective = Math.max(1, Math.round(10 / object.scale));
-  return `${scaled.w} × ${scaled.d} × ${scaled.h} MM // ${Math.round(object.scale * 100)}% [1:${perspective} PERSPECTIVE]`;
+  return `${scaled.w} × ${scaled.d} × ${scaled.h} MM // ${scale}`;
 };
 
 const loadSandbox = (): PersistedSandbox => {
@@ -330,7 +331,7 @@ const TradeVisualiser = () => {
               <div className={cn("relative transition-opacity duration-300", !isSelected && "group-hover:opacity-95")}>
                 <span aria-hidden="true" className="pointer-events-none absolute bottom-3 left-[15%] right-[15%] h-3 rounded-[50%] bg-foreground/15 blur-md" />
                 <img
-                  src={optimizeImageUrl(object.image_url || "")}
+                  src={optimizeImageUrl(object.image_url || "", CUTOUT_TRANSFORMS)}
                   alt={object.product_name}
                   draggable={false}
                   className="relative h-40 w-full object-contain mix-blend-multiply drop-shadow-[0_18px_12px_hsl(var(--foreground)/0.16)] md:h-52"
