@@ -40,16 +40,29 @@ const ShowroomDesignerDirectory = ({
     queryKey: ["showroom-designer-directory"],
     staleTime: 1000 * 60 * 30,
     queryFn: async () => {
+      // Only makers that actually carry showroom pieces.
       const { data, error } = await supabase
         .from("designers")
-        .select("id, name, slug, image_url, specialty")
+        .select("id, name, slug, image_url, specialty, designer_curator_picks!inner(id)")
         .eq("is_published", true)
         .not("slug", "is", null)
-        .range(0, 1499);
+        .range(0, 9999);
       if (error) throw error;
-      return (data || []).sort((a, b) =>
+      const byId = new Map<string, DirectoryDesigner>();
+      (data || []).forEach((d: any) => {
+        if (!byId.has(d.id)) {
+          byId.set(d.id, {
+            id: d.id,
+            name: d.name,
+            slug: d.slug,
+            image_url: d.image_url,
+            specialty: d.specialty,
+          });
+        }
+      });
+      return Array.from(byId.values()).sort((a, b) =>
         sortNameKey(a.name).localeCompare(sortNameKey(b.name)),
-      ) as DirectoryDesigner[];
+      );
     },
   });
 
