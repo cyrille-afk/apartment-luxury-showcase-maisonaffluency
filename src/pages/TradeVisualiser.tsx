@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
-import { dimensionBadgeLabel } from "@/lib/productDimensions";
+import { dimensionBadgeLabel, resolveDimensions } from "@/lib/productDimensions";
 import { toast } from "sonner";
 
 type CatalogueProduct = {
@@ -34,6 +34,24 @@ type PersistedSandbox = {
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v2";
+const MIN_OBJECT_SCALE = 0.4;
+const MAX_OBJECT_SCALE = 2.5;
+
+type CanvasGesture =
+  | { mode: "move"; id: string; offsetX: number; offsetY: number }
+  | { mode: "resize"; id: string; startDistance: number; startScale: number };
+
+const scaledDimensionLabel = (object: CanvasObject) => {
+  const dimensions = resolveDimensions(object);
+  if (!dimensions) return dimensionBadgeLabel(object);
+  const scaled = {
+    w: Math.round(dimensions.w * object.scale),
+    d: Math.round(dimensions.d * object.scale),
+    h: Math.round(dimensions.h * object.scale),
+  };
+  const perspective = Math.max(1, Math.round(10 / object.scale));
+  return `${scaled.w} × ${scaled.d} × ${scaled.h} MM // ${Math.round(object.scale * 100)}% [1:${perspective} PERSPECTIVE]`;
+};
 
 const loadSandbox = (): PersistedSandbox => {
   try {
@@ -62,7 +80,7 @@ const TradeVisualiser = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const fileRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<{ id: string; offsetX: number; offsetY: number } | null>(null);
+  const gestureRef = useRef<CanvasGesture | null>(null);
 
   useEffect(() => {
     const previousBodyOverflow = document.body.style.overflow;
@@ -193,7 +211,8 @@ const TradeVisualiser = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    dragRef.current = {
+    gestureRef.current = {
+      mode: "move",
       id: object.instanceId,
       offsetX: event.clientX - rect.left - (object.x / 100) * rect.width,
       offsetY: event.clientY - rect.top - (object.y / 100) * rect.height,
@@ -203,21 +222,50 @@ const TradeVisualiser = () => {
     event.preventDefault();
   };
 
+  const onResizePointerDown = (event: React.PointerEvent, object: CanvasObject) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const canvasRect = canvas.getBoundingClientRect();
+    const centerX = canvasRect.left + (object.x / 100) * canvasRect.width;
+    const centerY = canvasRect.top + (object.y / 100) * canvasRect.height;
+    gestureRef.current = {
+      mode: "resize",
+      id: object.instanceId,
+      startDistance: Math.max(1, Math.hypot(event.clientX - centerX, event.clientY - centerY)),
+      startScale: object.scale,
+    };
+    setSelectedId(object.instanceId);
+    event.currentTarget.setPointerCapture(event.pointerId);
+    event.stopPropagation();
+    event.preventDefault();
+  };
+
   const onPointerMove = (event: React.PointerEvent) => {
     const canvas = canvasRef.current;
-    const drag = dragRef.current;
-    if (!canvas || !drag) return;
+    const gesture = gestureRef.current;
+    if (!canvas || !gesture) return;
     const rect = canvas.getBoundingClientRect();
-    const x = ((event.clientX - rect.left - drag.offsetX) / rect.width) * 100;
-    const y = ((event.clientY - rect.top - drag.offsetY) / rect.height) * 100;
+    if (gesture.mode === "resize") {
+      setObjects((current) => current.map((object) => {
+        if (object.instanceId !== gesture.id) return object;
+        const centerX = rect.left + (object.x / 100) * rect.width;
+        const centerY = rect.top + (object.y / 100) * rect.height;
+        const distance = Math.hypot(event.clientX - centerX, event.clientY - centerY);
+        const scale = gesture.startScale * (distance / gesture.startDistance);
+        return { ...object, scale: Math.min(MAX_OBJECT_SCALE, Math.max(MIN_OBJECT_SCALE, scale)) };
+      }));
+      return;
+    }
+    const x = ((event.clientX - rect.left - gesture.offsetX) / rect.width) * 100;
+    const y = ((event.clientY - rect.top - gesture.offsetY) / rect.height) * 100;
     setObjects((current) => current.map((object) =>
-      object.instanceId === drag.id
+      object.instanceId === gesture.id
         ? { ...object, x: Math.min(96, Math.max(4, x)), y: Math.min(94, Math.max(6, y)) }
         : object,
     ));
   };
 
-  const stopDragging = useCallback(() => { dragRef.current = null; }, []);
+  const stopDragging = useCallback(() => { gestureRef.current = null; }, []);
 
   const resetSandbox = () => {
     setBackdrop(null);
@@ -279,19 +327,29 @@ const TradeVisualiser = () => {
               )}
               style={{ left: `${object.x}%`, top: `${object.y}%`, zIndex: object.z + 10, transform: `translate(-50%, -50%) scale(${object.scale})` }}
             >
-              <div className={cn("relative transition-opacity duration-300", !isSelected && "group-hover:opacity-90")}>
+              <div className={cn("relative transition-opacity duration-300", !isSelected && "group-hover:opacity-95")}>
+                <span aria-hidden="true" className="pointer-events-none absolute bottom-3 left-[15%] right-[15%] h-3 rounded-[50%] bg-foreground/15 blur-md" />
                 <img
                   src={optimizeImageUrl(object.image_url || "")}
                   alt={object.product_name}
                   draggable={false}
-                  className="h-40 w-full object-contain mix-blend-multiply drop-shadow-[0_14px_14px_hsl(var(--foreground)/0.08)] md:h-52"
+                  className="relative h-40 w-full object-contain mix-blend-multiply drop-shadow-[0_18px_12px_hsl(var(--foreground)/0.16)] md:h-52"
                 />
                 {isSelected && (
                   <div className="pointer-events-none absolute inset-0 border border-foreground/30">
-                    <span className="absolute -left-1 top-1/2 h-px w-2 -translate-y-1/2 bg-foreground/40" />
-                    <span className="absolute -top-1 left-1/2 h-2 w-px -translate-x-1/2 bg-foreground/40" />
-                    <span className="absolute -right-1 top-1/2 h-px w-2 -translate-y-1/2 bg-foreground/40" />
-                    <span className="absolute -bottom-1 left-1/2 h-2 w-px -translate-x-1/2 bg-foreground/40" />
+                    {(["-left-2 -top-2", "-right-2 -top-2", "-bottom-2 -left-2", "-bottom-2 -right-2"] as const).map((position) => (
+                      <span
+                        key={position}
+                        role="slider"
+                        tabIndex={0}
+                        aria-label={`Resize ${object.product_name}`}
+                        aria-valuemin={40}
+                        aria-valuemax={250}
+                        aria-valuenow={Math.round(object.scale * 100)}
+                        onPointerDown={(event) => onResizePointerDown(event, object)}
+                        className={cn("pointer-events-auto absolute h-4 w-4 touch-none cursor-nwse-resize border border-foreground/50 bg-card shadow-sm", position)}
+                      />
+                    ))}
                     <Button
                       type="button"
                       variant="ghost"
@@ -303,8 +361,8 @@ const TradeVisualiser = () => {
                     >
                       <X className="h-3 w-3" />
                     </Button>
-                    <span className="absolute -bottom-7 right-0 max-w-[260px] whitespace-nowrap bg-visualiser-canvas/90 px-1.5 py-1 font-body text-[8px] uppercase tracking-[0.15em] text-foreground/70 backdrop-blur-sm">
-                      {object.product_name} // {dimensionBadgeLabel(object)}
+                    <span aria-live="polite" className="absolute -bottom-7 right-0 max-w-[360px] whitespace-nowrap bg-visualiser-canvas/90 px-1.5 py-1 font-body text-[8px] uppercase tracking-[0.15em] text-foreground/70 backdrop-blur-sm">
+                      {object.product_name} // {scaledDimensionLabel(object)}
                     </span>
                   </div>
                 )}

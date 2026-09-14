@@ -50,3 +50,4 @@
 - [x] Replace the Trade Visualiser uploader with a fixed mood-board sandbox, live object index, backdrop upload, and layer controls
 - [x] Make the Visualiser canvas interactive with fluid dragging, technical selection bounds, depth toggling, deletion, and 15-item compositions
 - [x] Complete Visualiser backdrop upload, active-state relabeling, locked full-bleed layering, and reset restoration
+- [x] Upgrade Visualiser objects with proportional corner scaling, live spatial dimensions, transparent silhouettes, and grounded shadows
