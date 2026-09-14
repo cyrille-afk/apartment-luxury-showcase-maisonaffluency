@@ -51,3 +51,4 @@
 - [x] Make the Visualiser canvas interactive with fluid dragging, technical selection bounds, depth toggling, deletion, and 15-item compositions
 - [x] Complete Visualiser backdrop upload, active-state relabeling, locked full-bleed layering, and reset restoration
 - [x] Upgrade Visualiser objects with proportional corner scaling, live spatial dimensions, transparent silhouettes, and grounded shadows
+- [x] Add Visualiser perspective warping, per-object ambient matching, dual floor shadows, and Retina cutout sourcing

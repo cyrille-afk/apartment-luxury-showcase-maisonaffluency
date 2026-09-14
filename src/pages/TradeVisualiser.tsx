@@ -25,6 +25,13 @@ type CanvasObject = CatalogueProduct & {
   y: number;
   scale: number;
   z: number;
+  tiltX: number;
+  tiltY: number;
+  skewX: number;
+  brightness: number;
+  contrast: number;
+  warmth: number;
+  shadowDirection: number;
 };
 
 type PersistedSandbox = {
@@ -36,11 +43,38 @@ type PersistedSandbox = {
 const STORAGE_KEY = "trade-visualiser-sandbox-v2";
 const MIN_OBJECT_SCALE = 0.4;
 const MAX_OBJECT_SCALE = 2.5;
-const CUTOUT_TRANSFORMS = "f_png,q_auto,w_1600,dpr_auto,c_limit,e_make_transparent:10";
+const CUTOUT_TRANSFORMS = "f_png,q_auto:best,w_3000,dpr_auto,c_limit,e_make_transparent:10";
 
 type CanvasGesture =
   | { mode: "move"; id: string; offsetX: number; offsetY: number }
-  | { mode: "resize"; id: string; startDistance: number; startScale: number };
+  | { mode: "resize"; id: string; startDistance: number; startScale: number }
+  | {
+      mode: "perspective";
+      id: string;
+      cornerX: -1 | 1;
+      cornerY: -1 | 1;
+      startX: number;
+      startY: number;
+      startTiltX: number;
+      startTiltY: number;
+      startSkewX: number;
+    };
+
+const withRenderingDefaults = (object: Partial<CanvasObject> & CatalogueProduct): CanvasObject => ({
+  ...object,
+  instanceId: object.instanceId ?? `${object.id}-${Date.now()}`,
+  x: object.x ?? 50,
+  y: object.y ?? 50,
+  scale: object.scale ?? 1,
+  z: object.z ?? 1,
+  tiltX: object.tiltX ?? 0,
+  tiltY: object.tiltY ?? 0,
+  skewX: object.skewX ?? 0,
+  brightness: object.brightness ?? 100,
+  contrast: object.contrast ?? 100,
+  warmth: object.warmth ?? 0,
+  shadowDirection: object.shadowDirection ?? 10,
+});
 
 const scaledDimensionLabel = (object: CanvasObject) => {
   const dimensions = resolveDimensions(object);
@@ -60,7 +94,9 @@ const loadSandbox = (): PersistedSandbox => {
     return {
       backdrop: parsed.backdrop?.startsWith("blob:") ? parsed.backdropDataUrl ?? null : parsed.backdrop ?? null,
       backdropDataUrl: parsed.backdropDataUrl ?? null,
-      objects: Array.isArray(parsed.objects) ? parsed.objects : [],
+      objects: Array.isArray(parsed.objects)
+        ? parsed.objects.map((object) => withRenderingDefaults(object))
+        : [],
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [] };
@@ -185,6 +221,13 @@ const TradeVisualiser = () => {
       y: 35 + ((count * 8) % 25),
       scale: 1,
       z: Math.max(0, ...objects.map((object) => object.z)) + 1,
+      tiltX: 0,
+      tiltY: 0,
+      skewX: 0,
+      brightness: 100,
+      contrast: 100,
+      warmth: 0,
+      shadowDirection: 10,
     };
     setObjects((current) => [...current, next]);
     setSelectedId(next.instanceId);
@@ -241,11 +284,59 @@ const TradeVisualiser = () => {
     event.preventDefault();
   };
 
+  const onPerspectivePointerDown = (
+    event: React.PointerEvent,
+    object: CanvasObject,
+    cornerX: -1 | 1,
+    cornerY: -1 | 1,
+  ) => {
+    gestureRef.current = {
+      mode: "perspective",
+      id: object.instanceId,
+      cornerX,
+      cornerY,
+      startX: event.clientX,
+      startY: event.clientY,
+      startTiltX: object.tiltX,
+      startTiltY: object.tiltY,
+      startSkewX: object.skewX,
+    };
+    setSelectedId(object.instanceId);
+    event.currentTarget.setPointerCapture(event.pointerId);
+    event.stopPropagation();
+    event.preventDefault();
+  };
+
+  const updateObjectRendering = (
+    instanceId: string,
+    field: "brightness" | "contrast" | "warmth",
+    value: number,
+  ) => {
+    setObjects((current) => current.map((object) =>
+      object.instanceId === instanceId ? { ...object, [field]: value } : object,
+    ));
+  };
+
   const onPointerMove = (event: React.PointerEvent) => {
     const canvas = canvasRef.current;
     const gesture = gestureRef.current;
     if (!canvas || !gesture) return;
     const rect = canvas.getBoundingClientRect();
+    if (gesture.mode === "perspective") {
+      const deltaX = event.clientX - gesture.startX;
+      const deltaY = event.clientY - gesture.startY;
+      setObjects((current) => current.map((object) => {
+        if (object.instanceId !== gesture.id) return object;
+        return {
+          ...object,
+          tiltX: Math.min(24, Math.max(-24, gesture.startTiltX - deltaY * gesture.cornerY * 0.12)),
+          tiltY: Math.min(28, Math.max(-28, gesture.startTiltY + deltaX * gesture.cornerX * 0.12)),
+          skewX: Math.min(22, Math.max(-22, gesture.startSkewX + deltaX * gesture.cornerY * 0.08)),
+          shadowDirection: Math.min(34, Math.max(-34, object.shadowDirection + deltaX * 0.015)),
+        };
+      }));
+      return;
+    }
     if (gesture.mode === "resize") {
       setObjects((current) => current.map((object) => {
         if (object.instanceId !== gesture.id) return object;
@@ -310,6 +401,8 @@ const TradeVisualiser = () => {
 
         {objects.map((object) => {
           const isSelected = selectedId === object.instanceId;
+          const perspectiveTransform = `perspective(900px) rotateX(${object.tiltX}deg) rotateY(${object.tiltY}deg) skewX(${object.skewX}deg)`;
+          const imageFilter = `brightness(${object.brightness}%) contrast(${object.contrast}%) saturate(${Math.max(72, 100 - object.warmth * 0.22)}%) sepia(${object.warmth}%)`;
           return (
             <div
               key={object.instanceId}
@@ -329,13 +422,24 @@ const TradeVisualiser = () => {
               style={{ left: `${object.x}%`, top: `${object.y}%`, zIndex: object.z + 10, transform: `translate(-50%, -50%) scale(${object.scale})` }}
             >
               <div className={cn("relative transition-opacity duration-300", !isSelected && "group-hover:opacity-95")}>
-                <span aria-hidden="true" className="pointer-events-none absolute bottom-3 left-[15%] right-[15%] h-3 rounded-[50%] bg-foreground/15 blur-md" />
-                <img
-                  src={optimizeImageUrl(object.image_url || "", CUTOUT_TRANSFORMS)}
-                  alt={object.product_name}
-                  draggable={false}
-                  className="relative h-40 w-full object-contain mix-blend-multiply drop-shadow-[0_18px_12px_hsl(var(--foreground)/0.16)] md:h-52"
-                />
+                <div className="relative h-40 w-full md:h-52" style={{ transform: perspectiveTransform, transformStyle: "preserve-3d" }}>
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute bottom-[9%] left-[23%] right-[23%] h-px bg-foreground/65 blur-[1px]"
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute bottom-[5%] left-[12%] right-[12%] h-5 origin-center rounded-[50%] bg-gradient-to-r from-transparent via-foreground/20 to-transparent blur-lg"
+                    style={{ transform: `translateX(${object.shadowDirection}px) skewX(${object.shadowDirection * 0.7}deg) scaleX(1.18)` }}
+                  />
+                  <img
+                    src={optimizeImageUrl(object.image_url || "", CUTOUT_TRANSFORMS)}
+                    alt={object.product_name}
+                    draggable={false}
+                    className="relative h-full w-full object-contain mix-blend-multiply"
+                    style={{ filter: imageFilter }}
+                  />
+                </div>
                 {isSelected && (
                   <div className="pointer-events-none absolute inset-0 border border-foreground/30">
                     {(["-left-2 -top-2", "-right-2 -top-2", "-bottom-2 -left-2", "-bottom-2 -right-2"] as const).map((position) => (
@@ -348,7 +452,25 @@ const TradeVisualiser = () => {
                         aria-valuemax={250}
                         aria-valuenow={Math.round(object.scale * 100)}
                         onPointerDown={(event) => onResizePointerDown(event, object)}
-                        className={cn("pointer-events-auto absolute h-4 w-4 touch-none cursor-nwse-resize border border-foreground/50 bg-card shadow-sm", position)}
+                        className={cn("pointer-events-auto absolute h-3 w-3 touch-none cursor-nwse-resize border border-foreground/50 bg-card", position)}
+                      />
+                    ))}
+                    {([
+                      { position: "left-3 top-3", x: -1 as const, y: -1 as const },
+                      { position: "right-3 top-3", x: 1 as const, y: -1 as const },
+                      { position: "bottom-3 left-3", x: -1 as const, y: 1 as const },
+                      { position: "bottom-3 right-3", x: 1 as const, y: 1 as const },
+                    ]).map((handle) => (
+                      <span
+                        key={handle.position}
+                        role="slider"
+                        tabIndex={0}
+                        aria-label={`Warp ${object.product_name} ${handle.x < 0 ? "left" : "right"} ${handle.y < 0 ? "top" : "bottom"} corner`}
+                        aria-valuemin={-28}
+                        aria-valuemax={28}
+                        aria-valuenow={Math.round(object.tiltY)}
+                        onPointerDown={(event) => onPerspectivePointerDown(event, object, handle.x, handle.y)}
+                        className={cn("pointer-events-auto absolute h-2 w-2 touch-none rotate-45 cursor-crosshair border border-foreground/70 bg-visualiser-canvas", handle.position)}
                       />
                     ))}
                     <Button
@@ -358,13 +480,38 @@ const TradeVisualiser = () => {
                       aria-label={`Remove ${object.product_name}`}
                       onPointerDown={(event) => event.stopPropagation()}
                       onClick={(event) => { event.stopPropagation(); removeObject(object.instanceId); }}
-                      className="pointer-events-auto absolute -right-3 -top-3 h-6 w-6 rounded-full border border-border bg-card p-0 shadow-sm hover:bg-muted"
+                      className="pointer-events-auto absolute -right-3 -top-3 h-6 w-6 rounded-full border border-border bg-card p-0 hover:bg-muted"
                     >
                       <X className="h-3 w-3" />
                     </Button>
                     <span aria-live="polite" className="absolute -bottom-7 right-0 max-w-[360px] whitespace-nowrap bg-visualiser-canvas/90 px-1.5 py-1 font-body text-[8px] uppercase tracking-[0.15em] text-foreground/70 backdrop-blur-sm">
                       {object.product_name} // {scaledDimensionLabel(object)}
                     </span>
+                    <div
+                      className="pointer-events-auto absolute left-0 top-full mt-8 w-48 bg-card/95 px-3 py-2.5 backdrop-blur-sm"
+                      onPointerDown={(event) => event.stopPropagation()}
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <p className="mb-2 font-body text-[8px] uppercase tracking-[0.15em] text-foreground/70">Ambient Match</p>
+                      {([
+                        { field: "warmth" as const, label: "Warmth", min: 0, max: 70 },
+                        { field: "brightness" as const, label: "Brightness", min: 65, max: 130 },
+                        { field: "contrast" as const, label: "Contrast", min: 70, max: 145 },
+                      ]).map((control) => (
+                        <label key={control.field} className="mt-1.5 grid grid-cols-[56px_1fr_28px] items-center gap-2 font-body text-[7px] uppercase tracking-[0.12em] text-muted-foreground">
+                          <span>{control.label}</span>
+                          <input
+                            type="range"
+                            min={control.min}
+                            max={control.max}
+                            value={object[control.field]}
+                            onChange={(event) => updateObjectRendering(object.instanceId, control.field, Number(event.target.value))}
+                            className="h-px w-full cursor-ew-resize accent-foreground"
+                          />
+                          <span className="text-right tabular-nums">{object[control.field]}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -408,7 +555,7 @@ const TradeVisualiser = () => {
                   onClick={() => addObject(product)}
                   className="group h-full w-36 shrink-0 flex-col justify-end rounded-none p-0 hover:bg-transparent md:w-44"
                 >
-                  <img src={optimizeImageUrl(product.image_url || "")} alt="" loading="lazy" className="min-h-0 w-full flex-1 object-contain mix-blend-multiply transition-transform duration-500 group-hover:-translate-y-1" />
+                  <img src={optimizeImageUrl(product.image_url || "", CUTOUT_TRANSFORMS)} alt="" loading="lazy" className="min-h-0 w-full flex-1 object-contain mix-blend-multiply transition-transform duration-500 group-hover:-translate-y-1" />
                   <span className="mt-3 line-clamp-2 min-h-8 whitespace-normal text-center font-body text-[9px] uppercase leading-relaxed tracking-[0.15em] text-foreground/70">{product.product_name}</span>
                   <span className="mt-1 max-w-full truncate font-body text-[8px] uppercase tracking-[0.15em] text-muted-foreground">{product.brand_name}</span>
                 </Button>
