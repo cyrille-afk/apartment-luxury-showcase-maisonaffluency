@@ -304,7 +304,7 @@ const TradeQuotes = () => {
   };
 
   // Show detail view
-  if (selectedQuoteId) {
+  if (selectedQuoteId && !isDrawerQuote(selectedQuoteId)) {
     const quote = quotes.find((q) => q.id === selectedQuoteId);
     return (
       <QuoteDetail
