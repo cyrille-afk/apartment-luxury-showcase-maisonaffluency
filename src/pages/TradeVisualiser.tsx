@@ -293,7 +293,7 @@ const TradeVisualiser = () => {
         })}
 
         {sourceOpen && (
-          <div className="absolute bottom-28 left-1/2 z-[80] w-[min(1080px,calc(100%-32px))] -translate-x-1/2 bg-card px-5 py-5 shadow-elegant md:bottom-32 md:px-7">
+          <div className="absolute bottom-44 left-1/2 z-[80] w-[min(1080px,calc(100%-32px))] -translate-x-1/2 bg-card px-5 py-5 shadow-elegant md:bottom-32 md:px-7">
             <div className="mb-5 flex items-center gap-5 border-b border-border pb-4">
               <div className="min-w-0 flex-1">
                 <p className="font-display text-lg text-foreground">Designer Collection Index</p>
@@ -334,7 +334,7 @@ const TradeVisualiser = () => {
         )}
 
         {layersOpen && (
-          <div className="absolute bottom-28 left-1/2 z-[81] w-[min(440px,calc(100%-32px))] -translate-x-1/2 bg-card px-6 py-5 shadow-elegant md:bottom-32">
+          <div className="absolute bottom-44 left-1/2 z-[81] w-[min(440px,calc(100%-32px))] -translate-x-1/2 bg-card px-6 py-5 shadow-elegant md:bottom-32">
             <div className="flex items-center justify-between border-b border-border pb-4">
               <div>
                 <p className="font-display text-base">Layer Order</p>
@@ -352,7 +352,7 @@ const TradeVisualiser = () => {
         )}
 
         {resetOpen && (
-          <div className="absolute bottom-28 left-1/2 z-[82] w-[min(420px,calc(100%-32px))] -translate-x-1/2 bg-card px-7 py-6 shadow-elegant md:bottom-32">
+          <div className="absolute bottom-44 left-1/2 z-[82] w-[min(420px,calc(100%-32px))] -translate-x-1/2 bg-card px-7 py-6 shadow-elegant md:bottom-32">
             <p className="font-display text-lg">Reset this composition?</p>
             <p className="mt-2 font-body text-[10px] leading-relaxed tracking-[0.08em] text-muted-foreground">The backdrop and every placed object will be removed from this sandbox.</p>
             <div className="mt-5 flex justify-end gap-5">
@@ -362,14 +362,14 @@ const TradeVisualiser = () => {
           </div>
         )}
 
-        <div className="absolute bottom-20 left-1/2 z-[90] flex max-w-[calc(100%-24px)] -translate-x-1/2 items-center overflow-x-auto rounded-full border border-border bg-card px-2 py-1.5 shadow-elegant md:bottom-8">
-          <Button variant="ghost" onClick={() => { setSourceOpen((open) => !open); setLayersOpen(false); setResetOpen(false); }} className="h-10 rounded-full px-4 font-body text-[9px] uppercase tracking-[0.15em] text-foreground hover:bg-muted/50"><Plus /> Add Object</Button>
-          <span className="h-5 w-px shrink-0 bg-border" />
-          <Button variant="ghost" onClick={() => fileRef.current?.click()} className="h-10 rounded-full px-4 font-body text-[9px] uppercase tracking-[0.15em] text-foreground hover:bg-muted/50"><ImageUp /> Upload Canvas Backdrop</Button>
-          <span className="h-5 w-px shrink-0 bg-border" />
-          <Button variant="ghost" onClick={() => { setLayersOpen((open) => !open); setSourceOpen(false); setResetOpen(false); }} className="h-10 rounded-full px-4 font-body text-[9px] uppercase tracking-[0.15em] text-foreground hover:bg-muted/50"><Layers3 /> Layer Order</Button>
-          <span className="h-5 w-px shrink-0 bg-border" />
-          <Button variant="ghost" onClick={() => { setResetOpen(true); setSourceOpen(false); setLayersOpen(false); }} className="h-10 rounded-full px-4 font-body text-[9px] uppercase tracking-[0.15em] text-foreground hover:bg-muted/50"><X /> Reset Sandbox</Button>
+        <div className="absolute bottom-20 left-1/2 z-[90] grid w-[calc(100%-24px)] -translate-x-1/2 grid-cols-2 items-center border border-border bg-card p-1.5 shadow-elegant md:bottom-8 md:flex md:w-auto md:max-w-[calc(100%-24px)] md:rounded-full md:px-2">
+          <Button variant="ghost" onClick={() => { setSourceOpen((open) => !open); setLayersOpen(false); setResetOpen(false); }} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><Plus /> Add Object</Button>
+          <span className="hidden h-5 w-px shrink-0 bg-border md:block" />
+          <Button variant="ghost" onClick={() => fileRef.current?.click()} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><ImageUp /> Upload Backdrop</Button>
+          <span className="hidden h-5 w-px shrink-0 bg-border md:block" />
+          <Button variant="ghost" onClick={() => { setLayersOpen((open) => !open); setSourceOpen(false); setResetOpen(false); }} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><Layers3 /> Layer Order</Button>
+          <span className="hidden h-5 w-px shrink-0 bg-border md:block" />
+          <Button variant="ghost" onClick={() => { setResetOpen(true); setSourceOpen(false); setLayersOpen(false); }} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><X /> Reset Sandbox</Button>
         </div>
 
         <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => uploadBackdrop(event.target.files?.[0] ?? null)} />
