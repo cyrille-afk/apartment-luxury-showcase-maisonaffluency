@@ -231,6 +231,14 @@ export function BriefWizard() {
   const [cloudHydrated, setCloudHydrated] = useState(false);
   const [syncRetries, setSyncRetries] = useState(0);
 
+  // DEBUG: allow manual verification of the resumed-brief toast styling.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("toast") === "resumed") {
+      const t = setTimeout(() => showResumedBriefToast(), 300);
+      return () => clearTimeout(t);
+    }
+  }, []);
+
   // Restore draft if any
   useEffect(() => {
     try {
