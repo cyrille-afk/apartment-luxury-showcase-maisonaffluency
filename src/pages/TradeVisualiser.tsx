@@ -361,6 +361,14 @@ const TradeVisualiser = () => {
           />
           <hemisphereLight args={["#ffffff", "#d8d3cb", 0.35]} />
 
+          {/* Local IBL: metals need reflections or they render solid black. */}
+          <Environment resolution={256}>
+            <Lightformer intensity={2.2} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[12, 12, 1]} color="#ffffff" />
+            <Lightformer intensity={1.1} position={[-6, 2, 2]} rotation-y={Math.PI / 2} scale={[14, 6, 1]} color="#f4efe7" />
+            <Lightformer intensity={0.9} position={[6, 2, -2]} rotation-y={-Math.PI / 2} scale={[14, 6, 1]} color="#e8e3da" />
+            <Lightformer intensity={0.6} position={[0, -3, 0]} rotation-x={-Math.PI / 2} scale={[14, 14, 1]} color="#d8d3cb" />
+          </Environment>
+
           <ContactShadows
             position={[0, 0.002, 0]}
             scale={40}
