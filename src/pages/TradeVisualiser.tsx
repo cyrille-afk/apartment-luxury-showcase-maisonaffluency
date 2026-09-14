@@ -390,7 +390,7 @@ const TradeVisualiser = () => {
             <Lightformer intensity={0.6} position={[0, -3, 0]} rotation-x={-Math.PI / 2} scale={[14, 14, 1]} color="#d8d3cb" />
           </Environment>
 
-          <ContactShadows
+          {!backdropSrc && <ContactShadows
             position={[0, 0.002, 0]}
             scale={40}
             opacity={backdropSrc ? 0.5 : 0.32}
@@ -398,7 +398,7 @@ const TradeVisualiser = () => {
             far={12}
             resolution={1024}
             depthWrite={false}
-          />
+          />}
           {/* Invisible shadow-catcher floor: lets the backdrop's own flooring read through the shadows. */}
           <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
             <planeGeometry args={[80, 80]} />
