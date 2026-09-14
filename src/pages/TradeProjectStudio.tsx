@@ -352,7 +352,7 @@ export default function TradeProjectStudio() {
                 </span>
                 <span />
                 <span className="text-right font-body text-[11px] tracking-[0.05em] text-foreground">
-                  {isClientMode ? money(totals.msrp) || "—" : money(totals.trade) || "—"}
+                {isClientMode ? money(totals.clientEstimateCents) || "—" : money(totals.trade) || "—"}
                 </span>
               </div>
             )}
