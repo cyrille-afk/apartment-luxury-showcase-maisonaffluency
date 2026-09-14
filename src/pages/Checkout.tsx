@@ -177,12 +177,25 @@ export const deriveCheckoutTotals = (input: {
   const goodsCents = Math.max(0, input.subtotalCents - input.discountCents);
   const deliveryCents = input.shippingCents > 0 ? input.shippingCents : input.estimatedShippingCents;
   const taxCents = Math.max(0, input.taxCents);
+  // FX conversion can leave fractional cents (e.g. 10,187.55). Every summary
+  // row displays Math.round(cents/100) dollars, so the displayed ORDER TOTAL
+  // must be the sum of those displayed rows — otherwise the page shows
+  // 10,188 + 1,471 + 917 ≠ 12,575. Round each component to whole dollars
+  // first, then add: displayTotal is ALWAYS row-consistent.
+  const roundDollar = (c: number) => Math.round(c / 100) * 100;
   return {
     goodsCents,
     deliveryCents,
     taxCents,
     /** Displayed everywhere: subtotal + delivery + tax. Nothing else. */
     totalCents: goodsCents + deliveryCents + taxCents,
+    /**
+     * Row-consistent display total: roundDollar(goods) + roundDollar(delivery)
+     * + roundDollar(tax), so the total always equals the sum of the rows the
+     * buyer sees. Use this for ORDER TOTAL and every action-button amount.
+     */
+    displayTotalCents:
+      roundDollar(goodsCents) + roundDollar(deliveryCents) + roundDollar(taxCents),
     /** Charged now: excludes freight that no advisor has confirmed yet. */
     chargeTotalCents: goodsCents + input.shippingCents + taxCents,
   };
