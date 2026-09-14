@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, FileText, Clock, CheckCircle, Send, Trash2, ShoppingCart, ChevronRight, CreditCard, Users, XCircle, FolderOpen } from "lucide-react";
+import { Plus, FileText, Clock, CheckCircle, Send, Trash2, ShoppingCart, ChevronRight, CreditCard, XCircle, FolderOpen } from "lucide-react";
 import { QuoteCardSkeleton } from "@/components/trade/skeletons";
 import QuoteDetail from "@/components/trade/QuoteDetail";
 
@@ -40,7 +40,7 @@ const statusConfig: Record<string, { label: string; icon: typeof Clock; classNam
 };
 
 const TradeQuotes = () => {
-  const { user, isSuperAdmin } = useAuth();
+  const { user } = useAuth();
   const { currentStudio, canEdit } = useStudio();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -59,7 +59,7 @@ const TradeQuotes = () => {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
-  const [showAll, setShowAll] = useState(false);
+  
 
   const fetchQuotes = async () => {
     if (!user) return;
@@ -69,17 +69,14 @@ const TradeQuotes = () => {
       .select("*")
       .order("created_at", { ascending: false });
     
-    // Super admins can toggle between studio quotes and all quotes.
-    // Otherwise scope to current studio so all teammates see each other's work.
+    // Scope to current studio so all teammates see each other's work.
     // Also include legacy quotes (studio_id NULL) owned by the user so they
     // don't disappear once the user joins/creates a studio.
     // RLS enforces actual visibility based on role + per-project overrides.
-    if (!showAll || !isSuperAdmin) {
-      if (currentStudio) {
-        query = query.or(`studio_id.eq.${currentStudio.id},and(studio_id.is.null,user_id.eq.${user.id})`);
-      } else {
-        query = query.eq("user_id", user.id);
-      }
+    if (currentStudio) {
+      query = query.or(`studio_id.eq.${currentStudio.id},and(studio_id.is.null,user_id.eq.${user.id})`);
+    } else {
+      query = query.eq("user_id", user.id);
     }
 
     if (projectFilter) {
@@ -89,9 +86,7 @@ const TradeQuotes = () => {
     const { data: quotesData } = await query;
 
     const quoteIds = (quotesData || []).map((q: any) => q.id);
-    const userIds = showAll && isSuperAdmin
-      ? [...new Set((quotesData || []).map((q: any) => q.user_id))]
-      : [];
+    const userIds: string[] = [];
     const projectIds = [...new Set(((quotesData || []) as any[]).map((q) => q.project_id).filter(Boolean))] as string[];
 
     // Parallelize secondary fetches
@@ -131,7 +126,7 @@ const TradeQuotes = () => {
 
   useEffect(() => {
     fetchQuotes();
-  }, [user, showAll, projectFilter, currentStudio?.id]);
+  }, [user, projectFilter, currentStudio?.id]);
 
   useEffect(() => {
     if (!projectFilter) { setProjectFilterName(null); return; }
