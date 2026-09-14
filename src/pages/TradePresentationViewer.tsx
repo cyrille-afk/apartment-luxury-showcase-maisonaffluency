@@ -174,7 +174,7 @@ const TradePresentationViewer = () => {
         if (linked_product_ids && Array.isArray(linked_product_ids)) {
           linked_product_ids = await Promise.all(
             linked_product_ids.map(async (p: any) => {
-              if (!p.image_url) return p;
+              if (!p.image_url) return { ...p, ...convertProductPrice(p) };
               try {
                 const res = await fetch(p.image_url);
                 if (!res.ok) return p;
@@ -185,9 +185,9 @@ const TradePresentationViewer = () => {
                   reader.onerror = reject;
                   reader.readAsDataURL(blob);
                 });
-                return { ...p, image_url: dataUrl };
+                return { ...p, image_url: dataUrl, ...convertProductPrice(p) };
               } catch {
-                return p;
+                return { ...p, ...convertProductPrice(p) };
               }
             }),
           );
@@ -196,7 +196,7 @@ const TradePresentationViewer = () => {
         return { ...slide, image_url, linked_product_ids };
       }),
     );
-  }, [slides]);
+  }, [slides, convertProductPrice]);
 
   const handleExportPdf = useCallback(async () => {
     if (!presentation || slides.length === 0) return;
