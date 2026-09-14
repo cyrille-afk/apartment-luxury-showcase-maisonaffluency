@@ -102,7 +102,7 @@ export function StudioBridgeSidebar({
                       {parsed.object ? (
                         <>
                           <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">
-                            Object{" "}
+                            Object:{" "}
                           </span>
                           <span className="text-foreground">{parsed.object}</span>
                         </>
@@ -112,7 +112,7 @@ export function StudioBridgeSidebar({
                     </p>
                     <p className="font-body text-[11px] text-foreground leading-relaxed mt-3">
                       <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">
-                        Alert{" "}
+                        Alert:{" "}
                       </span>
                       {parsed.alert || parsed.fallbackBody}
                     </p>
