@@ -45,13 +45,13 @@ function clientReason(rec: Recommendation, sourceName: string) {
   return `Suggested ${category} for the ${sourceName}, balancing its silhouette through complementary scale, material tone, and spatial rhythm.`;
 }
 
-function recommendationContext(rec: Recommendation) {
+function recommendationContext(rec: Recommendation, sourceName: string) {
   const descriptor = `${rec.category} ${rec.title} ${rec.subtitle}`.toLowerCase();
 
   if (/mirror|wall|tapestry|panel|screen|artwork/.test(descriptor)) {
     return {
       label: "Material Harmony // Complementary Material Accent",
-      explanation: "Sourced to echo the organic textures and material grain present in the active composition through an architectural accent.",
+      explanation: `Sourced to echo the organic textures and stone or wood grain finishes present in the ${sourceName} composition.`,
     };
   }
   if (/rug|carpet|textile|fabric|upholster|cushion|throw/.test(descriptor)) {
@@ -424,7 +424,7 @@ export function ProjectCuratorialGuide({
           ) : recommendations.length ? (
             <div ref={streamRef} className="flex h-full snap-x gap-5 overflow-x-auto pb-3 [scrollbar-width:thin]">
               {recommendations.map((rec, index) => {
-                const context = recommendationContext(rec);
+                const context = recommendationContext(rec, activeItem?.name || "active piece");
                 const briefReason = isClientMode ? clientReason(rec, activeItem?.name || "composition") : rec.reason;
                 const rationale = `${briefReason} ${context.explanation}`;
                 const added = addedIds.has(rec.product_id);
