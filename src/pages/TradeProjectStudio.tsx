@@ -57,6 +57,8 @@ export default function TradeProjectStudio() {
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
   const isClientMode = !showTradePrice;
   const [specItemId, setSpecItemId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
   const [curatorialItemId, setCuratorialItemId] = useState<string | null>(null);
   const [isRecommendationHovered, setIsRecommendationHovered] = useState(false);
   const specItem = items.find((i) => i.product_id === specItemId) || null;
