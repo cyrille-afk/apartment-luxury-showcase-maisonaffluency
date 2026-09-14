@@ -6,6 +6,7 @@ import { useProject } from "@/hooks/useProjects";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Switch } from "@/components/ui/switch";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
+import { ProjectSpecDrawer } from "@/components/trade/ProjectSpecDrawer";
 
 type StudioItem = {
   id: string;
@@ -53,6 +54,8 @@ export default function TradeProjectStudio() {
   const [loadingItems, setLoadingItems] = useState(true);
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
   const isClientMode = !showTradePrice;
+  const [specItemId, setSpecItemId] = useState<string | null>(null);
+  const specItem = items.find((i) => i.product_id === specItemId) || null;
 
   useEffect(() => {
     if (!id) return;
