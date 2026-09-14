@@ -120,11 +120,13 @@ function useFittedModel(
         mesh.receiveShadow = true;
         const nodeName = mesh.name.toLowerCase();
         const isBondStreet = isBondStreetStool(productId);
-        const role = /upholstery|fabric|cushion|seat|cover|textile/.test(nodeName)
-          ? "upholstery"
-          : /base|frame|leg|metal|bronze|steel/.test(nodeName)
-            ? "base"
-            : null;
+        const role = isBondStreet
+          ? /upholstery|fabric|cushion|seat|cover|textile/.test(nodeName)
+            ? "upholstery"
+            : /base|frame|leg|metal|bronze|steel/.test(nodeName)
+              ? "base"
+              : null
+          : null;
         const finish = role === "upholstery" ? upholsteryMaterial : role === "base" ? baseMaterial : material;
         const maps = role === "upholstery" ? upholsteryMaps : role === "base" ? baseMaps : generalMaps;
         const neutralFabric = isBondStreet && role === "upholstery" && !upholsteryMaterial;
