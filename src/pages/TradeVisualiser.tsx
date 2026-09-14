@@ -61,10 +61,10 @@ const readSandbox = (): PersistedSandbox => {
   }
 };
 
-const SceneLoader = () => (
-  <Html center>
-    <span className={cn(microLabel, "text-muted-foreground")}>Loading asset…</span>
-  </Html>
+const CanvasLoader = () => (
+  <div className="absolute inset-0 flex items-center justify-center">
+    <span className={cn(microLabel, "text-muted-foreground")}>Preparing 3D workspace…</span>
+  </div>
 );
 
 const TradeVisualiser = () => {
