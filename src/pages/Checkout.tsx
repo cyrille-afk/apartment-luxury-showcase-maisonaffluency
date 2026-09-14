@@ -633,7 +633,7 @@ function MobileCheckoutSummary({
 }) {
   const [open, setOpen] = useState(false);
   // Single source of truth — never re-derive a total in a UI block.
-  const displayedTotalCents = summary.totalCents;
+  const displayedTotalCents = summary.displayTotalCents;
 
   return (
     <section className="fixed left-0 top-[var(--mobile-nav-height)] z-40 w-full border-b border-border bg-background md:top-[var(--header-h)] lg:hidden">
@@ -855,7 +855,7 @@ function PaymentForm({
     return () => clearTimeout(t);
   }, [paymentReady]);
 
-  const { totalCents: total, currency } = summary;
+  const { displayTotalCents: total, currency } = summary;
   const paynow = method === "paynow";
 
   const confirm = async () => {
@@ -1194,7 +1194,7 @@ function WireForm({
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
-  const { totalCents: total, currency } = summary;
+  const { displayTotalCents: total, currency } = summary;
 
   /* Region drives the settlement channel: the signed-in trade profile wins,
      otherwise we fall back to the chosen shipping destination.              */
