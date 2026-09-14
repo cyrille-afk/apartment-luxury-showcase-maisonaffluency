@@ -409,8 +409,22 @@ export default function TradeProjectStudio() {
                           {item.quantity > 1 ? ` · ×${item.quantity}` : ""}
                         </span>
                       </span>
-                      <span className="whitespace-nowrap pt-1 text-right font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
-                        Specified
+                      <span className="whitespace-nowrap pt-1 text-right">
+                        <span className="block font-body text-[11px] tracking-[0.05em] text-foreground">
+                          {isClientMode
+                            ? money(msrp) || "Price upon Request"
+                            : msrp
+                              ? money(trade)
+                              : "Price upon Request"}
+                        </span>
+                        {!isClientMode && msrp > 0 && (
+                          <span className="mt-0.5 block font-body text-[10px] tracking-[0.05em] text-muted-foreground/60 line-through">
+                            {money(msrp)}
+                          </span>
+                        )}
+                        <span className="mt-1.5 block font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
+                          Specified
+                        </span>
                       </span>
                     </div>
 
