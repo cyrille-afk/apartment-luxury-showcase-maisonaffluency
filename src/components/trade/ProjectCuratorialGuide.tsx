@@ -432,7 +432,8 @@ export function ProjectCuratorialGuide({
                   <article
                     ref={index === 0 ? firstRecommendationRef : undefined}
                     key={rec.product_id}
-                    className="grid h-[200px] w-[290px] shrink-0 snap-start grid-cols-[112px_1fr] grid-rows-1 gap-4 md:h-[250px] md:w-[360px] md:grid-cols-[148px_1fr]"
+                    title={rationale}
+                    className="group relative flex h-full w-[150px] shrink-0 snap-start flex-col md:w-[190px]"
                     onMouseEnter={() => onRecommendationHover(true)}
                     onMouseLeave={() => onRecommendationHover(false)}
                     onFocus={() => onRecommendationHover(true)}
@@ -445,42 +446,33 @@ export function ProjectCuratorialGuide({
                       variant="ghost"
                       onClick={() => void openRecommendation(rec)}
                       disabled={openingId === rec.product_id}
-                      className="block h-full w-full rounded-none bg-muted p-0 hover:bg-muted"
-                      aria-label={`View ${rec.title}`}
+                      className="relative block h-[130px] w-full rounded-none bg-transparent p-0 hover:bg-transparent md:h-[170px]"
+                      aria-label={`${Math.round(rec.score)}% match — view curation intent for ${rec.title}`}
                     >
-                      {rec.image_url ? <img src={rec.image_url} alt={`${rec.title} by ${rec.brand}`} loading="lazy" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Image on request</span>}
+                      {rec.image_url ? (
+                        <img src={rec.image_url} alt={`${rec.title} by ${rec.brand}`} loading="lazy" className="h-full w-full object-contain" />
+                      ) : (
+                        <span className="grid h-full place-items-center font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Image on request</span>
+                      )}
+                      <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-background/80 px-2 text-center font-body text-[9px] uppercase leading-relaxed tracking-[0.15em] text-foreground opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100">
+                        {Math.round(rec.score)}% Match // View Curation Intent
+                      </span>
                     </Button>
-                    <div className="flex min-w-0 flex-col justify-between h-full py-1">
-                      <div className="flex-1 min-h-0 overflow-hidden">
-                        <p className="truncate font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{rec.brand}</p>
-                        <p className="mt-1 line-clamp-1 font-body text-[8px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground/80">
-                          {context.label}
-                        </p>
-                        <h3 className="mt-1 line-clamp-1 font-display text-lg leading-tight text-foreground">{rec.title}</h3>
-                        <p className="mt-2 line-clamp-2 md:line-clamp-3 font-body text-[10px] leading-relaxed tracking-[0.04em] text-muted-foreground">{rationale}</p>
-                      </div>
-                      <div className="shrink-0 flex flex-col gap-2 pb-1">
-                        {!isClientMode && (
-                          <p className="line-clamp-1 font-body text-[10px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground">
-                            {rec.score >= 90 ? "Trade signal // Strong specification efficiency" : "Programme signal // Confirm lead-time alignment"}
-                          </p>
-                        )}
-                        <p className="font-body text-[10px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground">
-                          Match Rating: {Math.round(rec.score)}%
-                        </p>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={() => void addToComposition(rec)}
-                          disabled={addingId === rec.product_id || added}
-                          className="h-auto items-start justify-start rounded-none p-0 font-body text-[10px] uppercase leading-relaxed tracking-[0.15em] text-foreground hover:bg-transparent"
-                        >
-                          {addingId === rec.product_id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
-                          {added ? "Added to composition" : "[ + Add to Composition ]"}
-                        </Button>
-                      </div>
-                    </div>
+                    <p className="mt-2 truncate font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
+                      {rec.title}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => void addToComposition(rec)}
+                      disabled={addingId === rec.product_id || added}
+                      className="mt-1 h-auto justify-start rounded-none p-0 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/70 opacity-0 transition-opacity hover:bg-transparent hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100 disabled:opacity-100"
+                    >
+                      {addingId === rec.product_id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+                      {added ? "Added" : "Add"}
+                    </Button>
                   </article>
+
                 );
               })}
             </div>
