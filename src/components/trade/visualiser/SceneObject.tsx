@@ -17,6 +17,7 @@ export type PlacedObject = {
   rotation: [number, number, number];
   scale: number;
   material?: VisualiserMaterial | null;
+  topMaterial?: VisualiserMaterial | null;
   baseMaterial?: VisualiserMaterial | null;
   upholsteryMaterial?: VisualiserMaterial | null;
 };
