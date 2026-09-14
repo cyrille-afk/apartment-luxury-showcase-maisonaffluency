@@ -231,25 +231,6 @@ export function BriefWizard() {
   const [cloudHydrated, setCloudHydrated] = useState(false);
   const [syncRetries, setSyncRetries] = useState(0);
 
-  // DEBUG: allow manual verification of the resumed-brief toast styling.
-  useEffect(() => {
-    const isResumed = new URLSearchParams(window.location.search).get("toast") === "resumed";
-    console.log("[BriefWizard debug] toast param =", isResumed, window.location.search);
-    if (isResumed) {
-      const t = setTimeout(() => {
-        console.log("[BriefWizard debug] firing resumed toast. toast object:", typeof toast, Object.keys(toast || {}));
-        try {
-          toast.success("Plain test toast");
-          showResumedBriefToast();
-          console.log("[BriefWizard debug] toast calls done");
-        } catch (e) {
-          console.error("[BriefWizard debug] toast error", e);
-        }
-      }, 300);
-      return () => clearTimeout(t);
-    }
-  }, []);
-
   // Restore draft if any
   useEffect(() => {
     try {
