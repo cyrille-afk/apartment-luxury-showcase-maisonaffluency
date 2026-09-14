@@ -84,7 +84,9 @@ export function ProjectProposalPreview({
         <main className="proposal-print-sheet mx-auto my-20 min-h-[1123px] w-[min(794px,calc(100vw-32px))] bg-card px-12 py-14 text-card-foreground shadow-elegant md:px-16 md:py-20">
           <header className="flex min-h-[330px] flex-col justify-between border-b border-card-foreground pb-12">
             <div className="flex items-center justify-between gap-6">
-              <p className="font-display text-base text-card-foreground">Maison Affluency</p>
+              <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
+                [ Design Studio Specification Proposal ]
+              </p>
               <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                 Private client document
               </p>
@@ -119,8 +121,8 @@ export function ProjectProposalPreview({
                 const retail = (item.rrp_cents || 0) * item.quantity;
                 const trade = Math.round(retail * (1 - tradeDiscount));
                 return (
-                  <article key={item.product_id} className="grid grid-cols-[36px_72px_minmax(0,1fr)_auto] items-center gap-4 border-b border-border py-6 break-inside-avoid">
-                    <span className="font-body text-[9px] tracking-[0.15em] text-muted-foreground">
+                  <article key={item.product_id} className="proposal-line-item grid grid-cols-[48px_72px_minmax(0,1fr)_auto] items-center gap-x-5 border-b border-border py-6 break-inside-avoid">
+                    <span className="pr-3 text-right font-body text-[9px] tracking-[0.15em] text-muted-foreground">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <div className="h-16 w-[72px] bg-background">

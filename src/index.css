@@ -946,9 +946,10 @@ input, select, textarea {
   .proposal-preview-shell[data-state="open"] {
     position: absolute !important;
     inset: 0 !important;
+    width: 210mm !important;
     height: auto !important;
     overflow: visible !important;
-    background: transparent !important;
+    background: white !important;
     backdrop-filter: none !important;
   }
 
@@ -957,11 +958,25 @@ input, select, textarea {
   }
 
   .proposal-print-sheet {
+    display: block !important;
     width: 210mm !important;
     min-height: 297mm !important;
     margin: 0 !important;
+    background: white !important;
     box-shadow: none !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
+  }
+
+  .proposal-print-sheet header,
+  .proposal-print-sheet footer,
+  .proposal-line-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .proposal-line-item img {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 }
