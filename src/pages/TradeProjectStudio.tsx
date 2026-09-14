@@ -52,7 +52,7 @@ export default function TradeProjectStudio() {
   const [items, setItems] = useState<StudioItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
-  const clientView = !showTradePrice;
+  const isClientMode = !showTradePrice;
 
   useEffect(() => {
     if (!id) return;
@@ -242,27 +242,29 @@ export default function TradeProjectStudio() {
               {project.location || "Location TBC"} · {project.status}
             </p>
 
-            <div className="mt-6">
-              <div className="flex items-baseline justify-between font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                <span>Budget allocated</span>
-                <span className="text-foreground">
-                  {money(totals.msrp) || "—"} {budgetCents ? `/ ${money(budgetCents)}` : ""}
-                </span>
+            {!isClientMode && (
+              <div className="mt-6">
+                <div className="flex items-baseline justify-between font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                  <span>Budget allocated</span>
+                  <span className="text-foreground">
+                    {money(totals.msrp) || "—"} {budgetCents ? `/ ${money(budgetCents)}` : ""}
+                  </span>
+                </div>
+                <div className="mt-2 h-px w-full bg-border">
+                  <div className="h-px bg-foreground" style={{ width: `${budgetPct}%` }} />
+                </div>
+                <p className="mt-2 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/72">
+                  {budgetPct}% committed
+                </p>
               </div>
-              <div className="mt-2 h-px w-full bg-border">
-                <div className="h-px bg-foreground" style={{ width: `${budgetPct}%` }} />
-              </div>
-              <p className="mt-2 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/72">
-                {budgetPct}% committed
-              </p>
-            </div>
+            )}
 
-            <div className="mt-6 flex items-center justify-between">
+            <div className={isClientMode ? "mt-8 flex items-center justify-between" : "mt-6 flex items-center justify-between"}>
               <span className="font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
                 Client view
               </span>
               <Switch
-                checked={clientView}
+                checked={isClientMode}
                 onCheckedChange={(checked) => setShowTradePrice(!checked)}
                 aria-label="Client view"
               />
@@ -271,11 +273,11 @@ export default function TradeProjectStudio() {
 
           {/* Ledger */}
           <div className="mt-6">
-            <div className="grid grid-cols-[52px_1fr_72px_92px] gap-3 border-b border-border pb-2 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+            <div className="grid grid-cols-[44px_minmax(0,1fr)_88px_104px] gap-2 border-b border-border pb-2 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
               <span>Spec</span>
               <span>Item</span>
-              <span>Lead</span>
-              <span className="text-right">{clientView ? "MSRP" : "Trade"}</span>
+              <span className="pr-3">Lead</span>
+              <span className="text-right">{isClientMode ? "MSRP" : "Trade"}</span>
             </div>
 
             {loadingItems ? (
@@ -291,9 +293,9 @@ export default function TradeProjectStudio() {
                 return (
                   <div
                     key={item.product_id}
-                    className="grid grid-cols-[52px_1fr_72px_92px] items-start gap-3 border-b border-border py-4"
+                    className="grid grid-cols-[44px_minmax(0,1fr)_88px_104px] items-start gap-2 border-b border-border py-4"
                   >
-                    <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span className="pr-3 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                       {String(idx + 1).padStart(2, "0")}
                       <span className="block text-muted-foreground/72">{item.sku || "—"}</span>
                     </span>
@@ -313,7 +315,7 @@ export default function TradeProjectStudio() {
                       {leadLabel(item)}
                     </span>
                     <span className="text-right font-body text-[11px] tracking-[0.05em] text-foreground">
-                      {clientView ? (
+                      {isClientMode ? (
                         money(msrp) || "Price upon Request"
                       ) : msrp ? (
                         <>
@@ -333,14 +335,14 @@ export default function TradeProjectStudio() {
 
             {/* Totals */}
             {items.length > 0 && (
-              <div className="grid grid-cols-[52px_1fr_72px_92px] gap-3 border-b border-foreground py-4">
+              <div className="grid grid-cols-[44px_minmax(0,1fr)_88px_104px] gap-2 border-b border-foreground py-4">
                 <span />
                 <span className="font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
-                  {clientView ? "Total (MSRP)" : "Total (Trade)"}
+                  {isClientMode ? "Total Estimate" : "Total (Trade)"}
                 </span>
                 <span />
                 <span className="text-right font-body text-[11px] tracking-[0.05em] text-foreground">
-                  {clientView ? money(totals.msrp) || "—" : money(totals.trade) || "—"}
+                  {isClientMode ? money(totals.msrp) || "—" : money(totals.trade) || "—"}
                 </span>
               </div>
             )}
