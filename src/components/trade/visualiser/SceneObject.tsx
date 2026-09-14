@@ -3,6 +3,7 @@ import { useGLTF, useTexture, TransformControls } from "@react-three/drei";
 import { useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
+import { BOND_STREET_BASE_FINISH, isBondStreetStool } from "@/lib/visualiserProductFinishes";
 
 export type PlacedObject = {
   instanceId: string;
@@ -16,6 +17,8 @@ export type PlacedObject = {
   rotation: [number, number, number];
   scale: number;
   material?: VisualiserMaterial | null;
+  baseMaterial?: VisualiserMaterial | null;
+  upholsteryMaterial?: VisualiserMaterial | null;
 };
 
 type Props = {
@@ -26,63 +29,111 @@ type Props = {
   onDragStateChange: (dragging: boolean) => void;
 };
 
+type LoadedMaps = {
+  diffuse: THREE.Texture | null;
+  normal: THREE.Texture | null;
+  roughness: THREE.Texture | null;
+};
+
+const EMPTY_MAPS: LoadedMaps = { diffuse: null, normal: null, roughness: null };
+
+function useMaterialMaps(material: VisualiserMaterial | null, maxAnisotropy: number) {
+  const [maps, setMaps] = useState<LoadedMaps>(EMPTY_MAPS);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loader = new THREE.TextureLoader();
+    const load = (url?: string | null) => url ? loader.loadAsync(url) : Promise.resolve(null);
+    void Promise.all([
+      load(material?.diffuse_url ?? material?.image_url),
+      load(material?.normal_url),
+      load(material?.roughness_url),
+    ]).then(([diffuse, normal, roughness]) => {
+      if (cancelled) {
+        diffuse?.dispose();
+        normal?.dispose();
+        roughness?.dispose();
+        return;
+      }
+      const repeat = material?.repeat ?? 6;
+      for (const texture of [diffuse, normal, roughness]) {
+        if (!texture) continue;
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(repeat, repeat);
+        texture.anisotropy = maxAnisotropy;
+        texture.needsUpdate = true;
+      }
+      if (diffuse) diffuse.colorSpace = THREE.SRGBColorSpace;
+      if (normal) normal.colorSpace = THREE.NoColorSpace;
+      if (roughness) roughness.colorSpace = THREE.NoColorSpace;
+      setMaps({ diffuse, normal, roughness });
+    }).catch(() => setMaps(EMPTY_MAPS));
+    return () => {
+      cancelled = true;
+      setMaps((current) => {
+        current.diffuse?.dispose();
+        current.normal?.dispose();
+        current.roughness?.dispose();
+        return EMPTY_MAPS;
+      });
+    };
+  }, [material, maxAnisotropy]);
+
+  return maps;
+}
+
+function clonePbrMaterial(source: THREE.Material, finish: VisualiserMaterial | null, maps: LoadedMaps, neutralFabric = false) {
+  const original = source as THREE.MeshStandardMaterial;
+  const material = original.clone();
+  material.map = neutralFabric ? null : maps.diffuse;
+  material.normalMap = neutralFabric ? null : maps.normal;
+  material.roughnessMap = neutralFabric ? null : maps.roughness;
+  material.metalnessMap = null;
+  material.color.set(neutralFabric ? "#d8d4cc" : finish?.color ?? "#ffffff");
+  material.roughness = neutralFabric ? 0.96 : finish?.roughness ?? 0.75;
+  material.metalness = neutralFabric ? 0 : finish?.metalness ?? 0;
+  material.normalScale.set(0.22, 0.22);
+  material.needsUpdate = true;
+  return material;
+}
+
 /** Normalises any GLB to roughly 1.4m tall and seats it on the floor plane. */
-function useFittedModel(url: string, material: VisualiserMaterial | null) {
+function useFittedModel(
+  productId: string,
+  url: string,
+  material: VisualiserMaterial | null,
+  baseMaterial: VisualiserMaterial | null,
+  upholsteryMaterial: VisualiserMaterial | null,
+) {
   const { scene } = useGLTF(url);
-  const texture = useTexture(material?.image_url || "/placeholder.svg");
+  const { gl } = useThree();
+  const maxAnisotropy = gl.capabilities.getMaxAnisotropy();
+  const generalMaps = useMaterialMaps(material, maxAnisotropy);
+  const baseMaps = useMaterialMaps(baseMaterial, maxAnisotropy);
+  const upholsteryMaps = useMaterialMaps(upholsteryMaterial, maxAnisotropy);
   return useMemo(() => {
     const clone = scene.clone(true);
-    const category = `${material?.category ?? ""} ${material?.material_type ?? ""}`.toLowerCase();
-    const isMetal = /metal|brass|bronze|steel|aluminium|aluminum|chrome/.test(category);
-    const isFabric = /fabric|textile|upholstery|leather|wool|linen|velvet/.test(category);
-    const isGlass = /glass|crystal/.test(category);
-    const colorMap = material?.image_url ? texture.clone() : null;
-    const roughnessMap = material?.image_url && !isGlass ? texture.clone() : null;
-    const metalnessMap = material?.image_url && isMetal ? texture.clone() : null;
-    const neutralNormalMap = material?.image_url
-      ? new THREE.DataTexture(new Uint8Array([128, 128, 255, 255]), 1, 1, THREE.RGBAFormat)
-      : null;
-    if (colorMap) {
-      colorMap.colorSpace = THREE.SRGBColorSpace;
-      colorMap.wrapS = colorMap.wrapT = THREE.RepeatWrapping;
-      colorMap.repeat.set(isFabric ? 5 : 3, isFabric ? 5 : 3);
-      colorMap.needsUpdate = true;
-    }
-    if (roughnessMap) {
-      roughnessMap.colorSpace = THREE.NoColorSpace;
-      roughnessMap.wrapS = roughnessMap.wrapT = THREE.RepeatWrapping;
-      roughnessMap.repeat.copy(colorMap?.repeat ?? new THREE.Vector2(3, 3));
-      roughnessMap.needsUpdate = true;
-    }
-    if (metalnessMap) {
-      metalnessMap.colorSpace = THREE.NoColorSpace;
-      metalnessMap.wrapS = metalnessMap.wrapT = THREE.RepeatWrapping;
-      metalnessMap.repeat.copy(colorMap?.repeat ?? new THREE.Vector2(3, 3));
-      metalnessMap.needsUpdate = true;
-    }
-    if (neutralNormalMap) neutralNormalMap.needsUpdate = true;
     clone.traverse((child) => {
       const mesh = child as THREE.Mesh;
       if (mesh.isMesh) {
         mesh.castShadow = true;
         mesh.receiveShadow = true;
-        if (material) {
-          const source = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-          const next = source.map((entry) => {
-            const pbr = (entry as THREE.MeshStandardMaterial).clone();
-            pbr.map = colorMap;
-            pbr.roughnessMap = roughnessMap;
-            pbr.metalnessMap = metalnessMap;
-            pbr.normalMap = neutralNormalMap;
-            pbr.color.set(THREE.Color.NAMES.white);
-            pbr.roughness = isMetal ? 0.28 : isGlass ? 0.12 : isFabric ? 0.92 : 0.68;
-            pbr.metalness = isMetal ? 0.78 : 0;
-            pbr.normalScale = new THREE.Vector2(isFabric ? 0.18 : 0.08, isFabric ? 0.18 : 0.08);
-            pbr.needsUpdate = true;
-            return pbr;
-          });
-          mesh.material = Array.isArray(mesh.material) ? next : next[0];
-        }
+        const nodeName = mesh.name.toLowerCase();
+        const isBondStreet = isBondStreetStool(productId);
+        const role = isBondStreet
+          ? /upholstery|fabric|cushion|seat|cover|textile/.test(nodeName)
+            ? "upholstery"
+            : /base|frame|leg|metal|bronze|steel/.test(nodeName)
+              ? "base"
+              : null
+          : null;
+        const finish = role === "upholstery" ? upholsteryMaterial : role === "base" ? baseMaterial : material;
+        const maps = role === "upholstery" ? upholsteryMaps : role === "base" ? baseMaps : generalMaps;
+        const neutralFabric = isBondStreet && role === "upholstery" && !upholsteryMaterial;
+        if (!finish && !neutralFabric) return;
+        const source = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        const next = source.map((entry) => clonePbrMaterial(entry, finish, maps, neutralFabric));
+        mesh.material = Array.isArray(mesh.material) ? next : next[0];
       }
     });
     const box = new THREE.Box3().setFromObject(clone);
@@ -98,11 +149,25 @@ function useFittedModel(url: string, material: VisualiserMaterial | null) {
     const wrapper = new THREE.Group();
     wrapper.add(clone);
     return wrapper;
-  }, [material, scene, texture]);
+  }, [baseMaps, baseMaterial, generalMaps, material, productId, scene, upholsteryMaps, upholsteryMaterial]);
 }
 
-const ModelBody = ({ url, material }: { url: string; material: VisualiserMaterial | null }) => {
-  const model = useFittedModel(url, material);
+const ModelBody = ({ object }: { object: PlacedObject }) => {
+  const model = useFittedModel(
+    object.id,
+    object.glb_url ?? "",
+    object.material ?? null,
+    object.baseMaterial ?? (isBondStreetStool(object.id) ? BOND_STREET_BASE_FINISH : null),
+    object.upholsteryMaterial ?? null,
+  );
+  useEffect(() => () => {
+    model.traverse((child) => {
+      const mesh = child as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      materials.forEach((entry) => entry.dispose());
+    });
+  }, [model]);
   return <primitive object={model} />;
 };
 
@@ -137,7 +202,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
   }, [object.position]);
 
   const body = object.glb_url
-    ? <ModelBody url={object.glb_url} material={object.material ?? null} />
+    ? <ModelBody object={object} />
     : object.image_url
       ? <ImageBody url={object.image_url} name={object.product_name} />
       : null;

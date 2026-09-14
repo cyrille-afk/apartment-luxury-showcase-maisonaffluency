@@ -13,6 +13,11 @@ import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/Sc
 import { toast } from "sonner";
 import { useConciergeSession } from "@/hooks/useConciergeSession";
 import { useVisualiserMaterial, type VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
+import {
+  BOND_STREET_BASE_FINISH,
+  BOND_STREET_UPHOLSTERY_FINISHES,
+  isBondStreetStool,
+} from "@/lib/visualiserProductFinishes";
 
 type CatalogueProduct = {
   id: string;
@@ -213,7 +218,9 @@ const TradeVisualiser = () => {
       position: [((index % 4) - 1.5) * 1.4, 0, Math.floor(index / 4) * -1.4],
       rotation: [0, 0, 0],
       scale: 1,
-      material: activeMaterial,
+      material: isBondStreetStool(product.id) ? null : activeMaterial,
+      baseMaterial: isBondStreetStool(product.id) ? BOND_STREET_BASE_FINISH : null,
+      upholsteryMaterial: null,
     };
     setObjects((current) => [...current, next]);
     setSelectedId(next.instanceId);
@@ -259,6 +266,15 @@ const TradeVisualiser = () => {
     setObjects((current) => current.map((object) => (
       object.instanceId === selectedId ? { ...object, material } : object
     )));
+  };
+
+  const applyBondStreetFinish = (target: "base" | "upholstery", material: VisualiserMaterial | null) => {
+    if (!selectedId) return;
+    setObjects((current) => current.map((object) => object.instanceId === selectedId
+      ? target === "base"
+        ? { ...object, baseMaterial: material }
+        : { ...object, upholsteryMaterial: material }
+      : object));
   };
 
   const filteredMaterials = useMemo(() => {
@@ -417,6 +433,34 @@ const TradeVisualiser = () => {
           </div>
           <p className={cn(microLabel, "mt-4 text-muted-foreground/70")}>Drag the red · blue arrows to slide on the floor plane, or drag the piece directly. Spin buttons rotate.</p>
 
+          {isBondStreetStool(selected.id) ? (
+            <div className="mt-5 border-t border-foreground/10 pt-4">
+              <p className={cn(microLabel, "text-muted-foreground")}>Base Finish</p>
+              <button
+                onClick={() => applyBondStreetFinish("base", BOND_STREET_BASE_FINISH)}
+                className="mt-3 flex w-full items-center gap-3 text-left"
+              >
+                <span className={cn("h-8 w-8 shrink-0 bg-[#655347]", selected.baseMaterial?.id === BOND_STREET_BASE_FINISH.id && "ring-1 ring-foreground ring-offset-2")} />
+                <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-foreground">Powdercoated Bronze Metal Swivel</span>
+              </button>
+
+              <div className="mt-5 flex items-center justify-between gap-3">
+                <p className={cn(microLabel, "text-muted-foreground")}>Upholstery</p>
+                {selected.upholsteryMaterial && (
+                  <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={() => applyBondStreetFinish("upholstery", null)}>Clear</button>
+                )}
+              </div>
+              <div className="mt-3 flex gap-4">
+                {BOND_STREET_UPHOLSTERY_FINISHES.map((material) => (
+                  <button key={material.id} onClick={() => applyBondStreetFinish("upholstery", material)} className="w-20 shrink-0 text-left" title={material.name}>
+                    <img src={material.image_url ?? "/placeholder.svg"} alt="" className={cn("h-12 w-12 object-cover", selected.upholsteryMaterial?.id === material.id && "ring-1 ring-foreground ring-offset-2")} />
+                    <span className="mt-2 block font-mono text-[8px] uppercase leading-3 tracking-[0.15em] text-muted-foreground">{material.name}</span>
+                  </button>
+                ))}
+              </div>
+              <p className={cn(microLabel, "mt-3 text-foreground")}>{selected.upholsteryMaterial?.name ?? "Neutral Matte · No Pattern"}</p>
+            </div>
+          ) : (
           <div className="mt-5 border-t border-foreground/10 pt-4">
             <div className="flex items-center justify-between gap-3">
               <p className={cn(microLabel, "text-muted-foreground")}>Material / Finish</p>
@@ -441,6 +485,7 @@ const TradeVisualiser = () => {
             </div>
             <p className={cn(microLabel, "mt-1 truncate text-foreground")}>{selected.material?.name ?? activeMaterial?.name ?? "No active finish"}</p>
           </div>
+          )}
         </div>
       )}
 
