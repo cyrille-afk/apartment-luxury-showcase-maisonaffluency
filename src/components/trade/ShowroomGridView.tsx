@@ -180,6 +180,11 @@ const ShowroomGridView = ({
   const [highlightedId, setHighlightedId] = useState<string | null>(highlightProductId || null);
   const highlightRef = useRef<HTMLDivElement>(null);
 
+  // Keep the brand filter in sync when the directory selects a maker.
+  useEffect(() => {
+    if (initialDesigner) setSelectedDesigner(initialDesigner);
+  }, [initialDesigner]);
+
   /** Navigate to trade product sheet, preserving originating grid URL for back nav. */
   const openProductSheet = useCallback((product: ShowroomProduct) => {
     if (!product.designer_name) return;
@@ -517,7 +522,16 @@ const ShowroomGridView = ({
     return products.filter((p) => {
       const q = search.toLowerCase();
       const matchesSearch = !q || p.product_name.toLowerCase().includes(q) || p.designer_name?.toLowerCase().includes(q) || p.materials?.toLowerCase().includes(q);
-      const matchesDesigner = selectedDesigner === "all" || p.designer_name === selectedDesigner;
+      const designerBrand = (p.designer_name || "").includes(" - ")
+        ? (p.designer_name || "").split(" - ")[0].trim()
+        : (p.designer_name || "");
+      const selectedBrand = selectedDesigner.includes(" - ")
+        ? selectedDesigner.split(" - ")[0].trim()
+        : selectedDesigner;
+      const matchesDesigner =
+        selectedDesigner === "all" ||
+        p.designer_name === selectedDesigner ||
+        designerBrand.toLowerCase() === selectedBrand.toLowerCase();
       const matchesCategory = selectedCategory === "all" || p.category === selectedCategory;
       const matchesSubcategory =
         selectedSubcategory === "all" ||
