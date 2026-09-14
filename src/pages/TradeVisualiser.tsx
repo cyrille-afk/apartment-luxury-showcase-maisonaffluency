@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { ImageUp, Layers3, Loader2, Plus, Search, X } from "lucide-react";
@@ -43,7 +43,13 @@ type PersistedSandbox = {
 const STORAGE_KEY = "trade-visualiser-sandbox-v2";
 const MIN_OBJECT_SCALE = 0.4;
 const MAX_OBJECT_SCALE = 2.5;
-const CUTOUT_TRANSFORMS = "f_png,q_auto:best,w_3000,dpr_auto,c_limit,e_make_transparent:10";
+// Master-fidelity cutouts: near-lossless quality, Retina DPR, capped only by a 3000px ceiling (never upscaled).
+const CUTOUT_TRANSFORMS = "f_png,q_100,w_3000,dpr_auto,c_limit,e_make_transparent:10";
+const CUTOUT_IMAGE_STYLE: CSSProperties = {
+  imageRendering: "-webkit-optimize-contrast" as CSSProperties["imageRendering"],
+  transform: "translateZ(0)",
+  willChange: "transform, filter",
+};
 
 type CanvasGesture =
   | { mode: "move"; id: string; offsetX: number; offsetY: number }
@@ -424,7 +430,10 @@ const TradeVisualiser = () => {
               style={{ left: `${object.x}%`, top: `${object.y}%`, zIndex: object.z + 10, transform: `translate(-50%, -50%) scale(${object.scale})` }}
             >
               <div className={cn("relative transition-opacity duration-300", !isSelected && "group-hover:opacity-95")}>
-                <div className="relative h-40 w-full md:h-52" style={{ transform: perspectiveTransform, transformStyle: "preserve-3d" }}>
+                <div
+                  className="relative h-40 w-full md:h-52"
+                  style={{ transform: `${perspectiveTransform} translateZ(0)`, transformStyle: "preserve-3d", willChange: "transform, filter" }}
+                >
                   <span
                     aria-hidden="true"
                     className="pointer-events-none absolute bottom-[9%] left-[23%] right-[23%] h-px bg-foreground/65 blur-[1px]"
@@ -438,8 +447,8 @@ const TradeVisualiser = () => {
                     src={optimizeImageUrl(object.image_url || "", CUTOUT_TRANSFORMS)}
                     alt={object.product_name}
                     draggable={false}
-                    className="relative h-full w-full object-contain mix-blend-multiply"
-                    style={{ filter: imageFilter }}
+                    className="relative h-full w-full object-contain mix-blend-multiply [image-rendering:crisp-edges]"
+                    style={{ ...CUTOUT_IMAGE_STYLE, filter: imageFilter }}
                   />
                 </div>
                 {isSelected && (
@@ -557,7 +566,7 @@ const TradeVisualiser = () => {
                   onClick={() => addObject(product)}
                   className="group h-full w-36 shrink-0 flex-col justify-end rounded-none p-0 hover:bg-transparent md:w-44"
                 >
-                  <img src={optimizeImageUrl(product.image_url || "", CUTOUT_TRANSFORMS)} alt="" loading="lazy" className="min-h-0 w-full flex-1 object-contain mix-blend-multiply transition-transform duration-500 group-hover:-translate-y-1" />
+                  <img src={optimizeImageUrl(product.image_url || "", CUTOUT_TRANSFORMS)} alt="" loading="lazy" style={CUTOUT_IMAGE_STYLE} className="min-h-0 w-full flex-1 object-contain mix-blend-multiply [image-rendering:crisp-edges] transition-transform duration-500 group-hover:-translate-y-1" />
                   <span className="mt-3 line-clamp-2 min-h-8 whitespace-normal text-center font-body text-[9px] uppercase leading-relaxed tracking-[0.15em] text-foreground/70">{product.product_name}</span>
                   <span className="mt-1 max-w-full truncate font-body text-[8px] uppercase tracking-[0.15em] text-muted-foreground">{product.brand_name}</span>
                 </Button>
