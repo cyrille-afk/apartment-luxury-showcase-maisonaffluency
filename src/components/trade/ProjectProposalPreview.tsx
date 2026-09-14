@@ -50,6 +50,21 @@ export function ProjectProposalPreview({
   const retailTotal = items.reduce((sum, item) => sum + (item.rrp_cents || 0) * item.quantity, 0);
   const tradeTotal = Math.round(retailTotal * (1 - tradeDiscount));
 
+  const triggerPrint = () => {
+    const sheet = document.querySelector<HTMLElement>(".proposal-print-sheet");
+    if (!sheet) return;
+
+    document.querySelector(".proposal-print-document")?.remove();
+    const printDocument = sheet.cloneNode(true) as HTMLElement;
+    printDocument.classList.remove("proposal-print-sheet");
+    printDocument.classList.add("proposal-print-document");
+    document.body.appendChild(printDocument);
+
+    const cleanup = () => printDocument.remove();
+    window.addEventListener("afterprint", cleanup, { once: true });
+    window.print();
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -74,7 +89,7 @@ export function ProjectProposalPreview({
           <Button
             type="button"
             variant="ghost"
-            onClick={() => window.print()}
+            onClick={triggerPrint}
             className="h-9 rounded-none bg-card/95 px-3 font-body text-[10px] uppercase tracking-[0.15em] text-card-foreground backdrop-blur-sm hover:bg-card"
           >
             <Printer className="mr-2 h-3.5 w-3.5" /> [ Trigger Print System ]

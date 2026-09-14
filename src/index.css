@@ -927,40 +927,21 @@ input, select, textarea {
   .animate-gallery-icon-pulse { animation: none; }
 }
 
+.proposal-print-document {
+  display: none;
+}
+
 @media print {
   @page {
     size: A4 portrait;
     margin: 0;
   }
 
-  body:has(.proposal-preview-shell[data-state="open"]) > *:not(.proposal-preview-shell) {
+  body:has(.proposal-print-document) > *:not(.proposal-print-document) {
     display: none !important;
   }
 
-  .proposal-preview-shell[data-state="open"],
-  .proposal-print-sheet,
-  .proposal-print-sheet * {
-    visibility: visible !important;
-  }
-
-  .proposal-preview-shell {
-    position: static !important;
-    inset: auto !important;
-    transform: none !important;
-    width: 210mm !important;
-    height: auto !important;
-    min-height: 297mm !important;
-    overflow: visible !important;
-    background: white !important;
-    backdrop-filter: none !important;
-    animation: none !important;
-  }
-
-  .proposal-preview-controls {
-    display: none !important;
-  }
-
-  .proposal-print-sheet {
+  .proposal-print-document {
     display: block !important;
     box-sizing: border-box !important;
     width: 210mm !important;
@@ -972,19 +953,19 @@ input, select, textarea {
     -webkit-print-color-adjust: exact;
   }
 
-  .proposal-print-sheet header,
-  .proposal-print-sheet footer,
+  .proposal-print-document header,
+  .proposal-print-document footer,
   .proposal-line-item {
     display: grid;
     break-inside: avoid;
     page-break-inside: avoid;
   }
 
-  .proposal-print-sheet header {
+  .proposal-print-document header {
     display: flex !important;
   }
 
-  .proposal-print-sheet footer {
+  .proposal-print-document footer {
     display: flex !important;
   }
 
