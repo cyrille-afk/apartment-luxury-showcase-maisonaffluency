@@ -173,6 +173,32 @@ export default function CurrencyToggle({ value, onChange, className = "", compac
     };
   }, [compact, menuOpen]);
 
+  if (minimal) {
+    return (
+      <div className={cn("flex flex-wrap items-center gap-x-4 gap-y-1", className)}>
+        {OPTIONS.map((opt) => {
+          const active = value === opt.value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => onChange(opt.value)}
+              className={cn(
+                "font-body text-[11px] uppercase tracking-[0.12em] transition-colors",
+                active
+                  ? "text-foreground font-medium border-b border-foreground pb-0.5"
+                  : "text-muted-foreground/60 hover:text-foreground"
+              )}
+              aria-pressed={active}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
   if (!compact) {
     return (
       <div className={`flex items-center gap-1 border border-border rounded-md p-0.5 ${className}`}>
