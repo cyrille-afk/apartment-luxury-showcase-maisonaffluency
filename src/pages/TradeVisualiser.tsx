@@ -331,7 +331,7 @@ const TradeVisualiser = () => {
   const backdropSrc = backdrop ?? backdropDataUrl;
   const toolbarButton = cn(
     "font-mono text-[10px] uppercase tracking-[0.15em]",
-    "flex items-center gap-2 px-4 py-2.5 text-foreground/80 transition-colors duration-200 hover:text-foreground hover:bg-foreground/[0.04] disabled:opacity-40",
+    "flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-foreground/80 transition-colors duration-200 hover:text-foreground hover:bg-foreground/[0.04] disabled:opacity-40",
   );
 
   return (
