@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
+import { useExportCurrency } from "@/lib/displayMoney";
 import PrivateTradeImage from "@/components/trade/PrivateTradeImage";
 
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
@@ -82,6 +83,8 @@ export default function ProposalBuilder({
 }: ProposalBuilderProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  // Proposal figures follow the member's declared base preference currency.
+  const exportCurrency = useExportCurrency();
   const externalFileRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [creatingPresentation, setCreatingPresentation] = useState(false);

@@ -1,5 +1,6 @@
 import { FileText, Printer, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { formatMoneyIn } from "@/lib/displayMoney";
 import {
   Dialog,
   DialogContent,
@@ -31,18 +32,7 @@ interface ProjectProposalPreviewProps {
 }
 
 function makeMoney(currency: string) {
-  return (cents: number | null | undefined) => {
-    if (!cents) return "Price upon Request";
-    try {
-      return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency,
-        maximumFractionDigits: 0,
-      }).format(cents / 100);
-    } catch {
-      return `${currency} ${Math.round(cents / 100).toLocaleString("en-US")}`;
-    }
-  };
+  return (cents: number | null | undefined) => formatMoneyIn(cents, currency);
 }
 
 export function ProjectProposalPreview({

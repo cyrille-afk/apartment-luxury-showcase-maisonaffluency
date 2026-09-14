@@ -12,6 +12,7 @@ import { ProjectCuratorialGuide } from "@/components/trade/ProjectCuratorialGuid
 import { ProjectProposalPreview } from "@/components/trade/ProjectProposalPreview";
 import { dimensionBadgeLabel } from "@/lib/productDimensions";
 import { convertCents, useFxRates, type DisplayCurrency } from "@/components/trade/CurrencyToggle";
+import { formatMoneyIn } from "@/lib/displayMoney";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 
 type StudioItem = {
@@ -174,18 +175,7 @@ export default function TradeProjectStudio() {
   );
 
   const money = useCallback(
-    (cents: number | null | undefined) => {
-      if (!cents) return null;
-      try {
-        return new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: baseCurrency,
-          maximumFractionDigits: 0,
-        }).format(cents / 100);
-      } catch {
-        return `${baseCurrency} ${Math.round(cents / 100).toLocaleString("en-US")}`;
-      }
-    },
+    (cents: number | null | undefined) => (cents ? formatMoneyIn(cents, baseCurrency) : null),
     [baseCurrency],
   );
 
