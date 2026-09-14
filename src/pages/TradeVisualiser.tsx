@@ -247,7 +247,7 @@ const TradeVisualiser = () => {
         className="relative -m-4 h-[calc(100dvh-3.5rem)] overflow-hidden bg-visualiser-canvas md:-m-8 md:h-[calc(100dvh-4rem)] lg:-m-12"
       >
         {backdrop ? (
-          <img src={backdrop} alt="Client room canvas backdrop" className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover" />
+          <img src={backdrop} alt="Client room canvas backdrop" className="pointer-events-none absolute inset-0 z-0 h-full w-full select-none object-cover object-center" />
         ) : objects.length === 0 ? (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
             <div className="text-center">
@@ -277,7 +277,7 @@ const TradeVisualiser = () => {
                 "group absolute w-[180px] -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none select-none outline-none md:w-[240px]",
                 isSelected && "cursor-grabbing",
               )}
-              style={{ left: `${object.x}%`, top: `${object.y}%`, zIndex: object.z, transform: `translate(-50%, -50%) scale(${object.scale})` }}
+              style={{ left: `${object.x}%`, top: `${object.y}%`, zIndex: object.z + 10, transform: `translate(-50%, -50%) scale(${object.scale})` }}
             >
               <div className={cn("relative transition-opacity duration-300", !isSelected && "group-hover:opacity-90")}>
                 <img
@@ -372,14 +372,14 @@ const TradeVisualiser = () => {
         <div className="absolute bottom-20 left-1/2 z-[90] grid w-[calc(100%-24px)] -translate-x-1/2 grid-cols-2 items-center border border-border bg-card p-1.5 shadow-elegant md:bottom-8 md:flex md:w-auto md:max-w-[calc(100%-24px)] md:rounded-full md:px-2">
           <Button variant="ghost" onClick={() => { setSourceOpen((open) => !open); setResetOpen(false); }} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><Plus /> Add Object</Button>
           <span className="hidden h-5 w-px shrink-0 bg-border md:block" />
-          <Button variant="ghost" onClick={() => fileRef.current?.click()} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><ImageUp /><span className="md:hidden">Upload Backdrop</span><span className="hidden md:inline">Upload Canvas Backdrop</span></Button>
+          <Button variant="ghost" onClick={() => fileRef.current?.click()} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><ImageUp />{backdrop ? "Change Backdrop" : <><span className="md:hidden">Upload Backdrop</span><span className="hidden md:inline">Upload Canvas Backdrop</span></>}</Button>
           <span className="hidden h-5 w-px shrink-0 bg-border md:block" />
           <Button variant="ghost" disabled={!selected} onClick={() => { alternateLayer(); setSourceOpen(false); setResetOpen(false); }} title={selected ? "Alternate selected object between front and back" : "Select an object first"} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><Layers3 /> Layer Order</Button>
           <span className="hidden h-5 w-px shrink-0 bg-border md:block" />
           <Button variant="ghost" onClick={() => { setResetOpen(true); setSourceOpen(false); }} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><X /> Reset Sandbox</Button>
         </div>
 
-        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => uploadBackdrop(event.target.files?.[0] ?? null)} />
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(event) => uploadBackdrop(event.target.files?.[0] ?? null)} />
       </section>
     </>
   );
