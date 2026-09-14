@@ -7,6 +7,9 @@ import AdminPanelSkeleton from "@/components/admin/AdminPanelSkeleton";
 const LiveTransactionFunnelTracker = lazy(
   () => import("@/components/admin/LiveTransactionFunnelTracker")
 );
+const GitHubSyncStatusPanel = lazy(
+  () => import("@/components/admin/GitHubSyncStatusPanel")
+);
 
 export default function TradeAdminFunnelTracker() {
   const { isAdmin, loading } = useAuth();
