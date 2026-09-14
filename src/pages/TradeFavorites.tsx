@@ -460,9 +460,9 @@ export default function TradeFavorites() {
 
         {/* Content */}
         {loading ? (
-          favoritesViewMode === "grid" ? <div className="columns-1 gap-8 sm:columns-2 lg:columns-3">
+          favoritesViewMode === "grid" ? <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className={cn("mb-10 w-full animate-pulse bg-muted", i % 3 === 1 ? "aspect-[4/5]" : "aspect-[5/4]")} />
+              <div key={i} className="aspect-[4/5] w-full animate-pulse bg-muted" />
             ))}
           </div> : <div className="border-t border-border">
             {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-16 animate-pulse border-b border-border bg-muted/40" />)}
