@@ -33,6 +33,10 @@ export default function TradeOnboarding() {
   const [inputValue, setInputValue] = useState("");
   const [initialized, setInitialized] = useState(false);
   const { copilotName, setCopilotName } = useTradeCopilot();
+  const [currency, setCurrency] = useTradeDisplayCurrency();
+  const [baseCurrency, setBaseCurrency] = useState<DisplayCurrency>(
+    currency !== "original" ? currency : "SGD",
+  );
 
   const selectSuggestion = (name: string) => setInputValue(name);
 
