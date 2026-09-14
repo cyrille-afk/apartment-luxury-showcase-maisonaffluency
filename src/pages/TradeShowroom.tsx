@@ -137,7 +137,7 @@ const TradeShowroom = () => {
                 The Maison Archive
               </h1>
               <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 mt-4">
-                A matriculated index of 150+ collectible designers, ateliers, and curated residential galleries.
+                A MATRICULATED INDEX OF 150+ COLLECTIBLE DESIGNERS, ATELIERS, AND CURATED RESIDENTIAL GALLERIES.
               </p>
             </div>
             <button
