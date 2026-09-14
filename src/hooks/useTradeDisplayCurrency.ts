@@ -188,6 +188,24 @@ export function useTradeDisplayCurrency(): [DisplayCurrency, (next: DisplayCurre
     };
   }, []);
 
+  // Account-level preference (profiles.preferred_currency) is the master source
+  // of truth for the trade modules: it is applied on every mount, ahead of any
+  // country/IP detection, so every module renders in the declared currency.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const fromAccount = await loadAccountCurrency();
+      if (fromAccount && !cancelled) {
+        try {
+          window.localStorage.setItem(STORAGE_KEY, fromAccount);
+        } catch { /* ignore */ }
+        setValue(fromAccount);
+        window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: fromAccount }));
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   // One-shot auto-default from country, only if the user has never manually picked.
   useEffect(() => {
     if (isManual()) return;
