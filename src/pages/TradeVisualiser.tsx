@@ -250,13 +250,6 @@ const TradeVisualiser = () => {
     )));
   };
 
-  const spinObject = (instanceId: string, degrees: number) => {
-    setObjects((current) => current.map((object) => (
-      object.instanceId === instanceId
-        ? { ...object, rotation: [object.rotation[0], object.rotation[1] + THREE.MathUtils.degToRad(degrees), object.rotation[2]] }
-        : object
-    )));
-  };
 
   const DEPTH_LEVELS = [0, 0.012, 0.024];
 
