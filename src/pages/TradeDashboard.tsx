@@ -271,14 +271,6 @@ const TradeDashboard = () => {
         ))}
       </div>
 
-      <button
-        type="button"
-        onClick={() => toast("Click toast test")}
-        className="my-4 border px-3 py-2 text-xs"
-      >
-        Test Toast
-      </button>
-
       {activeProjects.length > 0 && (
         <div className="mt-14 border-y border-border py-4 md:mt-20" aria-label="Active workspace projects">
           <div className="h-px w-full bg-border" aria-hidden="true" />
