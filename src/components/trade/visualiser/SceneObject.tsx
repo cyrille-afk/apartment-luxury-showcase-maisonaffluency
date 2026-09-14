@@ -39,6 +39,7 @@ const EMPTY_MAPS: LoadedMaps = { diffuse: null, normal: null, roughness: null };
 
 function useMaterialMaps(material: VisualiserMaterial | null, maxAnisotropy: number) {
   const [maps, setMaps] = useState<LoadedMaps>(EMPTY_MAPS);
+  const liveRef = useRef<LoadedMaps>(EMPTY_MAPS);
 
   useEffect(() => {
     let cancelled = false;
@@ -66,15 +67,22 @@ function useMaterialMaps(material: VisualiserMaterial | null, maxAnisotropy: num
       if (diffuse) diffuse.colorSpace = THREE.SRGBColorSpace;
       if (normal) normal.colorSpace = THREE.NoColorSpace;
       if (roughness) roughness.colorSpace = THREE.NoColorSpace;
-      setMaps({ diffuse, normal, roughness });
-    }).catch(() => setMaps(EMPTY_MAPS));
+      const next = { diffuse, normal, roughness };
+      liveRef.current = next;
+      setMaps(next);
+    }).catch(() => {
+      liveRef.current = EMPTY_MAPS;
+      setMaps(EMPTY_MAPS);
+    });
     return () => {
       cancelled = true;
-      setMaps((current) => {
-        current.diffuse?.dispose();
-        current.normal?.dispose();
-        current.roughness?.dispose();
-        return EMPTY_MAPS;
+      // Dispose only the textures this effect owned, after the swap.
+      const owned = liveRef.current;
+      liveRef.current = EMPTY_MAPS;
+      queueMicrotask(() => {
+        owned.diffuse?.dispose();
+        owned.normal?.dispose();
+        owned.roughness?.dispose();
       });
     };
   }, [material, maxAnisotropy]);
@@ -82,6 +90,11 @@ function useMaterialMaps(material: VisualiserMaterial | null, maxAnisotropy: num
   return maps;
 }
 
+/**
+ * Clone a GLB material and re-key it to the chosen finish.
+ * Metals are given an envMapIntensity so they still read under IBL instead of
+ * rendering solid black when no reflection source contributes.
+ */
 function clonePbrMaterial(source: THREE.Material, finish: VisualiserMaterial | null, maps: LoadedMaps, neutralFabric = false) {
   const original = source as THREE.MeshStandardMaterial;
   const material = original.clone();
@@ -91,8 +104,13 @@ function clonePbrMaterial(source: THREE.Material, finish: VisualiserMaterial | n
   material.metalnessMap = null;
   material.color.set(neutralFabric ? "#d8d4cc" : finish?.color ?? "#ffffff");
   material.roughness = neutralFabric ? 0.96 : finish?.roughness ?? 0.75;
-  material.metalness = neutralFabric ? 0 : finish?.metalness ?? 0;
+  const metalness = neutralFabric ? 0 : finish?.metalness ?? 0;
+  material.metalness = THREE.MathUtils.clamp(metalness, 0, 0.92);
+  material.envMapIntensity = metalness > 0.2 ? 1.5 : 1;
   material.normalScale.set(0.22, 0.22);
+  material.transparent = original.transparent;
+  material.side = original.side;
+  material.userData.visualiserClone = true;
   material.needsUpdate = true;
   return material;
 }
