@@ -635,7 +635,19 @@ const TradeVisualiser = () => {
             <div className="mb-5 flex items-center gap-5 border-b border-border pb-4">
               <div className="min-w-0 flex-1">
                 <p className="font-display text-lg text-foreground">Designer Collection Index</p>
-                 <p className="mt-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Select up to 15 objects · {objects.length} placed</p>
+                 <p className="mt-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Select up to 15 objects · {objects.length} placed · {modelCount} with 3D models</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOnly3d((value) => !value)}
+                aria-pressed={only3d}
+                className={cn(
+                  "shrink-0 font-body text-[9px] uppercase tracking-[0.15em] underline-offset-4 hover:underline",
+                  only3d ? "text-foreground underline" : "text-muted-foreground",
+                )}
+              >
+                3D Models Only
+
               </div>
               <div className="relative w-52 md:w-72">
                 <Search className="absolute left-0 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
