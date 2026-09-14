@@ -365,7 +365,7 @@ export default function TradeFavorites() {
               className="pl-9 font-body text-xs"
             />
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             {CURRENCY_OPTIONS.map((c) => (
               <button
                 key={c}
