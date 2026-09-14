@@ -82,6 +82,7 @@ const TradeVisualiser = () => {
   const [orbitEnabled, setOrbitEnabled] = useState(true);
   const [materials, setMaterials] = useState<VisualiserMaterial[]>([]);
   const [materialSearch, setMaterialSearch] = useState("");
+  const [finishTarget, setFinishTarget] = useState<"all" | "top" | "base">("all");
   const { activeMaterial, setActiveMaterial } = useVisualiserMaterial();
   const { session: conciergeSession } = useConciergeSession();
 
