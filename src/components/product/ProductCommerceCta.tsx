@@ -1,5 +1,5 @@
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
 import { getCart, shouldUseFullPageCart, useCart } from "@/lib/cart";
@@ -11,6 +11,7 @@ import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { cn } from "@/lib/utils";
+import { setStickyCommerceDockHeight } from "@/lib/stickyCommerceDock";
 
 /**
  * Multi-tier product commerce CTA.
@@ -303,6 +304,21 @@ export default function ProductCommerceCta({
       ?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
+  // Publish the dock's measured height so the floating action buttons can lift
+  // above it. Height is 0 when the dock is display:none (desktop) or unmounted.
+  const dockMeasureRef = useCallback((node: HTMLDivElement | null) => {
+    if (!node) {
+      setStickyCommerceDockHeight(0);
+      return;
+    }
+    const publish = () => setStickyCommerceDockHeight(node.getBoundingClientRect().height);
+    publish();
+    const ro = new ResizeObserver(publish);
+    ro.observe(node);
+    const mql = window.matchMedia("(min-width: 768px)");
+    mql.addEventListener("change", publish);
+  }, []);
+
   // Mobile: PLACE ORDER opens the conversational 3-step intake sheet first;
   // its completion hands off to the existing selection / checkout flow.
   const handleMobilePrimary = () => {
@@ -459,7 +475,8 @@ export default function ProductCommerceCta({
       {dock && typeof document !== "undefined" && createPortal(
         <div
           data-mobile-commerce-dock
-          className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 px-4 pt-3 pb-[env(safe-area-inset-bottom,16px)]"
+          ref={dockMeasureRef}
+          className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 px-4 pt-3 pb-[env(safe-area-inset-bottom,16px)]"
         >
           <div className="flex min-h-11 w-full items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
@@ -492,7 +509,7 @@ export default function ProductCommerceCta({
               </div>
               <button
                 type="button"
-                onClick={handleMobilePrimary}
+                onClick={() => (finishSelectionRequired ? scrollToFinishes() : handleMobilePrimary())}
                 disabled={placingOrder}
                 className={cn(
                   primaryBtn,
