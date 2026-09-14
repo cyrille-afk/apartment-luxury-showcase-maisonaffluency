@@ -5,6 +5,7 @@ import type { PickPreview } from "@/lib/tradeConciergeStream";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 
 export type CuratedInventoryItem = PickPreview;
 
@@ -69,6 +70,7 @@ export function CuratedInventoryGrid({
 }: CuratedInventoryGridProps) {
   const navigate = useNavigate();
   const { discountPct, tierLabel } = useTradeDiscount();
+  const { showTradePrice } = useTradePriceMode();
   const [details, setDetails] = useState<Record<string, HoverDetail>>({});
   const requested = useRef<Set<string>>(new Set());
   const [expanded, setExpanded] = useState(false);
@@ -231,14 +233,21 @@ export function CuratedInventoryGrid({
                   {typeof item.price_cents === "number" && item.price_cents > 0 ? (
                     <div className="leading-tight">
                       <span className="font-display text-[15px] font-semibold text-foreground">
-                        {fmtPrice(Math.round(item.price_cents * (1 - discountPct)), item.currency || "EUR")}
+                        {fmtPrice(
+                          showTradePrice
+                            ? Math.round(item.price_cents * (1 - discountPct))
+                            : item.price_cents,
+                          item.currency || "EUR",
+                        )}
                       </span>
-                      <span className="block font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground/0 transition-colors group-hover:text-muted-foreground/70 group-focus-within:text-muted-foreground/70">
-                        {tierLabel} net · RRP {fmtPrice(item.price_cents, item.currency || "EUR")}
-                      </span>
+                      {showTradePrice && (
+                        <span className="block font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground/0 transition-colors group-hover:text-muted-foreground/70 group-focus-within:text-muted-foreground/70">
+                          {tierLabel} net · RRP {fmtPrice(item.price_cents, item.currency || "EUR")}
+                        </span>
+                      )}
                     </div>
                   ) : (
-                    <div className="font-body text-[12px] text-foreground/80">Trade Price upon Request</div>
+                    <div className="font-body text-[12px] text-foreground/80">Price upon Request</div>
                   )}
                   <span className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground/70">
                     {status}

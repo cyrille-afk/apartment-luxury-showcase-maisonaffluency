@@ -2,6 +2,7 @@ import { Award } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTradeDiscount, type TradeTier } from "@/hooks/useTradeDiscount";
 import { cn } from "@/lib/utils";
+import { useClientSafeMode } from "@/lib/clientSafeMode";
 
 const TIER_STYLES: Record<TradeTier, { wrap: string; dot: string }> = {
   silver: {
@@ -31,7 +32,10 @@ export const TierBadge = ({
   showDiscount = false,
 }: TierBadgeProps) => {
   const { tier, tierLabel, discountLabel } = useTradeDiscount();
+  const { clientSafe } = useClientSafeMode();
   const styles = TIER_STYLES[tier];
+
+  if (clientSafe) return null;
 
   const content = (
     <span

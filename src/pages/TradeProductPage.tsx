@@ -1822,7 +1822,7 @@ const TradeProductPage: React.FC = () => {
               {prefix.trim()}
             </span>
           )}
-          <span className="text-foreground align-middle">{showTradePrice ? netLabel : retailLabel}</span>
+          <span className="text-foreground align-middle">{showTradePrice ? netLabel : (retailLabel || netLabel)}</span>
           <span className="ml-2 align-middle font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             {showTradePrice ? "Net Trade Price" : "MSRP"}
           </span>
@@ -2438,7 +2438,7 @@ const TradeProductPage: React.FC = () => {
                       </p>
                     )}
                     <p className="font-display text-2xl leading-none text-foreground">
-                      {priceLabels.prefix}{showTradePrice ? priceLabels.netLabel : priceLabels.retailLabel}{" "}
+                      {priceLabels.prefix}{showTradePrice ? priceLabels.netLabel : (priceLabels.retailLabel || priceLabels.netLabel)}{" "}
                       <span className="font-body text-xs tracking-widest uppercase text-muted-foreground">
                         {showTradePrice ? "Net Trade Price" : "MSRP"}
                       </span>
