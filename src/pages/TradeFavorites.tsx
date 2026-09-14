@@ -1,15 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
-import { Heart, Trash2, ShoppingCart, Search, Grid3X3, List, Loader2, Wand2 } from "lucide-react";
+import { Heart, Trash2, ShoppingCart, Search, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 
 const CURRENCY_OPTIONS: DisplayCurrency[] = ["original", "SGD", "EUR", "USD", "GBP", "CHF", "AED", "HKD", "AUD"];
@@ -18,6 +16,8 @@ import TradeProductLightbox, { type TradeProductLightboxItem } from "@/component
 import { cn } from "@/lib/utils";
 import { prefillLineShippingFromCatalog } from "@/lib/prefillLineShipping";
 import { TRADE_FAVORITE_FOLDERS_EVENT } from "@/components/trade/TradeFavoriteFolderPicker";
+import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
+import { dimensionBadgeLabel } from "@/lib/productDimensions";
 
 interface FavoritedProduct {
   favoriteId: string;
@@ -25,11 +25,16 @@ interface FavoritedProduct {
   product_name: string;
   brand_name: string;
   image_url: string | null;
+  sku: string | null;
   category: string;
   subcategory: string | null;
   materials: string | null;
   materials_description: string | null;
   dimensions: string | null;
+  width_mm: number | null;
+  depth_mm: number | null;
+  height_mm: number | null;
+  size_variants: Array<{ label?: string | null; base?: string | null; top?: string | null }> | null;
   lead_time: string | null;
   origin: string | null;
   trade_price_cents: number | null;
@@ -54,8 +59,9 @@ export default function TradeFavorites() {
   const [favorites, setFavorites] = useState<FavoritedProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(() => searchParams.get("search") ?? "");
-  const [view, setView] = useState<"grid" | "list">("grid");
+  const [favoritesViewMode, setFavoritesViewMode] = useState<"grid" | "list">("grid");
   const [currency, setCurrency] = useTradeDisplayCurrency();
+  const { showTradePrice } = useTradePriceMode();
   const rates = useFxRates();
   const [removing, setRemoving] = useState<string | null>(null);
   const [selectedFor3D, setSelectedFor3D] = useState<Set<string>>(new Set());
@@ -65,6 +71,9 @@ export default function TradeFavorites() {
   const [folders, setFolders] = useState<FolderItem[]>([]);
   const [activeFolder, setActiveFolder] = useState<string | null>(() => searchParams.get("folder"));
   const [folderAssignments, setFolderAssignments] = useState<Record<string, string[]>>({});
+
+  const displayPriceCents = (fav: FavoritedProduct) =>
+    showTradePrice ? fav.trade_price_cents : fav.rrp_price_cents;
 
   const favToLightboxItem = (fav: FavoritedProduct): TradeProductLightboxItem => ({
     id: fav.productId,
@@ -78,7 +87,9 @@ export default function TradeFavorites() {
     origin: fav.origin,
     category: fav.category || undefined,
     subcategory: fav.subcategory || undefined,
-    price: fav.trade_price_cents ? `€${(fav.trade_price_cents / 100).toLocaleString()}` : undefined,
+    price: displayPriceCents(fav)
+      ? formatPriceConverted(displayPriceCents(fav) as number, fav.currency, currency, rates)
+      : undefined,
   });
 
   const handleLightboxAddToQuote = useCallback(async (product: TradeProductLightboxItem) => {
@@ -129,7 +140,7 @@ export default function TradeFavorites() {
     try {
       const { data, error } = await supabase
         .from("trade_favorites")
-        .select("id, product_id, notes, created_at, trade_products(product_name, brand_name, image_url, category, subcategory, materials, materials_description, dimensions, lead_time, origin, trade_price_cents, rrp_price_cents, currency)")
+        .select("id, product_id, notes, created_at, trade_products(product_name, brand_name, image_url, sku, category, subcategory, materials, materials_description, dimensions, width_mm, depth_mm, height_mm, size_variants, lead_time, origin, trade_price_cents, rrp_price_cents, currency)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -141,11 +152,16 @@ export default function TradeFavorites() {
         product_name: f.trade_products?.product_name || "Unknown",
         brand_name: f.trade_products?.brand_name || "Unknown",
         image_url: f.trade_products?.image_url,
+        sku: f.trade_products?.sku,
         category: f.trade_products?.category || "",
         subcategory: f.trade_products?.subcategory,
         materials: f.trade_products?.materials,
         materials_description: f.trade_products?.materials_description,
         dimensions: f.trade_products?.dimensions,
+        width_mm: f.trade_products?.width_mm,
+        depth_mm: f.trade_products?.depth_mm,
+        height_mm: f.trade_products?.height_mm,
+        size_variants: f.trade_products?.size_variants,
         lead_time: f.trade_products?.lead_time,
         origin: f.trade_products?.origin,
         trade_price_cents: f.trade_products?.trade_price_cents,
@@ -336,9 +352,10 @@ export default function TradeFavorites() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-6 md:p-8 space-y-6">
+      <div className="min-h-[calc(100dvh-13rem)] bg-muted/20">
+      <div className="max-w-6xl mx-auto px-6 py-8 md:px-8 md:py-10 space-y-8">
         {/* Toolbar */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-x-7 gap-y-5 border-b border-border pb-6">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
             <Input
@@ -348,15 +365,7 @@ export default function TradeFavorites() {
               className="pl-9 font-body text-xs"
             />
           </div>
-          <div className="flex items-center gap-1 border border-border rounded-md">
-            <button onClick={() => setView("grid")} className={cn("p-1.5 rounded-l-md transition-colors", view === "grid" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")}>
-              <Grid3X3 className="w-3.5 h-3.5" />
-            </button>
-            <button onClick={() => setView("list")} className={cn("p-1.5 rounded-r-md transition-colors", view === "list" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")}>
-              <List className="w-3.5 h-3.5" />
-            </button>
-          </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             {CURRENCY_OPTIONS.map((c) => (
               <button
                 key={c}
@@ -369,6 +378,37 @@ export default function TradeFavorites() {
                 {c === "original" ? "Original" : c}
               </button>
             ))}
+          </div>
+          <span className="hidden h-4 w-px bg-border lg:block" aria-hidden="true" />
+          <div className="flex items-center gap-5" role="group" aria-label="Favorites layout">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setFavoritesViewMode("grid")}
+              aria-pressed={favoritesViewMode === "grid"}
+              className={cn(
+                "h-auto rounded-none px-0 py-1 font-mono text-[10px] font-normal uppercase tracking-[0.15em] hover:bg-transparent",
+                favoritesViewMode === "grid"
+                  ? "font-medium text-foreground underline decoration-foreground underline-offset-[6px]"
+                  : "text-muted-foreground/60 hover:text-foreground"
+              )}
+            >
+              [ ▦ Editorial Grid ]
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setFavoritesViewMode("list")}
+              aria-pressed={favoritesViewMode === "list"}
+              className={cn(
+                "h-auto rounded-none px-0 py-1 font-mono text-[10px] font-normal uppercase tracking-[0.15em] hover:bg-transparent",
+                favoritesViewMode === "list"
+                  ? "font-medium text-foreground underline decoration-foreground underline-offset-[6px]"
+                  : "text-muted-foreground/60 hover:text-foreground"
+              )}
+            >
+              [ ☰ Technical List ]
+            </Button>
           </div>
           {favorites.length > 0 && (
             <Button variant="outline" size="sm" onClick={addAllToQuote} className="gap-1.5">
@@ -420,13 +460,16 @@ export default function TradeFavorites() {
 
         {/* Content */}
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          favoritesViewMode === "grid" ? <div className="columns-1 gap-8 sm:columns-2 lg:columns-3">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="aspect-square bg-muted rounded-lg animate-pulse" />
+              <div key={i} className={cn("mb-10 w-full animate-pulse bg-muted", i % 3 === 1 ? "aspect-[4/5]" : "aspect-[5/4]")} />
             ))}
+          </div> : <div className="border-t border-border">
+            {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-16 animate-pulse border-b border-border bg-muted/40" />)}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-24 px-6">
+          <div className="flex min-h-[44vh] items-center justify-center px-6 text-center">
+            <div>
             <p className="font-display font-light text-base text-foreground">
               {search ? "No matches found in your archive." : activeFolder ? "This folder is currently empty." : "The archive is currently empty."}
             </p>
@@ -445,18 +488,23 @@ export default function TradeFavorites() {
                 [ BROWSE SHOWROOM COLLECTION → ]
               </button>
             )}
+            </div>
           </div>
-        ) : view === "grid" ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filtered.map((fav) => (
-              <Card
+        ) : favoritesViewMode === "grid" ? (
+          <div className="columns-1 gap-x-8 sm:columns-2 lg:columns-3">
+            {filtered.map((fav, index) => (
+              <article
                 key={fav.favoriteId}
-                className={cn("group overflow-hidden cursor-pointer", selectedFor3D.has(fav.productId) && "ring-2 ring-[hsl(var(--gold))]")}
+                className="group mb-12 inline-block w-full break-inside-avoid cursor-pointer"
                 onClick={() => { setAddedToQuote(false); setLightboxProduct(favToLightboxItem(fav)); }}
               >
-                <div className="relative aspect-square bg-muted">
+                <div className={cn(
+                  "relative w-full overflow-hidden bg-background",
+                  index % 5 === 1 || index % 5 === 4 ? "aspect-[4/5]" : index % 5 === 2 ? "aspect-[3/2]" : "aspect-[5/4]",
+                  selectedFor3D.has(fav.productId) && "outline outline-1 outline-foreground outline-offset-4"
+                )}>
                   {fav.image_url ? (
-                    <img src={fav.image_url} alt={fav.product_name} className="w-full h-full object-cover" loading="lazy" />
+                    <img src={fav.image_url} alt={fav.product_name} className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]" loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
                       <Heart className="w-8 h-8" />
@@ -465,10 +513,10 @@ export default function TradeFavorites() {
                   <button
                     onClick={(e) => { e.stopPropagation(); toggle3D(fav.productId); }}
                     className={cn(
-                      "absolute top-2 left-2 w-7 h-7 rounded-full flex items-center justify-center transition-all",
+                       "absolute left-3 top-3 flex h-8 w-8 items-center justify-center bg-background/90 backdrop-blur-sm transition-all",
                       selectedFor3D.has(fav.productId)
-                        ? "bg-[hsl(var(--gold))] text-white"
-                        : "bg-background/80 backdrop-blur-sm text-muted-foreground opacity-0 group-hover:opacity-100"
+                         ? "text-foreground"
+                         : "text-muted-foreground opacity-0 group-hover:opacity-100 focus:opacity-100"
                     )}
                     title="Select for 3D Studio"
                   >
@@ -477,52 +525,50 @@ export default function TradeFavorites() {
                   <button
                     onClick={(e) => { e.stopPropagation(); removeFavorite(fav.favoriteId); }}
                     disabled={removing === fav.favoriteId}
-                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
+                    className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center bg-background/90 text-muted-foreground opacity-0 backdrop-blur-sm transition-opacity hover:text-destructive group-hover:opacity-100 focus:opacity-100"
                   >
                     {removing === fav.favoriteId ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <Trash2 className="w-3.5 h-3.5" />}
                   </button>
                 </div>
-                <div className="p-3 text-center space-y-1">
-                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">{fav.brand_name}</p>
-                  <p className="font-display text-xs text-foreground">{fav.product_name}</p>
-                  {fav.trade_price_cents && (
-                    <p className="font-body text-[10px] text-foreground/80">
-                      {formatPriceConverted(fav.trade_price_cents, fav.currency, currency, rates)}
-                    </p>
-                  )}
-                  {fav.materials && (
-                    <p className="font-body text-[9px] text-muted-foreground truncate">{fav.materials}</p>
-                  )}
+                <div className="space-y-1.5 pt-4 text-center">
+                  <p className="font-display text-[15px] font-light leading-snug text-foreground">{fav.product_name}</p>
+                  <p className="font-display text-xs font-light text-muted-foreground">{fav.brand_name}</p>
                 </div>
-              </Card>
+              </article>
             ))}
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="w-full overflow-x-auto">
+            <div className="min-w-[980px]">
+            <div className="grid grid-cols-[40px_minmax(100px,0.75fr)_minmax(170px,1.45fr)_minmax(140px,1.1fr)_minmax(155px,1fr)_minmax(110px,0.8fr)_minmax(105px,0.8fr)_28px] items-center gap-x-5 border-y border-border py-3 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+              <span aria-hidden="true" />
+              <span>SKU / Item ID</span>
+              <span>Product Name</span>
+              <span>Designer / Maker</span>
+              <span>Dimensions W × D × H</span>
+              <span>Lead Time</span>
+              <span>{showTradePrice ? "Trade Price" : "MSRP / Price"}</span>
+              <span aria-hidden="true" />
+            </div>
             {filtered.map((fav) => (
-              <Card
+              <div
                 key={fav.favoriteId}
-                className="flex items-center gap-4 p-3 group cursor-pointer"
+                className="group grid min-h-16 grid-cols-[40px_minmax(100px,0.75fr)_minmax(170px,1.45fr)_minmax(140px,1.1fr)_minmax(155px,1fr)_minmax(110px,0.8fr)_minmax(105px,0.8fr)_28px] items-center gap-x-5 border-b border-border py-3.5 text-left cursor-pointer transition-colors hover:bg-background/60"
                 onClick={() => { setAddedToQuote(false); setLightboxProduct(favToLightboxItem(fav)); }}
               >
-                <div className="w-16 h-16 rounded-md overflow-hidden bg-muted shrink-0">
-                  {fav.image_url && <img src={fav.image_url} alt={fav.product_name} className="w-full h-full object-cover" />}
+                <div className="h-10 w-10 overflow-hidden bg-background">
+                  {fav.image_url ? <img src={fav.image_url} alt="" className="h-full w-full object-cover" loading="lazy" /> : <Heart className="m-3 h-4 w-4 text-muted-foreground/30" />}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">{fav.brand_name}</p>
-                  <p className="font-display text-xs text-foreground">{fav.product_name}</p>
-                  <div className="flex items-center gap-3 mt-1">
-                    {fav.category && <Badge variant="outline" className="text-[8px]">{fav.category}</Badge>}
-                    {fav.materials && <span className="font-body text-[9px] text-muted-foreground truncate">{fav.materials}</span>}
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  {fav.trade_price_cents && (
-                    <p className="font-body text-xs text-foreground">
-                      {formatPriceConverted(fav.trade_price_cents, fav.currency, currency, rates)}
-                    </p>
-                  )}
-                </div>
+                <span className="truncate font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">{fav.sku || fav.productId.slice(0, 8)}</span>
+                <span className="font-display text-sm font-light text-foreground">{fav.product_name}</span>
+                <span className="font-body text-[11px] text-muted-foreground">{fav.brand_name}</span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">{dimensionBadgeLabel(fav)}</span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">{fav.lead_time || "On request"}</span>
+                <span className="font-mono text-[11px] text-foreground">
+                  {displayPriceCents(fav)
+                    ? formatPriceConverted(displayPriceCents(fav) as number, fav.currency, currency, rates)
+                    : "Price upon Request"}
+                </span>
                 <button
                   onClick={(e) => { e.stopPropagation(); removeFavorite(fav.favoriteId); }}
                   disabled={removing === fav.favoriteId}
@@ -530,10 +576,12 @@ export default function TradeFavorites() {
                 >
                   {removing === fav.favoriteId ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <Trash2 className="w-3.5 h-3.5" />}
                 </button>
-              </Card>
+              </div>
             ))}
+            </div>
           </div>
         )}
+      </div>
       </div>
 
       <TradeProductLightbox

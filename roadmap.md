@@ -55,3 +55,4 @@
 - [x] Rebuild the Visualiser as a real-time 3D WebGL scene with GLB assets, orbit camera, transform gizmo, and shadow lighting
 - [x] Connect shared material-library and AI finish selections to persistent per-object 3D PBR materials, transparent contact shadows, and the 32px floating console
 - [x] Isolate Bond Street Stool base/upholstery meshes and map authentic Man of Parts finishes without global texture replacement
+- [x] Upgrade Favorites with editorial-grid and technical-list modes plus Client View-safe MSRP pricing
