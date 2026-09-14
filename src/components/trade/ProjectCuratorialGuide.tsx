@@ -450,26 +450,28 @@ export function ProjectCuratorialGuide({
                     >
                       {rec.image_url ? <img src={rec.image_url} alt={`${rec.title} by ${rec.brand}`} loading="lazy" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Image on request</span>}
                     </Button>
-                    <div className="flex min-w-0 flex-col py-1">
+                    <div className="flex min-w-0 flex-col py-1 pb-4">
                       <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{rec.brand}</p>
                       <p className="mt-2 font-body text-[8px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground/80">
                         {context.label}
                       </p>
                       <h3 className="mt-1 font-display text-lg leading-tight text-foreground">{rec.title}</h3>
-                      <p className="mt-2 line-clamp-5 font-body text-[10px] leading-relaxed tracking-[0.04em] text-muted-foreground">{rationale}</p>
+                      <p className="mt-2 line-clamp-4 font-body text-[10px] leading-relaxed tracking-[0.04em] text-muted-foreground">{rationale}</p>
                       {!isClientMode && (
-                        <p className="mt-2 font-body text-[9px] uppercase tracking-[0.15em] text-foreground">
+                        <p className="mt-3 font-body text-[10px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground">
                           {rec.score >= 90 ? "Trade signal // Strong specification efficiency" : "Programme signal // Confirm lead-time alignment"}
                         </p>
                       )}
-                      <div className="mt-auto pt-3">
-                        <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Match Rating: {Math.round(rec.score)}%</p>
+                      <div className="mt-auto flex flex-col gap-2 pt-4">
+                        <p className="font-body text-[10px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground">
+                          Match Rating: {Math.round(rec.score)}%
+                        </p>
                         <Button
                           type="button"
                           variant="ghost"
                           onClick={() => void addToComposition(rec)}
                           disabled={addingId === rec.product_id || added}
-                          className="mt-1 h-auto rounded-none p-0 font-body text-[9px] uppercase tracking-[0.15em] text-foreground hover:bg-transparent"
+                          className="h-auto items-start justify-start rounded-none p-0 font-body text-[10px] uppercase leading-relaxed tracking-[0.15em] text-foreground hover:bg-transparent"
                         >
                           {addingId === rec.product_id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
                           {added ? "Added to composition" : "[ + Add to Composition ]"}
