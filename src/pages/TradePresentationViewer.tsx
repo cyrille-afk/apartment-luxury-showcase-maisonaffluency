@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
+import { useExportCurrency } from "@/lib/displayMoney";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate, useParams, useNavigate } from "react-router-dom";
@@ -148,6 +149,19 @@ const TradePresentationViewer = () => {
     }
     setFullscreen(!fullscreen);
   };
+
+  // Every exported figure is restated in the member's declared base currency.
+  const exportCurrency = useExportCurrency();
+  const convertProductPrice = useCallback(
+    (p: any) =>
+      p?.trade_price_cents
+        ? {
+            trade_price_cents: exportCurrency.convert(p.trade_price_cents, p.currency),
+            currency: exportCurrency.currency,
+          }
+        : {},
+    [exportCurrency],
+  );
 
   // Shared: convert slide images (main + linked product images) to base64
   // data URLs so both PDF and PPTX exports embed them without CORS issues.
