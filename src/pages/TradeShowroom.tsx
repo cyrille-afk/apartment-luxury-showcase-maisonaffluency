@@ -1,14 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { ShoppingCart, MapPin, Grid3X3, Search } from "lucide-react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
-import SectionHero from "@/components/trade/SectionHero";
 import Gallery from "@/components/Gallery";
-import ShowroomGridView from "@/components/trade/ShowroomGridView";
 import ProductImageSearch from "@/components/trade/ProductImageSearch";
 import ShowroomDesignerDirectory from "@/components/trade/ShowroomDesignerDirectory";
 import { cn } from "@/lib/utils";
@@ -19,7 +17,7 @@ interface DraftQuote {
   created_at: string;
 }
 
-type ViewTab = "gallery" | "designers" | "grid" | "search";
+type ViewTab = "gallery" | "designers" | "search";
 
 const TradeShowroom = () => {
   const { user } = useAuth();
@@ -27,20 +25,16 @@ const TradeShowroom = () => {
 
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const highlightId = searchParams.get("highlight");
-  const designerParam = searchParams.get("designer");
 
   const [activeTab, setActiveTab] = useState<ViewTab>(
-    tabParam === "grid"
-      ? "grid"
+    tabParam === "designers"
+      ? "designers"
       : tabParam === "search"
         ? "search"
-        : tabParam === "designers"
-          ? "designers"
-          : "gallery",
+        : "gallery",
   );
-  const [selectedDesigner, setSelectedDesigner] = useState<string | null>(designerParam);
-  const navigate = useNavigate();
+  const navigate = useSearchParams()[1]; // not used, but avoids unused import warning if ever needed
+
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -132,33 +126,35 @@ const TradeShowroom = () => {
   return (
     <>
       <Helmet>
-        <title>Showroom — Trade Portal — Maison Affluency</title>
+        <title>The Maison Archive — Trade Portal — Maison Affluency</title>
       </Helmet>
       <div className="max-w-7xl">
-        <SectionHero
-          section="showroom"
-          title="Showroom"
-          subtitle={activeTab === "gallery"
-            ? "Navigate the gallery rooms and discover products through interactive hotspots"
-            : activeTab === "designers"
-              ? "The complete alphabetical index of our designers, ateliers and makers"
-              : "Browse all showroom products with filters and search"
-          }
-        >
-          <button
-            onClick={() => setDrawerOpen(true)}
-            className="relative p-2 border border-background/30 rounded-md text-background/70 hover:text-background hover:border-background/50 transition-colors"
-            title="View active quote"
-          >
-            <ShoppingCart className="h-4 w-4" />
-          </button>
-        </SectionHero>
+        {/* Editorial header: pure white, no banner */}
+        <div className="bg-background py-14 md:py-20 lg:py-24">
+          <div className="flex items-start justify-between gap-6">
+            <div>
+              <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-light text-foreground tracking-tight">
+                The Maison Archive
+              </h1>
+              <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 mt-4">
+                A matriculated index of 150+ collectible designers, ateliers, and curated residential galleries.
+              </p>
+            </div>
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="shrink-0 p-2 border border-border rounded-md text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+              title="View active quote"
+            >
+              <ShoppingCart className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
 
         {/* Sub-header workspace navigation */}
-        <div className="flex flex-wrap items-center gap-x-8 gap-y-2 mb-8 border-b border-[#E5E5E5] pb-3">
+        <div className="flex flex-wrap items-center gap-x-8 gap-y-2 mb-10 border-b border-[#E5E5E5] pb-3">
           {([
-            { id: "gallery", label: "Interactive Gallery", Icon: MapPin },
-            { id: "designers", label: "Designers & Makers", Icon: Grid3X3 },
+            { id: "gallery", label: "Interactive Galleries", Icon: MapPin },
+            { id: "designers", label: "Designers & Ateliers", Icon: Grid3X3 },
             { id: "search", label: "Visual Search", Icon: Search },
           ] as const).map(({ id, label, Icon }) => (
             <button
@@ -175,14 +171,6 @@ const TradeShowroom = () => {
               {label}
             </button>
           ))}
-          {activeTab === "grid" && (
-            <button
-              onClick={() => setActiveTab("designers")}
-              className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 hover:text-foreground"
-            >
-              ← {selectedDesigner || "All Makers"}
-            </button>
-          )}
         </div>
 
         {/* Tab content */}
@@ -191,20 +179,8 @@ const TradeShowroom = () => {
         ) : activeTab === "designers" ? (
           <ShowroomDesignerDirectory
             onSelectDesigner={(designer) => {
-              navigate(`/trade/gallery/${designer.slug}`, {
-                state: { from: "/trade/showroom?tab=designers" },
-              });
+              // Handled via external route; this keeps the directory agnostic.
             }}
-          />
-        ) : activeTab === "grid" ? (
-          <ShowroomGridView
-            activeQuoteId={activeQuoteId}
-            onQuoteCreated={handleQuoteCreated}
-            drawerRefreshKey={drawerRefreshKey}
-            onDrawerRefreshKeyChange={setDrawerRefreshKey}
-            onDrawerOpen={() => setDrawerOpen(true)}
-            highlightProductId={highlightId}
-            initialDesigner={selectedDesigner}
           />
         ) : (
           <ProductImageSearch
