@@ -154,19 +154,27 @@ const TradeVisualiser = () => {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase
+      const columns = "id, product_name, brand_name, image_url, category, dimensions, glb_url";
+      const base = () => supabase
         .from("trade_products")
-        .select("id, product_name, brand_name, image_url, category, dimensions, glb_url")
+        .select(columns)
         .eq("is_active", true)
         .eq("is_hidden", false)
-        .not("image_url", "is", null)
-        .order("updated_at", { ascending: false })
-        .limit(180);
+        .not("image_url", "is", null);
+      const [recent, models] = await Promise.all([
+        base().order("updated_at", { ascending: false }).limit(180),
+        base().not("glb_url", "is", null).order("product_name").limit(120),
+      ]);
       if (cancelled) return;
-      if (error) toast.error("The collection index could not be loaded.");
-      setProducts((data ?? []) as CatalogueProduct[]);
+      if (recent.error || models.error) toast.error("The collection index could not be loaded.");
+      const merged = new Map<string, CatalogueProduct>();
+      for (const product of [...(models.data ?? []), ...(recent.data ?? [])] as CatalogueProduct[]) {
+        merged.set(product.id, product);
+      }
+      setProducts([...merged.values()]);
       setLoadingProducts(false);
     })();
+
     return () => { cancelled = true; };
   }, []);
 
