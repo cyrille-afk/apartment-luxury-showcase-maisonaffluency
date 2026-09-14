@@ -1,5 +1,5 @@
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
 import { getCart, shouldUseFullPageCart, useCart } from "@/lib/cart";
@@ -11,6 +11,7 @@ import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { cn } from "@/lib/utils";
+import { setStickyCommerceDockHeight } from "@/lib/stickyCommerceDock";
 
 /**
  * Multi-tier product commerce CTA.
