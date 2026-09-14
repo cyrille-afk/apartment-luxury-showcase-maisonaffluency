@@ -15,6 +15,7 @@ export type SpecDrawerItem = {
   width_mm: number | null;
   depth_mm: number | null;
   height_mm: number | null;
+  size_variants?: Array<{ label?: string | null; base?: string | null; top?: string | null }> | null;
 };
 
 type Finish = { label: string; swatch: string };
