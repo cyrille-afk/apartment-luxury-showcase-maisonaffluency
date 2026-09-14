@@ -926,3 +926,42 @@ input, select, textarea {
 @media (prefers-reduced-motion: reduce) {
   .animate-gallery-icon-pulse { animation: none; }
 }
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  body:has(.proposal-preview-shell[data-state="open"]) > *:not(#root),
+  body:has(.proposal-preview-shell[data-state="open"]) #root > * {
+    visibility: hidden;
+  }
+
+  .proposal-preview-shell[data-state="open"],
+  .proposal-preview-shell[data-state="open"] * {
+    visibility: visible;
+  }
+
+  .proposal-preview-shell[data-state="open"] {
+    position: absolute !important;
+    inset: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+  }
+
+  .proposal-preview-controls {
+    display: none !important;
+  }
+
+  .proposal-print-sheet {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
