@@ -775,7 +775,7 @@ const App = () => {
                     <Route path="designers/:slug" element={<TradeAtelierProfile />} />
                     <Route path="products/:id" element={<Suspense fallback={<PageLoadingSkeleton />}><ProductPageContainer isInsideTradePortal /></Suspense>} />
                     <Route path="products/:slug/:productSlug" element={<Suspense fallback={<PageLoadingSkeleton />}><ProductPageContainer isInsideTradePortal /></Suspense>} />
-                    <Route path="boards" element={<TradeBoards />} />
+                    <Route path="boards" element={<Navigate to="/trade/projects?view=folders" replace />} />
                     <Route path="boards/:id" element={<TradeBoardBuilder />} />
                     <Route path="projects" element={<TradeProjects />} />
                     <Route path="projects/:id" element={<TradeProjectDetail />} />

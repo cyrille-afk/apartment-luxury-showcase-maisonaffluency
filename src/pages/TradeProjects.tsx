@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Plus, FolderOpen, Loader2, Calendar, MapPin, User as UserIcon, Users, EyeOff, Trash2 } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,6 +16,7 @@ import {
 import { Label } from "@/components/ui/label";
 import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
 import { toast } from "sonner";
+import TradeBoards from "@/pages/TradeBoards";
 
 const STATUS_TABS: { key: "active" | "completed" | "archived"; label: string }[] = [
   { key: "active", label: "Active" },
@@ -27,6 +28,8 @@ export default function TradeProjects() {
   const { user } = useAuth();
   const { currentStudio, canEdit, isAdmin } = useStudio();
   const { projects, loading, refresh } = useProjects();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const view = searchParams.get("view") === "folders" ? "folders" : "projects";
   const [tab, setTab] = useState<"active" | "completed" | "archived">("active");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
@@ -114,7 +117,7 @@ export default function TradeProjects() {
             </div>
           )}
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        {view === "projects" && <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm" className="gap-2">
               <Plus className="h-4 w-4" /> New project
@@ -147,9 +150,27 @@ export default function TradeProjects() {
               </Button>
             </div>
           </DialogContent>
-        </Dialog>
+        </Dialog>}
       </div>
 
+      <div className="mb-8 flex items-center gap-8 border-b border-border">
+        {(["projects", "folders"] as const).map((nextView) => (
+          <button
+            key={nextView}
+            type="button"
+            onClick={() => setSearchParams(nextView === "folders" ? { view: "folders" } : {})}
+            className={`-mb-px border-b py-3 font-body text-[10px] uppercase tracking-[0.15em] transition-colors ${
+              view === nextView
+                ? "border-foreground text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {nextView === "projects" ? "Projects" : "Folders & Drafts"}
+          </button>
+        ))}
+      </div>
+
+      {view === "projects" ? <>
       <div className="flex items-center gap-1 border-b border-border mb-6">
         {STATUS_TABS.map((t) => (
           <button
@@ -307,6 +328,7 @@ export default function TradeProjects() {
           ))}
         </div>
       )}
+      </> : <TradeBoards embedded />}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import {
-  LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderArchive, FolderKanban,
+  LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderKanban,
   DollarSign, ClipboardList, Package, FileText, Settings, Wrench, UserCircle, Wand2, Image,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -24,7 +24,6 @@ const coreItems = [
   { title: "Visualiser", url: "/trade/visualiser", icon: Wand2 },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
   { title: "Projects", url: "/trade/projects", icon: FolderKanban },
-  { title: "Project Folders", url: "/trade/boards", icon: FolderArchive },
   { title: "Quotes", url: "/trade/quotes", icon: FileText },
   { title: "Tools", url: "/trade/tools", icon: Wrench },
   { title: "Settings", url: "/trade/settings", icon: Settings },
@@ -39,7 +38,7 @@ export function TradeSidebar() {
   const [submittedQuotes, setSubmittedQuotes] = useState(0);
   const [pendingApps, setPendingApps] = useState(0);
   const [pendingSamples, setPendingSamples] = useState(0);
-  // Mobile → desktop bridge: gold pulsing dot over Project Folders.
+  // Mobile → desktop bridge: surfaced on Projects now that folders live there.
   const [bridgeOpen, setBridgeOpen] = useState(false);
   const { count: flaggedCount } = useStudioBridge();
   const { count: alertCount } = useStudioAlerts();
@@ -102,17 +101,17 @@ export function TradeSidebar() {
 
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1">
               {coreItems.map((item) => {
-                const isBoards = item.url === "/trade/boards";
-                const showDot = isBoards && bridgeCount > 0;
+                const isProjects = item.url === "/trade/projects";
+                const showDot = isProjects && bridgeCount > 0;
                 return (
                   <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton asChild>
+                    <SidebarMenuButton asChild className="h-auto">
                       <NavLink
                         to={item.url}
                         end={item.end}
-                        className="flex items-center gap-3 px-3 py-2.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors border-l border-transparent"
+                        className="flex items-center gap-3 px-3 py-3 font-body text-xs text-muted-foreground hover:text-foreground transition-colors border-l border-transparent"
                         activeClassName="text-foreground font-medium border-foreground"
                       >
                         <span className="relative shrink-0">

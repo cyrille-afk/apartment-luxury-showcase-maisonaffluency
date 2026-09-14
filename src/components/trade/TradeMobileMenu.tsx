@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ChevronRight, LogOut, Menu, X,
-  LayoutDashboard, Heart, FolderArchive, FolderKanban, MapPin,
+  LayoutDashboard, Heart, FolderKanban, MapPin,
   FileText, Settings, Shield, Wrench, UserCircle, Image,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -16,7 +16,6 @@ const coreItems = [
   { title: "Showroom", url: "/trade/showroom", icon: MapPin },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
   { title: "Projects", url: "/trade/projects", icon: FolderKanban },
-  { title: "Project Folders", url: "/trade/boards", icon: FolderArchive },
   { title: "Quotes", url: "/trade/quotes", icon: FileText },
   { title: "Tools", url: "/trade/tools", icon: Wrench },
   { title: "Settings", url: "/trade/settings", icon: Settings },
