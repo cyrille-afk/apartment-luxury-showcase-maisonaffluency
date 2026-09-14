@@ -237,9 +237,14 @@ export function BriefWizard() {
     console.log("[BriefWizard debug] toast param =", isResumed, window.location.search);
     if (isResumed) {
       const t = setTimeout(() => {
-        console.log("[BriefWizard debug] firing resumed toast");
-        toast.success("Plain test toast");
-        showResumedBriefToast();
+        console.log("[BriefWizard debug] firing resumed toast. toast object:", typeof toast, Object.keys(toast || {}));
+        try {
+          toast.success("Plain test toast");
+          showResumedBriefToast();
+          console.log("[BriefWizard debug] toast calls done");
+        } catch (e) {
+          console.error("[BriefWizard debug] toast error", e);
+        }
       }, 300);
       return () => clearTimeout(t);
     }
