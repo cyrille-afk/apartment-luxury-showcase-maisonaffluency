@@ -2,6 +2,7 @@ import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import fs from "fs";
+import { execSync } from "child_process";
 import { componentTagger } from "lovable-tagger";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
@@ -139,6 +140,14 @@ function inlineCriticalCssPlugin(): Plugin {
  * and auto-reload when a fresh build is deployed.
  */
 function emitVersionPlugin(buildId: string): Plugin {
+  // Stamp the git commit SHA so the admin GitHub sync panel can tell whether
+  // the deployed app is ahead of the synced GitHub repo (i.e. a sync is due).
+  let commitSha: string | null = null;
+  try {
+    commitSha = execSync("git rev-parse HEAD", { encoding: "utf8" }).trim() || null;
+  } catch {
+    commitSha = null;
+  }
   return {
     name: "emit-version",
     apply: "build",
@@ -146,7 +155,7 @@ function emitVersionPlugin(buildId: string): Plugin {
       this.emitFile({
         type: "asset",
         fileName: "version.json",
-        source: JSON.stringify({ buildId, builtAt: new Date().toISOString() }),
+        source: JSON.stringify({ buildId, builtAt: new Date().toISOString(), commitSha }),
       });
     },
   };

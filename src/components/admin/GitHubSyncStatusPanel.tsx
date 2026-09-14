@@ -15,6 +15,8 @@ import {
 type SyncStatus = {
   repo: string;
   branch: string;
+  deployed: { commitSha: string | null };
+  syncState: "in_sync" | "ahead_of_github" | "unknown";
   commit: {
     sha: string;
     shortSha: string;
@@ -130,6 +132,26 @@ export default function GitHubSyncStatusPanel() {
           <p className="font-body text-sm text-muted-foreground line-clamp-1">
             {data.commit.message}
           </p>
+
+          {data.syncState === "ahead_of_github" && (
+            <div
+              role="alert"
+              className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2"
+            >
+              <p className="font-body text-sm text-amber-700 dark:text-amber-400">
+                Sync pending — the live site is on commit{" "}
+                <span className="font-mono">{data.deployed.commitSha?.slice(0, 7)}</span>, but
+                GitHub is still on <span className="font-mono">{data.commit.shortSha}</span>.
+                Run GitHub Sync (Project Settings → GitHub → Sync now) so CI picks up the
+                latest visual baselines.
+              </p>
+            </div>
+          )}
+          {data.syncState === "in_sync" && (
+            <p className="font-body text-xs text-emerald-700 dark:text-emerald-400">
+              Live site and GitHub are on the same commit.
+            </p>
+          )}
 
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-body text-sm text-muted-foreground">playwright-visual</span>
