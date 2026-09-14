@@ -86,6 +86,10 @@ const withRenderingDefaults = (object: Partial<CanvasObject> & CatalogueProduct)
   contrast: object.contrast ?? 100,
   warmth: object.warmth ?? 0,
   shadowDirection: object.shadowDirection ?? 10,
+  glb_url: object.glb_url ?? null,
+  render3d: object.render3d ?? false,
+  orbit: object.orbit ?? false,
+
 });
 
 const scaledDimensionLabel = (object: CanvasObject) => {
