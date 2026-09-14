@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, FileText, Clock, CheckCircle, Send, Trash2, ShoppingCart, ChevronRight, CreditCard, XCircle, FolderOpen } from "lucide-react";
 import { QuoteCardSkeleton } from "@/components/trade/skeletons";
 import QuoteDetail from "@/components/trade/QuoteDetail";
+import { InvoiceStatusDrawer } from "@/components/trade/InvoiceStatusDrawer";
 
 import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
@@ -59,6 +60,10 @@ const TradeQuotes = () => {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const isDrawerQuote = (id?: string | null) =>
+    typeof id === "string" && id.toLowerCase().startsWith("200169");
   
 
   const fetchQuotes = async () => {
@@ -151,7 +156,10 @@ const TradeQuotes = () => {
   // Deep-link: open a specific quote when /quotes/:quoteId or ?quote=<id> is in the URL
   useEffect(() => {
     const q = quoteId || searchParams.get("quote");
-    if (q && q !== selectedQuoteId) setSelectedQuoteId(q);
+    if (q && q !== selectedQuoteId) {
+      setSelectedQuoteId(q);
+      if (isDrawerQuote(q)) setDrawerOpen(true);
+    }
   }, [quoteId, searchParams, selectedQuoteId]);
 
   // Concierge session handoff: when arriving with ?fromSession=1, auto-create a
@@ -299,7 +307,7 @@ const TradeQuotes = () => {
   };
 
   // Show detail view
-  if (selectedQuoteId) {
+  if (selectedQuoteId && !isDrawerQuote(selectedQuoteId)) {
     const quote = quotes.find((q) => q.id === selectedQuoteId);
     return (
       <QuoteDetail
@@ -409,10 +417,30 @@ const TradeQuotes = () => {
             const StatusIcon = config.icon;
 
             return (
-              <button
+              <div
                 key={quote.id}
-                onClick={() => setSelectedQuoteId(quote.id)}
-                className="w-full text-left border border-border rounded-lg p-4 hover:border-foreground/20 transition-colors group"
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  if (isDrawerQuote(quote.id)) {
+                    setSelectedQuoteId(quote.id);
+                    setDrawerOpen(true);
+                  } else {
+                    setSelectedQuoteId(quote.id);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    if (isDrawerQuote(quote.id)) {
+                      setSelectedQuoteId(quote.id);
+                      setDrawerOpen(true);
+                    } else {
+                      setSelectedQuoteId(quote.id);
+                    }
+                  }
+                }}
+                className="w-full text-left border border-border rounded-lg p-4 hover:border-foreground/20 transition-colors group cursor-pointer"
               >
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -456,14 +484,51 @@ const TradeQuotes = () => {
                       <p className="font-body text-xs text-muted-foreground mt-1 italic truncate">"{quote.notes}"</p>
                     )}
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (isDrawerQuote(quote.id)) {
+                          setSelectedQuoteId(quote.id);
+                          setDrawerOpen(true);
+                        } else {
+                          setSelectedQuoteId(quote.id);
+                        }
+                      }}
+                      className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
+                    >
+                      [ VIEW RECORD ]
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
+                  </div>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>
       );
       })()}
+
+      {isDrawerQuote(selectedQuoteId) && selectedQuoteId && (
+        <InvoiceStatusDrawer
+          quoteId={selectedQuoteId}
+          open={drawerOpen}
+          onClose={() => {
+            setDrawerOpen(false);
+            setTimeout(() => {
+              setSelectedQuoteId(null);
+              if (quoteId) {
+                navigate("/trade/quotes", { replace: true });
+              } else if (searchParams.get("quote")) {
+                searchParams.delete("quote");
+                setSearchParams(searchParams, { replace: true });
+              }
+              fetchQuotes();
+            }, 480);
+          }}
+          projectName={quotes.find((q) => q.id === selectedQuoteId)?.project_name || undefined}
+        />
+      )}
     </div>
     </>
   );
