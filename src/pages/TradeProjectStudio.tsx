@@ -164,7 +164,7 @@ export default function TradeProjectStudio() {
   const titleLine = `PROJECT STUDIO // ${project.name.toUpperCase()}`;
 
   return (
-    <div className="-mx-4 -mt-4 md:-mx-8 md:-mt-8 lg:-mx-12 lg:-mt-12 lg:flex lg:h-[100dvh] lg:flex-col lg:overflow-hidden">
+    <div className="-mx-4 -mt-4 md:-mx-8 md:-mt-8 lg:-mx-12 lg:-mt-12 lg:flex lg:h-[calc(100dvh-4rem)] lg:flex-col lg:overflow-hidden">
       {/* Masthead */}
       <div className="shrink-0 border-b border-border px-4 py-6 md:px-8 lg:px-12">
         <Link
