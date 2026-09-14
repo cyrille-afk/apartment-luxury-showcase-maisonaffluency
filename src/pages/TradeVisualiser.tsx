@@ -203,11 +203,15 @@ const TradeVisualiser = () => {
 
   const filteredProducts = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return products;
-    return products.filter((product) =>
-      `${product.product_name} ${product.brand_name} ${product.category}`.toLowerCase().includes(query),
-    );
-  }, [products, search]);
+    return products.filter((product) => {
+      if (only3d && !product.glb_url) return false;
+      if (!query) return true;
+      return `${product.product_name} ${product.brand_name} ${product.category}`.toLowerCase().includes(query);
+    });
+  }, [products, search, only3d]);
+
+  const modelCount = useMemo(() => products.filter((product) => product.glb_url).length, [products]);
+
 
   const selected = objects.find((object) => object.instanceId === selectedId) ?? null;
 
