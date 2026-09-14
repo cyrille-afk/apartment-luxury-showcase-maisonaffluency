@@ -58,6 +58,7 @@ type CanvasGesture =
       startTiltX: number;
       startTiltY: number;
       startSkewX: number;
+      startShadowDirection: number;
     };
 
 const withRenderingDefaults = (object: Partial<CanvasObject> & CatalogueProduct): CanvasObject => ({
@@ -300,6 +301,7 @@ const TradeVisualiser = () => {
       startTiltX: object.tiltX,
       startTiltY: object.tiltY,
       startSkewX: object.skewX,
+      startShadowDirection: object.shadowDirection,
     };
     setSelectedId(object.instanceId);
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -332,7 +334,7 @@ const TradeVisualiser = () => {
           tiltX: Math.min(24, Math.max(-24, gesture.startTiltX - deltaY * gesture.cornerY * 0.12)),
           tiltY: Math.min(28, Math.max(-28, gesture.startTiltY + deltaX * gesture.cornerX * 0.12)),
           skewX: Math.min(22, Math.max(-22, gesture.startSkewX + deltaX * gesture.cornerY * 0.08)),
-          shadowDirection: Math.min(34, Math.max(-34, object.shadowDirection + deltaX * 0.015)),
+          shadowDirection: Math.min(34, Math.max(-34, gesture.startShadowDirection + deltaX * 0.08)),
         };
       }));
       return;
