@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { FileDown, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DIMENSIONS_PLACEHOLDER, formatDimensions, resolveDimensions } from "@/lib/productDimensions";
 
 export type SpecDrawerItem = {
   product_id: string;
