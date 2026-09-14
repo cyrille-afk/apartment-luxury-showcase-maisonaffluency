@@ -44,19 +44,7 @@ function leadLabel(item: StudioItem) {
 }
 
 function dimsLabel(item: StudioItem) {
-  if (item.width_mm && item.depth_mm && item.height_mm) {
-    return `${item.width_mm} × ${item.depth_mm} × ${item.height_mm} mm`;
-  }
-  if (item.dimensions) return item.dimensions;
-
-  const variantLabel = item.size_variants?.find((variant) => variant.label)?.label;
-  if (!variantLabel) return null;
-  const dimensions = variantLabel.match(/W\s*([\d.]+)\s*[×x]\s*D\s*([\d.]+)\s*[×x]\s*H\s*([\d.]+)\s*(mm|cm)/i);
-  if (!dimensions) return null;
-  const [, width, depth, height, unit] = dimensions;
-  if (!width || !depth || !height || !unit) return null;
-  const multiplier = unit.toLowerCase() === "cm" ? 10 : 1;
-  return `${Number(width) * multiplier} × ${Number(depth) * multiplier} × ${Number(height) * multiplier} mm`;
+  return dimensionBadgeLabel(item);
 }
 
 export default function TradeProjectStudio() {
