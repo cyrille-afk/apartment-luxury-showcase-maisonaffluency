@@ -22,6 +22,7 @@ type StudioItem = {
   width_mm: number | null;
   depth_mm: number | null;
   height_mm: number | null;
+  size_variants: Array<{ label?: string | null }> | null;
   rrp_cents: number | null;
   quantity: number;
 };
@@ -46,7 +47,16 @@ function dimsLabel(item: StudioItem) {
   if (item.width_mm && item.depth_mm && item.height_mm) {
     return `${item.width_mm} × ${item.depth_mm} × ${item.height_mm} mm`;
   }
-  return item.dimensions || null;
+  if (item.dimensions) return item.dimensions;
+
+  const variantLabel = item.size_variants?.find((variant) => variant.label)?.label;
+  if (!variantLabel) return null;
+  const dimensions = variantLabel.match(/W\s*([\d.]+)\s*[×x]\s*D\s*([\d.]+)\s*[×x]\s*H\s*([\d.]+)\s*(mm|cm)/i);
+  if (!dimensions) return null;
+  const [, width, depth, height, unit] = dimensions;
+  if (!width || !depth || !height || !unit) return null;
+  const multiplier = unit.toLowerCase() === "cm" ? 10 : 1;
+  return `${Number(width) * multiplier} × ${Number(depth) * multiplier} × ${Number(height) * multiplier} mm`;
 }
 
 export default function TradeProjectStudio() {
@@ -68,7 +78,7 @@ export default function TradeProjectStudio() {
       setLoadingItems(true);
       const sb = supabase as any;
       const productFields =
-        "id, product_name, brand_name, image_url, sku, lead_time, dimensions, width_mm, depth_mm, height_mm, trade_price_cents, rrp_price_cents";
+        "id, product_name, brand_name, image_url, sku, lead_time, dimensions, width_mm, depth_mm, height_mm, size_variants, trade_price_cents, rrp_price_cents";
 
       const [q, b] = await Promise.all([
         sb.from("trade_quotes").select("id").eq("project_id", id),
@@ -114,6 +124,7 @@ export default function TradeProjectStudio() {
           width_mm: p.width_mm,
           depth_mm: p.depth_mm,
           height_mm: p.height_mm,
+          size_variants: p.size_variants,
           rrp_cents: p.trade_price_cents ?? p.rrp_price_cents ?? null,
           quantity,
         });
@@ -218,7 +229,7 @@ export default function TradeProjectStudio() {
                     }}
                     aria-label={`Open AI curatorial guide for ${item.name}`}
                   >
-                    <div className="relative overflow-hidden bg-muted">
+                      <div className="relative overflow-hidden bg-muted">
                       {item.image_url ? (
                         <img
                           src={item.image_url}
@@ -231,7 +242,7 @@ export default function TradeProjectStudio() {
                       )}
 
                       {/* Wireframe / crosshair overlay */}
-                      <div className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ${isCuratorialActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+                      <div className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ${isCuratorialActive ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus:opacity-100"}`}>
                         <span className="absolute left-0 right-0 top-1/2 h-px bg-foreground/25" />
                         <span className="absolute bottom-0 top-0 left-1/2 w-px bg-foreground/25" />
                         <span className={`absolute inset-4 border transition-colors ${isCuratorialActive && isRecommendationHovered ? "animate-pulse border-foreground/60" : "border-foreground/25"}`} />
@@ -258,7 +269,7 @@ export default function TradeProjectStudio() {
                           setCuratorialItemId(item.product_id);
                           window.dispatchEvent(new CustomEvent("project-curator:open"));
                         }}
-                        className={`absolute left-4 right-4 top-4 z-10 h-auto whitespace-normal rounded-none bg-background/90 px-2 py-1 text-left font-body text-[9px] uppercase leading-relaxed tracking-[0.15em] text-foreground transition-opacity hover:bg-background/90 focus:opacity-100 ${isCuratorialActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+                        className={`absolute left-4 right-4 top-4 z-10 h-auto whitespace-normal rounded-none bg-background/90 px-2 py-1 text-left font-body text-[9px] uppercase leading-relaxed tracking-[0.15em] text-foreground transition-opacity hover:bg-background/90 focus:opacity-100 ${isCuratorialActive ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus:opacity-100"}`}
                         aria-label={`Use ${item.name} as AI curatorial reference`}
                       >
                         AI Analysis // Resourcing Complements
