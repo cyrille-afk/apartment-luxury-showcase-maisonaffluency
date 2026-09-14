@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { cn } from "@/lib/utils";
 
 export type DisplayCurrency = "original" | "SGD" | "EUR" | "USD" | "GBP" | "CHF" | "AED" | "HKD" | "AUD";
 
@@ -143,9 +144,15 @@ interface CurrencyToggleProps {
    * behind a "More ▾" dropdown. Used on dense surfaces like product pages.
    */
   compact?: boolean;
+  /**
+   * When true, render currencies as a flat horizontal text row with a crisp
+   * underline on the active option. This is the museum-grade ribbon style used
+   * in the Trade Gallery filter bar.
+   */
+  minimal?: boolean;
 }
 
-export default function CurrencyToggle({ value, onChange, className = "", compact = false }: CurrencyToggleProps) {
+export default function CurrencyToggle({ value, onChange, className = "", compact = false, minimal = false }: CurrencyToggleProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Close the dropdown on outside click / Escape.
