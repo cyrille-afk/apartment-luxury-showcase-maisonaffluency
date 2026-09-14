@@ -132,6 +132,7 @@ function useFittedModel(
   productId: string,
   url: string,
   material: VisualiserMaterial | null,
+  topMaterial: VisualiserMaterial | null,
   baseMaterial: VisualiserMaterial | null,
   upholsteryMaterial: VisualiserMaterial | null,
 ) {
@@ -139,6 +140,7 @@ function useFittedModel(
   const { gl } = useThree();
   const maxAnisotropy = gl.capabilities.getMaxAnisotropy();
   const generalMaps = useMaterialMaps(material, maxAnisotropy);
+  const topMaps = useMaterialMaps(topMaterial, maxAnisotropy);
   const baseMaps = useMaterialMaps(baseMaterial, maxAnisotropy);
   const upholsteryMaps = useMaterialMaps(upholsteryMaterial, maxAnisotropy);
   return useMemo(() => {
@@ -148,17 +150,32 @@ function useFittedModel(
       if (mesh.isMesh) {
         mesh.castShadow = true;
         mesh.receiveShadow = true;
-        const nodeName = mesh.name.toLowerCase();
+        // Sub-mesh roles are read from the GLB node names (Table_Top_Mesh, Base_Mesh …)
+        // so a finish lands on the surface the designer actually picked.
+        const nodeName = `${mesh.name} ${mesh.parent?.name ?? ""}`.toLowerCase();
         const isBondStreet = isBondStreetStool(productId);
-        const role = isBondStreet
-          ? /upholstery|fabric|cushion|seat|cover|textile/.test(nodeName)
+        const role: "upholstery" | "base" | "top" | null =
+          /upholstery|fabric|cushion|seat|cover|textile/.test(nodeName)
             ? "upholstery"
-            : /base|frame|leg|metal|bronze|steel/.test(nodeName)
+            : /base|frame|leg|stem|pedestal|foot|column|bracket/.test(nodeName)
               ? "base"
-              : null
-          : null;
-        const finish = role === "upholstery" ? upholsteryMaterial : role === "base" ? baseMaterial : material;
-        const maps = role === "upholstery" ? upholsteryMaps : role === "base" ? baseMaps : generalMaps;
+              : /top|surface|plate|tabletop|marble|stone|counter|shelf/.test(nodeName)
+                ? "top"
+                : null;
+        const finish = role === "upholstery"
+          ? upholsteryMaterial
+          : role === "base"
+            ? baseMaterial ?? material
+            : role === "top"
+              ? topMaterial ?? material
+              : material;
+        const maps = role === "upholstery"
+          ? upholsteryMaps
+          : role === "base"
+            ? (baseMaterial ? baseMaps : generalMaps)
+            : role === "top"
+              ? (topMaterial ? topMaps : generalMaps)
+              : generalMaps;
         const neutralFabric = isBondStreet && role === "upholstery" && !upholsteryMaterial;
         if (!finish && !neutralFabric) return;
         const source = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
