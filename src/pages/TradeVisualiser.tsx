@@ -240,7 +240,7 @@ const TradeVisualiser = () => {
   );
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-[hsl(var(--visualiser-canvas))]">
+    <div className="relative h-[calc(100dvh-3.5rem)] w-full overflow-hidden bg-[hsl(var(--visualiser-canvas))] md:h-[calc(100dvh-4rem)]">
       <Helmet>
         <title>Visualiser Sandbox | Maison Affluency Trade</title>
         <meta name="description" content="Compose interiors in a live 3D sandbox with collectible design assets." />
