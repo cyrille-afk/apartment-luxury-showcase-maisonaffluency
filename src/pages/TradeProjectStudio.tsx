@@ -243,11 +243,9 @@ export default function TradeProjectStudio() {
                           <span className="bg-background/85 px-1.5 py-1 font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
                             {String(idx + 1).padStart(2, "0")} // {item.name}
                           </span>
-                          {dims && (
-                            <span className="bg-background/85 px-1.5 py-1 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                              {dims}
-                            </span>
-                          )}
+                          <span className="whitespace-nowrap bg-background/85 px-1.5 py-1 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                            {dims}
+                          </span>
                         </span>
                       </div>
                       <Button
