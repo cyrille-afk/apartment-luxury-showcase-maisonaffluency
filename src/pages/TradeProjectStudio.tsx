@@ -26,6 +26,7 @@ type StudioItem = {
   height_mm: number | null;
   size_variants: Array<{ label?: string | null; base?: string | null; top?: string | null }> | null;
   rrp_cents: number | null;
+  source_pick_id: string | null;
   quantity: number;
 };
 
@@ -78,7 +79,7 @@ export default function TradeProjectStudio() {
       setLoadingItems(true);
       const sb = supabase as any;
       const productFields =
-        "id, product_name, brand_name, image_url, sku, lead_time, dimensions, width_mm, depth_mm, height_mm, size_variants, trade_price_cents, rrp_price_cents";
+        "id, product_name, brand_name, image_url, sku, lead_time, dimensions, width_mm, depth_mm, height_mm, size_variants, trade_price_cents, rrp_price_cents, source_pick_id";
 
       const [q, b] = await Promise.all([
         sb.from("trade_quotes").select("id").eq("project_id", id),
@@ -126,6 +127,7 @@ export default function TradeProjectStudio() {
           height_mm: p.height_mm,
           size_variants: p.size_variants,
           rrp_cents: p.trade_price_cents ?? p.rrp_price_cents ?? null,
+          source_pick_id: p.source_pick_id ?? null,
           quantity,
         });
       };
@@ -133,7 +135,30 @@ export default function TradeProjectStudio() {
       ((qItems.data as any[]) || []).forEach((r) => push(r, r.quantity || 1));
       ((bItems.data as any[]) || []).forEach((r) => push(r, 1));
 
-      setItems(Array.from(map.values()));
+      const list = Array.from(map.values());
+
+      // Hydrate prices from the curator pick when the trade_products mirror
+      // row is missing a price — the pick is the source of truth and this
+      // guarantees the ledger and proposal preview never render blank rows.
+      const missing = list.filter((i) => i.rrp_cents == null && i.source_pick_id);
+      if (missing.length) {
+        const pickIds = Array.from(new Set(missing.map((i) => i.source_pick_id as string)));
+        const { data: picks } = await supabase
+          .from("designer_curator_picks")
+          .select("id, trade_price_cents")
+          .in("id", pickIds);
+        const priceByPick = new Map(
+          ((picks as Array<{ id: string; trade_price_cents: number | null }> | null) || []).map(
+            (p) => [p.id, p.trade_price_cents],
+          ),
+        );
+        for (const item of missing) {
+          const pickPrice = item.source_pick_id ? priceByPick.get(item.source_pick_id) : undefined;
+          if (pickPrice != null) item.rrp_cents = pickPrice;
+        }
+      }
+
+      setItems(list);
       setLoadingItems(false);
     })();
   }, [id, itemsVersion]);
