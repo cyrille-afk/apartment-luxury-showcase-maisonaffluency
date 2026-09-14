@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
+import { useProjects } from "@/hooks/useProjects";
 import dashboard3dStudioImage from "@/assets/dashboard-3d-style-neutrals.jpg";
 
 interface BrandFolder {
@@ -75,6 +76,7 @@ const formatRelativeDate = (dateStr: string) => {
 
 const TradeDashboard = () => {
   const { profile } = useAuth();
+  const { projects: activeProjects } = useProjects({ activeOnly: true });
   const [searchParams, setSearchParams] = useSearchParams();
   const [brands, setBrands] = useState<BrandFolder[]>([]);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
@@ -232,13 +234,13 @@ const TradeDashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-x-5 gap-y-10 md:gap-y-14">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 content-start items-start gap-x-5 gap-y-14 md:gap-y-20">
         {DASH_CARDS.map((card, index) => (
           <Link
             key={card.to}
             to={card.to}
             data-tour-target={card.key === "dash-designers" ? "designers" : card.key === "dash-library" ? "resources" : undefined}
-            className={`group block tour-target ${index === 0 ? "lg:col-span-7" : index === 1 ? "lg:col-span-5" : "lg:col-span-4"}`}
+            className={`group flex h-full flex-col pb-2 md:pb-4 tour-target ${index === 0 ? "lg:col-span-7" : index === 1 ? "lg:col-span-5" : "lg:col-span-4"}`}
           >
             <div className={`relative overflow-hidden bg-muted ${index === 0 ? "aspect-[16/9]" : index === 1 ? "aspect-[10/9]" : "aspect-[4/3]"}`}>
               {getCardImage(card) ? (
@@ -260,7 +262,7 @@ const TradeDashboard = () => {
                 </span>
               )}
             </div>
-            <div className="pt-4 border-t border-border mt-3">
+            <div className="mt-3 min-h-[92px] border-t border-border pt-4 md:min-h-[104px]">
               <p className="trade-micro-label text-muted-foreground mb-1">0{index + 1} — Collection</p>
               <h3 className="font-display text-lg md:text-xl text-foreground mb-1">{card.title}</h3>
               <p className="trade-card-description font-body text-[11px] md:text-xs leading-relaxed">{card.description}</p>
@@ -268,6 +270,23 @@ const TradeDashboard = () => {
           </Link>
         ))}
       </div>
+
+      {activeProjects.length > 0 && (
+        <div className="mt-14 border-y border-border py-4 md:mt-20" aria-label="Active workspace projects">
+          <div className="h-px w-full bg-border" aria-hidden="true" />
+          <div className="mt-3 flex gap-x-7 gap-y-2 overflow-x-auto whitespace-nowrap font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {activeProjects.slice(0, 4).map((project, index) => (
+              <Link
+                key={project.id}
+                to={`/trade/projects/${project.id}`}
+                className="shrink-0 transition-colors hover:text-foreground"
+              >
+                {String(index + 1).padStart(2, "0")} // {project.name} (Active)
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Most Popular */}
       <MostPopularProducts />
