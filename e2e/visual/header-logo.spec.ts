@@ -32,12 +32,15 @@ test.describe("Mobile header logo", () => {
     for (const route of ROUTES) {
       test(`${bp.width}px (${bp.label}) — ${route} keeps the locked wordmark size`, async ({
         browser,
+        baseURL,
       }) => {
+        if (!baseURL) throw new Error("Playwright baseURL is required");
         const context = await browser.newContext({
           ...devices["Pixel 5"],
           viewport: { width: bp.width, height: bp.height },
           isMobile: true,
           hasTouch: true,
+          baseURL,
         });
         const page = await context.newPage();
         try {
@@ -48,8 +51,8 @@ test.describe("Mobile header logo", () => {
           await expect(logo).toHaveText(/AFFLUENCY/);
 
           // 1. Font size matches the locked step for this breakpoint.
-          const fontSize = await logo.evaluate(
-            (el) => parseFloat(getComputedStyle(el).fontSize),
+          const fontSize = await logo.evaluate((el) =>
+            parseFloat(getComputedStyle(el).fontSize),
           );
           expect(
             fontSize,
@@ -60,19 +63,25 @@ test.describe("Mobile header logo", () => {
           //    which is what previous shrink fixes were trying to solve).
           const box = await logo.boundingBox();
           expect(box, "logo has no layout box").not.toBeNull();
-          expect(box!.x).toBeGreaterThanOrEqual(-1);
-          expect(box!.x + box!.width).toBeLessThanOrEqual(bp.width + 1);
+          if (!box) throw new Error("Logo has no layout box");
+          expect(box.x).toBeGreaterThanOrEqual(-1);
+          expect(box.x + box.width).toBeLessThanOrEqual(bp.width + 1);
 
           // 3. It must not be cut off by a clipping ancestor in the header
           //    (the wordmark sits inside truncate / overflow-hidden wrappers).
           const truncated = await logo.evaluate((el) => {
             const rect = el.getBoundingClientRect();
             let node = el.parentElement;
-            for (let depth = 0; node && depth < 4; depth++, node = node.parentElement) {
+            for (
+              let depth = 0;
+              node && depth < 4;
+              depth++, node = node.parentElement
+            ) {
               const style = getComputedStyle(node);
               if (style.overflowX === "hidden" || style.overflowX === "clip") {
                 const clip = node.getBoundingClientRect();
-                if (rect.left < clip.left - 1 || rect.right > clip.right + 1) return true;
+                if (rect.left < clip.left - 1 || rect.right > clip.right + 1)
+                  return true;
               }
             }
             return false;
