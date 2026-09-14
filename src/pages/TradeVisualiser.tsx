@@ -64,6 +64,17 @@ const TradeVisualiser = () => {
   const dragRef = useRef<{ id: string; offsetX: number; offsetY: number } | null>(null);
 
   useEffect(() => {
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
     (async () => {
       const { data, error } = await supabase
@@ -232,7 +243,7 @@ const TradeVisualiser = () => {
       >
         {backdrop ? (
           <img src={backdrop} alt="Client room canvas backdrop" className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover" />
-        ) : (
+        ) : objects.length === 0 ? (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
             <div className="text-center">
               <p className="font-display text-xl text-foreground/45 md:text-2xl">Mood-Board Visualiser Sandbox</p>
@@ -241,7 +252,7 @@ const TradeVisualiser = () => {
               </p>
             </div>
           </div>
-        )}
+        ) : null}
 
         {objects.map((object) => {
           const isSelected = selectedId === object.instanceId;
@@ -351,7 +362,7 @@ const TradeVisualiser = () => {
           </div>
         )}
 
-        <div className="absolute bottom-8 left-1/2 z-[90] flex max-w-[calc(100%-24px)] -translate-x-1/2 items-center overflow-x-auto rounded-full border border-border bg-card px-2 py-1.5 shadow-elegant">
+        <div className="absolute bottom-20 left-1/2 z-[90] flex max-w-[calc(100%-24px)] -translate-x-1/2 items-center overflow-x-auto rounded-full border border-border bg-card px-2 py-1.5 shadow-elegant md:bottom-8">
           <Button variant="ghost" onClick={() => { setSourceOpen((open) => !open); setLayersOpen(false); setResetOpen(false); }} className="h-10 rounded-full px-4 font-body text-[9px] uppercase tracking-[0.15em] text-foreground hover:bg-muted/50"><Plus /> Add Object</Button>
           <span className="h-5 w-px shrink-0 bg-border" />
           <Button variant="ghost" onClick={() => fileRef.current?.click()} className="h-10 rounded-full px-4 font-body text-[9px] uppercase tracking-[0.15em] text-foreground hover:bg-muted/50"><ImageUp /> Upload Canvas Backdrop</Button>
