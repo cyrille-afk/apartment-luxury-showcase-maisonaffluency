@@ -100,15 +100,25 @@ function useMaterialMaps(material: VisualiserMaterial | null, maxAnisotropy: num
 function clonePbrMaterial(source: THREE.Material, finish: VisualiserMaterial | null, maps: LoadedMaps, neutralFabric = false) {
   const original = source as THREE.MeshStandardMaterial;
   const material = original.clone();
-  material.map = neutralFabric ? null : maps.diffuse;
-  material.normalMap = neutralFabric ? null : maps.normal;
-  material.roughnessMap = neutralFabric ? null : maps.roughness;
-  material.metalnessMap = null;
-  material.color.set(neutralFabric ? "#d8d4cc" : finish?.color ?? "#ffffff");
-  material.roughness = neutralFabric ? 0.96 : finish?.roughness ?? 0.75;
   const metalness = neutralFabric ? 0 : finish?.metalness ?? 0;
+  // Polished metals read from reflections, not a tiled swatch photo — a swatch
+  // stretched over brass or chrome is exactly what produced the grey noise.
+  const isMetal = metalness > 0.45;
+  if (neutralFabric) {
+    material.map = null;
+    material.normalMap = null;
+    material.roughnessMap = null;
+  } else {
+    // Keep the GLB's own authored maps whenever the finish does not supply one.
+    material.map = isMetal ? null : maps.diffuse ?? original.map;
+    material.normalMap = maps.normal ?? original.normalMap;
+    material.roughnessMap = maps.roughness ?? original.roughnessMap;
+  }
+  material.metalnessMap = isMetal ? null : original.metalnessMap;
+  material.color.set(neutralFabric ? "#d8d4cc" : finish?.color ?? (maps.diffuse ? "#ffffff" : "#ffffff"));
+  material.roughness = neutralFabric ? 0.96 : finish?.roughness ?? (isMetal ? 0.25 : 0.7);
   material.metalness = THREE.MathUtils.clamp(metalness, 0, 0.92);
-  material.envMapIntensity = metalness > 0.2 ? 1.5 : 1;
+  material.envMapIntensity = isMetal ? 1.8 : metalness > 0.2 ? 1.5 : 1;
   material.normalScale.set(0.22, 0.22);
   material.transparent = original.transparent;
   material.side = original.side;
