@@ -15,6 +15,7 @@ import { useConciergeSession } from "@/hooks/useConciergeSession";
 import { useVisualiserMaterial, type VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
 import {
   BOND_STREET_BASE_FINISH,
+  BOND_STREET_BASE_FINISHES,
   BOND_STREET_UPHOLSTERY_FINISHES,
   isBondStreetStool,
 } from "@/lib/visualiserProductFinishes";
