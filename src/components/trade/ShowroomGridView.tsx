@@ -180,6 +180,11 @@ const ShowroomGridView = ({
   const [highlightedId, setHighlightedId] = useState<string | null>(highlightProductId || null);
   const highlightRef = useRef<HTMLDivElement>(null);
 
+  // Keep the brand filter in sync when the directory selects a maker.
+  useEffect(() => {
+    if (initialDesigner) setSelectedDesigner(initialDesigner);
+  }, [initialDesigner]);
+
   /** Navigate to trade product sheet, preserving originating grid URL for back nav. */
   const openProductSheet = useCallback((product: ShowroomProduct) => {
     if (!product.designer_name) return;
