@@ -603,6 +603,9 @@ const TradeGallery = () => {
                       <img
                         src={product.image_url}
                         alt={product.product_name}
+                        width={800}
+                        height={1000}
+                        decoding="async"
                         className={cn(
                           "absolute inset-0 w-full h-full object-cover object-center transition-all duration-700",
                           product.hover_image_url ? "opacity-100 group-hover:opacity-0 group-hover:scale-105" : "group-hover:scale-105"
@@ -613,6 +616,9 @@ const TradeGallery = () => {
                         <img
                           src={product.hover_image_url}
                           alt={`${product.product_name} hover view`}
+                          width={800}
+                          height={1000}
+                          decoding="async"
                           className="absolute inset-0 w-full h-full object-cover object-center opacity-0 group-hover:opacity-100 transition-all duration-700 scale-105 group-hover:scale-100"
                           loading="lazy"
                         />
@@ -738,7 +744,7 @@ const TradeGallery = () => {
               <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
                 <div className="w-16 h-16 rounded bg-muted/30 overflow-hidden shrink-0">
                   {product.image_url ? (
-                    <img src={product.image_url} alt={product.product_name} className="w-full h-full object-cover" loading="lazy" />
+                    <img src={product.image_url} alt={product.product_name} width={160} height={200} decoding="async" className="w-full h-full object-cover" loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <Package className="h-4 w-4 text-muted-foreground/30" />

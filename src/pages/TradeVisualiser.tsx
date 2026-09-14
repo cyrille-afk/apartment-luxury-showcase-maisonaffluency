@@ -1,15 +1,17 @@
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
-import { Canvas } from "@react-three/fiber";
-import { ContactShadows, Environment, Lightformer, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
 import { Box, ImageUp, Loader2, Plus, RotateCcw, Search, X } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { DIMENSIONS_PLACEHOLDER, formatDimensions, resolveDimensions } from "@/lib/productDimensions";
-import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
+import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
+
+// three.js / @react-three/* live behind this boundary so they are never part
+// of the main bundle — they download only when the Visualiser route mounts.
+const VisualiserCanvas = lazy(() => import("@/components/trade/visualiser/VisualiserCanvas"));
 import { toast } from "sonner";
 import { useConciergeSession } from "@/hooks/useConciergeSession";
 import { useVisualiserMaterial, type VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
@@ -59,10 +61,10 @@ const readSandbox = (): PersistedSandbox => {
   }
 };
 
-const SceneLoader = () => (
-  <Html center>
-    <span className={cn(microLabel, "text-muted-foreground")}>Loading asset…</span>
-  </Html>
+const CanvasLoader = () => (
+  <div className="absolute inset-0 flex items-center justify-center">
+    <span className={cn(microLabel, "text-muted-foreground")}>Preparing 3D workspace…</span>
+  </div>
 );
 
 const TradeVisualiser = () => {
@@ -359,73 +361,19 @@ const TradeVisualiser = () => {
       )}
 
       <div className="absolute inset-0 z-10">
-        <Canvas shadows gl={{ alpha: true, antialias: true, preserveDrawingBuffer: true }} dpr={[1, 2]} onPointerMissed={() => setSelectedId(null)}>
-          <PerspectiveCamera makeDefault fov={50} position={[0, 5, 10]} near={0.1} far={200} />
-          <OrbitControls
-            makeDefault
-            enabled={orbitEnabled}
-            enablePan
-            enableDamping
-            dampingFactor={0.08}
-            minDistance={1.5}
-            maxDistance={24}
-            maxPolarAngle={Math.PI / 2.05}
-            target={[0, 0.6, 0]}
+        <Suspense fallback={<CanvasLoader />}>
+          <VisualiserCanvas
+            objects={objects}
+            selectedId={selectedId}
+            orbitEnabled={orbitEnabled}
+            hasBackdrop={Boolean(backdropSrc)}
+            onSelect={setSelectedId}
+            onTransform={transformObject}
+            onDragStateChange={(dragging) => setOrbitEnabled(!dragging)}
           />
-
-          <ambientLight intensity={0.5} />
-          <directionalLight
-            position={[5, 10, 5]}
-            intensity={1.2}
-            castShadow
-            shadow-mapSize-width={2048}
-            shadow-mapSize-height={2048}
-            shadow-camera-far={40}
-            shadow-camera-left={-12}
-            shadow-camera-right={12}
-            shadow-camera-top={12}
-            shadow-camera-bottom={-12}
-            shadow-bias={-0.0005}
-          />
-          <hemisphereLight args={["#ffffff", "#d8d3cb", 0.35]} />
-
-          {/* Local IBL: metals need reflections or they render solid black. */}
-          <Environment resolution={256}>
-            <Lightformer intensity={2.2} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[12, 12, 1]} color="#ffffff" />
-            <Lightformer intensity={1.1} position={[-6, 2, 2]} rotation-y={Math.PI / 2} scale={[14, 6, 1]} color="#f4efe7" />
-            <Lightformer intensity={0.9} position={[6, 2, -2]} rotation-y={-Math.PI / 2} scale={[14, 6, 1]} color="#e8e3da" />
-            <Lightformer intensity={0.6} position={[0, -3, 0]} rotation-x={-Math.PI / 2} scale={[14, 14, 1]} color="#d8d3cb" />
-          </Environment>
-
-          {!backdropSrc && <ContactShadows
-            position={[0, 0.002, 0]}
-            scale={40}
-            opacity={backdropSrc ? 0.5 : 0.32}
-            blur={1}
-            far={12}
-            resolution={1024}
-            depthWrite={false}
-          />}
-          {/* Invisible shadow-catcher floor: lets the backdrop's own flooring read through the shadows. */}
-          <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-            <planeGeometry args={[80, 80]} />
-            <shadowMaterial transparent opacity={0.4} />
-          </mesh>
-
-          <Suspense fallback={<SceneLoader />}>
-            {objects.map((object) => (
-              <SceneObject
-                key={object.instanceId}
-                object={object}
-                selected={object.instanceId === selectedId}
-                onSelect={setSelectedId}
-                onTransform={transformObject}
-                onDragStateChange={(dragging) => setOrbitEnabled(!dragging)}
-              />
-            ))}
-          </Suspense>
-        </Canvas>
+        </Suspense>
       </div>
+
 
       {/* Header */}
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-20 flex items-start justify-between px-8 pt-6">

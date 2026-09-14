@@ -136,7 +136,9 @@ function useFittedModel(
   baseMaterial: VisualiserMaterial | null,
   upholsteryMaterial: VisualiserMaterial | null,
 ) {
-  const { scene } = useGLTF(url);
+  // Self-hosted Draco decoder: compressed GLBs stream in a fraction of the
+  // bytes, uncompressed ones are unaffected (decoder is fetched on demand).
+  const { scene } = useGLTF(url, "/draco/");
   const { gl } = useThree();
   const maxAnisotropy = gl.capabilities.getMaxAnisotropy();
   const generalMaps = useMaterialMaps(material, maxAnisotropy);

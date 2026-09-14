@@ -503,7 +503,7 @@ export default function TradeFavorites() {
                   selectedFor3D.has(fav.productId) && "outline outline-1 outline-foreground outline-offset-4"
                 )}>
                   {fav.image_url ? (
-                    <img src={fav.image_url} alt={fav.product_name} className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.015]" loading="lazy" />
+                    <img src={fav.image_url} alt={fav.product_name} width={800} height={1000} decoding="async" className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.015]" loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
                       <Heart className="w-8 h-8" />
@@ -556,7 +556,7 @@ export default function TradeFavorites() {
                 onClick={() => { setAddedToQuote(false); setLightboxProduct(favToLightboxItem(fav)); }}
               >
                 <div className="h-10 w-10 overflow-hidden bg-background">
-                  {fav.image_url ? <img src={fav.image_url} alt="" className="h-full w-full object-cover" loading="lazy" /> : <Heart className="m-3 h-4 w-4 text-muted-foreground/30" />}
+                  {fav.image_url ? <img src={fav.image_url} alt="" width={96} height={120} decoding="async" className="h-full w-full object-cover" loading="lazy" /> : <Heart className="m-3 h-4 w-4 text-muted-foreground/30" />}
                 </div>
                 <span className="truncate font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">{fav.sku || fav.productId.slice(0, 8)}</span>
                 <span className="font-display text-sm font-light text-foreground">{fav.product_name}</span>
