@@ -302,6 +302,20 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
     }
   };
 
+  /** Persist the gizmo result back into React state (floor-locked, upright). */
+  const commit = () => {
+    const group = groupRef.current;
+    if (!group) return;
+    group.position.y = object.position[1] ?? 0;
+    group.rotation.x = 0;
+    group.rotation.z = 0;
+    onTransform(
+      object.instanceId,
+      [group.position.x, object.position[1] ?? 0, group.position.z],
+      [0, group.rotation.y, 0],
+    );
+  };
+
   const content = (
     <group
       ref={(node) => {
