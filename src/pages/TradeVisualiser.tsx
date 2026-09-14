@@ -258,6 +258,26 @@ const TradeVisualiser = () => {
     )));
   };
 
+  const DEPTH_LEVELS = [0, 0.012, 0.024];
+
+  /** Cycles the selected piece through floor depth layers so rugs can slide beneath seating. */
+  const cycleDepth = () => {
+    if (!selectedId) {
+      toast.error("Select an object first.");
+      return;
+    }
+    setObjects((current) => {
+      const target = current.find((object) => object.instanceId === selectedId);
+      if (!target) return current;
+      const level = DEPTH_LEVELS.indexOf(target.position[1] ?? 0);
+      const nextY = DEPTH_LEVELS[(level + 1) % DEPTH_LEVELS.length];
+      const updated = current
+        .filter((object) => object.instanceId !== selectedId)
+        .concat({ ...target, position: [target.position[0], nextY, target.position[2]] });
+      return updated;
+    });
+  };
+
   const applyMaterial = (material: VisualiserMaterial) => {
     setActiveMaterial(material);
     if (!selectedId) {
@@ -311,11 +331,11 @@ const TradeVisualiser = () => {
   const backdropSrc = backdrop ?? backdropDataUrl;
   const toolbarButton = cn(
     "font-mono text-[10px] uppercase tracking-[0.15em]",
-    "flex items-center gap-2 px-4 py-2.5 text-foreground/80 transition-colors duration-200 hover:text-foreground hover:bg-foreground/[0.04] disabled:opacity-40",
+    "flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-foreground/80 transition-colors duration-200 hover:text-foreground hover:bg-foreground/[0.04] disabled:opacity-40",
   );
 
   return (
-    <div className="relative h-[calc(100dvh-3.5rem)] w-full overflow-hidden bg-[hsl(var(--visualiser-canvas))] md:h-[calc(100dvh-4rem)]">
+    <div className="relative h-full min-h-0 w-full overflow-hidden bg-[#F9F8F6]">
       <Helmet>
         <title>Visualiser Sandbox | Maison Affluency Trade</title>
         <meta name="description" content="Compose interiors in a live 3D sandbox with collectible design assets." />
@@ -333,7 +353,7 @@ const TradeVisualiser = () => {
 
       <div className="absolute inset-0 z-10">
         <Canvas shadows gl={{ alpha: true, antialias: true, preserveDrawingBuffer: true }} dpr={[1, 2]} onPointerMissed={() => setSelectedId(null)}>
-          <PerspectiveCamera makeDefault fov={45} position={[4.5, 3.2, 6]} near={0.1} far={200} />
+          <PerspectiveCamera makeDefault fov={50} position={[0, 5, 10]} near={0.1} far={200} />
           <OrbitControls
             makeDefault
             enabled={orbitEnabled}
@@ -346,10 +366,10 @@ const TradeVisualiser = () => {
             target={[0, 0.6, 0]}
           />
 
-          <ambientLight intensity={0.55} />
+          <ambientLight intensity={0.5} />
           <directionalLight
-            position={[6, 9, 5]}
-            intensity={1.5}
+            position={[5, 10, 5]}
+            intensity={1.2}
             castShadow
             shadow-mapSize-width={2048}
             shadow-mapSize-height={2048}
@@ -370,7 +390,7 @@ const TradeVisualiser = () => {
             <Lightformer intensity={0.6} position={[0, -3, 0]} rotation-x={-Math.PI / 2} scale={[14, 14, 1]} color="#d8d3cb" />
           </Environment>
 
-          <ContactShadows
+          {!backdropSrc && <ContactShadows
             position={[0, 0.002, 0]}
             scale={40}
             opacity={backdropSrc ? 0.5 : 0.32}
@@ -378,10 +398,12 @@ const TradeVisualiser = () => {
             far={12}
             resolution={1024}
             depthWrite={false}
-          />
-          {!backdropSrc && (
-            <gridHelper args={[40, 40, "#dedad2", "#ebe8e2"]} position={[0, -0.001, 0]} />
-          )}
+          />}
+          {/* Invisible shadow-catcher floor: lets the backdrop's own flooring read through the shadows. */}
+          <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+            <planeGeometry args={[80, 80]} />
+            <shadowMaterial transparent opacity={0.4} />
+          </mesh>
 
           <Suspense fallback={<SceneLoader />}>
             {objects.map((object) => (
@@ -515,7 +537,7 @@ const TradeVisualiser = () => {
 
       {/* Sourcing tray */}
       {trayOpen && (
-        <div className="absolute bottom-28 left-1/2 z-[60] w-[calc(100%-64px)] max-w-[1040px] -translate-x-1/2 border-t border-foreground/15 bg-white/95 px-6 py-5 backdrop-blur-sm">
+        <div className="absolute bottom-32 left-1/2 z-[60] w-[calc(100%-64px)] max-w-[1040px] -translate-x-1/2 border-t border-foreground/15 bg-white/95 px-6 py-5 backdrop-blur-sm">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <p className={cn(microLabel, "text-muted-foreground")}>Designer Collection Index</p>
             <div className="flex items-center gap-4">
@@ -573,20 +595,18 @@ const TradeVisualiser = () => {
         </div>
       )}
 
-      {/* Floating toolbar */}
-      <div className="absolute bottom-8 left-1/2 z-[60] -translate-x-1/2">
-        <div className="flex items-center gap-1 border border-[#E5E5E5] bg-[#FFFFFF] px-5 py-2 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.15)] backdrop-blur-sm">
-          <button className={toolbarButton} onClick={() => setTrayOpen((value) => !value)}>
-            <Plus className="h-3.5 w-3.5" /> Add Object
-          </button>
-          <span className="h-6 w-px bg-[#E5E5E5]" />
+      {/* Floating executive console */}
+      <div className="absolute bottom-10 left-1/2 z-[60] -translate-x-1/2">
+        <div className="flex items-center gap-1 rounded-full border border-[#E5E5E5] bg-[#FFFFFF] px-4 py-2 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.15)]">
+          <button className={toolbarButton} onClick={() => setTrayOpen((value) => !value)}>[ + Add 3D Object ]</button>
+          <span className="h-5 w-px bg-[#E5E5E5]" />
+          <button className={toolbarButton} onClick={cycleDepth} disabled={!selected}>[ &#9099; Depth Stack ]</button>
+          <span className="h-5 w-px bg-[#E5E5E5]" />
           <button className={toolbarButton} onClick={() => fileRef.current?.click()}>
-            <ImageUp className="h-3.5 w-3.5" /> {backdropSrc ? "Change Backdrop" : "Upload Canvas Backdrop"}
+            [ &#8593; {backdropSrc ? "Change Canvas Backdrop" : "Upload Canvas Backdrop"} ]
           </button>
-          <span className="h-6 w-px bg-[#E5E5E5]" />
-          <button className={toolbarButton} onClick={resetSandbox}>
-            <RotateCcw className="h-3.5 w-3.5" /> Reset Sandbox
-          </button>
+          <span className="h-5 w-px bg-[#E5E5E5]" />
+          <button className={toolbarButton} onClick={resetSandbox}>[ &#10005; Reset Canvas ]</button>
         </div>
       </div>
 
