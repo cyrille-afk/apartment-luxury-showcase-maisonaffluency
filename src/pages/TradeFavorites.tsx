@@ -325,12 +325,13 @@ export default function TradeFavorites() {
 
       <div className="border-b border-border">
         <div className="max-w-6xl mx-auto px-6 md:px-8 py-10">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-start justify-between gap-3">
             <div>
-              <h1 className="font-display text-lg text-foreground">Saved Products</h1>
-              <p className="font-body text-xs text-muted-foreground mt-1">Your curated shortlist of products across our portfolio.</p>
+              <h1 className="font-display font-light text-2xl text-foreground tracking-tight">Saved Products</h1>
+              <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-3">
+                YOUR CURATED SHORTLIST // SOURCED PIECES ACROSS ALL PORTFOLIOS
+              </p>
             </div>
-            <Button variant="outline" size="sm" onClick={() => navigate("/trade/showroom")}>Back to Showroom</Button>
           </div>
         </div>
       </div>
@@ -355,7 +356,20 @@ export default function TradeFavorites() {
               <List className="w-3.5 h-3.5" />
             </button>
           </div>
-          <CurrencyToggle value={currency} onChange={setCurrency} />
+          <div className="flex items-center gap-4">
+            {CURRENCY_OPTIONS.map((c) => (
+              <button
+                key={c}
+                onClick={() => setCurrency(c)}
+                className={cn(
+                  "font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors",
+                  currency === c && "text-foreground underline underline-offset-[6px] decoration-foreground"
+                )}
+              >
+                {c === "original" ? "Original" : c}
+              </button>
+            ))}
+          </div>
           {favorites.length > 0 && (
             <Button variant="outline" size="sm" onClick={addAllToQuote} className="gap-1.5">
               <ShoppingCart className="w-3.5 h-3.5" />
@@ -368,9 +382,6 @@ export default function TradeFavorites() {
               Send {selectedFor3D.size} to 3D Studio
             </Button>
           )}
-          <Badge variant="secondary" className="text-[10px]">
-            <Heart className="w-3 h-3 mr-1 fill-current" />{favorites.length} saved
-          </Badge>
         </div>
 
         {/* Folder tabs (Artemest-style) */}
