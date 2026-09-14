@@ -10,6 +10,7 @@ import SectionHero from "@/components/trade/SectionHero";
 import Gallery from "@/components/Gallery";
 import ShowroomGridView from "@/components/trade/ShowroomGridView";
 import ProductImageSearch from "@/components/trade/ProductImageSearch";
+import ShowroomDesignerDirectory from "@/components/trade/ShowroomDesignerDirectory";
 import { cn } from "@/lib/utils";
 import { createActiveDraftQuote, fetchScopedDraftQuotes, rememberActiveQuoteId } from "@/lib/activeProjectId";
 
@@ -18,7 +19,7 @@ interface DraftQuote {
   created_at: string;
 }
 
-type ViewTab = "gallery" | "grid" | "search";
+type ViewTab = "gallery" | "designers" | "grid" | "search";
 
 const TradeShowroom = () => {
   const { user } = useAuth();
