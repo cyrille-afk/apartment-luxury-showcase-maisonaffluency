@@ -30,6 +30,8 @@ type Props = {
   activeItemId: string | null;
   isClientMode: boolean;
   docked?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   onActiveItemChange: (productId: string) => void;
   onCompositionChanged: () => void;
   onRecommendationHover: (active: boolean) => void;
@@ -86,11 +88,18 @@ export function ProjectCuratorialGuide({
   activeItemId,
   isClientMode,
   docked = false,
+  open: controlledOpen,
+  onOpenChange,
   onActiveItemChange,
   onCompositionChanged,
   onRecommendationHover,
 }: Props) {
-  const [open, setOpen] = useState(docked);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = (value: boolean) => {
+    if (onOpenChange) onOpenChange(value);
+    else setInternalOpen(value);
+  };
   const [heightIndex, setHeightIndex] = useState(1);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(false);
