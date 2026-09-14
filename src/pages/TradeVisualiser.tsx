@@ -444,13 +444,28 @@ const TradeVisualiser = () => {
           {isBondStreetStool(selected.id) ? (
             <div className="mt-5 border-t border-foreground/10 pt-4">
               <p className={cn(microLabel, "text-muted-foreground")}>Base Finish</p>
-              <button
-                onClick={() => applyBondStreetFinish("base", BOND_STREET_BASE_FINISH)}
-                className="mt-3 flex w-full items-center gap-3 text-left"
-              >
-                <span className={cn("h-8 w-8 shrink-0 bg-[#655347]", selected.baseMaterial?.id === BOND_STREET_BASE_FINISH.id && "ring-1 ring-foreground ring-offset-2")} />
-                <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-foreground">Powdercoated Bronze Metal Swivel</span>
-              </button>
+              <div className="mt-3 flex flex-wrap gap-4">
+                {BOND_STREET_BASE_FINISHES.map((material) => (
+                  <button
+                    key={material.id}
+                    onClick={() => applyBondStreetFinish("base", material)}
+                    className="w-20 shrink-0 text-left"
+                    title={material.name}
+                  >
+                    <span
+                      className={cn(
+                        "block h-8 w-8",
+                        (selected.baseMaterial?.id ?? BOND_STREET_BASE_FINISH.id) === material.id && "ring-1 ring-foreground ring-offset-2",
+                      )}
+                      style={{ backgroundColor: material.color }}
+                    />
+                    <span className="mt-2 block font-mono text-[8px] uppercase leading-3 tracking-[0.15em] text-muted-foreground">{material.name}</span>
+                  </button>
+                ))}
+              </div>
+              <p className={cn(microLabel, "mt-3 text-foreground")}>
+                {(selected.baseMaterial ?? BOND_STREET_BASE_FINISH).name}
+              </p>
 
               <div className="mt-5 flex items-center justify-between gap-3">
                 <p className={cn(microLabel, "text-muted-foreground")}>Upholstery</p>
