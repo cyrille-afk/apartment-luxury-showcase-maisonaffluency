@@ -3971,14 +3971,43 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
         {/* Payment Terms & Banking Details */}
         <div className="border-t border-border p-4 md:p-6 lg:p-8 space-y-5 md:space-y-6">
-          <div>
-            <h3 className="font-display text-xs uppercase tracking-[0.15em] text-foreground mb-3">Payment Terms</h3>
-            <ul className="font-body text-[10px] md:text-[11px] leading-relaxed text-muted-foreground space-y-1.5 list-disc list-inside">
-              <li>60% payment upon order confirmation unless indicated otherwise</li>
-              <li>Payment by bank transfer</li>
-              <li>Balance of Payment ex-work prior to shipping</li>
-            </ul>
-          </div>
+          <details className="group" open>
+            <summary className="flex items-center justify-between cursor-pointer list-none">
+              <h3 className="font-display text-xs uppercase tracking-[0.15em] text-foreground">Payment Terms</h3>
+              <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground group-open:hidden">Open</span>
+              <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground hidden group-open:inline">Close</span>
+            </summary>
+
+            <div className="mt-4 space-y-5">
+              <div>
+                <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">Trade Tiers</p>
+                <div className="font-body text-[10px] md:text-[11px] leading-relaxed text-muted-foreground space-y-1">
+                  <div className="flex justify-between border-b border-border/50 pb-1">
+                    <span className="text-foreground">Silver{tierLabel === "Silver" ? " • current" : ""}</span>
+                    <span>8% · entry</span>
+                  </div>
+                  <div className="flex justify-between border-b border-border/50 pb-1">
+                    <span className={tierLabel === "Gold" ? "text-foreground" : ""}>Gold{tierLabel === "Gold" ? " • current" : ""}</span>
+                    <span>10% · from 250,000 SGD</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className={tierLabel === "Platinum" ? "text-foreground" : ""}>Platinum{tierLabel === "Platinum" ? " • current" : ""}</span>
+                    <span>12% · from 750,000 SGD</span>
+                  </div>
+                </div>
+              </div>
+
+              <ul className="font-body text-[10px] md:text-[11px] leading-relaxed text-muted-foreground space-y-1.5 list-disc list-inside">
+                <li>60% deposit due on order confirmation; 40% balance due before shipment. Both instalments are calculated on the order total including the current shipping estimate.</li>
+                <li>Shipping and FX are estimates at quote date and are locked in if the deposit is received within 7 days of issue. Otherwise, around 2 weeks before the end of the lead time, Maison Affluency re-quotes freight at live carrier rates and FX, then emails the balance invoice unless the admin overrides the schedule.</li>
+                <li>Payment by bank transfer (no fee) or by card via Stripe (processing fee applies).</li>
+                <li>Lead times start from receipt of cleared deposit and finalised specifications.</li>
+                <li>Quote valid until {formatDate(expiryDate)}. Pricing in {currency} unless otherwise stated.</li>
+                <li>Quotes are valid for 30 days based on live manufacturer data. Final verification required before purchase.</li>
+              </ul>
+            </div>
+          </details>
+
 
           <div>
             <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mb-2">Payment by bank transfer to:</p>
