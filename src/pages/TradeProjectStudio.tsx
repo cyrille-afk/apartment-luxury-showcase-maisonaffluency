@@ -23,7 +23,7 @@ type StudioItem = {
   width_mm: number | null;
   depth_mm: number | null;
   height_mm: number | null;
-  size_variants: Array<{ label?: string | null }> | null;
+  size_variants: Array<{ label?: string | null; base?: string | null; top?: string | null }> | null;
   rrp_cents: number | null;
   quantity: number;
 };
