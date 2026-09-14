@@ -34,9 +34,9 @@ type Props = {
 };
 
 const HEIGHTS = [
-  "clamp(300px,30dvh,340px)",
-  "clamp(380px,35dvh,430px)",
-  "min(560px,calc(100dvh - 48px))",
+  "clamp(300px,26dvh,420px)",
+  "clamp(360px,30dvh,540px)",
+  "min(620px,calc(100dvh - 48px))",
 ] as const;
 
 function clientReason(rec: Recommendation, sourceName: string) {
