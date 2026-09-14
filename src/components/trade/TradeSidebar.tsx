@@ -20,7 +20,7 @@ import { pushRecentProject, useProjects } from "@/hooks/useProjects";
 const coreItems = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
   { title: "My Dashboard", url: "/trade/me", icon: UserCircle },
-  { title: "THE MAISON ARCHIVE", url: "/trade/showroom", icon: MapPin },
+  { title: "THE MAISON ARCHIVE", url: "/trade/archive", icon: MapPin },
   { title: "Visualiser", url: "/trade/visualiser", icon: Wand2 },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
   { title: "Projects", url: "/trade/projects", icon: FolderKanban },

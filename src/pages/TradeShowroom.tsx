@@ -180,7 +180,7 @@ const TradeShowroom = () => {
           <ShowroomDesignerDirectory
             onSelectDesigner={(designer) => {
               navigate(`/trade/gallery/${designer.slug}`, {
-                state: { from: "/trade/showroom?tab=designers" },
+                state: { from: "/trade/archive?tab=designers" },
               });
             }}
           />

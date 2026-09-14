@@ -129,29 +129,22 @@ const ShowroomDesignerDirectory = ({
               onClick={() => onSelectDesigner(d)}
               className="group text-left"
             >
-              <div
-                className={cn(
-                  "overflow-hidden bg-[#F2F1EE]",
-                  i % 5 === 0 ? "aspect-[4/5]" : i % 5 === 3 ? "aspect-square" : "aspect-[3/4]",
-                )}
-              >
+              <div className="overflow-hidden bg-[#F2F1EE] aspect-[3/4]">
                 {d.image_url ? (
                   <img
                     src={thumb(d.image_url)}
                     alt={displayDesignerName(d.name)}
                     loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                    className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.03]"
                   />
                 ) : null}
               </div>
-              <h3 className="font-display text-base font-light mt-4 leading-snug text-foreground">
+              <h3 className="font-display text-base font-light mt-4 leading-snug text-foreground line-clamp-1">
                 {displayDesignerName(d.name)}
               </h3>
-              {d.specialty ? (
-                <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 mt-1.5 line-clamp-1">
-                  {d.specialty}
-                </p>
-              ) : null}
+              <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 mt-1.5 line-clamp-1 min-h-[15px]">
+                {d.specialty || " "}
+              </p>
             </button>
           ))}
         </div>

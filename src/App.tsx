@@ -33,6 +33,11 @@ function LegacyStephGcRedirect() {
   return <Navigate to={`/designers/steph-gc${productSlug ? `/${productSlug}` : ""}`} replace />;
 }
 
+function ShowroomLegacyRedirect() {
+  const { search } = useLocation();
+  return <Navigate to={`/trade/archive${search}`} replace />;
+}
+
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
 const TradeLanding = lazy(() => import("./pages/TradeLanding"));
@@ -743,7 +748,8 @@ const App = () => {
                     <Route path="quotes/:quoteId/review" element={<TradeQuoteReview />} />
                     <Route path="quotes/:quoteId" element={<TradeQuotes />} />
                     <Route path="documents" element={<TradeDocuments />} />
-                    <Route path="showroom" element={<TradeShowroom />} />
+                    <Route path="archive" element={<TradeShowroom />} />
+                    <Route path="showroom" element={<ShowroomLegacyRedirect />} />
                     <Route path="visualiser" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeVisualiser /></Suspense>} />
                     <Route path="samples" element={<TradeSamples />} />
                     <Route path="journal" element={<TradeJournal />} />
