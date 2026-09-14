@@ -252,6 +252,10 @@ export default function TradeProjectStudio() {
                 );
               })}
             </div>
+          )}
+        </section>
+
+
 
 
         {/* RIGHT — procurement ledger */}
