@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Toaster as Sonner, toast } from "sonner";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
@@ -5,6 +6,11 @@ type ToasterProps = React.ComponentProps<typeof Sonner>;
 const Toaster = ({ ...props }: ToasterProps) => {
   console.log("[sonner.tsx] Toaster wrapper render");
   const theme = "light";
+
+  useEffect(() => {
+    console.log("[sonner.tsx] calling toast from wrapper");
+    toast("Wrapper test toast");
+  }, []);
 
   return (
     <Sonner
