@@ -156,7 +156,10 @@ const TradeQuotes = () => {
   // Deep-link: open a specific quote when /quotes/:quoteId or ?quote=<id> is in the URL
   useEffect(() => {
     const q = quoteId || searchParams.get("quote");
-    if (q && q !== selectedQuoteId) setSelectedQuoteId(q);
+    if (q && q !== selectedQuoteId) {
+      setSelectedQuoteId(q);
+      if (isDrawerQuote(q)) setDrawerOpen(true);
+    }
   }, [quoteId, searchParams, selectedQuoteId]);
 
   // Concierge session handoff: when arriving with ?fromSession=1, auto-create a
