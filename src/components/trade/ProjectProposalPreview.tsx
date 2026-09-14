@@ -91,7 +91,7 @@ export function ProjectProposalPreview({
             </div>
             <div>
               <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                Project Proposal
+                Project Proposal // {projectName}
               </p>
               <h2 className="mt-5 max-w-2xl font-display text-4xl font-normal leading-tight text-card-foreground md:text-5xl">
                 {projectName}
