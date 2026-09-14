@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, FolderOpen, Tag } from "lucide-react";
+import { Heart, FolderOpen } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
