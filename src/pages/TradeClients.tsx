@@ -22,6 +22,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import ClientDocumentsSection from "@/components/trade/ClientDocumentsSection";
+import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
+import { Link } from "react-router-dom";
 
 type ClientType = "company" | "studio" | "individual";
 
