@@ -151,10 +151,41 @@ export type CheckoutSummary = {
   taxCountry: string | null;
   /** Whether freight is inside the taxable base. */
   taxShipping: boolean;
-  /** Displayed total — includes the estimated freight when present. */
+  /** Delivery shown in the summary: confirmed freight, else the estimate. */
+  deliveryCents: number;
+  /** THE Order Total: goods − discount + delivery + tax. Used by every UI block. */
   totalCents: number;
-  /** Amount actually charged now (excludes unconfirmed estimated freight). */
+  /** Amount captured now (excludes unconfirmed estimated freight). */
   chargeTotalCents: number;
+};
+
+/**
+ * Single source of truth for checkout money. Every figure rendered anywhere on
+ * the checkout page — summary rows, sticky mobile bar, and the action button —
+ * must come from here. No block may re-derive or adjust a total on its own.
+ */
+export const deriveCheckoutTotals = (input: {
+  subtotalCents: number;
+  discountCents: number;
+  /** Advisor-confirmed freight. 0 until confirmed. */
+  shippingCents: number;
+  /** Country-based freight estimate, used only when nothing is confirmed. */
+  estimatedShippingCents: number;
+  /** Tax due on goods (+ confirmed freight when the rule taxes shipping). */
+  taxCents: number;
+}) => {
+  const goodsCents = Math.max(0, input.subtotalCents - input.discountCents);
+  const deliveryCents = input.shippingCents > 0 ? input.shippingCents : input.estimatedShippingCents;
+  const taxCents = Math.max(0, input.taxCents);
+  return {
+    goodsCents,
+    deliveryCents,
+    taxCents,
+    /** Displayed everywhere: subtotal + delivery + tax. Nothing else. */
+    totalCents: goodsCents + deliveryCents + taxCents,
+    /** Charged now: excludes freight that no advisor has confirmed yet. */
+    chargeTotalCents: goodsCents + input.shippingCents + taxCents,
+  };
 };
 
 /* Tax rules live in src/config/taxRules.ts and are mirrored server-side. */
