@@ -307,11 +307,10 @@ export default function TradeProjectStudio() {
 
           {/* Ledger */}
           <div className="mt-6">
-            <div className="grid grid-cols-[44px_minmax(0,1fr)_88px_104px] gap-2 border-b border-border pb-2 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+            <div className="grid grid-cols-[44px_minmax(0,1fr)_auto] gap-3 border-b border-border pb-3 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
               <span>Spec</span>
               <span>Item</span>
-              <span className="pr-3">Lead</span>
-              <span className="text-right">{isClientMode ? "MSRP" : "Trade"}</span>
+              <span className="text-right">Status</span>
             </div>
 
             {loadingItems ? (
@@ -324,51 +323,78 @@ export default function TradeProjectStudio() {
               items.map((item, idx) => {
                 const msrp = (item.rrp_cents || 0) * item.quantity;
                 const trade = Math.round(msrp * (1 - TRADE_DISCOUNT));
+                const expanded = expandedId === item.product_id;
                 return (
-                  <div
-                    key={item.product_id}
-                    className="grid cursor-pointer grid-cols-[44px_minmax(0,1fr)_88px_104px] items-start gap-2 border-b border-border py-4 transition-colors hover:bg-muted/40"
-                    onClick={() => setSpecItemId(item.product_id)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setSpecItemId(item.product_id);
-                      }
-                    }}
-                    aria-label={`Open specification for ${item.name}`}
-                  >
-                    <span className="pr-3 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                      {String(idx + 1).padStart(2, "0")}
-                      <span className="block text-muted-foreground/72">{item.sku || "—"}</span>
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block truncate font-display text-sm text-foreground">
-                        {item.name}
+                  <div key={item.product_id} className="border-b border-border">
+                    <div
+                      className="grid cursor-pointer grid-cols-[44px_minmax(0,1fr)_auto] items-start gap-3 py-7"
+                      onClick={() => setExpandedId(expanded ? null : item.product_id)}
+                      role="button"
+                      aria-expanded={expanded}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setExpandedId(expanded ? null : item.product_id);
+                        }
+                      }}
+                      aria-label={`Toggle details for ${item.name}`}
+                    >
+                      <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
+                        {String(idx + 1).padStart(2, "0")}
                       </span>
-                      <span className="mt-1 block font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/72">
-                        {item.designer}
-                        {item.quantity > 1 ? ` · ×${item.quantity}` : ""}
+                      <span className="min-w-0">
+                        <span className="block truncate font-display text-base text-foreground">
+                          {item.name}
+                        </span>
+                        <span className="mt-1.5 block font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
+                          {item.designer}
+                          {item.quantity > 1 ? ` · ×${item.quantity}` : ""}
+                        </span>
                       </span>
-                    </span>
-                    <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                      {leadLabel(item)}
-                    </span>
-                    <span className="text-right font-body text-[11px] tracking-[0.05em] text-foreground">
-                      {isClientMode ? (
-                        money(msrp) || "Price upon Request"
-                      ) : msrp ? (
-                        <>
-                          {money(trade)}
-                          <span className="mt-1 block text-[10px] text-muted-foreground/72 line-through">
-                            {money(msrp)}
-                          </span>
-                        </>
-                      ) : (
-                        "Price upon Request"
-                      )}
-                    </span>
+                      <span className="whitespace-nowrap pt-1 text-right font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
+                        Specified
+                      </span>
+                    </div>
+
+                    {expanded && (
+                      <div className="pb-7">
+                        <dl className="space-y-3">
+                          <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
+                            <dt className="text-muted-foreground/60">Spec</dt>
+                            <dd className="text-foreground">{item.sku || "—"}</dd>
+                          </div>
+                          <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
+                            <dt className="text-muted-foreground/60">Lead</dt>
+                            <dd className="text-foreground">{leadLabel(item)}</dd>
+                          </div>
+                          <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
+                            <dt className="text-muted-foreground/60">{isClientMode ? "MSRP" : "Trade"}</dt>
+                            <dd className="tracking-[0.05em] text-foreground">
+                              {isClientMode ? (
+                                money(msrp) || "Price upon Request"
+                              ) : msrp ? (
+                                <>
+                                  {money(trade)}
+                                  <span className="ml-2 text-muted-foreground/60 line-through">
+                                    {money(msrp)}
+                                  </span>
+                                </>
+                              ) : (
+                                "Price upon Request"
+                              )}
+                            </dd>
+                          </div>
+                        </dl>
+                        <button
+                          type="button"
+                          onClick={() => setSpecItemId(item.product_id)}
+                          className="mt-4 font-body text-[10px] uppercase tracking-[0.15em] text-foreground underline underline-offset-4 hover:no-underline"
+                        >
+                          Open full specification
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })
@@ -376,17 +402,16 @@ export default function TradeProjectStudio() {
 
             {/* Totals */}
             {items.length > 0 && (
-              <div className="grid grid-cols-[44px_minmax(0,1fr)_88px_104px] gap-2 border-b border-foreground py-4">
-                <span />
+              <div className="flex items-baseline justify-between gap-4 border-b border-foreground py-7">
                 <span className="font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
                   {isClientMode ? "Total Estimate" : "Total (Trade)"}
                 </span>
-                <span />
-                <span className="text-right font-body text-[11px] tracking-[0.05em] text-foreground">
+                <span className="font-body text-[11px] tracking-[0.05em] text-foreground">
                 {isClientMode ? money(totals.clientEstimateCents) || "—" : money(totals.trade) || "—"}
                 </span>
               </div>
             )}
+
 
             {/* Actions */}
             <div className="mt-8 flex flex-col gap-3">
