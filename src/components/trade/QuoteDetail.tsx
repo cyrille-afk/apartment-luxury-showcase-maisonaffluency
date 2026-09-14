@@ -3216,10 +3216,28 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         )}
                       </div>
                       <div className="hidden md:block text-right">
-                        <span className="font-body text-sm text-foreground tabular-nums">
-                          {unitPrice ? `${currencySymbol(currency)} ${formatPriceRaw(unitPrice, currency)}` : "TBD"}
-                        </span>
+                        {(() => {
+                          const srcCur = itemPriceCurrency(item, currency);
+                          const showOrigin = rawUnitPrice != null && srcCur !== currency;
+                          return (
+                            <>
+                              <span className="font-body text-sm text-foreground tabular-nums">
+                                {showOrigin
+                                  ? `${srcCur} ${formatPriceRaw(rawUnitPrice, srcCur)}`
+                                  : unitPrice
+                                    ? `${currencySymbol(currency)} ${formatPriceRaw(unitPrice, currency)}`
+                                    : "TBD"}
+                              </span>
+                              {showOrigin && unitPrice ? (
+                                <span className="block font-body text-[10px] text-muted-foreground tabular-nums">
+                                  ≈ {currencySymbol(currency)} {formatPriceRaw(unitPrice, currency)}
+                                </span>
+                              ) : null}
+                            </>
+                          );
+                        })()}
                       </div>
+
                       <div className="hidden md:block text-right">
                         <span className="font-body text-sm text-foreground font-medium tabular-nums">
                           {lineTotal ? `${currencySymbol(currency)} ${formatPriceRaw(lineTotal, currency)}` : "TBD"}
