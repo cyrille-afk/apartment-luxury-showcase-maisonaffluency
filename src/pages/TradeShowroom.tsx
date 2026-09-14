@@ -40,6 +40,7 @@ const TradeShowroom = () => {
           : "gallery",
   );
   const [selectedDesigner, setSelectedDesigner] = useState<string | null>(designerParam);
+  const navigate = useNavigate();
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);

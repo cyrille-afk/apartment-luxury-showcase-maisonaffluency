@@ -32,7 +32,7 @@ function thumb(url: string | null) {
 const ShowroomDesignerDirectory = ({
   onSelectDesigner,
 }: {
-  onSelectDesigner: (name: string) => void;
+  onSelectDesigner: (designer: DirectoryDesigner) => void;
 }) => {
   const [letter, setLetter] = useState<string | null>(null);
 
