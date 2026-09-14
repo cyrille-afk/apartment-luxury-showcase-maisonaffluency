@@ -57,7 +57,8 @@ function useMaterialMaps(material: VisualiserMaterial | null, maxAnisotropy: num
         roughness?.dispose();
         return;
       }
-      const repeat = material?.repeat ?? 6;
+      // Furniture-scale tiling: a swatch tiled 6x on a side table reads as grey noise.
+      const repeat = material?.repeat ?? 2;
       for (const texture of [diffuse, normal, roughness]) {
         if (!texture) continue;
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
