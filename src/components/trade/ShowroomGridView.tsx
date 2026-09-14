@@ -840,8 +840,8 @@ const ShowroomGridView = ({
                   </div>
                 </div>
                 {/* Description in portal tooltip */}
-                <div className="p-3 text-center">
-                  <h3 className="font-display text-sm text-foreground leading-tight truncate">{product.product_name}</h3>
+                <div className="flex flex-col items-center p-3 min-h-[4rem]">
+                  <h3 className="font-display text-sm text-foreground leading-tight line-clamp-2 min-h-[2.25rem]">{product.product_name}</h3>
                   {isAdmin ? (
                     <div className="mt-1 flex flex-col items-center gap-1.5">
                       {renderPriceDisplay(price, "font-display text-sm inline-flex items-center justify-center gap-1.5 flex-wrap", product.price_prefix)}
