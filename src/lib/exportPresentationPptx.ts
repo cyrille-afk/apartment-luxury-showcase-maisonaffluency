@@ -72,7 +72,7 @@ const parseProducts = (linked: unknown): PptxProduct[] => {
 };
 
 const formatPrice = (cents: number, currency = "SGD") =>
-  `${currency} ${(cents / 100).toLocaleString("en-SG", { maximumFractionDigits: 0 })}`;
+  formatMoneyIn(cents, (currency || "SGD").toUpperCase(), "On request");
 
 const DISCLAIMER =
   "The architectural visualizations contained in this document have been generated using artificial intelligence and are intended for concept and design exploration purposes only. These renderings are indicative representations and do not constitute final design specifications. All materials, finishes, dimensions, and spatial configurations shown are approximate and remain subject to the owner's final review and approval. The architectural base layouts shown herein are for reference only and shall be verified against the latest coordinated and approved architectural drawings. Maison Affluency accepts no liability for decisions made solely on the basis of these AI-generated visualizations.";

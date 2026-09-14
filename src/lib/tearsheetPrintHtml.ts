@@ -10,6 +10,8 @@
  * so parity between the two surfaces is guaranteed by construction.
  */
 
+import { formatMoneyIn } from "@/lib/displayMoney";
+
 export type TearsheetPrintProduct = {
   brand_name?: string | null;
   product_name: string;
@@ -43,12 +45,12 @@ const esc = (s?: string | null) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 
 function priceString(product: TearsheetPrintProduct): string {
-  if (!product.trade_price_cents) return "Price Upon Request";
-  const symbol =
-    product.currency === "USD" ? "$" :
-    product.currency === "GBP" ? "£" :
-    product.currency === "SGD" ? "S$" : "€";
-  return `${symbol}${(product.trade_price_cents / 100).toLocaleString()}`;
+  // Same formatter the on-screen ledger uses, in the member's base currency.
+  return formatMoneyIn(
+    product.trade_price_cents,
+    (product.currency || "SGD").toUpperCase(),
+    "Price Upon Request",
+  );
 }
 
 export function buildTearsheetPrintHtml(input: TearsheetPrintInput): string {
