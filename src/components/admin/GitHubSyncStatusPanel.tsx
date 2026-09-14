@@ -15,6 +15,8 @@ import {
 type SyncStatus = {
   repo: string;
   branch: string;
+  deployed: { commitSha: string | null };
+  syncState: "in_sync" | "ahead_of_github" | "unknown";
   commit: {
     sha: string;
     shortSha: string;
