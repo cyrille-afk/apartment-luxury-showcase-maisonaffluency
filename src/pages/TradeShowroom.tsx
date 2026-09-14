@@ -185,6 +185,14 @@ const TradeShowroom = () => {
         {/* Tab content */}
         {activeTab === "gallery" ? (
           <Gallery onHotspotAddToQuote={handleHotspotAddToQuote} hideIntro />
+        ) : activeTab === "designers" ? (
+          <ShowroomDesignerDirectory
+            onSelectDesigner={(name) => {
+              setSelectedDesigner(name);
+              setActiveTab("grid");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          />
         ) : activeTab === "grid" ? (
           <ShowroomGridView
             activeQuoteId={activeQuoteId}
