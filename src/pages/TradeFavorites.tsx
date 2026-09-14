@@ -491,20 +491,19 @@ export default function TradeFavorites() {
             </div>
           </div>
         ) : favoritesViewMode === "grid" ? (
-          <div className="columns-1 gap-x-8 sm:columns-2 lg:columns-3">
-            {filtered.map((fav, index) => (
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((fav) => (
               <article
                 key={fav.favoriteId}
-                className="group mb-12 inline-block w-full break-inside-avoid cursor-pointer"
+                className="group flex flex-col cursor-pointer"
                 onClick={() => { setAddedToQuote(false); setLightboxProduct(favToLightboxItem(fav)); }}
               >
                 <div className={cn(
-                  "relative w-full overflow-hidden bg-background",
-                  index % 5 === 1 || index % 5 === 4 ? "aspect-[4/5]" : index % 5 === 2 ? "aspect-[3/2]" : "aspect-[5/4]",
+                  "relative aspect-[4/5] w-full overflow-hidden bg-background",
                   selectedFor3D.has(fav.productId) && "outline outline-1 outline-foreground outline-offset-4"
                 )}>
                   {fav.image_url ? (
-                    <img src={fav.image_url} alt={fav.product_name} className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]" loading="lazy" />
+                    <img src={fav.image_url} alt={fav.product_name} className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.015]" loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
                       <Heart className="w-8 h-8" />
