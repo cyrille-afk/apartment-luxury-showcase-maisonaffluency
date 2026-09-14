@@ -360,6 +360,13 @@ const TradeVisualiser = () => {
     ));
   };
 
+  const toggleObjectField = (instanceId: string, field: "render3d" | "orbit") => {
+    setObjects((current) => current.map((object) =>
+      object.instanceId === instanceId ? { ...object, [field]: !object[field] } : object,
+    ));
+  };
+
+
   const onPointerMove = (event: React.PointerEvent) => {
     const canvas = canvasRef.current;
     const gesture = gestureRef.current;
