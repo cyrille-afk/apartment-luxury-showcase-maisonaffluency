@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, FileDown, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,8 @@ import { ProjectSpecDrawer } from "@/components/trade/ProjectSpecDrawer";
 import { ProjectCuratorialGuide } from "@/components/trade/ProjectCuratorialGuide";
 import { ProjectProposalPreview } from "@/components/trade/ProjectProposalPreview";
 import { dimensionBadgeLabel } from "@/lib/productDimensions";
+import { convertCents, useFxRates, type DisplayCurrency } from "@/components/trade/CurrencyToggle";
+import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 
 type StudioItem = {
   id: string;
@@ -26,20 +28,12 @@ type StudioItem = {
   height_mm: number | null;
   size_variants: Array<{ label?: string | null; base?: string | null; top?: string | null }> | null;
   rrp_cents: number | null;
+  currency: string;
   source_pick_id: string | null;
   quantity: number;
 };
 
 const TRADE_DISCOUNT = 0.08;
-
-function money(cents: number | null | undefined) {
-  if (!cents) return null;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(cents / 100);
-}
 
 function leadLabel(item: StudioItem) {
   if (item.lead_time) return item.lead_time;
@@ -61,6 +55,9 @@ export default function TradeProjectStudio() {
   const [specItemId, setSpecItemId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  const [displayCurrency] = useTradeDisplayCurrency();
+  const fxRates = useFxRates();
+
   const [curatorialItemId, setCuratorialItemId] = useState<string | null>(null);
   const [isRecommendationHovered, setIsRecommendationHovered] = useState(false);
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(true);
@@ -79,7 +76,7 @@ export default function TradeProjectStudio() {
       setLoadingItems(true);
       const sb = supabase as any;
       const productFields =
-        "id, product_name, brand_name, image_url, sku, lead_time, dimensions, width_mm, depth_mm, height_mm, size_variants, trade_price_cents, rrp_price_cents, source_pick_id";
+        "id, product_name, brand_name, image_url, sku, lead_time, dimensions, width_mm, depth_mm, height_mm, size_variants, trade_price_cents, rrp_price_cents, currency, source_pick_id";
 
       const [q, b] = await Promise.all([
         sb.from("trade_quotes").select("id").eq("project_id", id),
@@ -127,6 +124,7 @@ export default function TradeProjectStudio() {
           height_mm: p.height_mm,
           size_variants: p.size_variants,
           rrp_cents: p.trade_price_cents ?? p.rrp_price_cents ?? null,
+          currency: (p.currency || "SGD").toUpperCase(),
           source_pick_id: p.source_pick_id ?? null,
           quantity,
         });
@@ -163,15 +161,43 @@ export default function TradeProjectStudio() {
     })();
   }, [id, itemsVersion]);
 
+  // Every ledger figure is expressed in the member's declared base currency.
+  const baseCurrency = useMemo<string>(
+    () => (displayCurrency !== "original" ? displayCurrency : items[0]?.currency || "USD"),
+    [displayCurrency, items],
+  );
+
+  const toBase = useCallback(
+    (cents: number | null | undefined, from: string) =>
+      cents ? convertCents(cents, from, baseCurrency as DisplayCurrency, fxRates) : 0,
+    [baseCurrency, fxRates],
+  );
+
+  const money = useCallback(
+    (cents: number | null | undefined) => {
+      if (!cents) return null;
+      try {
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: baseCurrency,
+          maximumFractionDigits: 0,
+        }).format(cents / 100);
+      } catch {
+        return `${baseCurrency} ${Math.round(cents / 100).toLocaleString("en-US")}`;
+      }
+    },
+    [baseCurrency],
+  );
+
   const totals = useMemo(() => {
-    const msrp = items.reduce((s, i) => s + (i.rrp_cents || 0) * i.quantity, 0);
+    const msrp = items.reduce((s, i) => s + toBase(i.rrp_cents, i.currency) * i.quantity, 0);
     const trade = Math.round(msrp * (1 - TRADE_DISCOUNT));
     const clientEstimateCents = items.reduce((s, i) => {
-      const line = (i.rrp_cents || 0) * i.quantity;
+      const line = toBase(i.rrp_cents, i.currency) * i.quantity;
       return s + Math.round(line / 100) * 100;
     }, 0);
     return { msrp, trade, clientEstimateCents };
-  }, [items]);
+  }, [items, toBase]);
 
   const budgetCents = totals.msrp ? Math.round(totals.msrp * 1.25) : 0;
   const budgetPct = budgetCents ? Math.min(100, Math.round((totals.msrp / budgetCents) * 100)) : 0;
@@ -402,7 +428,7 @@ export default function TradeProjectStudio() {
                 <p className="py-8 font-body text-xs text-muted-foreground">No line items yet.</p>
               ) : (
                 items.map((item, idx) => {
-                  const msrp = (item.rrp_cents || 0) * item.quantity;
+                  const msrp = toBase(item.rrp_cents, item.currency) * item.quantity;
                   const trade = Math.round(msrp * (1 - TRADE_DISCOUNT));
                   const expanded = expandedId === item.product_id;
                   return (
@@ -519,9 +545,10 @@ export default function TradeProjectStudio() {
         projectName={project.name}
         clientName={project.client_name}
         location={project.location}
-        items={items}
+        items={items.map((i) => ({ ...i, rrp_cents: toBase(i.rrp_cents, i.currency) || null }))}
         isClientMode={isClientMode}
         tradeDiscount={TRADE_DISCOUNT}
+        currency={baseCurrency}
       />
     </div>
   );
