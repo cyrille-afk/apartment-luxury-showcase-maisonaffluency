@@ -29,7 +29,7 @@ import { normalizeBrandToParent } from "@/lib/brandNormalization";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import DuplicateProductsBanner from "@/components/dev/DuplicateProductsBanner";
-import { createActiveDraftQuote, fetchScopedDraftQuotes, rememberActiveQuoteId } from "@/lib/activeProjectId";
+import { createActiveDraftQuote, fetchScopedDraftQuotes } from "@/lib/activeProjectId";
 
 
 const slugifyForUrl = (s: string) =>
@@ -438,8 +438,8 @@ const TradeGallery = () => {
     }
   };
 
-  const inputClass =
-    "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
+  const filterInputClass =
+    "w-full bg-transparent border-0 font-body text-sm text-foreground focus:outline-none focus:ring-0 transition-colors placeholder:text-muted-foreground/60 placeholder:font-light";
 
   return (
     <>
