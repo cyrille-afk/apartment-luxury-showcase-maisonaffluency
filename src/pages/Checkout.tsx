@@ -340,7 +340,7 @@ function OrderSummary({
   const fxRates = useFxRates();
   const usdSgd = useUsdToSgdRate();
   // Single source of truth — never re-derive a total in a UI block.
-  const displayedTotalCents = summary.totalCents;
+  const displayedTotalCents = summary.displayTotalCents;
   const sgdEquivalentCents =
     currency.toUpperCase() === "USD"
       ? Math.round(displayedTotalCents * usdSgd.rate)
@@ -590,7 +590,7 @@ function OrderSummary({
               <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
               <dd className="tabular-nums font-medium text-base">
                 {money(
-                  summary.totalCents,
+                  summary.displayTotalCents,
                   currency,
                 )}
               </dd>
