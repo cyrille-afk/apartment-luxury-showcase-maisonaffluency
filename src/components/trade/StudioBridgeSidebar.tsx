@@ -69,35 +69,57 @@ export function StudioBridgeSidebar({
 
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
           {alerts.length > 0 && (
-            <section className="space-y-2">
-              <h3 className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            <section className="space-y-0">
+              <h3 className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-4">
                 Supply updates
               </h3>
-              {alerts.map((a) => (
-                <div key={a.id} className="border-l-2 border-amber-500 bg-amber-500/5 px-3 py-2">
-                  <p className="font-body text-xs text-foreground">{a.title}</p>
-                  <p className="font-body text-xs text-muted-foreground mt-1 leading-relaxed">{a.body}</p>
-                  <div className="flex items-center gap-3 mt-2">
-                    {a.url && (
+              {alerts.map((a) => {
+                const parsed = parseAlert(a);
+                return (
+                  <div
+                    key={a.id}
+                    className="py-7 border-b border-[#E5E5E5] last:border-b-0"
+                  >
+                    <p className="font-body text-[11px] text-muted-foreground leading-relaxed">
+                      {parsed.object ? (
+                        <>
+                          <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">
+                            Object{" "}
+                          </span>
+                          <span className="text-foreground">{parsed.object}</span>
+                        </>
+                      ) : (
+                        parsed.fallbackTitle
+                      )}
+                    </p>
+                    <p className="font-body text-[11px] text-foreground leading-relaxed mt-3">
+                      <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">
+                        Alert{" "}
+                      </span>
+                      {parsed.alert || parsed.fallbackBody}
+                    </p>
+                    <div className="flex items-center gap-5 mt-5">
+                      {a.url && (
+                        <button
+                          onClick={() => {
+                            onOpenChange(false);
+                            navigate(a.url!);
+                          }}
+                          className="font-body text-[10px] tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          [ review ]
+                        </button>
+                      )}
                       <button
-                        onClick={() => {
-                          onOpenChange(false);
-                          navigate(a.url!);
-                        }}
-                        className="font-body text-[11px] uppercase tracking-wider text-foreground underline underline-offset-4"
+                        onClick={() => dismiss(a.id)}
+                        className="font-body text-[10px] tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
                       >
-                        Review
+                        [ dismiss ]
                       </button>
-                    )}
-                    <button
-                      onClick={() => dismiss(a.id)}
-                      className="font-body text-[11px] uppercase tracking-wider text-muted-foreground"
-                    >
-                      Dismiss
-                    </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </section>
           )}
 
