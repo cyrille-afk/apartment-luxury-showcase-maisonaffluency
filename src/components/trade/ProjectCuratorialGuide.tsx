@@ -451,7 +451,7 @@ export function ProjectCuratorialGuide({
                       {rec.image_url ? <img src={rec.image_url} alt={`${rec.title} by ${rec.brand}`} loading="lazy" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Image on request</span>}
                     </Button>
                     <div className="flex min-w-0 flex-col justify-between h-full py-1">
-                      <div className="min-h-0 overflow-hidden">
+                      <div className="flex-1 min-h-0 overflow-hidden">
                         <p className="truncate font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{rec.brand}</p>
                         <p className="mt-1 line-clamp-1 font-body text-[8px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground/80">
                           {context.label}
