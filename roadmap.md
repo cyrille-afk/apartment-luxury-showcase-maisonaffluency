@@ -43,3 +43,4 @@
 - [x] Add recommendation design-context labels, expanded rationale, and canvas anchor hover feedback
 - [x] Unify selected canvas overlays and recover dimensions from product variants
 - [x] Lock Project Studio to a fixed viewport: 65/35 canvas/AI split, internal pane scrolling, docked assistant
+- [x] Collapsible AI concierge pane with dismiss control, glide transition, and activation tab

@@ -30,6 +30,8 @@ type Props = {
   activeItemId: string | null;
   isClientMode: boolean;
   docked?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   onActiveItemChange: (productId: string) => void;
   onCompositionChanged: () => void;
   onRecommendationHover: (active: boolean) => void;
@@ -86,11 +88,18 @@ export function ProjectCuratorialGuide({
   activeItemId,
   isClientMode,
   docked = false,
+  open: controlledOpen,
+  onOpenChange,
   onActiveItemChange,
   onCompositionChanged,
   onRecommendationHover,
 }: Props) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = (value: boolean) => {
+    if (onOpenChange) onOpenChange(value);
+    else setInternalOpen(value);
+  };
   const [heightIndex, setHeightIndex] = useState(1);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(false);
@@ -138,13 +147,9 @@ export function ProjectCuratorialGuide({
   }, [open, projectId, items]);
 
   useEffect(() => {
-    if (docked) setOpen(true);
-  }, [docked]);
-
-  useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !docked) setOpen(false);
+      if (event.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -301,8 +306,7 @@ export function ProjectCuratorialGuide({
     streamRef.current?.scrollBy({ left: direction * 360, behavior: "smooth" });
   };
 
-  if (!open) {
-    if (docked) return null;
+  if (!open && !docked) {
     return (
       <Button
         type="button"
@@ -321,7 +325,17 @@ export function ProjectCuratorialGuide({
 
   return (
     <>
-    {connector && (
+    {docked && !open && (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex h-11 w-full items-center justify-center gap-2 bg-background font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowUp className="h-3 w-3" aria-hidden="true" />
+        [ Activate AI Curatorial Concierge ]
+      </button>
+    )}
+    {connector && open && (
       <svg className="pointer-events-none fixed inset-0 z-[51] h-full w-full" aria-hidden="true">
         <line
           x1={connector.x1}
@@ -340,8 +354,9 @@ export function ProjectCuratorialGuide({
     <section
       ref={drawerRef}
       aria-label="AI Curatorial Assistant"
+      aria-hidden={docked && !open}
       className={docked
-        ? "relative flex h-full min-h-0 flex-col bg-background"
+        ? "relative flex min-h-0 flex-1 flex-col overflow-hidden bg-background"
         : "fixed inset-x-0 bottom-0 z-50 flex flex-col border-t border-border bg-background transition-[height] duration-500 [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]"}
       style={docked ? undefined : { height, maxHeight: "calc(100dvh - 48px)" }}
     >
@@ -360,6 +375,17 @@ export function ProjectCuratorialGuide({
           </p>
         </div>
         <div className="flex shrink-0 items-center">
+          {docked && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setOpen(false)}
+              className="h-auto rounded-none px-2 py-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground hover:bg-transparent hover:text-foreground"
+            >
+              <X className="h-3 w-3" aria-hidden="true" />
+              [ Dismiss AI Concierge ]
+            </Button>
+          )}
           {!docked && (
             <>
               <Button
