@@ -242,7 +242,7 @@ export function BriefWizard() {
             if (typeof p.lastCompletedStep === "number") setLastCompletedStep(p.lastCompletedStep);
             setSavedAt(cloudTs);
             setPrefilled(true);
-            toast.success("Resumed your brief from another device.");
+            showResumedBriefToast();
           }
         }
       } catch {}
