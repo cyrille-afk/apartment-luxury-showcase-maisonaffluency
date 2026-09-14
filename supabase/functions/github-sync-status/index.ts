@@ -66,7 +66,21 @@ Deno.serve(async (req) => {
     const runs: any[] = checks?.check_runs ?? []
     const visual = runs.find((r) => r.name === CHECK_NAME) ?? null
 
+    // Compare the deployed app's stamped commit against GitHub main to detect
+    // a pending Lovable → GitHub sync (deployed ahead of the repo).
+    let deployedSha: string | null = null
+    try {
+      const v = await fetch('https://www.maisonaffluency.com/version.json?t=' + Date.now())
+      if (v.ok) deployedSha = (await v.json())?.commitSha ?? null
+    } catch {
+      deployedSha = null
+    }
+    const syncState =
+      !deployedSha ? 'unknown' : deployedSha === sha ? 'in_sync' : 'ahead_of_github'
+
     return json({
+      deployed: { commitSha: deployedSha },
+      syncState,
       repo: `${OWNER}/${REPO}`,
       branch: BRANCH,
       commit: {
