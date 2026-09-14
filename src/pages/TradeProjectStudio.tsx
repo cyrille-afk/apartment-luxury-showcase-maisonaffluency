@@ -201,20 +201,20 @@ export default function TradeProjectStudio() {
                     key={item.product_id}
                     data-curatorial-source={item.product_id}
                     className="group relative mb-0 cursor-pointer break-inside-avoid"
-                    onClick={(event) => {
-                      if (event.shiftKey) setCuratorialItemId(item.product_id);
-                      else setSpecItemId(item.product_id);
+                    onClick={() => {
+                      setCuratorialItemId(item.product_id);
+                      window.dispatchEvent(new CustomEvent("project-curator:open"));
                     }}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        if (e.shiftKey) setCuratorialItemId(item.product_id);
-                        else setSpecItemId(item.product_id);
+                        setCuratorialItemId(item.product_id);
+                        window.dispatchEvent(new CustomEvent("project-curator:open"));
                       }
                     }}
-                    aria-label={`Open specification for ${item.name}`}
+                    aria-label={`Open AI curatorial guide for ${item.name}`}
                   >
                     <div className="relative overflow-hidden bg-muted">
                       {item.image_url ? (
