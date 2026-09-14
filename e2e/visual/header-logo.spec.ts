@@ -32,12 +32,15 @@ test.describe("Mobile header logo", () => {
     for (const route of ROUTES) {
       test(`${bp.width}px (${bp.label}) — ${route} keeps the locked wordmark size`, async ({
         browser,
+        baseURL,
       }) => {
+        if (!baseURL) throw new Error("Playwright baseURL is required");
         const context = await browser.newContext({
           ...devices["Pixel 5"],
           viewport: { width: bp.width, height: bp.height },
           isMobile: true,
           hasTouch: true,
+          baseURL,
         });
         const page = await context.newPage();
         try {
@@ -60,8 +63,9 @@ test.describe("Mobile header logo", () => {
           //    which is what previous shrink fixes were trying to solve).
           const box = await logo.boundingBox();
           expect(box, "logo has no layout box").not.toBeNull();
-          expect(box!.x).toBeGreaterThanOrEqual(-1);
-          expect(box!.x + box!.width).toBeLessThanOrEqual(bp.width + 1);
+          if (!box) throw new Error("Logo has no layout box");
+          expect(box.x).toBeGreaterThanOrEqual(-1);
+          expect(box.x + box.width).toBeLessThanOrEqual(bp.width + 1);
 
           // 3. It must not be cut off by a clipping ancestor in the header
           //    (the wordmark sits inside truncate / overflow-hidden wrappers).
