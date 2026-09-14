@@ -122,7 +122,11 @@ export default function TradeProjectStudio() {
   const totals = useMemo(() => {
     const msrp = items.reduce((s, i) => s + (i.rrp_cents || 0) * i.quantity, 0);
     const trade = Math.round(msrp * (1 - TRADE_DISCOUNT));
-    return { msrp, trade };
+    const clientEstimateCents = items.reduce((s, i) => {
+      const line = (i.rrp_cents || 0) * i.quantity;
+      return s + Math.round(line / 100) * 100;
+    }, 0);
+    return { msrp, trade, clientEstimateCents };
   }, [items]);
 
   const budgetCents = totals.msrp ? Math.round(totals.msrp * 1.25) : 0;
@@ -348,7 +352,7 @@ export default function TradeProjectStudio() {
                 </span>
                 <span />
                 <span className="text-right font-body text-[11px] tracking-[0.05em] text-foreground">
-                  {isClientMode ? money(totals.msrp) || "—" : money(totals.trade) || "—"}
+                {isClientMode ? money(totals.clientEstimateCents) || "—" : money(totals.trade) || "—"}
                 </span>
               </div>
             )}
