@@ -24,7 +24,7 @@ export default function PriceModeSelector({ className = "" }: PriceModeSelectorP
     setAnnouncement(
       showTradePrice
         ? `Showing ${tierLabel} trade price, ${pct} off retail.`
-        : `Showing retail price (RRP). Trade tier ${tierLabel}, ${pct} off available.`,
+        : "Client View active. Showing retail prices only.",
     );
   }, [showTradePrice, tierLabel, discountLabel]);
 
@@ -35,7 +35,9 @@ export default function PriceModeSelector({ className = "" }: PriceModeSelectorP
         className,
       )}
       role="group"
-      aria-label={`Price view — ${tierLabel} tier, ${discountLabel} trade discount`}
+      aria-label={showTradePrice
+        ? `Price view — ${tierLabel} tier, ${discountLabel} trade discount`
+        : "Price view — Client View active"}
     >
       <button
         type="button"
