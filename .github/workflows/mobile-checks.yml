@@ -71,7 +71,7 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.60.0-noble
     timeout-minutes: 20
     # Visual regression for landing CTAs / hero / designers section across mobile + desktop.
-    # Baselines live under e2e/visual/__screenshots__/. Refresh locally with `npm run test:visual:update`.
+    # Baselines live under e2e/visual/__screenshots__/. Refresh locally with `bun run test:visual:update`.
     steps:
       - uses: actions/checkout@v5
       - uses: oven-sh/setup-bun@v2
