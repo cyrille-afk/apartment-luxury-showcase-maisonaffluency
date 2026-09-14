@@ -143,7 +143,7 @@ export function InvoiceStatusDrawer({
         {/* Header */}
         <div className="flex items-start justify-between gap-6 px-8 pt-8 pb-6 border-b border-border">
           <div>
-            <h2 className="font-display text-2xl md:text-3xl font-light text-foreground leading-tight">
+            <h2 className="font-display text-xl md:text-2xl font-light text-foreground leading-tight">
               PROFORMA STATUS // {displayQuoteNumber}
             </h2>
             <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
