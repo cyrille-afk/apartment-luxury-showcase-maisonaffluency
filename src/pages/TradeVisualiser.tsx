@@ -478,13 +478,40 @@ const TradeVisualiser = () => {
                     className="pointer-events-none absolute bottom-[5%] left-[12%] right-[12%] h-5 origin-center rounded-[50%] bg-gradient-to-r from-transparent via-foreground/20 to-transparent blur-lg"
                     style={{ transform: `translateX(${object.shadowDirection}px) skewX(${object.shadowDirection * 0.7}deg) scaleX(1.18)` }}
                   />
-                  <img
-                    src={optimizeImageUrl(object.image_url || "", CUTOUT_TRANSFORMS)}
-                    alt={object.product_name}
-                    draggable={false}
-                    className="relative h-full w-full object-contain mix-blend-multiply [image-rendering:crisp-edges]"
-                    style={{ ...CUTOUT_IMAGE_STYLE, filter: imageFilter }}
-                  />
+                  {object.render3d && object.glb_url ? (
+                    modelViewerReady ? (
+                      createElement("model-viewer", {
+                        src: object.glb_url,
+                        alt: object.product_name,
+                        "camera-controls": object.orbit ? true : undefined,
+                        "disable-zoom": true,
+                        "interaction-prompt": "none",
+                        "shadow-intensity": "0",
+                        exposure: String(Math.max(0.4, object.brightness / 100)),
+                        "tone-mapping": "neutral",
+                        loading: "eager",
+                        style: {
+                          width: "100%",
+                          height: "100%",
+                          backgroundColor: "transparent",
+                          pointerEvents: object.orbit ? "auto" : "none",
+                        } as CSSProperties,
+                      })
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center">
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      </div>
+                    )
+                  ) : (
+                    <img
+                      src={optimizeImageUrl(object.image_url || "", CUTOUT_TRANSFORMS)}
+                      alt={object.product_name}
+                      draggable={false}
+                      className="relative h-full w-full object-contain mix-blend-multiply [image-rendering:crisp-edges]"
+                      style={{ ...CUTOUT_IMAGE_STYLE, filter: imageFilter }}
+                    />
+                  )}
+
                 </div>
                 {isSelected && (
                   <div className="pointer-events-none absolute inset-0 border border-foreground/30">
