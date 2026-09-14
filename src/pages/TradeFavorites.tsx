@@ -426,14 +426,25 @@ export default function TradeFavorites() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16">
-            <Heart className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="font-display text-sm text-foreground">
-              {search ? "No favorites match your search" : activeFolder ? "No pieces in this folder yet" : "No saved products yet"}
+          <div className="text-center py-24 px-6">
+            <p className="font-display font-light text-base text-foreground">
+              {search ? "No matches found in your archive." : activeFolder ? "This folder is currently empty." : "The archive is currently empty."}
             </p>
-            <p className="font-body text-xs text-muted-foreground mt-1">
-              {search ? "Try a different search term" : activeFolder ? "Save pieces to this folder using the heart icon." : "Browse the Showroom and tap the heart icon to save products here."}
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-4 max-w-xl mx-auto leading-relaxed">
+              {search
+                ? "TRY A DIFFERENT SEARCH TERM OR CLEAR FILTERS TO EXPLORE THE FULL ARCHIVE."
+                : activeFolder
+                ? "SAVE PIECES TO THIS FOLDER USING THE HEART ICON AS YOU BROWSE THE CATALOGUE."
+                : "BROWSE THE CATALOGUE OR CONSULT THE AI CURATORIAL GUIDE TO BEGIN SHORTLISTING ARCHITECTURAL PIECES FOR YOUR ACTIVE WORKSPACES."}
             </p>
+            {!search && !activeFolder && (
+              <button
+                onClick={() => navigate("/trade/showroom")}
+                className="mt-8 font-mono text-[10px] uppercase tracking-[0.15em] text-foreground hover:text-muted-foreground transition-colors"
+              >
+                [ BROWSE SHOWROOM COLLECTION → ]
+              </button>
+            )}
           </div>
         ) : view === "grid" ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
