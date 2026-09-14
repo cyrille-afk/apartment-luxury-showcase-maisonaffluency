@@ -33,6 +33,11 @@ function LegacyStephGcRedirect() {
   return <Navigate to={`/designers/steph-gc${productSlug ? `/${productSlug}` : ""}`} replace />;
 }
 
+function ShowroomLegacyRedirect() {
+  const { search } = useLocation();
+  return <Navigate to={`/trade/archive${search}`} replace />;
+}
+
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
 const TradeLanding = lazy(() => import("./pages/TradeLanding"));
