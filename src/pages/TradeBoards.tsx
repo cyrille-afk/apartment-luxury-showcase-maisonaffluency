@@ -48,7 +48,7 @@ const statusColors: Record<string, string> = {
   converted: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
 };
 
-const TradeBoards = () => {
+const TradeBoards = ({ embedded = false }: { embedded?: boolean }) => {
   const { user } = useAuth();
   const { currentStudio, canEdit } = useStudio();
   const { toast } = useToast();
@@ -186,53 +186,67 @@ const TradeBoards = () => {
     toast({ title: copied ? "Link copied" : "Share link ready", description: copied ? "Share this link with your client" : url });
   };
 
+  const createBoardDialog = (
+    <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" className="gap-2">
+          <Plus className="h-3.5 w-3.5" /> New Board
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="font-display">Create Project Folder</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 pt-2">
+          <div>
+            <Label className="font-body text-xs uppercase tracking-wider">Project / Board Name</Label>
+            <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Villa Marina Living Room" className="mt-1.5" />
+          </div>
+          <div>
+            <Label className="font-body text-xs uppercase tracking-wider">Client</Label>
+            <div className="mt-1.5">
+              <ClientPicker
+                value={clientId}
+                onChange={(c: PickedClient | null) => {
+                  setClientId(c?.id ?? null);
+                  setClientName(c?.name ?? "");
+                  if (c?.primary_contact?.email) setClientEmail(c.primary_contact.email);
+                }}
+                placeholder="Select or add a client…"
+              />
+            </div>
+          </div>
+          <div>
+            <Label className="font-body text-xs uppercase tracking-wider">Client Email (optional)</Label>
+            <Input value={clientEmail} onChange={e => setClientEmail(e.target.value)} placeholder="sarah@example.com" className="mt-1.5" />
+          </div>
+          <Button onClick={handleCreate} disabled={!title.trim() || creating} className="w-full">
+            {creating ? "Creating…" : "Create Board"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
   return (
     <>
-      <Helmet><title>Project Folders — Trade Portal — Maison Affluency</title></Helmet>
-      <div className="max-w-7xl">
-        <SectionHero section="boards" title="Project Folders" subtitle="Create curated collections for your clients to review and approve">
-          <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" className="gap-2">
-                <Plus className="h-3.5 w-3.5" /> New Board
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle className="font-display">Create Project Folder</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 pt-2">
-                <div>
-                  <Label className="font-body text-xs uppercase tracking-wider">Project / Board Name</Label>
-                  <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Villa Marina Living Room" className="mt-1.5" />
-                </div>
-                <div>
-                  <Label className="font-body text-xs uppercase tracking-wider">Client</Label>
-                  <div className="mt-1.5">
-                    <ClientPicker
-                      value={clientId}
-                      onChange={(c: PickedClient | null) => {
-                        setClientId(c?.id ?? null);
-                        setClientName(c?.name ?? "");
-                        if (c?.primary_contact?.email) setClientEmail(c.primary_contact.email);
-                      }}
-                      placeholder="Select or add a client…"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label className="font-body text-xs uppercase tracking-wider">Client Email (optional)</Label>
-                  <Input value={clientEmail} onChange={e => setClientEmail(e.target.value)} placeholder="sarah@example.com" className="mt-1.5" />
-                </div>
-                <Button onClick={handleCreate} disabled={!title.trim() || creating} className="w-full">
-                  {creating ? "Creating…" : "Create Board"}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </SectionHero>
+      {!embedded && <Helmet><title>Project Folders — Trade Portal — Maison Affluency</title></Helmet>}
+      <div className={embedded ? "max-w-none" : "max-w-7xl"}>
+        {embedded ? (
+          <div className="mb-6 flex items-end justify-between gap-4 border-b border-border pb-5">
+            <div>
+              <h2 className="font-display text-xl text-foreground">Folders &amp; Drafts</h2>
+              <p className="mt-1 font-body text-xs text-muted-foreground">Curated collections for client review and approval.</p>
+            </div>
+            {createBoardDialog}
+          </div>
+        ) : (
+          <SectionHero section="boards" title="Project Folders" subtitle="Create curated collections for your clients to review and approve">
+            {createBoardDialog}
+          </SectionHero>
+        )}
 
-        <TradeBreadcrumb current="Boards" currentProjectTab="boards" />
+        {!embedded && <TradeBreadcrumb current="Boards" currentProjectTab="boards" />}
         <ActiveFilterChips className="mb-4" confirmClearAll />
 
         {/* Source filter — separates AI Concierge–built boards from manually created ones */}
