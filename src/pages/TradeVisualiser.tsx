@@ -334,7 +334,7 @@ const TradeVisualiser = () => {
             </button>
           </div>
           <p className={cn(microLabel, "mt-3 text-muted-foreground")}>
-            {dimensionBadgeLabel(resolveDimensions(selected))}
+            {formatDimensions(resolveDimensions({ dimensions: selected.dimensions })) ?? DIMENSIONS_PLACEHOLDER}
           </p>
 
           <label className={cn(microLabel, "mt-5 block text-muted-foreground")}>Scale · {Math.round(selected.scale * 100)}%</label>
