@@ -55,6 +55,7 @@ export function ProjectCuratorialGuide({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [addingId, setAddingId] = useState<string | null>(null);
+  const [openingId, setOpeningId] = useState<string | null>(null);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const [boardId, setBoardId] = useState<string | null>(null);
   const [connector, setConnector] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
@@ -216,6 +217,33 @@ export function ProjectCuratorialGuide({
     }
   };
 
+  const openRecommendation = async (rec: Recommendation) => {
+    setOpeningId(rec.product_id);
+    setError(null);
+    try {
+      const { data: direct } = await supabase
+        .from("trade_products")
+        .select("id")
+        .eq("id", rec.product_id)
+        .maybeSingle();
+      if (direct?.id) {
+        window.location.assign(`/trade/products/${direct.id}`);
+        return;
+      }
+      const { data: twin } = await supabase
+        .from("trade_products")
+        .select("id")
+        .eq("source_pick_id", rec.product_id)
+        .eq("is_active", true)
+        .limit(1)
+        .maybeSingle();
+      window.location.assign(`/trade/products/${twin?.id || rec.product_id}`);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "The specification could not be opened.");
+      setOpeningId(null);
+    }
+  };
+
   const scroll = (direction: -1 | 1) => {
     streamRef.current?.scrollBy({ left: direction * 360, behavior: "smooth" });
   };
@@ -256,7 +284,7 @@ export function ProjectCuratorialGuide({
     <section
       aria-label="AI Curatorial Assistant"
       className="fixed inset-x-0 bottom-0 z-50 flex flex-col border-t border-border bg-background transition-[height] duration-500 [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]"
-      style={{ height }}
+      style={{ height, maxHeight: "calc(100dvh - 48px)" }}
     >
       <div className="flex min-h-16 items-center justify-between gap-4 border-b border-border px-4 md:px-8">
         <div className="min-w-0">
@@ -345,9 +373,16 @@ export function ProjectCuratorialGuide({
                 const added = addedIds.has(rec.product_id);
                 return (
                   <article key={rec.product_id} className="grid w-[290px] shrink-0 snap-start grid-cols-[112px_1fr] gap-4 md:w-[360px] md:grid-cols-[148px_1fr]">
-                    <a href={`/trade/products/${rec.product_id}`} className="block aspect-[4/5] bg-muted" aria-label={`View ${rec.title}`}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => void openRecommendation(rec)}
+                      disabled={openingId === rec.product_id}
+                      className="block h-auto aspect-[4/5] w-full rounded-none bg-muted p-0 hover:bg-muted"
+                      aria-label={`View ${rec.title}`}
+                    >
                       {rec.image_url ? <img src={rec.image_url} alt={`${rec.title} by ${rec.brand}`} loading="lazy" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Image on request</span>}
-                    </a>
+                    </Button>
                     <div className="flex min-w-0 flex-col py-1">
                       <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{rec.brand}</p>
                       <h3 className="mt-1 font-display text-lg leading-tight text-foreground">{rec.title}</h3>
