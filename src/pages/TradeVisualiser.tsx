@@ -513,9 +513,20 @@ const TradeVisualiser = () => {
           <div className="mt-5 border-t border-foreground/10 pt-4">
             <div className="flex items-center justify-between gap-3">
               <p className={cn(microLabel, "text-muted-foreground")}>Material / Finish</p>
-              {selected.material && (
-                <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={() => setObjects((current) => current.map((object) => object.instanceId === selected.instanceId ? { ...object, material: null } : object))}>Clear</button>
+              {(selected.material || selected.topMaterial || selected.baseMaterial) && (
+                <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={clearFinishes}>Clear</button>
               )}
+            </div>
+            <div className="mt-3 flex items-center gap-4">
+              {([["all", "Whole Piece"], ["top", "Top"], ["base", "Base"]] as const).map(([value, label]) => (
+                <button
+                  key={value}
+                  onClick={() => setFinishTarget(value)}
+                  className={cn(microLabel, finishTarget === value ? "text-foreground underline underline-offset-4" : "text-muted-foreground hover:text-foreground")}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
             <input
               value={materialSearch}
