@@ -1822,12 +1822,12 @@ const TradeProductPage: React.FC = () => {
               {prefix.trim()}
             </span>
           )}
-          <span className="text-foreground align-middle">{netLabel}</span>
+          <span className="text-foreground align-middle">{showTradePrice ? netLabel : retailLabel}</span>
           <span className="ml-2 align-middle font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            Net Trade Price
+            {showTradePrice ? "Net Trade Price" : "MSRP"}
           </span>
         </p>
-        {retailLabel && (
+        {showTradePrice && retailLabel && (
           <p className="mt-1 font-body text-[11px] tracking-[0.04em] text-muted-foreground">
             <span className="line-through decoration-muted-foreground/50">Retail: {retailLabel}</span>
           </p>
@@ -2432,15 +2432,15 @@ const TradeProductPage: React.FC = () => {
 
                 {priceLabels && (
                   <div className="flex flex-col gap-1">
-                    {priceLabels.retailLabel && (
+                    {showTradePrice && priceLabels.retailLabel && (
                       <p className="font-body text-[11px] tracking-[0.04em] text-muted-foreground line-through decoration-muted-foreground/50">
                         Retail: {priceLabels.prefix}{priceLabels.retailLabel}
                       </p>
                     )}
                     <p className="font-display text-2xl leading-none text-foreground">
-                      {priceLabels.prefix}{priceLabels.netLabel}{" "}
+                      {priceLabels.prefix}{showTradePrice ? priceLabels.netLabel : priceLabels.retailLabel}{" "}
                       <span className="font-body text-xs tracking-widest uppercase text-muted-foreground">
-                        Net Trade Price
+                        {showTradePrice ? "Net Trade Price" : "MSRP"}
                       </span>
                     </p>
                   </div>
