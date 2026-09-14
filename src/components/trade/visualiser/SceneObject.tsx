@@ -179,11 +179,15 @@ const ModelBody = ({ object }: { object: PlacedObject }) => {
     object.upholsteryMaterial ?? null,
   );
   useEffect(() => () => {
+    // Only dispose materials we cloned — the cached GLTF originals are shared
+    // across every instance and disposing them renders later clones black.
     model.traverse((child) => {
       const mesh = child as THREE.Mesh;
       if (!mesh.isMesh) return;
       const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-      materials.forEach((entry) => entry.dispose());
+      materials.forEach((entry) => {
+        if (entry?.userData?.visualiserClone) entry.dispose();
+      });
     });
   }, [model]);
   return <primitive object={model} />;
