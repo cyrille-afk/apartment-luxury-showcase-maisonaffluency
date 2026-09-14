@@ -182,7 +182,7 @@ export default function TradeProjectStudio() {
         {/* LEFT — central workspace: canvas (upper) + AI pane (lower) */}
         <section className="flex flex-col border-b border-border bg-background lg:min-h-0 lg:border-b-0 lg:border-r lg:border-border">
           {/* Upper zone — visual canvas */}
-          <div className="lg:min-h-0 lg:flex-[65] lg:overflow-y-auto">
+          <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           <div className="px-4 py-6 md:px-8 lg:px-12 lg:py-5">
             <p className="trade-micro-label text-muted-foreground">Visual canvas</p>
           </div>
@@ -260,7 +260,7 @@ export default function TradeProjectStudio() {
           </div>
 
           {/* Lower zone — AI Curatorial Assistant, anchored to the base of the workspace */}
-          <div className="shrink-0 border-t border-border lg:min-h-0 lg:flex-[35]">
+          <div className="shrink-0 border-t border-border lg:min-h-0">
             <ProjectCuratorialGuide
               docked
               projectId={project.id}

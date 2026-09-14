@@ -90,7 +90,7 @@ export function ProjectCuratorialGuide({
   onCompositionChanged,
   onRecommendationHover,
 }: Props) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(docked);
   const [heightIndex, setHeightIndex] = useState(1);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(false);
@@ -138,13 +138,9 @@ export function ProjectCuratorialGuide({
   }, [open, projectId, items]);
 
   useEffect(() => {
-    if (docked) setOpen(true);
-  }, [docked]);
-
-  useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !docked) setOpen(false);
+      if (event.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
