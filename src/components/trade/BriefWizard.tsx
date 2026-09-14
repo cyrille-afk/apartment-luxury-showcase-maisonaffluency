@@ -238,6 +238,7 @@ export function BriefWizard() {
     if (isResumed) {
       const t = setTimeout(() => {
         console.log("[BriefWizard debug] firing resumed toast");
+        toast.success("Plain test toast");
         showResumedBriefToast();
       }, 300);
       return () => clearTimeout(t);
