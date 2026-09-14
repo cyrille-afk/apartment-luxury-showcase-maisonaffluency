@@ -598,11 +598,9 @@ export default function ProposalBuilder({
         if (showPrices && pricing) {
           const price = pricing.trade_price_cents ?? pricing.rrp_price_cents;
           if (price) {
-            const formatted = new Intl.NumberFormat("en-SG", {
-              style: "currency",
-              currency: pricing.currency || "SGD",
-              minimumFractionDigits: 0,
-            }).format(price / 100);
+            const formatted = exportCurrency.format(
+              exportCurrency.convert(price, pricing.currency),
+            );
             desc += `\nPrice: ${formatted}${pricing.trade_price_cents ? " (Trade)" : " (RRP)"}`;
           } else {
             desc += `\nPrice upon Request`;
