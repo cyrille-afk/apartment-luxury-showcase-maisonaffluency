@@ -257,7 +257,7 @@ export default function TradeProjectStudio() {
                           setCuratorialItemId(item.product_id);
                           window.dispatchEvent(new CustomEvent("project-curator:open"));
                         }}
-                        className={`absolute right-4 top-4 z-10 h-auto max-w-[calc(100%-2rem)] rounded-none bg-background/90 px-2 py-1 text-right font-body text-[9px] uppercase tracking-[0.15em] text-foreground transition-opacity hover:bg-background/90 focus:opacity-100 ${isCuratorialActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+                        className={`absolute left-4 right-4 top-4 z-10 h-auto whitespace-normal rounded-none bg-background/90 px-2 py-1 text-left font-body text-[9px] uppercase leading-relaxed tracking-[0.15em] text-foreground transition-opacity hover:bg-background/90 focus:opacity-100 ${isCuratorialActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
                         aria-label={`Use ${item.name} as AI curatorial reference`}
                       >
                         AI Analysis // Resourcing Complements
