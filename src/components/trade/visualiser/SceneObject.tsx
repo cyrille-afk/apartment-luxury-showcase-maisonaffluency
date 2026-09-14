@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useRef } from "react";
-import { useGLTF, useTexture, PivotControls } from "@react-three/drei";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useGLTF, useTexture, TransformControls } from "@react-three/drei";
+import { useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 
 export type PlacedObject = {
@@ -69,14 +70,22 @@ const ImageBody = ({ url, name }: { url: string; name: string }) => {
   );
 };
 
-const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange }: Props) => {
-  const groupRef = useRef<THREE.Group>(null);
-  const matrixRef = useRef(new THREE.Matrix4());
-  const originRef = useRef<[number, number, number]>(object.position);
+const FLOOR_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
+const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange }: Props) => {
+  const groupRef = useRef<THREE.Group | null>(null);
+  const [groupNode, setGroupNode] = useState<THREE.Group | null>(null);
+  const { raycaster, gl } = useThree();
+  const draggingRef = useRef(false);
+  const offsetRef = useRef(new THREE.Vector3());
+  const hitRef = useRef(new THREE.Vector3());
+
+  // Keep the group in sync when position changes from outside (e.g. reset/restore).
   useEffect(() => {
-    matrixRef.current.identity();
-  }, [object.instanceId]);
+    if (groupRef.current && !draggingRef.current) {
+      groupRef.current.position.set(object.position[0], 0, object.position[2]);
+    }
+  }, [object.position]);
 
   const body = object.glb_url
     ? <ModelBody url={object.glb_url} />
@@ -84,56 +93,92 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
       ? <ImageBody url={object.image_url} name={object.product_name} />
       : null;
 
+  /** Raycast the pointer onto the y = 0 floor plane. */
+  const floorHit = useCallback(() => {
+    const point = hitRef.current;
+    return raycaster.ray.intersectPlane(FLOOR_PLANE, point) ? point : null;
+  }, [raycaster]);
+
+  const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
+    event.stopPropagation();
+    onSelect(object.instanceId);
+    const hit = floorHit();
+    if (!hit || !groupRef.current) return;
+    offsetRef.current.set(
+      groupRef.current.position.x - hit.x,
+      0,
+      groupRef.current.position.z - hit.z,
+    );
+    draggingRef.current = true;
+    onDragStateChange(true);
+    (event.target as Element | null)?.setPointerCapture?.(event.pointerId);
+    gl.domElement.style.cursor = "grabbing";
+  };
+
+  const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
+    if (!draggingRef.current || !groupRef.current) return;
+    event.stopPropagation();
+    const hit = floorHit();
+    if (!hit) return;
+    // Floor lock: X/Z translation only, y is pinned to 0.
+    groupRef.current.position.set(hit.x + offsetRef.current.x, 0, hit.z + offsetRef.current.z);
+  };
+
+  const endDrag = (event?: ThreeEvent<PointerEvent>) => {
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
+    onDragStateChange(false);
+    gl.domElement.style.cursor = "auto";
+    if (event) (event.target as Element | null)?.releasePointerCapture?.(event.pointerId);
+    const group = groupRef.current;
+    if (group) {
+      onTransform(object.instanceId, [group.position.x, 0, group.position.z], object.rotation);
+    }
+  };
+
   const content = (
     <group
-      ref={groupRef}
-      position={object.position}
+      ref={(node) => {
+        groupRef.current = node;
+        setGroupNode(node);
+      }}
+      position={[object.position[0], 0, object.position[2]]}
       rotation={object.rotation}
       scale={object.scale}
-      onClick={(event) => {
-        event.stopPropagation();
-        onSelect(object.instanceId);
-      }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={() => endDrag()}
     >
       {body}
     </group>
   );
 
-  if (!selected) return content;
-
   return (
-    <PivotControls
-      anchor={[0, 0, 0]}
-      scale={1.1}
-      lineWidth={2}
-      depthTest={false}
-      disableScaling
-      matrix={matrixRef.current}
-      autoTransform={false}
-      onDragStart={() => {
-        originRef.current = object.position;
-        onDragStateChange(true);
-      }}
-      onDragEnd={() => onDragStateChange(false)}
-      onDrag={(local) => {
-        const position = new THREE.Vector3();
-        const quaternion = new THREE.Quaternion();
-        const scale = new THREE.Vector3();
-        local.decompose(position, quaternion, scale);
-        const euler = new THREE.Euler().setFromQuaternion(quaternion);
-        onTransform(
-          object.instanceId,
-          [
-            originRef.current[0] + position.x,
-            0,
-            originRef.current[2] + position.z,
-          ],
-          [euler.x, euler.y, euler.z],
-        );
-      }}
-    >
+    <>
       {content}
-    </PivotControls>
+      {selected && groupNode && (
+        <TransformControls
+          object={groupNode}
+          mode="translate"
+          showY={false}
+          size={0.85}
+          onMouseDown={() => onDragStateChange(true)}
+          onMouseUp={() => {
+            onDragStateChange(false);
+            const group = groupRef.current;
+            if (group) {
+              group.position.y = 0;
+              onTransform(object.instanceId, [group.position.x, 0, group.position.z], object.rotation);
+            }
+          }}
+          onObjectChange={() => {
+            const group = groupRef.current;
+            if (group) group.position.y = 0;
+          }}
+        />
+      )}
+    </>
   );
 };
 

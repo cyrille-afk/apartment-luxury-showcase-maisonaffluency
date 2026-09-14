@@ -352,7 +352,7 @@ const TradeVisualiser = () => {
             <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={() => spinObject(selected.instanceId, -45)}>Spin −45°</button>
             <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={() => spinObject(selected.instanceId, 45)}>Spin +45°</button>
           </div>
-          <p className={cn(microLabel, "mt-4 text-muted-foreground/70")}>Use the gizmo rings to rotate on X · Y · Z, arrows to move on the floor plane.</p>
+          <p className={cn(microLabel, "mt-4 text-muted-foreground/70")}>Drag the red · blue arrows to slide on the floor plane, or drag the piece directly. Spin buttons rotate.</p>
         </div>
       )}
 
