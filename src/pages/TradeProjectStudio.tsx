@@ -127,6 +127,7 @@ export default function TradeProjectStudio() {
           height_mm: p.height_mm,
           size_variants: p.size_variants,
           rrp_cents: p.trade_price_cents ?? p.rrp_price_cents ?? null,
+          source_pick_id: p.source_pick_id ?? null,
           quantity,
         });
       };
