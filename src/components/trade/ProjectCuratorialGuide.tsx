@@ -33,7 +33,11 @@ type Props = {
   onCompositionChanged: () => void;
 };
 
-const HEIGHTS = [260, 390, 540] as const;
+const HEIGHTS = [
+  "clamp(300px,30dvh,340px)",
+  "clamp(380px,35dvh,430px)",
+  "min(560px,calc(100dvh - 48px))",
+] as const;
 
 function clientReason(rec: Recommendation, sourceName: string) {
   const category = rec.category ? rec.category.toLowerCase() : "piece";
@@ -60,6 +64,8 @@ export function ProjectCuratorialGuide({
   const [boardId, setBoardId] = useState<string | null>(null);
   const [connector, setConnector] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
   const streamRef = useRef<HTMLDivElement | null>(null);
+  const drawerRef = useRef<HTMLElement | null>(null);
+  const firstRecommendationRef = useRef<HTMLElement | null>(null);
 
   const activeItem = useMemo(
     () => items.find((item) => item.product_id === activeItemId) || items[0] || null,
@@ -121,16 +127,17 @@ export function ProjectCuratorialGuide({
         return;
       }
       const rect = source.getBoundingClientRect();
-      const drawerTop = window.innerHeight - HEIGHTS[heightIndex];
+      const drawerTop = drawerRef.current?.getBoundingClientRect().top ?? window.innerHeight;
       if (rect.bottom <= 0 || rect.top >= drawerTop) {
         setConnector(null);
         return;
       }
+      const firstRecommendation = firstRecommendationRef.current?.getBoundingClientRect();
       setConnector({
         x1: rect.left + rect.width / 2,
         y1: Math.min(rect.bottom, drawerTop - 18),
-        x2: Math.max(112, window.innerWidth * 0.24),
-        y2: drawerTop,
+        x2: firstRecommendation ? firstRecommendation.left + Math.min(56, firstRecommendation.width / 2) : Math.max(112, window.innerWidth * 0.24),
+        y2: firstRecommendation ? firstRecommendation.top + 18 : drawerTop,
       });
     };
     measure();
@@ -140,7 +147,7 @@ export function ProjectCuratorialGuide({
       window.removeEventListener("resize", measure);
       window.removeEventListener("scroll", measure, true);
     };
-  }, [activeItem, heightIndex, open]);
+  }, [activeItem, heightIndex, open, recommendations]);
 
   const resolveBoard = async () => {
     if (boardId) return boardId;
@@ -268,20 +275,23 @@ export function ProjectCuratorialGuide({
   return (
     <>
     {connector && (
-      <svg className="pointer-events-none fixed inset-0 z-[49] h-full w-full" aria-hidden="true">
+      <svg className="pointer-events-none fixed inset-0 z-[51] h-full w-full" aria-hidden="true">
         <line
           x1={connector.x1}
           y1={connector.y1}
           x2={connector.x2}
           y2={connector.y2}
-          className="stroke-foreground/35"
+          className="stroke-foreground/20"
           strokeWidth="1"
-          strokeDasharray="4 5"
+          strokeDasharray="1 6"
+          strokeLinecap="round"
         />
-        <circle cx={connector.x1} cy={connector.y1} r="3" className="fill-background stroke-foreground/60" strokeWidth="1" />
+        <circle cx={connector.x1} cy={connector.y1} r="2.5" className="fill-background stroke-foreground/35" strokeWidth="1" />
+        <circle cx={connector.x2} cy={connector.y2} r="2.5" className="fill-background stroke-foreground/35" strokeWidth="1" />
       </svg>
     )}
     <section
+      ref={drawerRef}
       aria-label="AI Curatorial Assistant"
       className="fixed inset-x-0 bottom-0 z-50 flex flex-col border-t border-border bg-background transition-[height] duration-500 [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]"
       style={{ height, maxHeight: "calc(100dvh - 48px)" }}
@@ -294,6 +304,11 @@ export function ProjectCuratorialGuide({
           <h2 className="mt-1 truncate font-display text-xl text-foreground md:text-2xl">
             AI Curatorial Assistant <span className="font-body text-[10px] uppercase tracking-[0.15em]">// Co-Designer</span>
           </h2>
+          <p className="mt-1 truncate font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
+            {isClientMode
+              ? "AI Curation: Aesthetic pairings selected to balance the textural composition."
+              : `AI Curation: Sourcing active wood variants and high-margin pairs matching ${activeItem?.name || "the active composition"}.`}
+          </p>
         </div>
         <div className="flex shrink-0 items-center">
           <Button
@@ -368,11 +383,15 @@ export function ProjectCuratorialGuide({
             </div>
           ) : recommendations.length ? (
             <div ref={streamRef} className="flex h-full snap-x gap-5 overflow-x-auto pb-3 [scrollbar-width:thin]">
-              {recommendations.map((rec) => {
+              {recommendations.map((rec, index) => {
                 const rationale = isClientMode ? clientReason(rec, activeItem?.name || "composition") : rec.reason;
                 const added = addedIds.has(rec.product_id);
                 return (
-                  <article key={rec.product_id} className="grid w-[290px] shrink-0 snap-start grid-cols-[112px_1fr] gap-4 md:w-[360px] md:grid-cols-[148px_1fr]">
+                  <article
+                    ref={index === 0 ? firstRecommendationRef : undefined}
+                    key={rec.product_id}
+                    className="grid w-[290px] shrink-0 snap-start grid-cols-[112px_1fr] gap-4 md:w-[360px] md:grid-cols-[148px_1fr]"
+                  >
                     <Button
                       type="button"
                       variant="ghost"

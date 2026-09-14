@@ -196,6 +196,7 @@ export default function TradeProjectStudio() {
             <div className="columns-2 gap-0 px-0 pb-12 md:columns-3">
               {items.map((item, idx) => {
                 const dims = dimsLabel(item);
+                const isCuratorialActive = curatorialItemId === item.product_id;
                 return (
                   <figure
                     key={item.product_id}
@@ -229,7 +230,7 @@ export default function TradeProjectStudio() {
                       )}
 
                       {/* Wireframe / crosshair overlay */}
-                      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                      <div className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ${isCuratorialActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
                         <span className="absolute left-0 right-0 top-1/2 h-px bg-foreground/25" />
                         <span className="absolute bottom-0 top-0 left-1/2 w-px bg-foreground/25" />
                         <span className="absolute inset-4 border border-foreground/25" />
@@ -256,10 +257,10 @@ export default function TradeProjectStudio() {
                           setCuratorialItemId(item.product_id);
                           window.dispatchEvent(new CustomEvent("project-curator:open"));
                         }}
-                        className="absolute right-4 top-4 z-10 h-auto rounded-none bg-background/90 px-2 py-1 font-body text-[9px] uppercase tracking-[0.15em] text-foreground opacity-0 transition-opacity hover:bg-background/90 group-hover:opacity-100 focus:opacity-100"
+                        className={`absolute right-4 top-4 z-10 h-auto max-w-[calc(100%-2rem)] rounded-none bg-background/90 px-2 py-1 text-right font-body text-[9px] uppercase tracking-[0.15em] text-foreground transition-opacity hover:bg-background/90 focus:opacity-100 ${isCuratorialActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
                         aria-label={`Use ${item.name} as AI curatorial reference`}
                       >
-                        AI reference
+                        AI Analysis // Resourcing Complements
                       </Button>
                     </div>
                   </figure>
