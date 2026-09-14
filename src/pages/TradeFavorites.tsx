@@ -482,7 +482,7 @@ export default function TradeFavorites() {
             </p>
             {!search && !activeFolder && (
               <button
-                onClick={() => navigate("/trade/showroom")}
+                onClick={() => navigate("/trade/archive")}
                 className="mt-8 font-mono text-[10px] uppercase tracking-[0.15em] text-foreground hover:text-muted-foreground transition-colors"
               >
                 [ BROWSE SHOWROOM COLLECTION → ]
