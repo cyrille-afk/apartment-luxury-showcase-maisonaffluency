@@ -933,8 +933,8 @@ input, select, textarea {
     margin: 0;
   }
 
-  body:has(.proposal-preview-shell[data-state="open"]) * {
-    visibility: hidden !important;
+  body:has(.proposal-preview-shell[data-state="open"]) > *:not(.proposal-preview-shell) {
+    display: none !important;
   }
 
   .proposal-preview-shell[data-state="open"],
