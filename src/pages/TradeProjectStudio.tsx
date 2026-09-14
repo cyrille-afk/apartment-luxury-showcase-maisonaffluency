@@ -180,7 +180,7 @@ export default function TradeProjectStudio() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[60%_40%]">
         {/* LEFT — visual canvas */}
-        <section className="border-b border-border lg:border-b-0 lg:border-r lg:border-border">
+        <section className="border-b border-border bg-background lg:border-b-0 lg:border-r lg:border-border">
           <div className="px-4 py-6 md:px-8 lg:px-12">
             <p className="trade-micro-label text-muted-foreground">Visual canvas</p>
           </div>
@@ -196,7 +196,7 @@ export default function TradeProjectStudio() {
               </p>
             </div>
           ) : (
-            <div className="columns-2 gap-6 bg-[hsl(var(--background))] px-4 pb-16 md:columns-3 md:px-8 lg:px-12">
+            <div className="columns-2 gap-8 px-4 pb-16 md:columns-3 md:gap-10 md:px-8 lg:px-12">
               {items.map((item, idx) => {
                 const dims = dimsLabel(item);
                 const isCuratorialActive = curatorialItemId === item.product_id;
@@ -208,7 +208,7 @@ export default function TradeProjectStudio() {
                   <figure
                     key={item.product_id}
                     data-curatorial-source={item.product_id}
-                    className="group relative mb-10 cursor-pointer break-inside-avoid"
+                    className="group relative mb-12 cursor-pointer break-inside-avoid md:mb-16"
                     onClick={activate}
                     role="button"
                     tabIndex={0}
@@ -226,7 +226,7 @@ export default function TradeProjectStudio() {
                           src={item.image_url}
                           alt={`${item.name} by ${item.designer}`}
                           loading={idx < 4 ? "eager" : "lazy"}
-                          className="w-full object-contain transition-transform duration-700 group-hover:scale-[1.01]"
+                          className="w-full object-contain mix-blend-multiply transition-transform duration-700 group-hover:scale-[1.01]"
                         />
                       ) : (
                         <div className="aspect-[4/5] w-full" />
@@ -239,14 +239,14 @@ export default function TradeProjectStudio() {
                     </div>
 
                     <figcaption
-                      className={`mt-3 space-y-0.5 transition-opacity duration-300 ${
+                      className={`mt-4 space-y-1 text-center transition-opacity duration-500 ${
                         isCuratorialActive ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus:opacity-100"
                       }`}
                     >
-                      <span className="block truncate font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                      <span className="block font-body text-[10px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground">
                         {item.name}
                       </span>
-                      <span className="block font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/60">
+                      <span className="block font-body text-[9px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground/60">
                         {dims}
                       </span>
                     </figcaption>
@@ -261,7 +261,7 @@ export default function TradeProjectStudio() {
 
 
         {/* RIGHT — procurement ledger */}
-        <aside className="px-4 py-6 md:px-8 lg:px-10">
+        <aside className="px-6 py-6 md:px-10 lg:px-14">
           {/* Header */}
           <div className="border-b border-border pb-6">
             <p className="trade-micro-label text-muted-foreground">Client</p>
@@ -308,8 +308,8 @@ export default function TradeProjectStudio() {
           </div>
 
           {/* Ledger */}
-          <div className="mt-6">
-            <div className="grid grid-cols-[44px_minmax(0,1fr)_auto] gap-3 border-b border-border pb-3 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+          <div className="mt-8 px-1 md:px-2">
+            <div className="grid grid-cols-[44px_minmax(0,1fr)_auto] gap-3 border-b border-border pb-4 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
               <span>Spec</span>
               <span>Item</span>
               <span className="text-right">Status</span>
@@ -329,7 +329,7 @@ export default function TradeProjectStudio() {
                 return (
                   <div key={item.product_id} className="border-b border-border">
                     <div
-                      className="grid cursor-pointer grid-cols-[44px_minmax(0,1fr)_auto] items-start gap-3 py-7"
+                      className="grid cursor-pointer grid-cols-[44px_minmax(0,1fr)_auto] items-start gap-3 py-9"
                       onClick={() => setExpandedId(expanded ? null : item.product_id)}
                       role="button"
                       aria-expanded={expanded}
@@ -360,7 +360,7 @@ export default function TradeProjectStudio() {
                     </div>
 
                     {expanded && (
-                      <div className="pb-7">
+                      <div className="pb-9">
                         <dl className="space-y-3">
                           <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
                             <dt className="text-muted-foreground/60">Spec</dt>
@@ -404,7 +404,7 @@ export default function TradeProjectStudio() {
 
             {/* Totals */}
             {items.length > 0 && (
-              <div className="flex items-baseline justify-between gap-4 border-b border-foreground py-7">
+              <div className="flex items-baseline justify-between gap-4 border-b border-foreground py-9">
                 <span className="font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
                   {isClientMode ? "Total Estimate" : "Total (Trade)"}
                 </span>
