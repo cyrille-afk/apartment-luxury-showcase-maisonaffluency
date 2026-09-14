@@ -838,5 +838,6 @@ export function BriefWizard() {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </>
   );
 }
