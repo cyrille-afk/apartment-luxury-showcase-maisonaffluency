@@ -40,3 +40,4 @@
 - [x] Synchronize Project Studio privacy controls, mask budget/trade figures, and repair ledger spacing
 - [x] Add the Project Studio Curatorial AI Guide with catalogue recommendations and Client View privacy
 - [x] Clarify the Project Studio AI selection, recommendation context, and visual trajectory
+- [x] Add recommendation design-context labels, expanded rationale, and canvas anchor hover feedback

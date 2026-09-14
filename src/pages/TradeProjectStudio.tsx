@@ -59,6 +59,7 @@ export default function TradeProjectStudio() {
   const isClientMode = !showTradePrice;
   const [specItemId, setSpecItemId] = useState<string | null>(null);
   const [curatorialItemId, setCuratorialItemId] = useState<string | null>(null);
+  const [isRecommendationHovered, setIsRecommendationHovered] = useState(false);
   const specItem = items.find((i) => i.product_id === specItemId) || null;
 
   useEffect(() => {
@@ -233,7 +234,7 @@ export default function TradeProjectStudio() {
                       <div className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ${isCuratorialActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
                         <span className="absolute left-0 right-0 top-1/2 h-px bg-foreground/25" />
                         <span className="absolute bottom-0 top-0 left-1/2 w-px bg-foreground/25" />
-                        <span className="absolute inset-4 border border-foreground/25" />
+                        <span className={`absolute inset-4 border transition-colors ${isCuratorialActive && isRecommendationHovered ? "animate-pulse border-foreground/60" : "border-foreground/25"}`} />
                         <span className="absolute left-4 top-4 h-2 w-2 border-l border-t border-foreground/60" />
                         <span className="absolute right-4 top-4 h-2 w-2 border-r border-t border-foreground/60" />
                         <span className="absolute bottom-4 left-4 h-2 w-2 border-b border-l border-foreground/60" />
@@ -262,6 +263,11 @@ export default function TradeProjectStudio() {
                       >
                         AI Analysis // Resourcing Complements
                       </Button>
+                      {isCuratorialActive && isRecommendationHovered && (
+                        <span className="pointer-events-none absolute left-4 right-4 top-[52px] z-10 bg-background/85 px-2 py-1 font-body text-[8px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground">
+                          Anchor Target for Material Match
+                        </span>
+                      )}
                     </div>
                   </figure>
                 );
@@ -428,6 +434,7 @@ export default function TradeProjectStudio() {
         isClientMode={isClientMode}
         onActiveItemChange={setCuratorialItemId}
         onCompositionChanged={() => setItemsVersion((version) => version + 1)}
+        onRecommendationHover={setIsRecommendationHovered}
       />
     </div>
   );

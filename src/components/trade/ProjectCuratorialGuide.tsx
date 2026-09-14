@@ -31,6 +31,7 @@ type Props = {
   isClientMode: boolean;
   onActiveItemChange: (productId: string) => void;
   onCompositionChanged: () => void;
+  onRecommendationHover: (active: boolean) => void;
 };
 
 const HEIGHTS = [
@@ -44,6 +45,39 @@ function clientReason(rec: Recommendation, sourceName: string) {
   return `Suggested ${category} for the ${sourceName}, balancing its silhouette through complementary scale, material tone, and spatial rhythm.`;
 }
 
+function recommendationContext(rec: Recommendation, sourceName: string) {
+  const descriptor = `${rec.category} ${rec.title} ${rec.subtitle}`.toLowerCase();
+
+  if (/mirror|wall|tapestry|panel|screen|artwork/.test(descriptor)) {
+    return {
+      label: "Material Harmony // Complementary Material Accent",
+      explanation: `Sourced to echo the organic textures and stone or wood grain finishes present in the ${sourceName} composition.`,
+    };
+  }
+  if (/rug|carpet|textile|fabric|upholster|cushion|throw/.test(descriptor)) {
+    return {
+      label: "Texture Balance // Dialogue with Fabric",
+      explanation: "Selected to build a measured dialogue between the existing upholstery, tactile depth, and surrounding surface tones.",
+    };
+  }
+  if (/table|stool|console|desk|pedestal|bench/.test(descriptor)) {
+    return {
+      label: "Spatial Composition // Pairing Recommendation",
+      explanation: "Positioned as a proportional counterpoint that reinforces circulation, usable scale, and the rhythm of the furniture plan.",
+    };
+  }
+  if (/lamp|light|sconce|chandelier|pendant/.test(descriptor)) {
+    return {
+      label: "Light Balance // Ambient Counterpoint",
+      explanation: "Chosen to add a controlled layer of illumination while preserving the composition's material warmth and visual hierarchy.",
+    };
+  }
+  return {
+    label: "Form Dialogue // Complementary Silhouette",
+    explanation: "Selected as a complementary form whose scale, silhouette, and material presence strengthen the wider composition.",
+  };
+}
+
 export function ProjectCuratorialGuide({
   projectId,
   projectName,
@@ -52,6 +86,7 @@ export function ProjectCuratorialGuide({
   isClientMode,
   onActiveItemChange,
   onCompositionChanged,
+  onRecommendationHover,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [heightIndex, setHeightIndex] = useState(1);
@@ -108,6 +143,11 @@ export function ProjectCuratorialGuide({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
+
+  useEffect(() => {
+    if (!open) onRecommendationHover(false);
+    return () => onRecommendationHover(false);
+  }, [open, onRecommendationHover]);
 
   useEffect(() => {
     const openGuide = () => setOpen(true);
@@ -384,13 +424,21 @@ export function ProjectCuratorialGuide({
           ) : recommendations.length ? (
             <div ref={streamRef} className="flex h-full snap-x gap-5 overflow-x-auto pb-3 [scrollbar-width:thin]">
               {recommendations.map((rec, index) => {
-                const rationale = isClientMode ? clientReason(rec, activeItem?.name || "composition") : rec.reason;
+                const context = recommendationContext(rec, activeItem?.name || "active piece");
+                const briefReason = isClientMode ? clientReason(rec, activeItem?.name || "composition") : rec.reason;
+                const rationale = `${briefReason} ${context.explanation}`;
                 const added = addedIds.has(rec.product_id);
                 return (
                   <article
                     ref={index === 0 ? firstRecommendationRef : undefined}
                     key={rec.product_id}
                     className="grid w-[290px] shrink-0 snap-start grid-cols-[112px_1fr] gap-4 md:w-[360px] md:grid-cols-[148px_1fr]"
+                    onMouseEnter={() => onRecommendationHover(true)}
+                    onMouseLeave={() => onRecommendationHover(false)}
+                    onFocus={() => onRecommendationHover(true)}
+                    onBlur={(event) => {
+                      if (!event.currentTarget.contains(event.relatedTarget)) onRecommendationHover(false);
+                    }}
                   >
                     <Button
                       type="button"
@@ -404,8 +452,11 @@ export function ProjectCuratorialGuide({
                     </Button>
                     <div className="flex min-w-0 flex-col py-1">
                       <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{rec.brand}</p>
+                      <p className="mt-2 font-body text-[8px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground/80">
+                        {context.label}
+                      </p>
                       <h3 className="mt-1 font-display text-lg leading-tight text-foreground">{rec.title}</h3>
-                      <p className="mt-2 line-clamp-4 font-body text-[10px] leading-relaxed tracking-[0.04em] text-muted-foreground">{rationale}</p>
+                      <p className="mt-2 line-clamp-5 font-body text-[10px] leading-relaxed tracking-[0.04em] text-muted-foreground">{rationale}</p>
                       {!isClientMode && (
                         <p className="mt-2 font-body text-[9px] uppercase tracking-[0.15em] text-foreground">
                           {rec.score >= 90 ? "Trade signal // Strong specification efficiency" : "Programme signal // Confirm lead-time alignment"}
