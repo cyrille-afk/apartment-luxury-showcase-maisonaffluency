@@ -75,6 +75,10 @@ export default function TradeClients() {
   const { user } = useAuth();
   const { currentStudio, canEdit } = useStudio();
   const { toast } = useToast();
+  const { showTradePrice } = useTradePriceMode();
+  const isClientMode = !showTradePrice;
+
+  const [projectsByClient, setProjectsByClient] = useState<Record<string, { id: string; name: string }>>({});
 
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState<Client[]>([]);
