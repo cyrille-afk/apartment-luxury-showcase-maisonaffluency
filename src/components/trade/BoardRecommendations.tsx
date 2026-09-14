@@ -200,7 +200,7 @@ export function BoardRecommendations() {
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-foreground truncate">{rec.title}</p>
               <p className="text-[11px] text-muted-foreground truncate mb-1">{rec.brand}</p>
-              <p className="text-[11px] text-foreground/80 leading-snug">
+              <p className="trade-card-description text-[11px] leading-snug">
                 {rec.reason}
               </p>
               {rec.anchors && rec.anchors.length > 0 && (

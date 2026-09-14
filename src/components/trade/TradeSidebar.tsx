@@ -123,7 +123,7 @@ export function TradeSidebar() {
                               onKeyDown={(e) => {
                                 if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); setBridgeOpen(true); }
                               }}
-                              className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-background animate-pulse cursor-pointer"
+                              className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-muted-foreground ring-2 ring-background cursor-pointer"
                             />
                           )}
                         </span>
@@ -134,7 +134,7 @@ export function TradeSidebar() {
                               <button
                                 type="button"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); setBridgeOpen(true); }}
-                                className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 text-[9px] font-medium leading-none"
+                                className="inline-flex items-center text-muted-foreground text-[9px] font-normal leading-none"
                               >
                                 {bridgeCount} from mobile
                               </button>
@@ -162,8 +162,8 @@ export function TradeSidebar() {
                   <SidebarMenuButton asChild className="h-auto min-h-[36px]">
                     <NavLink
                       to="/trade/admin-dashboard"
-                      className="flex items-start gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-                      activeClassName="bg-muted text-foreground font-medium"
+                      className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      activeClassName="text-foreground font-medium"
                     >
                       <Shield className="h-4 w-4 shrink-0" />
                       {!collapsed && (
@@ -172,19 +172,19 @@ export function TradeSidebar() {
                           {(submittedQuotes > 0 || pendingApps > 0 || pendingSamples > 0) && (
                             <span className="flex flex-col gap-0.5">
                               {submittedQuotes > 0 && (
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-destructive/15 text-destructive text-[9px] font-medium leading-none">
+                                <span className="inline-flex items-center gap-1 text-muted-foreground text-[9px] font-normal leading-none">
                                   <DollarSign className="h-2.5 w-2.5" />
                                   {submittedQuotes} Quote{submittedQuotes > 1 ? 's' : ''}
                                 </span>
                               )}
                               {pendingApps > 0 && (
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-warning/15 text-warning text-[9px] font-medium leading-none">
+                                <span className="inline-flex items-center gap-1 text-muted-foreground text-[9px] font-normal leading-none">
                                   <ClipboardList className="h-2.5 w-2.5" />
                                   {pendingApps} Application{pendingApps > 1 ? 's' : ''}
                                 </span>
                               )}
                               {pendingSamples > 0 && (
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary/15 text-primary text-[9px] font-medium leading-none">
+                                <span className="inline-flex items-center gap-1 text-muted-foreground text-[9px] font-normal leading-none">
                                   <Package className="h-2.5 w-2.5" />
                                   {pendingSamples} Sample{pendingSamples > 1 ? 's' : ''}
                                 </span>
@@ -194,7 +194,7 @@ export function TradeSidebar() {
                         </span>
                       )}
                       {collapsed && totalBadge > 0 && (
-                        <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-destructive" />
+                        <span className="absolute top-0 right-0 w-2 h-2 bg-muted-foreground" />
                       )}
                     </NavLink>
                   </SidebarMenuButton>
@@ -203,7 +203,7 @@ export function TradeSidebar() {
                   <SidebarMenuButton asChild>
                     <a
                       href="/designers-hero-lock"
-                      className="flex items-start gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                      className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                       <Image className="h-4 w-4 shrink-0" />
                       {!collapsed && <span>Locked Layout Gallery</span>}
