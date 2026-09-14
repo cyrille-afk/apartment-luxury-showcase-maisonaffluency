@@ -329,7 +329,7 @@ export default function TradeProjectStudio() {
                     aria-label={`Open specification for ${item.name}`}
                   >
                     <span className="pr-3 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                      {String(idx + 1).padStart(0 + 2, "0")}
+                      {String(idx + 1).padStart(2, "0")}
                       <span className="block text-muted-foreground/72">{item.sku || "—"}</span>
                     </span>
                     <span className="min-w-0">
@@ -395,6 +395,8 @@ export default function TradeProjectStudio() {
           </div>
         </aside>
       </div>
+
+      <ProjectSpecDrawer item={specItem} onClose={() => setSpecItemId(null)} />
     </div>
   );
 }
