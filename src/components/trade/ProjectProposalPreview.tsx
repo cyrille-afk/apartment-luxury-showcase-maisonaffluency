@@ -26,15 +26,23 @@ interface ProjectProposalPreviewProps {
   items: ProposalPreviewItem[];
   isClientMode: boolean;
   tradeDiscount: number;
+  /** Member's declared base currency — every figure is rendered in it. */
+  currency?: string;
 }
 
-function money(cents: number | null | undefined) {
-  if (!cents) return "Price upon Request";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(cents / 100);
+function makeMoney(currency: string) {
+  return (cents: number | null | undefined) => {
+    if (!cents) return "Price upon Request";
+    try {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency,
+        maximumFractionDigits: 0,
+      }).format(cents / 100);
+    } catch {
+      return `${currency} ${Math.round(cents / 100).toLocaleString("en-US")}`;
+    }
+  };
 }
 
 export function ProjectProposalPreview({
@@ -46,7 +54,9 @@ export function ProjectProposalPreview({
   items,
   isClientMode,
   tradeDiscount,
+  currency = "USD",
 }: ProjectProposalPreviewProps) {
+  const money = makeMoney(currency);
   const retailTotal = items.reduce((sum, item) => sum + (item.rrp_cents || 0) * item.quantity, 0);
   const tradeTotal = Math.round(retailTotal * (1 - tradeDiscount));
 

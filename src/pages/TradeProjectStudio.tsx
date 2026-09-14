@@ -545,9 +545,10 @@ export default function TradeProjectStudio() {
         projectName={project.name}
         clientName={project.client_name}
         location={project.location}
-        items={items}
+        items={items.map((i) => ({ ...i, rrp_cents: toBase(i.rrp_cents, i.currency) || null }))}
         isClientMode={isClientMode}
         tradeDiscount={TRADE_DISCOUNT}
+        currency={baseCurrency}
       />
     </div>
   );
