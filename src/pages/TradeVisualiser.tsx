@@ -430,7 +430,10 @@ const TradeVisualiser = () => {
               style={{ left: `${object.x}%`, top: `${object.y}%`, zIndex: object.z + 10, transform: `translate(-50%, -50%) scale(${object.scale})` }}
             >
               <div className={cn("relative transition-opacity duration-300", !isSelected && "group-hover:opacity-95")}>
-                <div className="relative h-40 w-full md:h-52" style={{ transform: perspectiveTransform, transformStyle: "preserve-3d" }}>
+                <div
+                  className="relative h-40 w-full md:h-52"
+                  style={{ transform: `${perspectiveTransform} translateZ(0)`, transformStyle: "preserve-3d", willChange: "transform, filter" }}
+                >
                   <span
                     aria-hidden="true"
                     className="pointer-events-none absolute bottom-[9%] left-[23%] right-[23%] h-px bg-foreground/65 blur-[1px]"
