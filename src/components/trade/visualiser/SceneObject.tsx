@@ -219,7 +219,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
   // Keep the group in sync when position changes from outside (e.g. reset/restore).
   useEffect(() => {
     if (groupRef.current && !draggingRef.current) {
-      groupRef.current.position.set(object.position[0], 0, object.position[2]);
+      groupRef.current.position.set(object.position[0], object.position[1] ?? 0, object.position[2]);
     }
   }, [object.position]);
 
@@ -257,7 +257,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
     const hit = floorHit();
     if (!hit) return;
     // Floor lock: X/Z translation only, y is pinned to 0.
-    groupRef.current.position.set(hit.x + offsetRef.current.x, 0, hit.z + offsetRef.current.z);
+    groupRef.current.position.set(hit.x + offsetRef.current.x, object.position[1] ?? 0, hit.z + offsetRef.current.z);
   };
 
   const endDrag = (event?: ThreeEvent<PointerEvent>) => {
@@ -268,7 +268,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
     if (event) (event.target as Element | null)?.releasePointerCapture?.(event.pointerId);
     const group = groupRef.current;
     if (group) {
-      onTransform(object.instanceId, [group.position.x, 0, group.position.z], object.rotation);
+      onTransform(object.instanceId, [group.position.x, object.position[1] ?? 0, group.position.z], object.rotation);
     }
   };
 
@@ -278,7 +278,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
         groupRef.current = node;
         setGroupNode(node);
       }}
-      position={[object.position[0], 0, object.position[2]]}
+      position={[object.position[0], object.position[1] ?? 0, object.position[2]]}
       rotation={object.rotation}
       scale={object.scale}
       onPointerDown={handlePointerDown}
@@ -304,13 +304,13 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
             onDragStateChange(false);
             const group = groupRef.current;
             if (group) {
-              group.position.y = 0;
-              onTransform(object.instanceId, [group.position.x, 0, group.position.z], object.rotation);
+              group.position.y = object.position[1] ?? 0;
+              onTransform(object.instanceId, [group.position.x, object.position[1] ?? 0, group.position.z], object.rotation);
             }
           }}
           onObjectChange={() => {
             const group = groupRef.current;
-            if (group) group.position.y = 0;
+            if (group) group.position.y = object.position[1] ?? 0;
           }}
         />
       )}
