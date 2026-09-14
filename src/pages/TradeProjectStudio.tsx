@@ -66,6 +66,12 @@ export default function TradeProjectStudio() {
   const [isProposalPreviewOpen, setIsProposalPreviewOpen] = useState(false);
   const specItem = items.find((i) => i.product_id === specItemId) || null;
 
+  const openProposalPreview = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsProposalPreviewOpen(true);
+  };
+
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -444,7 +450,8 @@ export default function TradeProjectStudio() {
               <Button
                 type="button"
                 variant="ghost"
-                onClick={() => setIsProposalPreviewOpen(true)}
+                onClick={openProposalPreview}
+                data-proposal-preview-trigger
                 className="inline-flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.15em] text-foreground underline underline-offset-4 hover:no-underline"
               >
                 <FileText className="h-3.5 w-3.5" /> Generate White-Label PDF Proposal
