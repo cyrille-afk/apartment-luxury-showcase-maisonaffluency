@@ -164,9 +164,9 @@ export default function TradeProjectStudio() {
   const titleLine = `PROJECT STUDIO // ${project.name.toUpperCase()}`;
 
   return (
-    <div className="-mx-4 md:-mx-8 lg:-mx-12 -mt-4 md:-mt-8 lg:-mt-12">
+    <div className="-mx-4 -mt-4 md:-mx-8 md:-mt-8 lg:-mx-12 lg:-mt-12 lg:flex lg:h-[100dvh] lg:flex-col lg:overflow-hidden">
       {/* Masthead */}
-      <div className="border-b border-border px-4 py-6 md:px-8 lg:px-12">
+      <div className="shrink-0 border-b border-border px-4 py-6 md:px-8 lg:px-12">
         <Link
           to={`/trade/projects/${project.id}`}
           className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground"
@@ -178,10 +178,12 @@ export default function TradeProjectStudio() {
         </h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[60%_40%]">
-        {/* LEFT — visual canvas */}
-        <section className="border-b border-border bg-background lg:border-b-0 lg:border-r lg:border-border">
-          <div className="px-4 py-6 md:px-8 lg:px-12">
+      <div className="grid grid-cols-1 lg:min-h-0 lg:flex-1 lg:grid-cols-[60%_40%]">
+        {/* LEFT — central workspace: canvas (upper) + AI pane (lower) */}
+        <section className="flex flex-col border-b border-border bg-background lg:min-h-0 lg:border-b-0 lg:border-r lg:border-border">
+          {/* Upper zone — visual canvas */}
+          <div className="lg:min-h-0 lg:flex-[65] lg:overflow-y-auto">
+          <div className="px-4 py-6 md:px-8 lg:px-12 lg:py-5">
             <p className="trade-micro-label text-muted-foreground">Visual canvas</p>
           </div>
           {loadingItems ? (
@@ -196,7 +198,7 @@ export default function TradeProjectStudio() {
               </p>
             </div>
           ) : (
-            <div className="columns-2 gap-8 px-4 pb-16 md:columns-3 md:gap-10 md:px-8 lg:px-12">
+            <div className="columns-2 gap-8 px-4 pb-10 md:columns-3 md:gap-10 md:px-8 lg:px-12">
               {items.map((item, idx) => {
                 const dims = dimsLabel(item);
                 const isCuratorialActive = curatorialItemId === item.product_id;
@@ -226,7 +228,7 @@ export default function TradeProjectStudio() {
                           src={item.image_url}
                           alt={`${item.name} by ${item.designer}`}
                           loading={idx < 4 ? "eager" : "lazy"}
-                          className="w-full object-contain mix-blend-multiply transition-transform duration-700 group-hover:scale-[1.01]"
+                          className="w-full object-contain mix-blend-multiply transition-transform duration-700 group-hover:scale-[1.01] lg:max-h-[24dvh]"
                         />
                       ) : (
                         <div className="aspect-[4/5] w-full" />
