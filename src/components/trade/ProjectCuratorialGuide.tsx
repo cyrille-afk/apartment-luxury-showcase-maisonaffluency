@@ -340,10 +340,12 @@ export function ProjectCuratorialGuide({
     <section
       ref={drawerRef}
       aria-label="AI Curatorial Assistant"
-      className="fixed inset-x-0 bottom-0 z-50 flex flex-col border-t border-border bg-background transition-[height] duration-500 [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]"
-      style={{ height, maxHeight: "calc(100dvh - 48px)" }}
+      className={docked
+        ? "relative flex h-full min-h-0 flex-col bg-background"
+        : "fixed inset-x-0 bottom-0 z-50 flex flex-col border-t border-border bg-background transition-[height] duration-500 [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]"}
+      style={docked ? undefined : { height, maxHeight: "calc(100dvh - 48px)" }}
     >
-      <div className="flex min-h-16 items-center justify-between gap-4 border-b border-border px-4 md:px-8">
+      <div className={`flex shrink-0 items-center justify-between gap-4 border-b border-border px-4 md:px-8 ${docked ? "min-h-0 py-3" : "min-h-16"}`}>
         <div className="min-w-0">
           <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
             Status // {status}
@@ -358,38 +360,42 @@ export function ProjectCuratorialGuide({
           </p>
         </div>
         <div className="flex shrink-0 items-center">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => setHeightIndex((value) => Math.min(HEIGHTS.length - 1, value + 1))}
-            disabled={heightIndex === HEIGHTS.length - 1}
-            aria-label="Expand curatorial assistant"
-            className="rounded-none text-muted-foreground"
-          >
-            <ArrowUp />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => setHeightIndex((value) => Math.max(0, value - 1))}
-            disabled={heightIndex === 0}
-            aria-label="Reduce curatorial assistant"
-            className="rounded-none text-muted-foreground"
-          >
-            <ArrowDown />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => setOpen(false)}
-            aria-label="Close curatorial assistant"
-            className="rounded-none text-muted-foreground"
-          >
-            <X />
-          </Button>
+          {!docked && (
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setHeightIndex((value) => Math.min(HEIGHTS.length - 1, value + 1))}
+                disabled={heightIndex === HEIGHTS.length - 1}
+                aria-label="Expand curatorial assistant"
+                className="rounded-none text-muted-foreground"
+              >
+                <ArrowUp />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setHeightIndex((value) => Math.max(0, value - 1))}
+                disabled={heightIndex === 0}
+                aria-label="Reduce curatorial assistant"
+                className="rounded-none text-muted-foreground"
+              >
+                <ArrowDown />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setOpen(false)}
+                aria-label="Close curatorial assistant"
+                className="rounded-none text-muted-foreground"
+              >
+                <X />
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
