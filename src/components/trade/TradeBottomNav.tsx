@@ -43,7 +43,7 @@ const TradeBottomNav = () => {
           className="fixed bottom-0 left-0 right-0 z-40 md:hidden print:hidden"
           aria-label="Trade navigation"
         >
-          <div className="bg-card/95 backdrop-blur-xl border-t border-border/30 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+          <div className="bg-card border-t border-border">
             <div className="flex items-center justify-around px-1 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               {navItems.map(({ id, label, icon: Icon, end }) => {
                 const active = isActive(id, end);
@@ -52,7 +52,7 @@ const TradeBottomNav = () => {
                     key={id}
                     onClick={() => navigate(id)}
                     className={cn(
-                      "flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors duration-200 touch-manipulation min-w-[3.5rem] relative",
+                      "flex flex-col items-center gap-0.5 px-2 py-1.5 transition-colors duration-200 touch-manipulation min-w-[3.5rem] relative",
                       active
                         ? "text-primary"
                         : "text-muted-foreground active:text-foreground"
@@ -67,7 +67,7 @@ const TradeBottomNav = () => {
                     {active && (
                       <motion.div
                         layoutId="tradeActiveTab"
-                        className="absolute -bottom-0.5 w-5 h-0.5 rounded-full bg-primary"
+                        className="absolute -bottom-0.5 w-5 h-px bg-foreground"
                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
                       />
                     )}

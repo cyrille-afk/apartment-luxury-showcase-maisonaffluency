@@ -49,12 +49,12 @@ export function MobileContinuityBanner() {
 
   return (
     <>
-      <div className="hidden md:flex items-center gap-4 mb-6 px-4 py-3 rounded-md border border-border bg-muted/40">
-        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-background">
+      <div className="hidden md:flex items-center gap-4 mb-10 px-0 py-4 border-y border-border bg-background">
+        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center border border-foreground bg-background">
           <Smartphone className="h-4 w-4 text-foreground" />
         </span>
         <div className="flex-1 min-w-0">
-          <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="trade-micro-label font-body text-muted-foreground">
             Desktop &rarr; Mobile
           </p>
           <p className="font-body text-sm text-foreground leading-snug mt-0.5">
@@ -68,7 +68,7 @@ export function MobileContinuityBanner() {
         <button
           onClick={dismiss}
           aria-label="Dismiss"
-          className="shrink-0 p-1 rounded hover:bg-background/60"
+          className="shrink-0 p-1 hover:opacity-60"
         >
           <X className="h-4 w-4 text-muted-foreground" />
         </button>
