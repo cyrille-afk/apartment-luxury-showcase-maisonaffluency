@@ -326,14 +326,24 @@ export function ProjectCuratorialGuide({
   return (
     <>
     {docked && !open && (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="flex h-11 w-full items-center justify-center gap-2 bg-background font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowUp className="h-3 w-3" aria-hidden="true" />
-        [ Activate AI Curatorial Concierge ]
-      </button>
+      <>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="flex h-11 w-full items-center justify-center gap-2 bg-background font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-foreground lg:hidden"
+        >
+          <ArrowUp className="h-3 w-3" aria-hidden="true" />
+          [ Activate AI Curatorial Concierge ]
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="hidden lg:absolute lg:bottom-8 lg:left-1/2 lg:z-50 lg:flex lg:-translate-x-1/2 lg:items-center lg:gap-3 lg:rounded-full lg:border lg:border-[#E5E5E5] lg:bg-white lg:px-6 lg:py-3.5 lg:font-mono lg:text-[10px] lg:uppercase lg:tracking-[0.2em] lg:text-foreground/80 lg:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08)] lg:backdrop-blur-sm lg:transition-all lg:duration-300 lg:ease-out lg:hover:-translate-y-1 lg:hover:text-foreground lg:hover:border-foreground/40 lg:hover:shadow-[0_8px_24px_-6px_rgba(0,0,0,0.12)]"
+        >
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-current ring-1 ring-current/30" aria-hidden="true" />
+          Activate AI Concierge Workspace
+        </button>
+      </>
     )}
     {connector && open && (
       <svg className="pointer-events-none fixed inset-0 z-[51] h-full w-full" aria-hidden="true">
