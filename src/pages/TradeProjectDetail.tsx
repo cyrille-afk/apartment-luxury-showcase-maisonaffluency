@@ -283,6 +283,12 @@ export default function TradeProjectDetail() {
           <ArrowLeft className="h-3.5 w-3.5" /> All projects
         </Link>
         <div className="flex items-center gap-2">
+          <Link
+            to={`/trade/projects/${project.id}/studio`}
+            className="mr-1 font-body text-[10px] uppercase tracking-[0.15em] text-foreground underline underline-offset-4 hover:no-underline"
+          >
+            Project Studio
+          </Link>
           {project.status !== "active" && (
             <Button size="sm" variant="ghost" onClick={() => setStatus("active")} className="gap-1.5">
               Reactivate
