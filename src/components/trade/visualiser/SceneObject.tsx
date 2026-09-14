@@ -58,7 +58,8 @@ const ModelBody = ({ url }: { url: string }) => {
 
 const ImageBody = ({ url, name }: { url: string; name: string }) => {
   const texture = useTexture(url);
-  const aspect = texture.image ? texture.image.width / texture.image.height : 1;
+  const image = texture.image as { width?: number; height?: number } | undefined;
+  const aspect = image?.width && image?.height ? image.width / image.height : 1;
   const height = 1.2;
   return (
     <mesh castShadow receiveShadow position={[0, height / 2, 0]} name={name}>
@@ -71,6 +72,7 @@ const ImageBody = ({ url, name }: { url: string; name: string }) => {
 const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange }: Props) => {
   const groupRef = useRef<THREE.Group>(null);
   const matrixRef = useRef(new THREE.Matrix4());
+  const originRef = useRef<[number, number, number]>(object.position);
 
   useEffect(() => {
     matrixRef.current.identity();
@@ -108,7 +110,10 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
       disableScaling
       matrix={matrixRef.current}
       autoTransform={false}
-      onDragStart={() => onDragStateChange(true)}
+      onDragStart={() => {
+        originRef.current = object.position;
+        onDragStateChange(true);
+      }}
       onDragEnd={() => onDragStateChange(false)}
       onDrag={(local) => {
         const position = new THREE.Vector3();
@@ -119,9 +124,9 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
         onTransform(
           object.instanceId,
           [
-            object.position[0] + position.x,
+            originRef.current[0] + position.x,
             0,
-            object.position[2] + position.z,
+            originRef.current[2] + position.z,
           ],
           [euler.x, euler.y, euler.z],
         );
