@@ -61,6 +61,7 @@ export default function TradeProjectStudio() {
 
   const [curatorialItemId, setCuratorialItemId] = useState<string | null>(null);
   const [isRecommendationHovered, setIsRecommendationHovered] = useState(false);
+  const [isAiPanelOpen, setIsAiPanelOpen] = useState(true);
   const specItem = items.find((i) => i.product_id === specItemId) || null;
 
   useEffect(() => {
@@ -260,9 +261,15 @@ export default function TradeProjectStudio() {
           </div>
 
           {/* Lower zone — AI Curatorial Assistant, anchored to the base of the workspace */}
-          <div className="shrink-0 border-t border-border lg:min-h-0">
+          <div
+            className={`flex shrink-0 flex-col border-t border-border transition-all duration-500 ease-in-out lg:min-h-0 ${
+              isAiPanelOpen ? "lg:h-[35%]" : "lg:h-11"
+            }`}
+          >
             <ProjectCuratorialGuide
               docked
+              open={isAiPanelOpen}
+              onOpenChange={setIsAiPanelOpen}
               projectId={project.id}
               projectName={project.name}
               items={items}
