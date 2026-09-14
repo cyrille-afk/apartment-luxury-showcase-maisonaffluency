@@ -43,7 +43,13 @@ type PersistedSandbox = {
 const STORAGE_KEY = "trade-visualiser-sandbox-v2";
 const MIN_OBJECT_SCALE = 0.4;
 const MAX_OBJECT_SCALE = 2.5;
-const CUTOUT_TRANSFORMS = "f_png,q_auto:best,w_3000,dpr_auto,c_limit,e_make_transparent:10";
+// Master-fidelity cutouts: near-lossless quality, Retina DPR, capped only by a 3000px ceiling (never upscaled).
+const CUTOUT_TRANSFORMS = "f_png,q_100,w_3000,dpr_auto,c_limit,e_make_transparent:10";
+const CUTOUT_IMAGE_STYLE: CSSProperties = {
+  imageRendering: "-webkit-optimize-contrast" as CSSProperties["imageRendering"],
+  transform: "translateZ(0)",
+  willChange: "transform, filter",
+};
 
 type CanvasGesture =
   | { mode: "move"; id: string; offsetX: number; offsetY: number }
