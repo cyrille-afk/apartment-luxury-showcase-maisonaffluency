@@ -54,4 +54,4 @@
 - [x] Add Visualiser perspective warping, per-object ambient matching, dual floor shadows, and Retina cutout sourcing
 - [x] Rebuild the Visualiser as a real-time 3D WebGL scene with GLB assets, orbit camera, transform gizmo, and shadow lighting
 - [x] Connect shared material-library and AI finish selections to persistent per-object 3D PBR materials, transparent contact shadows, and the 32px floating console
-- [ ] Isolate Bond Street Stool base/upholstery meshes and map authentic Man of Parts PBR finishes without global texture replacement
+- [x] Isolate Bond Street Stool base/upholstery meshes and map authentic Man of Parts finishes without global texture replacement

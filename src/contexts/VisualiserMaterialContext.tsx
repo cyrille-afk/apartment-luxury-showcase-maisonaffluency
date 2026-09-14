@@ -8,6 +8,14 @@ export type VisualiserMaterial = {
   material_type: string | null;
   color_family: string | null;
   image_url: string | null;
+  diffuse_url?: string | null;
+  normal_url?: string | null;
+  roughness_url?: string | null;
+  target?: "upholstery" | "base" | "top";
+  color?: string;
+  repeat?: number;
+  roughness?: number;
+  metalness?: number;
 };
 
 type VisualiserMaterialContextValue = {
