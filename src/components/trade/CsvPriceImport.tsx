@@ -157,7 +157,7 @@ async function exportCurrentProducts() {
   URL.revokeObjectURL(url);
 }
 
-export default function CsvPriceImport({ onComplete }: { onComplete?: () => void }) {
+export default function CsvPriceImport({ onComplete, minimal }: { onComplete?: () => void; minimal?: boolean }) {
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
@@ -167,6 +167,7 @@ export default function CsvPriceImport({ onComplete }: { onComplete?: () => void
 
   const hasTradeCol = rows.some(r => r.trade_price !== undefined);
   const hasRrpCol = rows.some(r => r.rrp_price !== undefined);
+
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
