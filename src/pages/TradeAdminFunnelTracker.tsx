@@ -29,6 +29,9 @@ export default function TradeAdminFunnelTracker() {
             Model views, cart adds, checkout and purchases across markets.
           </p>
         </div>
+        <Suspense fallback={<AdminPanelSkeleton rows={2} height="h-28" />}>
+          <GitHubSyncStatusPanel />
+        </Suspense>
         <Suspense fallback={<AdminPanelSkeleton rows={4} height="h-56" />}>
           <LiveTransactionFunnelTracker />
         </Suspense>
