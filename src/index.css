@@ -285,6 +285,10 @@ All colors MUST be HSL.
   text-transform: uppercase;
 }
 
+.trade-portal-shell .trade-card-description {
+  color: hsl(var(--muted-foreground) / 0.72);
+}
+
 .trade-editorial-main > * {
   animation: tradeEditorialReveal 500ms ease-out both;
 }

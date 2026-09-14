@@ -1,19 +1,16 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Image, FileText, FolderOpen, FolderClosed,
-  Clock, FileSpreadsheet, BookOpen, FileDown, MapPin, Package, Box, Users, Sparkles,
-  Smartphone, Download,
+  Clock, FileDown, MapPin, Box, Users,
 } from "lucide-react";
-import { trackEvent } from "@/lib/analytics";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
 import { BoardRecommendations } from "@/components/trade/BoardRecommendations";
 import { MobileContinuityBanner } from "@/components/trade/MobileContinuityBanner";
-import { InstallNativeAppCard } from "@/components/trade/InstallNativeAppCard";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -78,26 +75,13 @@ const formatRelativeDate = (dateStr: string) => {
 };
 
 const TradeDashboard = () => {
-  const { profile, user, isTradeUser } = useAuth();
-  const navigate = useNavigate();
+  const { profile } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [brands, setBrands] = useState<BrandFolder[]>([]);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [heroOverrides, setHeroOverrides] = useState<Record<string, { image_url: string; gravity: string }>>({});
   const [studioStats, setStudioStats] = useState<{ count: number; latestImage: string | null }>({ count: 0, latestImage: null });
-  const [conciergeName, setConciergeName] = useState<string>(() => loadName() || DEFAULT_NAME);
-
-  // Keep the dashboard pill in sync if the user renames the concierge from the chat.
-  useEffect(() => {
-    const sync = () => setConciergeName(loadName() || DEFAULT_NAME);
-    window.addEventListener("storage", sync);
-    window.addEventListener("concierge:name-changed", sync as EventListener);
-    return () => {
-      window.removeEventListener("storage", sync);
-      window.removeEventListener("concierge:name-changed", sync as EventListener);
-    };
-  }, []);
 
   // Arriving from /trade-onboarding ("Enter Workspace") — confirm the copilot
   // is live with a single non-intrusive toast at the base of the sidebar.
@@ -251,47 +235,6 @@ const TradeDashboard = () => {
 
       <MobileContinuityBanner />
 
-
-
-      {/* Mobile Essentials + Live Walkthrough — two distinct pinned sections */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-0 mb-10 md:mb-16 border-y border-border">
-        {/* Install Native App (inline QR + install steps) */}
-        <InstallNativeAppCard />
-
-        {/* Live Walkthrough with AI Concierge */}
-        <Link
-          to="/trade-demo"
-          className="group md:col-span-7 flex items-center gap-4 md:gap-6 bg-muted/30 p-5 md:p-7 transition-colors hover:bg-muted/50 md:border-l md:border-border"
-        >
-          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center border border-foreground text-foreground">
-            <Sparkles className="h-4 w-4" aria-hidden="true" />
-          </span>
-          <div className="flex-1 min-w-0">
-            <p className="trade-micro-label font-body text-muted-foreground">
-              Live walkthrough
-            </p>
-            <h3 className="font-display text-lg md:text-xl text-foreground leading-snug mt-1">
-              Experience the Trade Portal with AI Concierge
-            </h3>
-            <p className="font-body text-[11px] md:text-xs text-muted-foreground leading-tight mt-0.5">
-              8-step interactive demo — see how quotes, concierge, and projects work.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              navigate("/trade-demo");
-            }}
-              className="inline-flex shrink-0 items-center gap-1.5 border-b border-foreground px-0 py-1.5 font-body text-[10px] uppercase tracking-[0.15em] text-foreground hover:opacity-60 transition-opacity"
-            title="8-step interactive demo"
-          >
-            ▶ Start Demo
-          </button>
-        </Link>
-      </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-x-5 gap-y-10 md:gap-y-14">
         {DASH_CARDS.map((card, index) => (
           <Link
@@ -323,7 +266,7 @@ const TradeDashboard = () => {
             <div className="pt-4 border-t border-border mt-3">
               <p className="trade-micro-label text-muted-foreground mb-1">0{index + 1} — Collection</p>
               <h3 className="font-display text-lg md:text-xl text-foreground mb-1">{card.title}</h3>
-              <p className="font-body text-[11px] md:text-xs leading-relaxed text-muted-foreground">{card.description}</p>
+              <p className="trade-card-description font-body text-[11px] md:text-xs leading-relaxed">{card.description}</p>
             </div>
           </Link>
         ))}
@@ -363,7 +306,7 @@ const TradeDashboard = () => {
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="font-body text-sm text-foreground truncate">{item.title}</p>
-                    <p className="font-body text-[10px] text-muted-foreground">{item.subtitle}</p>
+                    <p className="trade-card-description font-body text-[10px]">{item.subtitle}</p>
                   </div>
                   <span className="font-body text-[10px] text-muted-foreground shrink-0">
                     {formatRelativeDate(item.date)}
