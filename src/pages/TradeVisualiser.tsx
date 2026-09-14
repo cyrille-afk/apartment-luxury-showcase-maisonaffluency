@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { createElement, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
-import { ImageUp, Layers3, Loader2, Plus, Search, X } from "lucide-react";
+import { Box, ImageUp, Layers3, Loader2, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
+import { ensureModelViewer } from "@/lib/modelViewer";
 import { dimensionBadgeLabel, resolveDimensions } from "@/lib/productDimensions";
 import { toast } from "sonner";
 
@@ -17,6 +18,7 @@ type CatalogueProduct = {
   image_url: string | null;
   category: string;
   dimensions: string | null;
+  glb_url: string | null;
 };
 
 type CanvasObject = CatalogueProduct & {
@@ -32,7 +34,10 @@ type CanvasObject = CatalogueProduct & {
   contrast: number;
   warmth: number;
   shadowDirection: number;
+  render3d: boolean;
+  orbit: boolean;
 };
+
 
 type PersistedSandbox = {
   backdrop: string | null;
