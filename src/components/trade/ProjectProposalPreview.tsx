@@ -50,12 +50,27 @@ export function ProjectProposalPreview({
   const retailTotal = items.reduce((sum, item) => sum + (item.rrp_cents || 0) * item.quantity, 0);
   const tradeTotal = Math.round(retailTotal * (1 - tradeDiscount));
 
+  const triggerPrint = () => {
+    const sheet = document.querySelector<HTMLElement>(".proposal-print-sheet");
+    if (!sheet) return;
+
+    document.querySelector(".proposal-print-document")?.remove();
+    const printDocument = sheet.cloneNode(true) as HTMLElement;
+    printDocument.classList.remove("proposal-print-sheet");
+    printDocument.classList.add("proposal-print-document");
+    document.body.appendChild(printDocument);
+
+    const cleanup = () => printDocument.remove();
+    window.addEventListener("afterprint", cleanup, { once: true });
+    window.print();
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         hideClose
         aria-describedby="proposal-preview-description"
-        className="proposal-preview-shell fixed inset-0 left-0 top-0 z-[120] block h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 overflow-y-auto border-0 bg-foreground/40 p-0 backdrop-blur-sm sm:rounded-none"
+        className="proposal-preview-shell fixed inset-0 left-0 top-0 z-[120] block h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 overflow-y-auto border-0 bg-foreground/40 p-0 backdrop-blur-sm print:!h-auto print:!w-[210mm] print:!overflow-visible print:!bg-card print:!backdrop-blur-none sm:rounded-none"
       >
         <DialogTitle className="sr-only">White-label project proposal preview</DialogTitle>
         <DialogDescription id="proposal-preview-description" className="sr-only">
@@ -74,7 +89,7 @@ export function ProjectProposalPreview({
           <Button
             type="button"
             variant="ghost"
-            onClick={() => window.print()}
+            onClick={triggerPrint}
             className="h-9 rounded-none bg-card/95 px-3 font-body text-[10px] uppercase tracking-[0.15em] text-card-foreground backdrop-blur-sm hover:bg-card"
           >
             <Printer className="mr-2 h-3.5 w-3.5" /> [ Trigger Print System ]
@@ -84,7 +99,9 @@ export function ProjectProposalPreview({
         <main className="proposal-print-sheet mx-auto my-20 min-h-[1123px] w-[min(794px,calc(100vw-32px))] bg-card px-12 py-14 text-card-foreground shadow-elegant md:px-16 md:py-20">
           <header className="flex min-h-[330px] flex-col justify-between border-b border-card-foreground pb-12">
             <div className="flex items-center justify-between gap-6">
-              <p className="font-display text-base text-card-foreground">Maison Affluency</p>
+              <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
+                [ Design Studio Specification Proposal ]
+              </p>
               <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                 Private client document
               </p>
@@ -119,8 +136,8 @@ export function ProjectProposalPreview({
                 const retail = (item.rrp_cents || 0) * item.quantity;
                 const trade = Math.round(retail * (1 - tradeDiscount));
                 return (
-                  <article key={item.product_id} className="grid grid-cols-[36px_72px_minmax(0,1fr)_auto] items-center gap-4 border-b border-border py-6 break-inside-avoid">
-                    <span className="font-body text-[9px] tracking-[0.15em] text-muted-foreground">
+                  <article key={item.product_id} className="proposal-line-item grid grid-cols-[48px_72px_minmax(0,1fr)_auto] items-center gap-x-5 border-b border-border py-6 break-inside-avoid">
+                    <span className="pr-3 text-right font-body text-[9px] tracking-[0.15em] text-muted-foreground">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <div className="h-16 w-[72px] bg-background">
