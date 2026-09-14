@@ -35,3 +35,4 @@
 - [x] Restore the body-level 76px product CTA, preserve the three-step funnel, and add mobile content clearance
 - [x] Redesign the global Trade Portal shell and dashboard as a flat luxury editorial workspace
 - [x] Remove dashboard promo banners and refine Trade navigation, admin markers, and secondary copy
+- [x] Correct dashboard card spacing and add a live active-project studio indicator
