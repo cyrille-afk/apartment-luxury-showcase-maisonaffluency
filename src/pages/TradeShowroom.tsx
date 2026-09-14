@@ -126,7 +126,7 @@ const TradeShowroom = () => {
   return (
     <>
       <Helmet>
-        <title>The Maison Archive — Trade Portal — Maison Affluency</title>
+        <title>The Collection — Trade Portal — Maison Affluency</title>
       </Helmet>
       <div className="max-w-7xl">
         {/* Editorial header: pure white, no banner */}
@@ -134,7 +134,7 @@ const TradeShowroom = () => {
           <div className="flex items-start justify-between gap-6">
             <div>
               <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-light text-foreground tracking-tight">
-                The Maison Archive
+                The Collection
               </h1>
               <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 mt-4">
                 A MATRICULATED INDEX OF 150+ COLLECTIBLE DESIGNERS, ATELIERS, AND CURATED RESIDENTIAL GALLERIES.
@@ -180,7 +180,7 @@ const TradeShowroom = () => {
           <ShowroomDesignerDirectory
             onSelectDesigner={(designer) => {
               navigate(`/trade/gallery/${designer.slug}`, {
-                state: { from: "/trade/archive?tab=designers" },
+                state: { from: "/trade/the-collection?tab=designers" },
               });
             }}
           />

@@ -35,7 +35,7 @@ function LegacyStephGcRedirect() {
 
 function ShowroomLegacyRedirect() {
   const { search } = useLocation();
-  return <Navigate to={`/trade/archive${search}`} replace />;
+  return <Navigate to={`/trade/the-collection${search}`} replace />;
 }
 
 // Trade portal pages

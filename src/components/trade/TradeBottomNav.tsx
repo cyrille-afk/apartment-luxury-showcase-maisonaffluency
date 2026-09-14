@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { id: "/trade", label: "Home", icon: LayoutDashboard, end: true },
-  { id: "/trade/archive", label: "Archive", icon: MapPin },
+  { id: "/trade/the-collection", label: "Collection", icon: MapPin },
   { id: "/trade/gallery", label: "Gallery", icon: Image },
   { id: "/trade/favorites", label: "Favorites", icon: Heart },
   { id: "/trade/quotes", label: "Quotes", icon: FileText },
