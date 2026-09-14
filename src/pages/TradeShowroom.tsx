@@ -30,7 +30,16 @@ const TradeShowroom = () => {
   const highlightId = searchParams.get("highlight");
   const designerParam = searchParams.get("designer");
 
-  const [activeTab, setActiveTab] = useState<ViewTab>(tabParam === "grid" ? "grid" : tabParam === "search" ? "search" : "gallery");
+  const [activeTab, setActiveTab] = useState<ViewTab>(
+    tabParam === "grid"
+      ? "grid"
+      : tabParam === "search"
+        ? "search"
+        : tabParam === "designers"
+          ? "designers"
+          : "gallery",
+  );
+  const [selectedDesigner, setSelectedDesigner] = useState<string | null>(designerParam);
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -142,44 +151,35 @@ const TradeShowroom = () => {
           </button>
         </SectionHero>
 
-        {/* Tab switcher */}
-        <div className="flex items-center gap-1 mb-6 border-b border-border">
-          <button
-            onClick={() => setActiveTab("gallery")}
-            className={cn(
-              "flex items-center gap-2 px-4 py-2.5 font-body text-xs uppercase tracking-[0.1em] transition-colors border-b-2 -mb-px",
-              activeTab === "gallery"
-                ? "border-foreground text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <MapPin className="h-3.5 w-3.5" />
-            Interactive Gallery
-          </button>
-          <button
-            onClick={() => setActiveTab("grid")}
-            className={cn(
-              "flex items-center gap-2 px-4 py-2.5 font-body text-xs uppercase tracking-[0.1em] transition-colors border-b-2 -mb-px",
-              activeTab === "grid"
-                ? "border-foreground text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Grid3X3 className="h-3.5 w-3.5" />
-            Product Grid
-          </button>
-          <button
-            onClick={() => setActiveTab("search")}
-            className={cn(
-              "flex items-center gap-2 px-4 py-2.5 font-body text-xs uppercase tracking-[0.1em] transition-colors border-b-2 -mb-px",
-              activeTab === "search"
-                ? "border-foreground text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Search className="h-3.5 w-3.5" />
-            Visual Search
-          </button>
+        {/* Sub-header workspace navigation */}
+        <div className="flex flex-wrap items-center gap-x-8 gap-y-2 mb-8 border-b border-[#E5E5E5] pb-3">
+          {([
+            { id: "gallery", label: "Interactive Gallery", Icon: MapPin },
+            { id: "designers", label: "Designers & Makers", Icon: Grid3X3 },
+            { id: "search", label: "Visual Search", Icon: Search },
+          ] as const).map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className={cn(
+                "flex items-center gap-2 font-body text-[11px] uppercase tracking-[0.15em] transition-colors",
+                activeTab === id
+                  ? "font-medium text-foreground underline decoration-foreground underline-offset-[10px]"
+                  : "text-muted-foreground/70 hover:text-foreground",
+              )}
+            >
+              <Icon className="h-3 w-3" />
+              {label}
+            </button>
+          ))}
+          {activeTab === "grid" && (
+            <button
+              onClick={() => setActiveTab("designers")}
+              className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 hover:text-foreground"
+            >
+              ← {selectedDesigner || "All Makers"}
+            </button>
+          )}
         </div>
 
         {/* Tab content */}
