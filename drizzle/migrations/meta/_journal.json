@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789388359259,
+      "tag": "0000_add_preferred_currency_to_profiles",
+      "breakpoints": true
+    }
+  ]
+}
