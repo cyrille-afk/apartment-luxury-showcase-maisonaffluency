@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { ProjectSpecDrawer } from "@/components/trade/ProjectSpecDrawer";
 import { ProjectCuratorialGuide } from "@/components/trade/ProjectCuratorialGuide";
+import { dimensionBadgeLabel } from "@/lib/productDimensions";
 
 type StudioItem = {
   id: string;
