@@ -324,8 +324,8 @@ function OrderSummary({
   const { currency } = summary;
   const fxRates = useFxRates();
   const usdSgd = useUsdToSgdRate();
-  const displayedTotalCents =
-    summary.estimatedShippingCents > 0 ? summary.totalCents : summary.chargeTotalCents;
+  // Single source of truth — never re-derive a total in a UI block.
+  const displayedTotalCents = summary.totalCents;
   const sgdEquivalentCents =
     currency.toUpperCase() === "USD"
       ? Math.round(displayedTotalCents * usdSgd.rate)
@@ -575,9 +575,7 @@ function OrderSummary({
               <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
               <dd className="tabular-nums font-medium text-base">
                 {money(
-                  summary.estimatedShippingCents > 0
-                    ? summary.totalCents
-                    : summary.chargeTotalCents,
+                  summary.totalCents,
                   currency,
                 )}
               </dd>
@@ -619,8 +617,8 @@ function MobileCheckoutSummary({
   isLoading: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const displayedTotalCents =
-    summary.estimatedShippingCents > 0 ? summary.totalCents : summary.chargeTotalCents;
+  // Single source of truth — never re-derive a total in a UI block.
+  const displayedTotalCents = summary.totalCents;
 
   return (
     <section className="fixed left-0 top-[var(--mobile-nav-height)] z-40 w-full border-b border-border bg-background md:top-[var(--header-h)] lg:hidden">
@@ -842,7 +840,7 @@ function PaymentForm({
     return () => clearTimeout(t);
   }, [paymentReady]);
 
-  const { chargeTotalCents: total, currency } = summary;
+  const { totalCents: total, currency } = summary;
   const paynow = method === "paynow";
 
   const confirm = async () => {
@@ -1181,7 +1179,7 @@ function WireForm({
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
-  const { chargeTotalCents: total, currency } = summary;
+  const { totalCents: total, currency } = summary;
 
   /* Region drives the settlement channel: the signed-in trade profile wins,
      otherwise we fall back to the chosen shipping destination.              */
@@ -1656,7 +1654,7 @@ export default function Checkout() {
         orderReference: reference,
         currency: summary.currency,
         grossCents:
-          summary.estimatedShippingCents > 0 ? summary.totalCents : summary.chargeTotalCents,
+          summary.totalCents,
         accountGroup,
         destinationIso: summary.taxCountry ?? pageDestination.iso ?? null,
         destinationName: pageDestination.name ?? null,
