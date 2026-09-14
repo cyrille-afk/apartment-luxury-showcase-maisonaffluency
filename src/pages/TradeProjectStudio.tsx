@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { ProjectSpecDrawer } from "@/components/trade/ProjectSpecDrawer";
 import { ProjectCuratorialGuide } from "@/components/trade/ProjectCuratorialGuide";
+import { ProjectProposalPreview } from "@/components/trade/ProjectProposalPreview";
 import { dimensionBadgeLabel } from "@/lib/productDimensions";
 
 type StudioItem = {
@@ -62,6 +63,7 @@ export default function TradeProjectStudio() {
   const [curatorialItemId, setCuratorialItemId] = useState<string | null>(null);
   const [isRecommendationHovered, setIsRecommendationHovered] = useState(false);
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(true);
+  const [isProposalPreviewOpen, setIsProposalPreviewOpen] = useState(false);
   const specItem = items.find((i) => i.product_id === specItemId) || null;
 
   useEffect(() => {
@@ -439,12 +441,14 @@ export default function TradeProjectStudio() {
 
             {/* Actions */}
             <div className="mt-8 flex flex-col gap-3">
-              <Link
-                to={`/trade/projects/${project.id}?tab=tearsheets`}
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setIsProposalPreviewOpen(true)}
                 className="inline-flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.15em] text-foreground underline underline-offset-4 hover:no-underline"
               >
                 <FileText className="h-3.5 w-3.5" /> Generate White-Label PDF Proposal
-              </Link>
+              </Button>
               <Link
                 to={`/trade/projects/${project.id}?tab=ffe`}
                 className="inline-flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.15em] text-foreground underline underline-offset-4 hover:no-underline"
@@ -457,6 +461,16 @@ export default function TradeProjectStudio() {
       </div>
 
       <ProjectSpecDrawer item={specItem} onClose={() => setSpecItemId(null)} />
+      <ProjectProposalPreview
+        open={isProposalPreviewOpen}
+        onOpenChange={setIsProposalPreviewOpen}
+        projectName={project.name}
+        clientName={project.client_name}
+        location={project.location}
+        items={items}
+        isClientMode={isClientMode}
+        tradeDiscount={TRADE_DISCOUNT}
+      />
     </div>
   );
 }
