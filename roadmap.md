@@ -45,3 +45,4 @@
 - [x] Lock Project Studio to a fixed viewport: 65/35 canvas/AI split, internal pane scrolling, docked assistant
 - [x] Collapsible AI concierge pane with dismiss control, glide transition, and activation tab
 - [x] Replace the Project Studio proposal redirect with an in-workspace, print-ready preview
+- [x] Add recent active Project Studio shortcuts beneath Projects in the trade sidebar
