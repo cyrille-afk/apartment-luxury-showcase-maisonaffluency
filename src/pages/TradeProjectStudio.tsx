@@ -257,13 +257,26 @@ export default function TradeProjectStudio() {
               })}
             </div>
           )}
+          </div>
+
+          {/* Lower zone — AI Curatorial Assistant, anchored to the base of the workspace */}
+          <div className="shrink-0 border-t border-border lg:min-h-0 lg:flex-[35]">
+            <ProjectCuratorialGuide
+              docked
+              projectId={project.id}
+              projectName={project.name}
+              items={items}
+              activeItemId={curatorialItemId}
+              isClientMode={isClientMode}
+              onActiveItemChange={setCuratorialItemId}
+              onCompositionChanged={() => setItemsVersion((version) => version + 1)}
+              onRecommendationHover={setIsRecommendationHovered}
+            />
+          </div>
         </section>
 
-
-
-
         {/* RIGHT — procurement ledger */}
-        <aside className="px-6 py-6 md:px-10 lg:px-14">
+        <aside className="px-6 py-6 md:px-10 lg:min-h-0 lg:overflow-y-auto lg:px-14">
           {/* Header */}
           <div className="border-b border-border pb-6">
             <p className="trade-micro-label text-muted-foreground">Client</p>
@@ -437,16 +450,6 @@ export default function TradeProjectStudio() {
       </div>
 
       <ProjectSpecDrawer item={specItem} onClose={() => setSpecItemId(null)} />
-      <ProjectCuratorialGuide
-        projectId={project.id}
-        projectName={project.name}
-        items={items}
-        activeItemId={curatorialItemId}
-        isClientMode={isClientMode}
-        onActiveItemChange={setCuratorialItemId}
-        onCompositionChanged={() => setItemsVersion((version) => version + 1)}
-        onRecommendationHover={setIsRecommendationHovered}
-      />
     </div>
   );
 }
