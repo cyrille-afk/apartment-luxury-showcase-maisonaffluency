@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
 import { Box, ImageUp, Loader2, Plus, RotateCcw, Search, X } from "lucide-react";
-import * as THREE from "three";
+
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
