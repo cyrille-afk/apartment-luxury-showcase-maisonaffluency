@@ -196,7 +196,7 @@ function useFittedModel(
     const wrapper = new THREE.Group();
     wrapper.add(clone);
     return wrapper;
-  }, [baseMaps, baseMaterial, generalMaps, material, productId, scene, upholsteryMaps, upholsteryMaterial]);
+  }, [baseMaps, baseMaterial, generalMaps, material, productId, scene, topMaps, topMaterial, upholsteryMaps, upholsteryMaterial]);
 }
 
 const ModelBody = ({ object }: { object: PlacedObject }) => {
@@ -204,6 +204,7 @@ const ModelBody = ({ object }: { object: PlacedObject }) => {
     object.id,
     object.glb_url ?? "",
     object.material ?? null,
+    object.topMaterial ?? null,
     object.baseMaterial ?? (isBondStreetStool(object.id) ? BOND_STREET_BASE_FINISH : null),
     object.upholsteryMaterial ?? null,
   );
