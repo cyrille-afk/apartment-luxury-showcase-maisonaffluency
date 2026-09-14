@@ -1526,9 +1526,12 @@ export default function Checkout() {
       rule &&
       formCountry?.toUpperCase() === "SG" &&
       currency.toLowerCase() === "sgd";
+    // GST applies to the full CIF value: goods + the delivery shown in the
+    // summary (confirmed freight, else the estimate).
+    const deliveryForTaxCents = shippingCents > 0 ? shippingCents : estimatedShippingCents;
     const localTaxCents = b2bZeroRated
       ? 0
-      : computeTaxCents(subtotalCents - discountCents, shippingCents, rule);
+      : computeTaxCents(subtotalCents - discountCents, deliveryForTaxCents, rule);
     // The PaymentIntent is authoritative: once the server has priced the order
     // the displayed tax and total equal the amount actually charged.
     const taxCents = serverTax !== null ? serverTax.cents : localTaxCents;
@@ -1544,7 +1547,7 @@ export default function Checkout() {
     // explanation of why the order is taxed or zero-rated.
     const taxableBaseCents = rule
       ? Math.max(0, subtotalCents - discountCents) +
-        (rule.taxShipping ? Math.max(0, shippingCents) : 0)
+        (rule.taxShipping ? Math.max(0, deliveryForTaxCents) : 0)
       : 0;
     const destination = (formCountry || "").trim().toUpperCase() || null;
     const taxStatusNote = b2bZeroRated
@@ -1830,6 +1833,10 @@ export default function Checkout() {
           shippingConfirmed: !!nextShipping,
           shippingCents: nextShipping?.cents ?? 0,
           shippingLabel: nextShipping?.label ?? "",
+          // Indicative freight for the GST (CIF) base only — never charged
+          // until confirmed. Keeps the server-computed tax in sync with the
+          // displayed "goods + delivery" GST line.
+          estimatedFreightCents: nextShipping ? 0 : estimate.cents,
           paymentIntentId: intentIdRef.current || undefined,
           // Destination country — drives Singapore GST server-side.
           shippingCountry: formCountry ?? "",
