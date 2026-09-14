@@ -36,3 +36,4 @@
 - [x] Redesign the global Trade Portal shell and dashboard as a flat luxury editorial workspace
 - [x] Remove dashboard promo banners and refine Trade navigation, admin markers, and secondary copy
 - [x] Correct dashboard card spacing and add a live active-project studio indicator
+- [x] Make Client View global and suppress trade pricing, tier, discount, and margin displays

@@ -10,6 +10,7 @@ import { FxAppliedRates } from "@/components/trade/FxAppliedRates";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock, FolderOpen, Layers, Eye, ExternalLink, Mail, History as HistoryIcon, Copy, AlertTriangle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -403,6 +404,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const { toast } = useToast();
   const navigate = useNavigate();
   const { discountPct: tradeDiscountPct, discountLabel: tradeDiscountLabel, tierLabel, tier: currentTier, config: tierConfig } = useTradeDiscount();
+  const { clientSafe } = useClientSafeMode();
   const [items, setItems] = useState<QuoteItemWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState(quoteNotes || "");
@@ -527,7 +529,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   // quote lands (or is switched) into that mode, force the toggle off so the
   // subtotal, extras, landed-cost panels and PDF totals all show full retail.
   const isMsrpOnly = billingMeta?.billing_mode === "msrp_only";
-  const discountApplies = !isMsrpOnly && tradeDiscount;
+  const discountApplies = !clientSafe && !isMsrpOnly && tradeDiscount;
   useEffect(() => {
     if (isMsrpOnly && tradeDiscount) setTradeDiscount(false);
   }, [isMsrpOnly, tradeDiscount]);
@@ -2654,7 +2656,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
 
 
-            <div className="flex items-center gap-4 flex-wrap">
+            {!clientSafe && <div className="flex items-center gap-4 flex-wrap">
               <button
                 onClick={() => !isMsrpOnly && setTradeDiscount(!tradeDiscount)}
                 disabled={isMsrpOnly}
@@ -2704,9 +2706,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   )
                 )}
               </div>
-            </div>
+            </div>}
 
-            {discountApplies && tierConfig && (
+            {!clientSafe && discountApplies && tierConfig && (
               <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[10px] text-muted-foreground">
                 <span className="uppercase tracking-widest">Tiers:</span>
                 {(["silver","gold","platinum"] as const).map((t) => {

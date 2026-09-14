@@ -24,7 +24,7 @@ export default function PriceModeSelector({ className = "" }: PriceModeSelectorP
     setAnnouncement(
       showTradePrice
         ? `Showing ${tierLabel} trade price, ${pct} off retail.`
-        : `Showing retail price (RRP). Trade tier ${tierLabel}, ${pct} off available.`,
+        : "Client View active. Showing retail prices only.",
     );
   }, [showTradePrice, tierLabel, discountLabel]);
 
@@ -35,13 +35,15 @@ export default function PriceModeSelector({ className = "" }: PriceModeSelectorP
         className,
       )}
       role="group"
-      aria-label={`Price view — ${tierLabel} tier, ${discountLabel} trade discount`}
+      aria-label={showTradePrice
+        ? `Price view — ${tierLabel} tier, ${discountLabel} trade discount`
+        : "Price view — Client View active"}
     >
       <button
         type="button"
         role="switch"
         aria-checked={!showTradePrice}
-        onClick={() => setShowTradePrice(false)}
+        onClick={() => setShowTradePrice(!showTradePrice)}
         className={cn(
           "p-0 text-[10px] font-body uppercase tracking-[0.15em] transition-colors focus-visible:outline-none focus-visible:underline",
           !showTradePrice
@@ -51,21 +53,14 @@ export default function PriceModeSelector({ className = "" }: PriceModeSelectorP
       >
         Client View
       </button>
-      <span className="h-3 w-px bg-border" aria-hidden="true" />
-      <button
-        type="button"
-        role="switch"
-        aria-checked={showTradePrice}
-        onClick={() => setShowTradePrice(true)}
-        className={cn(
-          "p-0 text-[10px] font-body uppercase tracking-[0.15em] transition-colors focus-visible:outline-none focus-visible:underline",
-          showTradePrice
-            ? "text-foreground"
-            : "text-muted-foreground hover:text-foreground",
-        )}
-      >
-        Account: Preferred Trade
-      </button>
+      {showTradePrice && (
+        <>
+          <span className="h-3 w-px bg-border" aria-hidden="true" />
+          <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+            Account: Preferred Trade
+          </span>
+        </>
+      )}
 
       <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
         {announcement}

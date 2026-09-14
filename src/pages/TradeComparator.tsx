@@ -5,10 +5,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Search, Loader2, X, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 
 export default function TradeComparator() {
   const [search, setSearch] = useState("");
   const [compareList, setCompareList] = useState<any[]>([]);
+  const { showTradePrice } = useTradePriceMode();
 
   // Load only the user's favourited products
   const { data: favorites = [], isLoading } = useQuery({
@@ -47,8 +49,10 @@ export default function TradeComparator() {
     { key: "dimensions", label: "Dimensions" },
     { key: "materials", label: "Materials" },
     { key: "lead_time", label: "Lead Time" },
-    { key: "trade_price_cents", label: "Trade Price", format: (v: number | null) => v ? `€${(v / 100).toFixed(2)}` : "On request" },
     { key: "rrp_price_cents", label: "RRP", format: (v: number | null) => v ? `€${(v / 100).toFixed(2)}` : "—" },
+    ...(showTradePrice
+      ? [{ key: "trade_price_cents", label: "Trade Price", format: (v: number | null) => v ? `€${(v / 100).toFixed(2)}` : "On request" }]
+      : []),
   ];
 
   return (

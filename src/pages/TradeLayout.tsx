@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 import PriceModeSelector from "@/components/trade/PriceModeSelector";
+import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher";
 import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 
@@ -290,6 +291,7 @@ function BackToTopButton() {
 
 const TradeLayout = () => {
   const { user, loading, applicationStatus, isAdmin, isTradeUser, profile } = useAuth();
+  const { showTradePrice } = useTradePriceMode();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [submittedCount, setSubmittedCount] = useState(0);
   const location = useLocation();
@@ -418,7 +420,10 @@ const TradeLayout = () => {
 
   return (
     <SidebarProvider>
-      <div className="trade-portal-shell min-h-screen flex w-full bg-background">
+      <div
+        className="trade-portal-shell min-h-screen flex w-full bg-background"
+        data-price-view={showTradePrice ? "trade" : "client"}
+      >
         {/* Sidebar — desktop only */}
         <div className="hidden md:block" data-trade-sidebar>
           <TradeSidebar />
