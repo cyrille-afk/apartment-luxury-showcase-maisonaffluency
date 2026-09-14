@@ -316,16 +316,50 @@ export default function TradeProjectStudio() {
         </section>
 
         {/* RIGHT — procurement ledger */}
-        <aside className="px-6 py-6 md:px-10 lg:min-h-0 lg:overflow-y-auto lg:px-14">
-          {/* Header */}
-          <div className="border-b border-border pb-6">
-            <p className="trade-micro-label text-muted-foreground">Client</p>
-            <p className="mt-2 font-display text-2xl leading-none text-foreground">
-              {project.client_name || "Unassigned"}
-            </p>
-            <p className="mt-2 font-body text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
-              {project.location || "Location TBC"} · {project.status}
-            </p>
+        <aside className="flex flex-col px-6 py-6 md:px-10 lg:min-h-0 lg:overflow-hidden lg:px-14">
+          {/* Header — fixed at the top of the right pane */}
+          <div className="shrink-0 border-b border-border pb-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div>
+                <p className="trade-micro-label text-muted-foreground">Client</p>
+                <p className="mt-2 font-display text-2xl leading-none text-foreground">
+                  {project.client_name || "Unassigned"}
+                </p>
+                <p className="mt-2 font-body text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+                  {project.location || "Location TBC"} · {project.status}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4 md:justify-end">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={openProposalPreview}
+                  data-proposal-preview-trigger
+                  className="inline-flex h-auto items-center gap-1.5 p-0 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  [ ⎙ Generate Proposal ]
+                </Button>
+                <Link
+                  to={`/trade/projects/${project.id}?tab=ffe`}
+                  className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground"
+                >
+                  <FileDown className="h-3.5 w-3.5" />
+                  [ ↓ Export Spec Sheets ]
+                </Link>
+                <div className="flex items-center gap-2">
+                  <span className="font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
+                    Client view
+                  </span>
+                  <Switch
+                    checked={isClientMode}
+                    onCheckedChange={(checked) => setShowTradePrice(!checked)}
+                    aria-label="Client view"
+                  />
+                </div>
+              </div>
+            </div>
 
             {isClientMode ? (
               <div className="mt-6">
@@ -349,161 +383,133 @@ export default function TradeProjectStudio() {
                 </p>
               </div>
             )}
-
-            <div className="mt-6 flex items-center justify-between">
-              <span className="font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
-                Client view
-              </span>
-              <Switch
-                checked={isClientMode}
-                onCheckedChange={(checked) => setShowTradePrice(!checked)}
-                aria-label="Client view"
-              />
-            </div>
           </div>
 
-          {/* Ledger */}
-          <div className="mt-8 px-1 md:px-2">
-            <div className="grid grid-cols-[44px_minmax(0,1fr)_auto] gap-3 border-b border-border pb-4 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-              <span>Spec</span>
-              <span>Item</span>
-              <span className="text-right">Status</span>
-            </div>
-
-            {loadingItems ? (
-              <div className="py-10 text-center">
-                <DotCircleLoader size="sm" className="text-muted-foreground" />
+          {/* Scrollable ledger body */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="mt-8 px-1 md:px-2">
+              <div className="grid grid-cols-[44px_minmax(0,1fr)_auto] gap-3 border-b border-border pb-4 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                <span>Spec</span>
+                <span>Item</span>
+                <span className="text-right">Status</span>
               </div>
-            ) : items.length === 0 ? (
-              <p className="py-8 font-body text-xs text-muted-foreground">No line items yet.</p>
-            ) : (
-              items.map((item, idx) => {
-                const msrp = (item.rrp_cents || 0) * item.quantity;
-                const trade = Math.round(msrp * (1 - TRADE_DISCOUNT));
-                const expanded = expandedId === item.product_id;
-                return (
-                  <div key={item.product_id} className="border-b border-border">
-                    <div
-                      className="grid cursor-pointer grid-cols-[44px_minmax(0,1fr)_auto] items-start gap-3 py-9"
-                      onClick={() => setExpandedId(expanded ? null : item.product_id)}
-                      role="button"
-                      aria-expanded={expanded}
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          setExpandedId(expanded ? null : item.product_id);
-                        }
-                      }}
-                      aria-label={`Toggle details for ${item.name}`}
-                    >
-                      <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
-                        {String(idx + 1).padStart(2, "0")}
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block truncate font-display text-base text-foreground">
-                          {item.name}
+
+              {loadingItems ? (
+                <div className="py-10 text-center">
+                  <DotCircleLoader size="sm" className="text-muted-foreground" />
+                </div>
+              ) : items.length === 0 ? (
+                <p className="py-8 font-body text-xs text-muted-foreground">No line items yet.</p>
+              ) : (
+                items.map((item, idx) => {
+                  const msrp = (item.rrp_cents || 0) * item.quantity;
+                  const trade = Math.round(msrp * (1 - TRADE_DISCOUNT));
+                  const expanded = expandedId === item.product_id;
+                  return (
+                    <div key={item.product_id} className="border-b border-border">
+                      <div
+                        className="grid cursor-pointer grid-cols-[44px_minmax(0,1fr)_auto] items-start gap-3 py-9"
+                        onClick={() => setExpandedId(expanded ? null : item.product_id)}
+                        role="button"
+                        aria-expanded={expanded}
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setExpandedId(expanded ? null : item.product_id);
+                          }
+                        }}
+                        aria-label={`Toggle details for ${item.name}`}
+                      >
+                        <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
+                          {String(idx + 1).padStart(2, "0")}
                         </span>
-                        <span className="mt-1.5 block font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
-                          {item.designer}
-                          {item.quantity > 1 ? ` · ×${item.quantity}` : ""}
-                        </span>
-                      </span>
-                      <span className="whitespace-nowrap pt-1 text-right">
-                        <span className="block font-body text-[11px] tracking-[0.05em] text-foreground">
-                          {isClientMode
-                            ? money(msrp) || "Price upon Request"
-                            : msrp
-                              ? money(trade)
-                              : "Price upon Request"}
-                        </span>
-                        {!isClientMode && msrp > 0 && (
-                          <span className="mt-0.5 block font-body text-[10px] tracking-[0.05em] text-muted-foreground/60 line-through">
-                            {money(msrp)}
+                        <span className="min-w-0">
+                          <span className="block truncate font-display text-base text-foreground">
+                            {item.name}
                           </span>
-                        )}
-                        <span className="mt-1.5 block font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
-                          Specified
+                          <span className="mt-1.5 block font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
+                            {item.designer}
+                            {item.quantity > 1 ? ` · ×${item.quantity}` : ""}
+                          </span>
                         </span>
-                      </span>
-                    </div>
-
-                    {expanded && (
-                      <div className="pb-9">
-                        <dl className="space-y-3">
-                          <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
-                            <dt className="text-muted-foreground/60">Spec</dt>
-                            <dd className="text-foreground">{item.sku || "—"}</dd>
-                          </div>
-                          <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
-                            <dt className="text-muted-foreground/60">Lead</dt>
-                            <dd className="text-foreground">{leadLabel(item)}</dd>
-                          </div>
-                          <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
-                            <dt className="text-muted-foreground/60">{isClientMode ? "MSRP" : "Trade"}</dt>
-                            <dd className="tracking-[0.05em] text-foreground">
-                              {isClientMode ? (
-                                money(msrp) || "Price upon Request"
-                              ) : msrp ? (
-                                <>
-                                  {money(trade)}
-                                  <span className="ml-2 text-muted-foreground/60 line-through">
-                                    {money(msrp)}
-                                  </span>
-                                </>
-                              ) : (
-                                "Price upon Request"
-                              )}
-                            </dd>
-                          </div>
-                        </dl>
-                        <button
-                          type="button"
-                          onClick={() => setSpecItemId(item.product_id)}
-                          className="mt-4 font-body text-[10px] uppercase tracking-[0.15em] text-foreground underline underline-offset-4 hover:no-underline"
-                        >
-                          Open full specification
-                        </button>
+                        <span className="whitespace-nowrap pt-1 text-right">
+                          <span className="block font-body text-[11px] tracking-[0.05em] text-foreground">
+                            {isClientMode
+                              ? money(msrp) || "Price upon Request"
+                              : msrp
+                                ? money(trade)
+                                : "Price upon Request"}
+                          </span>
+                          {!isClientMode && msrp > 0 && (
+                            <span className="mt-0.5 block font-body text-[10px] tracking-[0.05em] text-muted-foreground/60 line-through">
+                              {money(msrp)}
+                            </span>
+                          )}
+                          <span className="mt-1.5 block font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
+                            Specified
+                          </span>
+                        </span>
                       </div>
-                    )}
-                  </div>
-                );
-              })
-            )}
 
-            {/* Totals */}
-            {items.length > 0 && (
-              <div className="flex items-baseline justify-between gap-4 border-b border-foreground py-9">
-                <span className="font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
-                  {isClientMode ? "Total Estimate" : "Total (Trade)"}
-                </span>
-                <span className="font-body text-[11px] tracking-[0.05em] text-foreground">
-                {isClientMode ? money(totals.clientEstimateCents) || "—" : money(totals.trade) || "—"}
-                </span>
-              </div>
-            )}
+                      {expanded && (
+                        <div className="pb-9">
+                          <dl className="space-y-3">
+                            <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
+                              <dt className="text-muted-foreground/60">Spec</dt>
+                              <dd className="text-foreground">{item.sku || "—"}</dd>
+                            </div>
+                            <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
+                              <dt className="text-muted-foreground/60">Lead</dt>
+                              <dd className="text-foreground">{leadLabel(item)}</dd>
+                            </div>
+                            <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
+                              <dt className="text-muted-foreground/60">{isClientMode ? "MSRP" : "Trade"}</dt>
+                              <dd className="tracking-[0.05em] text-foreground">
+                                {isClientMode ? (
+                                  money(msrp) || "Price upon Request"
+                                ) : msrp ? (
+                                  <>
+                                    {money(trade)}
+                                    <span className="ml-2 text-muted-foreground/60 line-through">
+                                      {money(msrp)}
+                                    </span>
+                                  </>
+                                ) : (
+                                  "Price upon Request"
+                                )}
+                              </dd>
+                            </div>
+                          </dl>
+                          <button
+                            type="button"
+                            onClick={() => setSpecItemId(item.product_id)}
+                            className="mt-4 font-body text-[10px] uppercase tracking-[0.15em] text-foreground underline underline-offset-4 hover:no-underline"
+                          >
+                            Open full specification
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
 
-
-            {/* Actions */}
-            <div className="mt-8 flex flex-col gap-3">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={openProposalPreview}
-                data-proposal-preview-trigger
-                className="inline-flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.15em] text-foreground underline underline-offset-4 hover:no-underline"
-              >
-                <FileText className="h-3.5 w-3.5" /> Generate White-Label PDF Proposal
-              </Button>
-              <Link
-                to={`/trade/projects/${project.id}?tab=ffe`}
-                className="inline-flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.15em] text-foreground underline underline-offset-4 hover:no-underline"
-              >
-                <FileDown className="h-3.5 w-3.5" /> Export Specification Sheets
-              </Link>
+              {/* Totals */}
+              {items.length > 0 && (
+                <div className="flex items-baseline justify-between gap-4 border-b border-foreground py-9">
+                  <span className="font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
+                    {isClientMode ? "Total Estimate" : "Total (Trade)"}
+                  </span>
+                  <span className="font-body text-[11px] tracking-[0.05em] text-foreground">
+                  {isClientMode ? money(totals.clientEstimateCents) || "—" : money(totals.trade) || "—"}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </aside>
+
       </div>
 
       <ProjectSpecDrawer item={specItem} onClose={() => setSpecItemId(null)} />
