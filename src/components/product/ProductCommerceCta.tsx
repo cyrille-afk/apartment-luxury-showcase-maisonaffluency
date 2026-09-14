@@ -509,7 +509,7 @@ export default function ProductCommerceCta({
               </div>
               <button
                 type="button"
-                onClick={handleMobilePrimary}
+                onClick={() => (finishSelectionRequired ? scrollToFinishes() : handleMobilePrimary())}
                 disabled={placingOrder}
                 className={cn(
                   primaryBtn,
