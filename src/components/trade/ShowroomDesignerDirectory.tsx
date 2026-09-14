@@ -126,7 +126,7 @@ const ShowroomDesignerDirectory = ({
           {visible.map((d, i) => (
             <button
               key={d.id}
-              onClick={() => onSelectDesigner(d.name)}
+              onClick={() => onSelectDesigner(d)}
               className="group text-left"
             >
               <div
