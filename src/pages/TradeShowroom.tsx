@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { ShoppingCart, MapPin, Grid3X3, Search } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +22,7 @@ type ViewTab = "gallery" | "designers" | "search";
 const TradeShowroom = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
@@ -33,7 +34,6 @@ const TradeShowroom = () => {
         ? "search"
         : "gallery",
   );
-  const navigate = useSearchParams()[1]; // not used, but avoids unused import warning if ever needed
 
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
@@ -179,7 +179,9 @@ const TradeShowroom = () => {
         ) : activeTab === "designers" ? (
           <ShowroomDesignerDirectory
             onSelectDesigner={(designer) => {
-              // Handled via external route; this keeps the directory agnostic.
+              navigate(`/trade/gallery/${designer.slug}`, {
+                state: { from: "/trade/showroom?tab=designers" },
+              });
             }}
           />
         ) : (
