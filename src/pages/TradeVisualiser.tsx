@@ -271,14 +271,27 @@ const TradeVisualiser = () => {
     });
   };
 
+  /** Applies a swatch to the whole piece or to a single GLB sub-mesh group. */
   const applyMaterial = (material: VisualiserMaterial) => {
     setActiveMaterial(material);
     if (!selectedId) {
       toast.success(`${material.name} is ready for the next object.`);
       return;
     }
+    setObjects((current) => current.map((object) => {
+      if (object.instanceId !== selectedId) return object;
+      if (finishTarget === "top") return { ...object, topMaterial: material };
+      if (finishTarget === "base") return { ...object, baseMaterial: material };
+      return { ...object, material, topMaterial: null, baseMaterial: null };
+    }));
+  };
+
+  const clearFinishes = () => {
+    if (!selectedId) return;
     setObjects((current) => current.map((object) => (
-      object.instanceId === selectedId ? { ...object, material } : object
+      object.instanceId === selectedId
+        ? { ...object, material: null, topMaterial: null, baseMaterial: null }
+        : object
     )));
   };
 
