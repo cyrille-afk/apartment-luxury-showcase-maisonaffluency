@@ -22,7 +22,7 @@ import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useToast } from "@/hooks/use-toast";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
-import SectionHero from "@/components/trade/SectionHero";
+
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
