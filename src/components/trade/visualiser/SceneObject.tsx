@@ -38,6 +38,10 @@ function useFittedModel(url: string, material: VisualiserMaterial | null) {
     const isGlass = /glass|crystal/.test(category);
     const colorMap = material?.image_url ? texture.clone() : null;
     const roughnessMap = material?.image_url && !isGlass ? texture.clone() : null;
+    const metalnessMap = material?.image_url && isMetal ? texture.clone() : null;
+    const neutralNormalMap = material?.image_url
+      ? new THREE.DataTexture(new Uint8Array([128, 128, 255, 255]), 1, 1, THREE.RGBAFormat)
+      : null;
     if (colorMap) {
       colorMap.colorSpace = THREE.SRGBColorSpace;
       colorMap.wrapS = colorMap.wrapT = THREE.RepeatWrapping;
@@ -50,6 +54,13 @@ function useFittedModel(url: string, material: VisualiserMaterial | null) {
       roughnessMap.repeat.copy(colorMap?.repeat ?? new THREE.Vector2(3, 3));
       roughnessMap.needsUpdate = true;
     }
+    if (metalnessMap) {
+      metalnessMap.colorSpace = THREE.NoColorSpace;
+      metalnessMap.wrapS = metalnessMap.wrapT = THREE.RepeatWrapping;
+      metalnessMap.repeat.copy(colorMap?.repeat ?? new THREE.Vector2(3, 3));
+      metalnessMap.needsUpdate = true;
+    }
+    if (neutralNormalMap) neutralNormalMap.needsUpdate = true;
     clone.traverse((child) => {
       const mesh = child as THREE.Mesh;
       if (mesh.isMesh) {
@@ -61,6 +72,9 @@ function useFittedModel(url: string, material: VisualiserMaterial | null) {
             const pbr = (entry as THREE.MeshStandardMaterial).clone();
             pbr.map = colorMap;
             pbr.roughnessMap = roughnessMap;
+            pbr.metalnessMap = metalnessMap;
+            pbr.normalMap = neutralNormalMap;
+            pbr.color.set(THREE.Color.NAMES.white);
             pbr.roughness = isMetal ? 0.28 : isGlass ? 0.12 : isFabric ? 0.92 : 0.68;
             pbr.metalness = isMetal ? 0.78 : 0;
             pbr.normalScale = new THREE.Vector2(isFabric ? 0.18 : 0.08, isFabric ? 0.18 : 0.08);
