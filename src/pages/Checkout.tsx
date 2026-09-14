@@ -1565,8 +1565,9 @@ export default function Checkout() {
       taxStatusNote,
       taxCountry: destination,
       taxShipping: Boolean(rule?.taxShipping),
-      totalCents: chargeTotalCents + estimatedShippingCents + estimatedTaxCents,
-      chargeTotalCents,
+      deliveryCents: totals.deliveryCents,
+      totalCents: totals.totalCents,
+      chargeTotalCents: totals.chargeTotalCents,
     };
   }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, estimate.capped, estimate.notice, formCountry, serverTax, buyerType, buyerGstNumber]);
 
