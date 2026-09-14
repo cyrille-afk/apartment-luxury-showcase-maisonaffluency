@@ -585,17 +585,7 @@ export function BriefWizard() {
   };
 
   return (
-    <>
-      {typeof window !== "undefined" && new URLSearchParams(window.location.search).get("toast") === "test" && (
-        <button
-          type="button"
-          onClick={() => showResumedBriefToast()}
-          className="fixed top-4 left-4 z-[99999] border border-border bg-background px-3 py-2 text-xs"
-        >
-          Test resumed toast
-        </button>
-      )}
-      <Dialog open={open} onOpenChange={(o) => {
+    <Dialog open={open} onOpenChange={(o) => {
       if (!o && open && !saving) {
         // Auto-save draft when user dismisses (X / overlay / Esc)
         try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIdx, savedAt: Date.now() })); } catch {}
