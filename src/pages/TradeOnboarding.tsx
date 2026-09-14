@@ -133,13 +133,45 @@ export default function TradeOnboarding() {
                 </button>
               </>
             ) : (
-              <div style={instrumentSerif}>
-                <p className="text-2xl md:text-3xl text-black mb-3">Portal initialized.</p>
-                <p className="text-lg text-black/70 mb-10">
-                  Welcome, <span className="text-black">{copilotName}</span>.
-                </p>
+              <div className="w-full max-w-md">
+                <div style={instrumentSerif}>
+                  <p className="text-2xl md:text-3xl text-black mb-3">Portal initialized.</p>
+                  <p className="text-lg text-black/70 mb-12">
+                    Welcome, <span className="text-black">{copilotName}</span>.
+                  </p>
+                </div>
+
+                {/* Procurement configuration — single-field currency lock */}
+                <div className="text-left border-t border-black/15 pt-6 mb-12">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-black/50 mb-6">
+                    Procurement Configuration
+                  </p>
+                  <label
+                    htmlFor="base-currency"
+                    className="block font-mono text-[10px] uppercase tracking-[0.22em] text-black/60 mb-2"
+                  >
+                    Default Base Preference Currency
+                  </label>
+                  <select
+                    id="base-currency"
+                    value={baseCurrency}
+                    onChange={(e) => setBaseCurrency(e.target.value as DisplayCurrency)}
+                    className="w-full rounded-none border-0 border-b border-black/25 bg-transparent px-0 py-2 font-mono text-[12px] uppercase tracking-[0.18em] text-black focus:outline-none focus:border-black appearance-none"
+                  >
+                    {CURRENCY_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-black/35 mt-3">
+                    All trade pricing renders in this currency
+                  </p>
+                </div>
+
                 <Link
                   to="/trade?onboarded=1"
+                  onClick={() => setCurrency(baseCurrency)}
                   className="inline-block rounded-none bg-black text-white px-10 py-4 text-xs md:text-sm uppercase tracking-[0.25em] font-sans hover:bg-neutral-800 transition-colors duration-300"
                 >
                   Enter Workspace
