@@ -701,8 +701,8 @@ const TradeGallery = () => {
                   </div>
                 </div>
                 {/* Description in portal tooltip */}
-                <div className="p-3 text-center">
-                   <h3 className="font-display text-sm text-foreground leading-tight truncate">
+                <div className="flex flex-col items-center p-3 min-h-[4.5rem]">
+                   <h3 className="font-display text-sm text-foreground leading-tight line-clamp-2 min-h-[2.25rem]">
                      {product.product_name}
                    </h3>
                   {isAdmin ? (
