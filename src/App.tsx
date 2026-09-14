@@ -10,6 +10,7 @@ import { CompareProvider } from "@/contexts/CompareContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { CheckoutFormProvider } from "@/contexts/CheckoutFormContext";
 import { TradeCopilotProvider } from "@/contexts/TradeCopilotContext";
+import { VisualiserMaterialProvider } from "@/contexts/VisualiserMaterialContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { StudioProvider } from "@/hooks/useStudio";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
@@ -654,6 +655,7 @@ const App = () => {
                 </Routes>
               ) : (
                 <TradeCopilotProvider>
+                <VisualiserMaterialProvider>
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/products-category/:categorySlug" element={<Suspense fallback={<PageLoadingSkeleton />}><CategoryRoute /></Suspense>} />
@@ -838,6 +840,7 @@ const App = () => {
                   <Route path="/unsubscribe" element={<Suspense fallback={null}><Unsubscribe /></Suspense>} />
                   <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
                 </Routes>
+                </VisualiserMaterialProvider>
                 </TradeCopilotProvider>
               )}
 

@@ -2,7 +2,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
+import { ContactShadows, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
 import { Box, ImageUp, Loader2, Plus, RotateCcw, Search, X } from "lucide-react";
 import * as THREE from "three";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,8 @@ import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { DIMENSIONS_PLACEHOLDER, formatDimensions, resolveDimensions } from "@/lib/productDimensions";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import { toast } from "sonner";
+import { useConciergeSession } from "@/hooks/useConciergeSession";
+import { useVisualiserMaterial, type VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
 
 type CatalogueProduct = {
   id: string;
@@ -72,6 +74,10 @@ const TradeVisualiser = () => {
   const [backdrop, setBackdrop] = useState<string | null>(initial.backdrop);
   const [backdropDataUrl, setBackdropDataUrl] = useState<string | null>(initial.backdropDataUrl);
   const [orbitEnabled, setOrbitEnabled] = useState(true);
+  const [materials, setMaterials] = useState<VisualiserMaterial[]>([]);
+  const [materialSearch, setMaterialSearch] = useState("");
+  const { activeMaterial, setActiveMaterial } = useVisualiserMaterial();
+  const { session: conciergeSession } = useConciergeSession();
 
   useEffect(() => {
     const previousBody = document.body.style.overflow;
@@ -83,6 +89,38 @@ const TradeVisualiser = () => {
       document.documentElement.style.overflow = previousHtml;
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void supabase
+      .from("material_swatches")
+      .select("id, name, brand_name, category, material_type, color_family, image_url")
+      .eq("is_active", true)
+      .not("image_url", "is", null)
+      .order("brand_name")
+      .order("name")
+      .limit(160)
+      .then(({ data }) => {
+        if (!cancelled) setMaterials((data ?? []) as VisualiserMaterial[]);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    const finishes = conciergeSession?.finishes;
+    const imageUrl = finishes?.fabricImg ?? finishes?.woodImg;
+    const name = finishes?.fabric ?? finishes?.wood;
+    if (!imageUrl || !name) return;
+    setActiveMaterial({
+      id: `concierge-${name}`,
+      name,
+      brand_name: "AI Curatorial Assistant",
+      category: finishes?.fabricImg ? "Fabric" : "Wood",
+      material_type: finishes?.fabricImg ? "Fabric" : "Wood",
+      color_family: null,
+      image_url: imageUrl,
+    });
+  }, [conciergeSession?.finishes.fabric, conciergeSession?.finishes.fabricImg, conciergeSession?.finishes.wood, conciergeSession?.finishes.woodImg, setActiveMaterial]);
 
   useEffect(() => {
     let cancelled = false;
@@ -175,6 +213,7 @@ const TradeVisualiser = () => {
       position: [((index % 4) - 1.5) * 1.4, 0, Math.floor(index / 4) * -1.4],
       rotation: [0, 0, 0],
       scale: 1,
+      material: activeMaterial,
     };
     setObjects((current) => [...current, next]);
     setSelectedId(next.instanceId);
@@ -210,6 +249,25 @@ const TradeVisualiser = () => {
         : object
     )));
   };
+
+  const applyMaterial = (material: VisualiserMaterial) => {
+    setActiveMaterial(material);
+    if (!selectedId) {
+      toast.success(`${material.name} is ready for the next object.`);
+      return;
+    }
+    setObjects((current) => current.map((object) => (
+      object.instanceId === selectedId ? { ...object, material } : object
+    )));
+  };
+
+  const filteredMaterials = useMemo(() => {
+    const query = materialSearch.trim().toLowerCase();
+    if (!query) return materials;
+    return materials.filter((material) => (
+      `${material.name} ${material.brand_name} ${material.category} ${material.material_type ?? ""}`.toLowerCase().includes(query)
+    ));
+  }, [materialSearch, materials]);
 
   const uploadBackdrop = (file: File | null) => {
     if (!file) return;
@@ -287,10 +345,15 @@ const TradeVisualiser = () => {
           />
           <hemisphereLight args={["#ffffff", "#d8d3cb", 0.35]} />
 
-          <mesh rotation-x={-Math.PI / 2} receiveShadow position={[0, 0, 0]}>
-            <planeGeometry args={[80, 80]} />
-            <shadowMaterial opacity={backdropSrc ? 0.28 : 0.16} />
-          </mesh>
+          <ContactShadows
+            position={[0, 0.002, 0]}
+            scale={40}
+            opacity={backdropSrc ? 0.5 : 0.32}
+            blur={1}
+            far={12}
+            resolution={1024}
+            depthWrite={false}
+          />
           {!backdropSrc && (
             <gridHelper args={[40, 40, "#dedad2", "#ebe8e2"]} position={[0, -0.001, 0]} />
           )}
@@ -353,6 +416,31 @@ const TradeVisualiser = () => {
             <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={() => spinObject(selected.instanceId, 45)}>Spin +45°</button>
           </div>
           <p className={cn(microLabel, "mt-4 text-muted-foreground/70")}>Drag the red · blue arrows to slide on the floor plane, or drag the piece directly. Spin buttons rotate.</p>
+
+          <div className="mt-5 border-t border-foreground/10 pt-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className={cn(microLabel, "text-muted-foreground")}>Material / Finish</p>
+              {selected.material && (
+                <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={() => setObjects((current) => current.map((object) => object.instanceId === selected.instanceId ? { ...object, material: null } : object))}>Clear</button>
+              )}
+            </div>
+            <input
+              value={materialSearch}
+              onChange={(event) => setMaterialSearch(event.target.value)}
+              placeholder="Search finishes"
+              aria-label="Search finishes"
+              className="mt-3 w-full border-b border-foreground/10 bg-transparent pb-2 text-xs outline-none placeholder:text-muted-foreground"
+            />
+            <div className="mt-3 flex max-h-28 gap-3 overflow-x-auto pb-2">
+              {filteredMaterials.slice(0, 24).map((material) => (
+                <button key={material.id} onClick={() => applyMaterial(material)} className="w-14 shrink-0 text-left" title={`${material.brand_name} — ${material.name}`}>
+                  <img src={material.image_url ?? "/placeholder.svg"} alt="" className={cn("h-10 w-10 object-cover", selected.material?.id === material.id && "ring-1 ring-foreground ring-offset-2")} />
+                  <span className="mt-1 block truncate font-mono text-[8px] uppercase tracking-[0.15em] text-muted-foreground">{material.name}</span>
+                </button>
+              ))}
+            </div>
+            <p className={cn(microLabel, "mt-1 truncate text-foreground")}>{selected.material?.name ?? activeMaterial?.name ?? "No active finish"}</p>
+          </div>
         </div>
       )}
 
@@ -417,7 +505,7 @@ const TradeVisualiser = () => {
       )}
 
       {/* Floating toolbar */}
-      <div className="absolute bottom-12 left-1/2 z-[60] -translate-x-1/2">
+      <div className="absolute bottom-8 left-1/2 z-[60] -translate-x-1/2">
         <div className="flex items-center gap-1 border border-[#E5E5E5] bg-[#FFFFFF] px-5 py-2 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.15)] backdrop-blur-sm">
           <button className={toolbarButton} onClick={() => setTrayOpen((value) => !value)}>
             <Plus className="h-3.5 w-3.5" /> Add Object
