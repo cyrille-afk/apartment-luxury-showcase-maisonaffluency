@@ -414,10 +414,30 @@ const TradeQuotes = () => {
             const StatusIcon = config.icon;
 
             return (
-              <button
+              <div
                 key={quote.id}
-                onClick={() => setSelectedQuoteId(quote.id)}
-                className="w-full text-left border border-border rounded-lg p-4 hover:border-foreground/20 transition-colors group"
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  if (isDrawerQuote(quote.id)) {
+                    setSelectedQuoteId(quote.id);
+                    setDrawerOpen(true);
+                  } else {
+                    setSelectedQuoteId(quote.id);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    if (isDrawerQuote(quote.id)) {
+                      setSelectedQuoteId(quote.id);
+                      setDrawerOpen(true);
+                    } else {
+                      setSelectedQuoteId(quote.id);
+                    }
+                  }
+                }}
+                className="w-full text-left border border-border rounded-lg p-4 hover:border-foreground/20 transition-colors group cursor-pointer"
               >
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -461,9 +481,25 @@ const TradeQuotes = () => {
                       <p className="font-body text-xs text-muted-foreground mt-1 italic truncate">"{quote.notes}"</p>
                     )}
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (isDrawerQuote(quote.id)) {
+                          setSelectedQuoteId(quote.id);
+                          setDrawerOpen(true);
+                        } else {
+                          setSelectedQuoteId(quote.id);
+                        }
+                      }}
+                      className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
+                    >
+                      [ VIEW RECORD ]
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
+                  </div>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>
