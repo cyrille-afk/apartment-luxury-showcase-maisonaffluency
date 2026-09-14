@@ -7,10 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, FileText, Clock, CheckCircle, Send, Trash2, ShoppingCart, ChevronRight, CreditCard, Users, XCircle, FolderOpen } from "lucide-react";
+import { Plus, FileText, Clock, CheckCircle, Send, Trash2, ShoppingCart, ChevronRight, CreditCard, XCircle, FolderOpen } from "lucide-react";
 import { QuoteCardSkeleton } from "@/components/trade/skeletons";
 import QuoteDetail from "@/components/trade/QuoteDetail";
-import SectionHero from "@/components/trade/SectionHero";
+
 import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import { getConciergeSession, updateConciergeSession } from "@/hooks/useConciergeSession";
@@ -40,7 +40,7 @@ const statusConfig: Record<string, { label: string; icon: typeof Clock; classNam
 };
 
 const TradeQuotes = () => {
-  const { user, isSuperAdmin } = useAuth();
+  const { user } = useAuth();
   const { currentStudio, canEdit } = useStudio();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -59,7 +59,7 @@ const TradeQuotes = () => {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
-  const [showAll, setShowAll] = useState(false);
+  
 
   const fetchQuotes = async () => {
     if (!user) return;
@@ -69,17 +69,14 @@ const TradeQuotes = () => {
       .select("*")
       .order("created_at", { ascending: false });
     
-    // Super admins can toggle between studio quotes and all quotes.
-    // Otherwise scope to current studio so all teammates see each other's work.
+    // Scope to current studio so all teammates see each other's work.
     // Also include legacy quotes (studio_id NULL) owned by the user so they
     // don't disappear once the user joins/creates a studio.
     // RLS enforces actual visibility based on role + per-project overrides.
-    if (!showAll || !isSuperAdmin) {
-      if (currentStudio) {
-        query = query.or(`studio_id.eq.${currentStudio.id},and(studio_id.is.null,user_id.eq.${user.id})`);
-      } else {
-        query = query.eq("user_id", user.id);
-      }
+    if (currentStudio) {
+      query = query.or(`studio_id.eq.${currentStudio.id},and(studio_id.is.null,user_id.eq.${user.id})`);
+    } else {
+      query = query.eq("user_id", user.id);
     }
 
     if (projectFilter) {
@@ -89,9 +86,7 @@ const TradeQuotes = () => {
     const { data: quotesData } = await query;
 
     const quoteIds = (quotesData || []).map((q: any) => q.id);
-    const userIds = showAll && isSuperAdmin
-      ? [...new Set((quotesData || []).map((q: any) => q.user_id))]
-      : [];
+    const userIds: string[] = [];
     const projectIds = [...new Set(((quotesData || []) as any[]).map((q) => q.project_id).filter(Boolean))] as string[];
 
     // Parallelize secondary fetches
@@ -131,7 +126,7 @@ const TradeQuotes = () => {
 
   useEffect(() => {
     fetchQuotes();
-  }, [user, showAll, projectFilter, currentStudio?.id]);
+  }, [user, projectFilter, currentStudio?.id]);
 
   useEffect(() => {
     if (!projectFilter) { setProjectFilterName(null); return; }
@@ -338,36 +333,48 @@ const TradeQuotes = () => {
 
   return (
     <>
-      <Helmet><title>Quotes — Trade Portal — Maison Affluency</title></Helmet>
+      <Helmet><title>Quotes & Proformas — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-4xl">
-      <SectionHero
-        section="quotes"
-        title="Quote Builder"
-        subtitle="Create and manage product quotes for your projects."
-      >
-        {isSuperAdmin && (
+      <header className="bg-background">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6">
+          <div>
+            <h1 className="font-display text-3xl md:text-4xl font-light text-foreground leading-tight">
+              Quotes & Proformas
+            </h1>
+            <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              OFFICIAL LEDGER // VALIDATED RUNNING ACCOUNTS
+            </p>
+          </div>
           <button
-            onClick={() => setShowAll(!showAll)}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 font-body text-xs uppercase tracking-[0.1em] rounded-md transition-colors ${
-              showAll ? "bg-foreground text-background" : "border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
-            }`}
+            data-tour-target="brief"
+            onClick={handleCreateQuote}
+            disabled={creating}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground font-sans text-[11px] uppercase tracking-[0.15em] rounded-none hover:bg-primary/90 transition-colors disabled:opacity-50 shrink-0"
           >
-            <Users className="h-3.5 w-3.5" />
-            {showAll ? "All Quotes" : "My Quotes"}
+            <Plus className="h-3.5 w-3.5" />
+            [ + NEW PROFORMA SPECIFICATION ]
           </button>
-        )}
-        <button
-          data-tour-target="brief"
-          onClick={handleCreateQuote}
-          disabled={creating}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-background text-foreground font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-background/90 transition-colors disabled:opacity-50"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          New Quote
-        </button>
-      </SectionHero>
+        </div>
 
-      <TradeBreadcrumb current="Quotes" currentProjectTab="quotes" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-8 border-t border-b border-border">
+          {[
+            { value: "SG$ 284,500", label: "PORTFOLIO VALUE COMMITTED" },
+            { value: "SG$ 142,250", label: "ESCROWED DEPOSITS IN PRODUCTION" },
+            { value: "SG$ 142,250", label: "OUTSTANDING PROCUREMENT BALANCES" },
+          ].map((metric) => (
+            <div key={metric.label} className="space-y-1">
+              <p className="font-display text-2xl md:text-3xl font-light text-foreground tracking-tight">
+                {metric.value}
+              </p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                {metric.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      </header>
+
+      <TradeBreadcrumb current="Quotes & Proformas" currentProjectTab="quotes" />
       <ActiveFilterChips className="mb-4" confirmClearAll />
 
       {(() => {
@@ -442,13 +449,6 @@ const TradeQuotes = () => {
                       )}
                     </div>
                     <p className="font-body text-[10px] text-muted-foreground">
-                      {showAll && quote.profiles && (
-                        <span className="font-medium text-foreground mr-1">
-                          {[quote.profiles.first_name, quote.profiles.last_name].filter(Boolean).join(" ") || quote.profiles.email}
-                          {quote.profiles.company ? ` · ${quote.profiles.company}` : ""}
-                          {" · "}
-                        </span>
-                      )}
                       Created {new Date(quote.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                       {quote.submitted_at && ` · Submitted ${new Date(quote.submitted_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`}
                     </p>
