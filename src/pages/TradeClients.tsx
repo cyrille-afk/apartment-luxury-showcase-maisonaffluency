@@ -172,6 +172,35 @@ export default function TradeClients() {
       setContactsByClient({});
       setDocCountsByClient({});
     }
+    // Map each client to their active assigned project (client_id link, name fallback).
+    try {
+      let projs: any[] | null = null;
+      const full = await supabase
+        .from("projects" as any)
+        .select("id, name, client_id, client_name")
+        .eq("studio_id", currentStudio.id);
+      if (full.error) {
+        const fallback = await supabase
+          .from("projects" as any)
+          .select("id, name, client_name")
+          .eq("studio_id", currentStudio.id);
+        projs = fallback.data as any[] | null;
+      } else {
+        projs = full.data as any[] | null;
+      }
+      const map: Record<string, { id: string; name: string }> = {};
+      (projs || []).forEach((p: any) => {
+        const key =
+          (p.client_id && list.find((c) => c.id === p.client_id)?.id) ||
+          (p.client_name &&
+            list.find((c) => c.name.trim().toLowerCase() === String(p.client_name).trim().toLowerCase())?.id);
+        if (key && !map[key]) map[key] = { id: p.id, name: p.name };
+      });
+      setProjectsByClient(map);
+    } catch {
+      setProjectsByClient({});
+    }
+
     setLoading(false);
   }, [currentStudio, toast]);
 
