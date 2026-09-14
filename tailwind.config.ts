@@ -69,6 +69,7 @@ export default {
           bright: "hsl(var(--gold-bright))",
         },
         cream: "hsl(var(--cream))",
+        "visualiser-canvas": "hsl(var(--visualiser-canvas))",
         whatsapp: "hsl(var(--whatsapp))",
         "pdf-red": "hsl(var(--pdf-red))",
         success: "hsl(var(--success))",

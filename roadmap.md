@@ -47,3 +47,4 @@
 - [x] Replace the Project Studio proposal redirect with an in-workspace, print-ready preview
 - [x] Add recent active Project Studio shortcuts beneath Projects in the trade sidebar
 - [x] Consolidate Project Folders and drafts into the Projects hub
+- [x] Replace the Trade Visualiser uploader with a fixed mood-board sandbox, live object index, backdrop upload, and layer controls
