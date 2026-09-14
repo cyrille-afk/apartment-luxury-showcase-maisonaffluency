@@ -529,9 +529,9 @@ export default function TradeFavorites() {
                     {removing === fav.favoriteId ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <Trash2 className="w-3.5 h-3.5" />}
                   </button>
                 </div>
-                <div className="space-y-1.5 pt-4 text-center">
-                  <p className="font-display text-[15px] font-light leading-snug text-foreground">{fav.product_name}</p>
-                  <p className="font-display text-xs font-light text-muted-foreground">{fav.brand_name}</p>
+                <div className="flex flex-col items-center pt-4">
+                  <p className="font-display text-[15px] font-light leading-snug text-foreground line-clamp-2 min-h-[2.75rem]">{fav.product_name}</p>
+                  <p className="font-display text-xs font-light text-muted-foreground mt-1.5">{fav.brand_name}</p>
                 </div>
               </article>
             ))}
