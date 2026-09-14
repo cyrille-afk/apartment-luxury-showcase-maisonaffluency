@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { ShoppingCart, MapPin, Grid3X3, Search } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -189,10 +189,10 @@ const TradeShowroom = () => {
           <Gallery onHotspotAddToQuote={handleHotspotAddToQuote} hideIntro />
         ) : activeTab === "designers" ? (
           <ShowroomDesignerDirectory
-            onSelectDesigner={(name) => {
-              setSelectedDesigner(name);
-              setActiveTab("grid");
-              window.scrollTo({ top: 0, behavior: "smooth" });
+            onSelectDesigner={(designer) => {
+              navigate(`/trade/gallery/${designer.slug}`, {
+                state: { from: "/trade/showroom?tab=designers" },
+              });
             }}
           />
         ) : activeTab === "grid" ? (
