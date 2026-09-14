@@ -26,6 +26,7 @@ type StudioItem = {
   height_mm: number | null;
   size_variants: Array<{ label?: string | null; base?: string | null; top?: string | null }> | null;
   rrp_cents: number | null;
+  source_pick_id: string | null;
   quantity: number;
 };
 
