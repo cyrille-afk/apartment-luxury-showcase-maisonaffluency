@@ -8,8 +8,12 @@ const Toaster = ({ ...props }: ToasterProps) => {
   const theme = "light";
 
   useEffect(() => {
-    console.log("[sonner.tsx] calling toast from wrapper");
-    toast("Wrapper test toast");
+    console.log("[sonner.tsx] scheduling toast from wrapper");
+    const t = setTimeout(() => {
+      console.log("[sonner.tsx] calling toast from wrapper after 500ms");
+      toast("Wrapper test toast delayed");
+    }, 500);
+    return () => clearTimeout(t);
   }, []);
 
   return (
