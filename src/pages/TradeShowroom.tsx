@@ -139,7 +139,9 @@ const TradeShowroom = () => {
           title="Showroom"
           subtitle={activeTab === "gallery"
             ? "Navigate the gallery rooms and discover products through interactive hotspots"
-            : "Browse all showroom products with filters and search"
+            : activeTab === "designers"
+              ? "The complete alphabetical index of our designers, ateliers and makers"
+              : "Browse all showroom products with filters and search"
           }
         >
           <button
@@ -201,7 +203,7 @@ const TradeShowroom = () => {
             onDrawerRefreshKeyChange={setDrawerRefreshKey}
             onDrawerOpen={() => setDrawerOpen(true)}
             highlightProductId={highlightId}
-            initialDesigner={designerParam}
+            initialDesigner={selectedDesigner}
           />
         ) : (
           <ProductImageSearch
