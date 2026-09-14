@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
-import { ArrowDown, ArrowUp, ImageUp, Layers3, Loader2, Plus, Search, X } from "lucide-react";
+import { ImageUp, Layers3, Loader2, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
+import { dimensionBadgeLabel } from "@/lib/productDimensions";
 import { toast } from "sonner";
 
 type CatalogueProduct = {
@@ -15,6 +16,7 @@ type CatalogueProduct = {
   brand_name: string;
   image_url: string | null;
   category: string;
+  dimensions: string | null;
 };
 
 type CanvasObject = CatalogueProduct & {
@@ -53,7 +55,6 @@ const TradeVisualiser = () => {
   const [objects, setObjects] = useState<CanvasObject[]>(initial.objects);
   const [selectedId, setSelectedId] = useState<string | null>(initial.objects.at(-1)?.instanceId ?? null);
   const [sourceOpen, setSourceOpen] = useState(false);
-  const [layersOpen, setLayersOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState<CatalogueProduct[]>([]);
@@ -79,7 +80,7 @@ const TradeVisualiser = () => {
     (async () => {
       const { data, error } = await supabase
         .from("trade_products")
-        .select("id, product_name, brand_name, image_url, category")
+        .select("id, product_name, brand_name, image_url, category, dimensions")
         .eq("is_active", true)
         .eq("is_hidden", false)
         .not("image_url", "is", null)
@@ -153,6 +154,10 @@ const TradeVisualiser = () => {
   };
 
   const addObject = (product: CatalogueProduct) => {
+    if (objects.length >= 15) {
+      toast.error("This composition can hold up to 15 objects.");
+      return;
+    }
     const count = objects.length;
     const next: CanvasObject = {
       ...product,
@@ -164,25 +169,24 @@ const TradeVisualiser = () => {
     };
     setObjects((current) => [...current, next]);
     setSelectedId(next.instanceId);
-    setSourceOpen(false);
   };
 
-  const moveLayer = (direction: "up" | "down") => {
+  const alternateLayer = () => {
     if (!selectedId) return;
-    setObjects((current) => current.map((object) =>
-      object.instanceId === selectedId
-        ? { ...object, z: Math.max(0, object.z + (direction === "up" ? 1 : -1)) }
-        : object,
-    ));
+    setObjects((current) => {
+      const selectedObject = current.find((object) => object.instanceId === selectedId);
+      if (!selectedObject) return current;
+      const otherObjects = current.filter((object) => object.instanceId !== selectedId);
+      const highest = Math.max(0, ...otherObjects.map((object) => object.z));
+      const lowest = Math.min(0, ...otherObjects.map((object) => object.z));
+      const nextZ = selectedObject.z >= highest ? lowest - 1 : highest + 1;
+      return current.map((object) => object.instanceId === selectedId ? { ...object, z: nextZ } : object);
+    });
   };
 
-  const resizeSelected = (amount: number) => {
-    if (!selectedId) return;
-    setObjects((current) => current.map((object) =>
-      object.instanceId === selectedId
-        ? { ...object, scale: Math.min(1.8, Math.max(0.55, object.scale + amount)) }
-        : object,
-    ));
+  const removeObject = (instanceId: string) => {
+    setObjects((current) => current.filter((item) => item.instanceId !== instanceId));
+    setSelectedId((current) => current === instanceId ? null : current);
   };
 
   const onPointerDown = (event: React.PointerEvent, object: CanvasObject) => {
@@ -196,6 +200,7 @@ const TradeVisualiser = () => {
     };
     setSelectedId(object.instanceId);
     event.currentTarget.setPointerCapture(event.pointerId);
+    event.preventDefault();
   };
 
   const onPointerMove = (event: React.PointerEvent) => {
@@ -207,7 +212,7 @@ const TradeVisualiser = () => {
     const y = ((event.clientY - rect.top - drag.offsetY) / rect.height) * 100;
     setObjects((current) => current.map((object) =>
       object.instanceId === drag.id
-        ? { ...object, x: Math.min(92, Math.max(8, x)), y: Math.min(86, Math.max(12, y)) }
+        ? { ...object, x: Math.min(96, Math.max(4, x)), y: Math.min(94, Math.max(6, y)) }
         : object,
     ));
   };
@@ -265,8 +270,7 @@ const TradeVisualiser = () => {
               onPointerDown={(event) => onPointerDown(event, object)}
               onKeyDown={(event) => {
                 if (event.key === "Delete" || event.key === "Backspace") {
-                  setObjects((current) => current.filter((item) => item.instanceId !== object.instanceId));
-                  setSelectedId(null);
+                  removeObject(object.instanceId);
                 }
               }}
               className={cn(
@@ -282,7 +286,28 @@ const TradeVisualiser = () => {
                   draggable={false}
                   className="h-40 w-full object-contain mix-blend-multiply drop-shadow-[0_14px_14px_hsl(var(--foreground)/0.08)] md:h-52"
                 />
-                {isSelected && <div className="pointer-events-none absolute inset-2 border border-foreground/30" />}
+                {isSelected && (
+                  <div className="pointer-events-none absolute inset-0 border border-foreground/30">
+                    <span className="absolute -left-1 top-1/2 h-px w-2 -translate-y-1/2 bg-foreground/40" />
+                    <span className="absolute -top-1 left-1/2 h-2 w-px -translate-x-1/2 bg-foreground/40" />
+                    <span className="absolute -right-1 top-1/2 h-px w-2 -translate-y-1/2 bg-foreground/40" />
+                    <span className="absolute -bottom-1 left-1/2 h-2 w-px -translate-x-1/2 bg-foreground/40" />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label={`Remove ${object.product_name}`}
+                      onPointerDown={(event) => event.stopPropagation()}
+                      onClick={(event) => { event.stopPropagation(); removeObject(object.instanceId); }}
+                      className="pointer-events-auto absolute -right-3 -top-3 h-6 w-6 rounded-full border border-border bg-card p-0 shadow-sm hover:bg-muted"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                    <span className="absolute -bottom-7 right-0 max-w-[260px] whitespace-nowrap bg-visualiser-canvas/90 px-1.5 py-1 font-body text-[8px] uppercase tracking-[0.15em] text-foreground/70 backdrop-blur-sm">
+                      {object.product_name} // {dimensionBadgeLabel(object)}
+                    </span>
+                  </div>
+                )}
               </div>
               <div className={cn("mt-2 text-center transition-opacity duration-300", isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100")}>
                 <p className="font-body text-[9px] uppercase tracking-[0.15em] text-foreground/70">{object.product_name}</p>
@@ -297,7 +322,7 @@ const TradeVisualiser = () => {
             <div className="mb-5 flex items-center gap-5 border-b border-border pb-4">
               <div className="min-w-0 flex-1">
                 <p className="font-display text-lg text-foreground">Designer Collection Index</p>
-                <p className="mt-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Select an object to place it on the composition</p>
+                 <p className="mt-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Select up to 15 objects · {objects.length} placed</p>
               </div>
               <div className="relative w-52 md:w-72">
                 <Search className="absolute left-0 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -333,24 +358,6 @@ const TradeVisualiser = () => {
           </div>
         )}
 
-        {layersOpen && (
-          <div className="absolute bottom-44 left-1/2 z-[81] w-[min(440px,calc(100%-32px))] -translate-x-1/2 bg-card px-6 py-5 shadow-elegant md:bottom-32">
-            <div className="flex items-center justify-between border-b border-border pb-4">
-              <div>
-                <p className="font-display text-base">Layer Order</p>
-                <p className="mt-1 max-w-72 truncate font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{selected?.product_name || "Select an object on the canvas"}</p>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => setLayersOpen(false)} aria-label="Close layer controls" className="h-8 w-8 rounded-none"><X className="h-3.5 w-3.5" /></Button>
-            </div>
-            <div className="mt-5 grid grid-cols-2 gap-x-8 gap-y-2">
-              <Button variant="ghost" disabled={!selected} onClick={() => moveLayer("up")} className="justify-start rounded-none px-0 font-body text-[9px] uppercase tracking-[0.15em]"><ArrowUp /> Bring Forward</Button>
-              <Button variant="ghost" disabled={!selected} onClick={() => moveLayer("down")} className="justify-start rounded-none px-0 font-body text-[9px] uppercase tracking-[0.15em]"><ArrowDown /> Send Back</Button>
-              <Button variant="ghost" disabled={!selected} onClick={() => resizeSelected(0.1)} className="justify-start rounded-none px-0 font-body text-[9px] uppercase tracking-[0.15em]"><Plus /> Increase Scale</Button>
-              <Button variant="ghost" disabled={!selected} onClick={() => resizeSelected(-0.1)} className="justify-start rounded-none px-0 font-body text-[9px] uppercase tracking-[0.15em]"><span className="text-base">−</span> Reduce Scale</Button>
-            </div>
-          </div>
-        )}
-
         {resetOpen && (
           <div className="absolute bottom-44 left-1/2 z-[82] w-[min(420px,calc(100%-32px))] -translate-x-1/2 bg-card px-7 py-6 shadow-elegant md:bottom-32">
             <p className="font-display text-lg">Reset this composition?</p>
@@ -363,13 +370,13 @@ const TradeVisualiser = () => {
         )}
 
         <div className="absolute bottom-20 left-1/2 z-[90] grid w-[calc(100%-24px)] -translate-x-1/2 grid-cols-2 items-center border border-border bg-card p-1.5 shadow-elegant md:bottom-8 md:flex md:w-auto md:max-w-[calc(100%-24px)] md:rounded-full md:px-2">
-          <Button variant="ghost" onClick={() => { setSourceOpen((open) => !open); setLayersOpen(false); setResetOpen(false); }} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><Plus /> Add Object</Button>
+          <Button variant="ghost" onClick={() => { setSourceOpen((open) => !open); setResetOpen(false); }} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><Plus /> Add Object</Button>
           <span className="hidden h-5 w-px shrink-0 bg-border md:block" />
           <Button variant="ghost" onClick={() => fileRef.current?.click()} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><ImageUp /><span className="md:hidden">Upload Backdrop</span><span className="hidden md:inline">Upload Canvas Backdrop</span></Button>
           <span className="hidden h-5 w-px shrink-0 bg-border md:block" />
-          <Button variant="ghost" onClick={() => { setLayersOpen((open) => !open); setSourceOpen(false); setResetOpen(false); }} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><Layers3 /> Layer Order</Button>
+          <Button variant="ghost" disabled={!selected} onClick={() => { alternateLayer(); setSourceOpen(false); setResetOpen(false); }} title={selected ? "Alternate selected object between front and back" : "Select an object first"} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><Layers3 /> Layer Order</Button>
           <span className="hidden h-5 w-px shrink-0 bg-border md:block" />
-          <Button variant="ghost" onClick={() => { setResetOpen(true); setSourceOpen(false); setLayersOpen(false); }} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><X /> Reset Sandbox</Button>
+          <Button variant="ghost" onClick={() => { setResetOpen(true); setSourceOpen(false); }} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><X /> Reset Sandbox</Button>
         </div>
 
         <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => uploadBackdrop(event.target.files?.[0] ?? null)} />
