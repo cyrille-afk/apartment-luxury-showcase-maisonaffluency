@@ -242,7 +242,13 @@ export default function TradeProjectStudio() {
               {project.location || "Location TBC"} · {project.status}
             </p>
 
-            {!isClientMode && (
+            {isClientMode ? (
+              <div className="mt-6">
+                <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                  Project status: <span className="text-foreground">Active Development</span>
+                </p>
+              </div>
+            ) : (
               <div className="mt-6">
                 <div className="flex items-baseline justify-between font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                   <span>Budget allocated</span>
@@ -259,7 +265,7 @@ export default function TradeProjectStudio() {
               </div>
             )}
 
-            <div className={isClientMode ? "mt-8 flex items-center justify-between" : "mt-6 flex items-center justify-between"}>
+            <div className="mt-6 flex items-center justify-between">
               <span className="font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
                 Client view
               </span>
