@@ -769,9 +769,9 @@ const ShowroomGridView = ({
                 <div className="aspect-[4/5] bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.product_image_url ? (
                     <>
-                      <img src={product.product_image_url} alt={product.product_name} className={cn("w-full h-full object-cover object-center transition-opacity duration-500", product.hover_image_url ? "group-hover:opacity-0" : "")} loading="lazy" />
+                      <img src={product.product_image_url} alt={product.product_name} width={800} height={1000} decoding="async" className={cn("w-full h-full object-cover object-center transition-opacity duration-500", product.hover_image_url ? "group-hover:opacity-0" : "")} loading="lazy" />
                       {product.hover_image_url && (
-                        <img src={product.hover_image_url} alt={`${product.product_name} - in context`} className="absolute inset-0 w-full h-full object-cover object-center opacity-0 group-hover:opacity-100 transition-opacity duration-500" loading="lazy" />
+                        <img src={product.hover_image_url} alt={`${product.product_name} - in context`} width={800} height={1000} decoding="async" className="absolute inset-0 w-full h-full object-cover object-center opacity-0 group-hover:opacity-100 transition-opacity duration-500" loading="lazy" />
                       )}
                     </>
                   ) : (
@@ -878,7 +878,7 @@ const ShowroomGridView = ({
               <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
                 <div className="w-16 h-16 rounded bg-muted/30 overflow-hidden shrink-0 cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.product_image_url ? (
-                    <img src={product.product_image_url} alt={product.product_name} className="w-full h-full object-cover" loading="lazy" />
+                    <img src={product.product_image_url} alt={product.product_name} width={160} height={200} decoding="async" className="w-full h-full object-cover" loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center"><Package className="h-4 w-4 text-muted-foreground/30" /></div>
                   )}
