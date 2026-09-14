@@ -2,7 +2,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { Canvas } from "@react-three/fiber";
-import { ContactShadows, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
+import { ContactShadows, Environment, Lightformer, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
 import { Box, ImageUp, Loader2, Plus, RotateCcw, Search, X } from "lucide-react";
 import * as THREE from "three";
 import { supabase } from "@/integrations/supabase/client";
