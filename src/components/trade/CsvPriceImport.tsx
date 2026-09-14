@@ -234,8 +234,9 @@ export default function CsvPriceImport({ onComplete, minimal }: { onComplete?: (
   };
 
   if (minimal) {
-    return (
-      <>
+  return (
+    <>
+      {minimal ? (
         <div className="flex items-center gap-6">
           <button
             type="button"
@@ -252,6 +253,22 @@ export default function CsvPriceImport({ onComplete, minimal }: { onComplete?: (
             [↓] EXPORT SHEETS
           </button>
         </div>
+      ) : (
+        <div className="flex items-center gap-1.5">
+          <Button variant="outline" size="sm" className="gap-1.5 bg-white text-foreground border-white/60 hover:bg-white/90" onClick={() => fileRef.current?.click()}>
+            <FileSpreadsheet className="h-3.5 w-3.5" />
+            Import Prices (CSV)
+          </Button>
+          <Button variant="outline" size="sm" className="gap-1 bg-white/80 text-foreground border-white/60 hover:bg-white/90" onClick={exportCurrentProducts}>
+            <Download className="h-3 w-3" />
+            Export Products
+          </Button>
+          <Button variant="outline" size="sm" className="gap-1 bg-white/80 text-foreground border-white/60 hover:bg-white/90" onClick={downloadTemplate}>
+            <Download className="h-3 w-3" />
+            Template
+          </Button>
+        </div>
+      )}
 
       <input ref={fileRef} type="file" accept=".csv,.txt" className="hidden" onChange={handleFile} />
 
