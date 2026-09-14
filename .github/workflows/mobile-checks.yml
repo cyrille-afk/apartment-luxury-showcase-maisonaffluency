@@ -29,6 +29,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
+      - name: Install Bun setup prerequisite
+        run: apt-get update && apt-get install -y --no-install-recommends unzip
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
@@ -74,6 +76,8 @@ jobs:
     # Baselines live under e2e/visual/__screenshots__/. Refresh locally with `bun run test:visual:update`.
     steps:
       - uses: actions/checkout@v5
+      - name: Install Bun setup prerequisite
+        run: apt-get update && apt-get install -y --no-install-recommends unzip
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
