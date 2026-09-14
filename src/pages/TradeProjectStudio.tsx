@@ -11,6 +11,8 @@ import { ProjectSpecDrawer } from "@/components/trade/ProjectSpecDrawer";
 import { ProjectCuratorialGuide } from "@/components/trade/ProjectCuratorialGuide";
 import { ProjectProposalPreview } from "@/components/trade/ProjectProposalPreview";
 import { dimensionBadgeLabel } from "@/lib/productDimensions";
+import { convertCents, useFxRates, type DisplayCurrency } from "@/components/trade/CurrencyToggle";
+import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 
 type StudioItem = {
   id: string;
