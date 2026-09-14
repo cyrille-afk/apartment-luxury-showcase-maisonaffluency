@@ -8,7 +8,7 @@ import * as THREE from "three";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
-import { dimensionBadgeLabel, resolveDimensions } from "@/lib/productDimensions";
+import { DIMENSIONS_PLACEHOLDER, formatDimensions, resolveDimensions } from "@/lib/productDimensions";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import { toast } from "sonner";
 
