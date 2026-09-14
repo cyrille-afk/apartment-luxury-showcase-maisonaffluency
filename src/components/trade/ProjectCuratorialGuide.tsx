@@ -1,0 +1,331 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Loader2, Plus, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
+
+export type CuratorialSourceItem = {
+  product_id: string;
+  name: string;
+  designer: string;
+  image_url: string | null;
+};
+
+type Recommendation = {
+  product_id: string;
+  score: number;
+  reason: string;
+  title: string;
+  subtitle: string;
+  image_url: string;
+  category: string;
+  brand: string;
+  anchors?: Array<{ name: string; brand: string; category: string }>;
+};
+
+type Props = {
+  projectId: string;
+  projectName: string;
+  items: CuratorialSourceItem[];
+  activeItemId: string | null;
+  isClientMode: boolean;
+  onActiveItemChange: (productId: string) => void;
+  onCompositionChanged: () => void;
+};
+
+const HEIGHTS = [260, 390, 540] as const;
+
+function clientReason(rec: Recommendation, sourceName: string) {
+  const category = rec.category ? rec.category.toLowerCase() : "piece";
+  return `Suggested ${category} for the ${sourceName}, balancing its silhouette through complementary scale, material tone, and spatial rhythm.`;
+}
+
+export function ProjectCuratorialGuide({
+  projectId,
+  projectName,
+  items,
+  activeItemId,
+  isClientMode,
+  onActiveItemChange,
+  onCompositionChanged,
+}: Props) {
+  const [open, setOpen] = useState(false);
+  const [heightIndex, setHeightIndex] = useState(1);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [addingId, setAddingId] = useState<string | null>(null);
+  const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+  const [boardId, setBoardId] = useState<string | null>(null);
+  const streamRef = useRef<HTMLDivElement | null>(null);
+
+  const activeItem = useMemo(
+    () => items.find((item) => item.product_id === activeItemId) || items[0] || null,
+    [activeItemId, items],
+  );
+
+  useEffect(() => {
+    if (!activeItemId && items[0]) onActiveItemChange(items[0].product_id);
+  }, [activeItemId, items, onActiveItemChange]);
+
+  useEffect(() => {
+    if (!open || items.length === 0) return;
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      const { data, error: invokeError } = await supabase.functions.invoke("board-recommendations", {
+        body: { product_ids: items.map((item) => item.product_id).slice(0, 20), source: "mood_board" },
+      });
+      if (cancelled) return;
+      if (invokeError) {
+        setError(invokeError.message || "Curation analysis is temporarily unavailable.");
+        setRecommendations([]);
+      } else {
+        setRecommendations((data?.recommendations || []) as Recommendation[]);
+      }
+      setLoading(false);
+    };
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, projectId, items]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  const resolveBoard = async () => {
+    if (boardId) return boardId;
+    const { data: existing, error: boardError } = await supabase
+      .from("client_boards")
+      .select("id")
+      .eq("project_id", projectId)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (boardError) throw boardError;
+    if (existing?.id) {
+      setBoardId(existing.id);
+      return existing.id;
+    }
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData.user?.id;
+    if (!userId) throw new Error("Sign in is required to update this composition.");
+    const { data: created, error: createError } = await supabase
+      .from("client_boards")
+      .insert({
+        project_id: projectId,
+        title: `${projectName} — Curatorial Composition`,
+        client_name: "",
+        user_id: userId,
+      })
+      .select("id")
+      .single();
+    if (createError) throw createError;
+    setBoardId(created.id);
+    return created.id;
+  };
+
+  const addToComposition = async (rec: Recommendation) => {
+    setAddingId(rec.product_id);
+    setError(null);
+    try {
+      const targetBoardId = await resolveBoard();
+      let productId = rec.product_id;
+      const { data: direct } = await supabase
+        .from("trade_products")
+        .select("id")
+        .eq("id", rec.product_id)
+        .maybeSingle();
+      if (!direct?.id) {
+        const { data: twin } = await supabase
+          .from("trade_products")
+          .select("id")
+          .eq("source_pick_id", rec.product_id)
+          .eq("is_active", true)
+          .limit(1)
+          .maybeSingle();
+        if (!twin?.id) throw new Error("This piece is not yet available in the trade catalogue.");
+        productId = twin.id;
+      }
+      const { data: duplicate } = await supabase
+        .from("client_board_items")
+        .select("id")
+        .eq("board_id", targetBoardId)
+        .eq("product_id", productId)
+        .maybeSingle();
+      if (!duplicate) {
+        const { error: insertError } = await supabase
+          .from("client_board_items")
+          .insert({ board_id: targetBoardId, product_id: productId, sort_order: items.length });
+        if (insertError) throw insertError;
+      }
+      setAddedIds((current) => new Set(current).add(rec.product_id));
+      onCompositionChanged();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "The piece could not be added.");
+    } finally {
+      setAddingId(null);
+    }
+  };
+
+  const scroll = (direction: -1 | 1) => {
+    streamRef.current?.scrollBy({ left: direction * 360, behavior: "smooth" });
+  };
+
+  if (!open) {
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={() => setOpen(true)}
+        className="fixed bottom-5 right-5 z-40 h-auto rounded-none border-t border-foreground bg-background px-4 py-3 font-body text-[10px] uppercase tracking-[0.15em] text-foreground hover:bg-background md:bottom-7 md:right-8"
+      >
+        <span className="h-1.5 w-1.5 bg-foreground" />
+        AI Curatorial Assistant // Co-Designer
+      </Button>
+    );
+  }
+
+  const height = HEIGHTS[heightIndex];
+  const status = loading ? "Analysis in progress" : error ? "Review required" : "Curation ready";
+
+  return (
+    <section
+      aria-label="AI Curatorial Assistant"
+      className="fixed inset-x-0 bottom-0 z-50 flex flex-col border-t border-border bg-background transition-[height] duration-500 [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]"
+      style={{ height }}
+    >
+      <div className="flex min-h-16 items-center justify-between gap-4 border-b border-border px-4 md:px-8">
+        <div className="min-w-0">
+          <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
+            Status // {status}
+          </p>
+          <h2 className="mt-1 truncate font-display text-xl text-foreground md:text-2xl">
+            AI Curatorial Assistant <span className="font-body text-[10px] uppercase tracking-[0.15em]">// Co-Designer</span>
+          </h2>
+        </div>
+        <div className="flex shrink-0 items-center">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => setHeightIndex((value) => Math.min(HEIGHTS.length - 1, value + 1))}
+            disabled={heightIndex === HEIGHTS.length - 1}
+            aria-label="Expand curatorial assistant"
+            className="rounded-none text-muted-foreground"
+          >
+            <ArrowUp />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => setHeightIndex((value) => Math.max(0, value - 1))}
+            disabled={heightIndex === 0}
+            aria-label="Reduce curatorial assistant"
+            className="rounded-none text-muted-foreground"
+          >
+            <ArrowDown />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => setOpen(false)}
+            aria-label="Close curatorial assistant"
+            className="rounded-none text-muted-foreground"
+          >
+            <X />
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+        <div className="border-b border-border px-4 py-4 md:w-56 md:shrink-0 md:border-b-0 md:border-r md:px-6">
+          <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Active reference</p>
+          <p className="mt-2 font-display text-lg leading-tight text-foreground">{activeItem?.name || "Project composition"}</p>
+          <p className="mt-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{activeItem?.designer}</p>
+          {items.length > 1 && (
+            <select
+              value={activeItem?.product_id || ""}
+              onChange={(event) => onActiveItemChange(event.target.value)}
+              aria-label="Active source piece"
+              className="mt-4 w-full border-0 border-b border-border bg-transparent py-2 font-body text-[10px] uppercase tracking-[0.12em] text-foreground focus:outline-none"
+            >
+              {items.map((item) => <option key={item.product_id} value={item.product_id}>{item.name}</option>)}
+            </select>
+          )}
+          <p className="mt-4 font-body text-[10px] leading-relaxed tracking-[0.05em] text-muted-foreground">
+            {isClientMode
+              ? "Reading proportion, silhouette, material harmony, and spatial balance."
+              : "Reading composition, trade opportunity, and programme compatibility."}
+          </p>
+        </div>
+
+        <div className="min-w-0 flex-1 overflow-hidden px-4 py-4 md:px-6">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Curation stream</p>
+            <div className="flex">
+              <Button type="button" variant="ghost" size="icon" onClick={() => scroll(-1)} aria-label="Previous recommendations" className="h-7 w-7 rounded-none text-muted-foreground"><ArrowLeft /></Button>
+              <Button type="button" variant="ghost" size="icon" onClick={() => scroll(1)} aria-label="Next recommendations" className="h-7 w-7 rounded-none text-muted-foreground"><ArrowRight /></Button>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="flex h-40 items-center gap-3 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Analysing the composition
+            </div>
+          ) : recommendations.length ? (
+            <div ref={streamRef} className="flex h-full snap-x gap-5 overflow-x-auto pb-3 [scrollbar-width:thin]">
+              {recommendations.map((rec) => {
+                const rationale = isClientMode ? clientReason(rec, activeItem?.name || "composition") : rec.reason;
+                const added = addedIds.has(rec.product_id);
+                return (
+                  <article key={rec.product_id} className="grid w-[290px] shrink-0 snap-start grid-cols-[112px_1fr] gap-4 md:w-[360px] md:grid-cols-[148px_1fr]">
+                    <a href={`/trade/products/${rec.product_id}`} className="block aspect-[4/5] bg-muted" aria-label={`View ${rec.title}`}>
+                      {rec.image_url ? <img src={rec.image_url} alt={`${rec.title} by ${rec.brand}`} loading="lazy" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Image on request</span>}
+                    </a>
+                    <div className="flex min-w-0 flex-col py-1">
+                      <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{rec.brand}</p>
+                      <h3 className="mt-1 font-display text-lg leading-tight text-foreground">{rec.title}</h3>
+                      <p className="mt-2 line-clamp-4 font-body text-[10px] leading-relaxed tracking-[0.04em] text-muted-foreground">{rationale}</p>
+                      {!isClientMode && (
+                        <p className="mt-2 font-body text-[9px] uppercase tracking-[0.15em] text-foreground">
+                          {rec.score >= 90 ? "Trade signal // Strong specification efficiency" : "Programme signal // Confirm lead-time alignment"}
+                        </p>
+                      )}
+                      <div className="mt-auto pt-3">
+                        <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Match Rating: {Math.round(rec.score)}%</p>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => void addToComposition(rec)}
+                          disabled={addingId === rec.product_id || added}
+                          className="mt-1 h-auto rounded-none p-0 font-body text-[9px] uppercase tracking-[0.15em] text-foreground hover:bg-transparent"
+                        >
+                          {addingId === rec.product_id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+                          {added ? "Added to composition" : "[ + Add to Composition ]"}
+                        </Button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="py-10 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{error || "Add pieces to this project to begin a curatorial analysis."}</p>
+          )}
+          {error && recommendations.length > 0 && <p role="alert" className="mt-2 font-body text-[10px] text-destructive">{error}</p>}
+        </div>
+      </div>
+    </section>
+  );
+}
