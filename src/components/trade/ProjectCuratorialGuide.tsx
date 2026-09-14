@@ -446,7 +446,7 @@ export function ProjectCuratorialGuide({
                     ref={index === 0 ? firstRecommendationRef : undefined}
                     key={rec.product_id}
                     title={rationale}
-                    className="group relative flex h-full w-[150px] shrink-0 snap-start flex-col md:w-[190px]"
+                    className="group relative flex h-full w-[140px] shrink-0 snap-start flex-col md:w-[170px]"
                     onMouseEnter={() => onRecommendationHover(true)}
                     onMouseLeave={() => onRecommendationHover(false)}
                     onFocus={() => onRecommendationHover(true)}
@@ -459,7 +459,7 @@ export function ProjectCuratorialGuide({
                       variant="ghost"
                       onClick={() => void openRecommendation(rec)}
                       disabled={openingId === rec.product_id}
-                      className="relative block h-[130px] w-full rounded-none bg-transparent p-0 hover:bg-transparent md:h-[170px]"
+                      className="relative block h-[110px] w-full rounded-none bg-transparent p-0 hover:bg-transparent md:h-[140px]"
                       aria-label={`${Math.round(rec.score)}% match — view curation intent for ${rec.title}`}
                     >
                       {rec.image_url ? (
