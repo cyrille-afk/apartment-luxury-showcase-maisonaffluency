@@ -305,7 +305,7 @@ const TradeBoards = ({ embedded = false }: { embedded?: boolean }) => {
               onClick={() => {
                 const btn = document.querySelector<HTMLButtonElement>('[aria-label="Open AI Concierge"]');
                 if (btn) btn.click();
-                else navigate('/trade/archive');
+                else navigate('/trade/the-collection');
               }}
               className="gap-2"
             >

@@ -33,7 +33,7 @@ const PUBLIC_FOR_TRADE: Record<string, string> = {
   "/trade/designers": "/designers",
   "/trade/gallery": "/gallery",
   "/trade/journal": "/journal",
-  "/trade/archive": "/",
+  "/trade/the-collection": "/",
   "/trade/guides": "/",
 };
 

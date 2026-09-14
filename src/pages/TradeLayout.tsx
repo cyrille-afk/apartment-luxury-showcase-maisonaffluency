@@ -34,7 +34,7 @@ const TradeCopilotOnboarding = lazy(() => import("@/components/trade/TradeCopilo
 
 const ROUTE_TITLES: Record<string, string> = {
   "/trade": "Dashboard",
-  "/trade/archive": "The Maison Archive",
+  "/trade/the-collection": "The Collection",
   "/trade/favorites": "Favorites",
   "/trade/gallery": "Gallery",
   "/trade/quotes": "Quotes",
@@ -99,9 +99,9 @@ const TRADE_GATE_COPY: Record<string, { title: string; description: string; h1: 
     h1: "Trade Documents",
     description: "Access white-label client documentation, spec sheets and project exports. Sign in to view your trade documents.",
   },
-  "/trade/archive": {
-    title: "The Maison Archive | Maison Affluency",
-    h1: "The Maison Archive",
+  "/trade/the-collection": {
+    title: "The Collection | Maison Affluency",
+    h1: "The Collection",
     description: "Browse curated showroom collections with trade pricing and project tools available after sign-in.",
   },
   "/trade/samples": {

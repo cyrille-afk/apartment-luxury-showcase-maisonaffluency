@@ -21,7 +21,7 @@ import { categoryUrl } from "./categorySlugs";
 import type { Crumb } from "@/components/Breadcrumbs";
 
 export interface ProductBreadcrumbInput {
-  /** Root crumb (e.g. { label: "Home", to: "/" } or { label: "Trade", to: "/trade/archive" }). */
+  /** Root crumb (e.g. { label: "Home", to: "/" } or { label: "Trade", to: "/trade/the-collection" }). */
   root: Crumb;
   /** Raw category from the product row (may be empty / non-canonical). */
   category?: string | null;

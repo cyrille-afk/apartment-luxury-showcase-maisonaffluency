@@ -35,7 +35,7 @@ function LegacyStephGcRedirect() {
 
 function ShowroomLegacyRedirect() {
   const { search } = useLocation();
-  return <Navigate to={`/trade/archive${search}`} replace />;
+  return <Navigate to={`/trade/the-collection${search}`} replace />;
 }
 
 // Trade portal pages
@@ -748,7 +748,9 @@ const App = () => {
                     <Route path="quotes/:quoteId/review" element={<TradeQuoteReview />} />
                     <Route path="quotes/:quoteId" element={<TradeQuotes />} />
                     <Route path="documents" element={<TradeDocuments />} />
-                    <Route path="archive" element={<TradeShowroom />} />
+                    <Route path="the-collection" element={<TradeShowroom />} />
+                    <Route path="collection" element={<ShowroomLegacyRedirect />} />
+                    <Route path="archive" element={<ShowroomLegacyRedirect />} />
                     <Route path="showroom" element={<ShowroomLegacyRedirect />} />
                     <Route path="visualiser" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeVisualiser /></Suspense>} />
                     <Route path="samples" element={<TradeSamples />} />
