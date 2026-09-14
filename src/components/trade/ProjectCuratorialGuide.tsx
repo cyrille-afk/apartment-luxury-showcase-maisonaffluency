@@ -306,8 +306,7 @@ export function ProjectCuratorialGuide({
     streamRef.current?.scrollBy({ left: direction * 360, behavior: "smooth" });
   };
 
-  if (!open) {
-    if (docked) return null;
+  if (!open && !docked) {
     return (
       <Button
         type="button"
@@ -326,7 +325,17 @@ export function ProjectCuratorialGuide({
 
   return (
     <>
-    {connector && (
+    {docked && !open && (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex h-11 w-full items-center justify-center gap-2 bg-background font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowUp className="h-3 w-3" aria-hidden="true" />
+        [ Activate AI Curatorial Concierge ]
+      </button>
+    )}
+    {connector && open && (
       <svg className="pointer-events-none fixed inset-0 z-[51] h-full w-full" aria-hidden="true">
         <line
           x1={connector.x1}
@@ -345,8 +354,9 @@ export function ProjectCuratorialGuide({
     <section
       ref={drawerRef}
       aria-label="AI Curatorial Assistant"
+      aria-hidden={docked && !open}
       className={docked
-        ? "relative flex h-full min-h-0 flex-col bg-background"
+        ? "relative flex min-h-0 flex-1 flex-col overflow-hidden bg-background"
         : "fixed inset-x-0 bottom-0 z-50 flex flex-col border-t border-border bg-background transition-[height] duration-500 [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]"}
       style={docked ? undefined : { height, maxHeight: "calc(100dvh - 48px)" }}
     >
