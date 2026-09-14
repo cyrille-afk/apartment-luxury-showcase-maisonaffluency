@@ -647,8 +647,8 @@ const TradeVisualiser = () => {
                 )}
               >
                 3D Models Only
+              </button>
 
-              </div>
               <div className="relative w-52 md:w-72">
                 <Search className="absolute left-0 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
