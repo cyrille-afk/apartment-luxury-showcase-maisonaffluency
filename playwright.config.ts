@@ -71,7 +71,7 @@ export default defineConfig({
   webServer: process.env.PW_BASE_URL
     ? undefined
     : {
-        command: `npm run build && npm run preview -- --port ${PORT} --strictPort`,
+        command: `bun run build && bun run preview -- --port ${PORT} --strictPort`,
         url: BASE_URL,
         reuseExistingServer: true,
         timeout: 420_000,
