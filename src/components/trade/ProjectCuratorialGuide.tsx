@@ -29,6 +29,7 @@ type Props = {
   items: CuratorialSourceItem[];
   activeItemId: string | null;
   isClientMode: boolean;
+  docked?: boolean;
   onActiveItemChange: (productId: string) => void;
   onCompositionChanged: () => void;
   onRecommendationHover: (active: boolean) => void;
@@ -84,6 +85,7 @@ export function ProjectCuratorialGuide({
   items,
   activeItemId,
   isClientMode,
+  docked = false,
   onActiveItemChange,
   onCompositionChanged,
   onRecommendationHover,
@@ -136,9 +138,13 @@ export function ProjectCuratorialGuide({
   }, [open, projectId, items]);
 
   useEffect(() => {
+    if (docked) setOpen(true);
+  }, [docked]);
+
+  useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape" && !docked) setOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -296,6 +302,7 @@ export function ProjectCuratorialGuide({
   };
 
   if (!open) {
+    if (docked) return null;
     return (
       <Button
         type="button"
@@ -333,10 +340,12 @@ export function ProjectCuratorialGuide({
     <section
       ref={drawerRef}
       aria-label="AI Curatorial Assistant"
-      className="fixed inset-x-0 bottom-0 z-50 flex flex-col border-t border-border bg-background transition-[height] duration-500 [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]"
-      style={{ height, maxHeight: "calc(100dvh - 48px)" }}
+      className={docked
+        ? "relative flex h-full min-h-0 flex-col bg-background"
+        : "fixed inset-x-0 bottom-0 z-50 flex flex-col border-t border-border bg-background transition-[height] duration-500 [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]"}
+      style={docked ? undefined : { height, maxHeight: "calc(100dvh - 48px)" }}
     >
-      <div className="flex min-h-16 items-center justify-between gap-4 border-b border-border px-4 md:px-8">
+      <div className={`flex shrink-0 items-center justify-between gap-4 border-b border-border px-4 md:px-8 ${docked ? "min-h-0 py-3" : "min-h-16"}`}>
         <div className="min-w-0">
           <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
             Status // {status}
@@ -351,38 +360,42 @@ export function ProjectCuratorialGuide({
           </p>
         </div>
         <div className="flex shrink-0 items-center">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => setHeightIndex((value) => Math.min(HEIGHTS.length - 1, value + 1))}
-            disabled={heightIndex === HEIGHTS.length - 1}
-            aria-label="Expand curatorial assistant"
-            className="rounded-none text-muted-foreground"
-          >
-            <ArrowUp />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => setHeightIndex((value) => Math.max(0, value - 1))}
-            disabled={heightIndex === 0}
-            aria-label="Reduce curatorial assistant"
-            className="rounded-none text-muted-foreground"
-          >
-            <ArrowDown />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => setOpen(false)}
-            aria-label="Close curatorial assistant"
-            className="rounded-none text-muted-foreground"
-          >
-            <X />
-          </Button>
+          {!docked && (
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setHeightIndex((value) => Math.min(HEIGHTS.length - 1, value + 1))}
+                disabled={heightIndex === HEIGHTS.length - 1}
+                aria-label="Expand curatorial assistant"
+                className="rounded-none text-muted-foreground"
+              >
+                <ArrowUp />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setHeightIndex((value) => Math.max(0, value - 1))}
+                disabled={heightIndex === 0}
+                aria-label="Reduce curatorial assistant"
+                className="rounded-none text-muted-foreground"
+              >
+                <ArrowDown />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setOpen(false)}
+                aria-label="Close curatorial assistant"
+                className="rounded-none text-muted-foreground"
+              >
+                <X />
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -433,7 +446,7 @@ export function ProjectCuratorialGuide({
                     ref={index === 0 ? firstRecommendationRef : undefined}
                     key={rec.product_id}
                     title={rationale}
-                    className="group relative flex h-full w-[150px] shrink-0 snap-start flex-col md:w-[190px]"
+                    className="group relative flex h-full w-[140px] shrink-0 snap-start flex-col md:w-[170px]"
                     onMouseEnter={() => onRecommendationHover(true)}
                     onMouseLeave={() => onRecommendationHover(false)}
                     onFocus={() => onRecommendationHover(true)}
@@ -446,7 +459,7 @@ export function ProjectCuratorialGuide({
                       variant="ghost"
                       onClick={() => void openRecommendation(rec)}
                       disabled={openingId === rec.product_id}
-                      className="relative block h-[130px] w-full rounded-none bg-transparent p-0 hover:bg-transparent md:h-[170px]"
+                      className="relative block h-[110px] w-full rounded-none bg-transparent p-0 hover:bg-transparent md:h-[140px]"
                       aria-label={`${Math.round(rec.score)}% match — view curation intent for ${rec.title}`}
                     >
                       {rec.image_url ? (
