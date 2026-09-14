@@ -5,12 +5,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Search, Loader2, Layers } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { useVisualiserMaterial, type VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
 
 const CATEGORIES = ["All", "Fabric", "Stone", "Wood", "Metal", "Leather", "Glass", "Ceramic", "Other"];
 
 export default function TradeMaterialLibrary() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const navigate = useNavigate();
+  const { activeMaterial, setActiveMaterial } = useVisualiserMaterial();
 
   const { data: swatches = [], isLoading } = useQuery({
     queryKey: ["material-swatches"],
@@ -35,11 +40,18 @@ export default function TradeMaterialLibrary() {
     <>
       <Helmet><title>Material Library — Trade Portal</title></Helmet>
       <div className="max-w-6xl space-y-6">
-        <div>
-          <h1 className="font-display text-2xl text-foreground">Material Library</h1>
-          <p className="font-body text-sm text-muted-foreground mt-1">
-            Browse finishes, fabrics, and stone samples by category, colour, or application.
-          </p>
+        <div className="flex items-end justify-between gap-6 border-b border-border pb-5">
+          <div>
+            <h1 className="font-display text-2xl text-foreground">Material Library</h1>
+            <p className="font-body text-sm text-muted-foreground mt-1">
+              Browse finishes, fabrics, and stone samples by category, colour, or application.
+            </p>
+          </div>
+          {activeMaterial && (
+            <Button variant="ghost" onClick={() => navigate("/trade/visualiser")} className="h-auto px-0 font-mono text-[10px] uppercase tracking-[0.15em]">
+              Apply {activeMaterial.name} in Visualiser →
+            </Button>
+          )}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
@@ -75,7 +87,11 @@ export default function TradeMaterialLibrary() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {filtered.map((swatch: any) => (
-              <div key={swatch.id} className="group border border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+              <button
+                key={swatch.id}
+                onClick={() => setActiveMaterial(swatch as VisualiserMaterial)}
+                className={`group overflow-hidden text-left ${activeMaterial?.id === swatch.id ? "border-t border-foreground" : "border-t border-border"}`}
+              >
                 <div className="aspect-square bg-muted relative">
                   {swatch.image_url ? (
                     <img src={swatch.image_url} alt={swatch.name} className="w-full h-full object-cover" loading="lazy" />
@@ -97,7 +113,7 @@ export default function TradeMaterialLibrary() {
                     <p className="font-body text-[10px] text-muted-foreground/70 mt-0.5">{swatch.color_family} · {swatch.material_type}</p>
                   )}
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         )}
