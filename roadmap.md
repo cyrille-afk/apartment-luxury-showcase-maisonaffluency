@@ -38,3 +38,4 @@
 - [x] Correct dashboard card spacing and add a live active-project studio indicator
 - [x] Make Client View global and suppress trade pricing, tier, discount, and margin displays
 - [x] Synchronize Project Studio privacy controls, mask budget/trade figures, and repair ledger spacing
+- [x] Add the Project Studio Curatorial AI Guide with catalogue recommendations and Client View privacy

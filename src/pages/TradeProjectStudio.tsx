@@ -5,8 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProject } from "@/hooks/useProjects";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { ProjectSpecDrawer } from "@/components/trade/ProjectSpecDrawer";
+import { ProjectCuratorialGuide } from "@/components/trade/ProjectCuratorialGuide";
 
 type StudioItem = {
   id: string;
@@ -52,9 +54,11 @@ export default function TradeProjectStudio() {
   const { project, loading } = useProject(id);
   const [items, setItems] = useState<StudioItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
+  const [itemsVersion, setItemsVersion] = useState(0);
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
   const isClientMode = !showTradePrice;
   const [specItemId, setSpecItemId] = useState<string | null>(null);
+  const [curatorialItemId, setCuratorialItemId] = useState<string | null>(null);
   const specItem = items.find((i) => i.product_id === specItemId) || null;
 
   useEffect(() => {
@@ -120,7 +124,7 @@ export default function TradeProjectStudio() {
       setItems(Array.from(map.values()));
       setLoadingItems(false);
     })();
-  }, [id]);
+  }, [id, itemsVersion]);
 
   const totals = useMemo(() => {
     const msrp = items.reduce((s, i) => s + (i.rrp_cents || 0) * i.quantity, 0);
@@ -195,14 +199,19 @@ export default function TradeProjectStudio() {
                 return (
                   <figure
                     key={item.product_id}
+                    data-curatorial-source={item.product_id}
                     className="group relative mb-0 cursor-pointer break-inside-avoid"
-                    onClick={() => setSpecItemId(item.product_id)}
+                    onClick={(event) => {
+                      if (event.shiftKey) setCuratorialItemId(item.product_id);
+                      else setSpecItemId(item.product_id);
+                    }}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        setSpecItemId(item.product_id);
+                        if (e.shiftKey) setCuratorialItemId(item.product_id);
+                        else setSpecItemId(item.product_id);
                       }
                     }}
                     aria-label={`Open specification for ${item.name}`}
@@ -239,6 +248,19 @@ export default function TradeProjectStudio() {
                           )}
                         </span>
                       </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setCuratorialItemId(item.product_id);
+                          window.dispatchEvent(new CustomEvent("project-curator:open"));
+                        }}
+                        className="absolute right-4 top-4 z-10 h-auto rounded-none bg-background/90 px-2 py-1 font-body text-[9px] uppercase tracking-[0.15em] text-foreground opacity-0 transition-opacity hover:bg-background/90 group-hover:opacity-100 focus:opacity-100"
+                        aria-label={`Use ${item.name} as AI curatorial reference`}
+                      >
+                        AI reference
+                      </Button>
                     </div>
                   </figure>
                 );
@@ -397,6 +419,15 @@ export default function TradeProjectStudio() {
       </div>
 
       <ProjectSpecDrawer item={specItem} onClose={() => setSpecItemId(null)} />
+      <ProjectCuratorialGuide
+        projectId={project.id}
+        projectName={project.name}
+        items={items}
+        activeItemId={curatorialItemId}
+        isClientMode={isClientMode}
+        onActiveItemChange={setCuratorialItemId}
+        onCompositionChanged={() => setItemsVersion((version) => version + 1)}
+      />
     </div>
   );
 }
