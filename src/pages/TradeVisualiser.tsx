@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { createElement, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
-import { ImageUp, Layers3, Loader2, Plus, Search, X } from "lucide-react";
+import { Box, ImageUp, Layers3, Loader2, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
+import { ensureModelViewer } from "@/lib/modelViewer";
 import { dimensionBadgeLabel, resolveDimensions } from "@/lib/productDimensions";
 import { toast } from "sonner";
 
@@ -17,6 +18,7 @@ type CatalogueProduct = {
   image_url: string | null;
   category: string;
   dimensions: string | null;
+  glb_url: string | null;
 };
 
 type CanvasObject = CatalogueProduct & {
@@ -32,7 +34,10 @@ type CanvasObject = CatalogueProduct & {
   contrast: number;
   warmth: number;
   shadowDirection: number;
+  render3d: boolean;
+  orbit: boolean;
 };
+
 
 type PersistedSandbox = {
   backdrop: string | null;
@@ -81,6 +86,10 @@ const withRenderingDefaults = (object: Partial<CanvasObject> & CatalogueProduct)
   contrast: object.contrast ?? 100,
   warmth: object.warmth ?? 0,
   shadowDirection: object.shadowDirection ?? 10,
+  glb_url: object.glb_url ?? null,
+  render3d: object.render3d ?? false,
+  orbit: object.orbit ?? false,
+
 });
 
 const scaledDimensionLabel = (object: CanvasObject) => {
@@ -119,6 +128,11 @@ const TradeVisualiser = () => {
   const [sourceOpen, setSourceOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [only3d, setOnly3d] = useState(false);
+  const [modelViewerReady, setModelViewerReady] = useState(
+    () => typeof window !== "undefined" && !!customElements.get("model-viewer"),
+  );
+
   const [products, setProducts] = useState<CatalogueProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -140,21 +154,43 @@ const TradeVisualiser = () => {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase
+      const columns = "id, product_name, brand_name, image_url, category, dimensions, glb_url";
+      const base = () => supabase
         .from("trade_products")
-        .select("id, product_name, brand_name, image_url, category, dimensions")
+        .select(columns)
         .eq("is_active", true)
         .eq("is_hidden", false)
-        .not("image_url", "is", null)
-        .order("updated_at", { ascending: false })
-        .limit(180);
+        .not("image_url", "is", null);
+      const [recent, models] = await Promise.all([
+        base().order("updated_at", { ascending: false }).limit(180),
+        base().not("glb_url", "is", null).order("product_name").limit(120),
+      ]);
       if (cancelled) return;
-      if (error) toast.error("The collection index could not be loaded.");
-      setProducts((data ?? []) as CatalogueProduct[]);
+      if (recent.error || models.error) toast.error("The collection index could not be loaded.");
+      const merged = new Map<string, CatalogueProduct>();
+      for (const product of [...(models.data ?? []), ...(recent.data ?? [])] as CatalogueProduct[]) {
+        merged.set(product.id, product);
+      }
+      setProducts([...merged.values()]);
       setLoadingProducts(false);
     })();
+
     return () => { cancelled = true; };
   }, []);
+
+  const needsModelViewer = objects.some((object) => object.render3d && object.glb_url);
+  useEffect(() => {
+    if (!needsModelViewer || modelViewerReady) return;
+    let mounted = true;
+    ensureModelViewer()
+      .then(() => mounted && setModelViewerReady(true))
+      .catch(() => {
+        if (mounted) toast.error("The 3D renderer could not be loaded.");
+      });
+    return () => { mounted = false; };
+  }, [needsModelViewer, modelViewerReady]);
+
+
 
   useEffect(() => {
     try {
@@ -194,11 +230,15 @@ const TradeVisualiser = () => {
 
   const filteredProducts = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return products;
-    return products.filter((product) =>
-      `${product.product_name} ${product.brand_name} ${product.category}`.toLowerCase().includes(query),
-    );
-  }, [products, search]);
+    return products.filter((product) => {
+      if (only3d && !product.glb_url) return false;
+      if (!query) return true;
+      return `${product.product_name} ${product.brand_name} ${product.category}`.toLowerCase().includes(query);
+    });
+  }, [products, search, only3d]);
+
+  const modelCount = useMemo(() => products.filter((product) => product.glb_url).length, [products]);
+
 
   const selected = objects.find((object) => object.instanceId === selectedId) ?? null;
 
@@ -235,7 +275,10 @@ const TradeVisualiser = () => {
       contrast: 100,
       warmth: 0,
       shadowDirection: 10,
+      render3d: Boolean(product.glb_url),
+      orbit: false,
     };
+
     setObjects((current) => [...current, next]);
     setSelectedId(next.instanceId);
   };
@@ -324,6 +367,13 @@ const TradeVisualiser = () => {
       object.instanceId === instanceId ? { ...object, [field]: value } : object,
     ));
   };
+
+  const toggleObjectField = (instanceId: string, field: "render3d" | "orbit") => {
+    setObjects((current) => current.map((object) =>
+      object.instanceId === instanceId ? { ...object, [field]: !object[field] } : object,
+    ));
+  };
+
 
   const onPointerMove = (event: React.PointerEvent) => {
     const canvas = canvasRef.current;
@@ -443,13 +493,40 @@ const TradeVisualiser = () => {
                     className="pointer-events-none absolute bottom-[5%] left-[12%] right-[12%] h-5 origin-center rounded-[50%] bg-gradient-to-r from-transparent via-foreground/20 to-transparent blur-lg"
                     style={{ transform: `translateX(${object.shadowDirection}px) skewX(${object.shadowDirection * 0.7}deg) scaleX(1.18)` }}
                   />
-                  <img
-                    src={optimizeImageUrl(object.image_url || "", CUTOUT_TRANSFORMS)}
-                    alt={object.product_name}
-                    draggable={false}
-                    className="relative h-full w-full object-contain mix-blend-multiply [image-rendering:crisp-edges]"
-                    style={{ ...CUTOUT_IMAGE_STYLE, filter: imageFilter }}
-                  />
+                  {object.render3d && object.glb_url ? (
+                    modelViewerReady ? (
+                      createElement("model-viewer", {
+                        src: object.glb_url,
+                        alt: object.product_name,
+                        "camera-controls": object.orbit ? true : undefined,
+                        "disable-zoom": true,
+                        "interaction-prompt": "none",
+                        "shadow-intensity": "0",
+                        exposure: String(Math.max(0.4, object.brightness / 100)),
+                        "tone-mapping": "neutral",
+                        loading: "eager",
+                        style: {
+                          width: "100%",
+                          height: "100%",
+                          backgroundColor: "transparent",
+                          pointerEvents: object.orbit ? "auto" : "none",
+                        } as CSSProperties,
+                      })
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center">
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      </div>
+                    )
+                  ) : (
+                    <img
+                      src={optimizeImageUrl(object.image_url || "", CUTOUT_TRANSFORMS)}
+                      alt={object.product_name}
+                      draggable={false}
+                      className="relative h-full w-full object-contain mix-blend-multiply [image-rendering:crisp-edges]"
+                      style={{ ...CUTOUT_IMAGE_STYLE, filter: imageFilter }}
+                    />
+                  )}
+
                 </div>
                 {isSelected && (
                   <div className="pointer-events-none absolute inset-0 border border-foreground/30">
@@ -503,7 +580,34 @@ const TradeVisualiser = () => {
                       onPointerDown={(event) => event.stopPropagation()}
                       onClick={(event) => event.stopPropagation()}
                     >
+                      {object.glb_url && (
+                        <div className="mb-3 border-b border-border pb-2.5">
+                          <p className="mb-1.5 font-body text-[8px] uppercase tracking-[0.15em] text-foreground/70">3D Model</p>
+                          <div className="flex flex-wrap gap-3">
+                            <button
+                              type="button"
+                              onClick={() => toggleObjectField(object.instanceId, "render3d")}
+                              className="font-body text-[8px] uppercase tracking-[0.15em] text-foreground/70 underline-offset-4 hover:underline"
+                            >
+                              {object.render3d ? "Use Flat Image" : "Use 3D Model"}
+                            </button>
+                            {object.render3d && (
+                              <button
+                                type="button"
+                                onClick={() => toggleObjectField(object.instanceId, "orbit")}
+                                className={cn(
+                                  "font-body text-[8px] uppercase tracking-[0.15em] underline-offset-4 hover:underline",
+                                  object.orbit ? "text-foreground" : "text-muted-foreground",
+                                )}
+                              >
+                                {object.orbit ? "Orbit On" : "Orbit Off"}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
                       <p className="mb-2 font-body text-[8px] uppercase tracking-[0.15em] text-foreground/70">Ambient Match</p>
+
                       {([
                         { field: "warmth" as const, label: "Warmth", min: 0, max: 70 },
                         { field: "brightness" as const, label: "Brightness", min: 65, max: 130 },
@@ -539,8 +643,20 @@ const TradeVisualiser = () => {
             <div className="mb-5 flex items-center gap-5 border-b border-border pb-4">
               <div className="min-w-0 flex-1">
                 <p className="font-display text-lg text-foreground">Designer Collection Index</p>
-                 <p className="mt-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Select up to 15 objects · {objects.length} placed</p>
+                 <p className="mt-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Select up to 15 objects · {objects.length} placed · {modelCount} with 3D models</p>
               </div>
+              <button
+                type="button"
+                onClick={() => setOnly3d((value) => !value)}
+                aria-pressed={only3d}
+                className={cn(
+                  "shrink-0 font-body text-[9px] uppercase tracking-[0.15em] underline-offset-4 hover:underline",
+                  only3d ? "text-foreground underline" : "text-muted-foreground",
+                )}
+              >
+                3D Models Only
+              </button>
+
               <div className="relative w-52 md:w-72">
                 <Search className="absolute left-0 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -569,6 +685,12 @@ const TradeVisualiser = () => {
                   <img src={optimizeImageUrl(product.image_url || "", CUTOUT_TRANSFORMS)} alt="" loading="lazy" style={CUTOUT_IMAGE_STYLE} className="min-h-0 w-full flex-1 object-contain mix-blend-multiply [image-rendering:crisp-edges] transition-transform duration-500 group-hover:-translate-y-1" />
                   <span className="mt-3 line-clamp-2 min-h-8 whitespace-normal text-center font-body text-[9px] uppercase leading-relaxed tracking-[0.15em] text-foreground/70">{product.product_name}</span>
                   <span className="mt-1 max-w-full truncate font-body text-[8px] uppercase tracking-[0.15em] text-muted-foreground">{product.brand_name}</span>
+                  {product.glb_url && (
+                    <span className="mt-1 flex items-center gap-1 font-body text-[8px] uppercase tracking-[0.15em] text-foreground/70">
+                      <Box className="h-2.5 w-2.5" /> 3D
+                    </span>
+                  )}
+
                 </Button>
               ))}
             </div>
