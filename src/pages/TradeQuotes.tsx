@@ -60,6 +60,10 @@ const TradeQuotes = () => {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const isDrawerQuote = (id?: string | null) =>
+    typeof id === "string" && id.toLowerCase().startsWith("200169");
   
 
   const fetchQuotes = async () => {
