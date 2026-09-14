@@ -247,6 +247,18 @@ export default function TradeProjectStudio() {
                           )}
                         </span>
                       </div>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setCuratorialItemId(item.product_id);
+                          window.dispatchEvent(new CustomEvent("project-curator:open"));
+                        }}
+                        className="absolute right-4 top-4 z-10 bg-background/90 px-2 py-1 font-body text-[9px] uppercase tracking-[0.15em] text-foreground opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100"
+                        aria-label={`Use ${item.name} as AI curatorial reference`}
+                      >
+                        AI reference
+                      </button>
                     </div>
                   </figure>
                 );
