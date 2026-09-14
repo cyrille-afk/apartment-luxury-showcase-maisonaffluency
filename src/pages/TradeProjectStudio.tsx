@@ -57,6 +57,8 @@ export default function TradeProjectStudio() {
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
   const isClientMode = !showTradePrice;
   const [specItemId, setSpecItemId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
   const [curatorialItemId, setCuratorialItemId] = useState<string | null>(null);
   const [isRecommendationHovered, setIsRecommendationHovered] = useState(false);
   const specItem = items.find((i) => i.product_id === specItemId) || null;
@@ -194,85 +196,69 @@ export default function TradeProjectStudio() {
               </p>
             </div>
           ) : (
-            <div className="columns-2 gap-0 px-0 pb-12 md:columns-3">
+            <div className="columns-2 gap-6 bg-[hsl(var(--background))] px-4 pb-16 md:columns-3 md:px-8 lg:px-12">
               {items.map((item, idx) => {
                 const dims = dimsLabel(item);
                 const isCuratorialActive = curatorialItemId === item.product_id;
+                const activate = () => {
+                  setCuratorialItemId(item.product_id);
+                  window.dispatchEvent(new CustomEvent("project-curator:open"));
+                };
                 return (
                   <figure
                     key={item.product_id}
                     data-curatorial-source={item.product_id}
-                    className="group relative mb-0 cursor-pointer break-inside-avoid"
-                    onClick={() => {
-                      setCuratorialItemId(item.product_id);
-                      window.dispatchEvent(new CustomEvent("project-curator:open"));
-                    }}
+                    className="group relative mb-10 cursor-pointer break-inside-avoid"
+                    onClick={activate}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        setCuratorialItemId(item.product_id);
-                        window.dispatchEvent(new CustomEvent("project-curator:open"));
+                        activate();
                       }
                     }}
                     aria-label={`Open AI curatorial guide for ${item.name}`}
                   >
-                      <div className="relative overflow-hidden bg-muted">
+                    <div className="relative">
                       {item.image_url ? (
                         <img
                           src={item.image_url}
                           alt={`${item.name} by ${item.designer}`}
                           loading={idx < 4 ? "eager" : "lazy"}
-                          className="w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                          className="w-full object-contain transition-transform duration-700 group-hover:scale-[1.01]"
                         />
                       ) : (
-                        <div className="aspect-[4/5] w-full bg-muted" />
+                        <div className="aspect-[4/5] w-full" />
                       )}
-
-                      {/* Wireframe / crosshair overlay */}
-                      <div className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ${isCuratorialActive ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus:opacity-100"}`}>
-                        <span className="absolute left-0 right-0 top-1/2 h-px bg-foreground/25" />
-                        <span className="absolute bottom-0 top-0 left-1/2 w-px bg-foreground/25" />
-                        <span className={`absolute inset-4 border transition-colors ${isCuratorialActive && isRecommendationHovered ? "animate-pulse border-foreground/60" : "border-foreground/25"}`} />
-                        <span className="absolute left-4 top-4 h-2 w-2 border-l border-t border-foreground/60" />
-                        <span className="absolute right-4 top-4 h-2 w-2 border-r border-t border-foreground/60" />
-                        <span className="absolute bottom-4 left-4 h-2 w-2 border-b border-l border-foreground/60" />
-                        <span className="absolute bottom-4 right-4 h-2 w-2 border-b border-r border-foreground/60" />
-                        <span className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-2">
-                          <span className="bg-background/85 px-1.5 py-1 font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
-                            {String(idx + 1).padStart(2, "0")} // {item.name}
-                          </span>
-                          <span className="whitespace-nowrap bg-background/85 px-1.5 py-1 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                            {dims}
-                          </span>
-                        </span>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setCuratorialItemId(item.product_id);
-                          window.dispatchEvent(new CustomEvent("project-curator:open"));
-                        }}
-                        className={`absolute left-4 right-4 top-4 z-10 h-auto whitespace-normal rounded-none bg-background/90 px-2 py-1 text-left font-body text-[9px] uppercase leading-relaxed tracking-[0.15em] text-foreground transition-opacity hover:bg-background/90 focus:opacity-100 ${isCuratorialActive ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus:opacity-100"}`}
-                        aria-label={`Use ${item.name} as AI curatorial reference`}
-                      >
-                        AI Analysis // Resourcing Complements
-                      </Button>
                       {isCuratorialActive && isRecommendationHovered && (
-                        <span className="pointer-events-none absolute left-4 right-4 top-[52px] z-10 bg-background/85 px-2 py-1 font-body text-[8px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground">
-                          Anchor Target for Material Match
+                        <span className="pointer-events-none absolute inset-x-0 top-0 font-body text-[8px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground/70">
+                          Anchor target for material match
                         </span>
                       )}
                     </div>
+
+                    <figcaption
+                      className={`mt-3 space-y-0.5 transition-opacity duration-300 ${
+                        isCuratorialActive ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus:opacity-100"
+                      }`}
+                    >
+                      <span className="block truncate font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                        {item.name}
+                      </span>
+                      <span className="block font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/60">
+                        {dims}
+                      </span>
+                    </figcaption>
                   </figure>
                 );
               })}
             </div>
           )}
         </section>
+
+
+
 
         {/* RIGHT — procurement ledger */}
         <aside className="px-4 py-6 md:px-8 lg:px-10">
@@ -323,11 +309,10 @@ export default function TradeProjectStudio() {
 
           {/* Ledger */}
           <div className="mt-6">
-            <div className="grid grid-cols-[44px_minmax(0,1fr)_88px_104px] gap-2 border-b border-border pb-2 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+            <div className="grid grid-cols-[44px_minmax(0,1fr)_auto] gap-3 border-b border-border pb-3 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
               <span>Spec</span>
               <span>Item</span>
-              <span className="pr-3">Lead</span>
-              <span className="text-right">{isClientMode ? "MSRP" : "Trade"}</span>
+              <span className="text-right">Status</span>
             </div>
 
             {loadingItems ? (
@@ -340,51 +325,78 @@ export default function TradeProjectStudio() {
               items.map((item, idx) => {
                 const msrp = (item.rrp_cents || 0) * item.quantity;
                 const trade = Math.round(msrp * (1 - TRADE_DISCOUNT));
+                const expanded = expandedId === item.product_id;
                 return (
-                  <div
-                    key={item.product_id}
-                    className="grid cursor-pointer grid-cols-[44px_minmax(0,1fr)_88px_104px] items-start gap-2 border-b border-border py-4 transition-colors hover:bg-muted/40"
-                    onClick={() => setSpecItemId(item.product_id)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setSpecItemId(item.product_id);
-                      }
-                    }}
-                    aria-label={`Open specification for ${item.name}`}
-                  >
-                    <span className="pr-3 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                      {String(idx + 1).padStart(2, "0")}
-                      <span className="block text-muted-foreground/72">{item.sku || "—"}</span>
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block truncate font-display text-sm text-foreground">
-                        {item.name}
+                  <div key={item.product_id} className="border-b border-border">
+                    <div
+                      className="grid cursor-pointer grid-cols-[44px_minmax(0,1fr)_auto] items-start gap-3 py-7"
+                      onClick={() => setExpandedId(expanded ? null : item.product_id)}
+                      role="button"
+                      aria-expanded={expanded}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setExpandedId(expanded ? null : item.product_id);
+                        }
+                      }}
+                      aria-label={`Toggle details for ${item.name}`}
+                    >
+                      <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
+                        {String(idx + 1).padStart(2, "0")}
                       </span>
-                      <span className="mt-1 block font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/72">
-                        {item.designer}
-                        {item.quantity > 1 ? ` · ×${item.quantity}` : ""}
+                      <span className="min-w-0">
+                        <span className="block truncate font-display text-base text-foreground">
+                          {item.name}
+                        </span>
+                        <span className="mt-1.5 block font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
+                          {item.designer}
+                          {item.quantity > 1 ? ` · ×${item.quantity}` : ""}
+                        </span>
                       </span>
-                    </span>
-                    <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                      {leadLabel(item)}
-                    </span>
-                    <span className="text-right font-body text-[11px] tracking-[0.05em] text-foreground">
-                      {isClientMode ? (
-                        money(msrp) || "Price upon Request"
-                      ) : msrp ? (
-                        <>
-                          {money(trade)}
-                          <span className="mt-1 block text-[10px] text-muted-foreground/72 line-through">
-                            {money(msrp)}
-                          </span>
-                        </>
-                      ) : (
-                        "Price upon Request"
-                      )}
-                    </span>
+                      <span className="whitespace-nowrap pt-1 text-right font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
+                        Specified
+                      </span>
+                    </div>
+
+                    {expanded && (
+                      <div className="pb-7">
+                        <dl className="space-y-3">
+                          <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
+                            <dt className="text-muted-foreground/60">Spec</dt>
+                            <dd className="text-foreground">{item.sku || "—"}</dd>
+                          </div>
+                          <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
+                            <dt className="text-muted-foreground/60">Lead</dt>
+                            <dd className="text-foreground">{leadLabel(item)}</dd>
+                          </div>
+                          <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
+                            <dt className="text-muted-foreground/60">{isClientMode ? "MSRP" : "Trade"}</dt>
+                            <dd className="tracking-[0.05em] text-foreground">
+                              {isClientMode ? (
+                                money(msrp) || "Price upon Request"
+                              ) : msrp ? (
+                                <>
+                                  {money(trade)}
+                                  <span className="ml-2 text-muted-foreground/60 line-through">
+                                    {money(msrp)}
+                                  </span>
+                                </>
+                              ) : (
+                                "Price upon Request"
+                              )}
+                            </dd>
+                          </div>
+                        </dl>
+                        <button
+                          type="button"
+                          onClick={() => setSpecItemId(item.product_id)}
+                          className="mt-4 font-body text-[10px] uppercase tracking-[0.15em] text-foreground underline underline-offset-4 hover:no-underline"
+                        >
+                          Open full specification
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })
@@ -392,17 +404,16 @@ export default function TradeProjectStudio() {
 
             {/* Totals */}
             {items.length > 0 && (
-              <div className="grid grid-cols-[44px_minmax(0,1fr)_88px_104px] gap-2 border-b border-foreground py-4">
-                <span />
+              <div className="flex items-baseline justify-between gap-4 border-b border-foreground py-7">
                 <span className="font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
                   {isClientMode ? "Total Estimate" : "Total (Trade)"}
                 </span>
-                <span />
-                <span className="text-right font-body text-[11px] tracking-[0.05em] text-foreground">
+                <span className="font-body text-[11px] tracking-[0.05em] text-foreground">
                 {isClientMode ? money(totals.clientEstimateCents) || "—" : money(totals.trade) || "—"}
                 </span>
               </div>
             )}
+
 
             {/* Actions */}
             <div className="mt-8 flex flex-col gap-3">
