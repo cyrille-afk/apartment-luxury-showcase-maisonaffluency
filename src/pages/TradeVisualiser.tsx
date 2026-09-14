@@ -677,6 +677,12 @@ const TradeVisualiser = () => {
                   <img src={optimizeImageUrl(product.image_url || "", CUTOUT_TRANSFORMS)} alt="" loading="lazy" style={CUTOUT_IMAGE_STYLE} className="min-h-0 w-full flex-1 object-contain mix-blend-multiply [image-rendering:crisp-edges] transition-transform duration-500 group-hover:-translate-y-1" />
                   <span className="mt-3 line-clamp-2 min-h-8 whitespace-normal text-center font-body text-[9px] uppercase leading-relaxed tracking-[0.15em] text-foreground/70">{product.product_name}</span>
                   <span className="mt-1 max-w-full truncate font-body text-[8px] uppercase tracking-[0.15em] text-muted-foreground">{product.brand_name}</span>
+                  {product.glb_url && (
+                    <span className="mt-1 flex items-center gap-1 font-body text-[8px] uppercase tracking-[0.15em] text-foreground/70">
+                      <Box className="h-2.5 w-2.5" /> 3D
+                    </span>
+                  )}
+
                 </Button>
               ))}
             </div>
