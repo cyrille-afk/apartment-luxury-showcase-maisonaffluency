@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
+import { dimensionBadgeLabel } from "@/lib/productDimensions";
 import { toast } from "sonner";
 
 type CatalogueProduct = {
@@ -303,7 +304,7 @@ const TradeVisualiser = () => {
                       <X className="h-3 w-3" />
                     </Button>
                     <span className="absolute -bottom-7 right-0 max-w-[260px] whitespace-nowrap bg-visualiser-canvas/90 px-1.5 py-1 font-body text-[8px] uppercase tracking-[0.15em] text-foreground/70 backdrop-blur-sm">
-                      {object.product_name} // {object.dimensions || "Dimensions requesting data"}
+                      {object.product_name} // {dimensionBadgeLabel(object)}
                     </span>
                   </div>
                 )}
