@@ -17,6 +17,7 @@ export type PlacedObject = {
   rotation: [number, number, number];
   scale: number;
   material?: VisualiserMaterial | null;
+  topMaterial?: VisualiserMaterial | null;
   baseMaterial?: VisualiserMaterial | null;
   upholsteryMaterial?: VisualiserMaterial | null;
 };
@@ -56,7 +57,8 @@ function useMaterialMaps(material: VisualiserMaterial | null, maxAnisotropy: num
         roughness?.dispose();
         return;
       }
-      const repeat = material?.repeat ?? 6;
+      // Furniture-scale tiling: a swatch tiled 6x on a side table reads as grey noise.
+      const repeat = material?.repeat ?? 2;
       for (const texture of [diffuse, normal, roughness]) {
         if (!texture) continue;
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
@@ -98,15 +100,25 @@ function useMaterialMaps(material: VisualiserMaterial | null, maxAnisotropy: num
 function clonePbrMaterial(source: THREE.Material, finish: VisualiserMaterial | null, maps: LoadedMaps, neutralFabric = false) {
   const original = source as THREE.MeshStandardMaterial;
   const material = original.clone();
-  material.map = neutralFabric ? null : maps.diffuse;
-  material.normalMap = neutralFabric ? null : maps.normal;
-  material.roughnessMap = neutralFabric ? null : maps.roughness;
-  material.metalnessMap = null;
-  material.color.set(neutralFabric ? "#d8d4cc" : finish?.color ?? "#ffffff");
-  material.roughness = neutralFabric ? 0.96 : finish?.roughness ?? 0.75;
   const metalness = neutralFabric ? 0 : finish?.metalness ?? 0;
+  // Polished metals read from reflections, not a tiled swatch photo — a swatch
+  // stretched over brass or chrome is exactly what produced the grey noise.
+  const isMetal = metalness > 0.45;
+  if (neutralFabric) {
+    material.map = null;
+    material.normalMap = null;
+    material.roughnessMap = null;
+  } else {
+    // Keep the GLB's own authored maps whenever the finish does not supply one.
+    material.map = isMetal ? null : maps.diffuse ?? original.map;
+    material.normalMap = maps.normal ?? original.normalMap;
+    material.roughnessMap = maps.roughness ?? original.roughnessMap;
+  }
+  material.metalnessMap = isMetal ? null : original.metalnessMap;
+  material.color.set(neutralFabric ? "#d8d4cc" : finish?.color ?? (maps.diffuse ? "#ffffff" : "#ffffff"));
+  material.roughness = neutralFabric ? 0.96 : finish?.roughness ?? (isMetal ? 0.25 : 0.7);
   material.metalness = THREE.MathUtils.clamp(metalness, 0, 0.92);
-  material.envMapIntensity = metalness > 0.2 ? 1.5 : 1;
+  material.envMapIntensity = isMetal ? 1.8 : metalness > 0.2 ? 1.5 : 1;
   material.normalScale.set(0.22, 0.22);
   material.transparent = original.transparent;
   material.side = original.side;
@@ -120,6 +132,7 @@ function useFittedModel(
   productId: string,
   url: string,
   material: VisualiserMaterial | null,
+  topMaterial: VisualiserMaterial | null,
   baseMaterial: VisualiserMaterial | null,
   upholsteryMaterial: VisualiserMaterial | null,
 ) {
@@ -127,6 +140,7 @@ function useFittedModel(
   const { gl } = useThree();
   const maxAnisotropy = gl.capabilities.getMaxAnisotropy();
   const generalMaps = useMaterialMaps(material, maxAnisotropy);
+  const topMaps = useMaterialMaps(topMaterial, maxAnisotropy);
   const baseMaps = useMaterialMaps(baseMaterial, maxAnisotropy);
   const upholsteryMaps = useMaterialMaps(upholsteryMaterial, maxAnisotropy);
   return useMemo(() => {
@@ -136,17 +150,32 @@ function useFittedModel(
       if (mesh.isMesh) {
         mesh.castShadow = true;
         mesh.receiveShadow = true;
-        const nodeName = mesh.name.toLowerCase();
+        // Sub-mesh roles are read from the GLB node names (Table_Top_Mesh, Base_Mesh …)
+        // so a finish lands on the surface the designer actually picked.
+        const nodeName = `${mesh.name} ${mesh.parent?.name ?? ""}`.toLowerCase();
         const isBondStreet = isBondStreetStool(productId);
-        const role = isBondStreet
-          ? /upholstery|fabric|cushion|seat|cover|textile/.test(nodeName)
+        const role: "upholstery" | "base" | "top" | null =
+          /upholstery|fabric|cushion|seat|cover|textile/.test(nodeName)
             ? "upholstery"
-            : /base|frame|leg|metal|bronze|steel/.test(nodeName)
+            : /base|frame|leg|stem|pedestal|foot|column|bracket/.test(nodeName)
               ? "base"
-              : null
-          : null;
-        const finish = role === "upholstery" ? upholsteryMaterial : role === "base" ? baseMaterial : material;
-        const maps = role === "upholstery" ? upholsteryMaps : role === "base" ? baseMaps : generalMaps;
+              : /top|surface|plate|tabletop|marble|stone|counter|shelf/.test(nodeName)
+                ? "top"
+                : null;
+        const finish = role === "upholstery"
+          ? upholsteryMaterial
+          : role === "base"
+            ? baseMaterial ?? material
+            : role === "top"
+              ? topMaterial ?? material
+              : material;
+        const maps = role === "upholstery"
+          ? upholsteryMaps
+          : role === "base"
+            ? (baseMaterial ? baseMaps : generalMaps)
+            : role === "top"
+              ? (topMaterial ? topMaps : generalMaps)
+              : generalMaps;
         const neutralFabric = isBondStreet && role === "upholstery" && !upholsteryMaterial;
         if (!finish && !neutralFabric) return;
         const source = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
@@ -167,7 +196,7 @@ function useFittedModel(
     const wrapper = new THREE.Group();
     wrapper.add(clone);
     return wrapper;
-  }, [baseMaps, baseMaterial, generalMaps, material, productId, scene, upholsteryMaps, upholsteryMaterial]);
+  }, [baseMaps, baseMaterial, generalMaps, material, productId, scene, topMaps, topMaterial, upholsteryMaps, upholsteryMaterial]);
 }
 
 const ModelBody = ({ object }: { object: PlacedObject }) => {
@@ -175,6 +204,7 @@ const ModelBody = ({ object }: { object: PlacedObject }) => {
     object.id,
     object.glb_url ?? "",
     object.material ?? null,
+    object.topMaterial ?? null,
     object.baseMaterial ?? (isBondStreetStool(object.id) ? BOND_STREET_BASE_FINISH : null),
     object.upholsteryMaterial ?? null,
   );
@@ -272,6 +302,20 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
     }
   };
 
+  /** Persist the gizmo result back into React state (floor-locked, upright). */
+  const commit = () => {
+    const group = groupRef.current;
+    if (!group) return;
+    group.position.y = object.position[1] ?? 0;
+    group.rotation.x = 0;
+    group.rotation.z = 0;
+    onTransform(
+      object.instanceId,
+      [group.position.x, object.position[1] ?? 0, group.position.z],
+      [0, group.rotation.y, 0],
+    );
+  };
+
   const content = (
     <group
       ref={(node) => {
@@ -294,25 +338,45 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
     <>
       {content}
       {selected && groupNode && (
-        <TransformControls
-          object={groupNode}
-          mode="translate"
-          showY={false}
-          size={0.85}
-          onMouseDown={() => onDragStateChange(true)}
-          onMouseUp={() => {
-            onDragStateChange(false);
-            const group = groupRef.current;
-            if (group) {
-              group.position.y = object.position[1] ?? 0;
-              onTransform(object.instanceId, [group.position.x, object.position[1] ?? 0, group.position.z], object.rotation);
-            }
-          }}
-          onObjectChange={() => {
-            const group = groupRef.current;
-            if (group) group.position.y = object.position[1] ?? 0;
-          }}
-        />
+        <>
+          {/* Floor-plane arrows: X / Z translation only. */}
+          <TransformControls
+            object={groupNode}
+            mode="translate"
+            showY={false}
+            size={0.85}
+            onMouseDown={() => onDragStateChange(true)}
+            onMouseUp={() => {
+              onDragStateChange(false);
+              commit();
+            }}
+            onObjectChange={() => {
+              const group = groupRef.current;
+              if (group) group.position.y = object.position[1] ?? 0;
+            }}
+          />
+          {/* Outer ring: free 360° yaw so the piece can be aligned to the backdrop perspective. */}
+          <TransformControls
+            object={groupNode}
+            mode="rotate"
+            showX={false}
+            showZ={false}
+            size={1.15}
+            onMouseDown={() => onDragStateChange(true)}
+            onMouseUp={() => {
+              onDragStateChange(false);
+              commit();
+            }}
+            onObjectChange={() => {
+              const group = groupRef.current;
+              if (group) {
+                // Yaw only — keep the piece upright on the floor plane.
+                group.rotation.x = 0;
+                group.rotation.z = 0;
+              }
+            }}
+          />
+        </>
       )}
     </>
   );

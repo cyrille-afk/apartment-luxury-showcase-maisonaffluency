@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
 import { Box, ImageUp, Loader2, Plus, RotateCcw, Search, X } from "lucide-react";
-import * as THREE from "three";
+
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
@@ -82,6 +82,7 @@ const TradeVisualiser = () => {
   const [orbitEnabled, setOrbitEnabled] = useState(true);
   const [materials, setMaterials] = useState<VisualiserMaterial[]>([]);
   const [materialSearch, setMaterialSearch] = useState("");
+  const [finishTarget, setFinishTarget] = useState<"all" | "top" | "base">("all");
   const { activeMaterial, setActiveMaterial } = useVisualiserMaterial();
   const { session: conciergeSession } = useConciergeSession();
 
@@ -250,13 +251,6 @@ const TradeVisualiser = () => {
     )));
   };
 
-  const spinObject = (instanceId: string, degrees: number) => {
-    setObjects((current) => current.map((object) => (
-      object.instanceId === instanceId
-        ? { ...object, rotation: [object.rotation[0], object.rotation[1] + THREE.MathUtils.degToRad(degrees), object.rotation[2]] }
-        : object
-    )));
-  };
 
   const DEPTH_LEVELS = [0, 0.012, 0.024];
 
@@ -278,14 +272,27 @@ const TradeVisualiser = () => {
     });
   };
 
+  /** Applies a swatch to the whole piece or to a single GLB sub-mesh group. */
   const applyMaterial = (material: VisualiserMaterial) => {
     setActiveMaterial(material);
     if (!selectedId) {
       toast.success(`${material.name} is ready for the next object.`);
       return;
     }
+    setObjects((current) => current.map((object) => {
+      if (object.instanceId !== selectedId) return object;
+      if (finishTarget === "top") return { ...object, topMaterial: material };
+      if (finishTarget === "base") return { ...object, baseMaterial: material };
+      return { ...object, material, topMaterial: null, baseMaterial: null };
+    }));
+  };
+
+  const clearFinishes = () => {
+    if (!selectedId) return;
     setObjects((current) => current.map((object) => (
-      object.instanceId === selectedId ? { ...object, material } : object
+      object.instanceId === selectedId
+        ? { ...object, material: null, topMaterial: null, baseMaterial: null }
+        : object
     )));
   };
 
@@ -458,11 +465,7 @@ const TradeVisualiser = () => {
             className="mt-2 w-full accent-foreground"
           />
 
-          <div className="mt-4 flex items-center gap-4">
-            <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={() => spinObject(selected.instanceId, -45)}>Spin −45°</button>
-            <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={() => spinObject(selected.instanceId, 45)}>Spin +45°</button>
-          </div>
-          <p className={cn(microLabel, "mt-4 text-muted-foreground/70")}>Drag the red · blue arrows to slide on the floor plane, or drag the piece directly. Spin buttons rotate.</p>
+          <p className={cn(microLabel, "mt-4 text-muted-foreground/70")}>Drag the coloured arrows to slide along the floor plane, or the outer ring to spin the piece 360° into the backdrop perspective.</p>
 
           {isBondStreetStool(selected.id) ? (
             <div className="mt-5 border-t border-foreground/10 pt-4">
@@ -510,9 +513,20 @@ const TradeVisualiser = () => {
           <div className="mt-5 border-t border-foreground/10 pt-4">
             <div className="flex items-center justify-between gap-3">
               <p className={cn(microLabel, "text-muted-foreground")}>Material / Finish</p>
-              {selected.material && (
-                <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={() => setObjects((current) => current.map((object) => object.instanceId === selected.instanceId ? { ...object, material: null } : object))}>Clear</button>
+              {(selected.material || selected.topMaterial || selected.baseMaterial) && (
+                <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={clearFinishes}>Clear</button>
               )}
+            </div>
+            <div className="mt-3 flex items-center gap-4">
+              {([["all", "Whole Piece"], ["top", "Top"], ["base", "Base"]] as const).map(([value, label]) => (
+                <button
+                  key={value}
+                  onClick={() => setFinishTarget(value)}
+                  className={cn(microLabel, finishTarget === value ? "text-foreground underline underline-offset-4" : "text-muted-foreground hover:text-foreground")}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
             <input
               value={materialSearch}
@@ -524,12 +538,12 @@ const TradeVisualiser = () => {
             <div className="mt-3 flex max-h-28 gap-3 overflow-x-auto pb-2">
               {filteredMaterials.slice(0, 24).map((material) => (
                 <button key={material.id} onClick={() => applyMaterial(material)} className="w-14 shrink-0 text-left" title={`${material.brand_name} — ${material.name}`}>
-                  <img src={material.image_url ?? "/placeholder.svg"} alt="" className={cn("h-10 w-10 object-cover", selected.material?.id === material.id && "ring-1 ring-foreground ring-offset-2")} />
+                  <img src={material.image_url ?? "/placeholder.svg"} alt="" className={cn("h-10 w-10 object-cover", (finishTarget === "top" ? selected.topMaterial : finishTarget === "base" ? selected.baseMaterial : selected.material)?.id === material.id && "ring-1 ring-foreground ring-offset-2")} />
                   <span className="mt-1 block truncate font-mono text-[8px] uppercase tracking-[0.15em] text-muted-foreground">{material.name}</span>
                 </button>
               ))}
             </div>
-            <p className={cn(microLabel, "mt-1 truncate text-foreground")}>{selected.material?.name ?? activeMaterial?.name ?? "No active finish"}</p>
+            <p className={cn(microLabel, "mt-1 truncate text-foreground")}>{(finishTarget === "top" ? selected.topMaterial : finishTarget === "base" ? selected.baseMaterial : selected.material)?.name ?? activeMaterial?.name ?? "No active finish"}</p>
           </div>
           )}
         </div>
