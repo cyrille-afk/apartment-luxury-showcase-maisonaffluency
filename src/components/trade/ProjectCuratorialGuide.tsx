@@ -29,6 +29,7 @@ type Props = {
   items: CuratorialSourceItem[];
   activeItemId: string | null;
   isClientMode: boolean;
+  docked?: boolean;
   onActiveItemChange: (productId: string) => void;
   onCompositionChanged: () => void;
   onRecommendationHover: (active: boolean) => void;
@@ -84,6 +85,7 @@ export function ProjectCuratorialGuide({
   items,
   activeItemId,
   isClientMode,
+  docked = false,
   onActiveItemChange,
   onCompositionChanged,
   onRecommendationHover,
@@ -136,9 +138,13 @@ export function ProjectCuratorialGuide({
   }, [open, projectId, items]);
 
   useEffect(() => {
+    if (docked) setOpen(true);
+  }, [docked]);
+
+  useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape" && !docked) setOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -296,6 +302,7 @@ export function ProjectCuratorialGuide({
   };
 
   if (!open) {
+    if (docked) return null;
     return (
       <Button
         type="button"
