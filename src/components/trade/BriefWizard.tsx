@@ -137,6 +137,31 @@ const formatBriefMarkdown = (a: Answers) => {
   return lines.join("\n");
 };
 
+function showResumedBriefToast() {
+  toast.custom(
+    () => (
+      <div
+        className="flex items-center gap-2 border-t border-foreground/10 pt-3 pb-2 pr-6"
+        role="status"
+        aria-live="polite"
+      >
+        <span
+          className="h-1.5 w-1.5 rounded-full bg-foreground/50"
+          aria-hidden="true"
+        />
+        <span className="text-[10px] font-body uppercase tracking-[0.15em] text-muted-foreground/80">
+          Resumed your brief from another device.
+        </span>
+      </div>
+    ),
+    {
+      duration: 5000,
+      className:
+        "!bg-transparent !border-0 !shadow-none !rounded-none !px-0 !py-0 !text-foreground",
+    }
+  );
+}
+
 // Parse a previously-saved brief markdown back into structured hints we can reuse as defaults.
 function parseBriefMarkdown(md: string | null | undefined): Partial<Answers> {
   if (!md) return {};
