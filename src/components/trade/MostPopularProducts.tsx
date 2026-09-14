@@ -74,15 +74,15 @@ export function MostPopularProducts() {
   if (!loading && products.length === 0) return null;
 
   return (
-    <div className="mt-10">
-      <h2 className="font-display text-lg text-foreground mb-4 flex items-center gap-2">
+    <div className="mt-16 md:mt-24">
+      <h2 className="font-display text-2xl text-foreground mb-6 flex items-center gap-3">
         <Heart className="h-4 w-4 text-destructive" />
         Most Popular
       </h2>
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="border border-border rounded-lg overflow-hidden">
+            <div key={i}>
               <Skeleton className="aspect-square" />
               <div className="p-2 space-y-1.5">
                 <Skeleton className="h-3 w-3/4" />
@@ -97,7 +97,7 @@ export function MostPopularProducts() {
             <Link
               key={p.product_id}
               to={`/trade/showroom?tab=grid&highlight=${p.product_id}`}
-              className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 hover:shadow-sm transition-all"
+              className="group block"
             >
               <div className="relative aspect-square bg-muted overflow-hidden">
                 {p.image_url ? (
@@ -112,19 +112,19 @@ export function MostPopularProducts() {
                     <Heart className="w-6 h-6 text-muted-foreground/20" />
                   </div>
                 )}
-                <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-background/80 backdrop-blur-sm font-body text-[10px] text-foreground border border-border">
+                <span className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-1 bg-background/90 font-body text-[10px] text-foreground">
                   <Heart className="h-2.5 w-2.5 fill-destructive text-destructive" />
                   {p.fav_count}
                 </span>
                 {i === 0 && (
-                  <span className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full bg-foreground text-background font-body text-[10px]">
+                  <span className="absolute top-2 right-2 px-2 py-1 bg-foreground text-background font-body text-[10px]">
                     #1
                   </span>
                 )}
               </div>
-              <div className="p-2">
-                <p className="font-body text-xs text-foreground truncate">{p.product_name}</p>
-                <p className="font-body text-[10px] text-muted-foreground truncate">{p.brand_name}</p>
+              <div className="pt-3 mt-2 border-t border-border">
+                <p className="font-display text-base text-foreground truncate">{p.product_name}</p>
+                <p className="trade-micro-label text-muted-foreground truncate mt-1">{p.brand_name}</p>
               </div>
             </Link>
           ))}

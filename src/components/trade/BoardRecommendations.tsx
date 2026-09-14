@@ -120,12 +120,12 @@ export function BoardRecommendations() {
 
   if (loading) {
     return (
-      <div className="mt-10 animate-pulse">
+      <div className="mt-16 md:mt-24 animate-pulse">
         <div className="h-5 w-64 bg-muted rounded mb-4" />
         <div className="flex gap-4 overflow-hidden">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="w-44 shrink-0">
-              <div className="h-44 bg-muted rounded-lg mb-2" />
+              <div className="h-44 bg-muted mb-2" />
               <div className="h-3 w-32 bg-muted rounded mb-1" />
               <div className="h-3 w-24 bg-muted rounded" />
             </div>
@@ -138,9 +138,9 @@ export function BoardRecommendations() {
   if (!recommendations.length || !projectId) return null;
 
   return (
-    <div className="mt-10">
+    <div className="mt-16 md:mt-24">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-display text-lg text-foreground flex items-center gap-2">
+        <h2 className="font-display text-2xl text-foreground flex items-center gap-3">
           <Sparkles className="h-4 w-4 text-primary" />
           Suggested complements for{" "}
           <Link
@@ -183,7 +183,7 @@ export function BoardRecommendations() {
             to={`/trade/projects/${projectId}`}
             className="group flex gap-3"
           >
-            <div className="aspect-square w-28 shrink-0 rounded-lg overflow-hidden bg-muted border border-border group-hover:border-primary/30 transition-colors">
+            <div className="aspect-square w-28 shrink-0 overflow-hidden bg-muted">
               {rec.image_url ? (
                 <img
                   src={rec.image_url}

@@ -81,16 +81,16 @@ export function TradeSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border">
+    <Sidebar collapsible="icon" className="trade-editorial-sidebar border-r border-border bg-background">
       <SidebarContent>
         {/* Brand */}
-        <div className={`px-4 py-6 ${collapsed ? "px-2 py-4" : ""}`}>
+        <div className={`px-5 py-8 ${collapsed ? "px-2 py-5" : ""}`}>
           <NavLink to="/trade" className="block">
             {collapsed ? (
               <span className="font-display text-lg text-foreground block text-center">MA</span>
             ) : (
               <>
-                <span className="font-display text-base text-foreground tracking-wide block">Maison Affluency</span>
+                <span className="font-display text-lg text-foreground block">Maison Affluency</span>
                 <span className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.2em]">Trade Portal</span>
               </>
             )}
@@ -109,8 +109,8 @@ export function TradeSidebar() {
                       <NavLink
                         to={item.url}
                         end={item.end}
-                        className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-                        activeClassName="bg-muted text-foreground font-medium"
+                        className="flex items-center gap-3 px-3 py-2.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors border-l border-transparent"
+                        activeClassName="text-foreground font-medium border-foreground"
                       >
                         <span className="relative shrink-0">
                           <item.icon className="h-4 w-4 shrink-0" />
@@ -216,7 +216,7 @@ export function TradeSidebar() {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border p-3">
+      <SidebarFooter className="border-t border-border p-4">
         {profile && (
           <div className={`flex items-center gap-2.5 mb-2 ${collapsed ? "justify-center" : ""}`}>
             <div className="w-8 h-8 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center shrink-0">
@@ -237,7 +237,7 @@ export function TradeSidebar() {
         )}
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-2 w-full px-3 py-2 rounded-md font-body text-xs text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors min-h-[44px]"
+          className="flex items-center gap-2 w-full px-3 py-2 font-body text-xs text-muted-foreground hover:text-foreground transition-colors min-h-[44px]"
         >
           <LogOut className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Sign Out</span>}

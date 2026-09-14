@@ -232,6 +232,81 @@ All colors MUST be HSL.
   }
 }
 
+/* Trade Portal — flat editorial workspace */
+.trade-portal-shell {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 10.2%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 10.2%;
+  --muted: 40 20% 97.1%;
+  --muted-foreground: 0 0% 40%;
+  --border: 0 0% 89.8%;
+  --input: 0 0% 89.8%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 0 0% 10.2%;
+  --sidebar-accent: 40 20% 97.1%;
+  --sidebar-accent-foreground: 0 0% 10.2%;
+  --sidebar-border: 0 0% 89.8%;
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+  font-family: 'Inter', sans-serif;
+}
+
+.trade-portal-shell .font-body {
+  font-family: 'Inter', sans-serif;
+}
+
+.trade-portal-shell .font-display {
+  font-family: 'Playfair Display', serif;
+  letter-spacing: 0;
+}
+
+.trade-portal-shell [class*="shadow"] {
+  box-shadow: none;
+}
+
+.trade-editorial-main [class*="rounded"],
+.trade-editorial-header [class*="rounded"],
+.trade-editorial-sidebar [class*="rounded"] {
+  border-radius: 0;
+}
+
+.trade-editorial-main :where(h1, h2, h3, h4, h5, h6) {
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.trade-portal-shell .trade-micro-label {
+  font-size: 10px;
+  line-height: 1.4;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.trade-editorial-main > * {
+  animation: tradeEditorialReveal 500ms ease-out both;
+}
+
+.trade-editorial-sidebar [data-sidebar="menu-button"] {
+  border-radius: 0;
+}
+
+.trade-editorial-sidebar [data-sidebar="menu-button"]:hover,
+.trade-editorial-sidebar [data-sidebar="menu-button"][data-active="true"] {
+  background: transparent;
+}
+
+@keyframes tradeEditorialReveal {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trade-editorial-main > * { animation: none; }
+}
+
 /* Hide scrollbar for horizontal swipe strips */
 .scrollbar-hide {
   -ms-overflow-style: none;
