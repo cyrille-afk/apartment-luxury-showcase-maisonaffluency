@@ -181,7 +181,7 @@ export default function TradeProjectStudio() {
 
       <div className="grid grid-cols-1 lg:min-h-0 lg:flex-1 lg:grid-cols-[60%_40%]">
         {/* LEFT — central workspace: canvas (upper) + AI pane (lower) */}
-        <section className="flex flex-col border-b border-border bg-background lg:min-h-0 lg:border-b-0 lg:border-r lg:border-border">
+        <section className="relative flex flex-col border-b border-border bg-background lg:min-h-0 lg:border-b-0 lg:border-r lg:border-border">
           {/* Upper zone — visual canvas */}
           <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           <div className="px-4 py-6 md:px-8 lg:px-12 lg:py-5">
@@ -262,8 +262,8 @@ export default function TradeProjectStudio() {
 
           {/* Lower zone — AI Curatorial Assistant, anchored to the base of the workspace */}
           <div
-            className={`flex shrink-0 flex-col border-t border-border transition-all duration-500 ease-in-out lg:min-h-0 ${
-              isAiPanelOpen ? "lg:h-[35%]" : "lg:h-11"
+            className={`flex shrink-0 flex-col border-t border-border bg-background transition-all duration-500 ease-in-out lg:min-h-0 ${
+              isAiPanelOpen ? "lg:h-[35%]" : "lg:h-0 lg:border-0 lg:bg-transparent"
             }`}
           >
             <ProjectCuratorialGuide
