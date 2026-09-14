@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 const coreItems = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
   { title: "My Dashboard", url: "/trade/me", icon: UserCircle },
-  { title: "Showroom", url: "/trade/showroom", icon: MapPin },
+  { title: "The Maison Archive", url: "/trade/showroom", icon: MapPin },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
   { title: "Projects", url: "/trade/projects", icon: FolderKanban },
   { title: "Quotes", url: "/trade/quotes", icon: FileText },
