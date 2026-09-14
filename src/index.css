@@ -943,10 +943,12 @@ input, select, textarea {
   }
 
   .proposal-preview-shell {
-    position: absolute !important;
-    inset: 0 !important;
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
     width: 210mm !important;
     height: auto !important;
+    min-height: 297mm !important;
     overflow: visible !important;
     background: white !important;
     backdrop-filter: none !important;
