@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
+import { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
+
+const CURRENCY_OPTIONS: DisplayCurrency[] = ["original", "SGD", "EUR", "USD", "GBP", "CHF", "AED", "HKD", "AUD"];
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 import { cn } from "@/lib/utils";
