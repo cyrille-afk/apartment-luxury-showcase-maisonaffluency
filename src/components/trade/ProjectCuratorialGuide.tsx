@@ -432,7 +432,7 @@ export function ProjectCuratorialGuide({
                   <article
                     ref={index === 0 ? firstRecommendationRef : undefined}
                     key={rec.product_id}
-                    className="grid w-[290px] shrink-0 snap-start grid-cols-[112px_1fr] gap-4 md:w-[360px] md:grid-cols-[148px_1fr]"
+                    className="grid h-[200px] w-[290px] shrink-0 snap-start grid-cols-[112px_1fr] grid-rows-1 gap-4 md:h-[250px] md:w-[360px] md:grid-cols-[148px_1fr]"
                     onMouseEnter={() => onRecommendationHover(true)}
                     onMouseLeave={() => onRecommendationHover(false)}
                     onFocus={() => onRecommendationHover(true)}
@@ -445,24 +445,26 @@ export function ProjectCuratorialGuide({
                       variant="ghost"
                       onClick={() => void openRecommendation(rec)}
                       disabled={openingId === rec.product_id}
-                      className="block h-auto aspect-[4/5] w-full rounded-none bg-muted p-0 hover:bg-muted"
+                      className="block h-full w-full rounded-none bg-muted p-0 hover:bg-muted"
                       aria-label={`View ${rec.title}`}
                     >
                       {rec.image_url ? <img src={rec.image_url} alt={`${rec.title} by ${rec.brand}`} loading="lazy" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Image on request</span>}
                     </Button>
-                    <div className="flex min-w-0 flex-col py-1 pb-4">
-                      <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{rec.brand}</p>
-                      <p className="mt-2 font-body text-[8px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground/80">
-                        {context.label}
-                      </p>
-                      <h3 className="mt-1 font-display text-lg leading-tight text-foreground">{rec.title}</h3>
-                      <p className="mt-2 line-clamp-4 font-body text-[10px] leading-relaxed tracking-[0.04em] text-muted-foreground">{rationale}</p>
-                      {!isClientMode && (
-                        <p className="mt-3 font-body text-[10px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground">
-                          {rec.score >= 90 ? "Trade signal // Strong specification efficiency" : "Programme signal // Confirm lead-time alignment"}
+                    <div className="flex min-w-0 flex-col justify-between h-full py-1">
+                      <div className="flex-1 min-h-0 overflow-hidden">
+                        <p className="truncate font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{rec.brand}</p>
+                        <p className="mt-1 line-clamp-1 font-body text-[8px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground/80">
+                          {context.label}
                         </p>
-                      )}
-                      <div className="mt-auto flex flex-col gap-2 pt-4">
+                        <h3 className="mt-1 line-clamp-1 font-display text-lg leading-tight text-foreground">{rec.title}</h3>
+                        <p className="mt-2 line-clamp-2 md:line-clamp-3 font-body text-[10px] leading-relaxed tracking-[0.04em] text-muted-foreground">{rationale}</p>
+                      </div>
+                      <div className="shrink-0 flex flex-col gap-2 pb-1">
+                        {!isClientMode && (
+                          <p className="line-clamp-1 font-body text-[10px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground">
+                            {rec.score >= 90 ? "Trade signal // Strong specification efficiency" : "Programme signal // Confirm lead-time alignment"}
+                          </p>
+                        )}
                         <p className="font-body text-[10px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground">
                           Match Rating: {Math.round(rec.score)}%
                         </p>
