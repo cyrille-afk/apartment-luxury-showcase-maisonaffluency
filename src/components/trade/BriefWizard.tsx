@@ -128,6 +128,31 @@ const formatBriefMarkdown = (a: Answers) => {
   lines.push("");
   if (a.rooms.length) lines.push(`**Rooms:** ${a.rooms.join(", ")}`);
   if (a.styles.length) lines.push(`**Style direction:** ${a.styles.join(", ")}`);
+
+function showResumedBriefToast() {
+  toast.custom(
+    () => (
+      <div
+        className="flex items-center gap-2 border-t border-foreground/10 pt-3 pb-2 pr-6"
+        role="status"
+        aria-live="polite"
+      >
+        <span
+          className="h-1.5 w-1.5 rounded-full bg-foreground/50"
+          aria-hidden="true"
+        />
+        <span className="text-[10px] font-body uppercase tracking-[0.15em] text-muted-foreground/80">
+          Resumed your brief from another device.
+        </span>
+      </div>
+    ),
+    {
+      duration: 5000,
+      className:
+        "!bg-transparent !border-0 !shadow-none !rounded-none !px-0 !py-0 !text-foreground",
+    }
+  );
+}
   if (a.budget) lines.push(`**Budget:** ${a.budget}`);
   if (a.timeline) lines.push(`**Timeline:** ${a.timeline}`);
   if (a.notes) {
