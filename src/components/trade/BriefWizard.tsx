@@ -233,8 +233,13 @@ export function BriefWizard() {
 
   // DEBUG: allow manual verification of the resumed-brief toast styling.
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("toast") === "resumed") {
-      const t = setTimeout(() => showResumedBriefToast(), 300);
+    const isResumed = new URLSearchParams(window.location.search).get("toast") === "resumed";
+    console.log("[BriefWizard debug] toast param =", isResumed, window.location.search);
+    if (isResumed) {
+      const t = setTimeout(() => {
+        console.log("[BriefWizard debug] firing resumed toast");
+        showResumedBriefToast();
+      }, 300);
       return () => clearTimeout(t);
     }
   }, []);
