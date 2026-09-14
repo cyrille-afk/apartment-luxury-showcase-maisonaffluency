@@ -1,972 +1,379 @@
-/**
- * Trade Visualiser — UI prototype.
- *
- * Upload a room photo, pick a surface (Walls / Floors / Upholstery / Curtains),
- * tap the photo to mark the surface, then pick a finish from the live
- * trade_products catalogue. The "Render" step is mocked for now (overlay
- * preview + reveal animation) — the AI render engine wires in next phase.
- */
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
-import {
-  Upload, Sparkles, X, Loader2, Search, ImageIcon, MousePointerClick, Wand2, Layers,
-} from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { ArrowDown, ArrowUp, ImageUp, Layers3, Loader2, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
+import { toast } from "sonner";
 
-
-// ───────── Surfaces ──────────────────────────────────────────────────────────
-type Surface = "walls" | "floors" | "upholstery" | "curtains" | "furniture";
-
-const SURFACES: { id: Surface; label: string; hint: string }[] = [
-  {
-    id: "walls",
-    label: "Walls",
-    hint: "Lacquer · plaster · wallcovering",
-  },
-  {
-    id: "floors",
-    label: "Floors",
-    hint: "Rugs · carpets",
-  },
-  {
-    id: "upholstery",
-    label: "Upholstery",
-    hint: "Fabrics · leathers",
-  },
-  {
-    id: "curtains",
-    label: "Curtains",
-    hint: "Drapery · sheers",
-  },
-  {
-    id: "furniture",
-    label: "Furniture finish",
-    hint: "Frame · wood · stone · metal · lacquer",
-  },
-];
-
-const classifySwatchSurfaces = (s: Swatch): Surface[] => {
-  const cat = (s.category || "").trim().toLowerCase();
-  const text = `${s.category || ""} ${s.name || ""}`;
-
-  // Name-driven overrides first (rugs / curtains / wallcoverings can live in
-  // any category bucket in the fabrics library).
-  if (/\b(rugs?|carpets?|kilims?|dhurries?)\b/i.test(text)) return ["floors"];
-  if (/\b(curtains?|drapes?|drapery|sheers?|voiles?)\b/i.test(text)) return ["curtains"];
-  if (/\b(wallcovers?|wallcoverings?|wallpapers?|boiserie|panell?ing|wall panels?)\b/i.test(text)) return ["walls"];
-
-  // Hard, solid finishes → both wall cladding AND furniture frames (boiserie
-  // panels, lacquered cabinet fronts, marble tops, brass legs).
-  if (cat === "wood" || cat === "stone" || cat === "metal" || cat === "ceramic" || cat === "glass" || cat === "plaster" || cat === "lacquer") {
-    return ["walls", "furniture"];
-  }
-
-  // Soft covers — leather/rattan/cane/wicker can wrap upholstery OR frame
-  // elements (cane backs, leather-wrapped legs).
-  if (
-    cat === "leather" ||
-    cat === "rattan" ||
-    cat === "cane" ||
-    cat === "wicker" ||
-    cat === "cover"
-  ) {
-    return ["upholstery", "furniture"];
-  }
-
-  // Pure fabrics → upholstery AND furniture (furniture finish includes
-  // upholstered seating fabric/leather wraps as well as frame finishes).
-  if (
-    cat === "fabric" ||
-    cat === "fabrics" ||
-    cat === "upholstery" ||
-    cat === "fabric & leather"
-  ) {
-    return ["upholstery", "furniture"];
-  }
-
-  // Loose keyword fallback for legacy free-text categories.
-  if (/\b(fabrics?|textiles?|leathers?|upholstery)\b/i.test(text)) return ["upholstery", "furniture"];
-  return [];
-};
-
-const classifySwatchSurface = (s: Swatch): Surface | null =>
-  classifySwatchSurfaces(s)[0] ?? null;
-
-const swatchMatchesSurface = (s: Swatch, surface: Surface): boolean =>
-  classifySwatchSurfaces(s).includes(surface);
-
-interface Swatch {
+type CatalogueProduct = {
   id: string;
-  name: string;
-  supplier: string | null;
+  product_name: string;
+  brand_name: string;
   image_url: string | null;
-  category: string | null;
-  tier: string | null;
-}
+  category: string;
+};
 
-
-interface Pin {
-  id: string;
-  surface: Surface;
-  x: number; // 0..1
+type CanvasObject = CatalogueProduct & {
+  instanceId: string;
+  x: number;
   y: number;
-  swatch?: Swatch;
-  productHint?: { name: string; image_url: string | null; brand: string | null };
-}
-
-interface AxoRequest {
-  id: string;
-  project_name: string;
-  result_image_url: string;
-  request_type: string | null;
-  linked_favorite_product_ids: string[] | null;
-  updated_at: string;
-}
-
-const normalizeAssetKey = (url: string | null) => {
-  if (!url?.trim()) return "";
-  const clean = url.trim().split("?")[0];
-  const marker = "/image/upload/";
-  const markerIndex = clean.indexOf(marker);
-  if (markerIndex === -1) return clean.toLowerCase();
-  const prefix = clean.slice(0, markerIndex + marker.length);
-  const parts = clean.slice(markerIndex + marker.length).split("/").filter(Boolean);
-  while (parts.length > 1 && !/^v\d+$/i.test(parts[0]) && /(^|,)([a-z]_|ar_|q_auto|f_auto|c_|g_|w_|h_)/i.test(parts[0])) {
-    parts.shift();
-  }
-  return `${prefix}${parts.join("/")}`.toLowerCase();
+  scale: number;
+  z: number;
 };
 
-const productLabelScore = (name: string | null | undefined) => {
-  const text = (name || "").trim();
-  let score = text.length;
-  if (/\bby\s+\S+/i.test(text)) score += 80;
-  if (/\b(rug|rugs|carpet|kilim|dhurrie)\b/i.test(text)) score += 25;
-  if (text.length < 5) score -= 100;
-  return score;
+type PersistedSandbox = {
+  backdrop: string | null;
+  backdropDataUrl: string | null;
+  objects: CanvasObject[];
 };
 
-// Collapse supplier label variants (case, accents, " Paris"/" Editions" suffixes)
-// into one canonical key so chips don't show "ECART / Ecart / Écart" 3× over.
-const normalizeSupplierKey = (raw: string | null | undefined) => {
-  if (!raw) return "";
-  return raw
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // strip accents
-    .toLowerCase()
-    .replace(/\s+(paris|editions?|collection|atelier|studio)\b.*$/i, "")
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-};
+const STORAGE_KEY = "trade-visualiser-sandbox-v2";
 
-// ───────── Page ──────────────────────────────────────────────────────────────
-const STORAGE_KEY = "trade-visualiser-session-v1";
-type PersistedSession = {
-  photo: string | null;
-  photoDataUrl: string | null;
-  renderedImage: string | null;
-  surface: Surface;
-  pins: Pin[];
-  rendered: boolean;
-};
-const loadPersisted = (): Partial<PersistedSession> => {
+const loadSandbox = (): PersistedSandbox => {
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    return JSON.parse(raw) as Partial<PersistedSession>;
-  } catch { return {}; }
+    const parsed = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || "{}") as Partial<PersistedSandbox>;
+    return {
+      backdrop: parsed.backdrop?.startsWith("blob:") ? parsed.backdropDataUrl ?? null : parsed.backdrop ?? null,
+      backdropDataUrl: parsed.backdropDataUrl ?? null,
+      objects: Array.isArray(parsed.objects) ? parsed.objects : [],
+    };
+  } catch {
+    return { backdrop: null, backdropDataUrl: null, objects: [] };
+  }
 };
 
 const TradeVisualiser = () => {
-  const initial = loadPersisted();
-  // blob: URLs don't survive a page reload — fall back to the persisted data URL.
-  const initialPhoto =
-    initial.photo && !initial.photo.startsWith("blob:")
-      ? initial.photo
-      : initial.photoDataUrl ?? null;
-  const [photo, setPhoto] = useState<string | null>(initialPhoto);
-  const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(initial.photoDataUrl ?? null);
-  const [renderedImage, setRenderedImage] = useState<string | null>(initial.renderedImage ?? null);
-  const [surface, setSurface] = useState<Surface>(initial.surface ?? "walls");
-  const [pins, setPins] = useState<Pin[]>(initial.pins ?? []);
-  const [activePinId, setActivePinId] = useState<string | null>(null);
+  const initial = useRef(loadSandbox()).current;
+  const [backdrop, setBackdrop] = useState<string | null>(initial.backdrop);
+  const [backdropDataUrl, setBackdropDataUrl] = useState<string | null>(initial.backdropDataUrl);
+  const [objects, setObjects] = useState<CanvasObject[]>(initial.objects);
+  const [selectedId, setSelectedId] = useState<string | null>(initial.objects.at(-1)?.instanceId ?? null);
+  const [sourceOpen, setSourceOpen] = useState(false);
+  const [layersOpen, setLayersOpen] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [allSwatches, setAllSwatches] = useState<Swatch[]>([]);
-  const [loadingSwatches, setLoadingSwatches] = useState(false);
-  const [rendering, setRendering] = useState(false);
-  const [rendered, setRendered] = useState(initial.rendered ?? false);
-  const [renderError, setRenderError] = useState<string | null>(null);
-
-  // Axonometric Studio deliveries (completed renders the user can reopen here)
-  const [axoOpen, setAxoOpen] = useState(false);
-  const [axoLoading, setAxoLoading] = useState(false);
-  const [axoRequests, setAxoRequests] = useState<AxoRequest[]>([]);
-  const [importingAxoId, setImportingAxoId] = useState<string | null>(null);
+  const [products, setProducts] = useState<CatalogueProduct[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<{ id: string; offsetX: number; offsetY: number } | null>(null);
 
-  const fetchAxoRequests = useCallback(async () => {
-    setAxoLoading(true);
-    const [reqRes, galRes] = await Promise.all([
-      supabase
-        .from("axonometric_requests")
-        .select("id, project_name, result_image_url, request_type, linked_favorite_product_ids, updated_at")
-        .eq("status", "completed")
-        .not("result_image_url", "is", null)
-        .order("updated_at", { ascending: false }),
-      (supabase as any)
-        .from("axonometric_gallery")
-        .select("id, title, project_name, image_url, request_id, created_at")
-        .order("created_at", { ascending: false }),
-    ]);
-    setAxoLoading(false);
-    if (reqRes.error && galRes.error) {
-      toast.error("Could not load Axonometric deliveries");
-      return;
-    }
-    const requests = (reqRes.data ?? []) as AxoRequest[];
-    const seenRequestIds = new Set(requests.map((r) => r.id));
-    const galleryItems: AxoRequest[] = ((galRes.data ?? []) as any[])
-      .filter((g) => g.image_url && !(g.request_id && seenRequestIds.has(g.request_id)))
-      .map((g) => ({
-        id: g.request_id || `gallery-${g.id}`,
-        project_name: g.project_name || g.title || "Saved render",
-        result_image_url: g.image_url,
-        request_type: "gallery",
-        linked_favorite_product_ids: null,
-        updated_at: g.created_at,
-      }));
-    const merged = [...requests, ...galleryItems].sort(
-      (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-    );
-    setAxoRequests(merged);
-  }, []);
-
-  const importAxoDelivery = useCallback(async (req: AxoRequest) => {
-    if (!req.result_image_url) return;
-    setImportingAxoId(req.id);
-    try {
-      // Fetch the render as a data URL so the AI render endpoint can re-use it.
-      const resp = await fetch(req.result_image_url, { mode: "cors" });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const blob = await resp.blob();
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = () => resolve(typeof r.result === "string" ? r.result : "");
-        r.onerror = () => reject(r.error);
-        r.readAsDataURL(blob);
-      });
-
-      // Look up linked favourite products to seed pin labels.
-      const productIds = Array.isArray(req.linked_favorite_product_ids)
-        ? req.linked_favorite_product_ids.filter((x): x is string => typeof x === "string")
-        : [];
-      let products: { id: string; product_name: string | null; image_url: string | null; brand_name: string | null }[] = [];
-      if (productIds.length > 0) {
-        const { data: prods } = await supabase
-          .from("trade_products")
-          .select("id, product_name, image_url, brand_name")
-          .in("id", productIds);
-        products = prods ?? [];
-      }
-
-      // Distribute up to 8 hint pins evenly across the lower-middle of the image.
-      const seedPins: Pin[] = products.slice(0, 8).map((p, i, arr) => {
-        const n = arr.length;
-        const x = n === 1 ? 0.5 : 0.15 + (0.7 * i) / (n - 1);
-        const y = 0.55 + ((i % 2) * 0.15);
-        return {
-          id: `pin-axo-${req.id}-${i}-${Date.now()}`,
-          surface: "furniture" as Surface,
-          x,
-          y,
-          productHint: {
-            name: p.product_name || "Untitled product",
-            image_url: p.image_url,
-            brand: p.brand_name,
-          },
-        };
-      });
-
-      setPhoto(req.result_image_url);
-      setPhotoDataUrl(dataUrl);
-      setRenderedImage(null);
-      setRendered(false);
-      setRenderError(null);
-      setPins(seedPins);
-      setActivePinId(seedPins[0]?.id ?? null);
-      setAxoOpen(false);
-      toast.success(
-        seedPins.length > 0
-          ? `Loaded "${req.project_name || "Untitled"}" with ${seedPins.length} product hint${seedPins.length === 1 ? "" : "s"}`
-          : `Loaded "${req.project_name || "Untitled"}"`,
-      );
-    } catch (e) {
-      console.error(e);
-      toast.error("Could not import this render — the image may be unreachable.");
-    } finally {
-      setImportingAxoId(null);
-    }
-  }, []);
-
-  // Deep-link support: /trade/visualiser?fromAxo=<requestId>
   useEffect(() => {
-    const id = searchParams.get("fromAxo");
-    if (!id) return;
-    // Strip the param so reloads / fresh navigation don't reimport
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.delete("fromAxo");
-      return next;
-    }, { replace: true });
-    (async () => {
-      const { data, error } = await supabase
-        .from("axonometric_requests")
-        .select("id, project_name, result_image_url, request_type, linked_favorite_product_ids, updated_at")
-        .eq("id", id)
-        .maybeSingle();
-      if (error || !data || !data.result_image_url) {
-        toast.error("That delivery is not ready yet.");
-        return;
-      }
-      await importAxoDelivery(data as AxoRequest);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
   }, []);
 
-  // Persist session so an auto cache-bust reload (or accidental refresh)
-  // keeps the uploaded photo, pins, and last render intact.
-  // Never persist blob: URLs — they're invalidated on reload.
-  useEffect(() => {
-    const persistablePhoto = photo && photo.startsWith("blob:") ? null : photo;
-    try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
-        photo: persistablePhoto, photoDataUrl, renderedImage, surface, pins, rendered,
-      }));
-    } catch {
-      // sessionStorage quota (large data URLs) — drop the heaviest field first.
-      try {
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
-          photo: null, photoDataUrl, renderedImage: null, surface, pins, rendered: false,
-        }));
-      } catch { /* give up silently */ }
-    }
-  }, [photo, photoDataUrl, renderedImage, surface, pins, rendered]);
-
-
-
-  const imgRef = useRef<HTMLDivElement | null>(null);
-  const [photoAspect, setPhotoAspect] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement | null>(null);
-
-  // ─── Load swatches once from the curated fabrics & finishes library ─────
   useEffect(() => {
     let cancelled = false;
-    setLoadingSwatches(true);
     (async () => {
       const { data, error } = await supabase
-        .from("fabrics")
-        .select("id, name, supplier, image_url, category, tier")
+        .from("trade_products")
+        .select("id, product_name, brand_name, image_url, category")
         .eq("is_active", true)
+        .eq("is_hidden", false)
         .not("image_url", "is", null)
-        .neq("image_url", "")
-        .order("supplier", { ascending: true, nullsFirst: false })
-        .order("sort_order", { ascending: true })
-        .order("name", { ascending: true });
+        .order("updated_at", { ascending: false })
+        .limit(180);
       if (cancelled) return;
-      setAllSwatches(error || !data ? [] : (data as Swatch[]));
-      setLoadingSwatches(false);
+      if (error) toast.error("The collection index could not be loaded.");
+      setProducts((data ?? []) as CatalogueProduct[]);
+      setLoadingProducts(false);
     })();
     return () => { cancelled = true; };
   }, []);
 
-  // ─── Supplier list for the active surface ────────────────────────────────
-  const [supplierFilter, setSupplierFilter] = useState<string | null>(null);
-  useEffect(() => { setSupplierFilter(null); }, [surface]);
-
-  const surfaceSuppliers = useMemo(() => {
-    // Group variants of the same supplier (case/accent/" Paris" suffix) under
-    // one canonical display label — keep the longest pretty version as the label.
-    const groups = new Map<string, string>();
-    for (const s of allSwatches) {
-      if (!swatchMatchesSurface(s, surface)) continue;
-      const raw = s.supplier?.trim();
-      if (!raw) continue;
-      const key = normalizeSupplierKey(raw);
-      if (!key) continue;
-      const existing = groups.get(key);
-      // Prefer the prettiest label: mixed case with accents over ALL CAPS / lowercase.
-      const isPretty = (v: string) => v !== v.toUpperCase() && v !== v.toLowerCase();
-      if (!existing || (isPretty(raw) && !isPretty(existing)) || raw.length > existing.length) {
-        groups.set(key, raw);
-      }
-    }
-    return Array.from(groups.values()).sort((a, b) => a.localeCompare(b));
-  }, [allSwatches, surface]);
-
-  // ─── Filter swatches for the active surface ──────────────────────────────
-  const swatches = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    const supplierKey = supplierFilter ? normalizeSupplierKey(supplierFilter) : null;
-    const matching = allSwatches.filter((s) => {
-      if (!swatchMatchesSurface(s, surface)) return false;
-      if (supplierKey && normalizeSupplierKey(s.supplier) !== supplierKey) return false;
-      if (!q) return true;
-      return `${s.name} ${s.supplier || ""} ${s.category || ""}`.toLowerCase().includes(q);
-    });
-    const byAsset = new Map<string, Swatch>();
-    for (const s of matching) {
-      const assetKey = normalizeAssetKey(s.image_url) || `${s.supplier}|${s.name}`;
-      const previous = byAsset.get(assetKey);
-      if (!previous || productLabelScore(s.name) > productLabelScore(previous.name)) {
-        byAsset.set(assetKey, s);
-      }
-    }
-    return Array.from(byAsset.values()).sort((a, b) =>
-      `${a.supplier || ""} ${a.name}`.localeCompare(`${b.supplier || ""} ${b.name}`)
-    );
-  }, [allSwatches, surface, search, supplierFilter]);
-
-
-  // ─── Upload handling ─────────────────────────────────────────────────────
-  const onFile = (f: File | null) => {
-    if (!f) return;
-    const url = URL.createObjectURL(f);
-    setPhoto(url);
-    setPins([]);
-    setActivePinId(null);
-    setRendered(false);
-    setRenderedImage(null);
-    setRenderError(null);
-    // also read as base64 for the API
-    const reader = new FileReader();
-    reader.onload = () => setPhotoDataUrl(typeof reader.result === "string" ? reader.result : null);
-    reader.readAsDataURL(f);
-  };
-
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    onFile(e.dataTransfer.files?.[0] ?? null);
-  };
-
-  // ─── Pin a surface ───────────────────────────────────────────────────────
-  const onPhotoClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!imgRef.current) return;
-    const rect = imgRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    const newPin: Pin = {
-      id: `pin-${Date.now()}`,
-      surface,
-      x,
-      y,
-    };
-    setPins((p) => [...p, newPin]);
-    setActivePinId(newPin.id);
-    setRendered(false);
-    setRenderedImage(null);
-  };
-
-  const removePin = (id: string) => {
-    setPins((p) => p.filter((x) => x.id !== id));
-    if (activePinId === id) setActivePinId(null);
-    setRendered(false);
-    setRenderedImage(null);
-  };
-
-  // ─── Apply a swatch to the active pin ────────────────────────────────────
-  const applySwatch = useCallback((sw: Swatch) => {
-    if (!activePinId) return;
-    const activePin = pins.find((pin) => pin.id === activePinId);
-    if (!activePin || !swatchMatchesSurface(sw, activePin.surface)) return;
-    setPins((p) => p.map((pin) => (pin.id === activePinId ? { ...pin, swatch: sw } : pin)));
-    setRendered(false);
-    setRenderedImage(null);
-  }, [activePinId, pins]);
-
-  // ─── Render (live AI) ────────────────────────────────────────────────────
-  const canRender = pins.some((p) => p.swatch);
-  const onRender = async () => {
-    if (!canRender || !photoDataUrl) return;
-    setRendering(true);
-    setRendered(false);
-    setRenderError(null);
-    setRenderedImage(null);
+  useEffect(() => {
     try {
-      const payloadPins = pins
-        .filter((p) => p.swatch)
-        .map((p) => ({
-          surface: p.surface,
-          x: p.x,
-          y: p.y,
-          swatchUrl: p.swatch!.image_url,
-          swatchName: p.swatch!.name,
-          brandName: p.swatch!.supplier,
-          swatchCategory: p.swatch!.category,
-        }));
-      const { data, error } = await supabase.functions.invoke("visualiser-render", {
-        body: { roomImage: photoDataUrl, pins: payloadPins },
-      });
-      if (error) throw error;
-      if (!data?.image) throw new Error("No image returned");
-      setRenderedImage(data.image);
-      setRendered(true);
-    } catch (e: unknown) {
-      console.error(e);
-      setRenderError(e instanceof Error ? e.message : "Render failed");
-    } finally {
-      setRendering(false);
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+        backdrop: backdrop?.startsWith("blob:") ? null : backdrop,
+        backdropDataUrl,
+        objects,
+      }));
+    } catch {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ backdrop: null, backdropDataUrl: null, objects }));
     }
+  }, [backdrop, backdropDataUrl, objects]);
+
+  useEffect(() => {
+    const requestId = searchParams.get("fromAxo");
+    if (!requestId) return;
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous);
+      next.delete("fromAxo");
+      return next;
+    }, { replace: true });
+    void (async () => {
+      const { data } = await supabase
+        .from("axonometric_requests")
+        .select("result_image_url, project_name")
+        .eq("id", requestId)
+        .maybeSingle();
+      if (!data?.result_image_url) {
+        toast.error("That delivered visual is not available yet.");
+        return;
+      }
+      setBackdrop(data.result_image_url);
+      setBackdropDataUrl(null);
+      toast.success(`${data.project_name || "Delivered visual"} opened as the canvas backdrop.`);
+    })();
+  }, [searchParams, setSearchParams]);
+
+  const filteredProducts = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return products;
+    return products.filter((product) =>
+      `${product.product_name} ${product.brand_name} ${product.category}`.toLowerCase().includes(query),
+    );
+  }, [products, search]);
+
+  const selected = objects.find((object) => object.instanceId === selectedId) ?? null;
+
+  const uploadBackdrop = (file: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Choose a JPEG, PNG, or WebP image.");
+      return;
+    }
+    setBackdrop(URL.createObjectURL(file));
+    const reader = new FileReader();
+    reader.onload = () => setBackdropDataUrl(typeof reader.result === "string" ? reader.result : null);
+    reader.readAsDataURL(file);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const addObject = (product: CatalogueProduct) => {
+    const count = objects.length;
+    const next: CanvasObject = {
+      ...product,
+      instanceId: `${product.id}-${Date.now()}`,
+      x: 38 + ((count * 11) % 28),
+      y: 35 + ((count * 8) % 25),
+      scale: 1,
+      z: Math.max(0, ...objects.map((object) => object.z)) + 1,
+    };
+    setObjects((current) => [...current, next]);
+    setSelectedId(next.instanceId);
+    setSourceOpen(false);
+  };
+
+  const moveLayer = (direction: "up" | "down") => {
+    if (!selectedId) return;
+    setObjects((current) => current.map((object) =>
+      object.instanceId === selectedId
+        ? { ...object, z: Math.max(0, object.z + (direction === "up" ? 1 : -1)) }
+        : object,
+    ));
+  };
+
+  const resizeSelected = (amount: number) => {
+    if (!selectedId) return;
+    setObjects((current) => current.map((object) =>
+      object.instanceId === selectedId
+        ? { ...object, scale: Math.min(1.8, Math.max(0.55, object.scale + amount)) }
+        : object,
+    ));
+  };
+
+  const onPointerDown = (event: React.PointerEvent, object: CanvasObject) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    dragRef.current = {
+      id: object.instanceId,
+      offsetX: event.clientX - rect.left - (object.x / 100) * rect.width,
+      offsetY: event.clientY - rect.top - (object.y / 100) * rect.height,
+    };
+    setSelectedId(object.instanceId);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const onPointerMove = (event: React.PointerEvent) => {
+    const canvas = canvasRef.current;
+    const drag = dragRef.current;
+    if (!canvas || !drag) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = ((event.clientX - rect.left - drag.offsetX) / rect.width) * 100;
+    const y = ((event.clientY - rect.top - drag.offsetY) / rect.height) * 100;
+    setObjects((current) => current.map((object) =>
+      object.instanceId === drag.id
+        ? { ...object, x: Math.min(92, Math.max(8, x)), y: Math.min(86, Math.max(12, y)) }
+        : object,
+    ));
+  };
+
+  const stopDragging = useCallback(() => { dragRef.current = null; }, []);
+
+  const resetSandbox = () => {
+    setBackdrop(null);
+    setBackdropDataUrl(null);
+    setObjects([]);
+    setSelectedId(null);
+    setResetOpen(false);
+    sessionStorage.removeItem(STORAGE_KEY);
   };
 
   return (
     <>
       <Helmet>
-        <title>Visualiser — Trade Portal — Maison Affluency</title>
+        <title>Mood-Board Visualiser | Maison Affluency Trade</title>
+        <meta name="description" content="Compose client interiors with collectible furniture and architectural objects in the Maison Affluency trade visualiser." />
       </Helmet>
 
-      <div className="max-w-7xl">
-        {/* ─── Hero ─── */}
-        <div className="mb-8 rounded-xl bg-gradient-to-br from-foreground to-foreground/85 px-6 py-8 text-background">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Wand2 className="h-4 w-4 opacity-70" />
-                <span className="font-body text-[10px] uppercase tracking-[0.2em] opacity-70">
-                  Visualiser · Beta
-                </span>
-              </div>
-              <h1 className="font-display text-3xl md:text-4xl mb-2">Show clients the room before you build it.</h1>
-              <p className="font-body text-sm opacity-80 max-w-2xl">
-                Upload a room photo, mark walls, floors, upholstery or drapery, and drop in any finish
-                from our catalogue — Alexander Lamont lacquers, Pierre Frey wallcoverings, cc-tapis rugs,
-                Pouenat textiles. Render and send.
+      <section
+        ref={canvasRef}
+        aria-label="Mood-Board Visualiser Sandbox"
+        onPointerMove={onPointerMove}
+        onPointerUp={stopDragging}
+        onPointerCancel={stopDragging}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) setSelectedId(null);
+        }}
+        className="relative -m-4 h-[calc(100dvh-3.5rem)] overflow-hidden bg-visualiser-canvas md:-m-8 md:h-[calc(100dvh-4rem)] lg:-m-12"
+      >
+        {backdrop ? (
+          <img src={backdrop} alt="Client room canvas backdrop" className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover" />
+        ) : objects.length === 0 ? (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <p className="font-display text-xl text-foreground/45 md:text-2xl">Mood-Board Visualiser Sandbox</p>
+              <p className="mt-3 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
+                Add an object or introduce a spatial backdrop
               </p>
             </div>
           </div>
-        </div>
+        ) : null}
 
-        {/* ─── Upload (no photo yet) ─── */}
-        {!photo && (
-          <div className="space-y-3">
+        {objects.map((object) => {
+          const isSelected = selectedId === object.instanceId;
+          return (
             <div
-              onClick={() => fileRef.current?.click()}
-              onDrop={onDrop}
-              onDragOver={(e) => e.preventDefault()}
-              className="border-2 border-dashed border-border rounded-xl p-16 text-center cursor-pointer hover:border-foreground/40 transition-colors"
+              key={object.instanceId}
+              role="button"
+              tabIndex={0}
+              aria-label={`Move ${object.product_name}`}
+              onPointerDown={(event) => onPointerDown(event, object)}
+              onKeyDown={(event) => {
+                if (event.key === "Delete" || event.key === "Backspace") {
+                  setObjects((current) => current.filter((item) => item.instanceId !== object.instanceId));
+                  setSelectedId(null);
+                }
+              }}
+              className={cn(
+                "group absolute w-[180px] -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none select-none outline-none md:w-[240px]",
+                isSelected && "cursor-grabbing",
+              )}
+              style={{ left: `${object.x}%`, top: `${object.y}%`, zIndex: object.z, transform: `translate(-50%, -50%) scale(${object.scale})` }}
             >
-              <Upload className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
-              <p className="font-body text-sm text-foreground mb-1">
-                Drop a room photo here, or click to upload
-              </p>
-              <p className="font-body text-xs text-muted-foreground">
-                JPEG or PNG · client-side only, nothing is saved yet
-              </p>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => onFile(e.target.files?.[0] ?? null)}
-              />
+              <div className={cn("relative transition-opacity duration-300", !isSelected && "group-hover:opacity-90")}>
+                <img
+                  src={optimizeImageUrl(object.image_url || "")}
+                  alt={object.product_name}
+                  draggable={false}
+                  className="h-40 w-full object-contain mix-blend-multiply drop-shadow-[0_14px_14px_hsl(var(--foreground)/0.08)] md:h-52"
+                />
+                {isSelected && <div className="pointer-events-none absolute inset-2 border border-foreground/30" />}
+              </div>
+              <div className={cn("mt-2 text-center transition-opacity duration-300", isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100")}>
+                <p className="font-body text-[9px] uppercase tracking-[0.15em] text-foreground/70">{object.product_name}</p>
+                <p className="mt-1 font-body text-[8px] uppercase tracking-[0.15em] text-muted-foreground">{object.brand_name}</p>
+              </div>
             </div>
-            <div className="flex items-center justify-center">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => { e.stopPropagation(); setAxoOpen(true); fetchAxoRequests(); }}
-              >
-                <Layers className="h-4 w-4 mr-2" /> Load from Axonometric Studio
+          );
+        })}
+
+        {sourceOpen && (
+          <div className="absolute bottom-44 left-1/2 z-[80] w-[min(1080px,calc(100%-32px))] -translate-x-1/2 bg-card px-5 py-5 shadow-elegant md:bottom-32 md:px-7">
+            <div className="mb-5 flex items-center gap-5 border-b border-border pb-4">
+              <div className="min-w-0 flex-1">
+                <p className="font-display text-lg text-foreground">Designer Collection Index</p>
+                <p className="mt-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Select an object to place it on the composition</p>
+              </div>
+              <div className="relative w-52 md:w-72">
+                <Search className="absolute left-0 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search collection"
+                  className="h-8 rounded-none border-0 border-b border-border bg-transparent pl-6 font-body text-[10px] uppercase tracking-[0.15em] shadow-none focus-visible:ring-0"
+                />
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setSourceOpen(false)} aria-label="Close collection index" className="h-8 w-8 rounded-none">
+                <X className="h-3.5 w-3.5" />
               </Button>
             </div>
-          </div>
-        )}
-
-        {/* ─── Workspace ─── */}
-        {photo && (
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
-            {/* Photo + surface tabs */}
-            <div>
-              {/* Surface tabs */}
-              <div className="flex flex-wrap gap-2 mb-3">
-                {SURFACES.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => setSurface(s.id)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-md border text-xs uppercase tracking-[0.12em] font-body transition-colors",
-                      surface === s.id
-                        ? "bg-foreground text-background border-foreground"
-                        : "bg-background text-muted-foreground border-border hover:border-foreground/40 hover:text-foreground",
-                    )}
-                    title={s.hint}
-                  >
-                    {s.label}
-                  </button>
-                ))}
-                <div className="ml-auto flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => { setAxoOpen(true); fetchAxoRequests(); }}
-                    title="Load a render delivered by the Axonometric Studio"
-                  >
-                    <Layers className="h-4 w-4 mr-1" /> Axonometric deliveries
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => { setPhoto(null); setPins([]); setRendered(false); }}>
-                    <X className="h-4 w-4 mr-1" /> New photo
-                  </Button>
-                </div>
-              </div>
-
-              {/* Photo */}
-              <div
-                ref={imgRef}
-                onClick={onPhotoClick}
-                className="relative w-full rounded-xl overflow-hidden border border-border bg-muted cursor-crosshair select-none"
-                style={{ aspectRatio: photoAspect ?? "16/10" }}
-              >
-                <img
-                  src={rendered && renderedImage ? renderedImage : photo}
-                  alt="Room"
-                  onLoad={(e) => {
-                    const el = e.currentTarget;
-                    if (el.naturalWidth && el.naturalHeight) {
-                      setPhotoAspect(`${el.naturalWidth} / ${el.naturalHeight}`);
-                    }
-                  }}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-
-                {/* Rendering overlay */}
-                {rendering && (
-                  <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm flex items-center justify-center z-30">
-                    <div className="bg-background/95 rounded-lg px-5 py-3 flex items-center gap-3 shadow-lg">
-                      <Loader2 className="h-4 w-4 animate-spin text-foreground" />
-                      <span className="font-body text-sm">Rendering surfaces…</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Rendered "after" badge */}
-                {rendered && renderedImage && !rendering && (
-                  <div className="absolute top-3 left-3 z-20 bg-background/95 px-3 py-1.5 rounded-md text-[10px] uppercase tracking-[0.18em] font-body shadow">
-                    AI render · after
-                  </div>
-                )}
-
-                {/* Pins */}
-                {pins.map((p) => {
-                  const sdef = SURFACES.find((s) => s.id === p.surface)!;
-                  const isActive = p.id === activePinId;
-                  return (
-                    <div
-                      key={p.id}
-                      onClick={(e) => { e.stopPropagation(); setActivePinId(p.id); }}
-                      className={cn(
-                        "absolute z-20 -translate-x-1/2 -translate-y-1/2 group",
-                        "flex flex-col items-center cursor-pointer",
-                      )}
-                      style={{ left: `${p.x * 100}%`, top: `${p.y * 100}%` }}
-                    >
-                      <div
-                        className={cn(
-                          "w-7 h-7 rounded-full border-2 border-background shadow-lg flex items-center justify-center text-[10px] font-body uppercase tracking-wider transition-transform",
-                          isActive ? "bg-foreground text-background scale-110" : "bg-background/90 text-foreground",
-                          p.swatch ? "ring-2 ring-emerald-500" : "",
-                        )}
-                      >
-                        {sdef.label[0]}
-                      </div>
-                      {p.swatch ? (
-                        <div className="mt-1 bg-background/95 rounded shadow-md flex items-center gap-1.5 pr-2">
-                          {p.swatch.image_url && (
-                            <img src={p.swatch.image_url} alt="" className="w-6 h-6 object-cover rounded-l" />
-                          )}
-                          <span className="font-body text-[10px] text-foreground whitespace-nowrap max-w-[140px] truncate">
-                            {p.swatch.name}
-                          </span>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); removePin(p.id); }}
-                            className="text-muted-foreground hover:text-foreground"
-                            aria-label="Remove pin"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ) : p.productHint ? (
-                        <div className="mt-1 bg-background/95 rounded shadow-md flex items-center gap-1.5 pr-2 border border-dashed border-foreground/30">
-                          {p.productHint.image_url && (
-                            <img src={p.productHint.image_url} alt="" className="w-6 h-6 object-cover rounded-l" />
-                          )}
-                          <div className="flex flex-col py-0.5">
-                            <span className="font-body text-[10px] text-foreground whitespace-nowrap max-w-[160px] truncate">
-                              {p.productHint.name}
-                            </span>
-                            {p.productHint.brand && (
-                              <span className="font-body text-[9px] uppercase tracking-wider text-muted-foreground whitespace-nowrap max-w-[160px] truncate">
-                                {p.productHint.brand}
-                              </span>
-                            )}
-                          </div>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); removePin(p.id); }}
-                            className="text-muted-foreground hover:text-foreground"
-                            aria-label="Remove pin"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ) : null}
-                    </div>
-                  );
-                })}
-
-
-                {/* Empty hint */}
-                {pins.length === 0 && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="bg-background/90 px-4 py-2.5 rounded-md flex items-center gap-2 shadow">
-                      <MousePointerClick className="h-4 w-4 text-foreground" />
-                      <span className="font-body text-xs text-foreground">
-                        Tap on the <strong>{SURFACES.find((s) => s.id === surface)!.label.toLowerCase()}</strong> to mark a surface
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Render bar */}
-              <div className="mt-4 flex items-center justify-between gap-4 p-4 rounded-lg border border-border bg-muted/30">
-                <div className="font-body text-xs text-muted-foreground">
-                  {pins.length === 0 ? "No surfaces marked yet." :
-                    `${pins.filter(p => p.swatch).length} of ${pins.length} surface${pins.length > 1 ? "s" : ""} have a finish applied.`}
-                </div>
-                <Button onClick={onRender} disabled={!canRender || rendering} size="sm">
-                  {rendering ? (
-                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Rendering…</>
-                  ) : (
-                    <><Sparkles className="h-4 w-4 mr-2" /> Render</>
-                  )}
+            <div className="flex h-48 gap-8 overflow-x-auto pb-3">
+              {loadingProducts ? (
+                <div className="flex w-full items-center justify-center"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>
+              ) : filteredProducts.length === 0 ? (
+                <div className="flex w-full items-center justify-center font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">No matching objects</div>
+              ) : filteredProducts.map((product) => (
+                <Button
+                  key={product.id}
+                  variant="ghost"
+                  onClick={() => addObject(product)}
+                  className="group h-full w-36 shrink-0 flex-col justify-end rounded-none p-0 hover:bg-transparent md:w-44"
+                >
+                  <img src={optimizeImageUrl(product.image_url || "")} alt="" loading="lazy" className="min-h-0 w-full flex-1 object-contain mix-blend-multiply transition-transform duration-500 group-hover:-translate-y-1" />
+                  <span className="mt-3 line-clamp-2 min-h-8 whitespace-normal text-center font-body text-[9px] uppercase leading-relaxed tracking-[0.15em] text-foreground/70">{product.product_name}</span>
+                  <span className="mt-1 max-w-full truncate font-body text-[8px] uppercase tracking-[0.15em] text-muted-foreground">{product.brand_name}</span>
                 </Button>
-              </div>
-
-              {renderError && (
-                <p className="mt-3 font-body text-xs text-destructive">
-                  {renderError}
-                </p>
-              )}
-
-              {rendered && renderedImage && !rendering && (
-                <div className="mt-3 flex items-center gap-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => { setRendered(false); setRenderedImage(null); }}
-                  >
-                    Show original
-                  </Button>
-                  <a
-                    href={renderedImage}
-                    download="visualiser-render.png"
-                    className="text-xs font-body underline text-muted-foreground hover:text-foreground"
-                  >
-                    Download render
-                  </a>
-                </div>
-              )}
-
-              <p className="mt-3 font-body text-[11px] text-muted-foreground italic">
-                Beta — AI render powered by Lovable AI. The model preserves room geometry and swaps only the
-                marked surfaces with the selected catalogue finishes.
-              </p>
-
-            </div>
-
-            {/* Finish library */}
-            <div className="border border-border rounded-xl bg-card flex flex-col h-[600px] sticky top-4">
-              <div className="p-4 border-b border-border">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-display text-sm uppercase tracking-[0.15em]">Finish library</h3>
-                  <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
-                    {swatches.length} options
-                  </span>
-                </div>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                  <Input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder={`Search ${SURFACES.find((s) => s.id === surface)!.label.toLowerCase()}…`}
-                    className="pl-9 h-9 text-sm"
-                  />
-                </div>
-                {surfaceSuppliers.length > 1 && (
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    <button
-                      onClick={() => setSupplierFilter(null)}
-                      className={cn(
-                        "px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider border transition",
-                        supplierFilter === null
-                          ? "bg-foreground text-background border-foreground"
-                          : "border-border text-muted-foreground hover:text-foreground",
-                      )}
-                    >
-                      All
-                    </button>
-                    {surfaceSuppliers.map((sup) => (
-                      <button
-                        key={sup}
-                        onClick={() => setSupplierFilter(sup)}
-                        className={cn(
-                          "px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider border transition",
-                          supplierFilter === sup
-                            ? "bg-foreground text-background border-foreground"
-                            : "border-border text-muted-foreground hover:text-foreground",
-                        )}
-                      >
-                        {sup}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {!activePinId && pins.length > 0 && (
-                  <p className="mt-2 font-body text-[11px] text-muted-foreground">
-                    Tap a pin on the photo to apply a finish.
-                  </p>
-                )}
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-3">
-                {loadingSwatches ? (
-                  <div className="flex items-center justify-center h-32 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  </div>
-                ) : swatches.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-40 text-center px-6">
-                    <ImageIcon className="h-6 w-6 text-muted-foreground mb-2" />
-                    <p className="font-body text-xs text-muted-foreground">
-                      No finishes match this surface yet.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-2">
-                    {swatches.map((sw) => (
-                      <button
-                        key={sw.id}
-                        onClick={() => applySwatch(sw)}
-                        disabled={!activePinId}
-                        className={cn(
-                          "group text-left rounded-md overflow-hidden border border-border bg-background transition-all",
-                          activePinId ? "hover:border-foreground/40 cursor-pointer" : "opacity-50 cursor-not-allowed",
-                        )}
-                      >
-                        <div className="aspect-square bg-muted overflow-hidden">
-                          {sw.image_url && (
-                            <img
-                              src={sw.image_url}
-                              alt={sw.name}
-                              loading="lazy"
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
-                          )}
-                        </div>
-                        <div className="px-2 py-1.5">
-                          <div className="font-body text-[10px] uppercase tracking-wider text-muted-foreground truncate">
-                            {sw.supplier || sw.category || "—"}
-                          </div>
-                          <div className="font-body text-xs text-foreground truncate">
-                            {sw.name}
-                          </div>
-                          {sw.tier && (
-                            <div className="font-body text-[10px] tracking-wider uppercase text-muted-foreground mt-0.5">
-                              CAT {sw.tier}
-                            </div>
-                          )}
-                        </div>
-
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              ))}
             </div>
           </div>
         )}
-      </div>
 
-      {/* ─── Axonometric Studio deliveries dialog ─── */}
-      <Dialog open={axoOpen} onOpenChange={setAxoOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="font-display text-base">Axonometric Studio deliveries</DialogTitle>
-            <DialogDescription className="font-body text-xs">
-              Reopen a completed render here to re-pin surfaces and swap fabrics, finishes or rugs.
-            </DialogDescription>
-          </DialogHeader>
+        {layersOpen && (
+          <div className="absolute bottom-44 left-1/2 z-[81] w-[min(440px,calc(100%-32px))] -translate-x-1/2 bg-card px-6 py-5 shadow-elegant md:bottom-32">
+            <div className="flex items-center justify-between border-b border-border pb-4">
+              <div>
+                <p className="font-display text-base">Layer Order</p>
+                <p className="mt-1 max-w-72 truncate font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{selected?.product_name || "Select an object on the canvas"}</p>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setLayersOpen(false)} aria-label="Close layer controls" className="h-8 w-8 rounded-none"><X className="h-3.5 w-3.5" /></Button>
+            </div>
+            <div className="mt-5 grid grid-cols-2 gap-x-8 gap-y-2">
+              <Button variant="ghost" disabled={!selected} onClick={() => moveLayer("up")} className="justify-start rounded-none px-0 font-body text-[9px] uppercase tracking-[0.15em]"><ArrowUp /> Bring Forward</Button>
+              <Button variant="ghost" disabled={!selected} onClick={() => moveLayer("down")} className="justify-start rounded-none px-0 font-body text-[9px] uppercase tracking-[0.15em]"><ArrowDown /> Send Back</Button>
+              <Button variant="ghost" disabled={!selected} onClick={() => resizeSelected(0.1)} className="justify-start rounded-none px-0 font-body text-[9px] uppercase tracking-[0.15em]"><Plus /> Increase Scale</Button>
+              <Button variant="ghost" disabled={!selected} onClick={() => resizeSelected(-0.1)} className="justify-start rounded-none px-0 font-body text-[9px] uppercase tracking-[0.15em]"><span className="text-base">−</span> Reduce Scale</Button>
+            </div>
+          </div>
+        )}
 
-          {axoLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        {resetOpen && (
+          <div className="absolute bottom-44 left-1/2 z-[82] w-[min(420px,calc(100%-32px))] -translate-x-1/2 bg-card px-7 py-6 shadow-elegant md:bottom-32">
+            <p className="font-display text-lg">Reset this composition?</p>
+            <p className="mt-2 font-body text-[10px] leading-relaxed tracking-[0.08em] text-muted-foreground">The backdrop and every placed object will be removed from this sandbox.</p>
+            <div className="mt-5 flex justify-end gap-5">
+              <Button variant="ghost" onClick={() => setResetOpen(false)} className="rounded-none px-0 font-body text-[9px] uppercase tracking-[0.15em]">Cancel</Button>
+              <Button variant="ghost" onClick={resetSandbox} className="rounded-none px-0 font-body text-[9px] uppercase tracking-[0.15em] text-destructive hover:text-destructive">Reset Sandbox</Button>
             </div>
-          ) : axoRequests.length === 0 ? (
-            <div className="border border-dashed border-border rounded-lg py-10 text-center">
-              <Layers className="w-7 h-7 text-muted-foreground/40 mx-auto mb-2" />
-              <p className="font-body text-sm text-muted-foreground">
-                No completed deliveries yet. Submit a brief in the Axonometric Studio and the rendered result will appear here.
-              </p>
-            </div>
-          ) : (
-            <div className="max-h-[60vh] overflow-y-auto -mx-1 px-1 space-y-2">
-              {axoRequests.map((req) => {
-                const linkedCount = Array.isArray(req.linked_favorite_product_ids)
-                  ? req.linked_favorite_product_ids.length
-                  : 0;
-                const importing = importingAxoId === req.id;
-                return (
-                  <button
-                    key={req.id}
-                    onClick={() => importAxoDelivery(req)}
-                    disabled={!!importingAxoId}
-                    className="w-full text-left flex gap-3 p-3 rounded-lg border border-border hover:border-foreground/40 hover:bg-muted/30 transition-colors disabled:opacity-50"
-                  >
-                    <img
-                      src={req.result_image_url}
-                      alt=""
-                      className="w-24 h-24 object-cover rounded-md border border-border shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-display text-sm text-foreground truncate">
-                        {req.project_name || "Untitled"}
-                      </p>
-                      <p className="font-body text-[11px] text-muted-foreground capitalize">
-                        {(req.request_type || "elevation").replace("_", " ")} · delivered
-                      </p>
-                      {linkedCount > 0 && (
-                        <p className="font-body text-[11px] text-[hsl(var(--gold))] mt-1">
-                          {linkedCount} linked product{linkedCount === 1 ? "" : "s"} will pre-pin
-                        </p>
-                      )}
-                    </div>
-                    {importing ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground self-center" />
-                    ) : (
-                      <span className="self-center font-body text-[10px] uppercase tracking-wider text-muted-foreground">
-                        Open
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+          </div>
+        )}
+
+        <div className="absolute bottom-20 left-1/2 z-[90] grid w-[calc(100%-24px)] -translate-x-1/2 grid-cols-2 items-center border border-border bg-card p-1.5 shadow-elegant md:bottom-8 md:flex md:w-auto md:max-w-[calc(100%-24px)] md:rounded-full md:px-2">
+          <Button variant="ghost" onClick={() => { setSourceOpen((open) => !open); setLayersOpen(false); setResetOpen(false); }} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><Plus /> Add Object</Button>
+          <span className="hidden h-5 w-px shrink-0 bg-border md:block" />
+          <Button variant="ghost" onClick={() => fileRef.current?.click()} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><ImageUp /><span className="md:hidden">Upload Backdrop</span><span className="hidden md:inline">Upload Canvas Backdrop</span></Button>
+          <span className="hidden h-5 w-px shrink-0 bg-border md:block" />
+          <Button variant="ghost" onClick={() => { setLayersOpen((open) => !open); setSourceOpen(false); setResetOpen(false); }} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><Layers3 /> Layer Order</Button>
+          <span className="hidden h-5 w-px shrink-0 bg-border md:block" />
+          <Button variant="ghost" onClick={() => { setResetOpen(true); setSourceOpen(false); setLayersOpen(false); }} className="h-10 rounded-none px-2 font-body text-[8px] uppercase tracking-[0.12em] text-foreground hover:bg-muted/50 md:rounded-full md:px-4 md:text-[9px] md:tracking-[0.15em]"><X /> Reset Sandbox</Button>
+        </div>
+
+        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => uploadBackdrop(event.target.files?.[0] ?? null)} />
+      </section>
     </>
   );
 };
