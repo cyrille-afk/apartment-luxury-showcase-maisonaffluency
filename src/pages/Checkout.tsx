@@ -155,6 +155,8 @@ export type CheckoutSummary = {
   deliveryCents: number;
   /** THE Order Total: goods − discount + delivery + tax. Used by every UI block. */
   totalCents: number;
+  /** Row-consistent display total (each row rounded to dollars, then summed). */
+  displayTotalCents: number;
   /** Amount captured now (excludes unconfirmed estimated freight). */
   chargeTotalCents: number;
 };
@@ -177,12 +179,25 @@ export const deriveCheckoutTotals = (input: {
   const goodsCents = Math.max(0, input.subtotalCents - input.discountCents);
   const deliveryCents = input.shippingCents > 0 ? input.shippingCents : input.estimatedShippingCents;
   const taxCents = Math.max(0, input.taxCents);
+  // FX conversion can leave fractional cents (e.g. 10,187.55). Every summary
+  // row displays Math.round(cents/100) dollars, so the displayed ORDER TOTAL
+  // must be the sum of those displayed rows — otherwise the page shows
+  // 10,188 + 1,471 + 917 ≠ 12,575. Round each component to whole dollars
+  // first, then add: displayTotal is ALWAYS row-consistent.
+  const roundDollar = (c: number) => Math.round(c / 100) * 100;
   return {
     goodsCents,
     deliveryCents,
     taxCents,
     /** Displayed everywhere: subtotal + delivery + tax. Nothing else. */
     totalCents: goodsCents + deliveryCents + taxCents,
+    /**
+     * Row-consistent display total: roundDollar(goods) + roundDollar(delivery)
+     * + roundDollar(tax), so the total always equals the sum of the rows the
+     * buyer sees. Use this for ORDER TOTAL and every action-button amount.
+     */
+    displayTotalCents:
+      roundDollar(goodsCents) + roundDollar(deliveryCents) + roundDollar(taxCents),
     /** Charged now: excludes freight that no advisor has confirmed yet. */
     chargeTotalCents: goodsCents + input.shippingCents + taxCents,
   };
@@ -325,7 +340,7 @@ function OrderSummary({
   const fxRates = useFxRates();
   const usdSgd = useUsdToSgdRate();
   // Single source of truth — never re-derive a total in a UI block.
-  const displayedTotalCents = summary.totalCents;
+  const displayedTotalCents = summary.displayTotalCents;
   const sgdEquivalentCents =
     currency.toUpperCase() === "USD"
       ? Math.round(displayedTotalCents * usdSgd.rate)
@@ -575,7 +590,7 @@ function OrderSummary({
               <dt className="font-medium uppercase text-[11px] tracking-[0.2em]">Order Total</dt>
               <dd className="tabular-nums font-medium text-base">
                 {money(
-                  summary.totalCents,
+                  summary.displayTotalCents,
                   currency,
                 )}
               </dd>
@@ -618,7 +633,7 @@ function MobileCheckoutSummary({
 }) {
   const [open, setOpen] = useState(false);
   // Single source of truth — never re-derive a total in a UI block.
-  const displayedTotalCents = summary.totalCents;
+  const displayedTotalCents = summary.displayTotalCents;
 
   return (
     <section className="fixed left-0 top-[var(--mobile-nav-height)] z-40 w-full border-b border-border bg-background md:top-[var(--header-h)] lg:hidden">
@@ -840,7 +855,7 @@ function PaymentForm({
     return () => clearTimeout(t);
   }, [paymentReady]);
 
-  const { totalCents: total, currency } = summary;
+  const { displayTotalCents: total, currency } = summary;
   const paynow = method === "paynow";
 
   const confirm = async () => {
@@ -1179,7 +1194,7 @@ function WireForm({
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
-  const { totalCents: total, currency } = summary;
+  const { displayTotalCents: total, currency } = summary;
 
   /* Region drives the settlement channel: the signed-in trade profile wins,
      otherwise we fall back to the chosen shipping destination.              */
@@ -1565,6 +1580,7 @@ export default function Checkout() {
       taxShipping: Boolean(rule?.taxShipping),
       deliveryCents: totals.deliveryCents,
       totalCents: totals.totalCents,
+      displayTotalCents: totals.displayTotalCents,
       chargeTotalCents: totals.chargeTotalCents,
     };
   }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, estimate.capped, estimate.notice, formCountry, serverTax, buyerType, buyerGstNumber]);

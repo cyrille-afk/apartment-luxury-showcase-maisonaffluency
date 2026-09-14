@@ -31,7 +31,9 @@ export const TAX_RULES: TaxRule[] = [
     currencies: ["sgd"],
     rate: 0.09,
     name: "GST",
-    taxShipping: true,
+    // GST applies to the value of the goods only — delivery/freight is NOT
+    // inside the 9% tax loop.
+    taxShipping: false,
     registrationNumber: "UEN 201717288Z",
   },
 ];

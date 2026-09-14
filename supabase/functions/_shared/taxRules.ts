@@ -17,7 +17,8 @@ export interface TaxRule {
 }
 
 export const TAX_RULES: TaxRule[] = [
-  { country: "SG", currencies: ["sgd"], rate: 0.09, name: "GST", taxShipping: true, registrationNumber: "UEN 201717288Z" },
+  // GST applies to the value of the goods only — delivery/freight is NOT taxed.
+  { country: "SG", currencies: ["sgd"], rate: 0.09, name: "GST", taxShipping: false, registrationNumber: "UEN 201717288Z" },
 ];
 
 export const resolveTaxRule = (
