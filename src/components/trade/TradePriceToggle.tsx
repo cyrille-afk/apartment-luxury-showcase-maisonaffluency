@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { useClientSafeMode } from "@/lib/clientSafeMode";
 
 const STORAGE_KEY = "trade:show-trade-price";
 
@@ -18,7 +19,8 @@ let currentValue = readInitial();
  */
 export function useTradePriceMode() {
   const trade = useTradeDiscount();
-  const [showTradePrice, setLocal] = useState<boolean>(currentValue);
+  const { clientSafe, setClientSafe } = useClientSafeMode();
+  const [showTradePrice, setLocal] = useState<boolean>(() => !clientSafe && currentValue);
 
   useEffect(() => {
     const cb = (v: boolean) => setLocal(v);
@@ -28,13 +30,19 @@ export function useTradePriceMode() {
     };
   }, []);
 
+  useEffect(() => {
+    setLocal(!clientSafe);
+    currentValue = !clientSafe;
+  }, [clientSafe]);
+
   const setShowTradePrice = useCallback((v: boolean) => {
     currentValue = v;
     if (typeof window !== "undefined") {
       window.localStorage.setItem(STORAGE_KEY, v ? "1" : "0");
     }
+    setClientSafe(!v);
     listeners.forEach((l) => l(v));
-  }, []);
+  }, [setClientSafe]);
 
   return {
     showTradePrice,

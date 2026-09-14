@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProject } from "@/hooks/useProjects";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Switch } from "@/components/ui/switch";
+import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 
 type StudioItem = {
   id: string;
@@ -50,7 +51,8 @@ export default function TradeProjectStudio() {
   const { project, loading } = useProject(id);
   const [items, setItems] = useState<StudioItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
-  const [clientView, setClientView] = useState(false);
+  const { showTradePrice, setShowTradePrice } = useTradePriceMode();
+  const clientView = !showTradePrice;
 
   useEffect(() => {
     if (!id) return;
@@ -259,7 +261,11 @@ export default function TradeProjectStudio() {
               <span className="font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
                 Client view
               </span>
-              <Switch checked={clientView} onCheckedChange={setClientView} aria-label="Client view" />
+              <Switch
+                checked={clientView}
+                onCheckedChange={(checked) => setShowTradePrice(!checked)}
+                aria-label="Client view"
+              />
             </div>
           </div>
 

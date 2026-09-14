@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 import PriceModeSelector from "@/components/trade/PriceModeSelector";
+import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher";
 import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 
