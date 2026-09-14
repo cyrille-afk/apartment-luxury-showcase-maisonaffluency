@@ -141,9 +141,19 @@ serve(async (req) => {
       taxRule !== null &&
       taxRule.country === "SG";
 
+    // GST is charged on the full CIF value: goods + freight. Until freight is
+    // confirmed, the client-supplied estimate feeds the TAX BASE ONLY — it is
+    // never added to the charged amount.
+    const rawEstimatedFreight = Number(body?.estimatedFreightCents);
+    const estimatedFreightCents =
+      !shippingConfirmed && Number.isFinite(rawEstimatedFreight) && rawEstimatedFreight > 0
+        ? Math.round(rawEstimatedFreight)
+        : 0;
+    if (estimatedFreightCents > 5_000_000) return json({ error: "Shipping amount out of range." }, 400);
+    const freightForTaxCents = shippingCents > 0 ? shippingCents : estimatedFreightCents;
     const taxCents = isB2BZeroRated
       ? 0
-      : computeTaxCents(goodsAmount, shippingCents, taxRule);
+      : computeTaxCents(goodsAmount, freightForTaxCents, taxRule);
     const taxLabel = isB2BZeroRated
       ? B2B_TAX_LABEL
       : (taxRule ? taxRowLabel(taxRule) : null);
