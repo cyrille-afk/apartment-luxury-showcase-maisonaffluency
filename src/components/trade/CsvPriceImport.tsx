@@ -233,22 +233,26 @@ export default function CsvPriceImport({ onComplete, minimal }: { onComplete?: (
     onComplete?.();
   };
 
-  return (
-    <>
-      <div className="flex items-center gap-1.5">
-        <Button variant="outline" size="sm" className="gap-1.5 bg-white text-foreground border-white/60 hover:bg-white/90" onClick={() => fileRef.current?.click()}>
-          <FileSpreadsheet className="h-3.5 w-3.5" />
-          Import Prices (CSV)
-        </Button>
-        <Button variant="outline" size="sm" className="gap-1 bg-white/80 text-foreground border-white/60 hover:bg-white/90" onClick={exportCurrentProducts}>
-          <Download className="h-3 w-3" />
-          Export Products
-        </Button>
-        <Button variant="outline" size="sm" className="gap-1 bg-white/80 text-foreground border-white/60 hover:bg-white/90" onClick={downloadTemplate}>
-          <Download className="h-3 w-3" />
-          Template
-        </Button>
-      </div>
+  if (minimal) {
+    return (
+      <>
+        <div className="flex items-center gap-6">
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            [↑] CSV IMPORT
+          </button>
+          <button
+            type="button"
+            onClick={exportCurrentProducts}
+            className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            [↓] EXPORT SHEETS
+          </button>
+        </div>
+
       <input ref={fileRef} type="file" accept=".csv,.txt" className="hidden" onChange={handleFile} />
 
       <Dialog open={open} onOpenChange={setOpen}>
