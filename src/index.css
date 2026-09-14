@@ -933,9 +933,8 @@ input, select, textarea {
     margin: 0;
   }
 
-  body:has(.proposal-preview-shell[data-state="open"]) > *:not(#root),
-  body:has(.proposal-preview-shell[data-state="open"]) #root > * {
-    visibility: hidden;
+  body:has(.proposal-preview-shell[data-state="open"]) > *:not(.proposal-preview-shell) {
+    display: none !important;
   }
 
   .proposal-preview-shell[data-state="open"],
@@ -959,8 +958,9 @@ input, select, textarea {
 
   .proposal-print-sheet {
     display: block !important;
+    box-sizing: border-box !important;
     width: 210mm !important;
-    min-height: 297mm !important;
+    min-height: 296.5mm !important;
     margin: 0 !important;
     background: white !important;
     box-shadow: none !important;
@@ -971,8 +971,17 @@ input, select, textarea {
   .proposal-print-sheet header,
   .proposal-print-sheet footer,
   .proposal-line-item {
+    display: grid;
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+
+  .proposal-print-sheet header {
+    display: flex !important;
+  }
+
+  .proposal-print-sheet footer {
+    display: flex !important;
   }
 
   .proposal-line-item img {
