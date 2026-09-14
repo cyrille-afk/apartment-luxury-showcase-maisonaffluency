@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useStudioBridge, useStudioAlerts } from "@/hooks/useStudioBridge";
 import { StudioBridgeSidebar } from "@/components/trade/StudioBridgeSidebar";
+import { pushRecentProject, useProjects } from "@/hooks/useProjects";
 
 
 const coreItems = [
@@ -43,6 +44,8 @@ export function TradeSidebar() {
   const { count: flaggedCount } = useStudioBridge();
   const { count: alertCount } = useStudioAlerts();
   const bridgeCount = flaggedCount + alertCount;
+  const { projects: activeProjects } = useProjects({ activeOnly: true });
+  const recentActiveProjects = activeProjects.slice(0, 2);
 
 
   useEffect(() => {
@@ -143,6 +146,25 @@ export function TradeSidebar() {
                         )}
                       </NavLink>
                     </SidebarMenuButton>
+                    {item.url === "/trade/projects" && !collapsed && recentActiveProjects.length > 0 && (
+                      <ul
+                        aria-label="Recent active project workspaces"
+                        className="ml-10 mr-2 mt-0.5 mb-2 space-y-0.5 border-l border-border pl-3"
+                      >
+                        {recentActiveProjects.map((project) => (
+                          <li key={project.id}>
+                            <NavLink
+                              to={`/trade/projects/${project.id}/studio`}
+                              onClick={() => pushRecentProject(project.id)}
+                              className="block py-1.5 font-body text-[10px] leading-relaxed text-muted-foreground transition-colors hover:text-foreground"
+                              activeClassName="text-foreground"
+                            >
+                              {project.name}
+                            </NavLink>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </SidebarMenuItem>
                 );
               })}
