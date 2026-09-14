@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
+import { useExportCurrency } from "@/lib/displayMoney";
 import PrivateTradeImage from "@/components/trade/PrivateTradeImage";
 
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
@@ -82,6 +83,8 @@ export default function ProposalBuilder({
 }: ProposalBuilderProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  // Proposal figures follow the member's declared base preference currency.
+  const exportCurrency = useExportCurrency();
   const externalFileRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [creatingPresentation, setCreatingPresentation] = useState(false);
@@ -598,11 +601,9 @@ export default function ProposalBuilder({
         if (showPrices && pricing) {
           const price = pricing.trade_price_cents ?? pricing.rrp_price_cents;
           if (price) {
-            const formatted = new Intl.NumberFormat("en-SG", {
-              style: "currency",
-              currency: pricing.currency || "SGD",
-              minimumFractionDigits: 0,
-            }).format(price / 100);
+            const formatted = exportCurrency.format(
+              exportCurrency.convert(price, pricing.currency),
+            );
             desc += `\nPrice: ${formatted}${pricing.trade_price_cents ? " (Trade)" : " (RRP)"}`;
           } else {
             desc += `\nPrice upon Request`;

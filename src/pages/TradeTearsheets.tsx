@@ -21,6 +21,7 @@ import { getConciergeSession, useConciergeSession } from "@/hooks/useConciergeSe
 import { withImperialInline } from "@/lib/formatDimensions";
 import { formatLeadTime } from "@/components/trade/AvailabilityBadge";
 import { buildTearsheetPrintHtml } from "@/lib/tearsheetPrintHtml";
+import { useExportCurrency } from "@/lib/displayMoney";
 
 interface TearsheetProduct {
   id: string;
@@ -698,11 +699,17 @@ export default function TradeTearsheets() {
 
   const handlePrint = () => {
     if (!printRef.current || !selectedProduct) return;
+    // Print in the member's declared base currency, ledger formatting.
+    const printedPriceCents = exportCurrency.convert(snapshotPriceCents, selectedProduct.currency) || null;
     const win = window.open("", "_blank");
     if (!win) return;
     win.document.write(
       buildTearsheetPrintHtml({
-        selectedProduct: { ...selectedProduct, trade_price_cents: snapshotPriceCents },
+        selectedProduct: {
+          ...selectedProduct,
+          trade_price_cents: printedPriceCents,
+          currency: exportCurrency.currency,
+        },
         chosenFinishes,
         dimensionsDisplay,
         materialsDisplay,
@@ -712,6 +719,8 @@ export default function TradeTearsheets() {
     win.document.close();
     win.print();
   };
+
+  const exportCurrency = useExportCurrency();
 
   const snapshotPriceCents = useMemo(
     () => resolveSnapshotVariantPrice(selectedProduct?.size_variants, chosenFinishes) ?? selectedProduct?.trade_price_cents ?? null,

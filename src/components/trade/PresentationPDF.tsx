@@ -116,16 +116,15 @@ const formatDate = (dateStr: string) => {
   }
 };
 
-const formatPrice = (cents: number, currency = "SGD") => {
-  const amt = (cents / 100).toLocaleString("en-SG", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-  return `${currency} ${amt}`;
-};
+const formatPrice = (cents: number, currency = "SGD") =>
+  formatMoneyIn(cents, (currency || "SGD").toUpperCase(), "On request");
 
 const parseProducts = (linked: any): ProductData[] => {
   if (!linked) return [];
   if (Array.isArray(linked)) return linked;
   try { return JSON.parse(linked); } catch { return []; }
 };
+import { formatMoneyIn } from "@/lib/displayMoney";
 import { LIABILITY_ANCHOR, slideIsQuoteBearing } from "@/lib/slideIsQuoteBearing";
 export { LIABILITY_ANCHOR, slideIsQuoteBearing };
 
