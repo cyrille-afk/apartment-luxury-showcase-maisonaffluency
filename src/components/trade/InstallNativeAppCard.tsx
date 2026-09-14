@@ -55,10 +55,10 @@ export function InstallNativeAppCard() {
     <>
       <section
         aria-label="Install Maison Affluency on your phone"
-        className="rounded-lg border border-[hsl(var(--gold))/0.3] bg-muted/20 p-3 md:p-4 flex items-center gap-3 md:gap-4"
+        className="md:col-span-5 bg-background p-5 md:p-7 flex items-center gap-4 md:gap-6"
       >
         {/* QR */}
-        <div className="w-[104px] h-[104px] md:w-[116px] md:h-[116px] rounded-md border border-border bg-white flex items-center justify-center overflow-hidden shrink-0">
+        <div className="w-[104px] h-[104px] md:w-[116px] md:h-[116px] bg-background flex items-center justify-center overflow-hidden shrink-0">
           {state === "ready" && dataUrl ? (
             <img src={dataUrl} alt="Scan to sign in on your phone" className="w-full h-full" />
           ) : state === "error" ? (
@@ -75,10 +75,10 @@ export function InstallNativeAppCard() {
 
         {/* Copy + actions */}
         <div className="min-w-0 flex-1">
-          <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="trade-micro-label font-body text-muted-foreground">
             New · Mobile essentials
           </p>
-          <h3 className="font-display text-sm md:text-base text-foreground leading-snug mt-0.5">
+          <h3 className="font-display text-lg md:text-xl text-foreground leading-snug mt-1">
             Install the Native App on your phone
           </h3>
           <p className="font-body text-[11px] md:text-xs text-muted-foreground leading-tight mt-0.5">
@@ -89,7 +89,7 @@ export function InstallNativeAppCard() {
             <button
               type="button"
               onClick={() => setModalOpen(true)}
-              className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1 font-body text-[10px] uppercase tracking-[0.15em] text-foreground/80 hover:text-foreground hover:bg-muted transition-colors"
+              className="inline-flex items-center gap-1 border-b border-foreground py-1 font-body text-[10px] uppercase tracking-[0.15em] text-foreground/80 hover:text-foreground transition-colors"
             >
               How to install
             </button>
@@ -103,7 +103,7 @@ export function InstallNativeAppCard() {
                   source: "dashboard_install_card",
                 })
               }
-              className="inline-flex items-center gap-1 rounded-md bg-[hsl(var(--pdf-red))]/10 border border-[hsl(var(--pdf-red))]/30 px-2 py-1 font-body text-[10px] text-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/20 transition-colors"
+              className="inline-flex items-center gap-1 border-b border-border py-1 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors"
             >
               <Download className="h-3 w-3" /> PDF
             </a>

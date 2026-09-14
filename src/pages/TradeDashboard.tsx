@@ -232,14 +232,14 @@ const TradeDashboard = () => {
   return (
     <>
       <Helmet><title>Dashboard — Trade Portal — Maison Affluency</title></Helmet>
-    <div className="w-full">
-      <div className="mb-6 md:mb-8">
+    <div className="trade-dashboard w-full max-w-[1500px] mx-auto">
+      <div className="mb-10 md:mb-14 lg:mb-16 border-b border-border pb-7 md:pb-9">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="font-display text-xl md:text-2xl lg:text-3xl text-foreground">
+            <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-normal text-foreground leading-none">
               Welcome back{profile?.first_name ? `, ${profile.first_name}` : ""}
             </h1>
-            <p className="font-body text-xs md:text-sm text-muted-foreground mt-1.5">
+            <p className="trade-micro-label font-body text-muted-foreground mt-4">
               {profile?.company && <span>{profile.company} · </span>}
               Your trade dashboard
             </p>
@@ -254,23 +254,23 @@ const TradeDashboard = () => {
 
 
       {/* Mobile Essentials + Live Walkthrough — two distinct pinned sections */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-0 mb-10 md:mb-16 border-y border-border">
         {/* Install Native App (inline QR + install steps) */}
         <InstallNativeAppCard />
 
         {/* Live Walkthrough with AI Concierge */}
         <Link
           to="/trade-demo"
-          className="group flex items-center gap-3 md:gap-4 rounded-lg border border-[hsl(var(--gold))/0.3] bg-[hsl(var(--gold)/0.05)] p-3 md:p-4 hover:border-[hsl(var(--gold))/0.5] hover:bg-[hsl(var(--gold)/0.08)] transition-colors"
+          className="group md:col-span-7 flex items-center gap-4 md:gap-6 bg-muted/30 p-5 md:p-7 transition-colors hover:bg-muted/50 md:border-l md:border-border"
         >
-          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[hsl(var(--gold))/0.4] bg-[hsl(var(--gold)/0.12)] text-[hsl(var(--gold))]">
+          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center border border-foreground text-foreground">
             <Sparkles className="h-4 w-4" aria-hidden="true" />
           </span>
           <div className="flex-1 min-w-0">
-            <p className="font-body text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--gold))]">
+            <p className="trade-micro-label font-body text-muted-foreground">
               Live walkthrough
             </p>
-            <h3 className="font-display text-sm md:text-base text-foreground leading-snug mt-0.5">
+            <h3 className="font-display text-lg md:text-xl text-foreground leading-snug mt-1">
               Experience the Trade Portal with AI Concierge
             </h3>
             <p className="font-body text-[11px] md:text-xs text-muted-foreground leading-tight mt-0.5">
@@ -284,7 +284,7 @@ const TradeDashboard = () => {
               e.preventDefault();
               navigate("/trade-demo");
             }}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[hsl(var(--gold))] border border-[hsl(var(--gold))] px-3 py-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-background hover:bg-[hsl(var(--gold))/0.85] transition-colors"
+              className="inline-flex shrink-0 items-center gap-1.5 border-b border-foreground px-0 py-1.5 font-body text-[10px] uppercase tracking-[0.15em] text-foreground hover:opacity-60 transition-opacity"
             title="8-step interactive demo"
           >
             ▶ Start Demo
@@ -292,21 +292,21 @@ const TradeDashboard = () => {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-        {DASH_CARDS.map((card) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-x-5 gap-y-10 md:gap-y-14">
+        {DASH_CARDS.map((card, index) => (
           <Link
             key={card.to}
             to={card.to}
             data-tour-target={card.key === "dash-designers" ? "designers" : card.key === "dash-library" ? "resources" : undefined}
-            className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 hover:shadow-sm transition-all tour-target"
+            className={`group block tour-target ${index === 0 ? "lg:col-span-7" : index === 1 ? "lg:col-span-5" : "lg:col-span-4"}`}
           >
-            <div className="relative aspect-[3/2] overflow-hidden">
+            <div className={`relative overflow-hidden bg-muted ${index === 0 ? "aspect-[16/9]" : index === 1 ? "aspect-[10/9]" : "aspect-[4/3]"}`}>
               {getCardImage(card) ? (
                 <img
                   src={getCardImage(card)}
                   alt={card.title}
                   loading="lazy"
-                  className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${getCardPosition(card)}`}
+                  className={`w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.025] ${getCardPosition(card)}`}
                 />
               ) : (
                 <div className="w-full h-full bg-muted flex items-center justify-center">
@@ -315,14 +315,15 @@ const TradeDashboard = () => {
               )}
               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors" />
               {card.key === "dash-3d-studio" && studioStats.count > 0 && (
-                <span className="absolute top-2 right-2 inline-flex items-center px-2 py-0.5 rounded-full bg-background/80 backdrop-blur-sm font-body text-[10px] text-foreground border border-border">
+                <span className="absolute top-3 right-3 inline-flex items-center px-2 py-1 bg-background/90 font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
                   {studioStats.count} render{studioStats.count !== 1 ? "s" : ""}
                 </span>
               )}
             </div>
-            <div className={`p-3 md:p-4 ${card.key === "dash-3d-studio" ? "bg-foreground" : ""}`}>
-              <h3 className={`font-display text-sm md:text-base mb-0.5 md:mb-1 ${card.key === "dash-3d-studio" ? "text-background" : "text-foreground"}`}>{card.title}</h3>
-              <p className={`font-body text-[10px] md:text-xs leading-tight ${card.key === "dash-3d-studio" ? "text-background/70" : "text-muted-foreground"}`}>{card.description}</p>
+            <div className="pt-4 border-t border-border mt-3">
+              <p className="trade-micro-label text-muted-foreground mb-1">0{index + 1} — Collection</p>
+              <h3 className="font-display text-lg md:text-xl text-foreground mb-1">{card.title}</h3>
+              <p className="font-body text-[11px] md:text-xs leading-relaxed text-muted-foreground">{card.description}</p>
             </div>
           </Link>
         ))}
@@ -335,23 +336,23 @@ const TradeDashboard = () => {
       <BoardRecommendations />
 
       {/* Recent Activity */}
-      <div className="mt-10">
-        <h2 className="font-display text-lg text-foreground mb-4 flex items-center gap-2">
+      <div className="mt-16 md:mt-24">
+        <h2 className="font-display text-2xl text-foreground mb-6 flex items-center gap-3">
           <Clock className="h-4 w-4 text-muted-foreground" />
           Recent Activity
         </h2>
         {loading ? (
-          <div className="border border-border rounded-lg divide-y divide-border">
+          <div className="divide-y divide-border border-y border-border">
             {Array.from({ length: 4 }).map((_, i) => <ActivityRowSkeleton key={i} />)}
           </div>
         ) : activity.length === 0 ? (
-          <div className="border border-dashed border-border rounded-lg p-8 text-center">
+          <div className="border-y border-border py-12 text-center">
             <p className="font-body text-sm text-muted-foreground">
               No recent activity yet. Start by browsing the gallery or uploading documents.
             </p>
           </div>
         ) : (
-          <div className="border border-border rounded-lg divide-y divide-border">
+          <div className="divide-y divide-border border-y border-border">
             {activity.map((item) => {
               const inner = (
                 <>
@@ -391,30 +392,30 @@ const TradeDashboard = () => {
       </div>
 
       {/* Brand Folders */}
-      <div className="mt-10">
-        <h2 className="font-display text-lg text-foreground mb-4">Brands</h2>
+      <div className="mt-16 md:mt-24">
+        <h2 className="font-display text-2xl text-foreground mb-6">Brands</h2>
         {loading ? (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 md:gap-3">
             {Array.from({ length: 10 }).map((_, i) => <BrandFolderSkeleton key={i} />)}
           </div>
         ) : brands.length === 0 ? (
-          <div className="border border-dashed border-border rounded-lg p-8 text-center">
+          <div className="border-y border-border py-12 text-center">
             <p className="font-body text-sm text-muted-foreground">
               No brands available yet.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 md:gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 border-t border-l border-border">
             {brands.map((brand) => {
               const isEmpty = brand.doc_count === 0;
               return (
                 <Link
                   key={brand.brand_name}
                   to={`/trade/documents?brand=${encodeURIComponent(brand.brand_name)}`}
-                  className={`group flex flex-col items-center gap-2 border rounded-lg p-4 transition-all ${
+                  className={`group flex min-h-36 flex-col items-center justify-center gap-3 border-r border-b border-border p-5 transition-colors hover:bg-muted/40 ${
                     isEmpty
-                      ? "border-border/60 opacity-60 hover:opacity-80"
-                      : "border-border hover:border-foreground/20 hover:shadow-sm"
+                      ? "opacity-60 hover:opacity-80"
+                      : ""
                   }`}
                 >
                   {isEmpty ? (
