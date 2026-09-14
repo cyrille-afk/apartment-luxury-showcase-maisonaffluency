@@ -26,20 +26,12 @@ type StudioItem = {
   height_mm: number | null;
   size_variants: Array<{ label?: string | null; base?: string | null; top?: string | null }> | null;
   rrp_cents: number | null;
+  currency: string;
   source_pick_id: string | null;
   quantity: number;
 };
 
 const TRADE_DISCOUNT = 0.08;
-
-function money(cents: number | null | undefined) {
-  if (!cents) return null;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(cents / 100);
-}
 
 function leadLabel(item: StudioItem) {
   if (item.lead_time) return item.lead_time;
