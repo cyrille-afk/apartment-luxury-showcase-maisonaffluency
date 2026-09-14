@@ -51,8 +51,8 @@ test.describe("Mobile header logo", () => {
           await expect(logo).toHaveText(/AFFLUENCY/);
 
           // 1. Font size matches the locked step for this breakpoint.
-          const fontSize = await logo.evaluate(
-            (el) => parseFloat(getComputedStyle(el).fontSize),
+          const fontSize = await logo.evaluate((el) =>
+            parseFloat(getComputedStyle(el).fontSize),
           );
           expect(
             fontSize,
@@ -72,11 +72,16 @@ test.describe("Mobile header logo", () => {
           const truncated = await logo.evaluate((el) => {
             const rect = el.getBoundingClientRect();
             let node = el.parentElement;
-            for (let depth = 0; node && depth < 4; depth++, node = node.parentElement) {
+            for (
+              let depth = 0;
+              node && depth < 4;
+              depth++, node = node.parentElement
+            ) {
               const style = getComputedStyle(node);
               if (style.overflowX === "hidden" || style.overflowX === "clip") {
                 const clip = node.getBoundingClientRect();
-                if (rect.left < clip.left - 1 || rect.right > clip.right + 1) return true;
+                if (rect.left < clip.left - 1 || rect.right > clip.right + 1)
+                  return true;
               }
             }
             return false;
