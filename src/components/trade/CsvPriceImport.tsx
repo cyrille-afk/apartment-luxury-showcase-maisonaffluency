@@ -233,7 +233,6 @@ export default function CsvPriceImport({ onComplete, minimal }: { onComplete?: (
     onComplete?.();
   };
 
-  if (minimal) {
   return (
     <>
       {minimal ? (
