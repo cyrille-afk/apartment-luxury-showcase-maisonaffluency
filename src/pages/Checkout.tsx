@@ -1505,7 +1505,6 @@ export default function Checkout() {
     // Country-based base freight is indicative only: it is displayed and added
     // to the shown Order Total, but never charged until an advisor confirms it.
     const estimatedShippingCents = shippingCents > 0 ? 0 : estimate.cents;
-    const netCents = subtotalCents - discountCents + shippingCents;
     // Tax follows the configurable rules (destination + currency must match).
     const rule = resolveTaxRule(formCountry, currency);
     const b2bZeroRated =
@@ -1520,12 +1519,14 @@ export default function Checkout() {
     // The PaymentIntent is authoritative: once the server has priced the order
     // the displayed tax and total equal the amount actually charged.
     const taxCents = serverTax !== null ? serverTax.cents : localTaxCents;
-    const chargeTotalCents = netCents + taxCents;
-    const estimatedTaxCents = b2bZeroRated
-      ? 0
-      : rule && rule.taxShipping
-        ? Math.round(estimatedShippingCents * rule.rate)
-        : 0;
+    // One derivation for every figure on the page.
+    const totals = deriveCheckoutTotals({
+      subtotalCents,
+      discountCents,
+      shippingCents,
+      estimatedShippingCents,
+      taxCents,
+    });
     // Breakdown inputs: the base the rate is applied to, plus a plain-language
     // explanation of why the order is taxed or zero-rated.
     const taxableBaseCents = rule
