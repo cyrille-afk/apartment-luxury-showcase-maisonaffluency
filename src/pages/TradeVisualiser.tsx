@@ -358,7 +358,7 @@ const TradeVisualiser = () => {
 
       {/* Sourcing tray */}
       {trayOpen && (
-        <div className="absolute bottom-28 left-1/2 z-[60] w-[min(1040px,calc(100vw-64px))] -translate-x-1/2 border-t border-foreground/15 bg-white/95 px-6 py-5 backdrop-blur-sm">
+        <div className="absolute bottom-28 left-1/2 z-[60] w-[calc(100%-64px)] max-w-[1040px] -translate-x-1/2 border-t border-foreground/15 bg-white/95 px-6 py-5 backdrop-blur-sm">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <p className={cn(microLabel, "text-muted-foreground")}>Designer Collection Index</p>
             <div className="flex items-center gap-4">
