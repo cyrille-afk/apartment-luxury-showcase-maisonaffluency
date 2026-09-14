@@ -3718,11 +3718,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       <span>{formatPriceRaw(subtotalCents, currency) || "TBD"}</span>
                     </div>
                     {discountApplies && subtotalCents > 0 && (
-                      <div className="flex justify-between font-body text-xs text-muted-foreground">
-                        <span>Trade Discount ({tradeDiscountLabel})</span>
-                        <span>-{formatPriceRaw(tradeDiscountCents, currency)}</span>
-                      </div>
+                      <>
+                        <div className="flex justify-between font-body text-xs text-muted-foreground">
+                          <span>Trade Discount{tierLabel ? ` — ${tierLabel}` : ""} ({tradeDiscountLabel})</span>
+                          <span>-{formatPriceRaw(tradeDiscountCents, currency)}</span>
+                        </div>
+                        <div className="flex justify-between font-body text-xs text-foreground/80">
+                          <span>Net subtotal</span>
+                          <span>{formatPriceRaw(goodsAfterDiscountCents, currency)}</span>
+                        </div>
+                      </>
                     )}
+
                     {insuranceEnabled && insurancePremiumCents > 0 && (
                       <div className="flex justify-between font-body text-xs text-muted-foreground">
                         <span>
