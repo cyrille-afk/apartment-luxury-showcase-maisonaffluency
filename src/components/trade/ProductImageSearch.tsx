@@ -103,19 +103,19 @@ const ProductImageSearch = ({ onSelectImage }: ProductImageSearchProps) => {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search for product images (e.g. 'Fendi Casa sofa')…"
+            placeholder="Search for product images (e.g., Apparatus lighting, Man of Parts lounge chair)..."
             className="w-full pl-10 pr-4 py-2.5 border border-border rounded-md bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 transition-colors"
           />
         </div>
         <button
           type="submit"
           disabled={loading || !query.trim()}
-          className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="shrink-0 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading && results.length === 0 ? (
             <DotCircleLoader size="sm" />
           ) : (
-            "Search"
+            "[ SEARCH ]"
           )}
         </button>
       </form>
