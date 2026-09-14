@@ -2,8 +2,21 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTradeCopilot } from "@/contexts/TradeCopilotContext";
 import { saveName } from "@/components/trade/conciergeGreeting";
+import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
+import type { DisplayCurrency } from "@/components/trade/CurrencyToggle";
 
 const SUGGESTIONS = ["DESIGN CONCIERGE", "STUDIO ASSISTANT", "HEAD ARCHIVIST"];
+
+const CURRENCY_OPTIONS: { value: DisplayCurrency; label: string }[] = [
+  { value: "SGD", label: "SGD — SINGAPORE DOLLAR" },
+  { value: "USD", label: "USD — US DOLLAR" },
+  { value: "EUR", label: "EUR — EURO" },
+  { value: "GBP", label: "GBP — POUND STERLING" },
+  { value: "CHF", label: "CHF — SWISS FRANC" },
+  { value: "AED", label: "AED — UAE DIRHAM" },
+  { value: "HKD", label: "HKD — HONG KONG DOLLAR" },
+  { value: "AUD", label: "AUD — AUSTRALIAN DOLLAR" },
+];
 
 // "STUDIO ASSISTANT" / "FELIX" -> "Studio Assistant" / "Felix"
 const toCleanCase = (raw: string) =>
