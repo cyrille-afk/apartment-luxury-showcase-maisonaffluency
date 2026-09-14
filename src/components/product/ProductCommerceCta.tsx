@@ -304,6 +304,21 @@ export default function ProductCommerceCta({
       ?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
+  // Publish the dock's measured height so the floating action buttons can lift
+  // above it. Height is 0 when the dock is display:none (desktop) or unmounted.
+  const dockMeasureRef = useCallback((node: HTMLDivElement | null) => {
+    if (!node) {
+      setStickyCommerceDockHeight(0);
+      return;
+    }
+    const publish = () => setStickyCommerceDockHeight(node.getBoundingClientRect().height);
+    publish();
+    const ro = new ResizeObserver(publish);
+    ro.observe(node);
+    const mql = window.matchMedia("(min-width: 768px)");
+    mql.addEventListener("change", publish);
+  }, []);
+
   // Mobile: PLACE ORDER opens the conversational 3-step intake sheet first;
   // its completion hands off to the existing selection / checkout flow.
   const handleMobilePrimary = () => {
