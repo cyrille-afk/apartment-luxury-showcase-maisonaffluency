@@ -302,6 +302,8 @@ export function useTradeDisplayCurrency(): [DisplayCurrency, (next: DisplayCurre
     }
     // Notify other instances in the same tab.
     window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: next }));
+    // Keep the account-level preference in sync — one source of truth.
+    void saveAccountCurrency(next);
   }, []);
 
   return [value, update];
