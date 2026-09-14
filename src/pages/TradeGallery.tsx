@@ -445,77 +445,91 @@ const TradeGallery = () => {
     <>
       <Helmet><title>Gallery — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-7xl">
-      <SectionHero
-        section="gallery"
-        title="Trade Gallery"
-        subtitle={`${filtered.length} ${filtered.length === 1 ? "product" : "products"}${selectedBrand !== "all" ? ` from ${selectedBrand}` : ""}`}
-      >
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-6 border-b border-[#E5E5E5]">
+        <div>
+          <h1 className="font-display text-2xl md:text-3xl font-light text-foreground">Trade Gallery</h1>
+          <p className="mt-2 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+            {filtered.length} {filtered.length === 1 ? "collected piece" : "collected pieces"}
+            {selectedBrand !== "all" ? ` from ${selectedBrand}` : ""}
+          </p>
+        </div>
         {isAdmin && (
-          <CsvPriceImport onComplete={() => refreshPrices()} />
+          <CsvPriceImport minimal onComplete={() => refreshPrices()} />
         )}
-        <button
-          onClick={() => setDrawerOpen(true)}
-          className="relative p-2 border border-background/30 rounded-md text-background/70 hover:text-background hover:border-background/50 transition-colors"
-          title="View active quote"
-        >
-          <ShoppingCart className="h-4 w-4" />
-          {addedProductIds.size > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-primary text-primary-foreground text-[9px] font-medium rounded-full flex items-center justify-center">
-              {addedProductIds.size}
-            </span>
-          )}
-        </button>
-        {draftQuotes.length > 0 && (
-          <select
-            value={activeQuoteId || ""}
-            onChange={(e) => {
-              setActiveQuoteId(e.target.value);
-              rememberActiveQuoteId(e.target.value);
-            }}
-            className="px-3 py-2 bg-background/10 border border-background/30 rounded-md font-body text-xs text-background focus:outline-none transition-colors"
-          >
-            {draftQuotes.map((q) => (
-              <option key={q.id} value={q.id} className="text-foreground bg-background">
-                QU-{q.id.slice(0, 6).toUpperCase()}
-              </option>
-            ))}
-          </select>
-        )}
-        <div className="flex items-center gap-1 border border-background/30 rounded-md p-0.5">
+      </div>
+
+      <DuplicateProductsBanner groups={duplicateGroups} />
+
+      <div className="flex items-center justify-between gap-3 mt-6 mb-4">
+        <div className="flex items-center gap-0.5">
           <button
             onClick={() => setViewMode("grid")}
-            className={`p-1.5 rounded transition-colors ${viewMode === "grid" ? "bg-background/20 text-background" : "text-background/50"}`}
+            className={cn("p-1.5 transition-colors", viewMode === "grid" ? "text-foreground" : "text-muted-foreground/60 hover:text-muted-foreground")}
+            aria-label="Grid view"
+            title="Grid view"
           >
             <Grid3X3 className="h-4 w-4" />
           </button>
           <button
             onClick={() => setViewMode("list")}
-            className={`p-1.5 rounded transition-colors ${viewMode === "list" ? "bg-background/20 text-background" : "text-background/50"}`}
+            className={cn("p-1.5 transition-colors", viewMode === "list" ? "text-foreground" : "text-muted-foreground/60 hover:text-muted-foreground")}
+            aria-label="List view"
+            title="List view"
           >
             <List className="h-4 w-4" />
           </button>
+          {viewMode === "grid" && (
+            <div className="hidden md:flex items-center gap-0.5 ml-2">
+              <button
+                onClick={() => setDensity("comfortable")}
+                className={cn("p-1.5 transition-colors", density === "comfortable" ? "text-foreground" : "text-muted-foreground/60 hover:text-muted-foreground")}
+                aria-label="Comfortable grid"
+                title="3-up grid"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setDensity("compact")}
+                className={cn("p-1.5 transition-colors", density === "compact" ? "text-foreground" : "text-muted-foreground/60 hover:text-muted-foreground")}
+                aria-label="Compact grid"
+                title="6-up grid"
+              >
+                <Grid2X2 className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </div>
-        {viewMode === "grid" && (
-          <div className="hidden md:flex items-center gap-1 border border-background/30 rounded-md p-0.5" title="Grid density">
-            <button
-              onClick={() => setDensity("comfortable")}
-              className={`p-1.5 rounded transition-colors ${density === "comfortable" ? "bg-background/20 text-background" : "text-background/50"}`}
-              aria-label="Comfortable grid"
-              title="3-up grid"
+        <div className="flex items-center gap-2">
+          {draftQuotes.length > 0 && (
+            <select
+              value={activeQuoteId || ""}
+              onChange={(e) => {
+                setActiveQuoteId(e.target.value);
+                rememberActiveQuoteId(e.target.value);
+              }}
+              className="px-2 py-1.5 bg-transparent border-0 border-b border-border font-body text-xs text-foreground focus:outline-none"
             >
-              <LayoutGrid className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setDensity("compact")}
-              className={`p-1.5 rounded transition-colors ${density === "compact" ? "bg-background/20 text-background" : "text-background/50"}`}
-              aria-label="Compact grid"
-              title="6-up grid"
-            >
-              <Grid2X2 className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-      </SectionHero>
+              {draftQuotes.map((q) => (
+                <option key={q.id} value={q.id} className="text-foreground bg-background">
+                  QU-{q.id.slice(0, 6).toUpperCase()}
+                </option>
+              ))}
+            </select>
+          )}
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="relative p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+            title="View active quote"
+          >
+            <ShoppingCart className="h-4 w-4" />
+            {addedProductIds.size > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-primary text-primary-foreground text-[9px] font-medium rounded-full flex items-center justify-center">
+                {addedProductIds.size}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
 
       <DuplicateProductsBanner groups={duplicateGroups} />
 
