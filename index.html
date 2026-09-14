@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <!-- SEO: static content in #seo-content + noscript provides full indexability without JS redirects -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Maison Affluency | Luxury Collectible Design Singapore</title>
     <!-- Per-route <meta name="description"> is written by react-helmet-async. The static one was removed
          to avoid duplicate description tags that SEO scanners flag as "Multiple Head Tags". -->
@@ -237,7 +237,7 @@
     <style>
       /* Prevent layout shift */
       body { margin: 0; font-family: 'Lora', Georgia, serif; }
-      #root { min-height: 100vh; position: relative; z-index: 1; }
+      #root { min-height: 100vh; min-height: 100dvh; position: relative; z-index: 1; }
       /* FOUC guard removed 2026-06-25: it was hiding the hero <picture> with
          visibility:hidden until React mounted, blocking LCP on throttled
          PageSpeed/Lighthouse runs (LCP jumped to ~8.9s on desktop). The hero
