@@ -151,7 +151,7 @@ const TradeVisualiser = () => {
     (async () => {
       const { data, error } = await supabase
         .from("trade_products")
-        .select("id, product_name, brand_name, image_url, category, dimensions")
+        .select("id, product_name, brand_name, image_url, category, dimensions, glb_url")
         .eq("is_active", true)
         .eq("is_hidden", false)
         .not("image_url", "is", null)
