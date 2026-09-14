@@ -1,20 +1,9 @@
-import { useEffect } from "react";
 import { Toaster as Sonner, toast } from "sonner";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  console.log("[sonner.tsx] Toaster wrapper render");
   const theme = "light";
-
-  useEffect(() => {
-    console.log("[sonner.tsx] scheduling toast from wrapper");
-    const t = setTimeout(() => {
-      console.log("[sonner.tsx] calling toast from wrapper after 500ms");
-      toast("Wrapper test toast delayed");
-    }, 500);
-    return () => clearTimeout(t);
-  }, []);
 
   return (
     <Sonner
