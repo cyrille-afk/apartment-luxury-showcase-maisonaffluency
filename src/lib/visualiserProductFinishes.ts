@@ -16,6 +16,50 @@ export const BOND_STREET_BASE_FINISH: VisualiserMaterial = {
   metalness: 0.72,
 };
 
+/** Metal base / plinth finishes. Colour-only PBR — no texture maps required. */
+export const BOND_STREET_BASE_FINISHES: VisualiserMaterial[] = [
+  BOND_STREET_BASE_FINISH,
+  {
+    id: "bond-street-brushed-bronze",
+    name: "Brushed Bronze",
+    brand_name: "Man of Parts",
+    category: "Metal",
+    material_type: "Brushed bronze",
+    color_family: "Bronze",
+    image_url: null,
+    target: "base",
+    color: "#8c6f4e",
+    roughness: 0.45,
+    metalness: 0.9,
+  },
+  {
+    id: "bond-street-polished-brass",
+    name: "Polished Brass",
+    brand_name: "Man of Parts",
+    category: "Metal",
+    material_type: "Polished brass",
+    color_family: "Brass",
+    image_url: null,
+    target: "base",
+    color: "#b89448",
+    roughness: 0.16,
+    metalness: 0.95,
+  },
+  {
+    id: "bond-street-blackened-steel",
+    name: "Blackened Steel",
+    brand_name: "Man of Parts",
+    category: "Metal",
+    material_type: "Blackened steel",
+    color_family: "Charcoal",
+    image_url: null,
+    target: "base",
+    color: "#3b3a38",
+    roughness: 0.52,
+    metalness: 0.8,
+  },
+];
+
 export const BOND_STREET_UPHOLSTERY_FINISHES: VisualiserMaterial[] = [
   {
     id: "bond-street-sahco-coney-0003",
