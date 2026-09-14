@@ -418,10 +418,13 @@ const TradeLayout = () => {
     }
   }
 
+  // The Visualiser runs as a fixed-viewport workspace: no page scroll, no main padding.
+  const fullBleed = location.pathname.replace(/\/$/, "") === "/trade/visualiser";
+
   return (
     <SidebarProvider>
       <div
-        className="trade-portal-shell min-h-screen flex w-full bg-background"
+        className={`trade-portal-shell flex w-full bg-background ${fullBleed ? "h-screen overflow-hidden" : "min-h-screen"}`}
         data-price-view={showTradePrice ? "trade" : "client"}
       >
         {/* Sidebar — desktop only */}
@@ -459,7 +462,7 @@ const TradeLayout = () => {
               <ConciergeHeaderButton />
             </div>
           </header>
-          <main className="trade-editorial-main flex-1 p-4 md:p-8 lg:p-12 pb-24 md:pb-10 lg:pb-14">
+          <main className={`trade-editorial-main flex-1 ${fullBleed ? "min-h-0 overflow-hidden p-0" : "p-4 md:p-8 lg:p-12 pb-24 md:pb-10 lg:pb-14"}`}>
             
             <Suspense fallback={
               <div className="flex items-center justify-center py-20">
