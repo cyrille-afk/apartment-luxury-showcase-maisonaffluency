@@ -2571,7 +2571,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 {isDraft ? (
                   <input
                     type="date"
-                    value={issueDate ?? new Date(quoteCreatedAt).toISOString().slice(0, 10)}
+                    value={issueDate ?? sgtDay(quoteCreatedAt)}
                     onChange={(e) => setIssueDate(e.target.value || null)}
                     onBlur={async (e) => {
                       const v = e.target.value || null;
