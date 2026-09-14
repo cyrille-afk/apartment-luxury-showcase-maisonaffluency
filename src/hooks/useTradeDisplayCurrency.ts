@@ -160,6 +160,32 @@ const read = (): DisplayCurrency => {
   }
 };
 
+/** Account-level default currency stored on the user's trade profile. */
+export const loadAccountCurrency = async (): Promise<DisplayCurrency | null> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+    const { data } = await supabase
+      .from("profiles")
+      .select("preferred_currency")
+      .eq("id", user.id)
+      .maybeSingle();
+    const v = data?.preferred_currency;
+    return isValid(v) ? v : null;
+  } catch {
+    return null;
+  }
+};
+
+/** Persist the user's declared operating currency to their trade profile. */
+export const saveAccountCurrency = async (next: DisplayCurrency): Promise<void> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("profiles").update({ preferred_currency: next }).eq("id", user.id);
+  } catch { /* ignore */ }
+};
+
 const isManual = (): boolean => {
   if (typeof window === "undefined") return false;
   try {
@@ -186,6 +212,24 @@ export function useTradeDisplayCurrency(): [DisplayCurrency, (next: DisplayCurre
       window.removeEventListener("storage", onStorage);
       window.removeEventListener(EVENT_NAME, onCustom as EventListener);
     };
+  }, []);
+
+  // Account-level preference (profiles.preferred_currency) is the master source
+  // of truth for the trade modules: it is applied on every mount, ahead of any
+  // country/IP detection, so every module renders in the declared currency.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const fromAccount = await loadAccountCurrency();
+      if (fromAccount && !cancelled) {
+        try {
+          window.localStorage.setItem(STORAGE_KEY, fromAccount);
+        } catch { /* ignore */ }
+        setValue(fromAccount);
+        window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: fromAccount }));
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   // One-shot auto-default from country, only if the user has never manually picked.
@@ -258,6 +302,8 @@ export function useTradeDisplayCurrency(): [DisplayCurrency, (next: DisplayCurre
     }
     // Notify other instances in the same tab.
     window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: next }));
+    // Keep the account-level preference in sync — one source of truth.
+    void saveAccountCurrency(next);
   }, []);
 
   return [value, update];
