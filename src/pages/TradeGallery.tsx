@@ -518,56 +518,67 @@ const TradeGallery = () => {
       <DuplicateProductsBanner groups={duplicateGroups} />
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 mb-6">
-        <div className="relative flex-1 min-w-0 sm:min-w-[200px] sm:max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search products, brands, materials…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className={`${inputClass} pl-9 w-full text-[16px] sm:text-sm`}
-          />
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          {productsLoading ? (
-            <div
-              className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm flex items-center text-muted-foreground/70 italic`}
-              aria-busy="true"
-            >
-              Loading designers…
-            </div>
-          ) : (
-            <AlphabetDesignerPicker
-              brands={brands}
-              value={selectedBrand}
-              onChange={handleBrandChange}
-              selectClassName={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6 border-b border-border pb-4">
+        <div className="flex-1 min-w-0 flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-border">
+          <div className="relative flex-1 min-w-0 py-2 sm:py-0 px-3">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+            <input
+              type="text"
+              placeholder="Search products, brands, materials…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className={`${filterInputClass} pl-9 text-[16px] sm:text-sm`}
             />
-          )}
-
-          <select
-            value={selectedCategory}
-            onChange={(e) => {
-              setSelectedCategory(e.target.value);
-              setSelectedSubcategory("all");
-            }}
-            className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}
-          >
-            <option value="all">All Categories</option>
-            {categories.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-          {subcategories.length > 0 && (
-            <select value={selectedSubcategory} onChange={(e) => setSelectedSubcategory(e.target.value)} className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}>
-              <option value="all">All Subcategories</option>
-              {subcategories.map((s) => (
-                <option key={s} value={s}>{s}</option>
+          </div>
+          <div className="flex-1 sm:flex-none sm:min-w-[16rem] py-2 sm:py-0 px-3">
+            {productsLoading ? (
+              <div
+                className={`${filterInputClass} py-2 flex items-center text-muted-foreground/60 italic text-[16px] sm:text-sm`}
+                aria-busy="true"
+              >
+                Loading designers…
+              </div>
+            ) : (
+              <AlphabetDesignerPicker
+                brands={brands}
+                value={selectedBrand}
+                onChange={handleBrandChange}
+                selectClassName={`${filterInputClass} text-[16px] sm:text-sm`}
+              />
+            )}
+          </div>
+          <div className="flex-1 sm:flex-none sm:min-w-[12rem] py-2 sm:py-0 px-3">
+            <select
+              value={selectedCategory}
+              onChange={(e) => {
+                setSelectedCategory(e.target.value);
+                setSelectedSubcategory("all");
+              }}
+              className={`${filterInputClass} pr-6 text-[16px] sm:text-sm`}
+            >
+              <option value="all">All Categories</option>
+              {categories.map((c) => (
+                <option key={c} value={c}>{c}</option>
               ))}
             </select>
+          </div>
+          {subcategories.length > 0 && (
+            <div className="flex-1 sm:flex-none sm:min-w-[12rem] py-2 sm:py-0 px-3">
+              <select
+                value={selectedSubcategory}
+                onChange={(e) => setSelectedSubcategory(e.target.value)}
+                className={`${filterInputClass} pr-6 text-[16px] sm:text-sm`}
+              >
+                <option value="all">All Subcategories</option>
+                {subcategories.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
           )}
-          <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
+        </div>
+        <div className="shrink-0 py-2 sm:py-0 px-3 sm:px-0">
+          <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} minimal />
         </div>
       </div>
       {/* Content */}
