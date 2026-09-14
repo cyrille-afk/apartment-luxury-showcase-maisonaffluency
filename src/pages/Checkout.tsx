@@ -1902,7 +1902,7 @@ export default function Checkout() {
         setSyncing(false);
       }
     },
-    [grossLines, stripePromise, formCountry],
+    [grossLines, stripePromise, formCountry, estimate.cents],
   );
 
 
