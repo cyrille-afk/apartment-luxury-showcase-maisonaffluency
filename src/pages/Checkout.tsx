@@ -155,6 +155,8 @@ export type CheckoutSummary = {
   deliveryCents: number;
   /** THE Order Total: goods − discount + delivery + tax. Used by every UI block. */
   totalCents: number;
+  /** Row-consistent display total (each row rounded to dollars, then summed). */
+  displayTotalCents: number;
   /** Amount captured now (excludes unconfirmed estimated freight). */
   chargeTotalCents: number;
 };
@@ -1578,6 +1580,7 @@ export default function Checkout() {
       taxShipping: Boolean(rule?.taxShipping),
       deliveryCents: totals.deliveryCents,
       totalCents: totals.totalCents,
+      displayTotalCents: totals.displayTotalCents,
       chargeTotalCents: totals.chargeTotalCents,
     };
   }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, estimate.capped, estimate.notice, formCountry, serverTax, buyerType, buyerGstNumber]);
