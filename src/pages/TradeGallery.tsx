@@ -584,19 +584,6 @@ const TradeGallery = () => {
             </select>
           )}
           <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
-          <button
-            onClick={() => setShowTradePrice(!showTradePrice)}
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-2 rounded-md border font-body text-xs transition-colors",
-              showTradePrice
-                ? "border-accent bg-accent/10 text-accent"
-                : "border-border text-muted-foreground hover:text-foreground"
-            )}
-            title={showTradePrice ? `Showing trade price (–${discountLabel}, ${tierLabel} tier)` : "Showing retail price"}
-          >
-            <Tag className="h-3.5 w-3.5" />
-            {showTradePrice ? "Retail" : "Trade"}
-          </button>
         </div>
       </div>
       {/* Content */}
