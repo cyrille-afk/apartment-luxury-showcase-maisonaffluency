@@ -4,12 +4,13 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { User, Lock, Building, Phone, Mail, Save, Camera, Award, TrendingUp, Compass, Sparkles } from "lucide-react";
+import { User, Lock, Building, Phone, Mail, Save, Camera, Award, TrendingUp, Compass, Sparkles, Smartphone } from "lucide-react";
 import { saveName, sanitizeName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import StudioMemoryCard from "@/components/trade/StudioMemoryCard";
+import { MobileHandoffDialog } from "@/components/trade/MobileHandoffDialog";
 
 const COUNTRIES = [
   "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
@@ -46,6 +47,7 @@ const TradeSettings = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [spendCents, setSpendCents] = useState<number>(0);
+  const [mobileSetupOpen, setMobileSetupOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
@@ -361,6 +363,18 @@ const TradeSettings = () => {
         <span className="text-xs text-muted-foreground">→</span>
       </a>
 
+      <div className="mb-10 border-y border-border py-5">
+        <p className="trade-micro-label text-muted-foreground mb-2">Mobile access</p>
+        <button
+          type="button"
+          onClick={() => setMobileSetupOpen(true)}
+          className="inline-flex items-center gap-2 font-body text-xs text-foreground underline underline-offset-4 hover:text-muted-foreground transition-colors"
+        >
+          <Smartphone className="h-3.5 w-3.5" />
+          Configure the app on your phone
+        </button>
+      </div>
+
       {/* Profile Photo */}
       <div className="mb-10">
         <div className="flex items-center gap-2 mb-5">
@@ -611,6 +625,13 @@ const TradeSettings = () => {
       </div>
 
       <StudioMemoryCard />
+
+      <MobileHandoffDialog
+        open={mobileSetupOpen}
+        onOpenChange={setMobileSetupOpen}
+        redirectTo={typeof window === "undefined" ? "" : `${window.location.origin}/trade`}
+        targetLabel="your trade dashboard"
+      />
 
     </div>
     </>

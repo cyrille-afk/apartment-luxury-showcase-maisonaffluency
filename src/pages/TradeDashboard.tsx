@@ -10,7 +10,6 @@ import {
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
 import { BoardRecommendations } from "@/components/trade/BoardRecommendations";
-import { MobileContinuityBanner } from "@/components/trade/MobileContinuityBanner";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -232,8 +231,6 @@ const TradeDashboard = () => {
 
         </div>
       </div>
-
-      <MobileContinuityBanner />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-x-5 gap-y-10 md:gap-y-14">
         {DASH_CARDS.map((card, index) => (
