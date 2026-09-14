@@ -55,7 +55,7 @@ export function ProjectProposalPreview({
       <DialogContent
         hideClose
         aria-describedby="proposal-preview-description"
-        className="proposal-preview-shell fixed inset-0 left-0 top-0 z-[120] block h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 overflow-y-auto border-0 bg-foreground/40 p-0 backdrop-blur-sm sm:rounded-none"
+        className="proposal-preview-shell fixed inset-0 left-0 top-0 z-[120] block h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 overflow-y-auto border-0 bg-foreground/40 p-0 backdrop-blur-sm print:!h-auto print:!w-[210mm] print:!overflow-visible print:!bg-card print:!backdrop-blur-none sm:rounded-none"
       >
         <DialogTitle className="sr-only">White-label project proposal preview</DialogTitle>
         <DialogDescription id="proposal-preview-description" className="sr-only">
