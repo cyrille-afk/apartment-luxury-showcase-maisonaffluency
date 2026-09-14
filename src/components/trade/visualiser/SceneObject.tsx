@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useGLTF, useTexture, TransformControls } from "@react-three/drei";
 import { useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
@@ -73,7 +73,8 @@ const ImageBody = ({ url, name }: { url: string; name: string }) => {
 const FLOOR_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
 const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange }: Props) => {
-  const groupRef = useRef<THREE.Group>(null);
+  const groupRef = useRef<THREE.Group | null>(null);
+  const [groupNode, setGroupNode] = useState<THREE.Group | null>(null);
   const { raycaster, gl } = useThree();
   const draggingRef = useRef(false);
   const offsetRef = useRef(new THREE.Vector3());
@@ -137,7 +138,10 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
 
   const content = (
     <group
-      ref={groupRef}
+      ref={(node) => {
+        groupRef.current = node;
+        setGroupNode(node);
+      }}
       position={[object.position[0], 0, object.position[2]]}
       rotation={object.rotation}
       scale={object.scale}
@@ -153,9 +157,9 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
   return (
     <>
       {content}
-      {selected && groupRef.current && (
+      {selected && groupNode && (
         <TransformControls
-          object={groupRef.current}
+          object={groupNode}
           mode="translate"
           showY={false}
           size={0.85}
