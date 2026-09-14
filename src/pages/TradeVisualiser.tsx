@@ -538,12 +538,12 @@ const TradeVisualiser = () => {
             <div className="mt-3 flex max-h-28 gap-3 overflow-x-auto pb-2">
               {filteredMaterials.slice(0, 24).map((material) => (
                 <button key={material.id} onClick={() => applyMaterial(material)} className="w-14 shrink-0 text-left" title={`${material.brand_name} — ${material.name}`}>
-                  <img src={material.image_url ?? "/placeholder.svg"} alt="" className={cn("h-10 w-10 object-cover", selected.material?.id === material.id && "ring-1 ring-foreground ring-offset-2")} />
+                  <img src={material.image_url ?? "/placeholder.svg"} alt="" className={cn("h-10 w-10 object-cover", (finishTarget === "top" ? selected.topMaterial : finishTarget === "base" ? selected.baseMaterial : selected.material)?.id === material.id && "ring-1 ring-foreground ring-offset-2")} />
                   <span className="mt-1 block truncate font-mono text-[8px] uppercase tracking-[0.15em] text-muted-foreground">{material.name}</span>
                 </button>
               ))}
             </div>
-            <p className={cn(microLabel, "mt-1 truncate text-foreground")}>{selected.material?.name ?? activeMaterial?.name ?? "No active finish"}</p>
+            <p className={cn(microLabel, "mt-1 truncate text-foreground")}>{(finishTarget === "top" ? selected.topMaterial : finishTarget === "base" ? selected.baseMaterial : selected.material)?.name ?? activeMaterial?.name ?? "No active finish"}</p>
           </div>
           )}
         </div>
