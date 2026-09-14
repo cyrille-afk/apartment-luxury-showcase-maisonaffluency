@@ -10,6 +10,7 @@
  * "Export as PPTX" so it stays out of the main bundle.
  */
 
+import { formatMoneyIn } from "./displayMoney";
 import { LIABILITY_ANCHOR, slideIsQuoteBearing } from "./slideIsQuoteBearing";
 
 export interface PptxProduct {
