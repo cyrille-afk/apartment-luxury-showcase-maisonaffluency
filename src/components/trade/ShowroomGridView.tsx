@@ -766,12 +766,12 @@ const ShowroomGridView = ({
                     : "border-border hover:border-foreground/20"
                 )}
               >
-                <div className="aspect-square bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => openProductSheet(product)}>
+                <div className="aspect-[4/5] bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.product_image_url ? (
                     <>
-                      <img src={product.product_image_url} alt={product.product_name} className={cn("w-full h-full object-cover transition-opacity duration-500", product.hover_image_url ? "group-hover:opacity-0" : "")} loading="lazy" />
+                      <img src={product.product_image_url} alt={product.product_name} className={cn("w-full h-full object-cover object-center transition-opacity duration-500", product.hover_image_url ? "group-hover:opacity-0" : "")} loading="lazy" />
                       {product.hover_image_url && (
-                        <img src={product.hover_image_url} alt={`${product.product_name} - in context`} className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500" loading="lazy" />
+                        <img src={product.hover_image_url} alt={`${product.product_name} - in context`} className="absolute inset-0 w-full h-full object-cover object-center opacity-0 group-hover:opacity-100 transition-opacity duration-500" loading="lazy" />
                       )}
                     </>
                   ) : (
