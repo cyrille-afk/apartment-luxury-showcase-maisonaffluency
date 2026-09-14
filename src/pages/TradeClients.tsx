@@ -371,6 +371,23 @@ export default function TradeClients() {
     );
   }
 
+  // Global privacy mask: in Client View the directory is fully hidden.
+  if (isClientMode) {
+    return (
+      <div className="px-4 md:px-12 py-8 md:py-12 max-w-6xl mx-auto">
+        <Helmet>
+          <title>Clients — {currentStudio.name}</title>
+          <meta name="description" content="Shared clients address book for your studio" />
+        </Helmet>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground text-center">
+            Private studio directory component is securely masked.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="px-4 md:px-12 py-8 md:py-12 max-w-6xl mx-auto">
       <Helmet>
@@ -378,107 +395,129 @@ export default function TradeClients() {
         <meta name="description" content="Shared clients address book for your studio" />
       </Helmet>
 
-      <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+      <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
         <div>
-          <p className="font-body text-xs uppercase tracking-[0.3em] text-primary mb-2">
-            {currentStudio.name}
-          </p>
-          <h1 className="font-display text-3xl md:text-4xl text-foreground">Clients</h1>
-          <p className="font-body text-sm text-muted-foreground mt-2 max-w-xl">
-            A shared address book for your studio. Reuse client and contact details across quotes,
-            projects and presentations.
+          <h1 className="font-display font-light text-3xl md:text-5xl text-foreground tracking-tight">
+            Client Management
+          </h1>
+          <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-muted-foreground mt-3">
+            Studio Directory // Client &amp; Budget Registry
           </p>
         </div>
         {canEdit && (
-          <Button onClick={openNew} className="rounded-full">
-            <Plus className="h-4 w-4 mr-2" /> New client
-          </Button>
+          <button
+            type="button"
+            onClick={openNew}
+            className="font-body text-[11px] uppercase tracking-[0.25em] text-foreground hover:text-muted-foreground transition-colors whitespace-nowrap"
+          >
+            [ + Add New Client Profile ]
+          </button>
         )}
       </header>
 
-      <div className="relative mb-6">
-        <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <Input
+      <div className="relative mb-8">
+        <Search className="h-4 w-4 absolute left-0 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search clients or contacts…"
-          className="pl-9"
+          className="w-full bg-transparent border-0 border-b border-border/60 pl-7 pr-2 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-foreground transition-colors"
         />
       </div>
 
       {loading ? (
         <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
       ) : filtered.length === 0 ? (
-        <Card className="p-12 text-center">
+        <div className="py-20 text-center border-t border-border/40">
           <Building2 className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
           <p className="font-body text-muted-foreground">
             {clients.length === 0 ? "No clients yet." : "No clients match your search."}
           </p>
           {canEdit && clients.length === 0 && (
-            <Button onClick={openNew} variant="outline" className="mt-4 rounded-full">
-              <Plus className="h-4 w-4 mr-2" /> Add your first client
-            </Button>
+            <button
+              type="button"
+              onClick={openNew}
+              className="mt-6 font-body text-[11px] uppercase tracking-[0.25em] text-foreground hover:text-muted-foreground transition-colors"
+            >
+              [ + Add New Client Profile ]
+            </button>
           )}
-        </Card>
+        </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="border-t border-border/40">
+          {/* Column headers */}
+          <div className="hidden md:grid md:grid-cols-[1.4fr_1.2fr_1fr_0.5fr_auto] gap-6 py-3 border-b border-border/40">
+            <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Client</span>
+            <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Active Project</span>
+            <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Markup Rule</span>
+            <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Currency</span>
+            <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground text-right">Triggers</span>
+          </div>
           {filtered.map((c) => {
-            const cts = contactsByClient[c.id] || [];
-            const primary = cts.find((x) => x.is_primary) || cts[0];
+            const project = projectsByClient[c.id];
             return (
-              <Card key={c.id} className="p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-display text-xl text-foreground">{c.name}</h3>
-                      <Badge variant="secondary" className="capitalize">{c.type}</Badge>
-                      {c.billing_country && (
-                        <span className="font-body text-xs text-muted-foreground">{c.billing_country}</span>
-                      )}
-                      {(docCountsByClient[c.id] || 0) > 0 && (
-                        <Badge variant="outline" className="gap-1">
-                          <FileText className="h-3 w-3" />
-                          {docCountsByClient[c.id]} doc{docCountsByClient[c.id] > 1 ? "s" : ""}
-                        </Badge>
-                      )}
-                    </div>
-                    {primary && (
-                      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-body text-muted-foreground">
-                        <span className="flex items-center gap-1.5">
-                          <User className="h-3.5 w-3.5" />
-                          {[primary.first_name, primary.last_name].filter(Boolean).join(" ") || "—"}
-                          {primary.role_title && <span className="text-xs"> · {primary.role_title}</span>}
-                        </span>
-                        {primary.email && (
-                          <a href={`mailto:${primary.email}`} className="flex items-center gap-1.5 hover:text-foreground">
-                            <Mail className="h-3.5 w-3.5" />{primary.email}
-                          </a>
-                        )}
-                        {primary.phone && (
-                          <a href={`tel:${primary.phone}`} className="flex items-center gap-1.5 hover:text-foreground">
-                            <Phone className="h-3.5 w-3.5" />{primary.phone}
-                          </a>
-                        )}
-                      </div>
-                    )}
-                    {cts.length > 1 && (
-                      <p className="mt-1 font-body text-xs text-muted-foreground">
-                        +{cts.length - 1} other contact{cts.length - 1 > 1 ? "s" : ""}
-                      </p>
-                    )}
-                  </div>
-                  {canEdit && (
-                    <div className="flex items-center gap-1">
-                      <Button size="icon" variant="ghost" onClick={() => openEdit(c)} aria-label="Edit">
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button size="icon" variant="ghost" onClick={() => setConfirmDelete(c)} aria-label="Delete">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+              <div
+                key={c.id}
+                className="grid gap-2 md:gap-6 md:grid-cols-[1.4fr_1.2fr_1fr_0.5fr_auto] md:items-baseline py-6 border-b border-border/30"
+              >
+                {/* Client name */}
+                <div className="min-w-0">
+                  <span className="font-display text-lg text-foreground leading-snug">{c.name}</span>
+                  {c.type !== "company" && (
+                    <span className="ml-2 font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground align-middle">
+                      {c.type}
+                    </span>
                   )}
                 </div>
-              </Card>
+
+                {/* Active assigned project */}
+                <div className="min-w-0">
+                  {project ? (
+                    <Link
+                      to={`/trade/projects/${project.id}`}
+                      className="font-body text-sm text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors"
+                    >
+                      {project.name}
+                    </Link>
+                  ) : (
+                    <span className="font-body text-sm text-muted-foreground/60">—</span>
+                  )}
+                </div>
+
+                {/* Financial markup rule */}
+                <div className="min-w-0">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    Net Cost Pass-Through
+                  </span>
+                </div>
+
+                {/* Base operating currency */}
+                <div>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-foreground">
+                    {c.default_currency || "—"}
+                  </span>
+                </div>
+
+                {/* Operational triggers */}
+                {canEdit && (
+                  <div className="flex items-center gap-5 md:justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDelete(c)}
+                      className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+                    >
+                      [ Archive Studio File ]
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openEdit(c)}
+                      className="font-body text-[10px] uppercase tracking-[0.2em] text-foreground hover:text-muted-foreground transition-colors whitespace-nowrap"
+                    >
+                      [ View Account Sheet ]
+                    </button>
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
