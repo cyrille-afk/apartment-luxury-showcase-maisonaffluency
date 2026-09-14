@@ -447,8 +447,8 @@ const TradeVisualiser = () => {
                     src={optimizeImageUrl(object.image_url || "", CUTOUT_TRANSFORMS)}
                     alt={object.product_name}
                     draggable={false}
-                    className="relative h-full w-full object-contain mix-blend-multiply"
-                    style={{ filter: imageFilter }}
+                    className="relative h-full w-full object-contain mix-blend-multiply [image-rendering:crisp-edges]"
+                    style={{ ...CUTOUT_IMAGE_STYLE, filter: imageFilter }}
                   />
                 </div>
                 {isSelected && (
