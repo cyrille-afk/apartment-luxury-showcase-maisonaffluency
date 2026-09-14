@@ -52,3 +52,4 @@
 - [x] Complete Visualiser backdrop upload, active-state relabeling, locked full-bleed layering, and reset restoration
 - [x] Upgrade Visualiser objects with proportional corner scaling, live spatial dimensions, transparent silhouettes, and grounded shadows
 - [x] Add Visualiser perspective warping, per-object ambient matching, dual floor shadows, and Retina cutout sourcing
+- [x] Rebuild the Visualiser as a real-time 3D WebGL scene with GLB assets, orbit camera, transform gizmo, and shadow lighting
