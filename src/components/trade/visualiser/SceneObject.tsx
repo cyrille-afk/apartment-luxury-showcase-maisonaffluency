@@ -324,25 +324,45 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
     <>
       {content}
       {selected && groupNode && (
-        <TransformControls
-          object={groupNode}
-          mode="translate"
-          showY={false}
-          size={0.85}
-          onMouseDown={() => onDragStateChange(true)}
-          onMouseUp={() => {
-            onDragStateChange(false);
-            const group = groupRef.current;
-            if (group) {
-              group.position.y = object.position[1] ?? 0;
-              onTransform(object.instanceId, [group.position.x, object.position[1] ?? 0, group.position.z], object.rotation);
-            }
-          }}
-          onObjectChange={() => {
-            const group = groupRef.current;
-            if (group) group.position.y = object.position[1] ?? 0;
-          }}
-        />
+        <>
+          {/* Floor-plane arrows: X / Z translation only. */}
+          <TransformControls
+            object={groupNode}
+            mode="translate"
+            showY={false}
+            size={0.85}
+            onMouseDown={() => onDragStateChange(true)}
+            onMouseUp={() => {
+              onDragStateChange(false);
+              commit();
+            }}
+            onObjectChange={() => {
+              const group = groupRef.current;
+              if (group) group.position.y = object.position[1] ?? 0;
+            }}
+          />
+          {/* Outer ring: free 360° yaw so the piece can be aligned to the backdrop perspective. */}
+          <TransformControls
+            object={groupNode}
+            mode="rotate"
+            showX={false}
+            showZ={false}
+            size={1.15}
+            onMouseDown={() => onDragStateChange(true)}
+            onMouseUp={() => {
+              onDragStateChange(false);
+              commit();
+            }}
+            onObjectChange={() => {
+              const group = groupRef.current;
+              if (group) {
+                // Yaw only — keep the piece upright on the floor plane.
+                group.rotation.x = 0;
+                group.rotation.z = 0;
+              }
+            }}
+          />
+        </>
       )}
     </>
   );
