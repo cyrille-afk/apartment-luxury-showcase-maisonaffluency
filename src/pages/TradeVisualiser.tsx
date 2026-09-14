@@ -128,6 +128,11 @@ const TradeVisualiser = () => {
   const [sourceOpen, setSourceOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [only3d, setOnly3d] = useState(false);
+  const [modelViewerReady, setModelViewerReady] = useState(
+    () => typeof window !== "undefined" && !!customElements.get("model-viewer"),
+  );
+
   const [products, setProducts] = useState<CatalogueProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
