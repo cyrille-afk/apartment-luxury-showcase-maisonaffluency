@@ -103,6 +103,12 @@ export function ProjectCuratorialGuide({
   }, [open]);
 
   useEffect(() => {
+    const openGuide = () => setOpen(true);
+    window.addEventListener("project-curator:open", openGuide);
+    return () => window.removeEventListener("project-curator:open", openGuide);
+  }, []);
+
+  useEffect(() => {
     if (!open || !activeItem) {
       setConnector(null);
       return;
