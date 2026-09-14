@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { FileDown, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DIMENSIONS_PLACEHOLDER, formatDimensions, resolveDimensions } from "@/lib/productDimensions";
 
 export type SpecDrawerItem = {
   product_id: string;
@@ -15,6 +16,7 @@ export type SpecDrawerItem = {
   width_mm: number | null;
   depth_mm: number | null;
   height_mm: number | null;
+  size_variants?: Array<{ label?: string | null; base?: string | null; top?: string | null }> | null;
 };
 
 type Finish = { label: string; swatch: string };
@@ -31,20 +33,15 @@ const FINISHES: Finish[] = [
 ];
 
 function cratingLabel(item: SpecDrawerItem) {
-  if (item.width_mm && item.depth_mm && item.height_mm) {
-    const w = item.width_mm + 120;
-    const d = item.depth_mm + 120;
-    const h = item.height_mm + 120;
-    return `${w} × ${d} × ${h} mm (crated)`;
+  const dims = resolveDimensions(item);
+  if (dims) {
+    return `${dims.w + 120} × ${dims.d + 120} × ${dims.h + 120} mm (crated)`;
   }
   return item.dimensions ? `${item.dimensions} (uncrated)` : "On request";
 }
 
 function dimsLabel(item: SpecDrawerItem) {
-  if (item.width_mm && item.depth_mm && item.height_mm) {
-    return `${item.width_mm} × ${item.depth_mm} × ${item.height_mm} mm`;
-  }
-  return item.dimensions || "Custom dimensions";
+  return formatDimensions(resolveDimensions(item)) || DIMENSIONS_PLACEHOLDER;
 }
 
 export function ProjectSpecDrawer({

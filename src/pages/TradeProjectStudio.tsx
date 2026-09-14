@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { ProjectSpecDrawer } from "@/components/trade/ProjectSpecDrawer";
 import { ProjectCuratorialGuide } from "@/components/trade/ProjectCuratorialGuide";
+import { dimensionBadgeLabel } from "@/lib/productDimensions";
 
 type StudioItem = {
   id: string;
@@ -22,7 +23,7 @@ type StudioItem = {
   width_mm: number | null;
   depth_mm: number | null;
   height_mm: number | null;
-  size_variants: Array<{ label?: string | null }> | null;
+  size_variants: Array<{ label?: string | null; base?: string | null; top?: string | null }> | null;
   rrp_cents: number | null;
   quantity: number;
 };
@@ -44,19 +45,7 @@ function leadLabel(item: StudioItem) {
 }
 
 function dimsLabel(item: StudioItem) {
-  if (item.width_mm && item.depth_mm && item.height_mm) {
-    return `${item.width_mm} × ${item.depth_mm} × ${item.height_mm} mm`;
-  }
-  if (item.dimensions) return item.dimensions;
-
-  const variantLabel = item.size_variants?.find((variant) => variant.label)?.label;
-  if (!variantLabel) return null;
-  const dimensions = variantLabel.match(/W\s*([\d.]+)\s*[×x]\s*D\s*([\d.]+)\s*[×x]\s*H\s*([\d.]+)\s*(mm|cm)/i);
-  if (!dimensions) return null;
-  const [, width, depth, height, unit] = dimensions;
-  if (!width || !depth || !height || !unit) return null;
-  const multiplier = unit.toLowerCase() === "cm" ? 10 : 1;
-  return `${Number(width) * multiplier} × ${Number(depth) * multiplier} × ${Number(height) * multiplier} mm`;
+  return dimensionBadgeLabel(item);
 }
 
 export default function TradeProjectStudio() {
@@ -254,11 +243,9 @@ export default function TradeProjectStudio() {
                           <span className="bg-background/85 px-1.5 py-1 font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
                             {String(idx + 1).padStart(2, "0")} // {item.name}
                           </span>
-                          {dims && (
-                            <span className="bg-background/85 px-1.5 py-1 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                              {dims}
-                            </span>
-                          )}
+                          <span className="whitespace-nowrap bg-background/85 px-1.5 py-1 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                            {dims}
+                          </span>
                         </span>
                       </div>
                       <Button
