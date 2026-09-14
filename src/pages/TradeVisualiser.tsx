@@ -170,6 +170,20 @@ const TradeVisualiser = () => {
     return () => { cancelled = true; };
   }, []);
 
+  const needsModelViewer = objects.some((object) => object.render3d && object.glb_url);
+  useEffect(() => {
+    if (!needsModelViewer || modelViewerReady) return;
+    let mounted = true;
+    ensureModelViewer()
+      .then(() => mounted && setModelViewerReady(true))
+      .catch(() => {
+        if (mounted) toast.error("The 3D renderer could not be loaded.");
+      });
+    return () => { mounted = false; };
+  }, [needsModelViewer, modelViewerReady]);
+
+
+
   useEffect(() => {
     try {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
