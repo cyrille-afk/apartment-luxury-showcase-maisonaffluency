@@ -323,7 +323,7 @@ const TradeVisualiser = () => {
 
       {/* Selected object panel */}
       {selected && (
-        <div className="absolute right-8 top-24 z-30 w-64 border-t border-foreground/15 bg-white/90 px-5 py-4 backdrop-blur-sm">
+        <div className="absolute right-8 top-24 z-[60] w-64 border-t border-foreground/15 bg-white/90 px-5 py-4 backdrop-blur-sm">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className={cn(microLabel, "text-muted-foreground")}>{selected.brand_name}</p>
@@ -358,7 +358,7 @@ const TradeVisualiser = () => {
 
       {/* Sourcing tray */}
       {trayOpen && (
-        <div className="absolute bottom-28 left-1/2 z-30 w-[min(1040px,calc(100vw-64px))] -translate-x-1/2 border-t border-foreground/15 bg-white/95 px-6 py-5 backdrop-blur-sm">
+        <div className="absolute bottom-28 left-1/2 z-[60] w-[min(1040px,calc(100vw-64px))] -translate-x-1/2 border-t border-foreground/15 bg-white/95 px-6 py-5 backdrop-blur-sm">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <p className={cn(microLabel, "text-muted-foreground")}>Designer Collection Index</p>
             <div className="flex items-center gap-4">
@@ -417,7 +417,7 @@ const TradeVisualiser = () => {
       )}
 
       {/* Floating toolbar */}
-      <div className="absolute bottom-8 left-1/2 z-30 -translate-x-1/2">
+      <div className="absolute bottom-8 left-1/2 z-[60] -translate-x-1/2">
         <div className="flex items-center gap-1 border border-foreground/10 bg-white px-3 py-1 shadow-[0_18px_40px_-30px_rgba(0,0,0,0.6)]">
           <button className={toolbarButton} onClick={() => setTrayOpen((value) => !value)}>
             <Plus className="h-3.5 w-3.5" /> Add Object
