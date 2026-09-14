@@ -244,7 +244,10 @@ const TradeVisualiser = () => {
       contrast: 100,
       warmth: 0,
       shadowDirection: 10,
+      render3d: Boolean(product.glb_url),
+      orbit: false,
     };
+
     setObjects((current) => [...current, next]);
     setSelectedId(next.instanceId);
   };
