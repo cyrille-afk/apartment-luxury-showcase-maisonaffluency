@@ -5,11 +5,29 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
-import { useStudioBridge, useStudioAlerts } from "@/hooks/useStudioBridge";
+import { useStudioBridge, useStudioAlerts, type StudioAlert } from "@/hooks/useStudioBridge";
 import { enablePush, disablePush, pushPermission, pushSupported } from "@/lib/push";
 import { toast } from "sonner";
 
 const CAD_FORMATS_3D = new Set(["glb", "gltf", "obj", "fbx", "3ds", "skp", "rvt", "3dm"]);
+
+function parseAlert(a: StudioAlert) {
+  const brandMatch = a.body.match(/^(.+?)\s+reports/i);
+  const brand = brandMatch ? brandMatch[1].trim() : undefined;
+  const detailMatch = a.body.match(/for\s+(.+?)\s*[—–-]\s*(.+?)(?:\.|$)/i);
+  if (detailMatch) {
+    let object = detailMatch[1].trim();
+    if (brand && !object.toLowerCase().includes(" by ")) {
+      object = `${object} by ${brand}`;
+    }
+    const raw = detailMatch[2].trim();
+    const alert = /lead time now/i.test(raw)
+      ? `Production lead time updated to ${raw.replace(/.*lead time now\s+/i, "")}.`
+      : `${raw}.`;
+    return { object, alert, fallbackTitle: a.title, fallbackBody: a.body };
+  }
+  return { object: undefined, alert: undefined, fallbackTitle: a.title, fallbackBody: a.body };
+}
 
 /**
  * Desktop-only "bridge" panel: everything the designer flagged from their
