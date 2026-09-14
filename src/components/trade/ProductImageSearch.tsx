@@ -110,12 +110,12 @@ const ProductImageSearch = ({ onSelectImage }: ProductImageSearchProps) => {
         <button
           type="submit"
           disabled={loading || !query.trim()}
-          className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="shrink-0 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading && results.length === 0 ? (
             <DotCircleLoader size="sm" />
           ) : (
-            "Search"
+            "[ SEARCH ]"
           )}
         </button>
       </form>
