@@ -261,6 +261,22 @@ All colors MUST be HSL.
   letter-spacing: 0;
 }
 
+.trade-portal-shell [class*="shadow"] {
+  box-shadow: none;
+}
+
+.trade-editorial-main [class*="rounded"],
+.trade-editorial-header [class*="rounded"],
+.trade-editorial-sidebar [class*="rounded"] {
+  border-radius: 0;
+}
+
+.trade-editorial-main :where(h1, h2, h3, h4, h5, h6) {
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
 .trade-portal-shell .trade-micro-label {
   font-size: 10px;
   line-height: 1.4;
