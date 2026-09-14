@@ -505,6 +505,27 @@ const TradeQuotes = () => {
         </div>
       );
       })()}
+
+      {isDrawerQuote(selectedQuoteId) && selectedQuoteId && (
+        <InvoiceStatusDrawer
+          quoteId={selectedQuoteId}
+          open={drawerOpen}
+          onClose={() => {
+            setDrawerOpen(false);
+            setTimeout(() => {
+              setSelectedQuoteId(null);
+              if (quoteId) {
+                navigate("/trade/quotes", { replace: true });
+              } else if (searchParams.get("quote")) {
+                searchParams.delete("quote");
+                setSearchParams(searchParams, { replace: true });
+              }
+              fetchQuotes();
+            }, 480);
+          }}
+          projectName={quotes.find((q) => q.id === selectedQuoteId)?.project_name || undefined}
+        />
+      )}
     </div>
     </>
   );
