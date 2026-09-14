@@ -47,7 +47,7 @@
     "@radix-ui/react-tooltip": "^1.2.7",
     "@radix-ui/react-visually-hidden": "^1.2.4",
     "@react-pdf/renderer": "^4.3.2",
-    "@react-three/drei": "^10.7.8",
+    "@react-three/drei": "9.122.0",
     "@react-three/fiber": "^8.18",
     "@stripe/react-stripe-js": "^6.8.0",
     "@stripe/stripe-js": "^9.12.1",
@@ -94,7 +94,7 @@
     "three-stdlib": "^2.36.1",
     "use-image": "^1.1.4",
     "vaul": "^0.9.9",
-    "vitest": "^5.0.0",
+    "vitest": "4.1.11",
     "zod": "^3.25.76"
   },
   "devDependencies": {
