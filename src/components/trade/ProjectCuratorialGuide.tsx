@@ -375,6 +375,17 @@ export function ProjectCuratorialGuide({
           </p>
         </div>
         <div className="flex shrink-0 items-center">
+          {docked && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setOpen(false)}
+              className="h-auto rounded-none px-2 py-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground hover:bg-transparent hover:text-foreground"
+            >
+              <X className="h-3 w-3" aria-hidden="true" />
+              [ Dismiss AI Concierge ]
+            </Button>
+          )}
           {!docked && (
             <>
               <Button
