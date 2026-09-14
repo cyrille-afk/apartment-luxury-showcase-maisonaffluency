@@ -587,7 +587,6 @@ const App = () => {
   useEffect(() => {
     const win = window as any;
     const isHome = window.location.pathname === "/" || window.location.pathname === "";
-    console.log("[App deferred effect] isHome:", isHome);
 
     if (isHome) {
       let idleId: number | null = null;
@@ -623,12 +622,11 @@ const App = () => {
     }
 
     if (typeof win.requestIdleCallback === "function") {
-      const idleId = win.requestIdleCallback(() => { console.log("[App deferred effect] requestIdleCallback fired"); setShowDeferredUi(true); }, { timeout: 1500 });
-      console.log("[App deferred effect] scheduled requestIdleCallback", idleId);
+      const idleId = win.requestIdleCallback(() => setShowDeferredUi(true), { timeout: 1500 });
       return () => win.cancelIdleCallback?.(idleId);
     }
 
-    const timeoutId = window.setTimeout(() => { console.log("[App deferred effect] setTimeout fallback fired"); setShowDeferredUi(true); }, 1200);
+    const timeoutId = window.setTimeout(() => setShowDeferredUi(true), 1200);
     return () => window.clearTimeout(timeoutId);
   }, []);
 
