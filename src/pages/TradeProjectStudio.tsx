@@ -6,6 +6,7 @@ import { useProject } from "@/hooks/useProjects";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Switch } from "@/components/ui/switch";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
+import { ProjectSpecDrawer } from "@/components/trade/ProjectSpecDrawer";
 
 type StudioItem = {
   id: string;
@@ -53,6 +54,8 @@ export default function TradeProjectStudio() {
   const [loadingItems, setLoadingItems] = useState(true);
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
   const isClientMode = !showTradePrice;
+  const [specItemId, setSpecItemId] = useState<string | null>(null);
+  const specItem = items.find((i) => i.product_id === specItemId) || null;
 
   useEffect(() => {
     if (!id) return;
@@ -192,7 +195,17 @@ export default function TradeProjectStudio() {
                 return (
                   <figure
                     key={item.product_id}
-                    className="group relative mb-0 break-inside-avoid"
+                    className="group relative mb-0 cursor-pointer break-inside-avoid"
+                    onClick={() => setSpecItemId(item.product_id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSpecItemId(item.product_id);
+                      }
+                    }}
+                    aria-label={`Open specification for ${item.name}`}
                   >
                     <div className="relative overflow-hidden bg-muted">
                       {item.image_url ? (
@@ -303,19 +316,26 @@ export default function TradeProjectStudio() {
                 return (
                   <div
                     key={item.product_id}
-                    className="grid grid-cols-[44px_minmax(0,1fr)_88px_104px] items-start gap-2 border-b border-border py-4"
+                    className="grid cursor-pointer grid-cols-[44px_minmax(0,1fr)_88px_104px] items-start gap-2 border-b border-border py-4 transition-colors hover:bg-muted/40"
+                    onClick={() => setSpecItemId(item.product_id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSpecItemId(item.product_id);
+                      }
+                    }}
+                    aria-label={`Open specification for ${item.name}`}
                   >
                     <span className="pr-3 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                       {String(idx + 1).padStart(2, "0")}
                       <span className="block text-muted-foreground/72">{item.sku || "—"}</span>
                     </span>
                     <span className="min-w-0">
-                      <Link
-                        to={`/trade/products/${item.product_id}`}
-                        className="block truncate font-display text-sm text-foreground hover:underline"
-                      >
+                      <span className="block truncate font-display text-sm text-foreground">
                         {item.name}
-                      </Link>
+                      </span>
                       <span className="mt-1 block font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/72">
                         {item.designer}
                         {item.quantity > 1 ? ` · ×${item.quantity}` : ""}
@@ -375,6 +395,8 @@ export default function TradeProjectStudio() {
           </div>
         </aside>
       </div>
+
+      <ProjectSpecDrawer item={specItem} onClose={() => setSpecItemId(null)} />
     </div>
   );
 }
