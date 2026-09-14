@@ -194,85 +194,65 @@ export default function TradeProjectStudio() {
               </p>
             </div>
           ) : (
-            <div className="columns-2 gap-0 px-0 pb-12 md:columns-3">
+            <div className="columns-2 gap-6 bg-[hsl(var(--background))] px-4 pb-16 md:columns-3 md:px-8 lg:px-12">
               {items.map((item, idx) => {
                 const dims = dimsLabel(item);
                 const isCuratorialActive = curatorialItemId === item.product_id;
+                const activate = () => {
+                  setCuratorialItemId(item.product_id);
+                  window.dispatchEvent(new CustomEvent("project-curator:open"));
+                };
                 return (
                   <figure
                     key={item.product_id}
                     data-curatorial-source={item.product_id}
-                    className="group relative mb-0 cursor-pointer break-inside-avoid"
-                    onClick={() => {
-                      setCuratorialItemId(item.product_id);
-                      window.dispatchEvent(new CustomEvent("project-curator:open"));
-                    }}
+                    className="group relative mb-10 cursor-pointer break-inside-avoid"
+                    onClick={activate}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        setCuratorialItemId(item.product_id);
-                        window.dispatchEvent(new CustomEvent("project-curator:open"));
+                        activate();
                       }
                     }}
                     aria-label={`Open AI curatorial guide for ${item.name}`}
                   >
-                      <div className="relative overflow-hidden bg-muted">
+                    <div className="relative">
                       {item.image_url ? (
                         <img
                           src={item.image_url}
                           alt={`${item.name} by ${item.designer}`}
                           loading={idx < 4 ? "eager" : "lazy"}
-                          className="w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                          className="w-full object-contain transition-transform duration-700 group-hover:scale-[1.01]"
                         />
                       ) : (
-                        <div className="aspect-[4/5] w-full bg-muted" />
+                        <div className="aspect-[4/5] w-full" />
                       )}
-
-                      {/* Wireframe / crosshair overlay */}
-                      <div className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ${isCuratorialActive ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus:opacity-100"}`}>
-                        <span className="absolute left-0 right-0 top-1/2 h-px bg-foreground/25" />
-                        <span className="absolute bottom-0 top-0 left-1/2 w-px bg-foreground/25" />
-                        <span className={`absolute inset-4 border transition-colors ${isCuratorialActive && isRecommendationHovered ? "animate-pulse border-foreground/60" : "border-foreground/25"}`} />
-                        <span className="absolute left-4 top-4 h-2 w-2 border-l border-t border-foreground/60" />
-                        <span className="absolute right-4 top-4 h-2 w-2 border-r border-t border-foreground/60" />
-                        <span className="absolute bottom-4 left-4 h-2 w-2 border-b border-l border-foreground/60" />
-                        <span className="absolute bottom-4 right-4 h-2 w-2 border-b border-r border-foreground/60" />
-                        <span className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-2">
-                          <span className="bg-background/85 px-1.5 py-1 font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
-                            {String(idx + 1).padStart(2, "0")} // {item.name}
-                          </span>
-                          <span className="whitespace-nowrap bg-background/85 px-1.5 py-1 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                            {dims}
-                          </span>
-                        </span>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setCuratorialItemId(item.product_id);
-                          window.dispatchEvent(new CustomEvent("project-curator:open"));
-                        }}
-                        className={`absolute left-4 right-4 top-4 z-10 h-auto whitespace-normal rounded-none bg-background/90 px-2 py-1 text-left font-body text-[9px] uppercase leading-relaxed tracking-[0.15em] text-foreground transition-opacity hover:bg-background/90 focus:opacity-100 ${isCuratorialActive ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus:opacity-100"}`}
-                        aria-label={`Use ${item.name} as AI curatorial reference`}
-                      >
-                        AI Analysis // Resourcing Complements
-                      </Button>
                       {isCuratorialActive && isRecommendationHovered && (
-                        <span className="pointer-events-none absolute left-4 right-4 top-[52px] z-10 bg-background/85 px-2 py-1 font-body text-[8px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground">
-                          Anchor Target for Material Match
+                        <span className="pointer-events-none absolute inset-x-0 top-0 font-body text-[8px] uppercase leading-relaxed tracking-[0.15em] text-muted-foreground/70">
+                          Anchor target for material match
                         </span>
                       )}
                     </div>
+
+                    <figcaption
+                      className={`mt-3 space-y-0.5 transition-opacity duration-300 ${
+                        isCuratorialActive ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus:opacity-100"
+                      }`}
+                    >
+                      <span className="block truncate font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                        {item.name}
+                      </span>
+                      <span className="block font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/60">
+                        {dims}
+                      </span>
+                    </figcaption>
                   </figure>
                 );
               })}
             </div>
-          )}
-        </section>
+
 
         {/* RIGHT — procurement ledger */}
         <aside className="px-4 py-6 md:px-8 lg:px-10">
