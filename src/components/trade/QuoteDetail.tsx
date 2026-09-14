@@ -566,9 +566,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     );
   };
 
-  const createdDate = issueDate ? new Date(`${issueDate}T00:00:00`) : new Date(quoteCreatedAt);
+  // Issue date defaults to the creation day read in Singapore desk time, so a
+  // quote raised late in the evening SGT doesn't show the previous UTC day.
+  const sgtDay = (iso: string) =>
+    new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Singapore", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(iso));
+  const createdDate = new Date(`${issueDate ?? sgtDay(quoteCreatedAt)}T00:00:00`);
   const expiryDate = new Date(createdDate);
   expiryDate.setMonth(expiryDate.getMonth() + 1);
+
 
   const formatDate = (d: Date) =>
     d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
