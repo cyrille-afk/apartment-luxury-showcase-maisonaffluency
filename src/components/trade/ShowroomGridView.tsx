@@ -766,12 +766,12 @@ const ShowroomGridView = ({
                     : "border-border hover:border-foreground/20"
                 )}
               >
-                <div className="aspect-square bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => openProductSheet(product)}>
+                <div className="aspect-[4/5] bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.product_image_url ? (
                     <>
-                      <img src={product.product_image_url} alt={product.product_name} className={cn("w-full h-full object-cover transition-opacity duration-500", product.hover_image_url ? "group-hover:opacity-0" : "")} loading="lazy" />
+                      <img src={product.product_image_url} alt={product.product_name} className={cn("w-full h-full object-cover object-center transition-opacity duration-500", product.hover_image_url ? "group-hover:opacity-0" : "")} loading="lazy" />
                       {product.hover_image_url && (
-                        <img src={product.hover_image_url} alt={`${product.product_name} - in context`} className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500" loading="lazy" />
+                        <img src={product.hover_image_url} alt={`${product.product_name} - in context`} className="absolute inset-0 w-full h-full object-cover object-center opacity-0 group-hover:opacity-100 transition-opacity duration-500" loading="lazy" />
                       )}
                     </>
                   ) : (
@@ -840,8 +840,8 @@ const ShowroomGridView = ({
                   </div>
                 </div>
                 {/* Description in portal tooltip */}
-                <div className="p-3 text-center">
-                  <h3 className="font-display text-sm text-foreground leading-tight truncate">{product.product_name}</h3>
+                <div className="flex flex-col items-center p-3 min-h-[4rem]">
+                  <h3 className="font-display text-sm text-foreground leading-tight line-clamp-2 min-h-[2.25rem]">{product.product_name}</h3>
                   {isAdmin ? (
                     <div className="mt-1 flex flex-col items-center gap-1.5">
                       {renderPriceDisplay(price, "font-display text-sm inline-flex items-center justify-center gap-1.5 flex-wrap", product.price_prefix)}

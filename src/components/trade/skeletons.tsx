@@ -26,7 +26,7 @@ export const QuoteCardSkeleton = () => (
 /** Mimics a product card in grid view (TradeShowroom / TradeGallery) */
 export const ProductCardSkeleton = () => (
   <div className="border border-border rounded-lg overflow-hidden">
-    <Bone className="aspect-square w-full rounded-none" />
+    <Bone className="aspect-[4/5] w-full rounded-none" />
     <div className="p-3 space-y-2">
       <Bone className="h-3 w-3/4" />
       <Bone className="h-2.5 w-1/2" />

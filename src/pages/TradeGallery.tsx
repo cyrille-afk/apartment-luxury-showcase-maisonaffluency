@@ -597,14 +597,14 @@ const TradeGallery = () => {
             const pinned = isPinned(product.product_name, product.id);
             return (
               <div key={product.id} className="group relative border border-border rounded-lg hover:border-foreground/20 transition-colors">
-                <div className="aspect-square bg-muted/30 relative overflow-hidden rounded-t-lg cursor-pointer" onClick={() => openProductSheet(product)}>
+                <div className="aspect-[4/5] bg-muted/30 relative overflow-hidden rounded-t-lg cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.image_url ? (
                     <>
                       <img
                         src={product.image_url}
                         alt={product.product_name}
                         className={cn(
-                          "absolute inset-0 w-full h-full object-cover transition-all duration-700",
+                          "absolute inset-0 w-full h-full object-cover object-center transition-all duration-700",
                           product.hover_image_url ? "opacity-100 group-hover:opacity-0 group-hover:scale-105" : "group-hover:scale-105"
                         )}
                         loading="lazy"
@@ -613,7 +613,7 @@ const TradeGallery = () => {
                         <img
                           src={product.hover_image_url}
                           alt={`${product.product_name} hover view`}
-                          className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-all duration-700 scale-105 group-hover:scale-100"
+                          className="absolute inset-0 w-full h-full object-cover object-center opacity-0 group-hover:opacity-100 transition-all duration-700 scale-105 group-hover:scale-100"
                           loading="lazy"
                         />
                       )}
@@ -701,8 +701,8 @@ const TradeGallery = () => {
                   </div>
                 </div>
                 {/* Description in portal tooltip */}
-                <div className="p-3 text-center">
-                   <h3 className="font-display text-sm text-foreground leading-tight truncate">
+                <div className="flex flex-col items-center p-3 min-h-[4.5rem]">
+                   <h3 className="font-display text-sm text-foreground leading-tight line-clamp-2 min-h-[2.25rem]">
                      {product.product_name}
                    </h3>
                   {isAdmin ? (

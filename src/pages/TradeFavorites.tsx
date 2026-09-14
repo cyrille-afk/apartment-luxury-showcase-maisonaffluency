@@ -460,9 +460,9 @@ export default function TradeFavorites() {
 
         {/* Content */}
         {loading ? (
-          favoritesViewMode === "grid" ? <div className="columns-1 gap-8 sm:columns-2 lg:columns-3">
+          favoritesViewMode === "grid" ? <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className={cn("mb-10 w-full animate-pulse bg-muted", i % 3 === 1 ? "aspect-[4/5]" : "aspect-[5/4]")} />
+              <div key={i} className="aspect-[4/5] w-full animate-pulse bg-muted" />
             ))}
           </div> : <div className="border-t border-border">
             {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-16 animate-pulse border-b border-border bg-muted/40" />)}
@@ -491,20 +491,19 @@ export default function TradeFavorites() {
             </div>
           </div>
         ) : favoritesViewMode === "grid" ? (
-          <div className="columns-1 gap-x-8 sm:columns-2 lg:columns-3">
-            {filtered.map((fav, index) => (
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((fav) => (
               <article
                 key={fav.favoriteId}
-                className="group mb-12 inline-block w-full break-inside-avoid cursor-pointer"
+                className="group flex flex-col cursor-pointer"
                 onClick={() => { setAddedToQuote(false); setLightboxProduct(favToLightboxItem(fav)); }}
               >
                 <div className={cn(
-                  "relative w-full overflow-hidden bg-background",
-                  index % 5 === 1 || index % 5 === 4 ? "aspect-[4/5]" : index % 5 === 2 ? "aspect-[3/2]" : "aspect-[5/4]",
+                  "relative aspect-[4/5] w-full overflow-hidden bg-background",
                   selectedFor3D.has(fav.productId) && "outline outline-1 outline-foreground outline-offset-4"
                 )}>
                   {fav.image_url ? (
-                    <img src={fav.image_url} alt={fav.product_name} className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]" loading="lazy" />
+                    <img src={fav.image_url} alt={fav.product_name} className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.015]" loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
                       <Heart className="w-8 h-8" />
@@ -530,9 +529,9 @@ export default function TradeFavorites() {
                     {removing === fav.favoriteId ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <Trash2 className="w-3.5 h-3.5" />}
                   </button>
                 </div>
-                <div className="space-y-1.5 pt-4 text-center">
-                  <p className="font-display text-[15px] font-light leading-snug text-foreground">{fav.product_name}</p>
-                  <p className="font-display text-xs font-light text-muted-foreground">{fav.brand_name}</p>
+                <div className="flex flex-col items-center pt-4">
+                  <p className="font-display text-[15px] font-light leading-snug text-foreground line-clamp-2 min-h-[2.75rem]">{fav.product_name}</p>
+                  <p className="font-display text-xs font-light text-muted-foreground mt-1.5">{fav.brand_name}</p>
                 </div>
               </article>
             ))}
