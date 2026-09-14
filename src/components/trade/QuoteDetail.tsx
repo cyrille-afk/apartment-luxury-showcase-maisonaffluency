@@ -566,9 +566,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     );
   };
 
-  const createdDate = issueDate ? new Date(`${issueDate}T00:00:00`) : new Date(quoteCreatedAt);
+  // Issue date defaults to the creation day read in Singapore desk time, so a
+  // quote raised late in the evening SGT doesn't show the previous UTC day.
+  const sgtDay = (iso: string) =>
+    new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Singapore", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(iso));
+  const createdDate = new Date(`${issueDate ?? sgtDay(quoteCreatedAt)}T00:00:00`);
   const expiryDate = new Date(createdDate);
   expiryDate.setMonth(expiryDate.getMonth() + 1);
+
 
   const formatDate = (d: Date) =>
     d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
@@ -2566,7 +2571,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 {isDraft ? (
                   <input
                     type="date"
-                    value={issueDate ?? new Date(quoteCreatedAt).toISOString().slice(0, 10)}
+                    value={issueDate ?? sgtDay(quoteCreatedAt)}
                     onChange={(e) => setIssueDate(e.target.value || null)}
                     onBlur={async (e) => {
                       const v = e.target.value || null;
@@ -3216,10 +3221,28 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         )}
                       </div>
                       <div className="hidden md:block text-right">
-                        <span className="font-body text-sm text-foreground tabular-nums">
-                          {unitPrice ? `${currencySymbol(currency)} ${formatPriceRaw(unitPrice, currency)}` : "TBD"}
-                        </span>
+                        {(() => {
+                          const srcCur = itemPriceCurrency(item, currency);
+                          const showOrigin = rawUnitPrice != null && srcCur !== currency;
+                          return (
+                            <>
+                              <span className="font-body text-sm text-foreground tabular-nums">
+                                {showOrigin
+                                  ? `${srcCur} ${formatPriceRaw(rawUnitPrice, srcCur)}`
+                                  : unitPrice
+                                    ? `${currencySymbol(currency)} ${formatPriceRaw(unitPrice, currency)}`
+                                    : "TBD"}
+                              </span>
+                              {showOrigin && unitPrice ? (
+                                <span className="block font-body text-[10px] text-muted-foreground tabular-nums">
+                                  ≈ {currencySymbol(currency)} {formatPriceRaw(unitPrice, currency)}
+                                </span>
+                              ) : null}
+                            </>
+                          );
+                        })()}
                       </div>
+
                       <div className="hidden md:block text-right">
                         <span className="font-body text-sm text-foreground font-medium tabular-nums">
                           {lineTotal ? `${currencySymbol(currency)} ${formatPriceRaw(lineTotal, currency)}` : "TBD"}
@@ -3700,11 +3723,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       <span>{formatPriceRaw(subtotalCents, currency) || "TBD"}</span>
                     </div>
                     {discountApplies && subtotalCents > 0 && (
-                      <div className="flex justify-between font-body text-xs text-muted-foreground">
-                        <span>Trade Discount ({tradeDiscountLabel})</span>
-                        <span>-{formatPriceRaw(tradeDiscountCents, currency)}</span>
-                      </div>
+                      <>
+                        <div className="flex justify-between font-body text-xs text-muted-foreground">
+                          <span>Trade Discount{tierLabel ? ` — ${tierLabel}` : ""} ({tradeDiscountLabel})</span>
+                          <span>-{formatPriceRaw(tradeDiscountCents, currency)}</span>
+                        </div>
+                        <div className="flex justify-between font-body text-xs text-foreground/80">
+                          <span>Net subtotal</span>
+                          <span>{formatPriceRaw(goodsAfterDiscountCents, currency)}</span>
+                        </div>
+                      </>
                     )}
+
                     {insuranceEnabled && insurancePremiumCents > 0 && (
                       <div className="flex justify-between font-body text-xs text-muted-foreground">
                         <span>
@@ -3773,20 +3803,20 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           )}
 
 
-                          {/* 60/40 deposit/balance breakdown — shown when priced or later */}
-                          {(isPriced || isConfirmed) && total > 0 && (
+                          {/* Milestone schedule — 60% due now (primary), 40% locked until shipment */}
+                          {total > 0 && (
                             <div className="mt-3 pt-3 border-t border-dashed border-border space-y-1.5">
                               <div className="flex justify-between font-body text-xs">
-                                <span className={isDepositPaid || isFullyPaid ? "text-emerald-600" : "text-foreground/80"}>
-                                  {isDepositPaid || isFullyPaid ? "✓ " : ""}60% Deposit
+                                <span className={isDepositPaid || isFullyPaid ? "text-emerald-600" : "text-foreground"}>
+                                  {isDepositPaid || isFullyPaid ? "✓ " : ""}60% Deposit Due Now
                                 </span>
-                                <span className={isDepositPaid || isFullyPaid ? "text-emerald-600 font-medium" : "text-foreground/80"}>
+                                <span className={isDepositPaid || isFullyPaid ? "text-emerald-600 font-medium" : "text-foreground font-medium"}>
                                   {currencySymbol(currency)} {formatPriceRaw(depositCents, currency)}
                                 </span>
                               </div>
                               <div className="flex justify-between font-body text-xs">
                                 <span className={isFullyPaid ? "text-emerald-600" : "text-muted-foreground"}>
-                                  {isFullyPaid ? "✓ " : ""}40% Balance
+                                  {isFullyPaid ? "✓ " : "🔒 "}40% Balance Before Shipment
                                 </span>
                                 <span className={isFullyPaid ? "text-emerald-600 font-medium" : "text-muted-foreground"}>
                                   {currencySymbol(currency)} {formatPriceRaw(balanceCents, currency)}
@@ -3799,6 +3829,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               )}
                             </div>
                           )}
+
                         </>
                       );
                     })()}
@@ -3945,14 +3976,43 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
         {/* Payment Terms & Banking Details */}
         <div className="border-t border-border p-4 md:p-6 lg:p-8 space-y-5 md:space-y-6">
-          <div>
-            <h3 className="font-display text-xs uppercase tracking-[0.15em] text-foreground mb-3">Payment Terms</h3>
-            <ul className="font-body text-[10px] md:text-[11px] leading-relaxed text-muted-foreground space-y-1.5 list-disc list-inside">
-              <li>60% payment upon order confirmation unless indicated otherwise</li>
-              <li>Payment by bank transfer</li>
-              <li>Balance of Payment ex-work prior to shipping</li>
-            </ul>
-          </div>
+          <details className="group" open>
+            <summary className="flex items-center justify-between cursor-pointer list-none">
+              <h3 className="font-display text-xs uppercase tracking-[0.15em] text-foreground">Payment Terms</h3>
+              <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground group-open:hidden">Open</span>
+              <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground hidden group-open:inline">Close</span>
+            </summary>
+
+            <div className="mt-4 space-y-5">
+              <div>
+                <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">Trade Tiers</p>
+                <div className="font-body text-[10px] md:text-[11px] leading-relaxed text-muted-foreground space-y-1">
+                  <div className="flex justify-between border-b border-border/50 pb-1">
+                    <span className="text-foreground">Silver{tierLabel === "Silver" ? " • current" : ""}</span>
+                    <span>8% · entry</span>
+                  </div>
+                  <div className="flex justify-between border-b border-border/50 pb-1">
+                    <span className={tierLabel === "Gold" ? "text-foreground" : ""}>Gold{tierLabel === "Gold" ? " • current" : ""}</span>
+                    <span>10% · from 250,000 SGD</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className={tierLabel === "Platinum" ? "text-foreground" : ""}>Platinum{tierLabel === "Platinum" ? " • current" : ""}</span>
+                    <span>12% · from 750,000 SGD</span>
+                  </div>
+                </div>
+              </div>
+
+              <ul className="font-body text-[10px] md:text-[11px] leading-relaxed text-muted-foreground space-y-1.5 list-disc list-inside">
+                <li>60% deposit due on order confirmation; 40% balance due before shipment. Both instalments are calculated on the order total including the current shipping estimate.</li>
+                <li>Shipping and FX are estimates at quote date and are locked in if the deposit is received within 7 days of issue. Otherwise, around 2 weeks before the end of the lead time, Maison Affluency re-quotes freight at live carrier rates and FX, then emails the balance invoice unless the admin overrides the schedule.</li>
+                <li>Payment by bank transfer (no fee) or by card via Stripe (processing fee applies).</li>
+                <li>Lead times start from receipt of cleared deposit and finalised specifications.</li>
+                <li>Quote valid until {formatDate(expiryDate)}. Pricing in {currency} unless otherwise stated.</li>
+                <li>Quotes are valid for 30 days based on live manufacturer data. Final verification required before purchase.</li>
+              </ul>
+            </div>
+          </details>
+
 
           <div>
             <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mb-2">Payment by bank transfer to:</p>
