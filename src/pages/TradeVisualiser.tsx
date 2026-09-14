@@ -572,7 +572,34 @@ const TradeVisualiser = () => {
                       onPointerDown={(event) => event.stopPropagation()}
                       onClick={(event) => event.stopPropagation()}
                     >
+                      {object.glb_url && (
+                        <div className="mb-3 border-b border-border pb-2.5">
+                          <p className="mb-1.5 font-body text-[8px] uppercase tracking-[0.15em] text-foreground/70">3D Model</p>
+                          <div className="flex flex-wrap gap-3">
+                            <button
+                              type="button"
+                              onClick={() => toggleObjectField(object.instanceId, "render3d")}
+                              className="font-body text-[8px] uppercase tracking-[0.15em] text-foreground/70 underline-offset-4 hover:underline"
+                            >
+                              {object.render3d ? "Use Flat Image" : "Use 3D Model"}
+                            </button>
+                            {object.render3d && (
+                              <button
+                                type="button"
+                                onClick={() => toggleObjectField(object.instanceId, "orbit")}
+                                className={cn(
+                                  "font-body text-[8px] uppercase tracking-[0.15em] underline-offset-4 hover:underline",
+                                  object.orbit ? "text-foreground" : "text-muted-foreground",
+                                )}
+                              >
+                                {object.orbit ? "Orbit On" : "Orbit Off"}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
                       <p className="mb-2 font-body text-[8px] uppercase tracking-[0.15em] text-foreground/70">Ambient Match</p>
+
                       {([
                         { field: "warmth" as const, label: "Warmth", min: 0, max: 70 },
                         { field: "brightness" as const, label: "Brightness", min: 65, max: 130 },
