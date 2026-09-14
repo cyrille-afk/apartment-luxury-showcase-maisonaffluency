@@ -451,11 +451,7 @@ const TradeVisualiser = () => {
             className="mt-2 w-full accent-foreground"
           />
 
-          <div className="mt-4 flex items-center gap-4">
-            <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={() => spinObject(selected.instanceId, -45)}>Spin −45°</button>
-            <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={() => spinObject(selected.instanceId, 45)}>Spin +45°</button>
-          </div>
-          <p className={cn(microLabel, "mt-4 text-muted-foreground/70")}>Drag the red · blue arrows to slide on the floor plane, or drag the piece directly. Spin buttons rotate.</p>
+          <p className={cn(microLabel, "mt-4 text-muted-foreground/70")}>Drag the coloured arrows to slide along the floor plane, or the outer ring to spin the piece 360° into the backdrop perspective.</p>
 
           {isBondStreetStool(selected.id) ? (
             <div className="mt-5 border-t border-foreground/10 pt-4">
