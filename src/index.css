@@ -943,7 +943,7 @@ input, select, textarea {
     visibility: visible;
   }
 
-  .proposal-preview-shell[data-state="open"] {
+  .proposal-preview-shell {
     position: absolute !important;
     inset: 0 !important;
     width: 210mm !important;
