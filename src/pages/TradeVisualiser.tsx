@@ -417,16 +417,16 @@ const TradeVisualiser = () => {
       )}
 
       {/* Floating toolbar */}
-      <div className="absolute bottom-8 left-1/2 z-[60] -translate-x-1/2">
-        <div className="flex items-center gap-1 border border-foreground/10 bg-white px-3 py-1 shadow-[0_18px_40px_-30px_rgba(0,0,0,0.6)]">
+      <div className="absolute bottom-12 left-1/2 z-[60] -translate-x-1/2">
+        <div className="flex items-center gap-1 border border-[#E5E5E5] bg-[#FFFFFF] px-5 py-2 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.15)] backdrop-blur-sm">
           <button className={toolbarButton} onClick={() => setTrayOpen((value) => !value)}>
             <Plus className="h-3.5 w-3.5" /> Add Object
           </button>
-          <span className="h-5 w-px bg-foreground/10" />
+          <span className="h-6 w-px bg-[#E5E5E5]" />
           <button className={toolbarButton} onClick={() => fileRef.current?.click()}>
             <ImageUp className="h-3.5 w-3.5" /> {backdropSrc ? "Change Backdrop" : "Upload Canvas Backdrop"}
           </button>
-          <span className="h-5 w-px bg-foreground/10" />
+          <span className="h-6 w-px bg-[#E5E5E5]" />
           <button className={toolbarButton} onClick={resetSandbox}>
             <RotateCcw className="h-3.5 w-3.5" /> Reset Sandbox
           </button>
