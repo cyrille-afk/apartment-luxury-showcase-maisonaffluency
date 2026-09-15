@@ -2253,7 +2253,7 @@ const DesignersHoverHero = () => {
       {/* Desktop directory launcher — a persistent glass dock independent of
           the editorial sidebar so it remains reachable across the full hero. */}
       <div
-        className="fixed bottom-6 left-1/2 z-[73] hidden -translate-x-1/2 items-center border border-white/15 bg-black/45 px-1.5 py-1 backdrop-blur-2xl lg:flex"
+        className="fixed bottom-6 left-1/2 z-[73] hidden -translate-x-1/2 items-center border border-background/15 bg-foreground/45 px-1.5 py-1 backdrop-blur-2xl lg:flex"
         aria-label="Designer directory controls"
       >
         <button
@@ -2262,18 +2262,18 @@ const DesignersHoverHero = () => {
           onClick={() => openDesignerSearch("search")}
           aria-expanded={searchOpen && desktopDirectoryMode === "search"}
           aria-controls="designers-search-sheet"
-          className="whitespace-nowrap px-5 py-2 font-body text-[10px] uppercase tracking-[0.22em] text-white/75 transition-colors hover:text-white focus-visible:outline-none focus-visible:text-white"
+          className="whitespace-nowrap px-5 py-2 font-body text-[10px] uppercase tracking-[0.22em] text-background/75 transition-colors hover:text-background focus-visible:outline-none focus-visible:text-background"
         >
           [ Search Directory ]
         </button>
-        <span className="h-4 w-px bg-white/15" aria-hidden="true" />
+        <span className="h-4 w-px bg-background/15" aria-hidden="true" />
         <button
           ref={desktopAzDockRef}
           type="button"
           onClick={() => openDesignerSearch("az")}
           aria-expanded={searchOpen && desktopDirectoryMode === "az"}
           aria-controls="designers-search-sheet"
-          className="whitespace-nowrap px-5 py-2 font-body text-[10px] uppercase tracking-[0.22em] text-white/75 transition-colors hover:text-white focus-visible:outline-none focus-visible:text-white"
+          className="whitespace-nowrap px-5 py-2 font-body text-[10px] uppercase tracking-[0.22em] text-background/75 transition-colors hover:text-background focus-visible:outline-none focus-visible:text-background"
         >
           [ A - Z ]
         </button>
