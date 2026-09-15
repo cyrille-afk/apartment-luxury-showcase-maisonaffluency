@@ -2423,15 +2423,17 @@ const DesignersHoverHero = () => {
                             No designers match “{searchQuery}”.
                           </p>
                         ) : (
-                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-4 px-0 pt-2 pb-4">
-                            {flatResults.map((d: any) => (
-                              <DesignerGridCard
-                                key={d.slug}
-                                designer={d}
-                                useCardPhoto
-                                onNavigate={() => setSearchOpen(false)}
-                              />
-                            ))}
+                          <div className="max-h-[720px] overflow-y-auto overscroll-contain pr-1">
+                            <div className="grid grid-cols-4 gap-4 px-0 pt-2 pb-4">
+                              {flatResults.map((d: any) => (
+                                <DesignerGridCard
+                                  key={d.slug}
+                                  designer={d}
+                                  useCardPhoto
+                                  onNavigate={() => setSearchOpen(false)}
+                                />
+                              ))}
+                            </div>
                           </div>
                         )
                       ) : (
