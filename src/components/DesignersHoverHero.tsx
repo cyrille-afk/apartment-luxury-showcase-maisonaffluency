@@ -634,6 +634,7 @@ const DesignersHoverHero = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchTriggerRef = useRef<HTMLButtonElement>(null);
   const searchCloseTimerRef = useRef<number | null>(null);
+  const suppressSearchFocusOpenRef = useRef(false);
   const searchScrollRef = useRef<HTMLDivElement>(null);
   const [isRestoringLetter, setIsRestoringLetter] = useState(false);
   const [restoredOnlyLetter, setRestoredOnlyLetter] = useState<string | null>(() => restoredLetterRef.current);
@@ -1245,7 +1246,11 @@ const DesignersHoverHero = () => {
       setSearchOpen(false);
       setDropdownPos(null);
       searchCloseTimerRef.current = null;
+      suppressSearchFocusOpenRef.current = true;
       searchTriggerRef.current?.focus({ preventScroll: true });
+      window.requestAnimationFrame(() => {
+        suppressSearchFocusOpenRef.current = false;
+      });
     }, 400);
   };
 
@@ -1726,7 +1731,7 @@ const DesignersHoverHero = () => {
           type="button"
           onClick={openDesignerSearch}
           onFocus={() => {
-            if (!searchOpen) openDesignerSearch();
+            if (!searchOpen && !suppressSearchFocusOpenRef.current) openDesignerSearch();
           }}
           aria-expanded={searchOpen}
           aria-controls="designers-search-sheet"
