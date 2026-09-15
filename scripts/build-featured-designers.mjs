@@ -34,6 +34,7 @@ const FEATURED_SLUGS = [
   "paul-laszlo",
   "pierre-bonnefille",
   "pierre-chareau",
+  "stephane-parmentier",
   "thierry-lemaire",
   "tristan-auer",
   // Contemporary Talents
@@ -42,6 +43,7 @@ const FEATURED_SLUGS = [
   "christopher-boots",
   "delcourt-collection",
   "emmanuel-levet-stenne",
+  "collection-particuliere",
   "hamrei",
   "humbert-poyet",
   "kerstens",
