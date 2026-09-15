@@ -15,7 +15,7 @@ const categories: ToolCategory[] = [
   {
     label: "Discover",
     tools: [
-      { title: "Gallery", description: "Browse curated interiors and installations", url: "/trade/gallery", icon: Image },
+      { title: "Gallery", description: "Source the complete catalog, filter by categories, and view live trade pricing.", url: "/trade/gallery", icon: Image },
       { title: "Designers & Ateliers", description: "Explore our represented makers", url: "/trade/designers", icon: Users },
       { title: "Resources", description: "Catalogues, price lists & tech sheets", url: "/trade/documents", icon: FolderOpen },
       { title: "Material Library", description: "Swatches, finishes & fabric samples", url: "/trade/materials", icon: Layers },
