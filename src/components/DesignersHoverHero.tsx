@@ -1641,13 +1641,16 @@ const DesignersHoverHero = () => {
           onClick={() => {
             if (isDesktopViewport && directoryRef.current) {
               const rect = directoryRef.current.getBoundingClientRect();
-              const width = 380;
-              const left = Math.min(window.innerWidth - width - 16, rect.left);
+              const gutter = 24;
+              const width = Math.min(760, window.innerWidth - gutter * 2);
+              const centeredLeft = (window.innerWidth - width) / 2;
+              const left = Math.max(gutter, Math.min(rect.left, centeredLeft));
               const top = rect.bottom + 8;
               const height = Math.max(320, window.innerHeight - top - 16);
               setDropdownPos({
                 left,
                 top,
+                width,
                 height,
               });
             } else {
