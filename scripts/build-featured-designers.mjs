@@ -43,6 +43,7 @@ const FEATURED_SLUGS = [
   "christopher-boots",
   "delcourt-collection",
   "emmanuel-levet-stenne",
+  "garnier-linker",
   "collection-particuliere",
   "hamrei",
   "humbert-poyet",

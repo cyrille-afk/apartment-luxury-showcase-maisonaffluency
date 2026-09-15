@@ -277,6 +277,7 @@ const FEATURED_GROUPS = [
       "christopher-boots",
       "delcourt-collection",
       "emmanuel-levet-stenne",
+      "garnier-linker",
       "hamrei",
       "collection-particuliere",
       "humbert-poyet",
@@ -291,6 +292,8 @@ const FEATURED_GROUPS = [
 ];
 
 const MOBILE_ONLY_EXCLUDED_DESIGNERS = new Set(["paul-laszlo", "pouenat"]);
+const DESKTOP_ONLY_FEATURED_SLUGS = new Set(["garnier-linker"]);
+
 
 const MOBILE_BG_OVERRIDES: Record<string, string> = {
   // Jean-Michel Frank's raw pick is a square studio shot with a baked-in black
@@ -747,6 +750,7 @@ const DesignersHoverHero = () => {
     return FEATURED_GROUPS.map((g) => ({
       ...g,
       designers: g.slugs
+        .filter((slug) => !isMobileOrPwa || !DESKTOP_ONLY_FEATURED_SLUGS.has(slug))
         .map((slug) => {
           const d = bySlug.get(slug);
           if (!d) return undefined;
@@ -760,7 +764,7 @@ const DesignersHoverHero = () => {
           })
         ) as FeaturedDesigner[],
     }));
-  }, [designers]);
+  }, [designers, isMobileOrPwa]);
 
   const items = useMemo(
     () =>
@@ -1886,11 +1890,11 @@ const DesignersHoverHero = () => {
           "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-20 pointer-events-auto md:overflow-hidden md:h-full",
 
             isStandalone
-              ? "overflow-y-auto justify-start overscroll-contain touch-pan-y pt-4 short:pt-3 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pt-8 md:pb-8 md:justify-start md:overflow-hidden [-webkit-overflow-scrolling:touch]"
+              ? "overflow-y-auto justify-start overscroll-contain touch-pan-y pt-4 short:pt-3 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pt-8 lg:pt-5 md:pb-8 md:justify-start md:overflow-hidden [-webkit-overflow-scrolling:touch]"
               : // Mobile browser: the section already starts below the fixed
                 // header, so do not add var(--header-h) again here. Keep the
                 // designer list high while leaving room for the Directory link.
-                "overflow-y-hidden justify-start overscroll-contain touch-none pt-6 short:pt-5 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pt-8 md:justify-start md:pb-8 md:overflow-hidden"
+                "overflow-y-hidden justify-start overscroll-contain touch-none pt-6 short:pt-5 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pt-8 lg:pt-5 md:justify-start md:pb-8 md:overflow-hidden"
           )}
         >
 
@@ -1903,9 +1907,9 @@ const DesignersHoverHero = () => {
                 {directoryLabels("w-full", directoryRef, "left")}
               </div>
 
-              {/* Preserve the original desktop directory block's vertical
-                  footprint after moving search into the bottom dock. */}
-              <div className="hidden h-[6rem] shrink-0 lg:block" aria-hidden="true" />
+              {/* Preserve a small vertical gap for the bottom dock while moving
+                  the designer list higher on desktop. */}
+              <div className="hidden h-[2rem] shrink-0 lg:block" aria-hidden="true" />
 
 
               <nav
