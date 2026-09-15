@@ -8,7 +8,7 @@ import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import {
   ArrowLeft, Pencil, Save, Trash2, Loader2, FileText, FolderArchive,
   ListChecks, CalendarClock, Image as ImageIcon, ExternalLink, Archive, CheckCircle2,
-  Package, Users, LayoutGrid, Truck, Lock,
+  Package, Users, LayoutGrid, Truck, Lock, Scan,
 } from "lucide-react";
 import { useProject } from "@/hooks/useProjects";
 import { supabase } from "@/integrations/supabase/client";
