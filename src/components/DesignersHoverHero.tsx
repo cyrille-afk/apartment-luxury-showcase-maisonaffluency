@@ -1181,8 +1181,8 @@ const DesignersHoverHero = () => {
     requestAnimationFrame(() => {
       const scroller = searchScrollRef.current;
       if (!scroller) return;
-      // The scroller contains both the mobile block (md:hidden) and the desktop
-      // block (hidden md:block). Pick the currently visible row so we don't
+      // The scroller contains both the mobile block (lg:hidden) and the desktop
+      // block (hidden lg:block). Pick the currently visible row so we don't
       // measure a hidden mobile row on desktop or vice-versa.
       const rows = Array.from(
         scroller.querySelectorAll<HTMLElement>(`[data-designer-letter="${letter}"]`)
