@@ -2319,7 +2319,7 @@ const DesignersHoverHero = () => {
               ) : (
                 <>
                   {/* Mobile: grouped designer grid with sticky letter headers */}
-                  <div className="md:hidden">
+                  <div className="lg:hidden">
                     <div className="flex flex-col pb-2">
                       {isSearching ? (
                         <div className="grid grid-cols-2 gap-x-3 gap-y-4 px-0 pt-2 pb-4">
