@@ -2264,18 +2264,21 @@ const DesignersHoverHero = () => {
                 </button>
               </div>
             </div>
-            {/* Sticky horizontal A–Z quick-jump (mobile only, hidden while searching) */}
+            {/* Sticky horizontal A–Z quick-jump (hidden while searching) */}
             {!isSearching && (
-              <div className="lg:hidden shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3 overflow-x-auto no-scrollbar px-3">
+              <div className="shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3 overflow-x-auto no-scrollbar px-3 lg:overflow-visible lg:px-6">
                 <div
                   className={cn(
                     "mx-auto flex w-max min-w-full items-center justify-center gap-0.5 py-1.5 transition-opacity duration-150",
-                    isRestoringLetter ? "opacity-0" : "opacity-100"
+                    isRestoringLetter ? "opacity-0" : "opacity-100",
+                    "lg:w-full lg:min-w-0 lg:max-w-7xl lg:justify-center lg:gap-6"
                   )}
                   style={{ scrollbarWidth: "none" }}
                 >
                   {groupedResults.map(([letter]) => {
-                    const isActive = activeMobileLetter === letter;
+                    const isActive = isDesktopViewport
+                      ? activeAccordionLetter === letter
+                      : activeMobileLetter === letter;
                     return (
                       <button
                         key={letter}
@@ -2285,13 +2288,16 @@ const DesignersHoverHero = () => {
                           setRestoredOnlyLetter(null);
                           setExpandedLetters(new Set([letter]));
                           setActiveAccordionLetter(letter);
-                          scrollLetterIntoView(letter);
+                          if (!isDesktopViewport) scrollLetterIntoView(letter);
                         }}
                         className={cn(
                           "shrink-0 w-7 h-7 flex items-center justify-center rounded-full font-serif text-[13px] transition-colors",
-                          isActive ? "bg-white text-black" : "text-white/70 hover:text-white"
+                          "lg:w-auto lg:h-auto lg:rounded-none lg:font-body lg:text-[11px] lg:uppercase lg:tracking-[0.2em]",
+                          isActive
+                            ? "bg-white text-black lg:bg-transparent lg:text-white lg:underline lg:underline-offset-4"
+                            : "text-white/70 hover:text-white lg:text-white/50 lg:hover:text-white"
                         )}
-                        aria-label={`Jump to ${letter}`}
+                        aria-label={isDesktopViewport ? `Show designers starting with ${letter}` : `Jump to ${letter}`}
                       >
                         {letter}
                       </button>
