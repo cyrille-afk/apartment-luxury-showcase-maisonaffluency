@@ -2333,9 +2333,17 @@ const DesignersHoverHero = () => {
             )}>
               <div className="relative flex items-center">
                 <Search
-                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50 pointer-events-none"
+                  className={cn(
+                    "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50 pointer-events-none",
+                    desktopDirectoryMode === "az" && "lg:hidden"
+                  )}
                   aria-hidden="true"
                 />
+                {desktopDirectoryMode === "az" && (
+                  <span className="hidden font-body text-[10px] uppercase tracking-[0.24em] text-white/60 lg:block">
+                    Designer Directory // A–Z
+                  </span>
+                )}
                 <input
                   ref={searchInputRef}
                   type="text"
