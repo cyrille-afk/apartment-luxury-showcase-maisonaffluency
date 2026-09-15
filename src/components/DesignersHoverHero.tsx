@@ -2083,11 +2083,11 @@ const DesignersHoverHero = () => {
             Lowered slightly so it sits closer to the bottom edge. */}
         {isMobileBrowser && directoryLabels(cn(
           "absolute flex items-center text-white left-6 right-6 pointer-events-auto md:hidden z-30 bottom-[calc(1rem+env(safe-area-inset-bottom))]"
-        ), directoryRef, "left")}
+        ), directoryRef, "center")}
 
         {isStandalone && directoryLabels(cn(
           "absolute flex items-center text-white left-6 right-6 pointer-events-auto md:hidden z-30 bottom-[calc(0.75rem+env(safe-area-inset-bottom))]"
-        ), directoryRef, "left")}
+        ), directoryRef, "center")}
 
 
         {/* Mobile/PWA scroll hint — quiet mouse icon above the directory, right-justified.
