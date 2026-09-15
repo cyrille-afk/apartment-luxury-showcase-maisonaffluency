@@ -22,6 +22,7 @@ const OUT = path.join(ROOT, "src/data/featuredDesigners.json");
 const FEATURED_SLUGS = [
   // Masters
   "alexander-lamont",
+  "andree-putman",
   "arnold-madsen",
   "dagmar-london",
   "emmanuel-babled",
@@ -41,6 +42,7 @@ const FEATURED_SLUGS = [
   "delcourt-collection",
   "emmanuel-levet-stenne",
   "hamrei",
+  "humbert-poyet",
   "kerstens",
   "leo-aerts-alinea",
   "victoria-magniant",
