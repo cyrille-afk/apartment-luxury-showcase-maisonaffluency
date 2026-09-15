@@ -1753,9 +1753,7 @@ const DesignersHoverHero = () => {
           "mt-2.5 self-start text-left font-body text-[11px] leading-relaxed font-light text-neutral-400",
           isMobileOrPwa ? "w-full" : "min-w-[340px] max-w-[360px]"
         )}>
-          150+ master profiles live.{" "}
-          <br className="sm:hidden" />
-          Introducing new digital ateliers and exclusive collections weekly.
+          150+ master profiles live. Introducing new digital ateliers and exclusive collections weekly
         </p>
 
         {/* Subtle divider separating the search utility from the Masters list */}
