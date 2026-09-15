@@ -685,6 +685,18 @@ const DesignersHoverHero = () => {
     mql.addEventListener("change", update);
     return () => mql.removeEventListener("change", update);
   }, []);
+
+  const [isLgViewport, setIsLgViewport] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches
+  );
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsLgViewport(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
   const isMobileOrPwa = isMobileViewport || isMobileHook || isStandalone;
   const isMobileBrowser = (isMobileViewport || isMobileHook) && !isStandalone;
   const navRef = useRef<HTMLElement>(null);
