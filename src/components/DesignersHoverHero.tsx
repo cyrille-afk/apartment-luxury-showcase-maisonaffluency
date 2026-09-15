@@ -2455,67 +2455,29 @@ const DesignersHoverHero = () => {
                           </div>
                         )
                       ) : (
-                        groupedResults.map(([letter, items]) => {
-                          const isOpen = expandedLetters.has(letter);
-                          return (
-                            <div
-                              key={letter}
-                              data-designer-letter={letter}
-                              className="border-b border-white/[0.06] last:border-b-0 scroll-mt-2"
-                            >
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  let willOpen = false;
-                                  setExpandedLetters((prev) => {
-                                    if (prev.has(letter)) {
-                                      if (activeAccordionLetter === letter) setActiveAccordionLetter(null);
-                                      return new Set();
-                                    }
-                                    setActiveAccordionLetter(letter);
-                                    rememberDesignersAzLetter(letter);
-                                    willOpen = true;
-                                    return new Set([letter]);
-                                  });
-                                  // Scroll is handled by the desktop accordion
-                                  // effect so the cards are revealed after the
-                                  // grid has expanded.
-                                }}
-                                aria-expanded={isOpen}
-                                className="w-full flex items-center justify-between px-4 py-1.5 text-left hover:bg-white/[0.04] transition-colors"
-                              >
-                                <span className="flex items-center gap-2.5">
-                                  <span
-                                    className={cn(
-                                      "text-white/50 text-xs transition-transform",
-                                      isOpen && "rotate-90"
-                                    )}
-                                    aria-hidden="true"
-                                  >
-                                    ›
-                                  </span>
-                                  <span className="font-serif text-base text-white">{letter}</span>
-                                </span>
-                                <span className="font-body text-[11px] tracking-wide text-white/45 pl-3">{items.length}</span>
-                              </button>
-                              {isOpen && (
-                                <div className="max-h-[720px] overflow-y-auto overscroll-contain pr-1">
-                                  <div className="grid grid-cols-4 gap-4 px-0 pt-2 pb-4">
-                                    {items.map((d: any, i: number) => (
-                                      <DesignerGridCard
-                                        key={d.slug}
-                                        designer={d}
-                                        useCardPhoto
-                                        priority={i < 8}
-                                        onNavigate={() => setSearchOpen(false)}
-                                      />
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
+                        (() => {
+                          const activePair = groupedResults.find(([l]) => l === activeAccordionLetter);
+                          const items = activePair ? activePair[1] : [];
+                          return items.length === 0 ? (
+                            <p className="px-4 py-8 text-center text-sm font-body text-white/50">
+                              Select a letter to browse designers.
+                            </p>
+                          ) : (
+                            <div className="max-h-[720px] overflow-y-auto overscroll-contain pr-1">
+                              <div className="grid grid-cols-4 gap-4 px-0 pt-2 pb-4">
+                                {items.map((d: any, i: number) => (
+                                  <DesignerGridCard
+                                    key={d.slug}
+                                    designer={d}
+                                    useCardPhoto
+                                    priority={i < 8}
+                                    onNavigate={() => setSearchOpen(false)}
+                                  />
+                                ))}
+                              </div>
                             </div>
                           );
-                        })
+                        })()
                       )}
                     </div>
                   </div>
