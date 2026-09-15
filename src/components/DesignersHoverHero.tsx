@@ -2292,7 +2292,7 @@ const DesignersHoverHero = () => {
           )}
         </div>
         <p className="mt-2 max-w-md text-center font-serif text-[11px] leading-relaxed text-background/70">
-          Our online portfolio is an invitation to explore unique ateliers and find out signature pieces.
+          150+ master profiles live. Introducing new digital ateliers and exclusive collections weekly
         </p>
       </div>
 
