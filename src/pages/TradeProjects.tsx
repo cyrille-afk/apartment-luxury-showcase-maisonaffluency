@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Link, useSearchParams } from "react-router-dom";
-import { Plus, FolderOpen, Loader2, Calendar, MapPin, User as UserIcon, Users, EyeOff, Trash2 } from "lucide-react";
+import { Plus, FolderOpen, Loader2, Calendar, MapPin, User as UserIcon, Users, EyeOff, Trash2, Scan } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
@@ -292,6 +292,14 @@ export default function TradeProjects() {
                   </div>
                 </div>
               </Link>
+              <div className="px-4 pb-4 -mt-1">
+                <Link
+                  to={`/trade/visualiser?project=${p.id}${(p as any).client_id ? `&client=${(p as any).client_id}` : ""}`}
+                  className="inline-flex items-center gap-2 border border-foreground/25 px-3 py-1.5 font-body text-[10px] uppercase tracking-[0.2em] text-foreground transition-colors hover:border-foreground hover:bg-foreground/[0.04]"
+                >
+                  <Scan className="h-3.5 w-3.5" /> Launch Visualiser
+                </Link>
+              </div>
               {canEdit && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
