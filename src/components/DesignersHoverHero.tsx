@@ -1397,6 +1397,15 @@ const DesignersHoverHero = () => {
     }
   }, [searchOpen, groupedResults.length, isDesktopViewport]);
 
+  // Desktop dropdown defaults to the first available letter when it opens so
+  // the 4-column grid is never empty.
+  useEffect(() => {
+    if (!searchOpen || !isDesktopViewport || groupedResults.length === 0) return;
+    if (activeAccordionLetter && expandedLetters.has(activeAccordionLetter)) return;
+    const first = groupedResults[0][0];
+    setActiveAccordionLetter(first);
+    setExpandedLetters(new Set([first]));
+  }, [searchOpen, isDesktopViewport, groupedResults, activeAccordionLetter, expandedLetters]);
 
   // Desktop accordion: when a letter opens, pin that letter row to the top of
   // the sheet viewport so the expanded designer cards are visible. The scroller
