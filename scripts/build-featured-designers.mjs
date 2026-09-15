@@ -31,6 +31,7 @@ const FEATURED_SLUGS = [
   "michel-boyer",
   "kiko-lopez",
   "lazzarini-pickering",
+  "paul-laszlo",
   "pierre-bonnefille",
   "pierre-chareau",
   "thierry-lemaire",
@@ -47,6 +48,7 @@ const FEATURED_SLUGS = [
   "le-berre-vevaud",
   "leo-aerts-alinea",
   "marta-sala-editions",
+  "pouenat",
   "victoria-magniant",
 ];
 
