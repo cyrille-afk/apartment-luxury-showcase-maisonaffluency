@@ -117,6 +117,15 @@
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780638970/Solid_Oak_Wood_-_Neve_Fabric-2_w2umoh.jpg"
   },
   {
+    "id": "e3ab10a0-136b-4fbe-805c-9a7e2832b281",
+    "slug": "pouenat",
+    "name": "Pouenat",
+    "founder": "Pouenat",
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779702490/St%C3%A9phane_Parmentier_-_Sc%C3%A9no_-_Jean_Pierre_Vaillancourt_6_rq4ffb.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/pouenat-bg_lw3dlo",
+    "first_pick_image_url": null
+  },
+  {
     "id": "bb08e592-73ca-4abc-9c25-cd60dd7458dc",
     "slug": "felix-agostini",
     "name": "Felix Agostini",
@@ -151,6 +160,15 @@
     "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781694148/HAMREI_Studio_Showroom_swb9ic.webp",
     "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/hamrei",
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1777776530/Screen_Shot_2026-05-03_at_10.42.55_AM_flskhj.png"
+  },
+  {
+    "id": "1c2dce03-c84c-4e78-9189-36493ed2805d",
+    "slug": "paul-laszlo",
+    "name": "Paul László",
+    "founder": "Ecart",
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781094596/gri_2004_r_10_b0048_f005_Laszlo_8_lh_a_b9tq2z.jpg",
+    "image_url": "https://ecart.paris/cdn/shop/files/Paul_Laszlo_BD.jpg",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1777342363/PAUL_LASZLO_195O_Arcadia_Bench_03_A4_1_m4yuh3.jpg"
   },
   {
     "id": "c9d289d6-5b47-4305-94b1-799f9b3f1f9a",
