@@ -2216,15 +2216,15 @@ const DesignersHoverHero = () => {
               "fixed z-[71] flex flex-col bg-[#0a0a0a] text-white border border-white/10 shadow-2xl overflow-hidden",
               // Enter animation — dropped exit for critical-path perf.
               isDesktopViewport ? "animate-scale-in" : "animate-slide-in-right",
-              // Mobile: full sheet anchored right below the fixed header so the
-              // search field is immediately visible and the list has room to scroll.
+              // Mobile / tablet: full sheet anchored right below the fixed header so
+              // the search field is immediately visible and the list has room to scroll.
               "inset-x-0 top-[var(--header-h)] bottom-0 rounded-none",
-              // Desktop: a clean, wide rectangle anchored directly below the main
-              // header line and spanning most of the viewport width.
-              "md:top-[calc(var(--header-h)+8px)] md:inset-x-6 md:bottom-6 md:max-w-none md:rounded-none md:pb-0"
+              // Desktop (>=1024px): a clean, wide rectangle anchored directly below
+              // the main header line and spanning most of the viewport width.
+              "lg:top-[calc(var(--header-h)+8px)] lg:inset-x-6 lg:bottom-6 lg:max-w-none lg:rounded-none lg:pb-0"
             )}
             style={
-              dropdownPos && !isDesktopViewport
+              dropdownPos && isDesktopViewport
                 ? {
                     left: dropdownPos.left,
                     top: dropdownPos.top,
