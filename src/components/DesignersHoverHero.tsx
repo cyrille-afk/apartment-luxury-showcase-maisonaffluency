@@ -2250,9 +2250,9 @@ const DesignersHoverHero = () => {
         );
       })()}
 
-      {/* Desktop directory launcher — search and its editorial context remain
-          grouped in one bottom interaction zone above the scroll cue. */}
-      <div className="fixed bottom-[40px] left-1/2 z-[73] hidden w-[min(34rem,calc(100vw-6rem))] -translate-x-1/2 flex-col items-center lg:flex">
+      {/* Desktop directory launcher — match the directory grid width and stay
+          entirely above the white page floor at every desktop viewport height. */}
+      <div className="fixed bottom-[max(40px,calc(15vh-var(--header-h)+16px))] left-1/2 z-[73] hidden w-[min(80rem,calc(100vw-6rem))] -translate-x-1/2 flex-col items-center lg:flex">
         <div
           className="flex w-full items-center rounded-md border border-background/20 bg-background/[0.05] px-4 backdrop-blur-[12px]"
           aria-label="Designer directory controls"
@@ -2291,7 +2291,7 @@ const DesignersHoverHero = () => {
             </button>
           )}
         </div>
-        <p className="mt-2 max-w-md text-center font-serif text-[11px] leading-relaxed text-background/70">
+        <p className="mt-2 w-full text-center font-serif text-[11px] leading-relaxed text-background/70">
           150+ master profiles live. Introducing new digital ateliers and exclusive collections weekly
         </p>
       </div>
