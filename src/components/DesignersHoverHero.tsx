@@ -589,6 +589,7 @@ const DesignersHoverHero = () => {
   const [showPortalCursor, setShowPortalCursor] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [desktopSearchExpanded, setDesktopSearchExpanded] = useState(false);
+  const [desktopDirectoryMode, setDesktopDirectoryMode] = useState<"search" | "az">("az");
   const [searchQuery, setSearchQuery] = useState("");
   const restoredLetterRef = useRef<string | null>(null);
   const [expandedLetters, setExpandedLetters] = useState<Set<string>>(() => {
@@ -633,6 +634,8 @@ const DesignersHoverHero = () => {
   const [azRailRect, setAzRailRect] = useState<{ top: number; height: number } | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchTriggerRef = useRef<HTMLButtonElement>(null);
+  const desktopSearchDockRef = useRef<HTMLButtonElement>(null);
+  const desktopAzDockRef = useRef<HTMLButtonElement>(null);
   const searchCloseTimerRef = useRef<number | null>(null);
   const suppressSearchFocusOpenRef = useRef(false);
   const searchScrollRef = useRef<HTMLDivElement>(null);
@@ -1189,15 +1192,16 @@ const DesignersHoverHero = () => {
     const headerHeight = probe.getBoundingClientRect().top || 72;
     probe.remove();
     const width = Math.min(1280, window.innerWidth - 96);
+    const dockClearance = 88;
     return {
       left: (window.innerWidth - width) / 2,
       top: headerHeight,
       width,
-      height: Math.max(320, window.innerHeight - headerHeight - 24),
+      height: Math.max(320, window.innerHeight - headerHeight - dockClearance),
     };
   };
 
-  const openDesignerSearch = () => {
+  const openDesignerSearch = (mode: "search" | "az" = "search") => {
     if (searchCloseTimerRef.current !== null) {
       window.clearTimeout(searchCloseTimerRef.current);
       searchCloseTimerRef.current = null;
@@ -1207,15 +1211,9 @@ const DesignersHoverHero = () => {
       setSearchOpen(true);
       return;
     }
-    const rect = searchTriggerRef.current?.getBoundingClientRect();
-    if (rect) {
-      setDropdownPos({
-        left: rect.left,
-        top: rect.top,
-        width: rect.width,
-        height: rect.height,
-      });
-    }
+    setDesktopDirectoryMode(mode);
+    setSearchQuery("");
+    setDropdownPos(getDesktopSearchTarget());
     setDesktopSearchExpanded(false);
     setSearchOpen(true);
     window.requestAnimationFrame(() => {
@@ -1231,23 +1229,17 @@ const DesignersHoverHero = () => {
       setSearchOpen(false);
       return;
     }
-    const rect = searchTriggerRef.current?.getBoundingClientRect();
     setDesktopSearchExpanded(false);
-    if (rect) {
-      setDropdownPos({
-        left: rect.left,
-        top: rect.top,
-        width: rect.width,
-        height: rect.height,
-      });
-    }
     if (searchCloseTimerRef.current !== null) window.clearTimeout(searchCloseTimerRef.current);
     searchCloseTimerRef.current = window.setTimeout(() => {
       setSearchOpen(false);
       setDropdownPos(null);
       searchCloseTimerRef.current = null;
       suppressSearchFocusOpenRef.current = true;
-      searchTriggerRef.current?.focus({ preventScroll: true });
+      const returnTarget = desktopDirectoryMode === "search"
+        ? desktopSearchDockRef.current
+        : desktopAzDockRef.current;
+      returnTarget?.focus({ preventScroll: true });
       window.requestAnimationFrame(() => {
         suppressSearchFocusOpenRef.current = false;
       });
@@ -1322,7 +1314,9 @@ const DesignersHoverHero = () => {
     document.addEventListener("wheel", onWheel, { passive: false, capture: true });
     // Delay focus so the slide-up animation is visible before the keyboard opens.
     const t = window.setTimeout(() => {
-      if (!restoredLetterRef.current) searchInputRef.current?.focus();
+      if (!restoredLetterRef.current && (!isDesktopViewport || desktopDirectoryMode === "search")) {
+        searchInputRef.current?.focus();
+      }
     }, 220);
     return () => {
       document.body.style.overflow = bodyOverflow;
@@ -1332,7 +1326,7 @@ const DesignersHoverHero = () => {
       document.removeEventListener("wheel", onWheel, { capture: true });
       window.clearTimeout(t);
     };
-  }, [searchOpen, isDesktopViewport]);
+  }, [searchOpen, isDesktopViewport, desktopDirectoryMode]);
 
   useEffect(() => () => {
     if (searchCloseTimerRef.current !== null) window.clearTimeout(searchCloseTimerRef.current);
@@ -1688,6 +1682,10 @@ const DesignersHoverHero = () => {
       if (searchOpen && !isDesktopViewport) setDropdownPos(null);
       return;
     }
+    if (!dropdownPos) {
+      setDropdownPos(getDesktopSearchTarget());
+      window.requestAnimationFrame(() => setDesktopSearchExpanded(true));
+    }
     const update = () => {
       if (desktopSearchExpanded) setDropdownPos(getDesktopSearchTarget());
     };
@@ -1699,7 +1697,7 @@ const DesignersHoverHero = () => {
       window.removeEventListener("resize", update);
       window.removeEventListener("scroll", update);
     };
-  }, [searchOpen, isDesktopViewport, desktopSearchExpanded]);
+  }, [searchOpen, isDesktopViewport, desktopSearchExpanded, dropdownPos]);
 
   if (!hasItems) return null;
 
@@ -1729,9 +1727,9 @@ const DesignersHoverHero = () => {
         <button
           ref={searchTriggerRef}
           type="button"
-          onClick={openDesignerSearch}
+          onClick={() => openDesignerSearch("search")}
           onFocus={() => {
-            if (!searchOpen && !suppressSearchFocusOpenRef.current) openDesignerSearch();
+            if (!searchOpen && !suppressSearchFocusOpenRef.current) openDesignerSearch("search");
           }}
           aria-expanded={searchOpen}
           aria-controls="designers-search-sheet"
@@ -1876,7 +1874,7 @@ const DesignersHoverHero = () => {
               {/* Desktop: Directory sits directly above the designer list to
                   group navigation (list) with its utility (search) — Proximity.
                   All items share the same left edge as the designer names. */}
-              <div className={cn("mb-7 lg:mb-9", isMobileBrowser ? "hidden" : "hidden md:block")}>
+              <div className={cn("mb-7 lg:mb-9", isMobileBrowser ? "hidden" : "hidden md:block lg:hidden")}>
                 {directoryLabels("w-full", directoryRef, "left")}
               </div>
 
@@ -2252,13 +2250,41 @@ const DesignersHoverHero = () => {
         );
       })()}
 
+      {/* Desktop directory launcher — a persistent glass dock independent of
+          the editorial sidebar so it remains reachable across the full hero. */}
+      <div
+        className="fixed bottom-6 left-1/2 z-[73] hidden -translate-x-1/2 items-center border border-background/20 bg-background/10 px-1.5 py-1 backdrop-blur-2xl lg:flex"
+        aria-label="Designer directory controls"
+      >
+        <button
+          ref={desktopSearchDockRef}
+          type="button"
+          onClick={() => openDesignerSearch("search")}
+          aria-expanded={searchOpen && desktopDirectoryMode === "search"}
+          aria-controls="designers-search-sheet"
+          className="whitespace-nowrap px-5 py-2 font-body text-[10px] uppercase tracking-[0.22em] text-background/75 transition-colors hover:text-background focus-visible:outline-none focus-visible:text-background"
+        >
+          [ Search Directory ]
+        </button>
+        <span className="h-4 w-px bg-background/15" aria-hidden="true" />
+        <button
+          ref={desktopAzDockRef}
+          type="button"
+          onClick={() => openDesignerSearch("az")}
+          aria-expanded={searchOpen && desktopDirectoryMode === "az"}
+          aria-controls="designers-search-sheet"
+          className="whitespace-nowrap px-5 py-2 font-body text-[10px] uppercase tracking-[0.22em] text-background/75 transition-colors hover:text-background focus-visible:outline-none focus-visible:text-background"
+        >
+          [ A - Z ]
+        </button>
+      </div>
 
 
 
 
 
-      {/* Designer search: mobile bottom-sheet, desktop dropdown beneath the
-          Directory search bar. */}
+
+      {/* Designer search: mobile bottom-sheet, desktop bottom-up dock panel. */}
       <div
         key="designers-search-backdrop"
         data-testid="designers-search-backdrop"
@@ -2286,7 +2312,8 @@ const DesignersHoverHero = () => {
               // Desktop (>=1024px): centered panel matching the header content width
               // (max-w-7xl / 1280px) and side padding (px-12) so it aligns with the
               // logo and navigation boundaries.
-              "lg:inset-auto lg:rounded-none lg:pb-0"
+              "lg:inset-auto lg:rounded-none lg:pb-0",
+              !desktopSearchExpanded && "lg:pointer-events-none"
             )}
             style={
               dropdownPos && isDesktopViewport
@@ -2296,7 +2323,9 @@ const DesignersHoverHero = () => {
                     width: dropdownPos.width,
                     height: dropdownPos.height,
                     maxHeight: dropdownPos.height,
-                    transition: "all 0.4s cubic-bezier(0.25, 1, 0.5, 1)",
+                    transform: desktopSearchExpanded ? "translateY(0)" : "translateY(110%)",
+                    opacity: desktopSearchExpanded ? 1 : 0,
+                    transition: "transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease-out",
                   }
                 : undefined
             }
@@ -2304,14 +2333,21 @@ const DesignersHoverHero = () => {
             <div className="mx-auto mt-1.5 h-1 w-9 rounded-full bg-white/25 shrink-0 lg:hidden" aria-hidden="true" />
             <div className={cn(
               "px-4 pt-3 pb-3 border-b border-white/[0.06] shrink-0 mb-2",
-              "lg:p-0 lg:m-0 lg:border-b-0 lg:transition-[padding] lg:duration-[400ms]",
-              desktopSearchExpanded && "lg:px-6 lg:pt-5 lg:pb-4 lg:border-b lg:border-white/[0.06] lg:mb-2"
+              "lg:px-6 lg:pt-5 lg:pb-4 lg:border-b lg:border-white/[0.06] lg:mb-2"
             )}>
               <div className="relative flex items-center">
                 <Search
-                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50 pointer-events-none"
+                  className={cn(
+                    "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50 pointer-events-none",
+                    desktopDirectoryMode === "az" && "lg:hidden"
+                  )}
                   aria-hidden="true"
                 />
+                {desktopDirectoryMode === "az" && (
+                  <span className="hidden font-body text-[10px] uppercase tracking-[0.24em] text-white/60 lg:block">
+                    Designer Directory // A–Z
+                  </span>
+                )}
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -2323,8 +2359,8 @@ const DesignersHoverHero = () => {
                   spellCheck={false}
                   className={cn(
                     "w-full rounded-lg border border-gold/10 bg-white/[0.03] py-2.5 pl-9 pr-9 font-body text-sm text-white outline-none placeholder:text-white/60 focus:border-gold/25 focus:bg-white/[0.05]",
-                    "lg:h-full lg:rounded-none lg:border-transparent lg:bg-transparent lg:transition-all lg:duration-[400ms]",
-                    desktopSearchExpanded && "lg:h-auto lg:rounded-lg lg:border-gold/10 lg:bg-white/[0.03]"
+                    "lg:h-auto lg:rounded-lg lg:border-gold/10 lg:bg-white/[0.03]",
+                    desktopDirectoryMode === "az" && "lg:hidden"
                   )}
                   aria-label="Search designers"
                 />
@@ -2332,7 +2368,10 @@ const DesignersHoverHero = () => {
                   type="button"
                   onClick={closeDesignerSearch}
                   aria-label="Close search"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/50 hover:text-white transition-colors"
+                  className={cn(
+                    "absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/50 hover:text-white transition-colors",
+                    desktopDirectoryMode === "az" && "lg:static lg:ml-auto lg:translate-y-0"
+                  )}
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -2342,8 +2381,7 @@ const DesignersHoverHero = () => {
             {!isSearching && (
               <div className={cn(
                 "shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3 overflow-x-auto no-scrollbar px-3 lg:overflow-visible lg:px-6",
-                "lg:transition-opacity lg:duration-300",
-                desktopSearchExpanded ? "lg:opacity-100" : "lg:pointer-events-none lg:opacity-0"
+                "lg:transition-opacity lg:duration-300"
               )}>
                 <div
                   className={cn(
@@ -2386,8 +2424,7 @@ const DesignersHoverHero = () => {
             )}
             <div ref={searchScrollRef} className={cn(
               "flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-[calc(2rem+env(safe-area-inset-bottom))] min-h-0 relative touch-pan-y transition-opacity duration-300",
-              isRestoringLetter ? "opacity-0" : "opacity-100",
-              !desktopSearchExpanded && "lg:pointer-events-none lg:opacity-0"
+              isRestoringLetter ? "opacity-0" : "opacity-100"
             )}>
 
               {!isSearching && groupedResults.length === 0 ? (
