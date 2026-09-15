@@ -2231,7 +2231,7 @@ const DesignersHoverHero = () => {
               // Desktop (>=1024px): centered panel matching the header content width
               // (max-w-7xl / 1280px) and side padding (px-12) so it aligns with the
               // logo and navigation boundaries.
-              "lg:left-1/2 lg:top-[calc(var(--header-h)+8px)] lg:bottom-6 lg:w-[calc(100%-96px)] lg:max-w-7xl lg:-translate-x-1/2 lg:rounded-none lg:pb-0"
+              "lg:left-1/2 lg:top-[var(--header-h)] lg:bottom-auto lg:h-auto lg:max-h-[calc(100dvh-var(--header-h)-24px)] lg:w-[calc(100%-96px)] lg:max-w-7xl lg:-translate-x-1/2 lg:rounded-none lg:pb-0"
             )}
             style={
               dropdownPos && !isDesktopViewport
@@ -2451,7 +2451,7 @@ const DesignersHoverHero = () => {
                             No designers match “{searchQuery}”.
                           </p>
                         ) : (
-                          <div className="max-h-[720px] overflow-y-auto overscroll-contain pr-1">
+                          <div className="pr-1">
                             <div className="grid grid-cols-4 gap-4 px-0 pt-2 pb-4">
                               {flatResults.map((d: any) => (
                                 <DesignerGridCard
@@ -2473,7 +2473,7 @@ const DesignersHoverHero = () => {
                               Select a letter to browse designers.
                             </p>
                           ) : (
-                            <div className="max-h-[720px] overflow-y-auto overscroll-contain pr-1">
+                            <div className="pr-1">
                               <div className="grid grid-cols-4 gap-4 px-0 pt-2 pb-4">
                                 {items.map((d: any, i: number) => (
                                   <DesignerGridCard
