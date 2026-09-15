@@ -2266,7 +2266,7 @@ const DesignersHoverHero = () => {
             </div>
             {/* Sticky horizontal A–Z quick-jump (mobile only, hidden while searching) */}
             {!isSearching && (
-              <div className="md:hidden shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3 overflow-x-auto no-scrollbar px-3">
+              <div className="lg:hidden shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3 overflow-x-auto no-scrollbar px-3">
                 <div
                   className={cn(
                     "mx-auto flex w-max min-w-full items-center justify-center gap-0.5 py-1.5 transition-opacity duration-150",
