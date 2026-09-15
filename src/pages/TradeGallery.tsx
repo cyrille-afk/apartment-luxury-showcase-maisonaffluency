@@ -287,22 +287,24 @@ const TradeGallery = () => {
 
     const tradePrice = Math.round(price.cents * (1 - TRADE_DISCOUNT));
     const pfx = price.price_prefix ? `${price.price_prefix} ` : '';
+    const retailLabel = `${pfx}${formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}`;
+    const tradeLabel = `${pfx}${formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}`;
 
     return (
       <span className={className}>
         {showTradePrice ? (
           <>
-            <span className="line-through text-muted-foreground/60 font-normal text-xs">
-              {`${pfx}${formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}`}
+            <span className="text-muted-foreground font-normal">
+              RRP: {retailLabel}
             </span>
+            <span className="text-muted-foreground/50" aria-hidden="true">|</span>
             <span className="text-accent font-semibold">
-              {`${pfx}${formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}`}
+              TRADE: {tradeLabel}
             </span>
-            <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider" title={`${tierLabel} tier — ${discountLabel} trade discount`}>{tierLabel} –{discountLabel}</span>
           </>
         ) : (
-          <span className="text-foreground font-semibold">
-            {`${pfx}${formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}`}
+          <span className="text-foreground font-normal">
+            RRP: {retailLabel}
           </span>
         )}
       </span>
@@ -707,13 +709,16 @@ const TradeGallery = () => {
                   </div>
                 </div>
                 {/* Description in portal tooltip */}
-                <div className="flex flex-col items-center p-3 min-h-[4.5rem]">
-                   <h3 className="font-display text-sm text-foreground leading-tight line-clamp-2 min-h-[2.25rem]">
+                 <div className="flex min-h-[7.5rem] flex-col items-center px-3 pb-4 pt-3 text-center">
+                   <p className="min-h-4 font-body text-[9px] uppercase tracking-[0.18em] text-muted-foreground line-clamp-1">
+                     {product.brand_name}
+                   </p>
+                    <h3 className="mt-1 min-h-[2.5rem] font-display text-sm font-normal leading-snug text-foreground line-clamp-2">
                      {product.product_name}
                    </h3>
                   {isAdmin ? (
-                    <div className="mt-1 flex flex-col items-center gap-1.5">
-                      {renderPriceDisplay(price, "font-display text-sm inline-flex items-center justify-center gap-1.5 flex-wrap")}
+                     <div className="mt-auto flex flex-col items-center gap-1.5 pt-3">
+                       {renderPriceDisplay(price, "font-body text-[10px] uppercase tracking-[0.08em] inline-flex items-center justify-center gap-1.5 flex-wrap")}
                       <InlinePriceEditor
                         productName={product.product_name}
                         brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
@@ -726,7 +731,7 @@ const TradeGallery = () => {
                       />
                     </div>
                   ) : (
-                    renderPriceDisplay(price, "font-display text-sm mt-1 inline-flex items-center justify-center gap-1.5 flex-wrap")
+                     renderPriceDisplay(price, "font-body text-[10px] uppercase tracking-[0.08em] mt-auto pt-3 inline-flex items-center justify-center gap-1.5 flex-wrap")
                   )}
                 </div>
               </div>
