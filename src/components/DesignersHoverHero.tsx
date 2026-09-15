@@ -303,6 +303,8 @@ const MOBILE_BG_OVERRIDES: Record<string, string> = {
     "https://res.cloudinary.com/dif1oamtj/image/upload/v1784262044/Screenshot_2026-07-17_at_12.19.46_PM_fzvmvb.png",
   "arnold-madsen":
     "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/dagmar-london/the-clam-chair-moonlight-0.jpg",
+  "marta-sala-editions":
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1789467355/Screen_Shot_2026-09-15_at_6.14.23_PM_vqpbkp.png",
 };
 
 const DESKTOP_HERO_BG_OVERRIDES: Record<string, string> = {
