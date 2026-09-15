@@ -1763,7 +1763,8 @@ const DesignersHoverHero = () => {
         {/* Live network footprint — sits beneath the search field */}
         <p className={cn(
           "mt-2.5 self-start text-left font-body text-[11px] leading-relaxed font-light text-neutral-400",
-          isMobileOrPwa ? "w-full" : "min-w-[340px] max-w-[360px]"
+          isMobileOrPwa ? "w-full" : "min-w-[340px] max-w-[360px]",
+          isMobileOrPwa && "hidden"
         )}>
           150+ master profiles live. Introducing new digital ateliers and exclusive collections weekly
         </p>
@@ -1869,11 +1870,11 @@ const DesignersHoverHero = () => {
           className={cn(
           "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto md:overflow-hidden md:h-full",
             isStandalone
-              ? "overflow-y-auto justify-start overscroll-contain touch-pan-y pt-12 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pt-12 md:pb-8 md:justify-start md:overflow-hidden [-webkit-overflow-scrolling:touch]"
+              ? "overflow-y-auto justify-start overscroll-contain touch-pan-y pt-10 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pt-12 md:pb-8 md:justify-start md:overflow-hidden [-webkit-overflow-scrolling:touch]"
               : // Mobile browser: the section already starts below the fixed
                 // header, so do not add var(--header-h) again here. Keep the
                 // designer list high while leaving room for the Directory link.
-                "overflow-y-hidden justify-start overscroll-contain touch-none pt-[4.25rem] short:pt-[3.5rem] pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pt-12 md:justify-start md:pb-8 md:overflow-hidden"
+                "overflow-y-hidden justify-start overscroll-contain touch-none pt-[3.5rem] short:pt-[3rem] pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pt-12 md:justify-start md:pb-8 md:overflow-hidden"
           )}
         >
 
