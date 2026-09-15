@@ -5,6 +5,7 @@
 - [x] Expand Resources for large desktops with adaptive document grids and local breadcrumb navigation
 - [x] Unify Material Library with Admin Fabrics data and expand both large-screen layouts
 - [x] Expand all Specification workspaces for large desktops and add local Tools breadcrumbs
+- [x] Add synchronized supplier/designer filters and a dense 5/6-column desktop Material Library grid
 - [x] Checkout: "Delivery & Payment Options" alignment/spacing (done)
 - [x] Wire tab: bank details grid with copy buttons (done, verified in preview)
 - [x] Removed leftover "Secure Card Payment" caption in OrderSummary aside
