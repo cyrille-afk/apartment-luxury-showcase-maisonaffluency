@@ -591,7 +591,7 @@ const TradeGallery = () => {
           </p>
         </div>
       ) : viewMode === "grid" ? (
-        <div className={cn("grid gap-4", density === "compact" ? "grid-cols-2 md:grid-cols-4 lg:grid-cols-6" : "grid-cols-2 md:grid-cols-3")}>
+        <div className={cn("grid gap-x-4 gap-y-8 sm:gap-x-6 lg:gap-x-8 lg:gap-y-10", density === "compact" ? "grid-cols-2 md:grid-cols-[repeat(auto-fill,minmax(260px,1fr))]" : "grid-cols-2 md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]")}>
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
