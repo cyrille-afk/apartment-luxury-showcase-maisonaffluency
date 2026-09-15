@@ -106,7 +106,32 @@ export function TradeSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="gap-1">
-              {coreItems.map((item) => {
+              {topItems.map((item) => (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton asChild className="h-auto">
+                    <NavLink
+                      to={item.url}
+                      end={item.end}
+                      className="flex items-center gap-3 px-3 py-3 font-body text-xs text-muted-foreground hover:text-foreground transition-colors border-l border-transparent"
+                      activeClassName="text-foreground font-medium border-foreground"
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+            {!collapsed && "PROJECTS & INTERVENTIONS"}
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className="gap-1">
+              {projectItems.map((item) => {
                 const isProjects = item.url === "/trade/projects";
                 const showDot = isProjects && bridgeCount > 0;
                 return (
@@ -149,7 +174,7 @@ export function TradeSidebar() {
                         )}
                       </NavLink>
                     </SidebarMenuButton>
-                    {item.url === "/trade/projects" && !collapsed && recentActiveProjects.length > 0 && (
+                    {isProjects && !collapsed && recentActiveProjects.length > 0 && (
                       <ul
                         aria-label="Recent active project workspaces"
                         className="ml-10 mr-2 mt-0.5 mb-2 space-y-0.5 border-l border-border pl-3"
