@@ -151,7 +151,7 @@ function DesignerGridCard({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const baseRaw = useCardPhoto
-    ? (MOBILE_BG_OVERRIDES[designer.slug] || designer.image_url || designer.hero_image_url || pickGridImage(designer))
+    ? (designer.image_url || designer.hero_image_url || pickGridImage(designer))
     : pickGridImage(designer);
   const url = gridImageTransform(baseRaw);
 
