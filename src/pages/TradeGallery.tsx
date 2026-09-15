@@ -446,7 +446,7 @@ const TradeGallery = () => {
   return (
     <>
       <Helmet><title>Gallery — Trade Portal — Maison Affluency</title></Helmet>
-    <div className="max-w-7xl">
+    <div className="w-full max-w-7xl [@media(min-width:1440px)]:max-w-[min(90vw,1800px)] mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-6 border-b border-[#E5E5E5]">
         <div>
           <h1 className="font-display text-2xl md:text-3xl font-light text-foreground">Trade Gallery</h1>
@@ -591,15 +591,15 @@ const TradeGallery = () => {
           </p>
         </div>
       ) : viewMode === "grid" ? (
-        <div className={cn("grid gap-4", density === "compact" ? "grid-cols-2 md:grid-cols-4 lg:grid-cols-6" : "grid-cols-2 md:grid-cols-3")}>
+        <div className={cn("grid gap-x-4 gap-y-8 sm:gap-x-6 lg:gap-x-8 lg:gap-y-10", density === "compact" ? "grid-cols-2 md:grid-cols-[repeat(auto-fill,minmax(260px,1fr))]" : "grid-cols-2 md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]")}>
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
             const price = getProductPrice(product);
             const pinned = isPinned(product.product_name, product.id);
             return (
-              <div key={product.id} className="group relative border border-border rounded-lg hover:border-foreground/20 transition-colors">
-                <div className="aspect-[4/5] bg-muted/30 relative overflow-hidden rounded-t-lg cursor-pointer" onClick={() => openProductSheet(product)}>
+              <div key={product.id} className="group relative transition-colors">
+                <div className="aspect-square bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.image_url ? (
                     <>
                       <img
@@ -709,31 +709,31 @@ const TradeGallery = () => {
                   </div>
                 </div>
                 {/* Description in portal tooltip */}
-                 <div className="flex min-h-[7.5rem] flex-col items-center px-3 pb-4 pt-3 text-center">
-                   <p className="min-h-4 font-body text-[9px] uppercase tracking-[0.18em] text-muted-foreground line-clamp-1">
+                 <div className="flex flex-col pt-3 sm:pt-4 pb-4 text-left">
+                   <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground line-clamp-1">
                      {product.brand_name}
                    </p>
-                    <h3 className="mt-1 min-h-[2.5rem] font-display text-sm font-normal leading-snug text-foreground line-clamp-2">
+                   <h3 className="mt-1 min-h-[2.5rem] font-display text-[15px] leading-snug text-foreground sm:text-lg line-clamp-2">
                      {product.product_name}
                    </h3>
-                  {isAdmin ? (
-                     <div className="mt-auto flex flex-col items-center gap-1.5 pt-3">
-                       {renderPriceDisplay(price, "font-body text-[10px] uppercase tracking-[0.08em] inline-flex items-center justify-center gap-1.5 flex-wrap")}
-                      <InlinePriceEditor
-                        productName={product.product_name}
-                        brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
-                        currentPriceCents={price?.cents}
-                        currency={price?.currency || "SGD"}
-                        priceUnit={price?.price_unit}
-                        displayCurrency={displayCurrency}
-                        fxRates={fxRates}
-                        onPriceUpdated={() => refreshPrices()}
-                      />
-                    </div>
-                  ) : (
-                     renderPriceDisplay(price, "font-body text-[10px] uppercase tracking-[0.08em] mt-auto pt-3 inline-flex items-center justify-center gap-1.5 flex-wrap")
-                  )}
-                </div>
+                   {isAdmin ? (
+                     <div className="mt-auto flex flex-col items-start gap-1.5 pt-3">
+                       {renderPriceDisplay(price, "font-sans text-[11px] tracking-[0.14em] inline-flex items-start gap-1.5 flex-wrap")}
+                       <InlinePriceEditor
+                         productName={product.product_name}
+                         brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
+                         currentPriceCents={price?.cents}
+                         currency={price?.currency || "SGD"}
+                         priceUnit={price?.price_unit}
+                         displayCurrency={displayCurrency}
+                         fxRates={fxRates}
+                         onPriceUpdated={() => refreshPrices()}
+                       />
+                     </div>
+                   ) : (
+                     renderPriceDisplay(price, "font-sans text-[11px] tracking-[0.14em] mt-auto pt-3 inline-flex items-start gap-1.5 flex-wrap")
+                   )}
+                 </div>
               </div>
             );
           })}
