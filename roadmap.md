@@ -1,6 +1,6 @@
 # Roadmap
 
-- [x] Refresh the Tools Gallery description and Trade Gallery card hierarchy with live RRP/trade pricing
+- [x] Add Garnier & Linker to the desktop-only Contemporary Talents designer list and raise the designer list higher on desktop while keeping mobile positioning intact
 - [x] Match expanded Trade designer portraits to the constrained public editorial layout and update the card CTA
 - [x] Expand Resources for large desktops with adaptive document grids and local breadcrumb navigation
 - [x] Unify Material Library with Admin Fabrics data and expand both large-screen layouts
