@@ -2250,9 +2250,8 @@ const DesignersHoverHero = () => {
         );
       })()}
 
-      {/* Desktop directory launcher — match the directory grid width and stay
-          entirely above the white page floor at every desktop viewport height. */}
-      <div className="fixed bottom-[max(40px,calc(15vh-var(--header-h)+16px))] left-1/2 z-[73] hidden w-[min(80rem,calc(100vw-6rem))] -translate-x-1/2 flex-col items-center lg:flex">
+      {/* Desktop directory launcher — compact width grouped above the white page floor. */}
+      <div className="fixed bottom-[40px] left-1/2 z-[73] hidden w-[min(34rem,calc(100vw-6rem))] -translate-x-1/2 flex-col items-center lg:flex">
         <div
           className="flex w-full items-center rounded-md border border-background/20 bg-background/[0.05] px-4 backdrop-blur-[12px]"
           aria-label="Designer directory controls"
@@ -2291,7 +2290,7 @@ const DesignersHoverHero = () => {
             </button>
           )}
         </div>
-        <p className="mt-2 w-full text-center font-serif text-[11px] leading-relaxed text-background/70">
+        <p className="mt-2 max-w-md text-center font-serif text-[11px] leading-relaxed text-background/70">
           150+ master profiles live. Introducing new digital ateliers and exclusive collections weekly
         </p>
       </div>
@@ -2625,7 +2624,7 @@ const DesignersHoverHero = () => {
             {/* Desktop alphabet rail: anchored beneath the grid and directly
                 above the unified bottom search input. */}
             <div className="hidden shrink-0 border-t border-white/[0.06] bg-[#0a0a0a]/95 px-6 backdrop-blur lg:block">
-                <div className="mx-auto flex w-full max-w-7xl items-center justify-center gap-6 py-3">
+                <div className="mx-auto flex w-full max-w-7xl items-center justify-center gap-8 py-4">
                   {Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index)).map((letter) => {
                     const isActive = activeAccordionLetter === letter;
                     return (
@@ -2640,9 +2639,9 @@ const DesignersHoverHero = () => {
                           setActiveAccordionLetter(letter);
                         }}
                         className={cn(
-                          "font-body text-[11px] uppercase tracking-[0.2em] transition-colors",
+                          "font-body text-sm uppercase tracking-[0.35em] transition-colors",
                           isActive
-                            ? "text-white underline underline-offset-4"
+                            ? "text-white underline underline-offset-8"
                             : "text-white/50 hover:text-white"
                         )}
                         aria-label={`Show designers starting with ${letter}`}
