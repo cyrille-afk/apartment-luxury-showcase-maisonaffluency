@@ -1,6 +1,7 @@
 # Roadmap
 
 - [x] Refresh the Tools Gallery description and Trade Gallery card hierarchy with live RRP/trade pricing
+- [x] Match expanded Trade designer portraits to the constrained public editorial layout and update the card CTA
 - [x] Checkout: "Delivery & Payment Options" alignment/spacing (done)
 - [x] Wire tab: bank details grid with copy buttons (done, verified in preview)
 - [x] Removed leftover "Secure Card Payment" caption in OrderSummary aside

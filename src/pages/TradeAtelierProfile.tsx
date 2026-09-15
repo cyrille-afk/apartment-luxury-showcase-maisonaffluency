@@ -350,8 +350,25 @@ const TradeAtelierProfile = () => {
           <title>{`${name} — Full Portrait | Ateliers & Partners`}</title>
         </Helmet>
         <div className="relative w-full bg-cream">
+          <header className="mx-auto w-full max-w-6xl px-6 pt-5 pb-2 md:pt-6 md:pb-3 lg:px-8">
+            <button
+              type="button"
+              onClick={() => navigate("/trade/designers")}
+              className="group inline-flex items-center gap-3 font-body text-[10px] md:text-[11px] uppercase tracking-[0.22em] text-foreground/60 hover:text-foreground transition-colors duration-300"
+            >
+              <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-1" strokeWidth={1.25} />
+              <span>Back to Designers &amp; Ateliers</span>
+            </button>
+
+            <h1 className="mt-3 font-display text-4xl md:text-6xl leading-[1.05] text-foreground">
+              {name}
+            </h1>
+            <p className="mt-1 font-body text-[10px] md:text-[11px] uppercase tracking-[0.32em] text-foreground/60">
+              {designer.specialty || "The Full Portrait"}
+            </p>
+          </header>
           <EditorialBiographyColumns
-            containerClassName="w-auto max-w-none -mx-4 md:-mx-6 lg:-mx-8 px-3 md:px-4 pt-4 md:pt-6 pb-4 md:pb-6"
+            containerClassName="mx-auto w-full max-w-6xl px-6 pt-2 pb-4 md:pt-3 md:pb-6 lg:px-8"
             biography={designer.biography}
             biographyImages={designer.biography_images || []}
             designerName={designer.name}
