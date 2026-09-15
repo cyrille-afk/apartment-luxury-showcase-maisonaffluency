@@ -1682,6 +1682,10 @@ const DesignersHoverHero = () => {
       if (searchOpen && !isDesktopViewport) setDropdownPos(null);
       return;
     }
+    if (!dropdownPos) {
+      setDropdownPos(getDesktopSearchTarget());
+      window.requestAnimationFrame(() => setDesktopSearchExpanded(true));
+    }
     const update = () => {
       if (desktopSearchExpanded) setDropdownPos(getDesktopSearchTarget());
     };
@@ -1693,7 +1697,7 @@ const DesignersHoverHero = () => {
       window.removeEventListener("resize", update);
       window.removeEventListener("scroll", update);
     };
-  }, [searchOpen, isDesktopViewport, desktopSearchExpanded]);
+  }, [searchOpen, isDesktopViewport, desktopSearchExpanded, dropdownPos]);
 
   if (!hasItems) return null;
 
