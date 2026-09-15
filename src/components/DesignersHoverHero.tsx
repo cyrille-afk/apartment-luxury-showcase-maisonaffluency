@@ -2246,7 +2246,7 @@ const DesignersHoverHero = () => {
       <div
         key="designers-search-backdrop"
         data-testid="designers-search-backdrop"
-        onClick={() => setSearchOpen(false)}
+        onClick={closeDesignerSearch}
         className={cn(
           "fixed inset-x-0 bottom-0 top-[var(--header-h)] z-[70] bg-black/30 backdrop-blur-[4px] transition-[opacity,backdrop-filter] duration-300 ease-out",
           searchOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0 backdrop-blur-none",
@@ -2263,30 +2263,34 @@ const DesignersHoverHero = () => {
             aria-label="Browse designers A to Z"
             className={cn(
               "fixed z-[71] flex flex-col bg-[#0a0a0a] text-white border border-white/10 shadow-2xl overflow-hidden",
-              // Enter animation — dropped exit for critical-path perf.
-              isDesktopViewport ? "animate-scale-in" : "animate-slide-in-right",
+              !isDesktopViewport && "animate-slide-in-right",
               // Mobile / tablet: full sheet anchored right below the fixed header so
               // the search field is immediately visible and the list has room to scroll.
               "inset-x-0 top-[var(--header-h)] bottom-0 rounded-none",
               // Desktop (>=1024px): centered panel matching the header content width
               // (max-w-7xl / 1280px) and side padding (px-12) so it aligns with the
               // logo and navigation boundaries.
-              "lg:left-1/2 lg:top-[var(--header-h)] lg:bottom-auto lg:h-auto lg:max-h-[calc(100dvh-var(--header-h)-24px)] lg:w-[calc(100%-96px)] lg:max-w-7xl lg:-translate-x-1/2 lg:rounded-none lg:pb-0"
+              "lg:inset-auto lg:rounded-none lg:pb-0"
             )}
             style={
-              dropdownPos && !isDesktopViewport
+              dropdownPos && isDesktopViewport
                 ? {
                     left: dropdownPos.left,
                     top: dropdownPos.top,
                     width: dropdownPos.width,
                     height: dropdownPos.height,
                     maxHeight: dropdownPos.height,
+                    transition: "all 0.4s cubic-bezier(0.25, 1, 0.5, 1)",
                   }
                 : undefined
             }
           >
-            <div className="mx-auto mt-1.5 h-1 w-9 rounded-full bg-white/25 shrink-0" aria-hidden="true" />
-            <div className="px-4 pt-3 pb-3 border-b border-white/[0.06] shrink-0 mb-2">
+            <div className="mx-auto mt-1.5 h-1 w-9 rounded-full bg-white/25 shrink-0 lg:hidden" aria-hidden="true" />
+            <div className={cn(
+              "px-4 pt-3 pb-3 border-b border-white/[0.06] shrink-0 mb-2",
+              "lg:p-0 lg:m-0 lg:border-b-0 lg:transition-[padding] lg:duration-[400ms]",
+              desktopSearchExpanded && "lg:px-6 lg:pt-5 lg:pb-4 lg:border-b lg:border-white/[0.06] lg:mb-2"
+            )}>
               <div className="relative flex items-center">
                 <Search
                   className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50 pointer-events-none"
@@ -2301,12 +2305,16 @@ const DesignersHoverHero = () => {
                   autoCorrect="off"
                   autoCapitalize="none"
                   spellCheck={false}
-                  className="w-full rounded-lg border border-gold/10 bg-white/[0.03] py-2.5 pl-9 pr-9 font-body text-sm text-white outline-none placeholder:text-white/60 focus:border-gold/25 focus:bg-white/[0.05]"
+                  className={cn(
+                    "w-full rounded-lg border border-gold/10 bg-white/[0.03] py-2.5 pl-9 pr-9 font-body text-sm text-white outline-none placeholder:text-white/60 focus:border-gold/25 focus:bg-white/[0.05]",
+                    "lg:h-full lg:rounded-none lg:border-transparent lg:bg-transparent lg:transition-all lg:duration-[400ms]",
+                    desktopSearchExpanded && "lg:h-auto lg:rounded-lg lg:border-gold/10 lg:bg-white/[0.03]"
+                  )}
                   aria-label="Search designers"
                 />
                 <button
                   type="button"
-                  onClick={() => setSearchOpen(false)}
+                  onClick={closeDesignerSearch}
                   aria-label="Close search"
                   className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/50 hover:text-white transition-colors"
                 >
@@ -2316,7 +2324,11 @@ const DesignersHoverHero = () => {
             </div>
             {/* Sticky horizontal A–Z quick-jump (hidden while searching) */}
             {!isSearching && (
-              <div className="shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3 overflow-x-auto no-scrollbar px-3 lg:overflow-visible lg:px-6">
+              <div className={cn(
+                "shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3 overflow-x-auto no-scrollbar px-3 lg:overflow-visible lg:px-6",
+                "lg:transition-opacity lg:duration-300",
+                desktopSearchExpanded ? "lg:opacity-100" : "lg:pointer-events-none lg:opacity-0"
+              )}>
                 <div
                   className={cn(
                     "mx-auto flex w-max min-w-full items-center justify-center gap-0.5 py-1.5 transition-opacity duration-150",
@@ -2356,7 +2368,11 @@ const DesignersHoverHero = () => {
                 </div>
               </div>
             )}
-            <div ref={searchScrollRef} className={`flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-[calc(2rem+env(safe-area-inset-bottom))] min-h-0 relative touch-pan-y transition-opacity duration-150 ${isRestoringLetter ? "opacity-0" : "opacity-100"}`}>
+            <div ref={searchScrollRef} className={cn(
+              "flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-[calc(2rem+env(safe-area-inset-bottom))] min-h-0 relative touch-pan-y transition-opacity duration-300",
+              isRestoringLetter ? "opacity-0" : "opacity-100",
+              !desktopSearchExpanded && "lg:pointer-events-none lg:opacity-0"
+            )}>
 
               {!isSearching && groupedResults.length === 0 ? (
                 <div className="px-4 py-10 flex flex-col items-center gap-3" aria-live="polite">
