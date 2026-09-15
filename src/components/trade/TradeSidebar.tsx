@@ -17,16 +17,20 @@ import { StudioBridgeSidebar } from "@/components/trade/StudioBridgeSidebar";
 import { pushRecentProject, useProjects } from "@/hooks/useProjects";
 
 
-const coreItems = [
+const topItems = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
   { title: "My Dashboard", url: "/trade/me", icon: UserCircle },
   { title: "THE COLLECTION", url: "/trade/the-collection", icon: MapPin },
   { title: "Visualiser", url: "/trade/visualiser", icon: Wand2 },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
-  { title: "Projects", url: "/trade/projects", icon: FolderKanban },
   { title: "QUOTES & PROFORMAS", url: "/trade/quotes", icon: FileText },
   { title: "Tools", url: "/trade/tools", icon: Wrench },
   { title: "Settings", url: "/trade/settings", icon: Settings },
+];
+
+const projectItems = [
+  { title: "Projects", url: "/trade/projects", icon: FolderKanban },
+  { title: "Clients", url: "/trade/client-management", icon: Users },
 ];
 
 export function TradeSidebar() {
