@@ -2248,33 +2248,50 @@ const DesignersHoverHero = () => {
         );
       })()}
 
-      {/* Desktop directory launcher — a persistent glass dock independent of
-          the editorial sidebar so it remains reachable across the full hero. */}
-      <div
-        className="fixed bottom-[40px] left-1/2 z-[73] hidden -translate-x-1/2 items-center rounded-md border border-background/20 bg-background/[0.05] px-1.5 py-1 backdrop-blur-[12px] lg:flex"
-        aria-label="Designer directory controls"
-      >
-        <button
-          ref={desktopSearchDockRef}
-          type="button"
-          onClick={() => openDesignerSearch("search")}
-          aria-expanded={searchOpen && desktopDirectoryMode === "search"}
-          aria-controls="designers-search-sheet"
-          className="whitespace-nowrap px-5 py-2 font-body text-[10px] uppercase tracking-[0.22em] text-background/75 transition-colors hover:text-background focus-visible:outline-none focus-visible:text-background"
+      {/* Desktop directory launcher — search and its editorial context remain
+          grouped in one bottom interaction zone above the scroll cue. */}
+      <div className="fixed bottom-[40px] left-1/2 z-[73] hidden w-[min(34rem,calc(100vw-6rem))] -translate-x-1/2 flex-col items-center lg:flex">
+        <div
+          className="flex w-full items-center rounded-md border border-background/20 bg-background/[0.05] px-4 backdrop-blur-[12px]"
+          aria-label="Designer directory controls"
         >
-          [ Search Directory ]
-        </button>
-        <span className="h-4 w-px bg-background/15" aria-hidden="true" />
-        <button
-          ref={desktopAzDockRef}
-          type="button"
-          onClick={() => openDesignerSearch("az")}
-          aria-expanded={searchOpen && desktopDirectoryMode === "az"}
-          aria-controls="designers-search-sheet"
-          className="whitespace-nowrap px-5 py-2 font-body text-[10px] uppercase tracking-[0.22em] text-background/75 transition-colors hover:text-background focus-visible:outline-none focus-visible:text-background"
-        >
-          [ A - Z ]
-        </button>
+          <Search className="h-3.5 w-3.5 shrink-0 text-background/55" aria-hidden="true" />
+          <input
+            ref={desktopSearchDockRef}
+            type="search"
+            value={searchQuery}
+            onFocus={() => {
+              if (!searchOpen && !suppressSearchFocusOpenRef.current) openDesignerSearch("search");
+            }}
+            onClick={() => {
+              if (!searchOpen) openDesignerSearch("search");
+            }}
+            onChange={(event) => {
+              setSearchQuery(event.target.value);
+              if (!searchOpen) openDesignerSearch("search");
+            }}
+            placeholder="Search directory"
+            autoCorrect="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            aria-expanded={searchOpen}
+            aria-controls="designers-search-sheet"
+            className="h-10 min-w-0 flex-1 bg-transparent px-3 font-body text-[10px] uppercase tracking-[0.2em] text-background outline-none placeholder:text-background/70"
+          />
+          {searchOpen && (
+            <button
+              type="button"
+              onClick={closeDesignerSearch}
+              aria-label="Close search"
+              className="p-1 text-background/55 transition-colors hover:text-background focus-visible:outline-none focus-visible:text-background"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+        <p className="mt-2 max-w-md text-center font-serif text-[11px] leading-relaxed text-background/70">
+          Our online portfolio is an invitation to explore unique ateliers and find out signature pieces.
+        </p>
       </div>
 
 
@@ -2331,7 +2348,7 @@ const DesignersHoverHero = () => {
             <div className="mx-auto mt-1.5 h-1 w-9 rounded-full bg-white/25 shrink-0 lg:hidden" aria-hidden="true" />
             <div className={cn(
               "px-4 pt-3 pb-3 border-b border-white/[0.06] shrink-0 mb-2",
-              "lg:px-6 lg:pt-5 lg:pb-4 lg:border-b lg:border-white/[0.06] lg:mb-2"
+              "lg:hidden"
             )}>
               <div className="relative flex items-center">
                 <Search
@@ -2379,7 +2396,7 @@ const DesignersHoverHero = () => {
             {!isSearching && (
               <div className={cn(
                 "shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3 overflow-x-auto no-scrollbar px-3 lg:overflow-visible lg:px-6",
-                "lg:transition-opacity lg:duration-300"
+                "lg:hidden"
               )}>
                 <div
                   className={cn(
