@@ -2229,8 +2229,9 @@ const DesignersHoverHero = () => {
               // the search field is immediately visible and the list has room to scroll.
               "inset-x-0 top-[var(--header-h)] bottom-0 rounded-none",
               // Desktop (>=1024px): centered panel matching the header content width
-              // (max-w-7xl / 1280px) so it aligns with the logo and navigation.
-              "lg:left-1/2 lg:top-[calc(var(--header-h)+8px)] lg:bottom-6 lg:w-[calc(100%-48px)] lg:max-w-7xl lg:-translate-x-1/2 lg:rounded-none lg:pb-0"
+              // (max-w-7xl / 1280px) and side padding (px-12) so it aligns with the
+              // logo and navigation boundaries.
+              "lg:left-1/2 lg:top-[calc(var(--header-h)+8px)] lg:bottom-6 lg:w-[calc(100%-96px)] lg:max-w-7xl lg:-translate-x-1/2 lg:rounded-none lg:pb-0"
             )}
             style={
               dropdownPos && !isDesktopViewport
