@@ -709,31 +709,31 @@ const TradeGallery = () => {
                   </div>
                 </div>
                 {/* Description in portal tooltip */}
-                 <div className="flex min-h-[7.5rem] flex-col items-center px-3 pb-4 pt-3 text-center">
-                   <p className="min-h-4 font-body text-[9px] uppercase tracking-[0.18em] text-muted-foreground line-clamp-1">
+                 <div className="flex flex-col pt-3 sm:pt-4 pb-4 text-left">
+                   <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground line-clamp-1">
                      {product.brand_name}
                    </p>
-                    <h3 className="mt-1 min-h-[2.5rem] font-display text-sm font-normal leading-snug text-foreground line-clamp-2">
+                   <h3 className="mt-1 min-h-[2.5rem] font-display text-[15px] leading-snug text-foreground sm:text-lg line-clamp-2">
                      {product.product_name}
                    </h3>
-                  {isAdmin ? (
-                     <div className="mt-auto flex flex-col items-center gap-1.5 pt-3">
-                       {renderPriceDisplay(price, "font-body text-[10px] uppercase tracking-[0.08em] inline-flex items-center justify-center gap-1.5 flex-wrap")}
-                      <InlinePriceEditor
-                        productName={product.product_name}
-                        brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
-                        currentPriceCents={price?.cents}
-                        currency={price?.currency || "SGD"}
-                        priceUnit={price?.price_unit}
-                        displayCurrency={displayCurrency}
-                        fxRates={fxRates}
-                        onPriceUpdated={() => refreshPrices()}
-                      />
-                    </div>
-                  ) : (
-                     renderPriceDisplay(price, "font-body text-[10px] uppercase tracking-[0.08em] mt-auto pt-3 inline-flex items-center justify-center gap-1.5 flex-wrap")
-                  )}
-                </div>
+                   {isAdmin ? (
+                     <div className="mt-auto flex flex-col items-start gap-1.5 pt-3">
+                       {renderPriceDisplay(price, "font-sans text-[11px] tracking-[0.14em] inline-flex items-start gap-1.5 flex-wrap")}
+                       <InlinePriceEditor
+                         productName={product.product_name}
+                         brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
+                         currentPriceCents={price?.cents}
+                         currency={price?.currency || "SGD"}
+                         priceUnit={price?.price_unit}
+                         displayCurrency={displayCurrency}
+                         fxRates={fxRates}
+                         onPriceUpdated={() => refreshPrices()}
+                       />
+                     </div>
+                   ) : (
+                     renderPriceDisplay(price, "font-sans text-[11px] tracking-[0.14em] mt-auto pt-3 inline-flex items-start gap-1.5 flex-wrap")
+                   )}
+                 </div>
               </div>
             );
           })}
