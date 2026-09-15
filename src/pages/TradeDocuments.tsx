@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { trackDownload } from "@/lib/trackDownload";
 import { FileDown, Search, FolderOpen, FileText, BookOpen, FileSpreadsheet, X } from "lucide-react";
@@ -40,7 +40,7 @@ const TradeDocuments = () => {
   const [documents, setDocuments] = useState<TradeDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const initialBrand = searchParams.get("brand") || "all";
   const [selectedBrand, setSelectedBrand] = useState(initialBrand);
   const [selectedType, setSelectedType] = useState("all");
@@ -86,6 +86,10 @@ const TradeDocuments = () => {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    setSelectedBrand(searchParams.get("brand") || "all");
+  }, [searchParams]);
 
   const types = useMemo(() => [...new Set(documents.map((d) => d.document_type))].sort(), [documents]);
 
@@ -140,6 +144,18 @@ const TradeDocuments = () => {
 
   const handleCarouselSelect = (b: string) => {
     setSelectedBrand(b);
+    const nextParams = new URLSearchParams(searchParams);
+    if (b === "all") nextParams.delete("brand");
+    else nextParams.set("brand", b);
+    setSearchParams(nextParams, { replace: true });
+  };
+
+  const returnToResources = () => {
+    setSelectedBrand("all");
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("brand");
+    setSearchParams(nextParams, { replace: true });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const inputClass =
@@ -148,7 +164,24 @@ const TradeDocuments = () => {
   return (
     <>
       <Helmet><title>Resources — Trade Portal — Maison Affluency</title></Helmet>
-    <div className="max-w-5xl space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        <Link to="/trade/tools" className="transition-colors hover:text-foreground">
+          Tools
+        </Link>
+        <span aria-hidden="true">/</span>
+        {selectedBrand === "all" ? (
+          <span aria-current="page" className="text-foreground">Resources</span>
+        ) : (
+          <>
+            <button type="button" onClick={returnToResources} className="transition-colors hover:text-foreground">
+              Resources
+            </button>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page" className="text-foreground">{selectedBrand}</span>
+          </>
+        )}
+      </nav>
       <SectionHero
         section="documents"
         title="Resources"
@@ -246,7 +279,7 @@ const TradeDocuments = () => {
 
       {/* Content */}
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
           {Array.from({ length: 8 }).map((_, i) => <DocumentCardSkeleton key={i} />)}
         </div>
       ) : filtered.length === 0 ? (
@@ -269,7 +302,7 @@ const TradeDocuments = () => {
                   {docs.length} {docs.length === 1 ? "file" : "files"}
                 </span>
               </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
                 {docs.map((doc) => {
                   const isPdf = doc.file_url.toLowerCase().endsWith(".pdf");
                   return (
