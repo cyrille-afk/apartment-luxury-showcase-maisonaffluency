@@ -188,7 +188,7 @@ function DesignerGridCard({
       }}
       onTouchStart={() => { void warmProfile(); }}
       onMouseEnter={() => { void warmProfile(); }}
-      className="group relative block w-full aspect-[4/5] rounded-none overflow-hidden bg-neutral-800 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-gold/60"
+      className="group relative block w-full aspect-[4/5] rounded-none overflow-hidden bg-neutral-900 border border-white/[0.08] focus:outline-none focus:ring-2 focus:ring-gold/60"
       aria-label={`View ${displayName}`}
       style={
         lqip
@@ -224,7 +224,7 @@ function DesignerGridCard({
           onLoad={() => setLoaded(true)}
           onError={() => setLoaded(true)}
           className={cn(
-            "absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105",
+            "absolute inset-0 h-full w-full object-cover scale-105 transition-transform duration-700 ease-out group-hover:scale-100",
             "transition-opacity",
             loaded ? "opacity-100" : "opacity-0"
           )}
@@ -2207,18 +2207,18 @@ const DesignersHoverHero = () => {
               // Mobile: full sheet anchored right below the fixed header so the
               // search field is immediately visible and the list has room to scroll.
               "inset-x-0 top-[var(--header-h)] bottom-0 rounded-none",
-              // Desktop: a wide, centred editorial panel positioned from the
-              // Directory trigger via inline styles.
-              "md:inset-x-auto md:right-auto md:top-auto md:bottom-auto md:max-w-[calc(100vw-3rem)] md:max-h-[calc(100vh-var(--header-h)-3rem)] md:rounded-xl md:pb-0"
+              // Desktop: a clean, wide rectangle anchored directly below the main
+              // header line and spanning most of the viewport width.
+              "md:top-[calc(var(--header-h)+8px)] md:inset-x-6 md:bottom-6 md:max-w-none md:rounded-none md:pb-0"
             )}
             style={
-              dropdownPos
+              dropdownPos && !isDesktopViewport
                 ? {
                     left: dropdownPos.left,
                     top: dropdownPos.top,
-                    width: isDesktopViewport ? dropdownPos.width : undefined,
-                    height: isDesktopViewport ? dropdownPos.height : undefined,
-                    maxHeight: isDesktopViewport ? dropdownPos.height : undefined,
+                    width: dropdownPos.width,
+                    height: dropdownPos.height,
+                    maxHeight: dropdownPos.height,
                   }
                 : undefined
             }
@@ -2423,15 +2423,17 @@ const DesignersHoverHero = () => {
                             No designers match “{searchQuery}”.
                           </p>
                         ) : (
-                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-4 px-0 pt-2 pb-4">
-                            {flatResults.map((d: any) => (
-                              <DesignerGridCard
-                                key={d.slug}
-                                designer={d}
-                                useCardPhoto
-                                onNavigate={() => setSearchOpen(false)}
-                              />
-                            ))}
+                          <div className="max-h-[720px] overflow-y-auto overscroll-contain pr-1">
+                            <div className="grid grid-cols-4 gap-4 px-0 pt-2 pb-4">
+                              {flatResults.map((d: any) => (
+                                <DesignerGridCard
+                                  key={d.slug}
+                                  designer={d}
+                                  useCardPhoto
+                                  onNavigate={() => setSearchOpen(false)}
+                                />
+                              ))}
+                            </div>
                           </div>
                         )
                       ) : (
@@ -2479,16 +2481,18 @@ const DesignersHoverHero = () => {
                                 <span className="font-body text-[11px] tracking-wide text-white/45 pl-3">{items.length}</span>
                               </button>
                               {isOpen && (
-                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-4 px-0 pt-2 pb-4">
-                                  {items.map((d: any, i: number) => (
-                                    <DesignerGridCard
-                                      key={d.slug}
-                                      designer={d}
-                                      useCardPhoto
-                                      priority={i < 4}
-                                      onNavigate={() => setSearchOpen(false)}
-                                    />
-                                  ))}
+                                <div className="max-h-[720px] overflow-y-auto overscroll-contain pr-1">
+                                  <div className="grid grid-cols-4 gap-4 px-0 pt-2 pb-4">
+                                    {items.map((d: any, i: number) => (
+                                      <DesignerGridCard
+                                        key={d.slug}
+                                        designer={d}
+                                        useCardPhoto
+                                        priority={i < 8}
+                                        onNavigate={() => setSearchOpen(false)}
+                                      />
+                                    ))}
+                                  </div>
                                 </div>
                               )}
                             </div>
