@@ -2427,7 +2427,7 @@ const DesignersHoverHero = () => {
                   </div>
 
                   {/* Desktop: same grouped card grid as mobile, using the designer's card photo */}
-                  <div className="hidden md:block">
+                  <div className="hidden lg:block">
                     <div className="flex flex-col pb-2">
                       {isSearching ? (
                         flatResults.length === 0 ? (
