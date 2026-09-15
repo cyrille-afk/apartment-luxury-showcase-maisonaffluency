@@ -173,7 +173,7 @@ export default function TradeMaterialLibrary() {
   return (
     <>
       <Helmet><title>Material Library — Trade Portal</title></Helmet>
-      <div className="mx-auto w-full max-w-6xl space-y-6 lg:ml-8 lg:mr-0 lg:w-[calc(100%-2rem)] lg:max-w-none [@media(min-width:1440px)]:max-w-[1800px]">
+      <div className="mx-auto w-full max-w-6xl space-y-6 lg:w-[calc(100%-4rem)] lg:max-w-none [@media(min-width:1440px)]:max-w-[1800px]">
         <div className="flex items-end justify-between gap-6 border-b border-border pb-5">
           <div>
             <h1 className="font-display text-2xl text-foreground">Material Library</h1>
