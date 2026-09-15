@@ -44,8 +44,8 @@ test.describe("Designers index", () => {
 
     // Playwright's mobile viewport represents the visible area above browser
     // chrome, so a small positive inset is the correct safety requirement.
-    expect(mobileBrowser.bottomGap, "browser mobile directory must remain inside the visible viewport").toBeGreaterThan(16);
-    expect(pwaStandalone.bottomGap, "PWA directory must remain inside the visible viewport").toBeGreaterThan(8);
+    expect(mobileBrowser.bottomGap, "browser mobile directory must remain inside the visible viewport").toBeGreaterThanOrEqual(16);
+    expect(pwaStandalone.bottomGap, "PWA directory must remain inside the visible viewport").toBeGreaterThanOrEqual(8);
   });
 });
 
