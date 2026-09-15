@@ -308,6 +308,8 @@ const DESKTOP_HERO_BG_OVERRIDES: Record<string, string> = {
     "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/designers/arnold-madsen/advert-1946.jpg",
   "dagmar-london":
     "https://res.cloudinary.com/dif1oamtj/image/upload/v1786274677/Screen_Shot_2026-08-09_at_7.22.06_PM_wldg1a.png",
+  "humbert-poyet":
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1789450377/Screen_Shot_2026-09-15_at_1.28.00_PM_y1afop.png",
   "michel-boyer":
     "https://res.cloudinary.com/dif1oamtj/image/upload/v1773310436/Screen_Shot_2026-03-12_at_5.52.37_PM_ayejha.png",
 };
