@@ -640,7 +640,7 @@ const DesignersHoverHero = () => {
   const activeTitleRef = useRef<HTMLSpanElement>(null);
   const activeTitleWrapRef = useRef<HTMLDivElement>(null);
   const lastItemRef = useRef<HTMLLIElement>(null);
-  const [dropdownPos, setDropdownPos] = useState<{ left: number; top: number; height: number } | null>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
   const [directoryTop, setDirectoryTop] = useState<number | null>(null);
   const [activeTitleTop, setActiveTitleTop] = useState<number | null>(null);
 
@@ -1210,21 +1210,33 @@ const DesignersHoverHero = () => {
   // keyboard opens as usual — no custom keyboard.
   useEffect(() => {
     if (!searchOpen) return;
-    const wasAlreadyHidden = document.body.style.overflow === "hidden";
-    if (!wasAlreadyHidden) document.body.style.overflow = "hidden";
+    const bodyOverflow = document.body.style.overflow;
+    const htmlOverflow = document.documentElement.style.overflow;
+    const htmlOverscroll = document.documentElement.style.overscrollBehavior;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    document.documentElement.style.overscrollBehavior = "none";
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setSearchOpen(false);
     };
+    const onWheel = (e: WheelEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target?.closest("#designers-search-sheet")) return;
+      searchScrollRef.current?.scrollBy({ top: e.deltaY });
+      if (e.cancelable) e.preventDefault();
+    };
     window.addEventListener("keydown", onKey);
+    document.addEventListener("wheel", onWheel, { passive: false, capture: true });
     // Delay focus so the slide-up animation is visible before the keyboard opens.
     const t = window.setTimeout(() => {
       if (!restoredLetterRef.current) searchInputRef.current?.focus();
     }, 220);
     return () => {
-      // Only clear if we set it. Never restore a stale "hidden" captured from
-      // PublicDesigners' body lock — that would pin the next page's scroll.
-      if (!wasAlreadyHidden) document.body.style.overflow = "";
+      document.body.style.overflow = bodyOverflow;
+      document.documentElement.style.overflow = htmlOverflow;
+      document.documentElement.style.overscrollBehavior = htmlOverscroll;
       window.removeEventListener("keydown", onKey);
+      document.removeEventListener("wheel", onWheel, { capture: true });
       window.clearTimeout(t);
     };
   }, [searchOpen, isDesktopViewport]);
@@ -1563,19 +1575,21 @@ const DesignersHoverHero = () => {
   // the fixed header flicker in/out on hover. Static background instead.
 
 
-  // Desktop dropdown opens directly beneath the Directory search bar so it
-  // sits over the featured-designers list; the soft blur keeps it legible.
+  // Desktop directory opens beneath its trigger, then expands toward the
+  // viewport centre so the card grid reads as an editorial overlay.
   useEffect(() => {
     if (!searchOpen || !isDesktopViewport || !directoryRef.current) {
       if (searchOpen && !isDesktopViewport) setDropdownPos(null);
       return;
     }
     const update = () => {
-      const rect = directoryRef.current!.getBoundingClientRect();
-      const width = 380;
-      let left = rect.left;
-      const maxLeft = window.innerWidth - width - 16;
-      if (left > maxLeft) left = maxLeft;
+      const directory = directoryRef.current;
+      if (!directory) return;
+      const rect = directory.getBoundingClientRect();
+      const gutter = 24;
+      const width = Math.min(760, window.innerWidth - gutter * 2);
+      const centeredLeft = (window.innerWidth - width) / 2;
+      const left = Math.max(gutter, Math.min(rect.left, centeredLeft));
       const top = rect.bottom + 8;
       // Let the dropdown reach nearly the bottom of the viewport so the A–Z
       // grid has room to scroll in place over the page background.
@@ -1583,6 +1597,7 @@ const DesignersHoverHero = () => {
       setDropdownPos({
         left,
         top,
+        width,
         height,
       });
     };
@@ -2189,14 +2204,16 @@ const DesignersHoverHero = () => {
               // Mobile: full sheet anchored right below the fixed header so the
               // search field is immediately visible and the list has room to scroll.
               "inset-x-0 top-[var(--header-h)] bottom-0 rounded-none",
-              // Desktop: dropdown anchored to the Directory button via inline styles.
-              "md:inset-x-auto md:right-auto md:top-auto md:bottom-auto md:w-[380px] md:max-w-[calc(100vw-2rem)] md:max-h-[calc(100vh-var(--header-h)-3rem)] md:rounded-xl md:pb-0"
+              // Desktop: a wide, centred editorial panel positioned from the
+              // Directory trigger via inline styles.
+              "md:inset-x-auto md:right-auto md:top-auto md:bottom-auto md:max-w-[calc(100vw-3rem)] md:max-h-[calc(100vh-var(--header-h)-3rem)] md:rounded-xl md:pb-0"
             )}
             style={
               dropdownPos
                 ? {
                     left: dropdownPos.left,
                     top: dropdownPos.top,
+                    width: isDesktopViewport ? dropdownPos.width : undefined,
                     height: isDesktopViewport ? dropdownPos.height : undefined,
                     maxHeight: isDesktopViewport ? dropdownPos.height : undefined,
                   }
@@ -2403,7 +2420,7 @@ const DesignersHoverHero = () => {
                             No designers match “{searchQuery}”.
                           </p>
                         ) : (
-                          <div className="grid grid-cols-2 gap-x-3 gap-y-4 px-0 pt-2 pb-4">
+                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-4 px-0 pt-2 pb-4">
                             {flatResults.map((d: any) => (
                               <DesignerGridCard
                                 key={d.slug}
@@ -2459,7 +2476,7 @@ const DesignersHoverHero = () => {
                                 <span className="font-body text-[11px] tracking-wide text-white/45 pl-3">{items.length}</span>
                               </button>
                               {isOpen && (
-                                <div className="grid grid-cols-2 gap-x-3 gap-y-4 px-0 pt-2 pb-4">
+                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-4 px-0 pt-2 pb-4">
                                   {items.map((d: any, i: number) => (
                                     <DesignerGridCard
                                       key={d.slug}
