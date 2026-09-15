@@ -84,6 +84,10 @@ const TradeVisualiser = () => {
   const [backdrop, setBackdrop] = useState<string | null>(initial.backdrop);
   const [backdropDataUrl, setBackdropDataUrl] = useState<string | null>(initial.backdropDataUrl);
   const [orbitEnabled, setOrbitEnabled] = useState(true);
+  const [projectId, setProjectId] = useState<string | null>(initial.projectId ?? null);
+  const [projectName, setProjectName] = useState<string | null>(null);
+  const [loadingProject, setLoadingProject] = useState(false);
+  const intakeRef = useRef<string | null>(null);
   const [materials, setMaterials] = useState<VisualiserMaterial[]>([]);
   const [materialSearch, setMaterialSearch] = useState("");
   const [finishTarget, setFinishTarget] = useState<"all" | "top" | "base">("all");
@@ -165,11 +169,12 @@ const TradeVisualiser = () => {
         backdrop: backdrop?.startsWith("blob:") ? null : backdrop,
         backdropDataUrl,
         objects,
+        projectId,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects]);
+  }, [backdrop, backdropDataUrl, objects, projectId]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
