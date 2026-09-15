@@ -1876,6 +1876,10 @@ const DesignersHoverHero = () => {
                 {directoryLabels("w-full", directoryRef, "left")}
               </div>
 
+              {/* Preserve the original desktop directory block's vertical
+                  footprint after moving search into the bottom dock. */}
+              <div className="hidden h-[9.5rem] shrink-0 lg:block" aria-hidden="true" />
+
 
               <nav
                 ref={navRef}
