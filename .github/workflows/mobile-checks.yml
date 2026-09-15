@@ -91,7 +91,7 @@ jobs:
           restore-keys: visual-playwright-${{ runner.os }}-
       - run: bun install --frozen-lockfile
       - name: Ensure Chromium is installed
-        run: bunx playwright install chromium
+        run: bunx playwright install --with-deps chromium
       - name: Run visual structural checks (blocking)
         shell: bash
         run: |
