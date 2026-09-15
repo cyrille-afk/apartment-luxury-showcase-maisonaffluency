@@ -27,6 +27,15 @@
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779698535/Lantern_Cover_tikr2a.png"
   },
   {
+    "id": "1317ce9a-d0fa-4486-b933-12f826d65ff0",
+    "slug": "le-berre-vevaud",
+    "name": "Le Berre Vevaud",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1776080773/Le_Berre_Vevaud_RomainRicard-cropped_leggsa.webp",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:good,f_auto/Screen_Shot_2026-02-23_at_9.40.24_AM_nfyg7z",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1776136286/Barth_Stool-4_jkc3my.jpg"
+  },
+  {
     "id": "d3b4c761-2ee2-4e0d-9fbb-db965ef33a78",
     "slug": "michel-boyer",
     "name": "Michel Boyer",
@@ -196,6 +205,15 @@
     "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781872797/Hero_dxlcbb.jpg",
     "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/Screen_Shot_2025-12-12_at_1.08.35_AM_uzbbxd",
     "first_pick_image_url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/kiko-lopez-mirror.jpg"
+  },
+  {
+    "id": "bccc53bd-69e3-4e38-9f8d-34d3a4d65483",
+    "slug": "marta-sala-editions",
+    "name": "Marta Sala Éditions",
+    "founder": "Marta Sala Éditions",
+    "hero_image_url": null,
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/Screen_Shot_2026-02-26_at_7.44.59_AM_xqirha",
+    "first_pick_image_url": null
   },
   {
     "id": "f44b5dca-5009-4b87-9b3d-7a1b7eb50604",
