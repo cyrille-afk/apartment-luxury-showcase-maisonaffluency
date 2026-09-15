@@ -2629,8 +2629,8 @@ const DesignersHoverHero = () => {
 
             {/* Desktop alphabet rail: anchored beneath the grid and directly
                 above the unified bottom search input. */}
-            <div className="hidden shrink-0 border-t border-white/[0.06] bg-[#0a0a0a]/95 px-6 backdrop-blur lg:block">
-                <div className="mx-auto flex w-[min(34rem,calc(100vw-6rem))] items-center justify-between py-4">
+            <div className="mx-auto hidden w-[min(34rem,calc(100vw-6rem))] shrink-0 border-t border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur lg:block">
+                <div className="flex w-full items-center justify-between py-4">
                   {Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index)).map((letter) => {
                     const isActive = activeAccordionLetter === letter;
                     return (
