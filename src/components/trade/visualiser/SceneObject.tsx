@@ -75,9 +75,11 @@ function useMaterialMaps(material: VisualiserMaterial | null, maxAnisotropy: num
       const next = { diffuse, normal, roughness };
       liveRef.current = next;
       setMaps(next);
+      invalidate();
     }).catch(() => {
       liveRef.current = EMPTY_MAPS;
       setMaps(EMPTY_MAPS);
+      invalidate();
     });
     return () => {
       cancelled = true;
