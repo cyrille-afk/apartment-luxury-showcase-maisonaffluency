@@ -41,6 +41,9 @@ const EMPTY_MAPS: LoadedMaps = { diffuse: null, normal: null, roughness: null };
 function useMaterialMaps(material: VisualiserMaterial | null, maxAnisotropy: number) {
   const [maps, setMaps] = useState<LoadedMaps>(EMPTY_MAPS);
   const liveRef = useRef<LoadedMaps>(EMPTY_MAPS);
+  // frameloop="demand": textures resolve asynchronously, so the scene must be
+  // explicitly re-rendered once they land.
+  const invalidate = useThree((s) => s.invalidate);
 
   useEffect(() => {
     let cancelled = false;
