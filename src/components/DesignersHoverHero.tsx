@@ -2323,7 +2323,7 @@ const DesignersHoverHero = () => {
                     width: dropdownPos.width,
                     height: dropdownPos.height,
                     maxHeight: dropdownPos.height,
-                    transform: desktopSearchExpanded ? "translateY(0)" : "translateY(calc(100% + 7rem))",
+                    transform: desktopSearchExpanded ? "translateY(0)" : "translateY(110%)",
                     opacity: desktopSearchExpanded ? 1 : 0,
                     transition: "transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease-out",
                   }
