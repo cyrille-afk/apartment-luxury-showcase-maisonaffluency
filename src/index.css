@@ -273,6 +273,10 @@ All colors MUST be HSL.
   border-radius: 0;
 }
 
+.trade-editorial-main .material-library-swatch {
+  border-radius: 9999px;
+}
+
 .trade-editorial-main :where(h1, h2, h3, h4, h5, h6) {
   font-family: 'Playfair Display', serif;
   font-weight: 400;

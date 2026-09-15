@@ -134,7 +134,7 @@ export default function TradeMaterialLibrary() {
                 onClick={() => selectMaterial(swatch)}
                 className={`group overflow-hidden text-left ${activeMaterial?.id === swatch.id ? "border-t border-foreground" : "border-t border-border"}`}
               >
-                <div className="aspect-square overflow-hidden rounded-full bg-muted relative">
+                <div className="material-library-swatch aspect-square overflow-hidden rounded-full bg-muted relative">
                   {swatch.image_url ? (
                     <img src={swatch.image_url} alt={swatch.name} className="w-full h-full object-cover" loading="lazy" />
                   ) : (
