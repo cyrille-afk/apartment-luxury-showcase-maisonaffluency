@@ -2253,7 +2253,7 @@ const DesignersHoverHero = () => {
       {/* Desktop directory launcher — a persistent glass dock independent of
           the editorial sidebar so it remains reachable across the full hero. */}
       <div
-        className="fixed bottom-6 left-1/2 z-[73] hidden -translate-x-1/2 items-center border border-background/15 bg-foreground/45 px-1.5 py-1 backdrop-blur-2xl lg:flex"
+        className="fixed bottom-6 left-1/2 z-[73] hidden -translate-x-1/2 items-center border border-background/20 bg-background/10 px-1.5 py-1 backdrop-blur-2xl lg:flex"
         aria-label="Designer directory controls"
       >
         <button
@@ -2312,7 +2312,7 @@ const DesignersHoverHero = () => {
               // Desktop (>=1024px): centered panel matching the header content width
               // (max-w-7xl / 1280px) and side padding (px-12) so it aligns with the
               // logo and navigation boundaries.
-              "lg:inset-auto lg:rounded-none lg:pb-0 lg:transition-[transform,opacity] lg:duration-[400ms]",
+              "lg:inset-auto lg:rounded-none lg:pb-0",
               desktopSearchExpanded
                 ? "lg:translate-y-0 lg:opacity-100"
                 : "lg:pointer-events-none lg:translate-y-[calc(100%+7rem)] lg:opacity-0"
@@ -2325,7 +2325,7 @@ const DesignersHoverHero = () => {
                     width: dropdownPos.width,
                     height: dropdownPos.height,
                     maxHeight: dropdownPos.height,
-                    transitionTimingFunction: "cubic-bezier(0.25, 1, 0.5, 1)",
+                    transition: "transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease-out",
                   }
                 : undefined
             }
