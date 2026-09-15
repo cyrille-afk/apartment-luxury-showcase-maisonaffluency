@@ -1835,7 +1835,7 @@ const DesignersHoverHero = () => {
       {/* Luxury scroll indicator — desktop only */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-6 left-1/2 z-40 hidden -translate-x-1/2 md:block lg:bottom-0"
+        className="pointer-events-none absolute bottom-6 left-1/2 z-40 hidden -translate-x-1/2 md:block lg:bottom-auto lg:top-[calc(100%-2rem)]"
       >
         <div className="relative h-14 w-px overflow-hidden bg-white/20 lg:h-8">
           <span className="absolute left-0 top-0 block h-6 w-px bg-white/80 animate-scroll-cue" />
