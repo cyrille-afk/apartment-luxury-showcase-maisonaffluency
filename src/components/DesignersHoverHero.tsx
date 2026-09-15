@@ -685,6 +685,18 @@ const DesignersHoverHero = () => {
     mql.addEventListener("change", update);
     return () => mql.removeEventListener("change", update);
   }, []);
+
+  const [isLgViewport, setIsLgViewport] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches
+  );
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsLgViewport(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
   const isMobileOrPwa = isMobileViewport || isMobileHook || isStandalone;
   const isMobileBrowser = (isMobileViewport || isMobileHook) && !isStandalone;
   const navRef = useRef<HTMLElement>(null);
@@ -1159,7 +1171,7 @@ const DesignersHoverHero = () => {
   }, [isMobileOrPwa, searchOpen, hasItems, items]);
 
 
-  const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
+  const isDesktopViewport = isLgViewport;
 
   // Scroll a letter row (and its expanded card grid) into view inside the
   // directory scroller. First pins the letter header to the top, then after the
@@ -1169,8 +1181,8 @@ const DesignersHoverHero = () => {
     requestAnimationFrame(() => {
       const scroller = searchScrollRef.current;
       if (!scroller) return;
-      // The scroller contains both the mobile block (md:hidden) and the desktop
-      // block (hidden md:block). Pick the currently visible row so we don't
+      // The scroller contains both the mobile block (lg:hidden) and the desktop
+      // block (hidden lg:block). Pick the currently visible row so we don't
       // measure a hidden mobile row on desktop or vice-versa.
       const rows = Array.from(
         scroller.querySelectorAll<HTMLElement>(`[data-designer-letter="${letter}"]`)
@@ -2204,12 +2216,12 @@ const DesignersHoverHero = () => {
               "fixed z-[71] flex flex-col bg-[#0a0a0a] text-white border border-white/10 shadow-2xl overflow-hidden",
               // Enter animation — dropped exit for critical-path perf.
               isDesktopViewport ? "animate-scale-in" : "animate-slide-in-right",
-              // Mobile: full sheet anchored right below the fixed header so the
-              // search field is immediately visible and the list has room to scroll.
+              // Mobile / tablet: full sheet anchored right below the fixed header so
+              // the search field is immediately visible and the list has room to scroll.
               "inset-x-0 top-[var(--header-h)] bottom-0 rounded-none",
-              // Desktop: a clean, wide rectangle anchored directly below the main
-              // header line and spanning most of the viewport width.
-              "md:top-[calc(var(--header-h)+8px)] md:inset-x-6 md:bottom-6 md:max-w-none md:rounded-none md:pb-0"
+              // Desktop (>=1024px): a clean, wide rectangle anchored directly below
+              // the main header line and spanning most of the viewport width.
+              "lg:top-[calc(var(--header-h)+8px)] lg:inset-x-6 lg:bottom-6 lg:max-w-none lg:rounded-none lg:pb-0"
             )}
             style={
               dropdownPos && !isDesktopViewport
@@ -2254,7 +2266,7 @@ const DesignersHoverHero = () => {
             </div>
             {/* Sticky horizontal A–Z quick-jump (mobile only, hidden while searching) */}
             {!isSearching && (
-              <div className="md:hidden shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3 overflow-x-auto no-scrollbar px-3">
+              <div className="lg:hidden shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3 overflow-x-auto no-scrollbar px-3">
                 <div
                   className={cn(
                     "mx-auto flex w-max min-w-full items-center justify-center gap-0.5 py-1.5 transition-opacity duration-150",
@@ -2294,7 +2306,7 @@ const DesignersHoverHero = () => {
                 <div className="px-4 py-10 flex flex-col items-center gap-3" aria-live="polite">
                   <div className="h-6 w-6 rounded-full border-2 border-white/20 border-t-white/70 animate-spin" aria-hidden="true" />
                   <p className="text-xs font-body text-white/50 uppercase tracking-[0.2em]">Loading directory…</p>
-                  <div className="grid grid-cols-2 gap-3 w-full mt-4 md:hidden">
+                  <div className="grid grid-cols-2 gap-3 w-full mt-4 lg:hidden">
                     {Array.from({ length: 6 }).map((_, i) => (
                       <div key={i} className="aspect-[4/5] rounded-none bg-white/[0.04] animate-pulse" />
                     ))}
@@ -2307,7 +2319,7 @@ const DesignersHoverHero = () => {
               ) : (
                 <>
                   {/* Mobile: grouped designer grid with sticky letter headers */}
-                  <div className="md:hidden">
+                  <div className="lg:hidden">
                     <div className="flex flex-col pb-2">
                       {isSearching ? (
                         <div className="grid grid-cols-2 gap-x-3 gap-y-4 px-0 pt-2 pb-4">
@@ -2415,7 +2427,7 @@ const DesignersHoverHero = () => {
                   </div>
 
                   {/* Desktop: same grouped card grid as mobile, using the designer's card photo */}
-                  <div className="hidden md:block">
+                  <div className="hidden lg:block">
                     <div className="flex flex-col pb-2">
                       {isSearching ? (
                         flatResults.length === 0 ? (
