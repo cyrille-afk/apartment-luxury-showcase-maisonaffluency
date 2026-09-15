@@ -141,9 +141,9 @@ serve(async (req) => {
       taxRule !== null &&
       taxRule.country === "SG";
 
-    // GST is charged on the full CIF value: goods + freight. Until freight is
-    // confirmed, the client-supplied estimate feeds the TAX BASE ONLY — it is
-    // never added to the charged amount.
+    // GST and the collected order total use the full CIF value: goods + freight.
+    // Until freight is confirmed, the validated country estimate is the delivery
+    // amount shown and collected at checkout.
     const rawEstimatedFreight = Number(body?.estimatedFreightCents);
     const estimatedFreightCents =
       !shippingConfirmed && Number.isFinite(rawEstimatedFreight) && rawEstimatedFreight > 0
@@ -158,7 +158,12 @@ serve(async (req) => {
       ? B2B_TAX_LABEL
       : (taxRule ? taxRowLabel(taxRule) : null);
 
-    const amount = goodsAmount + shippingCents + taxCents;
+    const deliveryCents = shippingCents > 0 ? shippingCents : estimatedFreightCents;
+    // Checkout presents whole-currency rows. Charge their exact displayed sum
+    // so the action label, bank-wire amount, invoice, and PaymentIntent agree.
+    const roundDollar = (cents: number) => Math.round(cents / 100) * 100;
+    const amount =
+      roundDollar(goodsAmount) + roundDollar(deliveryCents) + roundDollar(taxCents);
     if (amount < 100 || amount > 100_000_00 * 100) return json({ error: "Price out of range." }, 400);
 
 
@@ -192,6 +197,8 @@ serve(async (req) => {
         discount_pct: String(discountPct),
         discount_label: discountLabel ?? "",
         shipping_cents: String(shippingCents),
+        estimated_freight_cents: String(estimatedFreightCents),
+        delivery_cents: String(deliveryCents),
         shipping_label: shippingLabel,
         shipping_country: shippingCountry,
         tax_cents: String(taxCents),
@@ -253,6 +260,8 @@ serve(async (req) => {
       discountLabel,
       goodsAmount,
       shippingCents,
+      estimatedFreightCents,
+      deliveryCents,
       shippingLabel,
       taxCents,
       taxLabel,
