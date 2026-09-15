@@ -461,7 +461,8 @@ const TradeVisualiser = () => {
         <div>
           <h1 className="font-serif text-2xl text-foreground">Visualiser Sandbox</h1>
           <p className={cn(microLabel, "mt-2 text-muted-foreground")}>
-            3D Spatial Composition // {objects.length} / {MAX_OBJECTS} Objects
+            {projectName ? `${projectName} // ` : ""}3D Spatial Composition // {objects.length} / {MAX_OBJECTS} Objects
+            {loadingProject ? " // Loading specification…" : ""}
           </p>
         </div>
         <p className={cn(microLabel, "text-muted-foreground")}>Drag to orbit // Scroll to zoom</p>
