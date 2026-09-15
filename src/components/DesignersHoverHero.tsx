@@ -2313,9 +2313,7 @@ const DesignersHoverHero = () => {
               // (max-w-7xl / 1280px) and side padding (px-12) so it aligns with the
               // logo and navigation boundaries.
               "lg:inset-auto lg:rounded-none lg:pb-0",
-              desktopSearchExpanded
-                ? "lg:translate-y-0 lg:opacity-100"
-                : "lg:pointer-events-none lg:translate-y-[calc(100%+7rem)] lg:opacity-0"
+              !desktopSearchExpanded && "lg:pointer-events-none"
             )}
             style={
               dropdownPos && isDesktopViewport
@@ -2325,6 +2323,8 @@ const DesignersHoverHero = () => {
                     width: dropdownPos.width,
                     height: dropdownPos.height,
                     maxHeight: dropdownPos.height,
+                    transform: desktopSearchExpanded ? "translateY(0)" : "translateY(calc(100% + 7rem))",
+                    opacity: desktopSearchExpanded ? 1 : 0,
                     transition: "transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease-out",
                   }
                 : undefined
