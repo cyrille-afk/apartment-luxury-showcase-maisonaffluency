@@ -1192,7 +1192,8 @@ const DesignersHoverHero = () => {
     const headerHeight = probe.getBoundingClientRect().top || 72;
     probe.remove();
     const width = Math.min(1280, window.innerWidth - 96);
-    const dockClearance = 88;
+    // Keep the panel above the 40px-elevated dock with a deliberate air gap.
+    const dockClearance = 104;
     return {
       left: (window.innerWidth - width) / 2,
       top: headerHeight,
@@ -1834,9 +1835,9 @@ const DesignersHoverHero = () => {
       {/* Luxury scroll indicator — desktop only */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-6 left-1/2 z-40 hidden -translate-x-1/2 md:block"
+        className="pointer-events-none absolute bottom-6 left-1/2 z-40 hidden -translate-x-1/2 md:block lg:fixed lg:bottom-0 lg:top-auto"
       >
-        <div className="relative h-14 w-px overflow-hidden bg-white/20">
+        <div className="relative h-14 w-px overflow-hidden bg-white/20 lg:h-8">
           <span className="absolute left-0 top-0 block h-6 w-px bg-white/80 animate-scroll-cue" />
         </div>
       </div>
@@ -2253,7 +2254,7 @@ const DesignersHoverHero = () => {
       {/* Desktop directory launcher — a persistent glass dock independent of
           the editorial sidebar so it remains reachable across the full hero. */}
       <div
-        className="fixed bottom-6 left-1/2 z-[73] hidden -translate-x-1/2 items-center border border-background/20 bg-background/10 px-1.5 py-1 backdrop-blur-2xl lg:flex"
+        className="fixed bottom-[40px] left-1/2 z-[73] hidden -translate-x-1/2 items-center rounded-md border border-background/20 bg-background/[0.05] px-1.5 py-1 backdrop-blur-[12px] lg:flex"
         aria-label="Designer directory controls"
       >
         <button
