@@ -2224,7 +2224,7 @@ const DesignersHoverHero = () => {
               "lg:top-[calc(var(--header-h)+8px)] lg:inset-x-6 lg:bottom-6 lg:max-w-none lg:rounded-none lg:pb-0"
             )}
             style={
-              dropdownPos && isDesktopViewport
+              dropdownPos && !isDesktopViewport
                 ? {
                     left: dropdownPos.left,
                     top: dropdownPos.top,
