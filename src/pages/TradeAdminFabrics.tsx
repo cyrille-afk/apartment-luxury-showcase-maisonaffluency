@@ -9,32 +9,11 @@ import { useToast } from "@/hooks/use-toast";
 import CloudUpload from "@/components/trade/CloudUpload";
 import { slugify } from "@/lib/whatsapp-share";
 
-type FabricCategory = "Fabric & Leather" | "Rug Finish" | "Wood" | "Stone" | "Metal" | "Glass" | "Other";
-
-const CATEGORIES: FabricCategory[] = [
-  "Fabric & Leather",
-  "Rug Finish",
-  "Wood",
-  "Stone",
-  "Metal",
-  "Glass",
-  "Other",
-];
-
-const normalizeAdminFabricCategory = (category: string | null | undefined): FabricCategory => {
-  const raw = (category || "").trim().toLowerCase();
-  if (["rug finish", "rug finishes", "rug"].includes(raw)) return "Rug Finish";
-  if ([
-    "fabric", "fabrics", "upholstery", "leather", "fabric & leather", "fabric/leather",
-    "shearling", "sheepskin", "suede", "nubuck", "hide", "textile", "velvet",
-    "boucle", "bouclé", "linen", "wool", "silk", "mohair", "cotton",
-  ].includes(raw)) return "Fabric & Leather";
-  if (["wood", "woods", "timber", "rattan", "cane", "wicker"].includes(raw)) return "Wood";
-  if (raw === "stone") return "Stone";
-  if (raw === "metal") return "Metal";
-  if (raw === "glass") return "Glass";
-  return "Other";
-};
+import {
+  FABRIC_CATEGORIES as CATEGORIES,
+  normalizeFabricCategory as normalizeAdminFabricCategory,
+  type FabricCategory,
+} from "@/lib/fabricCategory";
 
 
 interface Fabric {

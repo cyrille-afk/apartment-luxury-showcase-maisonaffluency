@@ -78,7 +78,11 @@ const VisualiserCanvas = ({
   >
     <RenderOnDemand
       signature={`${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${objects
-        .map((o) => `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}`)
+        .map(
+          (o) =>
+            `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}` +
+            `:${o.material?.id ?? ""}:${o.topMaterial?.id ?? ""}:${o.baseMaterial?.id ?? ""}:${o.upholsteryMaterial?.id ?? ""}`,
+        )
         .join("|")}`}
     />
     <PerspectiveCamera makeDefault fov={50} position={[0, 5, 10]} near={0.1} far={200} />

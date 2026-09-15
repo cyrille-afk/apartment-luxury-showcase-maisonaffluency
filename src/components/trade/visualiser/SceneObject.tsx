@@ -41,6 +41,9 @@ const EMPTY_MAPS: LoadedMaps = { diffuse: null, normal: null, roughness: null };
 function useMaterialMaps(material: VisualiserMaterial | null, maxAnisotropy: number) {
   const [maps, setMaps] = useState<LoadedMaps>(EMPTY_MAPS);
   const liveRef = useRef<LoadedMaps>(EMPTY_MAPS);
+  // frameloop="demand": textures resolve asynchronously, so the scene must be
+  // explicitly re-rendered once they land.
+  const invalidate = useThree((s) => s.invalidate);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,9 +75,11 @@ function useMaterialMaps(material: VisualiserMaterial | null, maxAnisotropy: num
       const next = { diffuse, normal, roughness };
       liveRef.current = next;
       setMaps(next);
+      invalidate();
     }).catch(() => {
       liveRef.current = EMPTY_MAPS;
       setMaps(EMPTY_MAPS);
+      invalidate();
     });
     return () => {
       cancelled = true;
@@ -87,7 +92,7 @@ function useMaterialMaps(material: VisualiserMaterial | null, maxAnisotropy: num
         owned.roughness?.dispose();
       });
     };
-  }, [material, maxAnisotropy]);
+  }, [material, maxAnisotropy, invalidate]);
 
   return maps;
 }
