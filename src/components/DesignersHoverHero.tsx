@@ -1359,6 +1359,11 @@ const DesignersHoverHero = () => {
     return { groupedResults: ordered, totalResults: filtered.length };
   }, [allDesigners, searchQuery, firstPickMap]);
 
+  const availableLetters = useMemo(
+    () => new Set(groupedResults.map(([letter]) => letter)),
+    [groupedResults],
+  );
+
   // Flat list for the mobile-first bottom sheet: fast visual scan, no A–Z index.
   const flatResults = useMemo(() => {
     const list = (allDesigners as any[])
