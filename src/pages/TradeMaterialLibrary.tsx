@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
 import { useVisualiserMaterial, type VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const CATEGORIES = ["All", "Fabric & Leather", "Rug Finish", "Wood", "Stone", "Metal", "Glass", "Other"];
 
