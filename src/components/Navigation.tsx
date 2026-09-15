@@ -443,21 +443,21 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         {/* Mobile: single row */}
         <div className="relative flex h-20 xsp:h-24 items-center justify-between md:hidden">
           <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
-            {/* Left-side group: burger + flag */}
-            <div className="relative z-10 flex items-center gap-0 -ml-2">
+            {/* Left-side group: burger + flag; fixed width to mirror right group so the logo stays dead-center */}
+            <div className="relative z-10 flex items-center gap-0 w-[88px] xsp:w-[96px] shrink-0 -ml-2 xsp:-ml-1">
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-12 w-12 text-primary" aria-label="Toggle menu">
                   {isOpen ? <X className="h-8 w-8" strokeWidth={3} /> : <Menu className="h-8 w-8" strokeWidth={3} />}
                 </Button>
               </SheetTrigger>
 
-              {/* Currency / shipping-destination flag — between burger and account */}
-              <ShippingDestinationSwitcher compact className="hidden xsp:flex min-h-10 min-w-10 px-0 shrink-0" flagClassName="text-lg" />
+              {/* Currency / shipping-destination flag — between burger and the centered logo */}
+              <ShippingDestinationSwitcher compact className="flex min-h-10 min-w-10 px-0 shrink-0" flagClassName="text-lg" />
             </div>
 
-            {/* Brand — absolutely centered in the viewport */}
+            {/* Brand — absolutely centered in the viewport; side groups reserve equal space */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="flex flex-col items-center max-w-full pointer-events-auto">
+              <div className="flex flex-col items-center max-w-[calc(100%-176px)] xsp:max-w-[calc(100%-192px)] pointer-events-auto">
                 <button onClick={scrollToTop} className="group flex min-h-[44px] cursor-pointer items-center whitespace-nowrap">
                   <span data-testid="mobile-brand-logo" className="font-brand text-[1.1rem] xs:text-[1.45rem] xsp:text-[1.65rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                     <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
@@ -471,10 +471,10 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
               </div>
             </div>
 
-            {/* Right-side group: account + cart */}
+            {/* Right-side group: sign-in + cart; fixed width to mirror left group so the logo stays dead-center */}
             <div
               className={cn(
-                "relative z-10 flex items-center justify-end gap-1"
+                "relative z-10 flex items-center justify-end gap-1 w-[88px] xsp:w-[96px] shrink-0"
               )}
             >
               <button
