@@ -1884,7 +1884,7 @@ const DesignersHoverHero = () => {
 
               {/* Preserve the original desktop directory block's vertical
                   footprint after moving search into the bottom dock. */}
-              <div className="hidden h-[8rem] shrink-0 lg:block" aria-hidden="true" />
+              <div className="hidden h-[6rem] shrink-0 lg:block" aria-hidden="true" />
 
 
               <nav
