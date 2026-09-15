@@ -1,19 +1,22 @@
-# Expandable Desktop Designer Search
+# Desktop Designer Directory Bottom Dock
 
 ## Goal
-Turn the desktop designer search into one continuous interaction: the existing left-side trigger expands into a centered search bar, then reveals the centered A–Z navigation and four-column directory below it. Mobile and tablet behavior stays unchanged.
+Replace the desktop-only sidebar search with a persistent floating dock and make the existing designer directory rise from the bottom above it. Preserve the current mobile and tablet experience unchanged.
 
 ## Changes
-- Keep the closed search control in its current left-column position and dimensions.
-- On click or focus, measure the trigger’s desktop position and animate a fixed search surface from that exact rectangle into the centered header-width layout.
-- Use the requested `all 0.4s cubic-bezier(0.25, 1, 0.5, 1)` transition for position, width, and supporting visual properties.
-- Reveal the horizontal alphabet row and four-column designer grid after the search bar begins expanding, centered directly beneath it.
-- Preserve the current two-row visible card area, internal overflow scrolling, body scroll lock, backdrop blur, and responsive card proportions.
-- On close, Escape, or backdrop click, reverse the animation back to the original trigger rectangle before unmounting the expanded directory.
-- Keep the existing mobile/tablet sheet and two-column directory unchanged below 1024px.
+- Remove the desktop Directory search field, count copy, and divider from the left designer column while keeping the featured designer lists aligned in place.
+- Add a desktop-only bottom-center glass dock with two compact controls: `[ SEARCH DIRECTORY ]` and `[ A - Z ]`.
+- Make `[ SEARCH DIRECTORY ]` open the panel with the search field focused; make `[ A - Z ]` open the same panel in alphabetical browsing mode with the horizontal alphabet bar visible.
+- Reposition the desktop panel as a wide, header-aligned 4-column directory above the dock, with a capped height and internal scrolling.
+- Animate the panel upward from below the viewport using the requested premium easing; reverse the motion on close.
+- Keep the soft darkened 4px backdrop blur, body scroll lock, outside-click dismissal, close control, and Escape-key dismissal.
+- Keep the dock visible and sharp above the blurred page while the directory is open.
 
-## Technical details
-- Add a short closing phase so the reverse transition remains visible instead of unmounting immediately.
-- Recalculate the trigger rectangle on desktop resize and use a centered maximum width matching the site header container.
-- Keep focus management accessible: focus enters the expanded input, Escape dismisses, and focus returns to the original trigger.
-- Verify opening, searching, alphabet filtering, internal scrolling, backdrop dismissal, close-button dismissal, and the reverse animation at desktop widths; confirm no visual regression below 1024px.
+## Responsive Boundary
+- Apply the dock and bottom-up panel only at `min-width: 1024px`.
+- Preserve the existing mobile/tablet Directory trigger, full-width sheet, two-column cards, touch scrolling, and safe-area behavior.
+
+## Verification
+- Desktop: verify the sidebar search is absent, dock remains bottom-centered, both controls open the correct state, the panel rests above the dock, four columns render, internal scrolling works, and outside click/close/Escape animate dismissal.
+- Tablet and mobile: verify the existing trigger and two-column sheet remain unchanged.
+- Run type-check and production build.
