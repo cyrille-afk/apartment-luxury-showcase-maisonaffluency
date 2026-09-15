@@ -173,7 +173,7 @@ export default function TradeMaterialLibrary() {
   return (
     <>
       <Helmet><title>Material Library — Trade Portal</title></Helmet>
-      <div className="mx-auto w-full max-w-6xl space-y-6 lg:max-w-none [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
+      <div className="mx-auto w-full max-w-6xl space-y-6 lg:ml-8 lg:mr-0 lg:w-[calc(100%-2rem)] lg:max-w-none [@media(min-width:1440px)]:mx-auto [@media(min-width:1440px)]:w-full [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
         <div className="flex items-end justify-between gap-6 border-b border-border pb-5">
           <div>
             <h1 className="font-display text-2xl text-foreground">Material Library</h1>
@@ -188,8 +188,7 @@ export default function TradeMaterialLibrary() {
           )}
         </div>
 
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center">
             <div className="relative w-full lg:w-80 lg:shrink-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -212,9 +211,8 @@ export default function TradeMaterialLibrary() {
                   {cat}
                 </Button>
               ))}
-            </div>
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row lg:justify-end">
+          <div className="flex flex-col gap-2 sm:flex-row lg:ml-auto">
             <Select value={supplierFilter} onValueChange={setSupplierFilter}>
               <SelectTrigger aria-label="Filter by supplier" className="h-9 w-full border-border/70 bg-background font-body text-xs text-muted-foreground sm:w-48">
                 <SelectValue placeholder="All Suppliers" />
