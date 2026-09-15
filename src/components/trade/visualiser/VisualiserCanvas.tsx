@@ -71,17 +71,22 @@ const VisualiserCanvas = ({
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows
-    gl={{ alpha: true, antialias: true, preserveDrawingBuffer: true }}
-    dpr={[1, 2]}
+    frameloop="demand"
+    gl={{ alpha: true, antialias: true, preserveDrawingBuffer: true, powerPreference: "high-performance" }}
+    dpr={[1, 1.5]}
     onPointerMissed={() => onSelect(null)}
   >
+    <RenderOnDemand
+      signature={`${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${objects
+        .map((o) => `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}`)
+        .join("|")}`}
+    />
     <PerspectiveCamera makeDefault fov={50} position={[0, 5, 10]} near={0.1} far={200} />
     <OrbitControls
       makeDefault
       enabled={orbitEnabled}
       enablePan
-      enableDamping
-      dampingFactor={0.08}
+      enableDamping={false}
       minDistance={1.5}
       maxDistance={24}
       maxPolarAngle={Math.PI / 2.05}
