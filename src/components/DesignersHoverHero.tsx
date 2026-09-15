@@ -2253,7 +2253,13 @@ const DesignersHoverHero = () => {
       {/* Desktop directory launcher — compact width grouped above the white page floor. */}
       <div className="fixed bottom-[40px] left-1/2 z-[73] hidden w-[min(34rem,calc(100vw-6rem))] -translate-x-1/2 flex-col items-center lg:flex">
         <div
-          className="flex w-full items-center rounded-md border border-background/20 bg-background/[0.05] px-4 backdrop-blur-[12px]"
+          className={cn(
+            "flex h-10 w-full shrink-0 items-center rounded-md border px-4 backdrop-blur-[12px]",
+            "transition-[background-color,border-color] duration-300",
+            searchOpen
+              ? "border-background/20 bg-background/[0.08]"
+              : "border-background/20 bg-background/[0.05]"
+          )}
           aria-label="Designer directory controls"
         >
           <Search className="h-3.5 w-3.5 shrink-0 text-background/55" aria-hidden="true" />
@@ -2277,7 +2283,7 @@ const DesignersHoverHero = () => {
             spellCheck={false}
             aria-expanded={searchOpen}
             aria-controls="designers-search-sheet"
-            className="h-10 min-w-0 flex-1 bg-transparent px-3 font-body text-[10px] uppercase tracking-[0.2em] text-background outline-none placeholder:text-background/70"
+            className="h-full min-w-0 flex-1 appearance-none bg-transparent px-3 font-body text-[10px] uppercase tracking-[0.2em] text-background outline-none placeholder:text-background/70 focus:bg-transparent focus:outline-none focus:ring-0"
           />
           {searchOpen && (
             <button
@@ -2623,8 +2629,8 @@ const DesignersHoverHero = () => {
 
             {/* Desktop alphabet rail: anchored beneath the grid and directly
                 above the unified bottom search input. */}
-            <div className="hidden shrink-0 border-t border-white/[0.06] bg-[#0a0a0a]/95 px-6 backdrop-blur lg:block">
-                <div className="mx-auto flex w-full max-w-7xl items-center justify-center gap-8 py-4">
+            <div className="mx-auto hidden w-[min(34rem,calc(100vw-6rem))] shrink-0 border-t border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur lg:block">
+                <div className="flex w-full items-center justify-between py-4">
                   {Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index)).map((letter) => {
                     const isActive = activeAccordionLetter === letter;
                     return (
