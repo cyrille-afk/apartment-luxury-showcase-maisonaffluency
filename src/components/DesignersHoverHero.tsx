@@ -2172,15 +2172,17 @@ const DesignersHoverHero = () => {
 
       {/* Designer search: mobile bottom-sheet, desktop dropdown beside the
           Directory button. */}
+      <div
+        key="designers-search-backdrop"
+        onClick={() => setSearchOpen(false)}
+        className={cn(
+          "fixed inset-x-0 bottom-0 top-[var(--header-h)] z-[70] bg-background/35 backdrop-blur-[12px] transition-[opacity,backdrop-filter] duration-300 ease-out",
+          searchOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0 backdrop-blur-none",
+        )}
+        aria-hidden="true"
+      />
       {searchOpen && (
         <>
-          <div
-            key="designers-search-backdrop"
-            onClick={() => setSearchOpen(false)}
-            className="fixed left-0 right-0 bottom-0 top-20 z-[70] animate-fade-in"
-            style={{ animationDuration: "200ms" }}
-            aria-hidden="true"
-          />
           <div
             key="designers-search-sheet"
             id="designers-search-sheet"
