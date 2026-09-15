@@ -2620,11 +2620,38 @@ const DesignersHoverHero = () => {
               )}
             </div>
 
-
-
-
-
-
+            {/* Desktop alphabet rail: anchored beneath the grid and directly
+                above the unified bottom search input. */}
+            {!isSearching && (
+              <div className="hidden shrink-0 border-t border-white/[0.06] bg-[#0a0a0a]/95 px-6 backdrop-blur lg:block">
+                <div className="mx-auto flex w-full max-w-7xl items-center justify-center gap-6 py-3">
+                  {groupedResults.map(([letter]) => {
+                    const isActive = activeAccordionLetter === letter;
+                    return (
+                      <button
+                        key={letter}
+                        type="button"
+                        onClick={() => {
+                          rememberDesignersAzLetter(letter);
+                          setRestoredOnlyLetter(null);
+                          setExpandedLetters(new Set([letter]));
+                          setActiveAccordionLetter(letter);
+                        }}
+                        className={cn(
+                          "font-body text-[11px] uppercase tracking-[0.2em] transition-colors",
+                          isActive
+                            ? "text-white underline underline-offset-4"
+                            : "text-white/50 hover:text-white"
+                        )}
+                        aria-label={`Show designers starting with ${letter}`}
+                      >
+                        {letter}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
           </div>
         </>
