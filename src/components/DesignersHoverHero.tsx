@@ -759,8 +759,14 @@ const DesignersHoverHero = () => {
   }, [designers]);
 
   const items = useMemo(
-    () => groupedItems.flatMap((g) => g.designers),
-    [groupedItems]
+    () =>
+      groupedItems
+        .flatMap((g) => g.designers)
+        .filter(
+          (designer) =>
+            !isMobileOrPwa || !MOBILE_ONLY_EXCLUDED_DESIGNERS.has(designer.slug)
+        ),
+    [groupedItems, isMobileOrPwa]
   );
   const hasItems = items.length > 0;
 
