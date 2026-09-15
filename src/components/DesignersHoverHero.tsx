@@ -2624,7 +2624,7 @@ const DesignersHoverHero = () => {
             {/* Desktop alphabet rail: anchored beneath the grid and directly
                 above the unified bottom search input. */}
             <div className="hidden shrink-0 border-t border-white/[0.06] bg-[#0a0a0a]/95 px-6 backdrop-blur lg:block">
-                <div className="mx-auto flex w-full max-w-7xl items-center justify-center gap-6 py-3">
+                <div className="mx-auto flex w-full max-w-7xl items-center justify-center gap-8 py-4">
                   {Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index)).map((letter) => {
                     const isActive = activeAccordionLetter === letter;
                     return (
@@ -2639,9 +2639,9 @@ const DesignersHoverHero = () => {
                           setActiveAccordionLetter(letter);
                         }}
                         className={cn(
-                          "font-body text-[11px] uppercase tracking-[0.2em] transition-colors",
+                          "font-body text-sm uppercase tracking-[0.35em] transition-colors",
                           isActive
-                            ? "text-white underline underline-offset-4"
+                            ? "text-white underline underline-offset-8"
                             : "text-white/50 hover:text-white"
                         )}
                         aria-label={`Show designers starting with ${letter}`}
