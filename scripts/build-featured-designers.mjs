@@ -44,7 +44,9 @@ const FEATURED_SLUGS = [
   "hamrei",
   "humbert-poyet",
   "kerstens",
+  "le-berre-vevaud",
   "leo-aerts-alinea",
+  "marta-sala-editions",
   "victoria-magniant",
 ];
 
