@@ -63,7 +63,7 @@ const TradeGallery = () => {
   }, [density]);
   const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const { showTradePrice } = useTradePriceMode();
-  const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
+  const { discountPct: TRADE_DISCOUNT } = useTradeDiscount();
   const fxRates = useFxRates();
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
