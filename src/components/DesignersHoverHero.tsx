@@ -2166,9 +2166,10 @@ const DesignersHoverHero = () => {
           Directory button. */}
       <div
         key="designers-search-backdrop"
+        data-testid="designers-search-backdrop"
         onClick={() => setSearchOpen(false)}
         className={cn(
-          "fixed inset-x-0 bottom-0 top-[var(--header-h)] z-[70] bg-background/35 backdrop-blur-[12px] transition-[opacity,backdrop-filter] duration-300 ease-out",
+          "fixed inset-x-0 bottom-0 top-[var(--header-h)] z-[70] bg-black/30 backdrop-blur-[4px] transition-[opacity,backdrop-filter] duration-300 ease-out",
           searchOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0 backdrop-blur-none",
         )}
         aria-hidden="true"
