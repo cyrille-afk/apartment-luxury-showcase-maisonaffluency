@@ -252,8 +252,8 @@ const FEATURED_GROUPS = [
     label: "Masters",
     slugs: [
       "alexander-lamont",
+      "andree-putman",
       "arnold-madsen",
-      
       "emmanuel-babled",
       "felix-agostini",
       "jean-michel-frank",
@@ -276,6 +276,7 @@ const FEATURED_GROUPS = [
       "delcourt-collection",
       "emmanuel-levet-stenne",
       "hamrei",
+      "humbert-poyet",
       "kerstens",
       "leo-aerts-alinea",
       "victoria-magniant",
