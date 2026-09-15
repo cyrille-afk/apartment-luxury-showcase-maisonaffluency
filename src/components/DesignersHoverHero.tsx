@@ -288,6 +288,8 @@ const FEATURED_GROUPS = [
   },
 ];
 
+const MOBILE_ONLY_EXCLUDED_DESIGNERS = new Set(["paul-laszlo", "pouenat"]);
+
 const MOBILE_BG_OVERRIDES: Record<string, string> = {
   // Jean-Michel Frank's raw pick is a square studio shot with a baked-in black
   // ceiling and gray floor; as a full-viewport background it reads as an
@@ -2005,7 +2007,9 @@ const DesignersHoverHero = () => {
                         {group.label}
                       </span>
                       <ul className="flex flex-col gap-[2px] short:gap-0 md:gap-1 text-left">
-                        {group.designers.map((d, dIdx) => {
+                        {group.designers
+                          .filter((d) => !isMobileOrPwa || !MOBILE_ONLY_EXCLUDED_DESIGNERS.has(d.slug))
+                          .map((d, dIdx, arr) => {
                           const [first, last] = splitName(d.name);
                           const isActive = d.slug === activeSlug;
                           const isDimmed = activeSlug !== null && !isActive;
@@ -2017,7 +2021,7 @@ const DesignersHoverHero = () => {
                                         : null);
                           const isLastItem =
                             groupIdx === groupedItems.length - 1 &&
-                            dIdx === group.designers.length - 1;
+                            dIdx === arr.length - 1;
                           return (
                             <li
                               key={d.slug}
