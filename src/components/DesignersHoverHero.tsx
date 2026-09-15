@@ -588,6 +588,7 @@ const DesignersHoverHero = () => {
   const [isStandalone, setIsStandalone] = useState(() => isPwaStandaloneDisplay());
   const [showPortalCursor, setShowPortalCursor] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [desktopSearchExpanded, setDesktopSearchExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const restoredLetterRef = useRef<string | null>(null);
   const [expandedLetters, setExpandedLetters] = useState<Set<string>>(() => {
@@ -631,6 +632,8 @@ const DesignersHoverHero = () => {
   const azTrackRef = useRef<HTMLElement | null>(null);
   const [azRailRect, setAzRailRect] = useState<{ top: number; height: number } | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchTriggerRef = useRef<HTMLButtonElement>(null);
+  const searchCloseTimerRef = useRef<number | null>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
   const [isRestoringLetter, setIsRestoringLetter] = useState(false);
   const [restoredOnlyLetter, setRestoredOnlyLetter] = useState<string | null>(() => restoredLetterRef.current);
@@ -1173,6 +1176,71 @@ const DesignersHoverHero = () => {
 
   const isDesktopViewport = isLgViewport;
 
+  const getDesktopSearchTarget = () => {
+    const rootStyles = window.getComputedStyle(document.documentElement);
+    const headerHeight = Number.parseFloat(rootStyles.getPropertyValue("--header-h")) || 72;
+    const width = Math.min(1280, window.innerWidth - 96);
+    return {
+      left: (window.innerWidth - width) / 2,
+      top: headerHeight,
+      width,
+      height: Math.max(320, window.innerHeight - headerHeight - 24),
+    };
+  };
+
+  const openDesignerSearch = () => {
+    if (searchCloseTimerRef.current !== null) {
+      window.clearTimeout(searchCloseTimerRef.current);
+      searchCloseTimerRef.current = null;
+    }
+    if (!isDesktopViewport) {
+      setDropdownPos(null);
+      setSearchOpen(true);
+      return;
+    }
+    const rect = searchTriggerRef.current?.getBoundingClientRect();
+    if (rect) {
+      setDropdownPos({
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+      });
+    }
+    setDesktopSearchExpanded(false);
+    setSearchOpen(true);
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        setDropdownPos(getDesktopSearchTarget());
+        setDesktopSearchExpanded(true);
+      });
+    });
+  };
+
+  const closeDesignerSearch = () => {
+    if (!isDesktopViewport) {
+      setSearchOpen(false);
+      return;
+    }
+    const rect = searchTriggerRef.current?.getBoundingClientRect();
+    setDesktopSearchExpanded(false);
+    if (rect) {
+      setDropdownPos({
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+      });
+    }
+    if (searchCloseTimerRef.current !== null) window.clearTimeout(searchCloseTimerRef.current);
+    searchCloseTimerRef.current = window.setTimeout(() => {
+      setSearchOpen(false);
+      setDropdownPos(null);
+      searchCloseTimerRef.current = null;
+      searchTriggerRef.current?.focus({ preventScroll: true });
+    }, 400);
+  };
+
   // Scroll a letter row (and its expanded card grid) into view inside the
   // directory scroller. First pins the letter header to the top, then after the
   // accordion grid has expanded it nudges the scroller so the cards are fully
@@ -1229,7 +1297,7 @@ const DesignersHoverHero = () => {
     document.documentElement.style.overflow = "hidden";
     document.documentElement.style.overscrollBehavior = "none";
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setSearchOpen(false);
+      if (e.key === "Escape") closeDesignerSearch();
     };
     const onWheel = (e: WheelEvent) => {
       const target = e.target as HTMLElement | null;
@@ -1252,6 +1320,10 @@ const DesignersHoverHero = () => {
       window.clearTimeout(t);
     };
   }, [searchOpen, isDesktopViewport]);
+
+  useEffect(() => () => {
+    if (searchCloseTimerRef.current !== null) window.clearTimeout(searchCloseTimerRef.current);
+  }, []);
 
   // Accent-insensitive search key: "Amelie" must match "Amélie".
   const foldSearch = (s: string) =>
@@ -1596,31 +1668,15 @@ const DesignersHoverHero = () => {
   // the fixed header flicker in/out on hover. Static background instead.
 
 
-  // Desktop directory opens beneath its trigger, then expands toward the
-  // viewport centre so the card grid reads as an editorial overlay.
+  // Keep the expanded desktop directory aligned to the header container when
+  // the viewport changes. Its closed position remains the live trigger rect.
   useEffect(() => {
-    if (!searchOpen || !isDesktopViewport || !directoryRef.current) {
+    if (!searchOpen || !isDesktopViewport) {
       if (searchOpen && !isDesktopViewport) setDropdownPos(null);
       return;
     }
     const update = () => {
-      const directory = directoryRef.current;
-      if (!directory) return;
-      const rect = directory.getBoundingClientRect();
-      const gutter = 24;
-      const width = Math.min(760, window.innerWidth - gutter * 2);
-      const centeredLeft = (window.innerWidth - width) / 2;
-      const left = Math.max(gutter, Math.min(rect.left, centeredLeft));
-      const top = rect.bottom + 8;
-      // Let the dropdown reach nearly the bottom of the viewport so the A–Z
-      // grid has room to scroll in place over the page background.
-      const height = Math.max(320, window.innerHeight - top - 16);
-      setDropdownPos({
-        left,
-        top,
-        width,
-        height,
-      });
+      if (desktopSearchExpanded) setDropdownPos(getDesktopSearchTarget());
     };
 
     update();
@@ -1630,7 +1686,7 @@ const DesignersHoverHero = () => {
       window.removeEventListener("resize", update);
       window.removeEventListener("scroll", update);
     };
-  }, [searchOpen, isDesktopViewport]);
+  }, [searchOpen, isDesktopViewport, desktopSearchExpanded]);
 
   if (!hasItems) return null;
 
@@ -1658,35 +1714,19 @@ const DesignersHoverHero = () => {
         </span>
 
         <button
+          ref={searchTriggerRef}
           type="button"
-          onClick={() => {
-            if (isDesktopViewport && directoryRef.current) {
-              const rect = directoryRef.current.getBoundingClientRect();
-              const gutter = 24;
-              const width = Math.min(760, window.innerWidth - gutter * 2);
-              const centeredLeft = (window.innerWidth - width) / 2;
-              const left = Math.max(gutter, Math.min(rect.left, centeredLeft));
-              const top = rect.bottom + 8;
-              const height = Math.max(320, window.innerHeight - top - 16);
-              setDropdownPos({
-                left,
-                top,
-                width,
-                height,
-              });
-            } else {
-              setDropdownPos(null);
-            }
-
-            setSearchOpen(true);
-          }}
+          onClick={openDesignerSearch}
           aria-expanded={searchOpen}
           aria-controls="designers-search-sheet"
           className={cn(
             "inline-flex items-center gap-2 text-xs font-body font-light italic transition-colors",
             isMobileOrPwa
               ? cn("text-white/85 hover:text-white underline-offset-4 hover:underline", align === "left" && "w-full justify-start")
-              : "w-full rounded-lg border border-gold/10 bg-white/[0.04] px-3 py-2.5 text-[13px] text-white/75 hover:text-white hover:bg-white/[0.07] hover:border-gold/20",
+              : cn(
+                  "w-full rounded-lg border border-gold/10 bg-white/[0.04] px-3 py-2.5 text-[13px] text-white/75 hover:text-white hover:bg-white/[0.07] hover:border-gold/20",
+                  searchOpen && "lg:opacity-0"
+                ),
             align === "left" && "text-left justify-start",
             align === "center" && "text-center justify-center",
             align === "right" && "text-right flex-row-reverse justify-start"
