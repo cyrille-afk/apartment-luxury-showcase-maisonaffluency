@@ -9,6 +9,7 @@ import { Search, Loader2, Paintbrush, Plus, X, Heart, FolderOpen, LayoutGrid, Sp
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 type PickerFilter = "all" | "favourites" | "board";
 
@@ -369,7 +370,11 @@ export default function TradeMoodBoards() {
   return (
     <>
       <Helmet><title>Mood Board — Trade Portal</title></Helmet>
-      <div className="max-w-6xl space-y-6">
+      <div className="mx-auto w-full max-w-6xl space-y-6 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
+        <Breadcrumbs
+          variant="compact"
+          items={[{ label: "Tools", to: "/trade/tools" }, { label: "Mood Board Builder" }]}
+        />
         <div>
           <h1 className="font-display text-2xl text-foreground">Mood Board Builder</h1>
           <p className="font-body text-sm text-muted-foreground mt-1">
@@ -377,7 +382,7 @@ export default function TradeMoodBoards() {
           </p>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col gap-6 lg:flex-row [@media(min-width:1440px)]:grid [@media(min-width:1440px)]:grid-cols-[minmax(0,1fr)_320px] [@media(min-width:1440px)]:gap-8">
           {/* Board area */}
           <div className="flex-1 space-y-6">
             <div>
@@ -385,12 +390,12 @@ export default function TradeMoodBoards() {
                 <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">{board.length} item{board.length !== 1 ? "s" : ""} on board</p>
               </div>
               {board.length === 0 ? (
-                <div className="border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center py-20">
+                <div className="border-2 border-dashed border-border rounded-lg flex min-h-[20rem] flex-col items-center justify-center py-20 [@media(min-width:1440px)]:min-h-[34rem]">
                   <Paintbrush className="h-10 w-10 text-muted-foreground/30 mb-3" />
                   <p className="font-body text-sm text-muted-foreground">Add products from the right panel to build your mood board.</p>
                 </div>
               ) : (
-                <div className={`grid gap-2 ${board.length <= 2 ? "grid-cols-3" : board.length <= 6 ? "grid-cols-3" : "grid-cols-4"}`}>
+                <div className={`grid gap-2 ${board.length <= 2 ? "grid-cols-3" : board.length <= 6 ? "grid-cols-3" : "grid-cols-4 [@media(min-width:1440px)]:grid-cols-5"}`}>
                   {board.map((item) => (
                     <div key={item.id} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
                       <img src={item.image_url} alt={item.product_name} className="w-full h-full object-cover" />
@@ -491,7 +496,7 @@ export default function TradeMoodBoards() {
           </div>
 
           {/* Product picker */}
-          <div className="w-full lg:w-72 shrink-0 space-y-3">
+          <div className="w-full shrink-0 space-y-3 lg:w-72 [@media(min-width:1440px)]:w-80">
             {/* Filter toggle */}
             <div className="flex gap-1 p-0.5 bg-muted/50 rounded-lg">
               {filterOptions.map((opt) => (
@@ -519,7 +524,7 @@ export default function TradeMoodBoards() {
               {filtered.length} product{filtered.length !== 1 ? "s" : ""}
             </p>
 
-            <div className="max-h-[500px] overflow-y-auto space-y-1.5 pr-1">
+            <div className="max-h-[500px] overflow-y-auto space-y-1.5 pr-1 [@media(min-width:1440px)]:max-h-[680px]">
               {sourceLoading ? (
                 <div className="flex justify-center py-10"><DotCircleLoader size="sm" className="text-muted-foreground" /></div>
               ) : filtered.length === 0 ? (

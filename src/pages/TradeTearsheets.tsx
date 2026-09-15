@@ -16,7 +16,7 @@ import { useUserBoards } from "@/hooks/useUserBoards";
 import { useStudio } from "@/hooks/useStudio";
 import { normalizeCategory, normalizeSubcategory, CATEGORY_ORDER, getSubcategoriesForCategory } from "@/lib/productTaxonomy";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
-import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { getConciergeSession, useConciergeSession } from "@/hooks/useConciergeSession";
 import { withImperialInline } from "@/lib/formatDimensions";
 import { formatLeadTime } from "@/components/trade/AvailabilityBadge";
@@ -730,8 +730,11 @@ export default function TradeTearsheets() {
   return (
     <>
       <Helmet><title>Tearsheet Builder — Trade Portal</title></Helmet>
-      <div className="max-w-6xl space-y-6">
-        <TradeBreadcrumb current="Tearsheets" currentProjectTab="tearsheets" />
+      <div className="mx-auto w-full max-w-6xl space-y-6 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
+        <Breadcrumbs
+          variant="compact"
+          items={[{ label: "Tools", to: "/trade/tools" }, { label: "Tearsheet Builder" }]}
+        />
         <div>
           <h1 className="font-display text-2xl text-foreground">Tearsheet Builder</h1>
           <p className="font-body text-sm text-muted-foreground mt-1">
@@ -813,7 +816,7 @@ export default function TradeTearsheets() {
               </div>
             </div>
 
-            <div ref={printRef} className="border border-border rounded-lg p-6 space-y-6">
+            <div ref={printRef} className="space-y-6 rounded-lg border border-border p-6 [@media(min-width:1440px)]:p-8">
               <div className="border-b border-border pb-4">
                 <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{selectedProduct.brand_name}</p>
                 <h2 className="font-display text-xl text-foreground mt-1">{selectedProduct.product_name}</h2>
@@ -836,7 +839,7 @@ export default function TradeTearsheets() {
                       Clear
                     </button>
                   </div>
-                  <div className="flex flex-wrap gap-6">
+                  <div className="grid gap-6 sm:grid-cols-2 [@media(min-width:1440px)]:grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
                     {chosenFinishes.wood && (
                       <div className="flex items-center gap-3">
                         {chosenFinishes.woodImg && (
@@ -863,7 +866,7 @@ export default function TradeTearsheets() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-x-8 gap-y-5 [@media(min-width:1440px)]:grid-cols-4">
                 {([
                   ["Category", selectedProduct.category],
                   ["Dimensions", dimensionsDisplay],
@@ -947,7 +950,7 @@ export default function TradeTearsheets() {
                 <p className="font-body text-sm text-muted-foreground">No products found.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 [@media(min-width:1440px)]:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
                 {filtered.map((p) => (
                   <button
                     key={p.id}

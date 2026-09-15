@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 interface Pin {
   id: string;
@@ -207,7 +208,11 @@ export default function TradeAnnotations() {
   return (
     <>
       <Helmet><title>Markup & Annotation — Trade Portal</title></Helmet>
-      <div className="max-w-6xl space-y-6">
+      <div className="mx-auto w-full max-w-6xl space-y-6 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
+        <Breadcrumbs
+          variant="compact"
+          items={[{ label: "Tools", to: "/trade/tools" }, { label: "Markup & Annotation" }]}
+        />
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-display text-2xl text-foreground">Markup & Annotation</h1>
@@ -237,7 +242,7 @@ export default function TradeAnnotations() {
             <p className="font-display text-xs uppercase tracking-wider text-muted-foreground">
               Your saved annotations
             </p>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 [@media(min-width:1440px)]:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
               {savedAnnotations.map(ann => (
                 <div key={ann.id} className="border border-border rounded-lg p-3 hover:border-foreground/30 transition-colors group">
                   <div className="flex items-start gap-3">
@@ -267,8 +272,8 @@ export default function TradeAnnotations() {
         )}
 
         {!imageUrl ? (
-          <div className="grid sm:grid-cols-2 gap-4">
-            <label className="flex flex-col items-center justify-center py-16 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-foreground/30 transition-colors">
+          <div className="grid gap-4 sm:grid-cols-2 [@media(min-width:1440px)]:gap-6">
+            <label className="flex min-h-[18rem] flex-col items-center justify-center border-2 border-dashed border-border rounded-lg cursor-pointer py-16 transition-colors hover:border-foreground/30 [@media(min-width:1440px)]:min-h-[30rem]">
               <Upload className="h-10 w-10 text-muted-foreground/40 mb-3" />
               <p className="font-body text-sm text-muted-foreground">Upload from your device</p>
               <p className="font-body text-xs text-muted-foreground/60 mt-1">JPG, PNG up to 20MB</p>
@@ -276,7 +281,7 @@ export default function TradeAnnotations() {
             </label>
             <button
               onClick={() => setBrowseOpen(true)}
-              className="flex flex-col items-center justify-center py-16 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-foreground/30 transition-colors"
+              className="flex min-h-[18rem] flex-col items-center justify-center border-2 border-dashed border-border rounded-lg cursor-pointer py-16 transition-colors hover:border-foreground/30 [@media(min-width:1440px)]:min-h-[30rem]"
             >
               <ImageIcon className="h-10 w-10 text-muted-foreground/40 mb-3" />
               <p className="font-body text-sm text-muted-foreground">Browse product photos</p>
@@ -284,7 +289,7 @@ export default function TradeAnnotations() {
             </button>
           </div>
         ) : (
-          <div className="flex gap-6 flex-col lg:flex-row">
+          <div className="flex flex-col gap-6 lg:flex-row [@media(min-width:1440px)]:gap-8">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-3">
                 <Input
@@ -319,7 +324,7 @@ export default function TradeAnnotations() {
               </div>
             </div>
 
-            <div className="w-full lg:w-80 space-y-2 shrink-0">
+            <div className="w-full shrink-0 space-y-2 lg:w-80 [@media(min-width:1440px)]:w-96">
               <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
                 {pins.length} annotation{pins.length !== 1 ? "s" : ""}
               </p>
