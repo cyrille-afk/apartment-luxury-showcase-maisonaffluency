@@ -1,45 +1,87 @@
 import { Helmet } from "react-helmet-async";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
-import { Search, Loader2, Layers } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Search, Layers } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useVisualiserMaterial, type VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
 
-const CATEGORIES = ["All", "Fabric", "Stone", "Wood", "Metal", "Leather", "Glass", "Ceramic", "Other"];
+const CATEGORIES = ["All", "Fabric & Leather", "Rug Finish", "Wood", "Stone", "Metal", "Glass", "Other"];
+
+interface LibraryFabric {
+  id: string;
+  name: string;
+  description: string | null;
+  image_url: string | null;
+  category: string | null;
+  supplier: string | null;
+  sort_order: number;
+  is_active: boolean;
+}
 
 export default function TradeMaterialLibrary() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { activeMaterial, setActiveMaterial } = useVisualiserMaterial();
 
   const { data: swatches = [], isLoading } = useQuery({
-    queryKey: ["material-swatches"],
+    queryKey: ["material-library-fabrics"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("material_swatches")
-        .select("*")
+      const { data, error } = await supabase
+        .from("fabrics")
+        .select("id, name, description, image_url, category, supplier, sort_order, is_active")
         .eq("is_active", true)
-        .order("brand_name")
+        .order("category")
+        .order("supplier")
+        .order("sort_order")
         .order("name");
-      return data || [];
+      if (error) throw error;
+      return (data as LibraryFabric[]) || [];
     },
   });
 
-  const filtered = swatches.filter((s: any) => {
-    const matchesSearch = !search || [s.name, s.brand_name, s.color_family, s.material_type].some((f: string) => f?.toLowerCase().includes(search.toLowerCase()));
+  useEffect(() => {
+    const channel = supabase
+      .channel("material-library-fabrics-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "fabrics" },
+        () => queryClient.invalidateQueries({ queryKey: ["material-library-fabrics"] }),
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  const filtered = swatches.filter((s) => {
+    const matchesSearch = !search || [s.name, s.supplier, s.description, s.category].some((field) => field?.toLowerCase().includes(search.toLowerCase()));
     const matchesCat = activeCategory === "All" || s.category?.toLowerCase() === activeCategory.toLowerCase();
     return matchesSearch && matchesCat;
   });
 
+  const selectMaterial = (swatch: LibraryFabric) => {
+    setActiveMaterial({
+      id: swatch.id,
+      name: swatch.name,
+      brand_name: swatch.supplier || "Maison Affluency",
+      category: swatch.category || "Other",
+      material_type: swatch.category,
+      color_family: null,
+      image_url: swatch.image_url,
+    } as VisualiserMaterial);
+  };
+
   return (
     <>
       <Helmet><title>Material Library — Trade Portal</title></Helmet>
-      <div className="max-w-6xl space-y-6">
+      <div className="mx-auto w-full max-w-6xl space-y-6 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
         <div className="flex items-end justify-between gap-6 border-b border-border pb-5">
           <div>
             <h1 className="font-display text-2xl text-foreground">Material Library</h1>
@@ -85,14 +127,14 @@ export default function TradeMaterialLibrary() {
             <p className="font-body text-sm text-muted-foreground">No materials found. Swatches will appear here once added.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {filtered.map((swatch: any) => (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
+            {filtered.map((swatch) => (
               <button
                 key={swatch.id}
-                onClick={() => setActiveMaterial(swatch as VisualiserMaterial)}
+                onClick={() => selectMaterial(swatch)}
                 className={`group overflow-hidden text-left ${activeMaterial?.id === swatch.id ? "border-t border-foreground" : "border-t border-border"}`}
               >
-                <div className="aspect-square bg-muted relative">
+                <div className="material-library-swatch aspect-square overflow-hidden rounded-full bg-muted relative">
                   {swatch.image_url ? (
                     <img src={swatch.image_url} alt={swatch.name} className="w-full h-full object-cover" loading="lazy" />
                   ) : (
@@ -100,18 +142,11 @@ export default function TradeMaterialLibrary() {
                       <Layers className="h-8 w-8 text-muted-foreground/30" />
                     </div>
                   )}
-                  {swatch.swatch_code && (
-                    <span className="absolute top-2 right-2 px-1.5 py-0.5 bg-background/80 backdrop-blur-sm rounded text-[9px] font-body text-muted-foreground">
-                      {swatch.swatch_code}
-                    </span>
-                  )}
                 </div>
                 <div className="p-3">
                   <p className="font-display text-xs text-foreground truncate">{swatch.name}</p>
-                  <p className="font-body text-[10px] text-muted-foreground mt-0.5">{swatch.brand_name}</p>
-                  {swatch.color_family && (
-                    <p className="font-body text-[10px] text-muted-foreground/70 mt-0.5">{swatch.color_family} · {swatch.material_type}</p>
-                  )}
+                  <p className="font-body text-[10px] text-muted-foreground mt-0.5">{swatch.supplier || "Maison Affluency"}</p>
+                  <p className="font-body text-[10px] text-muted-foreground/70 mt-0.5">{swatch.category || "Other"}</p>
                 </div>
               </button>
             ))}

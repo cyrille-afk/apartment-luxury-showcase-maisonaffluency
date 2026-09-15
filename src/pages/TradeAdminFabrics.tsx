@@ -470,6 +470,7 @@ export default function TradeAdminFabrics() {
     toast({ title: `Updated ${patch.name}` });
     cancelEdit();
     qc.invalidateQueries({ queryKey: ["admin-fabrics"] });
+    qc.invalidateQueries({ queryKey: ["material-library-fabrics"] });
   };
 
   const remove = async (f: Fabric) => {
@@ -481,6 +482,7 @@ export default function TradeAdminFabrics() {
     }
     toast({ title: `Removed ${f.name}` });
     qc.invalidateQueries({ queryKey: ["admin-fabrics"] });
+    qc.invalidateQueries({ queryKey: ["material-library-fabrics"] });
     qc.invalidateQueries({ queryKey: ["admin-fabrics-links"] });
   };
 
@@ -510,6 +512,7 @@ export default function TradeAdminFabrics() {
     setAdding(false);
     setNewRow(blankDraft());
     qc.invalidateQueries({ queryKey: ["admin-fabrics"] });
+    qc.invalidateQueries({ queryKey: ["material-library-fabrics"] });
   };
 
   const togglePickLink = async (fabricId: string, pickId: string, currentlyLinked: boolean) => {
@@ -565,7 +568,7 @@ export default function TradeAdminFabrics() {
       <Helmet>
         <title>Fabrics & Finishes — Admin — Maison Affluency</title>
       </Helmet>
-      <div className="max-w-6xl space-y-6">
+      <div className="w-full max-w-none space-y-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link to="/trade/admin-dashboard" className="p-1.5 rounded-md hover:bg-muted transition-colors">
