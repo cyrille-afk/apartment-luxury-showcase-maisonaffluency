@@ -1725,6 +1725,9 @@ const DesignersHoverHero = () => {
           ref={searchTriggerRef}
           type="button"
           onClick={openDesignerSearch}
+          onFocus={() => {
+            if (!searchOpen) openDesignerSearch();
+          }}
           aria-expanded={searchOpen}
           aria-controls="designers-search-sheet"
           className={cn(
