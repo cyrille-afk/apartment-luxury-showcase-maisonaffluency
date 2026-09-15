@@ -154,7 +154,7 @@ export default function TradeMaterialLibrary() {
 
   const filtered = swatches.filter((s) => {
     const matchesSearch = !search || [s.name, s.supplier, s.description, s.category].some((field) => field?.toLowerCase().includes(search.toLowerCase()));
-    const matchesCat = activeCategory === "All" || s.category?.toLowerCase() === activeCategory.toLowerCase();
+    const matchesCat = activeCategory === "All" || normalizeFabricCategory(s.category) === activeCategory;
     const matchesSupplier = supplierFilter === "all" || s.supplier?.trim() === supplierFilter;
     const matchesDesigner = designerFilter === "all" || designerIdsByFabric.get(s.id)?.has(designerFilter) === true;
     return matchesSearch && matchesCat && matchesSupplier && matchesDesigner;
@@ -165,7 +165,7 @@ export default function TradeMaterialLibrary() {
       id: swatch.id,
       name: swatch.name,
       brand_name: swatch.supplier || "Maison Affluency",
-      category: swatch.category || "Other",
+      category: normalizeFabricCategory(swatch.category),
       material_type: swatch.category,
       color_family: null,
       image_url: swatch.image_url,
@@ -275,7 +275,7 @@ export default function TradeMaterialLibrary() {
                 <div className="p-3">
                   <p className="font-display text-xs text-foreground truncate">{swatch.name}</p>
                   <p className="font-body text-[10px] text-muted-foreground mt-0.5">{swatch.supplier || "Maison Affluency"}</p>
-                  <p className="font-body text-[10px] text-muted-foreground/70 mt-0.5">{swatch.category || "Other"}</p>
+                  <p className="font-body text-[10px] text-muted-foreground/70 mt-0.5">{normalizeFabricCategory(swatch.category)}</p>
                 </div>
               </button>
             ))}
