@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderKanban,
-  DollarSign, ClipboardList, Package, FileText, Settings, Wrench, UserCircle, Wand2, Image,
+  DollarSign, ClipboardList, Package, FileText, Settings, Wrench, UserCircle, Wand2, Image, Users,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
