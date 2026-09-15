@@ -1397,6 +1397,15 @@ const DesignersHoverHero = () => {
     }
   }, [searchOpen, groupedResults.length, isDesktopViewport]);
 
+  // Desktop dropdown defaults to the first available letter when it opens so
+  // the 4-column grid is never empty.
+  useEffect(() => {
+    if (!searchOpen || !isDesktopViewport || groupedResults.length === 0) return;
+    if (activeAccordionLetter && expandedLetters.has(activeAccordionLetter)) return;
+    const first = groupedResults[0][0];
+    setActiveAccordionLetter(first);
+    setExpandedLetters(new Set([first]));
+  }, [searchOpen, isDesktopViewport, groupedResults, activeAccordionLetter, expandedLetters]);
 
   // Desktop accordion: when a letter opens, pin that letter row to the top of
   // the sheet viewport so the expanded designer cards are visible. The scroller
@@ -2219,9 +2228,10 @@ const DesignersHoverHero = () => {
               // Mobile / tablet: full sheet anchored right below the fixed header so
               // the search field is immediately visible and the list has room to scroll.
               "inset-x-0 top-[var(--header-h)] bottom-0 rounded-none",
-              // Desktop (>=1024px): a clean, wide rectangle anchored directly below
-              // the main header line and spanning most of the viewport width.
-              "lg:top-[calc(var(--header-h)+8px)] lg:inset-x-6 lg:bottom-6 lg:max-w-none lg:rounded-none lg:pb-0"
+              // Desktop (>=1024px): centered panel matching the header content width
+              // (max-w-7xl / 1280px) and side padding (px-12) so it aligns with the
+              // logo and navigation boundaries.
+              "lg:left-1/2 lg:top-[calc(var(--header-h)+8px)] lg:bottom-6 lg:w-[calc(100%-96px)] lg:max-w-7xl lg:-translate-x-1/2 lg:rounded-none lg:pb-0"
             )}
             style={
               dropdownPos && !isDesktopViewport
@@ -2264,18 +2274,21 @@ const DesignersHoverHero = () => {
                 </button>
               </div>
             </div>
-            {/* Sticky horizontal A–Z quick-jump (mobile only, hidden while searching) */}
+            {/* Sticky horizontal A–Z quick-jump (hidden while searching) */}
             {!isSearching && (
-              <div className="lg:hidden shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3 overflow-x-auto no-scrollbar px-3">
+              <div className="shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3 overflow-x-auto no-scrollbar px-3 lg:overflow-visible lg:px-6">
                 <div
                   className={cn(
                     "mx-auto flex w-max min-w-full items-center justify-center gap-0.5 py-1.5 transition-opacity duration-150",
-                    isRestoringLetter ? "opacity-0" : "opacity-100"
+                    isRestoringLetter ? "opacity-0" : "opacity-100",
+                    "lg:w-full lg:min-w-0 lg:max-w-7xl lg:justify-center lg:gap-6"
                   )}
                   style={{ scrollbarWidth: "none" }}
                 >
                   {groupedResults.map(([letter]) => {
-                    const isActive = activeMobileLetter === letter;
+                    const isActive = isDesktopViewport
+                      ? activeAccordionLetter === letter
+                      : activeMobileLetter === letter;
                     return (
                       <button
                         key={letter}
@@ -2285,13 +2298,16 @@ const DesignersHoverHero = () => {
                           setRestoredOnlyLetter(null);
                           setExpandedLetters(new Set([letter]));
                           setActiveAccordionLetter(letter);
-                          scrollLetterIntoView(letter);
+                          if (!isDesktopViewport) scrollLetterIntoView(letter);
                         }}
                         className={cn(
                           "shrink-0 w-7 h-7 flex items-center justify-center rounded-full font-serif text-[13px] transition-colors",
-                          isActive ? "bg-white text-black" : "text-white/70 hover:text-white"
+                          "lg:w-auto lg:h-auto lg:rounded-none lg:font-body lg:text-[11px] lg:uppercase lg:tracking-[0.2em]",
+                          isActive
+                            ? "bg-white text-black lg:bg-transparent lg:text-white lg:underline lg:underline-offset-4"
+                            : "text-white/70 hover:text-white lg:text-white/50 lg:hover:text-white"
                         )}
-                        aria-label={`Jump to ${letter}`}
+                        aria-label={isDesktopViewport ? `Show designers starting with ${letter}` : `Jump to ${letter}`}
                       >
                         {letter}
                       </button>
@@ -2449,67 +2465,29 @@ const DesignersHoverHero = () => {
                           </div>
                         )
                       ) : (
-                        groupedResults.map(([letter, items]) => {
-                          const isOpen = expandedLetters.has(letter);
-                          return (
-                            <div
-                              key={letter}
-                              data-designer-letter={letter}
-                              className="border-b border-white/[0.06] last:border-b-0 scroll-mt-2"
-                            >
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  let willOpen = false;
-                                  setExpandedLetters((prev) => {
-                                    if (prev.has(letter)) {
-                                      if (activeAccordionLetter === letter) setActiveAccordionLetter(null);
-                                      return new Set();
-                                    }
-                                    setActiveAccordionLetter(letter);
-                                    rememberDesignersAzLetter(letter);
-                                    willOpen = true;
-                                    return new Set([letter]);
-                                  });
-                                  // Scroll is handled by the desktop accordion
-                                  // effect so the cards are revealed after the
-                                  // grid has expanded.
-                                }}
-                                aria-expanded={isOpen}
-                                className="w-full flex items-center justify-between px-4 py-1.5 text-left hover:bg-white/[0.04] transition-colors"
-                              >
-                                <span className="flex items-center gap-2.5">
-                                  <span
-                                    className={cn(
-                                      "text-white/50 text-xs transition-transform",
-                                      isOpen && "rotate-90"
-                                    )}
-                                    aria-hidden="true"
-                                  >
-                                    ›
-                                  </span>
-                                  <span className="font-serif text-base text-white">{letter}</span>
-                                </span>
-                                <span className="font-body text-[11px] tracking-wide text-white/45 pl-3">{items.length}</span>
-                              </button>
-                              {isOpen && (
-                                <div className="max-h-[720px] overflow-y-auto overscroll-contain pr-1">
-                                  <div className="grid grid-cols-4 gap-4 px-0 pt-2 pb-4">
-                                    {items.map((d: any, i: number) => (
-                                      <DesignerGridCard
-                                        key={d.slug}
-                                        designer={d}
-                                        useCardPhoto
-                                        priority={i < 8}
-                                        onNavigate={() => setSearchOpen(false)}
-                                      />
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
+                        (() => {
+                          const activePair = groupedResults.find(([l]) => l === activeAccordionLetter);
+                          const items = activePair ? activePair[1] : [];
+                          return items.length === 0 ? (
+                            <p className="px-4 py-8 text-center text-sm font-body text-white/50">
+                              Select a letter to browse designers.
+                            </p>
+                          ) : (
+                            <div className="max-h-[720px] overflow-y-auto overscroll-contain pr-1">
+                              <div className="grid grid-cols-4 gap-4 px-0 pt-2 pb-4">
+                                {items.map((d: any, i: number) => (
+                                  <DesignerGridCard
+                                    key={d.slug}
+                                    designer={d}
+                                    useCardPhoto
+                                    priority={i < 8}
+                                    onNavigate={() => setSearchOpen(false)}
+                                  />
+                                ))}
+                              </div>
                             </div>
                           );
-                        })
+                        })()
                       )}
                     </div>
                   </div>
