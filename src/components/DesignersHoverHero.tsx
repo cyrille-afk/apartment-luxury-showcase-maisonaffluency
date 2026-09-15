@@ -634,8 +634,7 @@ const DesignersHoverHero = () => {
   const [azRailRect, setAzRailRect] = useState<{ top: number; height: number } | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchTriggerRef = useRef<HTMLButtonElement>(null);
-  const desktopSearchDockRef = useRef<HTMLButtonElement>(null);
-  const desktopAzDockRef = useRef<HTMLButtonElement>(null);
+  const desktopSearchDockRef = useRef<HTMLInputElement>(null);
   const searchCloseTimerRef = useRef<number | null>(null);
   const suppressSearchFocusOpenRef = useRef(false);
   const searchScrollRef = useRef<HTMLDivElement>(null);
@@ -1192,13 +1191,14 @@ const DesignersHoverHero = () => {
     const headerHeight = probe.getBoundingClientRect().top || 72;
     probe.remove();
     const width = Math.min(1280, window.innerWidth - 96);
-    // Keep the panel above the 40px-elevated dock with a deliberate air gap.
-    const dockClearance = 104;
+    const dockTop = desktopSearchDockRef.current?.getBoundingClientRect().top;
+    // Anchor the sheet directly above the unified input, with a narrow air gap.
+    const panelBottom = dockTop ?? window.innerHeight - 104;
     return {
       left: (window.innerWidth - width) / 2,
       top: headerHeight,
       width,
-      height: Math.max(320, window.innerHeight - headerHeight - dockClearance),
+      height: Math.max(320, panelBottom - headerHeight - 10),
     };
   };
 
@@ -1237,10 +1237,7 @@ const DesignersHoverHero = () => {
       setDropdownPos(null);
       searchCloseTimerRef.current = null;
       suppressSearchFocusOpenRef.current = true;
-      const returnTarget = desktopDirectoryMode === "search"
-        ? desktopSearchDockRef.current
-        : desktopAzDockRef.current;
-      returnTarget?.focus({ preventScroll: true });
+      desktopSearchDockRef.current?.focus({ preventScroll: true });
       window.requestAnimationFrame(() => {
         suppressSearchFocusOpenRef.current = false;
       });
@@ -1315,7 +1312,7 @@ const DesignersHoverHero = () => {
     document.addEventListener("wheel", onWheel, { passive: false, capture: true });
     // Delay focus so the slide-up animation is visible before the keyboard opens.
     const t = window.setTimeout(() => {
-      if (!restoredLetterRef.current && (!isDesktopViewport || desktopDirectoryMode === "search")) {
+      if (!restoredLetterRef.current && !isDesktopViewport) {
         searchInputRef.current?.focus();
       }
     }, 220);
