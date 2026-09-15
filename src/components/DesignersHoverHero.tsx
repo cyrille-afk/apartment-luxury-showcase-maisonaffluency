@@ -2162,8 +2162,8 @@ const DesignersHoverHero = () => {
 
 
 
-      {/* Designer search: mobile bottom-sheet, desktop dropdown beside the
-          Directory button. */}
+      {/* Designer search: mobile bottom-sheet, desktop dropdown beneath the
+          Directory search bar. */}
       <div
         key="designers-search-backdrop"
         data-testid="designers-search-backdrop"
