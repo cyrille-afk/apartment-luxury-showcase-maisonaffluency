@@ -60,6 +60,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/trade/mood-boards": "Mood Board",
   "/trade/budget": "Budget Tracker",
   "/trade/clients": "Clients",
+  "/trade/client-management": "Client Management",
   "/trade/lead-time-calendar": "Lead Time Calendar",
   "/trade/reorder": "Reorder",
   "/trade/currency-converter": "Currency Converter",

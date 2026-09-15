@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderKanban,
-  DollarSign, ClipboardList, Package, FileText, Settings, Wrench, UserCircle, Wand2, Image,
+  DollarSign, ClipboardList, Package, FileText, Settings, Wrench, UserCircle, Wand2, Image, Users,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
@@ -17,16 +17,22 @@ import { StudioBridgeSidebar } from "@/components/trade/StudioBridgeSidebar";
 import { pushRecentProject, useProjects } from "@/hooks/useProjects";
 
 
-const coreItems = [
+type NavItem = { title: string; url: string; icon: React.ElementType; end?: boolean };
+
+const topItems: NavItem[] = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
   { title: "My Dashboard", url: "/trade/me", icon: UserCircle },
   { title: "THE COLLECTION", url: "/trade/the-collection", icon: MapPin },
   { title: "Visualiser", url: "/trade/visualiser", icon: Wand2 },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
-  { title: "Projects", url: "/trade/projects", icon: FolderKanban },
   { title: "QUOTES & PROFORMAS", url: "/trade/quotes", icon: FileText },
   { title: "Tools", url: "/trade/tools", icon: Wrench },
   { title: "Settings", url: "/trade/settings", icon: Settings },
+];
+
+const projectItems: NavItem[] = [
+  { title: "Projects", url: "/trade/projects", icon: FolderKanban },
+  { title: "Clients", url: "/trade/client-management", icon: Users },
 ];
 
 export function TradeSidebar() {
@@ -102,7 +108,32 @@ export function TradeSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="gap-1">
-              {coreItems.map((item) => {
+              {topItems.map((item) => (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton asChild className="h-auto">
+                    <NavLink
+                      to={item.url}
+                      end={item.end}
+                      className="flex items-center gap-3 px-3 py-3 font-body text-xs text-muted-foreground hover:text-foreground transition-colors border-l border-transparent"
+                      activeClassName="text-foreground font-medium border-foreground"
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+            {!collapsed && "PROJECTS & INTERVENTIONS"}
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className="gap-1">
+              {projectItems.map((item) => {
                 const isProjects = item.url === "/trade/projects";
                 const showDot = isProjects && bridgeCount > 0;
                 return (
@@ -145,7 +176,7 @@ export function TradeSidebar() {
                         )}
                       </NavLink>
                     </SidebarMenuButton>
-                    {item.url === "/trade/projects" && !collapsed && recentActiveProjects.length > 0 && (
+                    {isProjects && !collapsed && recentActiveProjects.length > 0 && (
                       <ul
                         aria-label="Recent active project workspaces"
                         className="ml-10 mr-2 mt-0.5 mb-2 space-y-0.5 border-l border-border pl-3"
