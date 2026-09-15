@@ -2251,7 +2251,7 @@ const DesignersHoverHero = () => {
       })()}
 
       {/* Desktop directory launcher — compact width grouped above the white page floor. */}
-      <div className="fixed bottom-[40px] left-1/2 z-[73] hidden w-[min(34rem,calc(100vw-6rem))] -translate-x-1/2 flex-col items-center lg:flex">
+      <div className="fixed bottom-[56px] left-1/2 z-[73] hidden w-[min(34rem,calc(100vw-6rem))] -translate-x-1/2 flex-col items-center lg:flex">
         <div
           className={cn(
             "flex h-10 w-full shrink-0 items-center rounded-md border px-4 backdrop-blur-[12px]",
@@ -2296,7 +2296,7 @@ const DesignersHoverHero = () => {
             </button>
           )}
         </div>
-        <p className="mt-2 max-w-md text-center font-serif text-[11px] leading-relaxed text-background/70">
+        <p className="mt-2.5 max-w-md text-center font-serif text-[11px] leading-relaxed text-background/70">
           150+ master profiles live. Introducing new digital ateliers and exclusive collections weekly
         </p>
       </div>
