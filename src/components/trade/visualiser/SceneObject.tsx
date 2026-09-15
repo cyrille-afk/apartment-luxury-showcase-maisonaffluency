@@ -92,7 +92,7 @@ function useMaterialMaps(material: VisualiserMaterial | null, maxAnisotropy: num
         owned.roughness?.dispose();
       });
     };
-  }, [material, maxAnisotropy]);
+  }, [material, maxAnisotropy, invalidate]);
 
   return maps;
 }
