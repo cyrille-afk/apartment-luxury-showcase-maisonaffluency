@@ -257,12 +257,12 @@ export default function TradeMaterialLibrary() {
                 onClick={() => selectMaterial(swatch)}
                 className={`group overflow-hidden text-left ${activeMaterial?.id === swatch.id ? "border-t border-foreground" : "border-t border-border"}`}
               >
-                <div className={`material-library-swatch relative aspect-square overflow-hidden rounded-full ${swatch.supplier?.trim().toLowerCase() === "alinea design objects" ? "bg-muted/60" : "bg-muted"}`}>
+                <div className="material-library-swatch relative aspect-square overflow-hidden rounded-full bg-muted">
                   {swatch.image_url ? (
                     <img
                       src={swatch.image_url}
                       alt={swatch.name}
-                      className={`h-full w-full ${swatch.supplier?.trim().toLowerCase() === "alinea design objects" ? "object-contain mix-blend-multiply dark:mix-blend-normal" : "object-cover"}`}
+                      className="h-full w-full scale-[1.06] object-cover"
                       loading="lazy"
                     />
                   ) : (
