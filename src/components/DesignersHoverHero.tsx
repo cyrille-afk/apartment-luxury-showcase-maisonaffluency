@@ -1171,7 +1171,7 @@ const DesignersHoverHero = () => {
   }, [isMobileOrPwa, searchOpen, hasItems, items]);
 
 
-  const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
+  const isDesktopViewport = isLgViewport;
 
   // Scroll a letter row (and its expanded card grid) into view inside the
   // directory scroller. First pins the letter header to the top, then after the
