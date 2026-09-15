@@ -589,6 +589,7 @@ const DesignersHoverHero = () => {
   const [showPortalCursor, setShowPortalCursor] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [desktopSearchExpanded, setDesktopSearchExpanded] = useState(false);
+  const [desktopDirectoryMode, setDesktopDirectoryMode] = useState<"search" | "az">("az");
   const [searchQuery, setSearchQuery] = useState("");
   const restoredLetterRef = useRef<string | null>(null);
   const [expandedLetters, setExpandedLetters] = useState<Set<string>>(() => {
@@ -633,6 +634,8 @@ const DesignersHoverHero = () => {
   const [azRailRect, setAzRailRect] = useState<{ top: number; height: number } | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchTriggerRef = useRef<HTMLButtonElement>(null);
+  const desktopSearchDockRef = useRef<HTMLButtonElement>(null);
+  const desktopAzDockRef = useRef<HTMLButtonElement>(null);
   const searchCloseTimerRef = useRef<number | null>(null);
   const suppressSearchFocusOpenRef = useRef(false);
   const searchScrollRef = useRef<HTMLDivElement>(null);
@@ -1189,15 +1192,16 @@ const DesignersHoverHero = () => {
     const headerHeight = probe.getBoundingClientRect().top || 72;
     probe.remove();
     const width = Math.min(1280, window.innerWidth - 96);
+    const dockClearance = 88;
     return {
       left: (window.innerWidth - width) / 2,
       top: headerHeight,
       width,
-      height: Math.max(320, window.innerHeight - headerHeight - 24),
+      height: Math.max(320, window.innerHeight - headerHeight - dockClearance),
     };
   };
 
-  const openDesignerSearch = () => {
+  const openDesignerSearch = (mode: "search" | "az" = "search") => {
     if (searchCloseTimerRef.current !== null) {
       window.clearTimeout(searchCloseTimerRef.current);
       searchCloseTimerRef.current = null;
@@ -1207,15 +1211,9 @@ const DesignersHoverHero = () => {
       setSearchOpen(true);
       return;
     }
-    const rect = searchTriggerRef.current?.getBoundingClientRect();
-    if (rect) {
-      setDropdownPos({
-        left: rect.left,
-        top: rect.top,
-        width: rect.width,
-        height: rect.height,
-      });
-    }
+    setDesktopDirectoryMode(mode);
+    setSearchQuery("");
+    setDropdownPos(getDesktopSearchTarget());
     setDesktopSearchExpanded(false);
     setSearchOpen(true);
     window.requestAnimationFrame(() => {
@@ -1231,23 +1229,17 @@ const DesignersHoverHero = () => {
       setSearchOpen(false);
       return;
     }
-    const rect = searchTriggerRef.current?.getBoundingClientRect();
     setDesktopSearchExpanded(false);
-    if (rect) {
-      setDropdownPos({
-        left: rect.left,
-        top: rect.top,
-        width: rect.width,
-        height: rect.height,
-      });
-    }
     if (searchCloseTimerRef.current !== null) window.clearTimeout(searchCloseTimerRef.current);
     searchCloseTimerRef.current = window.setTimeout(() => {
       setSearchOpen(false);
       setDropdownPos(null);
       searchCloseTimerRef.current = null;
       suppressSearchFocusOpenRef.current = true;
-      searchTriggerRef.current?.focus({ preventScroll: true });
+      const returnTarget = desktopDirectoryMode === "search"
+        ? desktopSearchDockRef.current
+        : desktopAzDockRef.current;
+      returnTarget?.focus({ preventScroll: true });
       window.requestAnimationFrame(() => {
         suppressSearchFocusOpenRef.current = false;
       });
@@ -1322,7 +1314,9 @@ const DesignersHoverHero = () => {
     document.addEventListener("wheel", onWheel, { passive: false, capture: true });
     // Delay focus so the slide-up animation is visible before the keyboard opens.
     const t = window.setTimeout(() => {
-      if (!restoredLetterRef.current) searchInputRef.current?.focus();
+      if (!restoredLetterRef.current && (!isDesktopViewport || desktopDirectoryMode === "search")) {
+        searchInputRef.current?.focus();
+      }
     }, 220);
     return () => {
       document.body.style.overflow = bodyOverflow;
@@ -1332,7 +1326,7 @@ const DesignersHoverHero = () => {
       document.removeEventListener("wheel", onWheel, { capture: true });
       window.clearTimeout(t);
     };
-  }, [searchOpen, isDesktopViewport]);
+  }, [searchOpen, isDesktopViewport, desktopDirectoryMode]);
 
   useEffect(() => () => {
     if (searchCloseTimerRef.current !== null) window.clearTimeout(searchCloseTimerRef.current);
