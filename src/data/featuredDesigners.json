@@ -9,15 +9,6 @@
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772688897/Screen_Shot_2026-03-05_at_1.33.31_PM_srdpp4.png"
   },
   {
-    "id": "f74c1cac-d40d-47c7-b9ea-5270a2c21378",
-    "slug": "humbert-poyet",
-    "name": "Humbert & Poyet",
-    "founder": "Pouenat",
-    "hero_image_url": null,
-    "image_url": "https://eteline.com/upload/designers/humbert_et_poyet-website2.jpg",
-    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779723649/Dolly_Brass-1_2500x2500-2_toelnw.jpg"
-  },
-  {
     "id": "e637fe48-0001-4000-8000-000000000001",
     "slug": "apparatus-studio",
     "name": "Apparatus",
@@ -169,6 +160,15 @@
     "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781094596/gri_2004_r_10_b0048_f005_Laszlo_8_lh_a_b9tq2z.jpg",
     "image_url": "https://ecart.paris/cdn/shop/files/Paul_Laszlo_BD.jpg",
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1777342363/PAUL_LASZLO_195O_Arcadia_Bench_03_A4_1_m4yuh3.jpg"
+  },
+  {
+    "id": "f74c1cac-d40d-47c7-b9ea-5270a2c21378",
+    "slug": "humbert-poyet",
+    "name": "Humbert & Poyet",
+    "founder": "Pouenat",
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1789450377/Screen_Shot_2026-09-15_at_1.28.00_PM_y1afop.png",
+    "image_url": "https://eteline.com/upload/designers/humbert_et_poyet-website2.jpg",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779723649/Dolly_Brass-1_2500x2500-2_toelnw.jpg"
   },
   {
     "id": "c9d289d6-5b47-4305-94b1-799f9b3f1f9a",
