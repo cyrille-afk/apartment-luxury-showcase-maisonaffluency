@@ -471,10 +471,10 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
               </div>
             </div>
 
-            {/* Right-side group: account + cart */}
+            {/* Right-side group: sign-in + cart; fixed width to mirror left group so the logo stays dead-center */}
             <div
               className={cn(
-                "relative z-10 flex items-center justify-end gap-1"
+                "relative z-10 flex items-center justify-end gap-1 w-[88px] xsp:w-[96px] shrink-0"
               )}
             >
               <button
