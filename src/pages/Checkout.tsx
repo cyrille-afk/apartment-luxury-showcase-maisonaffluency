@@ -157,7 +157,7 @@ export type CheckoutSummary = {
   totalCents: number;
   /** Row-consistent display total (each row rounded to dollars, then summed). */
   displayTotalCents: number;
-  /** Amount captured now (excludes unconfirmed estimated freight). */
+  /** Amount collected now; identical to the row-consistent displayed total. */
   chargeTotalCents: number;
 };
 
@@ -198,8 +198,9 @@ export const deriveCheckoutTotals = (input: {
      */
     displayTotalCents:
       roundDollar(goodsCents) + roundDollar(deliveryCents) + roundDollar(taxCents),
-    /** Charged now: excludes freight that no advisor has confirmed yet. */
-    chargeTotalCents: goodsCents + input.shippingCents + taxCents,
+    /** Collected now: exactly matches the total promised throughout checkout. */
+    chargeTotalCents:
+      roundDollar(goodsCents) + roundDollar(deliveryCents) + roundDollar(taxCents),
   };
 };
 
@@ -855,7 +856,7 @@ function PaymentForm({
     return () => clearTimeout(t);
   }, [paymentReady]);
 
-  const { displayTotalCents: total, currency } = summary;
+  const { chargeTotalCents: total, currency } = summary;
   const paynow = method === "paynow";
 
   const confirm = async () => {
@@ -1194,7 +1195,7 @@ function WireForm({
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
-  const { displayTotalCents: total, currency } = summary;
+  const { chargeTotalCents: total, currency } = summary;
 
   /* Region drives the settlement channel: the signed-in trade profile wins,
      otherwise we fall back to the chosen shipping destination.              */
@@ -1515,8 +1516,8 @@ export default function Checkout() {
     const discountCents =
       effectiveDiscountPct > 0 ? Math.round(subtotalCents * effectiveDiscountPct) : 0;
     const shippingCents = shipping?.cents ?? 0;
-    // Country-based base freight is indicative only: it is displayed and added
-    // to the shown Order Total, but never charged until an advisor confirms it.
+    // Country-based base freight is the checkout delivery amount until an
+    // advisor replaces it with a confirmed quote.
     const estimatedShippingCents = shippingCents > 0 ? 0 : estimate.cents;
     // Tax follows the configurable rules (destination + currency must match).
     const rule = resolveTaxRule(formCountry, currency);
@@ -1833,9 +1834,8 @@ export default function Checkout() {
           shippingConfirmed: !!nextShipping,
           shippingCents: nextShipping?.cents ?? 0,
           shippingLabel: nextShipping?.label ?? "",
-          // Indicative freight for the GST (CIF) base only — never charged
-          // until confirmed. Keeps the server-computed tax in sync with the
-          // displayed "goods + delivery" GST line.
+          // Country-based freight is included in the CIF total until an
+          // advisor replaces it with a confirmed shipping quote.
           estimatedFreightCents: nextShipping ? 0 : estimate.cents,
           paymentIntentId: intentIdRef.current || undefined,
           // Destination country — drives Singapore GST server-side.
@@ -1876,11 +1876,15 @@ export default function Checkout() {
           label: typeof pi?.taxLabel === "string" && pi.taxLabel ? pi.taxLabel : null,
         });
         const totals = buildVerifiedTotals(grossLines);
-        const expectedCents =
+        const serverGoodsCents =
           totals.totalCents -
-          (serverPct > 0 ? Math.round(totals.totalCents * serverPct) : 0) +
-          serverShippingCents +
-          serverTaxCents;
+          (serverPct > 0 ? Math.round(totals.totalCents * serverPct) : 0);
+        const serverDeliveryCents = serverShippingCents > 0 ? serverShippingCents : estimate.cents;
+        const roundDollar = (cents: number) => Math.round(cents / 100) * 100;
+        const expectedCents =
+          roundDollar(serverGoodsCents) +
+          roundDollar(serverDeliveryCents) +
+          roundDollar(serverTaxCents);
         const check = reconcileBackendAmount(
           { ...totals, totalCents: expectedCents },
           pi?.amount,
