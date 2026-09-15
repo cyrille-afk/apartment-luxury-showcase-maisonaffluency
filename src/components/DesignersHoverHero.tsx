@@ -188,7 +188,7 @@ function DesignerGridCard({
       }}
       onTouchStart={() => { void warmProfile(); }}
       onMouseEnter={() => { void warmProfile(); }}
-      className="group relative block w-full aspect-[4/5] rounded-none overflow-hidden bg-neutral-800 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-gold/60"
+      className="group relative block w-full aspect-[4/5] rounded-none overflow-hidden bg-neutral-900 border border-white/[0.08] focus:outline-none focus:ring-2 focus:ring-gold/60"
       aria-label={`View ${displayName}`}
       style={
         lqip
