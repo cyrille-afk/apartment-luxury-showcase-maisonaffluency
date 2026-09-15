@@ -2097,8 +2097,8 @@ const DesignersHoverHero = () => {
             className={cn(
               "absolute right-6 sm:right-12 z-20 flex flex-col items-center gap-2 pointer-events-none md:hidden",
               isStandalone
-                ? "bottom-[calc(4.5rem+env(safe-area-inset-bottom))]"
-                : "bottom-[calc(4rem+env(safe-area-inset-bottom))]"
+                ? "bottom-[calc(3.5rem+env(safe-area-inset-bottom))]"
+                : "bottom-[calc(3rem+env(safe-area-inset-bottom))]"
             )}
           >
             <style>{`
