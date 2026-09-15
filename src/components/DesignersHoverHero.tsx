@@ -1907,9 +1907,9 @@ const DesignersHoverHero = () => {
                 {directoryLabels("w-full", directoryRef, "left")}
               </div>
 
-              {/* Preserve the original desktop directory block's vertical
-                  footprint after moving search into the bottom dock. */}
-              <div className="hidden h-[6rem] shrink-0 lg:block" aria-hidden="true" />
+              {/* Preserve a small vertical gap for the bottom dock while moving
+                  the designer list higher on desktop. */}
+              <div className="hidden h-[2rem] shrink-0 lg:block" aria-hidden="true" />
 
 
               <nav
