@@ -1763,7 +1763,8 @@ const DesignersHoverHero = () => {
         {/* Live network footprint — sits beneath the search field */}
         <p className={cn(
           "mt-2.5 self-start text-left font-body text-[11px] leading-relaxed font-light text-neutral-400",
-          isMobileOrPwa ? "w-full" : "min-w-[340px] max-w-[360px]"
+          isMobileOrPwa ? "w-full" : "min-w-[340px] max-w-[360px]",
+          isMobileOrPwa && "hidden"
         )}>
           150+ master profiles live. Introducing new digital ateliers and exclusive collections weekly
         </p>
