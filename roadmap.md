@@ -7,6 +7,7 @@
 - [x] Expand all Specification workspaces for large desktops and add local Tools breadcrumbs
 - [x] Add synchronized supplier/designer filters and a dense 5/6-column desktop Material Library grid
 - [x] Expand Product Comparator with a stable selection strip, four-column matrix, and local Tools breadcrumb
+- [x] Neutralize white product-cutout backgrounds in Alinea Material Library swatches
 - [x] Checkout: "Delivery & Payment Options" alignment/spacing (done)
 - [x] Wire tab: bank details grid with copy buttons (done, verified in preview)
 - [x] Removed leftover "Secure Card Payment" caption in OrderSummary aside
