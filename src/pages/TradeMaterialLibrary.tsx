@@ -10,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useNavigate } from "react-router-dom";
 import { useVisualiserMaterial, type VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { FABRIC_CATEGORIES, normalizeFabricCategory } from "@/lib/fabricCategory";
 
-const CATEGORIES = ["All", "Fabric & Leather", "Rug Finish", "Wood", "Stone", "Metal", "Glass", "Other"];
+const CATEGORIES = ["All", ...FABRIC_CATEGORIES];
 
 interface LibraryFabric {
   id: string;
