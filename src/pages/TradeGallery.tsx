@@ -446,7 +446,7 @@ const TradeGallery = () => {
   return (
     <>
       <Helmet><title>Gallery — Trade Portal — Maison Affluency</title></Helmet>
-    <div className="max-w-7xl">
+    <div className="w-full max-w-7xl [@media(min-width:1440px)]:max-w-[min(90vw,1800px)] mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-6 border-b border-[#E5E5E5]">
         <div>
           <h1 className="font-display text-2xl md:text-3xl font-light text-foreground">Trade Gallery</h1>
