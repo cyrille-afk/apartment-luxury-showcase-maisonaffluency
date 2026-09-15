@@ -36,6 +36,7 @@ type PersistedSandbox = {
   backdropDataUrl: string | null;
   backdrop: string | null;
   objects: PlacedObject[];
+  projectId?: string | null;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -55,9 +56,10 @@ const readSandbox = (): PersistedSandbox => {
       backdrop: parsed.backdrop ?? null,
       backdropDataUrl: parsed.backdropDataUrl ?? null,
       objects: Array.isArray(parsed.objects) ? parsed.objects : [],
+      projectId: parsed.projectId ?? null,
     };
   } catch {
-    return { backdrop: null, backdropDataUrl: null, objects: [] };
+    return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
   }
 };
 
