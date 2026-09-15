@@ -2481,16 +2481,18 @@ const DesignersHoverHero = () => {
                                 <span className="font-body text-[11px] tracking-wide text-white/45 pl-3">{items.length}</span>
                               </button>
                               {isOpen && (
-                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-4 px-0 pt-2 pb-4">
-                                  {items.map((d: any, i: number) => (
-                                    <DesignerGridCard
-                                      key={d.slug}
-                                      designer={d}
-                                      useCardPhoto
-                                      priority={i < 4}
-                                      onNavigate={() => setSearchOpen(false)}
-                                    />
-                                  ))}
+                                <div className="max-h-[720px] overflow-y-auto overscroll-contain pr-1">
+                                  <div className="grid grid-cols-4 gap-4 px-0 pt-2 pb-4">
+                                    {items.map((d: any, i: number) => (
+                                      <DesignerGridCard
+                                        key={d.slug}
+                                        designer={d}
+                                        useCardPhoto
+                                        priority={i < 8}
+                                        onNavigate={() => setSearchOpen(false)}
+                                      />
+                                    ))}
+                                  </div>
                                 </div>
                               )}
                             </div>
