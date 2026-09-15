@@ -9,6 +9,15 @@
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772688897/Screen_Shot_2026-03-05_at_1.33.31_PM_srdpp4.png"
   },
   {
+    "id": "f74c1cac-d40d-47c7-b9ea-5270a2c21378",
+    "slug": "humbert-poyet",
+    "name": "Humbert & Poyet",
+    "founder": "Pouenat",
+    "hero_image_url": null,
+    "image_url": "https://eteline.com/upload/designers/humbert_et_poyet-website2.jpg",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779723649/Dolly_Brass-1_2500x2500-2_toelnw.jpg"
+  },
+  {
     "id": "e637fe48-0001-4000-8000-000000000001",
     "slug": "apparatus-studio",
     "name": "Apparatus",
@@ -88,6 +97,15 @@
     "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1782089969/Side_tables_AngeloM_Workshop_1_pery0y.jpg",
     "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,f_auto/leo-aerts-alinea_f9oogs",
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780460960/stool-with-table-3_822x822_fjngmc.jpg"
+  },
+  {
+    "id": "6659ae84-757b-4e34-8241-9e72c71c3947",
+    "slug": "andree-putman",
+    "name": "Andrée Putman",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780635402/536_xhdn0x.jpg",
+    "image_url": "https://andreeputman.fr/img/the-founder-1.png",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780638970/Solid_Oak_Wood_-_Neve_Fabric-2_w2umoh.jpg"
   },
   {
     "id": "bb08e592-73ca-4abc-9c25-cd60dd7458dc",
