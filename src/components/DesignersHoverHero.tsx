@@ -2207,18 +2207,18 @@ const DesignersHoverHero = () => {
               // Mobile: full sheet anchored right below the fixed header so the
               // search field is immediately visible and the list has room to scroll.
               "inset-x-0 top-[var(--header-h)] bottom-0 rounded-none",
-              // Desktop: a wide, centred editorial panel positioned from the
-              // Directory trigger via inline styles.
-              "md:inset-x-auto md:right-auto md:top-auto md:bottom-auto md:max-w-[calc(100vw-3rem)] md:max-h-[calc(100vh-var(--header-h)-3rem)] md:rounded-xl md:pb-0"
+              // Desktop: a clean, wide rectangle anchored directly below the main
+              // header line and spanning most of the viewport width.
+              "md:top-[calc(var(--header-h)+8px)] md:inset-x-6 md:bottom-6 md:max-w-none md:rounded-none md:pb-0"
             )}
             style={
-              dropdownPos
+              dropdownPos && !isDesktopViewport
                 ? {
                     left: dropdownPos.left,
                     top: dropdownPos.top,
-                    width: isDesktopViewport ? dropdownPos.width : undefined,
-                    height: isDesktopViewport ? dropdownPos.height : undefined,
-                    maxHeight: isDesktopViewport ? dropdownPos.height : undefined,
+                    width: dropdownPos.width,
+                    height: dropdownPos.height,
+                    maxHeight: dropdownPos.height,
                   }
                 : undefined
             }
