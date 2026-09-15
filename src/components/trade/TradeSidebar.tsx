@@ -17,7 +17,9 @@ import { StudioBridgeSidebar } from "@/components/trade/StudioBridgeSidebar";
 import { pushRecentProject, useProjects } from "@/hooks/useProjects";
 
 
-const topItems = [
+type NavItem = { title: string; url: string; icon: React.ElementType; end?: boolean };
+
+const topItems: NavItem[] = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
   { title: "My Dashboard", url: "/trade/me", icon: UserCircle },
   { title: "THE COLLECTION", url: "/trade/the-collection", icon: MapPin },
@@ -28,7 +30,7 @@ const topItems = [
   { title: "Settings", url: "/trade/settings", icon: Settings },
 ];
 
-const projectItems = [
+const projectItems: NavItem[] = [
   { title: "Projects", url: "/trade/projects", icon: FolderKanban },
   { title: "Clients", url: "/trade/client-management", icon: Users },
 ];
