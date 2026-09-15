@@ -135,6 +135,15 @@
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780453180/Casque-Bar-Cabinet_1500x1500_v9cq04.jpg"
   },
   {
+    "id": "5d99b52f-4197-485e-a74b-eabb3292ef2a",
+    "slug": "garnier-linker",
+    "name": "Garnier & Linker",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779247973/Cover4_zs6t6a.webp",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/garnier-linker_wvqg7k",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779280510/Calliope_Small-1_fq8v56.webp"
+  },
+  {
     "id": "3ea0d50d-ac6d-4b56-a183-4338a8658ebc",
     "slug": "collection-particuliere",
     "name": "Collection Particulière",
