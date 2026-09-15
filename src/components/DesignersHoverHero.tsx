@@ -1876,10 +1876,11 @@ const DesignersHoverHero = () => {
         <div
           ref={contentScrollRef}
           className={cn(
-          // Desktop: horizontal padding tracks the header content boundary
-          // (max-w-7xl centered + px-12) so the designers column aligns with
-          // the logo / first menu item line.
-          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-[max(3rem,calc((100vw-80rem)/2+3rem))] pointer-events-auto md:overflow-hidden md:h-full",
+          // Desktop: generous 80px screen-edge padding for an open, editorial
+          // framing. The designers column and right hover label both flush to
+          // this wide margin line.
+          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-20 pointer-events-auto md:overflow-hidden md:h-full",
+
             isStandalone
               ? "overflow-y-auto justify-start overscroll-contain touch-pan-y pt-8 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pt-12 md:pb-8 md:justify-start md:overflow-hidden [-webkit-overflow-scrolling:touch]"
               : // Mobile browser: the section already starts below the fixed
@@ -2235,10 +2236,10 @@ const DesignersHoverHero = () => {
                 openProfile(active.slug);
               }}
               onMouseEnter={() => { void warmProfile(active.slug); }}
-              // Desktop: right inset tracks the header content boundary
-              // (max-w-7xl centered + px-12) so the hover label aligns with
-              // the bag/profile icons edge.
-              className="hidden md:block absolute right-20 lg:right-[max(3rem,calc((100vw-80rem)/2+3rem))] z-40 pointer-events-auto cursor-pointer group"
+              // Desktop: right inset aligns with the generous 80px screen-edge
+              // padding so the hover label sits on the same wide margin line.
+              className="hidden md:block absolute right-20 lg:right-20 z-40 pointer-events-auto cursor-pointer group"
+
               style={activeTitleTop != null ? { top: activeTitleTop } : { bottom: 96 }}
             >
               <div ref={activeTitleWrapRef} className="flex flex-col items-end text-right text-white">
