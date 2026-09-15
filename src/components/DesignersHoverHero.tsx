@@ -1563,8 +1563,8 @@ const DesignersHoverHero = () => {
   // the fixed header flicker in/out on hover. Static background instead.
 
 
-  // Desktop dropdown opens to the RIGHT of the Directory button so it never
-  // overlaps or truncates the featured-designers list underneath.
+  // Desktop dropdown opens directly beneath the Directory search bar so it
+  // sits over the featured-designers list; the soft blur keeps it legible.
   useEffect(() => {
     if (!searchOpen || !isDesktopViewport || !directoryRef.current) {
       if (searchOpen && !isDesktopViewport) setDropdownPos(null);
@@ -1572,20 +1572,14 @@ const DesignersHoverHero = () => {
     }
     const update = () => {
       const rect = directoryRef.current!.getBoundingClientRect();
-      const navRect = navRef.current?.getBoundingClientRect();
       const width = 380;
-      const gap = 24;
-      const navRight = navRect ? navRect.right : rect.right;
-      let left = navRight + gap;
+      let left = rect.left;
       const maxLeft = window.innerWidth - width - 16;
       if (left > maxLeft) left = maxLeft;
-      // Anchor top to Directory header baseline so the dropdown opens inline
-      // with the navigation group, not floating above or below it.
-      const top = rect.top;
-      const navBottom = navRect ? navRect.bottom : rect.bottom + 400;
-      // Clamp height to the featured designers list so the dropdown never
-      // extends beyond it.
-      const height = Math.max(320, navBottom - top);
+      const top = rect.bottom + 8;
+      // Let the dropdown reach nearly the bottom of the viewport so the A–Z
+      // grid has room to scroll in place over the page background.
+      const height = Math.max(320, window.innerHeight - top - 16);
       setDropdownPos({
         left,
         top,
@@ -1632,15 +1626,13 @@ const DesignersHoverHero = () => {
           onClick={() => {
             if (isDesktopViewport && directoryRef.current) {
               const rect = directoryRef.current.getBoundingClientRect();
-              const navRect = navRef.current?.getBoundingClientRect();
               const width = 380;
-              const gap = 24;
-              const navRight = navRect ? navRect.right : rect.right;
-              const navBottom = navRect ? navRect.bottom : rect.bottom + 400;
-              const height = Math.max(320, navBottom - rect.top);
+              const left = Math.min(window.innerWidth - width - 16, rect.left);
+              const top = rect.bottom + 8;
+              const height = Math.max(320, window.innerHeight - top - 16);
               setDropdownPos({
-                left: Math.min(window.innerWidth - width - 16, navRight + gap),
-                top: rect.top,
+                left,
+                top,
                 height,
               });
             } else {
@@ -2170,13 +2162,14 @@ const DesignersHoverHero = () => {
 
 
 
-      {/* Designer search: mobile bottom-sheet, desktop dropdown beside the
-          Directory button. */}
+      {/* Designer search: mobile bottom-sheet, desktop dropdown beneath the
+          Directory search bar. */}
       <div
         key="designers-search-backdrop"
+        data-testid="designers-search-backdrop"
         onClick={() => setSearchOpen(false)}
         className={cn(
-          "fixed inset-x-0 bottom-0 top-[var(--header-h)] z-[70] bg-background/35 backdrop-blur-[12px] transition-[opacity,backdrop-filter] duration-300 ease-out",
+          "fixed inset-x-0 bottom-0 top-[var(--header-h)] z-[70] bg-black/30 backdrop-blur-[4px] transition-[opacity,backdrop-filter] duration-300 ease-out",
           searchOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0 backdrop-blur-none",
         )}
         aria-hidden="true"
