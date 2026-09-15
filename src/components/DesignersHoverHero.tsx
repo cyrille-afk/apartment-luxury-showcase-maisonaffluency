@@ -1563,8 +1563,8 @@ const DesignersHoverHero = () => {
   // the fixed header flicker in/out on hover. Static background instead.
 
 
-  // Desktop dropdown opens to the RIGHT of the Directory button so it never
-  // overlaps or truncates the featured-designers list underneath.
+  // Desktop dropdown opens directly beneath the Directory search bar so it
+  // sits over the featured-designers list; the soft blur keeps it legible.
   useEffect(() => {
     if (!searchOpen || !isDesktopViewport || !directoryRef.current) {
       if (searchOpen && !isDesktopViewport) setDropdownPos(null);
@@ -1572,20 +1572,14 @@ const DesignersHoverHero = () => {
     }
     const update = () => {
       const rect = directoryRef.current!.getBoundingClientRect();
-      const navRect = navRef.current?.getBoundingClientRect();
       const width = 380;
-      const gap = 24;
-      const navRight = navRect ? navRect.right : rect.right;
-      let left = navRight + gap;
+      let left = rect.left;
       const maxLeft = window.innerWidth - width - 16;
       if (left > maxLeft) left = maxLeft;
-      // Anchor top to Directory header baseline so the dropdown opens inline
-      // with the navigation group, not floating above or below it.
-      const top = rect.top;
-      const navBottom = navRect ? navRect.bottom : rect.bottom + 400;
-      // Clamp height to the featured designers list so the dropdown never
-      // extends beyond it.
-      const height = Math.max(320, navBottom - top);
+      const top = rect.bottom + 8;
+      // Let the dropdown reach nearly the bottom of the viewport so the A–Z
+      // grid has room to scroll in place over the page background.
+      const height = Math.max(320, window.innerHeight - top - 16);
       setDropdownPos({
         left,
         top,
