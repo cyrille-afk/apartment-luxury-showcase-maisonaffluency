@@ -455,9 +455,9 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
               <ShippingDestinationSwitcher compact className="flex min-h-10 min-w-10 px-0 shrink-0" flagClassName="text-lg" />
             </div>
 
-            {/* Brand — absolutely centered in the viewport */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-[88px] xsp:px-[96px]">
-              <div className="flex flex-col items-center max-w-full pointer-events-auto">
+            {/* Brand — absolutely centered in the viewport; side groups reserve equal space */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="flex flex-col items-center max-w-[calc(100%-176px)] xsp:max-w-[calc(100%-192px)] pointer-events-auto">
                 <button onClick={scrollToTop} className="group flex min-h-[44px] cursor-pointer items-center whitespace-nowrap">
                   <span data-testid="mobile-brand-logo" className="font-brand text-[1.1rem] xs:text-[1.45rem] xsp:text-[1.65rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                     <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
