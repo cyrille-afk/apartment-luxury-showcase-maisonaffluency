@@ -36,6 +36,7 @@ type PersistedSandbox = {
   backdropDataUrl: string | null;
   backdrop: string | null;
   objects: PlacedObject[];
+  projectId?: string | null;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -55,9 +56,10 @@ const readSandbox = (): PersistedSandbox => {
       backdrop: parsed.backdrop ?? null,
       backdropDataUrl: parsed.backdropDataUrl ?? null,
       objects: Array.isArray(parsed.objects) ? parsed.objects : [],
+      projectId: parsed.projectId ?? null,
     };
   } catch {
-    return { backdrop: null, backdropDataUrl: null, objects: [] };
+    return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
   }
 };
 
@@ -82,6 +84,10 @@ const TradeVisualiser = () => {
   const [backdrop, setBackdrop] = useState<string | null>(initial.backdrop);
   const [backdropDataUrl, setBackdropDataUrl] = useState<string | null>(initial.backdropDataUrl);
   const [orbitEnabled, setOrbitEnabled] = useState(true);
+  const [projectId, setProjectId] = useState<string | null>(initial.projectId ?? null);
+  const [projectName, setProjectName] = useState<string | null>(null);
+  const [loadingProject, setLoadingProject] = useState(false);
+  const intakeRef = useRef<string | null>(null);
   const [materials, setMaterials] = useState<VisualiserMaterial[]>([]);
   const [materialSearch, setMaterialSearch] = useState("");
   const [finishTarget, setFinishTarget] = useState<"all" | "top" | "base">("all");
@@ -163,11 +169,12 @@ const TradeVisualiser = () => {
         backdrop: backdrop?.startsWith("blob:") ? null : backdrop,
         backdropDataUrl,
         objects,
+        projectId,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects]);
+  }, [backdrop, backdropDataUrl, objects, projectId]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -192,6 +199,80 @@ const TradeVisualiser = () => {
       toast.success(`${data.project_name || "Delivered visual"} opened as the canvas backdrop.`);
     })();
   }, [searchParams, setSearchParams]);
+
+  /**
+   * Project intake: `/trade/visualiser?project=<id>` pre-loads the canvas with the
+   * pieces already specified for that project (quote lines + client board items).
+   */
+  useEffect(() => {
+    const incoming = searchParams.get("project");
+    if (!incoming || intakeRef.current === incoming) return;
+    intakeRef.current = incoming;
+    const alreadyComposed = initial.projectId === incoming && initial.objects.length > 0;
+    setProjectId(incoming);
+
+    void (async () => {
+      const sb = supabase as any;
+      const { data: project } = await sb.from("projects").select("name").eq("id", incoming).maybeSingle();
+      setProjectName(project?.name ?? null);
+      if (alreadyComposed) return;
+
+      setLoadingProject(true);
+      const [quotes, boards] = await Promise.all([
+        sb.from("trade_quotes").select("id").eq("project_id", incoming),
+        sb.from("client_boards").select("id").eq("project_id", incoming),
+      ]);
+      const quoteIds = (quotes.data ?? []).map((row: { id: string }) => row.id);
+      const boardIds = (boards.data ?? []).map((row: { id: string }) => row.id);
+      const [quoteItems, boardItems] = await Promise.all([
+        quoteIds.length
+          ? sb.from("trade_quote_items").select("product_id").in("quote_id", quoteIds)
+          : Promise.resolve({ data: [] }),
+        boardIds.length
+          ? sb.from("client_board_items").select("product_id").in("board_id", boardIds)
+          : Promise.resolve({ data: [] }),
+      ]);
+      const productIds = [...new Set(
+        [...(quoteItems.data ?? []), ...(boardItems.data ?? [])]
+          .map((row: { product_id: string | null }) => row.product_id)
+          .filter(Boolean) as string[],
+      )].slice(0, MAX_OBJECTS);
+
+      if (!productIds.length) {
+        setLoadingProject(false);
+        toast.message("No specified pieces found for this project yet — starting from a blank canvas.");
+        return;
+      }
+
+      const { data: catalogue } = await sb
+        .from("trade_products")
+        .select("id, product_name, brand_name, image_url, category, dimensions, glb_url")
+        .in("id", productIds);
+
+      const placed: PlacedObject[] = ((catalogue ?? []) as CatalogueProduct[]).map((product, index) => ({
+        instanceId: `${product.id}-${incoming}-${index}`,
+        id: product.id,
+        product_name: product.product_name,
+        brand_name: product.brand_name,
+        image_url: product.image_url ? optimizeImageUrl(product.image_url, CUTOUT_TRANSFORMS) : null,
+        dimensions: product.dimensions,
+        glb_url: product.glb_url,
+        position: [((index % 4) - 1.5) * 1.4, 0, Math.floor(index / 4) * -1.4],
+        rotation: [0, 0, 0],
+        scale: 1,
+        material: isBondStreetStool(product.id) ? null : activeMaterial,
+        baseMaterial: isBondStreetStool(product.id) ? BOND_STREET_BASE_FINISH : null,
+        upholsteryMaterial: null,
+      }));
+
+      setObjects(placed);
+      setSelectedId(null);
+      setLoadingProject(false);
+      toast.success(`${project?.name || "Project"} specification loaded — ${placed.length} piece${placed.length === 1 ? "" : "s"}.`);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
 
   const filteredProducts = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -380,7 +461,8 @@ const TradeVisualiser = () => {
         <div>
           <h1 className="font-serif text-2xl text-foreground">Visualiser Sandbox</h1>
           <p className={cn(microLabel, "mt-2 text-muted-foreground")}>
-            3D Spatial Composition // {objects.length} / {MAX_OBJECTS} Objects
+            {projectName ? `${projectName} // ` : ""}3D Spatial Composition // {objects.length} / {MAX_OBJECTS} Objects
+            {loadingProject ? " // Loading specification…" : ""}
           </p>
         </div>
         <p className={cn(microLabel, "text-muted-foreground")}>Drag to orbit // Scroll to zoom</p>

@@ -8,7 +8,7 @@ import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import {
   ArrowLeft, Pencil, Save, Trash2, Loader2, FileText, FolderArchive,
   ListChecks, CalendarClock, Image as ImageIcon, ExternalLink, Archive, CheckCircle2,
-  Package, Users, LayoutGrid, Truck, Lock,
+  Package, Users, LayoutGrid, Truck, Lock, Scan,
 } from "lucide-react";
 import { useProject } from "@/hooks/useProjects";
 import { supabase } from "@/integrations/supabase/client";
@@ -283,6 +283,12 @@ export default function TradeProjectDetail() {
           <ArrowLeft className="h-3.5 w-3.5" /> All projects
         </Link>
         <div className="flex items-center gap-2">
+          <Link
+            to={`/trade/visualiser?project=${project.id}${(project as any).client_id ? `&client=${(project as any).client_id}` : ""}`}
+            className="inline-flex items-center gap-2 border border-foreground/25 px-4 py-2 font-body text-[10px] uppercase tracking-[0.2em] text-foreground transition-colors hover:border-foreground hover:bg-foreground/[0.04]"
+          >
+            <Scan className="h-3.5 w-3.5" /> Launch Visualiser
+          </Link>
           <Link
             to={`/trade/projects/${project.id}/studio`}
             className="mr-1 font-body text-[10px] uppercase tracking-[0.15em] text-foreground underline underline-offset-4 hover:no-underline"
