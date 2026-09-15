@@ -1,9 +1,43 @@
-import { Suspense } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Suspense, useEffect } from "react";
+import { Canvas, useThree } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
 
 const microLabel = "text-[10px] uppercase tracking-[0.15em]";
+
+/**
+ * The canvas runs on `frameloop="demand"` so it does not burn a frame every
+ * 16ms while the designer is doing something else (typing to Felix, reading
+ * the ledger). This helper re-renders exactly when the scene actually changes
+ * or while the pointer is interacting with it.
+ */
+const RenderOnDemand = ({ signature }: { signature: string }) => {
+  const invalidate = useThree((s) => s.invalidate);
+  const domElement = useThree((s) => s.gl.domElement);
+
+  useEffect(() => {
+    // Two frames: one for the state change, one after any texture/material swap.
+    invalidate();
+    const id = requestAnimationFrame(() => invalidate());
+    return () => cancelAnimationFrame(id);
+  }, [invalidate, signature]);
+
+  useEffect(() => {
+    const kick = () => invalidate();
+    domElement.addEventListener("pointermove", kick);
+    domElement.addEventListener("pointerdown", kick);
+    domElement.addEventListener("wheel", kick, { passive: true });
+    window.addEventListener("pointerup", kick);
+    return () => {
+      domElement.removeEventListener("pointermove", kick);
+      domElement.removeEventListener("pointerdown", kick);
+      domElement.removeEventListener("wheel", kick);
+      window.removeEventListener("pointerup", kick);
+    };
+  }, [domElement, invalidate]);
+
+  return null;
+};
 
 const SceneLoader = () => (
   <Html center>
