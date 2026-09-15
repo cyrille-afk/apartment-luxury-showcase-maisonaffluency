@@ -196,6 +196,7 @@ export default function TradeComparator() {
                             Select product {index + 1}
                           </div>
                         )}
+                      </div>
                     </th>
                   ))}
                 </tr>
