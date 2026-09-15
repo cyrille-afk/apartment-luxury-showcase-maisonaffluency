@@ -135,6 +135,15 @@
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780453180/Casque-Bar-Cabinet_1500x1500_v9cq04.jpg"
   },
   {
+    "id": "3ea0d50d-ac6d-4b56-a183-4338a8658ebc",
+    "slug": "collection-particuliere",
+    "name": "Collection Particulière",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1776006728/PIA-armchair-christophe-delcourt-Collection-Particuliere-2_zowxzg.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:good,f_auto/collection-particuliere-bg_hn4jiq",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780901008/Pia-5-cover_rm71c0.jpg"
+  },
+  {
     "id": "7a13d2f8-07a2-40cc-82ec-4292ceb633b5",
     "slug": "kerstens",
     "name": "Kerstens",
@@ -178,6 +187,15 @@
     "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781929908/as_is_wgubge.jpg",
     "image_url": "https://lazzarinipickering.com/wp-content/uploads/2024/11/02-Lazzarini-Pickering-Architetti-2-683x1024.jpg",
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1776464746/Screen_Shot_2026-04-18_at_6.24.46_AM_dm9lgc.png"
+  },
+  {
+    "id": "4c6aab16-7912-4c4c-8646-39ea74510bc3",
+    "slug": "stephane-parmentier",
+    "name": "Stéphane Parmentier",
+    "founder": "Pouenat",
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1785751060/Galerie_ydvrk0.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1785751060/Portrait_wj94js.png",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779724784/Sensible_CoffeeTable-1_3000x3000_j2fgto.jpg"
   },
   {
     "id": "e91f75d3-0001-4000-8000-000000000001",
