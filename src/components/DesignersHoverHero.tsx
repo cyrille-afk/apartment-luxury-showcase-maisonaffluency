@@ -288,6 +288,8 @@ const FEATURED_GROUPS = [
   },
 ];
 
+const MOBILE_ONLY_EXCLUDED_DESIGNERS = new Set(["paul-laszlo", "pouenat"]);
+
 const MOBILE_BG_OVERRIDES: Record<string, string> = {
   // Jean-Michel Frank's raw pick is a square studio shot with a baked-in black
   // ceiling and gray floor; as a full-viewport background it reads as an
