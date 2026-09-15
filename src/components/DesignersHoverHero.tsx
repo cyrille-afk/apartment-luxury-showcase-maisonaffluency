@@ -2638,24 +2638,27 @@ const DesignersHoverHero = () => {
                 <div className="flex w-full items-center justify-between py-4">
                   {Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index)).map((letter) => {
                     const isActive = activeAccordionLetter === letter;
+                    const hasDesigners = availableLetters.has(letter);
                     return (
                       <button
                         key={letter}
                         type="button"
-                        onClick={() => {
+                        disabled={!hasDesigners}
+                        onClick={hasDesigners ? () => {
                           setSearchQuery("");
                           rememberDesignersAzLetter(letter);
                           setRestoredOnlyLetter(null);
                           setExpandedLetters(new Set([letter]));
                           setActiveAccordionLetter(letter);
-                        }}
+                        } : undefined}
                         className={cn(
                           "font-body text-sm uppercase tracking-[0.35em] transition-colors",
-                          isActive
+                          !hasDesigners && "opacity-30 pointer-events-none cursor-default",
+                          hasDesigners && (isActive
                             ? "text-white underline underline-offset-8"
-                            : "text-white/50 hover:text-white"
+                            : "text-white/50 hover:text-white")
                         )}
-                        aria-label={`Show designers starting with ${letter}`}
+                        aria-label={hasDesigners ? `Show designers starting with ${letter}` : `No designers under ${letter}`}
                       >
                         {letter}
                       </button>
