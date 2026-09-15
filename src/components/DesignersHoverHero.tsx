@@ -1178,7 +1178,15 @@ const DesignersHoverHero = () => {
 
   const getDesktopSearchTarget = () => {
     const rootStyles = window.getComputedStyle(document.documentElement);
-    const headerHeight = Number.parseFloat(rootStyles.getPropertyValue("--header-h")) || 72;
+    const headerToken = rootStyles.getPropertyValue("--header-h").trim();
+    const probe = document.createElement("div");
+    probe.style.position = "fixed";
+    probe.style.top = headerToken || "72px";
+    probe.style.pointerEvents = "none";
+    probe.style.visibility = "hidden";
+    document.body.appendChild(probe);
+    const headerHeight = probe.getBoundingClientRect().top || 72;
+    probe.remove();
     const width = Math.min(1280, window.innerWidth - 96);
     return {
       left: (window.innerWidth - width) / 2,
