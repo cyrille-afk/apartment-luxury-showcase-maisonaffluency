@@ -750,6 +750,7 @@ const DesignersHoverHero = () => {
     return FEATURED_GROUPS.map((g) => ({
       ...g,
       designers: g.slugs
+        .filter((slug) => !isMobileOrPwa || !DESKTOP_ONLY_FEATURED_SLUGS.has(slug))
         .map((slug) => {
           const d = bySlug.get(slug);
           if (!d) return undefined;
@@ -763,7 +764,7 @@ const DesignersHoverHero = () => {
           })
         ) as FeaturedDesigner[],
     }));
-  }, [designers]);
+  }, [designers, isMobileOrPwa]);
 
   const items = useMemo(
     () =>
