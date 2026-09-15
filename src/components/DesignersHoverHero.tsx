@@ -634,8 +634,7 @@ const DesignersHoverHero = () => {
   const [azRailRect, setAzRailRect] = useState<{ top: number; height: number } | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchTriggerRef = useRef<HTMLButtonElement>(null);
-  const desktopSearchDockRef = useRef<HTMLButtonElement>(null);
-  const desktopAzDockRef = useRef<HTMLButtonElement>(null);
+  const desktopSearchDockRef = useRef<HTMLInputElement>(null);
   const searchCloseTimerRef = useRef<number | null>(null);
   const suppressSearchFocusOpenRef = useRef(false);
   const searchScrollRef = useRef<HTMLDivElement>(null);
@@ -1192,13 +1191,14 @@ const DesignersHoverHero = () => {
     const headerHeight = probe.getBoundingClientRect().top || 72;
     probe.remove();
     const width = Math.min(1280, window.innerWidth - 96);
-    // Keep the panel above the 40px-elevated dock with a deliberate air gap.
-    const dockClearance = 104;
+    const dockTop = desktopSearchDockRef.current?.getBoundingClientRect().top;
+    // Anchor the sheet directly above the unified input, with a narrow air gap.
+    const panelBottom = dockTop ?? window.innerHeight - 104;
     return {
       left: (window.innerWidth - width) / 2,
       top: headerHeight,
       width,
-      height: Math.max(320, window.innerHeight - headerHeight - dockClearance),
+      height: Math.max(320, panelBottom - headerHeight - 10),
     };
   };
 
@@ -1237,10 +1237,7 @@ const DesignersHoverHero = () => {
       setDropdownPos(null);
       searchCloseTimerRef.current = null;
       suppressSearchFocusOpenRef.current = true;
-      const returnTarget = desktopDirectoryMode === "search"
-        ? desktopSearchDockRef.current
-        : desktopAzDockRef.current;
-      returnTarget?.focus({ preventScroll: true });
+      desktopSearchDockRef.current?.focus({ preventScroll: true });
       window.requestAnimationFrame(() => {
         suppressSearchFocusOpenRef.current = false;
       });
@@ -1315,7 +1312,7 @@ const DesignersHoverHero = () => {
     document.addEventListener("wheel", onWheel, { passive: false, capture: true });
     // Delay focus so the slide-up animation is visible before the keyboard opens.
     const t = window.setTimeout(() => {
-      if (!restoredLetterRef.current && (!isDesktopViewport || desktopDirectoryMode === "search")) {
+      if (!restoredLetterRef.current && !isDesktopViewport) {
         searchInputRef.current?.focus();
       }
     }, 220);
@@ -2251,33 +2248,50 @@ const DesignersHoverHero = () => {
         );
       })()}
 
-      {/* Desktop directory launcher — a persistent glass dock independent of
-          the editorial sidebar so it remains reachable across the full hero. */}
-      <div
-        className="fixed bottom-[40px] left-1/2 z-[73] hidden -translate-x-1/2 items-center rounded-md border border-background/20 bg-background/[0.05] px-1.5 py-1 backdrop-blur-[12px] lg:flex"
-        aria-label="Designer directory controls"
-      >
-        <button
-          ref={desktopSearchDockRef}
-          type="button"
-          onClick={() => openDesignerSearch("search")}
-          aria-expanded={searchOpen && desktopDirectoryMode === "search"}
-          aria-controls="designers-search-sheet"
-          className="whitespace-nowrap px-5 py-2 font-body text-[10px] uppercase tracking-[0.22em] text-background/75 transition-colors hover:text-background focus-visible:outline-none focus-visible:text-background"
+      {/* Desktop directory launcher — search and its editorial context remain
+          grouped in one bottom interaction zone above the scroll cue. */}
+      <div className="fixed bottom-[40px] left-1/2 z-[73] hidden w-[min(34rem,calc(100vw-6rem))] -translate-x-1/2 flex-col items-center lg:flex">
+        <div
+          className="flex w-full items-center rounded-md border border-background/20 bg-background/[0.05] px-4 backdrop-blur-[12px]"
+          aria-label="Designer directory controls"
         >
-          [ Search Directory ]
-        </button>
-        <span className="h-4 w-px bg-background/15" aria-hidden="true" />
-        <button
-          ref={desktopAzDockRef}
-          type="button"
-          onClick={() => openDesignerSearch("az")}
-          aria-expanded={searchOpen && desktopDirectoryMode === "az"}
-          aria-controls="designers-search-sheet"
-          className="whitespace-nowrap px-5 py-2 font-body text-[10px] uppercase tracking-[0.22em] text-background/75 transition-colors hover:text-background focus-visible:outline-none focus-visible:text-background"
-        >
-          [ A - Z ]
-        </button>
+          <Search className="h-3.5 w-3.5 shrink-0 text-background/55" aria-hidden="true" />
+          <input
+            ref={desktopSearchDockRef}
+            type="search"
+            value={searchQuery}
+            onFocus={() => {
+              if (!searchOpen && !suppressSearchFocusOpenRef.current) openDesignerSearch("search");
+            }}
+            onClick={() => {
+              if (!searchOpen) openDesignerSearch("search");
+            }}
+            onChange={(event) => {
+              setSearchQuery(event.target.value);
+              if (!searchOpen) openDesignerSearch("search");
+            }}
+            placeholder="Search directory"
+            autoCorrect="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            aria-expanded={searchOpen}
+            aria-controls="designers-search-sheet"
+            className="h-10 min-w-0 flex-1 bg-transparent px-3 font-body text-[10px] uppercase tracking-[0.2em] text-background outline-none placeholder:text-background/70"
+          />
+          {searchOpen && (
+            <button
+              type="button"
+              onClick={closeDesignerSearch}
+              aria-label="Close search"
+              className="p-1 text-background/55 transition-colors hover:text-background focus-visible:outline-none focus-visible:text-background"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+        <p className="mt-2 max-w-md text-center font-serif text-[11px] leading-relaxed text-background/70">
+          Our online portfolio is an invitation to explore unique ateliers and find out signature pieces.
+        </p>
       </div>
 
 
@@ -2334,7 +2348,7 @@ const DesignersHoverHero = () => {
             <div className="mx-auto mt-1.5 h-1 w-9 rounded-full bg-white/25 shrink-0 lg:hidden" aria-hidden="true" />
             <div className={cn(
               "px-4 pt-3 pb-3 border-b border-white/[0.06] shrink-0 mb-2",
-              "lg:px-6 lg:pt-5 lg:pb-4 lg:border-b lg:border-white/[0.06] lg:mb-2"
+              "lg:hidden"
             )}>
               <div className="relative flex items-center">
                 <Search
@@ -2382,7 +2396,7 @@ const DesignersHoverHero = () => {
             {!isSearching && (
               <div className={cn(
                 "shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3 overflow-x-auto no-scrollbar px-3 lg:overflow-visible lg:px-6",
-                "lg:transition-opacity lg:duration-300"
+                "lg:hidden"
               )}>
                 <div
                   className={cn(
@@ -2606,11 +2620,37 @@ const DesignersHoverHero = () => {
               )}
             </div>
 
-
-
-
-
-
+            {/* Desktop alphabet rail: anchored beneath the grid and directly
+                above the unified bottom search input. */}
+            <div className="hidden shrink-0 border-t border-white/[0.06] bg-[#0a0a0a]/95 px-6 backdrop-blur lg:block">
+                <div className="mx-auto flex w-full max-w-7xl items-center justify-center gap-6 py-3">
+                  {Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index)).map((letter) => {
+                    const isActive = activeAccordionLetter === letter;
+                    return (
+                      <button
+                        key={letter}
+                        type="button"
+                        onClick={() => {
+                          setSearchQuery("");
+                          rememberDesignersAzLetter(letter);
+                          setRestoredOnlyLetter(null);
+                          setExpandedLetters(new Set([letter]));
+                          setActiveAccordionLetter(letter);
+                        }}
+                        className={cn(
+                          "font-body text-[11px] uppercase tracking-[0.2em] transition-colors",
+                          isActive
+                            ? "text-white underline underline-offset-4"
+                            : "text-white/50 hover:text-white"
+                        )}
+                        aria-label={`Show designers starting with ${letter}`}
+                      >
+                        {letter}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
           </div>
         </>
