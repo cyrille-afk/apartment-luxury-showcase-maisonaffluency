@@ -827,6 +827,7 @@ const App = () => {
                     <Route path="mood-boards" element={<TradeMoodBoards />} />
                     <Route path="budget" element={<TradeBudgetTracker />} />
                     <Route path="clients" element={<TradeClients />} />
+                    <Route path="client-management" element={<TradeClients />} />
                     <Route path="lead-time-calendar" element={<TradeLeadTimeCalendar />} />
                     <Route path="reorder" element={<TradeReorder />} />
                     <Route path="currency-converter" element={<TradeCurrencyConverter />} />
