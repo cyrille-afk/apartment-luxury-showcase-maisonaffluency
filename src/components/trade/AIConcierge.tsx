@@ -3936,7 +3936,22 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
 
           {!minimized && (<>
 
-          <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-5">
+          {briefBuilderOpen && (() => {
+            const lastUser = [...timeline].reverse().find((t) => t.kind === "msg" && t.role === "user") as { kind: "msg"; content?: string } | undefined;
+            const ctx = (lastUser?.content || "").replace(/\s+/g, " ").trim().slice(0, 120);
+            return (
+              <div className="shrink-0 border-b border-border px-4 py-2 flex items-center gap-2 min-w-0">
+                <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground shrink-0">
+                  Active Context
+                </span>
+                <span className="font-body text-[11px] text-foreground truncate">
+                  {ctx || "New architectural brief"}
+                </span>
+              </div>
+            );
+          })()}
+
+          <div ref={scrollRef} className={cn("flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-5", briefBuilderOpen && "hidden")}>
             {timeline.map((item, i) => {
               if (item.kind === "msg") {
                 const atts = item.role === "user" ? item.attachments : undefined;
