@@ -2538,6 +2538,38 @@ const TradeDesignersAdmin = () => {
                         />
                       </div>
 
+                      {/* Brand margin safety cap */}
+                      {(() => {
+                        const edited = editBuffer[d.id] && "max_trade_discount" in editBuffer[d.id]!;
+                        const raw = edited ? editBuffer[d.id]!.max_trade_discount : d.max_trade_discount;
+                        return (
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                              Maximum Eligible Trade Discount (%){" "}
+                              <span className="normal-case font-normal">(optional — caps the tier discount for this supplier)</span>
+                            </label>
+                            <Input
+                              type="number"
+                              min={0}
+                              max={100}
+                              step={0.5}
+                              inputMode="decimal"
+                              placeholder="No cap"
+                              value={raw === null || raw === undefined ? "" : String(raw)}
+                              onChange={(e) => {
+                                const v = e.target.value.trim();
+                                if (v === "") return setField(d.id, "max_trade_discount", null);
+                                const n = Number(v);
+                                if (!Number.isFinite(n)) return;
+                                setField(d.id, "max_trade_discount", Math.min(100, Math.max(0, n)));
+                              }}
+                              className="mt-1 text-sm w-40"
+                            />
+                          </div>
+                        );
+                      })()}
+
+
                       {/* Hero Image Override */}
                       {(() => {
                         // Use key presence (not ??) so an explicit null from "Clear hero" wins
