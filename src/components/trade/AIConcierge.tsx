@@ -5145,7 +5145,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             </div>
 
             {/* Quick-action chips: visual entry points so designers know how to interact with Felix without reading the full welcome text. */}
-            <div className={cn("grid grid-cols-1 sm:grid-cols-3 items-stretch justify-start gap-2", fullscreen && "shrink-0")}>
+            <div className={cn("grid grid-cols-1 sm:grid-cols-3 items-stretch justify-start gap-2", (fullscreen || briefBuilderOpen) && "shrink-0")}>
               <Button
                 type="button"
                 variant="outline"
@@ -5191,7 +5191,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             </div>
 
 
-            <div className={cn("flex flex-wrap lg:flex-nowrap items-end gap-2", fullscreen && "shrink-0")}>
+            <div className={cn("flex flex-wrap lg:flex-nowrap items-end gap-2", (fullscreen || briefBuilderOpen) && "shrink-0")}>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -5322,7 +5322,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               </button>
 
             </div>
-            <p className={cn("font-body text-[10px] text-muted-foreground mt-1.5 text-center", fullscreen && "shrink-0")}>
+            <p className={cn("font-body text-[10px] text-muted-foreground mt-1.5 text-center", (fullscreen || briefBuilderOpen) && "shrink-0")}>
               {copy.footer}
             </p>
           </div>
