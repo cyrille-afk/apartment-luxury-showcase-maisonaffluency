@@ -470,6 +470,11 @@ export default function TradeClients() {
                       {c.type}
                     </span>
                   )}
+                  {!isClientMode && upgradeFlags[c.id] && (
+                    <span className="ml-2 inline-flex items-center whitespace-nowrap rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-accent align-middle">
+                      {tierUpgradeLabel(upgradeFlags[c.id])}
+                    </span>
+                  )}
                 </div>
 
                 {/* Active assigned project */}
