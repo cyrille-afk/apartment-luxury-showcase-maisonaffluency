@@ -165,23 +165,8 @@ const TradeDocuments = () => {
     <>
       <Helmet><title>Resources — Trade Portal — Maison Affluency</title></Helmet>
     <div className="mx-auto w-full max-w-5xl space-y-6 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
-      <nav aria-label="Breadcrumb" className="flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-        <Link to="/trade/tools" className="transition-colors hover:text-foreground">
-          Tools
-        </Link>
-        <span aria-hidden="true">/</span>
-        {selectedBrand === "all" ? (
-          <span aria-current="page" className="text-foreground">Resources</span>
-        ) : (
-          <>
-            <button type="button" onClick={returnToResources} className="transition-colors hover:text-foreground">
-              Resources
-            </button>
-            <span aria-hidden="true">/</span>
-            <span aria-current="page" className="text-foreground">{selectedBrand}</span>
-          </>
-        )}
-      </nav>
+
+
       <SectionHero
         section="documents"
         title="Resources"
