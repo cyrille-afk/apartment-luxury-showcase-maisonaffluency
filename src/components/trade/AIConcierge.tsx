@@ -362,10 +362,13 @@ function composeBriefPrefill(
   const mergedFurniture = collapseFurnitureTokens(
     Array.from(new Set([...(scale.furniture || []), ...extractFurnitureTypology(priorFurnitureText)])),
   );
-  if (mergedFurniture.length) {
+  const typologyValue = mergedFurniture.length
+    ? mergedFurniture.join(", ")
+    : baselineTypologyForContext(scale, [currentText, priorFurnitureText].filter(Boolean).join(" \n "));
+  if (typologyValue) {
     prefilled = prefilled.replace(
       "[e.g. sectional + accent chairs]",
-      mergedFurniture.join(", "),
+      typologyValue,
     );
   }
   if (explicitReferenceBrands.length) {
