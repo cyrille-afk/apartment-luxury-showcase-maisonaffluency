@@ -5221,6 +5221,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   value={briefDraft}
                   onChange={setBriefDraft}
                   onClose={closeBriefBuilder}
+                  onSubmit={submitBriefFromBuilder}
+                  onSubmittingChange={setBriefSubmitting}
                 />
               </div>
             )}
