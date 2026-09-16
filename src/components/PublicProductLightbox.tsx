@@ -1091,13 +1091,14 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             </div>
           </div>
 
-          {/* More From — separated from upper block with defined margin */}
-          <div className="mt-6 md:mt-8 w-full">
-            {relatedStrip}
-          </div>
-
-          {/* Curator Notes — structured, scannable product narrative */}
-          <div className="w-full border-t border-border/40 mt-6 md:mt-8 pt-5 pb-6">
+          {/* Curator Notes — immediate context below the product details */}
+          <motion.div
+            key={`curator-notes-${product.id}`}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="w-full border-t border-border/40 mt-6 md:mt-8 pt-5 md:pt-6 pb-7 md:pb-9"
+          >
             <h3 className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-5">
               Curator Notes
             </h3>
@@ -1138,6 +1139,11 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
               </div>
             </div>
+          </motion.div>
+
+          {/* More From — final exploration tier */}
+          <div className="w-full border-t border-border/40 pt-6 md:pt-8 pb-4 md:pb-6">
+            {relatedStrip}
           </div>
         </div>
       </motion.div>
