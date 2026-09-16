@@ -165,21 +165,30 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   if (!open || typeof document === "undefined") return null;
 
-  // Card placement: prefer right of the target, then below, then above.
+  // Card placement: centered on the target — right of it, else below, else above.
   const cardW = Math.min(380, viewport.w - 32);
-  let cardLeft = 16;
-  let cardTop = 16;
+  const cardH = 320;
+  const clampX = (x: number) => Math.min(Math.max(x, 16), Math.max(viewport.w - cardW - 16, 16));
+  const clampY = (y: number) => Math.min(Math.max(y, 16), Math.max(viewport.h - cardH - 16, 16));
+  let cardLeft = clampX((viewport.w - cardW) / 2);
+  let cardTop = clampY((viewport.h - cardH) / 2);
   if (rect) {
+    const centerY = clampY(rect.top + rect.height / 2 - cardH / 2);
+    const centerX = clampX(rect.left + rect.width / 2 - cardW / 2);
     const rightX = rect.left + rect.width + PAD + 8;
+    const leftX = rect.left - PAD - 8 - cardW;
     if (rightX + cardW <= viewport.w - 16) {
       cardLeft = rightX;
-      cardTop = Math.min(Math.max(rect.top, 16), viewport.h - 320);
-    } else if (rect.top + rect.height + 300 < viewport.h) {
-      cardLeft = Math.min(Math.max(rect.left, 16), viewport.w - cardW - 16);
+      cardTop = centerY;
+    } else if (leftX >= 16) {
+      cardLeft = leftX;
+      cardTop = centerY;
+    } else if (rect.top + rect.height + PAD + 8 + cardH <= viewport.h - 16) {
+      cardLeft = centerX;
       cardTop = rect.top + rect.height + PAD + 8;
     } else {
-      cardLeft = Math.min(Math.max(rect.left, 16), viewport.w - cardW - 16);
-      cardTop = Math.max(rect.top - 300 - PAD, 16);
+      cardLeft = centerX;
+      cardTop = clampY(rect.top - cardH - PAD - 8);
     }
   }
 
