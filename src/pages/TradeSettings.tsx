@@ -526,35 +526,43 @@ const TradeSettings = () => {
         </button>
       </form>
 
-      {/* Copilot Section */}
+      {/* AI Guide Customization */}
       <form onSubmit={handleSaveCopilot} className="mb-10">
         <div className="flex items-center gap-2 mb-5">
           <Sparkles className="h-4 w-4 text-muted-foreground" />
-          <h2 className="font-display text-base text-foreground">Your AI Copilot</h2>
+          <h2 className="font-display text-base text-foreground">AI Guide Customization</h2>
         </div>
-        <div>
-          <label className="font-body text-xs text-muted-foreground uppercase tracking-wider mb-1.5 block">
-            Copilot Name
+        <div className="max-w-md">
+          <label className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.18em] mb-2 block">
+            Curator Assistant Profile Name
           </label>
           <input
             type="text"
             value={copilotName}
-            onChange={(e) => setCopilotName(sanitizeName(e.target.value))}
-            placeholder={`e.g. ${DEFAULT_NAME}, Pierre, Assistant, Concierge`}
-            maxLength={32}
+            onChange={(e) => {
+              const cleaned = e.target.value.replace(/[^A-Za-z '’-]/g, "").slice(0, 15);
+              setCopilotName(cleaned);
+              setCopilotError(cleaned && cleaned.trim().length < 2 ? "Use at least 2 letters." : "");
+            }}
+            placeholder={`${DEFAULT_NAME} (Default)`}
+            maxLength={15}
             className={inputClass}
           />
-          <p className="font-body text-[10px] text-muted-foreground/70 mt-1.5">
-            This is how your copilot introduces itself across the trade portal. Saved to your profile, it follows you on every device.
-          </p>
+          <div className="mt-1.5 flex items-start justify-between gap-4">
+            <p className="font-body text-[10px] text-muted-foreground/70">
+              {copilotError || `Letters only, up to 15 characters. Leave blank to keep ${DEFAULT_NAME}.`}
+            </p>
+            <span className="font-body text-[10px] text-muted-foreground/50 shrink-0">
+              {copilotName.length}/15
+            </span>
+          </div>
         </div>
         <button
           type="submit"
-          disabled={savingCopilot}
-          className="mt-6 inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-50"
+          disabled={savingCopilot || !!copilotError}
+          className="mt-5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground underline underline-offset-4 decoration-border hover:text-foreground transition-colors disabled:opacity-40"
         >
-          <Sparkles className="h-3.5 w-3.5" />
-          {savingCopilot ? "Saving…" : "Save Copilot Name"}
+          {savingCopilot ? "Saving…" : "[ Save Preferences ]"}
         </button>
       </form>
 
