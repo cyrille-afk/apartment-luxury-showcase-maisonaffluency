@@ -43,6 +43,13 @@
       "when": 1789527662471,
       "tag": "0005_enforce_meta_description_160",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789541346643,
+      "tag": "0006_settled_only_trade_tier_spend",
+      "breakpoints": true
     }
   ]
 }

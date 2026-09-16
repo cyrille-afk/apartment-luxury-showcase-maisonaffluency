@@ -66,13 +66,14 @@
 - [x] Isolate Bond Street Stool base/upholstery meshes and map authentic Man of Parts finishes without global texture replacement
 - [x] Upgrade Favorites with editorial-grid and technical-list modes plus Client View-safe MSRP pricing
 - [x] Quote builder: picking a client with a Default currency (e.g. Liz Spradling → USD) now auto-switches the quote currency toggle once; manual toggle override preserved
-- [x] Trade Tiers admin: ADMIN / TRADE TIERS breadcrumb, 90vw/1800px wide canvas, 3-card wide row, new defaults Silver 10%/€0, Gold 15%/€50k, Platinum 20%/€200k (DB + code fallbacks synced)
+- [x] Trade Tiers admin: ADMIN / TRADE TIERS breadcrumb, 90vw/1800px wide canvas, 3-card wide row; current tiers Silver 5%/€0, Gold 10%/€50k, Platinum 15%/€200k (database + code fallbacks synced)
 - [x] Brand-specific margin caps: designers.max_trade_discount admin input, shared min(tier, cap) rule across Trade Gallery, quote builder and checkout, 'Max margin cap applied for this supplier.' badge, server-side re-derivation in create-cart-checkout (verified live: 2%% cap on a supplier capped the gallery trade price and showed the badge)
 - [x] Auto-suggest client default currency from billing country while preserving manual overrides, and show the live trade tier beneath the dashboard greeting
 - [x] Slow Felix's project-scale chat-to-Brief Builder handoff with a 1.8s thinking state, eased response reveal, automatic open, and fluid history/canvas transition
 - [x] Isolate Felix chat text from Brief Builder draft state and restore active briefs intact after Trade Portal navigation
 - [x] Add a mirrored 450ms Brief Builder close transition with synchronized chat restoration and preserved draft fields
 - [x] Add supplier-cap-aware Trade Member pricing and a contextual Brand Margin Notice tooltip to the product details lightbox
+- [x] Align Trade Gallery fallback pricing to the live Silver 5% / Gold 10% / Platinum 15% tiers and exclude unsettled quotes from member tier spend
 
 ## Felix dashboard onboarding tour (done)
 - [x] src/components/trade/FelixTour.tsx — 4-step tour, highlight ring + dimmed cutout backdrop, Step x of 4 bar, Back/Pause-Resume/Next-Finish, corner skip; auto-starts once (felix_dashboard_tour_seen_v1, only after quick tour done), relaunch via "Meet Felix" button / startFelixTour()
