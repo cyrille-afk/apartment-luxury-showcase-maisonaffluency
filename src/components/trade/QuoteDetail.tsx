@@ -3223,6 +3223,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           <span className="font-body text-xs text-foreground font-medium">
                             {currencySymbol(currency)} {formatPriceRaw(lineTotal, currency) || "TBD"}
                           </span>
+                          {marginCapped && (
+                            <span
+                              title={MARGIN_CAP_TOOLTIP}
+                              aria-label={MARGIN_CAP_TOOLTIP}
+                              className="mt-1 inline-flex items-center gap-1 rounded border border-border px-1.5 py-0.5 font-body text-[9px] uppercase tracking-wider text-muted-foreground print:hidden"
+                            >
+                              <Info className="h-2.5 w-2.5" /> Margin cap
+                            </span>
+                          )}
                         </div>
                       </div>
                       {/* Desktop: standard columns */}
@@ -3287,6 +3296,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         <span className="font-body text-sm text-foreground font-medium tabular-nums">
                           {lineTotal ? `${currencySymbol(currency)} ${formatPriceRaw(lineTotal, currency)}` : "TBD"}
                         </span>
+                        {marginCapped && (
+                          <span
+                            title={MARGIN_CAP_TOOLTIP}
+                            aria-label={MARGIN_CAP_TOOLTIP}
+                            className="mt-1 inline-flex items-center gap-1 rounded border border-border px-1.5 py-0.5 font-body text-[9px] uppercase tracking-wider text-muted-foreground print:hidden"
+                          >
+                            <Info className="h-2.5 w-2.5" /> Margin cap
+                          </span>
+                        )}
                       </div>
 
                       {/* Procurement metadata — editable on draft/priced quotes, read-only otherwise */}
