@@ -22,7 +22,6 @@ const LegacyRouteRedirect = ({ to = "/designers" }: { to?: string }) => {
         <meta name="robots" content="noindex, follow" />
         <meta name="prerender-status-code" content="301" />
         <meta name="prerender-header" content={`Location: ${absolute}`} />
-        <link rel="canonical" href={absolute} />
       </Helmet>
       <Navigate to={to} replace state={{ redirectedFrom: pathname }} />
     </>

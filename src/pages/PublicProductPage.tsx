@@ -2151,7 +2151,6 @@ const PublicProductPageContent: React.FC = () => {
           <Helmet>
             <title>{pageTitle} — Maison Affluency</title>
             <meta name="description" content={desc} />
-            <link rel="canonical" href={canonical} />
             <meta property="og:type" content="product" />
             <meta property="og:site_name" content="Maison Affluency" />
             <meta property="og:title" content={`${pageTitle} — Maison Affluency`} />

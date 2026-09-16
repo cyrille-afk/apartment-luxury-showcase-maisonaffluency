@@ -182,7 +182,6 @@ const TradeRegister = () => {
       <Helmet>
         <title>{isPublicSignup ? "Create Account — Maison Affluency" : "Apply — Trade Program — Maison Affluency"}</title>
         <meta name="description" content={isPublicSignup ? "Create a free account on Maison Affluency. Browse curators' picks, save favourites, download spec sheets, and request quotes." : "Register and apply for the Maison Affluency Trade Program. Exclusive access for architects, interior designers, and luxury hospitality professionals."} />
-        <link rel="canonical" href="https://maisonaffluency.com/trade/register" />
         <meta property="og:title" content={isPublicSignup ? "Create Account — Maison Affluency" : "Apply — Trade Program — Maison Affluency"} />
         <meta property="og:description" content={isPublicSignup ? "Browse curators' picks, save favourites, and download spec sheets." : "Register for exclusive trade pricing and dedicated support for design professionals."} />
         <meta property="og:type" content="website" />

@@ -17,7 +17,6 @@ const ContactPage = () => {
           name="description"
           content="Contact Maison Affluency by appointment in Singapore and Paris. Private concierge for bespoke inquiries, custom specifications, and designer collaborations."
         />
-        <link rel="canonical" href="https://maisonaffluency.com/contact" />
         <meta property="og:type" content="website" />
         <meta property="og:locale" content="en_US" />
         <meta property="og:site_name" content="Maison Affluency" />

@@ -51,7 +51,6 @@ export default function PublicDesignerBiography() {
           name="description"
           content={`The full portrait of ${name}: history, craftsmanship and the studio's design philosophy.`}
         />
-        <link rel="canonical" href={`https://www.maisonaffluency.com/designers/${designer.slug}/biography`} />
       </Helmet>
 
       <Navigation />

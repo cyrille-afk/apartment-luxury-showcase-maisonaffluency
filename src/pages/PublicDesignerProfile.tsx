@@ -1394,7 +1394,6 @@ const PublicDesignerProfile = () => {
           <Helmet>
             <title>{seoTitle}</title>
             <meta name="description" content={desc} />
-            <link rel="canonical" href={canonical} />
             <meta property="og:type" content="profile" />
             <meta property="og:site_name" content="Maison Affluency" />
             <meta property="og:title" content={seoTitle} />

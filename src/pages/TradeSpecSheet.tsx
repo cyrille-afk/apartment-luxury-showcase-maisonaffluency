@@ -206,7 +206,6 @@ export default function TradeSpecSheet() {
           <title>{pageTitle} | Maison Affluency</title>
           <meta name="description" content={pageDescription} />
           <meta name="robots" content="index, follow" />
-          <link rel="canonical" href={canonicalUrl} />
         </Helmet>
         <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
           <div className="flex flex-col items-center text-center gap-6">
@@ -303,7 +302,6 @@ export default function TradeSpecSheet() {
           <title>{pageTitle} | Maison Affluency</title>
           <meta name="description" content={pageDescription} />
           <meta name="robots" content="index, follow" />
-          <link rel="canonical" href={canonicalUrl} />
         </Helmet>
 
         <div className="flex flex-col h-[calc(100vh-4rem)]">
@@ -339,7 +337,6 @@ export default function TradeSpecSheet() {
           <title>{pageTitle} | Maison Affluency</title>
           <meta name="description" content={pageDescription} />
           <meta name="robots" content="index, follow" />
-          <link rel="canonical" href={canonicalUrl} />
         </Helmet>
       <div className="w-full h-[calc(100vh-4rem)]">
         <h1 className="sr-only">{pageTitle}</h1>

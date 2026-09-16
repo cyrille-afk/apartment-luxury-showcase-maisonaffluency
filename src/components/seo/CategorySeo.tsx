@@ -49,7 +49,6 @@ export default function CategorySeo({ category, subcategory, categorySlug, subca
     <Helmet>
       <title>{title}</title>
       <meta name="description" content={description} />
-      <link rel="canonical" href={canonical} />
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content="Maison Affluency" />
       <meta property="og:title" content={title} />

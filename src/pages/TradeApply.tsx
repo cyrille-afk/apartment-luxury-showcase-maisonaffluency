@@ -20,7 +20,6 @@ const TradeApply = () => {
           name="description"
           content="Apply for the Maison Affluency Trade Program. Exclusive trade pricing, dedicated advisors, and consolidated insured shipping for architects and interior designers."
         />
-        <link rel="canonical" href="https://maisonaffluency.com/trade/apply" />
         <meta property="og:title" content="Apply — Trade Program — Maison Affluency" />
         <meta property="og:type" content="website" />
         <meta

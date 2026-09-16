@@ -8,11 +8,14 @@
  *
  * On a non-production host we:
  *  - force <meta name="robots"> to "noindex, nofollow" (and keep it forced),
- *  - rewrite rel=canonical / og:url to the production domain,
  *  - remove the sitemap <link> hint.
+ *
+ * Canonical URLs are owned by the GlobalCanonical component so this guard no
+ * longer touches rel=canonical or og:url — that prevents a DOM fight with
+ * react-helmet-async on routes that manage their own Helmet tags.
  */
 
-export const PRODUCTION_ORIGIN = "https://www.maisonaffluency.com";
+export const PRODUCTION_ORIGIN = "https://maisonaffluency.com";
 
 const PRODUCTION_HOSTS = new Set([
   "www.maisonaffluency.com",
@@ -38,15 +41,6 @@ function setMeta(name: string, content: string, attr: "name" | "property" = "nam
   });
 }
 
-function toProductionUrl(value: string): string {
-  try {
-    const url = new URL(value, window.location.origin);
-    return `${PRODUCTION_ORIGIN}${url.pathname}${url.search}`;
-  } catch {
-    return PRODUCTION_ORIGIN;
-  }
-}
-
 export function startEnvironmentIndexingGuard() {
   if (typeof window === "undefined" || typeof document === "undefined") return;
   if (isProductionHost()) return;
@@ -54,20 +48,6 @@ export function startEnvironmentIndexingGuard() {
   const apply = () => {
     setMeta("robots", "noindex, nofollow");
     setMeta("googlebot", "noindex, nofollow");
-
-    document
-      .querySelectorAll<HTMLLinkElement>('link[rel="canonical"]')
-      .forEach((link) => {
-        const next = toProductionUrl(link.getAttribute("href") || window.location.href);
-        if (link.getAttribute("href") !== next) link.setAttribute("href", next);
-      });
-
-    document
-      .querySelectorAll<HTMLMetaElement>('meta[property="og:url"]')
-      .forEach((tag) => {
-        const next = toProductionUrl(tag.content || window.location.href);
-        if (tag.content !== next) tag.content = next;
-      });
 
     document
       .querySelectorAll<HTMLLinkElement>('link[rel="sitemap"]')

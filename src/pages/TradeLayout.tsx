@@ -239,7 +239,6 @@ function TradePublicGate({ path }: { path: string }) {
       <Helmet>
         <title>{copy.title}</title>
         <meta name="description" content={copy.description} />
-        <link rel="canonical" href={canonical} />
         <meta property="og:title" content={copy.title} />
         <meta property="og:description" content={copy.description} />
         <meta property="og:url" content={canonical} />

@@ -39,7 +39,6 @@ const Journal = () => {
       <Helmet>
         <title>Journal — Maison Affluency</title>
         <meta name="description" content="Design stories, designer interviews, and curatorial insights from Maison Affluency — Singapore's premier destination for collectible luxury furniture." />
-        <link rel="canonical" href="https://maisonaffluency.com/journal" />
         <meta property="og:title" content="Journal — Maison Affluency" />
         <meta property="og:description" content="Design stories, designer interviews, and curatorial insights." />
         <meta property="og:type" content="website" />

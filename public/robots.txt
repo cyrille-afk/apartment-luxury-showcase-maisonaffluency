@@ -95,6 +95,6 @@ Allow: /
 User-agent: cohere-ai
 Disallow: /
 
-Sitemap: https://www.maisonaffluency.com/sitemap.xml
+Sitemap: https://maisonaffluency.com/sitemap.xml
 Disallow: /admin/trade-review
 Disallow: /trade/admin/trade-review
