@@ -8,10 +8,10 @@
  * "Importing a module script failed" / ChunkLoadError) — the user sees a blank
  * panel or an error boundary.
  *
- * This module listens for those failures and heals them by purging any
- * service worker / Cache Storage copy of the old build and reloading the SAME
- * url with a cache-busting query param. Guarded so it can only happen once per
- * build id per tab session — never a reload loop.
+ * Automatic navigation recovery is deliberately disabled. During an atomic
+ * hosting rollout, index.html can briefly reference a hashed chunk before it
+ * is available at every edge. Reloading at that moment can create a visible
+ * refresh loop without fixing the incomplete deployment.
  */
 
 const RELOAD_GUARD_KEY = "__ma_stale_chunk_reload";
@@ -84,22 +84,7 @@ async function purgeAndReload() {
 }
 
 export function startStaleChunkRecovery() {
-  if (typeof window === "undefined") return;
-  if (import.meta.env.DEV) return;
-
-  // Vite's own signal for a failed module preload — the most reliable hook.
-  window.addEventListener("vite:preloadError", (event) => {
-    event.preventDefault();
-    void purgeAndReload();
-  });
-
-  window.addEventListener("error", (event) => {
-    if (isStaleChunkMessage(event.message)) void purgeAndReload();
-  });
-
-  window.addEventListener("unhandledrejection", (event) => {
-    const reason = event.reason as { message?: string; name?: string } | string | undefined;
-    const message = typeof reason === "string" ? reason : reason?.message || reason?.name;
-    if (isStaleChunkMessage(message)) void purgeAndReload();
-  });
+  // Retained as a no-op for compatibility with any asynchronously cached
+  // caller from an earlier build. Updates are now user-controlled through the
+  // build-update notice instead of forcing browser navigation.
 }

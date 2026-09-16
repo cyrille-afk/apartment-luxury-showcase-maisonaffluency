@@ -5,7 +5,6 @@ import HmrStatusBanner from "./components/dev/HmrStatusBanner";
 import BuildUpdateBanner from "./components/BuildUpdateBanner";
 import { isPwaStandaloneDisplay } from "./lib/pwaMode";
 import { loadOgBridgeIndex } from "./lib/ogBridgeResolver";
-import { startStaleChunkRecovery } from "./lib/staleChunkRecovery";
 
 // Warm the OG bridge manifest so share links resolve to real files, never 404
 // guesses. Deferred to idle: the manifest is ~84 KB of JSON and parsing it on
@@ -87,9 +86,6 @@ void clearStaleFrontendCachesOnce().then(() => {
   // Do not register an app-shell service worker. The published /sw.js is now
   // a one-release cleanup worker so stale installed PWAs fetch the current UI.
 });
-// Self-heal tabs that were open across a publish: a removed hashed chunk
-// triggers a one-time cache purge + reload instead of a broken panel.
-startStaleChunkRecovery();
 pinStandaloneHomeLaunchToHero();
 
 // Defer non-critical boot work (build-update watcher + RUM) off the initial
