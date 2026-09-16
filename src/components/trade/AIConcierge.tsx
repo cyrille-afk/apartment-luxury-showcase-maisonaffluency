@@ -665,6 +665,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const briefTransitionTimersRef = useRef<number[]>([]);
   const briefCloseTimerRef = useRef<number | null>(null);
   const briefTransitionRunRef = useRef(0);
+  const briefSubmitDoneRef = useRef<((ok: boolean) => void) | null>(null);
   const cancelBriefTransition = useCallback(() => {
     briefTransitionRunRef.current += 1;
     briefTransitionTimersRef.current.forEach((timer) => window.clearTimeout(timer));
