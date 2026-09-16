@@ -56,7 +56,6 @@ const ApartmentTour = () => {
         <meta property="og:video:height" content="1080" />
         <meta property="og:site_name" content="Maison Affluency" />
         <meta name="description" content="Cinematic tour of a bespoke Singapore apartment by Maison Affluency — collectible furniture, artisan craft, panoramic skyline views." />
-        <link rel="canonical" href={CANONICAL_URL} />
         <meta name="twitter:card" content="player" />
         <meta name="twitter:site" content="@maisonaffluency" />
         <meta name="twitter:title" content="A Private Apartment Tour — Maison Affluency" />

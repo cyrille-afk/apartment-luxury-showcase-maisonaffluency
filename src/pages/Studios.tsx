@@ -169,7 +169,6 @@ export default function Studios() {
       <Helmet>
         <title>{seoTitle}</title>
         <meta name="description" content={seoDescription} />
-        <link rel="canonical" href={canonical} />
         <link rel="alternate" hrefLang="en" href={canonical} />
         <link rel="alternate" hrefLang="x-default" href={canonical} />
 

@@ -179,7 +179,6 @@ export default function StudioProfile() {
       <Helmet>
         <title>{studio.name} | Featured Studio — Maison Affluency</title>
         <meta name="description" content={description} />
-        <link rel="canonical" href={canonicalUrl} />
         <link rel="alternate" hrefLang="en" href={canonicalUrl} />
         <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
         <meta property="og:type" content="profile" />

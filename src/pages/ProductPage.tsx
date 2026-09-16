@@ -98,7 +98,6 @@ const ProductPage = () => {
         <Helmet>
           <title>Loading product — Maison Affluency</title>
           <meta name="description" content="Curated collectible design at Maison Affluency Singapore." />
-          <link rel="canonical" href={earlyCanonical} />
           <meta name="robots" content="noindex" />
         </Helmet>
         <div className="min-h-screen bg-background flex items-center justify-center">
@@ -170,7 +169,6 @@ const ProductPage = () => {
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
-        <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:type" content="product" />

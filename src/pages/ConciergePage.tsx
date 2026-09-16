@@ -154,7 +154,6 @@ const ConciergePage: React.FC = () => {
           name="description"
           content="Maison Affluency's private concierge for bespoke commissions — custom materials, dimensions, finishes, lead times and pricing on collectible design."
         />
-        <link rel="canonical" href={canonical} />
         <meta name="robots" content="noindex, nofollow" />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Maison Affluency" />
