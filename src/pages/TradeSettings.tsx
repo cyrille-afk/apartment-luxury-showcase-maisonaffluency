@@ -65,6 +65,7 @@ const TradeSettings = () => {
 
   const [copilotName, setCopilotName] = useState("");
   const [savingCopilot, setSavingCopilot] = useState(false);
+  const [copilotError, setCopilotError] = useState("");
 
   useEffect(() => {
     if (profile?.concierge_name) setCopilotName(profile.concierge_name);
