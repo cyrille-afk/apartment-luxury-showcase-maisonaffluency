@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Bookmark, BookmarkPlus, ChevronDown, ChevronRight, ClipboardPaste, Trash2, X } from "lucide-react";
+import { Bookmark, BookmarkPlus, ChevronDown, ChevronRight, ClipboardPaste, Loader2, Trash2, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { BrandPicker } from "@/components/trade/concierge/BrandPicker";
 import { updateConciergeSession } from "@/hooks/useConciergeSession";
 import brandCategoriesRaw from "@/data/brandCategories.json";
@@ -678,18 +679,28 @@ export function BriefBuilder({
   value,
   onChange,
   onClose,
+  onSubmit,
+  onSubmittingChange,
 }: {
   value: string;
   onChange: (next: string) => void;
   onClose: () => void;
+  onSubmit?: (briefText: string) => Promise<void>;
+  onSubmittingChange?: (submitting: boolean) => void;
 }) {
   const [values, setValues] = useState<BriefValues>(DEFAULT_VALUES);
   const [prefix, setPrefix] = useState("");
   const [suffix, setSuffix] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const lastEmitted = useRef<string>("");
   const restoredRef = useRef(false);
   const scopeRef = useRef<string>(getProjectScope());
   const [expanded, setExpanded] = useState<ExpandedSections>(() => loadExpanded(scopeRef.current));
+
+  useEffect(() => {
+    onSubmittingChange?.(isSubmitting);
+  }, [isSubmitting, onSubmittingChange]);
 
   // Re-read the scope + its saved layout whenever the active project changes
   // while the builder is mounted (e.g. user switches project filter).
@@ -813,6 +824,35 @@ export function BriefBuilder({
     const nextValues = { ...values, block4: next };
     setValues(nextValues);
     emit(nextValues, prefix, suffix);
+  };
+
+  const briefTextForSubmit = () => {
+    const formatted = formatBrief(values);
+    return [prefix, formatted, suffix].filter(Boolean).join("\n\n");
+  };
+
+  const handleSubmit = async () => {
+    if (!onSubmit) return;
+    const text = briefTextForSubmit();
+    const validation = validateBriefDraft(text);
+    if (!validation.valid) {
+      setSubmitError(
+        `To ensure Felix curates an accurate project schedule, please specify your desired furniture Typologies before submitting. Missing: ${validation.missing.join(", ")}`,
+      );
+      window.setTimeout(() => setSubmitError(null), 5000);
+      return;
+    }
+    setSubmitError(null);
+    setIsSubmitting(true);
+    try {
+      await onSubmit(text);
+      setIsSubmitting(false);
+      onClose();
+    } catch {
+      setIsSubmitting(false);
+      setSubmitError("The brief could not be submitted. Please try again or send it from the composer.");
+      window.setTimeout(() => setSubmitError(null), 5000);
+    }
   };
 
   const toggleSection = (block: ObjectBlock) => {
@@ -1306,6 +1346,34 @@ export function BriefBuilder({
             through formatBrief so the model always receives it. */}
 
       </div>
+
+      {onSubmit && (
+        <div className="mt-4 flex flex-col items-end gap-2">
+          {submitError && (
+            <p className="max-w-md text-right font-body text-[11px] text-amber-600 dark:text-amber-400">
+              {submitError}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitting || !validateBriefValues(values).valid}
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-5 py-2 font-body text-[11px] uppercase transition-all duration-300 motion-reduce:transition-none disabled:cursor-not-allowed",
+              isSubmitting
+                ? "bg-muted text-muted-foreground tracking-[0.2em]"
+                : "bg-foreground text-background tracking-wider hover:opacity-90",
+            )}
+            aria-label={isSubmitting ? "Curating architectural layouts" : "Submit brief"}
+            title={isSubmitting ? "Curating architectural layouts" : "Submit brief"}
+          >
+            {isSubmitting && (
+              <Loader2 className="h-3.5 w-3.5 animate-[spin_2s_linear_infinite] motion-reduce:animate-none" aria-hidden="true" />
+            )}
+            <span>{isSubmitting ? "CURATING ARCHITECTURAL LAYOUTS..." : "Submit Brief"}</span>
+          </button>
+        </div>
+      )}
 
       {pasteFallbackOpen && (
         <div

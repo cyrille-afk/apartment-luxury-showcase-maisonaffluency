@@ -661,10 +661,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [briefCanvasExiting, setBriefCanvasExiting] = useState(false);
   const [briefBuilderClosing, setBriefBuilderClosing] = useState(false);
   const [briefHistoryEntering, setBriefHistoryEntering] = useState(false);
+  const [briefSubmitting, setBriefSubmitting] = useState(false);
   const pendingBriefPrefillRef = useRef<string | null>(null);
   const briefTransitionTimersRef = useRef<number[]>([]);
   const briefCloseTimerRef = useRef<number | null>(null);
   const briefTransitionRunRef = useRef(0);
+  const briefSubmitDoneRef = useRef<((ok: boolean) => void) | null>(null);
   const cancelBriefTransition = useCallback(() => {
     briefTransitionRunRef.current += 1;
     briefTransitionTimersRef.current.forEach((timer) => window.clearTimeout(timer));
@@ -2257,8 +2259,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     window.setTimeout(() => setConciergeStatus("curator_assigned"), 3600);
   }, [user?.email]);
 
-  const send = useCallback(async (overrideText?: string, opts?: { displayText?: string }) => {
-    const text = (overrideText ?? (briefBuilderOpen ? briefDraft : input)).trim();
+  const send = useCallback(async (overrideText?: string, opts?: { displayText?: string; builderSubmit?: boolean }) => {
+    let builderSubmitOk = false;
+    try {
+      const text = (overrideText ?? (briefBuilderOpen ? briefDraft : input)).trim();
 
     // Sentinel: user clicked the "Open Architectural Brief" CTA. Load the
     // prefilled brief into the composer and open the Brief Builder — do NOT
@@ -2637,7 +2641,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     // wink from the concierge so the user knows they can reopen it to
     // adjust the brief. Missing fields no longer block submission — they
     // become soft signals we surface inside the wink.
-    if (briefBuilderOpen) {
+    // When the dedicated Submit Brief button is handling the flow, keep the
+    // builder open and visible with its loading state. The builder itself will
+    // fade down once the semantic database sync is confirmed.
+    if (briefBuilderOpen && !opts?.builderSubmit) {
       setBriefBuilderOpen(false);
       const missing = briefValidation.missing;
       const winkBase = "Brief tucked away for now — tap the brief icon anytime to reopen and refine it.";
@@ -3309,6 +3316,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         },
         signal: controller.signal,
       });
+      await saveActiveThreadNow(timelineRef.current);
+      builderSubmitOk = true;
     } catch {
       clearStallTimer();
       setStreaming(false);
@@ -3318,6 +3327,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         pushRetry(text, "The connection to the concierge dropped.");
       }
     }
+    } finally {
+      if (opts?.builderSubmit) {
+        briefSubmitDoneRef.current?.(builderSubmitOk);
+        briefSubmitDoneRef.current = null;
+      }
+    }
   }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry, user, cancelBriefTransition, briefBuilderOpen, briefDraft]);
 
   // Keep a ref to the latest `send` so the concierge:stage handler (which
@@ -3325,6 +3340,16 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // instead of the stale closure captured at mount time.
   const sendRef = useRef(send);
   useEffect(() => { sendRef.current = send; }, [send]);
+
+  const submitBriefFromBuilder = useCallback(async (text: string) => {
+    return new Promise<void>((resolve, reject) => {
+      briefSubmitDoneRef.current = (ok) => {
+        if (ok) resolve();
+        else reject(new Error("Brief submission failed or was interrupted."));
+      };
+      sendRef.current(text, { displayText: "Submitted Architectural Brief", builderSubmit: true });
+    });
+  }, []);
 
   // Mandarin auto-hand-off: after each completed assistant turn on lang=zh,
   // ask the CN brief endpoint to classify intent. Server-side dedupe keeps
@@ -5196,6 +5221,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   value={briefDraft}
                   onChange={setBriefDraft}
                   onClose={closeBriefBuilder}
+                  onSubmit={submitBriefFromBuilder}
+                  onSubmittingChange={setBriefSubmitting}
                 />
               </div>
             )}
@@ -5479,11 +5506,18 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 disabled={
                   (!(briefBuilderOpen ? briefDraft : input).trim() && attachments.length === 0) ||
                   streaming ||
+                  briefSubmitting ||
                   (briefBuilderOpen && !briefValidation.valid)
                 }
                 className="order-2 ml-auto h-11 w-11 shrink-0 rounded-none bg-foreground text-background p-2 disabled:opacity-40 hover:opacity-90 transition-opacity lg:order-none lg:ml-0 lg:h-auto lg:w-auto lg:rounded-xl"
-                aria-label="Send"
-                title={briefBuilderOpen && !briefValidation.valid ? "Complete required brief fields before sending" : "Send"}
+                aria-label={briefBuilderOpen ? "Submit brief" : "Send"}
+                title={
+                  briefBuilderOpen && briefValidation.valid
+                    ? "Submit brief"
+                    : briefBuilderOpen && !briefValidation.valid
+                      ? "Complete required brief fields before sending"
+                      : "Send"
+                }
               >
                 <Send className="h-4 w-4" />
               </button>
