@@ -1,6 +1,5 @@
 # Allow social preview crawlers full access to OG bridge pages.
-# These crawlers ignore robots meta tags and need the static OG markup
-# in *-og.html / *-card.html / *-share.html bridges to render rich link previews.
+
 User-agent: Googlebot
 Allow: /
 Allow: /trade/spec-sheet
@@ -37,12 +36,13 @@ User-agent: Discordbot
 Allow: /
 
 # Default policy for all other crawlers (Google, Bing, etc.)
-# Bridge files are blocked here AND carry <meta name="robots" content="noindex">
-# so they don't compete with the real React routes for canonical selection.
+
 User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /trade/admin
+Disallow: /trade/admin/trade-review
+Disallow: /admin/trade-review
 Disallow: /concierge
 Disallow: /collectibles
 Disallow: /trade/media
@@ -82,7 +82,6 @@ Disallow: /admin/
 User-agent: ChatGPT-User
 Allow: /
 
-# Allow Google AI (AI Overviews, Gemini)
 User-agent: Google-Extended
 Allow: /
 
@@ -95,6 +94,4 @@ Allow: /
 User-agent: cohere-ai
 Disallow: /
 
-Sitemap: https://maisonaffluency.com/sitemap.xml
-Disallow: /admin/trade-review
-Disallow: /trade/admin/trade-review
+Sitemap: https://www.maisonaffluency.com/sitemap.xml
