@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, ArrowRight, Check, Pause, Play, Sparkles, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 type FelixStep = {
@@ -8,36 +9,41 @@ type FelixStep = {
   title: string;
   target: string; // data-felix-target selector value
   dialogue: string;
+  route: string;
 };
 
 const FELIX_STEPS: FelixStep[] = [
   {
     id: "welcome",
-    title: "Welcome to Maison Affluency",
+    title: "The Welcome Desk & Silver Tier",
     target: "greeting",
+    route: "/trade",
     dialogue:
-      "Welcome! I am Felix, your AI Curatorial Guide. Your trade account is active, and your Silver Tier benefits have been pre-applied across the portal. Let's take a quick look around.",
+      "Welcome! I am Felix, your AI Curatorial Guide. As you can see right here under your welcome greeting, your account is verified at the Silver Tier level. This automatically unlocks exclusive trade pricing across our entire platform.",
   },
   {
     id: "collection",
-    title: "The Collection & Showrooms",
+    title: "Sourcing via 'The Collection'",
     target: "nav-collection",
+    route: "/trade/the-collection",
     dialogue:
-      "This is your primary design hub. Here, you can browse iconic pieces and see your exclusive Silver Tier trade discounts applied in real-time.",
+      "This is your primary design hub. Clicking here opens our Curated Showroom and Full Catalogue, where you can browse iconic global pieces with your Silver Tier discounts pre-applied.",
   },
   {
     id: "quotes",
     title: "Quotes & Proformas",
     target: "nav-quotes",
+    route: "/trade/quotes",
     dialogue:
-      "Generate bespoke client presentations here. You can group pieces by specific residential projects and export verified proforma invoices with one click.",
+      "Paramount for your business transactions, this section allows you to build bespoke presentations for clients, organize items by specific active projects, and instantly generate verified proforma invoices.",
   },
   {
-    id: "status",
-    title: "Preferred Trade Status",
-    target: "account-panel",
+    id: "tools",
+    title: "Deep Dive Tools & Settings",
+    target: "nav-tools-settings",
+    route: "/trade/tools",
     dialogue:
-      "Review your tier status milestones, transaction history, and active trade perks at any time right here. Feel free to explore!",
+      "Finally, use the Tools area to access specialized trade widgets, layouts, and adjust your professional profile configurations whenever needed. Enjoy creating with us!",
   },
 ];
 
@@ -47,6 +53,7 @@ const PAD = 10;
 type Rect = { top: number; left: number; width: number; height: number };
 
 export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -58,22 +65,34 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   const measure = useCallback(() => {
     setViewport({ w: window.innerWidth, h: window.innerHeight });
-    const el = document.querySelector(`[data-felix-target="${FELIX_STEPS[currentStep].target}"]`);
-    if (!el) {
+    const elements = Array.from(document.querySelectorAll(`[data-felix-target="${FELIX_STEPS[currentStep].target}"]`));
+    if (elements.length === 0) {
       setRect(null);
       return;
     }
-    const r = el.getBoundingClientRect();
-    setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+    const rects = elements.map((element) => element.getBoundingClientRect());
+    const top = Math.min(...rects.map((r) => r.top));
+    const left = Math.min(...rects.map((r) => r.left));
+    const right = Math.max(...rects.map((r) => r.right));
+    const bottom = Math.max(...rects.map((r) => r.bottom));
+    setRect({ top, left, width: right - left, height: bottom - top });
   }, [currentStep]);
+
+  useEffect(() => {
+    if (!open) return;
+    navigate(step.route);
+  }, [navigate, open, step.route]);
 
   useLayoutEffect(() => {
     if (!open) return;
     measure();
     const onChange = () => measure();
+    const observer = new MutationObserver(onChange);
+    observer.observe(document.body, { childList: true, subtree: true });
     window.addEventListener("resize", onChange);
     window.addEventListener("scroll", onChange, true);
     return () => {
+      observer.disconnect();
       window.removeEventListener("resize", onChange);
       window.removeEventListener("scroll", onChange, true);
     };

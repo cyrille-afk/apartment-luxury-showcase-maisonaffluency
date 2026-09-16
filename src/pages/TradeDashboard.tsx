@@ -7,7 +7,7 @@ import {
   Image, FileText, FolderOpen, FolderClosed,
   Clock, FileDown, MapPin, Box, Users, Sparkles,
 } from "lucide-react";
-import { FelixTour, startFelixTour } from "@/components/trade/FelixTour";
+import { startFelixTour } from "@/components/trade/FelixTour";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
 import { BoardRecommendations } from "@/components/trade/BoardRecommendations";
@@ -222,7 +222,6 @@ const TradeDashboard = () => {
   return (
     <>
       <Helmet><title>Dashboard — Trade Portal — Maison Affluency</title></Helmet>
-      <FelixTour />
     <div className="trade-dashboard w-full max-w-[1500px] mx-auto">
       <div className="mb-10 md:mb-14 lg:mb-16 border-b border-border pb-7 md:pb-9">
         <div className="flex items-start justify-between gap-4">

@@ -125,7 +125,9 @@ export function TradeSidebar() {
                           ? "nav-collection"
                           : item.url === "/trade/quotes"
                             ? "nav-quotes"
-                            : undefined
+                            : item.url === "/trade/tools" || item.url === "/trade/settings"
+                              ? "nav-tools-settings"
+                              : undefined
                       }
                       className="flex items-center gap-3 px-3 py-3 font-body text-xs text-muted-foreground hover:text-foreground transition-colors border-l border-transparent"
                       activeClassName="text-foreground font-medium border-foreground"

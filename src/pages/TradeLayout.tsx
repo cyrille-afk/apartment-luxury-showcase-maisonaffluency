@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { TradeSidebar } from "@/components/trade/TradeSidebar";
+import { FelixTour } from "@/components/trade/FelixTour";
 import { TradeMobileMenu } from "@/components/trade/TradeMobileMenu";
 import { NotificationBell } from "@/components/trade/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
@@ -479,6 +480,7 @@ const TradeLayout = () => {
         </div>
       </div>
       <Suspense fallback={null}>
+        <FelixTour />
         <CompareFab />
         <CompareDrawer />
         <AIConcierge />
