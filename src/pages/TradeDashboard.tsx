@@ -15,6 +15,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import { useProjects } from "@/hooks/useProjects";
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import dashboard3dStudioImage from "@/assets/dashboard-3d-style-neutrals.jpg";
 
 interface BrandFolder {
@@ -76,6 +78,8 @@ const formatRelativeDate = (dateStr: string) => {
 
 const TradeDashboard = () => {
   const { profile } = useAuth();
+  const { tierLabel } = useTradeDiscount();
+  const { showTradePrice } = useTradePriceMode();
   const { projects: activeProjects } = useProjects({ activeOnly: true });
   const [searchParams, setSearchParams] = useSearchParams();
   const [brands, setBrands] = useState<BrandFolder[]>([]);
@@ -224,10 +228,11 @@ const TradeDashboard = () => {
             <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-normal text-foreground leading-none">
               Welcome back{profile?.first_name ? `, ${profile.first_name}` : ""}
             </h1>
-            <p className="trade-micro-label font-body text-muted-foreground mt-4">
-              {profile?.company && <span>{profile.company} · </span>}
-              Your trade dashboard
-            </p>
+            {profile?.company && showTradePrice && (
+              <p className="trade-micro-label mt-4 font-body uppercase text-muted-foreground">
+                {profile.company} • {tierLabel} partner
+              </p>
+            )}
           </div>
           <div className="shrink-0 flex items-center gap-2" />
 

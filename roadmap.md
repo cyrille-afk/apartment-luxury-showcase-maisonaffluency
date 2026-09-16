@@ -68,3 +68,4 @@
 - [x] Quote builder: picking a client with a Default currency (e.g. Liz Spradling → USD) now auto-switches the quote currency toggle once; manual toggle override preserved
 - [x] Trade Tiers admin: ADMIN / TRADE TIERS breadcrumb, 90vw/1800px wide canvas, 3-card wide row, new defaults Silver 10%/€0, Gold 15%/€50k, Platinum 20%/€200k (DB + code fallbacks synced)
 - [x] Brand-specific margin caps: designers.max_trade_discount admin input, shared min(tier, cap) rule across Trade Gallery, quote builder and checkout, 'Max margin cap applied for this supplier.' badge, server-side re-derivation in create-cart-checkout (verified live: 2%% cap on a supplier capped the gallery trade price and showed the badge)
+- [x] Auto-suggest client default currency from billing country while preserving manual overrides, and show the live trade tier beneath the dashboard greeting
