@@ -825,6 +825,35 @@ export function BriefBuilder({
     emit(nextValues, prefix, suffix);
   };
 
+  const briefTextForSubmit = () => {
+    const formatted = formatBrief(values);
+    return [prefix, formatted, suffix].filter(Boolean).join("\n\n");
+  };
+
+  const handleSubmit = async () => {
+    if (!onSubmit) return;
+    const text = briefTextForSubmit();
+    const validation = validateBriefDraft(text);
+    if (!validation.valid) {
+      setSubmitError(
+        `To ensure Felix curates an accurate project schedule, please specify your desired furniture Typologies before submitting. Missing: ${validation.missing.join(", ")}`,
+      );
+      window.setTimeout(() => setSubmitError(null), 5000);
+      return;
+    }
+    setSubmitError(null);
+    setIsSubmitting(true);
+    try {
+      await onSubmit(text);
+      setIsSubmitting(false);
+      onClose();
+    } catch {
+      setIsSubmitting(false);
+      setSubmitError("The brief could not be submitted. Please try again or send it from the composer.");
+      window.setTimeout(() => setSubmitError(null), 5000);
+    }
+  };
+
   const toggleSection = (block: ObjectBlock) => {
     const next = { ...expanded, [block]: !expanded[block] };
     setExpanded(next);
