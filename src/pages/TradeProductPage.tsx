@@ -84,6 +84,7 @@ import AlsoContainsFinishes from "@/components/product/AlsoContainsFinishes";
 import { firstPublicVariantDimensionLabel } from "@/lib/productVariantSpecs";
 import { createActiveDraftQuote, fetchActiveDraftQuoteId } from "@/lib/activeProjectId";
 import { addToCart } from "@/lib/cart";
+import NotFound from "@/pages/NotFound";
 
 
 const specIcon = (symbol: string, className = "") => (

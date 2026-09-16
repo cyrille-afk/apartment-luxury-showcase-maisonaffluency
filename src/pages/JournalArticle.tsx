@@ -11,6 +11,7 @@ import JournalMarkdown from "@/components/journal/JournalMarkdown";
 
 import { fetchArticleBySlug, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
 import { useAuth } from "@/hooks/useAuth";
+import NotFound from "@/pages/NotFound";
 
 const PdfViewer = lazy(() => import("@/components/journal/PdfViewer"));
 

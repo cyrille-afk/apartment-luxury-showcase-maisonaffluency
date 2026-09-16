@@ -6,6 +6,7 @@ import DesignersDirectory from "@/components/DesignersDirectory";
 import CategorySeo from "@/components/seo/CategorySeo";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { categoryFromSlug, subcategoryFromSlugs } from "@/lib/categorySlugs";
+import NotFound from "@/pages/NotFound";
 import {
   setPendingCategoryFilter,
   clearPendingCategoryFilter,

@@ -10,6 +10,7 @@ import { useHeritageSlides } from "@/hooks/useHeritageSlides";
 import { useDesigner } from "@/hooks/useDesigner";
 import { useAuth } from "@/hooks/useAuth";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import NotFound from "@/pages/NotFound";
 
 function displayName(name: string): string {
   if (name.includes(" - ")) {

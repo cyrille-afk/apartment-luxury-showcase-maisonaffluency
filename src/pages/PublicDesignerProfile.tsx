@@ -59,6 +59,7 @@ import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePubli
 import NewInSpotlight from "@/components/NewInSpotlight";
 import SwipeAlternateProductImage from "@/components/product/SwipeAlternateProductImage";
 import { useShippingDestination } from "@/lib/shippingDestination";
+import NotFound from "@/pages/NotFound";
 // Collectible profiles are public; product-page gating lives in PublicProductPage.
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };

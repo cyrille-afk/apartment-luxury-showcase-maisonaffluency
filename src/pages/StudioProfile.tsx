@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, BarChart3, ExternalLink, Globe, Instagram, Mail, MapPin } from "lucide-react";
 import { logStudioEvent, type StudioCtaKind } from "@/lib/leadTracking";
+import NotFound from "@/pages/NotFound";
 
 type Studio = {
   id: string;
