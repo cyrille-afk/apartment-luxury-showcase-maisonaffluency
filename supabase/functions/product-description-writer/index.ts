@@ -388,7 +388,7 @@ RULES:
       {
         // Scope cache to (tone, product_id) so different products with similar
         // brand-biography blocks can never collide via semantic similarity.
-        feature: `product-description-writer:v3:${tone}:${source}:${product_id}`,
+        feature: `product-description-writer:v4:${tone}:${source}:${product_id}`,
         model: DESCRIPTION_MODEL,
         prompt: cachePrompt,
         apiKey: LOVABLE_API_KEY,
@@ -450,10 +450,13 @@ RULES:
       );
     }
 
-    const description = cached.value.description;
+    // Hard-enforce the ≤160-char meta limit for the seo tone, trimming at a
+    // sentence/word boundary instead of mid-sentence. Applies to cached and
+    // fresh output alike.
+    const description = tone === "seo" ? trimSeoMeta(cached.value.description) : cached.value.description;
     const seoLengthViolation = tone === "seo" && description.length > MAX_SEO_DESCRIPTION_LENGTH;
     if (seoLengthViolation) {
-      console.warn(`[product-description-writer] SEO description exceeds ${MAX_SEO_DESCRIPTION_LENGTH} chars: ${description.length} chars for product ${product_id}`);
+      console.warn(`[product-description-writer] SEO description exceeds ${MAX_SEO_DESCRIPTION_LENGTH} chars after trim: ${description.length} chars for product ${product_id}`);
     }
 
     logAiUsage({
