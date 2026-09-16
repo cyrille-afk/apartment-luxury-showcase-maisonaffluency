@@ -3168,6 +3168,38 @@ function typologyTokensToCategories(tokens: string[]): string[] {
   return Array.from(hits);
 }
 
+/**
+ * Deterministically parse declared TYPOLOGY lines out of the conversation
+ * (Brief Builder submissions and "Focus typology:" CTA lines).
+ *
+ * HARDENED: the label must lead its own line (allow list markers / block
+ * prefixes), immediately followed by a colon/dash. Prevents matches inside
+ * prose like "the typology of the project profile is loose." Anything before
+ * the word "typology" on the same line must be short (< ~24 chars).
+ */
+function parseDeclaredTypologyCats(text: string): string[] {
+  const out: string[] = [];
+  const typRe = /^[\s>*\-–—•]*(?:(?:block\s*\d+[\s:.\-–—]*)|(?:[a-z][a-z ]{0,22}\s+))?typology(?:\s*\([^)\n]{0,40}\))?\s*[:\-–—]\s*(.+)$/gim;
+  let tm: RegExpExecArray | null;
+  while ((tm = typRe.exec(text || "")) !== null) {
+    const raw = tm[1].replace(/[\[\]]/g, "").trim();
+    if (!raw) continue;
+    // Skip payloads that are themselves another block label echo.
+    if (/^(references|materials?|palette|budget|constraints?|block\s*\d+)\b/i.test(raw)) continue;
+    // Split on commas, plus, ampersand, slash, and " and "
+    const tokens = raw.split(/,|\+|&|\/|\band\b/i).map((t) => t.trim().toLowerCase()).filter(Boolean);
+    for (const t of tokens) {
+      // Strip trailing counts like "coffee table x2".
+      const cleaned = t.replace(/\s*x?\s*\d+\s*$/i, "").trim();
+      if (cleaned.length >= 3) out.push(cleaned);
+    }
+    for (const cat of typologyTokensToCategories(tokens)) out.push(cat);
+  }
+  return out;
+}
+
+
+
 function lineMatchesTypologyTerms(line: { title?: string | null; category?: string | null; subcategory?: string | null }, terms: string[] | undefined): boolean {
   const normalizedTerms = (terms || []).map((t) => normalizeLoose(t)).filter(Boolean);
   if (!normalizedTerms.length) return true;
@@ -5080,9 +5112,16 @@ serve(async (req) => {
     const hasAnyPreConstraint =
       (preRequestConstraints.materials?.length || 0) +
       (preRequestConstraints.colors?.length || 0) > 0;
+    // Typologies declared in the conversation (Brief Builder blocks, "Focus
+    // typology:" CTA lines). When present, the typology leads retrieval and
+    // palette/vibe tokens are demoted to ranking weights — see the
+    // TYPOLOGY-LED PERMISSIVE MATCHING block further down.
+    const declaredTypologyCats = parseDeclaredTypologyCats(userConversationText);
+    const ragConstraintsActive = hasAnyPreConstraint && declaredTypologyCats.length === 0;
     if (hasAnyPreConstraint) {
-      console.log("[concierge hard-constraints]", JSON.stringify(preRequestConstraints));
+      console.log("[concierge hard-constraints]", JSON.stringify({ ...preRequestConstraints, ragConstraintsActive, declaredTypologyCats }));
     }
+
     // Run sentiment + RAG retrieval in parallel with the rest. RAG is best-effort.
     const timed = async <T,>(name: string, p: Promise<T>): Promise<T> => {
       const s = performance.now();
@@ -5121,7 +5160,7 @@ serve(async (req) => {
     const shouldBypassSemanticCache = latestTurnHasAttachments || hasVisualSourcingContext;
     const ragPromise = (latestTurnHasAttachments || hasVisualSourcingContext || heuristicNeedsPieces || lastUserMsg.length > 40)
       ? buildRagQuery().then((q) =>
-          loadRelevantPieces(supabase, LOVABLE_API_KEY, q, userId, 40, hasAnyPreConstraint ? preRequestConstraints : undefined),
+          loadRelevantPieces(supabase, LOVABLE_API_KEY, q, userId, 40, ragConstraintsActive ? preRequestConstraints : undefined),
         )
       : Promise.resolve(null);
     const bundleT0 = performance.now();
@@ -5404,33 +5443,8 @@ serve(async (req) => {
     // Also deterministically parse TYPOLOGY from the structured brief so the
     // category filter stays live even on follow-up turns (the LLM extractor
     // won't see the brief again after turn 1).
-    const parsedTypologyCats: string[] = [];
-    {
-      // HARDENED: label must lead its own line (allow list markers / block
-      // prefixes), immediately followed by a colon/dash. Prevents matches
-      // inside prose like "the typology of the project profile is loose."
-      // Match block-labelled lines ("Typology: …", "Block 2 - Typology: …")
-      // AND the CTA input line ("Focus typology (optional): …" / "Focus
-      // typology: …"). Anything before the word "typology" on the same line
-      // must be short (< ~24 chars) so we don't grab prose like
-      // "the typology of the project profile is loose."
-      const typRe = /^[\s>*\-–—•]*(?:(?:block\s*\d+[\s:.\-–—]*)|(?:[a-z][a-z ]{0,22}\s+))?typology(?:\s*\([^)\n]{0,40}\))?\s*[:\-–—]\s*(.+)$/gim;
-      let tm: RegExpExecArray | null;
-      while ((tm = typRe.exec(userConversationText)) !== null) {
-        const raw = tm[1].replace(/[\[\]]/g, "").trim();
-        if (!raw) continue;
-        // Skip payloads that are themselves another block label echo.
-        if (/^(references|materials?|palette|budget|constraints?|block\s*\d+)\b/i.test(raw)) continue;
-        // Split on commas, plus, ampersand, slash, and " and "
-        const tokens = raw.split(/,|\+|&|\/|\band\b/i).map((t) => t.trim().toLowerCase()).filter(Boolean);
-        for (const t of tokens) {
-          // Strip trailing counts like "coffee table x2".
-          const cleaned = t.replace(/\s*x?\s*\d+\s*$/i, "").trim();
-          if (cleaned.length >= 3) parsedTypologyCats.push(cleaned);
-        }
-        for (const cat of typologyTokensToCategories(tokens)) parsedTypologyCats.push(cat);
-      }
-    }
+    const parsedTypologyCats: string[] = declaredTypologyCats.slice();
+
     const sqlLoadConstraints: HardConstraints = {
       materials: [
         ...(preRequestConstraints.materials || []),
@@ -5454,7 +5468,9 @@ serve(async (req) => {
       droppedMaterials: string[];
       droppedColors: string[];
       nullRatio: number;
+      mode: "sparse_materials" | "typology_led";
     } | null = null;
+
     if (
       hasScopedDesigners &&
       ((sqlLoadConstraints.materials?.length || 0) + (sqlLoadConstraints.colors?.length || 0) > 0)
@@ -5496,6 +5512,7 @@ serve(async (req) => {
             droppedMaterials: [...(sqlLoadConstraints.materials || [])],
             droppedColors: [...(sqlLoadConstraints.colors || [])],
             nullRatio: Math.round(nullRatio * 100) / 100,
+            mode: "sparse_materials",
           };
           sqlLoadConstraints.materials = [];
           sqlLoadConstraints.colors = [];
@@ -5505,6 +5522,32 @@ serve(async (req) => {
         console.warn("[concierge palette-advisory probe failed]", (e as Error).message);
       }
     }
+    // TYPOLOGY-LED PERMISSIVE MATCHING
+    // A submitted brief used to AND together Typology × Vibe × Palette ×
+    // Brands, so Felix held a "draft under-delivers" tearsheet even when the
+    // referenced ateliers (e.g. Ecart, Leo Sentou) publish the requested
+    // dining tables / coffee tables / chairs — they simply lacked the literal
+    // words "art deco" or "bouclé" in their metadata. When the brief declares
+    // a typology, the typology (and any brand scope) stays a hard filter while
+    // vibe + palette become ranking weights only.
+    if (
+      !paletteAdvisory &&
+      declaredTypologyCats.length > 0 &&
+      ((sqlLoadConstraints.materials?.length || 0) + (sqlLoadConstraints.colors?.length || 0) > 0)
+    ) {
+      paletteAdvisory = true;
+      paletteAdvisoryReason = {
+        brands: hasScopedDesigners ? scopedDesigners : [],
+        droppedMaterials: [...(sqlLoadConstraints.materials || [])],
+        droppedColors: [...(sqlLoadConstraints.colors || [])],
+        nullRatio: 0,
+        mode: "typology_led",
+      };
+      sqlLoadConstraints.materials = [];
+      sqlLoadConstraints.colors = [];
+      console.log("[concierge typology-led-palette]", paletteAdvisoryReason);
+    }
+
     const hasSqlConstraint =
       (sqlLoadConstraints.materials?.length || 0) +
       (sqlLoadConstraints.colors?.length || 0) +
@@ -5525,7 +5568,7 @@ serve(async (req) => {
     // Detect "hard constraints matched zero pieces" so the UI can render a
     // friendly empty-state and the model can acknowledge it warmly instead of
     // hallucinating alternatives.
-    const ragEmpty = useRag && hasAnyPreConstraint && (!ragResult || !Array.isArray((ragResult as any).rows) || (ragResult as any).rows.length === 0 || !(ragResult as { contextText: string }).contextText);
+    const ragEmpty = useRag && ragConstraintsActive && (!ragResult || !Array.isArray((ragResult as any).rows) || (ragResult as any).rows.length === 0 || !(ragResult as { contextText: string }).contextText);
     const sqlEmpty = !useRag && hasSqlConstraint && !hasScopedDesigners && (fullPiecesList === "No pieces currently loaded." || !fullPiecesList);
     const constraintsMatchedZero = ragEmpty || sqlEmpty;
     const constraintsEmptySource: "rag" | "sql" | null = ragEmpty ? "rag" : sqlEmpty ? "sql" : null;
@@ -5543,7 +5586,10 @@ serve(async (req) => {
       ? [
           "",
           "⚠️ PALETTE ADVISORY MODE ⚠️",
-          `The catalog's \`materials\` column is sparse for the scoped brand(s) ${paletteAdvisoryReason.brands.join(", ")} (${Math.round(paletteAdvisoryReason.nullRatio * 100)}% of rows have no structured material data). The palette / material constraint(s) [${[...paletteAdvisoryReason.droppedMaterials, ...paletteAdvisoryReason.droppedColors].join(", ") || "—"}] have been dropped from retrieval so typology + brand still return matches.`,
+          paletteAdvisoryReason.mode === "typology_led"
+            ? `The brief declares a typology, so the vibe / palette constraint(s) [${[...paletteAdvisoryReason.droppedMaterials, ...paletteAdvisoryReason.droppedColors].join(", ") || "—"}] are treated as WEIGHTING FACTORS, not database filters. Retrieval binds on typology${paletteAdvisoryReason.brands.length ? ` + the referenced atelier(s) ${paletteAdvisoryReason.brands.join(", ")}` : ""}; pieces are ranked by how closely they answer the palette, but a piece is NOT excluded for lacking those exact words in its metadata.`
+            : `The catalog's \`materials\` column is sparse for the scoped brand(s) ${paletteAdvisoryReason.brands.join(", ")} (${Math.round(paletteAdvisoryReason.nullRatio * 100)}% of rows have no structured material data). The palette / material constraint(s) [${[...paletteAdvisoryReason.droppedMaterials, ...paletteAdvisoryReason.droppedColors].join(", ") || "—"}] have been dropped from retrieval so typology + brand still return matches.`,
+
           "When you propose the tearsheet, append a single italic advisory line beneath it: *Palette shown as reference; confirm finish availability with the atelier.* Do NOT claim the pieces are guaranteed to be available in the requested finish, and do NOT hold or refuse the tearsheet on palette grounds this turn.",
           "",
         ].join("\n")
@@ -6491,7 +6537,7 @@ serve(async (req) => {
           ])],
           categories: [...new Set(((sqlLoadConstraints.categories) || []))],
           applied_to: [
-            hasAnyPreConstraint ? "rag" : null,
+            ragConstraintsActive ? "rag" : null,
             (hasSqlConstraint && !hasScopedDesigners) ? "sql" : null,
           ].filter(Boolean) as string[],
           empty: constraintsMatchedZero,
