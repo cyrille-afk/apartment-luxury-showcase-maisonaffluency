@@ -1271,6 +1271,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   type ConciergeThread = { id: string; title: string; last_active_at: string };
   const [threads, setThreads] = useState<ConciergeThread[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
+  const previousThreadIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (previousThreadIdRef.current !== null && previousThreadIdRef.current !== activeThreadId) {
+      cancelBriefTransition();
+    }
+    previousThreadIdRef.current = activeThreadId;
+  }, [activeThreadId, cancelBriefTransition]);
   const [threadsOpen, setThreadsOpen] = useState(false);
   const hydratedThreadRef = useRef<string | null>(null);
   const cloudSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
