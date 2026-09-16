@@ -371,6 +371,7 @@ function extractBriefVibe(text?: string | null): string | null {
 
 const HELD_TEARSHEET_RE = /(?:I[’']m going to hold the tearsheet|hold the tearsheet rather than)/i;
 const LAYOUT_INTRO_RE = /^I have structured your brief and generated three distinct custom configurations for your .+ project below\./i;
+const LAYOUT_CONFIRMATION_RE = /^Excellent choice\. I have locked in .+ for your layout workspace\./i;
 
 function layoutProjectLabel(text?: string | null, context = ""): string {
   const source = String(text || "");
@@ -389,7 +390,9 @@ function clearBriefResultState(items: TimelineItem[]): TimelineItem[] {
   return items.filter((item) => {
     if (item.kind === "layout_options" || item.kind === "pending_proposal" || item.kind === "retry") return false;
     if (item.kind !== "msg" || item.role !== "assistant") return true;
-    return !HELD_TEARSHEET_RE.test(item.content || "") && !LAYOUT_INTRO_RE.test(item.content || "");
+    return !HELD_TEARSHEET_RE.test(item.content || "")
+      && !LAYOUT_INTRO_RE.test(item.content || "")
+      && !LAYOUT_CONFIRMATION_RE.test(item.content || "");
   });
 }
 
@@ -4726,8 +4729,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                       selected={item.selected ?? null}
                       styleInput={item.styleInput ?? null}
                       onSelect={(option) => {
-                        if (item.selected) return;
+                        if (item.selected != null) return;
                         setTimeline((prev) => {
+                          const currentGrid = prev.find(
+                            (entry) => entry.kind === "layout_options" && entry.id === item.id,
+                          );
+                          if (currentGrid?.kind !== "layout_options" || currentGrid.selected != null) {
+                            return prev;
+                          }
                           const next = prev.map((t) =>
                             t.kind === "layout_options" && t.id === item.id
                               ? { ...t, selected: option.id }
@@ -4738,7 +4747,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                             {
                               kind: "msg" as const,
                               role: "assistant" as const,
-                              content: `Excellent choice. I have locked in Option ${option.id} for your GCB project. I am now compiling the live FF&E Schedule and generating your official trade quote preview right below.`,
+                              content: `Excellent choice. I have locked in ${option.name} for your layout workspace. I am now compiling the live FF&E Schedule and generating your official trade quote preview right below.`,
                             },
                           ];
                         });
