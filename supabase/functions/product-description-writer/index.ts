@@ -6,11 +6,18 @@ import { modelFor, tokenBudget } from "../_shared/aiModels.ts";
 import { withSemanticCache } from "../_shared/aiCache.ts";
 
 const DESCRIPTION_MODEL = modelFor("balanced");
-// Long-form on-page copy targets 180–260 words. The balanced tier spends part of
-// its budget on internal reasoning tokens, so the "rewrite" cap truncated seo_long
-// output mid-sentence. Give long-form a much larger ceiling.
+// The balanced tier spends part of its budget on internal reasoning tokens, so the
+// plain "rewrite" cap (600) truncated output mid-sentence for every tone. Give each
+// tone enough ceiling for reasoning + full prose.
 const DESCRIPTION_MAX_TOKENS = tokenBudget("rewrite");
 const SEO_LONG_MAX_TOKENS = 2400;
+const TONE_MAX_TOKENS: Record<string, number> = {
+  editorial: 1800,
+  technical: 1800,
+  seo: 1200,
+  seo_long: SEO_LONG_MAX_TOKENS,
+};
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -362,7 +369,7 @@ RULES:
       {
         // Scope cache to (tone, product_id) so different products with similar
         // brand-biography blocks can never collide via semantic similarity.
-        feature: `product-description-writer:v2:${tone}:${source}:${product_id}`,
+        feature: `product-description-writer:v3:${tone}:${source}:${product_id}`,
         model: DESCRIPTION_MODEL,
         prompt: cachePrompt,
         apiKey: LOVABLE_API_KEY,
@@ -378,7 +385,7 @@ RULES:
           },
           body: JSON.stringify({
             model: DESCRIPTION_MODEL,
-            max_completion_tokens: tone === "seo_long" ? SEO_LONG_MAX_TOKENS : DESCRIPTION_MAX_TOKENS,
+            max_completion_tokens: TONE_MAX_TOKENS[tone] ?? DESCRIPTION_MAX_TOKENS,
             messages: [
               { role: "system", content: systemPrompt },
               { role: "user", content: `Generate a ${tone} product description using the following data:\n${productContext}` },
