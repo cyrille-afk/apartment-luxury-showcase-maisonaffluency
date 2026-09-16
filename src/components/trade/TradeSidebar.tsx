@@ -125,9 +125,11 @@ export function TradeSidebar() {
                           ? "nav-collection"
                           : item.url === "/trade/quotes"
                             ? "nav-quotes"
-                            : item.url === "/trade/tools" || item.url === "/trade/settings"
-                              ? "nav-tools-settings"
-                              : undefined
+                            : item.url === "/trade/tools"
+                              ? "nav-tools"
+                              : item.url === "/trade/settings"
+                                ? "nav-settings"
+                                : undefined
                       }
                       className="flex items-center gap-3 px-3 py-3 font-body text-xs text-muted-foreground hover:text-foreground transition-colors border-l border-transparent"
                       activeClassName="text-foreground font-medium border-foreground"
@@ -142,7 +144,7 @@ export function TradeSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
+        <SidebarGroup data-felix-target="nav-projects">
           <SidebarGroupLabel className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
             {!collapsed && "PROJECTS & INTERVENTIONS"}
           </SidebarGroupLabel>
