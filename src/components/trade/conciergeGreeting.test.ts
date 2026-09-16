@@ -60,6 +60,20 @@ describe("greetingForContext", () => {
     expect(DEFAULT_GREETING).toMatch(/- \*\*Source\*\*/);
     expect(DEFAULT_GREETING).toMatch(/- \*\*Generate\*\*/);
     expect(DEFAULT_GREETING).toMatch(/- \*\*Automate\*\*/);
+    expect(DEFAULT_GREETING).toMatch(/\{trade_tier\}/);
+    expect(DEFAULT_GREETING).toMatch(/\{tier_discount_text\}/);
+  });
+
+  it("replaces tier and discount placeholders when meta is supplied", () => {
+    const msg = greetingForContext("Discover", "/trade/dashboard", "luxury", "en", {
+      conciergeName: "Felix",
+      tradeTier: "Platinum",
+      tierDiscountText: "20% discount",
+    });
+    expect(msg).toMatch(/\*\*Platinum Tier\*\*/);
+    expect(msg).toMatch(/\*\*20% discount pricing\*\*/);
+    expect(msg).not.toMatch(/\{trade_tier\}/);
+    expect(msg).not.toMatch(/\{tier_discount_text\}/);
   });
 
   it("uses consistent 'Allow me to help' phrasing across all stages except Discover", () => {
