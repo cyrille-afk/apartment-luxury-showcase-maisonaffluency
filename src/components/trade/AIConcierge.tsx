@@ -4701,6 +4701,33 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   </div>
                 );
               }
+              if (item.kind === "layout_options") {
+                return (
+                  <div key={i} className="w-full self-start">
+                    <LayoutComparisonGrid
+                      selected={item.selected ?? null}
+                      onSelect={(option) => {
+                        if (item.selected) return;
+                        setTimeline((prev) => {
+                          const next = prev.map((t) =>
+                            t.kind === "layout_options" && t.id === item.id
+                              ? { ...t, selected: option.id }
+                              : t,
+                          );
+                          return [
+                            ...next,
+                            {
+                              kind: "msg" as const,
+                              role: "assistant" as const,
+                              content: `Excellent choice. I have locked in Option ${option.id} for your GCB project. I am now compiling the live FF&E Schedule and generating your official trade quote preview right below.`,
+                            },
+                          ];
+                        });
+                      }}
+                    />
+                  </div>
+                );
+              }
               if (item.kind === "retry") {
                 return (
                   <div
