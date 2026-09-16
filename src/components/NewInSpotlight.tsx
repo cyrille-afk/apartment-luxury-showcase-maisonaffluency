@@ -195,11 +195,15 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
     titleClassName = "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground",
     mobileBadgeClassName = "px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5 md:hidden",
     mobileTitleClassName = "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold",
+    imageFrameClassName = "aspect-[4/3] max-h-[320px]",
+    gridClassName = "gap-x-4 gap-y-8 md:gap-x-8 md:gap-y-10",
   }: {
     barClassName?: string;
     titleClassName?: string;
     mobileBadgeClassName?: string;
     mobileTitleClassName?: string;
+    imageFrameClassName?: string;
+    gridClassName?: string;
   } = {}) => (
     <>
       <div className={barClassName}>
