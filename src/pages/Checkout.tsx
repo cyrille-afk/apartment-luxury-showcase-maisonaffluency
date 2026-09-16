@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { getCart, clearCart, rehydrateCart, useCart } from "@/lib/cart";
 import { readSecureBasket, writeSecureBasket, clearSecureBasket, subscribeSecureBasketStorage } from "@/lib/checkout/secureBasket";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
+import { useBrandDiscountCaps, effectiveDiscountForBrand } from "@/lib/brandDiscountCap";
 import { useAuth } from "@/hooks/useAuth";
 import { Helmet } from "react-helmet-async";
 import Navigation from "@/components/Navigation";
