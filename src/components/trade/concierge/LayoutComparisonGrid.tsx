@@ -107,7 +107,7 @@ export function LayoutComparisonGrid({
                   onClick={() => onSelect?.(option)}
                   aria-pressed={isActive}
                   className={cn(
-                    "w-full rounded-full border px-3 py-2 font-body text-[11px] uppercase tracking-[0.18em] transition-colors",
+                    "w-full rounded-full border px-2 py-2 font-body text-[10px] uppercase tracking-[0.14em] transition-colors",
                     isActive
                       ? "border-foreground bg-foreground text-background"
                       : "border-border bg-background text-foreground hover:border-foreground hover:bg-accent/10",
@@ -115,7 +115,7 @@ export function LayoutComparisonGrid({
                 >
                   {isActive ? (
                     <span className="inline-flex items-center justify-center gap-1.5">
-                      <Check className="h-3 w-3" /> Configuration Selected
+                      <Check className="h-3 w-3" /> Selected
                     </span>
                   ) : (
                     "Select Configuration Layout"
