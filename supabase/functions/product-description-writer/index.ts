@@ -19,6 +19,25 @@ const TONE_MAX_TOKENS: Record<string, number> = {
 };
 
 
+const MAX_SEO_META = 160;
+// Hard-trims an SEO meta snippet to <=160 chars without cutting mid-sentence:
+// prefer the last full sentence that fits, else the last whole word that fits.
+function trimSeoMeta(text: string): string {
+  const clean = String(text || "").replace(/\s+/g, " ").trim();
+  if (clean.length <= MAX_SEO_META) return clean;
+  const window160 = clean.slice(0, MAX_SEO_META);
+  const sentenceEnd = Math.max(
+    window160.lastIndexOf(". "),
+    window160.lastIndexOf("! "),
+    window160.lastIndexOf("? "),
+  );
+  if (sentenceEnd >= 40) return window160.slice(0, sentenceEnd + 1).trim();
+  // A terminal period exactly at the cut also counts as a clean sentence end.
+  if (window160.endsWith(".")) return window160;
+  const wordEnd = window160.lastIndexOf(" ");
+  return (wordEnd >= 40 ? window160.slice(0, wordEnd) : window160).replace(/[.,;:!?—–-]+$/, "").trim() + "…";
+}
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
