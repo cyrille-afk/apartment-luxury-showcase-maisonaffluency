@@ -9,6 +9,8 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { TradeSidebar } from "@/components/trade/TradeSidebar";
 import { FelixTour } from "@/components/trade/FelixTour";
 import { TradeMobileMenu } from "@/components/trade/TradeMobileMenu";
+import ToolsBreadcrumb, { ToolsBreadcrumbProvider } from "@/components/trade/ToolsBreadcrumb";
+
 import { NotificationBell } from "@/components/trade/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
