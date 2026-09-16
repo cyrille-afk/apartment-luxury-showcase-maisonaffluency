@@ -2518,6 +2518,7 @@ export type Database = {
           is_published: boolean
           links: Json | null
           logo_url: string | null
+          max_trade_discount: number | null
           name: string
           new_in_order: number | null
           notable_works: string
@@ -2553,6 +2554,7 @@ export type Database = {
           is_published?: boolean
           links?: Json | null
           logo_url?: string | null
+          max_trade_discount?: number | null
           name: string
           new_in_order?: number | null
           notable_works?: string
@@ -2588,6 +2590,7 @@ export type Database = {
           is_published?: boolean
           links?: Json | null
           logo_url?: string | null
+          max_trade_discount?: number | null
           name?: string
           new_in_order?: number | null
           notable_works?: string
