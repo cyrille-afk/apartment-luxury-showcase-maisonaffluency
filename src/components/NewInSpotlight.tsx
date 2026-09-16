@@ -442,12 +442,14 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
           </div>
 
           {/* Curators' Picks — snapped directly beneath the hero */}
-          <div className="w-full -mt-2">
+          <div className="w-full -mt-1">
             {renderCuratorsPicksSection({
-              barClassName: "flex justify-between items-center w-full border-t border-neutral-100 py-2 mt-2 mb-1 text-[11px] uppercase tracking-widest text-neutral-800",
+              barClassName: "flex justify-between items-center w-full border-t border-neutral-100 py-1.5 mt-1 mb-1 text-[11px] uppercase tracking-widest text-neutral-800",
               titleClassName: "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-800",
               mobileBadgeClassName: "px-4 py-1.5 rounded-full border border-neutral-800/20 bg-neutral-800/5 md:hidden",
               mobileTitleClassName: "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-neutral-800 font-semibold",
+              imageFrameClassName: "aspect-[4/3] max-h-[280px]",
+              gridClassName: "gap-x-4 gap-y-5 md:gap-x-8 md:gap-y-6",
             })}
           </div>
 
