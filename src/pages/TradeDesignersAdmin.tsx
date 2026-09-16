@@ -2093,6 +2093,7 @@ const TradeDesignersAdmin = () => {
       // Wait for refetch to complete before clearing buffer, so fresh server
       // data is available and the UI never falls back to stale cached values
       await queryClient.invalidateQueries({ queryKey: ["admin-designers"] });
+      queryClient.invalidateQueries({ queryKey: ["brand-discount-caps"] });
       // Clear the edit buffer only after the refetch has landed
       setEditBuffer((prev) => {
         const next = { ...prev };
