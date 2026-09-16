@@ -1127,6 +1127,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     ? Math.min(1200, typeof window !== "undefined" ? window.innerWidth - navInset - 48 : 1200)
     : (expanded ? 560 : 380);
   const PANEL_H_OPEN = modalMode ? 760 : (expanded ? 760 : 560);
+  // When the global trade sidebar is present we dock the large panel to the
+  // right of it instead of centring it on the viewport.
+  const docked = navInset > 0;
 
   // Brief exit-animation gate: when the welcome modal is dismissed we keep
   // the backdrop + panel mounted for ~280ms so they can fade/scale out
