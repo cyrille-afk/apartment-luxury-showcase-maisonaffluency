@@ -1808,6 +1808,8 @@ interface DesignerRow {
   instagram_handle: string | null;
   instagram_handle_2: string | null;
   parent_badge_label: string | null;
+  /** Optional brand safety cap on trade discount, in percent (5 = 5%). */
+  max_trade_discount: number | null;
 }
 
 
