@@ -5,8 +5,9 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Image, FileText, FolderOpen, FolderClosed,
-  Clock, FileDown, MapPin, Box, Users,
+  Clock, FileDown, MapPin, Box, Users, Sparkles,
 } from "lucide-react";
+import { FelixTour, startFelixTour } from "@/components/trade/FelixTour";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
 import { BoardRecommendations } from "@/components/trade/BoardRecommendations";
@@ -221,10 +222,11 @@ const TradeDashboard = () => {
   return (
     <>
       <Helmet><title>Dashboard — Trade Portal — Maison Affluency</title></Helmet>
+      <FelixTour />
     <div className="trade-dashboard w-full max-w-[1500px] mx-auto">
       <div className="mb-10 md:mb-14 lg:mb-16 border-b border-border pb-7 md:pb-9">
         <div className="flex items-start justify-between gap-4">
-          <div>
+          <div data-felix-target="greeting">
             <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-normal text-foreground leading-none">
               Welcome back{profile?.first_name ? `, ${profile.first_name}` : ""}
             </h1>
@@ -234,7 +236,16 @@ const TradeDashboard = () => {
               </p>
             )}
           </div>
-          <div className="shrink-0 flex items-center gap-2" />
+          <div className="shrink-0 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={startFelixTour}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <Sparkles className="h-3 w-3" />
+              Meet Felix
+            </button>
+          </div>
 
         </div>
       </div>
