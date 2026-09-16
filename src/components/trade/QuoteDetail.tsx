@@ -406,6 +406,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const navigate = useNavigate();
   const { discountPct: tradeDiscountPct, discountLabel: tradeDiscountLabel, tierLabel, tier: currentTier, config: tierConfig } = useTradeDiscount();
   const { clientSafe } = useClientSafeMode();
+  const brandCaps = useBrandDiscountCaps();
   const [items, setItems] = useState<QuoteItemWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState(quoteNotes || "");
