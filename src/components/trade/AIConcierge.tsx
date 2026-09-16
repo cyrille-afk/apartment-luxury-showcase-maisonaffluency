@@ -359,6 +359,7 @@ import { PendingProposalSkeleton } from "@/components/trade/concierge/PendingPro
 import { CuratedGridSkeleton } from "@/components/trade/concierge/CuratedGridSkeleton";
 import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { SpecScheduleBlock } from "@/components/trade/concierge/SpecScheduleBlock";
+import { LayoutComparisonGrid } from "@/components/trade/concierge/LayoutComparisonGrid";
 
 import { parseSlashCommand, SLASH_COMMAND_HELP } from "@/lib/conciergeSlashCommands";
 import { openHandoffChannel } from "@/lib/conciergeHandoff";
