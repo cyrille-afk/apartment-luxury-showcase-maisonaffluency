@@ -29,7 +29,27 @@ try {
   // .env not present in some environments — fall back to process.env
 }
 const DIST = path.join(ROOT, "dist");
-const CANONICAL_HOST = "https://maisonaffluency.com";
+const CANONICAL_HOST = "https://www.maisonaffluency.com";
+
+// ----- Domain lock ----------------------------------------------------------
+// A sitemap may only ever be generated for the production domain. If the build
+// is running for a staging/preview/development target (any *.lovable.app
+// branch, a Netlify/Vercel preview, or a local dev build), emit an EMPTY
+// urlset so a preview deployment can never feed Google a tree of URLs that
+// will 404 once the sandbox rotates.
+const DEPLOY_TARGET = (
+  process.env.SITEMAP_SITE_URL ||
+  process.env.PUBLIC_SITE_URL ||
+  process.env.DEPLOY_PRIME_URL ||
+  process.env.DEPLOY_URL ||
+  process.env.URL ||
+  process.env.VERCEL_URL ||
+  ""
+).toLowerCase();
+
+const IS_NON_PRODUCTION_TARGET =
+  DEPLOY_TARGET !== "" &&
+  !/(^|\/\/|\.)maisonaffluency\.com(\/|$)/.test(DEPLOY_TARGET);
 // Guardrail: the live catalogue is ~1,000 URLs. Anything far below that means a
 // failed/partial query, not a genuinely shrunken catalogue.
 const MIN_DYNAMIC_ROUTES = Number(process.env.SITEMAP_MIN_ROUTES ?? 300);
@@ -196,6 +216,17 @@ async function loadDynamicRoutes() {
 
 async function main() {
   await mkdir(DIST, { recursive: true });
+
+  if (IS_NON_PRODUCTION_TARGET) {
+    const emptyXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+</urlset>`;
+    await writeFile(path.join(DIST, "sitemap.xml"), emptyXml, "utf8");
+    console.log(
+      `[sitemap] non-production target (${DEPLOY_TARGET}) — wrote an empty sitemap; only ${CANONICAL_HOST} may publish a URL tree.`
+    );
+    return;
+  }
 
   const today = new Date().toISOString().split("T")[0];
   const dynamic = await loadDynamicRoutes();
