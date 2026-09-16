@@ -664,7 +664,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   }, []);
   useEffect(() => {
     if (!open) cancelBriefTransition();
-  }, [open, activeThreadId, cancelBriefTransition]);
+  }, [open, cancelBriefTransition]);
   // Ambient status shown as a small badge next to the concierge name. Switches
   // through discrete phases during a human-handoff so the designer feels the
   // curatorial team take over, then returns to null once they resume chatting.
