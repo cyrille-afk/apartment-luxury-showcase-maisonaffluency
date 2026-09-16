@@ -10,6 +10,7 @@ import { FxAppliedRates } from "@/components/trade/FxAppliedRates";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { useBrandDiscountCaps, effectiveDiscountForBrand, MARGIN_CAP_TOOLTIP } from "@/lib/brandDiscountCap";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock, FolderOpen, Layers, Eye, ExternalLink, Mail, History as HistoryIcon, Copy, AlertTriangle } from "lucide-react";
