@@ -3431,6 +3431,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     }
     } finally {
       if (opts?.builderSubmit) {
+        if (builderSubmitOk) {
+          // Post-submission: offer the three generated spatial configurations.
+          setTimeline((prev) =>
+            prev.some((t) => t.kind === "layout_options" && !t.selected)
+              ? prev
+              : [...prev, { kind: "layout_options", id: `layouts-${Date.now()}`, selected: null }],
+          );
+        }
         briefSubmitDoneRef.current?.(builderSubmitOk);
         briefSubmitDoneRef.current = null;
       }
