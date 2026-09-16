@@ -210,7 +210,7 @@ export default function TradeWorkspace({
             }}
             className="font-body text-[11px] uppercase tracking-[0.12em] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground transition-colors"
           >
-            Ask Felix
+            Ask {guideName}
           </button>
           <Link
             to={`/trade/products/${productId}${selectedFinishes.length ? `?finish=${encodeURIComponent(selectedFinishes.join(" / "))}` : ""}`}

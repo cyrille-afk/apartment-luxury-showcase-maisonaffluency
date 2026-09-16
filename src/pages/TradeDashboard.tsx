@@ -240,7 +240,7 @@ const TradeDashboard = () => {
               className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <Sparkles className="h-3 w-3" />
-              Meet Felix
+              Meet {guideName}
             </button>
           </div>
         </div>
