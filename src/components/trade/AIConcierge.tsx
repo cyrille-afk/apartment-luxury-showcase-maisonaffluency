@@ -2258,8 +2258,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     window.setTimeout(() => setConciergeStatus("curator_assigned"), 3600);
   }, [user?.email]);
 
-  const send = useCallback(async (overrideText?: string, opts?: { displayText?: string }) => {
-    const text = (overrideText ?? (briefBuilderOpen ? briefDraft : input)).trim();
+  const send = useCallback(async (overrideText?: string, opts?: { displayText?: string; builderSubmit?: boolean }) => {
+    let builderSubmitOk = false;
+    try {
+      const text = (overrideText ?? (briefBuilderOpen ? briefDraft : input)).trim();
 
     // Sentinel: user clicked the "Open Architectural Brief" CTA. Load the
     // prefilled brief into the composer and open the Brief Builder — do NOT
