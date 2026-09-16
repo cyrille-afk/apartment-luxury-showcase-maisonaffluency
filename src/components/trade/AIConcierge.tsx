@@ -661,6 +661,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [briefCanvasExiting, setBriefCanvasExiting] = useState(false);
   const [briefBuilderClosing, setBriefBuilderClosing] = useState(false);
   const [briefHistoryEntering, setBriefHistoryEntering] = useState(false);
+  const [briefSubmitting, setBriefSubmitting] = useState(false);
   const pendingBriefPrefillRef = useRef<string | null>(null);
   const briefTransitionTimersRef = useRef<number[]>([]);
   const briefCloseTimerRef = useRef<number | null>(null);
