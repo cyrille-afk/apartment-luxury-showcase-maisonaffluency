@@ -195,11 +195,15 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
     titleClassName = "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground",
     mobileBadgeClassName = "px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5 md:hidden",
     mobileTitleClassName = "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold",
+    imageFrameClassName = "aspect-[4/3] max-h-[320px]",
+    gridClassName = "gap-x-4 gap-y-8 md:gap-x-8 md:gap-y-10",
   }: {
     barClassName?: string;
     titleClassName?: string;
     mobileBadgeClassName?: string;
     mobileTitleClassName?: string;
+    imageFrameClassName?: string;
+    gridClassName?: string;
   } = {}) => (
     <>
       <div className={barClassName}>
@@ -256,7 +260,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
         </div>
       </div>
 
-      <div className={cn("grid items-start gap-x-4 gap-y-8 md:gap-x-8 md:gap-y-10", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
+      <div className={cn("grid items-start", gridClassName, mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
         {picks.map((pick) => {
           const alternateImage = pick.hover_image_url
             || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
@@ -271,7 +275,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 if (item) setLightboxItem(item);
               }}
             >
-              <div className="relative aspect-[4/3] max-h-[320px] w-full overflow-hidden rounded-sm bg-[hsl(var(--product-canvas))]">
+              <div className={cn("relative w-full overflow-hidden rounded-sm bg-[hsl(var(--product-canvas))]", imageFrameClassName)}>
                 <SwipeAlternateProductImage
                   primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
                   primarySrcSet={pickSrcSet(pick.image_url)}
@@ -397,7 +401,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
         <section className="hidden md:block w-full bg-transparent">
           <div className="grid grid-cols-2 gap-x-10 items-stretch w-full">
             {/* Left Column — constrained editorial hero */}
-            <div className="aspect-[16/10] max-h-[450px] w-full overflow-hidden bg-[hsl(var(--canvas))]">
+            <div className="aspect-[16/10] max-h-[420px] w-full overflow-hidden bg-[hsl(var(--canvas))]">
               <CldPicture
                 src={portraitImage}
                 alt={`${displayName} portrait`}
@@ -405,7 +409,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
             </div>
 
             {/* Right Column — compact biography stack */}
-            <div className="flex h-full flex-col justify-center py-3">
+            <div className="flex h-full flex-col justify-center py-2">
               <div className="flex items-center gap-3 w-full">
                 <h1 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
                   {displayName}
@@ -419,11 +423,11 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 />
               </div>
 
-              <p className="mt-4 text-justify w-full text-xs lg:text-sm text-neutral-600">
+              <p className="mt-3 text-justify w-full text-xs lg:text-sm text-neutral-600 leading-relaxed">
                 {renderParagraph(firstBioParagraph)}
               </p>
 
-              <div className="mt-5 w-full">
+              <div className="mt-4 w-full">
                 <PortraitCtaLink
                   label="View The Full Portrait"
                   className="text-[10px] uppercase tracking-widest text-neutral-800 font-medium inline-flex items-center gap-4"
@@ -437,8 +441,21 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
             </div>
           </div>
 
+          {/* Curators' Picks — snapped directly beneath the hero */}
+          <div className="w-full -mt-1">
+            {renderCuratorsPicksSection({
+              barClassName: "flex justify-between items-center w-full border-t border-neutral-100 py-1.5 mt-1 mb-1 text-[11px] uppercase tracking-widest text-neutral-800",
+              titleClassName: "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-800",
+              mobileBadgeClassName: "px-4 py-1.5 rounded-full border border-neutral-800/20 bg-neutral-800/5 md:hidden",
+              mobileTitleClassName: "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-neutral-800 font-semibold",
+              imageFrameClassName: "aspect-[4/3] max-h-[280px]",
+              gridClassName: "gap-x-4 gap-y-5 md:gap-x-8 md:gap-y-6",
+            })}
+          </div>
+
+          {/* From the Studio — relocated to footer */}
           {igWithImages.length > 0 && (
-            <div className="w-full border-t border-neutral-100 pt-3 mt-3 mb-3">
+            <div className="w-full border-t border-neutral-100 pt-3 mt-3">
               <div className="w-fit mx-auto flex flex-col items-center gap-1.5">
                 <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-neutral-400 font-normal">
                   <Instagram className="w-3.5 h-3.5" strokeWidth={1.5} />
@@ -466,16 +483,6 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
               </div>
             </div>
           )}
-
-          {/* Curators' Picks */}
-          <div className="w-full">
-            {renderCuratorsPicksSection({
-              barClassName: "flex justify-between items-center w-full border-t border-b border-neutral-100 py-2 my-3 text-[11px] uppercase tracking-widest text-neutral-800",
-              titleClassName: "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-800",
-              mobileBadgeClassName: "px-4 py-1.5 rounded-full border border-neutral-800/20 bg-neutral-800/5 md:hidden",
-              mobileTitleClassName: "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-neutral-800 font-semibold",
-            })}
-          </div>
         </section>
       )}
 
