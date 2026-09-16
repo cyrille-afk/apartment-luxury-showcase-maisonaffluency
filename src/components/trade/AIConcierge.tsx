@@ -399,7 +399,7 @@ type TimelineItem =
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" }
   | { kind: "retry"; text: string; reason: string }
   | { kind: "spec_schedule"; zone: string; markdown: string }
-  | { kind: "layout_options"; id: string; selected?: number | null }
+  | { kind: "layout_options"; id: string; selected?: number | null; styleInput?: string | null }
   | { kind: "proactive_tearsheet"; data: import("@/components/trade/concierge/ProactiveTearsheetCard").ProactiveTearsheetData; resolved?: "generated" | "boarded" | "dismissed" }
   | {
       kind: "quote_card";
