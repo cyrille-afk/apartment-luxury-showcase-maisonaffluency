@@ -248,7 +248,6 @@ async function main() {
     return;
   }
 
-  const today = new Date().toISOString().split("T")[0];
   const dynamic = await loadDynamicRoutes();
 
   // No <lastmod> for static routes: the build date is not a page-specific
@@ -272,9 +271,8 @@ async function main() {
       seen.add(r.loc);
       return true;
     })
-    .map((r) =>
-      urlEntry(r.loc, r.lastmod || today, r.changefreq, r.priority)
-    );
+    // Only a real, record-specific updated_at may become <lastmod>.
+    .map((r) => urlEntry(r.loc, r.lastmod || null, r.changefreq, r.priority));
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
