@@ -73,6 +73,7 @@
 - [x] Isolate Felix chat text from Brief Builder draft state and restore active briefs intact after Trade Portal navigation
 - [x] Add a mirrored 450ms Brief Builder close transition with synchronized chat restoration and preserved draft fields
 - [x] Add supplier-cap-aware Trade Member pricing and a contextual Brand Margin Notice tooltip to the product details lightbox
+- [x] Align Trade Gallery fallback pricing to the live Silver 5% / Gold 10% / Platinum 15% tiers and exclude unsettled quotes from member tier spend
 
 ## Felix dashboard onboarding tour (done)
 - [x] src/components/trade/FelixTour.tsx — 4-step tour, highlight ring + dimmed cutout backdrop, Step x of 4 bar, Back/Pause-Resume/Next-Finish, corner skip; auto-starts once (felix_dashboard_tour_seen_v1, only after quick tour done), relaunch via "Meet Felix" button / startFelixTour()

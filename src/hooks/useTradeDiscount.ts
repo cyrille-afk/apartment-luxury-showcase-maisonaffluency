@@ -2,7 +2,7 @@
  * Returns the active trade discount for the signed-in user, based on their tier.
  * Discount % and spend thresholds are sourced from the `trade_tier_config` table
  * so admins can edit them without code changes. Falls back to sensible defaults
- * (silver 10%, gold 15%, platinum 20%) while loading or for unauthenticated users.
+ * (silver 5%, gold 10%, platinum 15%) while loading or for unauthenticated users.
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,9 +19,9 @@ export interface TierConfigRow {
 }
 
 const FALLBACK_CONFIG: Record<TradeTier, TierConfigRow> = {
-  silver:   { tier: "silver",   discount_pct: 0.10, min_spend_cents: 0,          label: "Silver" },
-  gold:     { tier: "gold",     discount_pct: 0.15, min_spend_cents: 5_000_000,  label: "Gold" },
-  platinum: { tier: "platinum", discount_pct: 0.20, min_spend_cents: 20_000_000, label: "Platinum" },
+  silver:   { tier: "silver",   discount_pct: 0.05, min_spend_cents: 0,          label: "Silver" },
+  gold:     { tier: "gold",     discount_pct: 0.10, min_spend_cents: 5_000_000,  label: "Gold" },
+  platinum: { tier: "platinum", discount_pct: 0.15, min_spend_cents: 20_000_000, label: "Platinum" },
 };
 
 export const TIER_LABEL: Record<TradeTier, string> = {
@@ -36,9 +36,9 @@ export const TIER_LABEL: Record<TradeTier, string> = {
  * that render a quick label without a live config lookup.
  */
 export const TIER_DISCOUNT: Record<TradeTier, number> = {
-  silver: 0.10,
-  gold: 0.15,
-  platinum: 0.20,
+  silver: 0.05,
+  gold: 0.10,
+  platinum: 0.15,
 };
 
 const normalize = (raw: TradeTierRaw | null | undefined): TradeTier => {
