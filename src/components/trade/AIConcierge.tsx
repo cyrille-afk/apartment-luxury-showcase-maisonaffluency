@@ -359,6 +359,7 @@ import { PendingProposalSkeleton } from "@/components/trade/concierge/PendingPro
 import { CuratedGridSkeleton } from "@/components/trade/concierge/CuratedGridSkeleton";
 import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { SpecScheduleBlock } from "@/components/trade/concierge/SpecScheduleBlock";
+import { LayoutComparisonGrid } from "@/components/trade/concierge/LayoutComparisonGrid";
 
 import { parseSlashCommand, SLASH_COMMAND_HELP } from "@/lib/conciergeSlashCommands";
 import { openHandoffChannel } from "@/lib/conciergeHandoff";
@@ -398,6 +399,7 @@ type TimelineItem =
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" }
   | { kind: "retry"; text: string; reason: string }
   | { kind: "spec_schedule"; zone: string; markdown: string }
+  | { kind: "layout_options"; id: string; selected?: number | null }
   | { kind: "proactive_tearsheet"; data: import("@/components/trade/concierge/ProactiveTearsheetCard").ProactiveTearsheetData; resolved?: "generated" | "boarded" | "dismissed" }
   | {
       kind: "quote_card";
@@ -3429,6 +3431,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     }
     } finally {
       if (opts?.builderSubmit) {
+        if (builderSubmitOk) {
+          // Post-submission: offer the three generated spatial configurations.
+          setTimeline((prev) =>
+            prev.some((t) => t.kind === "layout_options" && !t.selected)
+              ? prev
+              : [...prev, { kind: "layout_options", id: `layouts-${Date.now()}`, selected: null }],
+          );
+        }
         briefSubmitDoneRef.current?.(builderSubmitOk);
         briefSubmitDoneRef.current = null;
       }
@@ -4696,6 +4706,33 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 return (
                   <div key={i} className="self-start">
                     <SpecScheduleBlock zone={item.zone} markdown={item.markdown} />
+                  </div>
+                );
+              }
+              if (item.kind === "layout_options") {
+                return (
+                  <div key={i} className="w-full self-start">
+                    <LayoutComparisonGrid
+                      selected={item.selected ?? null}
+                      onSelect={(option) => {
+                        if (item.selected) return;
+                        setTimeline((prev) => {
+                          const next = prev.map((t) =>
+                            t.kind === "layout_options" && t.id === item.id
+                              ? { ...t, selected: option.id }
+                              : t,
+                          );
+                          return [
+                            ...next,
+                            {
+                              kind: "msg" as const,
+                              role: "assistant" as const,
+                              content: `Excellent choice. I have locked in Option ${option.id} for your GCB project. I am now compiling the live FF&E Schedule and generating your official trade quote preview right below.`,
+                            },
+                          ];
+                        });
+                      }}
+                    />
                   </div>
                 );
               }
