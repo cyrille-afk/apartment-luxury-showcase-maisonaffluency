@@ -16,7 +16,7 @@ export function tierUpgradeLabel(tier: EligibleTier | string | null | undefined)
  * (clients.eligible_for_upgrade / eligible_tier). RLS scopes rows to the
  * studios the member belongs to, so the count is always studio-safe.
  */
-export function useClientTierUpgrades() {
+export function useClientTierUpgrades(studioId?: string | null) {
   const [flags, setFlags] = useState<ClientUpgradeFlags>({});
   const [loading, setLoading] = useState(true);
 
@@ -37,7 +37,7 @@ export function useClientTierUpgrades() {
       setFlags(next);
     }
     setLoading(false);
-  }, []);
+  }, [studioId]);
 
   useEffect(() => {
     let active = true;
