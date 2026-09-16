@@ -9,7 +9,6 @@ import { Search, Loader2, Paintbrush, Plus, X, Heart, FolderOpen, LayoutGrid, Sp
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import Breadcrumbs from "@/components/Breadcrumbs";
 
 type PickerFilter = "all" | "favourites" | "board";
 

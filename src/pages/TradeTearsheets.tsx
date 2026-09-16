@@ -16,7 +16,6 @@ import { useUserBoards } from "@/hooks/useUserBoards";
 import { useStudio } from "@/hooks/useStudio";
 import { normalizeCategory, normalizeSubcategory, CATEGORY_ORDER, getSubcategoriesForCategory } from "@/lib/productTaxonomy";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
-import Breadcrumbs from "@/components/Breadcrumbs";
 import { getConciergeSession, useConciergeSession } from "@/hooks/useConciergeSession";
 import { withImperialInline } from "@/lib/formatDimensions";
 import { formatLeadTime } from "@/components/trade/AvailabilityBadge";

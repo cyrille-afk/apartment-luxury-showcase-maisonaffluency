@@ -6,7 +6,6 @@ import { useState } from "react";
 import { Search, X, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import Breadcrumbs from "@/components/Breadcrumbs";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 
 export default function TradeComparator() {

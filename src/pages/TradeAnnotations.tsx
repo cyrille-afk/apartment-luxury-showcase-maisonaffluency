@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import Breadcrumbs from "@/components/Breadcrumbs";
 
 interface Pin {
   id: string;

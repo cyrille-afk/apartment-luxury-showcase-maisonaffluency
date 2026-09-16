@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
 import { useVisualiserMaterial, type VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
-import Breadcrumbs from "@/components/Breadcrumbs";
 import { FABRIC_CATEGORIES, normalizeFabricCategory } from "@/lib/fabricCategory";
 
 const CATEGORIES = ["All", ...FABRIC_CATEGORIES];
