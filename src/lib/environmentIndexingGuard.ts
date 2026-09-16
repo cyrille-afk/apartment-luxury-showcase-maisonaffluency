@@ -34,7 +34,7 @@ function setMeta(name: string, content: string, attr: "name" | "property" = "nam
     return;
   }
   nodes.forEach((n) => {
-    n.content = content;
+    if (n.content !== content) n.content = content;
   });
 }
 
@@ -58,13 +58,15 @@ export function startEnvironmentIndexingGuard() {
     document
       .querySelectorAll<HTMLLinkElement>('link[rel="canonical"]')
       .forEach((link) => {
-        link.href = toProductionUrl(link.href || window.location.href);
+        const next = toProductionUrl(link.getAttribute("href") || window.location.href);
+        if (link.getAttribute("href") !== next) link.setAttribute("href", next);
       });
 
     document
       .querySelectorAll<HTMLMetaElement>('meta[property="og:url"]')
       .forEach((tag) => {
-        tag.content = toProductionUrl(tag.content || window.location.href);
+        const next = toProductionUrl(tag.content || window.location.href);
+        if (tag.content !== next) tag.content = next;
       });
 
     document
