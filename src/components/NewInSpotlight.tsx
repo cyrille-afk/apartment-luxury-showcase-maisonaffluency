@@ -271,7 +271,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 if (item) setLightboxItem(item);
               }}
             >
-              <div className="relative flex h-[240px] w-full aspect-[4/5] items-center justify-center overflow-hidden rounded-sm bg-[hsl(var(--product-canvas))] sm:h-[320px] md:h-[360px] xl:h-[400px]">
+              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm bg-[hsl(var(--product-canvas))]">
                 <SwipeAlternateProductImage
                   primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
                   primarySrcSet={pickSrcSet(pick.image_url)}
@@ -279,9 +279,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                   sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                   alt={pick.title}
-                  contain
-                  primaryClassName="object-contain object-center p-0"
-                  alternateClassName="object-contain object-center p-0"
+                  primaryClassName="object-cover object-center p-0"
+                  alternateClassName="object-cover object-center p-0"
                 />
                 {/* Inventory badges — lower-left of the frame */}
                 <InventoryBadgeStack
@@ -355,8 +354,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   return (
                     <>
                       {/* Designer / brand — top, prominent */}
-                      {brandLine && (
-                        brandSlug ? (
+                       {brandSlug ? (
                           <Link
                             to={`/designers/${brandSlug}`}
                             onClick={(e) => e.stopPropagation()}
@@ -364,12 +362,13 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                           >
                             {brandLine}
                           </Link>
-                        ) : (
+                         ) : brandLine ? (
                           <span className="block h-5 font-display text-[11px] md:text-sm font-medium uppercase tracking-widest md:tracking-[0.18em] text-muted-foreground md:text-foreground leading-tight line-clamp-1">
                             {brandLine}
                           </span>
-                        )
-                      )}
+                         ) : (
+                           <span aria-hidden="true" className="block h-5" />
+                         )}
                       {/* Product name — secondary, elegant italic */}
                       <h3 className="font-body italic text-[13px] md:text-[15px] font-normal text-foreground/80 leading-snug line-clamp-2">
                         {productLine}
