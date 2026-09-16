@@ -34,7 +34,9 @@ interface Product {
   isInShowroom?: boolean;
 }
 
-const SITE_URL = "https://maisonaffluency.com";
+import { BASE_URL } from "@/config/site";
+
+const SITE_URL = BASE_URL;
 
 const ProductPage = () => {
   const { id } = useParams<{ id: string }>();
