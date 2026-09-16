@@ -5478,11 +5478,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 onClick={() => send()}
                 disabled={
                   (!(briefBuilderOpen ? briefDraft : input).trim() && attachments.length === 0) ||
-                  streaming
+                  streaming ||
+                  (briefBuilderOpen && !briefValidation.valid)
                 }
                 className="order-2 ml-auto h-11 w-11 shrink-0 rounded-none bg-foreground text-background p-2 disabled:opacity-40 hover:opacity-90 transition-opacity lg:order-none lg:ml-0 lg:h-auto lg:w-auto lg:rounded-xl"
                 aria-label="Send"
-                title="Send"
+                title={briefBuilderOpen && !briefValidation.valid ? "Complete required brief fields before sending" : "Send"}
               >
                 <Send className="h-4 w-4" />
               </button>
