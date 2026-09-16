@@ -84,3 +84,4 @@
 - [x] Brief Builder announcement fix: widened project-scale detection (brownstone/townhouse/loft, FF&E signal) + onDone fallback — if Felix's prose announces the builder without detection firing, the reply gets an "Open Architectural Brief Builder" CTA and a prepared draft.
 - [x] Make Brief Builder opening strictly user-initiated, add a refined manual canvas transition, and separate its left-side collapse control from the Felix window close button
 - [x] Make Brief Builder success and held-tearsheet fallback mutually exclusive, add the tailored configuration introduction, and clear stale results before resubmission
+- [x] Pause Felix after layout generation until manual selection, then confirm the chosen dynamic layout title without unrelated project labels
