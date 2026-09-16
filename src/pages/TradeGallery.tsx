@@ -19,6 +19,7 @@ import { isTradeProductMarkedHidden, useHiddenTradeProductIds } from "@/hooks/us
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { useBrandDiscountCaps, effectiveDiscountForBrand, MARGIN_CAP_TOOLTIP } from "@/lib/brandDiscountCap";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useToast } from "@/hooks/use-toast";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
