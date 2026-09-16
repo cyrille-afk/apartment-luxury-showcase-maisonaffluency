@@ -93,6 +93,7 @@ export default function TradeWorkspace({
   felixUrl,
   compact = false,
 }: Props) {
+  const guideName = useAIGuideName();
   const { data: pricing, isLoading } = useTradeProductPricing(productId);
   const { discountPct, tierLabel } = useTradeDiscount();
   const { clientSafe } = useClientSafeMode();
