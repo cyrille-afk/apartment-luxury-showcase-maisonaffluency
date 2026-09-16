@@ -98,7 +98,8 @@ const ProductPage = () => {
         <Helmet>
           <title>Loading product — Maison Affluency</title>
           <meta name="description" content="Curated collectible design at Maison Affluency Singapore." />
-          <meta name="robots" content="noindex" />
+          <meta name="robots" content="index, follow" />
+          <link rel="canonical" href={earlyCanonical} />
         </Helmet>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <DotCircleLoader size="md" />
@@ -169,6 +170,7 @@ const ProductPage = () => {
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
+        <meta name="robots" content="index, follow" />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:type" content="product" />

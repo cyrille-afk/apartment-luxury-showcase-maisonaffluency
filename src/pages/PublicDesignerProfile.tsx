@@ -739,7 +739,6 @@ const PublicDesignerProfile = () => {
     return (
       <>
         <Helmet>
-          <meta name="robots" content="noindex, nofollow" />
           <title>Not found — Maison Affluency</title>
         </Helmet>
         <Navigate to="/" replace />
@@ -1391,9 +1390,11 @@ const PublicDesignerProfile = () => {
           ],
         };
         return (
-          <Helmet>
+          <Helmet key={designer.slug}>
             <title>{seoTitle}</title>
             <meta name="description" content={desc} />
+            <meta name="robots" content="index, follow" />
+            <link rel="canonical" href={canonical} />
             <meta property="og:type" content="profile" />
             <meta property="og:site_name" content="Maison Affluency" />
             <meta property="og:title" content={seoTitle} />
