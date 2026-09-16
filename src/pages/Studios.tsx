@@ -139,7 +139,7 @@ export default function Studios() {
   const ogImage =
     studios.find((s) => s.is_featured && s.hero_image_url)?.hero_image_url ||
     studios.find((s) => s.hero_image_url)?.hero_image_url ||
-    "https://www.maisonaffluency.com/og-default.jpg";
+    "https://maisonaffluency.com/og-default.jpg";
 
   const itemListSchema = {
     "@context": "https://schema.org",
@@ -150,7 +150,7 @@ export default function Studios() {
     itemListElement: filtered.slice(0, 30).map((s, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `https://www.maisonaffluency.com/studios/${s.slug}`,
+      url: `https://maisonaffluency.com/studios/${s.slug}`,
       name: s.name,
     })),
   };
@@ -159,7 +159,7 @@ export default function Studios() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.maisonaffluency.com/" },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://maisonaffluency.com/" },
       { "@type": "ListItem", position: 2, name: "Studios", item: canonical },
     ],
   };

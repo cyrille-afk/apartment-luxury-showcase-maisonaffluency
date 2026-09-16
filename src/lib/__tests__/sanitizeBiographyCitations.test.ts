@@ -3,7 +3,7 @@ import { sanitizeBiographyCitations } from "../sanitizeBiographyCitations";
 
 describe("sanitizeBiographyCitations", () => {
   it("strips markdown citation links keeping the label", () => {
-    const input = "Her work with [CC-Tapis](https://www.maisonaffluency.com/designers/cc-tapis) is lyrical.";
+    const input = "Her work with [CC-Tapis](https://maisonaffluency.com/designers/cc-tapis) is lyrical.";
     expect(sanitizeBiographyCitations(input)).toBe("Her work with CC-Tapis is lyrical.");
   });
 
@@ -16,7 +16,7 @@ describe("sanitizeBiographyCitations", () => {
   });
 
   it("removes bare non-media URL lines", () => {
-    const input = "Intro paragraph.\nhttps://www.maisonaffluency.com/designers\nNext paragraph.";
+    const input = "Intro paragraph.\nhttps://maisonaffluency.com/designers\nNext paragraph.";
     expect(sanitizeBiographyCitations(input)).toBe("Intro paragraph.\nNext paragraph.");
   });
 

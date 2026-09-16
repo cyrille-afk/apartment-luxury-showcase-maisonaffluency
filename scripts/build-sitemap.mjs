@@ -29,7 +29,9 @@ try {
   // .env not present in some environments — fall back to process.env
 }
 const DIST = path.join(ROOT, "dist");
-const CANONICAL_HOST = "https://maisonaffluency.com";
+// Single global production origin. Every <loc> in the tree is built from this
+// exact prefix — never a relative path, never a staging/preview host, never www.
+const BASE_URL = "https://maisonaffluency.com";
 
 // ----- Domain lock ----------------------------------------------------------
 // A sitemap may only ever be generated for the production domain. If the build
@@ -86,10 +88,28 @@ const escapeXml = (s) =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;");
 
+// Hard guard: a route must be a clean, absolute-from-root canonical path with
+// no host, no protocol, no query and no trailing slash. Anything else would
+// emit a URL that bounces through a redirect (or points off-domain).
+function assertCanonicalPath(loc) {
+  if (typeof loc !== "string" || !loc.startsWith("/")) {
+    throw new Error(`[sitemap] non-canonical route (must start with "/"): ${loc}`);
+  }
+  if (/^\/\//.test(loc) || /https?:/i.test(loc) || /lovable\.app/i.test(loc)) {
+    throw new Error(`[sitemap] route must not carry a host or protocol: ${loc}`);
+  }
+  if (loc.length > 1 && loc.endsWith("/")) {
+    throw new Error(`[sitemap] route must not end with a trailing slash: ${loc}`);
+  }
+  return loc;
+}
+
 function urlEntry(loc, lastmod, changefreq, priority) {
+  const path = assertCanonicalPath(loc);
   return `  <url>
-    <loc>${CANONICAL_HOST}${escapeXml(loc)}</loc>
-    <lastmod>${lastmod}</lastmod>
+    <loc>${BASE_URL}${escapeXml(path)}</loc>${
+      lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : ""
+    }
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
   </url>`;
@@ -223,16 +243,17 @@ async function main() {
 </urlset>`;
     await writeFile(path.join(DIST, "sitemap.xml"), emptyXml, "utf8");
     console.log(
-      `[sitemap] non-production target (${DEPLOY_TARGET}) — wrote an empty sitemap; only ${CANONICAL_HOST} may publish a URL tree.`
+      `[sitemap] non-production target (${DEPLOY_TARGET}) — wrote an empty sitemap; only ${BASE_URL} may publish a URL tree.`
     );
     return;
   }
 
-  const today = new Date().toISOString().split("T")[0];
   const dynamic = await loadDynamicRoutes();
 
+  // No <lastmod> for static routes: the build date is not a page-specific
+  // content timestamp and would mislead crawlers on every deploy.
   const staticEntries = STATIC_ROUTES.map((r) =>
-    urlEntry(r.loc, today, r.changefreq, r.priority)
+    urlEntry(r.loc, null, r.changefreq, r.priority)
   );
 
   // Never ship a sitemap that silently collapsed: a near-empty tree would drop
@@ -250,9 +271,8 @@ async function main() {
       seen.add(r.loc);
       return true;
     })
-    .map((r) =>
-      urlEntry(r.loc, r.lastmod || today, r.changefreq, r.priority)
-    );
+    // Only a real, record-specific updated_at may become <lastmod>.
+    .map((r) => urlEntry(r.loc, r.lastmod || null, r.changefreq, r.priority));
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

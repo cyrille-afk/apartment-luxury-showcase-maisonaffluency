@@ -1,11 +1,12 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { BASE_URL, absoluteUrl } from "@/config/site";
 
-export const PRODUCTION_CANONICAL_ORIGIN = "https://maisonaffluency.com";
+export const PRODUCTION_CANONICAL_ORIGIN = BASE_URL;
 
 export function buildCanonicalUrl(pathname: string): string {
-  return `${PRODUCTION_CANONICAL_ORIGIN}${pathname}`;
+  return absoluteUrl(pathname);
 }
 
 /**

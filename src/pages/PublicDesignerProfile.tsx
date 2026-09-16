@@ -1595,8 +1595,8 @@ const PublicDesignerProfile = () => {
                   )}
                 </div>
                 <ShareMenu
-                  url={`https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
-                  message={`${designer.name} — Maison Affluency: https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
+                  url={`https://maisonaffluency.com${buildDesignerBridgePath("og")}`}
+                  message={`${designer.name} — Maison Affluency: https://maisonaffluency.com${buildDesignerBridgePath("og")}`}
                   className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-foreground/5 text-foreground/70 hover:bg-foreground/10 transition-colors"
                   iconSize="w-4 h-4"
                   showLabel={false}
@@ -1637,8 +1637,8 @@ const PublicDesignerProfile = () => {
                   )}
                   <div className="mt-8">
                     <ShareMenu
-                      url={`https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
-                      message={`${designer.name} — Maison Affluency: https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
+                      url={`https://maisonaffluency.com${buildDesignerBridgePath("og")}`}
+                      message={`${designer.name} — Maison Affluency: https://maisonaffluency.com${buildDesignerBridgePath("og")}`}
                       imageUrl={heroImage || undefined}
                       imageName={name}
                     />

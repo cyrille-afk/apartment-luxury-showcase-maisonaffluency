@@ -198,8 +198,8 @@ const JournalArticlePage = () => {
             <div className="max-w-4xl w-full mx-auto relative">
               <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4 z-10">
               <ShareMenu
-                url={`https://www.maisonaffluency.com/journal/${article.slug}-og.html`}
-                message={`${article.title} — Maison Affluency: https://www.maisonaffluency.com/journal/${article.slug}-og.html`}
+                url={`https://maisonaffluency.com/journal/${article.slug}-og.html`}
+                message={`${article.title} — Maison Affluency: https://maisonaffluency.com/journal/${article.slug}-og.html`}
                 className="flex items-center gap-1.5 bg-black/50 backdrop-blur-md text-white/90 hover:text-white px-3 py-2 rounded-full transition-colors"
                 iconSize="w-4 h-4"
                 showLabel={false}

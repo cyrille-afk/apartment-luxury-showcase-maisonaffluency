@@ -15,7 +15,9 @@
  * react-helmet-async on routes that manage their own Helmet tags.
  */
 
-export const PRODUCTION_ORIGIN = "https://maisonaffluency.com";
+import { BASE_URL } from "@/config/site";
+
+export const PRODUCTION_ORIGIN = BASE_URL;
 
 const PRODUCTION_HOSTS = new Set([
   "www.maisonaffluency.com",

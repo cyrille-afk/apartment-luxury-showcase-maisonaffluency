@@ -2106,7 +2106,7 @@ const PublicProductPageContent: React.FC = () => {
   return (
     <div className="product-configurator-canvas min-h-[100dvh] motion-safe:animate-fade-in">
       {(() => {
-        const canonical = `https://www.maisonaffluency.com/designers/${designer.slug}/${productSlug}`;
+        const canonical = `https://maisonaffluency.com/designers/${designer.slug}/${productSlug}`;
         const ogImg = toOgImage(product.image_url || images[0] || null);
         const desc =
           (product.description?.replace(/\s+/g, " ").trim().slice(0, 155)) ||
@@ -2141,9 +2141,9 @@ const PublicProductPageContent: React.FC = () => {
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Home", item: "https://www.maisonaffluency.com" },
-            { "@type": "ListItem", position: 2, name: "Designers", item: "https://www.maisonaffluency.com/designers" },
-            { "@type": "ListItem", position: 3, name: designerDisplay, item: `https://www.maisonaffluency.com/designers/${designer.slug}` },
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://maisonaffluency.com" },
+            { "@type": "ListItem", position: 2, name: "Designers", item: "https://maisonaffluency.com/designers" },
+            { "@type": "ListItem", position: 3, name: designerDisplay, item: `https://maisonaffluency.com/designers/${designer.slug}` },
             { "@type": "ListItem", position: 4, name: product.title, item: canonical },
           ],
         };

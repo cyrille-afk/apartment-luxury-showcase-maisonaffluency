@@ -122,7 +122,7 @@ export default function StudioProfile() {
   const igHandle = studio.instagram_handle?.replace(/^@/, "");
   const igUrl = igHandle ? `https://instagram.com/${igHandle}` : null;
 
-  const canonicalUrl = `https://www.maisonaffluency.com/studios/${studio.slug}`;
+  const canonicalUrl = `https://maisonaffluency.com/studios/${studio.slug}`;
   const description =
     studio.tagline || studio.bio?.slice(0, 155) || `${studio.name} — featured studio on Maison Affluency.`;
   const igHandleForLd = studio.instagram_handle?.replace(/^@/, "");
@@ -168,8 +168,8 @@ export default function StudioProfile() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.maisonaffluency.com" },
-      { "@type": "ListItem", position: 2, name: "Studios", item: "https://www.maisonaffluency.com/studios" },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://maisonaffluency.com" },
+      { "@type": "ListItem", position: 2, name: "Studios", item: "https://maisonaffluency.com/studios" },
       { "@type": "ListItem", position: 3, name: studio.name, item: canonicalUrl },
     ],
   };
