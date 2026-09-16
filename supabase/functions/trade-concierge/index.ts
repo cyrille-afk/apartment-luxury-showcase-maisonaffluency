@@ -5579,7 +5579,10 @@ serve(async (req) => {
       ? [
           "",
           "⚠️ PALETTE ADVISORY MODE ⚠️",
-          `The catalog's \`materials\` column is sparse for the scoped brand(s) ${paletteAdvisoryReason.brands.join(", ")} (${Math.round(paletteAdvisoryReason.nullRatio * 100)}% of rows have no structured material data). The palette / material constraint(s) [${[...paletteAdvisoryReason.droppedMaterials, ...paletteAdvisoryReason.droppedColors].join(", ") || "—"}] have been dropped from retrieval so typology + brand still return matches.`,
+          paletteAdvisoryReason.mode === "typology_led"
+            ? `The brief declares a typology, so the vibe / palette constraint(s) [${[...paletteAdvisoryReason.droppedMaterials, ...paletteAdvisoryReason.droppedColors].join(", ") || "—"}] are treated as WEIGHTING FACTORS, not database filters. Retrieval binds on typology${paletteAdvisoryReason.brands.length ? ` + the referenced atelier(s) ${paletteAdvisoryReason.brands.join(", ")}` : ""}; pieces are ranked by how closely they answer the palette, but a piece is NOT excluded for lacking those exact words in its metadata.`
+            : `The catalog's \`materials\` column is sparse for the scoped brand(s) ${paletteAdvisoryReason.brands.join(", ")} (${Math.round(paletteAdvisoryReason.nullRatio * 100)}% of rows have no structured material data). The palette / material constraint(s) [${[...paletteAdvisoryReason.droppedMaterials, ...paletteAdvisoryReason.droppedColors].join(", ") || "—"}] have been dropped from retrieval so typology + brand still return matches.`,
+
           "When you propose the tearsheet, append a single italic advisory line beneath it: *Palette shown as reference; confirm finish availability with the atelier.* Do NOT claim the pieces are guaranteed to be available in the requested finish, and do NOT hold or refuse the tearsheet on palette grounds this turn.",
           "",
         ].join("\n")
