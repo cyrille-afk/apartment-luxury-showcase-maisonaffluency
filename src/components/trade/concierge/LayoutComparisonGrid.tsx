@@ -97,7 +97,7 @@ export function LayoutComparisonGrid({
         Proposed Spatial Configurations
       </div>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        {LAYOUT_OPTIONS.map((option) => {
+        {layoutOptions.map((option) => {
           const isActive = selected === option.id;
           const isDimmed = !!selected && !isActive;
           return (
