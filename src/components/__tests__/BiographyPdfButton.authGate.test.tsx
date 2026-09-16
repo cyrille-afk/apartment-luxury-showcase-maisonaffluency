@@ -47,7 +47,7 @@ const baseProps = {
   biography: "Short bio.",
   biographyImages: [] as string[],
   heroImageUrl: null,
-  profileUrl: "https://www.maisonaffluency.com/designers/thierry-lemaire",
+  profileUrl: "https://maisonaffluency.com/designers/thierry-lemaire",
 };
 
 describe("BiographyPdfButton — auth gate", () => {

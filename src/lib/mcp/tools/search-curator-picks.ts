@@ -8,7 +8,7 @@ import { z } from "zod";
 // drive traffic to the site. Pricing is deliberately withheld — see get-product for
 // the same rule; trade net prices never leave the app over MCP.
 
-const SITE_ORIGIN = "https://www.maisonaffluency.com";
+const SITE_ORIGIN = "https://maisonaffluency.com";
 // Click-tracked redirector. Logs the click server-side then 302s to the real page.
 const CLICK_ORIGIN = `${process.env.SUPABASE_URL}/functions/v1/mcp-click`;
 const trackProductUrl = (slug: string, pickId: string) =>

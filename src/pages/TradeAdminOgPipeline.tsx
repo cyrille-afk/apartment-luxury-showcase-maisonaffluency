@@ -452,7 +452,7 @@ function UrlInspector() {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && !loading && inspect()}
-          placeholder="https://www.maisonaffluency.com/designers/apparatus-studio-og-v2.html"
+          placeholder="https://maisonaffluency.com/designers/apparatus-studio-og-v2.html"
           maxLength={500}
           className="flex-1 px-3 py-2 rounded-md border border-border bg-background text-sm font-mono"
         />

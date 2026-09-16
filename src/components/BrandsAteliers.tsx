@@ -3011,8 +3011,8 @@ const BrandsAteliers = () => {
             to bring exceptional pieces to discerning collectors and design professionals.
           </p>
           <ShareMenu
-            url={withOgCacheBust("https://www.maisonaffluency.com/brands-og.html")}
-            message={`Ateliers & Partners — Maison Affluency: ${withOgCacheBust("https://www.maisonaffluency.com/brands-og.html")}`}
+            url={withOgCacheBust("https://maisonaffluency.com/brands-og.html")}
+            message={`Ateliers & Partners — Maison Affluency: ${withOgCacheBust("https://maisonaffluency.com/brands-og.html")}`}
           />
         </motion.div>
 
