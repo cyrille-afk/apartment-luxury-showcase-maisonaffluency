@@ -1210,12 +1210,16 @@ export function BriefBuilder({
               value={values.block1.projectProfile}
               placeholder="[typology, city/area]"
               onChange={(v) => setBlockField("block1", "projectProfile", v)}
+              required
+              invalid={isPlaceholderValue(values.block1.projectProfile)}
             />
             <Field
               label="Zone"
               value={values.block1.zone}
               placeholder="[room, ceiling height]"
               onChange={(v) => setBlockField("block1", "zone", v)}
+              required
+              invalid={isPlaceholderValue(values.block1.zone)}
             />
             <Field
               label="Environment"
