@@ -1346,6 +1346,34 @@ export function BriefBuilder({
 
       </div>
 
+      {onSubmit && (
+        <div className="mt-4 flex flex-col items-end gap-2">
+          {submitError && (
+            <p className="max-w-md text-right font-body text-[11px] text-amber-600 dark:text-amber-400">
+              {submitError}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitting || !validateBriefValues(values).valid}
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-5 py-2 font-body text-[11px] uppercase transition-all duration-300 motion-reduce:transition-none disabled:cursor-not-allowed",
+              isSubmitting
+                ? "bg-muted text-muted-foreground tracking-[0.2em]"
+                : "bg-foreground text-background tracking-wider hover:opacity-90",
+            )}
+            aria-label={isSubmitting ? "Curating architectural layouts" : "Submit brief"}
+            title={isSubmitting ? "Curating architectural layouts" : "Submit brief"}
+          >
+            {isSubmitting && (
+              <Loader2 className="h-3.5 w-3.5 animate-[spin_2s_linear_infinite] motion-reduce:animate-none" aria-hidden="true" />
+            )}
+            <span>{isSubmitting ? "CURATING ARCHITECTURAL LAYOUTS..." : "Submit Brief"}</span>
+          </button>
+        </div>
+      )}
+
       {pasteFallbackOpen && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
