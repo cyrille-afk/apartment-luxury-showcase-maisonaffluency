@@ -1163,6 +1163,7 @@ export type Database = {
       }
       clients: {
         Row: {
+          assigned_tier: string
           billing_address_line1: string | null
           billing_address_line2: string | null
           billing_city: string | null
@@ -1172,16 +1173,21 @@ export type Database = {
           created_at: string
           created_by: string
           default_currency: string | null
+          eligible_for_upgrade: boolean
+          eligible_tier: string | null
           id: string
           name: string
           notes: string | null
+          rolling_12m_spend_cents: number
           studio_id: string
           tax_id: string | null
+          tier_computed_at: string | null
           type: Database["public"]["Enums"]["client_type"]
           updated_at: string
           website: string | null
         }
         Insert: {
+          assigned_tier?: string
           billing_address_line1?: string | null
           billing_address_line2?: string | null
           billing_city?: string | null
@@ -1191,16 +1197,21 @@ export type Database = {
           created_at?: string
           created_by: string
           default_currency?: string | null
+          eligible_for_upgrade?: boolean
+          eligible_tier?: string | null
           id?: string
           name: string
           notes?: string | null
+          rolling_12m_spend_cents?: number
           studio_id: string
           tax_id?: string | null
+          tier_computed_at?: string | null
           type?: Database["public"]["Enums"]["client_type"]
           updated_at?: string
           website?: string | null
         }
         Update: {
+          assigned_tier?: string
           billing_address_line1?: string | null
           billing_address_line2?: string | null
           billing_city?: string | null
@@ -1210,11 +1221,15 @@ export type Database = {
           created_at?: string
           created_by?: string
           default_currency?: string | null
+          eligible_for_upgrade?: boolean
+          eligible_tier?: string | null
           id?: string
           name?: string
           notes?: string | null
+          rolling_12m_spend_cents?: number
           studio_id?: string
           tax_id?: string | null
+          tier_computed_at?: string | null
           type?: Database["public"]["Enums"]["client_type"]
           updated_at?: string
           website?: string | null
@@ -8845,6 +8860,10 @@ export type Database = {
         Args: { _topic: string; _uid: string }
         Returns: boolean
       }
+      recompute_client_tier_eligibility: {
+        Args: { _client_id?: string }
+        Returns: undefined
+      }
       recompute_trade_tier_suggestions: { Args: never; Returns: number }
       record_security_event: {
         Args: {
@@ -8880,6 +8899,7 @@ export type Database = {
         Args: { _tier: Database["public"]["Enums"]["trade_tier"] }
         Returns: number
       }
+      tier_rank: { Args: { _tier: string }; Returns: number }
       trade_product_is_publicly_visible: {
         Args: { _product_id: string }
         Returns: boolean
