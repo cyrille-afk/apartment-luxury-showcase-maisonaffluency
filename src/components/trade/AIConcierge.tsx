@@ -732,8 +732,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const currentGreeting = useCallback((targetLang: Lang = lang) => (
     surface === "public"
       ? (initialGreeting || PUBLIC_GREETING)
-      : greetingForContext(stage, contextualPath, tone, targetLang).replace(/{concierge_name}/g, name)
-  ), [surface, initialGreeting, stage, contextualPath, tone, lang, name]);
+      : greetingForContext(stage, contextualPath, tone, targetLang, greetingMeta)
+  ), [surface, initialGreeting, stage, contextualPath, tone, lang, greetingMeta]);
   const scrollRef = useRef<HTMLDivElement>(null);
   // Two-step workflow: discovery grid (step 1) ⇄ procurement draft (step 2).
   const [configView, setConfigView] = useState(false);
