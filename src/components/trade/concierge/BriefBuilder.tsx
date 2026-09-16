@@ -1284,6 +1284,8 @@ export function BriefBuilder({
               value={values.block3.vibe}
               placeholder="[e.g. Japandi-Luxe, Italian Minimalism]"
               onChange={(v) => setBlockField("block3", "vibe", v)}
+              required
+              invalid={isPlaceholderValue(values.block3.vibe)}
             />
             <BrandPicker
               value={values.block3.references}
