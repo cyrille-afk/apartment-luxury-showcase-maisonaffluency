@@ -659,8 +659,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     }
   });
   const [briefCanvasExiting, setBriefCanvasExiting] = useState(false);
+  const [briefBuilderClosing, setBriefBuilderClosing] = useState(false);
+  const [briefHistoryEntering, setBriefHistoryEntering] = useState(false);
   const pendingBriefPrefillRef = useRef<string | null>(null);
   const briefTransitionTimersRef = useRef<number[]>([]);
+  const briefCloseTimerRef = useRef<number | null>(null);
   const briefTransitionRunRef = useRef(0);
   const cancelBriefTransition = useCallback(() => {
     briefTransitionRunRef.current += 1;
@@ -672,6 +675,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     briefTransitionRunRef.current += 1;
     briefTransitionTimersRef.current.forEach((timer) => window.clearTimeout(timer));
     briefTransitionTimersRef.current = [];
+    if (briefCloseTimerRef.current !== null) window.clearTimeout(briefCloseTimerRef.current);
   }, []);
   useEffect(() => {
     if (!open) cancelBriefTransition();
@@ -683,12 +687,29 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     } catch {}
   }, [briefBuilderOpen]);
   const openBriefBuilder = useCallback((draft?: string) => {
+    if (briefCloseTimerRef.current !== null) {
+      window.clearTimeout(briefCloseTimerRef.current);
+      briefCloseTimerRef.current = null;
+    }
     if (draft) setBriefDraft(draft);
+    setBriefBuilderClosing(false);
+    setBriefHistoryEntering(false);
     setBriefBuilderOpen(true);
   }, []);
   const closeBriefBuilder = useCallback(() => {
-    setBriefBuilderOpen(false);
-  }, []);
+    if (briefBuilderClosing) return;
+    setBriefBuilderClosing(true);
+    setBriefHistoryEntering(false);
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => setBriefHistoryEntering(true));
+    });
+    briefCloseTimerRef.current = window.setTimeout(() => {
+      setBriefBuilderOpen(false);
+      setBriefBuilderClosing(false);
+      setBriefHistoryEntering(false);
+      briefCloseTimerRef.current = null;
+    }, 450);
+  }, [briefBuilderClosing]);
   // Ambient status shown as a small badge next to the concierge name. Switches
   // through discrete phases during a human-handoff so the designer feels the
   // curatorial team take over, then returns to null once they resume chatting.
@@ -4039,7 +4060,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                       ? "border-foreground/40 bg-foreground/[0.06] text-foreground"
                       : "border-border bg-muted/60 text-muted-foreground",
                   )}
-                  title={`Current workflow stage: ${configView ? "Specify & Review" : stage}`}
+                  title={`Current workflow stage: ${briefBuilderOpen && !briefBuilderClosing ? "Brief Builder Open" : configView ? "Specify & Review" : stage}`}
                 >
                   <span
                     className={cn(
@@ -4048,10 +4069,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                     )}
                     aria-hidden="true"
                   />
-                  {copy.stage}: {configView ? "Specify & Review" : stage}
+                  {copy.stage}: {briefBuilderOpen && !briefBuilderClosing ? "Brief Builder Open" : configView ? "Specify & Review" : stage}
                 </span>
 
-                {briefBuilderOpen && (
+                {briefBuilderOpen && !briefBuilderClosing && (
                   <span
                     className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-body text-[10px] uppercase tracking-widest ${
                       briefValidation.valid
@@ -4075,7 +4096,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
 
           {!minimized && (<>
 
-          {briefBuilderOpen && (() => {
+          {briefBuilderOpen && !briefBuilderClosing && (() => {
             const lastUser = [...timeline].reverse().find((t) => t.kind === "msg" && t.role === "user") as { kind: "msg"; content?: string } | undefined;
             const ctx = (lastUser?.content || "").replace(/\s+/g, " ").trim().slice(0, 120);
             return (
@@ -4095,7 +4116,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             className={cn(
               "flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-5 transition-[opacity,transform] duration-500 ease-in-out motion-reduce:transition-none",
               briefCanvasExiting && "pointer-events-none -translate-y-6 opacity-0",
-              briefBuilderOpen && "hidden",
+              briefBuilderOpen && !briefBuilderClosing && "hidden",
+              briefBuilderClosing && (briefHistoryEntering ? "translate-y-0 opacity-100" : "-translate-y-5 opacity-0"),
             )}
           >
             {timeline.map((item, i) => {
@@ -5157,7 +5179,16 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               </div>
             )}
             {briefBuilderOpen && (
-              <div className="animate-[fade-in_700ms_cubic-bezier(0.22,1,0.36,1)_both] motion-reduce:animate-none">
+              <div
+                data-brief-builder-canvas
+                aria-hidden={briefBuilderClosing}
+                className={cn(
+                  "transition-[opacity,transform] duration-[450ms] ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none",
+                  briefBuilderClosing
+                    ? "pointer-events-none translate-y-5 opacity-0"
+                    : "translate-y-0 opacity-100 animate-[fade-in_700ms_cubic-bezier(0.22,1,0.36,1)_both] motion-reduce:animate-none",
+                )}
+              >
                 <BriefBuilder
                   value={briefDraft}
                   onChange={setBriefDraft}
