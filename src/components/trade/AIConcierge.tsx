@@ -181,18 +181,18 @@ function detectProjectScale(
   //
   // Also reject explicit negations ("not a GCB", "isn't a villa") which would
   // otherwise trip the keyword regex.
-  const negationRe = /\b(not|isn'?t|aren'?t|no|never|without)\s+(?:a\s+|an\s+|the\s+)?(?:gcb|gbc|good class bungalow|bungalow|penthouse|pavilion|villa)\b/i;
+  const negationRe = /\b(not|isn'?t|aren'?t|no|never|without)\s+(?:a\s+|an\s+|the\s+)?(?:gcb|gbc|good class bungalow|bungalow|penthouse|pavilion|villa|townhouse|brown[- ]?stone|loft)\b/i;
   if (negationRe.test(text)) return null;
 
   // Accept common typo "GBC" as GCB (Good Class Bungalow) — Singapore-only.
-  const strongTypologyRe = /\b(gcb|gbc|good class bungalow|bungalow|penthouse|pavilion|villa)\b/i;
+  const strongTypologyRe = /\b(gcb|gbc|good class bungalow|bungalow|penthouse|pavilion|villa|townhouse|brown[- ]?stone|loft)\b/i;
   const hasStrongTypology = strongTypologyRe.test(text);
   const minLen = hasStrongTypology
     ? priorUserTurns >= 2 ? 10 : priorUserTurns >= 1 ? 14 : 25
     : 25;
   if (text.length < minLen) return null;
 
-  const keywordRe = /\b(gcb|gbc|good class bungalow|bungalow|penthouse|whole[- ]?home|whole[- ]?house|multi[- ]?room|pavilion|villa|residence|to furnish|full home furnishing|entire (?:home|residence|apartment|villa|house))\b/i;
+  const keywordRe = /\b(gcb|gbc|good class bungalow|bungalow|penthouse|whole[- ]?home|whole[- ]?house|multi[- ]?room|pavilion|villa|townhouse|brown[- ]?stone|residence|to furnish|full home furnishing|entire (?:home|residence|apartment|villa|house))\b/i;
   const projectPhraseRe = /\bi(?:'m| am|'ve| have)\s+(?:got\s+)?(?:a |an )?(?:new\s+)?project\b/i;
   const zoneWords = ["living", "dining", "kitchen", "bedroom", "master", "study", "library", "foyer", "entryway", "powder", "guest", "family", "media", "lounge", "terrace", "garden", "pool", "bar", "home office", "office"];
   const zoneRe = new RegExp(`\\b(${zoneWords.join("|")})\\b`, "gi");
@@ -231,7 +231,10 @@ function detectProjectScale(
     (zoneMatches.length >= 1 ? 1 : 0) +
     (furnitureCount >= 1 ? 1 : 0) +
     (hasRoomDimensions ? 1 : 0) +
-    (wkMatch || moMatch ? 1 : 0);
+    (wkMatch || moMatch ? 1 : 0) +
+    // Procurement language ("gathering FF&E information") signals a real
+    // furnishing brief even when no individual furniture piece is named.
+    (/\bff\s*&\s*e\b/i.test(text) ? 1 : 0);
   const strongComposite = projectPhraseRe.test(text) || longMultiZone || dimensionsBrief;
   if (!strongComposite && signalCount < 2) return null;
 
@@ -241,8 +244,10 @@ function detectProjectScale(
     : /\bvilla\b/i.test(text) ? "Villa"
     : /\bbungalow\b/i.test(text) ? "Bungalow"
     : /\bpavilion\b/i.test(text) ? "Pavilion"
+    : /\bbrown[- ]?stone\b/i.test(text) ? "Brownstone"
     : /\bapartment\b/i.test(text) ? "Apartment"
     : /\btownhouse\b/i.test(text) ? "Townhouse"
+    : /\bloft\b/i.test(text) ? "Loft"
     : /\bresidence\b/i.test(text) ? "Private residence"
     : zoneMatches.length ? `${zoneMatches[0].charAt(0).toUpperCase() + zoneMatches[0].slice(1)} project`
     : "Multi-room residence";
@@ -277,6 +282,65 @@ function detectProjectScale(
     ceiling: extractCeilingLabel(text),
     vibe: extractVibeLabel(text),
   };
+}
+
+type ProjectScale = NonNullable<ReturnType<typeof detectProjectScale>>;
+
+/**
+ * Build the prefilled Architectural Brief text from detected project-scale
+ * signals. Shared by the client-side auto-open path and the announcement
+ * fallback so both produce an identical structured draft.
+ */
+function composeBriefPrefill(
+  scale: ProjectScale,
+  city: string,
+  country: string,
+  priorFurnitureText: string,
+  currentText: string,
+): string {
+  const profileLine = [scale.typology, [city, country].filter(Boolean).filter((v, i, arr) => arr.indexOf(v) === i).join(", ")]
+    .filter(Boolean)
+    .join(", ");
+  let prefilled = SPEC_BRIEF_TEMPLATE.replace("[typology, city/area]", profileLine || "[typology, city/area]");
+
+  const zoneLine = scale.zones.length
+    ? `${scale.zones.map((z) => z.charAt(0).toUpperCase() + z.slice(1)).join(", ")}${scale.ceiling ? ` — ${scale.ceiling}` : " — ceiling height [mm]"}`
+    : null;
+  if (zoneLine) {
+    prefilled = prefilled.replace("[room, ceiling height]", zoneLine);
+  }
+  if (scale.timelineWeeks) {
+    prefilled = prefilled.replace(
+      "Handover in [N] weeks (max lead time [N] weeks).",
+      `Handover in ${scale.timelineWeeks} weeks (max lead time [N] weeks).`,
+    );
+  }
+  if (scale.maxFootprint) {
+    prefilled = prefilled.replace("length ≤ [mm], depth ≤ [mm]", scale.maxFootprint);
+  }
+  if (scale.vibe) {
+    prefilled = prefilled.replace("[e.g. Japandi-Luxe, Italian Minimalism]", scale.vibe);
+  }
+
+  // Merge furniture typologies from the current message + every prior user
+  // turn so pieces named earlier still land in Block 2 TYPOLOGY.
+  const explicitReferenceBrands = extractExplicitReferenceBrands([currentText, priorFurnitureText].filter(Boolean).join(" \n "));
+  const mergedFurniture = collapseFurnitureTokens(
+    Array.from(new Set([...(scale.furniture || []), ...extractFurnitureTypology(priorFurnitureText)])),
+  );
+  if (mergedFurniture.length) {
+    prefilled = prefilled.replace(
+      "[e.g. sectional + accent chairs]",
+      mergedFurniture.join(", "),
+    );
+  }
+  if (explicitReferenceBrands.length) {
+    prefilled = prefilled.replace(
+      "[e.g. Man of Parts / Collection Particulière]",
+      explicitReferenceBrands.join(" / "),
+    );
+  }
+  return prefilled;
 }
 
 
@@ -2724,60 +2788,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           }
         }
 
-        const profileLine = [scale.typology, [city, country].filter(Boolean).filter((v, i, arr) => arr.indexOf(v) === i).join(", ")]
-          .filter(Boolean)
-          .join(", ");
-
-        // Zone line — capitalize + join detected zones (e.g. "Living, Dining, Master")
-        const zoneLine = scale.zones.length
-          ? `${scale.zones.map((z) => z.charAt(0).toUpperCase() + z.slice(1)).join(", ")}${scale.ceiling ? ` — ${scale.ceiling}` : " — ceiling height [mm]"}`
-          : null;
-
-        // Timeline line
-        const timelineLine = scale.timelineWeeks
-          ? `Handover in ${scale.timelineWeeks} weeks (max lead time [N] weeks).`
-          : null;
-
-        let prefilled = SPEC_BRIEF_TEMPLATE.replace("[typology, city/area]", profileLine || "[typology, city/area]");
-        if (zoneLine) {
-          prefilled = prefilled.replace("[room, ceiling height]", zoneLine);
-        }
-        if (timelineLine) {
-          prefilled = prefilled.replace(
-            "Handover in [N] weeks (max lead time [N] weeks).",
-            timelineLine,
-          );
-        }
-        if (scale.maxFootprint) {
-          prefilled = prefilled.replace("length ≤ [mm], depth ≤ [mm]", scale.maxFootprint);
-        }
-        if (scale.vibe) {
-          prefilled = prefilled.replace("[e.g. Japandi-Luxe, Italian Minimalism]", scale.vibe);
-        }
-
-        // Merge furniture typologies from the current message + every prior
-        // user turn so pieces named earlier ("sectional sofas, armchairs,
-        // side and coffee tables") still land in Block 2 TYPOLOGY.
+        // Furniture typologies from the current message + every prior user
+        // turn so pieces named earlier ("sectional sofas, armchairs, side and
+        // coffee tables") still land in Block 2 TYPOLOGY.
         const priorFurnitureText = timeline
           .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg" && t.role === "user")
           .map((t) => t.content || "")
           .join(" \n ");
-        const explicitReferenceBrands = extractExplicitReferenceBrands([text, priorFurnitureText].filter(Boolean).join(" \n "));
-        const mergedFurniture = collapseFurnitureTokens(
-          Array.from(new Set([...(scale.furniture || []), ...extractFurnitureTypology(priorFurnitureText)])),
-        );
-        if (mergedFurniture.length) {
-          prefilled = prefilled.replace(
-            "[e.g. sectional + accent chairs]",
-            mergedFurniture.join(", "),
-          );
-        }
-        if (explicitReferenceBrands.length) {
-          prefilled = prefilled.replace(
-            "[e.g. Man of Parts / Collection Particulière]",
-            explicitReferenceBrands.join(" / "),
-          );
-        }
+        const prefilled = composeBriefPrefill(scale, city, country, priorFurnitureText, text);
 
         // Stage the transition rather than snapping straight into the builder:
         // 1. Felix thinks for 1.8s using the existing typing indicator.
@@ -2787,11 +2805,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         try { sessionStorage.removeItem("concierge:briefAutoOpened"); } catch {}
 
 
+        const notedFurniture = collapseFurnitureTokens(
+          Array.from(new Set([...(scale.furniture || []), ...extractFurnitureTypology(priorFurnitureText)])),
+        );
         const noted = [
           scale.typology,
           city ? `city: ${city}` : null,
           scale.zones.length ? `zones: ${scale.zones.join(", ")}` : null,
-          mergedFurniture.length ? `pieces: ${mergedFurniture.join(", ")}` : null,
+          notedFurniture.length ? `pieces: ${notedFurniture.join(", ")}` : null,
           scale.timelineWeeks ? `${scale.timelineWeeks}-week handover` : null,
         ].filter(Boolean).join(" · ");
 
@@ -3260,6 +3281,85 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           try {
             const city = extractProjectCityFromAssistant(assistantSoFar);
             if (city) updateConciergeSession({ projectCity: city });
+          } catch { /* non-fatal */ }
+
+          // Brief Builder announcement fallback — when Felix's streamed prose
+          // announces the Architectural Brief Builder ("now open", "send the
+          // structured brief back") but the client-side project-scale
+          // detection did not fire (e.g. an unrecognized typology phrase), the
+          // builder would never appear. Patch the reply with an explicit CTA
+          // button and auto-open the builder with whatever context we can
+          // prefill from the conversation so far.
+          try {
+            const announcesBuilder = /brief builder is now open|now open and prefilled|send the structured brief back/i.test(assistantSoFar);
+            if (
+              announcesBuilder &&
+              !briefBuilderOpen &&
+              !pendingBriefPrefillRef.current &&
+              briefTransitionTimersRef.current.length === 0
+            ) {
+              const priorUserText = timelineRef.current
+                .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg" && t.role === "user")
+                .map((t) => t.content || "")
+                .join(" \n ");
+              const combined = [priorUserText, text].filter(Boolean).join(" \n ");
+              const scale = detectProjectScale(combined, 2) || detectProjectScale(text, 2);
+              if (scale) {
+                let fCity = scale.city;
+                let fCountry = scale.country;
+                if (!fCity) {
+                  const quick = quickClientProfile(combined);
+                  if (quick?.city) fCity = quick.city;
+                  if (quick?.country) fCountry = fCountry || quick.country;
+                }
+                if (!fCity) {
+                  const bare = combined.match(/\b(Singapore|London|Paris|New York|Hong Kong|Dubai|Monaco|Los Angeles|Miami|Bangkok|Jakarta|Kuala Lumpur|Tokyo|Sydney|Milan|Geneva|Zurich)\b/);
+                  if (bare) fCity = bare[1];
+                }
+                pendingBriefPrefillRef.current = composeBriefPrefill(scale, fCity, fCountry, priorUserText, text);
+              }
+              setTimeline((prev) => {
+                const last = prev[prev.length - 1];
+                if (!last || last.kind !== "msg" || last.role !== "assistant") return prev;
+                if (last.actions?.some((a) => a.prompt === "__OPEN_BRIEF_BUILDER__")) return prev;
+                const copy = prev.slice();
+                copy[prev.length - 1] = {
+                  ...last,
+                  actions: [
+                    ...(last.actions || []),
+                    { label: "Open Architectural Brief Builder", prompt: "__OPEN_BRIEF_BUILDER__", primary: true },
+                  ],
+                };
+                return copy;
+              });
+              // Auto-reveal: let the reply settle, then glide into the builder
+              // with the same staged transition as the detected-scale path.
+              cancelBriefTransition();
+              const run = briefTransitionRunRef.current;
+              const exitTimer = window.setTimeout(() => {
+                if (briefTransitionRunRef.current !== run) return;
+                setBriefCanvasExiting(true);
+                const openTimer = window.setTimeout(() => {
+                  if (briefTransitionRunRef.current !== run) return;
+                  const pending = pendingBriefPrefillRef.current;
+                  if (pending) {
+                    setBriefDraft(pending);
+                    pendingBriefPrefillRef.current = null;
+                  }
+                  try {
+                    const scope = sessionStorage.getItem("trade:lastProjectFilter") || "global";
+                    const expanded = JSON.stringify({ block1: true, block2: true, block3: true });
+                    localStorage.setItem(`concierge:briefBuilder:expanded:${scope}`, expanded);
+                    localStorage.setItem("concierge:briefBuilder:expanded", expanded);
+                  } catch {}
+                  openBriefBuilder();
+                  setBriefCanvasExiting(false);
+                  briefTransitionTimersRef.current = [];
+                }, 500);
+                briefTransitionTimersRef.current.push(openTimer);
+              }, 2600);
+              briefTransitionTimersRef.current.push(exitTimer);
+            }
           } catch { /* non-fatal */ }
         },
         onError: (msg) => {
