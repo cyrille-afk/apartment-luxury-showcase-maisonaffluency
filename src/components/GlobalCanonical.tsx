@@ -37,9 +37,14 @@ export function GlobalCanonical() {
         return;
       }
 
-      // Keep the first canonical and rewrite it to production; remove dupes.
-      links[0].setAttribute("href", canonical);
-      links.slice(1).forEach((l) => l.remove());
+      // Keep the first canonical and rewrite it to production only if needed.
+      if (links[0].getAttribute("href") !== canonical) {
+        links[0].setAttribute("href", canonical);
+      }
+      // Remove any duplicates introduced by nested Helmet calls.
+      if (links.length > 1) {
+        links.slice(1).forEach((l) => l.remove());
+      }
     };
 
     enforce();
