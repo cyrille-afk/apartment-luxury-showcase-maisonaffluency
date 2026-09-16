@@ -3,7 +3,7 @@
 # NOTE: Lovable hosting does NOT read this file (its SPA fallback is built in).
 # These rules take effect only if the site is deployed to Netlify.
 
-# 1. Canonical host — apex and any preview/staging remnant go to production
+# 1. Canonical host — www and any preview/staging remnant go to the apex domain
 https://www.maisonaffluency.com/*        https://maisonaffluency.com/:splat   301!
 https://:project.lovable.app/*           https://maisonaffluency.com/:splat   301!
 
