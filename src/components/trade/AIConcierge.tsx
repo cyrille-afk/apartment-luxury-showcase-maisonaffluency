@@ -2338,11 +2338,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     try {
       const text = (overrideText ?? (briefBuilderOpen ? briefDraft : input)).trim();
 
-    // Sentinel: user clicked the "Open Architectural Brief" CTA. Load the
-    // prefilled brief into the composer and open the Brief Builder — do NOT
-    // send anything to the LLM. This keeps the auto-open deferred to an
-    // explicit user action so the builder never appears at the same time as
-    // the assistant's announcement.
+    // Sentinel: only an explicit click on the assistant CTA may open the
+    // Brief Builder. First ease the narrative canvas away, then reveal the
+    // prefilled workspace; nothing is sent to the LLM on this path.
     if (text === "__OPEN_BRIEF_BUILDER__") {
       cancelBriefTransition();
       const prefill = pendingBriefPrefillRef.current;
@@ -2354,9 +2352,17 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           localStorage.setItem(`concierge:briefBuilder:expanded:${scope}`, expanded);
           localStorage.setItem("concierge:briefBuilder:expanded", expanded);
         } catch {}
-        pendingBriefPrefillRef.current = null;
       }
-      openBriefBuilder();
+      const run = briefTransitionRunRef.current;
+      setBriefCanvasExiting(true);
+      const openTimer = window.setTimeout(() => {
+        if (briefTransitionRunRef.current !== run) return;
+        pendingBriefPrefillRef.current = null;
+        openBriefBuilder();
+        setBriefCanvasExiting(false);
+        briefTransitionTimersRef.current = [];
+      }, 520);
+      briefTransitionTimersRef.current.push(openTimer);
       return;
     }
 
@@ -2756,14 +2762,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       } catch (e) { console.warn("[concierge-capture] setup", e); }
     }
 
-    // Project-scale auto-detection — whenever the user's message reads as a
-    // whole-home / multi-room project brief AND the Brief Builder isn't
-    // already open AND no tearsheet has been proposed yet, skip the slow
-    // one-question-at-a-time intake and open the Architectural Brief Builder
-    // with the detected typology/city prefilled. Not gated to turn 1, and
-    // deliberately not gated by a persistent sessionStorage flag: if the user
-    // closes the builder and later types another project-scale message, it
-    // should re-open.
+    // Project-scale detection prepares a draft and offers the Brief Builder,
+    // but never opens it automatically. The designer controls the pacing by
+    // clicking the CTA beneath Felix's response.
     const hasProposal = timeline.some((t) => t.kind === "proposal" || t.kind === "quote_proposal" || t.kind === "ffe_proposal");
     if (!hasProposal && !briefBuilderOpen && sendingAttachments.length === 0) {
 
@@ -2807,10 +2808,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           .join(" \n ");
         const prefilled = composeBriefPrefill(scale, city, country, priorFurnitureText, text);
 
-        // Stage the transition rather than snapping straight into the builder:
-        // 1. Felix thinks for 1.8s using the existing typing indicator.
-        // 2. His response fades in over 500ms and remains readable for 1s.
-        // 3. The history glides upward, then the clean builder enters below.
+        // Keep Felix's thinking/reveal pacing, then remain in the narrative
+        // view indefinitely until the designer clicks the CTA.
         pendingBriefPrefillRef.current = prefilled;
         try { sessionStorage.removeItem("concierge:briefAutoOpened"); } catch {}
 
@@ -2843,31 +2842,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             },
           ]);
           setStreaming(false);
-
-          const exitTimer = window.setTimeout(() => {
-            if (briefTransitionRunRef.current !== run) return;
-            setBriefCanvasExiting(true);
-
-            const openTimer = window.setTimeout(() => {
-              if (briefTransitionRunRef.current !== run) return;
-              const pending = pendingBriefPrefillRef.current;
-              if (pending) {
-                setBriefDraft(pending);
-                pendingBriefPrefillRef.current = null;
-              }
-              try {
-                const scope = sessionStorage.getItem("trade:lastProjectFilter") || "global";
-                const expanded = JSON.stringify({ block1: true, block2: true, block3: true });
-                localStorage.setItem(`concierge:briefBuilder:expanded:${scope}`, expanded);
-                localStorage.setItem("concierge:briefBuilder:expanded", expanded);
-              } catch {}
-              openBriefBuilder();
-              setBriefCanvasExiting(false);
-              briefTransitionTimersRef.current = [];
-            }, 500);
-            briefTransitionTimersRef.current.push(openTimer);
-          }, 1500);
-          briefTransitionTimersRef.current.push(exitTimer);
+          briefTransitionTimersRef.current = [];
         }, 1800);
         briefTransitionTimersRef.current.push(responseTimer);
         return;
@@ -3297,9 +3272,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           // announces the Architectural Brief Builder ("now open", "send the
           // structured brief back") but the client-side project-scale
           // detection did not fire (e.g. an unrecognized typology phrase), the
-          // builder would never appear. Patch the reply with an explicit CTA
-          // button and auto-open the builder with whatever context we can
-          // prefill from the conversation so far.
+          // builder would never be reachable. Patch the reply with an explicit
+          // CTA and prepare its context, but leave the chat visible until the
+          // designer deliberately opens it.
           try {
             const announcesBuilder = /brief builder is now open|now open and prefilled|send the structured brief back/i.test(assistantSoFar);
             if (
@@ -3342,33 +3317,6 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 };
                 return copy;
               });
-              // Auto-reveal: let the reply settle, then glide into the builder
-              // with the same staged transition as the detected-scale path.
-              cancelBriefTransition();
-              const run = briefTransitionRunRef.current;
-              const exitTimer = window.setTimeout(() => {
-                if (briefTransitionRunRef.current !== run) return;
-                setBriefCanvasExiting(true);
-                const openTimer = window.setTimeout(() => {
-                  if (briefTransitionRunRef.current !== run) return;
-                  const pending = pendingBriefPrefillRef.current;
-                  if (pending) {
-                    setBriefDraft(pending);
-                    pendingBriefPrefillRef.current = null;
-                  }
-                  try {
-                    const scope = sessionStorage.getItem("trade:lastProjectFilter") || "global";
-                    const expanded = JSON.stringify({ block1: true, block2: true, block3: true });
-                    localStorage.setItem(`concierge:briefBuilder:expanded:${scope}`, expanded);
-                    localStorage.setItem("concierge:briefBuilder:expanded", expanded);
-                  } catch {}
-                  openBriefBuilder();
-                  setBriefCanvasExiting(false);
-                  briefTransitionTimersRef.current = [];
-                }, 500);
-                briefTransitionTimersRef.current.push(openTimer);
-              }, 2600);
-              briefTransitionTimersRef.current.push(exitTimer);
             }
           } catch { /* non-fatal */ }
         },
@@ -4700,9 +4648,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                             onClick={() => send(a.prompt)}
                             disabled={streaming}
                             className={cn(
-                              "rounded-full border transition-colors px-3 py-1 font-body text-xs disabled:opacity-40",
+                              "border transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] px-3 py-1 font-body text-xs disabled:opacity-40 motion-reduce:transition-none",
                               a.primary
-                                ? "border-foreground bg-foreground text-background hover:opacity-90 px-4 py-1.5 text-[13px] shadow-sm inline-flex items-center gap-1.5"
+                                ? "w-full justify-center border-foreground bg-foreground text-background hover:-translate-y-0.5 hover:shadow-lg px-5 py-3 text-[11px] uppercase tracking-[0.16em] shadow-sm inline-flex items-center gap-2"
                                 : "border-border bg-background hover:bg-accent/10 hover:border-accent/40 text-foreground"
                             )}
                           >

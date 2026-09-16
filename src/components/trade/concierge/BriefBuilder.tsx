@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Bookmark, BookmarkPlus, ChevronDown, ChevronRight, ClipboardPaste, Loader2, Trash2, X } from "lucide-react";
+import { Bookmark, BookmarkPlus, ChevronDown, ChevronLeft, ChevronRight, ClipboardPaste, Loader2, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BrandPicker } from "@/components/trade/concierge/BrandPicker";
 import { updateConciergeSession } from "@/hooks/useConciergeSession";
@@ -1109,10 +1109,23 @@ export function BriefBuilder({
 
   return (
     <div className="mb-2 rounded-xl border border-accent/40 bg-muted/30 p-3">
-      <div className="flex items-center justify-between mb-3 gap-2">
-        <span className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-          Brief Builder
-        </span>
+      <div className="flex items-center justify-between mb-3 gap-2 border-b border-border/70 pb-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex shrink-0 items-center gap-1 font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+            aria-label="Collapse Brief Builder"
+            title="Collapse Brief Builder"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
+            Collapse Brief
+          </button>
+          <span className="h-3 w-px bg-border" aria-hidden="true" />
+          <span className="truncate font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+            Brief Builder
+          </span>
+        </div>
         <div className="flex items-center gap-1.5">
           {pasteStatus === "ok" && (
             <span className="font-body text-[10px] uppercase tracking-[0.12em] text-accent">
@@ -1235,15 +1248,6 @@ export function BriefBuilder({
             Paste the full architectural brief
           </button>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-foreground/10"
-            aria-label="Close brief builder"
-            title="Close brief builder"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
         </div>
       </div>
 
