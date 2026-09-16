@@ -30,6 +30,9 @@ try {
 }
 const DIST = path.join(ROOT, "dist");
 const CANONICAL_HOST = "https://maisonaffluency.com";
+// Guardrail: the live catalogue is ~1,000 URLs. Anything far below that means a
+// failed/partial query, not a genuinely shrunken catalogue.
+const MIN_DYNAMIC_ROUTES = Number(process.env.SITEMAP_MIN_ROUTES ?? 300);
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_KEY =
@@ -77,8 +80,9 @@ function urlEntry(loc, lastmod, changefreq, priority) {
 async function loadDynamicRoutes() {
   const routes = [];
   if (!SUPABASE_URL || !SUPABASE_KEY) {
-    console.warn("[sitemap] Supabase env vars missing — skipping dynamic routes.");
-    return routes;
+    throw new Error(
+      "Supabase env vars missing — refusing to emit a sitemap without live records."
+    );
   }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
@@ -105,7 +109,7 @@ async function loadDynamicRoutes() {
     }
     console.log(`[sitemap] designers: ${data?.length ?? 0}`);
   } catch (err) {
-    console.warn("[sitemap] designers query failed:", err?.message ?? err);
+    throw new Error(`designers query failed: ${err?.message ?? err}`);
   }
 
   // Journal articles (same filter as prerender-routes.mjs)
@@ -128,7 +132,7 @@ async function loadDynamicRoutes() {
     }
     console.log(`[sitemap] journal: ${data?.length ?? 0}`);
   } catch (err) {
-    console.warn("[sitemap] journal query failed:", err?.message ?? err);
+    throw new Error(`journal query failed: ${err?.message ?? err}`);
   }
 
   // Studios (public directory pages, not prerendered but indexable)
@@ -150,7 +154,7 @@ async function loadDynamicRoutes() {
     }
     console.log(`[sitemap] studios: ${data?.length ?? 0}`);
   } catch (err) {
-    console.warn("[sitemap] studios query failed:", err?.message ?? err);
+    throw new Error(`studios query failed: ${err?.message ?? err}`);
   }
 
   // Trade products (public "Price upon Request" pages)
@@ -182,7 +186,7 @@ async function loadDynamicRoutes() {
     }
     console.log(`[sitemap] products: ${products.length}`);
   } catch (err) {
-    console.warn("[sitemap] products query failed:", err?.message ?? err);
+    throw new Error(`products query failed: ${err?.message ?? err}`);
   }
 
   return routes;
@@ -200,9 +204,24 @@ async function main() {
     urlEntry(r.loc, today, r.changefreq, r.priority)
   );
 
-  const dynamicEntries = dynamic.map((r) =>
-    urlEntry(r.loc, r.lastmod || today, r.changefreq, r.priority)
-  );
+  // Never ship a sitemap that silently collapsed: a near-empty tree would drop
+  // thousands of live URLs out of Google's index in one deploy.
+  if (dynamic.length < MIN_DYNAMIC_ROUTES) {
+    throw new Error(
+      `only ${dynamic.length} dynamic routes resolved (minimum ${MIN_DYNAMIC_ROUTES}) — aborting instead of publishing a truncated sitemap.`
+    );
+  }
+
+  const seen = new Set(STATIC_ROUTES.map((r) => r.loc));
+  const dynamicEntries = dynamic
+    .filter((r) => {
+      if (!r.loc || seen.has(r.loc)) return false;
+      seen.add(r.loc);
+      return true;
+    })
+    .map((r) =>
+      urlEntry(r.loc, r.lastmod || today, r.changefreq, r.priority)
+    );
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -212,7 +231,7 @@ ${[...staticEntries, ...dynamicEntries].join("\n")}
   const outPath = path.join(DIST, "sitemap.xml");
   await writeFile(outPath, xml, "utf8");
 
-  const total = STATIC_ROUTES.length + dynamic.length;
+  const total = staticEntries.length + dynamicEntries.length;
   console.log(`[sitemap] wrote ${total} URLs to ${outPath}`);
 }
 
