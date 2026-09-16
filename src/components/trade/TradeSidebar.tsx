@@ -120,6 +120,13 @@ export function TradeSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.end}
+                      data-felix-target={
+                        item.url === "/trade/the-collection"
+                          ? "nav-collection"
+                          : item.url === "/trade/quotes"
+                            ? "nav-quotes"
+                            : undefined
+                      }
                       className="flex items-center gap-3 px-3 py-3 font-body text-xs text-muted-foreground hover:text-foreground transition-colors border-l border-transparent"
                       activeClassName="text-foreground font-medium border-foreground"
                     >
