@@ -245,6 +245,40 @@ function emitTradeProgramShellPlugin(): Plugin {
   };
 }
 
+/**
+ * Environment-scoped robots.txt.
+ *
+ * The published production host serves the static public/robots.txt (crawling
+ * allowed + production sitemap). Any non-production host served by this server
+ * — the Lovable live preview (*.lovable.app) and localhost — gets a strict
+ * block page instead, so preview routes never enter a search index.
+ */
+function environmentRobotsPlugin(): Plugin {
+  const BLOCKED = "User-agent: *\nDisallow: /\nSitemap:\n";
+  const isProductionHost = (host: string) =>
+    /(^|\.)maisonaffluency\.com(:\d+)?$/i.test((host || "").split(",")[0].trim());
+
+  const middleware = (req: any, res: any, next: any) => {
+    const url = (req.url || "").split("?")[0];
+    if (url !== "/robots.txt") return next();
+    const host = req.headers["x-forwarded-host"] || req.headers.host || "";
+    if (isProductionHost(String(host))) return next();
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.setHeader("Cache-Control", "no-store");
+    res.end(BLOCKED);
+  };
+
+  return {
+    name: "environment-robots",
+    configureServer(server) {
+      server.middlewares.use(middleware);
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(middleware);
+    },
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const buildId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -269,6 +303,7 @@ export default defineConfig(({ mode }) => {
       emitOgManifestPlugin(),
       inlineCriticalCssPlugin(),
       emitTradeProgramShellPlugin(),
+      environmentRobotsPlugin(),
 
     ].filter(Boolean),
   resolve: {

@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
+import LegacyRouteRedirect from "@/components/LegacyRouteRedirect";
 import { BrowserRouter, Navigate, Routes, Route, useLocation, useNavigate, useNavigationType, useParams } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
@@ -847,6 +848,15 @@ const App = () => {
                   <Route path="/privacy" element={<Suspense fallback={null}><PrivacyPolicy /></Suspense>} />
                   <Route path="/terms" element={<Suspense fallback={null}><TermsOfService /></Suspense>} />
                   <Route path="/unsubscribe" element={<Suspense fallback={null}><Unsubscribe /></Suspense>} />
+                  {/* Legacy / test route aliases Google has already crawled.
+                      Each performs a permanent (301-signalled) redirect to the
+                      live production catalogue instead of serving a dead page. */}
+                  {["/products", "/products/*", "/shop", "/shop/*", "/catalog", "/catalog/*",
+                    "/catalogue", "/catalogue/*", "/collection", "/collection/*",
+                    "/home", "/index.html", "/index.php",
+                    "/test", "/test/*", "/preview", "/preview/*", "/staging", "/staging/*"].map((legacyPath) => (
+                    <Route key={legacyPath} path={legacyPath} element={<LegacyRouteRedirect to="/designers" />} />
+                  ))}
                   <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
                 </Routes>
                 </VisualiserMaterialProvider>

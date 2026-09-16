@@ -13,7 +13,7 @@ import { useNoIndex } from "@/hooks/useNoIndex";
 const LegacyRouteRedirect = ({ to = "/designers" }: { to?: string }) => {
   const { pathname } = useLocation();
   useNoIndex("noindex, follow");
-  const absolute = `https://maisonaffluency.com${to}`;
+  const absolute = `https://www.maisonaffluency.com${to}`;
 
   return (
     <>
