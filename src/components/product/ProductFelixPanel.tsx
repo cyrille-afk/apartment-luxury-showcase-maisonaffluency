@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { MessageSquare } from "lucide-react";
 import { AIConcierge } from "@/components/trade/AIConcierge";
+import { useAIGuideName } from "@/hooks/useAIGuideName";
 
 export interface FelixProductContext {
   title: string;
@@ -35,6 +36,7 @@ export function buildFelixProductContext(ctx: FelixProductContext): string {
 }
 
 export default function ProductFelixPanel({ context }: { context: FelixProductContext }) {
+  const guideName = useAIGuideName();
   const contextRef = useRef(context);
   contextRef.current = context;
 
@@ -71,13 +73,13 @@ export default function ProductFelixPanel({ context }: { context: FelixProductCo
   return (
     <div className="rounded-lg border border-border bg-card/40 p-5 h-full flex flex-col">
       <p className="font-body text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--gold))]">
-        Felix · AI Curatorial Guide
+        {guideName} · AI Curatorial Guide
       </p>
       <h2 className="font-display text-lg mt-2 leading-snug">
         Welcome to the Maison Affluency Atelier
       </h2>
       <p className="font-body text-xs text-muted-foreground leading-relaxed mt-2">
-        Felix already has the {context.title} by {context.designer} in view — its dimensions,
+        {guideName} already has the {context.title} by {context.designer} in view — its dimensions,
         materials and finish options. Ask about pairings, lead times, or build a schedule around it.
       </p>
 
@@ -99,7 +101,7 @@ export default function ProductFelixPanel({ context }: { context: FelixProductCo
       >
         <span className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-md bg-foreground text-background font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/90 transition-colors">
           <MessageSquare className="h-3.5 w-3.5" />
-          Ask Felix about this piece
+          Ask {guideName} about this piece
         </span>
       </button>
 

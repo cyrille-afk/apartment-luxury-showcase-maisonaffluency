@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { ArrowLeft, ArrowRight, Check, Pause, Play, Sparkles, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useAIGuideName } from "@/hooks/useAIGuideName";
 
 type FelixStep = {
   id: string;
@@ -19,7 +20,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "greeting",
     route: "/trade",
     dialogue:
-      "Welcome! I am Felix, your AI Curatorial Guide. Your Silver Tier benefits are pre-applied across the entire platform. Let's look at how you'll manage your workflow.",
+      "Welcome! I am {name}, your AI Curatorial Guide. Your Silver Tier benefits are pre-applied across the entire platform. Let's look at how you'll manage your workflow.",
   },
   {
     id: "collection",
@@ -67,7 +68,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "felix-chat",
     route: "/trade",
     dialogue:
-      "Finally, whenever you need real-time design assistance, look up here. Launch the Felix Chat at any time to co-curate collections, source hard-to-find items, or build out an entire project layout alongside me. Let's create something iconic!",
+      "Finally, whenever you need real-time design assistance, look up here. Launch the {name} Chat at any time to co-curate collections, source hard-to-find items, or build out an entire project layout alongside me. Let's create something iconic!",
   },
 ];
 
@@ -77,6 +78,7 @@ const PAD = 10;
 type Rect = { top: number; left: number; width: number; height: number };
 
 export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
+  const guideName = useAIGuideName();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -242,7 +244,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       {/* Felix card */}
       <div
         role="dialog"
-        aria-label="Felix — Your Curatorial Guide"
+        aria-label={`${guideName} — Your Curatorial Guide`}
         className={cn(
           "fixed z-[132] print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-opacity duration-300",
           isPaused && "opacity-90",
@@ -258,7 +260,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
               </span>
               <div className="min-w-0">
                 <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                  Felix — Your Curatorial Guide
+                  {guideName} — Your Curatorial Guide
                 </p>
                 <h4 className="font-display text-base text-foreground leading-snug">{step.title}</h4>
               </div>
@@ -300,7 +302,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
               isPaused && "opacity-50",
             )}
           >
-            <p className="font-body text-[13px] leading-relaxed text-foreground">{step.dialogue}</p>
+            <p className="font-body text-[13px] leading-relaxed text-foreground">{step.dialogue.replace(/\{name\}/g, guideName)}</p>
           </div>
 
           {isPaused && (
