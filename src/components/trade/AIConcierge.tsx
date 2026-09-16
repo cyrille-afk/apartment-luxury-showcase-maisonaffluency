@@ -4727,6 +4727,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   <div key={i} className="w-full self-start">
                     <LayoutComparisonGrid
                       selected={item.selected ?? null}
+                      styleInput={item.styleInput ?? null}
                       onSelect={(option) => {
                         if (item.selected) return;
                         setTimeline((prev) => {
