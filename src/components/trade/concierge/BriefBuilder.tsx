@@ -147,6 +147,34 @@ const DEFAULT_VALUES: BriefValues = {
     "Return 3 layout configurations. For every piece, output a strict Architectural Specification Schedule:\nProduct Name · Designer · Exact mm Dimensions · Verified Finish Options · Lead Time · Cloudinary image URL · Supabase CAD/BIM URL.\nNo conversational intro.",
 };
 
+const REQUIRED_FIELDS: { key: string; block: "block1" | "block2" | "block3"; field: string; label: string }[] = [
+  { key: "projectProfile", block: "block1", field: "projectProfile", label: "PROJECT PROFILE" },
+  { key: "zone", block: "block1", field: "zone", label: "ZONE" },
+  { key: "typology", block: "block2", field: "typology", label: "TYPOLOGY" },
+  { key: "vibe", block: "block3", field: "vibe", label: "VIBE" },
+];
+
+function isPlaceholderValue(value: string): boolean {
+  if (!value || !value.trim()) return true;
+  // Any remaining bracketed token like [typology], [N], [mm] is treated as an
+  // unfilled template placeholder.
+  return /\[.*?\]/.test(value.trim());
+}
+
+export function validateBriefValues(values: BriefValues): { valid: boolean; missing: string[] } {
+  const missing: string[] = [];
+  for (const f of REQUIRED_FIELDS) {
+    const v = (values[f.block] as Record<string, string>)[f.field];
+    if (isPlaceholderValue(v)) missing.push(f.label);
+  }
+  return { valid: missing.length === 0, missing };
+}
+
+export function validateBriefDraft(text: string): { valid: boolean; missing: string[] } {
+  const parsed = parseBrief(text || "");
+  return validateBriefValues(parsed.values);
+}
+
 // Header labels used in the formatted brief sent to Felix. Do NOT change the
 // "Block N —" prefixes; parseBrief() relies on them.
 const BLOCK_LABELS: Record<string, string> = {
@@ -610,24 +638,37 @@ function Field({
   value,
   onChange,
   placeholder,
+  required,
+  invalid,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
+  required?: boolean;
+  invalid?: boolean;
 }) {
   return (
     <label className="block">
       <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
         {label}
+        {required && <span className="ml-1 text-amber-500" aria-hidden="true">*</span>}
       </span>
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="mt-1 block w-full rounded-lg border border-border bg-background px-2.5 py-1.5 font-body text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+        className={`mt-1 block w-full rounded-lg border px-2.5 py-1.5 font-body text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent ${
+          invalid ? "border-amber-500/40 bg-amber-500/[0.04]" : "border-border bg-background"
+        }`}
+        aria-required={required}
       />
+      {required && invalid && (
+        <span className="mt-1 block font-body text-[10px] uppercase tracking-wider text-amber-500/80">
+          Required field to unlock curation
+        </span>
+      )}
     </label>
   );
 }
@@ -1169,12 +1210,16 @@ export function BriefBuilder({
               value={values.block1.projectProfile}
               placeholder="[typology, city/area]"
               onChange={(v) => setBlockField("block1", "projectProfile", v)}
+              required
+              invalid={isPlaceholderValue(values.block1.projectProfile)}
             />
             <Field
               label="Zone"
               value={values.block1.zone}
               placeholder="[room, ceiling height]"
               onChange={(v) => setBlockField("block1", "zone", v)}
+              required
+              invalid={isPlaceholderValue(values.block1.zone)}
             />
             <Field
               label="Environment"
@@ -1203,6 +1248,8 @@ export function BriefBuilder({
               value={values.block2.typology}
               placeholder="[e.g. sectional + accent chairs]"
               onChange={(v) => setBlockField("block2", "typology", v)}
+              required
+              invalid={isPlaceholderValue(values.block2.typology)}
             />
             <Field
               label="Max Footprint"
@@ -1237,6 +1284,8 @@ export function BriefBuilder({
               value={values.block3.vibe}
               placeholder="[e.g. Japandi-Luxe, Italian Minimalism]"
               onChange={(v) => setBlockField("block3", "vibe", v)}
+              required
+              invalid={isPlaceholderValue(values.block3.vibe)}
             />
             <BrandPicker
               value={values.block3.references}

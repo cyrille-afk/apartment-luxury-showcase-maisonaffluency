@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Button } from "@/components/ui/button";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList, MessagesSquare, Plus, Trash2 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { BriefBuilder, loadBriefDraftText } from "@/components/trade/concierge/BriefBuilder";
+import { BriefBuilder, loadBriefDraftText, validateBriefDraft } from "@/components/trade/concierge/BriefBuilder";
 import { QuoteSummaryCardContainer } from "@/components/trade/QuoteSummaryCard";
 import { BriefBubble, isBriefContent } from "@/components/trade/concierge/BriefBubble";
 import brandCategoriesRaw from "@/data/brandCategories.json";
@@ -1120,25 +1120,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     }
   }, [briefBuilderOpen]);
 
-  // Soft-check the structured brief. Only TYPOLOGY matters for readiness;
-  // everything else is optional and must never block sending.
+  // Validate the structured brief against required fields before allowing
+  // submission. PROJECT PROFILE, ZONE, TYPOLOGY and VIBE must be filled with
+  // real values — any remaining bracketed placeholder text is treated as empty.
   const briefValidation = useMemo(() => {
     if (!briefBuilderOpen) return { valid: true, missing: [] as string[] };
-    const text = input;
-    const required: { label: string; key: string }[] = [{ label: "TYPOLOGY", key: "Typology" }];
-    const missing: string[] = [];
-    for (const { label, key } of required) {
-      const re = new RegExp(`^${label}:\\s*(.*)$`, "im");
-      const m = text.match(re);
-      const val = (m?.[1] || "").trim();
-      // Invalid when empty OR the value still reads as a bracketed template
-      // placeholder like "[typology, city/area]", "[room, ceiling height]",
-      // "[e.g. sectional + accent chairs]".
-      const isPlaceholder = !val || /^\[[^\]]*\]$/.test(val);
-      if (isPlaceholder) missing.push(key);
-    }
-    return { valid: missing.length === 0, missing };
-  }, [briefBuilderOpen, input]);
+    return validateBriefDraft(briefDraft);
+  }, [briefBuilderOpen, briefDraft]);
 
 
 
@@ -2299,6 +2287,21 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     if (!text && !hasFiles) return;
     if (streaming) return;
 
+    // Final object check: when the Brief Builder is open, all required fields
+    // must be populated and free of placeholder brackets before the brief is
+    // streamed. This prevents Felix from hallucinating that a field was left
+    // blank when the structured draft is actually incomplete.
+    if (briefBuilderOpen) {
+      const validation = validateBriefDraft(briefDraft);
+      if (!validation.valid) {
+        toast.error(
+          "To ensure Felix curates an accurate project schedule, please specify your desired furniture Typologies before submitting.",
+          { description: `Missing required fields: ${validation.missing.join(", ")}` },
+        );
+        return;
+      }
+    }
+
     // Rush detection: mirror the RUSH / URGENCY ACKNOWLEDGMENT PROTOCOL in
     // the trade-concierge system prompt so tearsheet cards can flip to the
     // "Express Shipping Available to <City>" badge the instant the user
@@ -3315,7 +3318,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         pushRetry(text, "The connection to the concierge dropped.");
       }
     }
-  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry, user, cancelBriefTransition]);
+  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry, user, cancelBriefTransition, briefBuilderOpen, briefDraft]);
 
   // Keep a ref to the latest `send` so the concierge:stage handler (which
   // registers once on mount) can auto-send prefills against fresh state
@@ -4082,10 +4085,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                     title={
                       briefValidation.valid
                         ? "Brief Builder is open — ready to send"
-                        : `Brief Builder is open — add: ${briefValidation.missing.join(", ")}`
+                        : `Brief Builder is open — required: ${briefValidation.missing.join(", ")}`
                     }
                   >
-                    <span className={`h-1.5 w-1.5 rounded-full ${briefValidation.valid ? "bg-accent" : "bg-destructive"} animate-pulse`} aria-hidden="true" />
+                    <span className={`h-1.5 w-1.5 rounded-full ${briefValidation.valid ? "bg-accent" : "bg-amber-500"} animate-pulse`} aria-hidden="true" />
                     Brief Builder Open
                   </span>
                 )}
@@ -5427,21 +5430,25 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               </button>
               {briefBuilderOpen ? (
                 <div
-                  className={`order-1 basis-full flex items-center gap-2 rounded-none border border-dashed px-3 py-2 font-body text-xs italic border-accent/50 bg-accent/5 text-muted-foreground lg:order-none lg:basis-auto lg:flex-1 lg:rounded-xl`}
+                  className={`order-1 basis-full flex items-center gap-2 rounded-none border border-dashed px-3 py-2 font-body text-xs italic lg:order-none lg:basis-auto lg:flex-1 lg:rounded-xl ${
+                    briefValidation.valid
+                      ? "border-accent/50 bg-accent/5 text-muted-foreground"
+                      : "border-amber-500/40 bg-amber-500/[0.04] text-amber-700 dark:text-amber-400"
+                  }`}
                   title={
                     briefValidation.valid
                       ? "Structured brief ready — press Send"
-                      : `Optional fields still empty: ${briefValidation.missing.join(", ")} — send anyway if you like`
+                      : `Required fields missing: ${briefValidation.missing.join(", ")}`
                   }
                 >
                   <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground">
-                    <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                    <span className={`h-1.5 w-1.5 rounded-full ${briefValidation.valid ? "bg-accent" : "bg-amber-500 animate-pulse"}`} />
                     Brief Builder Open
                   </span>
                   <span className="truncate flex-1">
                     {briefValidation.valid
                       ? "Structured brief ready · press Send"
-                      : `Add ${briefValidation.missing.join(", ")} to improve the brief`}
+                      : `Required: ${briefValidation.missing.join(", ")}`}
                   </span>
                   <button
                     type="button"
@@ -5471,11 +5478,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 onClick={() => send()}
                 disabled={
                   (!(briefBuilderOpen ? briefDraft : input).trim() && attachments.length === 0) ||
-                  streaming
+                  streaming ||
+                  (briefBuilderOpen && !briefValidation.valid)
                 }
                 className="order-2 ml-auto h-11 w-11 shrink-0 rounded-none bg-foreground text-background p-2 disabled:opacity-40 hover:opacity-90 transition-opacity lg:order-none lg:ml-0 lg:h-auto lg:w-auto lg:rounded-xl"
                 aria-label="Send"
-                title="Send"
+                title={briefBuilderOpen && !briefValidation.valid ? "Complete required brief fields before sending" : "Send"}
               >
                 <Send className="h-4 w-4" />
               </button>
