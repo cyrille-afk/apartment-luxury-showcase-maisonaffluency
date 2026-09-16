@@ -361,6 +361,14 @@ import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { SpecScheduleBlock } from "@/components/trade/concierge/SpecScheduleBlock";
 import { LayoutComparisonGrid } from "@/components/trade/concierge/LayoutComparisonGrid";
 
+/** Pulls the "Aesthetic & Visual DNA" (VIBE) line out of a structured brief. */
+function extractBriefVibe(text?: string | null): string | null {
+  if (!text) return null;
+  const m = String(text).match(/^\s*(?:VIBE|DESIGN PROFILE|STYLE)\s*[:—-]\s*(.+)$/im);
+  const v = m?.[1]?.trim();
+  return v ? v : null;
+}
+
 import { parseSlashCommand, SLASH_COMMAND_HELP } from "@/lib/conciergeSlashCommands";
 import { openHandoffChannel } from "@/lib/conciergeHandoff";
 import { useConciergeSession } from "@/hooks/useConciergeSession";
