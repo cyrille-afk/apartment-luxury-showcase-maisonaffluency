@@ -5160,7 +5160,7 @@ serve(async (req) => {
     const shouldBypassSemanticCache = latestTurnHasAttachments || hasVisualSourcingContext;
     const ragPromise = (latestTurnHasAttachments || hasVisualSourcingContext || heuristicNeedsPieces || lastUserMsg.length > 40)
       ? buildRagQuery().then((q) =>
-          loadRelevantPieces(supabase, LOVABLE_API_KEY, q, userId, 40, hasAnyPreConstraint ? preRequestConstraints : undefined),
+          loadRelevantPieces(supabase, LOVABLE_API_KEY, q, userId, 40, ragConstraintsActive ? preRequestConstraints : undefined),
         )
       : Promise.resolve(null);
     const bundleT0 = performance.now();
@@ -5568,7 +5568,7 @@ serve(async (req) => {
     // Detect "hard constraints matched zero pieces" so the UI can render a
     // friendly empty-state and the model can acknowledge it warmly instead of
     // hallucinating alternatives.
-    const ragEmpty = useRag && hasAnyPreConstraint && (!ragResult || !Array.isArray((ragResult as any).rows) || (ragResult as any).rows.length === 0 || !(ragResult as { contextText: string }).contextText);
+    const ragEmpty = useRag && ragConstraintsActive && (!ragResult || !Array.isArray((ragResult as any).rows) || (ragResult as any).rows.length === 0 || !(ragResult as { contextText: string }).contextText);
     const sqlEmpty = !useRag && hasSqlConstraint && !hasScopedDesigners && (fullPiecesList === "No pieces currently loaded." || !fullPiecesList);
     const constraintsMatchedZero = ragEmpty || sqlEmpty;
     const constraintsEmptySource: "rag" | "sql" | null = ragEmpty ? "rag" : sqlEmpty ? "sql" : null;
@@ -6537,7 +6537,7 @@ serve(async (req) => {
           ])],
           categories: [...new Set(((sqlLoadConstraints.categories) || []))],
           applied_to: [
-            hasAnyPreConstraint ? "rag" : null,
+            ragConstraintsActive ? "rag" : null,
             (hasSqlConstraint && !hasScopedDesigners) ? "sql" : null,
           ].filter(Boolean) as string[],
           empty: constraintsMatchedZero,
