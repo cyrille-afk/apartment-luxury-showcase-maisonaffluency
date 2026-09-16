@@ -731,10 +731,8 @@ export default function TradeTearsheets() {
     <>
       <Helmet><title>Tearsheet Builder — Trade Portal</title></Helmet>
       <div className="mx-auto w-full max-w-6xl space-y-6 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
-        <Breadcrumbs
-          variant="compact"
-          items={[{ label: "Tools", to: "/trade/tools" }, { label: "Tearsheet Builder" }]}
-        />
+
+
         <div>
           <h1 className="font-display text-2xl text-foreground">Tearsheet Builder</h1>
           <p className="font-body text-sm text-muted-foreground mt-1">
