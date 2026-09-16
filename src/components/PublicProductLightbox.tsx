@@ -865,6 +865,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   })()}
                 </div>
               </div>
+            </div>
 
               {/* CTA block */}
               <div className="shrink-0 pt-4">
