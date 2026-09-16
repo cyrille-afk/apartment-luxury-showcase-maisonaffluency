@@ -13,6 +13,7 @@ import SpecGlyph from "@/components/product/SpecGlyph";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import { looksLikeDimension } from "@/lib/rugPricing";
 import LegacyRouteRedirect from "@/components/LegacyRouteRedirect";
+import NotFound from "@/pages/NotFound";
 
 const specIcon = (symbol: string, className = "") => (
   <SpecGlyph symbol={symbol} className={className} />
@@ -113,7 +114,7 @@ const ProductPage = () => {
   // Deleted / deactivated / archived pieces: send crawlers and visitors back to
   // the curated catalogue instead of parking them on a dead 200 page.
   if (notFound || !product) {
-    return <LegacyRouteRedirect to="/designers" />;
+    return <NotFound />;
   }
 
   const allImages = [

@@ -11,6 +11,7 @@ import JournalMarkdown from "@/components/journal/JournalMarkdown";
 
 import { fetchArticleBySlug, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
 import { useAuth } from "@/hooks/useAuth";
+import NotFound from "@/pages/NotFound";
 
 const PdfViewer = lazy(() => import("@/components/journal/PdfViewer"));
 
@@ -58,7 +59,9 @@ const JournalArticlePage = () => {
         if (!cancelled) setArticle(data);
       })
       .catch(() => {
-        if (!cancelled) navigate("/journal", { replace: true });
+        // Unknown / unpublished slug: fall through to the 404 surface rather
+        // than bouncing to /journal with a 200 status.
+        if (!cancelled) setArticle(null);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -82,7 +85,7 @@ const JournalArticlePage = () => {
     );
   }
 
-  if (!article) return null;
+  if (!article) return <NotFound />;
 
   // SEO bands (per scanner): title 40–60 (keywords first, brand last),
   // description 140–160 (Google desktop/mobile truncation).

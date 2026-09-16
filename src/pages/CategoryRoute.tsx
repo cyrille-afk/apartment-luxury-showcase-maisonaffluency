@@ -6,6 +6,7 @@ import DesignersDirectory from "@/components/DesignersDirectory";
 import CategorySeo from "@/components/seo/CategorySeo";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { categoryFromSlug, subcategoryFromSlugs } from "@/lib/categorySlugs";
+import NotFound from "@/pages/NotFound";
 import {
   setPendingCategoryFilter,
   clearPendingCategoryFilter,
@@ -49,7 +50,7 @@ const CategoryRoute = () => {
     };
   }, [category, sub?.subcategory]);
 
-  if (!category) return <Navigate to="/" replace />;
+  if (!category) return <NotFound />;
   if (subcategorySlug && !sub) return <Navigate to={`/products-category/${categorySlug}`} replace />;
 
   return (

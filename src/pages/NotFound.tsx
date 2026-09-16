@@ -12,6 +12,15 @@ const NotFound = () => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname]);
 
+  // Marks the document as a 404 surface so the global canonical rule stops
+  // publishing a self-referencing canonical for a dead URL (Soft 404 signal).
+  useEffect(() => {
+    document.documentElement.dataset.routeStatus = "404";
+    return () => {
+      delete document.documentElement.dataset.routeStatus;
+    };
+  }, []);
+
   const isTradePath = location.pathname.startsWith("/trade");
 
   return (
