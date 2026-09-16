@@ -711,6 +711,16 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       briefCloseTimerRef.current = null;
     }, 450);
   }, [briefBuilderClosing]);
+
+  const submitBriefFromBuilder = useCallback(async (text: string) => {
+    return new Promise<void>((resolve, reject) => {
+      briefSubmitDoneRef.current = (ok) => {
+        if (ok) resolve();
+        else reject(new Error("Brief submission failed or was interrupted."));
+      };
+      send(text, { displayText: "Submitted Architectural Brief", builderSubmit: true });
+    });
+  }, [send]);
   // Ambient status shown as a small badge next to the concierge name. Switches
   // through discrete phases during a human-handoff so the designer feels the
   // curatorial team take over, then returns to null once they resume chatting.
