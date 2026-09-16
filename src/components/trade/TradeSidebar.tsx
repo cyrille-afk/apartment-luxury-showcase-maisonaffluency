@@ -137,6 +137,8 @@ export function TradeSidebar() {
               {projectItems.map((item) => {
                 const isProjects = item.url === "/trade/projects";
                 const showDot = isProjects && bridgeCount > 0;
+                const isClients = item.url === "/trade/client-management";
+                const showUpgrades = isClients && clientUpgradeCount > 0;
                 return (
                   <SidebarMenuItem key={item.url}>
                     <SidebarMenuButton asChild className="h-auto">
