@@ -4085,10 +4085,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                     title={
                       briefValidation.valid
                         ? "Brief Builder is open — ready to send"
-                        : `Brief Builder is open — add: ${briefValidation.missing.join(", ")}`
+                        : `Brief Builder is open — required: ${briefValidation.missing.join(", ")}`
                     }
                   >
-                    <span className={`h-1.5 w-1.5 rounded-full ${briefValidation.valid ? "bg-accent" : "bg-destructive"} animate-pulse`} aria-hidden="true" />
+                    <span className={`h-1.5 w-1.5 rounded-full ${briefValidation.valid ? "bg-accent" : "bg-amber-500"} animate-pulse`} aria-hidden="true" />
                     Brief Builder Open
                   </span>
                 )}
