@@ -287,6 +287,40 @@ function detectProjectScale(
 type ProjectScale = NonNullable<ReturnType<typeof detectProjectScale>>;
 
 /**
+ * Curated TYPOLOGY baselines used when the conversation carries a clear
+ * property/zone context ("full brownstone", "gathering FF&E ideas") but names
+ * no concrete pieces yet. Leaving TYPOLOGY blank fails brief validation, so we
+ * seed an editable, high-end default instead.
+ */
+const ZONE_TYPOLOGY_BASELINES: Array<{ match: RegExp; value: string }> = [
+  { match: /\b(living|lounge|family|media)\b/i, value: "Living and lounge seating, custom tables, architectural accent lighting" },
+  { match: /\b(dining)\b/i, value: "Dining tables, dining chairs, sideboards, architectural accent lighting" },
+  { match: /\b(bedroom|master|guest)\b/i, value: "Beds and headboards, bedside tables, lounge seating, accent lighting" },
+  { match: /\b(study|library|office)\b/i, value: "Desks, task and lounge seating, shelving, accent lighting" },
+  { match: /\b(foyer|entryway)\b/i, value: "Console tables, accent seating, mirrors, architectural accent lighting" },
+];
+
+const DEFAULT_RESIDENTIAL_TYPOLOGY =
+  "Living and lounge seating, custom tables, architectural accent lighting";
+
+/**
+ * Derive a sensible TYPOLOGY string from the property type and zone context
+ * when no explicit furniture nouns were mentioned.
+ */
+function baselineTypologyForContext(scale: ProjectScale, context: string): string | null {
+  const zoneText = [...(scale.zones || []), scale.typology, context].filter(Boolean).join(" ");
+  for (const { match, value } of ZONE_TYPOLOGY_BASELINES) {
+    if (match.test(zoneText)) return value;
+  }
+  // Broad procurement language or any recognised residential typology still
+  // deserves a curated baseline rather than an empty field.
+  const broadIntent = /\b(ff\s*&\s*e|furnish|furnishing|fit[- ]?out|whole[- ]?home|whole[- ]?house|full\s+(?:home|house|apartment|residence)|ideas)\b/i;
+  const residential = /\b(gcb|bungalow|penthouse|villa|pavilion|townhouse|brown[- ]?stone|brownstone|apartment|loft|residence|multi-room)\b/i;
+  if (broadIntent.test(zoneText) || residential.test(zoneText)) return DEFAULT_RESIDENTIAL_TYPOLOGY;
+  return null;
+}
+
+/**
  * Build the prefilled Architectural Brief text from detected project-scale
  * signals. Shared by the client-side auto-open path and the announcement
  * fallback so both produce an identical structured draft.
@@ -328,10 +362,13 @@ function composeBriefPrefill(
   const mergedFurniture = collapseFurnitureTokens(
     Array.from(new Set([...(scale.furniture || []), ...extractFurnitureTypology(priorFurnitureText)])),
   );
-  if (mergedFurniture.length) {
+  const typologyValue = mergedFurniture.length
+    ? mergedFurniture.join(", ")
+    : baselineTypologyForContext(scale, [currentText, priorFurnitureText].filter(Boolean).join(" \n "));
+  if (typologyValue) {
     prefilled = prefilled.replace(
       "[e.g. sectional + accent chairs]",
-      mergedFurniture.join(", "),
+      typologyValue,
     );
   }
   if (explicitReferenceBrands.length) {
