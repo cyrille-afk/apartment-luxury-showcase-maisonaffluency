@@ -3377,10 +3377,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           style={
             tabletViewport && !minimized
               ? { inset: 0, width: "100%", height: "100dvh", maxWidth: "none", maxHeight: "none", transform: "none" }
-              : modalMode
-              ? { width: PANEL_W }
-              : fullscreen
-                ? { width: PANEL_W }
+              : (modalMode || fullscreen)
+              ? (docked
+                  ? { width: PANEL_W, left: navInset + 24, right: "auto", top: 16, bottom: "auto", transform: "none", maxWidth: `calc(100vw - ${navInset + 48}px)` }
+                  : { width: PANEL_W })
                 : pos
                   ? { top: pos.y, left: pos.x, right: "auto", bottom: "auto", width: PANEL_W }
                   : { width: PANEL_W }
@@ -3389,11 +3389,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             "fixed z-[10000] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border shadow-2xl print:hidden overflow-hidden max-xl:!inset-0 max-xl:!h-[100dvh] max-xl:!max-h-[100dvh] max-xl:!w-full max-xl:!max-w-none max-xl:!translate-x-0 max-xl:!translate-y-0 max-xl:rounded-none",
             modalMode
               ? cn(
-                  "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-cream border-jade/40 ring-1 ring-jade/30 shadow-[0_30px_80px_-20px_hsl(var(--foreground)/0.5)]",
+                  !docked && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+                  "bg-cream border-jade/40 ring-1 ring-jade/30 shadow-[0_30px_80px_-20px_hsl(var(--foreground)/0.5)]",
                   welcomeClosing ? "animate-scale-out" : "animate-scale-in"
                 )
               : "bg-background border-border animate-fade-in",
-            !modalMode && fullscreen && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+            !modalMode && fullscreen && !docked && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
             !modalMode && !fullscreen && !pos && "bottom-20 md:bottom-6 right-4",
             minimized ? "h-auto max-xl:!inset-auto max-xl:!right-4 max-xl:!bottom-4 max-xl:!h-auto max-xl:!w-[min(560px,calc(100vw-2rem))] max-xl:!rounded-2xl" : ((fullscreen || modalMode) ? "h-[calc(100dvh-2rem)]" : (expanded ? "h-[760px] max-h-[calc(100dvh-4rem)]" : "h-[560px] max-h-[calc(100dvh-6rem)]"))
           )}
