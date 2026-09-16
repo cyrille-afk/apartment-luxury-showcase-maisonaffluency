@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
+import { absoluteUrl } from "@/config/site";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal, Square, Grid2X2, Heart } from "lucide-react";
@@ -1367,7 +1368,7 @@ const PublicDesignerProfile = () => {
   return (
     <>
       {(() => {
-        const canonical = `https://maisonaffluency.com/designers/${designer.slug}`;
+        const canonical = absoluteUrl(location.pathname);
         const ogImg = toOgImage(designer.hero_image_url || designer.image_url || null);
         const seoTitle = designerSeoTitle(name, designer.founder, isChildDesigner, designer.slug, designer.specialty);
         const desc = designerSeoDescription({ name, founder: designer.founder, specialty: designer.specialty, biography: designer.biography, isChildDesigner, slug: designer.slug });
@@ -1390,7 +1391,7 @@ const PublicDesignerProfile = () => {
           ],
         };
         return (
-          <Helmet key={designer.slug}>
+          <Helmet key={location.pathname}>
             <title>{seoTitle}</title>
             <meta name="description" content={desc} />
             <meta name="robots" content="index, follow" />
