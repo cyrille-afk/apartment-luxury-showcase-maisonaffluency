@@ -960,55 +960,59 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             </div>
           </div>
 
+          {/* More From — separated from upper block with defined margin */}
+          <div className="mt-10 md:mt-12 w-full">
+            {relatedStrip}
+          </div>
+
           {/* Curator Notes — structured, scannable product narrative */}
-          <div className="w-full border-t border-border/40 mt-8 pt-6 pb-14">
-            <div className="max-w-6xl mx-auto px-5 md:px-8">
-              <h3 className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-8">
-                Curator Notes
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
-                <div className="flex gap-4">
-                  <Award className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
-                  <div>
-                    <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
-                      Design Significance
-                    </p>
-                    <p className="font-body text-sm leading-[1.75] text-foreground/85">
-                      A definitive 1928 masterclass in understated elegance, capturing the transition from Art Deco to refined modern minimalism.
-                    </p>
-                  </div>
+          <div className="w-full border-t border-border/40 mt-10 md:mt-12 pt-6 pb-10">
+            <h3 className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-8">
+              Curator Notes
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+              <div className="flex gap-4">
+                <Award className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
+                <div>
+                  <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
+                    Design Significance
+                  </p>
+                  <p className="font-body text-sm leading-[1.75] text-foreground/85">
+                    A definitive 1928 masterclass in understated elegance, capturing the transition from Art Deco to refined modern minimalism.
+                  </p>
                 </div>
+              </div>
 
-                <div className="flex gap-4">
-                  <Compass className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
-                  <div>
-                    <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
-                      Spatial Calculation
-                    </p>
-                    <p className="font-body text-sm leading-[1.75] text-foreground/85">
-                      Features a stripped-back silhouette engineered with precise geometric proportions, calculated to serve as a quiet, functional sculptural focal point for high-end interiors.
-                    </p>
-                  </div>
+              <div className="flex gap-4">
+                <Compass className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
+                <div>
+                  <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
+                    Spatial Calculation
+                  </p>
+                  <p className="font-body text-sm leading-[1.75] text-foreground/85">
+                    Features a stripped-back silhouette engineered with precise geometric proportions, calculated to serve as a quiet, functional sculptural focal point for high-end interiors.
+                  </p>
                 </div>
+              </div>
 
-                <div className="flex gap-4">
-                  <FileText className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
-                  <div>
-                    <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
-                      Historical Provenance
-                    </p>
-                    <p className="font-body text-sm leading-[1.75] text-foreground/85">
-                      Reflects Jean-Michel Frank’s legendary philosophy of quiet luxury, bridging the gap between opulent glamour and minimalist simplicity.
-                    </p>
-                  </div>
+              <div className="flex gap-4">
+                <FileText className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
+                <div>
+                  <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
+                    Historical Provenance
+                  </p>
+                  <p className="font-body text-sm leading-[1.75] text-foreground/85">
+                    Reflects Jean-Michel Frank’s legendary philosophy of quiet luxury, bridging the gap between opulent glamour and minimalist simplicity.
+                  </p>
                 </div>
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </motion.div>
-      )}
-    </AnimatePresence>
+    </motion.div>
+    )}
+  </AnimatePresence>
   );
 
   return (
