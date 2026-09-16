@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Heart, ArrowRight, MapPin, Sparkles, Eye, Lock, X, Clock, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -112,6 +112,13 @@ export default function TradeMyDashboard() {
       .eq("user_id", asUserId!)
       .then(({ data }) => setImpersonatedIsTrade(!!data?.some((r: any) => r.role === "trade_user")));
   }, [isImpersonating, asUserId]);
+
+  // Unified routing: approved trade accounts and admins always land on the
+  // Curated Showroom dashboard. This alternate layout remains only for
+  // restricted public accounts and admin impersonation.
+  if (hasOwnTradeAccess && !isImpersonating) {
+    return <Navigate to="/trade" replace />;
+  }
 
   return (
     <>

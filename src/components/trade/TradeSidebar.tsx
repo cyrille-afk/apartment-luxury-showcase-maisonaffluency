@@ -40,7 +40,10 @@ export function TradeSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const navigate = useNavigate();
-  const { isAdmin, signOut, profile, user } = useAuth();
+  const { isAdmin, isTradeUser, applicationStatus, signOut, profile, user } = useAuth();
+  // Approved trade accounts and admins use the Curated Showroom dashboard only.
+  const hasTradeAccess = isAdmin || isTradeUser || applicationStatus === "approved";
+  const visibleTopItems = hasTradeAccess ? topItems.filter((i) => i.url !== "/trade/me") : topItems;
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [submittedQuotes, setSubmittedQuotes] = useState(0);
   const [pendingApps, setPendingApps] = useState(0);
@@ -111,7 +114,7 @@ export function TradeSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="gap-1">
-              {topItems.map((item) => (
+              {visibleTopItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild className="h-auto">
                     <NavLink

@@ -31,7 +31,10 @@ interface TradeMobileMenuProps {
 export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAdmin, signOut, profile } = useAuth();
+  const { isAdmin, isTradeUser, applicationStatus, signOut, profile } = useAuth();
+  // Approved trade accounts and admins use the Curated Showroom dashboard only.
+  const hasTradeAccess = isAdmin || isTradeUser || applicationStatus === "approved";
+  const items = hasTradeAccess ? coreItems.filter((i) => i.url !== "/trade/me") : coreItems;
 
   const isActive = (url: string, end?: boolean) =>
     end ? location.pathname === url : location.pathname.startsWith(url);
@@ -66,7 +69,7 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
         </div>
 
         <div className="flex flex-col px-6 pb-32">
-          {coreItems.map((item, idx) => {
+          {items.map((item, idx) => {
             const active = isActive(item.url, item.end);
             return (
               <button
