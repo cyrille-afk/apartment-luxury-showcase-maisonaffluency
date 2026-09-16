@@ -13,6 +13,7 @@ import {
   SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
 import { useStudioBridge, useStudioAlerts } from "@/hooks/useStudioBridge";
+import { useStudio } from "@/hooks/useStudio";
 import { StudioBridgeSidebar } from "@/components/trade/StudioBridgeSidebar";
 import { pushRecentProject, useProjects } from "@/hooks/useProjects";
 import { useClientTierUpgrades } from "@/hooks/useClientTierUpgrades";
@@ -49,7 +50,7 @@ export function TradeSidebar() {
   const { count: flaggedCount } = useStudioBridge();
   const { count: alertCount } = useStudioAlerts();
   const bridgeCount = flaggedCount + alertCount;
-  const { count: clientUpgradeCount } = useClientTierUpgrades();
+  const { count: clientUpgradeCount } = useClientTierUpgrades(currentStudio?.id);
   const { projects: activeProjects } = useProjects({ activeOnly: true });
   const recentActiveProjects = activeProjects.slice(0, 2);
 

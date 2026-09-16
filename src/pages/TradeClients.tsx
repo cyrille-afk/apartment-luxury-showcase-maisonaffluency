@@ -77,7 +77,7 @@ export default function TradeClients() {
   const { currentStudio, canEdit } = useStudio();
   const { toast } = useToast();
   const { showTradePrice } = useTradePriceMode();
-  const { flags: upgradeFlags } = useClientTierUpgrades();
+  const { flags: upgradeFlags } = useClientTierUpgrades(currentStudio?.id);
   const isClientMode = !showTradePrice;
 
   const [projectsByClient, setProjectsByClient] = useState<Record<string, { id: string; name: string }>>({});
