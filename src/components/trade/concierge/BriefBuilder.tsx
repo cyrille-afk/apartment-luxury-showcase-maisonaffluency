@@ -472,6 +472,13 @@ function loadDraft(): BriefDraft | null {
   }
 }
 
+export function loadBriefDraftText(): string {
+  const draft = loadDraft();
+  if (!draft) return "";
+  const formatted = formatBrief(draft.values);
+  return [draft.prefix, formatted, draft.suffix].filter(Boolean).join("\n\n");
+}
+
 function saveDraft(draft: BriefDraft) {
   if (typeof window === "undefined") return;
   try {

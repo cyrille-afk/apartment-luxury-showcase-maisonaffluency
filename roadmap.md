@@ -70,6 +70,7 @@
 - [x] Brand-specific margin caps: designers.max_trade_discount admin input, shared min(tier, cap) rule across Trade Gallery, quote builder and checkout, 'Max margin cap applied for this supplier.' badge, server-side re-derivation in create-cart-checkout (verified live: 2%% cap on a supplier capped the gallery trade price and showed the badge)
 - [x] Auto-suggest client default currency from billing country while preserving manual overrides, and show the live trade tier beneath the dashboard greeting
 - [x] Slow Felix's project-scale chat-to-Brief Builder handoff with a 1.8s thinking state, eased response reveal, automatic open, and fluid history/canvas transition
+- [x] Isolate Felix chat text from Brief Builder draft state and restore active briefs intact after Trade Portal navigation
 
 ## Felix dashboard onboarding tour (done)
 - [x] src/components/trade/FelixTour.tsx — 4-step tour, highlight ring + dimmed cutout backdrop, Step x of 4 bar, Back/Pause-Resume/Next-Finish, corner skip; auto-starts once (felix_dashboard_tour_seen_v1, only after quick tour done), relaunch via "Meet Felix" button / startFelixTour()
