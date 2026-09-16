@@ -1221,8 +1221,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const activeThreadKey = user?.id ? `concierge:activeThread:${user.id}` : null;
 
   const buildInitialTimeline = useCallback((): TimelineItem[] => [
-    { kind: "msg", role: "assistant", content: surface === "public" ? (initialGreeting || PUBLIC_GREETING) : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()).replace(/{concierge_name}/g, name) },
-  ], [surface, initialGreeting, pathname, name]);
+    { kind: "msg", role: "assistant", content: surface === "public" ? (initialGreeting || PUBLIC_GREETING) : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang(), greetingMeta) },
+  ], [surface, initialGreeting, pathname, greetingMeta]);
 
   const deriveThreadTitle = useCallback((items: TimelineItem[]): string => {
     const firstUser = items.find((t) => t.kind === "msg" && t.role === "user");
