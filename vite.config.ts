@@ -219,7 +219,7 @@ function emitTradeProgramShellPlugin(): Plugin {
 
       const title = "Trade Program — Maison Affluency";
       const description = "Exclusive benefits for architects, interior designers, and luxury hospitality professionals.";
-      const canonical = "https://www.maisonaffluency.com/trade-program";
+      const canonical = "https://maisonaffluency.com/trade-program";
       const image = "https://www.maisonaffluency.com/trade-program-hero-whatsapp.jpg";
       let html = fs.readFileSync(indexPath, "utf-8");
 
