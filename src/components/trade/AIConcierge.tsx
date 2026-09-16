@@ -369,6 +369,30 @@ function extractBriefVibe(text?: string | null): string | null {
   return v ? v : null;
 }
 
+const HELD_TEARSHEET_RE = /(?:I[’']m going to hold the tearsheet|hold the tearsheet rather than)/i;
+const LAYOUT_INTRO_RE = /^I have structured your brief and generated three distinct custom configurations for your .+ project below\./i;
+
+function layoutProjectLabel(text?: string | null, context = ""): string {
+  const source = String(text || "");
+  const profile = source.match(/^\s*PROJECT PROFILE\s*[:—-]\s*(.+)$/im)?.[1]?.trim() || "";
+  const vibe = extractBriefVibe(source) || "";
+  const profileParts = profile.split(",").map((part) => part.trim()).filter(Boolean);
+  const profileLocation = profileParts.length > 1 ? profileParts.slice(1).join(", ") : "";
+  const contextualLocation = context.match(/\b([A-Z][A-Za-z'-]+(?:\s+[A-Z][A-Za-z'-]+){0,2})\s+(?:brownstone|townhouse|penthouse|residence|apartment|loft)\b/)?.[1]?.trim() || "";
+  const sessionLocation = getConciergeSession()?.projectCity?.trim() || "";
+  const location = profileLocation || contextualLocation || sessionLocation;
+  if (location && vibe && location.toLocaleLowerCase() === vibe.toLocaleLowerCase()) return vibe;
+  return [location, vibe].filter(Boolean).join(" ").trim() || "architectural";
+}
+
+function clearBriefResultState(items: TimelineItem[]): TimelineItem[] {
+  return items.filter((item) => {
+    if (item.kind === "layout_options" || item.kind === "pending_proposal" || item.kind === "retry") return false;
+    if (item.kind !== "msg" || item.role !== "assistant") return true;
+    return !HELD_TEARSHEET_RE.test(item.content || "") && !LAYOUT_INTRO_RE.test(item.content || "");
+  });
+}
+
 import { parseSlashCommand, SLASH_COMMAND_HELP } from "@/lib/conciergeSlashCommands";
 import { openHandoffChannel } from "@/lib/conciergeHandoff";
 import { useConciergeSession } from "@/hooks/useConciergeSession";
@@ -725,6 +749,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [showBriefPreview, setShowBriefPreview] = useState(false);
   const [briefDraft, setBriefDraft] = useState<string>(() => loadBriefDraftText());
+  const briefProjectLocationRef = useRef<string | null>(null);
   const [briefBuilderOpen, setBriefBuilderOpen] = useState(() => {
     try {
       return sessionStorage.getItem(BRIEF_ACTIVE_STORAGE_KEY) === "1" && !!loadBriefDraftText();
@@ -2335,6 +2360,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
 
   const send = useCallback(async (overrideText?: string, opts?: { displayText?: string; builderSubmit?: boolean }) => {
     let builderSubmitOk = false;
+    const submittedBriefText = String(overrideText ?? briefDraft).trim();
     try {
       const text = (overrideText ?? (briefBuilderOpen ? briefDraft : input)).trim();
 
@@ -2709,7 +2735,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       } catch { /* non-fatal */ }
       updateConciergeSession({ projectCity: immediateProfile.city });
     }
-    const nextTimeline = [...timeline, userItem];
+    const cleanTimeline = opts?.builderSubmit ? clearBriefResultState(timeline) : timeline;
+    const nextTimeline = [...cleanTimeline, userItem];
     setTimeline(nextTimeline);
     setInput("");
     // Snapshot + clear attachments now so the input chips disappear immediately.
@@ -2775,11 +2802,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         // Fallback city: (a) synchronous qualifier on current text,
         // (b) any prior user turn's text (e.g. user answered "Singapore" on
         // turn 1, then "furnish my GCB" on turn 2), (c) captured profile.
-        let city = scale.city;
+        const projectLocation = text.match(/\b([A-Z][A-Za-z'-]+(?:\s+[A-Z][A-Za-z'-]+){0,2})\s+(?:brownstone|townhouse|penthouse|residence|apartment|loft)\b/)?.[1]?.trim() || null;
+        let city = projectLocation || scale.city;
         let country = scale.country;
         if (!city) {
+          city = text.match(/\b([A-Z][A-Za-z'-]+(?:\s+[A-Z][A-Za-z'-]+){0,2})\s+(?:brownstone|townhouse|penthouse|residence|apartment|loft)\b/)?.[1]?.trim() || null;
           const quick = quickClientProfile(text);
-          if (quick?.city) city = quick.city;
+          if (!city && quick?.city) city = quick.city;
           if (quick?.country) country = country || quick.country;
         }
         if (!city) {
@@ -2807,6 +2836,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           .map((t) => t.content || "")
           .join(" \n ");
         const prefilled = composeBriefPrefill(scale, city, country, priorFurnitureText, text);
+        briefProjectLocationRef.current = city || null;
 
         // Keep Felix's thinking/reveal pacing, then remain in the narrative
         // view indefinitely until the designer clicks the CTA.
@@ -3389,16 +3419,30 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       if (opts?.builderSubmit) {
         if (builderSubmitOk) {
           // Post-submission: offer the three generated spatial configurations,
-          // named from the aesthetic DNA captured in the brief.
-          const styleInput = extractBriefVibe(briefDraft);
-          setTimeline((prev) =>
-            prev.some((t) => t.kind === "layout_options" && !t.selected)
-              ? prev
-              : [
-                  ...prev,
-                  { kind: "layout_options", id: `layouts-${Date.now()}`, selected: null, styleInput },
-                ],
-          );
+          // named from the aesthetic DNA captured in the brief. Success replaces
+          // any held-tearsheet fallback from the same stream; the two states must
+          // never coexist in the active transcript.
+          const styleInput = extractBriefVibe(submittedBriefText);
+          const submittedContext = [...timeline, { kind: "msg", role: "user", content: submittedBriefText } as TimelineItem]
+            .filter((item): item is Extract<TimelineItem, { kind: "msg" }> => item.kind === "msg" && item.role === "user")
+            .map((item) => item.content)
+            .join("\n");
+          const styleLabel = extractBriefVibe(submittedBriefText);
+          const projectLabel = [briefProjectLocationRef.current, styleLabel]
+            .filter(Boolean)
+            .join(" ") || layoutProjectLabel(submittedBriefText, submittedContext);
+          setTimeline((prev) => {
+            const clean = clearBriefResultState(prev);
+            return [
+              ...clean,
+              {
+                kind: "msg",
+                role: "assistant",
+                content: `I have structured your brief and generated three distinct custom configurations for your ${projectLabel} project below. Select a layout scheme to lock in the technical specifications.`,
+              },
+              { kind: "layout_options", id: `layouts-${Date.now()}`, selected: null, styleInput },
+            ];
+          });
         }
         briefSubmitDoneRef.current?.(builderSubmitOk);
         briefSubmitDoneRef.current = null;
@@ -3414,6 +3458,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
 
   const submitBriefFromBuilder = useCallback(async (text: string) => {
     return new Promise<void>((resolve, reject) => {
+      // A revised submission starts on a clean result canvas. The builder's
+      // own spinner remains the only active feedback until fresh results land.
+      setTimeline((prev) => clearBriefResultState(prev));
       briefSubmitDoneRef.current = (ok) => {
         if (ok) resolve();
         else reject(new Error("Brief submission failed or was interrupted."));
@@ -4221,6 +4268,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           >
             {timeline.map((item, i) => {
               if (item.kind === "msg") {
+                const hasLayoutGrid = timeline.some((entry) => entry.kind === "layout_options");
+                if (hasLayoutGrid && item.role === "assistant" && HELD_TEARSHEET_RE.test(item.content || "")) return null;
                 const atts = item.role === "user" ? item.attachments : undefined;
                 return (
                   <div
