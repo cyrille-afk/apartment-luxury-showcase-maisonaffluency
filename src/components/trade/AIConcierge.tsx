@@ -662,6 +662,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     briefTransitionTimersRef.current.forEach((timer) => window.clearTimeout(timer));
     briefTransitionTimersRef.current = [];
   }, []);
+  useEffect(() => {
+    if (!open) cancelBriefTransition();
+  }, [open, activeThreadId, cancelBriefTransition]);
   // Ambient status shown as a small badge next to the concierge name. Switches
   // through discrete phases during a human-handoff so the designer feels the
   // curatorial team take over, then returns to null once they resume chatting.
@@ -3900,6 +3903,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => {
                   abortRef.current?.abort();
+                  cancelBriefTransition();
                   setStreaming(false);
                   setInput("");
                   setStageOverride(null);
