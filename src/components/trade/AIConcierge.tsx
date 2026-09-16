@@ -635,6 +635,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [tone, setTone] = useState<Tone>(() => loadTone());
   const [lang, setLang] = useState<Lang>(() => loadLang());
   const [name, setName] = useState<string>(() => loadName());
+  const { tierLabel, discountLabel } = useTradeDiscount();
+  const greetingMeta = {
+    conciergeName: name,
+    tradeTier: tierLabel || "Trade",
+    tierDiscountText: discountLabel ? `${discountLabel} discount` : "trade",
+  };
   const [nameDraft, setNameDraft] = useState<string>("");
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [toneMenuOpen, setToneMenuOpen] = useState(false);
