@@ -325,7 +325,7 @@ type PendingProposalTool =
   | "propose_ffe_rows"
   | "prepare_visualization_brief";
 type TimelineItem =
-  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; sourceContent?: string; sourceActions?: ConciergeQuickAction[]; designDirectorCtas?: DesignDirectorCtaLabel[]; attachments?: TimelineAttachment[]; appliedConstraints?: AppliedConstraintsEvent; moodboardSignals?: MoodboardSignalsEvent }
+  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; entrance?: "brief-response"; sourceContent?: string; sourceActions?: ConciergeQuickAction[]; designDirectorCtas?: DesignDirectorCtaLabel[]; attachments?: TimelineAttachment[]; appliedConstraints?: AppliedConstraintsEvent; moodboardSignals?: MoodboardSignalsEvent }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; locked?: string[]; newPickIds?: string[]; sourceOrigin?: "source" }
   | { kind: "quote_proposal"; proposal: QuoteProposal; resolved?: "approved" | "discarded" }
   | { kind: "ffe_proposal"; proposal: FfeProposal; resolved?: "approved" | "discarded" }
@@ -647,7 +647,24 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [showBriefPreview, setShowBriefPreview] = useState(false);
   const [briefBuilderOpen, setBriefBuilderOpen] = useState(false);
+  const [briefCanvasExiting, setBriefCanvasExiting] = useState(false);
   const pendingBriefPrefillRef = useRef<string | null>(null);
+  const briefTransitionTimersRef = useRef<number[]>([]);
+  const briefTransitionRunRef = useRef(0);
+  const cancelBriefTransition = useCallback(() => {
+    briefTransitionRunRef.current += 1;
+    briefTransitionTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+    briefTransitionTimersRef.current = [];
+    setBriefCanvasExiting(false);
+  }, []);
+  useEffect(() => () => {
+    briefTransitionRunRef.current += 1;
+    briefTransitionTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+    briefTransitionTimersRef.current = [];
+  }, []);
+  useEffect(() => {
+    if (!open) cancelBriefTransition();
+  }, [open, cancelBriefTransition]);
   // Ambient status shown as a small badge next to the concierge name. Switches
   // through discrete phases during a human-handoff so the designer feels the
   // curatorial team take over, then returns to null once they resume chatting.
@@ -1254,6 +1271,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   type ConciergeThread = { id: string; title: string; last_active_at: string };
   const [threads, setThreads] = useState<ConciergeThread[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
+  const previousThreadIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (previousThreadIdRef.current !== null && previousThreadIdRef.current !== activeThreadId) {
+      cancelBriefTransition();
+    }
+    previousThreadIdRef.current = activeThreadId;
+  }, [activeThreadId, cancelBriefTransition]);
   const [threadsOpen, setThreadsOpen] = useState(false);
   const hydratedThreadRef = useRef<string | null>(null);
   const cloudSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -2200,6 +2224,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     // explicit user action so the builder never appears at the same time as
     // the assistant's announcement.
     if (text === "__OPEN_BRIEF_BUILDER__") {
+      cancelBriefTransition();
       const prefill = pendingBriefPrefillRef.current;
       if (prefill) {
         setInput(prefill);
@@ -2690,11 +2715,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           );
         }
 
-        // Stash the prefilled brief but DO NOT auto-open the builder or
-        // populate the composer — the announcement message below carries an
-        // "Open Architectural Brief" CTA so the user opens it deliberately,
-        // avoiding the builder appearing on-screen at the same time as the
-        // assistant's text (which was confusing).
+        // Stage the transition rather than snapping straight into the builder:
+        // 1. Felix thinks for 1.8s using the existing typing indicator.
+        // 2. His response fades in over 500ms and remains readable for 1s.
+        // 3. The history glides upward, then the clean builder enters below.
         pendingBriefPrefillRef.current = prefilled;
         try { sessionStorage.removeItem("concierge:briefAutoOpened"); } catch {}
 
@@ -2707,18 +2731,50 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           scale.timelineWeeks ? `${scale.timelineWeeks}-week handover` : null,
         ].filter(Boolean).join(" · ");
 
-        setTimeline((prev) => [
-          ...prev,
-          {
-            kind: "msg",
-            role: "assistant",
-            content: `A project of this scale deserves a structured brief${noted ? ` — noted **${noted}**` : ""}. I've prefilled what I picked up — tap **Open Architectural Brief** below to review the four blocks (Spatial & Project Context · Hard Technical Parameters · Aesthetic & Visual DNA · Output Execution Protocol), complete footprint, materials, and aesthetic direction, then send it back and I'll return three layout configurations with a full Architectural Specification Schedule.`,
-            actions: [
-              { label: "Open Architectural Brief", prompt: "__OPEN_BRIEF_BUILDER__", primary: true },
-            ],
-          },
-        ]);
-        setStreaming(false);
+        cancelBriefTransition();
+        const run = briefTransitionRunRef.current;
+        const responseTimer = window.setTimeout(() => {
+          if (briefTransitionRunRef.current !== run) return;
+          setTimeline((prev) => [
+            ...prev,
+            {
+              kind: "msg",
+              role: "assistant",
+              entrance: "brief-response",
+              content: `A project of this scale deserves a structured brief${noted ? ` — noted **${noted}**` : ""}. I've prefilled what I picked up — tap **Open Architectural Brief** below to review the four blocks (Spatial & Project Context · Hard Technical Parameters · Aesthetic & Visual DNA · Output Execution Protocol), complete footprint, materials, and aesthetic direction, then send it back and I'll return three layout configurations with a full Architectural Specification Schedule.`,
+              actions: [
+                { label: "Open Architectural Brief", prompt: "__OPEN_BRIEF_BUILDER__", primary: true },
+              ],
+            },
+          ]);
+          setStreaming(false);
+
+          const exitTimer = window.setTimeout(() => {
+            if (briefTransitionRunRef.current !== run) return;
+            setBriefCanvasExiting(true);
+
+            const openTimer = window.setTimeout(() => {
+              if (briefTransitionRunRef.current !== run) return;
+              const pending = pendingBriefPrefillRef.current;
+              if (pending) {
+                setInput(pending);
+                pendingBriefPrefillRef.current = null;
+              }
+              try {
+                const scope = sessionStorage.getItem("trade:lastProjectFilter") || "global";
+                const expanded = JSON.stringify({ block1: true, block2: true, block3: true });
+                localStorage.setItem(`concierge:briefBuilder:expanded:${scope}`, expanded);
+                localStorage.setItem("concierge:briefBuilder:expanded", expanded);
+              } catch {}
+              setBriefBuilderOpen(true);
+              setBriefCanvasExiting(false);
+              briefTransitionTimersRef.current = [];
+            }, 500);
+            briefTransitionTimersRef.current.push(openTimer);
+          }, 1500);
+          briefTransitionTimersRef.current.push(exitTimer);
+        }, 1800);
+        briefTransitionTimersRef.current.push(responseTimer);
         return;
       }
     }
@@ -3205,7 +3261,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         pushRetry(text, "The connection to the concierge dropped.");
       }
     }
-  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry, user]);
+  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry, user, cancelBriefTransition]);
 
   // Keep a ref to the latest `send` so the concierge:stage handler (which
   // registers once on mount) can auto-send prefills against fresh state
@@ -3854,6 +3910,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => {
                   abortRef.current?.abort();
+                  cancelBriefTransition();
                   setStreaming(false);
                   setInput("");
                   setStageOverride(null);
@@ -3989,7 +4046,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             const lastUser = [...timeline].reverse().find((t) => t.kind === "msg" && t.role === "user") as { kind: "msg"; content?: string } | undefined;
             const ctx = (lastUser?.content || "").replace(/\s+/g, " ").trim().slice(0, 120);
             return (
-              <div className="shrink-0 border-b border-border px-4 py-2 flex items-center gap-2 min-w-0">
+              <div className="shrink-0 border-b border-border px-4 py-2 flex items-center gap-2 min-w-0 animate-[fade-in_700ms_cubic-bezier(0.22,1,0.36,1)_both] motion-reduce:animate-none">
                 <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground shrink-0">
                   Active Context
                 </span>
@@ -4000,12 +4057,26 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             );
           })()}
 
-          <div ref={scrollRef} className={cn("flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-5", briefBuilderOpen && "hidden")}>
+          <div
+            ref={scrollRef}
+            className={cn(
+              "flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-5 transition-[opacity,transform] duration-500 ease-in-out motion-reduce:transition-none",
+              briefCanvasExiting && "pointer-events-none -translate-y-6 opacity-0",
+              briefBuilderOpen && "hidden",
+            )}
+          >
             {timeline.map((item, i) => {
               if (item.kind === "msg") {
                 const atts = item.role === "user" ? item.attachments : undefined;
                 return (
-                  <div key={i} className={cn("flex flex-col gap-2", item.role === "user" ? "items-end" : "items-start")}>
+                  <div
+                    key={i}
+                    className={cn(
+                      "flex flex-col gap-2",
+                      item.role === "user" ? "items-end" : "items-start",
+                      item.entrance === "brief-response" && "animate-[fade-in_500ms_ease-in-out_both] motion-reduce:animate-none",
+                    )}
+                  >
                     {atts && atts.length > 0 && (
                       <div className={cn("flex flex-wrap justify-end gap-2", expanded ? "max-w-[92%]" : "max-w-[88%]")}>
                         {atts.map((a, ai) => (
@@ -5053,24 +5124,26 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               </div>
             )}
             {briefBuilderOpen && (
-              <BriefBuilder
-                value={input}
-                onChange={(next) => setInput(next)}
-                onClose={() => {
-                  // Strip the structured brief from the composer so it doesn't
-                  // linger in the "Ask me anything" field after the builder closes.
-                  // The draft is still persisted in localStorage and will be
-                  // restored the next time the builder is opened.
-                  setInput((current) => {
-                    const withoutBrief = current
-                      .replace(/(^|\n)Block\s+\d+\s*—[\s\S]*?(?=\nBlock\s+\d+\s*—|$)/gi, "")
-                      .replace(/\n{3,}/g, "\n\n")
-                      .trim();
-                    return withoutBrief;
-                  });
-                  setBriefBuilderOpen(false);
-                }}
-              />
+              <div className="animate-[fade-in_700ms_cubic-bezier(0.22,1,0.36,1)_both] motion-reduce:animate-none">
+                <BriefBuilder
+                  value={input}
+                  onChange={(next) => setInput(next)}
+                  onClose={() => {
+                    // Strip the structured brief from the composer so it doesn't
+                    // linger in the "Ask me anything" field after the builder closes.
+                    // The draft is still persisted in localStorage and will be
+                    // restored the next time the builder is opened.
+                    setInput((current) => {
+                      const withoutBrief = current
+                        .replace(/(^|\n)Block\s+\d+\s*—[\s\S]*?(?=\nBlock\s+\d+\s*—|$)/gi, "")
+                        .replace(/\n{3,}/g, "\n\n")
+                        .trim();
+                      return withoutBrief;
+                    });
+                    setBriefBuilderOpen(false);
+                  }}
+                />
+              </div>
             )}
 
             {showBriefPreview && input.trim() && (() => {
