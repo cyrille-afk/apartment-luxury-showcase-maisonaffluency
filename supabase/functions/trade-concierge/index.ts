@@ -5505,6 +5505,7 @@ serve(async (req) => {
             droppedMaterials: [...(sqlLoadConstraints.materials || [])],
             droppedColors: [...(sqlLoadConstraints.colors || [])],
             nullRatio: Math.round(nullRatio * 100) / 100,
+            mode: "sparse_materials",
           };
           sqlLoadConstraints.materials = [];
           sqlLoadConstraints.colors = [];
@@ -5514,6 +5515,32 @@ serve(async (req) => {
         console.warn("[concierge palette-advisory probe failed]", (e as Error).message);
       }
     }
+    // TYPOLOGY-LED PERMISSIVE MATCHING
+    // A submitted brief used to AND together Typology × Vibe × Palette ×
+    // Brands, so Felix held a "draft under-delivers" tearsheet even when the
+    // referenced ateliers (e.g. Ecart, Leo Sentou) publish the requested
+    // dining tables / coffee tables / chairs — they simply lacked the literal
+    // words "art deco" or "bouclé" in their metadata. When the brief declares
+    // a typology, the typology (and any brand scope) stays a hard filter while
+    // vibe + palette become ranking weights only.
+    if (
+      !paletteAdvisory &&
+      declaredTypologyCats.length > 0 &&
+      ((sqlLoadConstraints.materials?.length || 0) + (sqlLoadConstraints.colors?.length || 0) > 0)
+    ) {
+      paletteAdvisory = true;
+      paletteAdvisoryReason = {
+        brands: hasScopedDesigners ? scopedDesigners : [],
+        droppedMaterials: [...(sqlLoadConstraints.materials || [])],
+        droppedColors: [...(sqlLoadConstraints.colors || [])],
+        nullRatio: 0,
+        mode: "typology_led",
+      };
+      sqlLoadConstraints.materials = [];
+      sqlLoadConstraints.colors = [];
+      console.log("[concierge typology-led-palette]", paletteAdvisoryReason);
+    }
+
     const hasSqlConstraint =
       (sqlLoadConstraints.materials?.length || 0) +
       (sqlLoadConstraints.colors?.length || 0) +
