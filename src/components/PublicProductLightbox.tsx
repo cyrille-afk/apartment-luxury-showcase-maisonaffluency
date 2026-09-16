@@ -1109,7 +1109,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     Design Significance
                   </p>
                   <p className="font-body text-sm leading-[1.75] text-foreground/85">
-                    A definitive 1928 masterclass in understated elegance, capturing the transition from Art Deco to refined modern minimalism.
+                    {curatorNotes.significance}
                   </p>
                 </div>
               </div>
@@ -1121,7 +1121,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     Spatial Calculation
                   </p>
                   <p className="font-body text-sm leading-[1.75] text-foreground/85">
-                    Features a stripped-back silhouette engineered with precise geometric proportions, calculated to serve as a quiet, functional sculptural focal point for high-end interiors.
+                    {curatorNotes.spatial}
                   </p>
                 </div>
               </div>
@@ -1133,7 +1133,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     Historical Provenance
                   </p>
                   <p className="font-body text-sm leading-[1.75] text-foreground/85">
-                    Reflects Jean-Michel Frank’s legendary philosophy of quiet luxury, bridging the gap between opulent glamour and minimalist simplicity.
+                    {curatorNotes.provenance}
                   </p>
                 </div>
               </div>
