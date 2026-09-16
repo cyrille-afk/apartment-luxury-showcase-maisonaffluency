@@ -114,7 +114,7 @@ export function TradeSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="gap-1">
-              {topItems.map((item) => (
+              {visibleTopItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild className="h-auto">
                     <NavLink
