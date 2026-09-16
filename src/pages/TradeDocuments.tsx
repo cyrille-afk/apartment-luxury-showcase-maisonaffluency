@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import SectionHero from "@/components/trade/SectionHero";
 import BrandCarousel from "@/components/trade/BrandCarousel";
 import { DocumentCardSkeleton } from "@/components/trade/skeletons";
+import { useToolsBreadcrumbExtras } from "@/components/trade/ToolsBreadcrumb";
+
 
 const PdfThumbnail = lazy(() => import("@/components/trade/PdfThumbnail"));
 
