@@ -4920,8 +4920,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             )}
           </div>
 
-          <div className={cn("border-t border-border p-3 shrink-0 min-h-0", fullscreen && "flex flex-col gap-3 overflow-hidden", fullscreen && (briefBuilderOpen ? "max-h-[78vh]" : "max-h-[45vh]"))}>
-            <div className={cn(fullscreen && "flex-1 min-h-0 overflow-y-auto")}>
+          <div className={cn(
+            "border-t border-border p-3 min-h-0",
+            briefBuilderOpen
+              ? "flex-1 flex flex-col gap-3 overflow-hidden"
+              : cn("shrink-0", fullscreen && "flex flex-col gap-3 overflow-hidden max-h-[45vh]")
+          )}>
+            <div className={cn((fullscreen || briefBuilderOpen) && "flex-1 min-h-0 overflow-y-auto")}>
 
             {/* Correlation-id chip — copy-to-clipboard trace id for the
                 current concierge turn. Matches the server's SSE `event: request_id`
