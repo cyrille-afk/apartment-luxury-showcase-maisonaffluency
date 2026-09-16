@@ -720,11 +720,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
               </div>
 
-              {/* Related thumbnails sit directly under the main image */}
-              <div className="w-full shrink-0">
-                {relatedStrip}
               </div>
-            </div>
 
             {/* RIGHT COLUMN — specs card + CTAs */}
             <div className="w-full flex flex-col md:pl-10 md:border-l md:border-border/40">
