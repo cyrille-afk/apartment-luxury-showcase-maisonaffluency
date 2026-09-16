@@ -46,6 +46,8 @@ export const TOOL_ROUTES: Record<string, [string, string]> = {
   "/trade/calendar": ["Learn", "Showroom & Fair Calendar"],
   "/trade/guides": ["Learn", "Guides"],
   "/trade/learn": ["Learn", "Learn"],
+  "/trade/cpd": ["Learn", "CPD & Education"],
+  "/trade/axonometric-requests": ["Learn", "3D Studio"],
 };
 
 const titleCase = (segment: string) =>
