@@ -5112,9 +5112,16 @@ serve(async (req) => {
     const hasAnyPreConstraint =
       (preRequestConstraints.materials?.length || 0) +
       (preRequestConstraints.colors?.length || 0) > 0;
+    // Typologies declared in the conversation (Brief Builder blocks, "Focus
+    // typology:" CTA lines). When present, the typology leads retrieval and
+    // palette/vibe tokens are demoted to ranking weights — see the
+    // TYPOLOGY-LED PERMISSIVE MATCHING block further down.
+    const declaredTypologyCats = parseDeclaredTypologyCats(userConversationText);
+    const ragConstraintsActive = hasAnyPreConstraint && declaredTypologyCats.length === 0;
     if (hasAnyPreConstraint) {
-      console.log("[concierge hard-constraints]", JSON.stringify(preRequestConstraints));
+      console.log("[concierge hard-constraints]", JSON.stringify({ ...preRequestConstraints, ragConstraintsActive, declaredTypologyCats }));
     }
+
     // Run sentiment + RAG retrieval in parallel with the rest. RAG is best-effort.
     const timed = async <T,>(name: string, p: Promise<T>): Promise<T> => {
       const s = performance.now();
