@@ -649,7 +649,7 @@ const App = () => {
         <CheckoutFormProvider>
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
-              {/* <GlobalCanonical /> */}
+              <GlobalCanonical />
               <HomeRouteSync />
               <SameOriginLinkGuard />
               <RouteScrollLockFailsafe />
