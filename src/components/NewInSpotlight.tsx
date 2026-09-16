@@ -439,38 +439,46 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 />
               </div>
 
-              {igWithImages.length > 0 && (
-                <div className="mt-6 pt-4 border-t border-neutral-100 w-full">
-                  <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-neutral-400 font-normal mb-3">
-                    <Instagram className="w-3.5 h-3.5" strokeWidth={1.5} />
-                    From the Studio
-                  </span>
-                  <div className="flex gap-2.5 items-center h-16 md:h-20 overflow-hidden flex-shrink-0">
-                    {igWithImages.slice(0, 6).map((post) => (
-                      <a
-                        key={post.id}
-                        href={post.post_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group relative block h-full aspect-square flex-shrink-0 overflow-hidden bg-[hsl(var(--canvas))]"
-                      >
-                        <CldPicture
-                          src={post.image_url!}
-                          alt={post.caption || `${displayName} — From the Studio`}
-                          className="h-full w-full object-contain object-center transition-transform duration-700 ease-out group-hover:scale-105" />
-                        <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
-                          <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
-          {/* Full-width Curators' Picks — independent from either hero column */}
-          <div className="mt-4 w-full">
+          {/* Full-width From the Studio — independent from either hero column */}
+          {igWithImages.length > 0 && (
+            <div className="mt-10 w-full">
+              <div className="flex flex-col items-center mb-6">
+                <Instagram className="w-4 h-4 text-foreground/50 mb-2" strokeWidth={1.5} />
+                <div className="flex items-center gap-3">
+                  <div className="h-px w-10 bg-foreground/15" />
+                  <span className="font-display text-[10px] md:text-[11px] tracking-[0.2em] uppercase text-foreground/60 font-semibold text-center">
+                    From the Studio
+                  </span>
+                  <div className="h-px w-10 bg-foreground/15" />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-5">
+                {igWithImages.slice(0, 6).map((post) => (
+                  <a
+                    key={post.id}
+                    href={post.post_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative block aspect-square overflow-hidden bg-[hsl(var(--canvas))]"
+                  >
+                    <CldPicture
+                      src={post.image_url!}
+                      alt={post.caption || `${displayName} — From the Studio`}
+                      className="absolute inset-0 h-full w-full object-contain object-center transition-transform duration-700 ease-out group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
+                      <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Full-width Curators' Picks */}
+          <div className={cn("w-full", igWithImages.length > 0 ? "mt-12" : "mt-4")}>
             {renderCuratorsPicksSection({
               barClassName: "flex justify-between items-center w-full border-b border-neutral-100 py-2 mt-2 mb-3 text-[11px] uppercase tracking-widest text-neutral-800",
               titleClassName: "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-800",
