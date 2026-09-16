@@ -5436,33 +5436,8 @@ serve(async (req) => {
     // Also deterministically parse TYPOLOGY from the structured brief so the
     // category filter stays live even on follow-up turns (the LLM extractor
     // won't see the brief again after turn 1).
-    const parsedTypologyCats: string[] = [];
-    {
-      // HARDENED: label must lead its own line (allow list markers / block
-      // prefixes), immediately followed by a colon/dash. Prevents matches
-      // inside prose like "the typology of the project profile is loose."
-      // Match block-labelled lines ("Typology: …", "Block 2 - Typology: …")
-      // AND the CTA input line ("Focus typology (optional): …" / "Focus
-      // typology: …"). Anything before the word "typology" on the same line
-      // must be short (< ~24 chars) so we don't grab prose like
-      // "the typology of the project profile is loose."
-      const typRe = /^[\s>*\-–—•]*(?:(?:block\s*\d+[\s:.\-–—]*)|(?:[a-z][a-z ]{0,22}\s+))?typology(?:\s*\([^)\n]{0,40}\))?\s*[:\-–—]\s*(.+)$/gim;
-      let tm: RegExpExecArray | null;
-      while ((tm = typRe.exec(userConversationText)) !== null) {
-        const raw = tm[1].replace(/[\[\]]/g, "").trim();
-        if (!raw) continue;
-        // Skip payloads that are themselves another block label echo.
-        if (/^(references|materials?|palette|budget|constraints?|block\s*\d+)\b/i.test(raw)) continue;
-        // Split on commas, plus, ampersand, slash, and " and "
-        const tokens = raw.split(/,|\+|&|\/|\band\b/i).map((t) => t.trim().toLowerCase()).filter(Boolean);
-        for (const t of tokens) {
-          // Strip trailing counts like "coffee table x2".
-          const cleaned = t.replace(/\s*x?\s*\d+\s*$/i, "").trim();
-          if (cleaned.length >= 3) parsedTypologyCats.push(cleaned);
-        }
-        for (const cat of typologyTokensToCategories(tokens)) parsedTypologyCats.push(cat);
-      }
-    }
+    const parsedTypologyCats: string[] = declaredTypologyCats.slice();
+
     const sqlLoadConstraints: HardConstraints = {
       materials: [
         ...(preRequestConstraints.materials || []),
