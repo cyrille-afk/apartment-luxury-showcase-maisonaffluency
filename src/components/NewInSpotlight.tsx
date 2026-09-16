@@ -96,7 +96,6 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer.id);
   const dest = useShippingDestination();
   const isUnderlaid = variant === "underlaid";
-  const preserveFullProductImage = designer.id === "b8c3578b-31f7-4b89-835e-10e70ade9c21";
   const [gridCols, setGridCols] = useState<3 | 4>(3);
   const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
   const [ctaPressed, setCtaPressed] = useState(false);
@@ -274,10 +273,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 if (item) setLightboxItem(item);
               }}
             >
-              <div className={cn(
-                "bg-[hsl(var(--canvas))] rounded-sm overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer p-6",
-                preserveFullProductImage ? "aspect-[3/4]" : "aspect-[4/3]"
-              )}>
+              <div className="aspect-[4/3] max-h-[280px] w-full bg-[hsl(var(--canvas))] rounded-sm overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer">
                 <SwipeAlternateProductImage
                   primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
                   primarySrcSet={pickSrcSet(pick.image_url)}
@@ -285,9 +281,9 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                   sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                   alt={pick.title}
-                  contain={preserveFullProductImage}
-                  primaryClassName={cn("object-contain p-0", preserveFullProductImage && "object-top")}
-                  alternateClassName={cn("object-contain p-0", preserveFullProductImage && "object-top")}
+                  contain
+                  primaryClassName="object-contain object-center p-0"
+                  alternateClassName="object-contain object-center p-0"
                 />
                 {/* Inventory badges — lower-left of the frame */}
                 <InventoryBadgeStack
@@ -402,83 +398,77 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
       {/* Desktop-only underlaid split canvas (Emmanuel Babled et al.) */}
       {isUnderlaid && (
         <section className="hidden md:block w-full bg-transparent">
-          <div className="grid grid-cols-12 gap-x-8 items-stretch w-full mb-8">
-            {/* Left Column — Hero Landscape Image */}
-            <div className="col-span-4 aspect-[3/4] w-full overflow-hidden">
+          <div className="grid grid-cols-2 gap-x-10 items-stretch w-full">
+            {/* Left Column — constrained editorial hero */}
+            <div className="aspect-[16/10] max-h-[450px] w-full overflow-hidden bg-[hsl(var(--canvas))]">
               <CldPicture
                 src={portraitImage}
                 alt={`${displayName} portrait`}
-                className="w-full h-full object-cover object-bottom" />
+                className="w-full h-full object-cover object-center" />
             </div>
 
-            {/* Right Column — Full Stacked Typography & Studio Row */}
-            <div className="col-span-8 flex flex-col justify-between pt-1 h-full">
-              <div className="flex flex-col space-y-4 w-full">
-                <div className="flex flex-col space-y-3 w-full">
-                  <div className="flex items-center gap-3 w-full">
-                    <h1 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
-                      {displayName}
-                    </h1>
-                    <ShareMenu
-                      url={shareUrl}
-                      message={`Maison Affluency · ${displayName}: ${shareUrl}`}
-                      className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
-                      iconSize="w-4 h-4 md:w-5 md:h-5"
-                      showLabel={false}
-                    />
-                  </div>
-
-                  <p className="text-justify w-full text-xs lg:text-sm text-neutral-600">
-                    {renderParagraph(firstBioParagraph)}
-                  </p>
-
-                </div>
-
-                <div className="w-full">
-                  <PortraitCtaLink
-                    label="View The Full Portrait"
-                    className="text-[10px] uppercase tracking-widest text-neutral-800 font-medium inline-flex items-center gap-4"
-                    onClick={() => {
-                      if (ctaPressed) return;
-                      setCtaPressed(true);
-                      window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
-                    }}
-                  />
-                </div>
+            {/* Right Column — compact biography stack */}
+            <div className="flex h-full flex-col justify-center py-3">
+              <div className="flex items-center gap-3 w-full">
+                <h1 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
+                  {displayName}
+                </h1>
+                <ShareMenu
+                  url={shareUrl}
+                  message={`Maison Affluency · ${displayName}: ${shareUrl}`}
+                  className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
+                  iconSize="w-4 h-4 md:w-5 md:h-5"
+                  showLabel={false}
+                />
               </div>
 
-              {igWithImages.length > 0 && (
-                <div className="w-full border-t border-neutral-100 pt-4 mt-6">
-                  <div className="w-fit mx-auto flex flex-col items-center gap-2">
-                    <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-neutral-400 font-normal">
-                      <Instagram className="w-3.5 h-3.5" strokeWidth={1.5} />
-                      From the Studio
-                    </span>
-                    <div className="flex gap-2.5 items-center h-20 md:h-24 overflow-hidden flex-shrink-0">
-                      {igWithImages.slice(0, 6).map((post) => (
-                        <a
-                          key={post.id}
-                          href={post.post_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="group relative block h-full flex-shrink-0 overflow-hidden"
-                        >
-                          <CldPicture
-                            src={post.image_url!}
-                            alt={post.caption || `${displayName} — From the Studio`}
-                            className="h-full aspect-square object-cover bg-neutral-50 flex-shrink-0 transition-transform duration-700 ease-out group-hover:scale-105" />
-                          <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
-                            <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                          </div>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
+              <p className="mt-4 text-justify w-full text-xs lg:text-sm text-neutral-600">
+                {renderParagraph(firstBioParagraph)}
+              </p>
 
+              <div className="mt-5 w-full">
+                <PortraitCtaLink
+                  label="View The Full Portrait"
+                  className="text-[10px] uppercase tracking-widest text-neutral-800 font-medium inline-flex items-center gap-4"
+                  onClick={() => {
+                    if (ctaPressed) return;
+                    setCtaPressed(true);
+                    window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
+                  }}
+                />
+              </div>
             </div>
           </div>
+
+          {igWithImages.length > 0 && (
+            <div className="w-full border-t border-neutral-100 pt-4 mt-5 mb-5">
+              <div className="w-fit mx-auto flex flex-col items-center gap-2">
+                <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-neutral-400 font-normal">
+                  <Instagram className="w-3.5 h-3.5" strokeWidth={1.5} />
+                  From the Studio
+                </span>
+                <div className="flex gap-2.5 items-center h-20 md:h-24 overflow-hidden flex-shrink-0">
+                  {igWithImages.slice(0, 6).map((post) => (
+                    <a
+                      key={post.id}
+                      href={post.post_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative block h-full aspect-square flex-shrink-0 overflow-hidden bg-[hsl(var(--canvas))]"
+                    >
+                      <CldPicture
+                        src={post.image_url!}
+                        alt={post.caption || `${displayName} — From the Studio`}
+                        className="h-full w-full object-contain object-center transition-transform duration-700 ease-out group-hover:scale-105" />
+                      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
+                        <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Curators' Picks */}
           <div className="w-full">
