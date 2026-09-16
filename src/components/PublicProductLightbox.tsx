@@ -961,16 +961,16 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* More From — separated from upper block with defined margin */}
-          <div className="mt-10 md:mt-12 w-full">
+          <div className="mt-6 md:mt-8 w-full">
             {relatedStrip}
           </div>
 
           {/* Curator Notes — structured, scannable product narrative */}
-          <div className="w-full border-t border-border/40 mt-10 md:mt-12 pt-6 pb-10">
-            <h3 className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-8">
+          <div className="w-full border-t border-border/40 mt-6 md:mt-8 pt-5 pb-6">
+            <h3 className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-5">
               Curator Notes
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
               <div className="flex gap-4">
                 <Award className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
                 <div>
