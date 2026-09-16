@@ -859,7 +859,7 @@ export function BriefBuilder({
   };
 
   const briefTextForSubmit = () => {
-    const formatted = formatBrief(values);
+    const formatted = formatBrief(sanitizeBriefValues(values));
     return [prefix, formatted, suffix].filter(Boolean).join("\n\n");
   };
 
@@ -1283,7 +1283,7 @@ export function BriefBuilder({
               placeholder="[typology, city/area]"
               onChange={(v) => setBlockField("block1", "projectProfile", v)}
               required
-              invalid={isPlaceholderValue(values.block1.projectProfile)}
+              invalid={isPlaceholderValue(values.block1.projectProfile, DEFAULT_VALUES.block1.projectProfile)}
             />
             <Field
               label="Zone"
@@ -1291,7 +1291,7 @@ export function BriefBuilder({
               placeholder="[room, ceiling height]"
               onChange={(v) => setBlockField("block1", "zone", v)}
               required
-              invalid={isPlaceholderValue(values.block1.zone)}
+              invalid={isPlaceholderValue(values.block1.zone, DEFAULT_VALUES.block1.zone)}
             />
             <Field
               label="Environment"
@@ -1321,7 +1321,7 @@ export function BriefBuilder({
               placeholder="[e.g. sectional + accent chairs]"
               onChange={(v) => setBlockField("block2", "typology", v)}
               required
-              invalid={isPlaceholderValue(values.block2.typology)}
+              invalid={isPlaceholderValue(values.block2.typology, DEFAULT_VALUES.block2.typology)}
             />
             <Field
               label="Max Footprint"
@@ -1357,7 +1357,7 @@ export function BriefBuilder({
               placeholder="[e.g. Japandi-Luxe, Italian Minimalism]"
               onChange={(v) => setBlockField("block3", "vibe", v)}
               required
-              invalid={isPlaceholderValue(values.block3.vibe)}
+              invalid={isPlaceholderValue(values.block3.vibe, DEFAULT_VALUES.block3.vibe)}
             />
             <BrandPicker
               value={values.block3.references}
