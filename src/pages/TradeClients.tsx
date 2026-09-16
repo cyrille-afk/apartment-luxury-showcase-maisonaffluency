@@ -25,6 +25,7 @@ import ClientDocumentsSection from "@/components/trade/ClientDocumentsSection";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useClientTierUpgrades, tierUpgradeLabel } from "@/hooks/useClientTierUpgrades";
 import { Link } from "react-router-dom";
+import { SHIPPING_COUNTRIES } from "@/lib/shippingDestination";
 
 type ClientType = "company" | "studio" | "individual";
 
@@ -72,6 +73,14 @@ const emptyContact = (client_id: string): Partial<Contact> => ({
   email: "", phone: "", is_primary: false, notes: "",
 });
 
+const currencyForCountry = (country: string | null | undefined): string | null => {
+  const normalized = country?.trim().toLowerCase();
+  if (!normalized) return null;
+  return SHIPPING_COUNTRIES.find(
+    (entry) => entry.iso.toLowerCase() === normalized || entry.name.toLowerCase() === normalized,
+  )?.currency ?? null;
+};
+
 export default function TradeClients() {
   const { user } = useAuth();
   const { currentStudio, canEdit } = useStudio();
@@ -92,6 +101,7 @@ export default function TradeClients() {
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<Client | null>(null);
   const [attemptedSave, setAttemptedSave] = useState(false);
+  const [currencyManuallyEdited, setCurrencyManuallyEdited] = useState(false);
 
   // ---------- Validation ----------
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -219,6 +229,7 @@ export default function TradeClients() {
     if (found) {
       setEditing({ ...found });
       setEditingContacts((contactsByClient[found.id] || []).map((ct) => ({ ...ct })));
+      setCurrencyManuallyEdited(Boolean(found.default_currency));
       setAutoEditedFor(editId);
     }
   }, [loading, clients, contactsByClient, autoEditedFor]);
@@ -239,17 +250,24 @@ export default function TradeClients() {
   const openNew = () => {
     if (!user || !currentStudio) return;
     setAttemptedSave(false);
+    setCurrencyManuallyEdited(false);
     setEditing(emptyClient(currentStudio.id, user.id));
     setEditingContacts([emptyContact("")]);
   };
 
   const openEdit = (c: Client) => {
     setAttemptedSave(false);
+    setCurrencyManuallyEdited(Boolean(c.default_currency));
     setEditing({ ...c });
     setEditingContacts((contactsByClient[c.id] || []).map((ct) => ({ ...ct })));
   };
 
-  const closeEdit = () => { setEditing(null); setEditingContacts([]); setAttemptedSave(false); };
+  const closeEdit = () => {
+    setEditing(null);
+    setEditingContacts([]);
+    setAttemptedSave(false);
+    setCurrencyManuallyEdited(false);
+  };
 
   const addContactRow = () => setEditingContacts((arr) => [...arr, emptyContact(editing?.id || "")]);
   const removeContactRow = (i: number) =>
@@ -275,7 +293,8 @@ export default function TradeClients() {
         type: (editing.type || "company") as ClientType,
         website: editing.website || null,
         tax_id: editing.tax_id || null,
-        default_currency: editing.default_currency || null,
+        default_currency:
+          editing.default_currency || currencyForCountry(editing.billing_country) || null,
         billing_address_line1: editing.billing_address_line1 || null,
         billing_address_line2: editing.billing_address_line2 || null,
         billing_city: editing.billing_city || null,
@@ -588,7 +607,10 @@ export default function TradeClients() {
                     <Label>Default currency</Label>
                     <Input
                       value={editing.default_currency || ""}
-                      onChange={(e) => setEditing({ ...editing, default_currency: e.target.value.toUpperCase() })}
+                      onChange={(e) => {
+                        setCurrencyManuallyEdited(true);
+                        setEditing({ ...editing, default_currency: e.target.value.toUpperCase() });
+                      }}
                       placeholder="EUR"
                       maxLength={3}
                       aria-invalid={attemptedSave && !!clientErrors.default_currency}
@@ -650,10 +672,30 @@ export default function TradeClients() {
                   </div>
                   <div>
                     <Label>Country</Label>
-                    <Input
-                      value={editing.billing_country || ""}
-                      onChange={(e) => setEditing({ ...editing, billing_country: e.target.value })}
-                    />
+                    <Select
+                      value={editing.billing_country || undefined}
+                      onValueChange={(country) => {
+                        const suggestedCurrency = currencyForCountry(country);
+                        setEditing((current) => current ? {
+                          ...current,
+                          billing_country: country,
+                          default_currency: currencyManuallyEdited
+                            ? current.default_currency
+                            : suggestedCurrency ?? current.default_currency,
+                        } : current);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SHIPPING_COUNTRIES.map((country) => (
+                          <SelectItem key={country.iso} value={country.name}>
+                            {country.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </section>
