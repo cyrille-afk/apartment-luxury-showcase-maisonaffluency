@@ -162,10 +162,25 @@ export function TradeSidebar() {
                               className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-muted-foreground ring-2 ring-background cursor-pointer"
                             />
                           )}
+                          {showUpgrades && collapsed && (
+                            <span
+                              aria-hidden="true"
+                              className="absolute -top-1 -right-1 h-1.5 w-1.5 rounded-full bg-accent ring-2 ring-background"
+                            />
+                          )}
                         </span>
                         {!collapsed && (
                           <span className="flex items-center gap-2">
                             <span>{item.title}</span>
+                            {showUpgrades && (
+                              <span
+                                aria-label={`${clientUpgradeCount} client${clientUpgradeCount > 1 ? "s" : ""} eligible for a tier upgrade`}
+                                title={`${clientUpgradeCount} client${clientUpgradeCount > 1 ? "s" : ""} eligible for a tier upgrade`}
+                                className="inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full border border-accent/40 bg-accent/10 px-1 font-mono text-[9px] leading-none text-accent"
+                              >
+                                {clientUpgradeCount}
+                              </span>
+                            )}
                             {showDot && (
                               <button
                                 type="button"
