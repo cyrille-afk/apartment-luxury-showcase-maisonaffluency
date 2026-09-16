@@ -3312,6 +3312,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         },
         signal: controller.signal,
       });
+      await saveActiveThreadNow(timelineRef.current);
+      builderSubmitOk = true;
     } catch {
       clearStallTimer();
       setStreaming(false);
@@ -3319,6 +3321,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       // If the throw wasn't the user aborting, offer a retry.
       if (!controller.signal.aborted) {
         pushRetry(text, "The connection to the concierge dropped.");
+      }
+    }
+    } finally {
+      if (opts?.builderSubmit) {
+        briefSubmitDoneRef.current?.(builderSubmitOk);
+        briefSubmitDoneRef.current = null;
       }
     }
   }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry, user, cancelBriefTransition, briefBuilderOpen, briefDraft]);
