@@ -632,9 +632,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           <div className="max-w-6xl mx-auto p-5 md:p-8 w-full flex flex-col">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:h-[min(540px,58vh)] md:grid-rows-[1fr]">
 
-            {/* LEFT COLUMN — hero image + related thumbnails only */}
-            <div className="relative w-full flex flex-col gap-6">
-              <div className="relative w-full shrink-0 flex items-start justify-center">
+              {/* LEFT COLUMN — standardized hero image container */}
+              <div className="relative w-full md:h-full min-h-0 flex items-center justify-center">
                 {product.image_url ? (
                   <>
                     {!imageLoaded && !imageFailed && (
