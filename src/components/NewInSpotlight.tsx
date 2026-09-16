@@ -195,11 +195,13 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
     titleClassName = "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground",
     mobileBadgeClassName = "px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5 md:hidden",
     mobileTitleClassName = "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold",
+    fullWidthDesktop = false,
   }: {
     barClassName?: string;
     titleClassName?: string;
     mobileBadgeClassName?: string;
     mobileTitleClassName?: string;
+    fullWidthDesktop?: boolean;
   } = {}) => (
     <>
       <div className={barClassName}>
@@ -230,7 +232,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
             </svg>
           </button>
           {/* Desktop toggle */}
-          <button
+          {!fullWidthDesktop && <button
             onClick={() => setGridCols((prev) => (prev === 3 ? 4 : 3))}
             className="hidden md:flex items-center p-1.5 rounded transition-all hover:opacity-70"
             aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
@@ -252,11 +254,11 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 </>
               )}
             </svg>
-          </button>
+          </button>}
         </div>
       </div>
 
-      <div className={cn("grid items-start gap-x-4 gap-y-8 md:gap-x-8 md:gap-y-10", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
+      <div className={cn("grid items-start gap-x-4 gap-y-8 md:gap-x-8 md:gap-y-10", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", fullWidthDesktop ? "md:grid-cols-3" : gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
         {picks.map((pick) => {
           const alternateImage = pick.hover_image_url
             || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
@@ -271,7 +273,10 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 if (item) setLightboxItem(item);
               }}
             >
-              <div className="relative aspect-[4/3] max-h-[320px] w-full overflow-hidden rounded-sm bg-[hsl(var(--product-canvas))]">
+              <div className={cn(
+                "relative aspect-[4/3] w-full overflow-hidden rounded-sm bg-[hsl(var(--product-canvas))]",
+                !fullWidthDesktop && "max-h-[320px]"
+              )}>
                 <SwipeAlternateProductImage
                   primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
                   primarySrcSet={pickSrcSet(pick.image_url)}
@@ -279,8 +284,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                   sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                   alt={pick.title}
-                  primaryClassName="object-cover object-center p-0"
-                  alternateClassName="object-cover object-center p-0"
+                  primaryClassName={fullWidthDesktop ? "object-contain object-center p-0" : "object-cover object-center p-0"}
+                  alternateClassName={fullWidthDesktop ? "object-contain object-center p-0" : "object-cover object-center p-0"}
                 />
                 {/* Inventory badges — lower-left of the frame */}
                 <InventoryBadgeStack
@@ -396,23 +401,13 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
       {isUnderlaid && (
         <section className="hidden md:block w-full bg-transparent">
           <div className="grid grid-cols-2 gap-x-10 items-start w-full">
-            {/* Left Column — constrained editorial hero + Curators' Picks */}
+            {/* Left Column — constrained editorial hero */}
             <div className="flex flex-col">
               <div className="aspect-[16/10] max-h-[450px] w-full overflow-hidden bg-[hsl(var(--canvas))]">
                 <CldPicture
                   src={portraitImage}
                   alt={`${displayName} portrait`}
                   className="w-full h-full object-cover object-center" />
-              </div>
-
-              {/* Curators' Picks directly beneath left hero */}
-              <div className="w-full mt-4">
-                {renderCuratorsPicksSection({
-                  barClassName: "flex justify-between items-center w-full border-b border-neutral-100 py-2 mt-2 mb-3 text-[11px] uppercase tracking-widest text-neutral-800",
-                  titleClassName: "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-800",
-                  mobileBadgeClassName: "px-4 py-1.5 rounded-full border border-neutral-800/20 bg-neutral-800/5 md:hidden",
-                  mobileTitleClassName: "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-neutral-800 font-semibold",
-                })}
               </div>
             </div>
 
@@ -475,6 +470,17 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Full-width Curators' Picks — independent from either hero column */}
+          <div className="mt-4 w-full">
+            {renderCuratorsPicksSection({
+              barClassName: "flex justify-between items-center w-full border-b border-neutral-100 py-2 mt-2 mb-3 text-[11px] uppercase tracking-widest text-neutral-800",
+              titleClassName: "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-800",
+              mobileBadgeClassName: "px-4 py-1.5 rounded-full border border-neutral-800/20 bg-neutral-800/5 md:hidden",
+              mobileTitleClassName: "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-neutral-800 font-semibold",
+              fullWidthDesktop: true,
+            })}
           </div>
         </section>
       )}
