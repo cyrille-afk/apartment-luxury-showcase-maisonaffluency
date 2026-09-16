@@ -17,6 +17,10 @@ const NotFound = () => {
       <Helmet>
         <title>Page Not Found — Maison Affluency</title>
         <meta name="robots" content="noindex" />
+        {/* Status hints so crawlers/prerender proxies treat this as a real 404,
+            not a 200 shell. Static SPA hosting cannot emit the status line itself. */}
+        <meta name="prerender-status-code" content="404" />
+        <meta httpEquiv="Status" content="404 Not Found" />
       </Helmet>
 
       <p className="font-body text-xs uppercase tracking-[0.3em] text-muted-foreground mb-4">Page Not Found</p>
