@@ -50,6 +50,7 @@ export function TradeSidebar() {
   const { count: flaggedCount } = useStudioBridge();
   const { count: alertCount } = useStudioAlerts();
   const bridgeCount = flaggedCount + alertCount;
+  const { currentStudio } = useStudio();
   const { count: clientUpgradeCount } = useClientTierUpgrades(currentStudio?.id);
   const { projects: activeProjects } = useProjects({ activeOnly: true });
   const recentActiveProjects = activeProjects.slice(0, 2);
