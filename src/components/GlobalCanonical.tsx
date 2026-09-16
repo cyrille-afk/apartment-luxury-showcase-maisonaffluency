@@ -41,6 +41,12 @@ export function GlobalCanonical() {
         document.querySelectorAll<HTMLLinkElement>('link[rel="canonical"]')
       );
 
+      // 404 surfaces must not publish a canonical for a dead URL.
+      if (document.documentElement.dataset.routeStatus === "404") {
+        links.forEach((l) => l.remove());
+        return;
+      }
+
       if (links.length === 0) {
         const link = document.createElement("link");
         link.rel = "canonical";
@@ -70,6 +76,12 @@ export function GlobalCanonical() {
 
     return () => observer.disconnect();
   }, [canonical]);
+
+  const isNotFound =
+    typeof document !== "undefined" &&
+    document.documentElement.dataset.routeStatus === "404";
+
+  if (isNotFound) return null;
 
   return (
     <Helmet>
