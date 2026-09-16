@@ -678,10 +678,14 @@ export function BriefBuilder({
   value,
   onChange,
   onClose,
+  onSubmit,
+  onSubmittingChange,
 }: {
   value: string;
   onChange: (next: string) => void;
   onClose: () => void;
+  onSubmit?: (briefText: string) => Promise<void>;
+  onSubmittingChange?: (submitting: boolean) => void;
 }) {
   const [values, setValues] = useState<BriefValues>(DEFAULT_VALUES);
   const [prefix, setPrefix] = useState("");
