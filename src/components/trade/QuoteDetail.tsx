@@ -1541,7 +1541,28 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     const converted = convertCents(rawPrice, itemPriceCurrency(item, currency), currency) ?? 0;
     return sum + converted * item.quantity;
   }, 0);
-  const tradeDiscountCents = discountApplies && subtotalCents > 0 ? Math.round(subtotalCents * tradeDiscountPct) : 0;
+  /**
+   * Per-line discount: the member's tier rate, but never above the supplier's
+   * `max_trade_discount` safety cap. Lines whose rate was suppressed are
+   * flagged so the UI can badge them.
+   */
+  const lineDiscounts = items.map((item) => {
+    const rawPrice = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? 0;
+    const lineCents = (convertCents(rawPrice, itemPriceCurrency(item, currency), currency) ?? 0) * item.quantity;
+    const brand = item.trade_products?.brand_name || null;
+    const eff = effectiveDiscountForBrand(tradeDiscountPct, brand, brandCaps);
+    return {
+      id: item.id,
+      lineCents,
+      capped: eff.capped,
+      capPct: eff.capPct,
+      discountCents: discountApplies && lineCents > 0 ? Math.round(lineCents * eff.pct) : 0,
+    };
+  });
+  const cappedLineIds = new Set(lineDiscounts.filter((l) => l.capped && l.lineCents > 0).map((l) => l.id));
+  const tradeDiscountCents = discountApplies && subtotalCents > 0
+    ? lineDiscounts.reduce((sum, l) => sum + l.discountCents, 0)
+    : 0;
   const goodsAfterDiscountCents = subtotalCents - tradeDiscountCents;
 
   const buildPdfArgs = async () => {
