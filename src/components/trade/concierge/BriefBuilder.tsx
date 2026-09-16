@@ -155,18 +155,50 @@ const REQUIRED_FIELDS: { key: string; block: "block1" | "block2" | "block3"; fie
   { key: "vibe", block: "block3", field: "vibe", label: "VIBE" },
 ];
 
-function isPlaceholderValue(value: string): boolean {
-  if (!value || !value.trim()) return true;
-  // Any remaining bracketed token like [typology], [N], [mm] is treated as an
-  // unfilled template placeholder.
-  return /\[.*?\]/.test(value.trim());
+// Strips enclosing square brackets and any stray bracket characters so real
+// user input like "[4000 mm]" is treated as clean data ("4000 mm") rather
+// than an unfilled template placeholder.
+function sanitizeFieldValue(value: string): string {
+  let v = (value || "").trim();
+  const wrapped = v.match(/^\[(.*)\]$/s);
+  if (wrapped) v = wrapped[1].trim();
+  return v.replace(/[[\]]/g, "").replace(/\s{2,}/g, " ").trim();
+}
+
+function isPlaceholderValue(value: string, defaultValue?: string): boolean {
+  const v = sanitizeFieldValue(value);
+  if (!v) return true;
+  if (/^e\.g\./i.test(v)) return true;
+  // Untouched template defaults still count as unfilled placeholders.
+  if (defaultValue && v.toLowerCase() === sanitizeFieldValue(defaultValue).toLowerCase()) return true;
+  return false;
+}
+
+// Returns a copy of the values with real user input sanitized (brackets
+// stripped); fields left at their template default are kept verbatim.
+function sanitizeBriefValues(values: BriefValues): BriefValues {
+  const cleanBlock = <T extends Record<string, string>>(block: T, defaults: T): T => {
+    const out = { ...block };
+    for (const key of Object.keys(block)) {
+      const sanitized = sanitizeFieldValue(block[key]);
+      out[key] = sanitized.toLowerCase() === sanitizeFieldValue(defaults[key]).toLowerCase() ? block[key] : sanitized;
+    }
+    return out;
+  };
+  return {
+    block1: cleanBlock(values.block1, DEFAULT_VALUES.block1),
+    block2: cleanBlock(values.block2, DEFAULT_VALUES.block2),
+    block3: cleanBlock(values.block3, DEFAULT_VALUES.block3),
+    block4: values.block4,
+  };
 }
 
 export function validateBriefValues(values: BriefValues): { valid: boolean; missing: string[] } {
   const missing: string[] = [];
   for (const f of REQUIRED_FIELDS) {
     const v = (values[f.block] as Record<string, string>)[f.field];
-    if (isPlaceholderValue(v)) missing.push(f.label);
+    const d = (DEFAULT_VALUES[f.block] as Record<string, string>)[f.field];
+    if (isPlaceholderValue(v, d)) missing.push(f.label);
   }
   return { valid: missing.length === 0, missing };
 }
