@@ -1102,7 +1102,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // the left navigation. Otherwise fall back to fullscreen or the
   // expanded/compact widget.
   const PANEL_W = (fullscreen || modalMode)
-    ? Math.min(1200, typeof window !== "undefined" ? window.innerWidth - 32 : 1200)
+    ? Math.min(1200, typeof window !== "undefined" ? window.innerWidth - navInset - 48 : 1200)
     : (expanded ? 560 : 380);
   const PANEL_H_OPEN = modalMode ? 760 : (expanded ? 760 : 560);
 
