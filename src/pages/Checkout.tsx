@@ -1521,8 +1521,7 @@ export default function Checkout() {
     if (!grossLines?.length) return null;
     const currency = orderCurrency(grossLines);
     const subtotalCents = orderSubtotal(grossLines);
-    const discountCents =
-      effectiveDiscountPct > 0 ? Math.round(subtotalCents * effectiveDiscountPct) : 0;
+    const discountCents = cappedDiscountCents(grossLines);
     const shippingCents = shipping?.cents ?? 0;
     // Country-based base freight is the checkout delivery amount until an
     // advisor replaces it with a confirmed quote.
