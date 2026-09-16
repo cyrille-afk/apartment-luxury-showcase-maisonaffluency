@@ -12,7 +12,7 @@
  *  - remove the sitemap <link> hint.
  */
 
-export const PRODUCTION_ORIGIN = "https://www.maisonaffluency.com";
+export const PRODUCTION_ORIGIN = "https://maisonaffluency.com";
 
 const PRODUCTION_HOSTS = new Set([
   "www.maisonaffluency.com",
