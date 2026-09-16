@@ -958,6 +958,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
               </div>
             </div>
+            </div>
           </div>
 
           {/* More From — separated from upper block with defined margin */}
