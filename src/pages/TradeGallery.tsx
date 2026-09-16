@@ -417,7 +417,7 @@ const TradeGallery = () => {
     designerId: product.id,
     section: "designers",
     price: (() => {
-      const p = getDisplayPrice(getProductPrice(product));
+      const p = getDisplayPrice(getProductPrice(product), product.brand_name);
       return p ? formatPriceConverted(p.cents, p.currency, displayCurrency, fxRates, p.price_unit) : null;
     })(),
   });
@@ -739,7 +739,7 @@ const TradeGallery = () => {
                    </h3>
                    {isAdmin ? (
                      <div className="mt-auto flex flex-col items-start gap-1.5 pt-3">
-                       {renderPriceDisplay(price, "font-sans text-[11px] tracking-[0.14em] inline-flex items-start gap-1.5 flex-wrap")}
+                       {renderPriceDisplay(price, "font-sans text-[11px] tracking-[0.14em] inline-flex items-start gap-1.5 flex-wrap", product.brand_name)}
                        <InlinePriceEditor
                          productName={product.product_name}
                          brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
@@ -752,7 +752,7 @@ const TradeGallery = () => {
                        />
                      </div>
                    ) : (
-                     renderPriceDisplay(price, "font-sans text-[11px] tracking-[0.14em] mt-auto pt-3 inline-flex items-start gap-1.5 flex-wrap")
+                     renderPriceDisplay(price, "font-sans text-[11px] tracking-[0.14em] mt-auto pt-3 inline-flex items-start gap-1.5 flex-wrap", product.brand_name)
                    )}
                  </div>
               </div>
@@ -782,7 +782,7 @@ const TradeGallery = () => {
                 </div>
                 {isAdmin ? (
                   <div className="shrink-0 flex flex-col items-end gap-1.5">
-                    {renderPriceDisplay(price, "font-display text-sm inline-flex items-center gap-1.5 flex-wrap justify-end")}
+                    {renderPriceDisplay(price, "font-display text-sm inline-flex items-center gap-1.5 flex-wrap justify-end", product.brand_name)}
                     <InlinePriceEditor
                       productName={product.product_name}
                       brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
@@ -795,7 +795,7 @@ const TradeGallery = () => {
                     />
                   </div>
                 ) : (
-                  renderPriceDisplay(price, "font-display text-sm shrink-0 inline-flex items-center gap-1.5 flex-wrap")
+                  renderPriceDisplay(price, "font-display text-sm shrink-0 inline-flex items-center gap-1.5 flex-wrap", product.brand_name)
                 )}
                 <button
                   onClick={() => handleAddToQuote(product)}
