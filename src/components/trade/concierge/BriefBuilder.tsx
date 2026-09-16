@@ -147,6 +147,34 @@ const DEFAULT_VALUES: BriefValues = {
     "Return 3 layout configurations. For every piece, output a strict Architectural Specification Schedule:\nProduct Name · Designer · Exact mm Dimensions · Verified Finish Options · Lead Time · Cloudinary image URL · Supabase CAD/BIM URL.\nNo conversational intro.",
 };
 
+const REQUIRED_FIELDS: { key: string; block: "block1" | "block2" | "block3"; field: string; label: string }[] = [
+  { key: "projectProfile", block: "block1", field: "projectProfile", label: "PROJECT PROFILE" },
+  { key: "zone", block: "block1", field: "zone", label: "ZONE" },
+  { key: "typology", block: "block2", field: "typology", label: "TYPOLOGY" },
+  { key: "vibe", block: "block3", field: "vibe", label: "VIBE" },
+];
+
+function isPlaceholderValue(value: string): boolean {
+  if (!value || !value.trim()) return true;
+  // Any remaining bracketed token like [typology], [N], [mm] is treated as an
+  // unfilled template placeholder.
+  return /\[.*?\]/.test(value.trim());
+}
+
+export function validateBriefValues(values: BriefValues): { valid: boolean; missing: string[] } {
+  const missing: string[] = [];
+  for (const f of REQUIRED_FIELDS) {
+    const v = (values[f.block] as Record<string, string>)[f.field];
+    if (isPlaceholderValue(v)) missing.push(f.label);
+  }
+  return { valid: missing.length === 0, missing };
+}
+
+export function validateBriefDraft(text: string): { valid: boolean; missing: string[] } {
+  const parsed = parseBrief(text || "");
+  return validateBriefValues(parsed.values);
+}
+
 // Header labels used in the formatted brief sent to Felix. Do NOT change the
 // "Block N —" prefixes; parseBrief() relies on them.
 const BLOCK_LABELS: Record<string, string> = {
