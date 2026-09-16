@@ -107,23 +107,10 @@ const ProductPage = () => {
     );
   }
 
+  // Deleted / deactivated / archived pieces: send crawlers and visitors back to
+  // the curated catalogue instead of parking them on a dead 200 page.
   if (notFound || !product) {
-    return (
-      <>
-        <Helmet>
-          <title>Product not found — Maison Affluency</title>
-          <meta name="robots" content="noindex" />
-          <link rel="canonical" href={earlyCanonical} />
-        </Helmet>
-        <div className="min-h-screen bg-background flex items-center justify-center px-4">
-          <div className="text-center">
-            <h1 className="font-display text-2xl text-foreground mb-2">Product Not Found</h1>
-            <p className="font-body text-sm text-muted-foreground mb-6">This product may no longer be available.</p>
-            <Link to="/" className="font-body text-sm text-foreground underline underline-offset-4">Return to Home</Link>
-          </div>
-        </div>
-      </>
-    );
+    return <LegacyRouteRedirect to="/designers" />;
   }
 
   const allImages = [
