@@ -65,3 +65,4 @@
 - [x] Connect shared material-library and AI finish selections to persistent per-object 3D PBR materials, transparent contact shadows, and the 32px floating console
 - [x] Isolate Bond Street Stool base/upholstery meshes and map authentic Man of Parts finishes without global texture replacement
 - [x] Upgrade Favorites with editorial-grid and technical-list modes plus Client View-safe MSRP pricing
+- [x] Quote builder: picking a client with a Default currency (e.g. Liz Spradling → USD) now auto-switches the quote currency toggle once; manual toggle override preserved

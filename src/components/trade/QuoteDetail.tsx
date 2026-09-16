@@ -2434,6 +2434,21 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       supabase.from("trade_quotes")
                         .update({ client_id: newId, client_name: newName } as any)
                         .eq("id", quoteId);
+                      // One-time currency initialization: apply the client's
+                      // default currency (if any). The member can still switch
+                      // the toggle manually afterwards.
+                      if (newId) {
+                        (supabase.from("clients" as any)
+                          .select("default_currency")
+                          .eq("id", newId)
+                          .maybeSingle() as any
+                        ).then(({ data }: any) => {
+                          const cc = String(data?.default_currency ?? "").trim().toUpperCase();
+                          if (cc && (CURRENCIES as readonly string[]).includes(cc) && cc !== currency) {
+                            handleCurrencyChange(cc as Currency);
+                          }
+                        });
+                      }
                     }}
                   />
                   {clientId && (
