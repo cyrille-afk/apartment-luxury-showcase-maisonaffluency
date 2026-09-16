@@ -275,7 +275,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 if (item) setLightboxItem(item);
               }}
             >
-              <div className="relative aspect-[4/3] max-h-[320px] w-full overflow-hidden rounded-sm bg-[hsl(var(--product-canvas))]">
+              <div className={cn("relative w-full overflow-hidden rounded-sm bg-[hsl(var(--product-canvas))]", imageFrameClassName)}>
                 <SwipeAlternateProductImage
                   primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
                   primarySrcSet={pickSrcSet(pick.image_url)}
