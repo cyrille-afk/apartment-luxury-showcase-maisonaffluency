@@ -1151,10 +1151,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
 
   const clampPos = useCallback((x: number, y: number) => {
     const h = minimized ? PANEL_H_MIN : PANEL_H_OPEN;
-    const maxX = Math.max(8, window.innerWidth - PANEL_W - 8);
+    const minX = navInset + 8;
+    const maxX = Math.max(minX, window.innerWidth - PANEL_W - 8);
     const maxY = Math.max(8, window.innerHeight - h - 8);
-    return { x: Math.min(Math.max(8, x), maxX), y: Math.min(Math.max(8, y), maxY) };
-  }, [minimized]);
+    return { x: Math.min(Math.max(minX, x), maxX), y: Math.min(Math.max(8, y), maxY) };
+  }, [minimized, navInset, PANEL_W]);
 
   const onDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
     // Only react to primary button / touch
