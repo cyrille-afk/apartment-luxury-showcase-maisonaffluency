@@ -5,6 +5,10 @@ import HmrStatusBanner from "./components/dev/HmrStatusBanner";
 import BuildUpdateBanner from "./components/BuildUpdateBanner";
 import { isPwaStandaloneDisplay } from "./lib/pwaMode";
 import { loadOgBridgeIndex } from "./lib/ogBridgeResolver";
+import { startEnvironmentIndexingGuard } from "./lib/environmentIndexingGuard";
+
+// Block indexing + rewrite canonicals on any preview/staging/dev host.
+startEnvironmentIndexingGuard();
 
 // Warm the OG bridge manifest so share links resolve to real files, never 404
 // guesses. Deferred to idle: the manifest is ~84 KB of JSON and parsing it on
