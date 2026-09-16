@@ -5461,7 +5461,9 @@ serve(async (req) => {
       droppedMaterials: string[];
       droppedColors: string[];
       nullRatio: number;
+      mode: "sparse_materials" | "typology_led";
     } | null = null;
+
     if (
       hasScopedDesigners &&
       ((sqlLoadConstraints.materials?.length || 0) + (sqlLoadConstraints.colors?.length || 0) > 0)
