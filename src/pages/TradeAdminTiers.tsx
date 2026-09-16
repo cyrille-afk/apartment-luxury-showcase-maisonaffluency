@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Save, Award, Sparkles, TrendingUp, TrendingDown, Minus, Eye } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 type Tier = "silver" | "gold" | "platinum";
 
@@ -157,7 +158,15 @@ export default function TradeAdminTiers() {
   return (
     <>
       <Helmet><title>Trade Tiers — Admin — Maison Affluency</title></Helmet>
-      <div className="max-w-4xl space-y-6">
+      <div className="mx-auto w-full max-w-4xl space-y-6 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
+        <Breadcrumbs
+          variant="compact"
+          className="mb-1"
+          items={[
+            { label: "Admin", to: "/trade/admin-dashboard" },
+            { label: "Trade Tiers" },
+          ]}
+        />
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3">
             <Link to="/trade/admin-dashboard" className="p-1.5 rounded-md hover:bg-muted transition-colors">
@@ -285,7 +294,7 @@ export default function TradeAdminTiers() {
         {isLoading ? (
           <div className="text-sm text-muted-foreground py-8 text-center">Loading…</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 [@media(min-width:1440px)]:gap-8">
             {merged.map((row, idx) => {
               const dirty = isDirty(row.tier);
               const accent =
