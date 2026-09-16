@@ -2365,7 +2365,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       const validation = validateBriefDraft(briefDraft);
       if (!validation.valid) {
         toast.error(
-          "To ensure Felix curates an accurate project schedule, please specify your desired furniture Typologies before submitting.",
+          `To ensure ${name} curates an accurate project schedule, please specify your desired furniture Typologies before submitting.",
           { description: `Missing required fields: ${validation.missing.join(", ")}` },
         );
         return;
@@ -5040,7 +5040,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                     />
                     {item.resolved && (
                       <div className="mt-1 px-1 text-[11px] text-muted-foreground italic">
-                        {item.resolved === "downloaded" ? "PDF requested — Felix is preparing it." : "Sent — Felix will confirm delivery."}
+                        {item.resolved === "downloaded" ? `PDF requested — ${name} is preparing it.` : `Sent — ${name} will confirm delivery.`}
                       </div>
                     )}
                   </div>
@@ -5156,7 +5156,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                       </button>
                       {item.resolved && (
                         <span className="text-[11px] text-muted-foreground italic ml-1">
-                          {item.resolved === "downloaded" ? "PDF requested — Felix is preparing it." : "Sent — Felix will confirm delivery."}
+                          {item.resolved === "downloaded" ? `PDF requested — ${name} is preparing it.` : `Sent — ${name} will confirm delivery.`}
                         </span>
                       )}
                     </div>
@@ -5517,7 +5517,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 disabled={streaming}
                 className="h-11 lg:h-10 w-full justify-start rounded-none px-4 font-body text-xs uppercase tracking-wider"
                 aria-label="Check lead times"
-                title="Ask Felix about current lead times"
+                title={`Ask ${name} about current lead times`}
               >
                 Check Lead Times
               </Button>
@@ -5808,7 +5808,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                       onClick={submit}
                       className="rounded-full bg-foreground text-background px-3.5 py-1.5 font-body text-xs hover:bg-foreground/90 transition-colors"
                     >
-                      Send to Felix
+                      Send to {name}
                     </button>
                   </div>
                 </div>
