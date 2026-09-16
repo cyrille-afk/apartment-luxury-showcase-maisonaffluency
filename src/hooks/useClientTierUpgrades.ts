@@ -21,10 +21,12 @@ export function useClientTierUpgrades() {
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    const { data, error } = await supabase
+    let query = supabase
       .from("clients" as any)
-      .select("id, eligible_tier, eligible_for_upgrade")
+      .select("id, eligible_tier, eligible_for_upgrade, studio_id")
       .eq("eligible_for_upgrade", true);
+    if (studioId) query = query.eq("studio_id", studioId);
+    const { data, error } = await query;
     if (!error) {
       const next: ClientUpgradeFlags = {};
       ((data || []) as any[]).forEach((row) => {
