@@ -59,7 +59,9 @@ const JournalArticlePage = () => {
         if (!cancelled) setArticle(data);
       })
       .catch(() => {
-        if (!cancelled) navigate("/journal", { replace: true });
+        // Unknown / unpublished slug: fall through to the 404 surface rather
+        // than bouncing to /journal with a 200 status.
+        if (!cancelled) setArticle(null);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
