@@ -468,7 +468,11 @@ const TradeLayout = () => {
           </header>
           <main className={`trade-editorial-main flex-1 ${fullBleed ? "min-h-0 overflow-hidden p-0" : "p-4 md:p-8 lg:p-12 pb-24 md:pb-10 lg:pb-14"}`}>
             <ToolsBreadcrumbProvider>
-              {!fullBleed && <ToolsBreadcrumb />}
+              {!fullBleed && (
+                <div className="sticky top-14 md:top-16 z-20 -mx-4 md:-mx-8 lg:-mx-12 -mt-4 md:-mt-8 lg:-mt-12 mb-4 bg-background/95 backdrop-blur-sm px-4 md:px-8 lg:px-12 pt-4 md:pt-5 pb-3 border-b border-border/40">
+                  <ToolsBreadcrumb className="mb-0" />
+                </div>
+              )}
               <Suspense fallback={
                 <div className="flex items-center justify-center py-20">
                   <DotCircleLoader size="sm" className="text-muted-foreground" />
