@@ -271,7 +271,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 if (item) setLightboxItem(item);
               }}
             >
-              <div className="relative aspect-[4/3] max-h-[320px] w-full overflow-hidden rounded-sm bg-[hsl(var(--product-canvas))]">
+              <div className="relative h-[220px] w-full overflow-hidden rounded-sm bg-[hsl(var(--product-canvas))] md:h-[260px]">
                 <SwipeAlternateProductImage
                   primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
                   primarySrcSet={pickSrcSet(pick.image_url)}
@@ -279,8 +279,9 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                   sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                   alt={pick.title}
-                  primaryClassName="object-cover object-center p-0"
-                  alternateClassName="object-cover object-center p-0"
+                  contain
+                  primaryClassName="inset-0 left-0 top-0 h-full w-full max-h-none max-w-none translate-x-0 translate-y-0 object-contain object-center p-0"
+                  alternateClassName="inset-0 left-0 top-0 h-full w-full max-h-none max-w-none translate-x-0 translate-y-0 object-contain object-center p-0"
                 />
                 {/* Inventory badges — lower-left of the frame */}
                 <InventoryBadgeStack
@@ -306,7 +307,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 )}
               </div>
 
-              <div className="mt-2.5 grid w-full grid-rows-[1.25rem_2.75rem_1.25rem] items-start text-left leading-relaxed">
+              <div className="mt-2 grid w-full grid-rows-[1.25rem_2.75rem_1.25rem] items-start text-left leading-relaxed">
                 {(() => {
                   const composed = composeTitle(pick.title, pick.subtitle);
                   // Editor brands (e.g. De La Espada) embed the author in the title:
