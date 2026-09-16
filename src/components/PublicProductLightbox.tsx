@@ -1,6 +1,6 @@
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
-import { X, FileDown, Heart, Scale, ArrowRight, ChevronLeft, ChevronRight, Award, Compass, FileText } from "lucide-react";
+import { X, FileDown, Heart, Scale, ArrowRight, ChevronLeft, ChevronRight, Award, Compass, FileText, Info } from "lucide-react";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,14 @@ import { supabase } from "@/integrations/supabase/client";
 import SpecGlyph from "@/components/product/SpecGlyph";
 import { usePublicRrp, usePublicRrpDisplay, formatPublicRrp } from "@/hooks/usePublicRrp";
 import { FadeInImage } from "@/components/ui/FadeInImage";
+import { useAccountDiscount } from "@/hooks/useAccountDiscount";
+import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
+import { effectiveDiscountForBrand, useBrandDiscountCaps } from "@/lib/brandDiscountCap";
+import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
+import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
+import { formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage. */
 const slugifyProduct = (s: string) =>
@@ -319,6 +327,13 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   const { data: publicRrp } = usePublicRrp(product?.id);
   const { displayRow: publicRrpDisplayRow } = usePublicRrpDisplay(publicRrp);
   const publicPriceLabel = formatPublicRrp(publicRrpDisplayRow);
+  const accountDiscount = useAccountDiscount();
+  const { showTradePrice, tierLabel } = useTradePriceMode();
+  const showMemberTradePrice = accountDiscount.eligible && showTradePrice;
+  const { data: tradePricing } = useTradeProductPricing(product?.id, showMemberTradePrice);
+  const brandDiscountCaps = useBrandDiscountCaps(showMemberTradePrice);
+  const [tradeDisplayCurrency] = useTradeDisplayCurrency();
+  const fxRates = useFxRates();
 
   // Reset per-product state when the product changes (incl. selected finish).
   const [selectedBaseIdx, setSelectedBaseIdx] = useState<number | null>(null);
@@ -418,6 +433,38 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       : !isDualAxis && product.materials
         ? product.materials.split("\n").map((s) => s.trim()).filter(Boolean)
         : [];
+  const selectedVariantPriceCents = (() => {
+    if (!selectedSizeLabel) return null;
+    const match = sv.find((variant) =>
+      [variant.label, variant.base].some((label) => label?.trim() === selectedSizeLabel.trim()),
+    );
+    return typeof match?.price_cents === "number" && match.price_cents > 0
+      ? match.price_cents
+      : null;
+  })();
+  const baseRetailPriceCents = selectedVariantPriceCents
+    ?? tradePricing?.rrp_price_cents
+    ?? tradePricing?.trade_price_cents
+    ?? null;
+  const effectiveTradeDiscount = effectiveDiscountForBrand(
+    accountDiscount.pct,
+    product.brand_name,
+    brandDiscountCaps,
+  );
+  const netTradePriceCents = baseRetailPriceCents && baseRetailPriceCents > 0
+    ? Math.round(baseRetailPriceCents * (1 - effectiveTradeDiscount.pct))
+    : null;
+  const tradeCurrency = (tradePricing?.currency || "EUR").toUpperCase();
+  const formatTradePrice = (cents: number) => formatPriceConverted(
+    cents,
+    tradeCurrency,
+    tradeDisplayCurrency,
+    fxRates,
+    tradePricing?.price_unit || undefined,
+  );
+  const capPercent = effectiveTradeDiscount.capPct == null
+    ? null
+    : `${Number((effectiveTradeDiscount.capPct * 100).toFixed(2))}%`;
   // Resolve which gallery image matches the current selection.
   let finishImageIdx: number | undefined;
   if (finishMap && galleryImages.length > 0) {
@@ -748,7 +795,55 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       {product.subtitle}
                     </p>
                   )}
-                  {publicPriceLabel && (
+                  {showMemberTradePrice && netTradePriceCents ? (
+                    <div className="mt-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-display text-base md:text-lg leading-none text-foreground tabular-nums">
+                          {formatTradePrice(netTradePriceCents)}
+                        </p>
+                        <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+                          Net Trade Price
+                        </span>
+                        {effectiveTradeDiscount.capped && capPercent && (
+                          <TooltipProvider delayDuration={160}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  aria-label="Brand margin notice"
+                                  className="h-6 w-6 rounded-full text-muted-foreground/70 hover:bg-muted hover:text-foreground"
+                                >
+                                  <Info className="h-3.5 w-3.5" strokeWidth={1.5} />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent
+                                side="bottom"
+                                align="start"
+                                sideOffset={8}
+                                className="z-[10020] w-[min(340px,calc(100vw-2rem))] rounded-none border-border/70 bg-background/98 px-4 py-3 shadow-xl backdrop-blur-md"
+                              >
+                                <p className="font-body text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
+                                  Brand Margin Notice
+                                </p>
+                                <p className="mt-2 font-body text-xs leading-relaxed text-foreground/85">
+                                  This masterwork is handcrafted under strict heritage atelier licenses. Due to the limited artisan production scale and brand pricing structures, this piece qualifies for a specialized trade discount of <strong className="font-semibold text-foreground">{capPercent}</strong> rather than your standard <strong className="font-semibold text-foreground">{tierLabel} Tier rate</strong>.
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                      </div>
+                      {baseRetailPriceCents && (
+                        <p className="mt-1 font-body text-[10px] tracking-[0.04em] text-muted-foreground">
+                          <span className="line-through decoration-muted-foreground/50">
+                            Retail: {formatTradePrice(baseRetailPriceCents)}
+                          </span>
+                        </p>
+                      )}
+                    </div>
+                  ) : publicPriceLabel && (
                     <p className="font-display text-base md:text-lg text-foreground mt-2 leading-none">
                       {publicPriceLabel}
                     </p>
@@ -947,14 +1042,16 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   )}
                 </div>
 
-                <div className="pt-2 border-t border-border">
-                  <p className="font-body text-[11px] text-muted-foreground">
-                    To unlock Your Trade pricing,{" "}
-                    <a href="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
-                      join our Trade Program
-                    </a>.
-                  </p>
-                </div>
+                {!showMemberTradePrice && (
+                  <div className="pt-2 border-t border-border">
+                    <p className="font-body text-[11px] text-muted-foreground">
+                      To unlock Your Trade pricing,{" "}
+                      <a href="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
+                        join our Trade Program
+                      </a>.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
             </div>
