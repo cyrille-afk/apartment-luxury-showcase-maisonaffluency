@@ -6,11 +6,18 @@ import { modelFor, tokenBudget } from "../_shared/aiModels.ts";
 import { withSemanticCache } from "../_shared/aiCache.ts";
 
 const DESCRIPTION_MODEL = modelFor("balanced");
-// Long-form on-page copy targets 180–260 words. The balanced tier spends part of
-// its budget on internal reasoning tokens, so the "rewrite" cap truncated seo_long
-// output mid-sentence. Give long-form a much larger ceiling.
+// The balanced tier spends part of its budget on internal reasoning tokens, so the
+// plain "rewrite" cap (600) truncated output mid-sentence for every tone. Give each
+// tone enough ceiling for reasoning + full prose.
 const DESCRIPTION_MAX_TOKENS = tokenBudget("rewrite");
 const SEO_LONG_MAX_TOKENS = 2400;
+const TONE_MAX_TOKENS: Record<string, number> = {
+  editorial: 1800,
+  technical: 1800,
+  seo: 1200,
+  seo_long: SEO_LONG_MAX_TOKENS,
+};
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
