@@ -15,6 +15,9 @@ interface SwipeAlternateProductImageProps {
    *  grids where tall/narrow pieces (e.g. lamps) should not dominate wide
    *  furniture cards. */
   contain?: boolean;
+  /** When false, the component sizes to the primary image's native aspect ratio
+   *  instead of filling a fixed parent box. Both images still swap on hover/swipe. */
+  fill?: boolean;
 }
 
 /** Mobile swipe reveals the alternate view; desktop retains the established hover reveal. */
@@ -29,6 +32,7 @@ export default function SwipeAlternateProductImage({
   alternateClassName,
   alternateStyle,
   contain = false,
+  fill = true,
 }: SwipeAlternateProductImageProps) {
   const [showAlternate, setShowAlternate] = useState(false);
   const [primaryLoaded, setPrimaryLoaded] = useState(false);
@@ -66,7 +70,7 @@ export default function SwipeAlternateProductImage({
 
   return (
     <div
-      className="absolute inset-0 touch-pan-y"
+      className={cn("touch-pan-y", fill ? "absolute inset-0" : "relative w-full")}
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
       onPointerCancel={() => {
@@ -96,8 +100,12 @@ export default function SwipeAlternateProductImage({
         alt={alt}
         className={cn(
           contain
-            ? "absolute left-1/2 top-1/2 max-h-full max-w-full -translate-x-1/2 -translate-y-1/2 object-contain p-3 transition-all duration-500 ease-out md:duration-700"
-            : "absolute inset-0 h-full w-full object-cover p-0 transition-all duration-500 ease-out md:duration-700",
+            ? fill
+              ? "absolute left-1/2 top-1/2 max-h-full max-w-full -translate-x-1/2 -translate-y-1/2 object-contain p-3 transition-all duration-500 ease-out md:duration-700"
+              : "relative block h-auto w-full object-contain object-center p-3 transition-all duration-500 ease-out md:duration-700"
+            : fill
+              ? "absolute inset-0 h-full w-full object-contain p-3 transition-all duration-500 ease-out md:p-0 md:object-cover md:duration-700"
+              : "relative block h-auto w-full object-cover p-0 transition-all duration-500 ease-out md:duration-700",
           alternateSrc && !contain && "md:group-hover:scale-105 md:group-hover:opacity-0",
           showAlternate || !primaryLoaded ? "opacity-0" : "opacity-100",
           primaryClassName
@@ -115,9 +123,13 @@ export default function SwipeAlternateProductImage({
           sizes={sizes}
           alt={`${alt} alternate view`}
           className={cn(
-              contain
+            contain
+              ? fill
                 ? "absolute left-1/2 top-1/2 max-h-full max-w-full -translate-x-1/2 -translate-y-1/2 object-contain p-3 transition-all duration-500 ease-out md:duration-700"
-                : "absolute inset-0 h-full w-full object-cover p-0 transition-all duration-500 ease-out md:opacity-0 md:duration-700 md:group-hover:scale-105 md:group-hover:opacity-100",
+                : "absolute inset-0 h-full w-full object-contain object-center p-3 transition-all duration-500 ease-out md:duration-700"
+              : fill
+                ? "absolute inset-0 h-full w-full object-contain p-3 transition-all duration-500 ease-out md:p-0 md:object-cover md:opacity-0 md:duration-700 md:group-hover:scale-105 md:group-hover:opacity-100"
+                : "absolute inset-0 h-full w-full object-cover p-0 transition-all duration-500 ease-out md:opacity-0 md:duration-700",
             !contain && "md:opacity-0 md:group-hover:opacity-100",
             showAlternate && alternateLoaded ? "opacity-100" : "opacity-0",
             alternateClassName
