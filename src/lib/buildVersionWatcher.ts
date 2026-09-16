@@ -143,4 +143,26 @@ export function startBuildVersionWatcher() {
     if (document.visibilityState === "visible") checkForUpdate();
   });
   window.addEventListener("online", checkForUpdate);
+
+  // Client-side navigations are the moment a stale tab is most likely to pull
+  // a chunk that no longer exists — check the deployed build id then too.
+  let lastNavCheck = 0;
+  const checkOnNavigation = () => {
+    const now = Date.now();
+    if (now - lastNavCheck < NAV_CHECK_THROTTLE_MS) return;
+    lastNavCheck = now;
+    void checkForUpdate();
+  };
+  window.addEventListener("popstate", checkOnNavigation);
+  const { pushState, replaceState } = window.history;
+  window.history.pushState = function (...args) {
+    const result = pushState.apply(this, args as Parameters<typeof pushState>);
+    checkOnNavigation();
+    return result;
+  };
+  window.history.replaceState = function (...args) {
+    const result = replaceState.apply(this, args as Parameters<typeof replaceState>);
+    checkOnNavigation();
+    return result;
+  };
 }
