@@ -361,6 +361,14 @@ import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { SpecScheduleBlock } from "@/components/trade/concierge/SpecScheduleBlock";
 import { LayoutComparisonGrid } from "@/components/trade/concierge/LayoutComparisonGrid";
 
+/** Pulls the "Aesthetic & Visual DNA" (VIBE) line out of a structured brief. */
+function extractBriefVibe(text?: string | null): string | null {
+  if (!text) return null;
+  const m = String(text).match(/^\s*(?:VIBE|DESIGN PROFILE|STYLE)\s*[:—-]\s*(.+)$/im);
+  const v = m?.[1]?.trim();
+  return v ? v : null;
+}
+
 import { parseSlashCommand, SLASH_COMMAND_HELP } from "@/lib/conciergeSlashCommands";
 import { openHandoffChannel } from "@/lib/conciergeHandoff";
 import { useConciergeSession } from "@/hooks/useConciergeSession";
@@ -399,7 +407,7 @@ type TimelineItem =
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" }
   | { kind: "retry"; text: string; reason: string }
   | { kind: "spec_schedule"; zone: string; markdown: string }
-  | { kind: "layout_options"; id: string; selected?: number | null }
+  | { kind: "layout_options"; id: string; selected?: number | null; styleInput?: string | null }
   | { kind: "proactive_tearsheet"; data: import("@/components/trade/concierge/ProactiveTearsheetCard").ProactiveTearsheetData; resolved?: "generated" | "boarded" | "dismissed" }
   | {
       kind: "quote_card";
@@ -3432,11 +3440,16 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     } finally {
       if (opts?.builderSubmit) {
         if (builderSubmitOk) {
-          // Post-submission: offer the three generated spatial configurations.
+          // Post-submission: offer the three generated spatial configurations,
+          // named from the aesthetic DNA captured in the brief.
+          const styleInput = extractBriefVibe(briefDraft);
           setTimeline((prev) =>
             prev.some((t) => t.kind === "layout_options" && !t.selected)
               ? prev
-              : [...prev, { kind: "layout_options", id: `layouts-${Date.now()}`, selected: null }],
+              : [
+                  ...prev,
+                  { kind: "layout_options", id: `layouts-${Date.now()}`, selected: null, styleInput },
+                ],
           );
         }
         briefSubmitDoneRef.current?.(builderSubmitOk);
@@ -4714,6 +4727,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   <div key={i} className="w-full self-start">
                     <LayoutComparisonGrid
                       selected={item.selected ?? null}
+                      styleInput={item.styleInput ?? null}
                       onSelect={(option) => {
                         if (item.selected) return;
                         setTimeline((prev) => {

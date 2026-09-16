@@ -10,47 +10,94 @@ export type LayoutOption = {
   itemCount: number;
 };
 
-export const LAYOUT_OPTIONS: LayoutOption[] = [
-  {
-    id: 1,
-    name: "The Curated Classic",
-    focus: "Symmetrical placement, maximised flow, heritage pieces foregrounded.",
-    alignment: "Primary seating mirrored on a central axis, anchored by the principal case piece",
-    clearance: "1,050 mm circulation on all primary routes",
-    itemCount: 14,
-  },
-  {
-    id: 2,
-    name: "The Modernist Lounge",
-    focus: "Relaxed zoning, low-slung silhouettes, connection to the architectural landscape.",
-    alignment: "Low sofa run set parallel to the glazing, side tables floated off-wall",
-    clearance: "1,200 mm circulation between zones",
-    itemCount: 11,
-  },
-  {
-    id: 3,
-    name: "The Avant-Garde Atelier",
-    focus: "Bold sculptural focal points and dynamic, conversational seating.",
-    alignment: "Off-axis sculptural chairs orbiting a single statement centrepiece",
-    clearance: "900 mm circulation, widened to 1,300 mm at the focal approach",
-    itemCount: 16,
-  },
-];
+/** Generic fallback used only when no aesthetic DNA was captured. */
+const FALLBACK_STYLE = "Curated";
+
+/**
+ * Normalises the free-text "Aesthetic & Visual DNA" (VIBE) input into a short
+ * style modifier usable as a naming prefix, e.g. "Art Deco", "Japandi-Luxe".
+ */
+export function normaliseStyleInput(raw?: string | null): string {
+  if (!raw) return "";
+  let s = String(raw)
+    .replace(/\[[^\]]*\]/g, " ")
+    .replace(/[[\]]/g, " ")
+    .replace(/\b(?:e\.?g\.?|for example|such as|inspired by|style|vibe|aesthetic)\b/gi, " ")
+    .trim();
+  // Take the first declared concept only.
+  s = s.split(/[,;/|·—–]|\band\b|\bwith\b|\bplus\b/i)[0] ?? "";
+  s = s.replace(/\s+/g, " ").trim();
+  if (!s) return "";
+  const words = s.split(" ").slice(0, 3);
+  return words
+    .map((w) =>
+      w
+        .split("-")
+        .map((p) => (p ? p.charAt(0).toUpperCase() + p.slice(1) : p))
+        .join("-"),
+    )
+    .join(" ");
+}
+
+/**
+ * Derives the three spatial strategy variants from the captured design era.
+ * Titles and editorial copy are generated — never hardcoded per option.
+ */
+export function deriveLayoutOptions(styleInput?: string | null): LayoutOption[] {
+  const style = normaliseStyleInput(styleInput) || FALLBACK_STYLE;
+  const hasStyle = !!normaliseStyleInput(styleInput);
+  const era = hasStyle ? style : "the referenced period";
+
+  return [
+    {
+      id: 1,
+      name: `The ${style} Classic`,
+      focus: `Faithful ${era} symmetry: axial placement, maximised flow, heritage pieces foregrounded.`,
+      alignment: `Primary seating mirrored on a central axis, anchored by the principal ${era} case piece`,
+      clearance: "1,050 mm circulation on all primary routes",
+      itemCount: 14,
+    },
+    {
+      id: 2,
+      name: `Zoned ${style}`,
+      focus: `A fluid re-reading of ${era}: relaxed zoning, streamlined silhouettes, connection to the architectural landscape.`,
+      alignment: "Low seating run set parallel to the glazing, occasional pieces floated off-wall",
+      clearance: "1,200 mm circulation between zones",
+      itemCount: 11,
+    },
+    {
+      id: 3,
+      name: `The Progressive ${style} Atelier`,
+      focus: `A sculptural, progressive interpretation of ${era}: bold focal points and dynamic, conversational seating.`,
+      alignment: "Off-axis sculptural chairs orbiting a single statement centrepiece",
+      clearance: "900 mm circulation, widened to 1,300 mm at the focal approach",
+      itemCount: 16,
+    },
+  ];
+}
+
+/** Default set (no aesthetic DNA captured). */
+export const LAYOUT_OPTIONS: LayoutOption[] = deriveLayoutOptions();
 
 export function LayoutComparisonGrid({
   selected,
   onSelect,
+  options,
+  styleInput,
 }: {
   selected?: number | null;
   onSelect?: (option: LayoutOption) => void;
+  options?: LayoutOption[];
+  styleInput?: string | null;
 }) {
+  const layoutOptions = options ?? deriveLayoutOptions(styleInput);
   return (
     <div className="w-full animate-fade-in">
       <div className="mb-3 font-body text-[11px] uppercase tracking-[0.26em] text-muted-foreground">
         Proposed Spatial Configurations
       </div>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        {LAYOUT_OPTIONS.map((option) => {
+        {layoutOptions.map((option) => {
           const isActive = selected === option.id;
           const isDimmed = !!selected && !isActive;
           return (
