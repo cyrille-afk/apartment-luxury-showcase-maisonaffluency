@@ -10,7 +10,10 @@
  * - Never reloads automatically; the user controls refresh via the banner.
  */
 
-const POLL_INTERVAL_MS = 60_000;
+const POLL_INTERVAL_MS = 30_000;
+// Minimum gap between navigation-triggered checks so SPA route changes can't
+// hammer /version.json.
+const NAV_CHECK_THROTTLE_MS = 10_000;
 const DO_NOT_INTERRUPT = [
   "/trade/axonometric",
   "/trade/visualiser",
