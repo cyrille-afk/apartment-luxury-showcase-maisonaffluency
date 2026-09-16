@@ -20,6 +20,8 @@ interface BulkRow {
   id: string;
   label: string;
   hasExisting: boolean;
+  hasLong: boolean;
+  hasMeta: boolean;
   status: RowStatus;
   error?: string;
   warning?: string;
@@ -96,8 +98,6 @@ type PersistedState = {
   tone: Tone;
   bulkDesigner: string;
   skipExisting: boolean;
-  bulkRows: BulkRow[];
-  bulkProgress: { done: number; total: number };
 };
 
 function loadPersisted(): Partial<PersistedState> {
@@ -127,25 +127,22 @@ export default function TradeDescriptionWriter() {
   // Bulk state
   const [bulkDesigner, setBulkDesigner] = useState<string>(persisted.bulkDesigner ?? "");
   const [skipExisting, setSkipExisting] = useState(persisted.skipExisting ?? true);
-  const [bulkRows, setBulkRows] = useState<BulkRow[]>(() => {
-    // Any rows mid-flight when we left are considered failed (interrupted)
-    return (persisted.bulkRows ?? []).map((r) =>
-      r.status === "generating" ? { ...r, status: "pending" as RowStatus } : r,
-    );
-  });
+  // Completion status must always come from the live catalogue. Persisting rows
+  // made old "Empty" labels survive after descriptions had been saved.
+  const [bulkRows, setBulkRows] = useState<BulkRow[]>([]);
   const [bulkRunning, setBulkRunning] = useState(false);
-  const [bulkProgress, setBulkProgress] = useState(persisted.bulkProgress ?? { done: 0, total: 0 });
+  const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0 });
   const [cancelRequested, setCancelRequested] = useState(false);
 
   // Persist bulk session so navigating away & back doesn't wipe progress
   useEffect(() => {
     try {
       const payload: PersistedState = {
-        mode, source, tone, bulkDesigner, skipExisting, bulkRows, bulkProgress,
+        mode, source, tone, bulkDesigner, skipExisting,
       };
       sessionStorage.setItem(PERSIST_KEY, JSON.stringify(payload));
     } catch { /* quota — ignore */ }
-  }, [mode, source, tone, bulkDesigner, skipExisting, bulkRows, bulkProgress]);
+  }, [mode, source, tone, bulkDesigner, skipExisting]);
 
   // Warn if the user tries to close/reload while a bulk run is active
   useEffect(() => {
@@ -266,6 +263,8 @@ export default function TradeDescriptionWriter() {
         id: p.id,
         label: source === "curator_picks" ? p.title : p.product_name,
         hasExisting,
+        hasLong,
+        hasMeta,
         status: "pending" as RowStatus,
       };
     });
@@ -439,7 +438,7 @@ export default function TradeDescriptionWriter() {
               {TONES.map((t) => (
                 <button
                   key={t.value}
-                  onClick={() => { setTone(t.value); setResult(""); setResultLength(0); setSeoWarning(null); }}
+                  onClick={() => { setTone(t.value); setResult(""); setResultLength(0); setSeoWarning(null); setBulkRows([]); setBulkProgress({ done: 0, total: 0 }); }}
                   title={t.desc}
                   className={`flex-1 rounded-md border px-2 py-2 font-body text-xs transition-colors ${
                     tone === t.value
@@ -636,7 +635,15 @@ export default function TradeDescriptionWriter() {
                       {row.status === "saved" && "Saved"}
                       {row.status === "skipped" && "Skipped (has description)"}
                       {row.status === "generating" && "Generating…"}
-                      {row.status === "pending" && (row.hasExisting ? "Has description" : "Empty")}
+                      {row.status === "pending" && (isSeoBundle
+                        ? row.hasLong && row.hasMeta
+                          ? "Long-form + meta saved"
+                          : row.hasLong
+                            ? "Long-form saved · meta missing"
+                            : row.hasMeta
+                              ? "Meta saved · long-form missing"
+                              : "Empty"
+                        : row.hasLong ? "Has description" : "Empty")}
                       {row.status === "failed" && "Failed"}
                     </span>
                   </div>
