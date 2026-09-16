@@ -739,7 +739,6 @@ const PublicDesignerProfile = () => {
     return (
       <>
         <Helmet>
-          <meta name="robots" content="noindex, nofollow" />
           <title>Not found — Maison Affluency</title>
         </Helmet>
         <Navigate to="/" replace />
