@@ -26,11 +26,12 @@ export const TOOL_ROUTES: Record<string, [string, string]> = {
   "/trade/materials": ["Discover", "Material Library"],
   // Specification
   "/trade/visualiser": ["Specification", "Visualiser"],
-  "/trade/mood-boards": ["Specification", "Mood Board Builder"],
+  "/trade/mood-boards": ["Specification", "Mood Board"],
   "/trade/annotations": ["Specification", "Markup & Annotation"],
-  "/trade/tearsheets": ["Specification", "Tearsheet Builder"],
+  "/trade/tearsheets": ["Specification", "Specsheet Builder"],
   "/trade/comparator": ["Specification", "Product Comparator"],
   "/trade/ffe-schedule": ["Specification", "FF&E Schedule"],
+  "/trade/quotes": ["Specification", "Quote Builder"],
   // Procurement
   "/trade/order-timeline": ["Procurement", "Order Timeline"],
   "/trade/delivery-tracker": ["Procurement", "Delivery Tracker"],
@@ -40,12 +41,11 @@ export const TOOL_ROUTES: Record<string, [string, string]> = {
   "/trade/budget": ["Procurement", "Budget Tracker"],
   "/trade/reorder": ["Procurement", "Reorder"],
   "/trade/currency-converter": ["Procurement", "Currency Converter"],
-  "/trade/custom-requests": ["Procurement", "Custom Requests"],
-  "/trade/calendar": ["Procurement", "Showroom & Fair Calendar"],
   // Learn
+  "/trade/custom-requests": ["Learn", "Custom Requests"],
+  "/trade/calendar": ["Learn", "Showroom & Fair Calendar"],
   "/trade/guides": ["Learn", "Guides"],
-  "/trade/cpd": ["Learn", "CPD & Education"],
-  "/trade/axonometric-requests": ["Learn", "3D Studio"],
+  "/trade/learn": ["Learn", "Learn"],
 };
 
 const titleCase = (segment: string) =>
