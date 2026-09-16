@@ -1120,25 +1120,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     }
   }, [briefBuilderOpen]);
 
-  // Soft-check the structured brief. Only TYPOLOGY matters for readiness;
-  // everything else is optional and must never block sending.
+  // Validate the structured brief against required fields before allowing
+  // submission. PROJECT PROFILE, ZONE, TYPOLOGY and VIBE must be filled with
+  // real values — any remaining bracketed placeholder text is treated as empty.
   const briefValidation = useMemo(() => {
     if (!briefBuilderOpen) return { valid: true, missing: [] as string[] };
-    const text = input;
-    const required: { label: string; key: string }[] = [{ label: "TYPOLOGY", key: "Typology" }];
-    const missing: string[] = [];
-    for (const { label, key } of required) {
-      const re = new RegExp(`^${label}:\\s*(.*)$`, "im");
-      const m = text.match(re);
-      const val = (m?.[1] || "").trim();
-      // Invalid when empty OR the value still reads as a bracketed template
-      // placeholder like "[typology, city/area]", "[room, ceiling height]",
-      // "[e.g. sectional + accent chairs]".
-      const isPlaceholder = !val || /^\[[^\]]*\]$/.test(val);
-      if (isPlaceholder) missing.push(key);
-    }
-    return { valid: missing.length === 0, missing };
-  }, [briefBuilderOpen, input]);
+    return validateBriefDraft(briefDraft);
+  }, [briefBuilderOpen, briefDraft]);
 
 
 
