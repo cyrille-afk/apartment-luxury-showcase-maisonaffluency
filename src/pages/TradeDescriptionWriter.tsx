@@ -164,6 +164,10 @@ export default function TradeDescriptionWriter() {
       return (data || []) as any[];
     },
     enabled: source === "curator_picks",
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+
   });
 
   // Fetch trade products
@@ -179,6 +183,10 @@ export default function TradeDescriptionWriter() {
       return (data || []) as any[];
     },
     enabled: source === "trade_products",
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+
   });
 
   const items = source === "curator_picks" ? curatorPicks : tradeProducts;
