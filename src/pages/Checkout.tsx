@@ -1437,6 +1437,19 @@ export default function Checkout() {
   const { pct: hookDiscountPct, label: discountRowLabel } = useAccountDiscount();
   const [serverDiscountPct, setServerDiscountPct] = useState<number | null>(null);
   const effectiveDiscountPct = serverDiscountPct ?? hookDiscountPct;
+  // Supplier margin caps: a brand's `max_trade_discount` overrides the tier
+  // rate whenever it is lower, so each line is discounted at min(tier, cap).
+  const brandCaps = useBrandDiscountCaps();
+  const cappedDiscountCents = useCallback(
+    (lines: CheckoutLine[] | null | undefined) => {
+      if (!lines?.length || effectiveDiscountPct <= 0) return 0;
+      return lines.reduce((sum, line) => {
+        const { pct } = effectiveDiscountForBrand(effectiveDiscountPct, line.designer, brandCaps);
+        return sum + (pct > 0 ? Math.round(lineSubtotal(line) * pct) : 0);
+      }, 0);
+    },
+    [effectiveDiscountPct, brandCaps],
+  );
   // Tax returned by the PaymentIntent — authoritative over the local estimate.
   const [serverTax, setServerTax] = useState<{ cents: number; label: string | null } | null>(null);
   // Shipping stays "To be Quoted by Advisor" until the buyer confirms an
