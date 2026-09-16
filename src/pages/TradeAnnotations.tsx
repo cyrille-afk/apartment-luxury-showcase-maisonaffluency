@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import Breadcrumbs from "@/components/Breadcrumbs";
 
 interface Pin {
   id: string;
@@ -209,10 +208,8 @@ export default function TradeAnnotations() {
     <>
       <Helmet><title>Markup & Annotation — Trade Portal</title></Helmet>
       <div className="mx-auto w-full max-w-6xl space-y-6 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
-        <Breadcrumbs
-          variant="compact"
-          items={[{ label: "Tools", to: "/trade/tools" }, { label: "Markup & Annotation" }]}
-        />
+
+
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-display text-2xl text-foreground">Markup & Annotation</h1>

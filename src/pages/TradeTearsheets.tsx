@@ -16,7 +16,6 @@ import { useUserBoards } from "@/hooks/useUserBoards";
 import { useStudio } from "@/hooks/useStudio";
 import { normalizeCategory, normalizeSubcategory, CATEGORY_ORDER, getSubcategoriesForCategory } from "@/lib/productTaxonomy";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
-import Breadcrumbs from "@/components/Breadcrumbs";
 import { getConciergeSession, useConciergeSession } from "@/hooks/useConciergeSession";
 import { withImperialInline } from "@/lib/formatDimensions";
 import { formatLeadTime } from "@/components/trade/AvailabilityBadge";
@@ -731,10 +730,8 @@ export default function TradeTearsheets() {
     <>
       <Helmet><title>Tearsheet Builder — Trade Portal</title></Helmet>
       <div className="mx-auto w-full max-w-6xl space-y-6 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
-        <Breadcrumbs
-          variant="compact"
-          items={[{ label: "Tools", to: "/trade/tools" }, { label: "Tearsheet Builder" }]}
-        />
+
+
         <div>
           <h1 className="font-display text-2xl text-foreground">Tearsheet Builder</h1>
           <p className="font-body text-sm text-muted-foreground mt-1">

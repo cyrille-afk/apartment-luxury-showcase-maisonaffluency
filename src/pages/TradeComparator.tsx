@@ -6,7 +6,6 @@ import { useState } from "react";
 import { Search, X, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import Breadcrumbs from "@/components/Breadcrumbs";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 
 export default function TradeComparator() {
@@ -63,13 +62,8 @@ export default function TradeComparator() {
     <>
       <Helmet><title>Product Comparator — Trade Portal</title></Helmet>
       <div className="mx-auto w-full max-w-6xl space-y-6 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
-        <Breadcrumbs
-          variant="compact"
-          items={[
-            { label: "Tools", to: "/trade/tools" },
-            { label: "Product Comparator" },
-          ]}
-        />
+
+
 
         <div>
           <h1 className="font-display text-2xl text-foreground">Product Comparator</h1>

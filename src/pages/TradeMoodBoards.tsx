@@ -9,7 +9,6 @@ import { Search, Loader2, Paintbrush, Plus, X, Heart, FolderOpen, LayoutGrid, Sp
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import Breadcrumbs from "@/components/Breadcrumbs";
 
 type PickerFilter = "all" | "favourites" | "board";
 
@@ -371,10 +370,8 @@ export default function TradeMoodBoards() {
     <>
       <Helmet><title>Mood Board — Trade Portal</title></Helmet>
       <div className="mx-auto w-full max-w-6xl space-y-6 [@media(min-width:1440px)]:max-w-[min(90vw,1800px)]">
-        <Breadcrumbs
-          variant="compact"
-          items={[{ label: "Tools", to: "/trade/tools" }, { label: "Mood Board Builder" }]}
-        />
+
+
         <div>
           <h1 className="font-display text-2xl text-foreground">Mood Board Builder</h1>
           <p className="font-body text-sm text-muted-foreground mt-1">

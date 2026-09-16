@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import {
   Image, Users, FolderOpen, Layers, FileText, FileSpreadsheet, Scissors,
@@ -7,6 +7,7 @@ import {
   Wand2, Star, Search, X, Scan,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { categorySlug } from "@/lib/toolsBreadcrumbs";
 
 type Tool = { title: string; description: string; url: string; icon: any };
 type ToolCategory = { label: string; tools: Tool[] };
@@ -63,6 +64,8 @@ const FAV_KEY = "trade_tools_favorites_v1";
 
 export default function TradeTools() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const categoryParam = searchParams.get("category");
   const [favorites, setFavorites] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
@@ -93,6 +96,13 @@ export default function TradeTools() {
       }
     } catch {}
   }, []);
+
+  // Deep link from a breadcrumb: scroll the requested category into view.
+  useEffect(() => {
+    if (!categoryParam) return;
+    const el = document.getElementById(`tools-${categoryParam}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [categoryParam]);
 
   const persist = useCallback((next: string[]) => {
     setFavorites(next);
@@ -223,6 +233,8 @@ export default function TradeTools() {
       {filteredCategories.map((cat, catIndex) => (
         <section
           key={cat.label}
+          id={`tools-${categorySlug(cat.label)}`}
+          className="scroll-mt-24"
           data-felix-target={catIndex === 0 ? "tools-grid" : undefined}
           data-tour-target={
             cat.label === "Specification" ? "tools"
