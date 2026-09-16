@@ -29,7 +29,7 @@ try {
   // .env not present in some environments — fall back to process.env
 }
 const DIST = path.join(ROOT, "dist");
-const CANONICAL_HOST = "https://www.maisonaffluency.com";
+const CANONICAL_HOST = "https://maisonaffluency.com";
 
 // ----- Domain lock ----------------------------------------------------------
 // A sitemap may only ever be generated for the production domain. If the build
