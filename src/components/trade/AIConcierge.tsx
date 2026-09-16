@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Button } from "@/components/ui/button";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList, MessagesSquare, Plus, Trash2 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { BriefBuilder } from "@/components/trade/concierge/BriefBuilder";
+import { BriefBuilder, loadBriefDraftText } from "@/components/trade/concierge/BriefBuilder";
 import { QuoteSummaryCardContainer } from "@/components/trade/QuoteSummaryCard";
 import { BriefBubble, isBriefContent } from "@/components/trade/concierge/BriefBubble";
 import brandCategoriesRaw from "@/data/brandCategories.json";
@@ -594,6 +594,10 @@ const getStoredVisualSourcingContext = (): string => {
   try { return sessionStorage.getItem(VISUAL_SOURCING_CONTEXT_KEY)?.trim() || ""; } catch { return ""; }
 };
 
+const BRIEF_ACTIVE_STORAGE_KEY = "concierge:briefBuilder:active";
+const isStructuredBriefText = (value: string): boolean =>
+  isBriefContent(value) || /^\s*Block\s+\d+\s*[—-]/im.test(value);
+
 
 export type ConciergeSurface = "trade" | "public";
 
@@ -646,7 +650,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [toneMenuOpen, setToneMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [showBriefPreview, setShowBriefPreview] = useState(false);
-  const [briefBuilderOpen, setBriefBuilderOpen] = useState(false);
+  const [briefDraft, setBriefDraft] = useState<string>(() => loadBriefDraftText());
+  const [briefBuilderOpen, setBriefBuilderOpen] = useState(() => {
+    try {
+      return sessionStorage.getItem(BRIEF_ACTIVE_STORAGE_KEY) === "1" && !!loadBriefDraftText();
+    } catch {
+      return false;
+    }
+  });
   const [briefCanvasExiting, setBriefCanvasExiting] = useState(false);
   const pendingBriefPrefillRef = useRef<string | null>(null);
   const briefTransitionTimersRef = useRef<number[]>([]);
@@ -665,6 +676,19 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   useEffect(() => {
     if (!open) cancelBriefTransition();
   }, [open, cancelBriefTransition]);
+  useEffect(() => {
+    try {
+      if (briefBuilderOpen) sessionStorage.setItem(BRIEF_ACTIVE_STORAGE_KEY, "1");
+      else sessionStorage.removeItem(BRIEF_ACTIVE_STORAGE_KEY);
+    } catch {}
+  }, [briefBuilderOpen]);
+  const openBriefBuilder = useCallback((draft?: string) => {
+    if (draft) setBriefDraft(draft);
+    setBriefBuilderOpen(true);
+  }, []);
+  const closeBriefBuilder = useCallback(() => {
+    setBriefBuilderOpen(false);
+  }, []);
   // Ambient status shown as a small badge next to the concierge name. Switches
   // through discrete phases during a human-handoff so the designer feels the
   // curatorial team take over, then returns to null once they resume chatting.
@@ -730,7 +754,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
 
 
   const [input, setInput] = useState<string>(() => {
-    try { return sessionStorage.getItem("concierge:draft") || ""; } catch { return ""; }
+    try {
+      const saved = sessionStorage.getItem("concierge:draft") || "";
+      if (isStructuredBriefText(saved)) {
+        sessionStorage.removeItem("concierge:draft");
+        return "";
+      }
+      return saved;
+    } catch { return ""; }
   });
   useEffect(() => {
     try {
@@ -962,7 +993,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     const refLine = allMoodNames.length
       ? `MOOD BOARD REFERENCE: ${allMoodNames.join(", ")}`
       : "";
-    setInput((prev) => {
+    setBriefDraft((prev) => {
       const text = prev ?? "";
       // Strip any prior MOOD BOARD REFERENCE line anywhere.
       const stripped = text.replace(/^\s*MOOD BOARD REFERENCE:.*$/gim, "").replace(/\n{3,}/g, "\n\n");
@@ -1759,6 +1790,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           const display = detail.displayMessage?.trim() || "…";
           // Fire and forget — send() handles its own streaming state.
           void sendRef.current?.(detail.prefill, { displayText: display });
+        } else if (isStructuredBriefText(detail.prefill)) {
+          openBriefBuilder(detail.prefill);
         } else {
           setInput(detail.prefill);
           setTimeout(() => {
@@ -2216,7 +2249,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   }, [user?.email]);
 
   const send = useCallback(async (overrideText?: string, opts?: { displayText?: string }) => {
-    const text = (overrideText ?? input).trim();
+    const text = (overrideText ?? (briefBuilderOpen ? briefDraft : input)).trim();
 
     // Sentinel: user clicked the "Open Architectural Brief" CTA. Load the
     // prefilled brief into the composer and open the Brief Builder — do NOT
@@ -2227,7 +2260,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       cancelBriefTransition();
       const prefill = pendingBriefPrefillRef.current;
       if (prefill) {
-        setInput(prefill);
+        setBriefDraft(prefill);
         try {
           const scope = sessionStorage.getItem("trade:lastProjectFilter") || "global";
           const expanded = JSON.stringify({ block1: true, block2: true, block3: true });
@@ -2236,7 +2269,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         } catch {}
         pendingBriefPrefillRef.current = null;
       }
-      setBriefBuilderOpen(true);
+      openBriefBuilder();
       return;
     }
 
@@ -2757,7 +2790,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               if (briefTransitionRunRef.current !== run) return;
               const pending = pendingBriefPrefillRef.current;
               if (pending) {
-                setInput(pending);
+                setBriefDraft(pending);
                 pendingBriefPrefillRef.current = null;
               }
               try {
@@ -2766,7 +2799,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 localStorage.setItem(`concierge:briefBuilder:expanded:${scope}`, expanded);
                 localStorage.setItem("concierge:briefBuilder:expanded", expanded);
               } catch {}
-              setBriefBuilderOpen(true);
+              openBriefBuilder();
               setBriefCanvasExiting(false);
               briefTransitionTimersRef.current = [];
             }, 500);
@@ -5126,28 +5159,15 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             {briefBuilderOpen && (
               <div className="animate-[fade-in_700ms_cubic-bezier(0.22,1,0.36,1)_both] motion-reduce:animate-none">
                 <BriefBuilder
-                  value={input}
-                  onChange={(next) => setInput(next)}
-                  onClose={() => {
-                    // Strip the structured brief from the composer so it doesn't
-                    // linger in the "Ask me anything" field after the builder closes.
-                    // The draft is still persisted in localStorage and will be
-                    // restored the next time the builder is opened.
-                    setInput((current) => {
-                      const withoutBrief = current
-                        .replace(/(^|\n)Block\s+\d+\s*—[\s\S]*?(?=\nBlock\s+\d+\s*—|$)/gi, "")
-                        .replace(/\n{3,}/g, "\n\n")
-                        .trim();
-                      return withoutBrief;
-                    });
-                    setBriefBuilderOpen(false);
-                  }}
+                  value={briefDraft}
+                  onChange={setBriefDraft}
+                  onClose={closeBriefBuilder}
                 />
               </div>
             )}
 
-            {showBriefPreview && input.trim() && (() => {
-              const raw = input.trim();
+            {showBriefPreview && (briefBuilderOpen ? briefDraft : input).trim() && (() => {
+              const raw = (briefBuilderOpen ? briefDraft : input).trim();
               const blockRegex = /^Block\s+\d+.*$/gim;
               const headers: string[] = [];
               let m: RegExpExecArray | null;
@@ -5283,14 +5303,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  if (!/Block\s+1\s*—/i.test(input)) {
-                    const current = input.trim();
-                    const next = current
-                      ? `${input.replace(/\s+$/, "")}\n\n${SPEC_BRIEF_TEMPLATE}`
-                      : SPEC_BRIEF_TEMPLATE;
-                    setInput(next);
-                  }
-                  setBriefBuilderOpen(true);
+                  openBriefBuilder(briefDraft || SPEC_BRIEF_TEMPLATE);
                 }}
                 disabled={streaming}
                 className="h-11 lg:h-10 w-full justify-start rounded-none px-4 font-body text-xs uppercase tracking-wider"
@@ -5354,14 +5367,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 <button
                   type="button"
                   onClick={() => {
-                    if (!/Block\s+1\s*—/i.test(input)) {
-                      const current = input.trim();
-                      const next = current
-                        ? `${input.replace(/\s+$/, "")}\n\n${SPEC_BRIEF_TEMPLATE}`
-                        : SPEC_BRIEF_TEMPLATE;
-                      setInput(next);
-                    }
-                    setBriefBuilderOpen(true);
+                    openBriefBuilder(briefDraft || SPEC_BRIEF_TEMPLATE);
                   }}
                   disabled={streaming}
                   className="order-2 h-11 w-11 shrink-0 rounded-none border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors lg:order-none lg:h-auto lg:w-auto lg:rounded-xl"
@@ -5408,7 +5414,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   </span>
                   <button
                     type="button"
-                    onClick={() => setBriefBuilderOpen(false)}
+                    onClick={closeBriefBuilder}
                     className="shrink-0 rounded-full p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                     aria-label="Close Brief Builder"
                     title="Close Brief Builder"
@@ -5433,7 +5439,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               <button
                 onClick={() => send()}
                 disabled={
-                  (!input.trim() && attachments.length === 0) ||
+                  (!(briefBuilderOpen ? briefDraft : input).trim() && attachments.length === 0) ||
                   streaming
                 }
                 className="order-2 ml-auto h-11 w-11 shrink-0 rounded-none bg-foreground text-background p-2 disabled:opacity-40 hover:opacity-90 transition-opacity lg:order-none lg:ml-0 lg:h-auto lg:w-auto lg:rounded-xl"
