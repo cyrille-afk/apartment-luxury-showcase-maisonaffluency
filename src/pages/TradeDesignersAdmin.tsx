@@ -1990,7 +1990,7 @@ const TradeDesignersAdmin = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
-        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, trade_only, biography_images, links, instagram_handle, instagram_handle_2, parent_badge_label");
+        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, trade_only, biography_images, links, instagram_handle, instagram_handle_2, parent_badge_label, max_trade_discount");
       if (error) throw error;
       return (data || [])
         .map((row) => ({
