@@ -1539,19 +1539,11 @@ const PublicProductPageContent: React.FC = () => {
     );
   }
 
+  // Deleted / invalid product id: serve the canonical 404 surface (noindex +
+  // 404 status hints) instead of a 200 "not found" shell, which Google reports
+  // as a Soft 404.
   if (!data) {
-    return (
-      <div className="min-h-[100dvh] bg-background">
-        <Navigation />
-        <div className="flex flex-col items-center justify-center py-32 gap-4">
-          <p className="font-body text-sm text-muted-foreground">Product not found.</p>
-          <button onClick={() => navigate(-1)} className="font-body text-xs uppercase tracking-[0.12em] underline underline-offset-4 text-foreground hover:text-primary transition-colors">
-            Go Back
-          </button>
-        </div>
-        <Footer />
-      </div>
-    );
+    return <NotFound />;
   }
 
   const { product, designer, relatedPicks } = data;

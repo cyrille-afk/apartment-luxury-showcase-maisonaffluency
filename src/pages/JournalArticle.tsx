@@ -83,7 +83,7 @@ const JournalArticlePage = () => {
     );
   }
 
-  if (!article) return null;
+  if (!article) return <NotFound />;
 
   // SEO bands (per scanner): title 40–60 (keywords first, brand last),
   // description 140–160 (Google desktop/mobile truncation).

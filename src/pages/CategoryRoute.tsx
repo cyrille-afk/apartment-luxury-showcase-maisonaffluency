@@ -50,7 +50,7 @@ const CategoryRoute = () => {
     };
   }, [category, sub?.subcategory]);
 
-  if (!category) return <Navigate to="/" replace />;
+  if (!category) return <NotFound />;
   if (subcategorySlug && !sub) return <Navigate to={`/products-category/${categorySlug}`} replace />;
 
   return (

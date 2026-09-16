@@ -1354,17 +1354,7 @@ const TradeProductPage: React.FC = () => {
   }
 
   if (!data) {
-    return (
-      <div className="flex flex-col items-center justify-center py-32 gap-4">
-        <p className="font-body text-sm text-muted-foreground">Product not found.</p>
-        <button
-          onClick={() => navigate(-1)}
-          className="font-body text-xs uppercase tracking-[0.12em] underline underline-offset-4 text-foreground hover:text-primary transition-colors"
-        >
-          Go Back
-        </button>
-      </div>
-    );
+    return <NotFound />;
   }
 
   const { product, designer, relatedPicks, pricing, tradeProductId, glbUrl } = data;

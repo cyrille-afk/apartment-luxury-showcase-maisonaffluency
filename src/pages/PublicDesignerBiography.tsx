@@ -40,7 +40,7 @@ export default function PublicDesignerBiography() {
     );
   }
 
-  if (!designer) return <Navigate to="/" replace />;
+  if (!designer) return <NotFound />;
 
   const name = displayName(designer.name);
   const biography = designer.biography || "";

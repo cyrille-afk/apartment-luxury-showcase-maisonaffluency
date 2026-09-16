@@ -738,14 +738,7 @@ const PublicDesignerProfile = () => {
   }
 
   if (!designer) {
-    return (
-      <>
-        <Helmet>
-          <title>Not found — Maison Affluency</title>
-        </Helmet>
-        <Navigate to="/" replace />
-      </>
-    );
+    return <NotFound />;
   }
 
   const name = displayName(designer.name);

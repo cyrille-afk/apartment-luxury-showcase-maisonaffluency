@@ -108,16 +108,7 @@ export default function StudioProfile() {
   }
 
   if (notFound || !studio) {
-    return (
-      <main className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <p className="font-display text-3xl text-foreground">Studio not found</p>
-          <Button asChild variant="outline" className="mt-6">
-            <Link to="/studios">Back to directory</Link>
-          </Button>
-        </div>
-      </main>
-    );
+    return <NotFound />;
   }
 
   const igHandle = studio.instagram_handle?.replace(/^@/, "");
