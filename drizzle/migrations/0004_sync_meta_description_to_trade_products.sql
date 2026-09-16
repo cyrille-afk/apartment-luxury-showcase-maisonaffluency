@@ -1,0 +1,5 @@
+DROP TRIGGER IF EXISTS trg_sync_curator_pick_to_trade_product ON public.designer_curator_picks;
+CREATE TRIGGER trg_sync_curator_pick_to_trade_product
+AFTER INSERT OR UPDATE OF title, subtitle, designer_id, category, subcategory, materials, dimensions, description, meta_description, pdf_url, pdf_urls, currency, lead_time, price_prefix, gallery_images, origin, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, is_hidden, trade_price_cents, price_per_sqm_cents, pack_cbm, pack_weight_kg, pack_carton_count, default_ship_mode, pickup_country, pickup_postcode, pickup_address, hs_code, is_upholstered, wood_label_override, image_url, hover_image_url, width_mm, depth_mm, height_mm, seat_height_mm, is_contract_grade
+ON public.designer_curator_picks
+FOR EACH ROW EXECUTE FUNCTION public.sync_curator_pick_to_trade_product();
