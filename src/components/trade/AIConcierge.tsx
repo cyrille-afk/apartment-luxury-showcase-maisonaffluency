@@ -3340,6 +3340,16 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const sendRef = useRef(send);
   useEffect(() => { sendRef.current = send; }, [send]);
 
+  const submitBriefFromBuilder = useCallback(async (text: string) => {
+    return new Promise<void>((resolve, reject) => {
+      briefSubmitDoneRef.current = (ok) => {
+        if (ok) resolve();
+        else reject(new Error("Brief submission failed or was interrupted."));
+      };
+      sendRef.current(text, { displayText: "Submitted Architectural Brief", builderSubmit: true });
+    });
+  }, []);
+
   // Mandarin auto-hand-off: after each completed assistant turn on lang=zh,
   // ask the CN brief endpoint to classify intent. Server-side dedupe keeps
   // a single session to one brief per 24h (unless the viewing CTA forces it).
