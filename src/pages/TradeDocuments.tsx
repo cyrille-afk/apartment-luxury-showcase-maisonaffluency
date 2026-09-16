@@ -158,8 +158,12 @@ const TradeDocuments = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Dynamic folder segment appended to the global Tools breadcrumb.
+  useToolsBreadcrumbExtras(selectedBrand === "all" ? [] : [{ label: selectedBrand }]);
+
   const inputClass =
     "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
+
 
   return (
     <>
