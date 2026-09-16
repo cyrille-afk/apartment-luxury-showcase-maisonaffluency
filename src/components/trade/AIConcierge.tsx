@@ -1097,14 +1097,39 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // hasn't manually dragged or expanded the panel yet.
   const modalMode = welcomePending && !pos;
 
+  // Width of the global trade navigation sidebar, measured live so the
+  // concierge panel can never overlap or clip it.
+  const [navInset, setNavInset] = useState(0);
+  useEffect(() => {
+    const measure = () => {
+      const el = document.querySelector("[data-trade-sidebar]") as HTMLElement | null;
+      const right = el ? el.getBoundingClientRect().right : 0;
+      setNavInset(right > 0 && right < window.innerWidth * 0.5 ? Math.round(right) : 0);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    const obs = new MutationObserver(measure);
+    obs.observe(document.body, { subtree: true, attributes: true, childList: true });
+    const t = window.setInterval(measure, 1000);
+    return () => {
+      window.removeEventListener("resize", measure);
+      obs.disconnect();
+      window.clearInterval(t);
+    };
+  }, []);
+
+
   // Panel dimensions. On first-open the concierge renders as a centered
   // welcome modal — size it like the fullscreen panel so it never covers
   // the left navigation. Otherwise fall back to fullscreen or the
   // expanded/compact widget.
   const PANEL_W = (fullscreen || modalMode)
-    ? Math.min(1200, typeof window !== "undefined" ? window.innerWidth - 32 : 1200)
+    ? Math.min(1200, typeof window !== "undefined" ? window.innerWidth - navInset - 48 : 1200)
     : (expanded ? 560 : 380);
   const PANEL_H_OPEN = modalMode ? 760 : (expanded ? 760 : 560);
+  // When the global trade sidebar is present we dock the large panel to the
+  // right of it instead of centring it on the viewport.
+  const docked = navInset > 0;
 
   // Brief exit-animation gate: when the welcome modal is dismissed we keep
   // the backdrop + panel mounted for ~280ms so they can fade/scale out
@@ -1126,10 +1151,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
 
   const clampPos = useCallback((x: number, y: number) => {
     const h = minimized ? PANEL_H_MIN : PANEL_H_OPEN;
-    const maxX = Math.max(8, window.innerWidth - PANEL_W - 8);
+    const minX = navInset + 8;
+    const maxX = Math.max(minX, window.innerWidth - PANEL_W - 8);
     const maxY = Math.max(8, window.innerHeight - h - 8);
-    return { x: Math.min(Math.max(8, x), maxX), y: Math.min(Math.max(8, y), maxY) };
-  }, [minimized]);
+    return { x: Math.min(Math.max(minX, x), maxX), y: Math.min(Math.max(8, y), maxY) };
+  }, [minimized, navInset, PANEL_W]);
 
   const onDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
     // Only react to primary button / touch
@@ -3355,10 +3381,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           style={
             tabletViewport && !minimized
               ? { inset: 0, width: "100%", height: "100dvh", maxWidth: "none", maxHeight: "none", transform: "none" }
-              : modalMode
-              ? { width: PANEL_W }
-              : fullscreen
-                ? { width: PANEL_W }
+              : (modalMode || fullscreen)
+              ? (docked
+                  ? { width: PANEL_W, left: navInset + 24, right: "auto", top: 16, bottom: "auto", transform: "none", maxWidth: `calc(100vw - ${navInset + 48}px)` }
+                  : { width: PANEL_W })
                 : pos
                   ? { top: pos.y, left: pos.x, right: "auto", bottom: "auto", width: PANEL_W }
                   : { width: PANEL_W }
@@ -3367,11 +3393,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             "fixed z-[10000] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border shadow-2xl print:hidden overflow-hidden max-xl:!inset-0 max-xl:!h-[100dvh] max-xl:!max-h-[100dvh] max-xl:!w-full max-xl:!max-w-none max-xl:!translate-x-0 max-xl:!translate-y-0 max-xl:rounded-none",
             modalMode
               ? cn(
-                  "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-cream border-jade/40 ring-1 ring-jade/30 shadow-[0_30px_80px_-20px_hsl(var(--foreground)/0.5)]",
+                  !docked && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+                  "bg-cream border-jade/40 ring-1 ring-jade/30 shadow-[0_30px_80px_-20px_hsl(var(--foreground)/0.5)]",
                   welcomeClosing ? "animate-scale-out" : "animate-scale-in"
                 )
               : "bg-background border-border animate-fade-in",
-            !modalMode && fullscreen && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+            !modalMode && fullscreen && !docked && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
             !modalMode && !fullscreen && !pos && "bottom-20 md:bottom-6 right-4",
             minimized ? "h-auto max-xl:!inset-auto max-xl:!right-4 max-xl:!bottom-4 max-xl:!h-auto max-xl:!w-[min(560px,calc(100vw-2rem))] max-xl:!rounded-2xl" : ((fullscreen || modalMode) ? "h-[calc(100dvh-2rem)]" : (expanded ? "h-[760px] max-h-[calc(100dvh-4rem)]" : "h-[560px] max-h-[calc(100dvh-6rem)]"))
           )}
@@ -3936,7 +3963,22 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
 
           {!minimized && (<>
 
-          <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-5">
+          {briefBuilderOpen && (() => {
+            const lastUser = [...timeline].reverse().find((t) => t.kind === "msg" && t.role === "user") as { kind: "msg"; content?: string } | undefined;
+            const ctx = (lastUser?.content || "").replace(/\s+/g, " ").trim().slice(0, 120);
+            return (
+              <div className="shrink-0 border-b border-border px-4 py-2 flex items-center gap-2 min-w-0">
+                <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground shrink-0">
+                  Active Context
+                </span>
+                <span className="font-body text-[11px] text-foreground truncate">
+                  {ctx || "New architectural brief"}
+                </span>
+              </div>
+            );
+          })()}
+
+          <div ref={scrollRef} className={cn("flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-5", briefBuilderOpen && "hidden")}>
             {timeline.map((item, i) => {
               if (item.kind === "msg") {
                 const atts = item.role === "user" ? item.attachments : undefined;
@@ -4905,8 +4947,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             )}
           </div>
 
-          <div className={cn("border-t border-border p-3 shrink-0 min-h-0", fullscreen && "flex flex-col gap-3 overflow-hidden", fullscreen && (briefBuilderOpen ? "max-h-[78vh]" : "max-h-[45vh]"))}>
-            <div className={cn(fullscreen && "flex-1 min-h-0 overflow-y-auto")}>
+          <div className={cn(
+            "border-t border-border p-3 min-h-0",
+            briefBuilderOpen
+              ? "flex-1 flex flex-col gap-3 overflow-hidden"
+              : cn("shrink-0", fullscreen && "flex flex-col gap-3 overflow-hidden max-h-[45vh]")
+          )}>
+            <div className={cn((fullscreen || briefBuilderOpen) && "flex-1 min-h-0 overflow-y-auto")}>
 
             {/* Correlation-id chip — copy-to-clipboard trace id for the
                 current concierge turn. Matches the server's SSE `event: request_id`
@@ -5125,7 +5172,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             </div>
 
             {/* Quick-action chips: visual entry points so designers know how to interact with Felix without reading the full welcome text. */}
-            <div className={cn("grid grid-cols-1 sm:grid-cols-3 items-stretch justify-start gap-2", fullscreen && "shrink-0")}>
+            <div className={cn("grid grid-cols-1 sm:grid-cols-3 items-stretch justify-start gap-2", (fullscreen || briefBuilderOpen) && "shrink-0")}>
               <Button
                 type="button"
                 variant="outline"
@@ -5171,7 +5218,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             </div>
 
 
-            <div className={cn("flex flex-wrap lg:flex-nowrap items-end gap-2", fullscreen && "shrink-0")}>
+            <div className={cn("flex flex-wrap lg:flex-nowrap items-end gap-2", (fullscreen || briefBuilderOpen) && "shrink-0")}>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -5302,7 +5349,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               </button>
 
             </div>
-            <p className={cn("font-body text-[10px] text-muted-foreground mt-1.5 text-center", fullscreen && "shrink-0")}>
+            <p className={cn("font-body text-[10px] text-muted-foreground mt-1.5 text-center", (fullscreen || briefBuilderOpen) && "shrink-0")}>
               {copy.footer}
             </p>
           </div>
