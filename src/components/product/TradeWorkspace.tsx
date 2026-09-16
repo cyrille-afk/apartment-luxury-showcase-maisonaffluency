@@ -13,6 +13,7 @@ import { formatHandcrafted } from "@/lib/formatHandcrafted";
 
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { cn } from "@/lib/utils";
+import { useAIGuideName } from "@/hooks/useAIGuideName";
 import type { FelixProductContext } from "@/components/product/ProductFelixPanel";
 
 

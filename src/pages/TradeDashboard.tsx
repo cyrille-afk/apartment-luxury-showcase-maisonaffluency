@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
+import { useAIGuideName } from "@/hooks/useAIGuideName";
 import { useProjects } from "@/hooks/useProjects";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
@@ -78,6 +79,7 @@ const formatRelativeDate = (dateStr: string) => {
 };
 
 const TradeDashboard = () => {
+  const guideName = useAIGuideName();
   const { profile } = useAuth();
   const { tierLabel } = useTradeDiscount();
   const { showTradePrice } = useTradePriceMode();

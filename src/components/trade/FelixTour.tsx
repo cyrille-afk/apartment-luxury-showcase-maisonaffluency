@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { ArrowLeft, ArrowRight, Check, Pause, Play, Sparkles, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useAIGuideName } from "@/hooks/useAIGuideName";
 
 type FelixStep = {
   id: string;
@@ -77,6 +78,7 @@ const PAD = 10;
 type Rect = { top: number; left: number; width: number; height: number };
 
 export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
+  const guideName = useAIGuideName();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -300,7 +302,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
               isPaused && "opacity-50",
             )}
           >
-            <p className="font-body text-[13px] leading-relaxed text-foreground">{step.dialogue}</p>
+            <p className="font-body text-[13px] leading-relaxed text-foreground">{step.dialogue.replace(/\{name\}/g, guideName)}</p>
           </div>
 
           {isPaused && (

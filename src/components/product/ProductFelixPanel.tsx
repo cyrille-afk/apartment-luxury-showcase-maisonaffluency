@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { MessageSquare } from "lucide-react";
 import { AIConcierge } from "@/components/trade/AIConcierge";
+import { useAIGuideName } from "@/hooks/useAIGuideName";
 
 export interface FelixProductContext {
   title: string;
@@ -35,6 +36,7 @@ export function buildFelixProductContext(ctx: FelixProductContext): string {
 }
 
 export default function ProductFelixPanel({ context }: { context: FelixProductContext }) {
+  const guideName = useAIGuideName();
   const contextRef = useRef(context);
   contextRef.current = context;
 
