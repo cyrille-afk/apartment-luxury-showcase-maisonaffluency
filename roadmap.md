@@ -88,4 +88,3 @@
 - [x] Rebalance the Curator Portrait desktop header, compact the studio strip, and standardize fully contained Curators' Picks imagery
 - [x] Rebuild Curators' Picks with fixed portrait gallery frames and rigidly aligned brand, title, and price rows
 - [x] Remove artificial Curators' Picks image padding and use edge-to-edge cover imagery within uniform 4:5 frames
-- [x] Replace conflicting Curators' Picks crop rules with uniform 260px landscape frames, full-image contain scaling, warm canvas continuity, and locked caption baselines
