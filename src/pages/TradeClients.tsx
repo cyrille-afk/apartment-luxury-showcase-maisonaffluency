@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import ClientDocumentsSection from "@/components/trade/ClientDocumentsSection";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
+import { useClientTierUpgrades, tierUpgradeLabel } from "@/hooks/useClientTierUpgrades";
 import { Link } from "react-router-dom";
 
 type ClientType = "company" | "studio" | "individual";
@@ -76,6 +77,7 @@ export default function TradeClients() {
   const { currentStudio, canEdit } = useStudio();
   const { toast } = useToast();
   const { showTradePrice } = useTradePriceMode();
+  const { flags: upgradeFlags } = useClientTierUpgrades(currentStudio?.id);
   const isClientMode = !showTradePrice;
 
   const [projectsByClient, setProjectsByClient] = useState<Record<string, { id: string; name: string }>>({});
@@ -466,6 +468,11 @@ export default function TradeClients() {
                   {c.type !== "company" && (
                     <span className="ml-2 font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground align-middle">
                       {c.type}
+                    </span>
+                  )}
+                  {!isClientMode && upgradeFlags[c.id] && (
+                    <span className="ml-2 inline-flex items-center whitespace-nowrap rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-accent align-middle">
+                      {tierUpgradeLabel(upgradeFlags[c.id])}
                     </span>
                   )}
                 </div>

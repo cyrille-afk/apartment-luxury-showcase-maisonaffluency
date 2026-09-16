@@ -13,8 +13,10 @@ import {
   SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
 import { useStudioBridge, useStudioAlerts } from "@/hooks/useStudioBridge";
+import { useStudio } from "@/hooks/useStudio";
 import { StudioBridgeSidebar } from "@/components/trade/StudioBridgeSidebar";
 import { pushRecentProject, useProjects } from "@/hooks/useProjects";
+import { useClientTierUpgrades } from "@/hooks/useClientTierUpgrades";
 
 
 type NavItem = { title: string; url: string; icon: React.ElementType; end?: boolean };
@@ -48,6 +50,8 @@ export function TradeSidebar() {
   const { count: flaggedCount } = useStudioBridge();
   const { count: alertCount } = useStudioAlerts();
   const bridgeCount = flaggedCount + alertCount;
+  const { currentStudio } = useStudio();
+  const { count: clientUpgradeCount } = useClientTierUpgrades(currentStudio?.id);
   const { projects: activeProjects } = useProjects({ activeOnly: true });
   const recentActiveProjects = activeProjects.slice(0, 2);
 
@@ -135,6 +139,8 @@ export function TradeSidebar() {
               {projectItems.map((item) => {
                 const isProjects = item.url === "/trade/projects";
                 const showDot = isProjects && bridgeCount > 0;
+                const isClients = item.url === "/trade/client-management";
+                const showUpgrades = isClients && clientUpgradeCount > 0;
                 return (
                   <SidebarMenuItem key={item.url}>
                     <SidebarMenuButton asChild className="h-auto">
@@ -158,10 +164,25 @@ export function TradeSidebar() {
                               className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-muted-foreground ring-2 ring-background cursor-pointer"
                             />
                           )}
+                          {showUpgrades && collapsed && (
+                            <span
+                              aria-hidden="true"
+                              className="absolute -top-1 -right-1 h-1.5 w-1.5 rounded-full bg-accent ring-2 ring-background"
+                            />
+                          )}
                         </span>
                         {!collapsed && (
                           <span className="flex items-center gap-2">
                             <span>{item.title}</span>
+                            {showUpgrades && (
+                              <span
+                                aria-label={`${clientUpgradeCount} client${clientUpgradeCount > 1 ? "s" : ""} eligible for a tier upgrade`}
+                                title={`${clientUpgradeCount} client${clientUpgradeCount > 1 ? "s" : ""} eligible for a tier upgrade`}
+                                className="inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full border border-accent/40 bg-accent/10 px-1 font-mono text-[9px] leading-none text-accent"
+                              >
+                                {clientUpgradeCount}
+                              </span>
+                            )}
                             {showDot && (
                               <button
                                 type="button"
