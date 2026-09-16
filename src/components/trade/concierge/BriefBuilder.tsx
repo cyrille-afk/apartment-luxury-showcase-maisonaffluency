@@ -690,10 +690,16 @@ export function BriefBuilder({
   const [values, setValues] = useState<BriefValues>(DEFAULT_VALUES);
   const [prefix, setPrefix] = useState("");
   const [suffix, setSuffix] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const lastEmitted = useRef<string>("");
   const restoredRef = useRef(false);
   const scopeRef = useRef<string>(getProjectScope());
   const [expanded, setExpanded] = useState<ExpandedSections>(() => loadExpanded(scopeRef.current));
+
+  useEffect(() => {
+    onSubmittingChange?.(isSubmitting);
+  }, [isSubmitting, onSubmittingChange]);
 
   // Re-read the scope + its saved layout whenever the active project changes
   // while the builder is mounted (e.g. user switches project filter).
