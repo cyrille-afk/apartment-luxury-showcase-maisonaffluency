@@ -688,6 +688,28 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     } catch {}
   }, []);
 
+  // The opening greeting is stored inside the saved transcript (session cache
+  // and persisted thread), so an updated greeting template would otherwise
+  // never reach designers with existing history. Re-render the first assistant
+  // greeting in place whenever the live template/tier text differs.
+  useEffect(() => {
+    if (surface === "public") return;
+    const fresh = greetingForContext(stageFromPath(pathname), pathname, tone, lang, greetingMeta);
+    setTimeline((prev) => {
+      const first = prev[0];
+      if (!first || first.kind !== "msg" || first.role !== "assistant") return prev;
+      const content = String(first.content || "");
+      if (!content.startsWith("Welcome to the Maison Affluency Atelier")) return prev;
+      if (content === fresh) return prev;
+      const next = [...prev];
+      next[0] = { ...first, content: fresh };
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [surface, pathname, tone, lang, greetingMeta.tradeTier, greetingMeta.tierDiscountText, greetingMeta.conciergeName]);
+
+
+
 
 
   const [input, setInput] = useState<string>(() => {
