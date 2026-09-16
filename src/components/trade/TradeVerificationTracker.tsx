@@ -84,9 +84,12 @@ export default function TradeVerificationTracker() {
   };
 
   if (loading || !app) return null;
+  // Approved accounts get no status banner — confirmation lives as the small
+  // uppercase subtitle under the dashboard greeting.
+  if (app.status === "approved") return null;
 
   const verifying = app.status === "pending";
-  const approved = app.status === "approved";
+  const approved = false as boolean;
   const flagged = app.status === "flagged";
   const rejected = app.status === "rejected";
 
