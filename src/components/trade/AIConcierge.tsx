@@ -5430,21 +5430,25 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               </button>
               {briefBuilderOpen ? (
                 <div
-                  className={`order-1 basis-full flex items-center gap-2 rounded-none border border-dashed px-3 py-2 font-body text-xs italic border-accent/50 bg-accent/5 text-muted-foreground lg:order-none lg:basis-auto lg:flex-1 lg:rounded-xl`}
+                  className={`order-1 basis-full flex items-center gap-2 rounded-none border border-dashed px-3 py-2 font-body text-xs italic lg:order-none lg:basis-auto lg:flex-1 lg:rounded-xl ${
+                    briefValidation.valid
+                      ? "border-accent/50 bg-accent/5 text-muted-foreground"
+                      : "border-amber-500/40 bg-amber-500/[0.04] text-amber-700 dark:text-amber-400"
+                  }`}
                   title={
                     briefValidation.valid
                       ? "Structured brief ready — press Send"
-                      : `Optional fields still empty: ${briefValidation.missing.join(", ")} — send anyway if you like`
+                      : `Required fields missing: ${briefValidation.missing.join(", ")}`
                   }
                 >
                   <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground">
-                    <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                    <span className={`h-1.5 w-1.5 rounded-full ${briefValidation.valid ? "bg-accent" : "bg-amber-500 animate-pulse"}`} />
                     Brief Builder Open
                   </span>
                   <span className="truncate flex-1">
                     {briefValidation.valid
                       ? "Structured brief ready · press Send"
-                      : `Add ${briefValidation.missing.join(", ")} to improve the brief`}
+                      : `Required: ${briefValidation.missing.join(", ")}`}
                   </span>
                   <button
                     type="button"
