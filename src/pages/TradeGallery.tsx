@@ -313,6 +313,15 @@ const TradeGallery = () => {
             <span className="text-accent font-semibold">
               TRADE: {tradeLabel}
             </span>
+            {capped && (
+              <span
+                title={MARGIN_CAP_TOOLTIP}
+                aria-label={MARGIN_CAP_TOOLTIP}
+                className="inline-flex items-center gap-1 rounded border border-border px-1 py-0.5 text-[9px] uppercase tracking-wider text-muted-foreground"
+              >
+                <Info className="h-2.5 w-2.5" /> Margin cap
+              </span>
+            )}
           </>
         ) : (
           <span className="text-foreground font-normal">
