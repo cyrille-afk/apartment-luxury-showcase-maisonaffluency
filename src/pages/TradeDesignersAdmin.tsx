@@ -1808,6 +1808,8 @@ interface DesignerRow {
   instagram_handle: string | null;
   instagram_handle_2: string | null;
   parent_badge_label: string | null;
+  /** Optional brand safety cap on trade discount, in percent (5 = 5%). */
+  max_trade_discount: number | null;
 }
 
 
@@ -1988,7 +1990,7 @@ const TradeDesignersAdmin = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
-        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, trade_only, biography_images, links, instagram_handle, instagram_handle_2, parent_badge_label");
+        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, trade_only, biography_images, links, instagram_handle, instagram_handle_2, parent_badge_label, max_trade_discount");
       if (error) throw error;
       return (data || [])
         .map((row) => ({
@@ -2091,6 +2093,7 @@ const TradeDesignersAdmin = () => {
       // Wait for refetch to complete before clearing buffer, so fresh server
       // data is available and the UI never falls back to stale cached values
       await queryClient.invalidateQueries({ queryKey: ["admin-designers"] });
+      queryClient.invalidateQueries({ queryKey: ["brand-discount-caps"] });
       // Clear the edit buffer only after the refetch has landed
       setEditBuffer((prev) => {
         const next = { ...prev };
@@ -2535,6 +2538,38 @@ const TradeDesignersAdmin = () => {
                           className="mt-1 text-sm"
                         />
                       </div>
+
+                      {/* Brand margin safety cap */}
+                      {(() => {
+                        const edited = editBuffer[d.id] && "max_trade_discount" in editBuffer[d.id]!;
+                        const raw = edited ? editBuffer[d.id]!.max_trade_discount : d.max_trade_discount;
+                        return (
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                              Maximum Eligible Trade Discount (%){" "}
+                              <span className="normal-case font-normal">(optional — caps the tier discount for this supplier)</span>
+                            </label>
+                            <Input
+                              type="number"
+                              min={0}
+                              max={100}
+                              step={0.5}
+                              inputMode="decimal"
+                              placeholder="No cap"
+                              value={raw === null || raw === undefined ? "" : String(raw)}
+                              onChange={(e) => {
+                                const v = e.target.value.trim();
+                                if (v === "") return setField(d.id, "max_trade_discount", null);
+                                const n = Number(v);
+                                if (!Number.isFinite(n)) return;
+                                setField(d.id, "max_trade_discount", Math.min(100, Math.max(0, n)));
+                              }}
+                              className="mt-1 text-sm w-40"
+                            />
+                          </div>
+                        );
+                      })()}
+
 
                       {/* Hero Image Override */}
                       {(() => {

@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { getCart, clearCart, rehydrateCart, useCart } from "@/lib/cart";
 import { readSecureBasket, writeSecureBasket, clearSecureBasket, subscribeSecureBasketStorage } from "@/lib/checkout/secureBasket";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
+import { useBrandDiscountCaps, effectiveDiscountForBrand } from "@/lib/brandDiscountCap";
 import { useAuth } from "@/hooks/useAuth";
 import { Helmet } from "react-helmet-async";
 import Navigation from "@/components/Navigation";
@@ -1437,6 +1438,19 @@ export default function Checkout() {
   const { pct: hookDiscountPct, label: discountRowLabel } = useAccountDiscount();
   const [serverDiscountPct, setServerDiscountPct] = useState<number | null>(null);
   const effectiveDiscountPct = serverDiscountPct ?? hookDiscountPct;
+  // Supplier margin caps: a brand's `max_trade_discount` overrides the tier
+  // rate whenever it is lower, so each line is discounted at min(tier, cap).
+  const brandCaps = useBrandDiscountCaps();
+  const cappedDiscountCents = useCallback(
+    (lines: CheckoutLine[] | null | undefined) => {
+      if (!lines?.length || effectiveDiscountPct <= 0) return 0;
+      return lines.reduce((sum, line) => {
+        const { pct } = effectiveDiscountForBrand(effectiveDiscountPct, line.designer, brandCaps);
+        return sum + (pct > 0 ? Math.round(lineSubtotal(line) * pct) : 0);
+      }, 0);
+    },
+    [effectiveDiscountPct, brandCaps],
+  );
   // Tax returned by the PaymentIntent — authoritative over the local estimate.
   const [serverTax, setServerTax] = useState<{ cents: number; label: string | null } | null>(null);
   // Shipping stays "To be Quoted by Advisor" until the buyer confirms an
@@ -1490,13 +1504,7 @@ export default function Checkout() {
     orderCurrency(grossLines ?? []),
     // Cap freight at 15% of the discounted goods value.
     grossLines?.length
-      ? Math.max(
-          0,
-          orderSubtotal(grossLines) -
-            (effectiveDiscountPct > 0
-              ? Math.round(orderSubtotal(grossLines) * effectiveDiscountPct)
-              : 0),
-        )
+      ? Math.max(0, orderSubtotal(grossLines) - cappedDiscountCents(grossLines))
       : 0,
   );
   const [buyerType, setBuyerType] = useState<BuyerType>("private");
@@ -1513,8 +1521,7 @@ export default function Checkout() {
     if (!grossLines?.length) return null;
     const currency = orderCurrency(grossLines);
     const subtotalCents = orderSubtotal(grossLines);
-    const discountCents =
-      effectiveDiscountPct > 0 ? Math.round(subtotalCents * effectiveDiscountPct) : 0;
+    const discountCents = cappedDiscountCents(grossLines);
     const shippingCents = shipping?.cents ?? 0;
     // Country-based base freight is the checkout delivery amount until an
     // advisor replaces it with a confirmed quote.

@@ -216,10 +216,59 @@ serve(async (req) => {
     const discountPct = resolved.pct;
     const discountLabel = resolved.label;
 
-    // The discount is taken once on the cart subtotal (never per unit), so the
-    // charged total matches the on-screen "ORDER TOTAL" to the cent. Line items
-    // keep their full displayed price and Stripe applies an amount-off coupon.
-    const discountCents = discountPct > 0 ? Math.round(grossSubtotal * discountPct) : 0;
+    // Supplier margin caps: `designers.max_trade_discount` (percent) overrides
+    // the tier rate whenever it is lower, so each line discounts at
+    // min(tier, cap). Re-derived here so the charge matches the displayed sum.
+    const capByPick = new Map<string, number>();
+    if (discountPct > 0) {
+      const resolvedPickIds = Array.from(
+        new Set(
+          lines
+            .map((l: any) => {
+              const row = byPick.get(String(l.pick_id));
+              return String(row?.source_pick_id || row?.id || l.pick_id || "");
+            })
+            .filter(Boolean),
+        ),
+      );
+      const { data: pickRows } = await supabaseAdmin
+        .from("designer_curator_picks")
+        .select("id, designer_id")
+        .in("id", resolvedPickIds);
+      const designerIds = Array.from(
+        new Set((pickRows || []).map((p: any) => p.designer_id).filter(Boolean)),
+      );
+      if (designerIds.length) {
+        const { data: designerRows } = await supabaseAdmin
+          .from("designers")
+          .select("id, max_trade_discount")
+          .in("id", designerIds);
+        const capByDesigner = new Map<string, number>();
+        for (const d of designerRows || []) {
+          const pct = Number((d as any).max_trade_discount);
+          if (Number.isFinite(pct) && pct >= 0) capByDesigner.set(String(d.id), pct / 100);
+        }
+        for (const l of lines as any[]) {
+          const row = byPick.get(String(l.pick_id));
+          const resolvedId = String(row?.source_pick_id || row?.id || l.pick_id || "");
+          const pick = (pickRows || []).find((p: any) => String(p.id) === resolvedId);
+          const cap = pick?.designer_id ? capByDesigner.get(String(pick.designer_id)) : undefined;
+          if (cap !== undefined) capByPick.set(String(l.pick_id), cap);
+        }
+      }
+    }
+
+    // The discount is summed per line (each at its capped rate), so the charged
+    // total matches the on-screen "ORDER TOTAL" to the cent. Line items keep
+    // their full displayed price and Stripe applies an amount-off coupon.
+    const discountCents =
+      discountPct > 0
+        ? (lines as any[]).reduce((sum, l) => {
+            const cap = capByPick.get(String(l.pick_id));
+            const pct = cap !== undefined ? Math.min(discountPct, Math.max(0, cap)) : discountPct;
+            return sum + (pct > 0 ? Math.round(l.line_total_cents * pct) : 0);
+          }, 0)
+        : 0;
     const subtotal = grossSubtotal - discountCents;
     // Shipping is "To be Quoted by Advisor" until an advisor confirms a rate.
     // Only charge it when the client explicitly passes a confirmed amount.

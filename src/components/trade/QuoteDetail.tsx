@@ -10,9 +10,10 @@ import { FxAppliedRates } from "@/components/trade/FxAppliedRates";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { useBrandDiscountCaps, effectiveDiscountForBrand, MARGIN_CAP_TOOLTIP } from "@/lib/brandDiscountCap";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock, FolderOpen, Layers, Eye, ExternalLink, Mail, History as HistoryIcon, Copy, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock, FolderOpen, Layers, Eye, ExternalLink, Mail, History as HistoryIcon, Copy, AlertTriangle, Info } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link, useNavigate } from "react-router-dom";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
@@ -405,6 +406,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const navigate = useNavigate();
   const { discountPct: tradeDiscountPct, discountLabel: tradeDiscountLabel, tierLabel, tier: currentTier, config: tierConfig } = useTradeDiscount();
   const { clientSafe } = useClientSafeMode();
+  const brandCaps = useBrandDiscountCaps();
   const [items, setItems] = useState<QuoteItemWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState(quoteNotes || "");
@@ -1541,7 +1543,28 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     const converted = convertCents(rawPrice, itemPriceCurrency(item, currency), currency) ?? 0;
     return sum + converted * item.quantity;
   }, 0);
-  const tradeDiscountCents = discountApplies && subtotalCents > 0 ? Math.round(subtotalCents * tradeDiscountPct) : 0;
+  /**
+   * Per-line discount: the member's tier rate, but never above the supplier's
+   * `max_trade_discount` safety cap. Lines whose rate was suppressed are
+   * flagged so the UI can badge them.
+   */
+  const lineDiscounts = items.map((item) => {
+    const rawPrice = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? 0;
+    const lineCents = (convertCents(rawPrice, itemPriceCurrency(item, currency), currency) ?? 0) * item.quantity;
+    const brand = item.trade_products?.brand_name || null;
+    const eff = effectiveDiscountForBrand(tradeDiscountPct, brand, brandCaps);
+    return {
+      id: item.id,
+      lineCents,
+      capped: eff.capped,
+      capPct: eff.capPct,
+      discountCents: discountApplies && lineCents > 0 ? Math.round(lineCents * eff.pct) : 0,
+    };
+  });
+  const cappedLineIds = new Set(lineDiscounts.filter((l) => l.capped && l.lineCents > 0).map((l) => l.id));
+  const tradeDiscountCents = discountApplies && subtotalCents > 0
+    ? lineDiscounts.reduce((sum, l) => sum + l.discountCents, 0)
+    : 0;
   const goodsAfterDiscountCents = subtotalCents - tradeDiscountCents;
 
   const buildPdfArgs = async () => {
@@ -2902,6 +2925,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   const rawUnitPrice = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? null;
                   const unitPrice = convertCents(rawUnitPrice, itemPriceCurrency(item, currency), currency);
                   const lineTotal = unitPrice ? unitPrice * item.quantity : null;
+                  // Brand margin cap actively suppressing this line's discount.
+                  const marginCapped = discountApplies && cappedLineIds.has(item.id);
                   const lineImageUrl = item.image_url ?? product?.image_url ?? null;
 
                   return (
@@ -3198,6 +3223,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           <span className="font-body text-xs text-foreground font-medium">
                             {currencySymbol(currency)} {formatPriceRaw(lineTotal, currency) || "TBD"}
                           </span>
+                          {marginCapped && (
+                            <span
+                              title={MARGIN_CAP_TOOLTIP}
+                              aria-label={MARGIN_CAP_TOOLTIP}
+                              className="mt-1 inline-flex items-center gap-1 rounded border border-border px-1.5 py-0.5 font-body text-[9px] uppercase tracking-wider text-muted-foreground print:hidden"
+                            >
+                              <Info className="h-2.5 w-2.5" /> Margin cap
+                            </span>
+                          )}
                         </div>
                       </div>
                       {/* Desktop: standard columns */}
@@ -3262,6 +3296,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         <span className="font-body text-sm text-foreground font-medium tabular-nums">
                           {lineTotal ? `${currencySymbol(currency)} ${formatPriceRaw(lineTotal, currency)}` : "TBD"}
                         </span>
+                        {marginCapped && (
+                          <span
+                            title={MARGIN_CAP_TOOLTIP}
+                            aria-label={MARGIN_CAP_TOOLTIP}
+                            className="mt-1 inline-flex items-center gap-1 rounded border border-border px-1.5 py-0.5 font-body text-[9px] uppercase tracking-wider text-muted-foreground print:hidden"
+                          >
+                            <Info className="h-2.5 w-2.5" /> Margin cap
+                          </span>
+                        )}
                       </div>
 
                       {/* Procurement metadata — editable on draft/priced quotes, read-only otherwise */}

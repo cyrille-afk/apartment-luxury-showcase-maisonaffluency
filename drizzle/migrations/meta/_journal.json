@@ -15,6 +15,13 @@
       "when": 1789476986401,
       "tag": "0001_enable_fabrics_realtime",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789521799068,
+      "tag": "0002_add_designer_max_trade_discount",
+      "breakpoints": true
     }
   ]
 }

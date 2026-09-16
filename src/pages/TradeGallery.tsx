@@ -7,7 +7,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
 
-import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check, Scale, LayoutGrid, Grid2X2 } from "lucide-react";
+import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check, Scale, LayoutGrid, Grid2X2, Info } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,7 @@ import { isTradeProductMarkedHidden, useHiddenTradeProductIds } from "@/hooks/us
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { useBrandDiscountCaps, effectiveDiscountForBrand, MARGIN_CAP_TOOLTIP } from "@/lib/brandDiscountCap";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useToast } from "@/hooks/use-toast";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
@@ -64,6 +65,7 @@ const TradeGallery = () => {
   const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const { showTradePrice } = useTradePriceMode();
   const { discountPct: TRADE_DISCOUNT } = useTradeDiscount();
+  const brandCaps = useBrandDiscountCaps();
   const fxRates = useFxRates();
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
@@ -274,18 +276,28 @@ const TradeGallery = () => {
     return null;
   };
 
-  const getDisplayPrice = (p: { cents: number; currency: string; price_unit?: string; price_prefix?: string | null } | null) => {
+  /** Tier rate, capped by the supplier's own `max_trade_discount` when set. */
+  const brandDiscountPct = (brandName?: string | null) =>
+    effectiveDiscountForBrand(TRADE_DISCOUNT, brandName, brandCaps);
+
+  const getDisplayPrice = (
+    p: { cents: number; currency: string; price_unit?: string; price_prefix?: string | null } | null,
+    brandName?: string | null,
+  ) => {
     if (!p) return null;
-    return showTradePrice ? { ...p, cents: Math.round(p.cents * (1 - TRADE_DISCOUNT)) } : p;
+    const { pct } = brandDiscountPct(brandName);
+    return showTradePrice ? { ...p, cents: Math.round(p.cents * (1 - pct)) } : p;
   };
 
   const renderPriceDisplay = (
     price: { cents: number; currency: string; price_unit?: string; price_prefix?: string | null } | null,
     className: string,
+    brandName?: string | null,
   ) => {
     if (!price) return null;
 
-    const tradePrice = Math.round(price.cents * (1 - TRADE_DISCOUNT));
+    const { pct, capped } = brandDiscountPct(brandName);
+    const tradePrice = Math.round(price.cents * (1 - pct));
     const pfx = price.price_prefix ? `${price.price_prefix} ` : '';
     const retailLabel = `${pfx}${formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}`;
     const tradeLabel = `${pfx}${formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}`;
@@ -301,6 +313,15 @@ const TradeGallery = () => {
             <span className="text-accent font-semibold">
               TRADE: {tradeLabel}
             </span>
+            {capped && (
+              <span
+                title={MARGIN_CAP_TOOLTIP}
+                aria-label={MARGIN_CAP_TOOLTIP}
+                className="inline-flex items-center gap-1 rounded border border-border px-1 py-0.5 text-[9px] uppercase tracking-wider text-muted-foreground"
+              >
+                <Info className="h-2.5 w-2.5" /> Margin cap
+              </span>
+            )}
           </>
         ) : (
           <span className="text-foreground font-normal">
@@ -396,7 +417,7 @@ const TradeGallery = () => {
     designerId: product.id,
     section: "designers",
     price: (() => {
-      const p = getDisplayPrice(getProductPrice(product));
+      const p = getDisplayPrice(getProductPrice(product), product.brand_name);
       return p ? formatPriceConverted(p.cents, p.currency, displayCurrency, fxRates, p.price_unit) : null;
     })(),
   });
@@ -718,7 +739,7 @@ const TradeGallery = () => {
                    </h3>
                    {isAdmin ? (
                      <div className="mt-auto flex flex-col items-start gap-1.5 pt-3">
-                       {renderPriceDisplay(price, "font-sans text-[11px] tracking-[0.14em] inline-flex items-start gap-1.5 flex-wrap")}
+                       {renderPriceDisplay(price, "font-sans text-[11px] tracking-[0.14em] inline-flex items-start gap-1.5 flex-wrap", product.brand_name)}
                        <InlinePriceEditor
                          productName={product.product_name}
                          brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
@@ -731,7 +752,7 @@ const TradeGallery = () => {
                        />
                      </div>
                    ) : (
-                     renderPriceDisplay(price, "font-sans text-[11px] tracking-[0.14em] mt-auto pt-3 inline-flex items-start gap-1.5 flex-wrap")
+                     renderPriceDisplay(price, "font-sans text-[11px] tracking-[0.14em] mt-auto pt-3 inline-flex items-start gap-1.5 flex-wrap", product.brand_name)
                    )}
                  </div>
               </div>
@@ -761,7 +782,7 @@ const TradeGallery = () => {
                 </div>
                 {isAdmin ? (
                   <div className="shrink-0 flex flex-col items-end gap-1.5">
-                    {renderPriceDisplay(price, "font-display text-sm inline-flex items-center gap-1.5 flex-wrap justify-end")}
+                    {renderPriceDisplay(price, "font-display text-sm inline-flex items-center gap-1.5 flex-wrap justify-end", product.brand_name)}
                     <InlinePriceEditor
                       productName={product.product_name}
                       brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
@@ -774,7 +795,7 @@ const TradeGallery = () => {
                     />
                   </div>
                 ) : (
-                  renderPriceDisplay(price, "font-display text-sm shrink-0 inline-flex items-center gap-1.5 flex-wrap")
+                  renderPriceDisplay(price, "font-display text-sm shrink-0 inline-flex items-center gap-1.5 flex-wrap", product.brand_name)
                 )}
                 <button
                   onClick={() => handleAddToQuote(product)}
