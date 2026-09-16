@@ -281,11 +281,12 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       !propProduct.origin ||
       !propProduct.lead_time ||
       !propProduct.dimensions ||
+      !propProduct.description ||
       propProduct.is_upholstered === undefined;
     if (!needsHydration) return;
     supabase
       .from("designer_curator_picks_public" as any)
-      .select("size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map, materials_description, origin, lead_time, dimensions, gallery_captions, is_upholstered")
+      .select("size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map, materials_description, origin, lead_time, dimensions, gallery_captions, is_upholstered, description")
       .eq("id", propProduct.id)
       .maybeSingle()
       .then(({ data }) => {
@@ -311,8 +312,41 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       dimensions: propProduct.dimensions ?? variantPayload.dimensions ?? null,
       gallery_captions: propProduct.gallery_captions ?? variantPayload.gallery_captions ?? null,
       is_upholstered: propProduct.is_upholstered ?? variantPayload.is_upholstered ?? null,
+      description: propProduct.description ?? variantPayload.description ?? null,
     };
   }, [propProduct, variantPayload]);
+
+  // Curator Notes — derived from the ACTIVE product so they update whenever a
+  // "More from" thumbnail swaps the lightbox item.
+  const curatorNotes = useMemo(() => {
+    if (!product) return { significance: "", spatial: "", provenance: "" };
+    const designer = product.brand_name.includes(" - ")
+      ? product.brand_name.split(" - ")[0].trim()
+      : product.brand_name;
+    const yearMatch = product.title.match(/\b(18|19|20)\d{2}\b/);
+    const year = yearMatch?.[0] || null;
+    const plainDesc = (product.description || "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    const sentences = plainDesc.match(/[^.!?]+[.!?]+/g)?.map((s) => s.trim()).filter(Boolean) || [];
+    const categoryLabel = (product.subcategory || product.category || "piece").toLowerCase();
+    const significance =
+      sentences[0] ||
+      (year
+        ? `A definitive ${year} ${categoryLabel} in understated elegance, capturing the transition from historic craft to refined modern minimalism.`
+        : `A definitive ${categoryLabel} in understated elegance, capturing the transition from historic craft to refined modern minimalism.`);
+    const dims = (product.dimensions || "").split("\n")[0]?.trim();
+    const spatial =
+      sentences[1] ||
+      (dims
+        ? `Proportioned at ${dims}, engineered with precise geometric balance to serve as a quiet, functional focal point for high-end interiors.`
+        : `Features a stripped-back silhouette engineered with precise geometric proportions, calculated to serve as a quiet, functional sculptural focal point for high-end interiors.`);
+    const provenance =
+      sentences[2] ||
+      `Reflects ${designer}’s legendary philosophy of quiet luxury, bridging the gap between opulent glamour and minimalist simplicity.`;
+    return { significance, spatial, provenance };
+  }, [product]);
 
 
   // Resolve canonical designer slug (same hook used by product pages)
@@ -1075,7 +1109,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     Design Significance
                   </p>
                   <p className="font-body text-sm leading-[1.75] text-foreground/85">
-                    A definitive 1928 masterclass in understated elegance, capturing the transition from Art Deco to refined modern minimalism.
+                    {curatorNotes.significance}
                   </p>
                 </div>
               </div>
@@ -1087,7 +1121,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     Spatial Calculation
                   </p>
                   <p className="font-body text-sm leading-[1.75] text-foreground/85">
-                    Features a stripped-back silhouette engineered with precise geometric proportions, calculated to serve as a quiet, functional sculptural focal point for high-end interiors.
+                    {curatorNotes.spatial}
                   </p>
                 </div>
               </div>
@@ -1099,7 +1133,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     Historical Provenance
                   </p>
                   <p className="font-body text-sm leading-[1.75] text-foreground/85">
-                    Reflects Jean-Michel Frank’s legendary philosophy of quiet luxury, bridging the gap between opulent glamour and minimalist simplicity.
+                    {curatorNotes.provenance}
                   </p>
                 </div>
               </div>
