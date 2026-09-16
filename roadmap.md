@@ -66,3 +66,4 @@
 - [x] Isolate Bond Street Stool base/upholstery meshes and map authentic Man of Parts finishes without global texture replacement
 - [x] Upgrade Favorites with editorial-grid and technical-list modes plus Client View-safe MSRP pricing
 - [x] Quote builder: picking a client with a Default currency (e.g. Liz Spradling → USD) now auto-switches the quote currency toggle once; manual toggle override preserved
+- [x] Trade Tiers admin: ADMIN / TRADE TIERS breadcrumb, 90vw/1800px wide canvas, 3-card wide row, new defaults Silver 10%/€0, Gold 15%/€50k, Platinum 20%/€200k (DB + code fallbacks synced)
