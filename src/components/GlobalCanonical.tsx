@@ -10,6 +10,17 @@ export function buildCanonicalUrl(pathname: string): string {
 }
 
 /**
+ * Strict self-referencing canonical for any route.
+ *
+ * Always derived from the live router pathname, never from a database record
+ * (slug/id), so one profile can never publish another profile's URL.
+ */
+export function useSelfCanonical(): string {
+  const { pathname } = useLocation();
+  return buildCanonicalUrl(pathname);
+}
+
+/**
  * Global self-referencing canonical rule.
  *
  * Every route always publishes a canonical URL pointing to the production

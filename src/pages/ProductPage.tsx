@@ -34,7 +34,7 @@ interface Product {
   isInShowroom?: boolean;
 }
 
-import { BASE_URL } from "@/config/site";
+import { BASE_URL, absoluteUrl } from "@/config/site";
 
 const SITE_URL = BASE_URL;
 
@@ -92,7 +92,7 @@ const ProductPage = () => {
   // proxy (and any crawler that snapshots before the Supabase fetch resolves)
   // never inherits the homepage <title>/<canonical>. Helmet is upgraded with
   // brand + product name once data lands.
-  const earlyCanonical = `${SITE_URL}/product/${id ?? ""}`;
+  const earlyCanonical = absoluteUrl(location.pathname);
 
   if (loading) {
     return (
@@ -122,7 +122,7 @@ const ProductPage = () => {
   ];
   const hasMultipleImages = allImages.length > 1;
 
-  const canonicalUrl = `${SITE_URL}/product/${product.id}`;
+  const canonicalUrl = absoluteUrl(location.pathname);
   const pageTitle = `${product.product_name} by ${product.brand_name} — Maison Affluency`;
   const pageDescription = product.description
     ? product.description.slice(0, 155)

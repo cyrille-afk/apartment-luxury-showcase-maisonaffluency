@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { CldPicture } from "@/components/ui/CldPicture";
 import { useParams, useNavigate, Link, useLocation, Navigate } from "react-router-dom";
+import { absoluteUrl } from "@/config/site";
 import { Helmet } from "react-helmet-async";
 import { Heart, Pin, FileText, Layers, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2 } from "lucide-react";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
@@ -2106,7 +2107,7 @@ const PublicProductPageContent: React.FC = () => {
   return (
     <div className="product-configurator-canvas min-h-[100dvh] motion-safe:animate-fade-in">
       {(() => {
-        const canonical = `https://maisonaffluency.com/designers/${designer.slug}/${productSlug}`;
+        const canonical = absoluteUrl(location.pathname);
         const ogImg = toOgImage(product.image_url || images[0] || null);
         const desc =
           (product.description?.replace(/\s+/g, " ").trim().slice(0, 155)) ||
@@ -2148,7 +2149,9 @@ const PublicProductPageContent: React.FC = () => {
           ],
         };
         return (
-          <Helmet>
+          <Helmet key={location.pathname}>
+            <link rel="canonical" href={canonical} />
+            <meta name="robots" content="index, follow" />
             <title>{pageTitle} — Maison Affluency</title>
             <meta name="description" content={desc} />
             <meta property="og:type" content="product" />
