@@ -638,24 +638,37 @@ function Field({
   value,
   onChange,
   placeholder,
+  required,
+  invalid,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
+  required?: boolean;
+  invalid?: boolean;
 }) {
   return (
     <label className="block">
       <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
         {label}
+        {required && <span className="ml-1 text-amber-500" aria-hidden="true">*</span>}
       </span>
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="mt-1 block w-full rounded-lg border border-border bg-background px-2.5 py-1.5 font-body text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+        className={`mt-1 block w-full rounded-lg border px-2.5 py-1.5 font-body text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent ${
+          invalid ? "border-amber-500/40 bg-amber-500/[0.04]" : "border-border bg-background"
+        }`}
+        aria-required={required}
       />
+      {required && invalid && (
+        <span className="mt-1 block font-body text-[10px] uppercase tracking-wider text-amber-500/80">
+          Required field to unlock curation
+        </span>
+      )}
     </label>
   );
 }
