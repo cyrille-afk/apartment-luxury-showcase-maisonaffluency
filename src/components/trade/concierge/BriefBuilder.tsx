@@ -1248,6 +1248,8 @@ export function BriefBuilder({
               value={values.block2.typology}
               placeholder="[e.g. sectional + accent chairs]"
               onChange={(v) => setBlockField("block2", "typology", v)}
+              required
+              invalid={isPlaceholderValue(values.block2.typology)}
             />
             <Field
               label="Max Footprint"
