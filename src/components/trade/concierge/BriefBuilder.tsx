@@ -178,12 +178,12 @@ function isPlaceholderValue(value: string, defaultValue?: string): boolean {
 // stripped); fields left at their template default are kept verbatim.
 function sanitizeBriefValues(values: BriefValues): BriefValues {
   const cleanBlock = <T extends Record<string, string>>(block: T, defaults: T): T => {
-    const out = { ...block };
+    const out: Record<string, string> = { ...block };
     for (const key of Object.keys(block)) {
       const sanitized = sanitizeFieldValue(block[key]);
       out[key] = sanitized.toLowerCase() === sanitizeFieldValue(defaults[key]).toLowerCase() ? block[key] : sanitized;
     }
-    return out;
+    return out as T;
   };
   return {
     block1: cleanBlock(values.block1, DEFAULT_VALUES.block1),
