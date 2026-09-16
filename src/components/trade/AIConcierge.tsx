@@ -2640,7 +2640,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     // wink from the concierge so the user knows they can reopen it to
     // adjust the brief. Missing fields no longer block submission — they
     // become soft signals we surface inside the wink.
-    if (briefBuilderOpen) {
+    // When the dedicated Submit Brief button is handling the flow, keep the
+    // builder open and visible with its loading state. The builder itself will
+    // fade down once the semantic database sync is confirmed.
+    if (briefBuilderOpen && !opts?.builderSubmit) {
       setBriefBuilderOpen(false);
       const missing = briefValidation.missing;
       const winkBase = "Brief tucked away for now — tap the brief icon anytime to reopen and refine it.";
