@@ -234,18 +234,15 @@ const TradeDashboard = () => {
                 {profile.company} • {tierLabel} partner
               </p>
             )}
-          </div>
-          <div className="shrink-0 flex items-center gap-2">
             <button
               type="button"
               onClick={startFelixTour}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <Sparkles className="h-3 w-3" />
               Meet Felix
             </button>
           </div>
-
         </div>
       </div>
 

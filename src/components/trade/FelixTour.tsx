@@ -15,35 +15,59 @@ type FelixStep = {
 const FELIX_STEPS: FelixStep[] = [
   {
     id: "welcome",
-    title: "The Welcome Desk & Silver Tier",
+    title: "Welcome & Trade Tier Validation",
     target: "greeting",
     route: "/trade",
     dialogue:
-      "Welcome! I am Felix, your AI Curatorial Guide. As you can see right here under your welcome greeting, your account is verified at the Silver Tier level. This automatically unlocks exclusive trade pricing across our entire platform.",
+      "Welcome! I am Felix, your AI Curatorial Guide. Your Silver Tier benefits are pre-applied across the entire platform. Let's look at how you'll manage your workflow.",
   },
   {
     id: "collection",
-    title: "Sourcing via 'The Collection'",
+    title: "Sourcing 'The Collection'",
     target: "nav-collection",
     route: "/trade/the-collection",
     dialogue:
-      "This is your primary design hub. Clicking here opens our Curated Showroom and Full Catalogue, where you can browse iconic global pieces with your Silver Tier discounts pre-applied.",
+      "This is your primary design hub. Click here to browse our Curated Showroom and Full Catalogue with your Silver Tier trade pricing live.",
   },
   {
     id: "quotes",
-    title: "Quotes & Proformas",
+    title: "Financial Management",
     target: "nav-quotes",
     route: "/trade/quotes",
     dialogue:
-      "Paramount for your business transactions, this section allows you to build bespoke presentations for clients, organize items by specific active projects, and instantly generate verified proforma invoices.",
+      "Manage your business transactions here. Track deposit pipelines, open balances, and instantly export beautiful proforma documents for client approval.",
   },
   {
     id: "tools",
-    title: "Deep Dive Tools & Settings",
-    target: "nav-tools-settings",
+    title: "The Trade Tools Grid",
+    target: "tools-grid",
     route: "/trade/tools",
     dialogue:
-      "Finally, use the Tools area to access specialized trade widgets, layouts, and adjust your professional profile configurations whenever needed. Enjoy creating with us!",
+      "Welcome to your studio utility deck. Here you can utilize our Curation widgets, search Materials Libraries, create Moodboards, run a Product Comparator, or request physical fabric samples.",
+  },
+  {
+    id: "settings",
+    title: "Account & Team Configurations",
+    target: "nav-settings",
+    route: "/trade/settings",
+    dialogue:
+      "Configure your trade preferences, update your design practice details, manage team seats, and view your progressive tier thresholds here.",
+  },
+  {
+    id: "projects",
+    title: "Project Structuring",
+    target: "nav-projects",
+    route: "/trade/projects",
+    dialogue:
+      "Organize your active jobs dynamically. You can bucket your collections, quotes, and layouts by specific residential workflows, such as your Singapore GCB or Hamptons projects.",
+  },
+  {
+    id: "felix-chat",
+    title: "Dynamic Design Assistance",
+    target: "felix-chat",
+    route: "/trade",
+    dialogue:
+      "Finally, whenever you need real-time design assistance, look up here. Launch the Felix Chat at any time to co-curate collections, source hard-to-find items, or build out an entire project layout alongside me. Let's create something iconic!",
   },
 ];
 
@@ -141,21 +165,30 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   if (!open || typeof document === "undefined") return null;
 
-  // Card placement: prefer right of the target, then below, then above.
+  // Card placement: centered on the target — right of it, else below, else above.
   const cardW = Math.min(380, viewport.w - 32);
-  let cardLeft = 16;
-  let cardTop = 16;
+  const cardH = 320;
+  const clampX = (x: number) => Math.min(Math.max(x, 16), Math.max(viewport.w - cardW - 16, 16));
+  const clampY = (y: number) => Math.min(Math.max(y, 16), Math.max(viewport.h - cardH - 16, 16));
+  let cardLeft = clampX((viewport.w - cardW) / 2);
+  let cardTop = clampY((viewport.h - cardH) / 2);
   if (rect) {
+    const centerY = clampY(rect.top + rect.height / 2 - cardH / 2);
+    const centerX = clampX(rect.left + rect.width / 2 - cardW / 2);
     const rightX = rect.left + rect.width + PAD + 8;
+    const leftX = rect.left - PAD - 8 - cardW;
     if (rightX + cardW <= viewport.w - 16) {
       cardLeft = rightX;
-      cardTop = Math.min(Math.max(rect.top, 16), viewport.h - 320);
-    } else if (rect.top + rect.height + 300 < viewport.h) {
-      cardLeft = Math.min(Math.max(rect.left, 16), viewport.w - cardW - 16);
+      cardTop = centerY;
+    } else if (leftX >= 16) {
+      cardLeft = leftX;
+      cardTop = centerY;
+    } else if (rect.top + rect.height + PAD + 8 + cardH <= viewport.h - 16) {
+      cardLeft = centerX;
       cardTop = rect.top + rect.height + PAD + 8;
     } else {
-      cardLeft = Math.min(Math.max(rect.left, 16), viewport.w - cardW - 16);
-      cardTop = Math.max(rect.top - 300 - PAD, 16);
+      cardLeft = centerX;
+      cardTop = clampY(rect.top - cardH - PAD - 8);
     }
   }
 

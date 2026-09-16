@@ -29,6 +29,7 @@ export function ConciergeHeaderButton() {
   return (
     <button
       onClick={open}
+      data-felix-target="felix-chat"
       className="hidden sm:flex items-center gap-2 rounded-full bg-foreground text-background px-3 py-1.5 shadow-sm hover:opacity-90 transition-all"
       aria-label={`Open ${name}`}
     >

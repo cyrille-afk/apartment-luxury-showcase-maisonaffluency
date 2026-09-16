@@ -220,9 +220,10 @@ export default function TradeTools() {
         </section>
       )}
 
-      {filteredCategories.map((cat) => (
+      {filteredCategories.map((cat, catIndex) => (
         <section
           key={cat.label}
+          data-felix-target={catIndex === 0 ? "tools-grid" : undefined}
           data-tour-target={
             cat.label === "Specification" ? "tools"
               : cat.label === "Procurement" ? "procurement"
