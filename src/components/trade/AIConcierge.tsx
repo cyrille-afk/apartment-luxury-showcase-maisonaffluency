@@ -595,6 +595,8 @@ const getStoredVisualSourcingContext = (): string => {
 };
 
 const BRIEF_ACTIVE_STORAGE_KEY = "concierge:briefBuilder:active";
+const isStructuredBriefText = (value: string): boolean =>
+  isBriefContent(value) || /^\s*Block\s+\d+\s*[—-]/im.test(value);
 
 
 export type ConciergeSurface = "trade" | "public";
@@ -754,7 +756,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [input, setInput] = useState<string>(() => {
     try {
       const saved = sessionStorage.getItem("concierge:draft") || "";
-      return isBriefContent(saved) ? "" : saved;
+      if (isStructuredBriefText(saved)) {
+        sessionStorage.removeItem("concierge:draft");
+        return "";
+      }
+      return saved;
     } catch { return ""; }
   });
   useEffect(() => {
@@ -1784,6 +1790,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           const display = detail.displayMessage?.trim() || "…";
           // Fire and forget — send() handles its own streaming state.
           void sendRef.current?.(detail.prefill, { displayText: display });
+        } else if (isStructuredBriefText(detail.prefill)) {
+          openBriefBuilder(detail.prefill);
         } else {
           setInput(detail.prefill);
           setTimeout(() => {
