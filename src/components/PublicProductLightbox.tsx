@@ -722,8 +722,9 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
               </div>
 
-            {/* RIGHT COLUMN — specs card + CTAs */}
-            <div className="w-full flex flex-col md:pl-10 md:border-l md:border-border/40">
+              {/* RIGHT COLUMN — specs card + CTAs */}
+              <div className="w-full md:h-full md:min-h-0 flex flex-col md:pl-10 md:border-l md:border-border/40 md:overflow-hidden">
+                <div className="md:flex-1 md:overflow-y-auto min-h-0 pr-1">
 
               {/* Stone card — brand, dimensions, finishes, handcrafted details */}
               <div className="bg-muted/40 border border-border/60 p-5 flex flex-col gap-4">
