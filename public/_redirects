@@ -1,0 +1,56 @@
+# Netlify edge routing rules for Maison Affluency
+# ------------------------------------------------
+# NOTE: Lovable hosting does NOT read this file (its SPA fallback is built in).
+# These rules take effect only if the site is deployed to Netlify.
+
+# 1. Canonical host — apex and any preview/staging remnant go to production
+https://maisonaffluency.com/*            https://www.maisonaffluency.com/:splat   301!
+https://:project.lovable.app/*           https://www.maisonaffluency.com/:splat   301!
+
+# 2. Deprecated / placeholder paths -> live catalogue (permanent)
+/products                                https://www.maisonaffluency.com/designers   301!
+/products/*                              https://www.maisonaffluency.com/designers   301!
+/shop                                    https://www.maisonaffluency.com/designers   301!
+/shop/*                                  https://www.maisonaffluency.com/designers   301!
+/catalog                                 https://www.maisonaffluency.com/designers   301!
+/catalog/*                               https://www.maisonaffluency.com/designers   301!
+/catalogue                               https://www.maisonaffluency.com/designers   301!
+/catalogue/*                             https://www.maisonaffluency.com/designers   301!
+/collection                              https://www.maisonaffluency.com/designers   301!
+/collection/*                            https://www.maisonaffluency.com/designers   301!
+/home                                    https://www.maisonaffluency.com/            301!
+/index.html                              https://www.maisonaffluency.com/            301!
+/index.php                               https://www.maisonaffluency.com/            301!
+/test                                    https://www.maisonaffluency.com/            301!
+/test/*                                  https://www.maisonaffluency.com/            301!
+/preview                                 https://www.maisonaffluency.com/            301!
+/preview/*                               https://www.maisonaffluency.com/            301!
+/staging                                 https://www.maisonaffluency.com/            301!
+/staging/*                               https://www.maisonaffluency.com/            301!
+
+# 3. Real application routes must still resolve to the SPA shell (200)
+/                                        /index.html   200
+/designers                               /index.html   200
+/designers/*                             /index.html   200
+/designer/*                              /index.html   200
+/product/*                               /index.html   200
+/products-category/*                     /index.html   200
+/journal                                 /index.html   200
+/journal/*                               /index.html   200
+/studios                                 /index.html   200
+/studios/*                               /index.html   200
+/gallery                                 /index.html   200
+/new-in                                  /index.html   200
+/apartment-tour                          /index.html   200
+/trade-program                           /index.html   200
+/trade                                   /index.html   200
+/trade/*                                 /index.html   200
+/contact                                 /index.html   200
+/privacy                                 /index.html   200
+/terms                                   /index.html   200
+/unsubscribe                             /index.html   200
+/auth                                    /index.html   200
+/auth/*                                  /index.html   200
+
+# 4. Everything unmapped -> true 404 network status with the branded canvas
+/*                                       /404.html     404
