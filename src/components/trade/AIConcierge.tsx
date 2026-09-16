@@ -2287,6 +2287,21 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     if (!text && !hasFiles) return;
     if (streaming) return;
 
+    // Final object check: when the Brief Builder is open, all required fields
+    // must be populated and free of placeholder brackets before the brief is
+    // streamed. This prevents Felix from hallucinating that a field was left
+    // blank when the structured draft is actually incomplete.
+    if (briefBuilderOpen) {
+      const validation = validateBriefDraft(briefDraft);
+      if (!validation.valid) {
+        toast.error(
+          "To ensure Felix curates an accurate project schedule, please specify your desired furniture Typologies before submitting.",
+          { description: `Missing required fields: ${validation.missing.join(", ")}` },
+        );
+        return;
+      }
+    }
+
     // Rush detection: mirror the RUSH / URGENCY ACKNOWLEDGMENT PROTOCOL in
     // the trade-concierge system prompt so tearsheet cards can flip to the
     // "Express Shipping Available to <City>" badge the instant the user
