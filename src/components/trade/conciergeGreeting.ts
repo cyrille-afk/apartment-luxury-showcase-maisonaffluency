@@ -221,20 +221,34 @@ const ZH: LangPack = {
 
 const PACKS: Record<Lang, LangPack> = { en: EN as LangPack, id: ID, th: TH, zh: ZH };
 
+export type GreetingMeta = {
+  conciergeName?: string;
+  tradeTier?: string;
+  tierDiscountText?: string;
+};
+
 export const greetingForContext = (
   stage: Stage,
   pathname: string,
   tone: Tone = DEFAULT_TONE,
   lang: Lang = DEFAULT_LANG,
+  meta?: GreetingMeta,
 ): string => {
   const intent = intentFor(stage, pathname);
   // Resolution chain: lang+tone → lang+luxury → en+tone → en+luxury
-  return (
+  let text = (
     PACKS[lang]?.[tone]?.[intent]
     ?? PACKS[lang]?.[DEFAULT_TONE]?.[intent]
     ?? EN[tone][intent]
     ?? EN[DEFAULT_TONE][intent]
   );
+  if (meta) {
+    text = text
+      .replace(/{concierge_name}/g, meta.conciergeName || "Felix")
+      .replace(/{trade_tier}/g, meta.tradeTier || "Trade")
+      .replace(/{tier_discount_text}/g, meta.tierDiscountText || "trade");
+  }
+  return text;
 };
 
 export const DEFAULT_GREETING = greetingForContext("Discover", "/trade", DEFAULT_TONE, DEFAULT_LANG);
