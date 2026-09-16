@@ -65,9 +65,26 @@ async function saveDescription(productId: string, source: Source, description: s
   if (error) throw error;
 }
 
+// Hard-trim a meta snippet to <=160 chars without cutting mid-sentence:
+// prefer the last full sentence that fits, else the last whole word that fits.
+export function trimMetaSnippet(text: string, max = 160): string {
+  const clean = String(text || "").replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean;
+  const windowed = clean.slice(0, max);
+  const sentenceEnd = Math.max(
+    windowed.lastIndexOf(". "),
+    windowed.lastIndexOf("! "),
+    windowed.lastIndexOf("? "),
+  );
+  if (sentenceEnd >= 40) return windowed.slice(0, sentenceEnd + 1).trim();
+  if (windowed.endsWith(".")) return windowed;
+  const wordEnd = windowed.lastIndexOf(" ");
+  return (wordEnd >= 40 ? windowed.slice(0, wordEnd) : windowed).replace(/[.,;:!?—–-]+$/, "").trim() + "…";
+}
+
 async function saveMetaDescription(productId: string, source: Source, metaDescription: string) {
   const table = source === "curator_picks" ? "designer_curator_picks" : "trade_products";
-  const { error } = await supabase.from(table).update({ meta_description: metaDescription }).eq("id", productId);
+  const { error } = await supabase.from(table).update({ meta_description: trimMetaSnippet(metaDescription) }).eq("id", productId);
   if (error) throw error;
 }
 
