@@ -3168,6 +3168,38 @@ function typologyTokensToCategories(tokens: string[]): string[] {
   return Array.from(hits);
 }
 
+/**
+ * Deterministically parse declared TYPOLOGY lines out of the conversation
+ * (Brief Builder submissions and "Focus typology:" CTA lines).
+ *
+ * HARDENED: the label must lead its own line (allow list markers / block
+ * prefixes), immediately followed by a colon/dash. Prevents matches inside
+ * prose like "the typology of the project profile is loose." Anything before
+ * the word "typology" on the same line must be short (< ~24 chars).
+ */
+function parseDeclaredTypologyCats(text: string): string[] {
+  const out: string[] = [];
+  const typRe = /^[\s>*\-–—•]*(?:(?:block\s*\d+[\s:.\-–—]*)|(?:[a-z][a-z ]{0,22}\s+))?typology(?:\s*\([^)\n]{0,40}\))?\s*[:\-–—]\s*(.+)$/gim;
+  let tm: RegExpExecArray | null;
+  while ((tm = typRe.exec(text || "")) !== null) {
+    const raw = tm[1].replace(/[\[\]]/g, "").trim();
+    if (!raw) continue;
+    // Skip payloads that are themselves another block label echo.
+    if (/^(references|materials?|palette|budget|constraints?|block\s*\d+)\b/i.test(raw)) continue;
+    // Split on commas, plus, ampersand, slash, and " and "
+    const tokens = raw.split(/,|\+|&|\/|\band\b/i).map((t) => t.trim().toLowerCase()).filter(Boolean);
+    for (const t of tokens) {
+      // Strip trailing counts like "coffee table x2".
+      const cleaned = t.replace(/\s*x?\s*\d+\s*$/i, "").trim();
+      if (cleaned.length >= 3) out.push(cleaned);
+    }
+    for (const cat of typologyTokensToCategories(tokens)) out.push(cat);
+  }
+  return out;
+}
+
+
+
 function lineMatchesTypologyTerms(line: { title?: string | null; category?: string | null; subcategory?: string | null }, terms: string[] | undefined): boolean {
   const normalizedTerms = (terms || []).map((t) => normalizeLoose(t)).filter(Boolean);
   if (!normalizedTerms.length) return true;
