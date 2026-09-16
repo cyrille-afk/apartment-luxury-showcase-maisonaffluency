@@ -2365,7 +2365,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       const validation = validateBriefDraft(briefDraft);
       if (!validation.valid) {
         toast.error(
-          `To ensure ${name} curates an accurate project schedule, please specify your desired furniture Typologies before submitting.",
+          `To ensure ${name} curates an accurate project schedule, please specify your desired furniture Typologies before submitting.`,
           { description: `Missing required fields: ${validation.missing.join(", ")}` },
         );
         return;
