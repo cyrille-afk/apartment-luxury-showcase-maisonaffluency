@@ -3432,11 +3432,16 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     } finally {
       if (opts?.builderSubmit) {
         if (builderSubmitOk) {
-          // Post-submission: offer the three generated spatial configurations.
+          // Post-submission: offer the three generated spatial configurations,
+          // named from the aesthetic DNA captured in the brief.
+          const styleInput = extractBriefVibe(text) ?? extractBriefVibe(briefDraft);
           setTimeline((prev) =>
             prev.some((t) => t.kind === "layout_options" && !t.selected)
               ? prev
-              : [...prev, { kind: "layout_options", id: `layouts-${Date.now()}`, selected: null }],
+              : [
+                  ...prev,
+                  { kind: "layout_options", id: `layouts-${Date.now()}`, selected: null, styleInput },
+                ],
           );
         }
         briefSubmitDoneRef.current?.(builderSubmitOk);
