@@ -7,7 +7,9 @@
 
 import { findPieceBridgePath, getOgBridgeIndexSync } from "@/lib/ogBridgeResolver";
 
-const SITE_URL = "https://maisonaffluency.com";
+import { BASE_URL } from "@/config/site";
+
+const SITE_URL = BASE_URL;
 const OG_SHARE_VERSION = "20260906a";
 
 type ShareSection = "designer" | "collectible" | "atelier";
