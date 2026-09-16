@@ -274,18 +274,28 @@ const TradeGallery = () => {
     return null;
   };
 
-  const getDisplayPrice = (p: { cents: number; currency: string; price_unit?: string; price_prefix?: string | null } | null) => {
+  /** Tier rate, capped by the supplier's own `max_trade_discount` when set. */
+  const brandDiscountPct = (brandName?: string | null) =>
+    effectiveDiscountForBrand(TRADE_DISCOUNT, brandName, brandCaps);
+
+  const getDisplayPrice = (
+    p: { cents: number; currency: string; price_unit?: string; price_prefix?: string | null } | null,
+    brandName?: string | null,
+  ) => {
     if (!p) return null;
-    return showTradePrice ? { ...p, cents: Math.round(p.cents * (1 - TRADE_DISCOUNT)) } : p;
+    const { pct } = brandDiscountPct(brandName);
+    return showTradePrice ? { ...p, cents: Math.round(p.cents * (1 - pct)) } : p;
   };
 
   const renderPriceDisplay = (
     price: { cents: number; currency: string; price_unit?: string; price_prefix?: string | null } | null,
     className: string,
+    brandName?: string | null,
   ) => {
     if (!price) return null;
 
-    const tradePrice = Math.round(price.cents * (1 - TRADE_DISCOUNT));
+    const { pct, capped } = brandDiscountPct(brandName);
+    const tradePrice = Math.round(price.cents * (1 - pct));
     const pfx = price.price_prefix ? `${price.price_prefix} ` : '';
     const retailLabel = `${pfx}${formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}`;
     const tradeLabel = `${pfx}${formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}`;
