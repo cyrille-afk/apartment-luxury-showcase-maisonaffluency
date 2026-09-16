@@ -2925,6 +2925,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   const rawUnitPrice = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? null;
                   const unitPrice = convertCents(rawUnitPrice, itemPriceCurrency(item, currency), currency);
                   const lineTotal = unitPrice ? unitPrice * item.quantity : null;
+                  // Brand margin cap actively suppressing this line's discount.
+                  const marginCapped = discountApplies && cappedLineIds.has(item.id);
                   const lineImageUrl = item.image_url ?? product?.image_url ?? null;
 
                   return (
