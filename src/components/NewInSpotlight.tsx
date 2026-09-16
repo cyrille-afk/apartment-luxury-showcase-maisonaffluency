@@ -256,7 +256,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
         </div>
       </div>
 
-      <div className={cn("grid items-start gap-x-4 gap-y-10 md:gap-x-8 md:gap-y-14", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
+      <div className={cn("grid items-start gap-x-4 gap-y-8 md:gap-x-8 md:gap-y-10", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
         {picks.map((pick) => {
           const alternateImage = pick.hover_image_url
             || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
@@ -271,7 +271,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 if (item) setLightboxItem(item);
               }}
             >
-              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm bg-[hsl(var(--product-canvas))]">
+              <div className="relative aspect-[4/3] max-h-[320px] w-full overflow-hidden rounded-sm bg-[hsl(var(--product-canvas))]">
                 <SwipeAlternateProductImage
                   primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
                   primarySrcSet={pickSrcSet(pick.image_url)}
@@ -306,7 +306,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 )}
               </div>
 
-              <div className="mt-4 grid w-full grid-rows-[1.25rem_2.75rem_1.25rem] items-start text-left leading-relaxed">
+              <div className="mt-2.5 grid w-full grid-rows-[1.25rem_2.75rem_1.25rem] items-start text-left leading-relaxed">
                 {(() => {
                   const composed = composeTitle(pick.title, pick.subtitle);
                   // Editor brands (e.g. De La Espada) embed the author in the title:
@@ -438,13 +438,13 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
           </div>
 
           {igWithImages.length > 0 && (
-            <div className="w-full border-t border-neutral-100 pt-4 mt-5 mb-5">
-              <div className="w-fit mx-auto flex flex-col items-center gap-2">
+            <div className="w-full border-t border-neutral-100 pt-3 mt-3 mb-3">
+              <div className="w-fit mx-auto flex flex-col items-center gap-1.5">
                 <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-neutral-400 font-normal">
                   <Instagram className="w-3.5 h-3.5" strokeWidth={1.5} />
                   From the Studio
                 </span>
-                <div className="flex gap-2.5 items-center h-20 md:h-24 overflow-hidden flex-shrink-0">
+                <div className="flex gap-2.5 items-center h-16 md:h-20 overflow-hidden flex-shrink-0">
                   {igWithImages.slice(0, 6).map((post) => (
                     <a
                       key={post.id}
@@ -470,7 +470,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
           {/* Curators' Picks */}
           <div className="w-full">
             {renderCuratorsPicksSection({
-              barClassName: "flex justify-between items-center w-full border-t border-b border-neutral-100 py-2.5 my-4 text-[11px] uppercase tracking-widest text-neutral-800",
+              barClassName: "flex justify-between items-center w-full border-t border-b border-neutral-100 py-2 my-3 text-[11px] uppercase tracking-widest text-neutral-800",
               titleClassName: "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-800",
               mobileBadgeClassName: "px-4 py-1.5 rounded-full border border-neutral-800/20 bg-neutral-800/5 md:hidden",
               mobileTitleClassName: "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-neutral-800 font-semibold",
