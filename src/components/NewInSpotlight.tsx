@@ -256,24 +256,22 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
         </div>
       </div>
 
-      <div className={cn("grid gap-x-4 gap-y-5 md:gap-x-8 md:gap-y-12", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
-        {picks.map((pick, pickIndex) => {
+      <div className={cn("grid items-start gap-x-4 gap-y-10 md:gap-x-8 md:gap-y-14", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
+        {picks.map((pick) => {
           const alternateImage = pick.hover_image_url
             || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
             || null;
-          // Editorial staggered rhythm on mobile: every second card drops down.
-          const mobileStagger = mobileGridCols === 2 && pickIndex % 2 === 1 ? "mt-10 md:mt-0" : "";
 
           return (
             <div
               key={pick.id}
-              className={cn("mb-10 md:mb-0 group flex flex-col cursor-pointer", mobileStagger)}
+              className="group flex min-w-0 flex-col cursor-pointer"
               onClick={() => {
                 const item = lightboxItems.find((li) => li.id === pick.id);
                 if (item) setLightboxItem(item);
               }}
             >
-              <div className="aspect-[4/3] max-h-[280px] w-full bg-[hsl(var(--canvas))] rounded-sm overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer">
+              <div className="relative flex h-[240px] w-full aspect-[4/5] items-center justify-center overflow-hidden rounded-sm bg-[hsl(var(--product-canvas))] sm:h-[320px] md:h-[360px] xl:h-[400px]">
                 <SwipeAlternateProductImage
                   primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
                   primarySrcSet={pickSrcSet(pick.image_url)}
@@ -309,7 +307,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 )}
               </div>
 
-              <div className="flex flex-col flex-1 items-start text-left leading-relaxed">
+              <div className="mt-4 grid w-full grid-rows-[1.25rem_2.75rem_1.25rem] items-start text-left leading-relaxed">
                 {(() => {
                   const composed = composeTitle(pick.title, pick.subtitle);
                   // Editor brands (e.g. De La Espada) embed the author in the title:
@@ -362,25 +360,25 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                           <Link
                             to={`/designers/${brandSlug}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="block font-display text-[11px] md:text-sm font-medium uppercase tracking-widest md:tracking-[0.18em] text-muted-foreground md:text-foreground leading-tight line-clamp-1 hover:underline underline-offset-4 decoration-foreground/40 transition-colors"
+                            className="block h-5 font-display text-[11px] md:text-sm font-medium uppercase tracking-widest md:tracking-[0.18em] text-muted-foreground md:text-foreground leading-tight line-clamp-1 hover:underline underline-offset-4 decoration-foreground/40 transition-colors"
                           >
                             {brandLine}
                           </Link>
                         ) : (
-                          <span className="block font-display text-[11px] md:text-sm font-medium uppercase tracking-widest md:tracking-[0.18em] text-muted-foreground md:text-foreground leading-tight line-clamp-1">
+                          <span className="block h-5 font-display text-[11px] md:text-sm font-medium uppercase tracking-widest md:tracking-[0.18em] text-muted-foreground md:text-foreground leading-tight line-clamp-1">
                             {brandLine}
                           </span>
                         )
                       )}
                       {/* Product name — secondary, elegant italic */}
-                      <h3 className="mt-1 font-body italic text-[13px] md:text-[15px] font-normal text-foreground/80 leading-snug line-clamp-2">
+                      <h3 className="font-body italic text-[13px] md:text-[15px] font-normal text-foreground/80 leading-snug line-clamp-2">
                         {productLine}
                       </h3>
                     </>
                   );
                 })()}
                 {/* Price — muted, bottom */}
-                <div className="mt-1">
+                <div className="flex h-5 items-start">
                   <p className="font-body text-xs font-light tracking-wide text-muted-foreground">
                     {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
                   </p>

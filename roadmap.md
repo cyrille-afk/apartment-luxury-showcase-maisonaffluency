@@ -86,3 +86,4 @@
 - [x] Make Brief Builder success and held-tearsheet fallback mutually exclusive, add the tailored configuration introduction, and clear stale results before resubmission
 - [x] Pause Felix after layout generation until manual selection, then confirm the chosen dynamic layout title without unrelated project labels
 - [x] Rebalance the Curator Portrait desktop header, compact the studio strip, and standardize fully contained Curators' Picks imagery
+- [x] Rebuild Curators' Picks with fixed portrait gallery frames and rigidly aligned brand, title, and price rows
