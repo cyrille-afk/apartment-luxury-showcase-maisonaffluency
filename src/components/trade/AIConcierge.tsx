@@ -386,6 +386,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CnBriefViewingModal } from "@/components/trade/CnBriefViewingModal";
 import { useStudio } from "@/hooks/useStudio";
 import { useAuth } from "@/hooks/useAuth";
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { getConciergeSession, updateConciergeSession } from "@/hooks/useConciergeSession";
 import { extractProjectCityFromAssistant } from "@/lib/projectCityDetect";
 import { detectUrgency } from "@/lib/urgencyDetect";
