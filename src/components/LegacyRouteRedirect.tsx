@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { Navigate, useLocation } from "react-router-dom";
+import { useNoIndex } from "@/hooks/useNoIndex";
 
 /**
  * Permanent redirect surface for catalogue URLs Google has already crawled but
@@ -11,6 +12,7 @@ import { Navigate, useLocation } from "react-router-dom";
  */
 const LegacyRouteRedirect = ({ to = "/designers" }: { to?: string }) => {
   const { pathname } = useLocation();
+  useNoIndex("noindex, follow");
   const absolute = `https://maisonaffluency.com${to}`;
 
   return (

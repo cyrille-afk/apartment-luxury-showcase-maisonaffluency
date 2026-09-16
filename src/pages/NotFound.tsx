@@ -2,9 +2,11 @@ import { Link, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft } from "lucide-react";
+import { useNoIndex } from "@/hooks/useNoIndex";
 
 const NotFound = () => {
   const location = useLocation();
+  useNoIndex("noindex, nofollow");
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
