@@ -386,6 +386,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CnBriefViewingModal } from "@/components/trade/CnBriefViewingModal";
 import { useStudio } from "@/hooks/useStudio";
 import { useAuth } from "@/hooks/useAuth";
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { getConciergeSession, updateConciergeSession } from "@/hooks/useConciergeSession";
 import { extractProjectCityFromAssistant } from "@/lib/projectCityDetect";
 import { detectUrgency } from "@/lib/urgencyDetect";
@@ -634,6 +635,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [tone, setTone] = useState<Tone>(() => loadTone());
   const [lang, setLang] = useState<Lang>(() => loadLang());
   const [name, setName] = useState<string>(() => loadName());
+  const { tierLabel, discountLabel } = useTradeDiscount();
+  const greetingMeta = {
+    conciergeName: name,
+    tradeTier: tierLabel || "Trade",
+    tierDiscountText: discountLabel ? `${discountLabel} discount` : "trade",
+  };
   const [nameDraft, setNameDraft] = useState<string>("");
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [toneMenuOpen, setToneMenuOpen] = useState(false);
@@ -668,7 +675,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       }
     } catch {}
     return [
-      { kind: "msg", role: "assistant", content: surface === "public" ? (initialGreeting || PUBLIC_GREETING) : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()).replace(/{concierge_name}/g, name) },
+      { kind: "msg", role: "assistant", content: surface === "public" ? (initialGreeting || PUBLIC_GREETING) : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang(), greetingMeta) },
     ];
   });
   /** Thread the in-memory transcript belongs to (null = unknown/foreign). */
@@ -725,8 +732,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const currentGreeting = useCallback((targetLang: Lang = lang) => (
     surface === "public"
       ? (initialGreeting || PUBLIC_GREETING)
-      : greetingForContext(stage, contextualPath, tone, targetLang).replace(/{concierge_name}/g, name)
-  ), [surface, initialGreeting, stage, contextualPath, tone, lang, name]);
+      : greetingForContext(stage, contextualPath, tone, targetLang, greetingMeta)
+  ), [surface, initialGreeting, stage, contextualPath, tone, lang, greetingMeta]);
   const scrollRef = useRef<HTMLDivElement>(null);
   // Two-step workflow: discovery grid (step 1) ⇄ procurement draft (step 2).
   const [configView, setConfigView] = useState(false);
@@ -1214,8 +1221,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const activeThreadKey = user?.id ? `concierge:activeThread:${user.id}` : null;
 
   const buildInitialTimeline = useCallback((): TimelineItem[] => [
-    { kind: "msg", role: "assistant", content: surface === "public" ? (initialGreeting || PUBLIC_GREETING) : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()).replace(/{concierge_name}/g, name) },
-  ], [surface, initialGreeting, pathname, name]);
+    { kind: "msg", role: "assistant", content: surface === "public" ? (initialGreeting || PUBLIC_GREETING) : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang(), greetingMeta) },
+  ], [surface, initialGreeting, pathname, greetingMeta]);
 
   const deriveThreadTitle = useCallback((items: TimelineItem[]): string => {
     const firstUser = items.find((t) => t.kind === "msg" && t.role === "user");
