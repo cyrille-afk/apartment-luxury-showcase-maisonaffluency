@@ -12,6 +12,7 @@ import ExpandableSpec from "@/components/ExpandableSpec";
 import SpecGlyph from "@/components/product/SpecGlyph";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import { looksLikeDimension } from "@/lib/rugPricing";
+import LegacyRouteRedirect from "@/components/LegacyRouteRedirect";
 
 const specIcon = (symbol: string, className = "") => (
   <SpecGlyph symbol={symbol} className={className} />
