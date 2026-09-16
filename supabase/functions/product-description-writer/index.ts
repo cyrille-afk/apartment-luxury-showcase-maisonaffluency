@@ -362,7 +362,7 @@ RULES:
       {
         // Scope cache to (tone, product_id) so different products with similar
         // brand-biography blocks can never collide via semantic similarity.
-        feature: `product-description-writer:${tone}:${source}:${product_id}`,
+        feature: `product-description-writer:v2:${tone}:${source}:${product_id}`,
         model: DESCRIPTION_MODEL,
         prompt: cachePrompt,
         apiKey: LOVABLE_API_KEY,
@@ -378,7 +378,7 @@ RULES:
           },
           body: JSON.stringify({
             model: DESCRIPTION_MODEL,
-            max_completion_tokens: DESCRIPTION_MAX_TOKENS,
+            max_completion_tokens: tone === "seo_long" ? SEO_LONG_MAX_TOKENS : DESCRIPTION_MAX_TOKENS,
             messages: [
               { role: "system", content: systemPrompt },
               { role: "user", content: `Generate a ${tone} product description using the following data:\n${productContext}` },
