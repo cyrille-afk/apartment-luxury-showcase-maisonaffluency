@@ -1097,6 +1097,28 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // hasn't manually dragged or expanded the panel yet.
   const modalMode = welcomePending && !pos;
 
+  // Width of the global trade navigation sidebar, measured live so the
+  // concierge panel can never overlap or clip it.
+  const [navInset, setNavInset] = useState(0);
+  useEffect(() => {
+    const measure = () => {
+      const el = document.querySelector("[data-trade-sidebar]") as HTMLElement | null;
+      const right = el ? el.getBoundingClientRect().right : 0;
+      setNavInset(right > 0 && right < window.innerWidth * 0.5 ? Math.round(right) : 0);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    const obs = new MutationObserver(measure);
+    obs.observe(document.body, { subtree: true, attributes: true, childList: true });
+    const t = window.setInterval(measure, 1000);
+    return () => {
+      window.removeEventListener("resize", measure);
+      obs.disconnect();
+      window.clearInterval(t);
+    };
+  }, []);
+
+
   // Panel dimensions. On first-open the concierge renders as a centered
   // welcome modal — size it like the fullscreen panel so it never covers
   // the left navigation. Otherwise fall back to fullscreen or the
