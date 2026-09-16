@@ -628,12 +628,12 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             <X size={18} />
           </button>
 
-          {/* Upper two-column editorial block */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start max-w-6xl mx-auto p-5 md:p-8 w-full">
+          {/* Upper two-column editorial block — constrained to stay above the fold */}
+          <div className="max-w-6xl mx-auto p-5 md:p-8 w-full flex flex-col">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 md:h-[min(420px,48vh)] md:grid-rows-[1fr]">
 
-            {/* LEFT COLUMN — hero image + related thumbnails only */}
-            <div className="relative w-full flex flex-col gap-6">
-              <div className="relative w-full shrink-0 flex items-start justify-center">
+              {/* LEFT COLUMN — standardized hero image container */}
+              <div className="relative w-full md:h-full min-h-0 flex items-center justify-center">
                 {product.image_url ? (
                   <>
                     {!imageLoaded && !imageFailed && (
@@ -653,7 +653,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       onLoad={() => { setImageLoaded(true); setImageFailed(false); }}
                       onError={() => { setImageFailed(true); setImageLoaded(true); }}
                       className={cn(
-                        "w-full h-auto object-contain md:max-h-[58vh] transition-opacity duration-300",
+                        "w-full h-auto md:h-full object-contain transition-opacity duration-300",
                         imageFailed || !imageLoaded ? "opacity-0" : "opacity-100"
                       )}
                     />
@@ -720,14 +720,9 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
               </div>
 
-              {/* Related thumbnails sit directly under the main image */}
-              <div className="w-full shrink-0">
-                {relatedStrip}
-              </div>
-            </div>
-
-            {/* RIGHT COLUMN — specs card + CTAs */}
-            <div className="w-full flex flex-col md:pl-10 md:border-l md:border-border/40">
+              {/* RIGHT COLUMN — specs card + CTAs */}
+              <div className="w-full md:h-full md:min-h-0 flex flex-col md:pl-10 md:border-l md:border-border/40 md:overflow-hidden">
+                <div className="md:flex-1 md:overflow-y-auto min-h-0 pr-1">
 
               {/* Stone card — brand, dimensions, finishes, handcrafted details */}
               <div className="bg-muted/40 border border-border/60 p-5 flex flex-col gap-4">
@@ -870,9 +865,11 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   })()}
                 </div>
               </div>
+            </div>
 
               {/* CTA block */}
-              <div className="flex flex-col gap-4">
+              <div className="shrink-0 pt-4">
+                <div className="flex flex-col gap-4">
                 {/* Primary CTA */}
                 <div className="flex flex-col gap-2">
                   {productPageHref ? (
@@ -960,57 +957,62 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
               </div>
             </div>
+            </div>
+          </div>
+
+          {/* More From — separated from upper block with defined margin */}
+          <div className="mt-6 md:mt-8 w-full">
+            {relatedStrip}
           </div>
 
           {/* Curator Notes — structured, scannable product narrative */}
-          <div className="w-full border-t border-border/40 mt-8 pt-6 pb-14">
-            <div className="max-w-6xl mx-auto px-5 md:px-8">
-              <h3 className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-8">
-                Curator Notes
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
-                <div className="flex gap-4">
-                  <Award className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
-                  <div>
-                    <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
-                      Design Significance
-                    </p>
-                    <p className="font-body text-sm leading-[1.75] text-foreground/85">
-                      A definitive 1928 masterclass in understated elegance, capturing the transition from Art Deco to refined modern minimalism.
-                    </p>
-                  </div>
+          <div className="w-full border-t border-border/40 mt-6 md:mt-8 pt-5 pb-6">
+            <h3 className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-5">
+              Curator Notes
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+              <div className="flex gap-4">
+                <Award className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
+                <div>
+                  <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
+                    Design Significance
+                  </p>
+                  <p className="font-body text-sm leading-[1.75] text-foreground/85">
+                    A definitive 1928 masterclass in understated elegance, capturing the transition from Art Deco to refined modern minimalism.
+                  </p>
                 </div>
+              </div>
 
-                <div className="flex gap-4">
-                  <Compass className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
-                  <div>
-                    <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
-                      Spatial Calculation
-                    </p>
-                    <p className="font-body text-sm leading-[1.75] text-foreground/85">
-                      Features a stripped-back silhouette engineered with precise geometric proportions, calculated to serve as a quiet, functional sculptural focal point for high-end interiors.
-                    </p>
-                  </div>
+              <div className="flex gap-4">
+                <Compass className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
+                <div>
+                  <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
+                    Spatial Calculation
+                  </p>
+                  <p className="font-body text-sm leading-[1.75] text-foreground/85">
+                    Features a stripped-back silhouette engineered with precise geometric proportions, calculated to serve as a quiet, functional sculptural focal point for high-end interiors.
+                  </p>
                 </div>
+              </div>
 
-                <div className="flex gap-4">
-                  <FileText className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
-                  <div>
-                    <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
-                      Historical Provenance
-                    </p>
-                    <p className="font-body text-sm leading-[1.75] text-foreground/85">
-                      Reflects Jean-Michel Frank’s legendary philosophy of quiet luxury, bridging the gap between opulent glamour and minimalist simplicity.
-                    </p>
-                  </div>
+              <div className="flex gap-4">
+                <FileText className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
+                <div>
+                  <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
+                    Historical Provenance
+                  </p>
+                  <p className="font-body text-sm leading-[1.75] text-foreground/85">
+                    Reflects Jean-Michel Frank’s legendary philosophy of quiet luxury, bridging the gap between opulent glamour and minimalist simplicity.
+                  </p>
                 </div>
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </motion.div>
-      )}
-    </AnimatePresence>
+    </motion.div>
+    )}
+  </AnimatePresence>
   );
 
   return (
