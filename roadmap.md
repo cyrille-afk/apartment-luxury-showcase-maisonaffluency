@@ -82,3 +82,4 @@
 - [x] data-felix-target hooks: greeting (TradeDashboard), nav-collection/nav-quotes (TradeSidebar), account-panel (TradeLayout header)
 - [x] Verified live: steps 1-4, pause hides highlight + shows PAUSED label, back restores step, close + relaunch OK, no console errors
 - [x] Brief Builder announcement fix: widened project-scale detection (brownstone/townhouse/loft, FF&E signal) + onDone fallback — if Felix's prose announces the builder without detection firing, the reply gets an "Open Architectural Brief Builder" CTA and the builder auto-opens after the staged transition.
+- [x] Make Brief Builder opening strictly user-initiated, add a refined manual canvas transition, and separate its left-side collapse control from the Felix window close button
