@@ -66,9 +66,10 @@ export function effectiveDiscountForBrand(
 export const MARGIN_CAP_TOOLTIP = "Max margin cap applied for this supplier.";
 
 /** Loads every configured brand cap (small table, cached for 10 minutes). */
-export function useBrandDiscountCaps() {
+export function useBrandDiscountCaps(enabled = true) {
   const { data } = useQuery({
     queryKey: ["brand-discount-caps"],
+    enabled,
     staleTime: 1000 * 60 * 10,
     queryFn: async (): Promise<BrandDiscountCaps> => {
       const { data, error } = await (supabase as any)
