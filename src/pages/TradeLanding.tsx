@@ -572,7 +572,6 @@ const TradeLanding = () => {
         <meta name="twitter:title" content="Trade Program — Maison Affluency" />
         <meta name="twitter:description" content="Join Maison Affluency's Trade Program for architects and interior designers — exclusive pricing, dedicated advisors, custom sourcing, and insured shipping." />
         <meta name="twitter:image" content={TRADE_PROGRAM_SHARE_IMAGE} />
-        <link rel="canonical" href="https://www.maisonaffluency.com/trade-program" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebPage",
