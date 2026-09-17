@@ -273,10 +273,19 @@ export default function ProductCommerceCta({
    * order drawer or the bespoke dialog opens. Captured once per session —
    * returning visitors go straight through.
    */
+  // Captured once per browsing session (not forever): stored details only skip
+  // the gate after the visitor has actually completed it in this tab.
   const intakeCaptured = Boolean(
     checkoutForm.buyerProfile &&
       checkoutForm.projectCity.trim() &&
-      checkoutForm.email.trim(),
+      checkoutForm.email.trim() &&
+      (() => {
+        try {
+          return sessionStorage.getItem("ma_intake_done") === "1";
+        } catch {
+          return true;
+        }
+      })(),
   );
 
   const runIntent = (target: "order" | "bespoke") => {
@@ -295,6 +304,11 @@ export default function ProductCommerceCta({
   const completeIntake = (details: OrderIntakeDetails) => {
     const target = intakeFor ?? "order";
     setIntakeFor(null);
+    try {
+      sessionStorage.setItem("ma_intake_done", "1");
+    } catch {
+      /* private mode */
+    }
     checkoutForm.update({
       email: details.email,
       projectCity: details.city,
