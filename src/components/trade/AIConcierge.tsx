@@ -3437,6 +3437,18 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               });
             }
           } catch { /* non-fatal */ }
+
+          // Floor-plan upload → Felix announces the Architectural Brief Builder
+          // panel. Slide it open automatically right after the reply lands so
+          // the designer lands straight in the pre-filled fields.
+          try {
+            const announcesPanel = /opening the architectural brief builder panel/i.test(assistantSoFar);
+            if (announcesPanel && !briefBuilderOpen) {
+              const prefill = pendingBriefPrefillRef.current || undefined;
+              pendingBriefPrefillRef.current = null;
+              window.setTimeout(() => openBriefBuilder(prefill), 420);
+            }
+          } catch { /* non-fatal */ }
         },
         onError: (msg) => {
           clearStallTimer();
@@ -3536,7 +3548,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         briefSubmitDoneRef.current = null;
       }
     }
-  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry, user, cancelBriefTransition, briefBuilderOpen, briefDraft]);
+  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry, user, cancelBriefTransition, briefBuilderOpen, briefDraft, openBriefBuilder]);
 
   // Keep a ref to the latest `send` so the concierge:stage handler (which
   // registers once on mount) can auto-send prefills against fresh state
