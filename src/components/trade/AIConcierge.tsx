@@ -5430,7 +5430,15 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               </div>
             )}
             {attachments.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-2">
+              <div
+                className={cn(
+                  "flex flex-wrap gap-2 mb-2 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+                  attachmentsLaunching
+                    ? "pointer-events-none -translate-y-4 opacity-0"
+                    : "translate-y-0 opacity-100",
+                )}
+              >
+
                 {attachments.map((a) => (
                   <div
                     key={a.id}
