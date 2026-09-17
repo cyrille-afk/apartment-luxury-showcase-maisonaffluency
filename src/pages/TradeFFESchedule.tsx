@@ -627,11 +627,11 @@ export default function TradeFFESchedule() {
                           )}
                           </div>
                         </td>
-                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground tabular-nums xl:px-2"><TruncatedCellText value={item.po_number || "auto"} className={item.po_number ? "" : "italic text-muted-foreground/60"} /></td>
-                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.cost_code} /></td>
+                        {isColVisible("po") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground tabular-nums xl:px-2"><TruncatedCellText value={item.po_number || "auto"} className={item.po_number ? "" : "italic text-muted-foreground/60"} /></td>}
+                        {isColVisible("cost_code") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.cost_code} /></td>}
                         <td className="px-1.5 py-3 font-body text-xs text-foreground xl:px-2"><TruncatedCellText value={item.product_name} /></td>
-                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.brand_name} /></td>
-                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2">
+                        {isColVisible("brand") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.brand_name} /></td>}
+                        {isColVisible("project") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2">
                           {item.project_id ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -642,16 +642,16 @@ export default function TradeFFESchedule() {
                               <TooltipContent side="top" className="max-w-sm break-words font-body text-xs">{item.project_name || "—"}</TooltipContent>
                             </Tooltip>
                           ) : "—"}
-                        </td>
-                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.client_name} /></td>
-                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.studio_name} /></td>
-                        <td className="px-1.5 py-3 text-center font-body text-xs text-foreground xl:px-2">{item.quantity}</td>
-                        <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-foreground tabular-nums xl:px-2">{item.unit_price_cents ? `€${(item.unit_price_cents / 100).toFixed(0)}` : "TBD"}</td>
-                        <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] font-medium text-foreground tabular-nums xl:px-2">{item.unit_price_cents ? `€${((item.unit_price_cents * item.quantity) / 100).toFixed(0)}` : "TBD"}</td>
-                        <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2">{lead === 0 ? <span className="text-emerald-700 font-medium">In stock</span> : lead != null ? `${lead} wks` : "—"}</td>
-                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={STAGE_LABEL[item.kanban_status || ""] || item.kanban_status} /></td>
-                        <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-muted-foreground tabular-nums xl:px-2">{fmtDate(expected)}</td>
-                        <td className="px-1.5 py-3 font-body text-[11px] xl:px-2">
+                        </td>}
+                        {isColVisible("client") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.client_name} /></td>}
+                        {isColVisible("studio") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.studio_name} /></td>}
+                        {isColVisible("qty") && <td className="px-1.5 py-3 text-center font-body text-xs text-foreground xl:px-2">{item.quantity}</td>}
+                        {isColVisible("unit_trade") && <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-foreground tabular-nums xl:px-2">{item.unit_price_cents ? `€${(item.unit_price_cents / 100).toFixed(0)}` : "TBD"}</td>}
+                        {isColVisible("total") && <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] font-medium text-foreground tabular-nums xl:px-2">{item.unit_price_cents ? `€${((item.unit_price_cents * item.quantity) / 100).toFixed(0)}` : "TBD"}</td>}
+                        {isColVisible("lead") && <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2">{lead === 0 ? <span className="text-emerald-700 font-medium">In stock</span> : lead != null ? `${lead} wks` : "—"}</td>}
+                        {isColVisible("stage") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={STAGE_LABEL[item.kanban_status || ""] || item.kanban_status} /></td>}
+                        {isColVisible("expected") && <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-muted-foreground tabular-nums xl:px-2">{fmtDate(expected)}</td>}
+                        {isColVisible("required") && <td className="px-1.5 py-3 font-body text-[11px] xl:px-2">
                           <input
                             type="date"
                             defaultValue={item.required_by_date || ""}
@@ -661,8 +661,8 @@ export default function TradeFFESchedule() {
                             }}
                             className="w-full min-w-0 rounded border border-border bg-background px-1 py-0.5 font-body text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                           />
-                        </td>
-                        <td className="px-1.5 py-3 text-center font-body text-[11px] xl:px-2">{slackBadge(slackDays)}</td>
+                        </td>}
+                        {isColVisible("slack") && <td className="px-1.5 py-3 text-center font-body text-[11px] xl:px-2">{slackBadge(slackDays)}</td>}
                         <td className="sticky right-0 z-10 border-l border-border/60 bg-background px-1 py-3 text-center font-body text-[11px] transition-colors group-hover:bg-muted">
                           <Button type="button" variant="ghost" size="sm" className="h-7 max-w-full px-1.5 text-[9px] tabular-nums" onClick={() => setSelectedItem(item)} title={`Open ${item.quote_ref}`}>
                             {item.quote_ref}
