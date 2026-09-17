@@ -2691,9 +2691,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               value={shipTo[key] || ""}
                               onChange={(e) => setShipTo((s) => ({ ...s, [key]: e.target.value }))}
                               onBlur={async (e) => {
-                                await supabase.from("trade_quotes")
+                                const { error } = await supabase.from("trade_quotes")
                                   .update({ [dbCol]: e.target.value || null } as any)
                                   .eq("id", quoteId);
+                                if (error) {
+                                  console.error("ship_to save failed", dbCol, error);
+                                  toast.error("Delivery details not saved", { description: error.message });
+                                }
                               }}
                               className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs font-body"
                             />
