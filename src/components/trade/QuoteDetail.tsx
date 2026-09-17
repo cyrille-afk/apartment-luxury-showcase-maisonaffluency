@@ -3694,6 +3694,28 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           );
                         })()}
                       </div>
+                      {(() => {
+                        const crateCcy = ((item as any).crating_currency as string | null) || product?.currency || "EUR";
+                        const crateCents = (item as any).crating_cents as number | null | undefined;
+                        if (!crateCents || crateCents <= 0) return null;
+                        const qty = Math.max(1, item.quantity);
+                        const unitConverted = convertCents(crateCents, crateCcy, currency);
+                        const totalConverted = unitConverted != null ? unitConverted * qty : null;
+                        return (
+                          <div className="md:col-span-4 mt-1.5 flex flex-wrap items-center justify-between gap-2 border border-border/60 bg-muted/30 rounded px-3 py-2">
+                            <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
+                              Crating &amp; packing
+                            </span>
+                            <span className="font-body text-[11px] text-foreground tabular-nums">
+                              {formatPriceRaw(crateCents * qty, crateCcy)}
+                              {qty > 1 && <span className="text-muted-foreground/70"> ({qty} × {formatPriceRaw(crateCents, crateCcy)})</span>}
+                              {totalConverted != null && crateCcy !== currency && (
+                                <span className="text-muted-foreground"> &nbsp;=&nbsp; {formatPriceRaw(totalConverted, currency)}</span>
+                              )}
+                            </span>
+                          </div>
+                        );
+                      })()}
                       {item.ship_cbm == null && item.ship_weight_kg == null && (
                         <div className="md:col-span-4 mt-1 flex items-center gap-1.5 text-amber-700/90 print:hidden">
                           <AlertTriangle className="w-3 h-3 shrink-0" />
