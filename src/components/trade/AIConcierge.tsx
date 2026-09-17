@@ -527,6 +527,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { getConciergeSession, updateConciergeSession } from "@/hooks/useConciergeSession";
 import { extractProjectCityFromAssistant } from "@/lib/projectCityDetect";
+import { validateFelixLogic } from "@/lib/validateFelixLogic";
 import { detectUrgency } from "@/lib/urgencyDetect";
 
 
