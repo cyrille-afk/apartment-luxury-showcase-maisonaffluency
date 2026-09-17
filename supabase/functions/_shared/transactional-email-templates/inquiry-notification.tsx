@@ -26,7 +26,7 @@ const Row = ({ label, value }: { label: string; value?: string }) => (
   </tr>
 )
 
-const InquiryNotificationEmail = ({ name, company, email, phone, message, productName, designerName, selectedFinish }: Props) => (
+const InquiryNotificationEmail = ({ name, company, email, phone, message, productName, designerName, selectedFinish, attachmentUrl }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>New inquiry from {name || 'a visitor'}</Preview>
