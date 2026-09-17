@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, Check, ChevronDown, Loader2, X } from "lucide-react";
+import { ArrowLeft, Check, ChevronDown, FileText, Loader2, UploadCloud, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,10 @@ import { useToast } from "@/hooks/use-toast";
 import Turnstile from "@/components/Turnstile";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 import { getCurrentDestination } from "@/lib/shippingDestination";
+import PhoneDialField from "@/components/product/PhoneDialField";
+import { pushBespokeSync } from "@/lib/bespokeSync";
+import { cachePendingBespokeUpload } from "@/lib/pendingBespokeCache";
+import { BESPOKE_GUEST_EVENT } from "@/components/product/BespokeSubmissionBanner";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -47,6 +51,7 @@ interface Props {
   productId?: string | null;
   /** Overrides the last step's action label (e.g. "Continue"). */
   finalLabel?: string;
+  isTradeAuthorized?: boolean;
 }
 
 const inputCls =
@@ -79,6 +84,7 @@ export default function OrderIntakeSheet({
   mode = "order",
   productId,
   finalLabel,
+  isTradeAuthorized = false,
 }: Props) {
   const { toast } = useToast();
   const checkoutForm = useCheckoutForm();
@@ -100,6 +106,9 @@ export default function OrderIntakeSheet({
   const [notesEdited, setNotesEdited] = useState(false);
   const [finish, setFinish] = useState<string | null>(null);
   const [finishOpen, setFinishOpen] = useState(false);
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Carry the finish chosen on the product page straight into the sheet so the
   // client never retypes it. The selector opens preselected; changing it keeps
@@ -162,6 +171,8 @@ export default function OrderIntakeSheet({
         setTurnstileToken("");
         setCompany("");
         setBuyerType("individual");
+        setAttachment(null);
+        setIsDragging(false);
       }, 320);
       return () => window.clearTimeout(t);
     }
@@ -188,6 +199,22 @@ export default function OrderIntakeSheet({
     buyerType,
   });
 
+  const handleFiles = (files: FileList | null) => {
+    const file = files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Attachments must be 10 MB or smaller.", variant: "destructive" });
+      return;
+    }
+    setAttachment(file);
+  };
+
+  const formatBytes = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
   /** Quote flow: persist the inquiry, then show the in-drawer thank-you. */
   const submitQuote = async () => {
     if (sending) return;
@@ -201,6 +228,23 @@ export default function OrderIntakeSheet({
     }
     setSending(true);
     const d = details();
+    let attachmentPath: string | undefined;
+    if (attachment) {
+      try {
+        const ext = attachment.name.split(".").pop() || "bin";
+        const path = `${productId ?? "general"}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from("bespoke-attachments")
+          .upload(path, attachment, { cacheControl: "3600", upsert: false });
+        if (uploadError) throw uploadError;
+        attachmentPath = path;
+      } catch (error) {
+        console.error("Reference upload failed:", error);
+        toast({ title: "Attachment upload failed", description: "Please retry or submit without the file.", variant: "destructive" });
+        setSending(false);
+        return;
+      }
+    }
     const message = [
       productTitle ? `Product: ${productTitle}` : "",
       designerName ? `Designer: ${designerName}` : "",
@@ -231,9 +275,31 @@ export default function OrderIntakeSheet({
           productId: productId ?? undefined,
           source: "public_product",
            turnstileToken,
+           attachmentPath,
         },
       });
       if (error) throw error;
+      const syncEntry = {
+        productId: productId ?? undefined,
+        productTitle: productTitle ?? "Selected piece",
+        designerName,
+        finishLabel: finish,
+        specs: d.notes || "Bespoke specifications requested.",
+        attachmentName: attachment?.name ?? null,
+        attachmentPath: attachmentPath ?? null,
+        projectLocation: d.city,
+        submittedAt: new Date().toISOString(),
+      };
+      if (isTradeAuthorized) {
+        pushBespokeSync(syncEntry);
+        onComplete(d);
+        onClose();
+        window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { stage: "Discover" } }));
+        window.dispatchEvent(new CustomEvent("concierge:open"));
+        return;
+      }
+      cachePendingBespokeUpload(syncEntry);
+      window.dispatchEvent(new Event(BESPOKE_GUEST_EVENT));
       setSent(true);
       onComplete(d);
     } catch (error) {

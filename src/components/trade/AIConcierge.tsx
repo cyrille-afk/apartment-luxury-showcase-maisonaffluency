@@ -2063,14 +2063,20 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     const pending = readPendingBespokeSync();
     if (pending.length === 0) return;
     clearBespokeSync();
-    setTimeline((prev) => [
-      ...prev,
-      ...pending.map((entry) => ({
-        kind: "msg" as const,
-        role: "assistant" as const,
-        content: bespokeSyncConfirmation(entry),
-      })),
-    ]);
+    setStageOverride("Discover");
+    setStreaming(true);
+    const timer = window.setTimeout(() => {
+      setTimeline((prev) => [
+        ...prev,
+        ...pending.map((entry) => ({
+          kind: "msg" as const,
+          role: "assistant" as const,
+          content: bespokeSyncConfirmation(entry),
+        })),
+      ]);
+      setStreaming(false);
+    }, 900);
+    return () => window.clearTimeout(timer);
   }, [open, surface]);
 
   // Strict tour gate: Felix stays closed for the whole platform tour (nothing
