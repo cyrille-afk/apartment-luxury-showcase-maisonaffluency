@@ -3579,7 +3579,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       </div>
 
                       {/* Per-line shipping — origin / mode / CBM / weight. Defaults inherit from product.origin and destination mode. */}
-                      <div className="md:col-span-4 mt-2 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 print:hidden">
+                      <div className="md:col-span-4 mt-2 grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3 print:hidden">
                         <label className="flex flex-col gap-0.5">
                           <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Ship From</span>
                           <input
