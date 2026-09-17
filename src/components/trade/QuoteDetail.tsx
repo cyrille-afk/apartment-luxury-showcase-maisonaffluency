@@ -2696,7 +2696,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                   .eq("id", quoteId);
                                 if (error) {
                                   console.error("ship_to save failed", dbCol, error);
-                                  toast.error("Delivery details not saved", { description: error.message });
+                                  toast({ title: "Delivery details not saved", description: error.message, variant: "destructive" });
                                 }
                               }}
                               className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs font-body"
