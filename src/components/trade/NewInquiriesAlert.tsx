@@ -71,7 +71,7 @@ export function NewInquiriesAlert() {
   return (
     <Link
       to="/trade/admin/inquiries"
-      className="group mb-8 block border border-accent/60 bg-accent/10 px-5 py-4 transition-colors hover:bg-accent/20 md:px-7 md:py-5"
+      className="group mb-8 block animate-[pulse_2.5s_ease-in-out_infinite] border border-accent/60 bg-accent/10 px-5 py-4 transition-colors hover:bg-accent/20 md:px-7 md:py-5"
       aria-live="polite"
     >
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
