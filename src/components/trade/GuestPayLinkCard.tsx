@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Copy, Link2, Loader2, Check, Trash2 } from "lucide-react";
+import { Copy, Link2, Loader2, Check, Trash2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -41,6 +41,7 @@ export default function GuestPayLinkCard({ quoteId, currency, defaultAmountCents
   const [email, setEmail] = useState(defaultEmail ?? "");
   const [creating, setCreating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
 
   const load = async () => {
     const { data } = await supabase
@@ -86,6 +87,37 @@ export default function GuestPayLinkCard({ quoteId, currency, defaultAmountCents
     toast({ title: "Pay Now link created", description: "The link is copied — paste it into WhatsApp or email." });
   };
 
+
+  const handleEmailClient = async () => {
+    const cents = Math.round(Number(amount) * 100);
+    if (!Number.isFinite(cents) || cents <= 0) {
+      toast({ title: "Enter an amount", description: "Add the agreed amount before emailing the client.", variant: "destructive" });
+      return;
+    }
+    if (!email.trim()) {
+      toast({ title: "Client email required", description: "Add the client's email address to send the quotation.", variant: "destructive" });
+      return;
+    }
+    setSending(true);
+    const { data, error } = await supabase.functions.invoke("send-client-quote-payment", {
+      body: {
+        quoteId,
+        recipientEmail: email.trim(),
+        amountCents: cents,
+        currency: currency.toUpperCase(),
+        label: label.trim() || "Full payment",
+      },
+    });
+    setSending(false);
+    const err = (data as { error?: string } | null)?.error;
+    if (error || err) {
+      toast({ title: "Email not sent", description: err ?? "Please try again.", variant: "destructive" });
+      return;
+    }
+    await load();
+    toast({ title: "Quotation sent", description: `Pay Now link emailed to ${email.trim()}.` });
+  };
+
   const handleCopy = async (link: PayLink) => {
     await navigator.clipboard.writeText(linkUrl(link.token)).catch(() => {});
     setCopiedId(link.id);
@@ -112,7 +144,7 @@ export default function GuestPayLinkCard({ quoteId, currency, defaultAmountCents
         </p>
       </div>
 
-      <div className="grid gap-2 sm:grid-cols-[140px_1fr_1fr_auto] items-center">
+      <div className="grid gap-2 sm:grid-cols-[130px_1fr_1fr_auto_auto] items-center">
         <input
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
@@ -140,6 +172,14 @@ export default function GuestPayLinkCard({ quoteId, currency, defaultAmountCents
         >
           {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Link2 className="h-3.5 w-3.5" />}
           {creating ? "Creating…" : "Create link"}
+        </button>
+        <button
+          onClick={handleEmailClient}
+          disabled={sending}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-foreground text-foreground font-body text-[10px] uppercase tracking-[0.1em] rounded-md hover:bg-foreground/5 transition-colors disabled:opacity-50"
+        >
+          {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Mail className="h-3.5 w-3.5" />}
+          {sending ? "Sending…" : "Email client"}
         </button>
       </div>
 
