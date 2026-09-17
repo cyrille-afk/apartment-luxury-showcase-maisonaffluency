@@ -10,6 +10,7 @@ import PhoneDialField from "@/components/product/PhoneDialField";
 import { buildBespokePlaceholder } from "@/lib/phonePlaceholder";
 import { detectCountryCode } from "@/hooks/useShippingCountry";
 import { pushBespokeSync } from "@/lib/bespokeSync";
+import { cachePendingBespokeUpload } from "@/lib/pendingBespokeCache";
 import { BESPOKE_GUEST_EVENT } from "@/components/product/BespokeSubmissionBanner";
 
 /**
@@ -205,7 +206,19 @@ export default function BespokeConfigurationDialog({
         onClose();
       } else {
         // Path A — concierge inbox only. Felix must never mount or speak
-        // for an unverified session.
+        // for an unverified session. The payload is parked in the pending
+        // upload cache in case this guest converts through the Trade Program
+        // onboarding loop; it is merged only after the platform tour ends.
+        cachePendingBespokeUpload({
+          productId,
+          productTitle: productTitle ?? "Selected piece",
+          designerName,
+          finishLabel,
+          specs: specs.trim(),
+          attachmentName: attachment?.name ?? null,
+          attachmentPath: attachmentPath ?? null,
+          submittedAt: new Date().toISOString(),
+        });
         onClose();
         try {
           window.dispatchEvent(new Event(BESPOKE_GUEST_EVENT));
