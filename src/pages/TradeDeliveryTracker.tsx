@@ -344,7 +344,11 @@ export default function TradeDeliveryTracker() {
         byCurrency[l.currency] = (byCurrency[l.currency] || 0) + l.price_cents * l.quantity;
       }
     }
-    return { totalItems: items.length, byCurrency };
+    const lateItems = items.filter((l) => l.slack != null && l.slack < 0);
+    const avgDaysOverdue = lateItems.length
+      ? Math.round(lateItems.reduce((sum, l) => sum + Math.abs(l.slack), 0) / lateItems.length)
+      : 0;
+    return { totalItems: items.length, byCurrency, avgDaysOverdue };
   }, [visibleGroups]);
 
   const activeFilterLabel = filterTabs.find((t) => t.key === statusFilter)?.label || "All Items";
