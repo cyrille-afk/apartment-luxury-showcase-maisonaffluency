@@ -9,6 +9,7 @@ import { coerceClearance, classifyResultFailure, countDimensionNumbers } from ".
 import { canAccessProject } from "../_shared/tenantAccess.ts";
 import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, logInspectorRun, validateRequirementsCoverage, mergeRequirementsWithText, runDiscoveryProseGuard, deterministicRedact, SAFE_FALLBACK_PROSE, parseBudgetFromText } from "../_shared/concierge-inspector.ts";
 import { resolveProjectCity, looksLikeCityAssertion, buildCityLockSystemNote, findLatestCityAssertion } from "../_shared/cityResolver.ts";
+import { extractZones, assistantAskedForZone, buildZoneLockSystemNote } from "../_shared/spatialZones.ts";
 import { installFramePersistence, serveResume } from "./_resume.ts";
 import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
 import { inferDimensionConstraints, filterRowsByDimensionConstraints, type DimensionConstraints } from "../_shared/dimensionConstraints.ts";
@@ -6413,7 +6414,7 @@ serve(async (req) => {
         model: aiModel(chosenModel),
         temperature: 0,
         messages: [
-          { role: "system", content: languageDirective + systemPrompt + cityLockNote },
+          { role: "system", content: languageDirective + systemPrompt + cityLockNote + zoneLockNote },
           ...(() => {
             // If the current user turn carries image / file parts (mood
             // board, sketch, floor plan, reference photo, PDF), inject a
