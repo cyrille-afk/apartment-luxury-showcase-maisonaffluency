@@ -2809,6 +2809,31 @@ const PublicProductPageContent: React.FC = () => {
             </div>
           </div>
 
+          {!isMobileOrPwa && (
+            <section aria-label="Curator notes" className="mt-6 border-t border-border/30 pt-6">
+              <h2 className="mb-6 font-display text-lg italic text-foreground">Curator Notes</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+                {[
+                  { label: "Design Significance", text: curatorNotes.significance, Icon: History },
+                  { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
+                  { label: "Historical Provenance", text: curatorNotes.provenance, Icon: Scroll },
+                ].map(({ label, text, Icon }) => (
+                  <article key={label} className="group">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Icon className="h-4 w-4 shrink-0 text-muted-foreground/60 transition-colors duration-150 group-hover:text-foreground" strokeWidth={1.25} />
+                      <h3 className="font-body text-[10px] uppercase tracking-[0.2em] text-foreground">
+                        {label}
+                      </h3>
+                    </div>
+                    <p className="font-body text-sm italic leading-relaxed text-muted-foreground">
+                      {text}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Verified trade — Zone 1/2/3 workspace (strip + Felix | specs),
               running full width directly below the main product view. */}
           {user && !roleOverridden && hasTradeAccess && !isMobileOrPwa && (() => {
