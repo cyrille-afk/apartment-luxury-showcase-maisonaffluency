@@ -9,6 +9,7 @@ import { CalendarClock, ChevronRight, CalendarPlus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import QuoteLineDrawer, { type QuoteLineDrawerItem } from "@/components/trade/QuoteLineDrawer";
+import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback";
 
 const STAGE_LABEL: Record<string, string> = {
   not_started: "Not started",
@@ -56,6 +57,7 @@ interface Line {
   item_id: string;
   product_name: string;
   brand_name: string;
+  image_url: string | null;
   quantity: number;
   quote_id: string;
   quote_ref: string;
@@ -104,10 +106,11 @@ export default function TradeDeliveryTracker() {
       if (!qItems?.length) return [];
 
       const productIds = [...new Set(qItems.map((i) => i.product_id))];
-      const { data: products } = await supabase
+      const { data: productsRaw } = await supabase
         .from("trade_products")
-        .select("id, product_name, brand_name, lead_time, dimensions, materials, sku")
+        .select("id, product_name, brand_name, image_url, lead_time, dimensions, materials, sku")
         .in("id", productIds);
+      const products = await fillTradeProductImageFallbacks((productsRaw || []) as any[]);
 
       const projectIds = [...new Set(quotes.map((q: any) => q.project_id).filter(Boolean))] as string[];
       const { data: projects } = projectIds.length
@@ -133,6 +136,7 @@ export default function TradeDeliveryTracker() {
           item_id: it.id,
           product_name: p?.product_name || "Unknown",
           brand_name: p?.brand_name || "",
+          image_url: p?.image_url || null,
           quantity: it.quantity,
           quote_id: it.quote_id,
           quote_ref: `QU-${it.quote_id.slice(0, 6).toUpperCase()}`,
@@ -218,14 +222,14 @@ export default function TradeDeliveryTracker() {
                   <div className="min-w-0 overflow-hidden border border-border rounded-lg">
                     <table className="w-full table-fixed text-left">
                       <colgroup>
-                        <col className="w-[19%]" /><col className="w-[13%]" /><col className="w-[5%]" />
+                        <col className="w-[4%]" /><col className="w-[17%]" /><col className="w-[12%]" /><col className="w-[5%]" />
                         <col className="w-[12%]" /><col className="w-[12%]" /><col className="w-[11%]" />
-                        <col className="w-[12%]" /><col className="w-[8%]" /><col className="w-[8%]" />
+                        <col className="w-[11%]" /><col className="w-[8%]" /><col className="w-[8%]" />
                       </colgroup>
                       <thead>
                         <tr className="border-b border-border bg-muted/30">
-                          {["Item", "Brand", "Qty", "Client", "Stage", "Expected ready", "Required by", "Slack", "Quote"].map((h) => (
-                            <th key={h} className="px-2.5 py-2 font-body text-[10px] uppercase tracking-wider text-muted-foreground first:pl-4 last:pr-4">{h}</th>
+                          {["", "Item", "Brand", "Qty", "Client", "Stage", "Expected ready", "Required by", "Slack", "Quote"].map((h, index) => (
+                            <th key={`${h}-${index}`} className="px-2.5 py-2 font-body text-[10px] uppercase tracking-wider text-muted-foreground first:pl-2 last:pr-4">{h}</th>
                           ))}
                         </tr>
                       </thead>
@@ -239,7 +243,19 @@ export default function TradeDeliveryTracker() {
                           })
                           .map((l) => (
                             <tr key={l.item_id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
-                              <td className="px-2.5 py-2 pl-4 font-body text-sm text-foreground break-words">{l.product_name}</td>
+                              <td className="w-12 px-2 py-2">
+                                {l.image_url ? (
+                                  <img
+                                    src={l.image_url}
+                                    alt={l.product_name}
+                                    loading="lazy"
+                                    className="h-10 w-10 rounded border border-border/50 bg-muted/20 object-cover"
+                                  />
+                                ) : (
+                                  <div className="h-10 w-10 rounded border border-dashed border-border/50 bg-muted/10" aria-hidden />
+                                )}
+                              </td>
+                              <td className="px-2.5 py-2 font-body text-sm text-foreground break-words">{l.product_name}</td>
                               <td className="px-2.5 py-2 font-body text-xs text-muted-foreground break-words">{l.brand_name}</td>
                               <td className="px-2.5 py-2 font-body text-sm text-foreground tabular-nums">{l.quantity}</td>
                               <td className="px-2.5 py-2 font-body text-xs text-muted-foreground break-words">{l.client_name || "—"}</td>
