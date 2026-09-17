@@ -150,7 +150,13 @@ export function assistantAskedForZone(text: string | null | undefined): boolean 
 
 /** Title-case a zone list for the confirmation line. */
 function display(zones: string[]): string {
-  const pretty = zones.map((z) => z.replace(/\b\w/g, (c) => c.toUpperCase()));
+  const SMALL = new Set(["and", "or", "in", "of", "the"]);
+  const pretty = zones.map((z) =>
+    z
+      .split(" ")
+      .map((w, i) => (i > 0 && SMALL.has(w) ? w : w.replace(/^\w/, (c) => c.toUpperCase())))
+      .join(" "),
+  );
   if (pretty.length <= 1) return pretty[0] || "";
   return `${pretty.slice(0, -1).join(", ")} and ${pretty[pretty.length - 1]}`;
 }
