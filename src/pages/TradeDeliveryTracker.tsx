@@ -90,6 +90,20 @@ function statusDot(slackDays: number | null) {
   );
 }
 
+function statusLabelBadge(slackDays: number | null) {
+  if (slackDays == null) return null;
+  if (slackDays < 0)
+    return <span className="inline-flex items-center rounded-full bg-red-100 text-red-800 px-2 py-0.5 text-[10px] font-medium tabular-nums">Late</span>;
+  if (slackDays <= 14)
+    return <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-medium tabular-nums">Tight Timeline</span>;
+  return <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[10px] font-medium tabular-nums">On Track</span>;
+}
+
+function formatMoney(cents: number | null, currency: string): string {
+  if (cents == null) return "—";
+  return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(cents / 100);
+}
+
 interface Line {
   item_id: string;
   product_name: string;
@@ -112,6 +126,8 @@ interface Line {
   dimensions: string | null;
   materials: string | null;
   sku: string | null;
+  price_cents: number | null;
+  currency: string;
 }
 
 export default function TradeDeliveryTracker() {
@@ -124,7 +140,7 @@ export default function TradeDeliveryTracker() {
     queryFn: async (): Promise<Line[]> => {
       const { data: quotes } = await supabase
         .from("trade_quotes")
-        .select("id, client_name, status, project_id, created_at")
+        .select("id, client_name, status, project_id, created_at, currency")
         .eq("user_id", user!.id)
         .in("status", ["confirmed", "submitted", "responded", "priced", "deposit_paid", "paid"]);
       if (!quotes?.length) return [];
@@ -133,7 +149,7 @@ export default function TradeDeliveryTracker() {
       const [{ data: qItems }, { data: timelines }] = await Promise.all([
         supabase
           .from("trade_quote_items")
-          .select("id, product_id, quantity, quote_id, po_number, cost_code, lead_time_weeks_override, required_by_date")
+          .select("id, product_id, quantity, quote_id, po_number, cost_code, lead_time_weeks_override, required_by_date, unit_price_cents")
           .in("quote_id", quoteIds),
         supabase
           .from("order_timeline" as any)
@@ -192,6 +208,8 @@ export default function TradeDeliveryTracker() {
           dimensions: p?.dimensions || null,
           materials: p?.materials || null,
           sku: p?.sku || null,
+          price_cents: it.unit_price_cents ?? null,
+          currency: q?.currency || "EUR",
         };
       });
     },
@@ -347,6 +365,12 @@ export default function TradeDeliveryTracker() {
           <DialogHeader className="p-5 text-left">
             <DialogTitle className="font-display text-base">{previewLine?.product_name}</DialogTitle>
             <DialogDescription className="font-body text-xs uppercase tracking-wider">{previewLine?.brand_name}</DialogDescription>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <span className="font-body text-sm font-medium text-foreground">
+                {formatMoney(previewLine?.price_cents ?? null, previewLine?.currency || "EUR")}
+              </span>
+              {statusLabelBadge(previewLine?.slack ?? null)}
+            </div>
           </DialogHeader>
         </DialogContent>
       </Dialog>
