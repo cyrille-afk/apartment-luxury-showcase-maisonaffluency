@@ -653,15 +653,23 @@ export default function TradeFFESchedule() {
                   <DropdownMenuLabel className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
                     Preset layouts
                   </DropdownMenuLabel>
-                  {DEFAULT_VIEW_PRESETS.map((preset) => (
-                    <DropdownMenuItem
-                      key={preset.name}
-                      onClick={() => applyPreset(preset)}
-                      className="font-body text-xs"
-                    >
-                      {preset.name}
-                    </DropdownMenuItem>
-                  ))}
+                  {DEFAULT_VIEW_PRESETS.map((preset) => {
+                    const isActive = activePreset?.name === preset.name;
+                    return (
+                      <DropdownMenuItem
+                        key={preset.name}
+                        onClick={() => applyPreset(preset)}
+                        className={`relative flex items-center gap-2 font-body text-xs transition-all duration-200 ${isActive ? "font-semibold bg-accent/40" : ""}`}
+                      >
+                        <span
+                          className={`inline-flex h-2 w-2 shrink-0 rounded-full transition-all duration-200 ${isActive ? "bg-primary scale-100" : "bg-transparent scale-75"}`}
+                          aria-hidden="true"
+                        />
+                        {isActive && <Check className="sr-only" />}
+                        {preset.name}
+                      </DropdownMenuItem>
+                    );
+                  })}
                   {customPresets.length > 0 && <DropdownMenuSeparator />}
                   {customPresets.map((preset) => (
                     <DropdownMenuItem
