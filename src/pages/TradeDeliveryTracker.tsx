@@ -9,6 +9,8 @@ import { CalendarClock, ChevronRight, CalendarPlus, ImageOff } from "lucide-reac
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import QuoteLineDrawer, { type QuoteLineDrawerItem } from "@/components/trade/QuoteLineDrawer";
 import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback";
 
@@ -52,6 +54,40 @@ function slackBadge(slackDays: number | null) {
   if (slackDays <= 14)
     return <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-medium tabular-nums">{slackDays}d slack</span>;
   return <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[10px] font-medium tabular-nums">{slackDays}d slack</span>;
+}
+
+function statusDot(slackDays: number | null) {
+  if (slackDays == null) return null;
+  let label = "On Track";
+  let detail = `${slackDays}d of slack`;
+  let color = "bg-emerald-500";
+  if (slackDays < 0) {
+    label = "Late";
+    detail = `${Math.abs(slackDays)}d past required date`;
+    color = "bg-red-500";
+  } else if (slackDays <= 14) {
+    label = "Tight Timeline";
+    detail = "Less than 2 weeks slack";
+    color = "bg-amber-500";
+  }
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          tabIndex={0}
+          className={cn(
+            "absolute -bottom-1 -right-1 z-10 h-3 w-3 rounded-full ring-2 ring-background cursor-help",
+            color,
+          )}
+          aria-label={`Status: ${label}`}
+        />
+      </TooltipTrigger>
+      <TooltipContent side="right" className="max-w-[16rem]">
+        <p className="font-body text-xs font-medium">{label}</p>
+        <p className="font-body text-[10px] text-muted-foreground">{detail}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
 }
 
 interface Line {
@@ -246,23 +282,26 @@ export default function TradeDeliveryTracker() {
                           .map((l) => (
                             <tr key={l.item_id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
                               <td className="w-12 px-2 py-2">
-                                <button
-                                  type="button"
-                                  onClick={() => setPreviewLine(l)}
-                                  className="group relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded border border-border/50 bg-muted/20 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                  aria-label={`Preview ${l.product_name}`}
-                                >
-                                  {l.image_url ? (
-                                    <img
-                                      src={l.image_url}
-                                      alt={l.product_name}
-                                      loading="lazy"
-                                      className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-110"
-                                    />
-                                  ) : (
-                                    <ImageOff className="h-4 w-4 text-muted-foreground/60" />
-                                  )}
-                                </button>
+                                <div className="relative flex h-10 w-10 items-center justify-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => setPreviewLine(l)}
+                                    className="group relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded border border-border/50 bg-muted/20 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                    aria-label={`Preview ${l.product_name}`}
+                                  >
+                                    {l.image_url ? (
+                                      <img
+                                        src={l.image_url}
+                                        alt={l.product_name}
+                                        loading="lazy"
+                                        className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-110"
+                                      />
+                                    ) : (
+                                      <ImageOff className="h-4 w-4 text-muted-foreground/60" />
+                                    )}
+                                  </button>
+                                  {statusDot(l.slack)}
+                                </div>
                               </td>
                               <td className="px-2.5 py-2 font-body text-sm text-foreground break-words">{l.product_name}</td>
                               <td className="px-2.5 py-2 font-body text-xs text-muted-foreground break-words">{l.brand_name}</td>
