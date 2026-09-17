@@ -8834,6 +8834,7 @@ export type Database = {
           width_mm: number
         }[]
       }
+      parse_lead_weeks: { Args: { p_text: string }; Returns: number }
       pick_is_publicly_visible: { Args: { _pick_id: string }; Returns: boolean }
       profile_privileged_fields_unchanged: {
         Args: {
@@ -8900,9 +8901,41 @@ export type Database = {
         Returns: number
       }
       tier_rank: { Args: { _tier: string }; Returns: number }
+      trade_emit_delivery_escalation: {
+        Args: {
+          p_item_id: string
+          p_new_expected: string
+          p_new_slack: number
+          p_old_expected: string
+          p_old_slack: number
+        }
+        Returns: undefined
+      }
+      trade_expected_ready: {
+        Args: {
+          p_actual: string
+          p_deposit: string
+          p_estimated: string
+          p_lead_weeks: number
+          p_quote_created: string
+          p_shipping_weeks: number
+        }
+        Returns: string
+      }
+      trade_item_delivery_status: {
+        Args: { p_item_id: string }
+        Returns: {
+          expected: string
+          slack: number
+        }[]
+      }
       trade_product_is_publicly_visible: {
         Args: { _product_id: string }
         Returns: boolean
+      }
+      trade_slack_days: {
+        Args: { p_expected: string; p_required_by: string }
+        Returns: number
       }
       update_item_approval_by_token: {
         Args: { _approval_status: string; _item_id: string; _token: string }
