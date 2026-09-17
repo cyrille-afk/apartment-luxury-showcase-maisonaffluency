@@ -228,6 +228,52 @@ export default function TradeDeliveryTracker() {
     return Array.from(m.values()).sort((a, b) => a.name.localeCompare(b.name));
   }, [lines]);
 
+  const statusCounts = useMemo(() => {
+    return {
+      all: lines.length,
+      late: lines.filter((l) => l.slack != null && l.slack < 0).length,
+      tight: lines.filter((l) => l.slack != null && l.slack >= 0 && l.slack <= 14).length,
+      ontrack: lines.filter((l) => l.slack != null && l.slack > 14).length,
+    };
+  }, [lines]);
+
+  const filteredGroups = useMemo(() => {
+    return groups
+      .map((g) => ({
+        ...g,
+        lines: g.lines.filter((l) => {
+          if (statusFilter === "all") return true;
+          if (l.slack == null) return false;
+          if (statusFilter === "late") return l.slack < 0;
+          if (statusFilter === "tight") return l.slack >= 0 && l.slack <= 14;
+          return l.slack > 14;
+        }),
+      }))
+      .filter((g) => g.lines.length > 0);
+  }, [groups, statusFilter]);
+
+  const filterTabs: { key: "all" | "late" | "tight" | "ontrack"; label: string }[] = [
+    { key: "all", label: "All Items" },
+    { key: "late", label: "Late" },
+    { key: "tight", label: "Tight Timeline" },
+    { key: "ontrack", label: "On Track" },
+  ];
+
+  function filterButtonClasses(key: typeof statusFilter) {
+    const active = statusFilter === key;
+    const base = "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-body text-xs transition-colors";
+    if (key === "all") {
+      return cn(base, active ? "border-foreground bg-foreground text-background" : "border-border bg-background text-muted-foreground hover:text-foreground");
+    }
+    if (key === "late") {
+      return cn(base, active ? "border-red-200 bg-red-50 text-red-800" : "border-border bg-background text-muted-foreground hover:text-red-700");
+    }
+    if (key === "tight") {
+      return cn(base, active ? "border-amber-200 bg-amber-50 text-amber-800" : "border-border bg-background text-muted-foreground hover:text-amber-700");
+    }
+    return cn(base, active ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-border bg-background text-muted-foreground hover:text-emerald-700");
+  }
+
   return (
     <>
       <Helmet><title>Delivery Tracker — Trade Portal</title></Helmet>
