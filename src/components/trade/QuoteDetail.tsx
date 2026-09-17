@@ -4,7 +4,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { getDestinationTax } from "@/lib/destinationTax";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
-import { getFxRates, FALLBACK_RATES, getFxSource, getFxMeta, summarizeFxSources, describeFxSource, type FxSource } from "@/lib/fxRates";
+import { getFxRates, FALLBACK_RATES, getFxSource, getFxMeta, invalidateFxCache, summarizeFxSources, describeFxSource, type FxSource } from "@/lib/fxRates";
 import { formatFxSnapshotLine } from "@/lib/fxSnapshot";
 import { FxSourceBadge } from "@/components/trade/FxSourceBadge";
 import { FxAppliedRates } from "@/components/trade/FxAppliedRates";
@@ -437,6 +437,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [fxSource, setFxSource] = useState<FxSource>("identity");
   const [fxPairs, setFxPairs] = useState<Array<{ src: string; tgt: string; rate: number; source: FxSource; fetchedAt: number; cacheTtlMs: number }>>([]);
   const [fxAppliedAt, setFxAppliedAt] = useState<Date | null>(null);
+  const [fxRefreshTick, setFxRefreshTick] = useState(0);
+  const [fxRefreshing, setFxRefreshing] = useState(false);
 
   const [tradeDiscount, setTradeDiscount] = useState(true);
   // MSRP-only quotes must never apply the trade discount — the whole point of
