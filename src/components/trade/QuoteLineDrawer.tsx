@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, ClipboardList, FileText, Package, Paperclip, ReceiptText } from "lucide-react";
 import { autoPoNumber } from "@/lib/procurementExcel";
@@ -8,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import PODocumentViewer from "@/components/trade/PODocumentViewer";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 export interface QuoteLineDrawerItem {
@@ -20,6 +20,8 @@ export interface QuoteLineDrawerItem {
   client_name?: string | null;
   project_name?: string | null;
   po_number?: string | null;
+  price_cents?: number | null;
+  currency?: string | null;
   cost_code?: string | null;
   lead_time?: string | null;
   lead_time_weeks_override?: number | null;
@@ -51,6 +53,7 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
   const [leadWeeks, setLeadWeeks] = useState("");
   const [saving, setSaving] = useState(false);
   const [generatingPo, setGeneratingPo] = useState(false);
+  const [viewingPo, setViewingPo] = useState(false);
 
   /**
    * Generate and persist a PO reference for this line, matching the
@@ -93,6 +96,7 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
   };
 
   useEffect(() => {
+    setViewingPo(false);
     setPoNumber(item?.po_number || "");
     setCostCode(item?.cost_code || "");
     setRequiredBy(item?.required_by_date || "");
@@ -178,18 +182,19 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
               </div>
               <div className="p-4">
                 {(item.po_number || poNumber.trim()) ? (
-                  <Link
-                    to={`/trade/quotes?id=${item.quote_id}`}
-                    className="group inline-flex items-center gap-2.5 rounded-sm border border-border bg-background px-3.5 py-2.5 transition-colors hover:border-foreground/40 hover:bg-muted/50"
+                  <button
+                    type="button"
+                    onClick={() => setViewingPo(true)}
+                    className="group inline-flex items-center gap-2.5 rounded-sm border border-border bg-background px-3.5 py-2.5 text-left transition-colors hover:border-foreground/40 hover:bg-muted/50"
                   >
                     <Paperclip className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-foreground" />
                     <span className="font-body text-sm font-medium tracking-wide text-foreground underline-offset-4 group-hover:underline">
                       {item.po_number || poNumber.trim()}
                     </span>
                     <span className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                      View PO file
+                      View PO document
                     </span>
-                  </Link>
+                  </button>
                 ) : (
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <p className="font-body text-xs italic text-muted-foreground">PO Status: Pending Generation</p>
@@ -254,6 +259,32 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
           </div>
         )}
       </SheetContent>
+      {item && (
+        <PODocumentViewer
+          document={
+            viewingPo && (item.po_number || poNumber.trim())
+              ? {
+                  po_number: item.po_number || poNumber.trim(),
+                  quote_ref: item.quote_ref,
+                  product_name: item.product_name,
+                  brand_name: item.brand_name,
+                  quantity: item.quantity,
+                  client_name: item.client_name,
+                  project_name: item.project_name,
+                  cost_code: costCode || item.cost_code,
+                  sku: item.sku,
+                  dimensions: item.dimensions,
+                  materials: item.materials,
+                  lead_time: item.lead_time,
+                  required_by_date: requiredBy || item.required_by_date,
+                  price_cents: item.price_cents,
+                  currency: item.currency,
+                }
+              : null
+          }
+          onOpenChange={(open) => !open && setViewingPo(false)}
+        />
+      )}
     </Sheet>
   );
 }
