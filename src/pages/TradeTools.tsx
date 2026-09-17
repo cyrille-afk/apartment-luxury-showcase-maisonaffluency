@@ -4,7 +4,7 @@ import {
   Image, Users, FolderOpen, Layers, FileText, FileSpreadsheet, Scissors,
   Columns, Paintbrush, MessageCircle, CalendarClock, Package, Truck,
   CalendarDays, Wallet, RefreshCw, ArrowRightLeft, GraduationCap, Box, BookOpen,
-  Wand2, Star, Search, X, Scan, Presentation, ClipboardList,
+  Wand2, Star, Search, X, Scan, Presentation, ClipboardList, CalendarRange,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { categorySlug } from "@/lib/toolsBreadcrumbs";
@@ -44,6 +44,7 @@ const categories: ToolCategory[] = [
       { title: "Shipping Tracker", description: "Real-time delivery progress", url: "/trade/shipping-tracker", icon: Truck },
       { title: "Lead Time Calendar", description: "Production and shipping timelines", url: "/trade/lead-time-calendar", icon: CalendarDays },
       { title: "Budget Tracker & Cash-Flow Planner", description: "Margins, tier markups, deposits and invoice cash flow", url: "/trade/budget", icon: Wallet },
+      { title: "Gantt Chart & Project Timeline", description: "Delivery windows and cash milestones on one timeline", url: "/trade/gantt", icon: CalendarRange },
       { title: "Purchase Order Logs", description: "Invoice matching and vendor payment states", url: "/trade/po-logs", icon: ClipboardList },
       { title: "Reorder", description: "Quickly re-order from past quotes", url: "/trade/reorder", icon: RefreshCw },
       { title: "Currency Converter", description: "Convert trade prices across currencies", url: "/trade/currency-converter", icon: ArrowRightLeft },
