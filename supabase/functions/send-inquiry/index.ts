@@ -412,7 +412,7 @@ const handler = async (req: Request): Promise<Response> => {
         phone,
         company: companyName,
         productName,
-        selectedFinish,
+        selectedFinish: resolvedFinish,
       }).catch((err) => console.error("Quote WhatsApp alert unhandled:", err));
     }
 
