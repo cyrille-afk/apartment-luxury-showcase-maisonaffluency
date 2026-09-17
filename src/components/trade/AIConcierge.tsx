@@ -472,7 +472,7 @@ type TimelineItem =
   | { kind: "viz_brief"; proposal: VisualizationBriefProposal; resolved?: "opened" | "discarded" }
   | { kind: "pending_proposal"; tool: PendingProposalTool; toolCallId: string | null; index: number }
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" }
-  | { kind: "retry"; text: string; reason: string }
+  | { kind: "retry"; text: string; reason: string; stage?: Stage }
   | { kind: "spec_schedule"; zone: string; markdown: string }
   | { kind: "layout_options"; id: string; selected?: number | null; styleInput?: string | null }
   | { kind: "proactive_tearsheet"; data: import("@/components/trade/concierge/ProactiveTearsheetCard").ProactiveTearsheetData; resolved?: "generated" | "boarded" | "dismissed" }
