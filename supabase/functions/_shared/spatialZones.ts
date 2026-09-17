@@ -115,9 +115,16 @@ export function extractZones(text: string): string[] {
     if (AMBIGUOUS.has(token) && !/\b(room|rooms|zone|zones|area|areas|space|spaces|and|&)\b/i.test(t)) continue;
     hits.push(token);
   }
-  // Drop tokens that are a substring of a longer matched token
-  // ("living" when "living and dining" already matched).
-  return hits.filter((h) => !hits.some((other) => other !== h && other.includes(h)));
+  // Collapse overlapping matches: keep the longest phrase whenever two hits
+  // share a word ("living and dining" wins over "living" and "dining room").
+  const sorted = [...hits].sort((a, b) => b.length - a.length);
+  const kept: string[] = [];
+  for (const h of sorted) {
+    const words = h.split(" ");
+    const overlaps = kept.some((k) => k.split(" ").some((w) => words.includes(w)));
+    if (!overlaps) kept.push(h);
+  }
+  return hits.filter((h) => kept.includes(h));
 }
 
 /** Does this message name an interior room/zone rather than a location? */
