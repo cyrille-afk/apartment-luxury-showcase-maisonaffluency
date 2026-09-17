@@ -158,6 +158,7 @@ const ClientBoardViewer = lazy(() => import("./pages/ClientBoardViewer"));
 const TradeInsights = lazy(() => import("./pages/TradeInsights"));
 const TradeDesigners = lazy(() => import("./pages/TradeDesigners"));
 const TradeDesignersAdmin = lazy(() => import("./pages/TradeDesignersAdmin"));
+const TradeAdminSuppliers = lazy(() => import("./pages/TradeAdminSuppliers"));
 const TradeCollectiblesAdmin = lazy(() => import("./pages/TradeCollectiblesAdmin"));
 const TradeAdminProductAudit = lazy(() => import("./pages/TradeAdminProductAudit"));
 const TradePriceDriftAudit = lazy(() => import("./pages/TradePriceDriftAudit"));
@@ -808,6 +809,7 @@ const App = () => {
                     <Route path="admin/shipping-rates" element={<TradeAdminShippingRates />} />
                     <Route path="admin/shipping-surcharges" element={<TradeAdminShippingSurcharges />} />
                     <Route path="admin/taxonomy-audit" element={<TradeAdminTaxonomyAudit />} />
+                    <Route path="admin/suppliers" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminSuppliers /></Suspense>} />
                     <Route path="admin/descriptor-taxonomy" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminDescriptorTaxonomy /></Suspense>} />
                     <Route path="admin/duplicates" element={<TradeAdminDuplicates />} />
                     <Route path="admin/whatsapp-alerts" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminWhatsAppAlerts /></Suspense>} />
