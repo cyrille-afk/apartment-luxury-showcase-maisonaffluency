@@ -56,6 +56,40 @@ function slackBadge(slackDays: number | null) {
   return <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[10px] font-medium tabular-nums">{slackDays}d slack</span>;
 }
 
+function statusDot(slackDays: number | null) {
+  if (slackDays == null) return null;
+  let label = "On Track";
+  let detail = `${slackDays}d of slack`;
+  let color = "bg-emerald-500";
+  if (slackDays < 0) {
+    label = "Late";
+    detail = `${Math.abs(slackDays)}d past required date`;
+    color = "bg-red-500";
+  } else if (slackDays <= 14) {
+    label = "Tight Timeline";
+    detail = "Less than 2 weeks slack";
+    color = "bg-amber-500";
+  }
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          tabIndex={0}
+          className={cn(
+            "absolute -bottom-1 -right-1 z-10 h-3 w-3 rounded-full ring-2 ring-background cursor-help",
+            color,
+          )}
+          aria-label={`Status: ${label}`}
+        />
+      </TooltipTrigger>
+      <TooltipContent side="right" className="max-w-[16rem]">
+        <p className="font-body text-xs font-medium">{label}</p>
+        <p className="font-body text-[10px] text-muted-foreground">{detail}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 interface Line {
   item_id: string;
   product_name: string;
