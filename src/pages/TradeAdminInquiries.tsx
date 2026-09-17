@@ -289,6 +289,41 @@ export default function TradeAdminInquiries() {
                   </div>
                 </div>
 
+                {/* Primary actions */}
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <a
+                    href={`mailto:${selected.email}?subject=${encodeURIComponent(`Re: ${selected.product_name || "Your Maison Affluency inquiry"}`)}`}
+                    className="flex items-center gap-1.5 rounded-md bg-accent px-3.5 py-2 text-xs font-heading text-accent-foreground hover:opacity-90"
+                  >
+                    <Mail className="h-3.5 w-3.5" /> Reply by email
+                  </a>
+                  {whatsappHref(selected.phone) && (
+                    <a
+                      href={whatsappHref(selected.phone)!}
+                      target="_blank" rel="noreferrer"
+                      className="flex items-center gap-1.5 rounded-md border border-border px-3.5 py-2 text-xs hover:border-accent/50 hover:text-accent"
+                    >
+                      <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+                    </a>
+                  )}
+                  {selected.linked_quote_id ? (
+                    <button
+                      onClick={() => navigate(`/trade/quotes/${selected.linked_quote_id}`)}
+                      className="flex items-center gap-1.5 rounded-md border border-accent/40 px-3.5 py-2 text-xs text-accent hover:bg-accent/10"
+                    >
+                      <FileText className="h-3.5 w-3.5" /> Open quote
+                    </button>
+                  ) : (
+                    <button
+                      disabled={draftQuote.isPending}
+                      onClick={() => draftQuote.mutate({ inquiryId: selected.id, kind: quoteKind })}
+                      className="flex items-center gap-1.5 rounded-md border border-accent/40 px-3.5 py-2 text-xs text-accent hover:bg-accent/10 disabled:opacity-50"
+                    >
+                      <Send className="h-3.5 w-3.5" /> Send Quote
+                    </button>
+                  )}
+                </div>
+
                 {/* Product card */}
                 {(selected.product_name || selected.designer_name) && (
                   <div className="mt-4 flex items-center gap-3 rounded-lg border border-border bg-background/50 p-3">
