@@ -315,7 +315,7 @@ export default function TradeDeliveryTracker() {
 
   const exportRows = useMemo(
     () =>
-      filteredGroups.flatMap((g) =>
+      visibleGroups.flatMap((g) =>
         g.lines
           .slice()
           .sort((a, b) => (a.required_by_date || "9999-12-31").localeCompare(b.required_by_date || "9999-12-31"))
@@ -333,11 +333,11 @@ export default function TradeDeliveryTracker() {
             quote: l.quote_ref,
           })),
       ),
-    [filteredGroups],
+    [visibleGroups],
   );
 
-  const totals = useMemo(() => {
-    const items = filteredGroups.flatMap((g) => g.lines);
+  const visibleTotals = useMemo(() => {
+    const items = visibleGroups.flatMap((g) => g.lines);
     const byCurrency: Record<string, number> = {};
     for (const l of items) {
       if (l.price_cents != null && l.quantity > 0) {
@@ -345,7 +345,7 @@ export default function TradeDeliveryTracker() {
       }
     }
     return { totalItems: items.length, byCurrency };
-  }, [filteredGroups]);
+  }, [visibleGroups]);
 
   const activeFilterLabel = filterTabs.find((t) => t.key === statusFilter)?.label || "All Items";
 
