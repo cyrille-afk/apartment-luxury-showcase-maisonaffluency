@@ -12,6 +12,8 @@
 // geocoder itself fails or nothing sensible comes back, we degrade to the
 // dictionary/fallback path — Felix always gets a lock-in.
 
+import { looksLikeSpatialZone } from "./spatialZones.ts";
+
 export type CityMatchType = "exact" | "alias" | "fuzzy" | "geocoded" | "fallback" | "unknown" | "gibberish";
 
 export interface CityResolution {
