@@ -7,6 +7,7 @@ import { BriefBuilder, loadBriefDraftText, validateBriefDraft } from "@/componen
 import { ART_DECO_DISCOVERY_REPLY, evaluateFelixOnboardingGate, isHighLevelVisionStatement, hasRealBriefValue, type FelixBriefFacts } from "@/lib/felixOnboardingGate";
 import { loadLockedFacts, mergeLockedFacts, persistLockedFacts } from "@/lib/felixLockedFacts";
 import { readPendingBespokeSync, clearBespokeSync, bespokeSyncConfirmation } from "@/lib/bespokeSync";
+import { readPendingBespokeUploadCache, clearPendingBespokeUploadCache, pendingBespokeIntro } from "@/lib/pendingBespokeCache";
 import { QuoteSummaryCardContainer } from "@/components/trade/QuoteSummaryCard";
 import { BriefBubble, isBriefContent } from "@/components/trade/concierge/BriefBubble";
 import brandCategoriesRaw from "@/data/brandCategories.json";
@@ -2072,16 +2073,56 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     ]);
   }, [open, surface]);
 
-  // Auto-close Felix while the Quick Tour is running so its panel never
-  // overlaps the page being highlighted (especially the Tools step).
+  // Strict tour gate: Felix stays closed for the whole platform tour (nothing
+  // may re-open it, ambient or explicit) and only slides out once the member
+  // clicks "Finish Tour & Open Workspace". At that point the stage pill resets
+  // to 01 DISCOVER and any pending bespoke upload cache is merged into the log.
+  // Survives remounts/route changes during the tour, so the gate cannot be
+  // bypassed by navigating between tour steps.
+  const isTourActive = () => {
+    try { return sessionStorage.getItem("concierge:tour-active") === "1"; } catch { return false; }
+  };
+  const setTourActive = (v: boolean) => {
+    try {
+      if (v) sessionStorage.setItem("concierge:tour-active", "1");
+      else sessionStorage.removeItem("concierge:tour-active");
+    } catch { /* storage unavailable */ }
+  };
   useEffect(() => {
+    if (isTourActive()) { setOpen(false); setMinimized(false); }
     const close = () => { markDismissed(); setOpen(false); setMinimized(false); };
-    const reopen = () => { clearDismissed(); setMinimized(false); setOpen(true); };
-    window.addEventListener("trade-tour:start", close);
+    const start = () => { setTourActive(true); close(); };
+    const reopen = () => {
+      if (isTourActive()) return;
+      clearDismissed();
+      setMinimized(false);
+      setOpen(true);
+    };
+    const done = () => {
+      setTourActive(false);
+      clearDismissed();
+      setMinimized(false);
+      setStageOverride("Discover");
+      setOpen(true);
+      const pending = readPendingBespokeUploadCache();
+      if (pending.length === 0) return;
+      clearPendingBespokeUploadCache();
+      setTimeline((prev) => [
+        ...prev,
+        ...pending.map((entry) => ({
+          kind: "msg" as const,
+          role: "assistant" as const,
+          content: pendingBespokeIntro(entry),
+        })),
+      ]);
+    };
+    window.addEventListener("trade-tour:start", start);
+    window.addEventListener("trade-tour:done", done);
     window.addEventListener("concierge:close", close);
     window.addEventListener("concierge:open", reopen);
     return () => {
-      window.removeEventListener("trade-tour:start", close);
+      window.removeEventListener("trade-tour:start", start);
+      window.removeEventListener("trade-tour:done", done);
       window.removeEventListener("concierge:close", close);
       window.removeEventListener("concierge:open", reopen);
     };
