@@ -53,6 +53,18 @@ const whatsappHref = (phone: string | null) => {
   return digits ? `https://wa.me/${digits}` : null;
 };
 
+const STAGE_LABELS: Record<string, string> = {
+  new: "Open — not yet handled",
+  in_review: "Being handled",
+  quote_drafted: "Quote drafted",
+  ready_to_send: "Ready to send",
+  sent: "Quote sent",
+  closed: "Closed",
+  rejected: "Declined",
+};
+
+const stageLabel = (status: string) => STAGE_LABELS[status] || status.replace(/_/g, " ");
+
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-amber-500/10 text-amber-400 border-amber-500/20",
   in_review: "bg-sky-500/10 text-sky-400 border-sky-500/20",
@@ -93,6 +105,23 @@ export default function TradeAdminInquiries() {
     },
   });
 
+  const { data: stageCounts } = useQuery({
+    queryKey: ["admin-inquiry-stage-counts"],
+    enabled: !!user && isAdmin,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("inquiries")
+        .select("status")
+        .limit(1000);
+      if (error) throw error;
+      const counts: Record<string, number> = {};
+      (data || []).forEach((r: any) => {
+        counts[r.status] = (counts[r.status] || 0) + 1;
+      });
+      return counts;
+    },
+  });
+
   const filtered = useMemo(() => {
     if (!rows) return [] as InquiryRow[];
     const q = search.trim().toLowerCase();
@@ -113,6 +142,7 @@ export default function TradeAdminInquiries() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-inquiries"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-inquiry-stage-counts"] });
     },
     onError: (err: any) => toast({ title: "Update failed", description: err.message, variant: "destructive" }),
   });
@@ -125,6 +155,7 @@ export default function TradeAdminInquiries() {
     onSuccess: (_d, ids) => {
       setSelectedId(null);
       queryClient.invalidateQueries({ queryKey: ["admin-inquiries"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-inquiry-stage-counts"] });
       toast({ title: ids.length > 1 ? `${ids.length} inquiries deleted` : "Inquiry deleted" });
     },
     onError: (err: any) => toast({ title: "Delete failed", description: err.message, variant: "destructive" }),
@@ -141,6 +172,7 @@ export default function TradeAdminInquiries() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["admin-inquiries"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-inquiry-stage-counts"] });
       toast({ title: "Draft quote created", description: "Opening quote for review…" });
       navigate(`/trade/quotes/${data.quoteId}`);
     },
@@ -173,6 +205,24 @@ export default function TradeAdminInquiries() {
               Price-upon-Request submissions, concierge leads, and contact-form messages. Draft a quote and mark it ready when reviewed.
             </p>
           </div>
+        </div>
+
+        {/* Stage overview */}
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          {STATUS_OPTIONS.filter((o) => o.key !== "all").map((o) => {
+            const count = stageCounts?.[o.key] || 0;
+            const active = statusFilter === o.key;
+            return (
+              <button
+                key={o.key}
+                onClick={() => setStatusFilter(active ? "all" : o.key)}
+                className={`rounded-full border px-3 py-1 text-[11px] uppercase tracking-wider transition-colors ${active ? "border-accent text-accent" : STATUS_STYLES[o.key] || "border-border text-muted-foreground"} ${count === 0 ? "opacity-40" : ""}`}
+                title={stageLabel(o.key)}
+              >
+                {stageLabel(o.key)} · {count}
+              </button>
+            );
+          })}
         </div>
 
         {/* Filters */}
@@ -218,7 +268,7 @@ export default function TradeAdminInquiries() {
                     <div className="flex items-start justify-between gap-2">
                       <span className="font-heading text-foreground">{r.name}</span>
                       <span className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wider ${STATUS_STYLES[r.status] || "border-border text-muted-foreground"}`}>
-                        {r.status.replace(/_/g, " ")}
+                        {stageLabel(r.status)}
                       </span>
                     </div>
                     <div className="mt-0.5 truncate text-xs text-muted-foreground">
@@ -291,7 +341,7 @@ export default function TradeAdminInquiries() {
                     <div className="flex items-center gap-2">
                       <h2 className="font-heading text-xl">{selected.name}</h2>
                       <span className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wider ${STATUS_STYLES[selected.status] || "border-border text-muted-foreground"}`}>
-                        {selected.status.replace(/_/g, " ")}
+                        {stageLabel(selected.status)}
                       </span>
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
