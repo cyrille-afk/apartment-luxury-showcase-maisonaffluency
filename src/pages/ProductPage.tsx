@@ -143,15 +143,9 @@ const ProductPage = () => {
     ...(product.materials && { material: product.materials }),
     ...(product.category && { category: product.category }),
     url: canonicalUrl,
-    offers: {
-      "@type": "Offer",
-      availability: "https://schema.org/InStock",
-      seller: {
-        "@type": "Organization",
-        name: "Maison Affluency",
-      },
-      url: canonicalUrl,
-    },
+    // No public price is available on this legacy route, and an Offer without
+    // `price`/`priceCurrency` is an invalid Product snippet / Merchant listing
+    // in Google's validator — so we publish no Offer node at all.
   };
 
   // BreadcrumbList JSON-LD
