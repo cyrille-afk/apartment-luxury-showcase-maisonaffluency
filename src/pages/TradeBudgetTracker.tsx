@@ -15,6 +15,9 @@ import { Progress } from "@/components/ui/progress";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip as RTooltip, XAxis, YAxis,
+} from "recharts";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
 
@@ -35,6 +38,7 @@ interface BudgetItem {
   client_name: string | null;
   project_id: string | null;
   project_name: string | null;
+  quote_created_at: string | null;
   deposit_pct: number;       // 0..1
 }
 
@@ -156,6 +160,7 @@ export default function TradeBudgetTracker() {
           client_name: q?.client_name || null,
           project_id: q?.project_id || null,
           project_name: q?.project_id ? projectMap[q.project_id] || null : null,
+          quote_created_at: q?.created_at || null,
           deposit_pct: item.deposit_pct_override ?? 0.5,
         } as BudgetItem;
       });
