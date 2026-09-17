@@ -41,6 +41,7 @@ export const TOOL_ROUTES: Record<string, [string, string]> = {
   "/trade/lead-time-calendar": ["Procurement", "Lead Time Calendar"],
   "/trade/budget": ["Procurement", "Budget Tracker & Cash-Flow Planner"],
   "/trade/po-logs": ["Procurement", "Purchase Order Logs"],
+  "/trade/gantt": ["Procurement", "Gantt Chart & Project Timeline"],
   "/trade/reorder": ["Procurement", "Reorder"],
   "/trade/currency-converter": ["Procurement", "Currency Converter"],
   // Learn

@@ -85,6 +85,13 @@
       "when": 1789632267137,
       "tag": "0011_add_po_invoice_payment_tracking",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1789632652211,
+      "tag": "0012_add_quote_item_schedule_dates",
+      "breakpoints": true
     }
   ]
 }

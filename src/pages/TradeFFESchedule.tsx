@@ -58,6 +58,7 @@ interface FFEItem {
   deposit_pct_override: number | null;
   spec_sheet_url: string | null;
   required_by_date: string | null;
+  expected_ready_override: string | null;
   kanban_status: string | null;
   deposit_paid_at: string | null;
   shipping_weeks: number | null;
@@ -159,6 +160,8 @@ const STAGE_LABEL: Record<string, string> = {
 };
 
 function expectedReadyDate(it: FFEItem, leadWeeks: number | null): Date | null {
+  // A schedule dragged on the Gantt timeline wins over every derived estimate.
+  if (it.expected_ready_override) return new Date(it.expected_ready_override);
   if (it.actual_delivery_at) return new Date(it.actual_delivery_at);
   if (it.estimated_delivery_at) return new Date(it.estimated_delivery_at);
   const anchor = it.deposit_paid_at || it.quote_created_at;
@@ -348,7 +351,7 @@ export default function TradeFFESchedule() {
       const { data: qItems } = await supabase
         .from("trade_quote_items")
         .select(
-          "id, product_id, quantity, unit_price_cents, quote_id, po_number, cost_code, lead_time_weeks_override, deposit_pct_override, required_by_date"
+          "id, product_id, quantity, unit_price_cents, quote_id, po_number, cost_code, lead_time_weeks_override, deposit_pct_override, required_by_date, expected_ready_override"
         )
         .in("quote_id", quoteIds);
 
@@ -416,6 +419,7 @@ export default function TradeFFESchedule() {
           deposit_pct_override: item.deposit_pct_override ?? null,
           spec_sheet_url: p?.spec_sheet_url ?? null,
           required_by_date: item.required_by_date ?? null,
+          expected_ready_override: item.expected_ready_override ?? null,
           kanban_status: tl.kanban_status ?? null,
           deposit_paid_at: tl.deposit_paid_at ?? null,
           shipping_weeks: tl.shipping_weeks ?? null,

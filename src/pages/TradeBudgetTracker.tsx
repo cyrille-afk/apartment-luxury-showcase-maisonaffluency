@@ -127,7 +127,7 @@ export default function TradeBudgetTracker() {
       const quoteIds = quotes.map((q) => q.id);
       const { data: qItems } = await supabase
         .from("trade_quote_items")
-        .select("id, product_id, quantity, unit_price_cents, quote_id, deposit_pct_override")
+        .select("id, product_id, quantity, unit_price_cents, quote_id, deposit_pct_override, expected_ready_override")
         .in("quote_id", quoteIds);
       if (!qItems?.length) return [];
 
@@ -164,6 +164,7 @@ export default function TradeBudgetTracker() {
           project_name: q?.project_id ? projectMap[q.project_id] || null : null,
           quote_created_at: q?.created_at || null,
           deposit_pct: item.deposit_pct_override ?? 0.5,
+          expected_ready_at: item.expected_ready_override || null,
         } as BudgetItem;
       });
     },
@@ -271,12 +272,17 @@ export default function TradeBudgetTracker() {
 
     filteredRows.forEach((r) => {
       const k = monthKey(new Date(r.it.quote_created_at || Date.now()));
+      // A schedule rescheduled on the Gantt timeline re-anchors the payout and
+      // final-invoice months, so delays ripple straight into this projection.
+      const ready = (r.it as any).expected_ready_at ? new Date((r.it as any).expected_ready_at) : null;
+      const balanceOutKey = ready ? monthKey(ready) : k + PO_BALANCE_OFFSET;
+      const finalInKey = ready ? monthKey(ready) + 1 : k + FINAL_OFFSET;
       if (r.collected > 0) {
         bump(k, "in", r.collected);
         bump(k, "out", Math.round(r.cost * 0.6));
-        bump(k + PO_BALANCE_OFFSET, "out", r.cost - Math.round(r.cost * 0.6));
+        bump(Math.max(k, balanceOutKey), "out", r.cost - Math.round(r.cost * 0.6));
       }
-      bump(k + FINAL_OFFSET, "in", r.balanceDue);
+      bump(Math.max(k, finalInKey), "in", r.balanceDue);
     });
 
     const endKey = Math.max(startKey + horizon, ...Array.from(buckets.keys()));
