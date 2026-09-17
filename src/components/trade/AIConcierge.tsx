@@ -3788,6 +3788,30 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     });
   };
 
+  const hasSpatialSelection = timeline.some((item) => item.kind === "layout_options");
+  const hasCompiledTradeQuote = timeline.some((item) =>
+    item.kind === "proposal" ||
+    item.kind === "quote_proposal" ||
+    item.kind === "ffe_proposal" ||
+    item.kind === "quote_card" ||
+    item.kind === "quote_summary",
+  );
+  const pipelineActiveStep = briefBuilderOpen && !briefBuilderClosing
+    ? 2
+    : hasCompiledTradeQuote
+      ? 4
+      : hasSpatialSelection
+        ? 3
+        : onboardingGate.completed
+          ? 2
+          : 1;
+  const pipelineSteps = [
+    "Discover",
+    "Brief Builder",
+    "Spatial Selection",
+    "Trade Quote",
+  ] as const;
+
   return (
     <>
       {/* Hidden trigger — clicked by the global ConciergeHeaderButton in TradeLayout.
@@ -4363,43 +4387,58 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               </div>
             )}
             {!minimized && (
-              <div className="flex items-center gap-2 flex-wrap pl-6">
-                <span
-                  className={cn(
-                    "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-body text-[10px] uppercase tracking-widest transition-colors duration-300",
-                    configView
-                      ? "border-foreground/40 bg-foreground/[0.06] text-foreground"
-                      : "border-border bg-muted/60 text-muted-foreground",
-                  )}
-                  title={`Current workflow stage: ${briefBuilderOpen && !briefBuilderClosing ? "Brief Builder Open" : configView ? "Specify & Review" : stage}`}
-                >
-                  <span
-                    className={cn(
-                      "h-1.5 w-1.5 rounded-full transition-colors duration-300",
-                      configView ? "bg-foreground" : "bg-accent",
-                    )}
-                    aria-hidden="true"
-                  />
-                  {copy.stage}: {briefBuilderOpen && !briefBuilderClosing ? "Brief Builder Open" : configView ? "Specify & Review" : stage}
-                </span>
-
-                {briefBuilderOpen && !briefBuilderClosing && (
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-body text-[10px] uppercase tracking-widest ${
-                      briefValidation.valid
-                        ? "border-accent/60 bg-accent/10 text-accent"
-                        : "border-destructive/60 bg-destructive/10 text-destructive"
-                    }`}
-                    title={
-                      briefValidation.valid
-                        ? "Brief Builder is open — ready to send"
-                        : `Brief Builder is open — required: ${briefValidation.missing.join(", ")}`
-                    }
-                  >
-                    <span className={`h-1.5 w-1.5 rounded-full ${briefValidation.valid ? "bg-accent" : "bg-amber-500"} animate-pulse`} aria-hidden="true" />
-                    Brief Builder Open
-                  </span>
-                )}
+              <div
+                className="w-full overflow-hidden pl-6 pr-1"
+                role="list"
+                aria-label="Felix workflow progress"
+              >
+                <div className="flex w-full items-center" title={`Current workflow stage: ${pipelineSteps[pipelineActiveStep - 1]}`}>
+                  {pipelineSteps.map((label, index) => {
+                    const step = index + 1;
+                    const active = step === pipelineActiveStep;
+                    const complete = step < pipelineActiveStep;
+                    return (
+                      <React.Fragment key={label}>
+                        {index > 0 && (
+                          <span
+                            className={cn(
+                              "mx-1 h-px min-w-1 flex-1 transition-colors duration-500 sm:mx-1.5",
+                              step <= pipelineActiveStep
+                                ? (modalMode ? "bg-cream/50" : "bg-accent")
+                                : (modalMode ? "bg-cream/20" : "bg-border"),
+                            )}
+                            aria-hidden="true"
+                          />
+                        )}
+                        <div
+                          role="listitem"
+                          aria-current={active ? "step" : undefined}
+                          className={cn(
+                            "relative inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap font-body text-[8px] uppercase tracking-[0.1em] transition-colors duration-500 sm:text-[9px]",
+                            active
+                              ? (modalMode ? "text-cream" : "text-foreground")
+                              : complete
+                                ? (modalMode ? "text-cream/65" : "text-muted-foreground")
+                                : (modalMode ? "text-cream/30" : "text-muted-foreground/45"),
+                          )}
+                        >
+                          {complete && <Check className="h-2.5 w-2.5 shrink-0" strokeWidth={1.75} aria-hidden="true" />}
+                          <span className="tabular-nums">{String(step).padStart(2, "0")}</span>
+                          <span>{label}</span>
+                          {active && (
+                            <span
+                              className={cn(
+                                "absolute inset-x-0 bottom-0 h-px origin-left animate-[scale-in_350ms_ease-out_both] motion-reduce:animate-none",
+                                modalMode ? "bg-cream" : "bg-accent",
+                              )}
+                              aria-hidden="true"
+                            />
+                          )}
+                        </div>
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
