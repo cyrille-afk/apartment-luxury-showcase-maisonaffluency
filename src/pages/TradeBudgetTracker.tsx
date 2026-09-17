@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Wallet, TrendingUp, Percent, Banknote, Search, X, CheckCircle2, AlertTriangle,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
