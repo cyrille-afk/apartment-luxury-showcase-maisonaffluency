@@ -360,7 +360,7 @@ export default function ProductCommerceCta({
       onPlaceOrder(quantity);
       return;
     }
-    openSelection();
+    startIntent("order");
   };
 
   // Sticky banners dispatch this instead of navigating to /cart. Only the
