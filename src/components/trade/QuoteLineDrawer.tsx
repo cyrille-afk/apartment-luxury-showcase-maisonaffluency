@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, ClipboardList, FileText, Package, Paperclip, ReceiptText } from "lucide-react";
+import { BadgeCheck, CalendarDays, ClipboardList, FileText, Package, Paperclip, ReceiptText } from "lucide-react";
 import { autoPoNumber } from "@/lib/procurementExcel";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -30,6 +30,9 @@ export interface QuoteLineDrawerItem {
   materials?: string | null;
   sku?: string | null;
   stage?: string | null;
+  po_status?: string | null;
+  po_approved_by_name?: string | null;
+  po_approved_at?: string | null;
   /** Slack in days before this edit — used to detect an Amber -> Red escalation. */
   slack?: number | null;
   /** Expected-ready date before this edit. */
@@ -54,6 +57,12 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
   const [saving, setSaving] = useState(false);
   const [generatingPo, setGeneratingPo] = useState(false);
   const [viewingPo, setViewingPo] = useState(false);
+  const [approval, setApproval] = useState<{
+    po_status: string;
+    po_approved_by_name: string | null;
+    po_approved_at: string | null;
+  }>({ po_status: "pending", po_approved_by_name: null, po_approved_at: null });
+
 
   /**
    * Generate and persist a PO reference for this line, matching the
@@ -97,6 +106,11 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
 
   useEffect(() => {
     setViewingPo(false);
+    setApproval({
+      po_status: item?.po_status || "pending",
+      po_approved_by_name: item?.po_approved_by_name || null,
+      po_approved_at: item?.po_approved_at || null,
+    });
     setPoNumber(item?.po_number || "");
     setCostCode(item?.cost_code || "");
     setRequiredBy(item?.required_by_date || "");
@@ -195,7 +209,22 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
                       View PO document
                     </span>
                   </button>
-                ) : (
+                ) : null}
+                {(item.po_number || poNumber.trim()) ? (
+                  <p className="mt-3 font-body text-[10px] uppercase tracking-[0.16em]">
+                    {approval.po_status === "approved" ? (
+                      <span className="inline-flex items-center gap-1.5 text-emerald-700">
+                        <BadgeCheck className="h-3.5 w-3.5" />
+                        Approved{approval.po_approved_by_name ? ` · ${approval.po_approved_by_name}` : ""}
+                      </span>
+                    ) : approval.po_status === "changes_requested" ? (
+                      <span className="text-amber-700">Status: Changes requested</span>
+                    ) : (
+                      <span className="text-muted-foreground">Status: Pending review</span>
+                    )}
+                  </p>
+                ) : null}
+                {!(item.po_number || poNumber.trim()) && (
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <p className="font-body text-xs italic text-muted-foreground">PO Status: Pending Generation</p>
                     <Button
@@ -264,7 +293,11 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
           document={
             viewingPo && (item.po_number || poNumber.trim())
               ? {
+                  item_id: item.item_id,
                   po_number: item.po_number || poNumber.trim(),
+                  po_status: approval.po_status,
+                  po_approved_by_name: approval.po_approved_by_name,
+                  po_approved_at: approval.po_approved_at,
                   quote_ref: item.quote_ref,
                   product_name: item.product_name,
                   brand_name: item.brand_name,
@@ -283,6 +316,13 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
               : null
           }
           onOpenChange={(open) => !open && setViewingPo(false)}
+          onStatusChange={(next) => {
+            setApproval(next);
+            void Promise.all([
+              queryClient.invalidateQueries({ queryKey: ["delivery-tracker"] }),
+              queryClient.invalidateQueries({ queryKey: ["ffe-schedule"] }),
+            ]);
+          }}
         />
       )}
     </Sheet>

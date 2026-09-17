@@ -1,9 +1,26 @@
-import { useRef } from "react";
-import { Printer, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { BadgeCheck, CheckCircle2, Printer, RotateCcw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useStudio } from "@/hooks/useStudio";
+import { useToast } from "@/hooks/use-toast";
+
+export type POApprovalStatus = "pending" | "approved" | "changes_requested";
 
 export interface PODocumentData {
+  item_id?: string;
   po_number: string;
   quote_ref: string;
   product_name: string;
@@ -19,12 +36,35 @@ export interface PODocumentData {
   required_by_date?: string | null;
   price_cents?: number | null;
   currency?: string | null;
+  po_status?: POApprovalStatus | string | null;
+  po_approved_by_name?: string | null;
+  po_approved_at?: string | null;
 }
 
 interface Props {
   document: PODocumentData | null;
   onOpenChange: (open: boolean) => void;
+  /** Notifies the parent drawer so its badge updates without a page reload. */
+  onStatusChange?: (next: {
+    po_status: POApprovalStatus;
+    po_approved_by_name: string | null;
+    po_approved_at: string | null;
+  }) => void;
 }
+
+const statusLabel = (status: string) =>
+  status === "approved" ? "Approved" : status === "changes_requested" ? "Changes requested" : "Pending review";
+
+const stampTime = (value?: string | null) =>
+  value
+    ? new Date(value).toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "—";
 
 const money = (cents: number | null | undefined, currency: string) =>
   cents == null
@@ -36,8 +76,61 @@ const longDate = (value?: string | null) =>
     ? new Date(value).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
     : "—";
 
-export default function PODocumentViewer({ document: po, onOpenChange }: Props) {
+export default function PODocumentViewer({ document: po, onOpenChange, onStatusChange }: Props) {
   const sheetRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+  const { user, profile, isAdmin: isPlatformAdmin, isSuperAdmin } = useAuth();
+  const { isAdmin: isStudioManager } = useStudio();
+  const canSignOff = Boolean(user) && (isPlatformAdmin || isSuperAdmin || isStudioManager);
+
+  const [pendingAction, setPendingAction] = useState<"approved" | "changes_requested" | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [localStatus, setLocalStatus] = useState<{
+    po_status: POApprovalStatus;
+    po_approved_by_name: string | null;
+    po_approved_at: string | null;
+  } | null>(null);
+
+  const status = (localStatus?.po_status ?? (po?.po_status as POApprovalStatus) ?? "pending") as POApprovalStatus;
+  const approverName = localStatus?.po_approved_by_name ?? po?.po_approved_by_name ?? null;
+  const approvedAt = localStatus?.po_approved_at ?? po?.po_approved_at ?? null;
+
+  // A different line opened in the viewer must not inherit the previous sign-off.
+  useEffect(() => {
+    setLocalStatus(null);
+    setPendingAction(null);
+  }, [po?.item_id]);
+
+  const managerName =
+    [profile?.first_name, profile?.last_name].filter(Boolean).join(" ").trim() || profile?.email || "Studio manager";
+
+  const applyDecision = async (next: "approved" | "changes_requested") => {
+    if (!po?.item_id) return;
+    setSubmitting(true);
+    const stamp = new Date().toISOString();
+    const payload =
+      next === "approved"
+        ? { po_status: "approved", po_approved_by: user?.id ?? null, po_approved_by_name: managerName, po_approved_at: stamp }
+        : { po_status: "changes_requested", po_approved_by: user?.id ?? null, po_approved_by_name: managerName, po_approved_at: stamp };
+    const { error } = await supabase.from("trade_quote_items").update(payload).eq("id", po.item_id);
+    setSubmitting(false);
+    setPendingAction(null);
+    if (error) {
+      toast({ title: "Sign-off failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    const applied = {
+      po_status: next as POApprovalStatus,
+      po_approved_by_name: managerName,
+      po_approved_at: stamp,
+    };
+    setLocalStatus(applied);
+    onStatusChange?.(applied);
+    toast({
+      title: next === "approved" ? "Purchase order approved" : "Changes requested",
+      description: `${po.po_number} is now marked ${statusLabel(next).toLowerCase()}.`,
+    });
+  };
 
   /** Print the document sheet alone, via an isolated iframe so the app behind stays untouched. */
   const print = () => {
@@ -198,8 +291,92 @@ export default function PODocumentViewer({ document: po, onOpenChange }: Props) 
                     <p className="mt-2 uppercase tracking-[0.16em] text-muted-foreground">Supplier acknowledgement · Date</p>
                   </div>
                 </section>
+
+                <section className="mt-10 border-t border-border pt-6">
+                  <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Manager sign-off</p>
+
+                  {status === "approved" ? (
+                    <div className="mt-4 inline-flex animate-fade-in items-start gap-3 rounded-sm border-2 border-emerald-600/60 bg-emerald-50/70 px-5 py-4">
+                      <BadgeCheck className="mt-0.5 h-6 w-6 text-emerald-700" />
+                      <div>
+                        <p className="font-display text-base tracking-wide text-emerald-800">Approved</p>
+                        <p className="mt-0.5 font-body text-[11px] text-emerald-800/90">{approverName || "Studio manager"}</p>
+                        <p className="font-body text-[11px] text-emerald-800/70">{stampTime(approvedAt)}</p>
+                      </div>
+                    </div>
+                  ) : status === "changes_requested" ? (
+                    <div className="mt-4 flex flex-wrap items-center gap-3">
+                      <span className="inline-flex items-center gap-2 rounded-sm border border-amber-300 bg-amber-50 px-3 py-2 font-body text-[11px] uppercase tracking-[0.16em] text-amber-800">
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        Status: Changes requested
+                      </span>
+                      {canSignOff && (
+                        <Button
+                          size="sm"
+                          className="bg-emerald-600 font-body text-xs text-white hover:bg-emerald-700"
+                          onClick={() => setPendingAction("approved")}
+                        >
+                          <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
+                          Approve purchase order
+                        </Button>
+                      )}
+                    </div>
+                  ) : canSignOff ? (
+                    <div className="mt-4 flex flex-wrap items-center gap-3">
+                      <Button
+                        size="sm"
+                        className="bg-emerald-600 font-body text-xs text-white hover:bg-emerald-700"
+                        onClick={() => setPendingAction("approved")}
+                      >
+                        <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
+                        Approve purchase order
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="font-body text-xs"
+                        onClick={() => setPendingAction("changes_requested")}
+                      >
+                        <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                        Request changes
+                      </Button>
+                    </div>
+                  ) : (
+                    <span className="mt-4 inline-flex items-center rounded-sm border border-border bg-muted/50 px-3 py-2 font-body text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                      Status: Pending review
+                    </span>
+                  )}
+                </section>
               </div>
             </div>
+
+            <AlertDialog open={!!pendingAction} onOpenChange={(open) => !open && setPendingAction(null)}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="font-display text-xl font-normal">
+                    {pendingAction === "approved" ? `Approve ${po.po_number}?` : `Request changes on ${po.po_number}?`}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="font-body text-sm">
+                    {pendingAction === "approved"
+                      ? "This records your sign-off on the purchase order with your name and a time stamp."
+                      : "This marks the purchase order as requiring changes before it can be issued."}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="font-body text-xs">Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="font-body text-xs"
+                    disabled={submitting}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      if (pendingAction) void applyDecision(pendingAction);
+                    }}
+                  >
+                    {submitting ? "Saving…" : pendingAction === "approved" ? "Approve" : "Request changes"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </>
         )}
       </DialogContent>

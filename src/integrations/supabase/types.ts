@@ -7611,7 +7611,12 @@ export type Database = {
           internal_notes: string | null
           lead_time_weeks_override: number | null
           notes: string | null
+          po_approved_at: string | null
+          po_approved_by: string | null
+          po_approved_by_name: string | null
+          po_change_request_note: string | null
           po_number: string | null
+          po_status: string
           product_id: string
           quantity: number
           quote_id: string
@@ -7640,7 +7645,12 @@ export type Database = {
           internal_notes?: string | null
           lead_time_weeks_override?: number | null
           notes?: string | null
+          po_approved_at?: string | null
+          po_approved_by?: string | null
+          po_approved_by_name?: string | null
+          po_change_request_note?: string | null
           po_number?: string | null
+          po_status?: string
           product_id: string
           quantity?: number
           quote_id: string
@@ -7669,7 +7679,12 @@ export type Database = {
           internal_notes?: string | null
           lead_time_weeks_override?: number | null
           notes?: string | null
+          po_approved_at?: string | null
+          po_approved_by?: string | null
+          po_approved_by_name?: string | null
+          po_change_request_note?: string | null
           po_number?: string | null
+          po_status?: string
           product_id?: string
           quantity?: number
           quote_id?: string
