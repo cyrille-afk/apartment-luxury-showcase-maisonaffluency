@@ -581,6 +581,14 @@ export default function TradeFFESchedule() {
                       {col.locked && <span className="ml-auto text-[9px] uppercase tracking-wider text-muted-foreground/60">Locked</span>}
                     </DropdownMenuCheckboxItem>
                   ))}
+                  <DropdownMenuSeparator />
+                  <button
+                    onClick={resetColumns}
+                    className="relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-2 text-left font-body text-xs text-muted-foreground outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                  >
+                    <RotateCcw className="mr-2 h-3.5 w-3.5" />
+                    Reset to default
+                  </button>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
