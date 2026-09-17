@@ -72,6 +72,8 @@ export interface SelectionDrawerProps {
   onViewCart?: () => void;
   /** Fired by the sticky footer CTA with the selected payment method */
   onCheckout?: (method: PaymentMethod) => void;
+  /** Piece has no public price: hide payment methods, request a quotation. */
+  quoteOnly?: boolean;
   placing?: boolean;
 }
 
@@ -92,6 +94,7 @@ export default function SelectionDrawer({
   subtotalLabel = null,
   onViewCart,
   onCheckout,
+  quoteOnly = false,
   placing = false,
 }: SelectionDrawerProps) {
 
@@ -214,7 +217,7 @@ export default function SelectionDrawer({
         {/* ── 1 · Sticky header ─────────────────────────────────────────── */}
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-border/60 px-6">
           <h2 className="font-body text-[10px] font-medium uppercase tracking-widest text-foreground">
-            Your Selection
+            Your Cart Selection
           </h2>
           <button
             type="button"
@@ -389,27 +392,31 @@ export default function SelectionDrawer({
 
           <div className="my-6 h-px bg-border/50" />
 
-          {/* 4 · Payment method selector */}
-          <p className="font-body text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
-            Payment Method
-          </p>
-          {/* Section labels share one style token with QUANTITY + YOUR SELECTION. */}
-          <div className="mt-3 flex flex-col gap-2" role="radiogroup" aria-label="Payment method">
-            <PaymentOption
-              active={method === "online"}
-              onSelect={() => setMethod("online")}
-              icon={<CreditCard className="h-4 w-4" strokeWidth={1.5} />}
-              label="Pay Securely Online"
-              subtext="Credit Card, Google Pay, Apple Pay"
-            />
-            <PaymentOption
-              active={method === "wire"}
-              onSelect={() => setMethod("wire")}
-              icon={<Landmark className="h-4 w-4" strokeWidth={1.5} />}
-              label="Bank Wire Transfer"
-              subtext="Preferred for Trade & Corporate Accounts"
-            />
-          </div>
+          {/* 4 · Payment method selector — hidden for quotation-only pieces */}
+          {!quoteOnly && (
+            <>
+              <p className="font-body text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
+                Payment Method
+              </p>
+              {/* Section labels share one style token with QUANTITY + YOUR SELECTION. */}
+              <div className="mt-3 flex flex-col gap-2" role="radiogroup" aria-label="Payment method">
+                <PaymentOption
+                  active={method === "online"}
+                  onSelect={() => setMethod("online")}
+                  icon={<CreditCard className="h-4 w-4" strokeWidth={1.5} />}
+                  label="Pay Securely Online"
+                  subtext="Credit Card, Google Pay, Apple Pay"
+                />
+                <PaymentOption
+                  active={method === "wire"}
+                  onSelect={() => setMethod("wire")}
+                  icon={<Landmark className="h-4 w-4" strokeWidth={1.5} />}
+                  label="Bank Wire Transfer"
+                  subtext="Preferred for Trade & Corporate Accounts"
+                />
+              </div>
+            </>
+          )}
 
           {/* 5 · Trust & concierge block — swaps for the inline contact widget */}
           <div className="mt-6 border border-border/50 bg-cream px-4 py-4">
@@ -516,9 +523,11 @@ export default function SelectionDrawer({
           >
             {placing
               ? "Opening checkout…"
-              : method === "online"
-                ? "Go to Checkout"
-                : "Proceed to Wire Instructions"}
+              : quoteOnly
+                ? "[ Request Final Quotation ]"
+                : method === "online"
+                  ? "[ Proceed to Secure Checkout ]"
+                  : "[ Proceed to Wire Instructions ]"}
           </button>
           {onViewCart && (
             <button

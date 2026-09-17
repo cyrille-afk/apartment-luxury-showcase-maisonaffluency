@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getCart, shouldUseFullPageCart, useCart } from "@/lib/cart";
 import { Loader2, Minus, Plus } from "lucide-react";
 import SelectionDrawer, { type PaymentMethod } from "@/components/product/SelectionDrawer";
-import OrderIntakeSheet, { type OrderIntakeDetails } from "@/components/product/OrderIntakeSheet";
+import BespokeConfigurationDialog from "@/components/product/BespokeConfigurationDialog";
 
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
@@ -190,8 +190,9 @@ export default function ProductCommerceCta({
   const quantity = productConfig ? productConfig.quantity : localQuantity;
   const setQuantity = productConfig ? productConfig.setQuantity : setLocalQuantity;
   const [miniCartOpen, setMiniCartOpen] = useState(false);
-  const [intakeOpen, setIntakeOpen] = useState(false);
-  const [quoteOpen, setQuoteOpen] = useState(false);
+  const [bespokeOpen, setBespokeOpen] = useState(false);
+  // True when the open drawer holds a piece with no public price.
+  const [quoteOnlySelection, setQuoteOnlySelection] = useState(false);
   const cartItems = useCart();
 
   
@@ -245,12 +246,14 @@ export default function ProductCommerceCta({
   // the drawer; 2+ items route to the full-page /cart layout.
   const openSelection = () => {
     const added = onAddToCart?.(quantity);
-    // Pieces without a public price never enter the cart — route those to the
-    // concierge enquiry instead of opening an empty drawer over a locked page.
+    // Pieces without a public price still open the same drawer — the line reads
+    // "Price upon Request" and its footer routes to the bespoke quotation.
     if (added === false) {
-      onPlaceOrder(quantity);
+      setQuoteOnlySelection(true);
+      setMiniCartOpen(true);
       return;
     }
+    setQuoteOnlySelection(false);
     if (shouldUseFullPageCart(getCart())) {
       setMiniCartOpen(false);
       navigate("/cart");
@@ -261,22 +264,12 @@ export default function ProductCommerceCta({
   const primaryAction = tradeApproved ? undefined : openSelection;
 
   /**
-   * Secondary CTA: bespoke / contract enquiries go to the Trade Account
-   * inquiry form. The primary PLACE ORDER path never touches this route.
+   * Secondary CTA: bespoke / customisation enquiries open a centred overlay
+   * dialog on the product canvas — never the Trade Account registration page.
    */
-  const goToTradeInquiry = () => {
-    navigate(
-      `/contact?${new URLSearchParams({
-        subject: `Bespoke Quote / Customisation — ${productTitle || "Product"}${designerName ? ` by ${designerName}` : ""}`,
-        productId,
-        productName: productTitle || "",
-        designerName: designerName || "",
-        back: typeof window !== "undefined" ? window.location.pathname + window.location.search : "",
-      }).toString()}#contact`,
-    );
-  };
+  const openBespoke = () => setBespokeOpen(true);
 
-  // Unpriced pieces: the page asks for the in-page quote sheet rather than
+  // Unpriced pieces: the page asks for the in-canvas bespoke dialog rather than
   // sending a shopper to the corporate Trade Account form.
   useEffect(() => {
     const handler = () => {
@@ -284,7 +277,7 @@ export default function ProductCommerceCta({
       const isDesktop =
         typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
       if (dockOnly === isDesktop) return;
-      setQuoteOpen(true);
+      setBespokeOpen(true);
     };
     window.addEventListener("ma:open-quote", handler);
     return () => window.removeEventListener("ma:open-quote", handler);
@@ -319,26 +312,12 @@ export default function ProductCommerceCta({
     mql.addEventListener("change", publish);
   }, []);
 
-  // Mobile: PLACE ORDER opens the conversational 3-step intake sheet first;
-  // its completion hands off to the existing selection / checkout flow.
+  // Mobile: PLACE ORDER follows the same in-canvas selection drawer path.
   const handleMobilePrimary = () => {
     if (tradeApproved) {
       onPlaceOrder(quantity);
       return;
     }
-    setIntakeOpen(true);
-  };
-
-  const handleIntakeComplete = (details: OrderIntakeDetails) => {
-    try {
-      sessionStorage.setItem("ma_order_intake", JSON.stringify({ ...details, productId }));
-    } catch {
-      /* private mode — intake is a soft capture, never blocks the order */
-    }
-    // Quote requests are already submitted by the sheet, which then shows its
-    // own thank-you screen. Never hand those off to cart / account flows.
-    if (isUnpriced) return;
-    setIntakeOpen(false);
     openSelection();
   };
 
@@ -447,12 +426,12 @@ export default function ProductCommerceCta({
               {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
               {placingOrder ? "Opening checkout…" : finishSelectionRequired ? "Choose Finishes" : primaryLabel}
             </button>
-            {/* Secondary: high-touch / contract buyers — routes explicitly to
-                the Trade Account inquiry form. */}
+            {/* Secondary: high-touch / contract buyers — opens the bespoke
+                configuration dialog on the product canvas. */}
             <button
               type="button"
               data-commerce-quote
-              onClick={goToTradeInquiry}
+              onClick={openBespoke}
               className={secondaryBtn}
             >
               Request a Bespoke Quote / Customisation
@@ -534,57 +513,38 @@ export default function ProductCommerceCta({
           title={productTitle}
           configuration={orderFinishLabel || (selectedFinishes.length ? selectedFinishes.join(" / ") : null)}
           leadTime={leadTime}
-          priceLabel={retailLabel || rrpLabel || null}
+          priceLabel={
+            quoteOnlySelection ? "Price upon Request" : retailLabel || rrpLabel || null
+          }
           imageUrl={imageUrl}
           quantity={quantity}
-          onQuantityChange={handleDrawerQuantity}
-          onCheckout={handleCheckout}
+          onQuantityChange={quoteOnlySelection ? setQuantity : handleDrawerQuantity}
+          quoteOnly={quoteOnlySelection}
+          onCheckout={
+            quoteOnlySelection
+              ? () => {
+                  setMiniCartOpen(false);
+                  setBespokeOpen(true);
+                }
+              : handleCheckout
+          }
           placing={placingOrder}
         />
       )}
 
-      {/* Bespoke quote sheet (secondary white button — any breakpoint). The
-          sheet handles submission + its own thank-you state; no cart handoff. */}
+      {/* Bespoke configuration dialog (secondary action — any breakpoint).
+          Centred overlay on the product canvas; never the account wall. */}
       {!tradeApproved && (
-        <OrderIntakeSheet
-          isOpen={quoteOpen}
-          onClose={() => setQuoteOpen(false)}
-          onComplete={() => {
-            /* Quote requests end on the sheet's thank-you screen. */
-          }}
+        <BespokeConfigurationDialog
+          isOpen={bespokeOpen}
+          onClose={() => setBespokeOpen(false)}
+          productId={productId}
           productTitle={productTitle}
           designerName={designerName}
-          priceLabel={retailLabel || rrpLabel || null}
           finishLabel={
             orderFinishLabel || (selectedFinishes.length ? selectedFinishes.join(" / ") : null)
           }
-          finishOptions={finishOptions}
-          finishVariants={finishVariants}
-          baseImageUrl={imageUrl}
-          submitting={placingOrder}
-          mode="quote"
-          productId={productId}
-        />
-      )}
-
-      {/* Mobile 3-step order intake bottom sheet */}
-      {!tradeApproved && (
-        <OrderIntakeSheet
-          isOpen={intakeOpen}
-          onClose={() => setIntakeOpen(false)}
-          onComplete={handleIntakeComplete}
-          productTitle={productTitle}
-          designerName={designerName}
-          priceLabel={retailLabel || rrpLabel || null}
-          finishLabel={
-            orderFinishLabel || (selectedFinishes.length ? selectedFinishes.join(" / ") : null)
-          }
-          finishOptions={finishOptions}
-          finishVariants={finishVariants}
-          baseImageUrl={imageUrl}
-          submitting={placingOrder}
-          mode={isUnpriced ? "quote" : "order"}
-          productId={productId}
+          imageUrl={imageUrl}
         />
       )}
     </>
