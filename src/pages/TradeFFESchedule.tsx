@@ -551,6 +551,33 @@ export default function TradeFFESchedule() {
                   Clear <X className="h-3 w-3" />
                 </button>
               )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="ml-auto h-8 gap-1.5 font-body text-[11px]">
+                    <Columns3 className="h-3.5 w-3.5" />
+                    Columns
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 max-h-80 overflow-y-auto">
+                  <DropdownMenuLabel className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Toggle columns
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {FFE_COLUMNS.map((col) => (
+                    <DropdownMenuCheckboxItem
+                      key={col.key}
+                      checked={!hiddenColumns.includes(col.key)}
+                      disabled={col.locked}
+                      onCheckedChange={(checked) => toggleColumn(col.key, checked === true)}
+                      onSelect={(e) => e.preventDefault()}
+                      className="font-body text-xs"
+                    >
+                      {col.label}
+                      {col.locked && <span className="ml-auto text-[9px] uppercase tracking-wider text-muted-foreground/60">Locked</span>}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {filteredItems.length === 0 ? (
