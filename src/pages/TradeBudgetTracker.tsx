@@ -189,7 +189,7 @@ export default function TradeBudgetTracker() {
     return items.map((it) => {
       const cfg = cfgFor(it);
       const cost = it.unit_cost_cents * it.quantity;
-      const mk = markupPct(cfg);
+      const mk = markupPct(cfg) + globalMarkupPct / 100;
       const clientPrice = Math.round(cost * (1 + mk));
       const margin = clientPrice - cost;
       const marginPct = clientPrice > 0 ? (margin / clientPrice) * 100 : 0;
