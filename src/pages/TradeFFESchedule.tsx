@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X, Filter, Columns3, RotateCcw } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X, Filter, Columns3, RotateCcw, Eye, Trash2, Plus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -91,6 +91,48 @@ const FFE_COLUMNS: { key: FFEColumnKey; label: string; locked?: boolean; width: 
 ];
 
 const FFE_COLS_STORAGE_KEY = "ffe-schedule-hidden-columns-v1";
+const FFE_PRESETS_STORAGE_KEY = "ffe-schedule-view-presets-v1";
+
+const OPTIONAL_KEYS = FFE_COLUMNS.filter((c) => !c.locked).map((c) => c.key);
+
+interface ViewPreset {
+  name: string;
+  hidden: FFEColumnKey[];
+}
+
+const DEFAULT_VIEW_PRESETS: ViewPreset[] = [
+  { name: "Standard View", hidden: [] },
+  {
+    name: "Financial View",
+    // Hide logistics detail; keep price, cost code, totals, and stage/status.
+    hidden: ["po", "lead", "expected", "required", "slack"],
+  },
+  {
+    name: "Logistics View",
+    // Hide price/cost data; keep quantities, dates, tracking refs, and status.
+    hidden: ["cost_code", "unit_trade", "total"],
+  },
+];
+
+function sanitizeHidden(hidden: unknown): FFEColumnKey[] {
+  if (!Array.isArray(hidden)) return [];
+  const valid = new Set(OPTIONAL_KEYS);
+  return hidden.filter((k): k is FFEColumnKey => typeof k === "string" && valid.has(k as FFEColumnKey));
+}
+
+function loadViewPresets(): ViewPreset[] {
+  try {
+    const raw = localStorage.getItem(FFE_PRESETS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((p): p is ViewPreset => !!p && typeof p.name === "string" && p.name.trim().length > 0)
+      .map((p) => ({ name: p.name.trim().slice(0, 60), hidden: sanitizeHidden(p.hidden) }));
+  } catch {
+    return [];
+  }
+}
 
 function loadHiddenColumns(): FFEColumnKey[] {
   try {
