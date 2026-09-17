@@ -252,7 +252,35 @@ export default function TradeAdminSuppliers() {
     setImportFile(null);
     setParsedRows([]);
     setRowErrors([]);
+    setExcludedRows(new Set());
+    setImportStep("upload");
     setDragOver(false);
+  };
+
+  /** Duplicate status per parsed row, compared against the live directory. */
+  const duplicateStatus = useMemo(() => {
+    const byName = new Set(suppliers.map((s) => s.supplier_name.trim().toLowerCase()));
+    const byEmail = new Set(suppliers.map((s) => s.contact_email.trim().toLowerCase()));
+    const map = new Map<number, "upsert" | "skip">();
+    parsedRows.forEach((r) => {
+      if (byName.has(r.supplier_name.toLowerCase())) map.set(r.rowNumber, "upsert");
+      else if (byEmail.has(r.contact_email.toLowerCase())) map.set(r.rowNumber, "skip");
+    });
+    return map;
+  }, [suppliers, parsedRows]);
+
+  const selectedRows = useMemo(
+    () => parsedRows.filter((r) => !excludedRows.has(r.rowNumber)),
+    [parsedRows, excludedRows],
+  );
+
+  const toggleRow = (rowNumber: number) => {
+    setExcludedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(rowNumber)) next.delete(rowNumber);
+      else next.add(rowNumber);
+      return next;
+    });
   };
 
   const handleFile = async (file: File) => {
@@ -265,12 +293,23 @@ export default function TradeAdminSuppliers() {
     const { rows, errors } = parseSupplierCsv(text);
     setParsedRows(rows);
     setRowErrors(errors);
+    // Pre-exclude rows matching an existing contact email under a different supplier name.
+    const byName = new Set(suppliers.map((s) => s.supplier_name.trim().toLowerCase()));
+    const byEmail = new Set(suppliers.map((s) => s.contact_email.trim().toLowerCase()));
+    setExcludedRows(
+      new Set(
+        rows
+          .filter((r) => !byName.has(r.supplier_name.toLowerCase()) && byEmail.has(r.contact_email.toLowerCase()))
+          .map((r) => r.rowNumber),
+      ),
+    );
+    if (rows.length > 0) setImportStep("review");
   };
 
   const handleImport = async () => {
-    if (parsedRows.length === 0) return;
+    if (selectedRows.length === 0) return;
     setImporting(true);
-    const payload = parsedRows.map((r) => ({
+    const payload = selectedRows.map((r) => ({
       supplier_name: r.supplier_name,
       contact_email: r.contact_email,
       cc_email: r.cc_email || null,
