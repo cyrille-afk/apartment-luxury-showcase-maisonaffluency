@@ -18,6 +18,7 @@ import {
 import { generateSpecPackageZip, downloadBlob, type SpecPackageProduct } from "@/lib/specPackage";
 import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback";
 import QuoteLineDrawer, { type QuoteLineDrawerItem } from "@/components/trade/QuoteLineDrawer";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface FFEItem {
   item_id: string;
@@ -103,6 +104,20 @@ function parseLeadWeeks(text: string | null): number | null {
 
 function leadOverride(value: number | null): number | null {
   return value != null && value >= 0 ? value : null;
+}
+
+function TruncatedCellText({ value, className = "" }: { value: string | null | undefined; className?: string }) {
+  const displayValue = value || "—";
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className={`block min-w-0 truncate ${className}`} tabIndex={0}>{displayValue}</span>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-sm break-words font-body text-xs">
+        {displayValue}
+      </TooltipContent>
+    </Tooltip>
+  );
 }
 
 export default function TradeFFESchedule() {
@@ -381,7 +396,7 @@ export default function TradeFFESchedule() {
   return (
     <>
       <Helmet><title>FF&E Schedule — Trade Portal</title></Helmet>
-      <div className="min-w-0 space-y-6 xl:w-[calc(100vw-8rem)] xl:max-w-[1800px]">
+      <div className="w-full min-w-0 max-w-full space-y-6 2xl:max-w-[1800px]">
         <TradeBreadcrumb current="FF&E schedule" currentProjectTab="ffe" />
         <div className="flex items-center justify-between">
           <div>
@@ -482,18 +497,23 @@ export default function TradeFFESchedule() {
               </div>
             ) : (
                 <>
-                  <div className="min-w-0 overflow-hidden border border-border rounded-lg">
-              <table className="w-full table-fixed text-left text-[11px]">
+                  <div className="max-w-full min-w-0 overflow-x-auto overscroll-x-contain border border-border rounded-lg">
+              <table className="w-full min-w-[1280px] table-fixed text-left text-[11px] 2xl:min-w-0">
                 <colgroup>
-                  <col className="w-[4%]" /><col className="w-[7%]" /><col className="w-[6%]" /><col className="w-[13%]" />
-                  <col className="w-[9%]" /><col className="w-[8%]" /><col className="w-[7%]" /><col className="hidden 2xl:table-column w-[7%]" />
-                  <col className="w-[4%]" /><col className="w-[7%]" /><col className="w-[7%]" /><col className="w-[5%]" />
-                  <col className="w-[7%]" /><col className="hidden 2xl:table-column w-[7%]" /><col className="w-[9%]" /><col className="w-[6%]" /><col className="w-[7%]" />
+                  <col className="w-[4%]" /><col className="w-[6%]" /><col className="w-[5%]" /><col className="w-[11%]" />
+                  <col className="w-[7%]" /><col className="w-[7%]" /><col className="w-[6%]" /><col className="w-[5%]" />
+                  <col className="w-[3%]" /><col className="w-[6%]" /><col className="w-[6%]" /><col className="w-[4%]" />
+                  <col className="w-[6%]" /><col className="w-[7%]" /><col className="w-[8%]" /><col className="w-[5%]" /><col className="w-[4%]" />
                 </colgroup>
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
                     {["", "PO #", "Cost Code", "Item", "Brand", "Project", "Client", "Studio", "Qty", "Unit Trade", "Total", "Lead", "Stage", "Expected ready", "Required by", "Slack", "Quote"].map((h, idx) => (
-                      <th key={idx} className={`${h === "Studio" || h === "Expected ready" ? "hidden 2xl:table-cell" : ""} px-2 py-3 font-body text-[9px] uppercase tracking-wider text-muted-foreground`}>{h}</th>
+                      <th
+                        key={idx}
+                        className={`${idx === 0 ? "sticky left-0 z-20 border-r border-border/70 bg-muted text-center" : ""} ${idx === 16 ? "sticky right-0 z-20 border-l border-border/70 bg-muted text-center" : ""} px-1.5 py-3 font-body text-[9px] uppercase tracking-wider text-muted-foreground xl:px-2`}
+                      >
+                        {h}
+                      </th>
                     ))}
                   </tr>
                 </thead>
@@ -506,8 +526,9 @@ export default function TradeFFESchedule() {
                       ? Math.round((requiredBy.getTime() - expected.getTime()) / 86400000)
                       : null;
                     return (
-                      <tr key={i} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
-                        <td className="px-2 py-2 w-12">
+                      <tr key={i} className="group border-b border-border/50 transition-colors hover:bg-muted/20">
+                        <td className="sticky left-0 z-10 border-r border-border/60 bg-background px-1.5 py-2 transition-colors group-hover:bg-muted xl:px-2">
+                          <div className="flex items-center justify-center">
                           {item.image_url ? (
                             <img
                               src={item.image_url}
@@ -518,27 +539,33 @@ export default function TradeFFESchedule() {
                           ) : (
                             <div className="h-10 w-10 rounded border border-dashed border-border/50 bg-muted/10" aria-hidden />
                           )}
+                          </div>
                         </td>
-                        <td className="px-2 py-3 font-body text-[11px] text-muted-foreground tabular-nums break-words">{item.po_number || <span className="italic text-muted-foreground/60">auto</span>}</td>
-                        <td className="px-2 py-3 font-body text-[11px] text-muted-foreground break-words">{item.cost_code || "—"}</td>
-                        <td className="px-2 py-3 font-body text-xs text-foreground break-words">{item.product_name}</td>
-                        <td className="px-2 py-3 font-body text-[11px] text-muted-foreground break-words">{item.brand_name}</td>
-                        <td className="px-2 py-3 font-body text-[11px] text-muted-foreground break-words">
+                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground tabular-nums xl:px-2"><TruncatedCellText value={item.po_number || "auto"} className={item.po_number ? "" : "italic text-muted-foreground/60"} /></td>
+                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.cost_code} /></td>
+                        <td className="px-1.5 py-3 font-body text-xs text-foreground xl:px-2"><TruncatedCellText value={item.product_name} /></td>
+                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.brand_name} /></td>
+                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2">
                           {item.project_id ? (
-                            <Link to={`/trade/projects/${item.project_id}`} className="text-foreground underline underline-offset-2">
-                              {item.project_name || "—"}
-                            </Link>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Link to={`/trade/projects/${item.project_id}`} className="block min-w-0 truncate text-foreground underline underline-offset-2">
+                                  {item.project_name || "—"}
+                                </Link>
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="max-w-sm break-words font-body text-xs">{item.project_name || "—"}</TooltipContent>
+                            </Tooltip>
                           ) : "—"}
                         </td>
-                        <td className="px-2 py-3 font-body text-[11px] text-muted-foreground break-words">{item.client_name || "—"}</td>
-                        <td className="hidden 2xl:table-cell px-2 py-3 font-body text-[11px] text-muted-foreground break-words">{item.studio_name || "—"}</td>
-                        <td className="px-2 py-3 font-body text-xs text-foreground">{item.quantity}</td>
-                        <td className="px-2 py-3 font-body text-[11px] text-foreground tabular-nums break-words">{item.unit_price_cents ? `€${(item.unit_price_cents / 100).toFixed(0)}` : "TBD"}</td>
-                        <td className="px-2 py-3 font-body text-[11px] text-foreground font-medium tabular-nums break-words">{item.unit_price_cents ? `€${((item.unit_price_cents * item.quantity) / 100).toFixed(0)}` : "TBD"}</td>
-                        <td className="px-2 py-3 font-body text-[11px] text-muted-foreground">{lead === 0 ? <span className="text-emerald-700 font-medium">In stock</span> : lead != null ? `${lead} wks` : "—"}</td>
-                        <td className="px-2 py-3 font-body text-[11px] text-muted-foreground break-words">{STAGE_LABEL[item.kanban_status || ""] || (item.kanban_status ? item.kanban_status : "—")}</td>
-                        <td className="hidden 2xl:table-cell px-2 py-3 font-body text-[11px] text-muted-foreground tabular-nums">{fmtDate(expected)}</td>
-                        <td className="px-2 py-3 font-body text-[11px]">
+                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.client_name} /></td>
+                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.studio_name} /></td>
+                        <td className="px-1.5 py-3 text-center font-body text-xs text-foreground xl:px-2">{item.quantity}</td>
+                        <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-foreground tabular-nums xl:px-2">{item.unit_price_cents ? `€${(item.unit_price_cents / 100).toFixed(0)}` : "TBD"}</td>
+                        <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] font-medium text-foreground tabular-nums xl:px-2">{item.unit_price_cents ? `€${((item.unit_price_cents * item.quantity) / 100).toFixed(0)}` : "TBD"}</td>
+                        <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2">{lead === 0 ? <span className="text-emerald-700 font-medium">In stock</span> : lead != null ? `${lead} wks` : "—"}</td>
+                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={STAGE_LABEL[item.kanban_status || ""] || item.kanban_status} /></td>
+                        <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-muted-foreground tabular-nums xl:px-2">{fmtDate(expected)}</td>
+                        <td className="px-1.5 py-3 font-body text-[11px] xl:px-2">
                           <input
                             type="date"
                             defaultValue={item.required_by_date || ""}
@@ -549,9 +576,9 @@ export default function TradeFFESchedule() {
                             className="w-full min-w-0 rounded border border-border bg-background px-1 py-0.5 font-body text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                           />
                         </td>
-                        <td className="px-2 py-3 font-body text-[11px]">{slackBadge(slackDays)}</td>
-                        <td className="px-2 py-3 font-body text-[11px]">
-                          <Button type="button" variant="ghost" size="sm" className="h-7 max-w-full px-1.5 text-[9px] tabular-nums" onClick={() => setSelectedItem(item)}>
+                        <td className="px-1.5 py-3 text-center font-body text-[11px] xl:px-2">{slackBadge(slackDays)}</td>
+                        <td className="sticky right-0 z-10 border-l border-border/60 bg-background px-1 py-3 text-center font-body text-[11px] transition-colors group-hover:bg-muted">
+                          <Button type="button" variant="ghost" size="sm" className="h-7 max-w-full px-1.5 text-[9px] tabular-nums" onClick={() => setSelectedItem(item)} title={`Open ${item.quote_ref}`}>
                             {item.quote_ref}
                           </Button>
                         </td>
@@ -565,7 +592,7 @@ export default function TradeFFESchedule() {
                     <td className="px-4 py-3 font-display text-sm text-foreground font-semibold">
                       {totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}
                     </td>
-                    <td colSpan={6} />
+                    <td colSpan={6} className="sticky right-0 border-l border-border/60 bg-muted" />
                   </tr>
                 </tfoot>
               </table>

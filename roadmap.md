@@ -93,3 +93,4 @@
 - [x] Lock Felix Quote-stage transitions and proposal tables behind verified project profile, zone, budget, and explicit brief completion
 
 - [x] Replace Felix STAGE pill with synchronized four-step premium progress pipeline
+- [x] Optimize the main FF&E Schedule for wide desktops with fluid columns, clipped-cell tooltips, table-only overflow, and sticky image/quote edges
