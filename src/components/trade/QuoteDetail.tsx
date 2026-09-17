@@ -4343,7 +4343,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
             ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
             : 0;
-          const orderTotal = withGst + shippingQuoteCents;
+          const orderTotal = withGst + cratingTotalCents + shippingQuoteCents;
           const depositCents = Math.round(orderTotal * 0.6);
           const fixedFees: Record<string, number> = { SGD: 50, USD: 30, EUR: 25, GBP: 20 };
           const fixedFee = fixedFees[currency] ?? 50;
@@ -4403,6 +4403,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       {gstEnabled && (
                         <Row label={`GST (${gstRate}%)`} value={`+ ${fmt(gstCents)} ${currency}`} muted />
                       )}
+                      {cratingTotalCents > 0 && (
+                        <Row label="Crating & packing" value={`+ ${fmt(cratingTotalCents)} ${currency}`} muted />
+                      )}
                       {shippingQuoteCents > 0 && (
                         <Row label={`Shipping estimate (${perLine.shipments.length} shipment${perLine.shipments.length > 1 ? "s" : ""})`} value={`+ ${fmt(shippingQuoteCents)} ${currency}`} muted />
                       )}
@@ -4436,7 +4439,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
             ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
             : 0;
-          const orderTotal = withGst + shippingQuoteCents;
+          const orderTotal = withGst + cratingTotalCents + shippingQuoteCents;
 
           const isPayingDeposit = quoteStatus === "confirmed";
           const isPayingBalance = quoteStatus === "deposit_paid";
