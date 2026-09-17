@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList, MessagesSquare, Plus, Trash2 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { BriefBuilder, loadBriefDraftText, validateBriefDraft } from "@/components/trade/concierge/BriefBuilder";
+import { ART_DECO_DISCOVERY_REPLY, evaluateFelixOnboardingGate, isHighLevelVisionStatement } from "@/lib/felixOnboardingGate";
 import { QuoteSummaryCardContainer } from "@/components/trade/QuoteSummaryCard";
 import { BriefBubble, isBriefContent } from "@/components/trade/concierge/BriefBubble";
 import brandCategoriesRaw from "@/data/brandCategories.json";
@@ -11,6 +12,7 @@ import brandCategoriesRaw from "@/data/brandCategories.json";
 const SPEC_BRIEF_TEMPLATE = `Block 1 — Spatial & Project Context
 PROJECT PROFILE: [typology, city/area]
 ZONE: [room, ceiling height]
+BUDGET: [currency and target range]
 ENVIRONMENT: [humidity, sun exposure, glazing]
 TIMELINE: Handover in [N] weeks (max lead time [N] weeks).
 
@@ -425,7 +427,7 @@ function layoutProjectLabel(text?: string | null, context = ""): string {
 
 function clearBriefResultState(items: TimelineItem[]): TimelineItem[] {
   return items.filter((item) => {
-    if (item.kind === "layout_options" || item.kind === "pending_proposal" || item.kind === "retry") return false;
+    if (item.kind === "layout_options" || item.kind === "pending_proposal" || item.kind === "retry" || item.kind === "proposal" || item.kind === "quote_proposal" || item.kind === "ffe_proposal") return false;
     if (item.kind !== "msg" || item.role !== "assistant") return true;
     return !HELD_TEARSHEET_RE.test(item.content || "")
       && !LAYOUT_INTRO_RE.test(item.content || "")
@@ -791,6 +793,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [showBriefPreview, setShowBriefPreview] = useState(false);
   const [briefDraft, setBriefDraft] = useState<string>(() => loadBriefDraftText());
+  const [briefManuallyCompleted, setBriefManuallyCompleted] = useState(false);
   const briefProjectLocationRef = useRef<string | null>(null);
   const [briefBuilderOpen, setBriefBuilderOpen] = useState(() => {
     try {
@@ -962,7 +965,24 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     (routeStage === "Tearsheet" || routeStage === "Quote");
   const contextualPath = noWorkflowArtifactsContext ? "/trade" : pathname;
   const contextualRouteStage: Stage = noWorkflowArtifactsContext ? "Discover" : routeStage;
-  const stage: Stage = stageOverride ?? contextualRouteStage;
+  const onboardingGate = useMemo(() => evaluateFelixOnboardingGate(
+    briefDraft,
+    timeline
+      .filter((item): item is Extract<TimelineItem, { kind: "msg" }> => item.kind === "msg" && item.role === "user")
+      .map((item) => item.content),
+    briefManuallyCompleted || timeline.some((item) => item.kind === "layout_options"),
+  ), [briefDraft, timeline, briefManuallyCompleted]);
+  const onboardingGateRef = useRef(onboardingGate);
+  useEffect(() => { onboardingGateRef.current = onboardingGate; }, [onboardingGate]);
+  useEffect(() => {
+    if (onboardingGate.completed) return;
+    setTimeline((prev) => {
+      const next = clearBriefResultState(prev);
+      return next.length === prev.length ? prev : next;
+    });
+  }, [onboardingGate.completed]);
+  const requestedStage: Stage = stageOverride ?? contextualRouteStage;
+  const stage: Stage = onboardingGate.completed ? requestedStage : "Discover";
   const currentGreeting = useCallback((targetLang: Lang = lang) => (
     surface === "public"
       ? (initialGreeting || PUBLIC_GREETING)
@@ -1528,6 +1548,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     hydratedThreadRef.current = data.id;
     cloudLastPayloadRef.current = "";
     setActiveThreadId(data.id);
+    setBriefManuallyCompleted(false);
     if (activeThreadKey) try { localStorage.setItem(activeThreadKey, data.id); } catch {}
     stampTimelineThread(data.id);
     setTimeline(buildInitialTimeline());
@@ -1543,6 +1564,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     hydratedThreadRef.current = null;
     cloudLastPayloadRef.current = "";
     setTimeline([]);
+    setBriefManuallyCompleted(false);
     setActiveThreadId(threadId);
     if (activeThreadKey) try { localStorage.setItem(activeThreadKey, threadId); } catch {}
     setThreadsOpen(false);
@@ -1936,7 +1958,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         };
         setTimeline((prev) => (detail?.replaceTimeline ? [welcomeMessage] : [...prev, welcomeMessage]));
       }
-      if (detail?.stage) setStageOverride(detail.stage);
+      if (detail?.stage && (detail.stage === "Discover" || onboardingGateRef.current.completed)) setStageOverride(detail.stage);
       if (detail?.openPanel) { clearDismissed(); setOpen(true); }
       if (detail?.closeBriefBuilder) setBriefBuilderOpen(false);
 
@@ -2465,7 +2487,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       const validation = validateBriefDraft(briefDraft);
       if (!validation.valid) {
         toast.error(
-          `To ensure ${name} curates an accurate project schedule, please specify your desired furniture Typologies before submitting.`,
+          `Complete the three required onboarding details before submitting.`,
           { description: `Missing required fields: ${validation.missing.join(", ")}` },
         );
         return;
@@ -2514,6 +2536,16 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           role: "assistant",
           content: "Access restricted — the Concierge is available to Maison Affluency members only.",
         },
+      ]);
+      return;
+    }
+
+    if (!opts?.builderSubmit && !onboardingGate.completed && isHighLevelVisionStatement(text)) {
+      setInput("");
+      setTimeline((prev) => [
+        ...clearBriefResultState(prev),
+        { kind: "msg", role: "user", content: opts?.displayText ?? text },
+        { kind: "msg", role: "assistant", content: ART_DECO_DISCOVERY_REPLY },
       ]);
       return;
     }
@@ -3128,6 +3160,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       ...priorMsgs,
       currentUserMsg,
     ];
+    const turnOnboardingGate = opts?.builderSubmit && validateBriefDraft(submittedBriefText).valid
+      ? evaluateFelixOnboardingGate(submittedBriefText, [submittedBriefText], true)
+      : onboardingGate;
 
     let assistantSoFar = "";
     let assistantStarted = false;
@@ -3210,6 +3245,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
 
     const handleProposal = (proposal: ConciergeProposal) => {
       armStall();
+      if (!turnOnboardingGate.completed && ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote", "propose_ffe_rows"].includes(proposal.tool)) {
+        setTimeline((prev) => prev.filter((item) => item.kind !== "pending_proposal"));
+        return;
+      }
       const tcid = proposal.tool_call_id ?? null;
       if (proposal.tool === "draft_quote" || proposal.tool === "add_to_quote") {
         setTimeline((prev) => swapPendingWithReal(prev, tcid, proposal.tool, { kind: "quote_proposal", proposal }));
@@ -3276,6 +3315,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         projectId,
         surface,
         lang: effectiveLang,
+        onboardingGate: turnOnboardingGate,
         onDelta: upsertAssistant,
         onProposal: handleProposal,
         onStreamStart: (streamId) => {
@@ -3299,6 +3339,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         },
         onToolStart: (ev) => {
           armStall();
+          if (!turnOnboardingGate.completed && ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote", "propose_ffe_rows"].includes(ev.tool)) return;
           setTimeline((prev) => {
             // Guard against duplicates if the server re-emits (defensive).
             if (
@@ -3518,6 +3559,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     } finally {
       if (opts?.builderSubmit) {
         if (builderSubmitOk) {
+          setBriefManuallyCompleted(true);
           // Post-submission: offer the three generated spatial configurations,
           // named from the aesthetic DNA captured in the brief. Success replaces
           // any held-tearsheet fallback from the same stream; the two states must
@@ -3548,7 +3590,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         briefSubmitDoneRef.current = null;
       }
     }
-  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry, user, cancelBriefTransition, briefBuilderOpen, briefDraft, openBriefBuilder]);
+  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry, user, cancelBriefTransition, briefBuilderOpen, briefDraft, openBriefBuilder, onboardingGate]);
 
   // Keep a ref to the latest `send` so the concierge:stage handler (which
   // registers once on mount) can auto-send prefills against fresh state
@@ -4843,6 +4885,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 );
               }
               if (item.kind === "layout_options") {
+                if (!onboardingGate.completed) return null;
                 return (
                   <div key={i} className="w-full self-start">
                     <LayoutComparisonGrid
@@ -5004,6 +5047,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 );
               }
               if (item.kind === "quote_proposal") {
+                if (!onboardingGate.completed) return null;
                 return (
                   <QuoteProposalCard
                     key={i}
@@ -5027,6 +5071,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 );
               }
               if (item.kind === "ffe_proposal") {
+                if (!onboardingGate.completed) return null;
                 return (
                   <FfeProposalCard
                     key={i}
@@ -5304,6 +5349,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 );
               }
               if (item.kind !== "proposal") return null;
+              if (!onboardingGate.completed) return null;
               const excludedSet = new Set(item.excluded || []);
               const visibleForGrid = item.proposal.preview.filter((p) => !excludedSet.has(p.id));
               // Any fresh tearsheet proposal IS a discovery run — whether the

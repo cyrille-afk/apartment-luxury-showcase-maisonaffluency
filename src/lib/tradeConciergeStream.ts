@@ -337,6 +337,7 @@ export async function streamConcierge({
   projectId,
   surface,
   lang,
+  onboardingGate,
   onDelta,
   onProposal,
   onToolStart,
@@ -358,6 +359,7 @@ export async function streamConcierge({
   surface?: "public" | "trade";
   /** UI language code (en/id/th/zh). Forwarded to the edge function so the model's reply language matches the picker. */
   lang?: string | null;
+  onboardingGate?: { completed: boolean; facts: { projectProfile: string; zone: string; budget: string }; source: string };
   onDelta: (text: string) => void;
   onProposal?: (proposal: ConciergeProposal) => void;
   /**
@@ -444,7 +446,7 @@ export async function streamConcierge({
 
     const body = mode === "resume" && streamId
       ? { resume: { stream_id: streamId, last_seq: lastSeq }, surface: surface ?? "trade" }
-      : { messages: currentMessages, project_id: projectId ?? null, surface: surface ?? "trade", lang: lang ?? null };
+      : { messages: currentMessages, project_id: projectId ?? null, surface: surface ?? "trade", lang: lang ?? null, onboarding_gate: onboardingGate ?? null };
 
     // Track the custom (non-standard) headers we send so the client can name a
     // suspect when a CORS preflight fails silently in the browser. Standard
