@@ -95,4 +95,3 @@
 - [x] Replace Felix STAGE pill with synchronized four-step premium progress pipeline
 - [x] Optimize the main FF&E Schedule for wide desktops with fluid columns, clipped-cell tooltips, table-only overflow, and sticky image/quote edges
 - [x] Refine the product lightbox action hierarchy and replace full-page Creation essays with stacked dynamic Curator Notes
-- [x] Optimize product-page Curator Notes as a full-width 3-column horizontal grid with relaxed line height, fine divider, and tighter anchor to the action panel

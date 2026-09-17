@@ -3,7 +3,7 @@ import { CldPicture } from "@/components/ui/CldPicture";
 import { useParams, useNavigate, Link, useLocation, Navigate } from "react-router-dom";
 import { absoluteUrl } from "@/config/site";
 import { Helmet } from "react-helmet-async";
-import { Heart, Pin, FileText, Layers, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2, Award, Compass, History, Scroll } from "lucide-react";
+import { Heart, Pin, FileText, Layers, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2, Award, Compass } from "lucide-react";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
@@ -2373,6 +2373,30 @@ const PublicProductPageContent: React.FC = () => {
 
 
 
+              {!isMobileOrPwa && (
+                <section aria-label="Curator notes" className="mt-10 border-t border-border/50 pt-8">
+                  <h2 className="mb-9 font-display text-2xl italic text-foreground">Curator Notes</h2>
+                  <div className="max-w-xl divide-y divide-border/50">
+                    {[
+                      { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
+                      { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
+                      { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
+                    ].map(({ label, text, Icon }) => (
+                      <article key={label} className="group flex gap-5 py-7 first:pt-0 last:pb-0">
+                        <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/60 transition-colors duration-150 group-hover:text-foreground" strokeWidth={1.25} />
+                        <div className="min-w-0">
+                          <h3 className="mb-3 font-body text-[10px] uppercase tracking-[0.2em] text-foreground">
+                            {label}
+                          </h3>
+                          <p className="font-body text-sm italic leading-[1.8] text-muted-foreground">
+                            {text}
+                          </p>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              )}
 
             </div>
 
@@ -2808,31 +2832,6 @@ const PublicProductPageContent: React.FC = () => {
               </Dialog>
             </div>
           </div>
-
-          {!isMobileOrPwa && (
-            <section aria-label="Curator notes" className="mt-6 border-t border-border/30 pt-6">
-              <h2 className="mb-6 font-display text-lg italic text-foreground">Curator Notes</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
-                {[
-                  { label: "Design Significance", text: curatorNotes.significance, Icon: History },
-                  { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
-                  { label: "Historical Provenance", text: curatorNotes.provenance, Icon: Scroll },
-                ].map(({ label, text, Icon }) => (
-                  <article key={label} className="group">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Icon className="h-4 w-4 shrink-0 text-muted-foreground/60 transition-colors duration-150 group-hover:text-foreground" strokeWidth={1.25} />
-                      <h3 className="font-body text-[10px] uppercase tracking-[0.2em] text-foreground">
-                        {label}
-                      </h3>
-                    </div>
-                    <p className="font-body text-sm italic leading-relaxed text-muted-foreground">
-                      {text}
-                    </p>
-                  </article>
-                ))}
-              </div>
-            </section>
-          )}
 
           {/* Verified trade — Zone 1/2/3 workspace (strip + Felix | specs),
               running full width directly below the main product view. */}
