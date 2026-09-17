@@ -260,6 +260,30 @@ export default function TradeDeliveryTracker() {
       .filter((g) => g.lines.length > 0);
   }, [groups, statusFilter]);
 
+  const visibleGroups = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return filteredGroups;
+    return filteredGroups
+      .map((g) => ({
+        ...g,
+        lines: g.lines.filter((l) => {
+          const haystack = [
+            l.product_name,
+            l.brand_name,
+            l.client_name,
+            g.name,
+            l.quote_ref,
+            STAGE_LABEL[l.stage || ""] || l.stage || "",
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+          return haystack.includes(term);
+        }),
+      }))
+      .filter((g) => g.lines.length > 0);
+  }, [filteredGroups, searchTerm]);
+
   const filterTabs: { key: "all" | "late" | "tight" | "ontrack"; label: string }[] = [
     { key: "all", label: "All Items" },
     { key: "late", label: "Late" },
