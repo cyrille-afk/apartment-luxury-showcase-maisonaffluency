@@ -673,13 +673,27 @@ export default function TradeFFESchedule() {
                   })}
                 </tbody>
                 <tfoot>
-                  <tr className="bg-muted/30">
-                    <td colSpan={10} className="px-4 py-3 font-body text-sm text-foreground font-medium text-right">Total</td>
-                    <td className="px-4 py-3 font-display text-sm text-foreground font-semibold">
-                      {totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}
-                    </td>
-                    <td colSpan={6} className="sticky right-0 border-l border-border/60 bg-muted" />
-                  </tr>
+                  {(() => {
+                    const totalIdx = visibleColumns.findIndex((c) => c.key === "total");
+                    if (totalIdx < 0) {
+                      return (
+                        <tr className="bg-muted/30">
+                          <td colSpan={visibleColumns.length} className="sticky right-0 border-l border-border/60 bg-muted px-4 py-3 font-body text-sm text-foreground font-medium text-right">
+                            Total <span className="font-display font-semibold">{totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}</span>
+                          </td>
+                        </tr>
+                      );
+                    }
+                    return (
+                      <tr className="bg-muted/30">
+                        <td colSpan={totalIdx} className="px-4 py-3 font-body text-sm text-foreground font-medium text-right">Total</td>
+                        <td className="px-4 py-3 font-display text-sm text-foreground font-semibold">
+                          {totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}
+                        </td>
+                        <td colSpan={visibleColumns.length - totalIdx - 1} className="sticky right-0 border-l border-border/60 bg-muted" />
+                      </tr>
+                    );
+                  })()}
                 </tfoot>
               </table>
             </div>
