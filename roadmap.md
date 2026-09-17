@@ -92,4 +92,4 @@
 - [x] Expand Delivery Tracker and FF&E Schedule tables for wide desktops and replace quote redirects with an isolated editable quote-line drawer
 - [x] Lock Felix Quote-stage transitions and proposal tables behind verified project profile, zone, budget, and explicit brief completion
 
-- [ ] Replace Felix STAGE pill with synchronized four-step premium progress pipeline
+- [x] Replace Felix STAGE pill with synchronized four-step premium progress pipeline
