@@ -437,7 +437,7 @@ const handler = async (req: Request): Promise<Response> => {
               subject,
               productName,
               designerName,
-              selectedFinish,
+              selectedFinish: resolvedFinish,
               attachmentUrl,
             },
           },
