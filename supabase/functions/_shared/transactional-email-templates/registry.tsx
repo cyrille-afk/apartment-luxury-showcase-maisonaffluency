@@ -27,6 +27,7 @@ import { template as proformaInvoice } from './proforma-invoice.tsx'
 import { template as orderPaymentConfirmed } from './order-payment-confirmed.tsx'
 import { template as orderReceived } from './order-received.tsx'
 import { template as tradeProgramInvitation } from './trade-program-invitation.tsx'
+import { template as purchaseOrderDispatch } from './purchase-order-dispatch.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'trade-approval': tradeApproval,
@@ -47,4 +48,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'order-payment-confirmed': orderPaymentConfirmed,
   'order-received': orderReceived,
   'trade-program-invitation': tradeProgramInvitation,
+  'purchase-order-dispatch': purchaseOrderDispatch,
 }
