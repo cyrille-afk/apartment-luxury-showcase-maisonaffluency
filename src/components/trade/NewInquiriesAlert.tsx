@@ -83,8 +83,8 @@ export function NewInquiriesAlert() {
           <div className="min-w-0">
             <p className="font-body text-[11px] uppercase tracking-[0.2em] text-foreground">
               {items.length === 1
-                ? "1 new quote request awaiting reply"
-                : `${items.length}+ new quote requests awaiting reply`}
+                ? "1 quote request — quote not yet sent"
+                : `${items.length} quote requests — quotes not yet sent`}
             </p>
             <p className="mt-1 truncate font-body text-sm text-muted-foreground">
               {latest.product_name ?? "Quote request"}
