@@ -314,7 +314,9 @@ export default function ProductCommerceCta({
       projectCity: details.city,
       buyerProfile: details.profile,
     });
-    runIntent(target);
+    // One continuous motion: the sheet finishes closing before the selection
+    // drawer / bespoke dialog takes the canvas — never both on screen at once.
+    window.setTimeout(() => runIntent(target), 260);
   };
 
   const primaryAction = tradeApproved ? undefined : () => startIntent("order");
