@@ -34,6 +34,7 @@ import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp
 import { usePerLineShipping } from "@/hooks/usePerLineShipping";
 import { toIsoCountry, computePerLineShipments } from "@/lib/perLineShipping";
 import { parseCrateSpecs, cratesForSize, crateTotals } from "@/lib/crateSpecs";
+import { prefillLineShippingFromCatalog } from "@/lib/prefillLineShipping";
 import { labelForMode } from "@/lib/shippingEstimator";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
 import { findQuoteFinishSwatches, type QuoteFinishSwatch, type QuoteFinishVariant } from "@/lib/quoteFinishSwatches";
@@ -1101,8 +1102,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       } catch {
         // Crate data is optional — never block adding the product.
       }
-      const { error } = await supabase.from("trade_quote_items").insert(insertPayload);
+      const { data: insertedRow, error } = await supabase
+        .from("trade_quote_items")
+        .insert(insertPayload)
+        .select("id")
+        .maybeSingle();
       if (error) throw error;
+      // Safety net: fill packing/crating from the catalogue for any path that
+      // skipped the inline lookup above.
+      if (insertedRow?.id) await prefillLineShippingFromCatalog([insertedRow.id]);
       const picked = productOptions.find((p) => p.id === productId);
       toast({
         title: "Added to quote",
