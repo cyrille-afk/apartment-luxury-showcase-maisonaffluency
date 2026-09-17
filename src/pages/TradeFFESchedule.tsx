@@ -639,6 +639,80 @@ export default function TradeFFESchedule() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="ml-auto h-8 gap-1.5 font-body text-[11px]">
+                    <Eye className="h-3.5 w-3.5" />
+                    View Presets
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64">
+                  <DropdownMenuLabel className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Preset layouts
+                  </DropdownMenuLabel>
+                  {DEFAULT_VIEW_PRESETS.map((preset) => (
+                    <DropdownMenuItem
+                      key={preset.name}
+                      onClick={() => applyPreset(preset)}
+                      className="font-body text-xs"
+                    >
+                      {preset.name}
+                    </DropdownMenuItem>
+                  ))}
+                  {customPresets.length > 0 && <DropdownMenuSeparator />}
+                  {customPresets.map((preset) => (
+                    <DropdownMenuItem
+                      key={preset.name}
+                      onClick={() => applyPreset(preset)}
+                      className="group font-body text-xs"
+                    >
+                      <span className="min-w-0 flex-1 truncate">{preset.name}</span>
+                      <button
+                        type="button"
+                        aria-label={`Delete preset ${preset.name}`}
+                        className="ml-2 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deletePreset(preset.name);
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <div className="p-1.5" onKeyDown={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        value={presetName}
+                        onChange={(e) => setPresetName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            saveCurrentAsPreset();
+                          }
+                        }}
+                        placeholder="Preset name…"
+                        maxLength={60}
+                        className="h-7 min-w-0 flex-1 rounded border border-border bg-background px-2 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                      />
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        disabled={!presetName.trim()}
+                        onClick={saveCurrentAsPreset}
+                        className="h-7 gap-1 px-2 font-body text-[11px]"
+                      >
+                        <Plus className="h-3 w-3" />
+                        Save
+                      </Button>
+                    </div>
+                    <p className="mt-1 px-0.5 font-body text-[9px] uppercase tracking-wider text-muted-foreground/70">
+                      + Save current layout as preset
+                    </p>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8 gap-1.5 font-body text-[11px]">
                     <Columns3 className="h-3.5 w-3.5" />
                     Columns
                   </Button>
