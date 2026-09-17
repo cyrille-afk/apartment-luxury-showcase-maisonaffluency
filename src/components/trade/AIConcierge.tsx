@@ -3544,18 +3544,28 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const sendRef = useRef(send);
   useEffect(() => { sendRef.current = send; }, [send]);
 
-  // Auto-trigger the conversational pipeline as soon as an upload lands.
-  // Runs once per successful upload event, after the attachment state has
-  // committed, so `send` picks the new files up and Felix starts thinking.
+  // Auto-commit the upload to the timeline as soon as it lands: the chips
+  // animate out of the composer and the turn is submitted for the user. If a
+  // stream is still running, the flag stays armed and fires the moment it ends.
   useEffect(() => {
     if (!autoSendOnUploadRef.current) return;
     if (!attachments.length) return;
-    if (streaming) return;
     if (briefBuilderOpen) { autoSendOnUploadRef.current = false; return; }
+    if (streaming) return; // stay armed — this effect re-runs when streaming ends
     autoSendOnUploadRef.current = false;
-    const t = window.setTimeout(() => { void sendRef.current(); }, 60);
-    return () => window.clearTimeout(t);
+    setAttachmentsLaunching(true);
+    if (autoSendTimerRef.current) window.clearTimeout(autoSendTimerRef.current);
+    autoSendTimerRef.current = window.setTimeout(() => {
+      autoSendTimerRef.current = null;
+      setAttachmentsLaunching(false);
+      void sendRef.current();
+    }, 260);
   }, [autoSendTick, attachments, streaming, briefBuilderOpen]);
+
+  useEffect(() => () => {
+    if (autoSendTimerRef.current) window.clearTimeout(autoSendTimerRef.current);
+  }, []);
+
 
   const submitBriefFromBuilder = useCallback(async (text: string) => {
     return new Promise<void>((resolve, reject) => {
