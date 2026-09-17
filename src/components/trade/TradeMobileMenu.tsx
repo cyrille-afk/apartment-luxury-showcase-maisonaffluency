@@ -33,6 +33,7 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAdmin, isTradeUser, applicationStatus, signOut, profile } = useAuth();
+  const pendingInquiryCount = usePendingInquiryCount();
   // Approved trade accounts and admins use the Curated Showroom dashboard only.
   const hasTradeAccess = isAdmin || isTradeUser || applicationStatus === "approved";
   const items = hasTradeAccess ? coreItems.filter((i) => i.url !== "/trade/me") : coreItems;
