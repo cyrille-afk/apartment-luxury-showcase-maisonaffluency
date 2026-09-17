@@ -91,6 +91,7 @@ import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import { buildProductCuratorNotes } from "@/lib/productCuratorNotes";
 
 
+import StickyPurchaseBar from "@/components/product/StickyPurchaseBar";
 import { setStickyProductBarActive } from "@/lib/stickyProductBar";
 
 import TradePendingReviewCard from "@/components/product/TradePendingReviewCard";
@@ -2230,6 +2231,25 @@ const PublicProductPageContent: React.FC = () => {
       <div className="product-page-root flex min-h-[100dvh] flex-col bg-background text-foreground">
         <Navigation borderless />
 
+        {/* Desktop slim sticky purchase bar — price + button labels follow the
+            effective role so it stays in sync with the sidebar action block.
+            Hidden for verified trade: the full-width workspace strip below the
+            product grid replaces it and removes the overlapping floating block. */}
+        {!isTradeVerifiedView && (
+          <StickyPurchaseBar
+            triggerId="main-product-image-container"
+            image={images[0]}
+            title={product.title}
+            designer={designerDisplay}
+            price={isTradeVerifiedView && mockNetDisplay ? mockNetDisplay : displayRrpLabel}
+            currencyCode={isTradeVerifiedView && mockNetDisplay ? "Net Trade" : undefined}
+            primaryLabel={isTradeVerifiedView ? "Add to Co-Pilot Workspace & Order" : "Place Order"}
+            secondaryLabel={null}
+            onPlaceOrder={isTradeVerifiedView ? handleDirectCheckout : openSelectionDrawer}
+            placingOrder={checkoutLoading}
+          />
+        )}
+
         {/* Dev-only role preview switcher (never rendered in production builds) */}
         {import.meta.env.DEV && typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname) && <DevRoleToggle />}
 
@@ -2273,7 +2293,7 @@ const PublicProductPageContent: React.FC = () => {
           </div>
 
 
-          <div className="flex flex-col lg:grid lg:grid-cols-2 lg:items-start gap-3 md:gap-8 lg:gap-16">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-3 md:gap-8 lg:gap-16">
             <div
               id="main-product-image-container"
               className={cn(
@@ -2349,6 +2369,34 @@ const PublicProductPageContent: React.FC = () => {
 
               {/* Mobile favourite/studio-save now rides inside the gallery frame
                   (see `overlay` above) so it can never detach from the photo. */}
+
+
+
+
+              {!isMobileOrPwa && (
+                <section aria-label="Curator notes" className="mt-10 border-t border-border/50 pt-8">
+                  <h2 className="mb-9 font-display text-2xl italic text-foreground">Curator Notes</h2>
+                  <div className="max-w-xl divide-y divide-border/50">
+                    {[
+                      { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
+                      { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
+                      { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
+                    ].map(({ label, text, Icon }) => (
+                      <article key={label} className="group flex gap-5 py-7 first:pt-0 last:pb-0">
+                        <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/60 transition-colors duration-150 group-hover:text-foreground" strokeWidth={1.25} />
+                        <div className="min-w-0">
+                          <h3 className="mb-3 font-body text-[10px] uppercase tracking-[0.2em] text-foreground">
+                            {label}
+                          </h3>
+                          <p className="font-body text-sm italic leading-[1.8] text-muted-foreground">
+                            {text}
+                          </p>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              )}
 
             </div>
 
@@ -2785,34 +2833,6 @@ const PublicProductPageContent: React.FC = () => {
             </div>
           </div>
 
-          {!isMobileOrPwa && (
-            <section aria-label="Curator notes" className="mt-12 border-t border-border/50 pt-8 lg:mt-16 lg:pt-10">
-              <h2 className="mb-8 font-display text-2xl italic text-foreground">Curator Notes</h2>
-              <div className="grid grid-cols-3 divide-x divide-border/50">
-                {[
-                  { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
-                  { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
-                  { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
-                ].map(({ label, text, Icon }, index) => (
-                  <article
-                    key={label}
-                    className={cn("group flex min-w-0 gap-4", index === 0 ? "pr-8" : index === 2 ? "pl-8" : "px-8")}
-                  >
-                    <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/60 transition-colors duration-150 group-hover:text-foreground" strokeWidth={1.25} />
-                    <div className="min-w-0">
-                      <h3 className="mb-3 font-body text-[10px] uppercase tracking-[0.2em] text-foreground">
-                        {label}
-                      </h3>
-                      <p className="font-body text-sm italic leading-[1.8] text-muted-foreground">
-                        {text}
-                      </p>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
-          )}
-
           {/* Verified trade — Zone 1/2/3 workspace (strip + Felix | specs),
               running full width directly below the main product view. */}
           {user && !roleOverridden && hasTradeAccess && !isMobileOrPwa && (() => {
@@ -2847,8 +2867,8 @@ const PublicProductPageContent: React.FC = () => {
           })()}
 
           {relatedPicks.length > 0 && (
-            <section id="related-picks-section" className="mt-12 border-t border-border/50 pt-8 lg:mt-16 lg:pt-10">
-              <div className="grid grid-cols-1 gap-8 lg:gap-10">
+            <div id="related-picks-section" className="mt-6 pt-6">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
                 {/* Mobile-only heading: shown above the carousel */}
                 <div className="lg:hidden order-1">
                   <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
@@ -2901,7 +2921,7 @@ const PublicProductPageContent: React.FC = () => {
                 </div>
 
                 {/* Carousel: swipeable on mobile, paginated 3-up on desktop. */}
-                <div className="flex flex-col order-2">
+                <div className="lg:col-span-8 flex flex-col order-2 lg:order-2">
                   {/* Mobile: native horizontal scroll-snap carousel */}
                   <div className="lg:hidden -mx-4 px-4">
                     <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -3032,9 +3052,9 @@ const PublicProductPageContent: React.FC = () => {
 
                 </div>
 
-                {/* Desktop heading and complete designer introduction. */}
-                <div className="hidden lg:block order-1 max-w-4xl">
-                  <div className="mb-6">
+                {/* Brand summary — desktop column; mobile copy sits directly below the maker name. */}
+                <div className="hidden lg:block lg:col-span-4 lg:pr-4 lg:order-1">
+                  <div>
                     <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
                       {(product.subtitle || / by /i.test(product.title) || relatedPicks.some((rp) => rp.subtitle || / by /i.test(rp.title))) ? "From the Same Maker" : "From the Same Designer"}
                     </p>
@@ -3049,14 +3069,45 @@ const PublicProductPageContent: React.FC = () => {
                       <span className="mt-2 w-8 md:w-10 h-px bg-foreground/20" aria-hidden="true" />
                     </h2>
                   </div>
-                  {brandSummary && (
-                    <p className="font-body text-sm text-foreground/75 leading-relaxed">
-                      {renderParagraph(brandSummary)}
-                    </p>
-                  )}
+                  {brandSummary && (() => {
+                    const PREVIEW_LEN = 240;
+                    const needsToggle = brandSummary.length > PREVIEW_LEN;
+                    let preview = brandSummary;
+                    if (needsToggle) {
+                      const slice = brandSummary.slice(0, PREVIEW_LEN);
+                      // End the preview at the last complete sentence so dangling
+                      // fragments like "Guided by the…" are hidden below Read more.
+                      const sentenceMatch = slice.match(/.*[.!?](?=\s|$)/);
+                      const lastSentenceEnd = sentenceMatch ? sentenceMatch[0].length : -1;
+                      const lastSpace = slice.lastIndexOf(" ");
+                      const cutIndex = lastSentenceEnd > 0 ? lastSentenceEnd : lastSpace > 0 ? lastSpace : PREVIEW_LEN;
+                      preview = slice.slice(0, cutIndex).trim() + "…";
+                    }
+                    const shown = bioExpanded || !needsToggle ? brandSummary : preview;
+                    return (
+                      <div>
+                        <p className="font-body text-sm text-foreground/75 leading-relaxed text-justify">
+                          {renderParagraph(shown)}
+                        </p>
+                        {needsToggle && (
+                          <button
+                            type="button"
+                            onClick={() => setBioExpanded((v) => !v)}
+                            className="mt-2 inline-flex items-center gap-1 font-body text-[11px] uppercase tracking-[0.15em] text-foreground hover:text-primary transition-colors"
+                          >
+                            {bioExpanded ? "Read less" : "Read more"}
+                            <ChevronDown
+                              size={12}
+                              className={cn("transition-transform duration-200", bioExpanded && "rotate-180")}
+                            />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
-            </section>
+            </div>
           )}
         </main>
 
