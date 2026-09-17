@@ -368,7 +368,14 @@ export default function TradeDeliveryTracker() {
                             return ar.localeCompare(br);
                           })
                           .map((l) => (
-                            <tr key={l.item_id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                             <tr
+                               key={l.item_id}
+                               className={`border-b border-border/50 transition-colors ${
+                                 l.slack != null && l.slack < 0
+                                   ? "bg-red-50/60 hover:bg-red-100/70"
+                                   : "hover:bg-muted/20"
+                               }`}
+                             >
                               <td className="w-12 px-2 py-2">
                                 <div className="relative flex h-10 w-10 items-center justify-center">
                                   <button
