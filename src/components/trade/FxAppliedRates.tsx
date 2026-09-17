@@ -44,6 +44,8 @@ export function FxAppliedRates({
   className?: string;
 }) {
   if (!pairs.length) return null;
+  const latestFetch = Math.max(...pairs.map((p) => p.fetchedAt ?? 0));
+  const ttlMs = pairs.find((p) => p.cacheTtlMs)?.cacheTtlMs;
   return (
     <div className={`flex flex-wrap items-center gap-1 ${className}`}>
       {pairs.map((p) => {
@@ -59,7 +61,7 @@ export function FxAppliedRates({
             <TooltipTrigger asChild>
               <span
                 className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-mono leading-none ${toneClass[tone]}`}
-                aria-label={`Applied rate: 1 ${p.src} = ${rateStr} ${p.tgt}, source ${label}`}
+                aria-label={`Applied rate: 1 ${p.src} = ${rateStr} ${p.tgt}, source ${label}${p.fetchedAt ? `, fetched ${formatFetchedAt(p.fetchedAt)}` : ""}`}
               >
                 {p.src} → {p.tgt} @ {rateStr}
               </span>
@@ -68,10 +70,25 @@ export function FxAppliedRates({
               1 {p.src} = {rateStr} {p.tgt}
               <br />
               Source: {label} — {detail}
+              {p.fetchedAt ? (
+                <>
+                  <br />
+                  Fetched: {new Date(p.fetchedAt).toLocaleString()}
+                  {p.cacheTtlMs ? ` · ${formatTtl(p.cacheTtlMs)}` : ""}
+                </>
+              ) : null}
             </TooltipContent>
           </Tooltip>
         );
       })}
+      {latestFetch > 0 && (
+        <span
+          className="text-[9px] font-body text-muted-foreground uppercase tracking-widest"
+          aria-label={`FX rates last fetched at ${new Date(latestFetch).toLocaleString()}${ttlMs ? `, reused for up to ${formatTtl(ttlMs)} before refresh` : ""}`}
+        >
+          · fetched {formatFetchedAt(latestFetch)}{ttlMs ? ` · ${formatTtl(ttlMs)}` : ""}
+        </span>
+      )}
     </div>
   );
 }
