@@ -3,7 +3,15 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X, Filter } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X, Filter, Columns3 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
