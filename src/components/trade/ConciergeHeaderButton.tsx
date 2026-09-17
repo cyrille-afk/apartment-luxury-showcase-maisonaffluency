@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { loadName } from "@/components/trade/conciergeGreeting";
+import { BESPOKE_SYNC_EVENT, hasPendingBespokeSync } from "@/lib/bespokeSync";
 
 /**
  * Header pill that opens the AI Concierge. Rendered globally in TradeLayout so
