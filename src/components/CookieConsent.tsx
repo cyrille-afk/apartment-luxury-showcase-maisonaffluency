@@ -172,19 +172,37 @@ const CookieConsent = () => {
     return () => window.removeEventListener("mobile-preview-open-change", sync);
   }, []);
 
+  const dismissWithFade = (after?: () => void) => {
+    setFading(true);
+    window.setTimeout(() => {
+      after?.();
+      setVisible(false);
+      setFading(false);
+      setConsented(true);
+    }, 300);
+  };
+
   const accept = () => {
-    writeConsent("accepted");
-    setVisible(false);
-    // Load GA4 immediately
-    if (typeof (window as any).__loadGA4 === "function") {
-      (window as any).__loadGA4();
-    }
+    dismissWithFade(() => {
+      writeConsent("accepted");
+      // Load GA4 immediately
+      if (typeof (window as any).__loadGA4 === "function") {
+        (window as any).__loadGA4();
+      }
+    });
   };
 
   const decline = () => {
-    writeConsent("declined");
-    try { localStorage.setItem("ga_optout", "1"); } catch { /* ignore */ }
-    setVisible(false);
+    dismissWithFade(() => {
+      writeConsent("declined");
+      try { localStorage.setItem("ga_optout", "1"); } catch { /* ignore */ }
+    });
+  };
+
+  const reopen = () => {
+    setConsented(false);
+    setFading(false);
+    setVisible(true);
   };
 
 
