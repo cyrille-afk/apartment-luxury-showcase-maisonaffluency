@@ -124,7 +124,7 @@ export default function TradeDeliveryTracker() {
     queryFn: async (): Promise<Line[]> => {
       const { data: quotes } = await supabase
         .from("trade_quotes")
-        .select("id, client_name, status, project_id, created_at")
+        .select("id, client_name, status, project_id, created_at, currency")
         .eq("user_id", user!.id)
         .in("status", ["confirmed", "submitted", "responded", "priced", "deposit_paid", "paid"]);
       if (!quotes?.length) return [];
