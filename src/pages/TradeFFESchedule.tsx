@@ -589,19 +589,16 @@ export default function TradeFFESchedule() {
                   <div className="max-w-full min-w-0 overflow-x-auto overscroll-x-contain border border-border rounded-lg">
               <table className="w-full min-w-[1280px] table-fixed text-left text-[11px] 2xl:min-w-0">
                 <colgroup>
-                  <col className="w-[4%]" /><col className="w-[6%]" /><col className="w-[5%]" /><col className="w-[11%]" />
-                  <col className="w-[7%]" /><col className="w-[7%]" /><col className="w-[6%]" /><col className="w-[5%]" />
-                  <col className="w-[3%]" /><col className="w-[6%]" /><col className="w-[6%]" /><col className="w-[4%]" />
-                  <col className="w-[6%]" /><col className="w-[7%]" /><col className="w-[8%]" /><col className="w-[5%]" /><col className="w-[4%]" />
+                  {visibleColumns.map((c) => <col key={c.key} className={c.width} />)}
                 </colgroup>
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
-                    {["", "PO #", "Cost Code", "Item", "Brand", "Project", "Client", "Studio", "Qty", "Unit Trade", "Total", "Lead", "Stage", "Expected ready", "Required by", "Slack", "Quote"].map((h, idx) => (
+                    {visibleColumns.map((c) => (
                       <th
-                        key={idx}
-                        className={`${idx === 0 ? "sticky left-0 z-20 border-r border-border/70 bg-muted text-center" : ""} ${idx === 16 ? "sticky right-0 z-20 border-l border-border/70 bg-muted text-center" : ""} px-1.5 py-3 font-body text-[9px] uppercase tracking-wider text-muted-foreground xl:px-2`}
+                        key={c.key}
+                        className={`${c.key === "image" ? "sticky left-0 z-20 border-r border-border/70 bg-muted text-center" : ""} ${c.key === "quote" ? "sticky right-0 z-20 border-l border-border/70 bg-muted text-center" : ""} px-1.5 py-3 font-body text-[9px] uppercase tracking-wider text-muted-foreground xl:px-2`}
                       >
-                        {h}
+                        {c.key === "image" ? "" : c.label}
                       </th>
                     ))}
                   </tr>
