@@ -67,6 +67,9 @@ interface QuoteItemWithProduct {
   ship_mode: string | null;
   ship_cbm: number | null;
   ship_weight_kg: number | null;
+  /** Crating / packing charge carried over from the product's crate specs. */
+  crating_cents?: number | null;
+  crating_currency?: string | null;
   trade_products: {
     product_name: string;
     brand_name: string;
