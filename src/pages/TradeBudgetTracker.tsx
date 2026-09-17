@@ -297,6 +297,12 @@ export default function TradeBudgetTracker() {
     return out;
   }, [filteredRows]);
 
+  const hasCashFlowRisk = useMemo(() => {
+    if (totals.client <= 0) return false;
+    const threshold = Math.round((totals.client / 100) * 0.15);
+    return cashFlow.some((p) => p.buffer < threshold);
+  }, [cashFlow, totals.client]);
+
   const axisMoney = (v: number) => {
     const symbol = currency === "USD" ? "$" : currency === "GBP" ? "£" : currency === "SGD" ? "S$" : "€";
     if (Math.abs(v) >= 1000) return `${symbol}${(v / 1000).toFixed(0)}K`;
