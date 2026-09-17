@@ -2861,6 +2861,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       kind: "msg",
       role: "user",
       content: displayText,
+      ...(submittedStructuredBrief ? { briefSubmit: true } : {}),
       ...(timelineAttachments.length ? { attachments: timelineAttachments } : {}),
     };
     const immediateProfile = droppedAttachmentPlaceholder ? null : quickClientProfile(displayText);
