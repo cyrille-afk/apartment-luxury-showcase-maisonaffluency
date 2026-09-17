@@ -430,10 +430,8 @@ export default function PODocumentViewer({ document: po, onOpenChange, onStatusC
                     </p>
                   )}
 
-                  {false ? (
-                    <div />
+                  {status === "approved" ? null : status === "changes_requested" ? (
 
-                  ) : status === "changes_requested" ? (
                     <div className="mt-4 flex flex-wrap items-center gap-3">
                       <span className="inline-flex items-center gap-2 rounded-sm border border-amber-300 bg-amber-50 px-3 py-2 font-body text-[11px] uppercase tracking-[0.16em] text-amber-800">
                         <RotateCcw className="h-3.5 w-3.5" />
