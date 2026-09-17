@@ -513,11 +513,21 @@ export default function ProductCommerceCta({
           title={productTitle}
           configuration={orderFinishLabel || (selectedFinishes.length ? selectedFinishes.join(" / ") : null)}
           leadTime={leadTime}
-          priceLabel={retailLabel || rrpLabel || null}
+          priceLabel={
+            quoteOnlySelection ? "Price upon Request" : retailLabel || rrpLabel || null
+          }
           imageUrl={imageUrl}
           quantity={quantity}
-          onQuantityChange={handleDrawerQuantity}
-          onCheckout={handleCheckout}
+          onQuantityChange={quoteOnlySelection ? setQuantity : handleDrawerQuantity}
+          quoteOnly={quoteOnlySelection}
+          onCheckout={
+            quoteOnlySelection
+              ? () => {
+                  setMiniCartOpen(false);
+                  setBespokeOpen(true);
+                }
+              : handleCheckout
+          }
           placing={placingOrder}
         />
       )}
