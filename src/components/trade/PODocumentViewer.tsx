@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { BadgeCheck, CheckCircle2, Printer, RotateCcw, X } from "lucide-react";
+import { BadgeCheck, CheckCircle2, Loader2, Printer, RotateCcw, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -16,8 +16,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
 import { useToast } from "@/hooks/use-toast";
+import { purchaseOrderPdfBase64 } from "@/lib/purchaseOrderPdf";
 
 export type POApprovalStatus = "pending" | "approved" | "changes_requested";
+
+interface SupplierRecord {
+  id: string;
+  supplier_name: string;
+  contact_email: string;
+  cc_email: string | null;
+  brand_aliases?: string[] | null;
+}
+
 
 export interface PODocumentData {
   item_id?: string;
@@ -90,6 +100,10 @@ export default function PODocumentViewer({ document: po, onOpenChange, onStatusC
     po_approved_by_name: string | null;
     po_approved_at: string | null;
   } | null>(null);
+  const [supplier, setSupplier] = useState<SupplierRecord | null>(null);
+  const [dispatching, setDispatching] = useState(false);
+  const [dispatchedTo, setDispatchedTo] = useState<string | null>(null);
+
 
   const status = (localStatus?.po_status ?? (po?.po_status as POApprovalStatus) ?? "pending") as POApprovalStatus;
   const approverName = localStatus?.po_approved_by_name ?? po?.po_approved_by_name ?? null;
@@ -99,10 +113,94 @@ export default function PODocumentViewer({ document: po, onOpenChange, onStatusC
   useEffect(() => {
     setLocalStatus(null);
     setPendingAction(null);
+    setSupplier(null);
   }, [po?.item_id]);
+
+  // Resolve the supplier for this PO's brand (exact name or registered alias).
+  useEffect(() => {
+    const brand = po?.brand_name?.trim().toLowerCase();
+    if (!brand) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("suppliers")
+        .select("id, supplier_name, contact_email, cc_email, brand_aliases")
+        .eq("active", true)
+        .limit(1000);
+      if (cancelled) return;
+      const match =
+        (data ?? []).find(
+          (s) =>
+            s.supplier_name.trim().toLowerCase() === brand ||
+            (s.brand_aliases ?? []).some((a: string) => a.trim().toLowerCase() === brand),
+        ) ?? null;
+      setSupplier(match);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [po?.brand_name, po?.item_id]);
 
   const managerName =
     [profile?.first_name, profile?.last_name].filter(Boolean).join(" ").trim() || profile?.email || "Studio manager";
+
+  /** Compiles the approved PO as a PDF and emails it to the resolved supplier. */
+  const dispatchToSupplier = async (approvedAtStamp: string) => {
+    if (!po?.item_id) return;
+    if (!supplier?.contact_email) {
+      toast({
+        title: "No supplier email on file",
+        description: `Add a supplier contact for ${po.brand_name} to dispatch this purchase order automatically.`,
+      });
+      return;
+    }
+    setDispatching(true);
+    toast({
+      title: "PO approved",
+      description: `Dispatching document to ${supplier.contact_email}…`,
+    });
+    try {
+      const pdfBase64 = purchaseOrderPdfBase64({
+        poNumber: po.po_number,
+        quoteRef: po.quote_ref,
+        currency: po.currency || "EUR",
+        supplierName: supplier.supplier_name,
+        clientName: po.client_name,
+        projectName: po.project_name,
+        costCode: po.cost_code,
+        requiredBy: po.required_by_date,
+        leadTime: po.lead_time,
+        productName: po.product_name,
+        brandName: po.brand_name,
+        sku: po.sku,
+        dimensions: po.dimensions,
+        materials: po.materials,
+        quantity: po.quantity,
+        unitCents: po.price_cents ?? null,
+        approvedByName: managerName,
+        approvedAt: approvedAtStamp,
+      });
+      const { data, error } = await supabase.functions.invoke("send-purchase-order", {
+        body: { itemId: po.item_id, pdfBase64 },
+      });
+      if (error || (data && (data as { error?: string }).error)) {
+        throw new Error((data as { error?: string })?.error || error?.message || "Dispatch failed");
+      }
+      setDispatchedTo(supplier.contact_email);
+      toast({
+        title: "Purchase order dispatched",
+        description: `${po.po_number} sent to ${supplier.contact_email}${supplier.cc_email ? ` (cc ${supplier.cc_email})` : ""}.`,
+      });
+    } catch (err) {
+      toast({
+        title: "Supplier dispatch failed",
+        description: err instanceof Error ? err.message : "The purchase order was approved but not emailed.",
+        variant: "destructive",
+      });
+    } finally {
+      setDispatching(false);
+    }
+  };
 
   const applyDecision = async (next: "approved" | "changes_requested") => {
     if (!po?.item_id) return;
@@ -126,11 +224,16 @@ export default function PODocumentViewer({ document: po, onOpenChange, onStatusC
     };
     setLocalStatus(applied);
     onStatusChange?.(applied);
+    if (next === "approved") {
+      void dispatchToSupplier(stamp);
+      return;
+    }
     toast({
-      title: next === "approved" ? "Purchase order approved" : "Changes requested",
+      title: "Changes requested",
       description: `${po.po_number} is now marked ${statusLabel(next).toLowerCase()}.`,
     });
   };
+
 
   /** Print the document sheet alone, via an isolated iframe so the app behind stays untouched. */
   const print = () => {
@@ -304,7 +407,31 @@ export default function PODocumentViewer({ document: po, onOpenChange, onStatusC
                         <p className="font-body text-[11px] text-emerald-800/70">{stampTime(approvedAt)}</p>
                       </div>
                     </div>
-                  ) : status === "changes_requested" ? (
+                  ) : null}
+
+                  {status === "approved" && (
+                    <p className="mt-3 font-body text-[11px] text-muted-foreground">
+                      {dispatching ? (
+                        <span className="inline-flex items-center gap-2">
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          Dispatching document to {supplier?.contact_email}…
+                        </span>
+                      ) : dispatchedTo ? (
+                        <span className="inline-flex items-center gap-2 text-emerald-700">
+                          <Send className="h-3 w-3" />
+                          Dispatched to {dispatchedTo}
+                          {supplier?.cc_email ? ` · cc ${supplier.cc_email}` : ""}
+                        </span>
+                      ) : supplier?.contact_email ? (
+                        `Supplier on file: ${supplier.supplier_name} · ${supplier.contact_email}`
+                      ) : (
+                        `No supplier email on file for ${po.brand_name}.`
+                      )}
+                    </p>
+                  )}
+
+                  {status === "approved" ? null : status === "changes_requested" ? (
+
                     <div className="mt-4 flex flex-wrap items-center gap-3">
                       <span className="inline-flex items-center gap-2 rounded-sm border border-amber-300 bg-amber-50 px-3 py-2 font-body text-[11px] uppercase tracking-[0.16em] text-amber-800">
                         <RotateCcw className="h-3.5 w-3.5" />

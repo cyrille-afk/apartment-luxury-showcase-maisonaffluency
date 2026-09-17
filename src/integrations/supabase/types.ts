@@ -6456,6 +6456,42 @@ export type Database = {
         }
         Relationships: []
       }
+      suppliers: {
+        Row: {
+          active: boolean
+          brand_aliases: string[]
+          cc_email: string | null
+          contact_email: string
+          created_at: string
+          id: string
+          notes: string | null
+          supplier_name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          brand_aliases?: string[]
+          cc_email?: string | null
+          contact_email: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          supplier_name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          brand_aliases?: string[]
+          cc_email?: string | null
+          contact_email?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          supplier_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -7615,6 +7651,9 @@ export type Database = {
           po_approved_by: string | null
           po_approved_by_name: string | null
           po_change_request_note: string | null
+          po_dispatch_email: string | null
+          po_dispatched_at: string | null
+          po_document_path: string | null
           po_number: string | null
           po_status: string
           product_id: string
@@ -7626,6 +7665,7 @@ export type Database = {
           ship_mode: string | null
           ship_origin_country: string | null
           ship_weight_kg: number | null
+          supplier_id: string | null
           unit_price_cents: number | null
           unit_price_currency: string | null
           variant_label: string | null
@@ -7649,6 +7689,9 @@ export type Database = {
           po_approved_by?: string | null
           po_approved_by_name?: string | null
           po_change_request_note?: string | null
+          po_dispatch_email?: string | null
+          po_dispatched_at?: string | null
+          po_document_path?: string | null
           po_number?: string | null
           po_status?: string
           product_id: string
@@ -7660,6 +7703,7 @@ export type Database = {
           ship_mode?: string | null
           ship_origin_country?: string | null
           ship_weight_kg?: number | null
+          supplier_id?: string | null
           unit_price_cents?: number | null
           unit_price_currency?: string | null
           variant_label?: string | null
@@ -7683,6 +7727,9 @@ export type Database = {
           po_approved_by?: string | null
           po_approved_by_name?: string | null
           po_change_request_note?: string | null
+          po_dispatch_email?: string | null
+          po_dispatched_at?: string | null
+          po_document_path?: string | null
           po_number?: string | null
           po_status?: string
           product_id?: string
@@ -7694,6 +7741,7 @@ export type Database = {
           ship_mode?: string | null
           ship_origin_country?: string | null
           ship_weight_kg?: number | null
+          supplier_id?: string | null
           unit_price_cents?: number | null
           unit_price_currency?: string | null
           variant_label?: string | null
@@ -7733,6 +7781,13 @@ export type Database = {
             columns: ["quote_id"]
             isOneToOne: false
             referencedRelation: "trade_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_quote_items_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
           {
