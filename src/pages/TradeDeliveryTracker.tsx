@@ -488,20 +488,38 @@ export default function TradeDeliveryTracker() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <div className="rounded-lg border border-border bg-background px-3 py-2 min-w-[90px]">
+                  <div className="rounded-lg border border-border bg-background px-3 py-2 min-w-[90px] transition-colors">
                     <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Total Items</p>
                     <p className="font-display text-sm font-semibold text-foreground mt-0.5">{visibleTotals.totalItems}</p>
                   </div>
                   {Object.entries(visibleTotals.byCurrency).length === 0 ? (
-                    <div className="rounded-lg border border-border bg-background px-3 py-2 min-w-[110px]">
-                      <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Filtered Value</p>
-                      <p className="font-display text-sm font-semibold text-foreground mt-0.5">—</p>
+                    <div className={cn(
+                      "rounded-lg border px-3 py-2 min-w-[110px] transition-colors",
+                      statusFilter === "late" ? "bg-red-50/80 border-red-200" : "bg-background border-border"
+                    )}>
+                      <p className={cn(
+                        "font-body text-[10px] uppercase tracking-wider transition-colors",
+                        statusFilter === "late" ? "text-red-400" : "text-muted-foreground"
+                      )}>Filtered Value</p>
+                      <p className={cn(
+                        "font-display text-sm font-semibold mt-0.5 transition-colors",
+                        statusFilter === "late" ? "text-red-600" : "text-foreground"
+                      )}>—</p>
                     </div>
                   ) : (
                     Object.entries(visibleTotals.byCurrency).map(([currency, cents]) => (
-                      <div key={currency} className="rounded-lg border border-border bg-background px-3 py-2 min-w-[110px]">
-                        <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Filtered Value</p>
-                        <p className="font-display text-sm font-semibold text-foreground mt-0.5">{formatMoney(cents, currency)}</p>
+                      <div key={currency} className={cn(
+                        "rounded-lg border px-3 py-2 min-w-[110px] transition-colors",
+                        statusFilter === "late" ? "bg-red-50/80 border-red-200" : "bg-background border-border"
+                      )}>
+                        <p className={cn(
+                          "font-body text-[10px] uppercase tracking-wider transition-colors",
+                          statusFilter === "late" ? "text-red-400" : "text-muted-foreground"
+                        )}>Filtered Value</p>
+                        <p className={cn(
+                          "font-display text-sm font-semibold mt-0.5 transition-colors",
+                          statusFilter === "late" ? "text-red-600" : "text-foreground"
+                        )}>{formatMoney(cents, currency)}</p>
                       </div>
                     ))
                   )}
