@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X, Filter, Columns3, RotateCcw, Eye, Trash2, Plus } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X, Filter, Columns3, RotateCcw, Eye, Trash2, Plus, Check } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -274,6 +274,12 @@ export default function TradeFFESchedule() {
     [hiddenColumns]
   );
   const isColVisible = (key: FFEColumnKey) => visibleColumns.some((c) => c.key === key);
+
+  const activePreset = useMemo(() => {
+    const sortedCurrent = [...hiddenColumns].sort().join(",");
+    const allPresets = [...DEFAULT_VIEW_PRESETS, ...customPresets];
+    return allPresets.find((p) => [...p.hidden].sort().join(",") === sortedCurrent) || null;
+  }, [hiddenColumns, customPresets]);
 
   const [filterProjectId, setFilterProjectId] = useState<string>("");
   const [filterStudioId, setFilterStudioId] = useState<string>("");
@@ -641,42 +647,61 @@ export default function TradeFFESchedule() {
                   <Button variant="outline" size="sm" className="ml-auto h-8 gap-1.5 font-body text-[11px]">
                     <Eye className="h-3.5 w-3.5" />
                     View Presets
+                    {activePreset && (
+                      <span className="ml-0.5 inline-flex h-1.5 w-1.5 rounded-full bg-primary transition-all duration-200" aria-hidden="true" />
+                    )}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-64">
                   <DropdownMenuLabel className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
                     Preset layouts
                   </DropdownMenuLabel>
-                  {DEFAULT_VIEW_PRESETS.map((preset) => (
-                    <DropdownMenuItem
-                      key={preset.name}
-                      onClick={() => applyPreset(preset)}
-                      className="font-body text-xs"
-                    >
-                      {preset.name}
-                    </DropdownMenuItem>
-                  ))}
-                  {customPresets.length > 0 && <DropdownMenuSeparator />}
-                  {customPresets.map((preset) => (
-                    <DropdownMenuItem
-                      key={preset.name}
-                      onClick={() => applyPreset(preset)}
-                      className="group font-body text-xs"
-                    >
-                      <span className="min-w-0 flex-1 truncate">{preset.name}</span>
-                      <button
-                        type="button"
-                        aria-label={`Delete preset ${preset.name}`}
-                        className="ml-2 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deletePreset(preset.name);
-                        }}
+                  {DEFAULT_VIEW_PRESETS.map((preset) => {
+                    const isActive = activePreset?.name === preset.name;
+                    return (
+                      <DropdownMenuItem
+                        key={preset.name}
+                        onClick={() => applyPreset(preset)}
+                        className={`flex items-center gap-2 font-body text-xs transition-all duration-200 ${isActive ? "font-semibold bg-accent/40" : ""}`}
                       >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    </DropdownMenuItem>
-                  ))}
+                        {isActive ? (
+                          <Check className="h-3.5 w-3.5 shrink-0 text-primary transition-all duration-200" />
+                        ) : (
+                          <span className="inline-flex h-3.5 w-3.5 shrink-0 transition-all duration-200" aria-hidden="true" />
+                        )}
+                        {preset.name}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                  {customPresets.length > 0 && <DropdownMenuSeparator />}
+                  {customPresets.map((preset) => {
+                    const isActive = activePreset?.name === preset.name;
+                    return (
+                      <DropdownMenuItem
+                        key={preset.name}
+                        onClick={() => applyPreset(preset)}
+                        className={`group flex items-center gap-2 font-body text-xs transition-all duration-200 ${isActive ? "font-semibold bg-accent/40" : ""}`}
+                      >
+                        {isActive ? (
+                          <Check className="h-3.5 w-3.5 shrink-0 text-primary transition-all duration-200" />
+                        ) : (
+                          <span className="inline-flex h-3.5 w-3.5 shrink-0 transition-all duration-200" aria-hidden="true" />
+                        )}
+                        <span className="min-w-0 flex-1 truncate">{preset.name}</span>
+                        <button
+                          type="button"
+                          aria-label={`Delete preset ${preset.name}`}
+                          className="ml-2 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deletePreset(preset.name);
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </DropdownMenuItem>
+                    );
+                  })}
                   <DropdownMenuSeparator />
                   <div className="p-1.5" onKeyDown={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-1.5">
