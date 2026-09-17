@@ -219,6 +219,17 @@ export default function TradeFFESchedule() {
   const [selectedItem, setSelectedItem] = useState<FFEItem | null>(null);
   const [hiddenColumns, setHiddenColumns] = useState<FFEColumnKey[]>(() => loadHiddenColumns());
 
+  const [customPresets, setCustomPresets] = useState<ViewPreset[]>(() => loadViewPresets());
+  const [presetName, setPresetName] = useState("");
+
+  const applyColumns = (next: FFEColumnKey[]) => {
+    setHiddenColumns(next);
+    try {
+      if (next.length) localStorage.setItem(FFE_COLS_STORAGE_KEY, JSON.stringify(next));
+      else localStorage.removeItem(FFE_COLS_STORAGE_KEY);
+    } catch { /* ignore */ }
+  };
+
   const toggleColumn = (key: FFEColumnKey, visible: boolean) => {
     setHiddenColumns((prev) => {
       const next = visible ? prev.filter((k) => k !== key) : [...prev, key];
@@ -231,6 +242,32 @@ export default function TradeFFESchedule() {
     setHiddenColumns([]);
     try { localStorage.removeItem(FFE_COLS_STORAGE_KEY); } catch { /* ignore */ }
   };
+
+  const applyPreset = (preset: ViewPreset) => {
+    applyColumns(sanitizeHidden(preset.hidden));
+    toast({ title: `View applied: ${preset.name}` });
+  };
+
+  const saveCurrentAsPreset = () => {
+    const name = presetName.trim().slice(0, 60);
+    if (!name) return;
+    setCustomPresets((prev) => {
+      const next = [...prev.filter((p) => p.name !== name), { name, hidden: hiddenColumns }];
+      try { localStorage.setItem(FFE_PRESETS_STORAGE_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+      return next;
+    });
+    setPresetName("");
+    toast({ title: `Preset saved: ${name}` });
+  };
+
+  const deletePreset = (name: string) => {
+    setCustomPresets((prev) => {
+      const next = prev.filter((p) => p.name !== name);
+      try { localStorage.setItem(FFE_PRESETS_STORAGE_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+      return next;
+    });
+  };
+
 
   const visibleColumns = useMemo(
     () => FFE_COLUMNS.filter((c) => c.locked || !hiddenColumns.includes(c.key)),
