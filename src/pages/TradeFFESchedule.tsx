@@ -695,133 +695,154 @@ export default function TradeFFESchedule() {
                   Clear <X className="h-3 w-3" />
                 </button>
               )}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="ml-auto h-8 gap-1.5 font-body text-[11px]">
-                    <Eye className="h-3.5 w-3.5" />
-                    View Presets
-                    {activePreset && (
-                      <span className="ml-0.5 inline-flex h-1.5 w-1.5 rounded-full bg-primary transition-all duration-200" aria-hidden="true" />
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64">
-                  <DropdownMenuLabel className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Preset layouts
-                  </DropdownMenuLabel>
-                  {DEFAULT_VIEW_PRESETS.map((preset) => {
-                    const isActive = activePreset?.name === preset.name;
-                    return (
-                      <DropdownMenuItem
-                        key={preset.name}
-                        onClick={() => applyPreset(preset)}
-                        className={`flex items-center gap-2 font-body text-xs transition-all duration-200 ${isActive ? "font-semibold bg-accent/40" : ""}`}
-                      >
-                        {isActive ? (
-                          <Check className="h-3.5 w-3.5 shrink-0 text-primary transition-all duration-200" />
-                        ) : (
-                          <span className="inline-flex h-3.5 w-3.5 shrink-0 transition-all duration-200" aria-hidden="true" />
-                        )}
-                        {preset.name}
-                      </DropdownMenuItem>
-                    );
-                  })}
-                  {customPresets.length > 0 && <DropdownMenuSeparator />}
-                  {customPresets.map((preset) => {
-                    const isActive = activePreset?.name === preset.name;
-                    return (
-                      <DropdownMenuItem
-                        key={preset.name}
-                        onClick={() => applyPreset(preset)}
-                        className={`group flex items-center gap-2 font-body text-xs transition-all duration-200 ${isActive ? "font-semibold bg-accent/40" : ""}`}
-                      >
-                        {isActive ? (
-                          <Check className="h-3.5 w-3.5 shrink-0 text-primary transition-all duration-200" />
-                        ) : (
-                          <span className="inline-flex h-3.5 w-3.5 shrink-0 transition-all duration-200" aria-hidden="true" />
-                        )}
-                        <span className="min-w-0 flex-1 truncate">{preset.name}</span>
-                        <button
-                          type="button"
-                          aria-label={`Delete preset ${preset.name}`}
-                          className="ml-2 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deletePreset(preset.name);
-                          }}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative min-w-[220px] flex-1 max-w-md">
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search items, brands, projects, POs…"
+                  className="h-8 w-full rounded-md border border-border bg-background pl-8 pr-3 font-body text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+              </div>
+              <div className="ml-auto flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2 rounded-md border border-border bg-background px-2.5 py-1.5">
+                  <Switch id="compact-view" checked={isCompact} onCheckedChange={setIsCompact} className="scale-90" />
+                  <label htmlFor="compact-view" className="cursor-pointer font-body text-xs text-foreground">
+                    Compact View
+                  </label>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 gap-1.5 font-body text-[11px]">
+                      <Eye className="h-3.5 w-3.5" />
+                      View Presets
+                      {activePreset && (
+                        <span className="ml-0.5 inline-flex h-1.5 w-1.5 rounded-full bg-primary transition-all duration-200" aria-hidden="true" />
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-64">
+                    <DropdownMenuLabel className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Preset layouts
+                    </DropdownMenuLabel>
+                    {DEFAULT_VIEW_PRESETS.map((preset) => {
+                      const isActive = activePreset?.name === preset.name;
+                      return (
+                        <DropdownMenuItem
+                          key={preset.name}
+                          onClick={() => applyPreset(preset)}
+                          className={`flex items-center gap-2 font-body text-xs transition-all duration-200 ${isActive ? "font-semibold bg-accent/40" : ""}`}
                         >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
-                      </DropdownMenuItem>
-                    );
-                  })}
-                  <DropdownMenuSeparator />
-                  <div className="p-1.5" onKeyDown={(e) => e.stopPropagation()}>
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        value={presetName}
-                        onChange={(e) => setPresetName(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            saveCurrentAsPreset();
-                          }
-                        }}
-                        placeholder="Preset name…"
-                        maxLength={60}
-                        className="h-7 min-w-0 flex-1 rounded border border-border bg-background px-2 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                      />
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        disabled={!presetName.trim()}
-                        onClick={saveCurrentAsPreset}
-                        className="h-7 gap-1 px-2 font-body text-[11px]"
-                      >
-                        <Plus className="h-3 w-3" />
-                        Save
-                      </Button>
+                          {isActive ? (
+                            <Check className="h-3.5 w-3.5 shrink-0 text-primary transition-all duration-200" />
+                          ) : (
+                            <span className="inline-flex h-3.5 w-3.5 shrink-0 transition-all duration-200" aria-hidden="true" />
+                          )}
+                          {preset.name}
+                        </DropdownMenuItem>
+                      );
+                    })}
+                    {customPresets.length > 0 && <DropdownMenuSeparator />}
+                    {customPresets.map((preset) => {
+                      const isActive = activePreset?.name === preset.name;
+                      return (
+                        <DropdownMenuItem
+                          key={preset.name}
+                          onClick={() => applyPreset(preset)}
+                          className={`group flex items-center gap-2 font-body text-xs transition-all duration-200 ${isActive ? "font-semibold bg-accent/40" : ""}`}
+                        >
+                          {isActive ? (
+                            <Check className="h-3.5 w-3.5 shrink-0 text-primary transition-all duration-200" />
+                          ) : (
+                            <span className="inline-flex h-3.5 w-3.5 shrink-0 transition-all duration-200" aria-hidden="true" />
+                          )}
+                          <span className="min-w-0 flex-1 truncate">{preset.name}</span>
+                          <button
+                            type="button"
+                            aria-label={`Delete preset ${preset.name}`}
+                            className="ml-2 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deletePreset(preset.name);
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                    <DropdownMenuSeparator />
+                    <div className="p-1.5" onKeyDown={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          value={presetName}
+                          onChange={(e) => setPresetName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              saveCurrentAsPreset();
+                            }
+                          }}
+                          placeholder="Preset name…"
+                          maxLength={60}
+                          className="h-7 min-w-0 flex-1 rounded border border-border bg-background px-2 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                        />
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          disabled={!presetName.trim()}
+                          onClick={saveCurrentAsPreset}
+                          className="h-7 gap-1 px-2 font-body text-[11px]"
+                        >
+                          <Plus className="h-3 w-3" />
+                          Save
+                        </Button>
+                      </div>
+                      <p className="mt-1 px-0.5 font-body text-[9px] uppercase tracking-wider text-muted-foreground/70">
+                        + Save current layout as preset
+                      </p>
                     </div>
-                    <p className="mt-1 px-0.5 font-body text-[9px] uppercase tracking-wider text-muted-foreground/70">
-                      + Save current layout as preset
-                    </p>
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8 gap-1.5 font-body text-[11px]">
-                    <Columns3 className="h-3.5 w-3.5" />
-                    Columns
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 max-h-80 overflow-y-auto">
-                  <DropdownMenuLabel className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Toggle columns
-                  </DropdownMenuLabel>
-                  <DropdownMenuItem
-                    onClick={resetColumns}
-                    className="font-body text-xs text-muted-foreground focus:text-accent-foreground"
-                  >
-                    <RotateCcw className="mr-2 h-3.5 w-3.5" />
-                    Reset to default
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  {FFE_COLUMNS.map((col) => (
-                    <DropdownMenuCheckboxItem
-                      key={col.key}
-                      checked={!hiddenColumns.includes(col.key)}
-                      disabled={col.locked}
-                      onCheckedChange={(checked) => toggleColumn(col.key, checked === true)}
-                      onSelect={(e) => e.preventDefault()}
-                      className="font-body text-xs"
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 gap-1.5 font-body text-[11px]">
+                      <Columns3 className="h-3.5 w-3.5" />
+                      Columns
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 max-h-80 overflow-y-auto">
+                    <DropdownMenuLabel className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Toggle columns
+                    </DropdownMenuLabel>
+                    <DropdownMenuItem
+                      onClick={resetColumns}
+                      className="font-body text-xs text-muted-foreground focus:text-accent-foreground"
                     >
-                      {col.label}
-                      {col.locked && <span className="ml-auto text-[9px] uppercase tracking-wider text-muted-foreground/60">Locked</span>}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                      <RotateCcw className="mr-2 h-3.5 w-3.5" />
+                      Reset to default
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {FFE_COLUMNS.map((col) => (
+                      <DropdownMenuCheckboxItem
+                        key={col.key}
+                        checked={!hiddenColumns.includes(col.key)}
+                        disabled={col.locked}
+                        onCheckedChange={(checked) => toggleColumn(col.key, checked === true)}
+                        onSelect={(e) => e.preventDefault()}
+                        className="font-body text-xs"
+                      >
+                        {col.label}
+                        {col.locked && <span className="ml-auto text-[9px] uppercase tracking-wider text-muted-foreground/60">Locked</span>}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
 
             {displayedItems.length === 0 ? (
@@ -831,116 +852,116 @@ export default function TradeFFESchedule() {
             ) : (
                 <>
                   <div className="max-w-full min-w-0 overflow-x-auto overscroll-x-contain border border-border rounded-lg">
-              <table className="w-full min-w-[1280px] table-fixed text-left text-[11px] 2xl:min-w-0">
-                <colgroup>
-                  {visibleColumns.map((c) => <col key={c.key} className={c.width} />)}
-                </colgroup>
-                <thead>
-                  <tr className="border-b border-border bg-muted/30">
-                    {visibleColumns.map((c) => (
-                      <th
-                        key={c.key}
-                        className={`${c.key === "image" ? "sticky left-0 z-20 border-r border-border/70 bg-muted text-center" : ""} ${c.key === "quote" ? "sticky right-0 z-20 border-l border-border/70 bg-muted text-center" : ""} ${tableDensity.th} font-body text-[9px] uppercase tracking-wider text-muted-foreground`}
-                      >
-                        {c.key === "image" ? "" : c.label}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredItems.map((item, i) => {
-                    const lead = leadOverride(item.lead_time_weeks_override) ?? parseLeadWeeks(item.lead_time);
-                    const expected = expectedReadyDate(item, lead);
-                    const requiredBy = item.required_by_date ? new Date(item.required_by_date) : null;
-                    const slackDays = expected && requiredBy
-                      ? Math.round((requiredBy.getTime() - expected.getTime()) / 86400000)
-                      : null;
-                    return (
-                      <tr key={i} className="group border-b border-border/50 transition-colors hover:bg-muted/20">
-                        <td className="sticky left-0 z-10 border-r border-border/60 bg-background ${tableDensity.tdImg} transition-colors group-hover:bg-muted">
-                          <div className="flex items-center justify-center">
-                          {item.image_url ? (
-                            <img
-                              src={item.image_url}
-                              alt={item.product_name}
-                              loading="lazy"
-                              className="${tableDensity.img} object-cover rounded border border-border/50 bg-muted/20"
-                            />
-                          ) : (
-                            <div className="${tableDensity.img} rounded border border-dashed border-border/50 bg-muted/10" aria-hidden />
-                          )}
-                          </div>
-                        </td>
-                        {isColVisible("po") && <td className="${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground tabular-nums xl:px-2"><TruncatedCellText value={item.po_number || "auto"} className={item.po_number ? "" : "italic text-muted-foreground/60"} /></td>}
-                        {isColVisible("cost_code") && <td className="${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground xl:px-2"><TruncatedCellText value={item.cost_code} /></td>}
-                        <td className="${tableDensity.td} font-body ${tableDensity.product} text-foreground xl:px-2"><TruncatedCellText value={item.product_name} /></td>
-                        {isColVisible("brand") && <td className="${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground xl:px-2"><TruncatedCellText value={item.brand_name} /></td>}
-                        {isColVisible("project") && <td className="${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground xl:px-2">
-                          {item.project_id ? (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Link to={`/trade/projects/${item.project_id}`} className="block min-w-0 truncate text-foreground underline underline-offset-2">
-                                  {item.project_name || "—"}
-                                </Link>
-                              </TooltipTrigger>
-                              <TooltipContent side="top" className="max-w-sm break-words font-body text-xs">{item.project_name || "—"}</TooltipContent>
-                            </Tooltip>
-                          ) : "—"}
-                        </td>}
-                        {isColVisible("client") && <td className="${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground xl:px-2"><TruncatedCellText value={item.client_name} /></td>}
-                        {isColVisible("studio") && <td className="${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground xl:px-2"><TruncatedCellText value={item.studio_name} /></td>}
-                        {isColVisible("qty") && <td className="${tableDensity.td} text-center font-body ${tableDensity.qty} text-foreground xl:px-2">{item.quantity}</td>}
-                        {isColVisible("unit_trade") && <td className="whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} text-foreground tabular-nums xl:px-2">{item.unit_price_cents ? `€${(item.unit_price_cents / 100).toFixed(0)}` : "TBD"}</td>}
-                        {isColVisible("total") && <td className="whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} font-medium text-foreground tabular-nums xl:px-2">{item.unit_price_cents ? `€${((item.unit_price_cents * item.quantity) / 100).toFixed(0)}` : "TBD"}</td>}
-                        {isColVisible("lead") && <td className="whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground xl:px-2">{lead === 0 ? <span className="text-emerald-700 font-medium">In stock</span> : lead != null ? `${lead} wks` : "—"}</td>}
-                        {isColVisible("stage") && <td className="${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground xl:px-2"><TruncatedCellText value={STAGE_LABEL[item.kanban_status || ""] || item.kanban_status} /></td>}
-                        {isColVisible("expected") && <td className="whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground tabular-nums xl:px-2">{fmtDate(expected)}</td>}
-                        {isColVisible("required") && <td className="${tableDensity.td} font-body ${tableDensity.body} xl:px-2">
-                          <input
-                            type="date"
-                            defaultValue={item.required_by_date || ""}
-                            onBlur={(e) => {
-                              const v = e.target.value;
-                              if ((v || null) !== (item.required_by_date || null)) saveRequiredBy(item.item_id, v);
-                            }}
-                            className="w-full min-w-0 rounded border border-border bg-background px-1 py-0.5 font-body text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                          />
-                        </td>}
-                        {isColVisible("slack") && <td className="px-1.5 py-3 text-center font-body text-[11px] xl:px-2">{slackBadge(slackDays)}</td>}
-                        <td className="sticky right-0 z-10 border-l border-border/60 bg-background px-1 py-3 text-center font-body text-[11px] transition-colors group-hover:bg-muted">
-                          <Button type="button" variant="ghost" size="sm" className="${tableDensity.quoteBtn} max-w-full tabular-nums" onClick={() => setSelectedItem(item)} title={`Open ${item.quote_ref}`}>
-                            {item.quote_ref}
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-                <tfoot>
-                  {(() => {
-                    const totalIdx = visibleColumns.findIndex((c) => c.key === "total");
-                    if (totalIdx < 0) {
-                      return (
-                        <tr className="bg-muted/30">
-                          <td colSpan={visibleColumns.length} className="sticky right-0 border-l border-border/60 bg-muted ${tableDensity.foot} font-body text-foreground font-medium text-right">
-                            Total <span className="font-display font-semibold">{totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}</span>
-                          </td>
+                    <table className={`w-full min-w-[1280px] table-fixed text-left ${tableDensity.body} 2xl:min-w-0`}>
+                      <colgroup>
+                        {visibleColumns.map((c) => <col key={c.key} className={c.width} />)}
+                      </colgroup>
+                      <thead>
+                        <tr className="border-b border-border bg-muted/30">
+                          {visibleColumns.map((c) => (
+                            <th
+                              key={c.key}
+                              className={`${c.key === "image" ? "sticky left-0 z-20 border-r border-border/70 bg-muted text-center" : ""} ${c.key === "quote" ? "sticky right-0 z-20 border-l border-border/70 bg-muted text-center" : ""} ${tableDensity.th} font-body text-[9px] uppercase tracking-wider text-muted-foreground`}
+                            >
+                              {c.key === "image" ? "" : c.label}
+                            </th>
+                          ))}
                         </tr>
-                      );
-                    }
-                    return (
-                      <tr className="bg-muted/30">
-                        <td colSpan={totalIdx} className="${tableDensity.foot} font-body text-foreground font-medium text-right">Total</td>
-                        <td className="${tableDensity.foot} font-display text-foreground font-semibold">
-                          {totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}
-                        </td>
-                        <td colSpan={visibleColumns.length - totalIdx - 1} className="sticky right-0 border-l border-border/60 bg-muted" />
-                      </tr>
-                    );
-                  })()}
-                </tfoot>
-              </table>
-            </div>
+                      </thead>
+                      <tbody>
+                        {displayedItems.map((item, i) => {
+                          const lead = leadOverride(item.lead_time_weeks_override) ?? parseLeadWeeks(item.lead_time);
+                          const expected = expectedReadyDate(item, lead);
+                          const requiredBy = item.required_by_date ? new Date(item.required_by_date) : null;
+                          const slackDays = expected && requiredBy
+                            ? Math.round((requiredBy.getTime() - expected.getTime()) / 86400000)
+                            : null;
+                          return (
+                            <tr key={i} className="group border-b border-border/50 transition-colors hover:bg-muted/20">
+                              <td className={`sticky left-0 z-10 border-r border-border/60 bg-background ${tableDensity.tdImg} transition-colors group-hover:bg-muted`}>
+                                <div className="flex items-center justify-center">
+                                  {item.image_url ? (
+                                    <img
+                                      src={item.image_url}
+                                      alt={item.product_name}
+                                      loading="lazy"
+                                      className={`${tableDensity.img} object-cover rounded border border-border/50 bg-muted/20`}
+                                    />
+                                  ) : (
+                                    <div className={`${tableDensity.img} rounded border border-dashed border-border/50 bg-muted/10`} aria-hidden />
+                                  )}
+                                </div>
+                              </td>
+                              {isColVisible("po") && <td className={`${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground tabular-nums`}><TruncatedCellText value={item.po_number || "auto"} className={item.po_number ? "" : "italic text-muted-foreground/60"} /></td>}
+                              {isColVisible("cost_code") && <td className={`${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground`}><TruncatedCellText value={item.cost_code} /></td>}
+                              <td className={`${tableDensity.td} font-body ${tableDensity.product} text-foreground`}><TruncatedCellText value={item.product_name} /></td>
+                              {isColVisible("brand") && <td className={`${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground`}><TruncatedCellText value={item.brand_name} /></td>}
+                              {isColVisible("project") && <td className={`${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground`}>
+                                {item.project_id ? (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Link to={`/trade/projects/${item.project_id}`} className="block min-w-0 truncate text-foreground underline underline-offset-2">
+                                        {item.project_name || "—"}
+                                      </Link>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="max-w-sm break-words font-body text-xs">{item.project_name || "—"}</TooltipContent>
+                                  </Tooltip>
+                                ) : "—"}
+                              </td>}
+                              {isColVisible("client") && <td className={`${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground`}><TruncatedCellText value={item.client_name} /></td>}
+                              {isColVisible("studio") && <td className={`${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground`}><TruncatedCellText value={item.studio_name} /></td>}
+                              {isColVisible("qty") && <td className={`${tableDensity.td} text-center font-body ${tableDensity.qty} text-foreground`}>{item.quantity}</td>}
+                              {isColVisible("unit_trade") && <td className={`whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} text-foreground tabular-nums`}>{item.unit_price_cents ? `€${(item.unit_price_cents / 100).toFixed(0)}` : "TBD"}</td>}
+                              {isColVisible("total") && <td className={`whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} font-medium text-foreground tabular-nums`}>{item.unit_price_cents ? `€${((item.unit_price_cents * item.quantity) / 100).toFixed(0)}` : "TBD"}</td>}
+                              {isColVisible("lead") && <td className={`whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground`}>{lead === 0 ? <span className="text-emerald-700 font-medium">In stock</span> : lead != null ? `${lead} wks` : "—"}</td>}
+                              {isColVisible("stage") && <td className={`${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground`}><TruncatedCellText value={STAGE_LABEL[item.kanban_status || ""] || item.kanban_status} /></td>}
+                              {isColVisible("expected") && <td className={`whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground tabular-nums`}>{fmtDate(expected)}</td>}
+                              {isColVisible("required") && <td className={`${tableDensity.td} font-body ${tableDensity.body}`}>
+                                <input
+                                  type="date"
+                                  defaultValue={item.required_by_date || ""}
+                                  onBlur={(e) => {
+                                    const v = e.target.value;
+                                    if ((v || null) !== (item.required_by_date || null)) saveRequiredBy(item.item_id, v);
+                                  }}
+                                  className="w-full min-w-0 rounded border border-border bg-background px-1 py-0.5 font-body text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                                />
+                              </td>}
+                              {isColVisible("slack") && <td className={`${tableDensity.td} text-center font-body ${tableDensity.body}`}>{slackBadge(slackDays)}</td>}
+                              <td className={`sticky right-0 z-10 border-l border-border/60 bg-background ${tableDensity.td} text-center font-body ${tableDensity.body} transition-colors group-hover:bg-muted`}>
+                                <Button type="button" variant="ghost" size="sm" className={`${tableDensity.quoteBtn} max-w-full tabular-nums`} onClick={() => setSelectedItem(item)} title={`Open ${item.quote_ref}`}>
+                                  {item.quote_ref}
+                                </Button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                      <tfoot>
+                        {(() => {
+                          const totalIdx = visibleColumns.findIndex((c) => c.key === "total");
+                          if (totalIdx < 0) {
+                            return (
+                              <tr className="bg-muted/30">
+                                <td colSpan={visibleColumns.length} className={`sticky right-0 border-l border-border/60 bg-muted ${tableDensity.foot} font-body text-foreground font-medium text-right`}>
+                                  Total <span className="font-display font-semibold">{totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}</span>
+                                </td>
+                              </tr>
+                            );
+                          }
+                          return (
+                            <tr className="bg-muted/30">
+                              <td colSpan={totalIdx} className={`${tableDensity.foot} font-body text-foreground font-medium text-right`}>Total</td>
+                              <td className={`${tableDensity.foot} font-display text-foreground font-semibold`}>
+                                {totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}
+                              </td>
+                              <td colSpan={visibleColumns.length - totalIdx - 1} className="sticky right-0 border-l border-border/60 bg-muted" />
+                            </tr>
+                          );
+                        })()}
+                      </tfoot>
+                    </table>
+                  </div>
             <p className="font-body text-[11px] text-muted-foreground/70">
               PO numbers and cost codes can be edited per line on each quote. Empty PO numbers are auto-generated as <code>QU-XXXXXX-NNN</code> at export time.
                 </p>
