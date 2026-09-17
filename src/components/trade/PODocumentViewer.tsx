@@ -1,9 +1,26 @@
-import { useRef } from "react";
-import { Printer, X } from "lucide-react";
+import { useRef, useState } from "react";
+import { BadgeCheck, CheckCircle2, Printer, RotateCcw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useStudio } from "@/hooks/useStudio";
+import { useToast } from "@/hooks/use-toast";
+
+export type POApprovalStatus = "pending" | "approved" | "changes_requested";
 
 export interface PODocumentData {
+  item_id?: string;
   po_number: string;
   quote_ref: string;
   product_name: string;
@@ -19,12 +36,35 @@ export interface PODocumentData {
   required_by_date?: string | null;
   price_cents?: number | null;
   currency?: string | null;
+  po_status?: POApprovalStatus | string | null;
+  po_approved_by_name?: string | null;
+  po_approved_at?: string | null;
 }
 
 interface Props {
   document: PODocumentData | null;
   onOpenChange: (open: boolean) => void;
+  /** Notifies the parent drawer so its badge updates without a page reload. */
+  onStatusChange?: (next: {
+    po_status: POApprovalStatus;
+    po_approved_by_name: string | null;
+    po_approved_at: string | null;
+  }) => void;
 }
+
+const statusLabel = (status: string) =>
+  status === "approved" ? "Approved" : status === "changes_requested" ? "Changes requested" : "Pending review";
+
+const stampTime = (value?: string | null) =>
+  value
+    ? new Date(value).toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "—";
 
 const money = (cents: number | null | undefined, currency: string) =>
   cents == null
