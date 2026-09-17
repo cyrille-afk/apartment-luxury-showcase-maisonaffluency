@@ -11,7 +11,6 @@ import { buildBespokePlaceholder } from "@/lib/phonePlaceholder";
 import { detectCountryCode } from "@/hooks/useShippingCountry";
 import { pushBespokeSync } from "@/lib/bespokeSync";
 import { cachePendingBespokeUpload } from "@/lib/pendingBespokeCache";
-import { BESPOKE_GUEST_EVENT } from "@/components/product/BespokeSubmissionBanner";
 
 /**
  * BespokeConfigurationDialog — the wide, centred overlay opened by the
@@ -232,12 +231,8 @@ export default function BespokeConfigurationDialog({
           attachmentPath: attachmentPath ?? null,
           submittedAt: new Date().toISOString(),
         });
-        onClose();
-        try {
-          window.dispatchEvent(new Event(BESPOKE_GUEST_EVENT));
-        } catch {
-          /* SSR */
-        }
+         // Keep the request surface open and transition to its own confirmation;
+         // guests should never rely on a detached global-header banner.
       }
       setSent(true);
     } catch (err) {

@@ -10,7 +10,6 @@ import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import ShareMenu from "@/components/ShareMenu";
 import CornerTooltip from "@/components/product/CornerTooltip";
-import BespokeSubmissionBanner from "@/components/product/BespokeSubmissionBanner";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { formatProductSubtitleLine, isFinishSubtitle } from "@/lib/subtitleDisplay";
@@ -3114,9 +3113,6 @@ const PublicProductPageContent: React.FC = () => {
 
         <Footer />
       </div>
-
-      {/* Guest bespoke submission confirmation (Path A) */}
-      <BespokeSubmissionBanner />
 
       {/* One authoritative mobile dock, outside the product layout and footer.
           ProductCommerceCta portals its fixed surface directly to document.body. */}
