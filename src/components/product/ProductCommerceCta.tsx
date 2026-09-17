@@ -304,6 +304,11 @@ export default function ProductCommerceCta({
   const completeIntake = (details: OrderIntakeDetails) => {
     const target = intakeFor ?? "order";
     setIntakeFor(null);
+    try {
+      sessionStorage.setItem("ma_intake_done", "1");
+    } catch {
+      /* private mode */
+    }
     checkoutForm.update({
       email: details.email,
       projectCity: details.city,
