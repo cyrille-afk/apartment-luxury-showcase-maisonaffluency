@@ -3,11 +3,12 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X, Filter, Columns3 } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X, Filter, Columns3, RotateCcw } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -182,6 +183,11 @@ export default function TradeFFESchedule() {
       try { localStorage.setItem(FFE_COLS_STORAGE_KEY, JSON.stringify(next)); } catch { /* ignore */ }
       return next;
     });
+  };
+
+  const resetColumns = () => {
+    setHiddenColumns([]);
+    try { localStorage.removeItem(FFE_COLS_STORAGE_KEY); } catch { /* ignore */ }
   };
 
   const visibleColumns = useMemo(
@@ -562,6 +568,13 @@ export default function TradeFFESchedule() {
                   <DropdownMenuLabel className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
                     Toggle columns
                   </DropdownMenuLabel>
+                  <DropdownMenuItem
+                    onClick={resetColumns}
+                    className="font-body text-xs text-muted-foreground focus:text-accent-foreground"
+                  >
+                    <RotateCcw className="mr-2 h-3.5 w-3.5" />
+                    Reset to default
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   {FFE_COLUMNS.map((col) => (
                     <DropdownMenuCheckboxItem
