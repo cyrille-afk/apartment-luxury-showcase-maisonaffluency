@@ -1026,7 +1026,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     }
   }, []);
 
-  const pushRetry = useCallback((text: string, reason: string) => {
+  const pushRetry = useCallback((text: string, reason: string, atStage?: Stage) => {
     // Drop any orphaned empty assistant bubble so the retry card stands alone.
     setTimeline((prev) => {
       let copy = prev;
