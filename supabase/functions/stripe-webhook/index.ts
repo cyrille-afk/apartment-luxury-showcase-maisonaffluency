@@ -39,6 +39,30 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    // ===== Guest quote payment link handler =====
+    if (paymentType === "guest_quote_link") {
+      const linkId = session.metadata?.payment_link_id;
+      if (linkId && session.payment_status === "paid") {
+        const { error: linkErr } = await supabase
+          .from("quote_payment_links")
+          .update({ status: "paid", paid_at: new Date().toISOString() })
+          .eq("id", linkId);
+        if (linkErr) console.error("[STRIPE-WEBHOOK] payment link update failed:", linkErr);
+
+        if (quoteId) {
+          const { error: qErr } = await supabase
+            .from("trade_quotes")
+            .update({ status: "deposit_paid" })
+            .eq("id", quoteId);
+          if (qErr) console.error("[STRIPE-WEBHOOK] quote status update failed:", qErr);
+        }
+      }
+      return new Response(JSON.stringify({ received: true }), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     // ===== Cart order handler =====
     if (paymentType === "cart_order") {
       const orderId = session.metadata?.order_id;
