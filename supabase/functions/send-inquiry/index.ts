@@ -271,6 +271,7 @@ const handler = async (req: Request): Promise<Response> => {
     const {
       name, firm, company, email, phone, message, subject, turnstileToken,
       productId, productSlug, productName, designerName, selectedFinish, source,
+      attachmentPath,
     } = parsed.data;
 
     // Signed-in callers (e.g. the trade registration form, which submits right
