@@ -198,6 +198,7 @@ export default function ProductCommerceCta({
   const [intakeFor, setIntakeFor] = useState<null | "order" | "bespoke">(null);
   // Detail captured in the 3 steps, carried into whatever opens next.
   const [intakeDetails, setIntakeDetails] = useState<OrderIntakeDetails | null>(null);
+  const [desktopDirectBespoke, setDesktopDirectBespoke] = useState(false);
   const checkoutForm = useCheckoutForm();
   // True when the open drawer holds a piece with no public price.
   const [quoteOnlySelection, setQuoteOnlySelection] = useState(false);
@@ -296,6 +297,13 @@ export default function ProductCommerceCta({
   };
 
   const startIntent = (target: "order" | "bespoke") => {
+    const desktop = typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+    if (target === "bespoke" && desktop) {
+      setDesktopDirectBespoke(true);
+      setIntakeFor(target);
+      return;
+    }
+    setDesktopDirectBespoke(false);
     if (tradeApproved || intakeCaptured) {
       runIntent(target);
       return;
@@ -319,7 +327,9 @@ export default function ProductCommerceCta({
     });
     // One continuous motion: the sheet finishes closing before the selection
     // drawer / bespoke dialog takes the canvas — never both on screen at once.
-    window.setTimeout(() => runIntent(target), 260);
+    if (!(target === "bespoke" && desktopDirectBespoke)) {
+      window.setTimeout(() => runIntent(target), 260);
+    }
   };
 
   const primaryAction = tradeApproved ? undefined : () => startIntent("order");
@@ -628,15 +638,16 @@ export default function ProductCommerceCta({
 
       {/* 3-step intent capture — mobile sheet / centred desktop panel. Runs
           ahead of both the order drawer and the bespoke dialog. */}
-      {!tradeApproved && (
+      {(!tradeApproved || intakeFor === "bespoke") && (
         <OrderIntakeSheet
           isOpen={intakeFor !== null}
           onClose={() => setIntakeFor(null)}
           onComplete={completeIntake}
-          mode="order"
+          mode={desktopDirectBespoke ? "quote" : "order"}
+          isTradeAuthorized={tradeApproved}
           finalLabel={
             intakeFor === "bespoke"
-              ? "Continue to Bespoke Details"
+              ? desktopDirectBespoke ? "Submit Specifications" : "Continue to Bespoke Details"
               : "Continue to Your Selection"
           }
           productId={productId}

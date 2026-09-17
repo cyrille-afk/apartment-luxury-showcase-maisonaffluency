@@ -21,6 +21,7 @@ export interface BespokeSyncEntry {
   specs: string;
   attachmentName?: string | null;
   attachmentPath?: string | null;
+  projectLocation?: string | null;
   submittedAt: string;
 }
 
@@ -68,5 +69,8 @@ export function bespokeSyncConfirmation(entry: BespokeSyncEntry): string {
   const finish = entry.finishLabel?.trim();
   const piece = finish ? `${entry.productTitle} (${finish})` : entry.productTitle;
   const swatch = entry.attachmentName ? "and material swatch files " : "";
-  return `I have successfully synchronized your custom specification annotations ${swatch}for the ${piece} into our active layout workspace deck. The atelier team is currently verifying artisan feasibility.`;
+  const location = entry.projectLocation?.trim()
+    ? ` for the ${entry.projectLocation.trim()} project`
+    : "";
+  return `I have successfully synchronized your custom specification annotations ${swatch}for the ${piece}${location} into our active layout workspace deck. The atelier team is currently verifying artisan feasibility.`;
 }

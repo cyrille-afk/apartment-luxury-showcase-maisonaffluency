@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, Check, ChevronDown, Loader2, X } from "lucide-react";
+import { ArrowLeft, Check, ChevronDown, FileText, Loader2, UploadCloud, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,10 @@ import { useToast } from "@/hooks/use-toast";
 import Turnstile from "@/components/Turnstile";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 import { getCurrentDestination } from "@/lib/shippingDestination";
+import PhoneDialField from "@/components/product/PhoneDialField";
+import { pushBespokeSync } from "@/lib/bespokeSync";
+import { cachePendingBespokeUpload } from "@/lib/pendingBespokeCache";
+import { BESPOKE_GUEST_EVENT } from "@/components/product/BespokeSubmissionBanner";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -47,6 +51,7 @@ interface Props {
   productId?: string | null;
   /** Overrides the last step's action label (e.g. "Continue"). */
   finalLabel?: string;
+  isTradeAuthorized?: boolean;
 }
 
 const inputCls =
@@ -79,6 +84,7 @@ export default function OrderIntakeSheet({
   mode = "order",
   productId,
   finalLabel,
+  isTradeAuthorized = false,
 }: Props) {
   const { toast } = useToast();
   const checkoutForm = useCheckoutForm();
@@ -100,6 +106,9 @@ export default function OrderIntakeSheet({
   const [notesEdited, setNotesEdited] = useState(false);
   const [finish, setFinish] = useState<string | null>(null);
   const [finishOpen, setFinishOpen] = useState(false);
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Carry the finish chosen on the product page straight into the sheet so the
   // client never retypes it. The selector opens preselected; changing it keeps
@@ -162,6 +171,8 @@ export default function OrderIntakeSheet({
         setTurnstileToken("");
         setCompany("");
         setBuyerType("individual");
+        setAttachment(null);
+        setIsDragging(false);
       }, 320);
       return () => window.clearTimeout(t);
     }
@@ -188,10 +199,26 @@ export default function OrderIntakeSheet({
     buyerType,
   });
 
+  const handleFiles = (files: FileList | null) => {
+    const file = files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Attachments must be 10 MB or smaller.", variant: "destructive" });
+      return;
+    }
+    setAttachment(file);
+  };
+
+  const formatBytes = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
   /** Quote flow: persist the inquiry, then show the in-drawer thank-you. */
   const submitQuote = async () => {
     if (sending) return;
-    if (!turnstileToken) {
+    if (!isTradeAuthorized && !turnstileToken) {
       toast({
         title: "Security check is still loading",
         description: "Please wait a moment, then submit your request again.",
@@ -201,6 +228,23 @@ export default function OrderIntakeSheet({
     }
     setSending(true);
     const d = details();
+    let attachmentPath: string | undefined;
+    if (attachment) {
+      try {
+        const ext = attachment.name.split(".").pop() || "bin";
+        const path = `${productId ?? "general"}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from("bespoke-attachments")
+          .upload(path, attachment, { cacheControl: "3600", upsert: false });
+        if (uploadError) throw uploadError;
+        attachmentPath = path;
+      } catch (error) {
+        console.error("Reference upload failed:", error);
+        toast({ title: "Attachment upload failed", description: "Please retry or submit without the file.", variant: "destructive" });
+        setSending(false);
+        return;
+      }
+    }
     const message = [
       productTitle ? `Product: ${productTitle}` : "",
       designerName ? `Designer: ${designerName}` : "",
@@ -231,9 +275,31 @@ export default function OrderIntakeSheet({
           productId: productId ?? undefined,
           source: "public_product",
            turnstileToken,
+           attachmentPath,
         },
       });
       if (error) throw error;
+      const syncEntry = {
+        productId: productId ?? undefined,
+        productTitle: productTitle ?? "Selected piece",
+        designerName,
+        finishLabel: finish,
+        specs: d.notes || "Bespoke specifications requested.",
+        attachmentName: attachment?.name ?? null,
+        attachmentPath: attachmentPath ?? null,
+        projectLocation: d.city,
+        submittedAt: new Date().toISOString(),
+      };
+      if (isTradeAuthorized) {
+        pushBespokeSync(syncEntry);
+        onComplete(d);
+        onClose();
+        window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { stage: "Discover" } }));
+        window.dispatchEvent(new CustomEvent("concierge:open"));
+        return;
+      }
+      cachePendingBespokeUpload(syncEntry);
+      window.dispatchEvent(new Event(BESPOKE_GUEST_EVENT));
       setSent(true);
       onComplete(d);
     } catch (error) {
@@ -302,9 +368,9 @@ export default function OrderIntakeSheet({
           aria-label="Quote request sent"
           className={cn(
             "absolute inset-x-0 bottom-0 flex flex-col bg-background shadow-[0_-24px_60px_-24px_rgba(0,0,0,0.35)]",
-            "md:left-1/2 md:right-auto md:w-[440px] md:-translate-x-1/2",
+            "md:inset-y-0 md:left-auto md:right-0 md:h-full md:w-[500px] md:border-l md:border-border/60",
             "transition-transform duration-300 ease-out will-change-transform",
-            isOpen ? "translate-y-0" : "translate-y-full"
+            isOpen ? "translate-y-0 md:translate-x-0" : "translate-y-full md:translate-y-0 md:translate-x-full"
           )}
         >
           <div className="flex justify-end px-5 pt-4">
@@ -356,7 +422,7 @@ export default function OrderIntakeSheet({
         aria-label="Close"
         onClick={onClose}
         className={cn(
-          "absolute inset-0 bg-foreground/40 backdrop-blur-[2px] transition-opacity duration-300",
+          "absolute inset-0 bg-foreground/40 backdrop-blur-[2px] transition-opacity duration-300 md:bg-foreground/10 md:backdrop-blur-none",
           isOpen ? "opacity-100" : "opacity-0"
         )}
       />
@@ -368,9 +434,9 @@ export default function OrderIntakeSheet({
         aria-label="Order intake"
         className={cn(
           "absolute inset-0 flex h-full w-full flex-col overflow-y-auto bg-background shadow-[0_-24px_60px_-24px_rgba(0,0,0,0.35)]",
-          "md:inset-x-auto md:bottom-0 md:left-1/2 md:top-auto md:h-auto md:max-h-[92svh] md:w-[440px] md:-translate-x-1/2",
+          "md:inset-y-0 md:left-auto md:right-0 md:h-full md:w-[500px] md:border-l md:border-border/60 md:shadow-[0_0_50px_-30px_hsl(var(--foreground)/0.22)]",
           "transition-transform duration-300 ease-out will-change-transform",
-          isOpen ? "translate-y-0" : "translate-y-full"
+          isOpen ? "translate-y-0 md:translate-x-0" : "translate-y-full md:translate-y-0 md:translate-x-full"
         )}
       >
         {/* Razor-thin progress rule */}
@@ -381,7 +447,7 @@ export default function OrderIntakeSheet({
           />
         </div>
 
-        <div className="flex shrink-0 items-center justify-between px-6 pb-3 pt-4 md:px-5">
+        <div className="flex shrink-0 items-center justify-between px-6 pb-3 pt-4 md:px-8 md:pt-6">
           <div className="flex items-center gap-2">
             {step > 0 && (
               <button
@@ -393,8 +459,11 @@ export default function OrderIntakeSheet({
                 <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
               </button>
             )}
-            <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
+            <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground md:hidden">
               Step {step + 1} of 3 · {STEPS[step]}
+            </span>
+            <span className="hidden font-body text-[10px] uppercase tracking-[0.18em] text-foreground md:inline">
+              Quote &amp; Order Workspace
             </span>
           </div>
           <button
@@ -407,24 +476,20 @@ export default function OrderIntakeSheet({
           </button>
         </div>
 
-        <div className="px-6 py-4 md:min-h-0 md:flex-1 md:overflow-y-auto md:px-5 md:pb-4 md:pt-0">
+        <div className="px-6 py-4 md:min-h-0 md:flex-1 md:overflow-y-auto md:px-8 md:pb-8 md:pt-2">
           {(productTitle || designerName) && (
-            <div className="mb-5 border-b border-border/50 pb-4 short:mb-3 short:pb-2">
-              {designerName && (
-                <p className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
-                  {designerName}
-                </p>
-              )}
-              {productTitle && (
-                <p className="mt-1 font-display text-lg leading-snug text-foreground">{productTitle}</p>
-              )}
+            <div className="mb-5 border-b border-border/50 pb-5 short:mb-3 short:pb-2">
+              <p className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Target Piece</p>
+              <p className="mt-1 font-display text-lg leading-snug text-foreground">
+                {[productTitle, designerName ? `by ${designerName}` : ""].filter(Boolean).join(" ")}
+              </p>
               {activePriceLabel && (
                 <p className="mt-1 font-body text-xs tracking-wide text-muted-foreground transition-opacity duration-200">
                   {activePriceLabel}
                 </p>
               )}
               {previewImage && (
-                <div className="mt-3 short:mt-2">
+                <div className="mt-3 md:hidden short:mt-2">
                   <div className="overflow-hidden bg-muted/30">
                     <img
                       key={previewImage}
@@ -441,6 +506,13 @@ export default function OrderIntakeSheet({
                   )}
                 </div>
               )}
+              <div className="mt-5 hidden grid-cols-3 border-y border-border/50 py-3 md:grid">
+                {(["Profile", "Context", "Contact"] as const).map((label, index) => (
+                  <div key={label} className={cn("font-body text-[9px] uppercase tracking-[0.16em]", index <= step ? "text-foreground" : "text-muted-foreground/45")}>
+                    <span className="mr-1.5 tabular-nums">0{index + 1}</span>{label}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
@@ -449,7 +521,7 @@ export default function OrderIntakeSheet({
               <p className="mb-4 font-display text-xl leading-snug text-foreground short:mb-3">
                 Are you an Interior Designer / Architect, or a Private Client?
               </p>
-              <div className="flex flex-col gap-3 short:gap-2">
+              <div className="flex flex-col gap-3 md:grid md:grid-cols-2 short:gap-2">
                 {([
                   { key: "designer", label: "Interior Designer / Architect" },
                   { key: "private", label: "Private Client" },
@@ -459,7 +531,7 @@ export default function OrderIntakeSheet({
                     type="button"
                     onClick={() => chooseProfile(opt.key)}
                     className={cn(
-                      "flex h-14 w-full items-center justify-between border px-4 font-body text-sm transition-all duration-200",
+                      "flex min-h-14 w-full items-center justify-between border px-4 py-4 text-left font-body text-sm transition-all duration-200 md:min-h-28 md:flex-col md:items-start md:justify-between",
                       profile === opt.key
                         ? "border-foreground bg-foreground text-background"
                         : "border-border/60 bg-background text-foreground hover:border-foreground/50"
@@ -614,21 +686,53 @@ export default function OrderIntakeSheet({
               <label className={cn(labelCls, "mt-5")} htmlFor="intake-phone">
                 Phone Number (optional)
               </label>
-              <input
-                id="intake-phone"
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+65 0000 0000"
-                className={inputCls}
-              />
+              <PhoneDialField value={phone} onChange={setPhone} />
+              {isQuote && (
+                <div className="mt-6">
+                  <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    Attach Reference Material / Fabric Swatch (Optional)
+                  </span>
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      setIsDragging(false);
+                      handleFiles(event.dataTransfer.files);
+                    }}
+                    onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }}
+                    onDragLeave={(event) => { event.preventDefault(); setIsDragging(false); }}
+                    className={cn(
+                      "mt-2 flex cursor-pointer flex-col items-center justify-center border border-dashed border-border/60 bg-muted/30 px-6 py-6 transition-colors hover:bg-muted/50",
+                      isDragging && "border-foreground/40 bg-muted/50",
+                    )}
+                  >
+                    <UploadCloud className="h-4 w-4 text-muted-foreground" strokeWidth={1.25} />
+                    <p className="mt-2 text-center font-body text-xs leading-relaxed text-muted-foreground">
+                      drag and drop fabric swatches, grain reference photos, or COM datasheets here, or browse local files (max 10MB)
+                    </p>
+                    <input ref={fileInputRef} type="file" accept="image/*,.pdf,.doc,.docx" className="sr-only" onChange={(event) => handleFiles(event.target.files)} />
+                  </div>
+                  {attachment && (
+                    <div className="mt-3 flex items-center gap-3 border border-border/60 bg-muted/20 px-3 py-2">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-border/50 bg-background">
+                        <FileText className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.5} />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-body text-xs text-foreground">{attachment.name}</p>
+                        <p className="font-body text-[10px] text-muted-foreground">{formatBytes(attachment.size)}</p>
+                      </div>
+                      <button type="button" aria-label="Remove attachment" onClick={() => setAttachment(null)} className="flex h-7 w-7 items-center justify-center text-muted-foreground hover:text-foreground">
+                        <X className="h-3.5 w-3.5" strokeWidth={1.5} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
               {isQuote && (
                 <Turnstile
                   onVerify={setTurnstileToken}
                   onExpire={() => setTurnstileToken("")}
-                  className="mt-5 min-h-[65px]"
+                  className={cn("mt-5 min-h-[65px]", isTradeAuthorized && "hidden")}
                 />
               )}
             </div>
@@ -637,11 +741,11 @@ export default function OrderIntakeSheet({
 
         {/* Natural-flow mobile action; desktop retains its docked sheet action. */}
         {/* Mobile: button flows with the content. Desktop keeps its docked action. */}
-        <div className="px-6 pb-[calc(3rem+env(safe-area-inset-bottom))] pt-0 md:sticky md:bottom-0 md:mt-auto md:shrink-0 md:border-t md:border-border/50 md:bg-background/95 md:px-5 md:pb-[env(safe-area-inset-bottom)] md:pt-3 md:backdrop-blur-md">
+        <div className="px-6 pb-[calc(3rem+env(safe-area-inset-bottom))] pt-0 md:sticky md:bottom-0 md:mt-auto md:shrink-0 md:border-t md:border-border/50 md:bg-background/95 md:px-8 md:pb-5 md:pt-5 md:backdrop-blur-md">
           <button
             type="button"
             onClick={next}
-            disabled={!canAdvance || submitting || sending || (isQuote && step === 2 && !turnstileToken)}
+            disabled={!canAdvance || submitting || sending || (isQuote && !isTradeAuthorized && step === 2 && !turnstileToken)}
             className={cn(
               "mt-6 inline-flex w-full items-center justify-center rounded-none bg-foreground px-5 py-4 font-body text-xs uppercase tracking-widest text-background md:mb-3 md:mt-0 md:h-12 md:py-0",
               "transition-transform duration-150 active:scale-[0.98] disabled:opacity-40"

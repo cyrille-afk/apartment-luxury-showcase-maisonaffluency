@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Reformat the three-step Quote/Order intake as a desktop right-side workspace with localized phone, swatch upload, and verified Felix handoff
+
 - [x] Add Garnier & Linker to the desktop-only Contemporary Talents designer list and raise the designer list higher on desktop while keeping mobile positioning intact
 - [x] Match expanded Trade designer portraits to the constrained public editorial layout and update the card CTA
 - [x] Expand Resources for large desktops with adaptive document grids and local breadcrumb navigation
