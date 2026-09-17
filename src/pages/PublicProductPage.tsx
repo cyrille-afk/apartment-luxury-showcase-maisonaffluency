@@ -2376,14 +2376,14 @@ const PublicProductPageContent: React.FC = () => {
               {!isMobileOrPwa && (
                 <section aria-label="Curator notes" className="mt-10 border-t border-border/50 pt-8">
                   <h2 className="mb-6 font-display text-2xl italic text-foreground">Curator Notes</h2>
-                  <div className="grid grid-cols-3 gap-6">
+                  <div className="flex flex-col space-y-6">
                     {[
                       { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
                       { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
                       { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
                     ].map(({ label, text, Icon }) => (
-                      <article key={label} className="group flex flex-col gap-3">
-                        <div className="flex items-center gap-2">
+                      <article key={label} className="group flex w-full flex-col gap-3 pb-6 last:pb-0">
+                        <div className="flex items-center justify-start gap-2">
                           <Icon className="h-4 w-4 shrink-0 text-muted-foreground/60 transition-colors duration-150 group-hover:text-foreground" strokeWidth={1.25} />
                           <h3 className="font-body text-[10px] uppercase tracking-[0.2em] text-foreground">
                             {label}
