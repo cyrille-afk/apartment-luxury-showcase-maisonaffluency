@@ -2489,7 +2489,17 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       setClientName(newName);
                       supabase.from("trade_quotes")
                         .update({ client_id: newId, client_name: newName } as any)
-                        .eq("id", quoteId);
+                        .eq("id", quoteId)
+                        .then(({ error }) => {
+                          if (error) {
+                            console.error("[QuoteDetail] client save failed", error);
+                            toast({
+                              title: "Client not saved",
+                              description: error.message ?? "The client selection could not be saved.",
+                              variant: "destructive",
+                            });
+                          }
+                        });
                       // One-time currency initialization: apply the client's
                       // default currency (if any). The member can still switch
                       // the toggle manually afterwards.
