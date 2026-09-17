@@ -584,30 +584,22 @@ export default function TradeAdminSuppliers() {
             Download Sample Template CSV
           </button>
 
-          {importFile && (
-            <div className="mt-3 space-y-2">
-              <p className="font-body text-sm text-foreground">
-                <span className="font-medium">{parsedRows.length}</span> valid record{parsedRows.length === 1 ? "" : "s"} ready
-                {rowErrors.length > 0 && (
-                  <span className="text-destructive"> — {rowErrors.length} issue{rowErrors.length === 1 ? "" : "s"} flagged</span>
-                )}
-              </p>
-              {rowErrors.length > 0 && (
-                <div className="max-h-40 overflow-y-auto rounded-md border border-destructive/30 bg-destructive/5 p-3 space-y-1">
-                  {rowErrors.map((err, i) => (
-                    <p key={i} className="font-body text-xs text-destructive">{err.message}</p>
-                  ))}
-                </div>
-              )}
+          {importFile && rowErrors.length > 0 && (
+            <div className="mt-3 max-h-40 overflow-y-auto rounded-md border border-destructive/30 bg-destructive/5 p-3 space-y-1">
+              {rowErrors.map((err, i) => (
+                <p key={i} className="font-body text-xs text-destructive">{err.message}</p>
+              ))}
             </div>
           )}
 
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" size="sm" onClick={() => { setImportOpen(false); resetImport(); }}>Cancel</Button>
-            <Button size="sm" onClick={() => void handleImport()} disabled={importing || parsedRows.length === 0}>
-              {importing ? "Importing…" : `Import ${parsedRows.length > 0 ? parsedRows.length : ""} Supplier${parsedRows.length === 1 ? "" : "s"}`}
+            <Button size="sm" onClick={() => setImportStep("review")} disabled={parsedRows.length === 0}>
+              Review {parsedRows.length > 0 ? parsedRows.length : ""} Row{parsedRows.length === 1 ? "" : "s"}
             </Button>
           </div>
+          </>
+          )}
         </DialogContent>
       </Dialog>
     </>
