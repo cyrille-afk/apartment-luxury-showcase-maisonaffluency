@@ -38,7 +38,7 @@ export const TOOL_ROUTES: Record<string, [string, string]> = {
   "/trade/samples": ["Procurement", "Sample Requests"],
   "/trade/shipping-tracker": ["Procurement", "Shipping Tracker"],
   "/trade/lead-time-calendar": ["Procurement", "Lead Time Calendar"],
-  "/trade/budget": ["Procurement", "Budget Tracker"],
+  "/trade/budget": ["Procurement", "Budget Tracker & Cash-Flow Planner"],
   "/trade/reorder": ["Procurement", "Reorder"],
   "/trade/currency-converter": ["Procurement", "Currency Converter"],
   // Learn
