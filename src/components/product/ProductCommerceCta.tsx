@@ -267,13 +267,49 @@ export default function ProductCommerceCta({
     }
     setMiniCartOpen(true);
   };
-  const primaryAction = tradeApproved ? undefined : openSelection;
+  /**
+   * Intent gate: public visitors qualify themselves (designer vs private
+   * client), state the project city and leave contact detail before either the
+   * order drawer or the bespoke dialog opens. Captured once per session —
+   * returning visitors go straight through.
+   */
+  const intakeCaptured = Boolean(
+    checkoutForm.buyerProfile &&
+      checkoutForm.projectCity.trim() &&
+      checkoutForm.email.trim(),
+  );
+
+  const runIntent = (target: "order" | "bespoke") => {
+    if (target === "order") openSelection();
+    else setBespokeOpen(true);
+  };
+
+  const startIntent = (target: "order" | "bespoke") => {
+    if (tradeApproved || intakeCaptured) {
+      runIntent(target);
+      return;
+    }
+    setIntakeFor(target);
+  };
+
+  const completeIntake = (details: OrderIntakeDetails) => {
+    const target = intakeFor ?? "order";
+    setIntakeFor(null);
+    checkoutForm.update({
+      email: details.email,
+      projectCity: details.city,
+      buyerProfile: details.profile,
+    });
+    runIntent(target);
+  };
+
+  const primaryAction = tradeApproved ? undefined : () => startIntent("order");
 
   /**
    * Secondary CTA: bespoke / customisation enquiries open a centred overlay
    * dialog on the product canvas — never the Trade Account registration page.
    */
-  const openBespoke = () => setBespokeOpen(true);
+  const openBespoke = () => startIntent("bespoke");
 
   // Unpriced pieces: the page asks for the in-canvas bespoke dialog rather than
   // sending a shopper to the corporate Trade Account form.
@@ -283,7 +319,7 @@ export default function ProductCommerceCta({
       const isDesktop =
         typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
       if (dockOnly === isDesktop) return;
-      setBespokeOpen(true);
+      startIntent("bespoke");
     };
     window.addEventListener("ma:open-quote", handler);
     return () => window.removeEventListener("ma:open-quote", handler);
