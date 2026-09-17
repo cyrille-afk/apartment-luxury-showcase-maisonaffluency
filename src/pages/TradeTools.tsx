@@ -44,6 +44,7 @@ const categories: ToolCategory[] = [
       { title: "Shipping Tracker", description: "Real-time delivery progress", url: "/trade/shipping-tracker", icon: Truck },
       { title: "Lead Time Calendar", description: "Production and shipping timelines", url: "/trade/lead-time-calendar", icon: CalendarDays },
       { title: "Budget Tracker & Cash-Flow Planner", description: "Margins, tier markups, deposits and invoice cash flow", url: "/trade/budget", icon: Wallet },
+      { title: "Purchase Order Logs", description: "Invoice matching and vendor payment states", url: "/trade/po-logs", icon: ClipboardList },
       { title: "Reorder", description: "Quickly re-order from past quotes", url: "/trade/reorder", icon: RefreshCw },
       { title: "Currency Converter", description: "Convert trade prices across currencies", url: "/trade/currency-converter", icon: ArrowRightLeft },
     ],
