@@ -308,26 +308,12 @@ export default function ProductCommerceCta({
     mql.addEventListener("change", publish);
   }, []);
 
-  // Mobile: PLACE ORDER opens the conversational 3-step intake sheet first;
-  // its completion hands off to the existing selection / checkout flow.
+  // Mobile: PLACE ORDER follows the same in-canvas selection drawer path.
   const handleMobilePrimary = () => {
     if (tradeApproved) {
       onPlaceOrder(quantity);
       return;
     }
-    setIntakeOpen(true);
-  };
-
-  const handleIntakeComplete = (details: OrderIntakeDetails) => {
-    try {
-      sessionStorage.setItem("ma_order_intake", JSON.stringify({ ...details, productId }));
-    } catch {
-      /* private mode — intake is a soft capture, never blocks the order */
-    }
-    // Quote requests are already submitted by the sheet, which then shows its
-    // own thank-you screen. Never hand those off to cart / account flows.
-    if (isUnpriced) return;
-    setIntakeOpen(false);
     openSelection();
   };
 
