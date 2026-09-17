@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList, MessagesSquare, Plus, Trash2 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -5656,7 +5657,11 @@ export function AIConcierge({
             {showTypingDots && (
               <div className="flex justify-start">
                 <div className="bg-muted rounded-2xl rounded-bl-md px-3.5 py-2.5">
-                  <DotCircleLoader size="sm" className="text-muted-foreground" />
+                  {embedded ? (
+                    <Shimmer className="font-body text-xs">Felix is synchronizing your studio brief...</Shimmer>
+                  ) : (
+                    <DotCircleLoader size="sm" className="text-muted-foreground" />
+                  )}
                 </div>
               </div>
             )}
