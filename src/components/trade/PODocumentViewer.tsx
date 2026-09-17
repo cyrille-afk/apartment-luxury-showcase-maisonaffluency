@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { BadgeCheck, CheckCircle2, Printer, RotateCcw, X } from "lucide-react";
+import { BadgeCheck, CheckCircle2, Loader2, Printer, RotateCcw, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
