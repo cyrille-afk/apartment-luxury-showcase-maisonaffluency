@@ -409,7 +409,29 @@ export default function TradeDeliveryTracker() {
                   </span>
                 </button>
               ))}
+
+              <div className="ml-auto">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button type="button" variant="outline" size="sm" className="h-8 gap-1.5 rounded-full px-3 font-body text-xs" disabled={exportRows.length === 0}>
+                      <Download className="h-3.5 w-3.5" />
+                      Export
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onSelect={() => handleExportCsv()} className="font-body text-xs">
+                      <FileSpreadsheet className="mr-2 h-3.5 w-3.5" />
+                      Export to CSV
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => handleExportPdf()} className="font-body text-xs">
+                      <FileText className="mr-2 h-3.5 w-3.5" />
+                      Export to PDF
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
+
 
             {filteredGroups.length === 0 ? (
               <div className="text-center py-16 border border-dashed border-border rounded-lg">
