@@ -523,9 +523,11 @@ export default function SelectionDrawer({
           >
             {placing
               ? "Opening checkout…"
-              : method === "online"
-                ? "[ Proceed to Secure Checkout ]"
-                : "[ Proceed to Wire Instructions ]"}
+              : quoteOnly
+                ? "[ Request Final Quotation ]"
+                : method === "online"
+                  ? "[ Proceed to Secure Checkout ]"
+                  : "[ Proceed to Wire Instructions ]"}
           </button>
           {onViewCart && (
             <button
