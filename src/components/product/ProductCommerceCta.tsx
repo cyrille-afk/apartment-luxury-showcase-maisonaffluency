@@ -415,24 +415,32 @@ export default function ProductCommerceCta({
           </>
         ) : (
           <>
-            <QuantitySelector value={quantity} onChange={setQuantity} />
-            <button
-              type="button"
-              data-commerce-primary
-              onClick={() => (finishSelectionRequired ? scrollToFinishes() : primaryAction())}
-              disabled={placingOrder}
-              className={primaryBtn}
-            >
-              {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
-              {placingOrder ? "Opening checkout…" : finishSelectionRequired ? "Choose Finishes" : primaryLabel}
-            </button>
-            {/* Secondary: high-touch / contract buyers — opens the bespoke
-                configuration dialog on the product canvas. */}
+            {/* Price-upon-Request pieces are quote-only: the Place Order CTA
+                and quantity stepper are unmounted entirely, and the bespoke
+                request becomes the single primary action. */}
+            {!isUnpriced && (
+              <>
+                <QuantitySelector value={quantity} onChange={setQuantity} />
+                <button
+                  type="button"
+                  data-commerce-primary
+                  onClick={() => (finishSelectionRequired ? scrollToFinishes() : primaryAction())}
+                  disabled={placingOrder}
+                  className={primaryBtn}
+                >
+                  {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
+                  {placingOrder ? "Opening checkout…" : finishSelectionRequired ? "Choose Finishes" : primaryLabel}
+                </button>
+              </>
+            )}
+            {/* High-touch / contract buyers — opens the bespoke configuration
+                dialog on the product canvas. Elevated to the primary block
+                when the piece is Price upon Request. */}
             <button
               type="button"
               data-commerce-quote
               onClick={openBespoke}
-              className={secondaryBtn}
+              className={isUnpriced ? primaryBtn : secondaryBtn}
             >
               Request a Bespoke Quote / Customisation
             </button>
