@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
+import { getDestinationTax } from "@/lib/destinationTax";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
 import { getFxRates, FALLBACK_RATES, getFxSource, summarizeFxSources, describeFxSource, type FxSource } from "@/lib/fxRates";
 import { formatFxSnapshotLine } from "@/lib/fxSnapshot";
@@ -449,6 +450,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   /** Display the totals block in the quote currency or in GBP DDP landed cost. */
   const [displayCcy, setDisplayCcy] = useState<"quote" | "gbp">("quote");
   const [gstRate, setGstRate] = useState(9);
+  const [taxLabel, setTaxLabel] = useState("GST");
   const [editingGstRate, setEditingGstRate] = useState(false);
   const [payingStripe, setPayingStripe] = useState(false);
   const [manualShipReq, setManualShipReq] = useState<null | {
@@ -1218,10 +1220,22 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   useEffect(() => { loadEmailLog(); }, [loadEmailLog]);
 
-  // Auto-default GST on/off when currency changes, unless the user has manually toggled it.
+  // Auto-default tax label / rate / on-off from the delivery country, unless the
+  // user has manually toggled it. Falls back to currency heuristics when the
+  // destination country is unknown.
   useEffect(() => {
-    if (!gstUserTouched) setGstEnabled(currency === "SGD");
-  }, [currency, gstUserTouched]);
+    if (gstUserTouched) return;
+    const preset = getDestinationTax(effectiveDestCountry);
+    if (preset) {
+      setTaxLabel(preset.label);
+      setGstRate(preset.rate);
+      setGstEnabled(preset.rate > 0);
+      return;
+    }
+    setTaxLabel(currency === "SGD" ? "GST" : "VAT");
+    setGstRate(currency === "SGD" ? 9 : 20);
+    setGstEnabled(currency === "SGD");
+  }, [currency, gstUserTouched, effectiveDestCountry]);
 
   const [editingQtyId, setEditingQtyId] = useState<string | null>(null);
   const [editingQtyValue, setEditingQtyValue] = useState<string>("");
@@ -2854,7 +2868,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   <div className={`relative w-8 h-[18px] rounded-full transition-colors ${gstEnabled ? "bg-foreground" : "bg-border"}`}>
                     <div className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform ${gstEnabled ? "translate-x-[14px]" : "translate-x-[2px]"}`} />
                   </div>
-                  <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">GST</span>
+                  <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">{taxLabel}</span>
                 </button>
                 {gstEnabled && (
                   editingGstRate ? (
@@ -4043,7 +4057,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       const taxable = goodsAfterDiscountCents + insurancePremiumCents;
                       return (
                         <div className="flex justify-between font-body text-xs text-muted-foreground">
-                          <span>GST ({gstRate}%)</span>
+                          <span>{taxLabel} ({gstRate}%)</span>
                           <span>{formatPriceRaw(Math.round(taxable * gstRate / 100), currency)}</span>
                         </div>
                       );
@@ -4515,7 +4529,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       )}
                       <Row label="Net subtotal" value={`${fmt(afterDiscount)} ${currency}`} />
                       {gstEnabled && (
-                        <Row label={`GST (${gstRate}%)`} value={`+ ${fmt(gstCents)} ${currency}`} muted />
+                        <Row label={`${taxLabel} (${gstRate}%)`} value={`+ ${fmt(gstCents)} ${currency}`} muted />
                       )}
                       {cratingTotalCents > 0 && (
                         <Row label="Crating & packing" value={`+ ${fmt(cratingTotalCents)} ${currency}`} muted />
@@ -4592,7 +4606,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   </button>
                   {subtotalCents > 0 && (
                     <span className="font-body text-[10px] text-muted-foreground">
-                      Stripe charge: {currencySymbol(currency)}{formatPriceRaw(chargeTotal, currency)} {currency} (incl.{gstEnabled ? ` ${gstRate}% GST +` : ""} processing fee)
+                      Stripe charge: {currencySymbol(currency)}{formatPriceRaw(chargeTotal, currency)} {currency} (incl.{gstEnabled ? ` ${gstRate}% ${taxLabel} +` : ""} processing fee)
                     </span>
                   )}
                 </div>
@@ -4604,7 +4618,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   <ul className="font-body text-[10px] text-muted-foreground space-y-1 list-disc list-inside">
                     <li>You are paying the <span className="font-medium text-foreground/70">{isPayingDeposit ? "60% deposit" : "40% balance"}</span> of {currencySymbol(currency)}{formatPriceRaw(portionCents, currency)} {currency} (on an order total of {currencySymbol(currency)}{formatPriceRaw(orderTotal, currency)} {currency}{shippingQuoteCents > 0 ? ", goods + shipping" : ""}).</li>
                     <li>A processing fee of 3.4% + {feeDisplay} is included in the Stripe charge above.</li>
-                    {gstEnabled && <li>{gstRate}% GST is included.</li>}
+                    {gstEnabled && <li>{gstRate}% {taxLabel} is included.</li>}
                     {isPayingDeposit && shippingQuoteCents > 0 && (
                       <li>Shipping &amp; FX shown are estimates. Two weeks before delivery we'll re-quote freight at live carrier rates and FX, then email you the adjusted balance invoice.</li>
                     )}
