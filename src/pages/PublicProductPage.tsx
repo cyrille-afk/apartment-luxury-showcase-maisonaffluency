@@ -2146,14 +2146,7 @@ const PublicProductPageContent: React.FC = () => {
           width: quantitativeValue(ldDims?.width, ldDims?.unit || "CMT"),
           depth: quantitativeValue(ldDims?.depth, ldDims?.unit || "CMT"),
           height: quantitativeValue(ldDims?.height, ldDims?.unit || "CMT"),
-          // Never expose pricing to unauthenticated crawlers — the Offer stays
-          // price-free and simply points at the enquiry flow.
-          offers: {
-            "@type": "Offer",
-            availability: "https://schema.org/InStock",
-            url: canonical,
-            seller: { "@type": "Organization", name: "Maison Affluency" },
-          },
+          offers: ldOffer,
         };
 
         const crumbsLd = {
