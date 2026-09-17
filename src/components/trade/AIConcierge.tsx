@@ -4555,7 +4555,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                       return null;
                     })()}
                     {(item as any).__display && (
-                      item.role === "user" && isBriefContent(item.content) ? (
+                      item.role === "user" && item.briefSubmit === true && isBriefContent(item.content) ? (
                         <div className={cn(expanded ? "max-w-[92%]" : "max-w-[88%]", "w-full flex justify-end")}>
                           <BriefBubble content={item.content} />
                         </div>
