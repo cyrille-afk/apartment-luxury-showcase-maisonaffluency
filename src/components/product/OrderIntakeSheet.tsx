@@ -302,7 +302,7 @@ export default function OrderIntakeSheet({
       // Keep the drawer anchored while Step 3 fades away, then reveal the
       // persistent success canvas in the same bounds.
       setShowingSuccess(true);
-      window.setTimeout(() => setSent(true), 300);
+      window.setTimeout(() => setSent(true), 250);
     } catch (error) {
       let responseBody: string | undefined;
       if (error && typeof error === "object" && "context" in error) {
@@ -454,7 +454,7 @@ export default function OrderIntakeSheet({
           isOpen ? "translate-y-0 md:translate-x-0" : "translate-y-full md:translate-y-0 md:translate-x-full"
         )}
       >
-        <div className={cn("flex min-h-0 flex-1 flex-col transition-opacity duration-300", showingSuccess && "opacity-0")}>
+        <div className={cn("flex min-h-0 flex-1 flex-col transition-opacity duration-[250ms] ease-in-out", showingSuccess && "opacity-0")}>
         {/* Razor-thin progress rule */}
         <div className="h-[2px] w-full bg-border/50">
           <div
