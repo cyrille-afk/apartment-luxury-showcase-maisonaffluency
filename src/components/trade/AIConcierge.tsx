@@ -527,6 +527,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { getConciergeSession, updateConciergeSession } from "@/hooks/useConciergeSession";
 import { extractProjectCityFromAssistant } from "@/lib/projectCityDetect";
+import { validateFelixLogic } from "@/lib/validateFelixLogic";
 import { detectUrgency } from "@/lib/urgencyDetect";
 
 
@@ -3093,6 +3094,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
 
     let assistantSoFar = "";
     let assistantStarted = false;
+    // Set when Guardrail 3 discards a freight-routing reply to a zone answer.
+    let felixLogicDiscarded = false;
     const controller = new AbortController();
     abortRef.current = controller;
 
@@ -3117,6 +3120,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     const upsertAssistant = (chunk: string) => {
       armStall();
       assistantSoFar += chunk;
+      // Guardrail 3 — semantic sanity check BEFORE the bubble renders. A
+      // freight/hub answer to an interior room or zone reply is discarded and
+      // replaced with a zone acknowledgement.
+      const verdict = validateFelixLogic(assistantSoFar, text);
+      if (!verdict.ok) {
+        felixLogicDiscarded = true;
+        assistantSoFar = verdict.response;
+      }
       setTimeline((prev) => {
         if (assistantStarted) {
           // Update the last assistant text bubble (which must be the last item)
@@ -3334,7 +3345,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           // Delivery to Singapore in 2 Weeks"). Matches the phrasing used by
           // the LOCALIZED SHIPPING FILTER preamble and the CITY LOCK reply.
           try {
-            const city = extractProjectCityFromAssistant(assistantSoFar);
+            const city = felixLogicDiscarded ? null : extractProjectCityFromAssistant(assistantSoFar);
             if (city) updateConciergeSession({ projectCity: city });
           } catch { /* non-fatal */ }
 
