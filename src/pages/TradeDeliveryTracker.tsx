@@ -5,9 +5,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
-import { CalendarClock, ChevronRight, CalendarPlus } from "lucide-react";
+import { CalendarClock, ChevronRight, CalendarPlus, ImageOff } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import QuoteLineDrawer, { type QuoteLineDrawerItem } from "@/components/trade/QuoteLineDrawer";
 import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback";
 
@@ -80,6 +81,7 @@ interface Line {
 export default function TradeDeliveryTracker() {
   const { user } = useAuth();
   const [selectedLine, setSelectedLine] = useState<Line | null>(null);
+  const [previewLine, setPreviewLine] = useState<Line | null>(null);
 
   const { data: lines = [], isLoading } = useQuery({
     queryKey: ["delivery-tracker", user?.id],
@@ -244,16 +246,23 @@ export default function TradeDeliveryTracker() {
                           .map((l) => (
                             <tr key={l.item_id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
                               <td className="w-12 px-2 py-2">
-                                {l.image_url ? (
-                                  <img
-                                    src={l.image_url}
-                                    alt={l.product_name}
-                                    loading="lazy"
-                                    className="h-10 w-10 rounded border border-border/50 bg-muted/20 object-cover"
-                                  />
-                                ) : (
-                                  <div className="h-10 w-10 rounded border border-dashed border-border/50 bg-muted/10" aria-hidden />
-                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => setPreviewLine(l)}
+                                  className="group relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded border border-border/50 bg-muted/20 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                  aria-label={`Preview ${l.product_name}`}
+                                >
+                                  {l.image_url ? (
+                                    <img
+                                      src={l.image_url}
+                                      alt={l.product_name}
+                                      loading="lazy"
+                                      className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-110"
+                                    />
+                                  ) : (
+                                    <ImageOff className="h-4 w-4 text-muted-foreground/60" />
+                                  )}
+                                </button>
                               </td>
                               <td className="px-2.5 py-2 font-body text-sm text-foreground break-words">{l.product_name}</td>
                               <td className="px-2.5 py-2 font-body text-xs text-muted-foreground break-words">{l.brand_name}</td>
@@ -279,6 +288,30 @@ export default function TradeDeliveryTracker() {
           </div>
         )}
       </div>
+
+      <Dialog open={!!previewLine} onOpenChange={(open) => !open && setPreviewLine(null)}>
+        <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0 sm:rounded-lg">
+          <div className="relative flex aspect-[4/3] w-full items-center justify-center bg-muted">
+            {previewLine?.image_url ? (
+              <img
+                src={previewLine.image_url}
+                alt={previewLine.product_name}
+                className="h-full w-full object-contain"
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <ImageOff className="h-12 w-12" />
+                <span className="font-body text-xs uppercase tracking-wider">No image</span>
+              </div>
+            )}
+          </div>
+          <DialogHeader className="p-5 text-left">
+            <DialogTitle className="font-display text-base">{previewLine?.product_name}</DialogTitle>
+            <DialogDescription className="font-body text-xs uppercase tracking-wider">{previewLine?.brand_name}</DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
       <QuoteLineDrawer item={selectedLine as QuoteLineDrawerItem | null} onOpenChange={(open) => !open && setSelectedLine(null)} />
     </>
   );
