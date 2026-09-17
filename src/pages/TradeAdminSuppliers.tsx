@@ -442,14 +442,103 @@ export default function TradeAdminSuppliers() {
 
       {/* CSV Import */}
       <Dialog open={importOpen} onOpenChange={(open) => { setImportOpen(open); if (!open) resetImport(); }}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className={importStep === "review" ? "sm:max-w-3xl" : "sm:max-w-lg"}>
           <DialogHeader>
-            <DialogTitle className="font-display">Import Suppliers from CSV</DialogTitle>
+            <DialogTitle className="font-display">
+              {importStep === "review" ? "Review & Confirm" : "Import Suppliers from CSV"}
+            </DialogTitle>
             <DialogDescription className="font-body text-sm">
-              Required columns: Supplier Name, Contact Email. CC Email is optional. Existing supplier names are updated; new names are inserted.
+              {importStep === "review"
+                ? "Check the parsed records below. Duplicates are flagged; uncheck any row to exclude it from the import."
+                : "Required columns: Supplier Name, Contact Email. CC Email is optional. Existing supplier names are updated; new names are inserted."}
             </DialogDescription>
           </DialogHeader>
 
+          {importStep === "review" ? (
+            <div className="space-y-3">
+              <div className="max-h-[50vh] overflow-auto rounded-lg border border-border">
+                <table className="w-full text-sm">
+                  <thead className="sticky top-0 bg-muted/60 backdrop-blur">
+                    <tr className="border-b border-border">
+                      <th className="w-10 px-3 py-2"></th>
+                      <th className="px-3 py-2 text-left font-display text-[11px] uppercase tracking-widest text-muted-foreground">Supplier Name</th>
+                      <th className="px-3 py-2 text-left font-display text-[11px] uppercase tracking-widest text-muted-foreground">Contact Email</th>
+                      <th className="px-3 py-2 text-left font-display text-[11px] uppercase tracking-widest text-muted-foreground">CC Email</th>
+                      <th className="px-3 py-2 text-left font-display text-[11px] uppercase tracking-widest text-muted-foreground">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {parsedRows.map((r) => {
+                      const dup = duplicateStatus.get(r.rowNumber);
+                      const excluded = excludedRows.has(r.rowNumber);
+                      return (
+                        <tr
+                          key={r.rowNumber}
+                          className={`border-b border-border/60 last:border-0 transition-colors ${
+                            dup ? "bg-amber-50/70 dark:bg-amber-500/10" : ""
+                          } ${excluded ? "opacity-45" : ""}`}
+                        >
+                          <td className="px-3 py-2">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 accent-foreground cursor-pointer"
+                              checked={!excluded}
+                              onChange={() => toggleRow(r.rowNumber)}
+                              aria-label={`Include ${r.supplier_name}`}
+                            />
+                          </td>
+                          <td className="px-3 py-2 font-display text-sm text-foreground">{r.supplier_name}</td>
+                          <td className="px-3 py-2 font-body text-sm text-foreground">{r.contact_email}</td>
+                          <td className="px-3 py-2 font-body text-sm text-muted-foreground">{r.cc_email || "—"}</td>
+                          <td className="px-3 py-2">
+                            {dup === "upsert" ? (
+                              <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-100/60 px-2 py-0.5 font-body text-[11px] text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300">
+                                Duplicate (Will Upsert)
+                              </span>
+                            ) : dup === "skip" ? (
+                              <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-100/60 px-2 py-0.5 font-body text-[11px] text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300">
+                                Duplicate (Skip)
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 font-body text-[11px] text-emerald-700 dark:text-emerald-400">
+                                New
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <p className="font-body text-xs text-muted-foreground">
+                {selectedRows.length} of {parsedRows.length} row{parsedRows.length === 1 ? "" : "s"} selected
+                {rowErrors.length > 0 && (
+                  <span className="text-destructive"> — {rowErrors.length} row{rowErrors.length === 1 ? "" : "s"} rejected during parsing</span>
+                )}
+              </p>
+
+              {rowErrors.length > 0 && (
+                <div className="max-h-32 overflow-y-auto rounded-md border border-destructive/30 bg-destructive/5 p-3 space-y-1">
+                  {rowErrors.map((err, i) => (
+                    <p key={i} className="font-body text-xs text-destructive">{err.message}</p>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex justify-between gap-2 pt-1">
+                <Button variant="ghost" size="sm" onClick={() => { resetImport(); }}>Choose another file</Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => { setImportOpen(false); resetImport(); }}>Cancel</Button>
+                  <Button size="sm" onClick={() => void handleImport()} disabled={importing || selectedRows.length === 0}>
+                    {importing ? "Importing…" : `Confirm Import (${selectedRows.length} Row${selectedRows.length === 1 ? "" : "s"})`}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+          <>
           <div
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
