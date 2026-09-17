@@ -222,6 +222,9 @@ export default function TradeDeliveryTracker() {
           sku: p?.sku || null,
           price_cents: it.unit_price_cents ?? null,
           currency: q?.currency || "EUR",
+          po_status: it.po_status ?? "pending",
+          po_approved_by_name: it.po_approved_by_name ?? null,
+          po_approved_at: it.po_approved_at ?? null,
         };
       });
     },
