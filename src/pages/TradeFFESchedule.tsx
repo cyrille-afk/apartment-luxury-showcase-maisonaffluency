@@ -647,6 +647,9 @@ export default function TradeFFESchedule() {
                   <Button variant="outline" size="sm" className="ml-auto h-8 gap-1.5 font-body text-[11px]">
                     <Eye className="h-3.5 w-3.5" />
                     View Presets
+                    {activePreset && (
+                      <span className="ml-0.5 inline-flex h-1.5 w-1.5 rounded-full bg-primary transition-all duration-200" aria-hidden="true" />
+                    )}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-64">
