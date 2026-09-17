@@ -133,7 +133,7 @@ export default function TradeDeliveryTracker() {
       const [{ data: qItems }, { data: timelines }] = await Promise.all([
         supabase
           .from("trade_quote_items")
-          .select("id, product_id, quantity, quote_id, po_number, cost_code, lead_time_weeks_override, required_by_date")
+          .select("id, product_id, quantity, quote_id, po_number, cost_code, lead_time_weeks_override, required_by_date, unit_price_cents")
           .in("quote_id", quoteIds),
         supabase
           .from("order_timeline" as any)
