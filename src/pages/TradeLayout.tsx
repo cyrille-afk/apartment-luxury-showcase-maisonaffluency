@@ -62,6 +62,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/trade/shipping-tracker": "Shipping Tracker",
   "/trade/mood-boards": "Mood Board",
   "/trade/budget": "Budget Tracker & Cash-Flow Planner",
+  "/trade/po-logs": "Purchase Order Logs",
   "/trade/spec-generator": "Specification Sheet Generator",
   "/trade/clients": "Clients",
   "/trade/client-management": "Client Management",
@@ -208,6 +209,11 @@ const TRADE_GATE_COPY: Record<string, { title: string; description: string; h1: 
     title: "Budget Tracker | Maison Affluency",
     h1: "Budget Tracker",
     description: "Monitor project budgets and spend across your trade orders. Sign in to access the budget tracker.",
+  },
+  "/trade/po-logs": {
+    title: "Purchase Order Logs | Maison Affluency",
+    h1: "Purchase Order Logs",
+    description: "Track purchase orders, supplier invoices and vendor payments. Sign in to access the PO logs.",
   },
   "/trade/spec-generator": {
     title: "Specification Sheet Generator | Maison Affluency",

@@ -7650,11 +7650,16 @@ export type Database = {
           po_approved_at: string | null
           po_approved_by: string | null
           po_approved_by_name: string | null
+          po_balance_due_date: string | null
           po_change_request_note: string | null
+          po_deposit_paid_at: string | null
           po_dispatch_email: string | null
           po_dispatched_at: string | null
           po_document_path: string | null
+          po_due_date: string | null
+          po_fully_paid_at: string | null
           po_number: string | null
+          po_payment_status: string
           po_status: string
           product_id: string
           quantity: number
@@ -7666,6 +7671,8 @@ export type Database = {
           ship_origin_country: string | null
           ship_weight_kg: number | null
           supplier_id: string | null
+          supplier_invoice_status: string
+          supplier_invoice_total_cents: number | null
           unit_price_cents: number | null
           unit_price_currency: string | null
           variant_label: string | null
@@ -7688,11 +7695,16 @@ export type Database = {
           po_approved_at?: string | null
           po_approved_by?: string | null
           po_approved_by_name?: string | null
+          po_balance_due_date?: string | null
           po_change_request_note?: string | null
+          po_deposit_paid_at?: string | null
           po_dispatch_email?: string | null
           po_dispatched_at?: string | null
           po_document_path?: string | null
+          po_due_date?: string | null
+          po_fully_paid_at?: string | null
           po_number?: string | null
+          po_payment_status?: string
           po_status?: string
           product_id: string
           quantity?: number
@@ -7704,6 +7716,8 @@ export type Database = {
           ship_origin_country?: string | null
           ship_weight_kg?: number | null
           supplier_id?: string | null
+          supplier_invoice_status?: string
+          supplier_invoice_total_cents?: number | null
           unit_price_cents?: number | null
           unit_price_currency?: string | null
           variant_label?: string | null
@@ -7726,11 +7740,16 @@ export type Database = {
           po_approved_at?: string | null
           po_approved_by?: string | null
           po_approved_by_name?: string | null
+          po_balance_due_date?: string | null
           po_change_request_note?: string | null
+          po_deposit_paid_at?: string | null
           po_dispatch_email?: string | null
           po_dispatched_at?: string | null
           po_document_path?: string | null
+          po_due_date?: string | null
+          po_fully_paid_at?: string | null
           po_number?: string | null
+          po_payment_status?: string
           po_status?: string
           product_id?: string
           quantity?: number
@@ -7742,6 +7761,8 @@ export type Database = {
           ship_origin_country?: string | null
           ship_weight_kg?: number | null
           supplier_id?: string | null
+          supplier_invoice_status?: string
+          supplier_invoice_total_cents?: number | null
           unit_price_cents?: number | null
           unit_price_currency?: string | null
           variant_label?: string | null
