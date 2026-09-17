@@ -71,7 +71,7 @@ serve(async (req) => {
 
     const { data: items } = await admin
       .from("trade_quote_items")
-      .select("quantity, variant_label, product:trade_products(name)")
+      .select("quantity, variant_label, product:trade_products(product_name)")
       .eq("quote_id", quoteId);
 
     const { data: link, error: linkErr } = await admin
@@ -108,7 +108,7 @@ serve(async (req) => {
           payUrl,
           note,
           lines: (items ?? []).map((i: any) => ({
-            name: i.product?.name ?? "Bespoke item",
+            name: i.product?.product_name ?? "Bespoke item",
             finish: i.variant_label ?? null,
             quantity: i.quantity ?? 1,
           })),
