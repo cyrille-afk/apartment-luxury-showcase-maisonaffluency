@@ -2134,9 +2134,9 @@ const PublicProductPageContent: React.FC = () => {
         const productLd = {
           "@context": "https://schema.org",
           "@type": "Product",
-          name: pageTitle,
+          name: product.title || pageTitle,
           description: desc,
-          image: images.length ? images : [ogImg],
+          image: ldImages.length ? ldImages : undefined,
           brand: { "@type": "Brand", name: designerDisplay },
           category: product.subcategory || product.category || undefined,
           material: product.materials || product.materials_description || undefined,
