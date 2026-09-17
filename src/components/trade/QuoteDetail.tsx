@@ -4,7 +4,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { getDestinationTax } from "@/lib/destinationTax";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
-import { getFxRates, FALLBACK_RATES, getFxSource, summarizeFxSources, describeFxSource, type FxSource } from "@/lib/fxRates";
+import { getFxRates, FALLBACK_RATES, getFxSource, getFxMeta, summarizeFxSources, describeFxSource, type FxSource } from "@/lib/fxRates";
 import { formatFxSnapshotLine } from "@/lib/fxSnapshot";
 import { FxSourceBadge } from "@/components/trade/FxSourceBadge";
 import { FxAppliedRates } from "@/components/trade/FxAppliedRates";
@@ -435,7 +435,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [fxRates, setFxRates] = useState<Record<string, number>>({});
   const [fxSource, setFxSource] = useState<FxSource>("identity");
-  const [fxPairs, setFxPairs] = useState<Array<{ src: string; tgt: string; rate: number; source: FxSource }>>([]);
+  const [fxPairs, setFxPairs] = useState<Array<{ src: string; tgt: string; rate: number; source: FxSource; fetchedAt: number; cacheTtlMs: number }>>([]);
   const [fxAppliedAt, setFxAppliedAt] = useState<Date | null>(null);
 
   const [tradeDiscount, setTradeDiscount] = useState(true);
@@ -656,12 +656,17 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       setFxRates(rates);
       setFxSource(summarizeFxSources(pairs.map((p) => getFxSource(p.src, p.tgt))));
       setFxPairs(
-        pairs.map((p) => ({
-          src: p.src,
-          tgt: p.tgt,
-          rate: rates[`${p.src}_${p.tgt}`] ?? 1,
-          source: getFxSource(p.src, p.tgt),
-        })),
+        pairs.map((p) => {
+          const meta = getFxMeta(p.src, p.tgt);
+          return {
+            src: p.src,
+            tgt: p.tgt,
+            rate: rates[`${p.src}_${p.tgt}`] ?? 1,
+            source: getFxSource(p.src, p.tgt),
+            fetchedAt: meta?.fetchedAt ?? Date.now(),
+            cacheTtlMs: meta?.cacheTtlMs ?? 10 * 60 * 1000,
+          };
+        }),
       );
       setFxAppliedAt(new Date());
 

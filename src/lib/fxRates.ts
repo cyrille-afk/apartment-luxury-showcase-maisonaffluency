@@ -56,13 +56,27 @@ export const FALLBACK_RATES: Record<string, number> = {
 export type FxSource = "identity" | "frankfurter" | "open-er-api" | "hardcoded" | "unknown";
 
 type CacheEntry = { rate: number; ts: number; source: FxSource };
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+export const FX_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const CACHE_TTL = FX_CACHE_TTL_MS;
 const cache = new Map<string, CacheEntry>();
 const lastSources = new Map<string, FxSource>();
 
 export function getFxSource(src: string, tgt: string): FxSource {
   if (src === tgt) return "identity";
   return lastSources.get(`${src}_${tgt}`) ?? "unknown";
+}
+
+/** Audit metadata for a pair: which source served the rate and when it was
+ *  fetched (from the live providers or, for hardcoded, when the fallback was
+ *  resolved). Returns null when the pair hasn't been resolved this session. */
+export function getFxMeta(src: string, tgt: string): { source: FxSource; fetchedAt: number; cacheTtlMs: number } | null {
+  if (src === tgt) return { source: "identity", fetchedAt: Date.now(), cacheTtlMs: FX_CACHE_TTL_MS };
+  const key = `${src}_${tgt}`;
+  const cached = cache.get(key);
+  if (cached) return { source: cached.source, fetchedAt: cached.ts, cacheTtlMs: FX_CACHE_TTL_MS };
+  const source = lastSources.get(key);
+  if (source) return { source, fetchedAt: Date.now(), cacheTtlMs: FX_CACHE_TTL_MS };
+  return null;
 }
 
 /** Reduce many pair sources to the lowest-fidelity one, so the UI can
