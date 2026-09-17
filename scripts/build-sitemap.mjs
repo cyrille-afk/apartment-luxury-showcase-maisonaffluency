@@ -202,15 +202,27 @@ async function loadDynamicRoutes() {
   // intentionally protected by RLS, so public builds must not query it directly.
   try {
     const products = [];
-    const pageSize = 1000;
+    // Small pages + id-only ordering: sorting the view by updated_at is heavy
+    // enough to hit the server statement timeout on larger catalogues.
+    const pageSize = 250;
     for (let from = 0; ; from += pageSize) {
-      const { data, error } = await supabase
-        .from("sitemap_products")
-        .select("id, updated_at")
-        .order("updated_at", { ascending: false, nullsFirst: false })
-        .order("id", { ascending: true })
-        .range(from, from + pageSize - 1);
-      if (error) throw error;
+      let data = null;
+      let lastError = null;
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        const res = await supabase
+          .from("sitemap_products")
+          .select("id, updated_at")
+          .order("id", { ascending: true })
+          .range(from, from + pageSize - 1);
+        if (!res.error) {
+          data = res.data;
+          lastError = null;
+          break;
+        }
+        lastError = res.error;
+        await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+      }
+      if (lastError) throw lastError;
       products.push(...(data ?? []));
       if (!data || data.length < pageSize) break;
     }

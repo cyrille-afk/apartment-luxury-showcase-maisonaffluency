@@ -1201,6 +1201,39 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     setEditingQtyError(null);
   };
 
+  // --- Manual unit price entry -------------------------------------------
+  const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
+  const [editingPriceValue, setEditingPriceValue] = useState<string>("");
+  const priceInputRef = useRef<HTMLInputElement | null>(null);
+
+  const startEditPrice = (itemId: string, currentCents: number | null) => {
+    setEditingPriceId(itemId);
+    setEditingPriceValue(currentCents != null ? String(currentCents / 100) : "");
+    setTimeout(() => priceInputRef.current?.select(), 0);
+  };
+
+  const cancelEditPrice = () => {
+    setEditingPriceId(null);
+    setEditingPriceValue("");
+  };
+
+  const commitEditPrice = async (itemId: string) => {
+    const raw = editingPriceValue.trim().replace(/[^\d.,-]/g, "").replace(/,/g, "");
+    setEditingPriceId(null);
+    const cents = raw === "" ? null : Math.round(parseFloat(raw) * 100);
+    if (raw !== "" && (cents == null || Number.isNaN(cents) || cents < 0)) {
+      toast({ title: "Invalid price", description: "Enter a number, or leave blank to clear.", variant: "destructive" });
+      return;
+    }
+    const patch = {
+      unit_price_cents: cents,
+      unit_price_currency: cents == null ? null : currency,
+    };
+    setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, ...patch } as any : i)));
+    const { error } = await supabase.from("trade_quote_items").update(patch as any).eq("id", itemId);
+    if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
+  };
+
   const startEditNotes = (itemId: string, currentNotes: string | null) => {
     setEditingNotesId(itemId);
     setEditingNotesValue(currentNotes || "");
@@ -3220,9 +3253,34 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           )}
                         </div>
                         <div className="text-right">
-                          <span className="font-body text-xs text-foreground font-medium">
-                            {currencySymbol(currency)} {formatPriceRaw(lineTotal, currency) || "TBD"}
-                          </span>
+                          {canEditLines && editingPriceId === item.id ? (
+                            <input
+                              ref={priceInputRef}
+                              type="text"
+                              inputMode="decimal"
+                              value={editingPriceValue}
+                              onChange={(e) => setEditingPriceValue(e.target.value)}
+                              onBlur={() => commitEditPrice(item.id)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") { e.preventDefault(); commitEditPrice(item.id); }
+                                else if (e.key === "Escape") { cancelEditPrice(); }
+                              }}
+                              placeholder={`${currencySymbol(currency)} 0`}
+                              className="w-24 font-body text-xs text-foreground tabular-nums text-right bg-background border border-border rounded px-2 py-0.5 focus:border-foreground/50 outline-none"
+                              autoFocus
+                            />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => canEditLines && startEditPrice(item.id, item.unit_price_cents ?? unitPrice)}
+                              title={canEditLines ? "Tap to enter unit price" : undefined}
+                              className={`font-body text-xs text-foreground font-medium ${canEditLines ? "underline decoration-dotted decoration-border underline-offset-4" : ""}`}
+                            >
+                              {lineTotal
+                                ? `${currencySymbol(currency)} ${formatPriceRaw(lineTotal, currency)}`
+                                : canEditLines ? "Set price" : "TBD"}
+                            </button>
+                          )}
                           {marginCapped && (
                             <span
                               title={MARGIN_CAP_TOOLTIP}
@@ -3273,15 +3331,39 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         {(() => {
                           const srcCur = itemPriceCurrency(item, currency);
                           const showOrigin = rawUnitPrice != null && srcCur !== currency;
+                          if (canEditLines && editingPriceId === item.id) {
+                            return (
+                              <input
+                                ref={priceInputRef}
+                                type="text"
+                                inputMode="decimal"
+                                value={editingPriceValue}
+                                onChange={(e) => setEditingPriceValue(e.target.value)}
+                                onBlur={() => commitEditPrice(item.id)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") { e.preventDefault(); commitEditPrice(item.id); }
+                                  else if (e.key === "Escape") { cancelEditPrice(); }
+                                }}
+                                placeholder={`${currencySymbol(currency)} 0`}
+                                className="w-full font-body text-sm text-foreground tabular-nums text-right bg-background border border-border rounded px-2 py-0.5 focus:border-foreground/50 outline-none"
+                                autoFocus
+                              />
+                            );
+                          }
                           return (
                             <>
-                              <span className="font-body text-sm text-foreground tabular-nums">
+                              <button
+                                type="button"
+                                onClick={() => canEditLines && startEditPrice(item.id, item.unit_price_cents ?? (showOrigin ? null : unitPrice))}
+                                title={canEditLines ? "Click to enter unit price" : undefined}
+                                className={`font-body text-sm text-foreground tabular-nums ${canEditLines ? "cursor-text hover:text-foreground/70 underline decoration-dotted decoration-border underline-offset-4" : ""}`}
+                              >
                                 {showOrigin
                                   ? `${srcCur} ${formatPriceRaw(rawUnitPrice, srcCur)}`
                                   : unitPrice
                                     ? `${currencySymbol(currency)} ${formatPriceRaw(unitPrice, currency)}`
-                                    : "TBD"}
-                              </span>
+                                    : canEditLines ? "Set price" : "TBD"}
+                              </button>
                               {showOrigin && unitPrice ? (
                                 <span className="block font-body text-[10px] text-muted-foreground tabular-nums">
                                   ≈ {currencySymbol(currency)} {formatPriceRaw(unitPrice, currency)}
@@ -3291,6 +3373,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           );
                         })()}
                       </div>
+
 
                       <div className="hidden md:block text-right">
                         <span className="font-body text-sm text-foreground font-medium tabular-nums">
