@@ -73,6 +73,7 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.60.0-noble
     timeout-minutes: 20
     # Visual regression for landing CTAs / hero / designers section across mobile + desktop.
+    # INFORMATIONAL ONLY: all steps use continue-on-error so drift is reported, never merge-blocking.
     # Baselines live under e2e/visual/__screenshots__/. Refresh locally with `bun run test:visual:update`.
     steps:
       - uses: actions/checkout@v5
