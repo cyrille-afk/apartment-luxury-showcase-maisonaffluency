@@ -39,7 +39,9 @@ function parseLeadWeeks(text: string | null): number | null {
   return single ? parseInt(single[0], 10) : null;
 }
 
-function expectedReady(tl: any, leadWeeks: number | null, quoteCreatedAt: string | null): Date | null {
+function expectedReady(tl: any, leadWeeks: number | null, quoteCreatedAt: string | null, override?: string | null): Date | null {
+  // A schedule dragged on the Gantt timeline wins over every derived estimate.
+  if (override) return new Date(override);
   if (tl?.actual_delivery_at) return new Date(tl.actual_delivery_at);
   if (tl?.estimated_delivery_at) return new Date(tl.estimated_delivery_at);
   const anchor = tl?.deposit_paid_at || quoteCreatedAt;
@@ -161,7 +163,7 @@ export default function TradeDeliveryTracker() {
       const [{ data: qItems }, { data: timelines }] = await Promise.all([
         supabase
           .from("trade_quote_items")
-          .select("id, product_id, quantity, quote_id, po_number, cost_code, lead_time_weeks_override, required_by_date, unit_price_cents, po_status, po_approved_by_name, po_approved_at")
+          .select("id, product_id, quantity, quote_id, po_number, cost_code, lead_time_weeks_override, required_by_date, expected_ready_override, unit_price_cents, po_status, po_approved_by_name, po_approved_at")
           .in("quote_id", quoteIds),
         supabase
           .from("order_timeline" as any)
@@ -193,7 +195,7 @@ export default function TradeDeliveryTracker() {
         const q: any = quoteMap[it.quote_id];
         const tl = timelineMap[it.quote_id];
         const lead = it.lead_time_weeks_override ?? parseLeadWeeks(p?.lead_time || null);
-        const expected = expectedReady(tl, lead, q?.created_at || null);
+        const expected = expectedReady(tl, lead, q?.created_at || null, it.expected_ready_override);
         const requiredBy = it.required_by_date ? new Date(it.required_by_date) : null;
         const slack = expected && requiredBy
           ? Math.round((requiredBy.getTime() - expected.getTime()) / 86400000)
