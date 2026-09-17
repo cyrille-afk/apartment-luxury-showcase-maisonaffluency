@@ -612,6 +612,7 @@ export default function ProductCommerceCta({
           onClose={() => setIntakeFor(null)}
           onComplete={completeIntake}
           mode="order"
+          finalLabel={intakeFor === "bespoke" ? "Continue" : undefined}
           productId={productId}
           productTitle={productTitle}
           designerName={designerName}
