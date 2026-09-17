@@ -2243,9 +2243,9 @@ const PublicProductPageContent: React.FC = () => {
             designer={designerDisplay}
             price={isTradeVerifiedView && mockNetDisplay ? mockNetDisplay : displayRrpLabel}
             currencyCode={isTradeVerifiedView && mockNetDisplay ? "Net Trade" : undefined}
-            primaryLabel={isTradeVerifiedView ? "Add to Co-Pilot Workspace & Order" : "Place Order"}
+            primaryLabel={isTradeVerifiedView ? "Add to Co-Pilot Workspace & Order" : !displayRrpLabel ? "Request a Bespoke Quote" : "Place Order"}
             secondaryLabel={null}
-            onPlaceOrder={isTradeVerifiedView ? handleDirectCheckout : openSelectionDrawer}
+            onPlaceOrder={isTradeVerifiedView ? handleDirectCheckout : !displayRrpLabel ? () => window.dispatchEvent(new Event("ma:open-quote")) : openSelectionDrawer}
             placingOrder={checkoutLoading}
           />
         )}
