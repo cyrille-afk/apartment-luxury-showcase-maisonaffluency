@@ -129,7 +129,7 @@ async function sendQuoteWhatsAppAlert(
     `• *Client Email:* ${vars["4"]}`,
     `• *Client Phone:* ${vars["5"]}`,
     "",
-    "Review: https://www.maisonaffluency.com/trade/admin/inquiries",
+    "Open the internal Admin Dashboard panel at /trade/admin/trade-review to review and reply.",
   ].join("\n");
 
   // Ask Twilio to POST delivery updates back to us so the admin page has a
