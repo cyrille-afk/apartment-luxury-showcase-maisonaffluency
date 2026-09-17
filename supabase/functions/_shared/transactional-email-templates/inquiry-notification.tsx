@@ -43,6 +43,7 @@ const InquiryNotificationEmail = ({ name, company, email, phone, message, produc
             {productName ? <Row label="Product" value={productName} /> : null}
             {designerName ? <Row label="Designer" value={designerName} /> : null}
             {selectedFinish ? <Row label="Selected finish" value={selectedFinish} /> : null}
+            {attachmentUrl ? <Row label="Attachment" value={attachmentUrl} /> : null}
           </tbody>
         </table>
 
