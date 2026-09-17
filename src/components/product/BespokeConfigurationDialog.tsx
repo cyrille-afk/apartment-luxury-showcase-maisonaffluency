@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import PhoneDialField from "@/components/product/PhoneDialField";
 import { buildBespokePlaceholder } from "@/lib/phonePlaceholder";
 import { detectCountryCode } from "@/hooks/useShippingCountry";
+import { pushBespokeSync } from "@/lib/bespokeSync";
+import { BESPOKE_GUEST_EVENT } from "@/components/product/BespokeSubmissionBanner";
 
 /**
  * BespokeConfigurationDialog — the wide, centred overlay opened by the
@@ -27,6 +29,8 @@ export interface BespokeConfigurationDialogProps {
   designerName?: string | null;
   finishLabel?: string | null;
   imageUrl?: string | null;
+  /** Verified trade member — routes the submission into the Felix workspace. */
+  isTradeAuthorized?: boolean;
 }
 
 function formatBytes(bytes: number): string {
@@ -45,6 +49,7 @@ export default function BespokeConfigurationDialog({
   designerName = null,
   finishLabel = null,
   imageUrl = null,
+  isTradeAuthorized = false,
 }: BespokeConfigurationDialogProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
