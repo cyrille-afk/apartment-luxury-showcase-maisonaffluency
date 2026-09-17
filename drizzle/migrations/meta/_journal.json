@@ -127,6 +127,13 @@
       "when": 1789682974204,
       "tag": "0017_trade_tier_config_realtime",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1789683624491,
+      "tag": "0018_quote_item_crating",
+      "breakpoints": true
     }
   ]
 }

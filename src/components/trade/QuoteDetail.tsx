@@ -33,6 +33,7 @@ import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurre
 import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp, fetchFx, FX_BUFFER } from "@/hooks/useGbpLandedCost";
 import { usePerLineShipping } from "@/hooks/usePerLineShipping";
 import { toIsoCountry, computePerLineShipments } from "@/lib/perLineShipping";
+import { parseCrateSpecs, cratesForSize, crateTotals } from "@/lib/crateSpecs";
 import { labelForMode } from "@/lib/shippingEstimator";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
 import { findQuoteFinishSwatches, type QuoteFinishSwatch, type QuoteFinishVariant } from "@/lib/quoteFinishSwatches";
@@ -67,6 +68,9 @@ interface QuoteItemWithProduct {
   ship_mode: string | null;
   ship_cbm: number | null;
   ship_weight_kg: number | null;
+  /** Crating / packing charge carried over from the product's crate specs. */
+  crating_cents?: number | null;
+  crating_currency?: string | null;
   trade_products: {
     product_name: string;
     brand_name: string;
@@ -1075,6 +1079,28 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           if (pendingVariants?.currency) insertPayload.unit_price_currency = pendingVariants.currency;
         }
       }
+      // Crate specs → packed volume / weight / crating charge for this line.
+      // Size-specific crates win over generic ones; nothing is overwritten later
+      // so the admin can still edit the figures by hand on the line.
+      try {
+        const { data: crateRow } = await (supabase as any)
+          .from("trade_products")
+          .select("crate_specs")
+          .eq("id", productId)
+          .maybeSingle();
+        const crates = cratesForSize(parseCrateSpecs(crateRow?.crate_specs), variantRow?.label ?? null);
+        if (crates.length) {
+          const t = crateTotals(crates);
+          if (t.cbm > 0) insertPayload.ship_cbm = t.cbm;
+          if (t.weightKg > 0) insertPayload.ship_weight_kg = t.weightKg;
+          if (t.priceCents > 0) {
+            insertPayload.crating_cents = t.priceCents;
+            insertPayload.crating_currency = t.currency || "EUR";
+          }
+        }
+      } catch {
+        // Crate data is optional — never block adding the product.
+      }
       const { error } = await supabase.from("trade_quote_items").insert(insertPayload);
       if (error) throw error;
       const picked = productOptions.find((p) => p.id === productId);
@@ -1601,6 +1627,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     : 0;
   const goodsAfterDiscountCents = subtotalCents - tradeDiscountCents;
 
+  /**
+   * Crating / packing charges carried on each line (from the product's crate
+   * specs). Charged per unit, converted into the quote currency, never
+   * discounted — it is a pass-through workshop cost.
+   */
+  const cratingTotalCents = items.reduce((sum, item) => {
+    const raw = (item as any).crating_cents as number | null | undefined;
+    if (!raw || raw <= 0) return sum;
+    const ccy = ((item as any).crating_currency as string | null) || "EUR";
+    const converted = convertCents(raw, ccy, currency) ?? 0;
+    return sum + converted * Math.max(1, item.quantity);
+  }, 0);
+
   const buildPdfArgs = async () => {
     const lines: QuotePdfLine[] = items.map((item) => {
       const product = item.trade_products;
@@ -1823,10 +1862,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           .eq("quote_id", quoteId)
           .order("sort_order", { ascending: true })
           .order("created_at", { ascending: true });
-        return ((data as any[]) || []).map((e) => ({
+        const rows = ((data as any[]) || []).map((e) => ({
           label: e.label as string,
           amountCents: Number(e.amount_cents) || 0,
         }));
+        // Crating charges live on the lines, but read as one charge on the PDF.
+        if (cratingTotalCents > 0) {
+          rows.unshift({ label: "Crating & packing", amountCents: cratingTotalCents });
+        }
+        return rows;
       })(),
       notes: notes || null,
       // Compliance snapshot: FX pairs actually applied to convert source-currency
@@ -3912,11 +3956,17 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
                         ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
                         : 0;
-                      const total = goodsTotal + shippingQuoteCents + extrasTotalCents;
+                      const total = goodsTotal + cratingTotalCents + shippingQuoteCents + extrasTotalCents;
                       const depositCents = Math.round(total * 0.6);
                       const balanceCents = total - depositCents;
                       return (
                         <>
+                          {cratingTotalCents > 0 && (
+                            <div className="flex justify-between font-body text-xs text-muted-foreground">
+                              <span>Crating &amp; packing</span>
+                              <span>{formatPriceRaw(cratingTotalCents, currency)}</span>
+                            </div>
+                          )}
                           {shippingQuoteCents > 0 && (
                             <div className="flex justify-between font-body text-xs text-muted-foreground">
                               <span>Shipping (estimate, {perLine.shipments.length} shipment{perLine.shipments.length > 1 ? "s" : ""})</span>
@@ -4298,7 +4348,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
             ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
             : 0;
-          const orderTotal = withGst + shippingQuoteCents;
+          const orderTotal = withGst + cratingTotalCents + shippingQuoteCents;
           const depositCents = Math.round(orderTotal * 0.6);
           const fixedFees: Record<string, number> = { SGD: 50, USD: 30, EUR: 25, GBP: 20 };
           const fixedFee = fixedFees[currency] ?? 50;
@@ -4358,6 +4408,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       {gstEnabled && (
                         <Row label={`GST (${gstRate}%)`} value={`+ ${fmt(gstCents)} ${currency}`} muted />
                       )}
+                      {cratingTotalCents > 0 && (
+                        <Row label="Crating & packing" value={`+ ${fmt(cratingTotalCents)} ${currency}`} muted />
+                      )}
                       {shippingQuoteCents > 0 && (
                         <Row label={`Shipping estimate (${perLine.shipments.length} shipment${perLine.shipments.length > 1 ? "s" : ""})`} value={`+ ${fmt(shippingQuoteCents)} ${currency}`} muted />
                       )}
@@ -4391,7 +4444,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
             ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
             : 0;
-          const orderTotal = withGst + shippingQuoteCents;
+          const orderTotal = withGst + cratingTotalCents + shippingQuoteCents;
 
           const isPayingDeposit = quoteStatus === "confirmed";
           const isPayingBalance = quoteStatus === "deposit_paid";
