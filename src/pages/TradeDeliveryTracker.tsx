@@ -483,7 +483,7 @@ export default function TradeDeliveryTracker() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Search items, brands, clients..."
-                    className="h-8 w-[220px] rounded-full border-border bg-background pl-8 pr-3 font-body text-xs placeholder:text-muted-foreground/70"
+                    className="h-8 w-[260px] rounded-full border-border bg-background pl-8 pr-3 font-body text-xs placeholder:text-muted-foreground/70"
                   />
                 </div>
 
