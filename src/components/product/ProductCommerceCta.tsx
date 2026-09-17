@@ -190,8 +190,7 @@ export default function ProductCommerceCta({
   const quantity = productConfig ? productConfig.quantity : localQuantity;
   const setQuantity = productConfig ? productConfig.setQuantity : setLocalQuantity;
   const [miniCartOpen, setMiniCartOpen] = useState(false);
-  const [intakeOpen, setIntakeOpen] = useState(false);
-  const [quoteOpen, setQuoteOpen] = useState(false);
+  const [bespokeOpen, setBespokeOpen] = useState(false);
   const cartItems = useCart();
 
   
