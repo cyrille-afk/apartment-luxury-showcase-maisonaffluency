@@ -45,6 +45,8 @@ interface Props {
    */
   mode?: "order" | "quote";
   productId?: string | null;
+  /** Overrides the last step's action label (e.g. "Continue"). */
+  finalLabel?: string;
 }
 
 const inputCls =
