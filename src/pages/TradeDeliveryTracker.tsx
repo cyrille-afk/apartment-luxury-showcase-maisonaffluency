@@ -344,7 +344,11 @@ export default function TradeDeliveryTracker() {
         byCurrency[l.currency] = (byCurrency[l.currency] || 0) + l.price_cents * l.quantity;
       }
     }
-    return { totalItems: items.length, byCurrency };
+    const lateItems = items.filter((l) => l.slack != null && l.slack < 0);
+    const avgDaysOverdue = lateItems.length
+      ? Math.round(lateItems.reduce((sum, l) => sum + Math.abs(l.slack), 0) / lateItems.length)
+      : 0;
+    return { totalItems: items.length, byCurrency, avgDaysOverdue };
   }, [visibleGroups]);
 
   const activeFilterLabel = filterTabs.find((t) => t.key === statusFilter)?.label || "All Items";
@@ -522,6 +526,12 @@ export default function TradeDeliveryTracker() {
                         )}>{formatMoney(cents, currency)}</p>
                       </div>
                     ))
+                  )}
+                  {statusFilter === "late" && visibleTotals.avgDaysOverdue > 0 && (
+                    <div className="rounded-lg border bg-red-50/80 border-red-200 px-3 py-2 min-w-[90px] transition-colors">
+                      <p className="font-body text-[10px] uppercase tracking-wider text-red-400">Avg. Delay</p>
+                      <p className="font-display text-sm font-semibold text-red-600 mt-0.5">{visibleTotals.avgDaysOverdue} Days</p>
+                    </div>
                   )}
                 </div>
 
