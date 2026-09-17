@@ -3094,6 +3094,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
 
     let assistantSoFar = "";
     let assistantStarted = false;
+    // Set when Guardrail 3 discards a freight-routing reply to a zone answer.
+    let felixLogicDiscarded = false;
     const controller = new AbortController();
     abortRef.current = controller;
 
