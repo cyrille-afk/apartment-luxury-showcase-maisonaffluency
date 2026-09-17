@@ -442,6 +442,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { MatchBadge, parseMatchTail, inlineSignalsIntoMatchLines } from "@/components/trade/concierge/MatchBadge";
 import { buildSeedDirective } from "@/lib/conciergePrefill";
+import { isAttachmentPlaceholderText, buildAttachmentSystemNote } from "@/lib/attachmentIntent";
 import {
   conciergeCopy,
   conciergeStatusCopy,
