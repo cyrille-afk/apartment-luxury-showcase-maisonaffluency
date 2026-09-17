@@ -1167,6 +1167,41 @@ const PublicProductPageContent: React.FC = () => {
     }
   }, [isLegacyArnoldClamChairRoute, navigate, stateFrom, storedFrom]);
   const { data, isLoading } = useProductBySlug(designerSlug, productSlug);
+
+  /**
+   * One product = one indexable URL.
+   *
+   * The resolver deliberately accepts legacy / shortened / parent-house slugs
+   * (e.g. `/designers/alexander-lamont/koi-carps` for `koi-carps-wall-art`),
+   * which made several URLs render identical content and triggered Google's
+   * "Duplicate, Google chose different canonical than user". Whenever the
+   * current path is not the definitive one, replace it so the self-referencing
+   * canonical always matches the URL Google should index.
+   */
+  const definitiveDesignerSlug = data?.designer?.slug || designerSlug;
+  const definitiveProductSlug =
+    data?.product?.slug ||
+    (data?.product?.title
+      ? slugify(data.product.title + (data.product.subtitle ? `-${data.product.subtitle}` : ""))
+      : productSlug);
+
+  useEffect(() => {
+    if (isLegacyArnoldClamChairRoute) return;
+    if (!definitiveDesignerSlug || !definitiveProductSlug) return;
+    const definitivePath = `/designers/${definitiveDesignerSlug}/${definitiveProductSlug}`;
+    const currentPath = location.pathname.replace(/\/+$/, "") || "/";
+    if (currentPath !== definitivePath) {
+      navigate(`${definitivePath}${location.search}`, { replace: true, state: location.state });
+    }
+  }, [
+    definitiveDesignerSlug,
+    definitiveProductSlug,
+    isLegacyArnoldClamChairRoute,
+    location.pathname,
+    location.search,
+    location.state,
+    navigate,
+  ]);
   const { data: publicRrpRow } = usePublicRrp(data?.product?.id);
   const { data: relatedRrpMap = {} } = usePublicRrpMap((data?.relatedPicks || []).map((p: any) => p.id));
   // Display currency follows the header flag globally (listing ↔ detail parity).
