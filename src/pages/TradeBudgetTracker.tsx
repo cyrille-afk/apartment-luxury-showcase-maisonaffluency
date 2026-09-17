@@ -101,6 +101,7 @@ export default function TradeBudgetTracker() {
   const [isCompact, setIsCompact] = useState(() => {
     try { return localStorage.getItem(COMPACT_KEY) === "1"; } catch { return false; }
   });
+  const [globalMarkupPct, setGlobalMarkupPct] = useState(0);
 
   useEffect(() => {
     try { localStorage.setItem(COMPACT_KEY, isCompact ? "1" : "0"); } catch { /* ignore */ }
