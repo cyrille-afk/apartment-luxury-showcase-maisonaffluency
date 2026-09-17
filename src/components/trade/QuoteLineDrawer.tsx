@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, ClipboardList, FileText, Package, Paperclip, ReceiptText } from "lucide-react";
+import { BadgeCheck, CalendarDays, ClipboardList, FileText, Package, Paperclip, ReceiptText } from "lucide-react";
 import { autoPoNumber } from "@/lib/procurementExcel";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
