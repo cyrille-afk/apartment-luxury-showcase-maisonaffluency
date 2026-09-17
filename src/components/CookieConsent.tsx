@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { Shield } from "lucide-react";
 
 /**
  * Minimal GDPR cookie consent banner.
@@ -57,6 +57,8 @@ const shouldDeferOnDesignersMobileHero = (): boolean => {
 
 const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
+  const [fading, setFading] = useState(false);
+  const [consented, setConsented] = useState(false);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("mobile_preview") === "1") return;
@@ -74,7 +76,10 @@ const CookieConsent = () => {
     if (isStandaloneHomeLaunch) return;
 
     const consent = readConsent();
-    if (consent) return;
+    if (consent) {
+      setConsented(true);
+      return;
+    }
 
 
     // Never mount during the LCP measurement window. Lighthouse keeps
@@ -167,60 +172,80 @@ const CookieConsent = () => {
     return () => window.removeEventListener("mobile-preview-open-change", sync);
   }, []);
 
+  const dismissWithFade = (after?: () => void) => {
+    setFading(true);
+    window.setTimeout(() => {
+      after?.();
+      setVisible(false);
+      setFading(false);
+      setConsented(true);
+    }, 300);
+  };
+
   const accept = () => {
-    writeConsent("accepted");
-    setVisible(false);
-    // Load GA4 immediately
-    if (typeof (window as any).__loadGA4 === "function") {
-      (window as any).__loadGA4();
-    }
+    dismissWithFade(() => {
+      writeConsent("accepted");
+      // Load GA4 immediately
+      if (typeof (window as any).__loadGA4 === "function") {
+        (window as any).__loadGA4();
+      }
+    });
   };
 
   const decline = () => {
-    writeConsent("declined");
-    try { localStorage.setItem("ga_optout", "1"); } catch { /* ignore */ }
-    setVisible(false);
+    dismissWithFade(() => {
+      writeConsent("declined");
+      try { localStorage.setItem("ga_optout", "1"); } catch { /* ignore */ }
+    });
+  };
+
+  const reopen = () => {
+    setConsented(false);
+    setFading(false);
+    setVisible(true);
   };
 
 
   return (
     <>
       {visible && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 p-0 pointer-events-none animate-slide-up-in">
-          <div className="pointer-events-auto max-w-2xl mx-auto m-4 md:m-6 bg-card/95 backdrop-blur-md border border-border/50 rounded-lg shadow-2xl px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-
-            {/* Close/decline via X */}
-            <button
-              onClick={decline}
-              className="absolute top-3 right-3 sm:hidden text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Decline cookies"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <p className="text-sm text-muted-foreground leading-relaxed flex-1 font-serif pr-6 sm:pr-0">
-              We use cookies and local storage to remember your shipping country
-              and display currency, and to analyse site performance. By accepting,
-              you consent to preference and analytics cookies. Declining keeps
-              only what is strictly necessary for the site to function.
+        <div
+          className={`fixed bottom-6 left-6 z-50 max-w-[340px] transition-opacity duration-300 ease-in-out ${
+            fading ? "opacity-0" : "opacity-100"
+          }`}
+        >
+          <div className="bg-card/70 backdrop-blur-md border border-border/40 rounded-full shadow-lg px-5 py-3 flex items-center gap-4">
+            <p className="text-xs tracking-[0.12em] lowercase text-muted-foreground leading-snug flex-1">
+              we use cookies to tune your studio ecosystem.
             </p>
 
             <div className="flex items-center gap-3 shrink-0">
               <button
                 onClick={decline}
-                className="hidden sm:inline-flex text-xs uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors px-4 py-2"
+                className="text-xs uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors"
               >
-                Decline
+                Preferences
               </button>
               <button
                 onClick={accept}
-                className="text-xs uppercase tracking-[0.15em] bg-foreground text-background px-5 py-2.5 rounded hover:opacity-90 transition-opacity font-medium"
+                className="text-xs uppercase tracking-[0.15em] text-foreground hover:text-muted-foreground transition-colors font-medium"
               >
                 Accept
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Persistent privacy trigger — reopen settings anytime */}
+      {!visible && consented && (
+        <button
+          onClick={reopen}
+          aria-label="Cookie preferences"
+          className="fixed bottom-6 left-6 z-50 p-2 text-muted-foreground/50 hover:text-foreground transition-colors duration-300"
+        >
+          <Shield className="w-3 h-3" />
+        </button>
       )}
     </>
   );
