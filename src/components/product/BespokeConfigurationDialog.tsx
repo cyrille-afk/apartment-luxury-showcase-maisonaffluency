@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, Loader2, Check, UploadCloud, FileText } from "lucide-react";
 import Turnstile from "@/components/Turnstile";
@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 import { cn } from "@/lib/utils";
 import PhoneDialField from "@/components/product/PhoneDialField";
+import { buildBespokePlaceholder } from "@/lib/phonePlaceholder";
+import { detectCountryCode } from "@/hooks/useShippingCountry";
 
 /**
  * BespokeConfigurationDialog — the wide, centred overlay opened by the
@@ -54,6 +56,13 @@ export default function BespokeConfigurationDialog({
   const [sent, setSent] = useState(false);
   const [attachment, setAttachment] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+
+  // Localized placeholder: active finish name woven into the sentence,
+  // freight note matched to the session's geolocated region.
+  const specsPlaceholder = useMemo(
+    () => buildBespokePlaceholder(finishLabel, detectCountryCode()),
+    [finishLabel]
+  );
 
   useEffect(() => {
     if (!isOpen) return;
@@ -279,7 +288,7 @@ export default function BespokeConfigurationDialog({
                   rows={6}
                   value={specs}
                   onChange={(e) => setSpecs(e.target.value)}
-                  placeholder="specify custom leather textures, alternative timber finishes, or bespoke structural scale requirements for your project narrative..."
+                  placeholder={specsPlaceholder}
                   className="mt-2 w-full resize-none border border-border/60 bg-background px-4 py-3 font-body text-sm leading-relaxed text-foreground placeholder:font-body placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-foreground/40"
                 />
               </label>

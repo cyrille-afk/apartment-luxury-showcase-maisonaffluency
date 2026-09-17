@@ -140,3 +140,37 @@ export const getDialCodeByIso = (iso?: string | null): string | null => {
   const country = ISO_TO_COUNTRY[iso.trim().toUpperCase()];
   return country ? DIAL_CODES[country] ?? null : null;
 };
+
+/** Asia-Pacific ISO codes routed through the Singapore white-glove freight note. */
+const APAC_CODES = new Set([
+  "SG", "HK", "JP", "KR", "CN", "TW", "TH", "MY", "ID", "PH", "VN", "IN", "AU", "NZ",
+]);
+/** North American ISO codes routed through the New York distribution note. */
+const NA_CODES = new Set(["US", "CA", "MX"]);
+
+/**
+ * Regional freight note for the bespoke specifications placeholder, keyed off
+ * the geolocated session country. Defaults to the European craft network copy.
+ */
+export const getBespokeRegionNote = (iso?: string | null): string => {
+  const code = iso?.trim().toUpperCase() ?? "";
+  if (APAC_CODES.has(code)) {
+    return "Note: Bespoke modifications will be evaluated by our Paris atelier for direct white-glove climate-controlled freight allocation to Singapore.";
+  }
+  if (NA_CODES.has(code)) {
+    return "Note: Bespoke modifications will be evaluated by our Paris atelier for consolidated air freight schedules to our New York distribution point.";
+  }
+  return "Note: Bespoke modifications are custom-routed through our European craft network to optimize regional lead times.";
+};
+
+/**
+ * Composes the localized bespoke textarea placeholder, weaving the active
+ * finish name into the sentence when one is selected.
+ */
+export const buildBespokePlaceholder = (finishLabel?: string | null, iso?: string | null): string => {
+  const finish = finishLabel?.trim();
+  const finishClause = finish
+    ? `alternative alterations to the selected ${finish} finish`
+    : "alternative alterations to the selected finish";
+  return `Specify custom leather textures, ${finishClause}, or custom dimensions. ${getBespokeRegionNote(iso)}`;
+};
