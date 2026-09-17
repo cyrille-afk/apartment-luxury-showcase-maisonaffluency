@@ -1627,6 +1627,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     : 0;
   const goodsAfterDiscountCents = subtotalCents - tradeDiscountCents;
 
+  /**
+   * Crating / packing charges carried on each line (from the product's crate
+   * specs). Charged per unit, converted into the quote currency, never
+   * discounted — it is a pass-through workshop cost.
+   */
+  const cratingTotalCents = items.reduce((sum, item) => {
+    const raw = (item as any).crating_cents as number | null | undefined;
+    if (!raw || raw <= 0) return sum;
+    const ccy = ((item as any).crating_currency as string | null) || "EUR";
+    const converted = convertCents(raw, ccy, currency) ?? 0;
+    return sum + converted * Math.max(1, item.quantity);
+  }, 0);
+
   const buildPdfArgs = async () => {
     const lines: QuotePdfLine[] = items.map((item) => {
       const product = item.trade_products;
