@@ -194,6 +194,8 @@ export default function TradeDeliveryTracker() {
           dimensions: p?.dimensions || null,
           materials: p?.materials || null,
           sku: p?.sku || null,
+          price_cents: it.unit_price_cents ?? null,
+          currency: q?.currency || "EUR",
         };
       });
     },
