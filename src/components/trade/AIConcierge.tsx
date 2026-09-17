@@ -4388,11 +4388,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             )}
             {!minimized && (
               <div
-                className="w-full overflow-x-auto pl-6 pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                className="w-full overflow-hidden pl-6 pr-1"
                 role="list"
                 aria-label="Felix workflow progress"
               >
-                <div className="flex min-w-max items-center" title={`Current workflow stage: ${pipelineSteps[pipelineActiveStep - 1]}`}>
+                <div className="flex w-full items-center" title={`Current workflow stage: ${pipelineSteps[pipelineActiveStep - 1]}`}>
                   {pipelineSteps.map((label, index) => {
                     const step = index + 1;
                     const active = step === pipelineActiveStep;
@@ -4402,7 +4402,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                         {index > 0 && (
                           <span
                             className={cn(
-                              "mx-2 h-px w-4 shrink-0 transition-colors duration-500 sm:mx-3 sm:w-6",
+                              "mx-1 h-px min-w-1 flex-1 transition-colors duration-500 sm:mx-1.5",
                               step <= pipelineActiveStep
                                 ? (modalMode ? "bg-cream/50" : "bg-accent")
                                 : (modalMode ? "bg-cream/20" : "bg-border"),
@@ -4414,7 +4414,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                           role="listitem"
                           aria-current={active ? "step" : undefined}
                           className={cn(
-                            "relative inline-flex h-7 shrink-0 items-center gap-1.5 whitespace-nowrap font-body text-[9px] uppercase tracking-[0.16em] transition-colors duration-500 sm:text-[10px]",
+                            "relative inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap font-body text-[8px] uppercase tracking-[0.1em] transition-colors duration-500 sm:text-[9px]",
                             active
                               ? (modalMode ? "text-cream" : "text-foreground")
                               : complete
