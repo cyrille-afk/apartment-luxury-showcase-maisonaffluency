@@ -65,6 +65,45 @@ interface FFEItem {
 
 const QUOTE_REF = (id: string) => `QU-${id.slice(0, 6).toUpperCase()}`;
 
+type FFEColumnKey =
+  | "image" | "po" | "cost_code" | "item" | "brand" | "project" | "client" | "studio"
+  | "qty" | "unit_trade" | "total" | "lead" | "stage" | "expected" | "required" | "slack" | "quote";
+
+const FFE_COLUMNS: { key: FFEColumnKey; label: string; locked?: boolean; width: string }[] = [
+  { key: "image", label: "Image", locked: true, width: "w-[4%]" },
+  { key: "po", label: "PO #", width: "w-[6%]" },
+  { key: "cost_code", label: "Cost Code", width: "w-[5%]" },
+  { key: "item", label: "Item", locked: true, width: "w-[11%]" },
+  { key: "brand", label: "Brand", width: "w-[7%]" },
+  { key: "project", label: "Project", width: "w-[7%]" },
+  { key: "client", label: "Client", width: "w-[6%]" },
+  { key: "studio", label: "Studio", width: "w-[5%]" },
+  { key: "qty", label: "Qty", width: "w-[3%]" },
+  { key: "unit_trade", label: "Unit Trade", width: "w-[6%]" },
+  { key: "total", label: "Total", width: "w-[6%]" },
+  { key: "lead", label: "Lead", width: "w-[4%]" },
+  { key: "stage", label: "Stage", width: "w-[6%]" },
+  { key: "expected", label: "Expected ready", width: "w-[7%]" },
+  { key: "required", label: "Required by", width: "w-[8%]" },
+  { key: "slack", label: "Slack", width: "w-[5%]" },
+  { key: "quote", label: "Quote", locked: true, width: "w-[4%]" },
+];
+
+const FFE_COLS_STORAGE_KEY = "ffe-schedule-hidden-columns-v1";
+
+function loadHiddenColumns(): FFEColumnKey[] {
+  try {
+    const raw = localStorage.getItem(FFE_COLS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    const valid = new Set(FFE_COLUMNS.map((c) => c.key));
+    return parsed.filter((k): k is FFEColumnKey => valid.has(k) && !FFE_COLUMNS.find((c) => c.key === k)?.locked);
+  } catch {
+    return [];
+  }
+}
+
 const STAGE_LABEL: Record<string, string> = {
   not_started: "Not started",
   deposit_pending: "Deposit pending",
