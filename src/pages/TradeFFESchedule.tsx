@@ -174,6 +174,21 @@ export default function TradeFFESchedule() {
   const { projectFilter, clearProjectFilter } = useProjectFilter();
   const [projectName, setProjectName] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<FFEItem | null>(null);
+  const [hiddenColumns, setHiddenColumns] = useState<FFEColumnKey[]>(() => loadHiddenColumns());
+
+  const toggleColumn = (key: FFEColumnKey, visible: boolean) => {
+    setHiddenColumns((prev) => {
+      const next = visible ? prev.filter((k) => k !== key) : [...prev, key];
+      try { localStorage.setItem(FFE_COLS_STORAGE_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+      return next;
+    });
+  };
+
+  const visibleColumns = useMemo(
+    () => FFE_COLUMNS.filter((c) => c.locked || !hiddenColumns.includes(c.key)),
+    [hiddenColumns]
+  );
+  const isColVisible = (key: FFEColumnKey) => visibleColumns.some((c) => c.key === key);
 
   const [filterProjectId, setFilterProjectId] = useState<string>("");
   const [filterStudioId, setFilterStudioId] = useState<string>("");
