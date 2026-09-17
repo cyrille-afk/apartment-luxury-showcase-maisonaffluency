@@ -119,8 +119,23 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
                 style={{ animationDelay: `${(coreItems.length + 2) * 50}ms`, animationFillMode: "forwards" }}
               >
                 <span className="flex items-center gap-3">
-                  <Inbox className="h-4 w-4 shrink-0" />
-                  Quote Requests
+                  <span className="relative">
+                    <Inbox className="h-4 w-4 shrink-0" />
+                    {pendingInquiryCount > 0 && (
+                      <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-accent animate-pulse ring-2 ring-background" />
+                    )}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    Quote Requests
+                    {pendingInquiryCount > 0 && (
+                      <span
+                        aria-label={`${pendingInquiryCount} pending quote request${pendingInquiryCount > 1 ? "s" : ""}`}
+                        className="inline-flex h-5 min-w-[1.25rem] animate-pulse items-center justify-center rounded-full bg-accent px-1.5 font-mono text-[10px] leading-none text-white"
+                      >
+                        {pendingInquiryCount}
+                      </span>
+                    )}
+                  </span>
                 </span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
               </button>
