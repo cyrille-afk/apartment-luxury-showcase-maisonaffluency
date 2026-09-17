@@ -310,6 +310,17 @@ export default function TradeDeliveryTracker() {
     [filteredGroups],
   );
 
+  const totals = useMemo(() => {
+    const items = filteredGroups.flatMap((g) => g.lines);
+    const byCurrency: Record<string, number> = {};
+    for (const l of items) {
+      if (l.price_cents != null && l.quantity > 0) {
+        byCurrency[l.currency] = (byCurrency[l.currency] || 0) + l.price_cents * l.quantity;
+      }
+    }
+    return { totalItems: items.length, byCurrency };
+  }, [filteredGroups]);
+
   const activeFilterLabel = filterTabs.find((t) => t.key === statusFilter)?.label || "All Items";
 
   function handleExportCsv() {
@@ -348,6 +359,11 @@ export default function TradeDeliveryTracker() {
       .join("");
     const generatedOn = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
     const logoUrl = `${window.location.origin}/logo.png`;
+    const totalValueLabel = Object.keys(totals.byCurrency).length > 1 ? "Total Value" : "Total Value";
+    const summaryHtml = `<div class="summary-row"><span class="summary-label">Total Items</span><span class="summary-value">${totals.totalItems}</span></div>` +
+      Object.entries(totals.byCurrency)
+        .map(([currency, cents]) => `<div class="summary-row"><span class="summary-label">${escHtml(totalValueLabel)}</span><span class="summary-value">${escHtml(formatMoney(cents, currency))}</span></div>`)
+        .join("");
     const html = `<!doctype html><html><head><meta charset="utf-8"><title>Delivery Tracker</title>
       <style>
         @page { size: A4 landscape; margin: 14mm; }
@@ -355,7 +371,12 @@ export default function TradeDeliveryTracker() {
         header.report-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding-bottom: 12px; margin-bottom: 18px; border-bottom: 1px solid #d4d4d4; }
         .brand img { height: 40px; display: block; }
         .brand .brand-name { font-size: 15px; letter-spacing: .28em; text-transform: uppercase; }
-        .generated { font-family: Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #6b7280; text-align: right; white-space: nowrap; }
+        .generated { font-family: Helvetica, Arial, sans-serif; text-align: right; }
+        .generated .date-stamp { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #6b7280; }
+        .generated .summary { margin-top: 8px; color: #6b7280; font-size: 10px; }
+        .generated .summary-row { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 2px; }
+        .generated .summary-label { color: #9ca3af; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; }
+        .generated .summary-value { color: #374151; font-weight: 600; }
         h1 { font-size: 18px; margin: 0 0 4px; }
         p.meta { font-size: 11px; color: #6b7280; margin: 0 0 16px; letter-spacing: .06em; text-transform: uppercase; }
         table { width: 100%; border-collapse: collapse; font-family: Helvetica, Arial, sans-serif; font-size: 10px; }
@@ -369,7 +390,10 @@ export default function TradeDeliveryTracker() {
           <img src="${logoUrl}" alt="Maison Affluency" onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
           <span class="brand-name" style="display:none">Maison Affluency</span>
         </div>
-        <div class="generated">Report Generated: ${escHtml(generatedOn)}</div>
+        <div class="generated">
+          <div class="date-stamp">Report Generated: ${escHtml(generatedOn)}</div>
+          <div class="summary">${summaryHtml || ""}</div>
+        </div>
       </header>
       <h1>Delivery Tracker</h1>
       <p class="meta">${escHtml(activeFilterLabel)} · ${exportRows.length} line${exportRows.length === 1 ? "" : "s"}</p>
