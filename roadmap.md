@@ -96,3 +96,7 @@
 - [x] Optimize the main FF&E Schedule for wide desktops with fluid columns, clipped-cell tooltips, table-only overflow, and sticky image/quote edges
 - [x] Refine the product lightbox action hierarchy and replace full-page Creation essays with stacked dynamic Curator Notes
 - [x] FF&E Schedule column visibility toggle: Columns dropdown with per-column checkboxes, locked Image/Item/Quote, instant show/hide, localStorage persistence (ffe-schedule-hidden-columns-v1)
+
+## FF&E view presets (done)
+- TradeFFESchedule.tsx: View Presets dropdown next to Columns — Standard/Financial/Logistics defaults, per-custom-preset delete, "+ Save Current Layout as Preset" name input, presets persisted in localStorage (ffe-schedule-view-presets-v1), applying a preset writes the same hidden-columns key so reloads keep the layout. Verified live: preset switching, save, reload persistence, no overflow.
+- GitHub sync needed.
