@@ -603,6 +603,31 @@ export default function ProductCommerceCta({
           imageUrl={imageUrl}
         />
       )}
+
+      {/* 3-step intent capture — mobile sheet / centred desktop panel. Runs
+          ahead of both the order drawer and the bespoke dialog. */}
+      {!tradeApproved && (
+        <OrderIntakeSheet
+          isOpen={intakeFor !== null}
+          onClose={() => setIntakeFor(null)}
+          onComplete={completeIntake}
+          mode="order"
+          productId={productId}
+          productTitle={productTitle}
+          designerName={designerName}
+          priceLabel={retailLabel || rrpLabel || "Price upon Request"}
+          finishLabel={
+            orderFinishLabel ||
+            (selectedFinishes.length ? selectedFinishes.join(" / ") : null) ||
+            finishOptions?.[0] ||
+            null
+          }
+          finishOptions={finishOptions}
+          finishVariants={finishVariants}
+          baseImageUrl={imageUrl}
+        />
+      )}
     </>
+
   );
 }
