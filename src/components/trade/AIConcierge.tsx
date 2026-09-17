@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList, MessagesSquare, Plus, Trash2 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { BriefBuilder, loadBriefDraftText, validateBriefDraft } from "@/components/trade/concierge/BriefBuilder";
-import { ART_DECO_DISCOVERY_REPLY, evaluateFelixOnboardingGate, isHighLevelVisionStatement } from "@/lib/felixOnboardingGate";
+import { ART_DECO_DISCOVERY_REPLY, evaluateFelixOnboardingGate, isHighLevelVisionStatement, hasRealBriefValue, type FelixBriefFacts } from "@/lib/felixOnboardingGate";
+import { loadLockedFacts, mergeLockedFacts, persistLockedFacts } from "@/lib/felixLockedFacts";
 import { QuoteSummaryCardContainer } from "@/components/trade/QuoteSummaryCard";
 import { BriefBubble, isBriefContent } from "@/components/trade/concierge/BriefBubble";
 import brandCategoriesRaw from "@/data/brandCategories.json";
@@ -465,14 +466,14 @@ type PendingProposalTool =
   | "propose_ffe_rows"
   | "prepare_visualization_brief";
 type TimelineItem =
-  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; entrance?: "brief-response"; sourceContent?: string; sourceActions?: ConciergeQuickAction[]; designDirectorCtas?: DesignDirectorCtaLabel[]; attachments?: TimelineAttachment[]; appliedConstraints?: AppliedConstraintsEvent; moodboardSignals?: MoodboardSignalsEvent }
+  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; entrance?: "brief-response"; sourceContent?: string; sourceActions?: ConciergeQuickAction[]; designDirectorCtas?: DesignDirectorCtaLabel[]; attachments?: TimelineAttachment[]; appliedConstraints?: AppliedConstraintsEvent; moodboardSignals?: MoodboardSignalsEvent; briefSubmit?: boolean }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; locked?: string[]; newPickIds?: string[]; sourceOrigin?: "source" }
   | { kind: "quote_proposal"; proposal: QuoteProposal; resolved?: "approved" | "discarded" }
   | { kind: "ffe_proposal"; proposal: FfeProposal; resolved?: "approved" | "discarded" }
   | { kind: "viz_brief"; proposal: VisualizationBriefProposal; resolved?: "opened" | "discarded" }
   | { kind: "pending_proposal"; tool: PendingProposalTool; toolCallId: string | null; index: number }
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" }
-  | { kind: "retry"; text: string; reason: string }
+  | { kind: "retry"; text: string; reason: string; stage?: Stage }
   | { kind: "spec_schedule"; zone: string; markdown: string }
   | { kind: "layout_options"; id: string; selected?: number | null; styleInput?: string | null }
   | { kind: "proactive_tearsheet"; data: import("@/components/trade/concierge/ProactiveTearsheetCard").ProactiveTearsheetData; resolved?: "generated" | "boarded" | "dismissed" }
@@ -974,6 +975,27 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   ), [briefDraft, timeline, briefManuallyCompleted]);
   const onboardingGateRef = useRef(onboardingGate);
   useEffect(() => { onboardingGateRef.current = onboardingGate; }, [onboardingGate]);
+  // --- Locked project facts (no memory drift across timeouts / resumes) ---
+  // Once a verified attribute exists ("Prewar Co-op"), it is pinned in local
+  // state + localStorage. Nothing coming back from the stream, a retry, or a
+  // "Resume brief" event can downgrade it to a placeholder or a different
+  // typology.
+  const [lockedFacts, setLockedFacts] = useState<FelixBriefFacts>(() => loadLockedFacts());
+  const lockedFactsRef = useRef(lockedFacts);
+  useEffect(() => { lockedFactsRef.current = lockedFacts; }, [lockedFacts]);
+  useEffect(() => {
+    setLockedFacts((prev) => {
+      const next = mergeLockedFacts(prev, onboardingGate.facts);
+      if (next.projectProfile === prev.projectProfile && next.zone === prev.zone && next.budget === prev.budget) return prev;
+      persistLockedFacts(next);
+      return next;
+    });
+  }, [onboardingGate.facts]);
+  /** Gate facts merged with the locked cache — always the richer of the two. */
+  const verifiedFacts = useMemo(
+    () => mergeLockedFacts(lockedFacts, onboardingGate.facts),
+    [lockedFacts, onboardingGate.facts],
+  );
   useEffect(() => {
     if (onboardingGate.completed) return;
     setTimeline((prev) => {
@@ -1004,7 +1026,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     }
   }, []);
 
-  const pushRetry = useCallback((text: string, reason: string) => {
+  const pushRetry = useCallback((text: string, reason: string, atStage?: Stage) => {
     // Drop any orphaned empty assistant bubble so the retry card stands alone.
     setTimeline((prev) => {
       let copy = prev;
@@ -1015,7 +1037,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       // Never stack two retry cards in a row for the same text.
       const tail = copy[copy.length - 1];
       if (tail?.kind === "retry" && tail.text === text) return copy;
-      return [...copy, { kind: "retry", text, reason }];
+      // Snapshot the stage the failure happened in so a successful retry
+      // re-anchors the state machine exactly where it was (an API timeout in
+      // Discover must never advance the pipeline).
+      return [...copy, { kind: "retry", text, reason, stage: atStage }];
     });
   }, []);
 
@@ -2803,7 +2828,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       kind: a.kind,
       previewUrl: a.previewUrl,
     }));
-    const submittedStructuredBrief = isBriefContent(text);
+    // STRICT SEQUENTIAL EVENT MATCHING — a message only counts as a submitted
+    // Architectural Brief when the user physically pressed Submit inside the
+    // Brief Builder panel. A resume/retry payload that merely quotes the brief
+    // text must never flip the timeline into "brief submitted" state, and must
+    // never be executed server-side as a fresh brief.
+    const submittedStructuredBrief = opts?.builderSubmit === true && isBriefContent(text);
     // Guardrail: a bare "here is the floor plan attached" style notification
     // sent with a document is never structural content — drop it entirely from
     // entity parsing (zones, typologies, cities) and let the document speak.
@@ -2834,6 +2864,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       kind: "msg",
       role: "user",
       content: displayText,
+      ...(submittedStructuredBrief ? { briefSubmit: true } : {}),
       ...(timelineAttachments.length ? { attachments: timelineAttachments } : {}),
     };
     const immediateProfile = droppedAttachmentPlaceholder ? null : quickClientProfile(displayText);
@@ -3180,7 +3211,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         try { controller.abort(); } catch {}
         setStreaming(false);
         clearStallTimer();
-        pushRetry(text, "The concierge stopped responding.");
+        pushRetry(text, "The concierge stopped responding.", stage);
       }, STALL_MS);
     };
     armStall();
@@ -3529,7 +3560,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 : "The browser blocked the request before it reached the concierge.",
               duration: 10000,
             });
-            pushRetry(text, "The browser blocked the request to the concierge (CORS preflight).");
+            pushRetry(text, "The browser blocked the request to the concierge (CORS preflight).", stage);
           } else {
             // Surface a retry card instead of a fire-and-forget toast so the
             // user has a one-click path back to a working turn.
@@ -3538,7 +3569,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               : msg === "STREAM_TRUNCATED"
                 ? "The connection to the concierge dropped after auto-reconnect attempts."
                 : msg || "The concierge hit an error.";
-            pushRetry(text, friendly);
+            pushRetry(text, friendly, stage);
           }
           setStreaming(false);
           setTimeline((prev) => prev.filter((t) => t.kind !== "pending_proposal"));
@@ -3553,7 +3584,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       setTimeline((prev) => prev.filter((t) => t.kind !== "pending_proposal"));
       // If the throw wasn't the user aborting, offer a retry.
       if (!controller.signal.aborted) {
-        pushRetry(text, "The connection to the concierge dropped.");
+        pushRetry(text, "The connection to the concierge dropped.", stage);
       }
     }
     } finally {
@@ -4527,7 +4558,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                       return null;
                     })()}
                     {(item as any).__display && (
-                      item.role === "user" && isBriefContent(item.content) ? (
+                      item.role === "user" && item.briefSubmit === true && isBriefContent(item.content) ? (
                         <div className={cn(expanded ? "max-w-[92%]" : "max-w-[88%]", "w-full flex justify-end")}>
                           <BriefBubble content={item.content} />
                         </div>
@@ -4959,18 +4990,29 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 );
               }
               if (item.kind === "retry") {
+                // Refined recovery line — Felix speaks, no raw system alert.
+                const profileLabel = hasRealBriefValue(verifiedFacts.projectProfile)
+                  ? verifiedFacts.projectProfile
+                  : "";
+                const recoveryLine = profileLabel
+                  ? `I encountered a momentary connection lag while compiling your spatial dimensions. Let's resume exactly where we left off with your ${profileLabel} layout dimensions.`
+                  : "I encountered a momentary connection lag while compiling your spatial dimensions. Let's resume exactly where we left off.";
+                // Re-anchor the state machine to the stage the failure happened in.
+                const restoreStage = () => {
+                  if (item.stage && onboardingGateRef.current.completed) setStageOverride(item.stage);
+                  else setStageOverride("Discover");
+                };
                 return (
                   <div
                     key={i}
                     className={cn(
-                      "self-start rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 font-body text-sm text-foreground",
+                      "self-start flex flex-col gap-2.5",
                       expanded ? "max-w-[92%]" : "max-w-[88%]",
                     )}
-                    role="alert"
+                    role="status"
                   >
-                    <div className="mb-2 leading-relaxed">
-                      <span className="font-medium">{item.reason}</span>{" "}
-                      <span className="text-muted-foreground">You can retry your last message.</span>
+                    <div className="rounded-2xl rounded-bl-md bg-muted/60 px-4 py-3 font-body text-sm leading-relaxed text-foreground">
+                      {recoveryLine}
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       <button
@@ -4978,6 +5020,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                         disabled={streaming}
                         onClick={() => {
                           const retryText = item.text;
+                          restoreStage();
                           // Drop this retry card before re-sending so a second failure
                           // stacks cleanly instead of leaving stale cards behind.
                           setTimeline((prev) => prev.filter((_, idx) => idx !== i));
@@ -4986,7 +5029,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                         className="rounded-full border border-foreground bg-foreground px-4 py-1.5 text-[13px] text-background shadow-sm inline-flex items-center gap-1.5 hover:opacity-90 disabled:opacity-40"
                       >
                         <Sparkles className="h-3 w-3" />
-                        Try again
+                        Continue
                       </button>
                       {(() => {
                         const sess = getConciergeSession();
@@ -4997,6 +5040,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                             type="button"
                             disabled={streaming}
                             onClick={() => {
+                              restoreStage();
                               setTimeline((prev) => prev.filter((_, idx) => idx !== i));
                               const product = sess?.product
                                 ? `\n\nSelected piece: ${sess.product.title}${sess.product.designer_name ? ` by ${sess.product.designer_name}` : ""}.`
@@ -5009,11 +5053,23 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                   ].filter(Boolean).join(" · ")
                                 : "";
                               const finishLine = finishes ? `\nLocked finishes: ${finishes}.` : "";
+                              // LOCKED FACTS come first and are declared
+                              // authoritative so the model cannot substitute a
+                              // different typology on resume.
+                              const lockedLines = [
+                                hasRealBriefValue(verifiedFacts.projectProfile) ? `PROJECT PROFILE: ${verifiedFacts.projectProfile}` : null,
+                                hasRealBriefValue(verifiedFacts.zone) ? `ZONE: ${verifiedFacts.zone}` : null,
+                                hasRealBriefValue(verifiedFacts.budget) ? `BUDGET: ${verifiedFacts.budget}` : null,
+                              ].filter(Boolean).join("\n");
+                              const lockedBlock = lockedLines
+                                ? `LOCKED PROJECT FACTS — these are verified and must be reused verbatim. Never substitute, rename or re-ask them:\n${lockedLines}\n\n`
+                                : "";
                               const resumeText =
-                                `[Resume — continue from where we left off; do NOT re-ask qualifiers I've already answered in the brief below. Acknowledge briefly and take the next concrete step in stage "${stage}".]\n\n` +
+                                `[Resume — continue from where we left off; do NOT re-ask qualifiers I've already answered and do NOT treat the brief below as a new submission. Acknowledge briefly and take the next concrete step in stage "${item.stage ?? stage}".]\n\n` +
+                                lockedBlock +
                                 `Current brief so far:\n${brief}${product}${finishLine}\n\n` +
                                 (item.text ? `My last message was: "${item.text}". Please continue.` : `Please continue building the brief.`);
-                              send(resumeText);
+                              send(resumeText, { displayText: "Resuming where we left off." });
                             }}
                             className="rounded-full border border-accent/50 bg-accent/10 px-4 py-1.5 text-[13px] text-foreground inline-flex items-center gap-1.5 hover:bg-accent/20 disabled:opacity-40"
                             title="Continue from the last saved brief without repeating earlier questions"
