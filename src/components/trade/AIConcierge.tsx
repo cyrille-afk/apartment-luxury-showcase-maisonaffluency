@@ -3548,7 +3548,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         briefSubmitDoneRef.current = null;
       }
     }
-  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry, user, cancelBriefTransition, briefBuilderOpen, briefDraft]);
+  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry, user, cancelBriefTransition, briefBuilderOpen, briefDraft, openBriefBuilder]);
 
   // Keep a ref to the latest `send` so the concierge:stage handler (which
   // registers once on mount) can auto-send prefills against fresh state
