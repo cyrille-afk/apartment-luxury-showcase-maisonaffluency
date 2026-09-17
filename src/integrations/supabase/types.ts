@@ -3380,6 +3380,87 @@ export type Database = {
           },
         ]
       }
+      items: {
+        Row: {
+          balance_due: number
+          brand: string | null
+          category: string | null
+          client_price: number
+          created_at: string
+          created_by: string | null
+          deposit_paid: boolean
+          deposit_required_percent: number
+          expected_ready_date: string | null
+          id: string
+          item_name: string
+          markup_percentage: number
+          markup_tier: string
+          po_id: string | null
+          quantity: number
+          quote_id: string | null
+          required_by_date: string | null
+          supplier_cost: number
+          thumbnail_url: string | null
+        }
+        Insert: {
+          balance_due?: number
+          brand?: string | null
+          category?: string | null
+          client_price?: number
+          created_at?: string
+          created_by?: string | null
+          deposit_paid?: boolean
+          deposit_required_percent?: number
+          expected_ready_date?: string | null
+          id?: string
+          item_name: string
+          markup_percentage?: number
+          markup_tier?: string
+          po_id?: string | null
+          quantity?: number
+          quote_id?: string | null
+          required_by_date?: string | null
+          supplier_cost?: number
+          thumbnail_url?: string | null
+        }
+        Update: {
+          balance_due?: number
+          brand?: string | null
+          category?: string | null
+          client_price?: number
+          created_at?: string
+          created_by?: string | null
+          deposit_paid?: boolean
+          deposit_required_percent?: number
+          expected_ready_date?: string | null
+          id?: string
+          item_name?: string
+          markup_percentage?: number
+          markup_tier?: string
+          po_id?: string | null
+          quantity?: number
+          quote_id?: string | null
+          required_by_date?: string | null
+          supplier_cost?: number
+          thumbnail_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "items_po_id_fkey"
+            columns: ["po_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "items_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       journal_articles: {
         Row: {
           author: string
@@ -5047,6 +5128,66 @@ export type Database = {
           },
         ]
       }
+      purchase_orders: {
+        Row: {
+          approval_date: string | null
+          approved_by_manager: boolean
+          created_at: string
+          created_by: string | null
+          due_date: string | null
+          id: string
+          invoice_status: string
+          payment_status: string
+          po_number: string | null
+          quote_id: string | null
+          supplier_id: string | null
+          total_amount: number
+        }
+        Insert: {
+          approval_date?: string | null
+          approved_by_manager?: boolean
+          created_at?: string
+          created_by?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_status?: string
+          payment_status?: string
+          po_number?: string | null
+          quote_id?: string | null
+          supplier_id?: string | null
+          total_amount?: number
+        }
+        Update: {
+          approval_date?: string | null
+          approved_by_manager?: boolean
+          created_at?: string
+          created_by?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_status?: string
+          payment_status?: string
+          po_number?: string | null
+          quote_id?: string | null
+          supplier_id?: string | null
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_subscriptions: {
         Row: {
           auth: string
@@ -5120,6 +5261,47 @@ export type Database = {
             columns: ["quote_id"]
             isOneToOne: false
             referencedRelation: "trade_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          file_url: string | null
+          id: string
+          quote_number: string | null
+          status: string
+          supplier_id: string | null
+          total_amount: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          file_url?: string | null
+          id?: string
+          quote_number?: string | null
+          status?: string
+          supplier_id?: string | null
+          total_amount?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          file_url?: string | null
+          id?: string
+          quote_number?: string | null
+          status?: string
+          supplier_id?: string | null
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotes_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
         ]
