@@ -3291,6 +3291,7 @@ export type Database = {
         Row: {
           admin_notes: string | null
           assigned_admin_id: string | null
+          assigned_at: string | null
           attachment_path: string | null
           company: string | null
           concierge_lead_id: string | null
@@ -3309,6 +3310,7 @@ export type Database = {
           selected_finish: string | null
           source: string | null
           status: string
+          status_changed_at: string | null
           subject: string | null
           updated_at: string
           user_agent: string | null
@@ -3316,6 +3318,7 @@ export type Database = {
         Insert: {
           admin_notes?: string | null
           assigned_admin_id?: string | null
+          assigned_at?: string | null
           attachment_path?: string | null
           company?: string | null
           concierge_lead_id?: string | null
@@ -3334,6 +3337,7 @@ export type Database = {
           selected_finish?: string | null
           source?: string | null
           status?: string
+          status_changed_at?: string | null
           subject?: string | null
           updated_at?: string
           user_agent?: string | null
@@ -3341,6 +3345,7 @@ export type Database = {
         Update: {
           admin_notes?: string | null
           assigned_admin_id?: string | null
+          assigned_at?: string | null
           attachment_path?: string | null
           company?: string | null
           concierge_lead_id?: string | null
@@ -3359,6 +3364,7 @@ export type Database = {
           selected_finish?: string | null
           source?: string | null
           status?: string
+          status_changed_at?: string | null
           subject?: string | null
           updated_at?: string
           user_agent?: string | null
