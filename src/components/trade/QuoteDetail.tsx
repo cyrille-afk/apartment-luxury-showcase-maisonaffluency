@@ -1078,6 +1078,28 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           if (pendingVariants?.currency) insertPayload.unit_price_currency = pendingVariants.currency;
         }
       }
+      // Crate specs → packed volume / weight / crating charge for this line.
+      // Size-specific crates win over generic ones; nothing is overwritten later
+      // so the admin can still edit the figures by hand on the line.
+      try {
+        const { data: crateRow } = await (supabase as any)
+          .from("trade_products")
+          .select("crate_specs")
+          .eq("id", productId)
+          .maybeSingle();
+        const crates = cratesForSize(parseCrateSpecs(crateRow?.crate_specs), variantRow?.label ?? null);
+        if (crates.length) {
+          const t = crateTotals(crates);
+          if (t.cbm > 0) insertPayload.ship_cbm = t.cbm;
+          if (t.weightKg > 0) insertPayload.ship_weight_kg = t.weightKg;
+          if (t.priceCents > 0) {
+            insertPayload.crating_cents = t.priceCents;
+            insertPayload.crating_currency = t.currency || "EUR";
+          }
+        }
+      } catch {
+        // Crate data is optional — never block adding the product.
+      }
       const { error } = await supabase.from("trade_quote_items").insert(insertPayload);
       if (error) throw error;
       const picked = productOptions.find((p) => p.id === productId);
