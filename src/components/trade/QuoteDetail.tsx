@@ -33,6 +33,7 @@ import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurre
 import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp, fetchFx, FX_BUFFER } from "@/hooks/useGbpLandedCost";
 import { usePerLineShipping } from "@/hooks/usePerLineShipping";
 import { toIsoCountry, computePerLineShipments } from "@/lib/perLineShipping";
+import { parseCrateSpecs, cratesForSize, crateTotals } from "@/lib/crateSpecs";
 import { labelForMode } from "@/lib/shippingEstimator";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
 import { findQuoteFinishSwatches, type QuoteFinishSwatch, type QuoteFinishVariant } from "@/lib/quoteFinishSwatches";
