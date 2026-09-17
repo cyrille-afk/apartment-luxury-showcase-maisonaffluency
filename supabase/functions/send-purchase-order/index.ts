@@ -51,7 +51,7 @@ serve(async (req) => {
     const { data: item, error: itemErr } = await supabase
       .from("trade_quote_items")
       .select(
-        "id, quote_id, po_number, po_status, product_name, brand_name, quantity, supplier_id, required_by_date, lead_time_weeks_override",
+        "id, quote_id, po_number, po_status, quantity, supplier_id, required_by_date, lead_time_weeks_override, product_id, trade_products(product_name, brand_name)",
       )
       .eq("id", itemId)
       .maybeSingle();
@@ -60,9 +60,15 @@ serve(async (req) => {
     if (!item.po_number) return json({ error: "No purchase order reference on this line." }, 409);
 
     /* Authorization: quote owner or admin/super_admin. */
+    const product = (item as Record<string, any>).trade_products as
+      | { product_name?: string | null; brand_name?: string | null }
+      | null;
+    const productName = product?.product_name ?? "Item";
+    const brandName = product?.brand_name ?? "";
+
     const { data: quote } = await supabase
       .from("trade_quotes")
-      .select("id, user_id, quote_ref, project_name, client_name")
+      .select("id, user_id, client_name, project_id, projects(name)")
       .eq("id", item.quote_id)
       .maybeSingle();
     let authorized = quote?.user_id === userId;
@@ -89,8 +95,8 @@ serve(async (req) => {
         .maybeSingle();
       supplier = data ?? null;
     }
-    if (!supplier && item.brand_name) {
-      const brand = String(item.brand_name).trim().toLowerCase();
+    if (!supplier && brandName) {
+      const brand = brandName.trim().toLowerCase();
       const { data: candidates } = await supabase
         .from("suppliers")
         .select("supplier_name, contact_email, cc_email, brand_aliases")
@@ -131,9 +137,12 @@ serve(async (req) => {
     const templateData = {
       supplierName: supplier.supplier_name,
       poNumber: item.po_number,
-      projectName: quote?.project_name ?? quote?.client_name ?? null,
-      productName: item.product_name,
-      brandName: item.brand_name,
+      projectName:
+        ((quote as Record<string, any> | null)?.projects?.name as string | undefined) ??
+        quote?.client_name ??
+        null,
+      productName,
+      brandName,
       quantity: item.quantity,
       requiredBy: item.required_by_date
         ? new Date(item.required_by_date).toLocaleDateString("en-GB", {
