@@ -17,6 +17,7 @@ import { useStudio } from "@/hooks/useStudio";
 import { StudioBridgeSidebar } from "@/components/trade/StudioBridgeSidebar";
 import { pushRecentProject, useProjects } from "@/hooks/useProjects";
 import { useClientTierUpgrades } from "@/hooks/useClientTierUpgrades";
+import { usePendingInquiryCount } from "@/hooks/usePendingInquiryCount";
 
 
 type NavItem = { title: string; url: string; icon: React.ElementType; end?: boolean };
