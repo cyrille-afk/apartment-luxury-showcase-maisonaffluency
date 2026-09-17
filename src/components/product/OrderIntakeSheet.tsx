@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Check, ChevronDown, FileText, Loader2, UploadCloud, X } from "lucide-react";
@@ -61,6 +61,9 @@ const labelCls =
   "mb-2 block font-body text-[10px] uppercase tracking-widest text-muted-foreground";
 
 const STEPS = ["Intent", "Project", "Contact"] as const;
+const EmbeddedFelixChat = lazy(() =>
+  import("@/components/trade/AIConcierge").then((module) => ({ default: module.AIConcierge })),
+);
 
 /**
  * Mobile-first 3-step order intake bottom sheet.
@@ -381,7 +384,17 @@ export default function OrderIntakeSheet({
               <X className="h-4 w-4" strokeWidth={1.5} />
             </button>
           </div>
-           <div className="relative flex min-h-0 flex-1 animate-in flex-col items-center justify-center fade-in px-7 pb-24 text-center duration-300 md:px-12">
+           {isTradeAuthorized ? (
+             <Suspense
+               fallback={
+                 <div className="flex min-h-0 flex-1 items-center justify-center" aria-label="Opening Felix workspace">
+                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                 </div>
+               }
+             >
+               <EmbeddedFelixChat embedded onEmbeddedClose={onClose} />
+             </Suspense>
+           ) : <div className="relative flex min-h-0 flex-1 animate-in flex-col items-center justify-center fade-in px-7 pb-24 text-center duration-300 md:px-12">
              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-primary/45 text-primary">
                <Check className="h-5 w-5" strokeWidth={1.4} />
              </div>
@@ -405,7 +418,7 @@ export default function OrderIntakeSheet({
              >
                [ apply for the trade program to track project timelines in real-time ]
              </Link>
-           </div>
+           </div>}
           <div className="pb-[env(safe-area-inset-bottom)]" />
         </div>
       </div>,

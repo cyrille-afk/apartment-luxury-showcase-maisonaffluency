@@ -468,7 +468,7 @@ type PendingProposalTool =
   | "propose_ffe_rows"
   | "prepare_visualization_brief";
 type TimelineItem =
-  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; entrance?: "brief-response"; sourceContent?: string; sourceActions?: ConciergeQuickAction[]; designDirectorCtas?: DesignDirectorCtaLabel[]; attachments?: TimelineAttachment[]; appliedConstraints?: AppliedConstraintsEvent; moodboardSignals?: MoodboardSignalsEvent; briefSubmit?: boolean }
+  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; entrance?: "brief-response" | "bespoke-sync"; sourceContent?: string; sourceActions?: ConciergeQuickAction[]; designDirectorCtas?: DesignDirectorCtaLabel[]; attachments?: TimelineAttachment[]; appliedConstraints?: AppliedConstraintsEvent; moodboardSignals?: MoodboardSignalsEvent; briefSubmit?: boolean }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; locked?: string[]; newPickIds?: string[]; sourceOrigin?: "source" }
   | { kind: "quote_proposal"; proposal: QuoteProposal; resolved?: "approved" | "discarded" }
   | { kind: "ffe_proposal"; proposal: FfeProposal; resolved?: "approved" | "discarded" }
@@ -2077,6 +2077,21 @@ export function AIConcierge({
     if (pending.length === 0) return;
     clearBespokeSync();
     setStageOverride("Discover");
+    if (embedded) {
+      setTimeline((prev) => [
+        ...prev,
+        ...pending.map((entry) => ({
+          kind: "msg" as const,
+          role: "user" as const,
+          content: [
+            entry.specs.trim(),
+            entry.finishLabel?.trim() ? `Selected finish: ${entry.finishLabel.trim()}` : "",
+            entry.projectLocation?.trim() ? `Project location: ${entry.projectLocation.trim()}` : "",
+            entry.attachmentName?.trim() ? `Material reference: ${entry.attachmentName.trim()}` : "",
+          ].filter(Boolean).join("\n"),
+        })),
+      ]);
+    }
     setStreaming(true);
     const timer = window.setTimeout(() => {
       setTimeline((prev) => [
@@ -2085,6 +2100,7 @@ export function AIConcierge({
           kind: "msg" as const,
           role: "assistant" as const,
           content: bespokeSyncConfirmation(entry),
+          entrance: "bespoke-sync" as const,
         })),
       ]);
       setStreaming(false);
@@ -3919,7 +3935,9 @@ export function AIConcierge({
     item.kind === "quote_card" ||
     item.kind === "quote_summary",
   );
-  const pipelineActiveStep = briefBuilderOpen && !briefBuilderClosing
+  const pipelineActiveStep = embedded
+    ? 1
+    : briefBuilderOpen && !briefBuilderClosing
     ? 2
     : hasCompiledTradeQuote
       ? 4
@@ -4482,6 +4500,10 @@ export function AIConcierge({
               <button
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => {
+                  if (embedded) {
+                    onEmbeddedClose?.();
+                    return;
+                  }
                   if (modalMode) {
                     closeWelcomeModal();
                     return;
@@ -4611,6 +4633,7 @@ export function AIConcierge({
                       "flex flex-col gap-2",
                       item.role === "user" ? "items-end" : "items-start",
                       item.entrance === "brief-response" && "animate-[fade-in_500ms_ease-in-out_both] motion-reduce:animate-none",
+                      item.entrance === "bespoke-sync" && "animate-[fade-in_500ms_ease-out_both] motion-reduce:animate-none",
                     )}
                   >
                     {atts && atts.length > 0 && (
