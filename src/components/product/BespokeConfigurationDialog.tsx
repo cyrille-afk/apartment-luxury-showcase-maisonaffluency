@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, Loader2, Check, UploadCloud, FileText } from "lucide-react";
 import Turnstile from "@/components/Turnstile";
@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 import { cn } from "@/lib/utils";
 import PhoneDialField from "@/components/product/PhoneDialField";
+import { buildBespokePlaceholder } from "@/lib/phonePlaceholder";
+import { detectCountryCode } from "@/hooks/useShippingCountry";
 
 /**
  * BespokeConfigurationDialog — the wide, centred overlay opened by the
