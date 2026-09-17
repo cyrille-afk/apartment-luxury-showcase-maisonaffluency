@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X, Filter, Columns3, RotateCcw, Eye, Trash2, Plus, Check } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X, Filter, Columns3, RotateCcw, Eye, Trash2, Plus, Check, Search } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
@@ -221,6 +222,8 @@ export default function TradeFFESchedule() {
 
   const [customPresets, setCustomPresets] = useState<ViewPreset[]>(() => loadViewPresets());
   const [presetName, setPresetName] = useState("");
+  const [isCompact, setIsCompact] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const applyColumns = (next: FFEColumnKey[]) => {
     setHiddenColumns(next);
@@ -280,6 +283,33 @@ export default function TradeFFESchedule() {
     const allPresets = [...DEFAULT_VIEW_PRESETS, ...customPresets];
     return allPresets.find((p) => [...p.hidden].sort().join(",") === sortedCurrent) || null;
   }, [hiddenColumns, customPresets]);
+
+  const tableDensity = useMemo(() => {
+    if (!isCompact) {
+      return {
+        th: "px-1.5 py-3 xl:px-2",
+        td: "px-1.5 py-3 xl:px-2",
+        tdImg: "px-1.5 py-2 xl:px-2",
+        body: "text-[11px]",
+        product: "text-xs",
+        qty: "text-xs",
+        img: "h-10 w-10",
+        quoteBtn: "h-7 px-1.5 text-[9px]",
+        foot: "px-4 py-3 text-sm",
+      };
+    }
+    return {
+      th: "px-1 py-1.5",
+      td: "px-1 py-1",
+      tdImg: "px-1 py-1",
+      body: "text-[10px]",
+      product: "text-[11px]",
+      qty: "text-[11px]",
+      img: "h-7 w-7",
+      quoteBtn: "h-6 px-1 text-[9px]",
+      foot: "px-2 py-1.5 text-xs",
+    };
+  }, [isCompact]);
 
   const [filterProjectId, setFilterProjectId] = useState<string>("");
   const [filterStudioId, setFilterStudioId] = useState<string>("");
@@ -420,6 +450,29 @@ export default function TradeFFESchedule() {
     });
   }, [items, filterProjectId, filterStudioId, filterClient]);
 
+  const displayedItems = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return filteredItems;
+    return filteredItems.filter((item) => {
+      const haystack = [
+        item.product_name,
+        item.brand_name,
+        item.category,
+        item.sku,
+        item.project_name,
+        item.client_name,
+        item.studio_name,
+        item.po_number,
+        item.cost_code,
+        item.quote_ref,
+        item.dimensions,
+        item.materials,
+        STAGE_LABEL[item.kanban_status || ""] || item.kanban_status,
+      ].map((v) => (v || "").toLowerCase());
+      return haystack.some((s) => s.includes(q));
+    });
+  }, [filteredItems, searchQuery]);
+
   const projectOptions = useMemo(() => {
     const map = new Map<string, string>();
     items.forEach((i) => { if (i.project_id && i.project_name) map.set(i.project_id, i.project_name); });
@@ -447,12 +500,12 @@ export default function TradeFFESchedule() {
   };
 
   const handleExport = async () => {
-    if (!filteredItems.length) return;
+    if (!displayedItems.length) return;
     setExporting(true);
     try {
       // Group by quote so PO auto-numbering is stable per quote
       const seqByQuote: Record<string, number> = {};
-      const lines: ProcurementLine[] = filteredItems.map((item) => {
+      const lines: ProcurementLine[] = displayedItems.map((item) => {
         seqByQuote[item.quote_id] = (seqByQuote[item.quote_id] || 0) + 1;
         const seq = seqByQuote[item.quote_id];
         const lead =
@@ -485,7 +538,7 @@ export default function TradeFFESchedule() {
           designer_studio: "—",
           address: "—",
           revision: "Rev 1",
-          quote_refs: [...new Set(filteredItems.map((i) => i.quote_ref))],
+          quote_refs: [...new Set(displayedItems.map((i) => i.quote_ref))],
         },
         lines,
         fileName: `ffe-schedule-${today}.xlsx`,
@@ -504,13 +557,13 @@ export default function TradeFFESchedule() {
 
   const [packaging, setPackaging] = useState(false);
   const handleSpecPackage = async () => {
-    if (!filteredItems.length) return;
+    if (!displayedItems.length) return;
     setPackaging(true);
     try {
       // Deduplicate by product_name+brand for cleaner ZIP
       const seen = new Set<string>();
       const products: SpecPackageProduct[] = [];
-      for (const it of filteredItems) {
+      for (const it of displayedItems) {
         const key = `${it.brand_name}|${it.product_name}`;
         if (seen.has(key)) continue;
         seen.add(key);
@@ -525,7 +578,7 @@ export default function TradeFFESchedule() {
           pdf_url: it.spec_sheet_url,
         });
       }
-      const projectName = filteredItems.find((i) => i.client_name)?.client_name || "Project";
+      const projectName = displayedItems.find((i) => i.client_name)?.client_name || "Project";
       const { blob, filename, missingPdfs } = await generateSpecPackageZip(products, {
         projectName,
         studioName: "Maison Affluency",
@@ -544,7 +597,7 @@ export default function TradeFFESchedule() {
     }
   };
 
-  const totalValue = filteredItems.reduce((sum, i) => sum + (i.unit_price_cents || 0) * i.quantity, 0);
+  const totalValue = displayedItems.reduce((sum, i) => sum + (i.unit_price_cents || 0) * i.quantity, 0);
 
   return (
     <>
@@ -559,11 +612,11 @@ export default function TradeFFESchedule() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={handleSpecPackage} disabled={!filteredItems.length || packaging} variant="outline" size="sm">
+            <Button onClick={handleSpecPackage} disabled={!displayedItems.length || packaging} variant="outline" size="sm">
               {packaging ? <DotCircleLoader size="sm" className="mr-2" /> : <Package className="h-4 w-4 mr-2" />}
               Spec Package (.zip)
             </Button>
-            <Button onClick={handleExport} disabled={!filteredItems.length || exporting} variant="outline" size="sm">
+            <Button onClick={handleExport} disabled={!displayedItems.length || exporting} variant="outline" size="sm">
               {exporting ? <DotCircleLoader size="sm" className="mr-2" /> : <Download className="h-4 w-4 mr-2" />}
               Export Excel (.xlsx)
             </Button>
@@ -771,9 +824,9 @@ export default function TradeFFESchedule() {
               </DropdownMenu>
             </div>
 
-            {filteredItems.length === 0 ? (
+            {displayedItems.length === 0 ? (
               <div className="text-center py-12 border border-dashed border-border rounded-lg">
-                <p className="font-body text-sm text-muted-foreground">No items match your filters.</p>
+                <p className="font-body text-sm text-muted-foreground">No items match your filters or search.</p>
               </div>
             ) : (
                 <>
@@ -787,7 +840,7 @@ export default function TradeFFESchedule() {
                     {visibleColumns.map((c) => (
                       <th
                         key={c.key}
-                        className={`${c.key === "image" ? "sticky left-0 z-20 border-r border-border/70 bg-muted text-center" : ""} ${c.key === "quote" ? "sticky right-0 z-20 border-l border-border/70 bg-muted text-center" : ""} px-1.5 py-3 font-body text-[9px] uppercase tracking-wider text-muted-foreground xl:px-2`}
+                        className={`${c.key === "image" ? "sticky left-0 z-20 border-r border-border/70 bg-muted text-center" : ""} ${c.key === "quote" ? "sticky right-0 z-20 border-l border-border/70 bg-muted text-center" : ""} ${tableDensity.th} font-body text-[9px] uppercase tracking-wider text-muted-foreground`}
                       >
                         {c.key === "image" ? "" : c.label}
                       </th>
@@ -804,25 +857,25 @@ export default function TradeFFESchedule() {
                       : null;
                     return (
                       <tr key={i} className="group border-b border-border/50 transition-colors hover:bg-muted/20">
-                        <td className="sticky left-0 z-10 border-r border-border/60 bg-background px-1.5 py-2 transition-colors group-hover:bg-muted xl:px-2">
+                        <td className="sticky left-0 z-10 border-r border-border/60 bg-background ${tableDensity.tdImg} transition-colors group-hover:bg-muted">
                           <div className="flex items-center justify-center">
                           {item.image_url ? (
                             <img
                               src={item.image_url}
                               alt={item.product_name}
                               loading="lazy"
-                              className="h-10 w-10 object-cover rounded border border-border/50 bg-muted/20"
+                              className="${tableDensity.img} object-cover rounded border border-border/50 bg-muted/20"
                             />
                           ) : (
-                            <div className="h-10 w-10 rounded border border-dashed border-border/50 bg-muted/10" aria-hidden />
+                            <div className="${tableDensity.img} rounded border border-dashed border-border/50 bg-muted/10" aria-hidden />
                           )}
                           </div>
                         </td>
-                        {isColVisible("po") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground tabular-nums xl:px-2"><TruncatedCellText value={item.po_number || "auto"} className={item.po_number ? "" : "italic text-muted-foreground/60"} /></td>}
-                        {isColVisible("cost_code") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.cost_code} /></td>}
-                        <td className="px-1.5 py-3 font-body text-xs text-foreground xl:px-2"><TruncatedCellText value={item.product_name} /></td>
-                        {isColVisible("brand") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.brand_name} /></td>}
-                        {isColVisible("project") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2">
+                        {isColVisible("po") && <td className="${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground tabular-nums xl:px-2"><TruncatedCellText value={item.po_number || "auto"} className={item.po_number ? "" : "italic text-muted-foreground/60"} /></td>}
+                        {isColVisible("cost_code") && <td className="${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground xl:px-2"><TruncatedCellText value={item.cost_code} /></td>}
+                        <td className="${tableDensity.td} font-body ${tableDensity.product} text-foreground xl:px-2"><TruncatedCellText value={item.product_name} /></td>
+                        {isColVisible("brand") && <td className="${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground xl:px-2"><TruncatedCellText value={item.brand_name} /></td>}
+                        {isColVisible("project") && <td className="${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground xl:px-2">
                           {item.project_id ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -834,15 +887,15 @@ export default function TradeFFESchedule() {
                             </Tooltip>
                           ) : "—"}
                         </td>}
-                        {isColVisible("client") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.client_name} /></td>}
-                        {isColVisible("studio") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.studio_name} /></td>}
-                        {isColVisible("qty") && <td className="px-1.5 py-3 text-center font-body text-xs text-foreground xl:px-2">{item.quantity}</td>}
-                        {isColVisible("unit_trade") && <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-foreground tabular-nums xl:px-2">{item.unit_price_cents ? `€${(item.unit_price_cents / 100).toFixed(0)}` : "TBD"}</td>}
-                        {isColVisible("total") && <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] font-medium text-foreground tabular-nums xl:px-2">{item.unit_price_cents ? `€${((item.unit_price_cents * item.quantity) / 100).toFixed(0)}` : "TBD"}</td>}
-                        {isColVisible("lead") && <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2">{lead === 0 ? <span className="text-emerald-700 font-medium">In stock</span> : lead != null ? `${lead} wks` : "—"}</td>}
-                        {isColVisible("stage") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={STAGE_LABEL[item.kanban_status || ""] || item.kanban_status} /></td>}
-                        {isColVisible("expected") && <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-muted-foreground tabular-nums xl:px-2">{fmtDate(expected)}</td>}
-                        {isColVisible("required") && <td className="px-1.5 py-3 font-body text-[11px] xl:px-2">
+                        {isColVisible("client") && <td className="${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground xl:px-2"><TruncatedCellText value={item.client_name} /></td>}
+                        {isColVisible("studio") && <td className="${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground xl:px-2"><TruncatedCellText value={item.studio_name} /></td>}
+                        {isColVisible("qty") && <td className="${tableDensity.td} text-center font-body ${tableDensity.qty} text-foreground xl:px-2">{item.quantity}</td>}
+                        {isColVisible("unit_trade") && <td className="whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} text-foreground tabular-nums xl:px-2">{item.unit_price_cents ? `€${(item.unit_price_cents / 100).toFixed(0)}` : "TBD"}</td>}
+                        {isColVisible("total") && <td className="whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} font-medium text-foreground tabular-nums xl:px-2">{item.unit_price_cents ? `€${((item.unit_price_cents * item.quantity) / 100).toFixed(0)}` : "TBD"}</td>}
+                        {isColVisible("lead") && <td className="whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground xl:px-2">{lead === 0 ? <span className="text-emerald-700 font-medium">In stock</span> : lead != null ? `${lead} wks` : "—"}</td>}
+                        {isColVisible("stage") && <td className="${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground xl:px-2"><TruncatedCellText value={STAGE_LABEL[item.kanban_status || ""] || item.kanban_status} /></td>}
+                        {isColVisible("expected") && <td className="whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground tabular-nums xl:px-2">{fmtDate(expected)}</td>}
+                        {isColVisible("required") && <td className="${tableDensity.td} font-body ${tableDensity.body} xl:px-2">
                           <input
                             type="date"
                             defaultValue={item.required_by_date || ""}
@@ -855,7 +908,7 @@ export default function TradeFFESchedule() {
                         </td>}
                         {isColVisible("slack") && <td className="px-1.5 py-3 text-center font-body text-[11px] xl:px-2">{slackBadge(slackDays)}</td>}
                         <td className="sticky right-0 z-10 border-l border-border/60 bg-background px-1 py-3 text-center font-body text-[11px] transition-colors group-hover:bg-muted">
-                          <Button type="button" variant="ghost" size="sm" className="h-7 max-w-full px-1.5 text-[9px] tabular-nums" onClick={() => setSelectedItem(item)} title={`Open ${item.quote_ref}`}>
+                          <Button type="button" variant="ghost" size="sm" className="${tableDensity.quoteBtn} max-w-full tabular-nums" onClick={() => setSelectedItem(item)} title={`Open ${item.quote_ref}`}>
                             {item.quote_ref}
                           </Button>
                         </td>
@@ -869,7 +922,7 @@ export default function TradeFFESchedule() {
                     if (totalIdx < 0) {
                       return (
                         <tr className="bg-muted/30">
-                          <td colSpan={visibleColumns.length} className="sticky right-0 border-l border-border/60 bg-muted px-4 py-3 font-body text-sm text-foreground font-medium text-right">
+                          <td colSpan={visibleColumns.length} className="sticky right-0 border-l border-border/60 bg-muted ${tableDensity.foot} font-body text-foreground font-medium text-right">
                             Total <span className="font-display font-semibold">{totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}</span>
                           </td>
                         </tr>
@@ -877,8 +930,8 @@ export default function TradeFFESchedule() {
                     }
                     return (
                       <tr className="bg-muted/30">
-                        <td colSpan={totalIdx} className="px-4 py-3 font-body text-sm text-foreground font-medium text-right">Total</td>
-                        <td className="px-4 py-3 font-display text-sm text-foreground font-semibold">
+                        <td colSpan={totalIdx} className="${tableDensity.foot} font-body text-foreground font-medium text-right">Total</td>
+                        <td className="${tableDensity.foot} font-display text-foreground font-semibold">
                           {totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}
                         </td>
                         <td colSpan={visibleColumns.length - totalIdx - 1} className="sticky right-0 border-l border-border/60 bg-muted" />
