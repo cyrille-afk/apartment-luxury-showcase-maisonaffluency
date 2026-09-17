@@ -72,5 +72,5 @@ export function bespokeSyncConfirmation(entry: BespokeSyncEntry): string {
   const location = entry.projectLocation?.trim()
     ? ` for the ${entry.projectLocation.trim()} project`
     : "";
-  return `I have successfully synchronized your custom specification annotations ${swatch}for the ${piece}${location} into our active layout workspace deck. The atelier team is currently verifying artisan feasibility.`;
+  return `I have successfully synchronized your custom specification annotations ${swatch}for the ${piece}${location} into our active layout workspace deck. The atelier team in Paris is currently verifying artisan feasibility. Let's begin defining your project scale guidelines...`;
 }
