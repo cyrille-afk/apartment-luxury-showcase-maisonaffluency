@@ -60,16 +60,37 @@ serve(async (req) => {
       return json({ quoteId: inquiry.linked_quote_id, reused: true }, 200);
     }
 
-    // Look up product (may be null if inquiry has no product)
+    // Look up product (may be null if inquiry has no product).
+    // inquiry.product_id can reference either trade_products.id or a
+    // designer_curator_picks id (public pages use pick ids), so try both.
     let product: any = null;
     if (inquiry.product_id) {
-      const { data } = await supabase
+      const cols = "id, product_name, rrp_price_cents, trade_price_cents, currency";
+      const { data: byId } = await supabase
         .from("trade_products")
-        .select("id, rrp_price_cents, trade_price_cents, currency")
+        .select(cols)
         .eq("id", inquiry.product_id)
         .maybeSingle();
-      product = data;
+      product = byId;
+      if (!product) {
+        const { data: byPick } = await supabase
+          .from("trade_products")
+          .select(cols)
+          .eq("source_pick_id", inquiry.product_id)
+          .maybeSingle();
+        product = byPick;
+      }
+      if (!product && inquiry.product_name) {
+        const { data: byName } = await supabase
+          .from("trade_products")
+          .select(cols)
+          .ilike("product_name", inquiry.product_name)
+          .limit(1)
+          .maybeSingle();
+        product = byName;
+      }
     }
+
 
     // Create draft quote
     const currency = product?.currency || "USD";
@@ -104,8 +125,11 @@ serve(async (req) => {
         product_id: product.id,
         quantity,
         unit_price_cents: unitPrice || null,
+        variant_label: inquiry.selected_finish || null,
+        notes: inquiry.selected_finish ? `Requested finish: ${inquiry.selected_finish}` : null,
       });
       if (itemErr) console.error("Quote item insert failed:", itemErr);
+
     }
 
     // Link back on inquiry + advance status
