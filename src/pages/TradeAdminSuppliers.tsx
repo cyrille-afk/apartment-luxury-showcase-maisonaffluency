@@ -190,9 +190,11 @@ export default function TradeAdminSuppliers() {
   const [saving, setSaving] = useState(false);
 
   const [importOpen, setImportOpen] = useState(false);
+  const [importStep, setImportStep] = useState<"upload" | "review">("upload");
   const [importFile, setImportFile] = useState<File | null>(null);
   const [parsedRows, setParsedRows] = useState<ParsedRow[]>([]);
   const [rowErrors, setRowErrors] = useState<RowError[]>([]);
+  const [excludedRows, setExcludedRows] = useState<Set<number>>(new Set());
   const [importing, setImporting] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -250,7 +252,35 @@ export default function TradeAdminSuppliers() {
     setImportFile(null);
     setParsedRows([]);
     setRowErrors([]);
+    setExcludedRows(new Set());
+    setImportStep("upload");
     setDragOver(false);
+  };
+
+  /** Duplicate status per parsed row, compared against the live directory. */
+  const duplicateStatus = useMemo(() => {
+    const byName = new Set(suppliers.map((s) => s.supplier_name.trim().toLowerCase()));
+    const byEmail = new Set(suppliers.map((s) => s.contact_email.trim().toLowerCase()));
+    const map = new Map<number, "upsert" | "skip">();
+    parsedRows.forEach((r) => {
+      if (byName.has(r.supplier_name.toLowerCase())) map.set(r.rowNumber, "upsert");
+      else if (byEmail.has(r.contact_email.toLowerCase())) map.set(r.rowNumber, "skip");
+    });
+    return map;
+  }, [suppliers, parsedRows]);
+
+  const selectedRows = useMemo(
+    () => parsedRows.filter((r) => !excludedRows.has(r.rowNumber)),
+    [parsedRows, excludedRows],
+  );
+
+  const toggleRow = (rowNumber: number) => {
+    setExcludedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(rowNumber)) next.delete(rowNumber);
+      else next.add(rowNumber);
+      return next;
+    });
   };
 
   const handleFile = async (file: File) => {
@@ -263,12 +293,23 @@ export default function TradeAdminSuppliers() {
     const { rows, errors } = parseSupplierCsv(text);
     setParsedRows(rows);
     setRowErrors(errors);
+    // Pre-exclude rows matching an existing contact email under a different supplier name.
+    const byName = new Set(suppliers.map((s) => s.supplier_name.trim().toLowerCase()));
+    const byEmail = new Set(suppliers.map((s) => s.contact_email.trim().toLowerCase()));
+    setExcludedRows(
+      new Set(
+        rows
+          .filter((r) => !byName.has(r.supplier_name.toLowerCase()) && byEmail.has(r.contact_email.toLowerCase()))
+          .map((r) => r.rowNumber),
+      ),
+    );
+    if (rows.length > 0) setImportStep("review");
   };
 
   const handleImport = async () => {
-    if (parsedRows.length === 0) return;
+    if (selectedRows.length === 0) return;
     setImporting(true);
-    const payload = parsedRows.map((r) => ({
+    const payload = selectedRows.map((r) => ({
       supplier_name: r.supplier_name,
       contact_email: r.contact_email,
       cc_email: r.cc_email || null,
@@ -401,14 +442,103 @@ export default function TradeAdminSuppliers() {
 
       {/* CSV Import */}
       <Dialog open={importOpen} onOpenChange={(open) => { setImportOpen(open); if (!open) resetImport(); }}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className={importStep === "review" ? "sm:max-w-3xl" : "sm:max-w-lg"}>
           <DialogHeader>
-            <DialogTitle className="font-display">Import Suppliers from CSV</DialogTitle>
+            <DialogTitle className="font-display">
+              {importStep === "review" ? "Review & Confirm" : "Import Suppliers from CSV"}
+            </DialogTitle>
             <DialogDescription className="font-body text-sm">
-              Required columns: Supplier Name, Contact Email. CC Email is optional. Existing supplier names are updated; new names are inserted.
+              {importStep === "review"
+                ? "Check the parsed records below. Duplicates are flagged; uncheck any row to exclude it from the import."
+                : "Required columns: Supplier Name, Contact Email. CC Email is optional. Existing supplier names are updated; new names are inserted."}
             </DialogDescription>
           </DialogHeader>
 
+          {importStep === "review" ? (
+            <div className="space-y-3">
+              <div className="max-h-[50vh] overflow-auto rounded-lg border border-border">
+                <table className="w-full text-sm">
+                  <thead className="sticky top-0 bg-muted/60 backdrop-blur">
+                    <tr className="border-b border-border">
+                      <th className="w-10 px-3 py-2"></th>
+                      <th className="px-3 py-2 text-left font-display text-[11px] uppercase tracking-widest text-muted-foreground">Supplier Name</th>
+                      <th className="px-3 py-2 text-left font-display text-[11px] uppercase tracking-widest text-muted-foreground">Contact Email</th>
+                      <th className="px-3 py-2 text-left font-display text-[11px] uppercase tracking-widest text-muted-foreground">CC Email</th>
+                      <th className="px-3 py-2 text-left font-display text-[11px] uppercase tracking-widest text-muted-foreground">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {parsedRows.map((r) => {
+                      const dup = duplicateStatus.get(r.rowNumber);
+                      const excluded = excludedRows.has(r.rowNumber);
+                      return (
+                        <tr
+                          key={r.rowNumber}
+                          className={`border-b border-border/60 last:border-0 transition-colors ${
+                            dup ? "bg-amber-50/70 dark:bg-amber-500/10" : ""
+                          } ${excluded ? "opacity-45" : ""}`}
+                        >
+                          <td className="px-3 py-2">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 accent-foreground cursor-pointer"
+                              checked={!excluded}
+                              onChange={() => toggleRow(r.rowNumber)}
+                              aria-label={`Include ${r.supplier_name}`}
+                            />
+                          </td>
+                          <td className="px-3 py-2 font-display text-sm text-foreground">{r.supplier_name}</td>
+                          <td className="px-3 py-2 font-body text-sm text-foreground">{r.contact_email}</td>
+                          <td className="px-3 py-2 font-body text-sm text-muted-foreground">{r.cc_email || "—"}</td>
+                          <td className="px-3 py-2">
+                            {dup === "upsert" ? (
+                              <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-100/60 px-2 py-0.5 font-body text-[11px] text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300">
+                                Duplicate (Will Upsert)
+                              </span>
+                            ) : dup === "skip" ? (
+                              <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-100/60 px-2 py-0.5 font-body text-[11px] text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300">
+                                Duplicate (Skip)
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 font-body text-[11px] text-emerald-700 dark:text-emerald-400">
+                                New
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <p className="font-body text-xs text-muted-foreground">
+                {selectedRows.length} of {parsedRows.length} row{parsedRows.length === 1 ? "" : "s"} selected
+                {rowErrors.length > 0 && (
+                  <span className="text-destructive"> — {rowErrors.length} row{rowErrors.length === 1 ? "" : "s"} rejected during parsing</span>
+                )}
+              </p>
+
+              {rowErrors.length > 0 && (
+                <div className="max-h-32 overflow-y-auto rounded-md border border-destructive/30 bg-destructive/5 p-3 space-y-1">
+                  {rowErrors.map((err, i) => (
+                    <p key={i} className="font-body text-xs text-destructive">{err.message}</p>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex justify-between gap-2 pt-1">
+                <Button variant="ghost" size="sm" onClick={() => { resetImport(); }}>Choose another file</Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => { setImportOpen(false); resetImport(); }}>Cancel</Button>
+                  <Button size="sm" onClick={() => void handleImport()} disabled={importing || selectedRows.length === 0}>
+                    {importing ? "Importing…" : `Confirm Import (${selectedRows.length} Row${selectedRows.length === 1 ? "" : "s"})`}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+          <>
           <div
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
@@ -454,30 +584,22 @@ export default function TradeAdminSuppliers() {
             Download Sample Template CSV
           </button>
 
-          {importFile && (
-            <div className="mt-3 space-y-2">
-              <p className="font-body text-sm text-foreground">
-                <span className="font-medium">{parsedRows.length}</span> valid record{parsedRows.length === 1 ? "" : "s"} ready
-                {rowErrors.length > 0 && (
-                  <span className="text-destructive"> — {rowErrors.length} issue{rowErrors.length === 1 ? "" : "s"} flagged</span>
-                )}
-              </p>
-              {rowErrors.length > 0 && (
-                <div className="max-h-40 overflow-y-auto rounded-md border border-destructive/30 bg-destructive/5 p-3 space-y-1">
-                  {rowErrors.map((err, i) => (
-                    <p key={i} className="font-body text-xs text-destructive">{err.message}</p>
-                  ))}
-                </div>
-              )}
+          {importFile && rowErrors.length > 0 && (
+            <div className="mt-3 max-h-40 overflow-y-auto rounded-md border border-destructive/30 bg-destructive/5 p-3 space-y-1">
+              {rowErrors.map((err, i) => (
+                <p key={i} className="font-body text-xs text-destructive">{err.message}</p>
+              ))}
             </div>
           )}
 
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" size="sm" onClick={() => { setImportOpen(false); resetImport(); }}>Cancel</Button>
-            <Button size="sm" onClick={() => void handleImport()} disabled={importing || parsedRows.length === 0}>
-              {importing ? "Importing…" : `Import ${parsedRows.length > 0 ? parsedRows.length : ""} Supplier${parsedRows.length === 1 ? "" : "s"}`}
+            <Button size="sm" onClick={() => setImportStep("review")} disabled={parsedRows.length === 0}>
+              Review {parsedRows.length > 0 ? parsedRows.length : ""} Row{parsedRows.length === 1 ? "" : "s"}
             </Button>
           </div>
+          </>
+          )}
         </DialogContent>
       </Dialog>
     </>
