@@ -2053,6 +2053,24 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     return () => window.removeEventListener("concierge:propose_tearsheet_proactive", handler as EventListener);
   }, []);
 
+  // Bespoke specifications submitted by a verified trade member are queued in
+  // the workspace deck. The first time the canvas opens after a submission,
+  // Felix logs the synchronisation confirmation and clears the badge.
+  useEffect(() => {
+    if (!open || surface === "public") return;
+    const pending = readPendingBespokeSync();
+    if (pending.length === 0) return;
+    clearBespokeSync();
+    setTimeline((prev) => [
+      ...prev,
+      ...pending.map((entry) => ({
+        kind: "msg" as const,
+        role: "assistant" as const,
+        content: bespokeSyncConfirmation(entry),
+      })),
+    ]);
+  }, [open, surface]);
+
   // Auto-close Felix while the Quick Tour is running so its panel never
   // overlaps the page being highlighted (especially the Tools step).
   useEffect(() => {
