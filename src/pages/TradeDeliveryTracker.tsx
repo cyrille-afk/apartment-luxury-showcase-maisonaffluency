@@ -295,9 +295,21 @@ export default function TradeDeliveryTracker() {
             <p className="font-body text-sm text-muted-foreground">No confirmed lines yet.</p>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-6">
             <div className="flex flex-wrap items-center gap-2">
-              <button type="button" onClick={() => setStatusFilter("all")}>All</button>
+              {filterTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setStatusFilter(tab.key)}
+                  className={filterButtonClasses(tab.key)}
+                >
+                  <span>{tab.label}</span>
+                  <span className={cn("inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1.5 py-0 font-body text-[10px] tabular-nums", statusFilter === tab.key ? "bg-white/30" : "bg-muted text-muted-foreground")}>
+                    {statusCounts[tab.key]}
+                  </span>
+                </button>
+              ))}
             </div>
 
             {filteredGroups.length === 0 ? (
@@ -307,7 +319,7 @@ export default function TradeDeliveryTracker() {
               </div>
             ) : (
               <div className="space-y-8">
-                {groups.map((g) => {
+                {filteredGroups.map((g) => {
                   const worst = g.lines.reduce<number | null>((acc, l) => {
                     if (l.slack == null) return acc;
                     return acc == null || l.slack < acc ? l.slack : acc;
