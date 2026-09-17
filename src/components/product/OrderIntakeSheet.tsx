@@ -45,6 +45,8 @@ interface Props {
    */
   mode?: "order" | "quote";
   productId?: string | null;
+  /** Overrides the last step's action label (e.g. "Continue"). */
+  finalLabel?: string;
 }
 
 const inputCls =
@@ -76,6 +78,7 @@ export default function OrderIntakeSheet({
   submitting = false,
   mode = "order",
   productId,
+  finalLabel,
 }: Props) {
   const { toast } = useToast();
   const checkoutForm = useCheckoutForm();
@@ -645,7 +648,7 @@ export default function OrderIntakeSheet({
             )}
           >
             {(submitting || sending) && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-            {step < 2 ? "Next" : isQuote ? "Submit Quote Request" : "Place Order"}
+            {step < 2 ? "Next" : finalLabel ?? (isQuote ? "Submit Quote Request" : "Place Order")}
           </button>
         </div>
       </div>

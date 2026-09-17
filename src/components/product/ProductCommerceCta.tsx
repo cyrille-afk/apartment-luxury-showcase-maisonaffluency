@@ -6,6 +6,8 @@ import { getCart, shouldUseFullPageCart, useCart } from "@/lib/cart";
 import { Loader2, Minus, Plus } from "lucide-react";
 import SelectionDrawer, { type PaymentMethod } from "@/components/product/SelectionDrawer";
 import BespokeConfigurationDialog from "@/components/product/BespokeConfigurationDialog";
+import OrderIntakeSheet, { type OrderIntakeDetails } from "@/components/product/OrderIntakeSheet";
+import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
@@ -191,6 +193,10 @@ export default function ProductCommerceCta({
   const setQuantity = productConfig ? productConfig.setQuantity : setLocalQuantity;
   const [miniCartOpen, setMiniCartOpen] = useState(false);
   const [bespokeOpen, setBespokeOpen] = useState(false);
+  // 3-step intent capture (Intent → Project → Contact) gating both the order
+  // and the bespoke/quote path. Null = no gate open.
+  const [intakeFor, setIntakeFor] = useState<null | "order" | "bespoke">(null);
+  const checkoutForm = useCheckoutForm();
   // True when the open drawer holds a piece with no public price.
   const [quoteOnlySelection, setQuoteOnlySelection] = useState(false);
   const cartItems = useCart();
@@ -261,13 +267,49 @@ export default function ProductCommerceCta({
     }
     setMiniCartOpen(true);
   };
-  const primaryAction = tradeApproved ? undefined : openSelection;
+  /**
+   * Intent gate: public visitors qualify themselves (designer vs private
+   * client), state the project city and leave contact detail before either the
+   * order drawer or the bespoke dialog opens. Captured once per session —
+   * returning visitors go straight through.
+   */
+  const intakeCaptured = Boolean(
+    checkoutForm.buyerProfile &&
+      checkoutForm.projectCity.trim() &&
+      checkoutForm.email.trim(),
+  );
+
+  const runIntent = (target: "order" | "bespoke") => {
+    if (target === "order") openSelection();
+    else setBespokeOpen(true);
+  };
+
+  const startIntent = (target: "order" | "bespoke") => {
+    if (tradeApproved || intakeCaptured) {
+      runIntent(target);
+      return;
+    }
+    setIntakeFor(target);
+  };
+
+  const completeIntake = (details: OrderIntakeDetails) => {
+    const target = intakeFor ?? "order";
+    setIntakeFor(null);
+    checkoutForm.update({
+      email: details.email,
+      projectCity: details.city,
+      buyerProfile: details.profile,
+    });
+    runIntent(target);
+  };
+
+  const primaryAction = tradeApproved ? undefined : () => startIntent("order");
 
   /**
    * Secondary CTA: bespoke / customisation enquiries open a centred overlay
    * dialog on the product canvas — never the Trade Account registration page.
    */
-  const openBespoke = () => setBespokeOpen(true);
+  const openBespoke = () => startIntent("bespoke");
 
   // Unpriced pieces: the page asks for the in-canvas bespoke dialog rather than
   // sending a shopper to the corporate Trade Account form.
@@ -277,7 +319,7 @@ export default function ProductCommerceCta({
       const isDesktop =
         typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
       if (dockOnly === isDesktop) return;
-      setBespokeOpen(true);
+      startIntent("bespoke");
     };
     window.addEventListener("ma:open-quote", handler);
     return () => window.removeEventListener("ma:open-quote", handler);
@@ -318,7 +360,7 @@ export default function ProductCommerceCta({
       onPlaceOrder(quantity);
       return;
     }
-    openSelection();
+    startIntent("order");
   };
 
   // Sticky banners dispatch this instead of navigating to /cart. Only the
@@ -330,7 +372,7 @@ export default function ProductCommerceCta({
         typeof window !== "undefined" &&
         window.matchMedia("(min-width: 768px)").matches;
       if (dockOnly === isDesktop) return;
-      openSelection();
+      startIntent("order");
     };
     window.addEventListener("ma:open-selection", handler);
     return () => window.removeEventListener("ma:open-selection", handler);
@@ -561,6 +603,32 @@ export default function ProductCommerceCta({
           imageUrl={imageUrl}
         />
       )}
+
+      {/* 3-step intent capture — mobile sheet / centred desktop panel. Runs
+          ahead of both the order drawer and the bespoke dialog. */}
+      {!tradeApproved && (
+        <OrderIntakeSheet
+          isOpen={intakeFor !== null}
+          onClose={() => setIntakeFor(null)}
+          onComplete={completeIntake}
+          mode="order"
+          finalLabel={intakeFor === "bespoke" ? "Continue" : undefined}
+          productId={productId}
+          productTitle={productTitle}
+          designerName={designerName}
+          priceLabel={retailLabel || rrpLabel || "Price upon Request"}
+          finishLabel={
+            orderFinishLabel ||
+            (selectedFinishes.length ? selectedFinishes.join(" / ") : null) ||
+            finishOptions?.[0] ||
+            null
+          }
+          finishOptions={finishOptions}
+          finishVariants={finishVariants}
+          baseImageUrl={imageUrl}
+        />
+      )}
     </>
+
   );
 }
