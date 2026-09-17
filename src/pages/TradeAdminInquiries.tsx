@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useMemo } from "react";
-import { Inbox, Mail, Phone, Package, User, Clock, ExternalLink, FileText, X, CheckCircle2, MessageCircle, Send } from "lucide-react";
+import { Inbox, Mail, Phone, Package, User, Clock, ExternalLink, FileText, X, CheckCircle2, MessageCircle, Send, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 
@@ -116,6 +116,20 @@ export default function TradeAdminInquiries() {
     },
     onError: (err: any) => toast({ title: "Update failed", description: err.message, variant: "destructive" }),
   });
+
+  const deleteInquiry = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from("inquiries").delete().in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: (_d, ids) => {
+      setSelectedId(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-inquiries"] });
+      toast({ title: ids.length > 1 ? `${ids.length} inquiries deleted` : "Inquiry deleted" });
+    },
+    onError: (err: any) => toast({ title: "Delete failed", description: err.message, variant: "destructive" }),
+  });
+
 
   const draftQuote = useMutation({
     mutationFn: async ({ inquiryId, kind }: { inquiryId: string; kind: "public" | "trade" }) => {
