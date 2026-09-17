@@ -5,9 +5,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
-import { CalendarClock, ChevronRight, CalendarPlus, ImageOff } from "lucide-react";
+import { CalendarClock, ChevronRight, CalendarPlus, ImageOff, Download, FileSpreadsheet, FileText } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -274,6 +280,99 @@ export default function TradeDeliveryTracker() {
     return cn(base, active ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-border bg-background text-muted-foreground hover:text-emerald-700");
   }
 
+  function statusText(slack: number | null): string {
+    if (slack == null) return "—";
+    if (slack < 0) return "Late";
+    if (slack <= 14) return "Tight Timeline";
+    return "On Track";
+  }
+
+  const exportRows = useMemo(
+    () =>
+      filteredGroups.flatMap((g) =>
+        g.lines
+          .slice()
+          .sort((a, b) => (a.required_by_date || "9999-12-31").localeCompare(b.required_by_date || "9999-12-31"))
+          .map((l) => ({
+            project: g.name,
+            item: l.product_name,
+            brand: l.brand_name,
+            qty: l.quantity,
+            client: l.client_name || "—",
+            stage: STAGE_LABEL[l.stage || ""] || l.stage || "—",
+            expected: fmtDate(l.expected),
+            requiredBy: l.required_by_date ? fmtDate(new Date(l.required_by_date)) : "—",
+            status: statusText(l.slack),
+            slack: l.slack,
+            quote: l.quote_ref,
+          })),
+      ),
+    [filteredGroups],
+  );
+
+  const activeFilterLabel = filterTabs.find((t) => t.key === statusFilter)?.label || "All Items";
+
+  function handleExportCsv() {
+    const headers = ["Project", "Item Name", "Brand", "Quantity", "Client", "Stage", "Expected Ready", "Required By", "Status", "Quote ID"];
+    const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const csv = [
+      headers.map(esc).join(","),
+      ...exportRows.map((r) =>
+        [r.project, r.item, r.brand, r.qty, r.client, r.stage, r.expected, r.requiredBy, r.status, r.quote].map(esc).join(","),
+      ),
+    ].join("\r\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `delivery-tracker-${statusFilter}-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function handleExportPdf() {
+    const colorFor = (s: string) => (s === "Late" ? "#b91c1c" : s === "Tight Timeline" ? "#b45309" : s === "On Track" ? "#047857" : "#6b7280");
+    const escHtml = (v: unknown) =>
+      String(v ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c] as string));
+    const rowsHtml = exportRows
+      .map(
+        (r) => `<tr>
+          <td>${escHtml(r.project)}</td><td>${escHtml(r.item)}</td><td>${escHtml(r.brand)}</td>
+          <td class="num">${escHtml(r.qty)}</td><td>${escHtml(r.client)}</td><td>${escHtml(r.stage)}</td>
+          <td class="num">${escHtml(r.expected)}</td><td class="num">${escHtml(r.requiredBy)}</td>
+          <td style="color:${colorFor(r.status)};font-weight:600">${escHtml(r.status)}</td><td class="num">${escHtml(r.quote)}</td>
+        </tr>`,
+      )
+      .join("");
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>Delivery Tracker</title>
+      <style>
+        @page { size: A4 landscape; margin: 14mm; }
+        body { font-family: Georgia, 'Times New Roman', serif; color: #1c1c1c; }
+        h1 { font-size: 18px; margin: 0 0 4px; }
+        p.meta { font-size: 11px; color: #6b7280; margin: 0 0 16px; letter-spacing: .06em; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; font-family: Helvetica, Arial, sans-serif; font-size: 10px; }
+        th { text-align: left; text-transform: uppercase; letter-spacing: .08em; font-size: 8px; color: #6b7280; border-bottom: 1px solid #d4d4d4; padding: 6px 6px; }
+        td { padding: 6px 6px; border-bottom: 1px solid #eee; vertical-align: top; }
+        td.num { white-space: nowrap; font-variant-numeric: tabular-nums; }
+        tr { break-inside: avoid; }
+      </style></head><body>
+      <h1>Delivery Tracker</h1>
+      <p class="meta">${escHtml(activeFilterLabel)} · ${exportRows.length} line${exportRows.length === 1 ? "" : "s"} · ${escHtml(new Date().toLocaleDateString())}</p>
+      <table><thead><tr>
+        <th>Project</th><th>Item</th><th>Brand</th><th>Qty</th><th>Client</th><th>Stage</th>
+        <th>Expected ready</th><th>Required by</th><th>Status</th><th>Quote</th>
+      </tr></thead><tbody>${rowsHtml}</tbody></table>
+      </body></html>`;
+    const w = window.open("", "_blank", "width=1200,height=800");
+    if (!w) return;
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+    setTimeout(() => w.print(), 300);
+  }
+
   return (
     <>
       <Helmet><title>Delivery Tracker — Trade Portal</title></Helmet>
@@ -310,7 +409,29 @@ export default function TradeDeliveryTracker() {
                   </span>
                 </button>
               ))}
+
+              <div className="ml-auto">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button type="button" variant="outline" size="sm" className="h-8 gap-1.5 rounded-full px-3 font-body text-xs" disabled={exportRows.length === 0}>
+                      <Download className="h-3.5 w-3.5" />
+                      Export
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onSelect={() => handleExportCsv()} className="font-body text-xs">
+                      <FileSpreadsheet className="mr-2 h-3.5 w-3.5" />
+                      Export to CSV
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => handleExportPdf()} className="font-body text-xs">
+                      <FileText className="mr-2 h-3.5 w-3.5" />
+                      Export to PDF
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
+
 
             {filteredGroups.length === 0 ? (
               <div className="text-center py-16 border border-dashed border-border rounded-lg">
