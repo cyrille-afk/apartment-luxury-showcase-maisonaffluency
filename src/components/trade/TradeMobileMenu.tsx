@@ -4,6 +4,7 @@ import {
   ChevronRight, LogOut, Menu, X,
   LayoutDashboard, Heart, FolderKanban, MapPin,
   FileText, Settings, Shield, Wrench, UserCircle, Image, Users, Inbox,
+  TrendingDown,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -140,7 +141,7 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
                 <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
               </button>
               <button
-                onClick={() => go("/trade/admin/sales-funnel")}
+                onClick={() => handleNav("/trade/admin/sales-funnel")}
                 className={cn(
                   "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0",
                   isActive("/trade/admin/sales-funnel") ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
