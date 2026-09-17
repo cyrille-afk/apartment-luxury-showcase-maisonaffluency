@@ -974,6 +974,27 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   ), [briefDraft, timeline, briefManuallyCompleted]);
   const onboardingGateRef = useRef(onboardingGate);
   useEffect(() => { onboardingGateRef.current = onboardingGate; }, [onboardingGate]);
+  // --- Locked project facts (no memory drift across timeouts / resumes) ---
+  // Once a verified attribute exists ("Prewar Co-op"), it is pinned in local
+  // state + localStorage. Nothing coming back from the stream, a retry, or a
+  // "Resume brief" event can downgrade it to a placeholder or a different
+  // typology.
+  const [lockedFacts, setLockedFacts] = useState<FelixBriefFacts>(() => loadLockedFacts());
+  const lockedFactsRef = useRef(lockedFacts);
+  useEffect(() => { lockedFactsRef.current = lockedFacts; }, [lockedFacts]);
+  useEffect(() => {
+    setLockedFacts((prev) => {
+      const next = mergeLockedFacts(prev, onboardingGate.facts);
+      if (next.projectProfile === prev.projectProfile && next.zone === prev.zone && next.budget === prev.budget) return prev;
+      persistLockedFacts(next);
+      return next;
+    });
+  }, [onboardingGate.facts]);
+  /** Gate facts merged with the locked cache — always the richer of the two. */
+  const verifiedFacts = useMemo(
+    () => mergeLockedFacts(lockedFacts, onboardingGate.facts),
+    [lockedFacts, onboardingGate.facts],
+  );
   useEffect(() => {
     if (onboardingGate.completed) return;
     setTimeline((prev) => {
