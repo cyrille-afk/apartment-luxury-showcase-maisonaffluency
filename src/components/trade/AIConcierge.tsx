@@ -3125,7 +3125,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       // replaced with a zone acknowledgement.
       const verdict = validateFelixLogic(assistantSoFar, text);
       if (!verdict.ok) {
-        felixLogicDiscardedRef.current = true;
+        felixLogicDiscarded = true;
         assistantSoFar = verdict.response;
       }
       setTimeline((prev) => {
