@@ -403,7 +403,7 @@ const handler = async (req: Request): Promise<Response> => {
           templateName: "inquiry-confirmation",
           recipientEmail: email,
           idempotencyKey: `inquiry-confirm-${idStem}`,
-          templateData: { name, message },
+          templateData: { name, message: resolvedMessage },
         },
       }
     );
