@@ -26,6 +26,10 @@ export interface QuoteLineDrawerItem {
   materials?: string | null;
   sku?: string | null;
   stage?: string | null;
+  /** Slack in days before this edit — used to detect an Amber -> Red escalation. */
+  slack?: number | null;
+  /** Expected-ready date before this edit. */
+  expected?: Date | string | null;
 }
 
 interface QuoteLineDrawerProps {
