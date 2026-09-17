@@ -4943,6 +4943,18 @@ serve(async (req) => {
     if (highLevelVisionWithoutGate) {
       return sseTextResponse("An Art Deco prewar co-op is an exceptional canvas. To structure our studio layout options accurately, let's lock in two quick technical specifications: What is our target budget range for this phase, and which specific zones (such as salon seating, dining area, or master lounge) are we curating first?");
     }
+    const latestUserContent = [...messages].reverse().find((m: any) => m.role === "user")?.content;
+    const latestTurnHasFile = Array.isArray(latestUserContent) && latestUserContent.some((part: any) => part?.type === "file" || part?.type === "image_url");
+    if (!onboardingGateComplete && !latestTurnHasFile) {
+      const missing: string[] = [];
+      if (!isRealGateFact(gateFacts?.projectProfile)) missing.push("project profile");
+      if (!isRealGateFact(gateFacts?.zone)) missing.push("zone");
+      if (!isRealGateFact(gateFacts?.budget)) missing.push("budget");
+      const factPrompt = missing.length
+        ? `Before I assemble any item schedule, let's lock in ${missing.join(", ")}. What would you like me to record?`
+        : "I have the project profile, zones, and budget. Please confirm these details, or submit them through the Architectural Brief Builder, and I will open the next studio stage.";
+      return sseTextResponse(factPrompt);
+    }
 
     const VISUAL_CONTEXT_MARKER = "[Latest upload visual sourcing context — use this as the retrieval brief, not the button label]";
     const VISUAL_CONTEXT_MARKER_ALT = "[Latest upload visual sourcing context — atmosphere reference only; do NOT let it broaden the typology or palette below]";

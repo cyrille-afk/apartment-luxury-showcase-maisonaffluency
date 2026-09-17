@@ -970,7 +970,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     timeline
       .filter((item): item is Extract<TimelineItem, { kind: "msg" }> => item.kind === "msg" && item.role === "user")
       .map((item) => item.content),
-    briefManuallyCompleted,
+    briefManuallyCompleted || timeline.some((item) => item.kind === "layout_options"),
   ), [briefDraft, timeline, briefManuallyCompleted]);
   const onboardingGateRef = useRef(onboardingGate);
   useEffect(() => { onboardingGateRef.current = onboardingGate; }, [onboardingGate]);
