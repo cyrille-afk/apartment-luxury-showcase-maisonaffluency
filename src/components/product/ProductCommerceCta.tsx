@@ -372,7 +372,7 @@ export default function ProductCommerceCta({
         typeof window !== "undefined" &&
         window.matchMedia("(min-width: 768px)").matches;
       if (dockOnly === isDesktop) return;
-      openSelection();
+      startIntent("order");
     };
     window.addEventListener("ma:open-selection", handler);
     return () => window.removeEventListener("ma:open-selection", handler);
