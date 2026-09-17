@@ -216,6 +216,39 @@ export default function TradeAdminInquiries() {
                       <span>·</span>
                       <span>{r.source?.replace(/_/g, " ") || "form"}</span>
                     </div>
+                    <div className="mt-2 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      <a
+                        href={`mailto:${r.email}?subject=${encodeURIComponent(`Re: ${r.product_name || "Your Maison Affluency inquiry"}`)}`}
+                        className="flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground hover:border-accent/50 hover:text-accent"
+                      >
+                        <Mail className="h-3 w-3" /> Reply
+                      </a>
+                      {whatsappHref(r.phone) && (
+                        <a
+                          href={whatsappHref(r.phone)!}
+                          target="_blank" rel="noreferrer"
+                          className="flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground hover:border-accent/50 hover:text-accent"
+                        >
+                          <MessageCircle className="h-3 w-3" /> WhatsApp
+                        </a>
+                      )}
+                      {r.linked_quote_id ? (
+                        <button
+                          onClick={() => navigate(`/trade/quotes/${r.linked_quote_id}`)}
+                          className="flex items-center gap-1 rounded-md bg-accent/15 px-2 py-1 text-[11px] text-accent hover:bg-accent/25"
+                        >
+                          <FileText className="h-3 w-3" /> Open quote
+                        </button>
+                      ) : (
+                        <button
+                          disabled={draftQuote.isPending}
+                          onClick={() => { setSelectedId(r.id); draftQuote.mutate({ inquiryId: r.id, kind: quoteKind }); }}
+                          className="flex items-center gap-1 rounded-md bg-accent px-2 py-1 text-[11px] text-accent-foreground hover:opacity-90 disabled:opacity-50"
+                        >
+                          <Send className="h-3 w-3" /> Send Quote
+                        </button>
+                      )}
+                    </div>
                   </button>
                 );
               })}
