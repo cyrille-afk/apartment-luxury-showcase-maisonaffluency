@@ -191,6 +191,8 @@ export default function ProductCommerceCta({
   const setQuantity = productConfig ? productConfig.setQuantity : setLocalQuantity;
   const [miniCartOpen, setMiniCartOpen] = useState(false);
   const [bespokeOpen, setBespokeOpen] = useState(false);
+  // True when the open drawer holds a piece with no public price.
+  const [quoteOnlySelection, setQuoteOnlySelection] = useState(false);
   const cartItems = useCart();
 
   
