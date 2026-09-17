@@ -389,27 +389,31 @@ export default function SelectionDrawer({
 
           <div className="my-6 h-px bg-border/50" />
 
-          {/* 4 · Payment method selector */}
-          <p className="font-body text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
-            Payment Method
-          </p>
-          {/* Section labels share one style token with QUANTITY + YOUR SELECTION. */}
-          <div className="mt-3 flex flex-col gap-2" role="radiogroup" aria-label="Payment method">
-            <PaymentOption
-              active={method === "online"}
-              onSelect={() => setMethod("online")}
-              icon={<CreditCard className="h-4 w-4" strokeWidth={1.5} />}
-              label="Pay Securely Online"
-              subtext="Credit Card, Google Pay, Apple Pay"
-            />
-            <PaymentOption
-              active={method === "wire"}
-              onSelect={() => setMethod("wire")}
-              icon={<Landmark className="h-4 w-4" strokeWidth={1.5} />}
-              label="Bank Wire Transfer"
-              subtext="Preferred for Trade & Corporate Accounts"
-            />
-          </div>
+          {/* 4 · Payment method selector — hidden for quotation-only pieces */}
+          {!quoteOnly && (
+            <>
+              <p className="font-body text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
+                Payment Method
+              </p>
+              {/* Section labels share one style token with QUANTITY + YOUR SELECTION. */}
+              <div className="mt-3 flex flex-col gap-2" role="radiogroup" aria-label="Payment method">
+                <PaymentOption
+                  active={method === "online"}
+                  onSelect={() => setMethod("online")}
+                  icon={<CreditCard className="h-4 w-4" strokeWidth={1.5} />}
+                  label="Pay Securely Online"
+                  subtext="Credit Card, Google Pay, Apple Pay"
+                />
+                <PaymentOption
+                  active={method === "wire"}
+                  onSelect={() => setMethod("wire")}
+                  icon={<Landmark className="h-4 w-4" strokeWidth={1.5} />}
+                  label="Bank Wire Transfer"
+                  subtext="Preferred for Trade & Corporate Accounts"
+                />
+              </div>
+            </>
+          )}
 
           {/* 5 · Trust & concierge block — swaps for the inline contact widget */}
           <div className="mt-6 border border-border/50 bg-cream px-4 py-4">
