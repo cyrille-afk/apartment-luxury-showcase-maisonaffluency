@@ -275,6 +275,12 @@ export default function TradeFFESchedule() {
   );
   const isColVisible = (key: FFEColumnKey) => visibleColumns.some((c) => c.key === key);
 
+  const activePreset = useMemo(() => {
+    const sortedCurrent = [...hiddenColumns].sort().join(",");
+    const allPresets = [...DEFAULT_VIEW_PRESETS, ...customPresets];
+    return allPresets.find((p) => [...p.hidden].sort().join(",") === sortedCurrent) || null;
+  }, [hiddenColumns, customPresets]);
+
   const [filterProjectId, setFilterProjectId] = useState<string>("");
   const [filterStudioId, setFilterStudioId] = useState<string>("");
   const [filterClient, setFilterClient] = useState<string>("");
