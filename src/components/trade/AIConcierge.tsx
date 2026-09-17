@@ -5659,13 +5659,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 multiple
                 accept="image/*,application/pdf,.pdf"
                 className="hidden"
-                onChange={async (e) => {
-                  const added = await handleFilesPicked(e.target.files);
-                  if (added.length) {
-                    autoSendOnUploadRef.current = true;
-                    setAutoSendTick((n) => n + 1);
-                  }
-                }}
+                onChange={(e) => { void handleFilesPicked(e.target.files); }}
+
               />
               <input
                 ref={moodInputRef}
