@@ -316,6 +316,13 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
               : null
           }
           onOpenChange={(open) => !open && setViewingPo(false)}
+          onStatusChange={(next) => {
+            setApproval(next);
+            void Promise.all([
+              queryClient.invalidateQueries({ queryKey: ["delivery-tracker"] }),
+              queryClient.invalidateQueries({ queryKey: ["ffe-schedule"] }),
+            ]);
+          }}
         />
       )}
     </Sheet>
