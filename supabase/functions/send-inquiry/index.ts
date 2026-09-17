@@ -47,6 +47,7 @@ const InquirySchema = z.object({
   designerName: z.string().trim().max(200).optional(),
   selectedFinish: z.string().trim().max(500).optional(),
   source: z.enum(["public_product", "concierge_lead", "contact_form", "bespoke_configuration"]).optional(),
+  attachmentPath: z.string().trim().max(500).optional(),
 });
 
 const TWILIO_GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
