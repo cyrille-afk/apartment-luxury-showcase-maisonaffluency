@@ -3118,6 +3118,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     const upsertAssistant = (chunk: string) => {
       armStall();
       assistantSoFar += chunk;
+      // Guardrail 3 — semantic sanity check BEFORE the bubble renders. A
+      // freight/hub answer to an interior room or zone reply is discarded and
+      // replaced with a zone acknowledgement.
+      const verdict = validateFelixLogic(assistantSoFar, text);
+      if (!verdict.ok) {
+        felixLogicDiscardedRef.current = true;
+        assistantSoFar = verdict.response;
+      }
       setTimeline((prev) => {
         if (assistantStarted) {
           // Update the last assistant text bubble (which must be the last item)
