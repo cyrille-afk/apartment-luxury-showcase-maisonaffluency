@@ -9,6 +9,7 @@ import { coerceClearance, classifyResultFailure, countDimensionNumbers } from ".
 import { canAccessProject } from "../_shared/tenantAccess.ts";
 import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, logInspectorRun, validateRequirementsCoverage, mergeRequirementsWithText, runDiscoveryProseGuard, deterministicRedact, SAFE_FALLBACK_PROSE, parseBudgetFromText } from "../_shared/concierge-inspector.ts";
 import { resolveProjectCity, looksLikeCityAssertion, buildCityLockSystemNote, findLatestCityAssertion } from "../_shared/cityResolver.ts";
+import { extractZones, assistantAskedForZone, buildZoneLockSystemNote } from "../_shared/spatialZones.ts";
 import { installFramePersistence, serveResume } from "./_resume.ts";
 import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
 import { inferDimensionConstraints, filterRowsByDimensionConstraints, type DimensionConstraints } from "../_shared/dimensionConstraints.ts";
@@ -6352,7 +6353,44 @@ serve(async (req) => {
     // system note so Felix produces the elite TIER 1 / TIER 2 lock-in reply
     // (never a blunt "city not found").
     let cityLockNote = "";
+    // ----- ZONE GUARD — sequence-aware room/zone typology -----
+    // If Felix's previous turn asked which rooms/zones to prioritise, or the
+    // user's message contains standard spatial vocabulary, the text is a zone
+    // answer: bypass the geographic hub lookup entirely.
+    let zoneLockNote = "";
     try {
+      const prevAssistant = (() => {
+        for (let i = trimmedMessages.length - 1; i >= 0; i--) {
+          const m: any = trimmedMessages[i];
+          if (m?.role !== "assistant") continue;
+          return typeof m.content === "string" ? m.content : "";
+        }
+        return "";
+      })();
+      const zones = extractZones(lastUserMsg);
+      let sequenceZoneTurn =
+        zones.length === 0 &&
+        assistantAskedForZone(prevAssistant) &&
+        lastUserMsg.trim().length > 0 &&
+        lastUserMsg.trim().length <= 160;
+      if (sequenceZoneTurn) {
+        // The sequence rule must never swallow a genuine location correction
+        // ("actually the project is in Marrakech") given on the same turn.
+        const probe = await resolveProjectCity(lastUserMsg);
+        const isRealCity = ["exact", "alias", "fuzzy", "geocoded"].includes(probe.matchType);
+        if (isRealCity || /\b(project (is )?in|based in|located in|city|relocat|moved to)\b/i.test(lastUserMsg)) {
+          sequenceZoneTurn = false;
+        }
+      }
+      if (zones.length > 0 || sequenceZoneTurn) {
+        zoneLockNote = "\n\n" + buildZoneLockSystemNote(lastUserMsg, zones);
+        mark("zoneLock", { zones: zones.join("|").slice(0, 60), sequence: sequenceZoneTurn });
+      }
+    } catch (err) {
+      console.warn("[concierge zoneLock] parser failed", err);
+    }
+    try {
+      if (!zoneLockNote) {
       // Re-resolve the project location on EVERY turn using the latest
       // user assertion found anywhere in the thread — so a follow-up like
       // "actually Brooklyn Heights" replaces the earlier "NYC" in the
@@ -6369,6 +6407,7 @@ serve(async (req) => {
           : "";
         cityLockNote = "\n\n" + buildCityLockSystemNote(resolution) + overrideNote;
         mark("cityLock", { input: latestAssertion.slice(0, 40), hub: resolution.hub, match: resolution.matchType, refinement: isRefinement });
+      }
       }
     } catch (err) {
       console.warn("[concierge cityLock] resolver failed", err);
@@ -6387,7 +6426,7 @@ serve(async (req) => {
         model: aiModel(chosenModel),
         temperature: 0,
         messages: [
-          { role: "system", content: languageDirective + systemPrompt + cityLockNote },
+          { role: "system", content: languageDirective + systemPrompt + cityLockNote + zoneLockNote },
           ...(() => {
             // If the current user turn carries image / file parts (mood
             // board, sketch, floor plan, reference photo, PDF), inject a

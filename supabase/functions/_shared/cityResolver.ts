@@ -12,6 +12,8 @@
 // geocoder itself fails or nothing sensible comes back, we degrade to the
 // dictionary/fallback path — Felix always gets a lock-in.
 
+import { looksLikeSpatialZone } from "./spatialZones.ts";
+
 export type CityMatchType = "exact" | "alias" | "fuzzy" | "geocoded" | "fallback" | "unknown" | "gibberish";
 
 export interface CityResolution {
@@ -427,6 +429,9 @@ export function looksLikeCityAssertion(text: string): boolean {
   const t = (text || "").trim();
   if (!t) return false;
   if (t.length > 160) return false;
+  // Spatial vocabulary baseline — an interior room / zone answer
+  // ("Living and Dining room") must never enter the geographic hub lookup.
+  if (looksLikeSpatialZone(t)) return false;
   // Explicit location framing (incl. corrections and neighborhood narrows).
   if (/\b(project (is )?in|based in|located in|our project (is )?in|city[:\s]|location[:\s]|actually (it'?s )?(in )?|it'?s (actually )?in|make (it|that) |change (it|that) to|update (the )?(city|location) to|neighou?rhood|borough|district|arrondissement|zip|postcode|brownstone|townhouse|penthouse|apartment|villa|bungalow) /i.test(t + " ")) return true;
   // Short place phrases (allow up to 6 words for "Brooklyn Heights, New York").
