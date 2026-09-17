@@ -299,7 +299,15 @@ export default function TradeDeliveryTracker() {
             <div className="flex flex-wrap items-center gap-2">
               <button type="button" onClick={() => setStatusFilter("all")}>All</button>
             </div>
-            {groups.map((g) => {
+
+            {filteredGroups.length === 0 ? (
+              <div className="text-center py-16 border border-dashed border-border rounded-lg">
+                <CalendarClock className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
+                <p className="font-body text-sm text-muted-foreground">No items match the selected status filter.</p>
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {groups.map((g) => {
                   const worst = g.lines.reduce<number | null>((acc, l) => {
                     if (l.slack == null) return acc;
                     return acc == null || l.slack < acc ? l.slack : acc;
