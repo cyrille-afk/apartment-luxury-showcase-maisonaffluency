@@ -95,6 +95,12 @@ export default function PODocumentViewer({ document: po, onOpenChange, onStatusC
   const approverName = localStatus?.po_approved_by_name ?? po?.po_approved_by_name ?? null;
   const approvedAt = localStatus?.po_approved_at ?? po?.po_approved_at ?? null;
 
+  // A different line opened in the viewer must not inherit the previous sign-off.
+  useEffect(() => {
+    setLocalStatus(null);
+    setPendingAction(null);
+  }, [po?.item_id]);
+
   const managerName =
     [profile?.first_name, profile?.last_name].filter(Boolean).join(" ").trim() || profile?.email || "Studio manager";
 
