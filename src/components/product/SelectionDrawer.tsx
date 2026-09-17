@@ -517,8 +517,8 @@ export default function SelectionDrawer({
             {placing
               ? "Opening checkout…"
               : method === "online"
-                ? "Go to Checkout"
-                : "Proceed to Wire Instructions"}
+                ? "[ Proceed to Secure Checkout ]"
+                : "[ Proceed to Wire Instructions ]"}
           </button>
           {onViewCart && (
             <button
