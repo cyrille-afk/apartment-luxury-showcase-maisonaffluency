@@ -135,6 +135,9 @@ interface Line {
   sku: string | null;
   price_cents: number | null;
   currency: string;
+  po_status: string | null;
+  po_approved_by_name: string | null;
+  po_approved_at: string | null;
 }
 
 export default function TradeDeliveryTracker() {
