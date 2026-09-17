@@ -26,13 +26,24 @@ export function NewInquiriesAlert() {
   const [items, setItems] = useState<NewInquiry[]>([]);
 
   const load = async () => {
-    const { data, error } = await supabase
-      .from("inquiries")
-      .select("id, product_name, company, email, created_at")
-      .eq("status", "new")
-      .order("created_at", { ascending: false })
-      .limit(5);
-    if (!error) setItems((data ?? []) as NewInquiry[]);
+    // Pending = inquiry not yet handled OR its linked quote is still a draft (not sent).
+    const [{ data: inquiries, error }, { data: draftQuotes }] = await Promise.all([
+      supabase
+        .from("inquiries")
+        .select("id, product_name, company, email, created_at, status, linked_quote_id")
+        .in("status", ["new", "quote_drafted"])
+        .order("created_at", { ascending: false })
+        .limit(20),
+      supabase.from("trade_quotes").select("id").eq("status", "draft"),
+    ]);
+    if (error) return;
+    const draftIds = new Set((draftQuotes ?? []).map((q) => q.id));
+    const pending = (inquiries ?? []).filter(
+      (i) =>
+        i.status === "new" ||
+        (i.linked_quote_id && draftIds.has(i.linked_quote_id))
+    );
+    setItems(pending.slice(0, 5) as NewInquiry[]);
   };
 
   useEffect(() => {
