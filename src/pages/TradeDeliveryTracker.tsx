@@ -346,10 +346,16 @@ export default function TradeDeliveryTracker() {
         </tr>`,
       )
       .join("");
+    const generatedOn = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    const logoUrl = `${window.location.origin}/logo.png`;
     const html = `<!doctype html><html><head><meta charset="utf-8"><title>Delivery Tracker</title>
       <style>
         @page { size: A4 landscape; margin: 14mm; }
         body { font-family: Georgia, 'Times New Roman', serif; color: #1c1c1c; }
+        header.report-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding-bottom: 12px; margin-bottom: 18px; border-bottom: 1px solid #d4d4d4; }
+        .brand img { height: 40px; display: block; }
+        .brand .brand-name { font-size: 15px; letter-spacing: .28em; text-transform: uppercase; }
+        .generated { font-family: Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #6b7280; text-align: right; white-space: nowrap; }
         h1 { font-size: 18px; margin: 0 0 4px; }
         p.meta { font-size: 11px; color: #6b7280; margin: 0 0 16px; letter-spacing: .06em; text-transform: uppercase; }
         table { width: 100%; border-collapse: collapse; font-family: Helvetica, Arial, sans-serif; font-size: 10px; }
@@ -358,8 +364,15 @@ export default function TradeDeliveryTracker() {
         td.num { white-space: nowrap; font-variant-numeric: tabular-nums; }
         tr { break-inside: avoid; }
       </style></head><body>
+      <header class="report-header">
+        <div class="brand">
+          <img src="${logoUrl}" alt="Maison Affluency" onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
+          <span class="brand-name" style="display:none">Maison Affluency</span>
+        </div>
+        <div class="generated">Report Generated: ${escHtml(generatedOn)}</div>
+      </header>
       <h1>Delivery Tracker</h1>
-      <p class="meta">${escHtml(activeFilterLabel)} · ${exportRows.length} line${exportRows.length === 1 ? "" : "s"} · ${escHtml(new Date().toLocaleDateString())}</p>
+      <p class="meta">${escHtml(activeFilterLabel)} · ${exportRows.length} line${exportRows.length === 1 ? "" : "s"}</p>
       <table><thead><tr>
         <th>Project</th><th>Item</th><th>Brand</th><th>Qty</th><th>Client</th><th>Stage</th>
         <th>Expected ready</th><th>Required by</th><th>Status</th><th>Quote</th>
