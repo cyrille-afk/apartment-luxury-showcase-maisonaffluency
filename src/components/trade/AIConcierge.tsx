@@ -6,6 +6,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { BriefBuilder, loadBriefDraftText, validateBriefDraft } from "@/components/trade/concierge/BriefBuilder";
 import { ART_DECO_DISCOVERY_REPLY, evaluateFelixOnboardingGate, isHighLevelVisionStatement, hasRealBriefValue, type FelixBriefFacts } from "@/lib/felixOnboardingGate";
 import { loadLockedFacts, mergeLockedFacts, persistLockedFacts } from "@/lib/felixLockedFacts";
+import { readPendingBespokeSync, clearBespokeSync, bespokeSyncConfirmation } from "@/lib/bespokeSync";
 import { QuoteSummaryCardContainer } from "@/components/trade/QuoteSummaryCard";
 import { BriefBubble, isBriefContent } from "@/components/trade/concierge/BriefBubble";
 import brandCategoriesRaw from "@/data/brandCategories.json";
