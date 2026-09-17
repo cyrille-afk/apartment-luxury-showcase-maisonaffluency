@@ -407,6 +407,32 @@ export default function PODocumentViewer({ document: po, onOpenChange, onStatusC
                         <p className="font-body text-[11px] text-emerald-800/70">{stampTime(approvedAt)}</p>
                       </div>
                     </div>
+                  ) : null}
+
+                  {status === "approved" && (
+                    <p className="mt-3 font-body text-[11px] text-muted-foreground">
+                      {dispatching ? (
+                        <span className="inline-flex items-center gap-2">
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          Dispatching document to {supplier?.contact_email}…
+                        </span>
+                      ) : dispatchedTo ? (
+                        <span className="inline-flex items-center gap-2 text-emerald-700">
+                          <Send className="h-3 w-3" />
+                          Dispatched to {dispatchedTo}
+                          {supplier?.cc_email ? ` · cc ${supplier.cc_email}` : ""}
+                        </span>
+                      ) : supplier?.contact_email ? (
+                        `Supplier on file: ${supplier.supplier_name} · ${supplier.contact_email}`
+                      ) : (
+                        `No supplier email on file for ${po.brand_name}.`
+                      )}
+                    </p>
+                  )}
+
+                  {false ? (
+                    <div />
+
                   ) : status === "changes_requested" ? (
                     <div className="mt-4 flex flex-wrap items-center gap-3">
                       <span className="inline-flex items-center gap-2 rounded-sm border border-amber-300 bg-amber-50 px-3 py-2 font-body text-[11px] uppercase tracking-[0.16em] text-amber-800">
