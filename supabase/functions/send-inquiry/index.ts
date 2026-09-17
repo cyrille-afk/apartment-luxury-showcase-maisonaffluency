@@ -109,22 +109,28 @@ async function sendQuoteWhatsAppAlert(
   const twilioKey = Deno.env.get("TWILIO_API_KEY");
   if (!to || !from || !lovableKey || !twilioKey) return;
 
+  // Every variable is trimmed and collapsed so the WhatsApp layout never shows
+  // ragged spacing, stray line breaks or an empty row.
+  const clean = (v?: string | null) => (v ?? "").replace(/\s+/g, " ").trim();
   const vars = {
-    "1": inquiry.company || "Not provided",
-    "2": inquiry.productName || "(unknown)",
-    "3": inquiry.selectedFinish || "Not specified",
-    "4": inquiry.email,
-    "5": inquiry.phone || "Not provided",
+    "1": clean(inquiry.company) || "Private client",
+    "2": clean(inquiry.productName) || "Unlisted piece",
+    "3": clean(inquiry.selectedFinish) || "As presented",
+    "4": clean(inquiry.email),
+    "5": clean(inquiry.phone) || "—",
   };
 
-  const body = `🚨 *New Quote Request on Maison Affluency!*
-• *Company:* ${vars["1"]}
-• *Product:* ${vars["2"]}
-• *Finish:* ${vars["3"]}
-• *Client Email:* ${vars["4"]}
-• *Client Phone:* ${vars["5"]}
-
-View details: https://www.maisonaffluency.com/trade/admin/inquiries`;
+  const body = [
+    "🚨 *New Quote Request on Maison Affluency*",
+    "",
+    `• *Company:* ${vars["1"]}`,
+    `• *Product:* ${vars["2"]}`,
+    `• *Finish:* ${vars["3"]}`,
+    `• *Client Email:* ${vars["4"]}`,
+    `• *Client Phone:* ${vars["5"]}`,
+    "",
+    "Review: https://www.maisonaffluency.com/trade/admin/inquiries",
+  ].join("\n");
 
   // Ask Twilio to POST delivery updates back to us so the admin page has a
   // real history instead of only on-demand lookups.
