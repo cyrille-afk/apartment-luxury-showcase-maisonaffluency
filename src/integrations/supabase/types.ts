@@ -7880,6 +7880,8 @@ export type Database = {
         Row: {
           axonometric_image_url: string | null
           cost_code: string | null
+          crating_cents: number | null
+          crating_currency: string | null
           created_at: string
           deposit_pct_override: number | null
           expected_ready_override: string | null
@@ -7927,6 +7929,8 @@ export type Database = {
         Insert: {
           axonometric_image_url?: string | null
           cost_code?: string | null
+          crating_cents?: number | null
+          crating_currency?: string | null
           created_at?: string
           deposit_pct_override?: number | null
           expected_ready_override?: string | null
@@ -7974,6 +7978,8 @@ export type Database = {
         Update: {
           axonometric_image_url?: string | null
           cost_code?: string | null
+          crating_cents?: number | null
+          crating_currency?: string | null
           created_at?: string
           deposit_pct_override?: number | null
           expected_ready_override?: string | null
