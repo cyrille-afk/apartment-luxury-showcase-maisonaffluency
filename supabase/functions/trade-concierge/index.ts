@@ -6368,8 +6368,20 @@ serve(async (req) => {
         return "";
       })();
       const zones = extractZones(lastUserMsg);
-      const sequenceZoneTurn =
-        assistantAskedForZone(prevAssistant) && lastUserMsg.trim().length > 0 && lastUserMsg.trim().length <= 160;
+      let sequenceZoneTurn =
+        zones.length === 0 &&
+        assistantAskedForZone(prevAssistant) &&
+        lastUserMsg.trim().length > 0 &&
+        lastUserMsg.trim().length <= 160;
+      if (sequenceZoneTurn) {
+        // The sequence rule must never swallow a genuine location correction
+        // ("actually the project is in Marrakech") given on the same turn.
+        const probe = await resolveProjectCity(lastUserMsg);
+        const isRealCity = ["exact", "alias", "fuzzy", "geocoded"].includes(probe.matchType);
+        if (isRealCity || /\b(project (is )?in|based in|located in|city|relocat|moved to)\b/i.test(lastUserMsg)) {
+          sequenceZoneTurn = false;
+        }
+      }
       if (zones.length > 0 || sequenceZoneTurn) {
         zoneLockNote = "\n\n" + buildZoneLockSystemNote(lastUserMsg, zones);
         mark("zoneLock", { zones: zones.join("|").slice(0, 60), sequence: sequenceZoneTurn });
