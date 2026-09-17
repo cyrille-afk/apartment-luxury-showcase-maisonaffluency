@@ -109,22 +109,28 @@ async function sendQuoteWhatsAppAlert(
   const twilioKey = Deno.env.get("TWILIO_API_KEY");
   if (!to || !from || !lovableKey || !twilioKey) return;
 
+  // Every variable is trimmed and collapsed so the WhatsApp layout never shows
+  // ragged spacing, stray line breaks or an empty row.
+  const clean = (v?: string | null) => (v ?? "").replace(/\s+/g, " ").trim();
   const vars = {
-    "1": inquiry.company || "Not provided",
-    "2": inquiry.productName || "(unknown)",
-    "3": inquiry.selectedFinish || "Not specified",
-    "4": inquiry.email,
-    "5": inquiry.phone || "Not provided",
+    "1": clean(inquiry.company) || "Private client",
+    "2": clean(inquiry.productName) || "Unlisted piece",
+    "3": clean(inquiry.selectedFinish) || "As presented",
+    "4": clean(inquiry.email),
+    "5": clean(inquiry.phone) || "—",
   };
 
-  const body = `🚨 *New Quote Request on Maison Affluency!*
-• *Company:* ${vars["1"]}
-• *Product:* ${vars["2"]}
-• *Finish:* ${vars["3"]}
-• *Client Email:* ${vars["4"]}
-• *Client Phone:* ${vars["5"]}
-
-View details: https://www.maisonaffluency.com/trade/admin/inquiries`;
+  const body = [
+    "🚨 *New Quote Request on Maison Affluency*",
+    "",
+    `• *Company:* ${vars["1"]}`,
+    `• *Product:* ${vars["2"]}`,
+    `• *Finish:* ${vars["3"]}`,
+    `• *Client Email:* ${vars["4"]}`,
+    `• *Client Phone:* ${vars["5"]}`,
+    "",
+    "Review: https://www.maisonaffluency.com/trade/admin/inquiries",
+  ].join("\n");
 
   // Ask Twilio to POST delivery updates back to us so the admin page has a
   // real history instead of only on-demand lookups.
@@ -277,13 +283,15 @@ const handler = async (req: Request): Promise<Response> => {
     // Signed-in callers (e.g. the trade registration form, which submits right
     // after sign-up) are already authenticated, so the bot check is skipped.
     let isAuthenticated = false;
+    let authUserId: string | null = null;
     const authHeader = req.headers.get("authorization") || "";
     const bearer = authHeader.toLowerCase().startsWith("bearer ") ? authHeader.slice(7) : "";
     if (bearer && bearer !== Deno.env.get("SUPABASE_ANON_KEY")) {
       try {
         const authClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
         const { data: claimsData } = await authClient.auth.getClaims(bearer);
-        isAuthenticated = !!claimsData?.claims?.sub;
+        authUserId = (claimsData?.claims?.sub as string | undefined) ?? null;
+        isAuthenticated = !!authUserId;
       } catch (_e) {
         isAuthenticated = false;
       }
@@ -300,10 +308,59 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
 
-    const companyName = firm || company || "";
     console.log("Received inquiry from:", name, email);
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Verified trade members: resolve the registered business entity title from
+    // their profile (falling back to the approved trade application) so the
+    // concierge alert never reads "Not provided" for a known studio.
+    let companyName = (firm || company || "").trim();
+    if (!companyName && authUserId) {
+      try {
+        const { data: profileRow } = await supabase
+          .from("profiles")
+          .select("company, trade_status")
+          .eq("id", authUserId)
+          .maybeSingle();
+        companyName = (profileRow?.company || "").trim();
+        if (!companyName) {
+          const { data: appRow } = await supabase
+            .from("trade_applications")
+            .select("company_name")
+            .eq("user_id", authUserId)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          companyName = (appRow?.company_name || "").trim();
+        }
+      } catch (e) {
+        console.error("Trade profile company lookup failed:", e);
+      }
+    }
+
+    // Active finish: the client sends the highlighted canvas selection. If it
+    // is still missing (legacy callers), read the piece's own default finish
+    // so the alert carries a real configuration string.
+    let resolvedFinish = (selectedFinish || "").trim();
+    if (!resolvedFinish && (productId || productSlug)) {
+      try {
+        const q = supabase
+          .from("designer_curator_picks")
+          .select("size_variants, materials")
+          .limit(1);
+        const { data: pickRow } = productId
+          ? await q.eq("id", productId).maybeSingle()
+          : await q.eq("slug", productSlug!).maybeSingle();
+        const variants = (pickRow?.size_variants || []) as Array<{ label?: string; base?: string; top?: string }>;
+        const first = variants[0];
+        resolvedFinish =
+          [first?.base, first?.top, first?.label].filter(Boolean).join(" / ").trim() ||
+          (pickRow?.materials || "").trim();
+      } catch (e) {
+        console.error("Default finish lookup failed:", e);
+      }
+    }
 
     const idStem = crypto.randomUUID();
 
@@ -340,7 +397,7 @@ const handler = async (req: Request): Promise<Response> => {
       product_slug: productSlug || null,
       product_name: productName || null,
       designer_name: designerName || null,
-      selected_finish: selectedFinish || null,
+      selected_finish: resolvedFinish || null,
       attachment_path: attachmentPath || null,
       status: "new",
       ip_address: clientIp === "unknown" ? null : clientIp,
@@ -361,7 +418,7 @@ const handler = async (req: Request): Promise<Response> => {
         phone,
         company: companyName,
         productName,
-        selectedFinish,
+        selectedFinish: resolvedFinish,
       }).catch((err) => console.error("Quote WhatsApp alert unhandled:", err));
     }
 
@@ -386,7 +443,7 @@ const handler = async (req: Request): Promise<Response> => {
               subject,
               productName,
               designerName,
-              selectedFinish,
+              selectedFinish: resolvedFinish,
               attachmentUrl,
             },
           },
