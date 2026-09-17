@@ -106,6 +106,11 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
 
   useEffect(() => {
     setViewingPo(false);
+    setApproval({
+      po_status: item?.po_status || "pending",
+      po_approved_by_name: item?.po_approved_by_name || null,
+      po_approved_at: item?.po_approved_at || null,
+    });
     setPoNumber(item?.po_number || "");
     setCostCode(item?.cost_code || "");
     setRequiredBy(item?.required_by_date || "");
