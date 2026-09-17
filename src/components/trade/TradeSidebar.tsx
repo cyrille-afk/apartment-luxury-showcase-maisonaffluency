@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderKanban,
-  DollarSign, ClipboardList, Package, FileText, Settings, Wrench, UserCircle, Wand2, Image, Users,
+  DollarSign, ClipboardList, Package, FileText, Settings, Wrench, UserCircle, Wand2, Image, Users, Inbox,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
@@ -282,6 +282,18 @@ export function TradeSidebar() {
                       {collapsed && totalBadge > 0 && (
                         <span className="absolute top-0 right-0 w-2 h-2 bg-muted-foreground" />
                       )}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to="/trade/admin/inquiries"
+                      className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      activeClassName="text-foreground font-medium"
+                    >
+                      <Inbox className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>Quote Requests</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
