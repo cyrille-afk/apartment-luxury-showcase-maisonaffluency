@@ -15,6 +15,9 @@ import { Progress } from "@/components/ui/progress";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip as RTooltip, XAxis, YAxis,
+} from "recharts";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
 
@@ -35,6 +38,7 @@ interface BudgetItem {
   client_name: string | null;
   project_id: string | null;
   project_name: string | null;
+  quote_created_at: string | null;
   deposit_pct: number;       // 0..1
 }
 
@@ -156,6 +160,7 @@ export default function TradeBudgetTracker() {
           client_name: q?.client_name || null,
           project_id: q?.project_id || null,
           project_name: q?.project_id ? projectMap[q.project_id] || null : null,
+          quote_created_at: q?.created_at || null,
           deposit_pct: item.deposit_pct_override ?? 0.5,
         } as BudgetItem;
       });
@@ -240,6 +245,63 @@ export default function TradeBudgetTracker() {
     return Array.from(map.values()).sort((a, b) => b.client - a.client);
   }, [filteredRows]);
 
+  /* --- cash flow timeline ------------------------------------------ */
+  const cashFlow = useMemo(() => {
+    if (!filteredRows.length) return [] as { label: string; inflow: number; outflow: number; buffer: number }[];
+
+    const monthKey = (d: Date) => d.getFullYear() * 12 + d.getMonth();
+    const anchors = filteredRows.map((r) => new Date(r.it.quote_created_at || Date.now()));
+    const startKey = Math.min(...anchors.map(monthKey));
+
+    // Milestone model: deposit invoice settles in the quote month; the final
+    // balance is projected 4 months later. Supplier payouts follow the deposit
+    // (60% of cost on order release) with the remainder at shipment (+3 months).
+    const FINAL_OFFSET = 4;
+    const PO_BALANCE_OFFSET = 3;
+    const horizon = 6;
+
+    const buckets = new Map<number, { in: number; out: number }>();
+    const bump = (k: number, field: "in" | "out", amount: number) => {
+      const b = buckets.get(k) || { in: 0, out: 0 };
+      b[field] += amount;
+      buckets.set(k, b);
+    };
+
+    filteredRows.forEach((r) => {
+      const k = monthKey(new Date(r.it.quote_created_at || Date.now()));
+      if (r.collected > 0) {
+        bump(k, "in", r.collected);
+        bump(k, "out", Math.round(r.cost * 0.6));
+        bump(k + PO_BALANCE_OFFSET, "out", r.cost - Math.round(r.cost * 0.6));
+      }
+      bump(k + FINAL_OFFSET, "in", r.balanceDue);
+    });
+
+    const endKey = Math.max(startKey + horizon, ...Array.from(buckets.keys()));
+    const out: { label: string; inflow: number; outflow: number; buffer: number }[] = [];
+    let cIn = 0, cOut = 0;
+    for (let k = startKey; k <= endKey; k++) {
+      const b = buckets.get(k) || { in: 0, out: 0 };
+      cIn += b.in;
+      cOut += b.out;
+      const date = new Date(Math.floor(k / 12), k % 12, 1);
+      out.push({
+        label: date.toLocaleDateString("en", { month: "short", year: "2-digit" }),
+        inflow: Math.round(cIn / 100),
+        outflow: Math.round(cOut / 100),
+        buffer: Math.round((cIn - cOut) / 100),
+      });
+    }
+    return out;
+  }, [filteredRows]);
+
+  const axisMoney = (v: number) => {
+    const symbol = currency === "USD" ? "$" : currency === "GBP" ? "£" : currency === "SGD" ? "S$" : "€";
+    if (Math.abs(v) >= 1000) return `${symbol}${(v / 1000).toFixed(0)}K`;
+    return `${symbol}${v}`;
+  };
+
+
   const d = isCompact
     ? { th: "px-2 py-1.5", td: "px-2 py-1", text: "text-[10px]", ctl: "h-6 text-[10px]" }
     : { th: "px-3 py-3", td: "px-3 py-2.5", text: "text-xs", ctl: "h-8 text-xs" };
@@ -295,6 +357,100 @@ export default function TradeBudgetTracker() {
                 </div>
               ))}
             </div>
+
+            {/* Cash Flow Health */}
+            <div className="rounded-lg border border-border bg-card p-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+                <div>
+                  <h2 className="font-display text-lg text-foreground">Cash Flow Health</h2>
+                  <p className="font-body text-xs text-muted-foreground">
+                    Cumulative client inflow against supplier payouts — the shaded band is your cash buffer.
+                  </p>
+                </div>
+                <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Lowest projected buffer: {money(cashFlow.length ? Math.min(...cashFlow.map((p) => p.buffer)) * 100 : 0, currency)}
+                </span>
+              </div>
+              {cashFlow.length === 0 ? (
+                <p className="py-10 text-center font-body text-sm text-muted-foreground">
+                  No cash-flow data yet — it builds as quotes and deposits are recorded.
+                </p>
+              ) : (
+                <div className="h-[280px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={cashFlow} margin={{ top: 8, right: 16, bottom: 0, left: 8 }}>
+                      <defs>
+                        <linearGradient id="inflowFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="hsl(152 55% 38%)" stopOpacity={0.28} />
+                          <stop offset="100%" stopColor="hsl(152 55% 38%)" stopOpacity={0.02} />
+                        </linearGradient>
+                        <linearGradient id="outflowFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="hsl(0 65% 50%)" stopOpacity={0.22} />
+                          <stop offset="100%" stopColor="hsl(0 65% 50%)" stopOpacity={0.02} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                      <XAxis
+                        dataKey="label"
+                        tick={{ fontSize: 11 }}
+                        stroke="hsl(var(--muted-foreground))"
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        tickFormatter={axisMoney}
+                        tick={{ fontSize: 11 }}
+                        stroke="hsl(var(--muted-foreground))"
+                        tickLine={false}
+                        axisLine={false}
+                        width={62}
+                      />
+                      <RTooltip
+                        formatter={(value: any, name: any) => [axisMoney(Number(value)), name]}
+                        labelFormatter={(l) => `Timeline: ${l}`}
+                        contentStyle={{
+                          borderRadius: 8,
+                          border: "1px solid hsl(var(--border))",
+                          background: "hsl(var(--card))",
+                          fontSize: 12,
+                        }}
+                      />
+                      <Legend wrapperStyle={{ fontSize: 11 }} />
+                      <Area
+                        type="monotone"
+                        dataKey="inflow"
+                        name="Client inflow"
+                        stroke="hsl(152 55% 32%)"
+                        strokeWidth={2}
+                        fill="url(#inflowFill)"
+                        activeDot={{ r: 4 }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="outflow"
+                        name="Supplier outbound"
+                        stroke="hsl(0 65% 45%)"
+                        strokeWidth={2}
+                        fill="url(#outflowFill)"
+                        activeDot={{ r: 4 }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="buffer"
+                        name="Cash buffer"
+                        stroke="hsl(var(--muted-foreground))"
+                        strokeDasharray="4 4"
+                        strokeWidth={1}
+                        fill="none"
+                        activeDot={{ r: 3 }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </div>
+
+
 
             {/* Toolbar */}
             <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card/60 px-3 py-2">
