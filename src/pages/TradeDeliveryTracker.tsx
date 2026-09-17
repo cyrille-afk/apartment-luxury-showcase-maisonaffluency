@@ -403,6 +403,7 @@ export default function TradeDeliveryTracker() {
           </div>
         )}
       </div>
+    )}
 
       <Dialog open={!!previewLine} onOpenChange={(open) => !open && setPreviewLine(null)}>
         <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0 sm:rounded-lg">
