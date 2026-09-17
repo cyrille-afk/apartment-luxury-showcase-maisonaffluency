@@ -3,7 +3,15 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X, Filter } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X, Filter, Columns3 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -56,6 +64,45 @@ interface FFEItem {
 }
 
 const QUOTE_REF = (id: string) => `QU-${id.slice(0, 6).toUpperCase()}`;
+
+type FFEColumnKey =
+  | "image" | "po" | "cost_code" | "item" | "brand" | "project" | "client" | "studio"
+  | "qty" | "unit_trade" | "total" | "lead" | "stage" | "expected" | "required" | "slack" | "quote";
+
+const FFE_COLUMNS: { key: FFEColumnKey; label: string; locked?: boolean; width: string }[] = [
+  { key: "image", label: "Image", locked: true, width: "w-[4%]" },
+  { key: "po", label: "PO #", width: "w-[6%]" },
+  { key: "cost_code", label: "Cost Code", width: "w-[5%]" },
+  { key: "item", label: "Item", locked: true, width: "w-[11%]" },
+  { key: "brand", label: "Brand", width: "w-[7%]" },
+  { key: "project", label: "Project", width: "w-[7%]" },
+  { key: "client", label: "Client", width: "w-[6%]" },
+  { key: "studio", label: "Studio", width: "w-[5%]" },
+  { key: "qty", label: "Qty", width: "w-[3%]" },
+  { key: "unit_trade", label: "Unit Trade", width: "w-[6%]" },
+  { key: "total", label: "Total", width: "w-[6%]" },
+  { key: "lead", label: "Lead", width: "w-[4%]" },
+  { key: "stage", label: "Stage", width: "w-[6%]" },
+  { key: "expected", label: "Expected ready", width: "w-[7%]" },
+  { key: "required", label: "Required by", width: "w-[8%]" },
+  { key: "slack", label: "Slack", width: "w-[5%]" },
+  { key: "quote", label: "Quote", locked: true, width: "w-[4%]" },
+];
+
+const FFE_COLS_STORAGE_KEY = "ffe-schedule-hidden-columns-v1";
+
+function loadHiddenColumns(): FFEColumnKey[] {
+  try {
+    const raw = localStorage.getItem(FFE_COLS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    const valid = new Set(FFE_COLUMNS.map((c) => c.key));
+    return parsed.filter((k): k is FFEColumnKey => valid.has(k) && !FFE_COLUMNS.find((c) => c.key === k)?.locked);
+  } catch {
+    return [];
+  }
+}
 
 const STAGE_LABEL: Record<string, string> = {
   not_started: "Not started",
@@ -127,6 +174,21 @@ export default function TradeFFESchedule() {
   const { projectFilter, clearProjectFilter } = useProjectFilter();
   const [projectName, setProjectName] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<FFEItem | null>(null);
+  const [hiddenColumns, setHiddenColumns] = useState<FFEColumnKey[]>(() => loadHiddenColumns());
+
+  const toggleColumn = (key: FFEColumnKey, visible: boolean) => {
+    setHiddenColumns((prev) => {
+      const next = visible ? prev.filter((k) => k !== key) : [...prev, key];
+      try { localStorage.setItem(FFE_COLS_STORAGE_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+      return next;
+    });
+  };
+
+  const visibleColumns = useMemo(
+    () => FFE_COLUMNS.filter((c) => c.locked || !hiddenColumns.includes(c.key)),
+    [hiddenColumns]
+  );
+  const isColVisible = (key: FFEColumnKey) => visibleColumns.some((c) => c.key === key);
 
   const [filterProjectId, setFilterProjectId] = useState<string>("");
   const [filterStudioId, setFilterStudioId] = useState<string>("");
@@ -489,6 +551,33 @@ export default function TradeFFESchedule() {
                   Clear <X className="h-3 w-3" />
                 </button>
               )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="ml-auto h-8 gap-1.5 font-body text-[11px]">
+                    <Columns3 className="h-3.5 w-3.5" />
+                    Columns
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 max-h-80 overflow-y-auto">
+                  <DropdownMenuLabel className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Toggle columns
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {FFE_COLUMNS.map((col) => (
+                    <DropdownMenuCheckboxItem
+                      key={col.key}
+                      checked={!hiddenColumns.includes(col.key)}
+                      disabled={col.locked}
+                      onCheckedChange={(checked) => toggleColumn(col.key, checked === true)}
+                      onSelect={(e) => e.preventDefault()}
+                      className="font-body text-xs"
+                    >
+                      {col.label}
+                      {col.locked && <span className="ml-auto text-[9px] uppercase tracking-wider text-muted-foreground/60">Locked</span>}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {filteredItems.length === 0 ? (
@@ -500,19 +589,16 @@ export default function TradeFFESchedule() {
                   <div className="max-w-full min-w-0 overflow-x-auto overscroll-x-contain border border-border rounded-lg">
               <table className="w-full min-w-[1280px] table-fixed text-left text-[11px] 2xl:min-w-0">
                 <colgroup>
-                  <col className="w-[4%]" /><col className="w-[6%]" /><col className="w-[5%]" /><col className="w-[11%]" />
-                  <col className="w-[7%]" /><col className="w-[7%]" /><col className="w-[6%]" /><col className="w-[5%]" />
-                  <col className="w-[3%]" /><col className="w-[6%]" /><col className="w-[6%]" /><col className="w-[4%]" />
-                  <col className="w-[6%]" /><col className="w-[7%]" /><col className="w-[8%]" /><col className="w-[5%]" /><col className="w-[4%]" />
+                  {visibleColumns.map((c) => <col key={c.key} className={c.width} />)}
                 </colgroup>
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
-                    {["", "PO #", "Cost Code", "Item", "Brand", "Project", "Client", "Studio", "Qty", "Unit Trade", "Total", "Lead", "Stage", "Expected ready", "Required by", "Slack", "Quote"].map((h, idx) => (
+                    {visibleColumns.map((c) => (
                       <th
-                        key={idx}
-                        className={`${idx === 0 ? "sticky left-0 z-20 border-r border-border/70 bg-muted text-center" : ""} ${idx === 16 ? "sticky right-0 z-20 border-l border-border/70 bg-muted text-center" : ""} px-1.5 py-3 font-body text-[9px] uppercase tracking-wider text-muted-foreground xl:px-2`}
+                        key={c.key}
+                        className={`${c.key === "image" ? "sticky left-0 z-20 border-r border-border/70 bg-muted text-center" : ""} ${c.key === "quote" ? "sticky right-0 z-20 border-l border-border/70 bg-muted text-center" : ""} px-1.5 py-3 font-body text-[9px] uppercase tracking-wider text-muted-foreground xl:px-2`}
                       >
-                        {h}
+                        {c.key === "image" ? "" : c.label}
                       </th>
                     ))}
                   </tr>
@@ -541,11 +627,11 @@ export default function TradeFFESchedule() {
                           )}
                           </div>
                         </td>
-                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground tabular-nums xl:px-2"><TruncatedCellText value={item.po_number || "auto"} className={item.po_number ? "" : "italic text-muted-foreground/60"} /></td>
-                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.cost_code} /></td>
+                        {isColVisible("po") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground tabular-nums xl:px-2"><TruncatedCellText value={item.po_number || "auto"} className={item.po_number ? "" : "italic text-muted-foreground/60"} /></td>}
+                        {isColVisible("cost_code") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.cost_code} /></td>}
                         <td className="px-1.5 py-3 font-body text-xs text-foreground xl:px-2"><TruncatedCellText value={item.product_name} /></td>
-                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.brand_name} /></td>
-                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2">
+                        {isColVisible("brand") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.brand_name} /></td>}
+                        {isColVisible("project") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2">
                           {item.project_id ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -556,16 +642,16 @@ export default function TradeFFESchedule() {
                               <TooltipContent side="top" className="max-w-sm break-words font-body text-xs">{item.project_name || "—"}</TooltipContent>
                             </Tooltip>
                           ) : "—"}
-                        </td>
-                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.client_name} /></td>
-                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.studio_name} /></td>
-                        <td className="px-1.5 py-3 text-center font-body text-xs text-foreground xl:px-2">{item.quantity}</td>
-                        <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-foreground tabular-nums xl:px-2">{item.unit_price_cents ? `€${(item.unit_price_cents / 100).toFixed(0)}` : "TBD"}</td>
-                        <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] font-medium text-foreground tabular-nums xl:px-2">{item.unit_price_cents ? `€${((item.unit_price_cents * item.quantity) / 100).toFixed(0)}` : "TBD"}</td>
-                        <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2">{lead === 0 ? <span className="text-emerald-700 font-medium">In stock</span> : lead != null ? `${lead} wks` : "—"}</td>
-                        <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={STAGE_LABEL[item.kanban_status || ""] || item.kanban_status} /></td>
-                        <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-muted-foreground tabular-nums xl:px-2">{fmtDate(expected)}</td>
-                        <td className="px-1.5 py-3 font-body text-[11px] xl:px-2">
+                        </td>}
+                        {isColVisible("client") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.client_name} /></td>}
+                        {isColVisible("studio") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={item.studio_name} /></td>}
+                        {isColVisible("qty") && <td className="px-1.5 py-3 text-center font-body text-xs text-foreground xl:px-2">{item.quantity}</td>}
+                        {isColVisible("unit_trade") && <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-foreground tabular-nums xl:px-2">{item.unit_price_cents ? `€${(item.unit_price_cents / 100).toFixed(0)}` : "TBD"}</td>}
+                        {isColVisible("total") && <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] font-medium text-foreground tabular-nums xl:px-2">{item.unit_price_cents ? `€${((item.unit_price_cents * item.quantity) / 100).toFixed(0)}` : "TBD"}</td>}
+                        {isColVisible("lead") && <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2">{lead === 0 ? <span className="text-emerald-700 font-medium">In stock</span> : lead != null ? `${lead} wks` : "—"}</td>}
+                        {isColVisible("stage") && <td className="px-1.5 py-3 font-body text-[11px] text-muted-foreground xl:px-2"><TruncatedCellText value={STAGE_LABEL[item.kanban_status || ""] || item.kanban_status} /></td>}
+                        {isColVisible("expected") && <td className="whitespace-nowrap px-1.5 py-3 font-body text-[11px] text-muted-foreground tabular-nums xl:px-2">{fmtDate(expected)}</td>}
+                        {isColVisible("required") && <td className="px-1.5 py-3 font-body text-[11px] xl:px-2">
                           <input
                             type="date"
                             defaultValue={item.required_by_date || ""}
@@ -575,8 +661,8 @@ export default function TradeFFESchedule() {
                             }}
                             className="w-full min-w-0 rounded border border-border bg-background px-1 py-0.5 font-body text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                           />
-                        </td>
-                        <td className="px-1.5 py-3 text-center font-body text-[11px] xl:px-2">{slackBadge(slackDays)}</td>
+                        </td>}
+                        {isColVisible("slack") && <td className="px-1.5 py-3 text-center font-body text-[11px] xl:px-2">{slackBadge(slackDays)}</td>}
                         <td className="sticky right-0 z-10 border-l border-border/60 bg-background px-1 py-3 text-center font-body text-[11px] transition-colors group-hover:bg-muted">
                           <Button type="button" variant="ghost" size="sm" className="h-7 max-w-full px-1.5 text-[9px] tabular-nums" onClick={() => setSelectedItem(item)} title={`Open ${item.quote_ref}`}>
                             {item.quote_ref}
@@ -587,13 +673,27 @@ export default function TradeFFESchedule() {
                   })}
                 </tbody>
                 <tfoot>
-                  <tr className="bg-muted/30">
-                    <td colSpan={10} className="px-4 py-3 font-body text-sm text-foreground font-medium text-right">Total</td>
-                    <td className="px-4 py-3 font-display text-sm text-foreground font-semibold">
-                      {totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}
-                    </td>
-                    <td colSpan={6} className="sticky right-0 border-l border-border/60 bg-muted" />
-                  </tr>
+                  {(() => {
+                    const totalIdx = visibleColumns.findIndex((c) => c.key === "total");
+                    if (totalIdx < 0) {
+                      return (
+                        <tr className="bg-muted/30">
+                          <td colSpan={visibleColumns.length} className="sticky right-0 border-l border-border/60 bg-muted px-4 py-3 font-body text-sm text-foreground font-medium text-right">
+                            Total <span className="font-display font-semibold">{totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}</span>
+                          </td>
+                        </tr>
+                      );
+                    }
+                    return (
+                      <tr className="bg-muted/30">
+                        <td colSpan={totalIdx} className="px-4 py-3 font-body text-sm text-foreground font-medium text-right">Total</td>
+                        <td className="px-4 py-3 font-display text-sm text-foreground font-semibold">
+                          {totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}
+                        </td>
+                        <td colSpan={visibleColumns.length - totalIdx - 1} className="sticky right-0 border-l border-border/60 bg-muted" />
+                      </tr>
+                    );
+                  })()}
                 </tfoot>
               </table>
             </div>

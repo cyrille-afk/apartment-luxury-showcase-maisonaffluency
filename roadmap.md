@@ -95,3 +95,4 @@
 - [x] Replace Felix STAGE pill with synchronized four-step premium progress pipeline
 - [x] Optimize the main FF&E Schedule for wide desktops with fluid columns, clipped-cell tooltips, table-only overflow, and sticky image/quote edges
 - [x] Refine the product lightbox action hierarchy and replace full-page Creation essays with stacked dynamic Curator Notes
+- [x] FF&E Schedule column visibility toggle: Columns dropdown with per-column checkboxes, locked Image/Item/Quote, instant show/hide, localStorage persistence (ffe-schedule-hidden-columns-v1)
