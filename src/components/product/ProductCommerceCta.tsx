@@ -422,12 +422,12 @@ export default function ProductCommerceCta({
               {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
               {placingOrder ? "Opening checkout…" : finishSelectionRequired ? "Choose Finishes" : primaryLabel}
             </button>
-            {/* Secondary: high-touch / contract buyers — routes explicitly to
-                the Trade Account inquiry form. */}
+            {/* Secondary: high-touch / contract buyers — opens the bespoke
+                configuration dialog on the product canvas. */}
             <button
               type="button"
               data-commerce-quote
-              onClick={goToTradeInquiry}
+              onClick={openBespoke}
               className={secondaryBtn}
             >
               Request a Bespoke Quote / Customisation
