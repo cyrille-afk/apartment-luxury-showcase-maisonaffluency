@@ -16,8 +16,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
 import { useToast } from "@/hooks/use-toast";
+import { purchaseOrderPdfBase64 } from "@/lib/purchaseOrderPdf";
 
 export type POApprovalStatus = "pending" | "approved" | "changes_requested";
+
+interface SupplierRecord {
+  id: string;
+  supplier_name: string;
+  contact_email: string;
+  cc_email: string | null;
+  brand_aliases?: string[] | null;
+}
+
 
 export interface PODocumentData {
   item_id?: string;
@@ -90,6 +100,10 @@ export default function PODocumentViewer({ document: po, onOpenChange, onStatusC
     po_approved_by_name: string | null;
     po_approved_at: string | null;
   } | null>(null);
+  const [supplier, setSupplier] = useState<SupplierRecord | null>(null);
+  const [dispatching, setDispatching] = useState(false);
+  const [dispatchedTo, setDispatchedTo] = useState<string | null>(null);
+
 
   const status = (localStatus?.po_status ?? (po?.po_status as POApprovalStatus) ?? "pending") as POApprovalStatus;
   const approverName = localStatus?.po_approved_by_name ?? po?.po_approved_by_name ?? null;
