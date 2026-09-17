@@ -553,7 +553,9 @@ export default function ProductCommerceCta({
           finishLabel={
             orderFinishLabel ||
             (selectedFinishes.length ? selectedFinishes.join(" / ") : null) ||
-            (materials || "").trim() ||
+            // Nothing manually chosen: fall back to the finish currently
+            // highlighted on the canvas (first selectable swatch).
+            finishOptions?.[0] ||
             null
           }
           imageUrl={imageUrl}
