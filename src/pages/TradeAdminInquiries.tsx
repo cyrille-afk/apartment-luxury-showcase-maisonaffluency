@@ -262,6 +262,18 @@ export default function TradeAdminInquiries() {
                           <Send className="h-3 w-3" /> Send Quote
                         </button>
                       )}
+                      <button
+                        title="Delete inquiry"
+                        disabled={deleteInquiry.isPending}
+                        onClick={() => {
+                          if (window.confirm(`Delete this inquiry from ${r.name}? This cannot be undone.`)) {
+                            deleteInquiry.mutate([r.id]);
+                          }
+                        }}
+                        className="ml-auto flex items-center gap-1 rounded-md border border-destructive/40 px-2 py-1 text-[11px] text-destructive hover:bg-destructive/10 disabled:opacity-50"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
                     </div>
                   </button>
                 );
@@ -460,6 +472,17 @@ export default function TradeAdminInquiries() {
                       Mark sent
                     </button>
                   )}
+                  <button
+                    disabled={deleteInquiry.isPending}
+                    onClick={() => {
+                      if (window.confirm(`Permanently delete this inquiry from ${selected.name}?`)) {
+                        deleteInquiry.mutate([selected.id]);
+                      }
+                    }}
+                    className="ml-auto flex items-center gap-1 rounded-md border border-destructive/40 px-3 py-1.5 text-xs text-destructive hover:bg-destructive/10 disabled:opacity-50"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Delete
+                  </button>
                 </div>
               </>
             )}
