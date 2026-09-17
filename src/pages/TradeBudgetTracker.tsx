@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Wallet, TrendingUp, Percent, Banknote, Search, X, CheckCircle2, AlertTriangle,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -100,6 +101,7 @@ export default function TradeBudgetTracker() {
   const [isCompact, setIsCompact] = useState(() => {
     try { return localStorage.getItem(COMPACT_KEY) === "1"; } catch { return false; }
   });
+  const [globalMarkupPct, setGlobalMarkupPct] = useState(0);
 
   useEffect(() => {
     try { localStorage.setItem(COMPACT_KEY, isCompact ? "1" : "0"); } catch { /* ignore */ }
@@ -187,7 +189,7 @@ export default function TradeBudgetTracker() {
     return items.map((it) => {
       const cfg = cfgFor(it);
       const cost = it.unit_cost_cents * it.quantity;
-      const mk = markupPct(cfg);
+      const mk = markupPct(cfg) + globalMarkupPct / 100;
       const clientPrice = Math.round(cost * (1 + mk));
       const margin = clientPrice - cost;
       const marginPct = clientPrice > 0 ? (margin / clientPrice) * 100 : 0;
@@ -295,6 +297,12 @@ export default function TradeBudgetTracker() {
     return out;
   }, [filteredRows]);
 
+  const hasCashFlowRisk = useMemo(() => {
+    if (totals.client <= 0) return false;
+    const threshold = Math.round((totals.client / 100) * 0.15);
+    return cashFlow.some((p) => p.buffer < threshold);
+  }, [cashFlow, totals.client]);
+
   const axisMoney = (v: number) => {
     const symbol = currency === "USD" ? "$" : currency === "GBP" ? "£" : currency === "SGD" ? "S$" : "€";
     if (Math.abs(v) >= 1000) return `${symbol}${(v / 1000).toFixed(0)}K`;
@@ -306,12 +314,12 @@ export default function TradeBudgetTracker() {
     ? { th: "px-2 py-1.5", td: "px-2 py-1", text: "text-[10px]", ctl: "h-6 text-[10px]" }
     : { th: "px-3 py-3", td: "px-3 py-2.5", text: "text-xs", ctl: "h-8 text-xs" };
 
-  const statCards = [
-    { label: "Total Procurement Cost", value: money(totals.cost, currency), sub: `${filteredRows.length} line${filteredRows.length === 1 ? "" : "s"}`, icon: Wallet, tone: "text-foreground" },
-    { label: "Total Client Price", value: money(totals.client, currency), sub: "After applied markup", icon: TrendingUp, tone: "text-foreground" },
-    { label: "Gross Profit Margin", value: money(totals.margin, currency), sub: `${totals.marginPct.toFixed(1)}% of client price`, icon: Percent, tone: "text-emerald-700" },
-    { label: "Total Deposits Collected", value: money(totals.collected, currency), sub: `${money(totals.outstanding, currency)} outstanding`, icon: Banknote, tone: "text-foreground" },
-  ];
+  const statCards = useMemo(() => [
+    { label: "Total Procurement Cost", value: money(totals.cost, currency), sub: `${filteredRows.length} line${filteredRows.length === 1 ? "" : "s"}`, icon: Wallet, tone: "text-foreground", alert: false },
+    { label: "Total Client Price", value: money(totals.client, currency), sub: "After applied markup", icon: TrendingUp, tone: "text-foreground", alert: false },
+    { label: "Gross Profit Margin", value: money(totals.margin, currency), sub: `${totals.marginPct.toFixed(1)}% of client price`, icon: Percent, tone: "text-emerald-700", alert: hasCashFlowRisk },
+    { label: "Total Deposits Collected", value: money(totals.collected, currency), sub: `${money(totals.outstanding, currency)} outstanding`, icon: Banknote, tone: "text-foreground", alert: false },
+  ], [totals, currency, filteredRows.length, hasCashFlowRisk]);
 
   return (
     <>
@@ -347,7 +355,21 @@ export default function TradeBudgetTracker() {
             {/* Stat cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
               {statCards.map((c) => (
-                <div key={c.label} className="rounded-lg border border-border bg-card p-4">
+                <div
+                  key={c.label}
+                  className={cn(
+                    "relative rounded-lg border bg-card p-4 transition-colors duration-300",
+                    c.alert
+                      ? "border-destructive/50 ring-2 ring-destructive/40 animate-pulse bg-destructive/[0.04]"
+                      : "border-border"
+                  )}
+                >
+                  {c.alert && (
+                    <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 font-body text-[10px] uppercase tracking-widest text-destructive">
+                      <AlertTriangle className="h-3 w-3" />
+                      Cash Buffer Risk
+                    </span>
+                  )}
                   <div className="flex items-center gap-2 mb-2">
                     <c.icon className="h-4 w-4 text-muted-foreground" />
                     <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">{c.label}</span>
@@ -471,6 +493,20 @@ export default function TradeBudgetTracker() {
                     <X className="h-3.5 w-3.5" />
                   </button>
                 )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">Global markup</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={50}
+                  value={globalMarkupPct}
+                  onChange={(e) => setGlobalMarkupPct(Number(e.target.value))}
+                  className="w-28 cursor-pointer"
+                  style={{ accentColor: "hsl(var(--primary))" }}
+                  aria-label="Global markup percentage"
+                />
+                <span className="font-body text-xs tabular-nums text-foreground min-w-[2.5rem]">+{globalMarkupPct}%</span>
               </div>
               <div className="ml-auto flex items-center gap-2">
                 <Switch id="budget-compact" checked={isCompact} onCheckedChange={setIsCompact} />
