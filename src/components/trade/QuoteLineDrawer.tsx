@@ -293,7 +293,11 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
           document={
             viewingPo && (item.po_number || poNumber.trim())
               ? {
+                  item_id: item.item_id,
                   po_number: item.po_number || poNumber.trim(),
+                  po_status: approval.po_status,
+                  po_approved_by_name: approval.po_approved_by_name,
+                  po_approved_at: approval.po_approved_at,
                   quote_ref: item.quote_ref,
                   product_name: item.product_name,
                   brand_name: item.brand_name,
