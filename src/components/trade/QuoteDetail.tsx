@@ -3306,15 +3306,39 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         {(() => {
                           const srcCur = itemPriceCurrency(item, currency);
                           const showOrigin = rawUnitPrice != null && srcCur !== currency;
+                          if (canEditLines && editingPriceId === item.id) {
+                            return (
+                              <input
+                                ref={priceInputRef}
+                                type="text"
+                                inputMode="decimal"
+                                value={editingPriceValue}
+                                onChange={(e) => setEditingPriceValue(e.target.value)}
+                                onBlur={() => commitEditPrice(item.id)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") { e.preventDefault(); commitEditPrice(item.id); }
+                                  else if (e.key === "Escape") { cancelEditPrice(); }
+                                }}
+                                placeholder={`${currencySymbol(currency)} 0`}
+                                className="w-full font-body text-sm text-foreground tabular-nums text-right bg-background border border-border rounded px-2 py-0.5 focus:border-foreground/50 outline-none"
+                                autoFocus
+                              />
+                            );
+                          }
                           return (
                             <>
-                              <span className="font-body text-sm text-foreground tabular-nums">
+                              <button
+                                type="button"
+                                onClick={() => canEditLines && startEditPrice(item.id, item.unit_price_cents ?? (showOrigin ? null : unitPrice))}
+                                title={canEditLines ? "Click to enter unit price" : undefined}
+                                className={`font-body text-sm text-foreground tabular-nums ${canEditLines ? "cursor-text hover:text-foreground/70 underline decoration-dotted decoration-border underline-offset-4" : ""}`}
+                              >
                                 {showOrigin
                                   ? `${srcCur} ${formatPriceRaw(rawUnitPrice, srcCur)}`
                                   : unitPrice
                                     ? `${currencySymbol(currency)} ${formatPriceRaw(unitPrice, currency)}`
-                                    : "TBD"}
-                              </span>
+                                    : canEditLines ? "Set price" : "TBD"}
+                              </button>
                               {showOrigin && unitPrice ? (
                                 <span className="block font-body text-[10px] text-muted-foreground tabular-nums">
                                   ≈ {currencySymbol(currency)} {formatPriceRaw(unitPrice, currency)}
@@ -3324,6 +3348,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           );
                         })()}
                       </div>
+
 
                       <div className="hidden md:block text-right">
                         <span className="font-body text-sm text-foreground font-medium tabular-nums">
