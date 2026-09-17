@@ -2077,12 +2077,23 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // may re-open it, ambient or explicit) and only slides out once the member
   // clicks "Finish Tour & Open Workspace". At that point the stage pill resets
   // to 01 DISCOVER and any pending bespoke upload cache is merged into the log.
-  const tourActiveRef = useRef(false);
+  // Survives remounts/route changes during the tour, so the gate cannot be
+  // bypassed by navigating between tour steps.
+  const isTourActive = () => {
+    try { return sessionStorage.getItem("concierge:tour-active") === "1"; } catch { return false; }
+  };
+  const setTourActive = (v: boolean) => {
+    try {
+      if (v) sessionStorage.setItem("concierge:tour-active", "1");
+      else sessionStorage.removeItem("concierge:tour-active");
+    } catch { /* storage unavailable */ }
+  };
   useEffect(() => {
+    if (isTourActive()) { setOpen(false); setMinimized(false); }
     const close = () => { markDismissed(); setOpen(false); setMinimized(false); };
-    const start = () => { tourActiveRef.current = true; close(); };
+    const start = () => { setTourActive(true); close(); };
     const reopen = () => {
-      if (tourActiveRef.current) return;
+      if (isTourActive()) return;
       clearDismissed();
       setMinimized(false);
       setOpen(true);
