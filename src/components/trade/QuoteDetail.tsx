@@ -2234,6 +2234,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     patch: Partial<Pick<QuoteItemWithProduct,
       "po_number" | "cost_code" | "lead_time_weeks_override" | "deposit_pct_override" | "room"
       | "ship_origin_country" | "ship_mode" | "ship_cbm" | "ship_weight_kg" | "notes"
+      | "crating_cents" | "crating_currency"
     >> & { internal_notes?: string | null },
   ) => {
     if (isReadOnly) return;
