@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, ClipboardList, Package, ReceiptText } from "lucide-react";
+import { CalendarDays, ClipboardList, FileText, Package, Paperclip, ReceiptText } from "lucide-react";
+import { autoPoNumber } from "@/lib/procurementExcel";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
