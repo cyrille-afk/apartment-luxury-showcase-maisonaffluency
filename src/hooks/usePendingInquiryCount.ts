@@ -33,7 +33,7 @@ export function usePendingInquiryCount() {
     if (!isAdmin) return;
     load();
     const channel = supabase
-      .channel("pending-inquiry-count")
+      .channel(channelName)
       .on("postgres_changes", { event: "*", schema: "public", table: "inquiries" }, () => load())
       .on("postgres_changes", { event: "*", schema: "public", table: "trade_quotes" }, () => load())
       .subscribe();
