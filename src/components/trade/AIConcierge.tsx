@@ -3345,7 +3345,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           // Delivery to Singapore in 2 Weeks"). Matches the phrasing used by
           // the LOCALIZED SHIPPING FILTER preamble and the CITY LOCK reply.
           try {
-            const city = extractProjectCityFromAssistant(assistantSoFar);
+            const city = felixLogicDiscarded ? null : extractProjectCityFromAssistant(assistantSoFar);
             if (city) updateConciergeSession({ projectCity: city });
           } catch { /* non-fatal */ }
 
