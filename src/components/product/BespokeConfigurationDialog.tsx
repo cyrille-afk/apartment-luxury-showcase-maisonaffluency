@@ -57,6 +57,13 @@ export default function BespokeConfigurationDialog({
   const [attachment, setAttachment] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
+  // Localized placeholder: active finish name woven into the sentence,
+  // freight note matched to the session's geolocated region.
+  const specsPlaceholder = useMemo(
+    () => buildBespokePlaceholder(finishLabel, detectCountryCode()),
+    [finishLabel]
+  );
+
   useEffect(() => {
     if (!isOpen) return;
     lockBodyScroll();
@@ -281,7 +288,7 @@ export default function BespokeConfigurationDialog({
                   rows={6}
                   value={specs}
                   onChange={(e) => setSpecs(e.target.value)}
-                  placeholder="specify custom leather textures, alternative timber finishes, or bespoke structural scale requirements for your project narrative..."
+                  placeholder={specsPlaceholder}
                   className="mt-2 w-full resize-none border border-border/60 bg-background px-4 py-3 font-body text-sm leading-relaxed text-foreground placeholder:font-body placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-foreground/40"
                 />
               </label>
