@@ -3,7 +3,7 @@ import { CldPicture } from "@/components/ui/CldPicture";
 import { useParams, useNavigate, Link, useLocation, Navigate } from "react-router-dom";
 import { absoluteUrl } from "@/config/site";
 import { Helmet } from "react-helmet-async";
-import { Heart, Pin, FileText, Layers, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2 } from "lucide-react";
+import { Heart, Pin, FileText, Layers, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2, Award, Compass } from "lucide-react";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
@@ -88,6 +88,7 @@ import {
 } from "@/lib/productMotionOptions";
 import CurrencyToggle, { formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
+import { buildProductCuratorNotes } from "@/lib/productCuratorNotes";
 
 
 import StickyPurchaseBar from "@/components/product/StickyPurchaseBar";
@@ -1585,6 +1586,14 @@ const PublicProductPageContent: React.FC = () => {
   const favorited = favIds.has(product.id);
 
   const designerDisplay = formatDesignerDisplayName(designer.name);
+  const curatorNotes = buildProductCuratorNotes({
+    title: product.title,
+    brandName: designerDisplay,
+    description: product.description,
+    dimensions: product.dimensions,
+    category: product.category,
+    subcategory: product.subcategory,
+  });
 
   const compareItem: CompareItem = {
     pick: {
@@ -2364,15 +2373,28 @@ const PublicProductPageContent: React.FC = () => {
 
 
 
-              {/* "The Creation" — desktop only. */}
-              {!isMobileOrPwa && product.description && product.description.trim().length > 0 && (
-                <section aria-label="About this creation" className="mt-6">
-                  <h2 className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
-                    The Creation
-                  </h2>
-                  <p className="font-body text-sm leading-relaxed text-muted-foreground whitespace-pre-line text-justify">
-                    {product.description}
-                  </p>
+              {!isMobileOrPwa && (
+                <section aria-label="Curator notes" className="mt-10 border-t border-border/50 pt-8">
+                  <h2 className="mb-9 font-display text-2xl italic text-foreground">Curator Notes</h2>
+                  <div className="max-w-xl divide-y divide-border/50">
+                    {[
+                      { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
+                      { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
+                      { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
+                    ].map(({ label, text, Icon }) => (
+                      <article key={label} className="group flex gap-5 py-7 first:pt-0 last:pb-0">
+                        <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/60 transition-colors duration-150 group-hover:text-foreground" strokeWidth={1.25} />
+                        <div className="min-w-0">
+                          <h3 className="mb-3 font-body text-[10px] uppercase tracking-[0.2em] text-foreground">
+                            {label}
+                          </h3>
+                          <p className="font-body text-sm italic leading-[1.8] text-muted-foreground">
+                            {text}
+                          </p>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
                 </section>
               )}
 
