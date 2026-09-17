@@ -923,58 +923,6 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     );
                   })()}
 
-                  {(() => {
-                    const sv = product.size_variants || [];
-                    const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
-                    const baseIsDim = (baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) || isDimensionAxisLabel(product.base_axis_label);
-                    const topOptions = isDualAxis
-                      ? Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)))
-                      : [];
-                    const topIsDim = (topOptions.length > 0 && topOptions.every(looksLikeDimension)) || isDimensionAxisLabel(product.top_axis_label);
-
-                    const hasFinishAxis =
-                      isUpholsteredProduct ||
-                      (isDualAxis && (!baseIsDim || !topIsDim)) ||
-                      (!isDualAxis && materialOptions.length > 0 && !(materialOptions.length === 1 && looksLikeDimension(materialOptions[0]))) ||
-                      (!!product.materials_description && product.materials_description.trim().length > 0);
-
-                    if (!hasFinishAxis) return null;
-                    return (
-                      <div className="border-t border-border/60 py-3 flex items-center gap-4">
-                        <span className="shrink-0"><SpecGlyph symbol="⬗" /></span>
-                        <span className="font-body text-sm text-muted-foreground">
-                          Finish options — refer to the full product page for details.
-                        </span>
-                      </div>
-                    );
-                  })()}
-
-                  {(() => {
-                    const handcrafted = formatHandcrafted(product.origin, product.lead_time);
-                    if (!handcrafted) return null;
-                    let originLine = handcrafted;
-                    let leadLine: string | null = null;
-                    const dotSplit = handcrafted.split(" · ");
-                    if (dotSplit.length === 2) {
-                      originLine = dotSplit[0];
-                      leadLine = dotSplit[1];
-                    } else {
-                      const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
-                      if (m) {
-                        originLine = m[1];
-                        leadLine = `Production lead time: ${m[2]}`;
-                      }
-                    }
-                    return (
-                      <div className="border-t border-border/60 py-3 flex items-start gap-4">
-                        {specIcon("✦", "mt-0.5")}
-                        <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
-                          <p>{originLine}</p>
-                          {leadLine && <p className="mt-0.5">{leadLine}</p>}
-                        </div>
-                      </div>
-                    );
-                  })()}
                 </div>
               </div>
             </div>
