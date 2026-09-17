@@ -89,3 +89,4 @@
 - [x] Rebuild Curators' Picks with fixed portrait gallery frames and rigidly aligned brand, title, and price rows
 - [x] Remove artificial Curators' Picks image padding and use edge-to-edge cover imagery within uniform 4:5 frames
 - [x] Release the desktop Curators' Picks grid from the portrait column into a full-width three-column canvas
+- [x] Expand Delivery Tracker and FF&E Schedule tables for wide desktops and replace quote redirects with an isolated editable quote-line drawer
