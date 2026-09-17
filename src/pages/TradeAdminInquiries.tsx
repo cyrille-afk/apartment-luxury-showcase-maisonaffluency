@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useMemo } from "react";
-import { Inbox, Mail, Phone, Package, User, Clock, ExternalLink, FileText, X, CheckCircle2 } from "lucide-react";
+import { Inbox, Mail, Phone, Package, User, Clock, ExternalLink, FileText, X, CheckCircle2, MessageCircle, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 
@@ -46,6 +46,12 @@ const SOURCE_OPTIONS = [
   { key: "concierge_lead", label: "Concierge chat" },
   { key: "contact_form", label: "Contact form" },
 ];
+
+const whatsappHref = (phone: string | null) => {
+  if (!phone) return null;
+  const digits = phone.replace(/[^\d]/g, "");
+  return digits ? `https://wa.me/${digits}` : null;
+};
 
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-amber-500/10 text-amber-400 border-amber-500/20",
@@ -210,6 +216,39 @@ export default function TradeAdminInquiries() {
                       <span>·</span>
                       <span>{r.source?.replace(/_/g, " ") || "form"}</span>
                     </div>
+                    <div className="mt-2 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      <a
+                        href={`mailto:${r.email}?subject=${encodeURIComponent(`Re: ${r.product_name || "Your Maison Affluency inquiry"}`)}`}
+                        className="flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground hover:border-accent/50 hover:text-accent"
+                      >
+                        <Mail className="h-3 w-3" /> Reply
+                      </a>
+                      {whatsappHref(r.phone) && (
+                        <a
+                          href={whatsappHref(r.phone)!}
+                          target="_blank" rel="noreferrer"
+                          className="flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground hover:border-accent/50 hover:text-accent"
+                        >
+                          <MessageCircle className="h-3 w-3" /> WhatsApp
+                        </a>
+                      )}
+                      {r.linked_quote_id ? (
+                        <button
+                          onClick={() => navigate(`/trade/quotes/${r.linked_quote_id}`)}
+                          className="flex items-center gap-1 rounded-md bg-accent/15 px-2 py-1 text-[11px] text-accent hover:bg-accent/25"
+                        >
+                          <FileText className="h-3 w-3" /> Open quote
+                        </button>
+                      ) : (
+                        <button
+                          disabled={draftQuote.isPending}
+                          onClick={() => { setSelectedId(r.id); draftQuote.mutate({ inquiryId: r.id, kind: quoteKind }); }}
+                          className="flex items-center gap-1 rounded-md bg-accent px-2 py-1 text-[11px] text-accent-foreground hover:opacity-90 disabled:opacity-50"
+                        >
+                          <Send className="h-3 w-3" /> Send Quote
+                        </button>
+                      )}
+                    </div>
                   </button>
                 );
               })}
@@ -248,6 +287,41 @@ export default function TradeAdminInquiries() {
                       {formatDistanceToNow(new Date(selected.created_at), { addSuffix: true })} · {selected.source?.replace(/_/g, " ") || "form"}
                     </div>
                   </div>
+                </div>
+
+                {/* Primary actions */}
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <a
+                    href={`mailto:${selected.email}?subject=${encodeURIComponent(`Re: ${selected.product_name || "Your Maison Affluency inquiry"}`)}`}
+                    className="flex items-center gap-1.5 rounded-md bg-accent px-3.5 py-2 text-xs font-heading text-accent-foreground hover:opacity-90"
+                  >
+                    <Mail className="h-3.5 w-3.5" /> Reply by email
+                  </a>
+                  {whatsappHref(selected.phone) && (
+                    <a
+                      href={whatsappHref(selected.phone)!}
+                      target="_blank" rel="noreferrer"
+                      className="flex items-center gap-1.5 rounded-md border border-border px-3.5 py-2 text-xs hover:border-accent/50 hover:text-accent"
+                    >
+                      <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+                    </a>
+                  )}
+                  {selected.linked_quote_id ? (
+                    <button
+                      onClick={() => navigate(`/trade/quotes/${selected.linked_quote_id}`)}
+                      className="flex items-center gap-1.5 rounded-md border border-accent/40 px-3.5 py-2 text-xs text-accent hover:bg-accent/10"
+                    >
+                      <FileText className="h-3.5 w-3.5" /> Open quote
+                    </button>
+                  ) : (
+                    <button
+                      disabled={draftQuote.isPending}
+                      onClick={() => draftQuote.mutate({ inquiryId: selected.id, kind: quoteKind })}
+                      className="flex items-center gap-1.5 rounded-md border border-accent/40 px-3.5 py-2 text-xs text-accent hover:bg-accent/10 disabled:opacity-50"
+                    >
+                      <Send className="h-3.5 w-3.5" /> Send Quote
+                    </button>
+                  )}
                 </div>
 
                 {/* Product card */}
