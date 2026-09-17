@@ -3211,7 +3211,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         try { controller.abort(); } catch {}
         setStreaming(false);
         clearStallTimer();
-        pushRetry(text, "The concierge stopped responding.");
+        pushRetry(text, "The concierge stopped responding.", stage);
       }, STALL_MS);
     };
     armStall();
@@ -3560,7 +3560,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 : "The browser blocked the request before it reached the concierge.",
               duration: 10000,
             });
-            pushRetry(text, "The browser blocked the request to the concierge (CORS preflight).");
+            pushRetry(text, "The browser blocked the request to the concierge (CORS preflight).", stage);
           } else {
             // Surface a retry card instead of a fire-and-forget toast so the
             // user has a one-click path back to a working turn.
@@ -3569,7 +3569,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               : msg === "STREAM_TRUNCATED"
                 ? "The connection to the concierge dropped after auto-reconnect attempts."
                 : msg || "The concierge hit an error.";
-            pushRetry(text, friendly);
+            pushRetry(text, friendly, stage);
           }
           setStreaming(false);
           setTimeline((prev) => prev.filter((t) => t.kind !== "pending_proposal"));
@@ -3584,7 +3584,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       setTimeline((prev) => prev.filter((t) => t.kind !== "pending_proposal"));
       // If the throw wasn't the user aborting, offer a retry.
       if (!controller.signal.aborted) {
-        pushRetry(text, "The connection to the concierge dropped.");
+        pushRetry(text, "The connection to the concierge dropped.", stage);
       }
     }
     } finally {
