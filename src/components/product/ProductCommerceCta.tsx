@@ -485,6 +485,14 @@ export default function ProductCommerceCta({
             <Link to={workspaceHref} data-commerce-secondary state={redirectTo ? { from: redirectTo } : undefined} className={secondaryBtn}>
               Add to Co-Pilot Workspace
             </Link>
+            <button
+              type="button"
+              data-commerce-quote
+              onClick={openBespoke}
+              className={secondaryBtn}
+            >
+              Request a Bespoke Quote / Customisation
+            </button>
           </>
         ) : (
           <>
