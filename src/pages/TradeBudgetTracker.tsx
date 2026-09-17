@@ -314,12 +314,12 @@ export default function TradeBudgetTracker() {
     ? { th: "px-2 py-1.5", td: "px-2 py-1", text: "text-[10px]", ctl: "h-6 text-[10px]" }
     : { th: "px-3 py-3", td: "px-3 py-2.5", text: "text-xs", ctl: "h-8 text-xs" };
 
-  const statCards = [
-    { label: "Total Procurement Cost", value: money(totals.cost, currency), sub: `${filteredRows.length} line${filteredRows.length === 1 ? "" : "s"}`, icon: Wallet, tone: "text-foreground" },
-    { label: "Total Client Price", value: money(totals.client, currency), sub: "After applied markup", icon: TrendingUp, tone: "text-foreground" },
-    { label: "Gross Profit Margin", value: money(totals.margin, currency), sub: `${totals.marginPct.toFixed(1)}% of client price`, icon: Percent, tone: "text-emerald-700" },
-    { label: "Total Deposits Collected", value: money(totals.collected, currency), sub: `${money(totals.outstanding, currency)} outstanding`, icon: Banknote, tone: "text-foreground" },
-  ];
+  const statCards = useMemo(() => [
+    { label: "Total Procurement Cost", value: money(totals.cost, currency), sub: `${filteredRows.length} line${filteredRows.length === 1 ? "" : "s"}`, icon: Wallet, tone: "text-foreground", alert: false },
+    { label: "Total Client Price", value: money(totals.client, currency), sub: "After applied markup", icon: TrendingUp, tone: "text-foreground", alert: false },
+    { label: "Gross Profit Margin", value: money(totals.margin, currency), sub: `${totals.marginPct.toFixed(1)}% of client price`, icon: Percent, tone: "text-emerald-700", alert: hasCashFlowRisk },
+    { label: "Total Deposits Collected", value: money(totals.collected, currency), sub: `${money(totals.outstanding, currency)} outstanding`, icon: Banknote, tone: "text-foreground", alert: false },
+  ], [totals, currency, filteredRows.length, hasCashFlowRisk]);
 
   return (
     <>
