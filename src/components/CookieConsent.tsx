@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { Shield } from "lucide-react";
 
 /**
  * Minimal GDPR cookie consent banner.
