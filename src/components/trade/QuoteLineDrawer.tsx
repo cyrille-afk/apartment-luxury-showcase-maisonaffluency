@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, ClipboardList, FileText, Package, Paperclip, ReceiptText } from "lucide-react";
 import { autoPoNumber } from "@/lib/procurementExcel";
@@ -8,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import PODocumentViewer from "@/components/trade/PODocumentViewer";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 export interface QuoteLineDrawerItem {
@@ -20,6 +20,8 @@ export interface QuoteLineDrawerItem {
   client_name?: string | null;
   project_name?: string | null;
   po_number?: string | null;
+  price_cents?: number | null;
+  currency?: string | null;
   cost_code?: string | null;
   lead_time?: string | null;
   lead_time_weeks_override?: number | null;
@@ -51,6 +53,7 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
   const [leadWeeks, setLeadWeeks] = useState("");
   const [saving, setSaving] = useState(false);
   const [generatingPo, setGeneratingPo] = useState(false);
+  const [viewingPo, setViewingPo] = useState(false);
 
   /**
    * Generate and persist a PO reference for this line, matching the
@@ -93,6 +96,7 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
   };
 
   useEffect(() => {
+    setViewingPo(false);
     setPoNumber(item?.po_number || "");
     setCostCode(item?.cost_code || "");
     setRequiredBy(item?.required_by_date || "");
@@ -255,6 +259,32 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
           </div>
         )}
       </SheetContent>
+      {item && (
+        <PODocumentViewer
+          document={
+            viewingPo && (item.po_number || poNumber.trim())
+              ? {
+                  po_number: item.po_number || poNumber.trim(),
+                  quote_ref: item.quote_ref,
+                  product_name: item.product_name,
+                  brand_name: item.brand_name,
+                  quantity: item.quantity,
+                  client_name: item.client_name,
+                  project_name: item.project_name,
+                  cost_code: costCode || item.cost_code,
+                  sku: item.sku,
+                  dimensions: item.dimensions,
+                  materials: item.materials,
+                  lead_time: item.lead_time,
+                  required_by_date: requiredBy || item.required_by_date,
+                  price_cents: item.price_cents,
+                  currency: item.currency,
+                }
+              : null
+          }
+          onOpenChange={(open) => !open && setViewingPo(false)}
+        />
+      )}
     </Sheet>
   );
 }
