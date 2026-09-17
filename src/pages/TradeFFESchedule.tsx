@@ -671,26 +671,33 @@ export default function TradeFFESchedule() {
                     );
                   })}
                   {customPresets.length > 0 && <DropdownMenuSeparator />}
-                  {customPresets.map((preset) => (
-                    <DropdownMenuItem
-                      key={preset.name}
-                      onClick={() => applyPreset(preset)}
-                      className="group font-body text-xs"
-                    >
-                      <span className="min-w-0 flex-1 truncate">{preset.name}</span>
-                      <button
-                        type="button"
-                        aria-label={`Delete preset ${preset.name}`}
-                        className="ml-2 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deletePreset(preset.name);
-                        }}
+                  {customPresets.map((preset) => {
+                    const isActive = activePreset?.name === preset.name;
+                    return (
+                      <DropdownMenuItem
+                        key={preset.name}
+                        onClick={() => applyPreset(preset)}
+                        className={`group relative flex items-center gap-2 font-body text-xs transition-all duration-200 ${isActive ? "font-semibold bg-accent/40" : ""}`}
                       >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    </DropdownMenuItem>
-                  ))}
+                        <span
+                          className={`inline-flex h-2 w-2 shrink-0 rounded-full transition-all duration-200 ${isActive ? "bg-primary scale-100" : "bg-transparent scale-75"}`}
+                          aria-hidden="true"
+                        />
+                        <span className="min-w-0 flex-1 truncate">{preset.name}</span>
+                        <button
+                          type="button"
+                          aria-label={`Delete preset ${preset.name}`}
+                          className="ml-2 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deletePreset(preset.name);
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </DropdownMenuItem>
+                    );
+                  })}
                   <DropdownMenuSeparator />
                   <div className="p-1.5" onKeyDown={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-1.5">
