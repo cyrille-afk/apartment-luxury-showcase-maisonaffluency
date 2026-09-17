@@ -8,6 +8,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { usePendingInquiryCount } from "@/hooks/usePendingInquiryCount";
 import { cn } from "@/lib/utils";
 
 const coreItems = [
