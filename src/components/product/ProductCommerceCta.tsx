@@ -247,7 +247,7 @@ export default function ProductCommerceCta({
     // Pieces without a public price never enter the cart — route those to the
     // concierge enquiry instead of opening an empty drawer over a locked page.
     if (added === false) {
-      onPlaceOrder(quantity);
+      setBespokeOpen(true);
       return;
     }
     if (shouldUseFullPageCart(getCart())) {
@@ -260,22 +260,12 @@ export default function ProductCommerceCta({
   const primaryAction = tradeApproved ? undefined : openSelection;
 
   /**
-   * Secondary CTA: bespoke / contract enquiries go to the Trade Account
-   * inquiry form. The primary PLACE ORDER path never touches this route.
+   * Secondary CTA: bespoke / customisation enquiries open a centred overlay
+   * dialog on the product canvas — never the Trade Account registration page.
    */
-  const goToTradeInquiry = () => {
-    navigate(
-      `/contact?${new URLSearchParams({
-        subject: `Bespoke Quote / Customisation — ${productTitle || "Product"}${designerName ? ` by ${designerName}` : ""}`,
-        productId,
-        productName: productTitle || "",
-        designerName: designerName || "",
-        back: typeof window !== "undefined" ? window.location.pathname + window.location.search : "",
-      }).toString()}#contact`,
-    );
-  };
+  const openBespoke = () => setBespokeOpen(true);
 
-  // Unpriced pieces: the page asks for the in-page quote sheet rather than
+  // Unpriced pieces: the page asks for the in-canvas bespoke dialog rather than
   // sending a shopper to the corporate Trade Account form.
   useEffect(() => {
     const handler = () => {
@@ -283,7 +273,7 @@ export default function ProductCommerceCta({
       const isDesktop =
         typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
       if (dockOnly === isDesktop) return;
-      setQuoteOpen(true);
+      setBespokeOpen(true);
     };
     window.addEventListener("ma:open-quote", handler);
     return () => window.removeEventListener("ma:open-quote", handler);
