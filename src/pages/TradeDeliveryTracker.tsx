@@ -9,6 +9,8 @@ import { CalendarClock, ChevronRight, CalendarPlus, ImageOff } from "lucide-reac
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import QuoteLineDrawer, { type QuoteLineDrawerItem } from "@/components/trade/QuoteLineDrawer";
 import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback";
 
