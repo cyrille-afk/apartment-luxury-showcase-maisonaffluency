@@ -17,6 +17,7 @@ import { useStudio } from "@/hooks/useStudio";
 import { StudioBridgeSidebar } from "@/components/trade/StudioBridgeSidebar";
 import { pushRecentProject, useProjects } from "@/hooks/useProjects";
 import { useClientTierUpgrades } from "@/hooks/useClientTierUpgrades";
+import { usePendingInquiryCount } from "@/hooks/usePendingInquiryCount";
 
 
 type NavItem = { title: string; url: string; icon: React.ElementType; end?: boolean };
@@ -57,6 +58,7 @@ export function TradeSidebar() {
   const { count: clientUpgradeCount } = useClientTierUpgrades(currentStudio?.id);
   const { projects: activeProjects } = useProjects({ activeOnly: true });
   const recentActiveProjects = activeProjects.slice(0, 2);
+  const pendingInquiryCount = usePendingInquiryCount();
 
 
   useEffect(() => {
@@ -292,8 +294,25 @@ export function TradeSidebar() {
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                       activeClassName="text-foreground font-medium"
                     >
-                      <Inbox className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>Quote Requests</span>}
+                      <span className="relative shrink-0">
+                        <Inbox className="h-4 w-4 shrink-0" />
+                        {collapsed && pendingInquiryCount > 0 && (
+                          <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-accent animate-pulse ring-2 ring-background" />
+                        )}
+                      </span>
+                      {!collapsed && (
+                        <span className="flex items-center gap-2">
+                          <span>Quote Requests</span>
+                          {pendingInquiryCount > 0 && (
+                            <span
+                              aria-label={`${pendingInquiryCount} pending quote request${pendingInquiryCount > 1 ? "s" : ""}`}
+                              className="relative inline-flex h-4 min-w-[1rem] animate-pulse items-center justify-center rounded-full bg-accent px-1 font-mono text-[9px] leading-none text-white"
+                            >
+                              {pendingInquiryCount}
+                            </span>
+                          )}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
