@@ -109,6 +109,7 @@ export type BriefValues = {
   block1: {
     projectProfile: string;
     zone: string;
+    budget: string;
     environment: string;
     timeline: string;
   };
@@ -130,6 +131,7 @@ const DEFAULT_VALUES: BriefValues = {
   block1: {
     projectProfile: "[typology, city/area]",
     zone: "[room, ceiling height]",
+    budget: "[currency and target range]",
     environment: "[humidity, sun exposure, glazing]",
     timeline: "Handover in [N] weeks (max lead time [N] weeks).",
   },
@@ -151,8 +153,7 @@ const DEFAULT_VALUES: BriefValues = {
 const REQUIRED_FIELDS: { key: string; block: "block1" | "block2" | "block3"; field: string; label: string }[] = [
   { key: "projectProfile", block: "block1", field: "projectProfile", label: "PROJECT PROFILE" },
   { key: "zone", block: "block1", field: "zone", label: "ZONE" },
-  { key: "typology", block: "block2", field: "typology", label: "TYPOLOGY" },
-  { key: "vibe", block: "block3", field: "vibe", label: "VIBE" },
+  { key: "budget", block: "block1", field: "budget", label: "BUDGET" },
 ];
 
 // Strips enclosing square brackets and any stray bracket characters so real
@@ -228,6 +229,7 @@ const UI_BLOCK_LABELS: Record<string, string> = {
 const FIELD_LABELS: { key: keyof BriefValues["block1"] | keyof BriefValues["block2"] | keyof BriefValues["block3"]; label: string }[] = [
   { key: "projectProfile", label: "PROJECT PROFILE" },
   { key: "zone", label: "ZONE" },
+  { key: "budget", label: "BUDGET" },
   { key: "environment", label: "ENVIRONMENT" },
   { key: "timeline", label: "TIMELINE" },
   { key: "typology", label: "TYPOLOGY" },
@@ -241,7 +243,7 @@ const FIELD_LABELS: { key: keyof BriefValues["block1"] | keyof BriefValues["bloc
 
 function formatBrief(values: BriefValues): string {
   return [
-    `${BLOCK_LABELS.block1}\nPROJECT PROFILE: ${values.block1.projectProfile}\nZONE: ${values.block1.zone}\nENVIRONMENT: ${values.block1.environment}\nTIMELINE: ${values.block1.timeline}`,
+    `${BLOCK_LABELS.block1}\nPROJECT PROFILE: ${values.block1.projectProfile}\nZONE: ${values.block1.zone}\nBUDGET: ${values.block1.budget}\nENVIRONMENT: ${values.block1.environment}\nTIMELINE: ${values.block1.timeline}`,
     `${BLOCK_LABELS.block2}\nTYPOLOGY: ${values.block2.typology}\nMAX FOOTPRINT: ${values.block2.maxFootprint}\nCLEARANCE: ${values.block2.clearance}\nMATERIALS: ${values.block2.materials}`,
     `${BLOCK_LABELS.block3}\nVIBE: ${values.block3.vibe}\nREFERENCES: ${values.block3.references}\nPALETTE: ${values.block3.palette}`,
     `${BLOCK_LABELS.block4}\n${values.block4}`,
@@ -264,6 +266,7 @@ const FIELD_ALIASES: Record<"block1" | "block2" | "block3", Record<string, strin
   block1: {
     projectProfile: ["PROJECT PROFILE", "PROJECT TYPE"],
     zone: ["ZONE"],
+    budget: ["BUDGET", "TARGET BUDGET", "BUDGET RANGE", "INVESTMENT RANGE"],
     environment: ["ENVIRONMENT"],
     timeline: ["TIMELINE", "LOGISTICS DEADLINE", "DEADLINE", "LEAD TIME"],
   },
@@ -869,7 +872,7 @@ export function BriefBuilder({
     const validation = validateBriefDraft(text);
     if (!validation.valid) {
       setSubmitError(
-        `To ensure Felix curates an accurate project schedule, please specify your desired furniture Typologies before submitting. Missing: ${validation.missing.join(", ")}`,
+        `Complete the three required onboarding details before submitting. Missing: ${validation.missing.join(", ")}`,
       );
       window.setTimeout(() => setSubmitError(null), 5000);
       return;
@@ -1296,6 +1299,14 @@ export function BriefBuilder({
               onChange={(v) => setBlockField("block1", "zone", v)}
               required
               invalid={isPlaceholderValue(values.block1.zone, DEFAULT_VALUES.block1.zone)}
+            />
+            <Field
+              label="Budget"
+              value={values.block1.budget}
+              placeholder="[currency and target range]"
+              onChange={(v) => setBlockField("block1", "budget", v)}
+              required
+              invalid={isPlaceholderValue(values.block1.budget, DEFAULT_VALUES.block1.budget)}
             />
             <Field
               label="Environment"
