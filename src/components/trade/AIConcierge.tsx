@@ -442,6 +442,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { MatchBadge, parseMatchTail, inlineSignalsIntoMatchLines } from "@/components/trade/concierge/MatchBadge";
 import { buildSeedDirective } from "@/lib/conciergePrefill";
+import { isAttachmentPlaceholderText, buildAttachmentSystemNote } from "@/lib/attachmentIntent";
 import {
   conciergeCopy,
   conciergeStatusCopy,
@@ -1017,6 +1018,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [attachments, setAttachments] = useState<StagedAttachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const moodInputRef = useRef<HTMLInputElement>(null);
+  // Set the moment a document upload succeeds so the conversational pipeline
+  // fires automatically — the user never has to type or press enter.
+  const autoSendOnUploadRef = useRef(false);
+  const [autoSendTick, setAutoSendTick] = useState(0);
 
   // Mandarin director hand-off state.
   const [cnViewingOpen, setCnViewingOpen] = useState(false);
@@ -2753,13 +2758,31 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       previewUrl: a.previewUrl,
     }));
     const submittedStructuredBrief = isBriefContent(text);
-    const apiText = submittedStructuredBrief
+    // Guardrail: a bare "here is the floor plan attached" style notification
+    // sent with a document is never structural content — drop it entirely from
+    // entity parsing (zones, typologies, cities) and let the document speak.
+    const droppedAttachmentPlaceholder =
+      hasFiles && !submittedStructuredBrief && isAttachmentPlaceholderText(text);
+    const baseApiText = submittedStructuredBrief
       ? [
           "SUBMITTED ARCHITECTURAL BRIEF — this is the active client brief from the Brief Builder. Execute it now; do not reply that no brief was detected.",
           "Return three layout configurations and a full Architectural Specification Schedule using the structured fields below.",
           text,
         ].join("\n\n")
-      : text;
+      : droppedAttachmentPlaceholder
+        ? ""
+        : text;
+    const apiText = hasFiles
+      ? [
+          buildAttachmentSystemNote(
+            attachments.map((a) => a.name),
+            droppedAttachmentPlaceholder,
+          ),
+          baseApiText,
+        ]
+          .filter(Boolean)
+          .join("\n\n")
+      : baseApiText;
     const displayText = opts?.displayText ?? text;
     const userItem: TimelineItem = {
       kind: "msg",
@@ -2767,7 +2790,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       content: displayText,
       ...(timelineAttachments.length ? { attachments: timelineAttachments } : {}),
     };
-    const immediateProfile = quickClientProfile(displayText);
+    const immediateProfile = droppedAttachmentPlaceholder ? null : quickClientProfile(displayText);
     if (immediateProfile?.city) {
       try {
         const raw = sessionStorage.getItem("concierge:profile");
@@ -3506,6 +3529,19 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // instead of the stale closure captured at mount time.
   const sendRef = useRef(send);
   useEffect(() => { sendRef.current = send; }, [send]);
+
+  // Auto-trigger the conversational pipeline as soon as an upload lands.
+  // Runs once per successful upload event, after the attachment state has
+  // committed, so `send` picks the new files up and Felix starts thinking.
+  useEffect(() => {
+    if (!autoSendOnUploadRef.current) return;
+    if (!attachments.length) return;
+    if (streaming) return;
+    if (briefBuilderOpen) { autoSendOnUploadRef.current = false; return; }
+    autoSendOnUploadRef.current = false;
+    const t = window.setTimeout(() => { void sendRef.current(); }, 60);
+    return () => window.clearTimeout(t);
+  }, [autoSendTick, attachments, streaming, briefBuilderOpen]);
 
   const submitBriefFromBuilder = useCallback(async (text: string) => {
     return new Promise<void>((resolve, reject) => {
@@ -5599,7 +5635,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 multiple
                 accept="image/*,application/pdf,.pdf"
                 className="hidden"
-                onChange={(e) => handleFilesPicked(e.target.files)}
+                onChange={async (e) => {
+                  const added = await handleFilesPicked(e.target.files);
+                  if (added.length) {
+                    autoSendOnUploadRef.current = true;
+                    setAutoSendTick((n) => n + 1);
+                  }
+                }}
               />
               <input
                 ref={moodInputRef}
