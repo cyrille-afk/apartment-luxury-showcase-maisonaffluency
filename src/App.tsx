@@ -119,6 +119,7 @@ const TradeAdminSharePreview = lazy(() => import("./pages/TradeAdminSharePreview
 const TradeAdminHotspotMapping = lazy(() => import("./pages/TradeAdminHotspotMapping"));
 const TradeMoodBoards = lazy(() => import("./pages/TradeMoodBoards"));
 const TradeBudgetTracker = lazy(() => import("./pages/TradeBudgetTracker"));
+const TradeSpecSheetGenerator = lazy(() => import("./pages/TradeSpecSheetGenerator"));
 const TradeClients = lazy(() => import("./pages/TradeClients"));
 const TradeLeadTimeCalendar = lazy(() => import("./pages/TradeLeadTimeCalendar"));
 const TradeReorder = lazy(() => import("./pages/TradeReorder"));
@@ -831,6 +832,7 @@ const App = () => {
                     <Route path="admin/hotspot-mapping" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminHotspotMapping /></Suspense>} />
                     <Route path="mood-boards" element={<TradeMoodBoards />} />
                     <Route path="budget" element={<TradeBudgetTracker />} />
+                    <Route path="spec-generator" element={<TradeSpecSheetGenerator />} />
                     <Route path="clients" element={<TradeClients />} />
                     <Route path="client-management" element={<TradeClients />} />
                     <Route path="lead-time-calendar" element={<TradeLeadTimeCalendar />} />
