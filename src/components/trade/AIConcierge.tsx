@@ -1021,7 +1021,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // Set the moment a document upload succeeds so the conversational pipeline
   // fires automatically — the user never has to type or press enter.
   const autoSendOnUploadRef = useRef(false);
+  const autoSendTimerRef = useRef<number | null>(null);
   const [autoSendTick, setAutoSendTick] = useState(0);
+  // True while staged chips animate out of the composer and into the feed.
+  const [attachmentsLaunching, setAttachmentsLaunching] = useState(false);
+
 
   // Mandarin director hand-off state.
   const [cnViewingOpen, setCnViewingOpen] = useState(false);
@@ -1146,11 +1150,21 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         toast.error(`Couldn't read ${f.name}.`);
       }
     }
-    if (accepted.length) setAttachments((prev) => [...prev, ...accepted]);
+    if (accepted.length) {
+      setAttachments((prev) => [...prev, ...accepted]);
+      // Documents are committed to the timeline immediately — the composer is
+      // never a staging area. Mood board images are the single exception:
+      // they belong to Block 3 of the brief, not to a chat turn.
+      if (opts?.role !== "moodboard") {
+        autoSendOnUploadRef.current = true;
+        setAutoSendTick((n) => n + 1);
+      }
+    }
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (moodInputRef.current) moodInputRef.current.value = "";
     return accepted;
   }, [attachments.length]);
+
 
   /**
    * Insert or update a "MOOD BOARD REFERENCE:" line inside Block 3 of the
@@ -3530,18 +3544,28 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const sendRef = useRef(send);
   useEffect(() => { sendRef.current = send; }, [send]);
 
-  // Auto-trigger the conversational pipeline as soon as an upload lands.
-  // Runs once per successful upload event, after the attachment state has
-  // committed, so `send` picks the new files up and Felix starts thinking.
+  // Auto-commit the upload to the timeline as soon as it lands: the chips
+  // animate out of the composer and the turn is submitted for the user. If a
+  // stream is still running, the flag stays armed and fires the moment it ends.
   useEffect(() => {
     if (!autoSendOnUploadRef.current) return;
     if (!attachments.length) return;
-    if (streaming) return;
     if (briefBuilderOpen) { autoSendOnUploadRef.current = false; return; }
+    if (streaming) return; // stay armed — this effect re-runs when streaming ends
     autoSendOnUploadRef.current = false;
-    const t = window.setTimeout(() => { void sendRef.current(); }, 60);
-    return () => window.clearTimeout(t);
+    setAttachmentsLaunching(true);
+    if (autoSendTimerRef.current) window.clearTimeout(autoSendTimerRef.current);
+    autoSendTimerRef.current = window.setTimeout(() => {
+      autoSendTimerRef.current = null;
+      setAttachmentsLaunching(false);
+      void sendRef.current();
+    }, 260);
   }, [autoSendTick, attachments, streaming, briefBuilderOpen]);
+
+  useEffect(() => () => {
+    if (autoSendTimerRef.current) window.clearTimeout(autoSendTimerRef.current);
+  }, []);
+
 
   const submitBriefFromBuilder = useCallback(async (text: string) => {
     return new Promise<void>((resolve, reject) => {
@@ -5406,7 +5430,15 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               </div>
             )}
             {attachments.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-2">
+              <div
+                className={cn(
+                  "flex flex-wrap gap-2 mb-2 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+                  attachmentsLaunching
+                    ? "pointer-events-none -translate-y-4 opacity-0"
+                    : "translate-y-0 opacity-100",
+                )}
+              >
+
                 {attachments.map((a) => (
                   <div
                     key={a.id}
@@ -5635,13 +5667,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 multiple
                 accept="image/*,application/pdf,.pdf"
                 className="hidden"
-                onChange={async (e) => {
-                  const added = await handleFilesPicked(e.target.files);
-                  if (added.length) {
-                    autoSendOnUploadRef.current = true;
-                    setAutoSendTick((n) => n + 1);
-                  }
-                }}
+                onChange={(e) => { void handleFilesPicked(e.target.files); }}
+
               />
               <input
                 ref={moodInputRef}
