@@ -2754,13 +2754,31 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       previewUrl: a.previewUrl,
     }));
     const submittedStructuredBrief = isBriefContent(text);
-    const apiText = submittedStructuredBrief
+    // Guardrail: a bare "here is the floor plan attached" style notification
+    // sent with a document is never structural content — drop it entirely from
+    // entity parsing (zones, typologies, cities) and let the document speak.
+    const droppedAttachmentPlaceholder =
+      hasFiles && !submittedStructuredBrief && isAttachmentPlaceholderText(text);
+    const baseApiText = submittedStructuredBrief
       ? [
           "SUBMITTED ARCHITECTURAL BRIEF — this is the active client brief from the Brief Builder. Execute it now; do not reply that no brief was detected.",
           "Return three layout configurations and a full Architectural Specification Schedule using the structured fields below.",
           text,
         ].join("\n\n")
-      : text;
+      : droppedAttachmentPlaceholder
+        ? ""
+        : text;
+    const apiText = hasFiles
+      ? [
+          buildAttachmentSystemNote(
+            attachments.map((a) => a.name),
+            droppedAttachmentPlaceholder,
+          ),
+          baseApiText,
+        ]
+          .filter(Boolean)
+          .join("\n\n")
+      : baseApiText;
     const displayText = opts?.displayText ?? text;
     const userItem: TimelineItem = {
       kind: "msg",
@@ -2768,7 +2786,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       content: displayText,
       ...(timelineAttachments.length ? { attachments: timelineAttachments } : {}),
     };
-    const immediateProfile = quickClientProfile(displayText);
+    const immediateProfile = droppedAttachmentPlaceholder ? null : quickClientProfile(displayText);
     if (immediateProfile?.city) {
       try {
         const raw = sessionStorage.getItem("concierge:profile");
