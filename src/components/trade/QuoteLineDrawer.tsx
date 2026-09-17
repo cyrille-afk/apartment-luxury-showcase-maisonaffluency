@@ -30,6 +30,9 @@ export interface QuoteLineDrawerItem {
   materials?: string | null;
   sku?: string | null;
   stage?: string | null;
+  po_status?: string | null;
+  po_approved_by_name?: string | null;
+  po_approved_at?: string | null;
   /** Slack in days before this edit — used to detect an Amber -> Red escalation. */
   slack?: number | null;
   /** Expected-ready date before this edit. */
