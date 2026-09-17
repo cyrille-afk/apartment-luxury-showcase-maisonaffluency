@@ -306,6 +306,7 @@ export default function ProductCommerceCta({
   const completeIntake = (details: OrderIntakeDetails) => {
     const target = intakeFor ?? "order";
     setIntakeFor(null);
+    setIntakeDetails(details);
     try {
       sessionStorage.setItem("ma_intake_done", "1");
     } catch {
