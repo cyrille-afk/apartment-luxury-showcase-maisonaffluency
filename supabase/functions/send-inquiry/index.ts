@@ -382,11 +382,12 @@ const handler = async (req: Request): Promise<Response> => {
               company: companyName,
               email,
               phone,
-              message,
+              message: resolvedMessage,
               subject,
               productName,
               designerName,
               selectedFinish,
+              attachmentUrl,
             },
           },
         }
