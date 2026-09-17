@@ -72,6 +72,8 @@ export interface SelectionDrawerProps {
   onViewCart?: () => void;
   /** Fired by the sticky footer CTA with the selected payment method */
   onCheckout?: (method: PaymentMethod) => void;
+  /** Piece has no public price: hide payment methods, request a quotation. */
+  quoteOnly?: boolean;
   placing?: boolean;
 }
 
