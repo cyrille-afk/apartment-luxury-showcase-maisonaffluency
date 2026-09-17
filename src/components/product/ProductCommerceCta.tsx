@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getCart, shouldUseFullPageCart, useCart } from "@/lib/cart";
 import { Loader2, Minus, Plus } from "lucide-react";
 import SelectionDrawer, { type PaymentMethod } from "@/components/product/SelectionDrawer";
-import OrderIntakeSheet, { type OrderIntakeDetails } from "@/components/product/OrderIntakeSheet";
+import BespokeConfigurationDialog from "@/components/product/BespokeConfigurationDialog";
 
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
