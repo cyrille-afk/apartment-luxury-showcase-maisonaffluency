@@ -47,9 +47,32 @@ const normalize = (raw: TradeTierRaw | null | undefined): TradeTier => {
 };
 
 export function useTierConfig() {
+  const qc = useQueryClient();
+
+  // Any admin edit to the tier table pushes straight into every open quote /
+  // pricing view — no refresh, no cache wait.
+  useEffect(() => {
+    const channel = supabase
+      .channel(`trade-tier-config-${crypto.randomUUID()}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "trade_tier_config" },
+        () => {
+          qc.invalidateQueries({ queryKey: ["trade-tier-config"] });
+          qc.invalidateQueries({ queryKey: ["trade-tier"] });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [qc]);
+
   return useQuery({
     queryKey: ["trade-tier-config"],
-    staleTime: 1000 * 60 * 10,
+    staleTime: 30 * 1000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
     queryFn: async (): Promise<Record<TradeTier, TierConfigRow>> => {
       const { data, error } = await (supabase as any)
         .from("trade_tier_config")
