@@ -542,6 +542,34 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     if (isMsrpOnly && tradeDiscount) setTradeDiscount(false);
   }, [isMsrpOnly, tradeDiscount]);
 
+  // Safety net: inline quote fields (ship-to, prices, quantities, notes, crate
+  // costs) commit their value when the field loses focus. If the user closes
+  // the quote, switches tab or reloads while a field is still focused, that
+  // blur never fires and the edit is silently lost. Force a blur on unmount
+  // and whenever the page is being hidden so every pending edit is written.
+  useEffect(() => {
+    const flushActiveField = () => {
+      const el = document.activeElement as HTMLElement | null;
+      if (!el) return;
+      const tag = el.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || el.isContentEditable) {
+        el.blur();
+      }
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flushActiveField();
+    };
+    window.addEventListener("pagehide", flushActiveField);
+    window.addEventListener("beforeunload", flushActiveField);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      flushActiveField();
+      window.removeEventListener("pagehide", flushActiveField);
+      window.removeEventListener("beforeunload", flushActiveField);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
+
 
 
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
