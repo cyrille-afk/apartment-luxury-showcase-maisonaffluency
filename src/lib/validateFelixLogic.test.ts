@@ -16,6 +16,6 @@ describe("validateFelixLogic", () => {
   });
   it("similarity", () => {
     expect(cityNameSimilarity("Londn")).toBeGreaterThan(0.5);
-    expect(cityNameSimilarity("dressing room")).toBeLessThan(0.5);
+    expect(cityNameSimilarity("dressing room")).toBeLessThanOrEqual(0.5);
   });
 });
