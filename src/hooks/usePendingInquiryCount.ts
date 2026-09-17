@@ -2,9 +2,14 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
+function makeChannelName() {
+  return `pending-inquiry-count-${crypto.randomUUID()}`;
+}
+
 export function usePendingInquiryCount() {
   const { isAdmin } = useAuth();
   const [count, setCount] = useState(0);
+  const [channelName] = useState(makeChannelName);
 
   const load = async () => {
     const [{ data: inquiries, error }, { data: draftQuotes }] = await Promise.all([
