@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { Printer, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export interface PODocumentData {
   po_number: string;
@@ -78,6 +78,7 @@ export default function PODocumentViewer({ document: po, onOpenChange }: Props) 
       >
         {po && (
           <>
+            <DialogTitle className="sr-only">Purchase order {po.po_number}</DialogTitle>
             <div className="flex items-center justify-between gap-3 border-b border-border bg-background px-4 py-3">
               <div>
                 <p className="font-body text-[10px] uppercase tracking-[0.24em] text-muted-foreground">Purchase order</p>
