@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
 import { ArrowLeft, Check, ChevronDown, FileText, Loader2, UploadCloud, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -11,7 +13,6 @@ import { getCurrentDestination } from "@/lib/shippingDestination";
 import PhoneDialField from "@/components/product/PhoneDialField";
 import { pushBespokeSync } from "@/lib/bespokeSync";
 import { cachePendingBespokeUpload } from "@/lib/pendingBespokeCache";
-import { BESPOKE_GUEST_EVENT } from "@/components/product/BespokeSubmissionBanner";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -91,6 +92,7 @@ export default function OrderIntakeSheet({
   const isQuote = mode === "quote";
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [showingSuccess, setShowingSuccess] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState(0);
   const [profile, setProfile] = useState<"designer" | "private" | null>(
@@ -167,6 +169,7 @@ export default function OrderIntakeSheet({
         setStep(0);
         setNotesEdited(false);
         setSent(false);
+        setShowingSuccess(false);
         setSending(false);
         setTurnstileToken("");
         setCompany("");
@@ -290,18 +293,13 @@ export default function OrderIntakeSheet({
         projectLocation: d.city,
         submittedAt: new Date().toISOString(),
       };
-      if (isTradeAuthorized) {
-        pushBespokeSync(syncEntry);
-        onComplete(d);
-        onClose();
-        window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { stage: "Discover" } }));
-        window.dispatchEvent(new CustomEvent("concierge:open"));
-        return;
-      }
-      cachePendingBespokeUpload(syncEntry);
-      window.dispatchEvent(new Event(BESPOKE_GUEST_EVENT));
-      setSent(true);
+      if (isTradeAuthorized) pushBespokeSync(syncEntry);
+      else cachePendingBespokeUpload(syncEntry);
       onComplete(d);
+      // Keep the drawer anchored while Step 3 fades away, then reveal the
+      // persistent success canvas in the same bounds.
+      setShowingSuccess(true);
+      window.setTimeout(() => setSent(true), 300);
     } catch (error) {
       let responseBody: string | undefined;
       if (error && typeof error === "object" && "context" in error) {
@@ -373,7 +371,7 @@ export default function OrderIntakeSheet({
             isOpen ? "translate-y-0 md:translate-x-0" : "translate-y-full md:translate-y-0 md:translate-x-full"
           )}
         >
-          <div className="flex justify-end px-5 pt-4">
+           <div className="flex justify-end px-5 pt-4 md:px-8 md:pt-6">
             <button
               type="button"
               aria-label="Close"
@@ -383,27 +381,31 @@ export default function OrderIntakeSheet({
               <X className="h-4 w-4" strokeWidth={1.5} />
             </button>
           </div>
-          <div className="px-5 pb-8 pt-2 text-center">
-            <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full border border-border/60">
-              <Check className="h-5 w-5" strokeWidth={1.5} />
-            </div>
-            <p className="font-display text-2xl leading-snug text-foreground">Thank You!</p>
-            <p className="mx-auto mt-3 max-w-[19rem] font-body text-sm leading-relaxed text-muted-foreground">
-              We have received your quote request and will reply shortly.
-            </p>
-            {(productTitle || finish) && (
-              <p className="mt-4 font-body text-[10px] uppercase tracking-widest text-muted-foreground/80">
-                {[productTitle, finish].filter(Boolean).join(" · ")}
-              </p>
-            )}
-            <button
-              type="button"
-              onClick={onClose}
-              className="mt-7 inline-flex h-12 w-full items-center justify-center rounded-none bg-foreground px-5 font-body text-xs uppercase tracking-widest text-background transition-transform duration-150 active:scale-[0.98]"
-            >
-              Close
-            </button>
-          </div>
+           <div className="relative flex min-h-0 flex-1 animate-in flex-col items-center justify-center fade-in px-7 pb-24 text-center duration-300 md:px-12">
+             <div className="flex h-14 w-14 items-center justify-center rounded-full border border-primary/45 text-primary">
+               <Check className="h-5 w-5" strokeWidth={1.4} />
+             </div>
+             <p className="mt-7 font-body text-[11px] font-medium uppercase tracking-[0.22em] text-foreground">
+               Specifications Recorded
+             </p>
+             <p className="mx-auto mt-6 max-w-sm font-body text-sm leading-7 text-muted-foreground">
+               Our Concierge desk has successfully registered your parameters and custom material swatches for the {productTitle || "selected piece"}. A formal proforma transaction estimate is being compiled by our Paris atelier and will be routed to your verified studio inbox within 48 hours.
+             </p>
+             <Button
+               type="button"
+               onClick={onClose}
+               className="mt-10 h-12 w-full max-w-sm rounded-none font-body text-[10px] uppercase tracking-[0.18em]"
+             >
+               [ Close Workspace Drawer ]
+             </Button>
+             <Link
+               to="/trade-program"
+               onClick={onClose}
+               className="absolute inset-x-6 bottom-8 font-body text-[10px] lowercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+             >
+               [ apply for the trade program to track project timelines in real-time ]
+             </Link>
+           </div>
           <div className="pb-[env(safe-area-inset-bottom)]" />
         </div>
       </div>,
@@ -428,7 +430,7 @@ export default function OrderIntakeSheet({
       />
 
       {/* Sheet */}
-      <div
+       <div
         role="dialog"
         aria-modal="true"
         aria-label="Order intake"
@@ -439,6 +441,7 @@ export default function OrderIntakeSheet({
           isOpen ? "translate-y-0 md:translate-x-0" : "translate-y-full md:translate-y-0 md:translate-x-full"
         )}
       >
+        <div className={cn("flex min-h-0 flex-1 flex-col transition-opacity duration-300", showingSuccess && "opacity-0")}>
         {/* Razor-thin progress rule */}
         <div className="h-[2px] w-full bg-border/50">
           <div
@@ -741,7 +744,7 @@ export default function OrderIntakeSheet({
 
         {/* Natural-flow mobile action; desktop retains its docked sheet action. */}
         {/* Mobile: button flows with the content. Desktop keeps its docked action. */}
-        <div className="px-6 pb-[calc(3rem+env(safe-area-inset-bottom))] pt-0 md:sticky md:bottom-0 md:mt-auto md:shrink-0 md:border-t md:border-border/50 md:bg-background/95 md:px-8 md:pb-5 md:pt-5 md:backdrop-blur-md">
+         <div className="px-6 pb-[calc(3rem+env(safe-area-inset-bottom))] pt-0 md:sticky md:bottom-0 md:mt-auto md:shrink-0 md:border-t md:border-border/50 md:bg-background/95 md:px-8 md:pb-5 md:pt-5 md:backdrop-blur-md">
           <button
             type="button"
             onClick={next}
@@ -755,6 +758,7 @@ export default function OrderIntakeSheet({
             {step < 2 ? "Next" : finalLabel ?? (isQuote ? "Submit Quote Request" : "Place Order")}
           </button>
         </div>
+         </div>
       </div>
     </div>,
     document.body

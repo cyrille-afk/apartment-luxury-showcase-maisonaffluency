@@ -1,6 +1,7 @@
 # Roadmap
 
 - [x] Reformat the three-step Quote/Order intake as a desktop right-side workspace with localized phone, swatch upload, and verified Felix handoff
+- [x] Replace the global bespoke confirmation banner with a persistent Step 4 success canvas inside the request drawer
 
 - [x] Add Garnier & Linker to the desktop-only Contemporary Talents designer list and raise the designer list higher on desktop while keeping mobile positioning intact
 - [x] Match expanded Trade designer portraits to the constrained public editorial layout and update the card CTA

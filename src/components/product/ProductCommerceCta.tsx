@@ -313,7 +313,9 @@ export default function ProductCommerceCta({
 
   const completeIntake = (details: OrderIntakeDetails) => {
     const target = intakeFor ?? "order";
-    setIntakeFor(null);
+    // A direct desktop bespoke submission owns its Step 4 confirmation inside
+    // this same drawer. Keep it mounted until the visitor explicitly closes it.
+    if (!(target === "bespoke" && desktopDirectBespoke)) setIntakeFor(null);
     setIntakeDetails(details);
     try {
       sessionStorage.setItem("ma_intake_done", "1");
