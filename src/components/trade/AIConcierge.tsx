@@ -1037,7 +1037,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       // Never stack two retry cards in a row for the same text.
       const tail = copy[copy.length - 1];
       if (tail?.kind === "retry" && tail.text === text) return copy;
-      return [...copy, { kind: "retry", text, reason }];
+      // Snapshot the stage the failure happened in so a successful retry
+      // re-anchors the state machine exactly where it was (an API timeout in
+      // Discover must never advance the pipeline).
+      return [...copy, { kind: "retry", text, reason, stage: atStage }];
     });
   }, []);
 
