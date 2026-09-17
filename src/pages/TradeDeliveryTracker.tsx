@@ -458,22 +458,55 @@ export default function TradeDeliveryTracker() {
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="flex flex-wrap items-center gap-2">
-              {filterTabs.map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setStatusFilter(tab.key)}
-                  className={filterButtonClasses(tab.key)}
-                >
-                  <span>{tab.label}</span>
-                  <span className={cn("inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1.5 py-0 font-body text-[10px] tabular-nums", statusFilter === tab.key ? "bg-white/30" : "bg-muted text-muted-foreground")}>
-                    {statusCounts[tab.key]}
-                  </span>
-                </button>
-              ))}
+            <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                {filterTabs.map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setStatusFilter(tab.key)}
+                    className={filterButtonClasses(tab.key)}
+                  >
+                    <span>{tab.label}</span>
+                    <span className={cn("inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1.5 py-0 font-body text-[10px] tabular-nums", statusFilter === tab.key ? "bg-white/30" : "bg-muted text-muted-foreground")}>
+                      {statusCounts[tab.key]}
+                    </span>
+                  </button>
+                ))}
+              </div>
 
-              <div className="ml-auto">
+              <div className="flex flex-1 flex-wrap items-center justify-start lg:justify-end gap-3">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search items, brands, clients..."
+                    className="h-8 w-[220px] rounded-full border-border bg-background pl-8 pr-3 font-body text-xs placeholder:text-muted-foreground/70"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="rounded-lg border border-border bg-background px-3 py-2 min-w-[90px]">
+                    <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Total Items</p>
+                    <p className="font-display text-sm font-semibold text-foreground mt-0.5">{visibleTotals.totalItems}</p>
+                  </div>
+                  {Object.entries(visibleTotals.byCurrency).length === 0 ? (
+                    <div className="rounded-lg border border-border bg-background px-3 py-2 min-w-[110px]">
+                      <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Filtered Value</p>
+                      <p className="font-display text-sm font-semibold text-foreground mt-0.5">—</p>
+                    </div>
+                  ) : (
+                    Object.entries(visibleTotals.byCurrency).map(([currency, cents]) => (
+                      <div key={currency} className="rounded-lg border border-border bg-background px-3 py-2 min-w-[110px]">
+                        <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Filtered Value</p>
+                        <p className="font-display text-sm font-semibold text-foreground mt-0.5">{formatMoney(cents, currency)}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button type="button" variant="outline" size="sm" className="h-8 gap-1.5 rounded-full px-3 font-body text-xs" disabled={exportRows.length === 0}>
