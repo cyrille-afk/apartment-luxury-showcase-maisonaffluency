@@ -16,6 +16,7 @@ interface Props {
   productName?: string
   designerName?: string
   selectedFinish?: string
+  attachmentUrl?: string
 }
 
 const Row = ({ label, value }: { label: string; value?: string }) => (
