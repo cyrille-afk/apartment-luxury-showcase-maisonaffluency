@@ -112,6 +112,8 @@ interface Line {
   dimensions: string | null;
   materials: string | null;
   sku: string | null;
+  price_cents: number | null;
+  currency: string;
 }
 
 export default function TradeDeliveryTracker() {
