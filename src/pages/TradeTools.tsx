@@ -42,7 +42,7 @@ const categories: ToolCategory[] = [
       { title: "Sample Requests", description: "Request and track material samples", url: "/trade/samples", icon: Package },
       { title: "Shipping Tracker", description: "Real-time delivery progress", url: "/trade/shipping-tracker", icon: Truck },
       { title: "Lead Time Calendar", description: "Production and shipping timelines", url: "/trade/lead-time-calendar", icon: CalendarDays },
-      { title: "Budget Tracker", description: "Monitor project spend vs budget", url: "/trade/budget", icon: Wallet },
+      { title: "Budget Tracker & Cash-Flow Planner", description: "Margins, tier markups, deposits and invoice cash flow", url: "/trade/budget", icon: Wallet },
       { title: "Reorder", description: "Quickly re-order from past quotes", url: "/trade/reorder", icon: RefreshCw },
       { title: "Currency Converter", description: "Convert trade prices across currencies", url: "/trade/currency-converter", icon: ArrowRightLeft },
     ],
