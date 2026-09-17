@@ -3656,6 +3656,43 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed tabular-nums"
                           />
                         </label>
+                        {(() => {
+                          const crateCcy = ((item as any).crating_currency as string | null) || product?.currency || "EUR";
+                          const crateCents = (item as any).crating_cents as number | null | undefined;
+                          const convertedTotal = crateCents && crateCents > 0
+                            ? (convertCents(crateCents, crateCcy, currency) ?? 0) * Math.max(1, item.quantity)
+                            : 0;
+                          return (
+                            <label className="flex flex-col gap-0.5">
+                              <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">
+                                Crate / unit ({crateCcy})
+                              </span>
+                              <input
+                                type="number"
+                                min={0}
+                                step={1}
+                                defaultValue={crateCents != null ? Math.round(crateCents / 100) : ""}
+                                placeholder="0"
+                                disabled={isReadOnly}
+                                readOnly={isReadOnly}
+                                onBlur={(e) => {
+                                  if (isReadOnly) return;
+                                  const raw = e.target.value.trim();
+                                  const v = raw === "" ? null : Math.max(0, Math.round(parseFloat(raw) * 100));
+                                  if (v !== (crateCents ?? null)) {
+                                    updateItemField(item.id, { crating_cents: v, crating_currency: v == null ? null : crateCcy } as any);
+                                  }
+                                }}
+                                className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed tabular-nums"
+                              />
+                              <span className="font-body text-[9px] text-muted-foreground/70 tabular-nums">
+                                {convertedTotal > 0
+                                  ? `= ${formatPriceRaw(convertedTotal, currency)}${item.quantity > 1 ? ` (${item.quantity} ×)` : ""}`
+                                  : "From product crate specs"}
+                              </span>
+                            </label>
+                          );
+                        })()}
                       </div>
                       {item.ship_cbm == null && item.ship_weight_kg == null && (
                         <div className="md:col-span-4 mt-1 flex items-center gap-1.5 text-amber-700/90 print:hidden">
