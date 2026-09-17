@@ -288,6 +288,30 @@ export default function TradeDeliveryTracker() {
           </div>
         )}
       </div>
+
+      <Dialog open={!!previewLine} onOpenChange={(open) => !open && setPreviewLine(null)}>
+        <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0 sm:rounded-lg">
+          <div className="relative flex aspect-[4/3] w-full items-center justify-center bg-muted">
+            {previewLine?.image_url ? (
+              <img
+                src={previewLine.image_url}
+                alt={previewLine.product_name}
+                className="h-full w-full object-contain"
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <ImageOff className="h-12 w-12" />
+                <span className="font-body text-xs uppercase tracking-wider">No image</span>
+              </div>
+            )}
+          </div>
+          <DialogHeader className="p-5 text-left">
+            <DialogTitle className="font-display text-base">{previewLine?.product_name}</DialogTitle>
+            <DialogDescription className="font-body text-xs uppercase tracking-wider">{previewLine?.brand_name}</DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
       <QuoteLineDrawer item={selectedLine as QuoteLineDrawerItem | null} onOpenChange={(open) => !open && setSelectedLine(null)} />
     </>
   );
