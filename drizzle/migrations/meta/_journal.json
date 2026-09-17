@@ -57,6 +57,13 @@
       "when": 1789613081244,
       "tag": "0007_delivery_escalation_alerts",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789616106076,
+      "tag": "0008_add_po_approval_workflow",
+      "breakpoints": true
     }
   ]
 }
