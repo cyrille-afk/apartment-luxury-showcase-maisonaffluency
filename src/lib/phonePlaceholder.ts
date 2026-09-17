@@ -89,3 +89,54 @@ export const getPhonePlaceholder = (country?: string | null): string => {
 
 export const getDialCode = (country?: string | null): string | null =>
   (country && DIAL_CODES[country]) || null;
+
+/**
+ * ISO-3166 alpha-2 → country name, restricted to the supported dial list.
+ * Used to resolve a geo/locale-detected country code into a dial prefix.
+ */
+const ISO_TO_COUNTRY: Record<string, string> = {
+  SG: "Singapore",
+  AU: "Australia",
+  CA: "Canada",
+  CN: "China",
+  FR: "France",
+  DE: "Germany",
+  HK: "Hong Kong",
+  IN: "India",
+  ID: "Indonesia",
+  IT: "Italy",
+  JP: "Japan",
+  MY: "Malaysia",
+  NL: "Netherlands",
+  NZ: "New Zealand",
+  PH: "Philippines",
+  KR: "South Korea",
+  ES: "Spain",
+  CH: "Switzerland",
+  TW: "Taiwan",
+  TH: "Thailand",
+  AE: "United Arab Emirates",
+  GB: "United Kingdom",
+  US: "United States",
+  VN: "Vietnam",
+  // Nearby markets mapped onto their closest supported dial region.
+  IE: "United Kingdom",
+  BE: "Netherlands",
+  AT: "Germany",
+  PT: "Spain",
+  MC: "France",
+  LU: "France",
+  GR: "Italy",
+  SA: "United Arab Emirates",
+  QA: "United Arab Emirates",
+  KW: "United Arab Emirates",
+  BH: "United Arab Emirates",
+  OM: "United Arab Emirates",
+  MX: "United States",
+};
+
+export const getDialCodeByIso = (iso?: string | null): string | null => {
+  if (!iso) return null;
+  const country = ISO_TO_COUNTRY[iso.trim().toUpperCase()];
+  return country ? DIAL_CODES[country] ?? null : null;
+};
