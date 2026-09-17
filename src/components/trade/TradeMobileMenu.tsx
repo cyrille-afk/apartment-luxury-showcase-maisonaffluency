@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   ChevronRight, LogOut, Menu, X,
   LayoutDashboard, Heart, FolderKanban, MapPin,
-  FileText, Settings, Shield, Wrench, UserCircle, Image, Users,
+  FileText, Settings, Shield, Wrench, UserCircle, Image, Users, Inbox,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -105,6 +105,20 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
                 <span className="flex items-center gap-3">
                   <Shield className="h-4 w-4 shrink-0" />
                   Admin Dashboard
+                </span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+              </button>
+              <button
+                onClick={() => handleNav("/trade/admin/inquiries")}
+                className={cn(
+                  "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0",
+                  isActive("/trade/admin/inquiries") ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
+                )}
+                style={{ animationDelay: `${(coreItems.length + 2) * 50}ms`, animationFillMode: "forwards" }}
+              >
+                <span className="flex items-center gap-3">
+                  <Inbox className="h-4 w-4 shrink-0" />
+                  Quote Requests
                 </span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
               </button>
