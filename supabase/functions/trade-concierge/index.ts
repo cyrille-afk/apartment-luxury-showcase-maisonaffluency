@@ -6377,7 +6377,7 @@ serve(async (req) => {
       console.warn("[concierge zoneLock] parser failed", err);
     }
     try {
-      if (zoneLockNote) throw { __skipCityLock: true };
+      if (zoneLockNote) throw new Error("__skipCityLock");
       // Re-resolve the project location on EVERY turn using the latest
       // user assertion found anywhere in the thread — so a follow-up like
       // "actually Brooklyn Heights" replaces the earlier "NYC" in the
