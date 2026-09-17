@@ -22,7 +22,7 @@ export function buildProductCuratorNotes(source: CuratorNotesSource): ProductCur
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-  const sentences = plainDescription.match(/[^.!?]+[.!?]+/g)?.map((sentence) => sentence.trim()).filter(Boolean) || [];
+  const sentences = splitSentences(plainDescription);
   const category = (source.subcategory || source.category || "piece").toLowerCase();
   const dimensions = (source.dimensions || "").split("\n")[0]?.trim();
 

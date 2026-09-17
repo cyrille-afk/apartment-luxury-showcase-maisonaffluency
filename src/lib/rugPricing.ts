@@ -80,6 +80,14 @@ export function looksLikeDimension(text: string | null | undefined): boolean {
     .map((l) => l.trim())
     .filter(Boolean)
     .some((line) => {
+      // Upholstery/material yardage options ("COM fabric (3.5 m)", "ECART fabric (6 m)")
+      // are material requirements, not product dimensions.
+      const isMaterialQuantity =
+        /\b(com|col|fabric|leather|hide|velvet|linen|silk|mohair|yardage|metrage)\b/i.test(line) &&
+        !/[Ø⌀]\s*\d/.test(line) &&
+        !/\d\s*[×x*]\s*\d/i.test(line) &&
+        !/\b[HWLDhwld]\s*\d/.test(line);
+      if (isMaterialQuantity) return false;
       if (/\d\s*(?:cm|mm|in|inches?|")\b/i.test(line)) return true;
       if (/(?<![A-Za-z\/])\d+(?:[.,]\d+)?\s*m(?![A-Za-z\/])/i.test(line)) return true;
       if (/\d\s*[×x*]\s*\d/i.test(line)) return true;
