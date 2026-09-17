@@ -125,8 +125,11 @@ serve(async (req) => {
         product_id: product.id,
         quantity,
         unit_price_cents: unitPrice || null,
+        variant_label: inquiry.selected_finish || null,
+        notes: inquiry.selected_finish ? `Requested finish: ${inquiry.selected_finish}` : null,
       });
       if (itemErr) console.error("Quote item insert failed:", itemErr);
+
     }
 
     // Link back on inquiry + advance status
