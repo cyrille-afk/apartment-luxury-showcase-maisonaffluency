@@ -71,6 +71,13 @@
       "when": 1789616542952,
       "tag": "0009_create_suppliers_and_po_dispatch",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789618868921,
+      "tag": "0010_suppliers_name_unique",
+      "breakpoints": true
     }
   ]
 }
