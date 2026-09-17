@@ -76,7 +76,10 @@ const CookieConsent = () => {
     if (isStandaloneHomeLaunch) return;
 
     const consent = readConsent();
-    if (consent) return;
+    if (consent) {
+      setConsented(true);
+      return;
+    }
 
 
     // Never mount during the LCP measurement window. Lighthouse keeps
