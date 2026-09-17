@@ -3530,6 +3530,18 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const sendRef = useRef(send);
   useEffect(() => { sendRef.current = send; }, [send]);
 
+  // Auto-trigger the conversational pipeline as soon as an upload lands.
+  // Runs once per successful upload event, after the attachment state has
+  // committed, so `send` picks the new files up and Felix starts thinking.
+  useEffect(() => {
+    if (!autoSendOnUploadRef.current) return;
+    if (!attachments.length) return;
+    if (streaming) return;
+    autoSendOnUploadRef.current = false;
+    const t = window.setTimeout(() => { void sendRef.current(); }, 60);
+    return () => window.clearTimeout(t);
+  }, [autoSendTick, attachments, streaming]);
+
   const submitBriefFromBuilder = useCallback(async (text: string) => {
     return new Promise<void>((resolve, reject) => {
       // A revised submission starts on a clean result canvas. The builder's
