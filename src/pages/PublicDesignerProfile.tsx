@@ -107,7 +107,7 @@ function displayName(name: string): string {
 
 /**
  * Derive small inventory badges for a curator-pick card.
- * Matches tags/edition strings to "Available Now" or "Exclusive" labels shown
+ * Matches tags/edition strings to "Available Now" or explicit "Exclusive" labels shown
  * in the lower-left corner of product thumbnails.
  */
 function inventoryBadgesForPick(pick: AttributedCuratorPick): string[] {
@@ -117,12 +117,7 @@ function inventoryBadgesForPick(pick: AttributedCuratorPick): string[] {
   if (tags.some((t) => /available[-\s]?now|in[-\s]?stock/.test(t))) {
     badges.push("Available Now");
   }
-  if (
-    edition.includes("exclusive") ||
-    edition.includes("limited edition") ||
-    edition.includes("unique piece") ||
-    tags.some((t) => /exclusive|limited[-\s]?edition|unique[-\s]?piece/.test(t))
-  ) {
+  if (edition.includes("exclusive") || tags.some((t) => /\bexclusive\b/.test(t))) {
     badges.push("Exclusive");
   }
   return badges;

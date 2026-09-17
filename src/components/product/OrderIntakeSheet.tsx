@@ -24,6 +24,7 @@ export interface OrderIntakeDetails {
   phone: string;
   company: string;
   buyerType?: "individual" | "business";
+  attachment?: File | null;
 }
 
 interface Props {
@@ -53,6 +54,7 @@ interface Props {
   /** Overrides the last step's action label (e.g. "Continue"). */
   finalLabel?: string;
   isTradeAuthorized?: boolean;
+  showAttachmentDropzone?: boolean;
 }
 
 const inputCls =
@@ -89,10 +91,12 @@ export default function OrderIntakeSheet({
   productId,
   finalLabel,
   isTradeAuthorized = false,
+  showAttachmentDropzone = false,
 }: Props) {
   const { toast, dismiss } = useToast();
   const checkoutForm = useCheckoutForm();
   const isQuote = mode === "quote";
+  const shouldShowAttachmentDropzone = isQuote || showAttachmentDropzone;
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [showingSuccess, setShowingSuccess] = useState(false);
@@ -205,6 +209,7 @@ export default function OrderIntakeSheet({
     phone: phone.trim(),
     company: buyerType === "business" ? company.trim() : "",
     buyerType,
+    attachment,
   });
 
   const handleFiles = (files: FileList | null) => {
@@ -349,6 +354,47 @@ export default function OrderIntakeSheet({
   };
 
   const progress = ((step + (canAdvance ? 1 : 0.35)) / STEPS.length) * 100;
+  const attachmentDropzone = shouldShowAttachmentDropzone ? (
+    <div className="mt-6">
+      <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        Attach Reference Material / Fabric Swatch (Optional)
+      </span>
+      <div
+        onClick={() => fileInputRef.current?.click()}
+        onDrop={(event) => {
+          event.preventDefault();
+          setIsDragging(false);
+          handleFiles(event.dataTransfer.files);
+        }}
+        onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }}
+        onDragLeave={(event) => { event.preventDefault(); setIsDragging(false); }}
+        className={cn(
+          "mt-2 flex cursor-pointer flex-col items-center justify-center border border-dashed border-border/60 bg-muted/30 px-6 py-6 transition-colors hover:bg-muted/50",
+          isDragging && "border-foreground/40 bg-muted/50",
+        )}
+      >
+        <UploadCloud className="h-4 w-4 text-muted-foreground" strokeWidth={1.25} />
+        <p className="mt-2 text-center font-body text-xs leading-relaxed text-muted-foreground">
+          drag and drop fabric swatches, grain reference photos, or COM datasheets here, or browse local files (max 10MB)
+        </p>
+        <input ref={fileInputRef} type="file" accept="image/*,.pdf,.doc,.docx" className="sr-only" onChange={(event) => handleFiles(event.target.files)} />
+      </div>
+      {attachment && (
+        <div className="mt-3 flex items-center gap-3 border border-border/60 bg-muted/20 px-3 py-2">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-border/50 bg-background">
+            <FileText className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.5} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-body text-xs text-foreground">{attachment.name}</p>
+            <p className="font-body text-[10px] text-muted-foreground">{formatBytes(attachment.size)}</p>
+          </div>
+          <button type="button" aria-label="Remove attachment" onClick={() => setAttachment(null)} className="flex h-7 w-7 items-center justify-center text-muted-foreground hover:text-foreground">
+            <X className="h-3.5 w-3.5" strokeWidth={1.5} />
+          </button>
+        </div>
+      )}
+    </div>
+  ) : null;
 
   if (sent) {
     return createPortal(
@@ -635,6 +681,7 @@ export default function OrderIntakeSheet({
                 placeholder="Optional — finishes, dimensions, timeline"
                 className={cn(inputCls, "h-auto py-3 leading-relaxed")}
               />
+              {attachmentDropzone}
             </div>
           )}
 
@@ -706,47 +753,6 @@ export default function OrderIntakeSheet({
                 Phone Number (optional)
               </label>
               <PhoneDialField value={phone} onChange={setPhone} />
-              {isQuote && (
-                <div className="mt-6">
-                  <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                    Attach Reference Material / Fabric Swatch (Optional)
-                  </span>
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    onDrop={(event) => {
-                      event.preventDefault();
-                      setIsDragging(false);
-                      handleFiles(event.dataTransfer.files);
-                    }}
-                    onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }}
-                    onDragLeave={(event) => { event.preventDefault(); setIsDragging(false); }}
-                    className={cn(
-                      "mt-2 flex cursor-pointer flex-col items-center justify-center border border-dashed border-border/60 bg-muted/30 px-6 py-6 transition-colors hover:bg-muted/50",
-                      isDragging && "border-foreground/40 bg-muted/50",
-                    )}
-                  >
-                    <UploadCloud className="h-4 w-4 text-muted-foreground" strokeWidth={1.25} />
-                    <p className="mt-2 text-center font-body text-xs leading-relaxed text-muted-foreground">
-                      drag and drop fabric swatches, grain reference photos, or COM datasheets here, or browse local files (max 10MB)
-                    </p>
-                    <input ref={fileInputRef} type="file" accept="image/*,.pdf,.doc,.docx" className="sr-only" onChange={(event) => handleFiles(event.target.files)} />
-                  </div>
-                  {attachment && (
-                    <div className="mt-3 flex items-center gap-3 border border-border/60 bg-muted/20 px-3 py-2">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-border/50 bg-background">
-                        <FileText className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.5} />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-body text-xs text-foreground">{attachment.name}</p>
-                        <p className="font-body text-[10px] text-muted-foreground">{formatBytes(attachment.size)}</p>
-                      </div>
-                      <button type="button" aria-label="Remove attachment" onClick={() => setAttachment(null)} className="flex h-7 w-7 items-center justify-center text-muted-foreground hover:text-foreground">
-                        <X className="h-3.5 w-3.5" strokeWidth={1.5} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
               {isQuote && (
                 <Turnstile
                   onVerify={setTurnstileToken}

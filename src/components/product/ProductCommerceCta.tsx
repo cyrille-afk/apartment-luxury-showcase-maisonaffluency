@@ -643,6 +643,7 @@ export default function ProductCommerceCta({
           prefillEmail={intakeDetails?.email || checkoutForm.email || null}
           prefillPhone={intakeDetails?.phone || null}
           prefillNotes={intakeDetails?.notes || null}
+          prefillAttachment={intakeDetails?.attachment || null}
         />
       )}
 
@@ -655,6 +656,7 @@ export default function ProductCommerceCta({
           onComplete={completeIntake}
           mode={desktopDirectBespoke ? "quote" : "order"}
           isTradeAuthorized={tradeApproved}
+          showAttachmentDropzone={intakeFor === "bespoke"}
           finalLabel={
             intakeFor === "bespoke"
               ? desktopDirectBespoke ? "Submit Specifications" : "Continue to Bespoke Details"
