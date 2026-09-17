@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 import { cn } from "@/lib/utils";
+import PhoneDialField from "@/components/product/PhoneDialField";
 
 /**
  * BespokeConfigurationDialog — the wide, centred overlay opened by the
