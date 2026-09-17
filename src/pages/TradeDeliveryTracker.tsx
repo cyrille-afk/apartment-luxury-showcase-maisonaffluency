@@ -5,9 +5,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
-import { CalendarClock, ChevronRight, CalendarPlus, ImageOff, Download, FileSpreadsheet, FileText } from "lucide-react";
+import { CalendarClock, ChevronRight, CalendarPlus, ImageOff, Download, FileSpreadsheet, FileText, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -141,6 +142,7 @@ export default function TradeDeliveryTracker() {
   const [selectedLine, setSelectedLine] = useState<Line | null>(null);
   const [previewLine, setPreviewLine] = useState<Line | null>(null);
   const [statusFilter, setStatusFilter] = useState<"all" | "late" | "tight" | "ontrack">("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { data: lines = [], isLoading } = useQuery({
     queryKey: ["delivery-tracker", user?.id],
@@ -258,6 +260,30 @@ export default function TradeDeliveryTracker() {
       .filter((g) => g.lines.length > 0);
   }, [groups, statusFilter]);
 
+  const visibleGroups = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return filteredGroups;
+    return filteredGroups
+      .map((g) => ({
+        ...g,
+        lines: g.lines.filter((l) => {
+          const haystack = [
+            l.product_name,
+            l.brand_name,
+            l.client_name,
+            g.name,
+            l.quote_ref,
+            STAGE_LABEL[l.stage || ""] || l.stage || "",
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+          return haystack.includes(term);
+        }),
+      }))
+      .filter((g) => g.lines.length > 0);
+  }, [filteredGroups, searchTerm]);
+
   const filterTabs: { key: "all" | "late" | "tight" | "ontrack"; label: string }[] = [
     { key: "all", label: "All Items" },
     { key: "late", label: "Late" },
@@ -289,7 +315,7 @@ export default function TradeDeliveryTracker() {
 
   const exportRows = useMemo(
     () =>
-      filteredGroups.flatMap((g) =>
+      visibleGroups.flatMap((g) =>
         g.lines
           .slice()
           .sort((a, b) => (a.required_by_date || "9999-12-31").localeCompare(b.required_by_date || "9999-12-31"))
@@ -307,11 +333,11 @@ export default function TradeDeliveryTracker() {
             quote: l.quote_ref,
           })),
       ),
-    [filteredGroups],
+    [visibleGroups],
   );
 
-  const totals = useMemo(() => {
-    const items = filteredGroups.flatMap((g) => g.lines);
+  const visibleTotals = useMemo(() => {
+    const items = visibleGroups.flatMap((g) => g.lines);
     const byCurrency: Record<string, number> = {};
     for (const l of items) {
       if (l.price_cents != null && l.quantity > 0) {
@@ -319,7 +345,7 @@ export default function TradeDeliveryTracker() {
       }
     }
     return { totalItems: items.length, byCurrency };
-  }, [filteredGroups]);
+  }, [visibleGroups]);
 
   const activeFilterLabel = filterTabs.find((t) => t.key === statusFilter)?.label || "All Items";
 
@@ -359,9 +385,9 @@ export default function TradeDeliveryTracker() {
       .join("");
     const generatedOn = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
     const logoUrl = `${window.location.origin}/logo.png`;
-    const totalValueLabel = Object.keys(totals.byCurrency).length > 1 ? "Total Value" : "Total Value";
-    const summaryHtml = `<div class="summary-row"><span class="summary-label">Total Items</span><span class="summary-value">${totals.totalItems}</span></div>` +
-      Object.entries(totals.byCurrency)
+    const totalValueLabel = Object.keys(visibleTotals.byCurrency).length > 1 ? "Total Value" : "Total Value";
+    const summaryHtml = `<div class="summary-row"><span class="summary-label">Total Items</span><span class="summary-value">${visibleTotals.totalItems}</span></div>` +
+      Object.entries(visibleTotals.byCurrency)
         .map(([currency, cents]) => `<div class="summary-row"><span class="summary-label">${escHtml(totalValueLabel)}</span><span class="summary-value">${escHtml(formatMoney(cents, currency))}</span></div>`)
         .join("");
     const html = `<!doctype html><html><head><meta charset="utf-8"><title>Delivery Tracker</title>
@@ -432,22 +458,55 @@ export default function TradeDeliveryTracker() {
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="flex flex-wrap items-center gap-2">
-              {filterTabs.map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setStatusFilter(tab.key)}
-                  className={filterButtonClasses(tab.key)}
-                >
-                  <span>{tab.label}</span>
-                  <span className={cn("inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1.5 py-0 font-body text-[10px] tabular-nums", statusFilter === tab.key ? "bg-white/30" : "bg-muted text-muted-foreground")}>
-                    {statusCounts[tab.key]}
-                  </span>
-                </button>
-              ))}
+            <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                {filterTabs.map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setStatusFilter(tab.key)}
+                    className={filterButtonClasses(tab.key)}
+                  >
+                    <span>{tab.label}</span>
+                    <span className={cn("inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1.5 py-0 font-body text-[10px] tabular-nums", statusFilter === tab.key ? "bg-white/30" : "bg-muted text-muted-foreground")}>
+                      {statusCounts[tab.key]}
+                    </span>
+                  </button>
+                ))}
+              </div>
 
-              <div className="ml-auto">
+              <div className="flex flex-1 flex-wrap items-center justify-start lg:justify-end gap-3">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search items, brands, clients..."
+                    className="h-8 w-[260px] rounded-full border-border bg-background pl-8 pr-3 font-body text-xs placeholder:text-muted-foreground/70"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="rounded-lg border border-border bg-background px-3 py-2 min-w-[90px]">
+                    <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Total Items</p>
+                    <p className="font-display text-sm font-semibold text-foreground mt-0.5">{visibleTotals.totalItems}</p>
+                  </div>
+                  {Object.entries(visibleTotals.byCurrency).length === 0 ? (
+                    <div className="rounded-lg border border-border bg-background px-3 py-2 min-w-[110px]">
+                      <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Filtered Value</p>
+                      <p className="font-display text-sm font-semibold text-foreground mt-0.5">—</p>
+                    </div>
+                  ) : (
+                    Object.entries(visibleTotals.byCurrency).map(([currency, cents]) => (
+                      <div key={currency} className="rounded-lg border border-border bg-background px-3 py-2 min-w-[110px]">
+                        <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Filtered Value</p>
+                        <p className="font-display text-sm font-semibold text-foreground mt-0.5">{formatMoney(cents, currency)}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button type="button" variant="outline" size="sm" className="h-8 gap-1.5 rounded-full px-3 font-body text-xs" disabled={exportRows.length === 0}>
@@ -470,14 +529,14 @@ export default function TradeDeliveryTracker() {
             </div>
 
 
-            {filteredGroups.length === 0 ? (
+            {visibleGroups.length === 0 ? (
               <div className="text-center py-16 border border-dashed border-border rounded-lg">
                 <CalendarClock className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
-                <p className="font-body text-sm text-muted-foreground">No items match the selected status filter.</p>
+                <p className="font-body text-sm text-muted-foreground">No items match the selected filters.</p>
               </div>
             ) : (
               <div className="space-y-8">
-                {filteredGroups.map((g) => {
+                {visibleGroups.map((g) => {
                   const worst = g.lines.reduce<number | null>((acc, l) => {
                     if (l.slack == null) return acc;
                     return acc == null || l.slack < acc ? l.slack : acc;
