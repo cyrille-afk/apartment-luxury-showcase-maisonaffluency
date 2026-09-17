@@ -4139,18 +4139,21 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               <div>
                 <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">Trade Tiers</p>
                 <div className="font-body text-[10px] md:text-[11px] leading-relaxed text-muted-foreground space-y-1">
-                  <div className="flex justify-between border-b border-border/50 pb-1">
-                    <span className="text-foreground">Silver{tierLabel === "Silver" ? " • current" : ""}</span>
-                    <span>8% · entry</span>
-                  </div>
-                  <div className="flex justify-between border-b border-border/50 pb-1">
-                    <span className={tierLabel === "Gold" ? "text-foreground" : ""}>Gold{tierLabel === "Gold" ? " • current" : ""}</span>
-                    <span>10% · from 250,000 SGD</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className={tierLabel === "Platinum" ? "text-foreground" : ""}>Platinum{tierLabel === "Platinum" ? " • current" : ""}</span>
-                    <span>12% · from 750,000 SGD</span>
-                  </div>
+                  {(["silver", "gold", "platinum"] as const).map((t, i) => {
+                    const c = tierConfig?.[t];
+                    const label = c?.label || (t === "silver" ? "Silver" : t === "gold" ? "Gold" : "Platinum");
+                    const pct = c ? Math.round(c.discount_pct * 100) : t === "silver" ? 10 : t === "gold" ? 15 : 20;
+                    const min = c ? c.min_spend_cents : t === "silver" ? 0 : t === "gold" ? 5_000_000 : 20_000_000;
+                    const isCurrent = tierLabel === label;
+                    return (
+                      <div key={t} className={`flex justify-between${i < 2 ? " border-b border-border/50 pb-1" : ""}`}>
+                        <span className={isCurrent ? "text-foreground" : ""}>{label}{isCurrent ? " • current" : ""}</span>
+                        <span>
+                          {pct}% · {min > 0 ? `from ${(min / 100).toLocaleString("en-US")} EUR rolling 12 months` : "entry"}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
