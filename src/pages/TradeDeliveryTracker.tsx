@@ -5,9 +5,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
-import { CalendarClock, ChevronRight, CalendarPlus, ImageOff, Download, FileSpreadsheet, FileText } from "lucide-react";
+import { CalendarClock, ChevronRight, CalendarPlus, ImageOff, Download, FileSpreadsheet, FileText, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
