@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useMemo } from "react";
-import { Inbox, Mail, Phone, Package, User, Clock, ExternalLink, FileText, X, CheckCircle2, MessageCircle, Send } from "lucide-react";
+import { Inbox, Mail, Phone, Package, User, Clock, ExternalLink, FileText, X, CheckCircle2, MessageCircle, Send, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 
@@ -116,6 +116,20 @@ export default function TradeAdminInquiries() {
     },
     onError: (err: any) => toast({ title: "Update failed", description: err.message, variant: "destructive" }),
   });
+
+  const deleteInquiry = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from("inquiries").delete().in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: (_d, ids) => {
+      setSelectedId(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-inquiries"] });
+      toast({ title: ids.length > 1 ? `${ids.length} inquiries deleted` : "Inquiry deleted" });
+    },
+    onError: (err: any) => toast({ title: "Delete failed", description: err.message, variant: "destructive" }),
+  });
+
 
   const draftQuote = useMutation({
     mutationFn: async ({ inquiryId, kind }: { inquiryId: string; kind: "public" | "trade" }) => {
@@ -248,6 +262,18 @@ export default function TradeAdminInquiries() {
                           <Send className="h-3 w-3" /> Send Quote
                         </button>
                       )}
+                      <button
+                        title="Delete inquiry"
+                        disabled={deleteInquiry.isPending}
+                        onClick={() => {
+                          if (window.confirm(`Delete this inquiry from ${r.name}? This cannot be undone.`)) {
+                            deleteInquiry.mutate([r.id]);
+                          }
+                        }}
+                        className="ml-auto flex items-center gap-1 rounded-md border border-destructive/40 px-2 py-1 text-[11px] text-destructive hover:bg-destructive/10 disabled:opacity-50"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
                     </div>
                   </button>
                 );
@@ -446,6 +472,17 @@ export default function TradeAdminInquiries() {
                       Mark sent
                     </button>
                   )}
+                  <button
+                    disabled={deleteInquiry.isPending}
+                    onClick={() => {
+                      if (window.confirm(`Permanently delete this inquiry from ${selected.name}?`)) {
+                        deleteInquiry.mutate([selected.id]);
+                      }
+                    }}
+                    className="ml-auto flex items-center gap-1 rounded-md border border-destructive/40 px-3 py-1.5 text-xs text-destructive hover:bg-destructive/10 disabled:opacity-50"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Delete
+                  </button>
                 </div>
               </>
             )}
