@@ -3253,9 +3253,34 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           )}
                         </div>
                         <div className="text-right">
-                          <span className="font-body text-xs text-foreground font-medium">
-                            {currencySymbol(currency)} {formatPriceRaw(lineTotal, currency) || "TBD"}
-                          </span>
+                          {canEditLines && editingPriceId === item.id ? (
+                            <input
+                              ref={priceInputRef}
+                              type="text"
+                              inputMode="decimal"
+                              value={editingPriceValue}
+                              onChange={(e) => setEditingPriceValue(e.target.value)}
+                              onBlur={() => commitEditPrice(item.id)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") { e.preventDefault(); commitEditPrice(item.id); }
+                                else if (e.key === "Escape") { cancelEditPrice(); }
+                              }}
+                              placeholder={`${currencySymbol(currency)} 0`}
+                              className="w-24 font-body text-xs text-foreground tabular-nums text-right bg-background border border-border rounded px-2 py-0.5 focus:border-foreground/50 outline-none"
+                              autoFocus
+                            />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => canEditLines && startEditPrice(item.id, item.unit_price_cents ?? unitPrice)}
+                              title={canEditLines ? "Tap to enter unit price" : undefined}
+                              className={`font-body text-xs text-foreground font-medium ${canEditLines ? "underline decoration-dotted decoration-border underline-offset-4" : ""}`}
+                            >
+                              {lineTotal
+                                ? `${currencySymbol(currency)} ${formatPriceRaw(lineTotal, currency)}`
+                                : canEditLines ? "Set price" : "TBD"}
+                            </button>
+                          )}
                           {marginCapped && (
                             <span
                               title={MARGIN_CAP_TOOLTIP}
