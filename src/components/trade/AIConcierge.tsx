@@ -4990,18 +4990,29 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 );
               }
               if (item.kind === "retry") {
+                // Refined recovery line — Felix speaks, no raw system alert.
+                const profileLabel = hasRealBriefValue(verifiedFacts.projectProfile)
+                  ? verifiedFacts.projectProfile
+                  : "";
+                const recoveryLine = profileLabel
+                  ? `I encountered a momentary connection lag while compiling your spatial dimensions. Let's resume exactly where we left off with your ${profileLabel} layout dimensions.`
+                  : "I encountered a momentary connection lag while compiling your spatial dimensions. Let's resume exactly where we left off.";
+                // Re-anchor the state machine to the stage the failure happened in.
+                const restoreStage = () => {
+                  if (item.stage && onboardingGateRef.current.completed) setStageOverride(item.stage);
+                  else setStageOverride("Discover");
+                };
                 return (
                   <div
                     key={i}
                     className={cn(
-                      "self-start rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 font-body text-sm text-foreground",
+                      "self-start flex flex-col gap-2.5",
                       expanded ? "max-w-[92%]" : "max-w-[88%]",
                     )}
-                    role="alert"
+                    role="status"
                   >
-                    <div className="mb-2 leading-relaxed">
-                      <span className="font-medium">{item.reason}</span>{" "}
-                      <span className="text-muted-foreground">You can retry your last message.</span>
+                    <div className="rounded-2xl rounded-bl-md bg-muted/60 px-4 py-3 font-body text-sm leading-relaxed text-foreground">
+                      {recoveryLine}
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       <button
@@ -5009,6 +5020,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                         disabled={streaming}
                         onClick={() => {
                           const retryText = item.text;
+                          restoreStage();
                           // Drop this retry card before re-sending so a second failure
                           // stacks cleanly instead of leaving stale cards behind.
                           setTimeline((prev) => prev.filter((_, idx) => idx !== i));
@@ -5017,7 +5029,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                         className="rounded-full border border-foreground bg-foreground px-4 py-1.5 text-[13px] text-background shadow-sm inline-flex items-center gap-1.5 hover:opacity-90 disabled:opacity-40"
                       >
                         <Sparkles className="h-3 w-3" />
-                        Try again
+                        Continue
                       </button>
                       {(() => {
                         const sess = getConciergeSession();
@@ -5028,6 +5040,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                             type="button"
                             disabled={streaming}
                             onClick={() => {
+                              restoreStage();
                               setTimeline((prev) => prev.filter((_, idx) => idx !== i));
                               const product = sess?.product
                                 ? `\n\nSelected piece: ${sess.product.title}${sess.product.designer_name ? ` by ${sess.product.designer_name}` : ""}.`
@@ -5040,11 +5053,23 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                   ].filter(Boolean).join(" · ")
                                 : "";
                               const finishLine = finishes ? `\nLocked finishes: ${finishes}.` : "";
+                              // LOCKED FACTS come first and are declared
+                              // authoritative so the model cannot substitute a
+                              // different typology on resume.
+                              const lockedLines = [
+                                hasRealBriefValue(verifiedFacts.projectProfile) ? `PROJECT PROFILE: ${verifiedFacts.projectProfile}` : null,
+                                hasRealBriefValue(verifiedFacts.zone) ? `ZONE: ${verifiedFacts.zone}` : null,
+                                hasRealBriefValue(verifiedFacts.budget) ? `BUDGET: ${verifiedFacts.budget}` : null,
+                              ].filter(Boolean).join("\n");
+                              const lockedBlock = lockedLines
+                                ? `LOCKED PROJECT FACTS — these are verified and must be reused verbatim. Never substitute, rename or re-ask them:\n${lockedLines}\n\n`
+                                : "";
                               const resumeText =
-                                `[Resume — continue from where we left off; do NOT re-ask qualifiers I've already answered in the brief below. Acknowledge briefly and take the next concrete step in stage "${stage}".]\n\n` +
+                                `[Resume — continue from where we left off; do NOT re-ask qualifiers I've already answered and do NOT treat the brief below as a new submission. Acknowledge briefly and take the next concrete step in stage "${item.stage ?? stage}".]\n\n` +
+                                lockedBlock +
                                 `Current brief so far:\n${brief}${product}${finishLine}\n\n` +
                                 (item.text ? `My last message was: "${item.text}". Please continue.` : `Please continue building the brief.`);
-                              send(resumeText);
+                              send(resumeText, { displayText: "Resuming where we left off." });
                             }}
                             className="rounded-full border border-accent/50 bg-accent/10 px-4 py-1.5 text-[13px] text-foreground inline-flex items-center gap-1.5 hover:bg-accent/20 disabled:opacity-40"
                             title="Continue from the last saved brief without repeating earlier questions"
