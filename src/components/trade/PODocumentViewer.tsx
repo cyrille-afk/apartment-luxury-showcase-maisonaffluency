@@ -76,8 +76,55 @@ const longDate = (value?: string | null) =>
     ? new Date(value).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
     : "—";
 
-export default function PODocumentViewer({ document: po, onOpenChange }: Props) {
+export default function PODocumentViewer({ document: po, onOpenChange, onStatusChange }: Props) {
   const sheetRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+  const { user, profile, isAdmin: isPlatformAdmin, isSuperAdmin } = useAuth();
+  const { isAdmin: isStudioManager } = useStudio();
+  const canSignOff = Boolean(user) && (isPlatformAdmin || isSuperAdmin || isStudioManager);
+
+  const [pendingAction, setPendingAction] = useState<"approved" | "changes_requested" | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [localStatus, setLocalStatus] = useState<{
+    po_status: POApprovalStatus;
+    po_approved_by_name: string | null;
+    po_approved_at: string | null;
+  } | null>(null);
+
+  const status = (localStatus?.po_status ?? (po?.po_status as POApprovalStatus) ?? "pending") as POApprovalStatus;
+  const approverName = localStatus?.po_approved_by_name ?? po?.po_approved_by_name ?? null;
+  const approvedAt = localStatus?.po_approved_at ?? po?.po_approved_at ?? null;
+
+  const managerName =
+    [profile?.first_name, profile?.last_name].filter(Boolean).join(" ").trim() || profile?.email || "Studio manager";
+
+  const applyDecision = async (next: "approved" | "changes_requested") => {
+    if (!po?.item_id) return;
+    setSubmitting(true);
+    const stamp = new Date().toISOString();
+    const payload =
+      next === "approved"
+        ? { po_status: "approved", po_approved_by: user?.id ?? null, po_approved_by_name: managerName, po_approved_at: stamp }
+        : { po_status: "changes_requested", po_approved_by: user?.id ?? null, po_approved_by_name: managerName, po_approved_at: stamp };
+    const { error } = await supabase.from("trade_quote_items").update(payload).eq("id", po.item_id);
+    setSubmitting(false);
+    setPendingAction(null);
+    if (error) {
+      toast({ title: "Sign-off failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    const applied = {
+      po_status: next as POApprovalStatus,
+      po_approved_by_name: managerName,
+      po_approved_at: stamp,
+    };
+    setLocalStatus(applied);
+    onStatusChange?.(applied);
+    toast({
+      title: next === "approved" ? "Purchase order approved" : "Changes requested",
+      description: `${po.po_number} is now marked ${statusLabel(next).toLowerCase()}.`,
+    });
+  };
 
   /** Print the document sheet alone, via an isolated iframe so the app behind stays untouched. */
   const print = () => {
