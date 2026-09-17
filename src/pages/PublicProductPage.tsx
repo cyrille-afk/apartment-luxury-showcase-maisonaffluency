@@ -40,7 +40,7 @@ import LegendDisclosure from "@/components/LegendDisclosure";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
-import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder, formatVariantAxisLabel, isDimensionAxisLabel, resolveFinishSectionLabels } from "@/lib/variantPlaceholders";
+import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder, formatVariantAxisLabel, isDimensionAxisLabel, isUpholsteryAxisLabel, resolveFinishSectionLabels } from "@/lib/variantPlaceholders";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { isRugCategory, parseRugDims, looksLikeDimension } from "@/lib/rugPricing";
 import FinishSelector from "@/components/FinishSelector";
@@ -539,8 +539,17 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
   const hasWoodSwatches = linkedWoodFinishes.length > 0;
   const allBasesHaveSwatches = baseOptions.length > 0 && everyOptionCoveredBySwatches(baseOptions, linkedWoodFinishes);
   const topAxisHasSwatches = !topAxisIsDim && topOptions.length > 0 && someOptionCoveredBySwatches(topOptions, linkedWoodFinishes);
-  const suppressBaseAsFinish = !baseAxisIsDim && (allBasesHaveSwatches || (hasWoodSwatches && isFinishAxis(baseAxisLabelRaw)));
-  const suppressTopAsFinish = !topAxisIsDim && (topAxisHasSwatches || (isProductUpholstered(product) && isFinishAxis(topAxisLabelRaw)) || (hasWoodSwatches && isFinishAxis(topAxisLabelRaw)));
+  const suppressBaseAsFinish = !baseAxisIsDim && (
+    allBasesHaveSwatches
+    || (hasWoodSwatches && isFinishAxis(baseAxisLabelRaw))
+    || isUpholsteryAxisLabel(baseAxisLabelRaw)
+  );
+  const suppressTopAsFinish = !topAxisIsDim && (
+    topAxisHasSwatches
+    || isUpholsteryAxisLabel(topAxisLabelRaw)
+    || (isProductUpholstered(product) && isFinishAxis(topAxisLabelRaw))
+    || (hasWoodSwatches && isFinishAxis(topAxisLabelRaw))
+  );
   const suppressSingleAsFinish = shouldSuppressSingleAsFinish({
     hasSingleAxisSplit,
     singleMaterialOptions,

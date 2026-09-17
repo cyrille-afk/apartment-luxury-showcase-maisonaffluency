@@ -19,7 +19,7 @@ export interface VariantPlaceholderInput {
   top_axis_label?: string | null;
 }
 
-const DEFAULT_BASE_PLACEHOLDER = "Select Your Base Finish";
+const DEFAULT_BASE_PLACEHOLDER = "Select Your Base";
 const DEFAULT_TOP_PLACEHOLDER = "Select Your Top Finish";
 const DEFAULT_MATERIAL_PLACEHOLDER = "Select Your Finish";
 
@@ -53,7 +53,7 @@ function placeholderFromAxisLabel(label: string): string {
     .split(/\s+/)
     .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
     .join(" ");
-  const skipSuffix = /\b(finish|fabric|material|size|colour|color|leather|diffuser|shade|shape|form|profile|model|version|variant|option)$/i.test(titled);
+  const skipSuffix = /\b(base|upholstery|finish|fabric|material|size|colour|color|leather|diffuser|shade|shape|form|profile|model|version|variant|option)$/i.test(titled);
   return skipSuffix ? `Select Your ${titled}` : `Select Your ${titled} Finish`;
 }
 
