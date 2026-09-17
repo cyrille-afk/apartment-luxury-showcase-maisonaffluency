@@ -542,7 +542,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
   const suppressBaseAsFinish = !baseAxisIsDim && (
     allBasesHaveSwatches
     || (hasWoodSwatches && isFinishAxis(baseAxisLabelRaw))
-    || (hasLinkedFabrics && isUpholsteryAxisLabel(baseAxisLabelRaw))
+    || isUpholsteryAxisLabel(baseAxisLabelRaw)
   );
   const suppressTopAsFinish = !topAxisIsDim && (topAxisHasSwatches || (isProductUpholstered(product) && isFinishAxis(topAxisLabelRaw)) || (hasWoodSwatches && isFinishAxis(topAxisLabelRaw)));
   const suppressSingleAsFinish = shouldSuppressSingleAsFinish({
