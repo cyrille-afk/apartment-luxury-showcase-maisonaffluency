@@ -134,6 +134,7 @@ export default function TradeDeliveryTracker() {
   const { user } = useAuth();
   const [selectedLine, setSelectedLine] = useState<Line | null>(null);
   const [previewLine, setPreviewLine] = useState<Line | null>(null);
+  const [statusFilter, setStatusFilter] = useState<"all" | "late" | "tight" | "ontrack">("all");
 
   const { data: lines = [], isLoading } = useQuery({
     queryKey: ["delivery-tracker", user?.id],
@@ -227,6 +228,52 @@ export default function TradeDeliveryTracker() {
     return Array.from(m.values()).sort((a, b) => a.name.localeCompare(b.name));
   }, [lines]);
 
+  const statusCounts = useMemo(() => {
+    return {
+      all: lines.length,
+      late: lines.filter((l) => l.slack != null && l.slack < 0).length,
+      tight: lines.filter((l) => l.slack != null && l.slack >= 0 && l.slack <= 14).length,
+      ontrack: lines.filter((l) => l.slack != null && l.slack > 14).length,
+    };
+  }, [lines]);
+
+  const filteredGroups = useMemo(() => {
+    return groups
+      .map((g) => ({
+        ...g,
+        lines: g.lines.filter((l) => {
+          if (statusFilter === "all") return true;
+          if (l.slack == null) return false;
+          if (statusFilter === "late") return l.slack < 0;
+          if (statusFilter === "tight") return l.slack >= 0 && l.slack <= 14;
+          return l.slack > 14;
+        }),
+      }))
+      .filter((g) => g.lines.length > 0);
+  }, [groups, statusFilter]);
+
+  const filterTabs: { key: "all" | "late" | "tight" | "ontrack"; label: string }[] = [
+    { key: "all", label: "All Items" },
+    { key: "late", label: "Late" },
+    { key: "tight", label: "Tight Timeline" },
+    { key: "ontrack", label: "On Track" },
+  ];
+
+  function filterButtonClasses(key: typeof statusFilter) {
+    const active = statusFilter === key;
+    const base = "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-body text-xs transition-colors";
+    if (key === "all") {
+      return cn(base, active ? "border-foreground bg-foreground text-background" : "border-border bg-background text-muted-foreground hover:text-foreground");
+    }
+    if (key === "late") {
+      return cn(base, active ? "border-red-200 bg-red-50 text-red-800" : "border-border bg-background text-muted-foreground hover:text-red-700");
+    }
+    if (key === "tight") {
+      return cn(base, active ? "border-amber-200 bg-amber-50 text-amber-800" : "border-border bg-background text-muted-foreground hover:text-amber-700");
+    }
+    return cn(base, active ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-border bg-background text-muted-foreground hover:text-emerald-700");
+  }
+
   return (
     <>
       <Helmet><title>Delivery Tracker — Trade Portal</title></Helmet>
@@ -248,12 +295,35 @@ export default function TradeDeliveryTracker() {
             <p className="font-body text-sm text-muted-foreground">No confirmed lines yet.</p>
           </div>
         ) : (
-          <div className="space-y-8">
-            {groups.map((g) => {
-              const worst = g.lines.reduce<number | null>((acc, l) => {
-                if (l.slack == null) return acc;
-                return acc == null || l.slack < acc ? l.slack : acc;
-              }, null);
+          <div className="space-y-6">
+            <div className="flex flex-wrap items-center gap-2">
+              {filterTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setStatusFilter(tab.key)}
+                  className={filterButtonClasses(tab.key)}
+                >
+                  <span>{tab.label}</span>
+                  <span className={cn("inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1.5 py-0 font-body text-[10px] tabular-nums", statusFilter === tab.key ? "bg-white/30" : "bg-muted text-muted-foreground")}>
+                    {statusCounts[tab.key]}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {filteredGroups.length === 0 ? (
+              <div className="text-center py-16 border border-dashed border-border rounded-lg">
+                <CalendarClock className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
+                <p className="font-body text-sm text-muted-foreground">No items match the selected status filter.</p>
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {filteredGroups.map((g) => {
+                  const worst = g.lines.reduce<number | null>((acc, l) => {
+                    if (l.slack == null) return acc;
+                    return acc == null || l.slack < acc ? l.slack : acc;
+                  }, null);
               const lateCount = g.lines.filter((l) => l.slack != null && l.slack < 0).length;
               const tightCount = g.lines.filter((l) => l.slack != null && l.slack >= 0 && l.slack <= 14).length;
               return (
@@ -345,6 +415,8 @@ export default function TradeDeliveryTracker() {
           </div>
         )}
       </div>
+    )}
+  </div>
 
       <Dialog open={!!previewLine} onOpenChange={(open) => !open && setPreviewLine(null)}>
         <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0 sm:rounded-lg">
