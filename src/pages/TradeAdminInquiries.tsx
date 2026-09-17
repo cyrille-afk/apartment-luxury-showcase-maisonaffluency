@@ -26,6 +26,8 @@ type InquiryRow = {
   linked_quote_id: string | null;
   admin_notes: string | null;
   assigned_admin_id: string | null;
+  assigned_at: string | null;
+  status_changed_at: string | null;
   concierge_lead_id: string | null;
 };
 
@@ -62,6 +64,8 @@ const STAGE_LABELS: Record<string, string> = {
   closed: "Closed",
   rejected: "Declined",
 };
+
+const timeAgo = (iso: string | null) => (iso ? formatDistanceToNow(new Date(iso), { addSuffix: true }) : null);
 
 const stageLabel = (status: string) => STAGE_LABELS[status] || status.replace(/_/g, " ");
 
@@ -122,6 +126,25 @@ export default function TradeAdminInquiries() {
     },
   });
 
+  // Names of the admins handling requests
+  const { data: adminNames } = useQuery({
+    queryKey: ["admin-inquiry-handlers", (rows || []).map((r) => r.assigned_admin_id).filter(Boolean).join(",")],
+    enabled: !!user && isAdmin,
+    queryFn: async () => {
+      const ids = Array.from(new Set((rows || []).map((r) => r.assigned_admin_id).filter(Boolean))) as string[];
+      if (ids.length === 0) return {} as Record<string, string>;
+      const { data, error } = await supabase.from("profiles").select("id, first_name, last_name, email").in("id", ids);
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      (data || []).forEach((p: any) => {
+        map[p.id] = [p.first_name, p.last_name].filter(Boolean).join(" ").trim() || p.email || "Admin";
+      });
+      return map;
+    },
+  });
+
+  const handlerName = (id: string | null) => (id ? adminNames?.[id] || "Admin" : null);
+
   const filtered = useMemo(() => {
     if (!rows) return [] as InquiryRow[];
     const q = search.trim().toLowerCase();
@@ -137,7 +160,9 @@ export default function TradeAdminInquiries() {
 
   const updateInquiry = useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<InquiryRow> }) => {
-      const { error } = await supabase.from("inquiries").update(patch).eq("id", id);
+      const stamped: Partial<InquiryRow> = { ...patch };
+      if (patch.status) stamped.status_changed_at = new Date().toISOString();
+      const { error } = await supabase.from("inquiries").update(stamped).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -280,6 +305,16 @@ export default function TradeAdminInquiries() {
                       <span>·</span>
                       <span>{r.source?.replace(/_/g, " ") || "form"}</span>
                     </div>
+                    <div className="mt-1 text-[11px]">
+                      {r.assigned_admin_id ? (
+                        <span className="text-emerald-500">
+                          Handled by {handlerName(r.assigned_admin_id)}
+                          {r.assigned_at ? ` · picked up ${timeAgo(r.assigned_at)}` : ""}
+                        </span>
+                      ) : (
+                        <span className="text-amber-500">Unassigned — nobody has picked this up</span>
+                      )}
+                    </div>
                     <div className="mt-2 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                       <a
                         href={`mailto:${r.email}?subject=${encodeURIComponent(`Re: ${r.product_name || "Your Maison Affluency inquiry"}`)}`}
@@ -306,7 +341,13 @@ export default function TradeAdminInquiries() {
                       ) : (
                         <button
                           disabled={draftQuote.isPending}
-                          onClick={() => { setSelectedId(r.id); draftQuote.mutate({ inquiryId: r.id, kind: quoteKind }); }}
+                          onClick={() => {
+                            setSelectedId(r.id);
+                            if (!r.assigned_admin_id) {
+                              updateInquiry.mutate({ id: r.id, patch: { assigned_admin_id: user.id, assigned_at: new Date().toISOString() } });
+                            }
+                            draftQuote.mutate({ inquiryId: r.id, kind: quoteKind });
+                          }}
                           className="flex items-center gap-1 rounded-md bg-accent px-2 py-1 text-[11px] text-accent-foreground hover:opacity-90 disabled:opacity-50"
                         >
                           <Send className="h-3 w-3" /> Send Quote
@@ -486,6 +527,47 @@ export default function TradeAdminInquiries() {
                     className="mt-1 w-full rounded-lg border border-border bg-background/50 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
                     placeholder="Internal notes about this inquiry…"
                   />
+                </div>
+
+                {/* Ownership */}
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-background/40 px-3 py-2 text-xs">
+                  <div>
+                    {selected.assigned_admin_id ? (
+                      <span className="text-foreground">
+                        Handled by <span className="font-medium">{handlerName(selected.assigned_admin_id)}</span>
+                        {selected.assigned_at ? ` · picked up ${timeAgo(selected.assigned_at)}` : ""}
+                      </span>
+                    ) : (
+                      <span className="text-amber-500">Unassigned — nobody has picked this up yet</span>
+                    )}
+                    {selected.status_changed_at && (
+                      <span className="ml-2 text-muted-foreground">
+                        · stage &ldquo;{stageLabel(selected.status)}&rdquo; set {timeAgo(selected.status_changed_at)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {selected.assigned_admin_id !== user.id && (
+                      <button
+                        onClick={() => updateInquiry.mutate({ id: selected.id, patch: {
+                          assigned_admin_id: user.id,
+                          assigned_at: new Date().toISOString(),
+                          ...(selected.status === "new" ? { status: "in_review" } : {}),
+                        } })}
+                        className="rounded-md bg-accent px-3 py-1.5 text-xs text-accent-foreground hover:opacity-90"
+                      >
+                        {selected.assigned_admin_id ? "Take over" : "I'll handle this"}
+                      </button>
+                    )}
+                    {selected.assigned_admin_id && (
+                      <button
+                        onClick={() => updateInquiry.mutate({ id: selected.id, patch: { assigned_admin_id: null, assigned_at: null } })}
+                        className="rounded-md border border-border px-3 py-1.5 text-xs hover:bg-muted/40"
+                      >
+                        Release
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Status actions */}

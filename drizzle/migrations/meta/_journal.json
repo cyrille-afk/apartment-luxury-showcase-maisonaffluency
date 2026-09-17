@@ -134,6 +134,13 @@
       "when": 1789683624491,
       "tag": "0018_quote_item_crating",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1789685073681,
+      "tag": "0019_inquiry_assignment_timestamps",
+      "breakpoints": true
     }
   ]
 }
