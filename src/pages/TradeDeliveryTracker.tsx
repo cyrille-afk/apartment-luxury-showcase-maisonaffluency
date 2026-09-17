@@ -5,9 +5,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
-import { CalendarClock, ChevronRight, CalendarPlus } from "lucide-react";
+import { CalendarClock, ChevronRight, CalendarPlus, ImageOff } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import QuoteLineDrawer, { type QuoteLineDrawerItem } from "@/components/trade/QuoteLineDrawer";
 import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback";
 
