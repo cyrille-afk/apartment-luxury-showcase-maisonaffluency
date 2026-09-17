@@ -2904,7 +2904,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     <input
                       type="number"
                       value={gstRate}
-                      onChange={(e) => setGstRate(Math.max(0, Math.min(100, Number(e.target.value))))}
+                      onChange={(e) => { setGstUserTouched(true); setGstRate(Math.max(0, Math.min(100, Number(e.target.value)))); }}
                       onBlur={() => setEditingGstRate(false)}
                       onKeyDown={(e) => e.key === "Enter" && setEditingGstRate(false)}
                       autoFocus
