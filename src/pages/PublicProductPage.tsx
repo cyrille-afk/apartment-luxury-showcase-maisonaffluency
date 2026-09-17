@@ -2106,6 +2106,31 @@ const PublicProductPageContent: React.FC = () => {
           (product.description?.replace(/\s+/g, " ").trim().slice(0, 155)) ||
           `${product.title} by ${designerDisplay}. ${product.materials || "Collectible design at Maison Affluency."}`.slice(0, 155);
         const ldDims = parseDimensions(product.dimensions);
+
+        // ---- Offer ---------------------------------------------------------
+        // Google's Product snippet / Merchant listing validators reject an
+        // Offer without `price` + `priceCurrency`. We publish the public RRP
+        // (the same figure the page prints) as a bare decimal string — no
+        // currency symbol, no thousands separator. Pieces that are genuinely
+        // "Price upon Request" carry no Offer node at all, which is valid
+        // Product markup and keeps them out of merchant listing validation.
+        const ldImages = (images.length ? images : [ogImg]).filter(
+          (src): src is string => typeof src === "string" && /^https?:\/\//.test(src),
+        );
+        const ldPriceCents = Number(publicRrpRow?.rrp_price_cents) || 0;
+        const ldOffer =
+          ldPriceCents > 0
+            ? {
+                "@type": "Offer",
+                price: (ldPriceCents / 100).toFixed(2),
+                priceCurrency: (publicRrpRow?.currency || "EUR").toUpperCase(),
+                availability: "https://schema.org/InStock",
+                itemCondition: "https://schema.org/NewCondition",
+                url: canonical,
+                seller: { "@type": "Organization", name: "Maison Affluency" },
+              }
+            : undefined;
+
         const productLd = {
           "@context": "https://schema.org",
           "@type": "Product",
