@@ -620,6 +620,9 @@ export default function ProductCommerceCta({
             null
           }
           imageUrl={imageUrl}
+          prefillEmail={intakeDetails?.email || checkoutForm.email || null}
+          prefillPhone={intakeDetails?.phone || null}
+          prefillNotes={intakeDetails?.notes || null}
         />
       )}
 
