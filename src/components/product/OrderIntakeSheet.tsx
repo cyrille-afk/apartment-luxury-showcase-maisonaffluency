@@ -90,7 +90,7 @@ export default function OrderIntakeSheet({
   finalLabel,
   isTradeAuthorized = false,
 }: Props) {
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
   const checkoutForm = useCheckoutForm();
   const isQuote = mode === "quote";
   const [sending, setSending] = useState(false);
@@ -163,6 +163,8 @@ export default function OrderIntakeSheet({
 
   useEffect(() => {
     if (isOpen) {
+      // Clear any confirmation retained by the legacy header-notice flow.
+      dismiss();
       setMounted(true);
       lockBodyScroll();
     } else {
@@ -298,6 +300,7 @@ export default function OrderIntakeSheet({
       };
       if (isTradeAuthorized) pushBespokeSync(syncEntry);
       else cachePendingBespokeUpload(syncEntry);
+      dismiss();
       onComplete(d);
       // Keep the drawer anchored while Step 3 fades away, then reveal the
       // persistent success canvas in the same bounds.

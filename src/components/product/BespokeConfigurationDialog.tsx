@@ -61,7 +61,7 @@ export default function BespokeConfigurationDialog({
   prefillPhone = null,
   prefillNotes = null,
 }: BespokeConfigurationDialogProps) {
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [specs, setSpecs] = useState("");
   const [email, setEmail] = useState("");
@@ -81,6 +81,8 @@ export default function BespokeConfigurationDialog({
 
   useEffect(() => {
     if (!isOpen) return;
+    // Clear any confirmation retained by the legacy header-notice flow.
+    dismiss();
     // Fresh sheet on every open — the confirmation state belongs to the
     // banner (guests) or the Felix log (trade), not to a stale dialog.
     setSent(false);
@@ -236,6 +238,7 @@ export default function BespokeConfigurationDialog({
          // Keep the request surface open and transition to its own confirmation;
          // guests should never rely on a detached global-header banner.
       }
+      dismiss();
       setSent(true);
     } catch (err) {
       console.error("Bespoke specification submission failed:", err);

@@ -104,7 +104,6 @@ import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
 import { computeDisplayPrice } from "@/lib/productPricing";
 import { UserRoleProvider, useUserRole, DevRoleToggle, type UserRole } from "@/contexts/UserRoleContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { toast } from "sonner";
 import NotFound from "@/pages/NotFound";
 
 
