@@ -196,6 +196,8 @@ export default function ProductCommerceCta({
   // 3-step intent capture (Intent → Project → Contact) gating both the order
   // and the bespoke/quote path. Null = no gate open.
   const [intakeFor, setIntakeFor] = useState<null | "order" | "bespoke">(null);
+  // Detail captured in the 3 steps, carried into whatever opens next.
+  const [intakeDetails, setIntakeDetails] = useState<OrderIntakeDetails | null>(null);
   const checkoutForm = useCheckoutForm();
   // True when the open drawer holds a piece with no public price.
   const [quoteOnlySelection, setQuoteOnlySelection] = useState(false);
@@ -304,6 +306,7 @@ export default function ProductCommerceCta({
   const completeIntake = (details: OrderIntakeDetails) => {
     const target = intakeFor ?? "order";
     setIntakeFor(null);
+    setIntakeDetails(details);
     try {
       sessionStorage.setItem("ma_intake_done", "1");
     } catch {
@@ -617,6 +620,9 @@ export default function ProductCommerceCta({
             null
           }
           imageUrl={imageUrl}
+          prefillEmail={intakeDetails?.email || checkoutForm.email || null}
+          prefillPhone={intakeDetails?.phone || null}
+          prefillNotes={intakeDetails?.notes || null}
         />
       )}
 
