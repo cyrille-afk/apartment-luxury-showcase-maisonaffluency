@@ -18,7 +18,16 @@ export interface FxAppliedPair {
   tgt: string;
   rate: number;
   source: FxSource;
+  /** Epoch ms when the rate was fetched/resolved. */
+  fetchedAt?: number;
+  /** Cache TTL in ms (how long this rate is reused before refetch). */
+  cacheTtlMs?: number;
 }
+
+const formatFetchedAt = (ts: number) =>
+  new Date(ts).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+
+const formatTtl = (ms: number) => `${Math.round(ms / 60000)}-min cache`;
 
 const toneClass: Record<string, string> = {
   live:      "text-emerald-700 dark:text-emerald-300 border-emerald-300/50",
