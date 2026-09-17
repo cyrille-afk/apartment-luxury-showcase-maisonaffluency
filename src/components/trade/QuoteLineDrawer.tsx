@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, ClipboardList, Package, ReceiptText } from "lucide-react";
+import { CalendarDays, ClipboardList, FileText, Package, Paperclip, ReceiptText } from "lucide-react";
+import { autoPoNumber } from "@/lib/procurementExcel";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -48,6 +50,47 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
   const [requiredBy, setRequiredBy] = useState("");
   const [leadWeeks, setLeadWeeks] = useState("");
   const [saving, setSaving] = useState(false);
+  const [generatingPo, setGeneratingPo] = useState(false);
+
+  /**
+   * Generate and persist a PO reference for this line, matching the
+   * `{quoteRef}-NNN` sequence used across the procurement workbook.
+   */
+  const generatePoReference = async () => {
+    if (!item) return;
+    setGeneratingPo(true);
+    const { data: siblings, error: fetchError } = await supabase
+      .from("trade_quote_items")
+      .select("id, po_number")
+      .eq("quote_id", item.quote_id)
+      .order("created_at", { ascending: true });
+    if (fetchError) {
+      setGeneratingPo(false);
+      toast({ title: "Could not generate PO", description: fetchError.message, variant: "destructive" });
+      return;
+    }
+    const rows = siblings ?? [];
+    const idx = rows.findIndex((row) => row.id === item.item_id);
+    let seq = idx >= 0 ? idx + 1 : rows.length + 1;
+    const taken = new Set(rows.map((row) => row.po_number).filter(Boolean));
+    while (taken.has(autoPoNumber(item.quote_ref, seq))) seq += 1;
+    const po = autoPoNumber(item.quote_ref, seq);
+    const { error } = await supabase
+      .from("trade_quote_items")
+      .update({ po_number: po })
+      .eq("id", item.item_id);
+    setGeneratingPo(false);
+    if (error) {
+      toast({ title: "Could not generate PO", description: error.message, variant: "destructive" });
+      return;
+    }
+    setPoNumber(po);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["delivery-tracker"] }),
+      queryClient.invalidateQueries({ queryKey: ["ffe-schedule"] }),
+    ]);
+    toast({ title: "Purchase order generated", description: `${po} is now linked to this line.` });
+  };
 
   useEffect(() => {
     setPoNumber(item?.po_number || "");
@@ -125,6 +168,42 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
                 <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Order</p>
                 <p className="font-display text-base text-foreground mt-1">{item.quantity} unit{item.quantity === 1 ? "" : "s"}</p>
                 <p className="font-body text-xs text-muted-foreground mt-1">{stageLabel(item.stage)}</p>
+              </div>
+            </section>
+
+            <section className="mt-6 border border-border">
+              <div className="flex items-center gap-2 border-b border-border bg-muted/40 px-4 py-3">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <h3 className="font-body text-[11px] uppercase tracking-[0.18em] text-foreground">Associated purchase order</h3>
+              </div>
+              <div className="p-4">
+                {(item.po_number || poNumber.trim()) ? (
+                  <Link
+                    to={`/trade/quotes?id=${item.quote_id}`}
+                    className="group inline-flex items-center gap-2.5 rounded-sm border border-border bg-background px-3.5 py-2.5 transition-colors hover:border-foreground/40 hover:bg-muted/50"
+                  >
+                    <Paperclip className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-foreground" />
+                    <span className="font-body text-sm font-medium tracking-wide text-foreground underline-offset-4 group-hover:underline">
+                      {item.po_number || poNumber.trim()}
+                    </span>
+                    <span className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                      View PO file
+                    </span>
+                  </Link>
+                ) : (
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="font-body text-xs italic text-muted-foreground">PO Status: Pending Generation</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="font-body text-xs"
+                      onClick={generatePoReference}
+                      disabled={generatingPo}
+                    >
+                      {generatingPo ? "Generating…" : "Generate PO reference"}
+                    </Button>
+                  </div>
+                )}
               </div>
             </section>
 
