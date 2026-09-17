@@ -47,6 +47,12 @@ const SOURCE_OPTIONS = [
   { key: "contact_form", label: "Contact form" },
 ];
 
+const whatsappHref = (phone: string | null) => {
+  if (!phone) return null;
+  const digits = phone.replace(/[^\d]/g, "");
+  return digits ? `https://wa.me/${digits}` : null;
+};
+
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-amber-500/10 text-amber-400 border-amber-500/20",
   in_review: "bg-sky-500/10 text-sky-400 border-sky-500/20",
