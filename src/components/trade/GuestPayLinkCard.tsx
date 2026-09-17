@@ -25,7 +25,10 @@ const fmt = (cents: number, currency: string) =>
 interface Props {
   quoteId: string;
   currency: string;
-  defaultAmountCents?: number;
+  /** Full order total in quote currency (goods + crating + shipping + extras). */
+  orderTotalCents?: number;
+  /** Deposit share of the order total, e.g. 0.6 for 60%. */
+  depositPct?: number;
   defaultEmail?: string | null;
 }
 
@@ -33,12 +36,31 @@ interface Props {
  * Admin-only: mint a login-free Stripe Checkout link for an agreed amount,
  * then copy it into WhatsApp or email. No trade account needed by the payer.
  */
-export default function GuestPayLinkCard({ quoteId, currency, defaultAmountCents = 0, defaultEmail }: Props) {
+export default function GuestPayLinkCard({ quoteId, currency, orderTotalCents = 0, depositPct = 0.6, defaultEmail }: Props) {
   const { toast } = useToast();
+  const pctLabel = `${Math.round(depositPct * 100)}% deposit`;
+  const autoDepositCents = Math.round(orderTotalCents * depositPct);
   const [links, setLinks] = useState<PayLink[]>([]);
-  const [amount, setAmount] = useState(defaultAmountCents ? (defaultAmountCents / 100).toFixed(2) : "");
-  const [label, setLabel] = useState("Full payment");
+  const [overrideAmount, setOverrideAmount] = useState(false);
+  const [manualAmount, setManualAmount] = useState("");
+  const [label, setLabel] = useState(pctLabel);
   const [email, setEmail] = useState(defaultEmail ?? "");
+  const [emailTouched, setEmailTouched] = useState(false);
+
+  // Keep the auto amount and prefilled client email in sync with the live quote.
+  const amount = overrideAmount
+    ? manualAmount
+    : autoDepositCents
+      ? (autoDepositCents / 100).toFixed(2)
+      : "";
+
+  useEffect(() => {
+    if (!emailTouched && defaultEmail) setEmail(defaultEmail);
+  }, [defaultEmail, emailTouched]);
+
+  useEffect(() => {
+    if (!overrideAmount) setLabel(pctLabel);
+  }, [overrideAmount, pctLabel]);
   const [creating, setCreating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -139,18 +161,21 @@ export default function GuestPayLinkCard({ quoteId, currency, defaultAmountCents
       <div>
         <p className="font-display text-xs uppercase tracking-[0.15em] text-foreground mb-1">Guest Pay Now Link</p>
         <p className="font-body text-[11px] text-muted-foreground max-w-xl">
-          Agreed a price over WhatsApp or email? Enter the amount, create a secure link and send it to the client —
-          they pay by card on Stripe with no account or sign-in.
+          The {pctLabel} is calculated automatically from this quote&apos;s order total
+          {orderTotalCents > 0 ? ` (${fmt(orderTotalCents, currency)})` : ""}. Override it only if the agreed amount or FX differs.
+          The client pays by card on Stripe with no account or sign-in.
         </p>
       </div>
 
       <div className="grid gap-2 sm:grid-cols-[130px_1fr_1fr_auto_auto] items-center">
         <input
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          onChange={(e) => setManualAmount(e.target.value)}
+          readOnly={!overrideAmount}
           inputMode="decimal"
           placeholder={`Amount (${currency.toUpperCase()})`}
-          className="px-3 py-2 border border-border rounded-md bg-background font-body text-xs"
+          title={overrideAmount ? "Manual amount" : `Auto: ${pctLabel} of the order total`}
+          className={`px-3 py-2 border border-border rounded-md font-body text-xs ${overrideAmount ? "bg-background" : "bg-muted/40 text-muted-foreground cursor-default"}`}
         />
         <input
           value={label}
@@ -160,9 +185,10 @@ export default function GuestPayLinkCard({ quoteId, currency, defaultAmountCents
         />
         <input
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => { setEmailTouched(true); setEmail(e.target.value); }}
           type="email"
-          placeholder="Client email (optional)"
+          onFocus={() => setEmailTouched(true)}
+          placeholder="Client email"
           className="px-3 py-2 border border-border rounded-md bg-background font-body text-xs"
         />
         <button
@@ -182,6 +208,20 @@ export default function GuestPayLinkCard({ quoteId, currency, defaultAmountCents
           {sending ? "Sending…" : "Email client"}
         </button>
       </div>
+
+      <label className="flex items-center gap-2 font-body text-[11px] text-muted-foreground">
+        <input
+          type="checkbox"
+          checked={overrideAmount}
+          onChange={(e) => {
+            const on = e.target.checked;
+            setOverrideAmount(on);
+            if (on) setManualAmount(autoDepositCents ? (autoDepositCents / 100).toFixed(2) : "");
+          }}
+          className="h-3.5 w-3.5 accent-foreground"
+        />
+        Override amount (incorrect total or FX adjustment)
+      </label>
 
       {links.length > 0 && (
         <div className="space-y-2">

@@ -4365,14 +4365,23 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         )}
 
-        {isSuperAdmin && (
-          <GuestPayLinkCard
-            quoteId={quoteId}
-            currency={currency}
-            defaultAmountCents={subtotalCents}
-            defaultEmail={shipTo.email}
-          />
-        )}
+        {isSuperAdmin && (() => {
+          const taxable = goodsAfterDiscountCents + insurancePremiumCents;
+          const goodsTotal = gstEnabled && taxable > 0 ? taxable + Math.round(taxable * gstRate / 100) : taxable;
+          const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
+            ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
+            : 0;
+          const orderTotalCents = goodsTotal + cratingTotalCents + shippingQuoteCents + extrasTotalCents;
+          return (
+            <GuestPayLinkCard
+              quoteId={quoteId}
+              currency={currency}
+              orderTotalCents={orderTotalCents}
+              depositPct={0.6}
+              defaultEmail={shipTo.email || clientApproval.email}
+            />
+          );
+        })()}
 
         {/* Billing mode selector — show whenever the quote is editable or being paid */}
         {(isDraft || isPriced) && (
