@@ -90,6 +90,20 @@ function statusDot(slackDays: number | null) {
   );
 }
 
+function statusLabelBadge(slackDays: number | null) {
+  if (slackDays == null) return null;
+  if (slackDays < 0)
+    return <span className="inline-flex items-center rounded-full bg-red-100 text-red-800 px-2 py-0.5 text-[10px] font-medium tabular-nums">Late</span>;
+  if (slackDays <= 14)
+    return <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-medium tabular-nums">Tight Timeline</span>;
+  return <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[10px] font-medium tabular-nums">On Track</span>;
+}
+
+function formatMoney(cents: number | null, currency: string): string {
+  if (cents == null) return "—";
+  return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(cents / 100);
+}
+
 interface Line {
   item_id: string;
   product_name: string;
