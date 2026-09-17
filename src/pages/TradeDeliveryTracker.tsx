@@ -282,23 +282,26 @@ export default function TradeDeliveryTracker() {
                           .map((l) => (
                             <tr key={l.item_id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
                               <td className="w-12 px-2 py-2">
-                                <button
-                                  type="button"
-                                  onClick={() => setPreviewLine(l)}
-                                  className="group relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded border border-border/50 bg-muted/20 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                  aria-label={`Preview ${l.product_name}`}
-                                >
-                                  {l.image_url ? (
-                                    <img
-                                      src={l.image_url}
-                                      alt={l.product_name}
-                                      loading="lazy"
-                                      className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-110"
-                                    />
-                                  ) : (
-                                    <ImageOff className="h-4 w-4 text-muted-foreground/60" />
-                                  )}
-                                </button>
+                                <div className="relative flex h-10 w-10 items-center justify-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => setPreviewLine(l)}
+                                    className="group relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded border border-border/50 bg-muted/20 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                    aria-label={`Preview ${l.product_name}`}
+                                  >
+                                    {l.image_url ? (
+                                      <img
+                                        src={l.image_url}
+                                        alt={l.product_name}
+                                        loading="lazy"
+                                        className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-110"
+                                      />
+                                    ) : (
+                                      <ImageOff className="h-4 w-4 text-muted-foreground/60" />
+                                    )}
+                                  </button>
+                                  {statusDot(l.slack)}
+                                </div>
                               </td>
                               <td className="px-2.5 py-2 font-body text-sm text-foreground break-words">{l.product_name}</td>
                               <td className="px-2.5 py-2 font-body text-xs text-muted-foreground break-words">{l.brand_name}</td>
