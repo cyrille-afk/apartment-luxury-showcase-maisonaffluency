@@ -14,6 +14,13 @@ interface NewInquiry {
   linked_quote_id: string | null;
 }
 
+const STAGE_LABEL: Record<string, string> = {
+  new: "Open — not yet handled",
+  in_review: "Being handled",
+  quote_drafted: "Quote drafted",
+  ready_to_send: "Ready to send",
+};
+
 const relative = (dateStr: string) => {
   const mins = Math.floor((Date.now() - new Date(dateStr).getTime()) / 60000);
   if (mins < 1) return "just now";
@@ -28,24 +35,24 @@ export function NewInquiriesAlert() {
   const [items, setItems] = useState<NewInquiry[]>([]);
 
   const load = async () => {
-    // Pending = inquiry not yet handled OR its linked quote is still a draft (not sent).
+    // Pending = anything not yet sent/closed/rejected, or whose linked quote is still a draft.
     const [{ data: inquiries, error }, { data: draftQuotes }] = await Promise.all([
       supabase
         .from("inquiries")
         .select("id, product_name, company, email, created_at, status, linked_quote_id")
-        .in("status", ["new", "quote_drafted"])
+        .in("status", ["new", "in_review", "quote_drafted", "ready_to_send"])
         .order("created_at", { ascending: false })
-        .limit(20),
+        .limit(50),
       supabase.from("trade_quotes").select("id").eq("status", "draft"),
     ]);
     if (error) return;
     const draftIds = new Set((draftQuotes ?? []).map((q) => q.id));
     const pending = (inquiries ?? []).filter(
       (i) =>
-        i.status === "new" ||
-        (i.linked_quote_id && draftIds.has(i.linked_quote_id))
+        i.status !== "quote_drafted" ||
+        (i.linked_quote_id ? draftIds.has(i.linked_quote_id) : true)
     );
-    setItems(pending.slice(0, 5) as NewInquiry[]);
+    setItems(pending as NewInquiry[]);
   };
 
   useEffect(() => {
@@ -67,6 +74,12 @@ export function NewInquiriesAlert() {
   if (!isAdmin || items.length === 0) return null;
 
   const latest = items[0];
+  const openCount = items.filter((i) => i.status === "new").length;
+  const handlingCount = items.length - openCount;
+  const headline = [
+    openCount > 0 ? `${openCount} open` : null,
+    handlingCount > 0 ? `${handlingCount} being handled` : null,
+  ].filter(Boolean).join(" · ");
 
   return (
     <Link
@@ -82,9 +95,7 @@ export function NewInquiriesAlert() {
           </span>
           <div className="min-w-0">
             <p className="font-body text-[11px] uppercase tracking-[0.2em] text-foreground">
-              {items.length === 1
-                ? "1 quote request — quote not yet sent"
-                : `${items.length} quote requests — quotes not yet sent`}
+              {`${items.length} quote request${items.length === 1 ? "" : "s"} — ${headline}`}
             </p>
             <p className="mt-1 truncate font-body text-sm text-muted-foreground">
               {latest.product_name ?? "Quote request"}
@@ -92,6 +103,8 @@ export function NewInquiriesAlert() {
               {latest.company || latest.email || "Private client"}
               {" · "}
               {relative(latest.created_at)}
+              {" · "}
+              {STAGE_LABEL[latest.status ?? "new"] ?? "Open"}
             </p>
           </div>
         </div>
