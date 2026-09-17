@@ -58,6 +58,7 @@ export function TradeSidebar() {
   const { count: clientUpgradeCount } = useClientTierUpgrades(currentStudio?.id);
   const { projects: activeProjects } = useProjects({ activeOnly: true });
   const recentActiveProjects = activeProjects.slice(0, 2);
+  const pendingInquiryCount = usePendingInquiryCount();
 
 
   useEffect(() => {
