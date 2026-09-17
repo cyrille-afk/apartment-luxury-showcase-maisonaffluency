@@ -209,7 +209,22 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
                       View PO document
                     </span>
                   </button>
-                ) : (
+                ) : null}
+                {(item.po_number || poNumber.trim()) ? (
+                  <p className="mt-3 font-body text-[10px] uppercase tracking-[0.16em]">
+                    {approval.po_status === "approved" ? (
+                      <span className="inline-flex items-center gap-1.5 text-emerald-700">
+                        <BadgeCheck className="h-3.5 w-3.5" />
+                        Approved{approval.po_approved_by_name ? ` · ${approval.po_approved_by_name}` : ""}
+                      </span>
+                    ) : approval.po_status === "changes_requested" ? (
+                      <span className="text-amber-700">Status: Changes requested</span>
+                    ) : (
+                      <span className="text-muted-foreground">Status: Pending review</span>
+                    )}
+                  </p>
+                ) : null}
+                {!(item.po_number || poNumber.trim()) && (
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <p className="font-body text-xs italic text-muted-foreground">PO Status: Pending Generation</p>
                     <Button
