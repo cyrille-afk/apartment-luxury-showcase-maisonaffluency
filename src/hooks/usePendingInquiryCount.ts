@@ -16,15 +16,15 @@ export function usePendingInquiryCount() {
       supabase
         .from("inquiries")
         .select("id, status, linked_quote_id")
-        .in("status", ["new", "quote_drafted"])
+        .in("status", ["new", "in_review", "quote_drafted", "ready_to_send"])
         .order("created_at", { ascending: false })
-        .limit(100),
+        .limit(200),
       supabase.from("trade_quotes").select("id").eq("status", "draft"),
     ]);
     if (error) return;
     const draftIds = new Set((draftQuotes ?? []).map((q) => q.id));
     const pending = (inquiries ?? []).filter(
-      (i) => i.status === "new" || (i.linked_quote_id && draftIds.has(i.linked_quote_id))
+      (i) => i.status !== "quote_drafted" || (i.linked_quote_id ? draftIds.has(i.linked_quote_id) : true)
     );
     setCount(pending.length);
   };
