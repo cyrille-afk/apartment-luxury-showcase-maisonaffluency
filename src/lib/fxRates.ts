@@ -104,6 +104,18 @@ export function describeFxSource(s: FxSource): { label: string; tone: "live" | "
   }
 }
 
+/** Drop cached rates (all pairs, or one pair) so the next getFxRate call
+ *  hits the live providers again. Used by the manual "Refresh FX" action. */
+export function invalidateFxCache(src?: string, tgt?: string): void {
+  if (src && tgt) {
+    cache.delete(`${src}_${tgt}`);
+    lastSources.delete(`${src}_${tgt}`);
+    return;
+  }
+  cache.clear();
+  lastSources.clear();
+}
+
 const fetchWithTimeout = async (url: string, ms = 4000): Promise<Response> => {
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), ms);

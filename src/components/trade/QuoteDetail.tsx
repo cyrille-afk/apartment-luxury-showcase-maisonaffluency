@@ -4,7 +4,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { getDestinationTax } from "@/lib/destinationTax";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
-import { getFxRates, FALLBACK_RATES, getFxSource, getFxMeta, summarizeFxSources, describeFxSource, type FxSource } from "@/lib/fxRates";
+import { getFxRates, FALLBACK_RATES, getFxSource, getFxMeta, invalidateFxCache, summarizeFxSources, describeFxSource, type FxSource } from "@/lib/fxRates";
 import { formatFxSnapshotLine } from "@/lib/fxSnapshot";
 import { FxSourceBadge } from "@/components/trade/FxSourceBadge";
 import { FxAppliedRates } from "@/components/trade/FxAppliedRates";
@@ -15,7 +15,7 @@ import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useBrandDiscountCaps, effectiveDiscountForBrand, MARGIN_CAP_TOOLTIP } from "@/lib/brandDiscountCap";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock, FolderOpen, Layers, Eye, ExternalLink, Mail, History as HistoryIcon, Copy, AlertTriangle, Info } from "lucide-react";
+import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock, FolderOpen, Layers, Eye, ExternalLink, Mail, History as HistoryIcon, Copy, AlertTriangle, Info, RefreshCw } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link, useNavigate } from "react-router-dom";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
@@ -437,6 +437,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [fxSource, setFxSource] = useState<FxSource>("identity");
   const [fxPairs, setFxPairs] = useState<Array<{ src: string; tgt: string; rate: number; source: FxSource; fetchedAt: number; cacheTtlMs: number }>>([]);
   const [fxAppliedAt, setFxAppliedAt] = useState<Date | null>(null);
+  const [fxRefreshTick, setFxRefreshTick] = useState(0);
+  const [fxRefreshing, setFxRefreshing] = useState(false);
 
   const [tradeDiscount, setTradeDiscount] = useState(true);
   // MSRP-only quotes must never apply the trade discount — the whole point of
@@ -634,6 +636,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   // reprices every line.
   useEffect(() => {
     const fetchRates = async () => {
+      setFxRefreshing(true);
       // The FX target follows the display toggle: when the user flips to
       // GBP DDP the badge must reflect the GBP rate source, not the quote
       // currency's source.
@@ -650,7 +653,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       // Always include quote→target so the badge reflects the display
       // conversion itself even when every line is already in `currency`.
       if (displayCcy === "gbp" && currency !== "GBP") sourceCurrencies.add(currency);
-      if (sourceCurrencies.size === 0) { setFxRates({}); setFxSource("identity"); setFxPairs([]); setFxAppliedAt(null); return; }
+      if (sourceCurrencies.size === 0) { setFxRates({}); setFxSource("identity"); setFxPairs([]); setFxAppliedAt(null); setFxRefreshing(false); return; }
       const pairs = Array.from(sourceCurrencies).map((src) => ({ src, tgt: targetCcy }));
       const rates = await getFxRates(pairs);
       setFxRates(rates);
@@ -669,10 +672,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         }),
       );
       setFxAppliedAt(new Date());
-
+      setFxRefreshing(false);
     };
     if (items.length > 0) fetchRates();
-  }, [items, currency, displayCcy]);
+    else setFxRefreshing(false);
+  }, [items, currency, displayCcy, fxRefreshTick]);
+
+  /** Manual "Refresh FX rate": dump the 10-min cache and re-run the rate
+   *  fetch, which reprices every converted line, shipping and the totals. */
+  const refreshFxRates = () => {
+    if (fxRefreshing) return;
+    invalidateFxCache();
+    setFxRefreshTick((t) => t + 1);
+  };
 
 
   // Fetch items, currency, and profile
@@ -2844,6 +2856,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               {fxSource !== "identity" && <FxSourceBadge source={fxSource} />}
             </div>
             {fxPairs.length > 0 && <FxAppliedRates pairs={fxPairs} className="mt-1" />}
+            {fxPairs.length > 0 && !clientSafe && (
+              <button
+                onClick={refreshFxRates}
+                disabled={fxRefreshing}
+                className="mt-1 inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                title="Fetch the latest live FX rate and recalculate converted prices, shipping and totals"
+                aria-label="Refresh FX rate and recalculate totals"
+              >
+                <RefreshCw className={`h-3 w-3 ${fxRefreshing ? "animate-spin" : ""}`} />
+                {fxRefreshing ? "Refreshing FX…" : "Refresh FX rate"}
+              </button>
+            )}
 
 
 
