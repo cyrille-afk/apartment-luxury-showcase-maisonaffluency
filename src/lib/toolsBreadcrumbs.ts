@@ -32,6 +32,7 @@ export const TOOL_ROUTES: Record<string, [string, string]> = {
   "/trade/comparator": ["Specification", "Product Comparator"],
   "/trade/ffe-schedule": ["Specification", "FF&E Schedule"],
   "/trade/quotes": ["Specification", "Quote Builder"],
+  "/trade/spec-generator": ["Specification", "Specification Sheet Generator"],
   // Procurement
   "/trade/order-timeline": ["Procurement", "Order Timeline"],
   "/trade/delivery-tracker": ["Procurement", "Delivery Tracker"],
