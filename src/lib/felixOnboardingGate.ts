@@ -73,7 +73,7 @@ export const isHighLevelVisionStatement = (text: string): boolean => {
   const normalized = text.trim();
   if (!normalized || BUDGET_RE.test(normalized)) return false;
   const procurement = /\b(ff\s*&\s*e|sourc(?:e|ing)|gathering|working on|ideas?)\b/i.test(normalized);
-  const vision = /\b(art deco|pre[- ]?war|vibe|aesthetic|visual direction|style|atmosphere|mood)\b/i.test(normalized);
+  const vision = /\bart deco\b/i.test(normalized) && /\bpre[- ]?war\b/i.test(normalized);
   return procurement && vision;
 };
 

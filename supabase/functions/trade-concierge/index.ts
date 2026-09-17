@@ -4939,7 +4939,7 @@ serve(async (req) => {
     );
     const highLevelVisionWithoutGate = !onboardingGateComplete &&
       /\b(ff\s*&\s*e|sourc(?:e|ing)|gathering|working on|ideas?)\b/i.test(lastUserMsg) &&
-      /\b(art deco|pre[- ]?war|vibe|aesthetic|visual direction|style|atmosphere|mood)\b/i.test(lastUserMsg);
+      /\bart deco\b/i.test(lastUserMsg) && /\bpre[- ]?war\b/i.test(lastUserMsg);
     if (highLevelVisionWithoutGate) {
       return sseTextResponse("An Art Deco prewar co-op is an exceptional canvas. To structure our studio layout options accurately, let's lock in two quick technical specifications: What is our target budget range for this phase, and which specific zones (such as salon seating, dining area, or master lounge) are we curating first?");
     }

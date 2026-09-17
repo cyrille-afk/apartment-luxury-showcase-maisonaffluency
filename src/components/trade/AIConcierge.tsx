@@ -1548,6 +1548,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     hydratedThreadRef.current = data.id;
     cloudLastPayloadRef.current = "";
     setActiveThreadId(data.id);
+    setBriefManuallyCompleted(false);
     if (activeThreadKey) try { localStorage.setItem(activeThreadKey, data.id); } catch {}
     stampTimelineThread(data.id);
     setTimeline(buildInitialTimeline());
@@ -1563,6 +1564,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     hydratedThreadRef.current = null;
     cloudLastPayloadRef.current = "";
     setTimeline([]);
+    setBriefManuallyCompleted(false);
     setActiveThreadId(threadId);
     if (activeThreadKey) try { localStorage.setItem(activeThreadKey, threadId); } catch {}
     setThreadsOpen(false);
@@ -2485,7 +2487,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       const validation = validateBriefDraft(briefDraft);
       if (!validation.valid) {
         toast.error(
-          `To ensure ${name} curates an accurate project schedule, please specify your desired furniture Typologies before submitting.`,
+          `Complete the three required onboarding details before submitting.`,
           { description: `Missing required fields: ${validation.missing.join(", ")}` },
         );
         return;
