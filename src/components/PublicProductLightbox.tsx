@@ -33,6 +33,7 @@ import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import { formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { buildProductCuratorNotes } from "@/lib/productCuratorNotes";
 
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage. */
 const slugifyProduct = (s: string) =>
@@ -320,32 +321,14 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   // "More from" thumbnail swaps the lightbox item.
   const curatorNotes = useMemo(() => {
     if (!product) return { significance: "", spatial: "", provenance: "" };
-    const designer = product.brand_name.includes(" - ")
-      ? product.brand_name.split(" - ")[0].trim()
-      : product.brand_name;
-    const yearMatch = product.title.match(/\b(18|19|20)\d{2}\b/);
-    const year = yearMatch?.[0] || null;
-    const plainDesc = (product.description || "")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-    const sentences = plainDesc.match(/[^.!?]+[.!?]+/g)?.map((s) => s.trim()).filter(Boolean) || [];
-    const categoryLabel = (product.subcategory || product.category || "piece").toLowerCase();
-    const significance =
-      sentences[0] ||
-      (year
-        ? `A definitive ${year} ${categoryLabel} in understated elegance, capturing the transition from historic craft to refined modern minimalism.`
-        : `A definitive ${categoryLabel} in understated elegance, capturing the transition from historic craft to refined modern minimalism.`);
-    const dims = (product.dimensions || "").split("\n")[0]?.trim();
-    const spatial =
-      sentences[1] ||
-      (dims
-        ? `Proportioned at ${dims}, engineered with precise geometric balance to serve as a quiet, functional focal point for high-end interiors.`
-        : `Features a stripped-back silhouette engineered with precise geometric proportions, calculated to serve as a quiet, functional sculptural focal point for high-end interiors.`);
-    const provenance =
-      sentences[2] ||
-      `Reflects ${designer}’s legendary philosophy of quiet luxury, bridging the gap between opulent glamour and minimalist simplicity.`;
-    return { significance, spatial, provenance };
+    return buildProductCuratorNotes({
+      title: product.title,
+      brandName: product.brand_name,
+      description: product.description,
+      dimensions: product.dimensions,
+      category: product.category,
+      subcategory: product.subcategory,
+    });
   }, [product]);
 
 
@@ -940,58 +923,6 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     );
                   })()}
 
-                  {(() => {
-                    const sv = product.size_variants || [];
-                    const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
-                    const baseIsDim = (baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) || isDimensionAxisLabel(product.base_axis_label);
-                    const topOptions = isDualAxis
-                      ? Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)))
-                      : [];
-                    const topIsDim = (topOptions.length > 0 && topOptions.every(looksLikeDimension)) || isDimensionAxisLabel(product.top_axis_label);
-
-                    const hasFinishAxis =
-                      isUpholsteredProduct ||
-                      (isDualAxis && (!baseIsDim || !topIsDim)) ||
-                      (!isDualAxis && materialOptions.length > 0 && !(materialOptions.length === 1 && looksLikeDimension(materialOptions[0]))) ||
-                      (!!product.materials_description && product.materials_description.trim().length > 0);
-
-                    if (!hasFinishAxis) return null;
-                    return (
-                      <div className="border-t border-border/60 py-3 flex items-center gap-4">
-                        <span className="shrink-0"><SpecGlyph symbol="⬗" /></span>
-                        <span className="font-body text-sm text-muted-foreground">
-                          Finish options — refer to the full product page for details.
-                        </span>
-                      </div>
-                    );
-                  })()}
-
-                  {(() => {
-                    const handcrafted = formatHandcrafted(product.origin, product.lead_time);
-                    if (!handcrafted) return null;
-                    let originLine = handcrafted;
-                    let leadLine: string | null = null;
-                    const dotSplit = handcrafted.split(" · ");
-                    if (dotSplit.length === 2) {
-                      originLine = dotSplit[0];
-                      leadLine = dotSplit[1];
-                    } else {
-                      const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
-                      if (m) {
-                        originLine = m[1];
-                        leadLine = `Production lead time: ${m[2]}`;
-                      }
-                    }
-                    return (
-                      <div className="border-t border-border/60 py-3 flex items-start gap-4">
-                        {specIcon("✦", "mt-0.5")}
-                        <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
-                          <p>{originLine}</p>
-                          {leadLine && <p className="mt-0.5">{leadLine}</p>}
-                        </div>
-                      </div>
-                    );
-                  })()}
                 </div>
               </div>
             </div>
@@ -1022,70 +953,15 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       {publicPriceLabel || "Price Upon Request"}
                     </a>
                   )}
-                  {productPageHref && (
-                    <p className="text-center font-body text-[10px] tracking-wide text-muted-foreground/80">
-                      See all photos, finishes & specifications
-                    </p>
-                  )}
-                </div>
-
-                {/* Secondary actions */}
-                <div className="hidden md:grid grid-cols-3 gap-2 items-stretch">
-                  <FavoriteFolderPicker pickId={product.id} align="start" side="top">
-                    <button
-                      onClick={(e) => e.stopPropagation()}
-                      title={favorited ? "Manage folders" : "Favorite"}
-                      className={cn(
-                        "w-full h-10 flex items-center justify-center gap-1.5 px-3 font-body text-[10px] uppercase tracking-[0.14em] transition-colors border",
-                        favorited
-                          ? "border-foreground/40 text-foreground"
-                          : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
-                      )}
+                  {!showMemberTradePrice && (
+                    <a
+                      href="/trade-program"
+                      className="border border-border/60 bg-background px-4 py-3 text-center font-body text-[9px] uppercase leading-relaxed tracking-[0.18em] text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
                     >
-                      <Heart size={13} strokeWidth={1.5} className={cn(favorited && "fill-current")} />
-                      {favorited ? "Saved" : "Favorite"}
-                    </button>
-                  </FavoriteFolderPicker>
-
-                  <button
-                    onClick={() => togglePin(compareItem)}
-                    title={pinned ? "Pinned" : "Pin to Selection"}
-                    className={cn(
-                      "w-full h-10 flex items-center justify-center gap-1.5 px-3 font-body text-[10px] uppercase tracking-[0.14em] transition-colors border",
-                      pinned
-                        ? "border-foreground/40 text-foreground"
-                        : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
-                      compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
-                    )}
-                  >
-                    <Scale size={13} strokeWidth={1.5} />
-                    {pinned ? "Pinned" : "Pin to Selection"}
-                  </button>
-
-                  {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) && (
-                    <SpecSheetButton
-                      pdfUrl={product.pdf_url}
-                      pdfUrls={product.pdf_urls}
-                      brandName={designerDisplay}
-                      productName={product.title}
-                      variant="button"
-                      icon={<FileDown size={13} strokeWidth={1.5} />}
-                      className="w-full h-10 flex items-center justify-center gap-1.5 px-3 font-body text-[10px] uppercase tracking-[0.14em] transition-colors border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 cursor-pointer"
-                      onBeforeOpen={() => { let allowed = false; requireAuth(() => { allowed = true; }, "download this spec sheet"); return allowed; }}
-                    />
+                      Exclusive trade privileges available. Join our Trade Program to unlock pricing mutations.
+                    </a>
                   )}
                 </div>
-
-                {!showMemberTradePrice && (
-                  <div className="pt-2 border-t border-border">
-                    <p className="font-body text-[11px] text-muted-foreground">
-                      To unlock Your Trade pricing,{" "}
-                      <a href="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
-                        join our Trade Program
-                      </a>.
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
             </div>
