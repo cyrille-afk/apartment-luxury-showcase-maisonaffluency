@@ -184,6 +184,11 @@ export default function TradeFFESchedule() {
     });
   };
 
+  const resetColumns = () => {
+    setHiddenColumns([]);
+    try { localStorage.removeItem(FFE_COLS_STORAGE_KEY); } catch { /* ignore */ }
+  };
+
   const visibleColumns = useMemo(
     () => FFE_COLUMNS.filter((c) => c.locked || !hiddenColumns.includes(c.key)),
     [hiddenColumns]
