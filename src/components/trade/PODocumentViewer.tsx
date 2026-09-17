@@ -285,8 +285,92 @@ export default function PODocumentViewer({ document: po, onOpenChange, onStatusC
                     <p className="mt-2 uppercase tracking-[0.16em] text-muted-foreground">Supplier acknowledgement · Date</p>
                   </div>
                 </section>
+
+                <section className="mt-10 border-t border-border pt-6">
+                  <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Manager sign-off</p>
+
+                  {status === "approved" ? (
+                    <div className="mt-4 inline-flex animate-fade-in items-start gap-3 rounded-sm border-2 border-emerald-600/60 bg-emerald-50/70 px-5 py-4">
+                      <BadgeCheck className="mt-0.5 h-6 w-6 text-emerald-700" />
+                      <div>
+                        <p className="font-display text-base tracking-wide text-emerald-800">Approved</p>
+                        <p className="mt-0.5 font-body text-[11px] text-emerald-800/90">{approverName || "Studio manager"}</p>
+                        <p className="font-body text-[11px] text-emerald-800/70">{stampTime(approvedAt)}</p>
+                      </div>
+                    </div>
+                  ) : status === "changes_requested" ? (
+                    <div className="mt-4 flex flex-wrap items-center gap-3">
+                      <span className="inline-flex items-center gap-2 rounded-sm border border-amber-300 bg-amber-50 px-3 py-2 font-body text-[11px] uppercase tracking-[0.16em] text-amber-800">
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        Status: Changes requested
+                      </span>
+                      {canSignOff && (
+                        <Button
+                          size="sm"
+                          className="bg-emerald-600 font-body text-xs text-white hover:bg-emerald-700"
+                          onClick={() => setPendingAction("approved")}
+                        >
+                          <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
+                          Approve purchase order
+                        </Button>
+                      )}
+                    </div>
+                  ) : canSignOff ? (
+                    <div className="mt-4 flex flex-wrap items-center gap-3">
+                      <Button
+                        size="sm"
+                        className="bg-emerald-600 font-body text-xs text-white hover:bg-emerald-700"
+                        onClick={() => setPendingAction("approved")}
+                      >
+                        <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
+                        Approve purchase order
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="font-body text-xs"
+                        onClick={() => setPendingAction("changes_requested")}
+                      >
+                        <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                        Request changes
+                      </Button>
+                    </div>
+                  ) : (
+                    <span className="mt-4 inline-flex items-center rounded-sm border border-border bg-muted/50 px-3 py-2 font-body text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                      Status: Pending review
+                    </span>
+                  )}
+                </section>
               </div>
             </div>
+
+            <AlertDialog open={!!pendingAction} onOpenChange={(open) => !open && setPendingAction(null)}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="font-display text-xl font-normal">
+                    {pendingAction === "approved" ? `Approve ${po.po_number}?` : `Request changes on ${po.po_number}?`}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="font-body text-sm">
+                    {pendingAction === "approved"
+                      ? "This records your sign-off on the purchase order with your name and a time stamp."
+                      : "This marks the purchase order as requiring changes before it can be issued."}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="font-body text-xs">Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="font-body text-xs"
+                    disabled={submitting}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      if (pendingAction) void applyDecision(pendingAction);
+                    }}
+                  >
+                    {submitting ? "Saving…" : pendingAction === "approved" ? "Approve" : "Request changes"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </>
         )}
       </DialogContent>
