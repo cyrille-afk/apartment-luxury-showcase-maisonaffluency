@@ -2825,7 +2825,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       kind: a.kind,
       previewUrl: a.previewUrl,
     }));
-    const submittedStructuredBrief = isBriefContent(text);
+    // STRICT SEQUENTIAL EVENT MATCHING — a message only counts as a submitted
+    // Architectural Brief when the user physically pressed Submit inside the
+    // Brief Builder panel. A resume/retry payload that merely quotes the brief
+    // text must never flip the timeline into "brief submitted" state, and must
+    // never be executed server-side as a fresh brief.
+    const submittedStructuredBrief = opts?.builderSubmit === true && isBriefContent(text);
     // Guardrail: a bare "here is the floor plan attached" style notification
     // sent with a document is never structural content — drop it entirely from
     // entity parsing (zones, typologies, cities) and let the document speak.
