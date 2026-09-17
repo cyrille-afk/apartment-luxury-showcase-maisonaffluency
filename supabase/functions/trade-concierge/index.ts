@@ -6395,6 +6395,7 @@ serve(async (req) => {
         cityLockNote = "\n\n" + buildCityLockSystemNote(resolution) + overrideNote;
         mark("cityLock", { input: latestAssertion.slice(0, 40), hub: resolution.hub, match: resolution.matchType, refinement: isRefinement });
       }
+      }
     } catch (err) {
       console.warn("[concierge cityLock] resolver failed", err);
     }
