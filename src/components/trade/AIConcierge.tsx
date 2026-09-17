@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList, MessagesSquare, Plus, Trash2 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { BriefBuilder, loadBriefDraftText, validateBriefDraft } from "@/components/trade/concierge/BriefBuilder";
+import { ART_DECO_DISCOVERY_REPLY, evaluateFelixOnboardingGate, isHighLevelVisionStatement } from "@/lib/felixOnboardingGate";
 import { QuoteSummaryCardContainer } from "@/components/trade/QuoteSummaryCard";
 import { BriefBubble, isBriefContent } from "@/components/trade/concierge/BriefBubble";
 import brandCategoriesRaw from "@/data/brandCategories.json";
@@ -11,6 +12,7 @@ import brandCategoriesRaw from "@/data/brandCategories.json";
 const SPEC_BRIEF_TEMPLATE = `Block 1 — Spatial & Project Context
 PROJECT PROFILE: [typology, city/area]
 ZONE: [room, ceiling height]
+BUDGET: [currency and target range]
 ENVIRONMENT: [humidity, sun exposure, glazing]
 TIMELINE: Handover in [N] weeks (max lead time [N] weeks).
 
@@ -425,7 +427,7 @@ function layoutProjectLabel(text?: string | null, context = ""): string {
 
 function clearBriefResultState(items: TimelineItem[]): TimelineItem[] {
   return items.filter((item) => {
-    if (item.kind === "layout_options" || item.kind === "pending_proposal" || item.kind === "retry") return false;
+    if (item.kind === "layout_options" || item.kind === "pending_proposal" || item.kind === "retry" || item.kind === "proposal" || item.kind === "quote_proposal" || item.kind === "ffe_proposal") return false;
     if (item.kind !== "msg" || item.role !== "assistant") return true;
     return !HELD_TEARSHEET_RE.test(item.content || "")
       && !LAYOUT_INTRO_RE.test(item.content || "")
@@ -791,6 +793,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [showBriefPreview, setShowBriefPreview] = useState(false);
   const [briefDraft, setBriefDraft] = useState<string>(() => loadBriefDraftText());
+  const [briefManuallyCompleted, setBriefManuallyCompleted] = useState(false);
   const briefProjectLocationRef = useRef<string | null>(null);
   const [briefBuilderOpen, setBriefBuilderOpen] = useState(() => {
     try {
@@ -962,7 +965,15 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     (routeStage === "Tearsheet" || routeStage === "Quote");
   const contextualPath = noWorkflowArtifactsContext ? "/trade" : pathname;
   const contextualRouteStage: Stage = noWorkflowArtifactsContext ? "Discover" : routeStage;
-  const stage: Stage = stageOverride ?? contextualRouteStage;
+  const onboardingGate = useMemo(() => evaluateFelixOnboardingGate(
+    briefDraft,
+    timeline
+      .filter((item): item is Extract<TimelineItem, { kind: "msg" }> => item.kind === "msg" && item.role === "user")
+      .map((item) => item.content),
+    briefManuallyCompleted,
+  ), [briefDraft, timeline, briefManuallyCompleted]);
+  const requestedStage: Stage = stageOverride ?? contextualRouteStage;
+  const stage: Stage = onboardingGate.completed ? requestedStage : "Discover";
   const currentGreeting = useCallback((targetLang: Lang = lang) => (
     surface === "public"
       ? (initialGreeting || PUBLIC_GREETING)
@@ -1936,7 +1947,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         };
         setTimeline((prev) => (detail?.replaceTimeline ? [welcomeMessage] : [...prev, welcomeMessage]));
       }
-      if (detail?.stage) setStageOverride(detail.stage);
+      if (detail?.stage && (detail.stage === "Discover" || onboardingGate.completed)) setStageOverride(detail.stage);
       if (detail?.openPanel) { clearDismissed(); setOpen(true); }
       if (detail?.closeBriefBuilder) setBriefBuilderOpen(false);
 
