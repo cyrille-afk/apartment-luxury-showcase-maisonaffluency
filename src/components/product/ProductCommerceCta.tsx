@@ -244,12 +244,14 @@ export default function ProductCommerceCta({
   // the drawer; 2+ items route to the full-page /cart layout.
   const openSelection = () => {
     const added = onAddToCart?.(quantity);
-    // Pieces without a public price never enter the cart — route those to the
-    // concierge enquiry instead of opening an empty drawer over a locked page.
+    // Pieces without a public price still open the same drawer — the line reads
+    // "Price upon Request" and its footer routes to the bespoke quotation.
     if (added === false) {
-      setBespokeOpen(true);
+      setQuoteOnlySelection(true);
+      setMiniCartOpen(true);
       return;
     }
+    setQuoteOnlySelection(false);
     if (shouldUseFullPageCart(getCart())) {
       setMiniCartOpen(false);
       navigate("/cart");
