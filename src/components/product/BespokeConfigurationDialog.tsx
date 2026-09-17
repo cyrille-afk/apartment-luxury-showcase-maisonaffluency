@@ -56,6 +56,9 @@ export default function BespokeConfigurationDialog({
   finishLabel = null,
   imageUrl = null,
   isTradeAuthorized = false,
+  prefillEmail = null,
+  prefillPhone = null,
+  prefillNotes = null,
 }: BespokeConfigurationDialogProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
