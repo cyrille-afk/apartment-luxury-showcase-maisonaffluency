@@ -32,6 +32,11 @@ export interface BespokeConfigurationDialogProps {
   imageUrl?: string | null;
   /** Verified trade member — routes the submission into the Felix workspace. */
   isTradeAuthorized?: boolean;
+  /** Contact detail already captured by the 3-step intent panel. */
+  prefillEmail?: string | null;
+  prefillPhone?: string | null;
+  /** Project notes already written in the 3-step intent panel. */
+  prefillNotes?: string | null;
 }
 
 function formatBytes(bytes: number): string {
