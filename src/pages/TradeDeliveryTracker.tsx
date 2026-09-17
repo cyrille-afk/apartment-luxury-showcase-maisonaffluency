@@ -5,8 +5,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
-import { CalendarClock, ChevronRight } from "lucide-react";
-import { useMemo } from "react";
+import { CalendarClock, ChevronRight, CalendarPlus } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import QuoteLineDrawer, { type QuoteLineDrawerItem } from "@/components/trade/QuoteLineDrawer";
 
 const STAGE_LABEL: Record<string, string> = {
   not_started: "Not started",
@@ -64,10 +66,18 @@ interface Line {
   stage: string | null;
   expected: Date | null;
   slack: number | null;
+  po_number: string | null;
+  cost_code: string | null;
+  lead_time: string | null;
+  lead_time_weeks_override: number | null;
+  dimensions: string | null;
+  materials: string | null;
+  sku: string | null;
 }
 
 export default function TradeDeliveryTracker() {
   const { user } = useAuth();
+  const [selectedLine, setSelectedLine] = useState<Line | null>(null);
 
   const { data: lines = [], isLoading } = useQuery({
     queryKey: ["delivery-tracker", user?.id],
@@ -83,7 +93,7 @@ export default function TradeDeliveryTracker() {
       const [{ data: qItems }, { data: timelines }] = await Promise.all([
         supabase
           .from("trade_quote_items")
-          .select("id, product_id, quantity, quote_id, lead_time_weeks_override, required_by_date")
+          .select("id, product_id, quantity, quote_id, po_number, cost_code, lead_time_weeks_override, required_by_date")
           .in("quote_id", quoteIds),
         supabase
           .from("order_timeline" as any)
@@ -96,7 +106,7 @@ export default function TradeDeliveryTracker() {
       const productIds = [...new Set(qItems.map((i) => i.product_id))];
       const { data: products } = await supabase
         .from("trade_products")
-        .select("id, product_name, brand_name, lead_time")
+        .select("id, product_name, brand_name, lead_time, dimensions, materials, sku")
         .in("id", productIds);
 
       const projectIds = [...new Set(quotes.map((q: any) => q.project_id).filter(Boolean))] as string[];
@@ -133,6 +143,13 @@ export default function TradeDeliveryTracker() {
           stage: tl?.kanban_status || null,
           expected,
           slack,
+          po_number: it.po_number ?? null,
+          cost_code: it.cost_code ?? null,
+          lead_time: p?.lead_time || null,
+          lead_time_weeks_override: it.lead_time_weeks_override ?? null,
+          dimensions: p?.dimensions || null,
+          materials: p?.materials || null,
+          sku: p?.sku || null,
         };
       });
     },
@@ -153,7 +170,7 @@ export default function TradeDeliveryTracker() {
   return (
     <>
       <Helmet><title>Delivery Tracker — Trade Portal</title></Helmet>
-      <div className="max-w-6xl space-y-6">
+      <div className="min-w-0 space-y-6 xl:w-[calc(100vw-8rem)] xl:max-w-[1800px]">
         <TradeBreadcrumb current="Delivery tracker" />
         <div>
           <h1 className="font-display text-2xl text-foreground">Delivery Tracker</h1>
@@ -198,12 +215,17 @@ export default function TradeDeliveryTracker() {
                       {worst != null && slackBadge(worst)}
                     </div>
                   </div>
-                  <div className="overflow-x-auto border border-border rounded-lg">
-                    <table className="w-full text-left">
+                  <div className="min-w-0 overflow-hidden border border-border rounded-lg">
+                    <table className="w-full table-fixed text-left">
+                      <colgroup>
+                        <col className="w-[19%]" /><col className="w-[13%]" /><col className="w-[5%]" />
+                        <col className="w-[12%]" /><col className="w-[12%]" /><col className="w-[11%]" />
+                        <col className="w-[12%]" /><col className="w-[8%]" /><col className="w-[8%]" />
+                      </colgroup>
                       <thead>
                         <tr className="border-b border-border bg-muted/30">
                           {["Item", "Brand", "Qty", "Client", "Stage", "Expected ready", "Required by", "Slack", "Quote"].map((h) => (
-                            <th key={h} className="px-4 py-2 font-body text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">{h}</th>
+                            <th key={h} className="px-2.5 py-2 font-body text-[10px] uppercase tracking-wider text-muted-foreground first:pl-4 last:pr-4">{h}</th>
                           ))}
                         </tr>
                       </thead>
@@ -217,18 +239,18 @@ export default function TradeDeliveryTracker() {
                           })
                           .map((l) => (
                             <tr key={l.item_id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
-                              <td className="px-4 py-2 font-body text-sm text-foreground">{l.product_name}</td>
-                              <td className="px-4 py-2 font-body text-sm text-muted-foreground">{l.brand_name}</td>
-                              <td className="px-4 py-2 font-body text-sm text-foreground tabular-nums">{l.quantity}</td>
-                              <td className="px-4 py-2 font-body text-xs text-muted-foreground">{l.client_name || "—"}</td>
-                              <td className="px-4 py-2 font-body text-xs text-muted-foreground whitespace-nowrap">{STAGE_LABEL[l.stage || ""] || (l.stage || "—")}</td>
-                              <td className="px-4 py-2 font-body text-xs text-muted-foreground whitespace-nowrap tabular-nums">{fmtDate(l.expected)}</td>
-                              <td className="px-4 py-2 font-body text-xs text-muted-foreground whitespace-nowrap tabular-nums">{l.required_by_date ? fmtDate(new Date(l.required_by_date)) : <Link to="/trade/ffe-schedule" className="italic underline underline-offset-2">set on FF&E</Link>}</td>
-                              <td className="px-4 py-2 font-body text-xs whitespace-nowrap">{slackBadge(l.slack)}</td>
-                              <td className="px-4 py-2 font-body text-xs">
-                                <Link to={`/trade/quotes?id=${l.quote_id}`} className="text-foreground underline underline-offset-2 tabular-nums">
+                              <td className="px-2.5 py-2 pl-4 font-body text-sm text-foreground break-words">{l.product_name}</td>
+                              <td className="px-2.5 py-2 font-body text-xs text-muted-foreground break-words">{l.brand_name}</td>
+                              <td className="px-2.5 py-2 font-body text-sm text-foreground tabular-nums">{l.quantity}</td>
+                              <td className="px-2.5 py-2 font-body text-xs text-muted-foreground break-words">{l.client_name || "—"}</td>
+                              <td className="px-2.5 py-2 font-body text-xs text-muted-foreground">{STAGE_LABEL[l.stage || ""] || (l.stage || "—")}</td>
+                              <td className="px-2.5 py-2 font-body text-xs text-muted-foreground tabular-nums">{fmtDate(l.expected)}</td>
+                              <td className="px-2.5 py-2 font-body text-xs text-muted-foreground tabular-nums">{l.required_by_date ? fmtDate(new Date(l.required_by_date)) : <Button type="button" variant="outline" size="sm" className="h-7 px-2 text-[10px]" onClick={() => setSelectedLine(l)}><CalendarPlus className="h-3 w-3 mr-1" />Set on FF&amp;E</Button>}</td>
+                              <td className="px-2.5 py-2 font-body text-xs">{slackBadge(l.slack)}</td>
+                              <td className="px-2.5 py-2 pr-4 font-body text-xs">
+                                <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-[10px] tabular-nums" onClick={() => setSelectedLine(l)}>
                                   {l.quote_ref}
-                                </Link>
+                                </Button>
                               </td>
                             </tr>
                           ))}
@@ -241,6 +263,7 @@ export default function TradeDeliveryTracker() {
           </div>
         )}
       </div>
+      <QuoteLineDrawer item={selectedLine as QuoteLineDrawerItem | null} onOpenChange={(open) => !open && setSelectedLine(null)} />
     </>
   );
 }
