@@ -214,7 +214,7 @@ export default function TradePOLogs() {
 
   const patchRow = async (row: PORow, patch: Record<string, unknown>, message: string) => {
     setSaving(true);
-    const { error } = await supabase.from("trade_quote_items").update(patch).eq("id", row.item_id);
+    const { error } = await supabase.from("trade_quote_items").update(patch as never).eq("id", row.item_id);
     setSaving(false);
     if (error) {
       toast({ title: "Could not update", description: error.message, variant: "destructive" });
