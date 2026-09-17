@@ -2389,7 +2389,7 @@ const PublicProductPageContent: React.FC = () => {
                             {label}
                           </h3>
                         </div>
-                        <p className="font-body text-sm italic leading-relaxed text-muted-foreground">
+                        <p className="font-body text-sm italic leading-relaxed text-justify text-muted-foreground">
                           {text}
                         </p>
                       </article>
