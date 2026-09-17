@@ -29,6 +29,9 @@ import { template as orderReceived } from './order-received.tsx'
 import { template as tradeProgramInvitation } from './trade-program-invitation.tsx'
 import { template as purchaseOrderDispatch } from './purchase-order-dispatch.tsx'
 import { template as clientQuotePayment } from './client-quote-payment.tsx'
+import { template as cartReminder } from './cart-reminder.tsx'
+import { template as quotePaymentReminder } from './quote-payment-reminder.tsx'
+import { template as funnelStallAlert } from './funnel-stall-alert.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'trade-approval': tradeApproval,
@@ -51,4 +54,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'trade-program-invitation': tradeProgramInvitation,
   'purchase-order-dispatch': purchaseOrderDispatch,
   'client-quote-payment': clientQuotePayment,
+  'cart-reminder': cartReminder,
+  'quote-payment-reminder': quotePaymentReminder,
+  'funnel-stall-alert': funnelStallAlert,
 }
