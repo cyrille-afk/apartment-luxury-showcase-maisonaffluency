@@ -2106,12 +2106,37 @@ const PublicProductPageContent: React.FC = () => {
           (product.description?.replace(/\s+/g, " ").trim().slice(0, 155)) ||
           `${product.title} by ${designerDisplay}. ${product.materials || "Collectible design at Maison Affluency."}`.slice(0, 155);
         const ldDims = parseDimensions(product.dimensions);
+
+        // ---- Offer ---------------------------------------------------------
+        // Google's Product snippet / Merchant listing validators reject an
+        // Offer without `price` + `priceCurrency`. We publish the public RRP
+        // (the same figure the page prints) as a bare decimal string — no
+        // currency symbol, no thousands separator. Pieces that are genuinely
+        // "Price upon Request" carry no Offer node at all, which is valid
+        // Product markup and keeps them out of merchant listing validation.
+        const ldImages = (images.length ? images : [ogImg]).filter(
+          (src): src is string => typeof src === "string" && /^https?:\/\//.test(src),
+        );
+        const ldPriceCents = Number(publicRrpRow?.rrp_price_cents) || 0;
+        const ldOffer =
+          ldPriceCents > 0
+            ? {
+                "@type": "Offer",
+                price: (ldPriceCents / 100).toFixed(2),
+                priceCurrency: (publicRrpRow?.currency || "EUR").toUpperCase(),
+                availability: "https://schema.org/InStock",
+                itemCondition: "https://schema.org/NewCondition",
+                url: canonical,
+                seller: { "@type": "Organization", name: "Maison Affluency" },
+              }
+            : undefined;
+
         const productLd = {
           "@context": "https://schema.org",
           "@type": "Product",
-          name: pageTitle,
+          name: product.title || pageTitle,
           description: desc,
-          image: images.length ? images : [ogImg],
+          image: ldImages.length ? ldImages : undefined,
           brand: { "@type": "Brand", name: designerDisplay },
           category: product.subcategory || product.category || undefined,
           material: product.materials || product.materials_description || undefined,
@@ -2121,14 +2146,7 @@ const PublicProductPageContent: React.FC = () => {
           width: quantitativeValue(ldDims?.width, ldDims?.unit || "CMT"),
           depth: quantitativeValue(ldDims?.depth, ldDims?.unit || "CMT"),
           height: quantitativeValue(ldDims?.height, ldDims?.unit || "CMT"),
-          // Never expose pricing to unauthenticated crawlers — the Offer stays
-          // price-free and simply points at the enquiry flow.
-          offers: {
-            "@type": "Offer",
-            availability: "https://schema.org/InStock",
-            url: canonical,
-            seller: { "@type": "Organization", name: "Maison Affluency" },
-          },
+          offers: ldOffer,
         };
 
         const crumbsLd = {
