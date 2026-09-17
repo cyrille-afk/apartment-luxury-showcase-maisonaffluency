@@ -357,14 +357,7 @@ export default function BespokeConfigurationDialog({
                   <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                     Phone <span className="normal-case tracking-normal">(optional)</span>
                   </span>
-                  <input
-                    type="tel"
-                    autoComplete="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+65 9123 4567"
-                    className="mt-2 h-11 w-full border border-border/60 bg-background px-3 font-body text-sm focus:outline-none focus:ring-1 focus:ring-foreground/40"
-                  />
+                  <PhoneDialField value={phone} onChange={setPhone} />
                 </label>
               </div>
 
