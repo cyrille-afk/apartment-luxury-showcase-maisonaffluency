@@ -3437,6 +3437,18 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               });
             }
           } catch { /* non-fatal */ }
+
+          // Floor-plan upload → Felix announces the Architectural Brief Builder
+          // panel. Slide it open automatically right after the reply lands so
+          // the designer lands straight in the pre-filled fields.
+          try {
+            const announcesPanel = /opening the architectural brief builder panel/i.test(assistantSoFar);
+            if (announcesPanel && !briefBuilderOpen) {
+              const prefill = pendingBriefPrefillRef.current || undefined;
+              pendingBriefPrefillRef.current = null;
+              window.setTimeout(() => openBriefBuilder(prefill), 420);
+            }
+          } catch { /* non-fatal */ }
         },
         onError: (msg) => {
           clearStallTimer();
