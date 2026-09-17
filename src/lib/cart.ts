@@ -231,6 +231,8 @@ function commit(next: CartItem[]) {
   items = [...next];
   writeEnvelope(items, captureRegion());
   listeners.forEach((l) => l());
+  // Mirror the basket server-side for the abandoned-bag funnel (fire and forget).
+  void import("@/lib/cartTracking").then((m) => m.syncCart(items)).catch(() => {});
 }
 
 /** Deliberate mutation: mirror the exact result into the checkout basket too. */
