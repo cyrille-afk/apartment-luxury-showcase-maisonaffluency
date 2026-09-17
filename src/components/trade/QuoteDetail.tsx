@@ -1201,6 +1201,39 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     setEditingQtyError(null);
   };
 
+  // --- Manual unit price entry -------------------------------------------
+  const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
+  const [editingPriceValue, setEditingPriceValue] = useState<string>("");
+  const priceInputRef = useRef<HTMLInputElement | null>(null);
+
+  const startEditPrice = (itemId: string, currentCents: number | null) => {
+    setEditingPriceId(itemId);
+    setEditingPriceValue(currentCents != null ? String(currentCents / 100) : "");
+    setTimeout(() => priceInputRef.current?.select(), 0);
+  };
+
+  const cancelEditPrice = () => {
+    setEditingPriceId(null);
+    setEditingPriceValue("");
+  };
+
+  const commitEditPrice = async (itemId: string) => {
+    const raw = editingPriceValue.trim().replace(/[^\d.,-]/g, "").replace(/,/g, "");
+    setEditingPriceId(null);
+    const cents = raw === "" ? null : Math.round(parseFloat(raw) * 100);
+    if (raw !== "" && (cents == null || Number.isNaN(cents) || cents < 0)) {
+      toast({ title: "Invalid price", description: "Enter a number, or leave blank to clear.", variant: "destructive" });
+      return;
+    }
+    const patch = {
+      unit_price_cents: cents,
+      unit_price_currency: cents == null ? null : currency,
+    };
+    setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, ...patch } as any : i)));
+    const { error } = await supabase.from("trade_quote_items").update(patch as any).eq("id", itemId);
+    if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
+  };
+
   const startEditNotes = (itemId: string, currentNotes: string | null) => {
     setEditingNotesId(itemId);
     setEditingNotesValue(currentNotes || "");
