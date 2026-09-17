@@ -54,6 +54,7 @@ export function NewInquiriesAlert() {
     const channel = supabase
       .channel("dashboard-new-inquiries")
       .on("postgres_changes", { event: "*", schema: "public", table: "inquiries" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "trade_quotes" }, () => load())
       .subscribe();
     const poll = setInterval(load, 60000);
     return () => {
