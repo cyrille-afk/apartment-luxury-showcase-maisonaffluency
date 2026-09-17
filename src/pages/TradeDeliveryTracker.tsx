@@ -81,6 +81,7 @@ interface Line {
 export default function TradeDeliveryTracker() {
   const { user } = useAuth();
   const [selectedLine, setSelectedLine] = useState<Line | null>(null);
+  const [previewLine, setPreviewLine] = useState<Line | null>(null);
 
   const { data: lines = [], isLoading } = useQuery({
     queryKey: ["delivery-tracker", user?.id],
