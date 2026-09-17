@@ -10,6 +10,8 @@ interface NewInquiry {
   company: string | null;
   email: string | null;
   created_at: string;
+  status: string | null;
+  linked_quote_id: string | null;
 }
 
 const relative = (dateStr: string) => {
