@@ -527,6 +527,12 @@ export default function TradeDeliveryTracker() {
                       </div>
                     ))
                   )}
+                  {statusFilter === "late" && visibleTotals.avgDaysOverdue > 0 && (
+                    <div className="rounded-lg border bg-red-50/80 border-red-200 px-3 py-2 min-w-[90px] transition-colors">
+                      <p className="font-body text-[10px] uppercase tracking-wider text-red-400">Avg. Delay</p>
+                      <p className="font-display text-sm font-semibold text-red-600 mt-0.5">{visibleTotals.avgDaysOverdue} Days</p>
+                    </div>
+                  )}
                 </div>
 
                 <DropdownMenu>
