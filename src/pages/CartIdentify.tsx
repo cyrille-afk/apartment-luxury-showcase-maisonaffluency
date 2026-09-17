@@ -100,6 +100,8 @@ export default function CartIdentify() {
 
   const startCheckout = async (contactEmail?: string, fullName?: string) => {
     if (!items.length) return;
+    // Remember who this basket belongs to so it can be recovered if abandoned.
+    setCartContact(contactEmail ?? user?.email ?? null, fullName ?? null);
     // Card payments use the branded in-page checkout (/checkout) so the
     // collector never leaves Maison Affluency's design system. Bank transfer
     // still creates the order + wire instructions via the edge function.
