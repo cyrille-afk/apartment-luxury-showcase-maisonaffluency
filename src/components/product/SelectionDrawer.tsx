@@ -94,6 +94,7 @@ export default function SelectionDrawer({
   subtotalLabel = null,
   onViewCart,
   onCheckout,
+  quoteOnly = false,
   placing = false,
 }: SelectionDrawerProps) {
 
