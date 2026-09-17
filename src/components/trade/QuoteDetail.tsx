@@ -449,6 +449,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   /** Display the totals block in the quote currency or in GBP DDP landed cost. */
   const [displayCcy, setDisplayCcy] = useState<"quote" | "gbp">("quote");
   const [gstRate, setGstRate] = useState(9);
+  const [taxLabel, setTaxLabel] = useState("GST");
   const [editingGstRate, setEditingGstRate] = useState(false);
   const [payingStripe, setPayingStripe] = useState(false);
   const [manualShipReq, setManualShipReq] = useState<null | {
