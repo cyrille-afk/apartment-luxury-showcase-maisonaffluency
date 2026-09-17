@@ -6,6 +6,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { BriefBuilder, loadBriefDraftText, validateBriefDraft } from "@/components/trade/concierge/BriefBuilder";
 import { ART_DECO_DISCOVERY_REPLY, evaluateFelixOnboardingGate, isHighLevelVisionStatement, hasRealBriefValue, type FelixBriefFacts } from "@/lib/felixOnboardingGate";
 import { loadLockedFacts, mergeLockedFacts, persistLockedFacts } from "@/lib/felixLockedFacts";
+import { readPendingBespokeSync, clearBespokeSync, bespokeSyncConfirmation } from "@/lib/bespokeSync";
 import { QuoteSummaryCardContainer } from "@/components/trade/QuoteSummaryCard";
 import { BriefBubble, isBriefContent } from "@/components/trade/concierge/BriefBubble";
 import brandCategoriesRaw from "@/data/brandCategories.json";
@@ -2052,6 +2053,24 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     window.addEventListener("concierge:propose_tearsheet_proactive", handler as EventListener);
     return () => window.removeEventListener("concierge:propose_tearsheet_proactive", handler as EventListener);
   }, []);
+
+  // Bespoke specifications submitted by a verified trade member are queued in
+  // the workspace deck. The first time the canvas opens after a submission,
+  // Felix logs the synchronisation confirmation and clears the badge.
+  useEffect(() => {
+    if (!open || surface === "public") return;
+    const pending = readPendingBespokeSync();
+    if (pending.length === 0) return;
+    clearBespokeSync();
+    setTimeline((prev) => [
+      ...prev,
+      ...pending.map((entry) => ({
+        kind: "msg" as const,
+        role: "assistant" as const,
+        content: bespokeSyncConfirmation(entry),
+      })),
+    ]);
+  }, [open, surface]);
 
   // Auto-close Felix while the Quick Tour is running so its panel never
   // overlaps the page being highlighted (especially the Tools step).

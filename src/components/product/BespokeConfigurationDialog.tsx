@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import PhoneDialField from "@/components/product/PhoneDialField";
 import { buildBespokePlaceholder } from "@/lib/phonePlaceholder";
 import { detectCountryCode } from "@/hooks/useShippingCountry";
+import { pushBespokeSync } from "@/lib/bespokeSync";
+import { BESPOKE_GUEST_EVENT } from "@/components/product/BespokeSubmissionBanner";
 
 /**
  * BespokeConfigurationDialog — the wide, centred overlay opened by the
@@ -27,6 +29,8 @@ export interface BespokeConfigurationDialogProps {
   designerName?: string | null;
   finishLabel?: string | null;
   imageUrl?: string | null;
+  /** Verified trade member — routes the submission into the Felix workspace. */
+  isTradeAuthorized?: boolean;
 }
 
 function formatBytes(bytes: number): string {
@@ -45,6 +49,7 @@ export default function BespokeConfigurationDialog({
   designerName = null,
   finishLabel = null,
   imageUrl = null,
+  isTradeAuthorized = false,
 }: BespokeConfigurationDialogProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -66,6 +71,9 @@ export default function BespokeConfigurationDialog({
 
   useEffect(() => {
     if (!isOpen) return;
+    // Fresh sheet on every open — the confirmation state belongs to the
+    // banner (guests) or the Felix log (trade), not to a stale dialog.
+    setSent(false);
     lockBodyScroll();
     return () => unlockBodyScroll();
   }, [isOpen]);
@@ -181,13 +189,29 @@ export default function BespokeConfigurationDialog({
         },
       });
       if (error) throw error;
-      // Push the notes into the Felix concierge chat draft and open it.
-      try {
-        sessionStorage.setItem("concierge:draft", message);
-        sessionStorage.setItem("concierge:open", "1");
-        window.dispatchEvent(new Event("concierge:open"));
-      } catch {
-        /* private mode — the inquiry is already persisted */
+      if (isTradeAuthorized) {
+        // Path B — map the annotations, swatch reference and product id into
+        // the persistent workspace deck; Felix confirms it in the project log.
+        pushBespokeSync({
+          productId,
+          productTitle: productTitle ?? "Selected piece",
+          designerName,
+          finishLabel,
+          specs: specs.trim(),
+          attachmentName: attachment?.name ?? null,
+          attachmentPath: attachmentPath ?? null,
+          submittedAt: new Date().toISOString(),
+        });
+        onClose();
+      } else {
+        // Path A — concierge inbox only. Felix must never mount or speak
+        // for an unverified session.
+        onClose();
+        try {
+          window.dispatchEvent(new Event(BESPOKE_GUEST_EVENT));
+        } catch {
+          /* SSR */
+        }
       }
       setSent(true);
     } catch (err) {

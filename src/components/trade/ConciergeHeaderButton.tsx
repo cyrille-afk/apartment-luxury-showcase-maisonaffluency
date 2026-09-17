@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { loadName } from "@/components/trade/conciergeGreeting";
+import { BESPOKE_SYNC_EVENT, hasPendingBespokeSync } from "@/lib/bespokeSync";
 
 /**
  * Header pill that opens the AI Concierge. Rendered globally in TradeLayout so
@@ -11,6 +12,13 @@ import { loadName } from "@/components/trade/conciergeGreeting";
  */
 export function ConciergeHeaderButton() {
   const [name, setName] = useState<string>(() => loadName());
+  const [pendingSync, setPendingSync] = useState<boolean>(() => hasPendingBespokeSync());
+
+  useEffect(() => {
+    const onSync = () => setPendingSync(hasPendingBespokeSync());
+    window.addEventListener(BESPOKE_SYNC_EVENT, onSync);
+    return () => window.removeEventListener(BESPOKE_SYNC_EVENT, onSync);
+  }, []);
 
   useEffect(() => {
     const onRename = (e: Event) => {
@@ -30,11 +38,17 @@ export function ConciergeHeaderButton() {
     <button
       onClick={open}
       data-felix-target="felix-chat"
-      className="hidden sm:flex items-center gap-2 rounded-full bg-foreground text-background px-3 py-1.5 shadow-sm hover:opacity-90 transition-all"
-      aria-label={`Open ${name}`}
+      className="relative hidden sm:flex items-center gap-2 rounded-full bg-foreground text-background px-3 py-1.5 shadow-sm hover:opacity-90 transition-all"
+      aria-label={pendingSync ? `Open ${name} — new specification synced` : `Open ${name}`}
     >
       <Sparkles className="h-3.5 w-3.5" />
       <span className="font-body text-[11px] uppercase tracking-[0.15em]">{name}</span>
+      {pendingSync && (
+        <span
+          aria-hidden
+          className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[hsl(var(--gold))] ring-2 ring-background"
+        />
+      )}
     </button>
   );
 }
