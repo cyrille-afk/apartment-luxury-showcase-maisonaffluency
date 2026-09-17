@@ -368,7 +368,7 @@ export default function TradeBudgetTracker() {
                   </p>
                 </div>
                 <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Buffer today: {money((totals.collected - cashFlow.reduce((s, p) => s, 0) * 0) || 0, currency)}
+                  Lowest projected buffer: {money(cashFlow.length ? Math.min(...cashFlow.map((p) => p.buffer)) * 100 : 0, currency)}
                 </span>
               </div>
               {cashFlow.length === 0 ? (
