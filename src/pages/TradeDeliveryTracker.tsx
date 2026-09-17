@@ -385,9 +385,9 @@ export default function TradeDeliveryTracker() {
       .join("");
     const generatedOn = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
     const logoUrl = `${window.location.origin}/logo.png`;
-    const totalValueLabel = Object.keys(totals.byCurrency).length > 1 ? "Total Value" : "Total Value";
-    const summaryHtml = `<div class="summary-row"><span class="summary-label">Total Items</span><span class="summary-value">${totals.totalItems}</span></div>` +
-      Object.entries(totals.byCurrency)
+    const totalValueLabel = Object.keys(visibleTotals.byCurrency).length > 1 ? "Total Value" : "Total Value";
+    const summaryHtml = `<div class="summary-row"><span class="summary-label">Total Items</span><span class="summary-value">${visibleTotals.totalItems}</span></div>` +
+      Object.entries(visibleTotals.byCurrency)
         .map(([currency, cents]) => `<div class="summary-row"><span class="summary-label">${escHtml(totalValueLabel)}</span><span class="summary-value">${escHtml(formatMoney(cents, currency))}</span></div>`)
         .join("");
     const html = `<!doctype html><html><head><meta charset="utf-8"><title>Delivery Tracker</title>
