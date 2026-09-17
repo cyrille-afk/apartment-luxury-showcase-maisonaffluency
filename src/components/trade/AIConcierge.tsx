@@ -3537,10 +3537,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     if (!autoSendOnUploadRef.current) return;
     if (!attachments.length) return;
     if (streaming) return;
+    if (briefBuilderOpen) { autoSendOnUploadRef.current = false; return; }
     autoSendOnUploadRef.current = false;
     const t = window.setTimeout(() => { void sendRef.current(); }, 60);
     return () => window.clearTimeout(t);
-  }, [autoSendTick, attachments, streaming]);
+  }, [autoSendTick, attachments, streaming, briefBuilderOpen]);
 
   const submitBriefFromBuilder = useCallback(async (text: string) => {
     return new Promise<void>((resolve, reject) => {
@@ -5634,7 +5635,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 multiple
                 accept="image/*,application/pdf,.pdf"
                 className="hidden"
-                onChange={(e) => handleFilesPicked(e.target.files)}
+                onChange={async (e) => {
+                  const added = await handleFilesPicked(e.target.files);
+                  if (added.length) {
+                    autoSendOnUploadRef.current = true;
+                    setAutoSendTick((n) => n + 1);
+                  }
+                }}
               />
               <input
                 ref={moodInputRef}
