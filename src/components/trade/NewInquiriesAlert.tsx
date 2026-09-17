@@ -10,6 +10,8 @@ interface NewInquiry {
   company: string | null;
   email: string | null;
   created_at: string;
+  status: string | null;
+  linked_quote_id: string | null;
 }
 
 const relative = (dateStr: string) => {
@@ -26,13 +28,24 @@ export function NewInquiriesAlert() {
   const [items, setItems] = useState<NewInquiry[]>([]);
 
   const load = async () => {
-    const { data, error } = await supabase
-      .from("inquiries")
-      .select("id, product_name, company, email, created_at")
-      .eq("status", "new")
-      .order("created_at", { ascending: false })
-      .limit(5);
-    if (!error) setItems((data ?? []) as NewInquiry[]);
+    // Pending = inquiry not yet handled OR its linked quote is still a draft (not sent).
+    const [{ data: inquiries, error }, { data: draftQuotes }] = await Promise.all([
+      supabase
+        .from("inquiries")
+        .select("id, product_name, company, email, created_at, status, linked_quote_id")
+        .in("status", ["new", "quote_drafted"])
+        .order("created_at", { ascending: false })
+        .limit(20),
+      supabase.from("trade_quotes").select("id").eq("status", "draft"),
+    ]);
+    if (error) return;
+    const draftIds = new Set((draftQuotes ?? []).map((q) => q.id));
+    const pending = (inquiries ?? []).filter(
+      (i) =>
+        i.status === "new" ||
+        (i.linked_quote_id && draftIds.has(i.linked_quote_id))
+    );
+    setItems(pending.slice(0, 5) as NewInquiry[]);
   };
 
   useEffect(() => {
@@ -41,6 +54,7 @@ export function NewInquiriesAlert() {
     const channel = supabase
       .channel("dashboard-new-inquiries")
       .on("postgres_changes", { event: "*", schema: "public", table: "inquiries" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "trade_quotes" }, () => load())
       .subscribe();
     const poll = setInterval(load, 60000);
     return () => {
@@ -57,7 +71,7 @@ export function NewInquiriesAlert() {
   return (
     <Link
       to="/trade/admin/inquiries"
-      className="group mb-8 block border border-accent/60 bg-accent/10 px-5 py-4 transition-colors hover:bg-accent/20 md:px-7 md:py-5"
+      className="group mb-8 block animate-[pulse_2.5s_ease-in-out_infinite] border border-accent/60 bg-accent/10 px-5 py-4 transition-colors hover:bg-accent/20 md:px-7 md:py-5"
       aria-live="polite"
     >
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -69,8 +83,8 @@ export function NewInquiriesAlert() {
           <div className="min-w-0">
             <p className="font-body text-[11px] uppercase tracking-[0.2em] text-foreground">
               {items.length === 1
-                ? "1 new quote request awaiting reply"
-                : `${items.length}+ new quote requests awaiting reply`}
+                ? "1 quote request — quote not yet sent"
+                : `${items.length} quote requests — quotes not yet sent`}
             </p>
             <p className="mt-1 truncate font-body text-sm text-muted-foreground">
               {latest.product_name ?? "Quote request"}
