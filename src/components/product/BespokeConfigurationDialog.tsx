@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
 import { X, Loader2, Check, UploadCloud, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Turnstile from "@/components/Turnstile";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -285,22 +287,30 @@ export default function BespokeConfigurationDialog({
           </header>
 
           {sent ? (
-            <div className="px-6 py-14 text-center md:px-8">
-              <span className="mx-auto mb-5 flex h-11 w-11 items-center justify-center border border-border/60">
-                <Check className="h-5 w-5 text-foreground" strokeWidth={1.5} />
+            <div className="relative flex min-h-[32rem] animate-in flex-col items-center justify-center fade-in px-7 pb-24 pt-14 text-center duration-300 md:px-12">
+              <span className="flex h-14 w-14 items-center justify-center rounded-full border border-primary/45 text-primary">
+                <Check className="h-5 w-5" strokeWidth={1.4} />
               </span>
-              <p className="font-display text-xl">Specifications received</p>
-              <p className="mx-auto mt-3 max-w-md font-body text-sm leading-relaxed text-muted-foreground">
-                Your notes have been sent to our concierge and opened in your Felix conversation. We reply
-                within one business day with feasibility, lead time and pricing.
+              <p className="mt-7 font-body text-[11px] font-medium uppercase tracking-[0.22em] text-foreground">
+                Specifications Recorded
               </p>
-              <button
+              <p className="mx-auto mt-6 max-w-md font-body text-sm leading-7 text-muted-foreground">
+                Our Concierge desk has successfully registered your parameters and custom material swatches for the {productTitle || "selected piece"}. A formal proforma transaction estimate is being compiled by our Paris atelier and will be routed to your verified studio inbox within 48 hours.
+              </p>
+              <Button
                 type="button"
                 onClick={onClose}
-                className="mt-7 inline-flex h-11 items-center justify-center border border-border/70 px-7 font-body text-[11px] uppercase tracking-[0.18em] transition-colors hover:border-foreground"
+                className="mt-10 h-12 w-full max-w-sm rounded-none font-body text-[10px] uppercase tracking-[0.18em]"
               >
-                Close
-              </button>
+                [ Close Workspace Drawer ]
+              </Button>
+              <Link
+                to="/trade-program"
+                onClick={onClose}
+                className="absolute inset-x-6 bottom-8 font-body text-[10px] lowercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+              >
+                [ apply for the trade program to track project timelines in real-time ]
+              </Link>
             </div>
           ) : (
             <div className="px-6 py-6 md:px-8 md:py-7">

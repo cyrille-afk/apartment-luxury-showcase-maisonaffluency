@@ -293,15 +293,8 @@ export default function OrderIntakeSheet({
         projectLocation: d.city,
         submittedAt: new Date().toISOString(),
       };
-      if (isTradeAuthorized) {
-        pushBespokeSync(syncEntry);
-        onComplete(d);
-        onClose();
-        window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { stage: "Discover" } }));
-        window.dispatchEvent(new CustomEvent("concierge:open"));
-        return;
-      }
-      cachePendingBespokeUpload(syncEntry);
+      if (isTradeAuthorized) pushBespokeSync(syncEntry);
+      else cachePendingBespokeUpload(syncEntry);
       onComplete(d);
       // Keep the drawer anchored while Step 3 fades away, then reveal the
       // persistent success canvas in the same bounds.
