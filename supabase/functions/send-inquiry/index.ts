@@ -307,6 +307,23 @@ const handler = async (req: Request): Promise<Response> => {
 
     const idStem = crypto.randomUUID();
 
+    // Build a signed link for any uploaded attachment so concierge can review it.
+    let attachmentUrl: string | null = null;
+    if (attachmentPath) {
+      const { data: signedData, error: signedErr } = await supabase.storage
+        .from("bespoke-attachments")
+        .createSignedUrl(attachmentPath, 60 * 60 * 24 * 7);
+      if (signedErr) {
+        console.error("Failed to create signed URL for attachment:", signedErr);
+      } else if (signedData) {
+        attachmentUrl = signedData.signedUrl;
+      }
+    }
+
+    const resolvedMessage = attachmentUrl
+      ? `${message}\n\nAttachment (7-day link): ${attachmentUrl}`
+      : message;
+
     // Persist the inquiry so it appears in the admin side, not just email.
     const userAgent = req.headers.get("user-agent") || null;
     const resolvedSource = source || (productId || productSlug ? "public_product" : "contact_form");
@@ -317,13 +334,14 @@ const handler = async (req: Request): Promise<Response> => {
       email,
       phone: phone || null,
       subject: subject || null,
-      message,
+      message: resolvedMessage,
       source: resolvedSource,
       product_id: productId || null,
       product_slug: productSlug || null,
       product_name: productName || null,
       designer_name: designerName || null,
       selected_finish: selectedFinish || null,
+      attachment_path: attachmentPath || null,
       status: "new",
       ip_address: clientIp === "unknown" ? null : clientIp,
       user_agent: userAgent,
