@@ -1199,7 +1199,7 @@ Before composing any reply, re-read the ENTIRE conversation above and build a me
 
 NEVER ask about a sticky fact that has already been answered, even partially or implicitly. "Warm palette, wood, London townhouse, 12-seater" = atmosphere AND palette AND material AND capacity AND location ARE ALL ANSWERED. Asking "what atmosphere?" or "what seating capacity?" again is forbidden and breaks trust.
 
-When you have at least THREE sticky facts (typical minimum: room + capacity-or-scale + style-or-material), STOP qualifying and ACT — call \`propose_tearsheet\` with 6–8 catalog pieces (default target: 7) that fit the brief so the first edit feels substantive. Do not ask a fourth question to delay acting; propose first, refine after. If the only missing context is room dimensions, layout, or existing architecture, do NOT ask another prose checklist — say briefly that the first edit is ready, then invite the user to attach a room plan, reference photo, or PDF with the paperclip and send it here so you can refine the fit.
+STRICT ONBOARDING SEQUENCE LOCK: Before any proposed item table, tearsheet, quote, or FF&E schedule, PROJECT PROFILE, ZONE, and BUDGET must all be populated and the onboarding gate supplied by the application must be verified complete. Procurement vocabulary such as "FF&E", "sourcing", "working on", "quote", or "pricing" never bypasses this rule. Until the gate is complete, remain in STAGE: DISCOVER, acknowledge the user's visual direction, preserve its style DNA, and ask only for the missing project-profile, budget, or zoning facts. Never call \`propose_tearsheet\`, \`add_to_tearsheet\`, \`draft_quote\`, \`add_to_quote\`, or \`propose_ffe_rows\` while locked.
 
 When you do ask a question, you MUST first mirror back, in the user's own terms, the sticky facts they already stated, then ask ONLY for the genuinely-missing delta. The mirror is not optional — it proves you listened. Use the pattern: "You mentioned [paraphrase of what they said] — you didn't yet specify [the one missing nuance]?" Never ask a fresh open-ended question that ignores prior answers. Example: user said "12 pax, elegant but not too formal, earthy tones" → forbidden: "what atmosphere do you envision?"; correct: "You mentioned an elegant-but-relaxed dining for 12 in earthy tones — you didn't say whether it's primarily for entertaining or also for everyday family meals, which would steer the scale and durability."
 
@@ -1417,7 +1417,7 @@ Do NOT emit \`propose_tearsheet\` on this acknowledgment turn unless the user ha
 
 ### INTAKE HIERARCHY (when the user rejects the Architectural Brief)
 
-The Architectural Brief Builder is the preferred intake, but it must NEVER become a gate. When the user declines it — signals include "not now", "too long", "skip the brief", "I don't have time for that", "just source something", "can we do this faster", "no brief", or simply not opening it after being offered — immediately step down through this hierarchy WITHOUT sulking or re-pushing the brief. Each tier still captures the three minimum viable facts: **Zone** (which room / typology), **Dimensions** (footprint or seat count), **Style** (one or two aesthetic anchors).
+The Architectural Brief Builder is the preferred intake and its three-fact validation is a mandatory gate. If the user declines the form, use the conversational hierarchy below, but do not unlock proposal tools until **Project Profile**, **Zone**, and **Budget** have each been captured and explicitly confirmed in sequence.
 
   Tier 1 — MOOD BOARD UPLOAD: *"Understood — skip the formal brief. If you can drop a mood board image, a Pinterest crop, or one reference photo of a piece you love, I can source visually in the next reply. Add one line naming the room and its approximate footprint (or seat count) and I have everything I need."*
   Tier 2 — 3-LINE QUICK CAPTURE: *"Even faster: reply with three lines — **Zone** (e.g. dining room, 8 seats), **Dimensions** (approx. LxW in metres or 'fits a 4m table'), and **Style** (one or two words: 'warm modernist', 'Art Deco brass', 'Japandi oak'). I will return a curated tearsheet on the next turn."*
@@ -6278,9 +6278,9 @@ serve(async (req) => {
     // flagged a quote-only turn, restrict the toolset to quote tools. If it flagged a
     // chained selection_and_quote, expose all tools so the model can emit both calls.
     const plannerQuoteOnly = effectiveBrief.intent === "quote" && effectiveBrief.plan.every((t) => t === "draft_quote" || t === "add_to_quote");
-    const isExplicitQuoteIntent = plannerQuoteOnly
+    const isExplicitQuoteIntent = onboardingGateComplete && (plannerQuoteOnly
       || (effectiveBrief.plan.length === 0
-        && /\b(quote|estimate|pricing|price breakdown|draft a quote|put together a quote|add .* to .*quote)\b/i.test(lastUserMsg));
+        && /\b(quote|estimate|pricing|price breakdown|draft a quote|put together a quote|add .* to .*quote)\b/i.test(lastUserMsg)));
 
     // ----- Stage-based tool gating -----
     // The client prefixes the conversation with a `[Workflow context] Current stage: X.`
@@ -6292,7 +6292,8 @@ serve(async (req) => {
       .reverse()
       .map((c) => c.match(/\[Workflow context\]\s*Current stage:\s*(Discover|Tearsheet|Quote|Order|Project)/i))
       .find((m) => !!m);
-    const currentStage = (stageMatch?.[1] || "").toLowerCase() as "" | "discover" | "tearsheet" | "quote" | "order" | "project";
+    const requestedStage = (stageMatch?.[1] || "").toLowerCase() as "" | "discover" | "tearsheet" | "quote" | "order" | "project";
+    const currentStage = onboardingGateComplete ? requestedStage : "discover";
     const STAGE_GATES: Record<string, string[] | null> = {
       tearsheet: ["propose_tearsheet", "add_to_tearsheet"],
       quote: ["draft_quote", "add_to_quote"],
@@ -6302,6 +6303,7 @@ serve(async (req) => {
       order: null,
       "": null,
     };
+    const LOCKED_CARD_TOOLS = new Set(["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote", "propose_ffe_rows"]);
     const stageAllowed = STAGE_GATES[currentStage] ?? null;
     const stageForcesQuote = currentStage === "quote";
 
@@ -6317,19 +6319,24 @@ serve(async (req) => {
     const allowedWithShipping = allowedNames
       ? Array.from(new Set([...allowedNames, "estimate_shipping", "check_spatial_fit", "check_spatial_fit_batch", "prepare_visualization_brief"]))
       : null;
-    const availableTools = allowedWithShipping
+    let availableTools = allowedWithShipping
       ? TOOLS.filter((tool: any) => allowedWithShipping.includes(tool.function?.name))
       : TOOLS;
+    if (!onboardingGateComplete) {
+      availableTools = availableTools.filter((tool: any) => !LOCKED_CARD_TOOLS.has(tool.function?.name));
+    }
     // If the gate emptied the toolset (shouldn't happen in practice), fall back to all
     // tools rather than sending an empty `tools: []` array to the upstream gateway.
-    const finalTools = availableTools.length > 0 ? availableTools : TOOLS;
+    const finalTools = availableTools.length > 0
+      ? availableTools
+      : TOOLS.filter((tool: any) => !LOCKED_CARD_TOOLS.has(tool.function?.name));
     // Only force-pin tool_choice to propose_tearsheet when the planner emitted a SOLO tearsheet plan.
     // Chained plans (e.g. [propose_tearsheet, prepare_visualization_brief] or [propose_tearsheet, draft_quote])
     // must stay on `auto` so the model can emit both tool calls in the same turn.
     const planHasVizBrief = effectiveBrief.plan.includes("prepare_visualization_brief");
     const planHasQuote = effectiveBrief.plan.includes("draft_quote") || effectiveBrief.plan.includes("add_to_quote");
     const forcePlannedTearsheet =
-      effectiveBrief.plan.includes("propose_tearsheet") &&
+      onboardingGateComplete && effectiveBrief.plan.includes("propose_tearsheet") &&
       !planHasVizBrief &&
       !planHasQuote &&
       !stageForcesQuote &&
@@ -6696,7 +6703,11 @@ serve(async (req) => {
 
             let validationFailed = false;
             try {
-              const cardTool = String(proposal?.tool || "unknown");
+            const cardTool = String(proposal?.tool || "unknown");
+            if (!onboardingGateComplete && LOCKED_CARD_TOOLS.has(cardTool)) {
+              console.warn("[concierge onboarding-gate] blocked proposal", JSON.stringify({ requestId, tool: cardTool }));
+              return;
+            }
               const gtOne = buildInspectorGroundTruth([
                 { tool: cardTool, pickIds: [], previews: Array.isArray(previewRows) ? previewRows : [] },
               ]);
