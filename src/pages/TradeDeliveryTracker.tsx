@@ -174,7 +174,7 @@ export default function TradeDeliveryTracker() {
   return (
     <>
       <Helmet><title>Delivery Tracker — Trade Portal</title></Helmet>
-      <div className="min-w-0 space-y-6 xl:w-[calc(100vw-8rem)] xl:max-w-[1800px]">
+      <div className="w-full min-w-0 max-w-[1800px] space-y-6">
         <TradeBreadcrumb current="Delivery tracker" />
         <div>
           <h1 className="font-display text-2xl text-foreground">Delivery Tracker</h1>
