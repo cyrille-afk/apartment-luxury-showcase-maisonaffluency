@@ -2099,7 +2099,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       setOpen(true);
     };
     const done = () => {
-      tourActiveRef.current = false;
+      setTourActive(false);
       clearDismissed();
       setMinimized(false);
       setStageOverride("Discover");
