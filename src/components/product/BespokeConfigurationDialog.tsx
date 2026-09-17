@@ -83,9 +83,14 @@ export default function BespokeConfigurationDialog({
     // Fresh sheet on every open — the confirmation state belongs to the
     // banner (guests) or the Felix log (trade), not to a stale dialog.
     setSent(false);
+    // Contact detail already given in the 3-step intent panel is carried over —
+    // nobody types their email or phone twice in the same flow.
+    if (prefillEmail) setEmail((prev) => prev || prefillEmail);
+    if (prefillPhone) setPhone((prev) => prev || prefillPhone);
+    if (prefillNotes) setSpecs((prev) => prev || prefillNotes);
     lockBodyScroll();
     return () => unlockBodyScroll();
-  }, [isOpen]);
+  }, [isOpen, prefillEmail, prefillPhone, prefillNotes]);
 
   useEffect(() => {
     if (!isOpen) return;
