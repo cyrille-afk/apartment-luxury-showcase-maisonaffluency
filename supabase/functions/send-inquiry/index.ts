@@ -391,7 +391,7 @@ const handler = async (req: Request): Promise<Response> => {
       product_slug: productSlug || null,
       product_name: productName || null,
       designer_name: designerName || null,
-      selected_finish: selectedFinish || null,
+      selected_finish: resolvedFinish || null,
       attachment_path: attachmentPath || null,
       status: "new",
       ip_address: clientIp === "unknown" ? null : clientIp,
