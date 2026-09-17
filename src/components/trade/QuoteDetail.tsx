@@ -2856,6 +2856,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               {fxSource !== "identity" && <FxSourceBadge source={fxSource} />}
             </div>
             {fxPairs.length > 0 && <FxAppliedRates pairs={fxPairs} className="mt-1" />}
+            {fxPairs.length > 0 && !clientSafe && (
+              <button
+                onClick={refreshFxRates}
+                disabled={fxRefreshing}
+                className="mt-1 inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                title="Fetch the latest live FX rate and recalculate converted prices, shipping and totals"
+                aria-label="Refresh FX rate and recalculate totals"
+              >
+                <RefreshCw className={`h-3 w-3 ${fxRefreshing ? "animate-spin" : ""}`} />
+                {fxRefreshing ? "Refreshing FX…" : "Refresh FX rate"}
+              </button>
+            )}
 
 
 
