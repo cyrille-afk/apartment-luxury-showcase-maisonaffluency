@@ -1018,6 +1018,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [attachments, setAttachments] = useState<StagedAttachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const moodInputRef = useRef<HTMLInputElement>(null);
+  // Set the moment a document upload succeeds so the conversational pipeline
+  // fires automatically — the user never has to type or press enter.
+  const autoSendOnUploadRef = useRef(false);
+  const [autoSendTick, setAutoSendTick] = useState(0);
 
   // Mandarin director hand-off state.
   const [cnViewingOpen, setCnViewingOpen] = useState(false);
