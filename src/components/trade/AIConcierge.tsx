@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList, MessagesSquare, Plus, Trash2 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -468,7 +469,7 @@ type PendingProposalTool =
   | "propose_ffe_rows"
   | "prepare_visualization_brief";
 type TimelineItem =
-  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; entrance?: "brief-response"; sourceContent?: string; sourceActions?: ConciergeQuickAction[]; designDirectorCtas?: DesignDirectorCtaLabel[]; attachments?: TimelineAttachment[]; appliedConstraints?: AppliedConstraintsEvent; moodboardSignals?: MoodboardSignalsEvent; briefSubmit?: boolean }
+  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; entrance?: "brief-response" | "bespoke-sync"; sourceContent?: string; sourceActions?: ConciergeQuickAction[]; designDirectorCtas?: DesignDirectorCtaLabel[]; attachments?: TimelineAttachment[]; appliedConstraints?: AppliedConstraintsEvent; moodboardSignals?: MoodboardSignalsEvent; briefSubmit?: boolean }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; locked?: string[]; newPickIds?: string[]; sourceOrigin?: "source" }
   | { kind: "quote_proposal"; proposal: QuoteProposal; resolved?: "approved" | "discarded" }
   | { kind: "ffe_proposal"; proposal: FfeProposal; resolved?: "approved" | "discarded" }
@@ -746,7 +747,18 @@ const isStructuredBriefText = (value: string): boolean =>
 
 export type ConciergeSurface = "trade" | "public";
 
-export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: ConciergeSurface; initialGreeting?: string } = {}) {
+export function AIConcierge({
+  surface = "trade",
+  initialGreeting,
+  embedded = false,
+  onEmbeddedClose,
+}: {
+  surface?: ConciergeSurface;
+  initialGreeting?: string;
+  /** Render the complete Felix workspace inside an existing drawer shell. */
+  embedded?: boolean;
+  onEmbeddedClose?: () => void;
+} = {}) {
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
   const { currentStudio } = useStudio();
@@ -762,6 +774,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // survives route changes (e.g. when Felix auto-navigates to a freshly
   // created tearsheet) and any tab-internal remounts.
   const [open, setOpen] = useState(() => {
+    if (embedded) return true;
     try { return sessionStorage.getItem("concierge:open") === "1"; } catch { return false; }
   });
   const [minimized, setMinimized] = useState(() => {
@@ -1469,8 +1482,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
 
   // Persist concierge open/minimized/timeline so it survives navigation.
   useEffect(() => {
+    if (embedded) return;
     try { sessionStorage.setItem("concierge:open", open ? "1" : "0"); } catch {}
-  }, [open]);
+  }, [embedded, open]);
   useEffect(() => {
     try { sessionStorage.setItem("concierge:minimized", minimized ? "1" : "0"); } catch {}
   }, [minimized]);
@@ -2064,6 +2078,21 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     if (pending.length === 0) return;
     clearBespokeSync();
     setStageOverride("Discover");
+    if (embedded) {
+      setTimeline((prev) => [
+        ...prev,
+        ...pending.map((entry) => ({
+          kind: "msg" as const,
+          role: "user" as const,
+          content: [
+            entry.specs.trim(),
+            entry.finishLabel?.trim() ? `Selected finish: ${entry.finishLabel.trim()}` : "",
+            entry.projectLocation?.trim() ? `Project location: ${entry.projectLocation.trim()}` : "",
+            entry.attachmentName?.trim() ? `Material reference: ${entry.attachmentName.trim()}` : "",
+          ].filter(Boolean).join("\n"),
+        })),
+      ]);
+    }
     setStreaming(true);
     const timer = window.setTimeout(() => {
       setTimeline((prev) => [
@@ -2072,12 +2101,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           kind: "msg" as const,
           role: "assistant" as const,
           content: bespokeSyncConfirmation(entry),
+          entrance: "bespoke-sync" as const,
         })),
       ]);
       setStreaming(false);
-    }, 900);
+    }, embedded ? 1500 : 900);
     return () => window.clearTimeout(timer);
-  }, [open, surface]);
+  }, [embedded, open, surface]);
 
   // Strict tour gate: Felix stays closed for the whole platform tour (nothing
   // may re-open it, ambient or explicit) and only slides out once the member
@@ -3906,7 +3936,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     item.kind === "quote_card" ||
     item.kind === "quote_summary",
   );
-  const pipelineActiveStep = briefBuilderOpen && !briefBuilderClosing
+  const pipelineActiveStep = embedded
+    ? 1
+    : briefBuilderOpen && !briefBuilderClosing
     ? 2
     : hasCompiledTradeQuote
       ? 4
@@ -3926,7 +3958,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     <>
       {/* Hidden trigger — clicked by the global ConciergeHeaderButton in TradeLayout.
           Rendered on every trade page so Felix is always reachable from the header. */}
-      {!open && (
+      {!embedded && !open && (
         <button
           onClick={() => { clearDismissed(); setOpen(true); }}
           className="sr-only"
@@ -3937,7 +3969,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       {/* Chat panel */}
       {open && (
         <>
-          {modalMode && (
+          {!embedded && modalMode && (
             <div
               className={cn(
                 "fixed inset-0 z-[9998] bg-foreground/40 backdrop-blur-sm print:hidden transition-[opacity,backdrop-filter] duration-300 ease-out",
@@ -3947,7 +3979,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               onClick={closeWelcomeModal}
             />
           )}
-          {!modalMode && !minimized && (
+          {!embedded && !modalMode && !minimized && (
             <div
               className="fixed inset-0 z-[1] backdrop-blur-sm bg-foreground/10 print:hidden animate-fade-in pointer-events-none"
               aria-hidden="true"
@@ -3956,7 +3988,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         <div
           data-concierge-panel
           style={
-            tabletViewport && !minimized
+            embedded
+              ? undefined
+              : tabletViewport && !minimized
               ? { inset: 0, width: "100%", height: "100dvh", maxWidth: "none", maxHeight: "none", transform: "none" }
               : (modalMode || fullscreen)
               ? (docked
@@ -3967,27 +4001,31 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   : { width: PANEL_W }
           }
           className={cn(
-            "fixed z-[10000] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border shadow-2xl print:hidden overflow-hidden max-xl:!inset-0 max-xl:!h-[100dvh] max-xl:!max-h-[100dvh] max-xl:!w-full max-xl:!max-w-none max-xl:!translate-x-0 max-xl:!translate-y-0 max-xl:rounded-none",
+            embedded
+              ? "absolute inset-0 z-[2] flex h-full w-full flex-col overflow-hidden bg-background animate-in fade-in duration-300"
+              : "fixed z-[10000] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border shadow-2xl print:hidden overflow-hidden max-xl:!inset-0 max-xl:!h-[100dvh] max-xl:!max-h-[100dvh] max-xl:!w-full max-xl:!max-w-none max-xl:!translate-x-0 max-xl:!translate-y-0 max-xl:rounded-none",
+            !embedded && (
             modalMode
               ? cn(
                   !docked && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
                   "bg-cream border-jade/40 ring-1 ring-jade/30 shadow-[0_30px_80px_-20px_hsl(var(--foreground)/0.5)]",
                   welcomeClosing ? "animate-scale-out" : "animate-scale-in"
                 )
-              : "bg-background border-border animate-fade-in",
-            !modalMode && fullscreen && !docked && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
-            !modalMode && !fullscreen && !pos && "bottom-20 md:bottom-6 right-4",
-            minimized ? "h-auto max-xl:!inset-auto max-xl:!right-4 max-xl:!bottom-4 max-xl:!h-auto max-xl:!w-[min(560px,calc(100vw-2rem))] max-xl:!rounded-2xl" : ((fullscreen || modalMode) ? "h-[calc(100dvh-2rem)]" : (expanded ? "h-[760px] max-h-[calc(100dvh-4rem)]" : "h-[560px] max-h-[calc(100dvh-6rem)]"))
+              : "bg-background border-border animate-fade-in"),
+            !embedded && !modalMode && fullscreen && !docked && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+            !embedded && !modalMode && !fullscreen && !pos && "bottom-20 md:bottom-6 right-4",
+            !embedded && (minimized ? "h-auto max-xl:!inset-auto max-xl:!right-4 max-xl:!bottom-4 max-xl:!h-auto max-xl:!w-[min(560px,calc(100vw-2rem))] max-xl:!rounded-2xl" : ((fullscreen || modalMode) ? "h-[calc(100dvh-2rem)]" : (expanded ? "h-[760px] max-h-[calc(100dvh-4rem)]" : "h-[560px] max-h-[calc(100dvh-6rem)]")))
           )}
         >
           <div
-            onPointerDown={onDragStart}
-            onPointerMove={onDragMove}
-            onPointerUp={onDragEnd}
-            onPointerCancel={onDragEnd}
-            onDoubleClick={() => setMinimized((m) => !m)}
+            onPointerDown={embedded ? undefined : onDragStart}
+            onPointerMove={embedded ? undefined : onDragMove}
+            onPointerUp={embedded ? undefined : onDragEnd}
+            onPointerCancel={embedded ? undefined : onDragEnd}
+            onDoubleClick={embedded ? undefined : () => setMinimized((m) => !m)}
             className={cn(
-              "flex flex-col gap-1.5 px-4 py-3 border-b cursor-grab active:cursor-grabbing select-none touch-none shrink-0",
+              "flex flex-col gap-1.5 px-4 py-3 border-b select-none shrink-0",
+              !embedded && "cursor-grab active:cursor-grabbing touch-none",
               modalMode
                 ? "bg-jade text-cream border-jade [&_.text-muted-foreground]:text-cream/70 [&_.text-accent]:text-cream [&_button:hover]:bg-cream/10 [&_button:hover]:text-cream"
                 : "border-border"
@@ -3996,7 +4034,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           >
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0 flex-1">
-                <GripHorizontal className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
+                {!embedded && <GripHorizontal className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />}
                 <Sparkles className="h-4 w-4 text-accent shrink-0" />
                 <span
                   className="font-display text-sm uppercase tracking-[0.12em] whitespace-nowrap overflow-hidden text-ellipsis"
@@ -4054,7 +4092,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 })()}
               </div>
               <div className="flex items-center gap-1 shrink-0 relative">
-              {surface === "trade" && user?.id && (
+              {!embedded && surface === "trade" && user?.id && (
                 <button
                   onPointerDown={(e) => e.stopPropagation()}
                   onClick={() => setThreadsOpen(true)}
@@ -4065,7 +4103,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   <MessagesSquare className="h-3.5 w-3.5" />
                 </button>
               )}
-              <div className="relative">
+              {!embedded && <div className="relative">
                 <button
                   onPointerDown={(e) => e.stopPropagation()}
                   onClick={() => {
@@ -4144,7 +4182,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                     </div>
                   </div>
                 )}
-              </div>
+              </div>}
               <div className="relative">
                 <button
                   onPointerDown={(e) => e.stopPropagation()}
@@ -4194,7 +4232,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   </div>
                 )}
               </div>
-              <button
+              {!embedded && <button
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => {
                   const next: Lang = lang === "zh" ? "en" : "zh";
@@ -4215,8 +4253,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 title="Toggle Mandarin (QA)"
               >
                 🇨🇳 中文
-              </button>
-              {lang === "zh" ? (
+              </button>}
+              {!embedded && lang === "zh" ? (
                 <button
                   onPointerDown={(e) => e.stopPropagation()}
                   onClick={() => setCnViewingOpen(true)}
@@ -4226,7 +4264,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   预约鉴赏
                 </button>
               ) : null}
-              <div className="relative">
+              {!embedded && <div className="relative">
                 <button
                   onPointerDown={(e) => e.stopPropagation()}
                   onClick={() => setLangMenuOpen((v) => !v)}
@@ -4272,7 +4310,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                     })}
                   </div>
                 )}
-              </div>
+              </div>}
               <button
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => {
@@ -4463,6 +4501,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               <button
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => {
+                  if (embedded) {
+                    onEmbeddedClose?.();
+                    return;
+                  }
                   if (modalMode) {
                     closeWelcomeModal();
                     return;
@@ -4592,6 +4634,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                       "flex flex-col gap-2",
                       item.role === "user" ? "items-end" : "items-start",
                       item.entrance === "brief-response" && "animate-[fade-in_500ms_ease-in-out_both] motion-reduce:animate-none",
+                      item.entrance === "bespoke-sync" && "animate-[fade-in_500ms_ease-out_both] motion-reduce:animate-none",
                     )}
                   >
                     {atts && atts.length > 0 && (
@@ -5614,7 +5657,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             {showTypingDots && (
               <div className="flex justify-start">
                 <div className="bg-muted rounded-2xl rounded-bl-md px-3.5 py-2.5">
-                  <DotCircleLoader size="sm" className="text-muted-foreground" />
+                  {embedded ? (
+                    <Shimmer className="font-body text-xs">Felix is synchronizing your studio brief...</Shimmer>
+                  ) : (
+                    <DotCircleLoader size="sm" className="text-muted-foreground" />
+                  )}
                 </div>
               </div>
             )}
