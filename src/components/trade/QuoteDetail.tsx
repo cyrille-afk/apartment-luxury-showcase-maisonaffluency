@@ -636,6 +636,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   // reprices every line.
   useEffect(() => {
     const fetchRates = async () => {
+      setFxRefreshing(true);
       // The FX target follows the display toggle: when the user flips to
       // GBP DDP the badge must reflect the GBP rate source, not the quote
       // currency's source.
