@@ -78,6 +78,20 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
       queryClient.invalidateQueries({ queryKey: ["delivery-tracker"] }),
       queryClient.invalidateQueries({ queryKey: ["ffe-schedule"] }),
     ]);
+
+    // Amber (<= 14 days slack) -> Red escalation: the database trigger raises the
+    // in-app notification, this hook sends the procurement email.
+    const priorSlack = typeof item.slack === "number" ? item.slack : null;
+    if (priorSlack != null && priorSlack >= 0 && priorSlack <= 14) {
+      const priorExpected = item.expected
+        ? new Date(item.expected as string | Date).toISOString()
+        : null;
+      supabase.functions
+        .invoke("notify-delivery-escalation", {
+          body: { item_id: item.item_id, previous_slack: priorSlack, previous_expected: priorExpected },
+        })
+        .catch((err) => console.warn("delivery escalation hook failed", err));
+    }
     toast({ title: "FF&E line updated", description: `${item.quote_ref} configuration saved.` });
     onOpenChange(false);
   };
