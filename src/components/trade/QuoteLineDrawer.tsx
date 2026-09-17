@@ -57,6 +57,12 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
   const [saving, setSaving] = useState(false);
   const [generatingPo, setGeneratingPo] = useState(false);
   const [viewingPo, setViewingPo] = useState(false);
+  const [approval, setApproval] = useState<{
+    po_status: string;
+    po_approved_by_name: string | null;
+    po_approved_at: string | null;
+  }>({ po_status: "pending", po_approved_by_name: null, po_approved_at: null });
+
 
   /**
    * Generate and persist a PO reference for this line, matching the
