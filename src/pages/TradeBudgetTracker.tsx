@@ -355,7 +355,21 @@ export default function TradeBudgetTracker() {
             {/* Stat cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
               {statCards.map((c) => (
-                <div key={c.label} className="rounded-lg border border-border bg-card p-4">
+                <div
+                  key={c.label}
+                  className={cn(
+                    "relative rounded-lg border bg-card p-4 transition-colors duration-300",
+                    c.alert
+                      ? "border-destructive/50 ring-2 ring-destructive/40 animate-pulse bg-destructive/[0.04]"
+                      : "border-border"
+                  )}
+                >
+                  {c.alert && (
+                    <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 font-body text-[10px] uppercase tracking-widest text-destructive">
+                      <AlertTriangle className="h-3 w-3" />
+                      Cash Buffer Risk
+                    </span>
+                  )}
                   <div className="flex items-center gap-2 mb-2">
                     <c.icon className="h-4 w-4 text-muted-foreground" />
                     <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">{c.label}</span>
