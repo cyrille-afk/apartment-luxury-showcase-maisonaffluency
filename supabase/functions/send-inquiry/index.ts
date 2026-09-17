@@ -277,13 +277,15 @@ const handler = async (req: Request): Promise<Response> => {
     // Signed-in callers (e.g. the trade registration form, which submits right
     // after sign-up) are already authenticated, so the bot check is skipped.
     let isAuthenticated = false;
+    let authUserId: string | null = null;
     const authHeader = req.headers.get("authorization") || "";
     const bearer = authHeader.toLowerCase().startsWith("bearer ") ? authHeader.slice(7) : "";
     if (bearer && bearer !== Deno.env.get("SUPABASE_ANON_KEY")) {
       try {
         const authClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
         const { data: claimsData } = await authClient.auth.getClaims(bearer);
-        isAuthenticated = !!claimsData?.claims?.sub;
+        authUserId = (claimsData?.claims?.sub as string | undefined) ?? null;
+        isAuthenticated = !!authUserId;
       } catch (_e) {
         isAuthenticated = false;
       }
