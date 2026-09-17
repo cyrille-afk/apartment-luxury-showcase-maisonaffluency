@@ -551,7 +551,10 @@ export default function ProductCommerceCta({
           productTitle={productTitle}
           designerName={designerName}
           finishLabel={
-            orderFinishLabel || (selectedFinishes.length ? selectedFinishes.join(" / ") : null)
+            orderFinishLabel ||
+            (selectedFinishes.length ? selectedFinishes.join(" / ") : null) ||
+            (materials || "").trim() ||
+            null
           }
           imageUrl={imageUrl}
         />
