@@ -50,6 +50,47 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
   const [requiredBy, setRequiredBy] = useState("");
   const [leadWeeks, setLeadWeeks] = useState("");
   const [saving, setSaving] = useState(false);
+  const [generatingPo, setGeneratingPo] = useState(false);
+
+  /**
+   * Generate and persist a PO reference for this line, matching the
+   * `{quoteRef}-NNN` sequence used across the procurement workbook.
+   */
+  const generatePoReference = async () => {
+    if (!item) return;
+    setGeneratingPo(true);
+    const { data: siblings, error: fetchError } = await supabase
+      .from("trade_quote_items")
+      .select("id, po_number")
+      .eq("quote_id", item.quote_id)
+      .order("created_at", { ascending: true });
+    if (fetchError) {
+      setGeneratingPo(false);
+      toast({ title: "Could not generate PO", description: fetchError.message, variant: "destructive" });
+      return;
+    }
+    const rows = siblings ?? [];
+    const idx = rows.findIndex((row) => row.id === item.item_id);
+    let seq = idx >= 0 ? idx + 1 : rows.length + 1;
+    const taken = new Set(rows.map((row) => row.po_number).filter(Boolean));
+    while (taken.has(autoPoNumber(item.quote_ref, seq))) seq += 1;
+    const po = autoPoNumber(item.quote_ref, seq);
+    const { error } = await supabase
+      .from("trade_quote_items")
+      .update({ po_number: po })
+      .eq("id", item.item_id);
+    setGeneratingPo(false);
+    if (error) {
+      toast({ title: "Could not generate PO", description: error.message, variant: "destructive" });
+      return;
+    }
+    setPoNumber(po);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["delivery-tracker"] }),
+      queryClient.invalidateQueries({ queryKey: ["ffe-schedule"] }),
+    ]);
+    toast({ title: "Purchase order generated", description: `${po} is now linked to this line.` });
+  };
 
   useEffect(() => {
     setPoNumber(item?.po_number || "");
