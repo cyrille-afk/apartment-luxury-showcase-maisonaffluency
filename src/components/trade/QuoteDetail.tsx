@@ -3707,10 +3707,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               Crating &amp; packing
                             </span>
                             <span className="font-body text-[11px] text-foreground tabular-nums">
-                              {formatPriceRaw(crateCents * qty, crateCcy)}
-                              {qty > 1 && <span className="text-muted-foreground/70"> ({qty} × {formatPriceRaw(crateCents, crateCcy)})</span>}
+                              {crateCcy} {formatPriceRaw(crateCents * qty, crateCcy)}
+                              {qty > 1 && <span className="text-muted-foreground/70"> ({qty} × {crateCcy} {formatPriceRaw(crateCents, crateCcy)})</span>}
                               {totalConverted != null && crateCcy !== currency && (
-                                <span className="text-muted-foreground"> &nbsp;=&nbsp; {formatPriceRaw(totalConverted, currency)}</span>
+                                <span className="text-muted-foreground"> &nbsp;=&nbsp; {currency} {formatPriceRaw(totalConverted, currency)}</span>
                               )}
                             </span>
                           </div>
