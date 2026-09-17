@@ -134,6 +134,7 @@ export default function TradeDeliveryTracker() {
   const { user } = useAuth();
   const [selectedLine, setSelectedLine] = useState<Line | null>(null);
   const [previewLine, setPreviewLine] = useState<Line | null>(null);
+  const [statusFilter, setStatusFilter] = useState<"all" | "late" | "tight" | "ontrack">("all");
 
   const { data: lines = [], isLoading } = useQuery({
     queryKey: ["delivery-tracker", user?.id],
