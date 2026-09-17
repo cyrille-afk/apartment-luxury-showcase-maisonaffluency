@@ -38,6 +38,8 @@ export interface BespokeConfigurationDialogProps {
   prefillPhone?: string | null;
   /** Project notes already written in the 3-step intent panel. */
   prefillNotes?: string | null;
+  /** Reference material already attached in the 3-step intent panel. */
+  prefillAttachment?: File | null;
 }
 
 function formatBytes(bytes: number): string {
@@ -60,6 +62,7 @@ export default function BespokeConfigurationDialog({
   prefillEmail = null,
   prefillPhone = null,
   prefillNotes = null,
+  prefillAttachment = null,
 }: BespokeConfigurationDialogProps) {
   const { toast, dismiss } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -91,9 +94,10 @@ export default function BespokeConfigurationDialog({
     if (prefillEmail) setEmail((prev) => prev || prefillEmail);
     if (prefillPhone) setPhone((prev) => prev || prefillPhone);
     if (prefillNotes) setSpecs((prev) => prev || prefillNotes);
+    if (prefillAttachment) setAttachment((prev) => prev || prefillAttachment);
     lockBodyScroll();
     return () => unlockBodyScroll();
-  }, [isOpen, prefillEmail, prefillPhone, prefillNotes]);
+  }, [isOpen, prefillEmail, prefillPhone, prefillNotes, prefillAttachment]);
 
   useEffect(() => {
     if (!isOpen) return;

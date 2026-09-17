@@ -24,6 +24,7 @@ export interface OrderIntakeDetails {
   phone: string;
   company: string;
   buyerType?: "individual" | "business";
+  attachment?: File | null;
 }
 
 interface Props {
@@ -53,6 +54,7 @@ interface Props {
   /** Overrides the last step's action label (e.g. "Continue"). */
   finalLabel?: string;
   isTradeAuthorized?: boolean;
+  showAttachmentDropzone?: boolean;
 }
 
 const inputCls =
@@ -89,10 +91,12 @@ export default function OrderIntakeSheet({
   productId,
   finalLabel,
   isTradeAuthorized = false,
+  showAttachmentDropzone = false,
 }: Props) {
   const { toast, dismiss } = useToast();
   const checkoutForm = useCheckoutForm();
   const isQuote = mode === "quote";
+  const shouldShowAttachmentDropzone = isQuote || showAttachmentDropzone;
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [showingSuccess, setShowingSuccess] = useState(false);
@@ -205,6 +209,7 @@ export default function OrderIntakeSheet({
     phone: phone.trim(),
     company: buyerType === "business" ? company.trim() : "",
     buyerType,
+    attachment,
   });
 
   const handleFiles = (files: FileList | null) => {
@@ -349,7 +354,7 @@ export default function OrderIntakeSheet({
   };
 
   const progress = ((step + (canAdvance ? 1 : 0.35)) / STEPS.length) * 100;
-  const attachmentDropzone = isQuote ? (
+  const attachmentDropzone = shouldShowAttachmentDropzone ? (
     <div className="mt-6">
       <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
         Attach Reference Material / Fabric Swatch (Optional)
