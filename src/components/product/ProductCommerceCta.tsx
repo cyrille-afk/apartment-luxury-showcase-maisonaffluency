@@ -542,8 +542,9 @@ export default function ProductCommerceCta({
 
       {/* Bespoke configuration dialog (secondary action — any breakpoint).
           Centred overlay on the product canvas; never the account wall. */}
-      {!tradeApproved && (
+      {(
         <BespokeConfigurationDialog
+          isTradeAuthorized={!!tradeApproved}
           isOpen={bespokeOpen}
           onClose={() => setBespokeOpen(false)}
           productId={productId}

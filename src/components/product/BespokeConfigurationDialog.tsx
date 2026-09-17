@@ -186,13 +186,29 @@ export default function BespokeConfigurationDialog({
         },
       });
       if (error) throw error;
-      // Push the notes into the Felix concierge chat draft and open it.
-      try {
-        sessionStorage.setItem("concierge:draft", message);
-        sessionStorage.setItem("concierge:open", "1");
-        window.dispatchEvent(new Event("concierge:open"));
-      } catch {
-        /* private mode — the inquiry is already persisted */
+      if (isTradeAuthorized) {
+        // Path B — map the annotations, swatch reference and product id into
+        // the persistent workspace deck; Felix confirms it in the project log.
+        pushBespokeSync({
+          productId,
+          productTitle: productTitle ?? "Selected piece",
+          designerName,
+          finishLabel,
+          specs: specs.trim(),
+          attachmentName: attachment?.name ?? null,
+          attachmentPath: attachmentPath ?? null,
+          submittedAt: new Date().toISOString(),
+        });
+        onClose();
+      } else {
+        // Path A — concierge inbox only. Felix must never mount or speak
+        // for an unverified session.
+        onClose();
+        try {
+          window.dispatchEvent(new Event(BESPOKE_GUEST_EVENT));
+        } catch {
+          /* SSR */
+        }
       }
       setSent(true);
     } catch (err) {
