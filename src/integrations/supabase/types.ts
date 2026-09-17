@@ -5265,6 +5265,65 @@ export type Database = {
           },
         ]
       }
+      quote_payment_links: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          expires_at: string | null
+          id: string
+          label: string
+          paid_at: string | null
+          payer_email: string | null
+          payer_name: string | null
+          quote_id: string
+          status: string
+          stripe_session_id: string | null
+          token: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          expires_at?: string | null
+          id?: string
+          label?: string
+          paid_at?: string | null
+          payer_email?: string | null
+          payer_name?: string | null
+          quote_id: string
+          status?: string
+          stripe_session_id?: string | null
+          token?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          expires_at?: string | null
+          id?: string
+          label?: string
+          paid_at?: string | null
+          payer_email?: string | null
+          payer_name?: string | null
+          quote_id?: string
+          status?: string
+          stripe_session_id?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_payment_links_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "trade_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quotes: {
         Row: {
           created_at: string
