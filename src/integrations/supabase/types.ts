@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      abandoned_carts: {
+        Row: {
+          created_at: string
+          currency: string | null
+          email: string | null
+          id: string
+          item_count: number
+          items: Json
+          last_activity_at: string
+          last_reminder_at: string | null
+          name: string | null
+          recovered_at: string | null
+          reminder_count: number
+          session_id: string
+          status: string
+          subtotal_cents: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string | null
+          email?: string | null
+          id?: string
+          item_count?: number
+          items?: Json
+          last_activity_at?: string
+          last_reminder_at?: string | null
+          name?: string | null
+          recovered_at?: string | null
+          reminder_count?: number
+          session_id: string
+          status?: string
+          subtotal_cents?: number
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string | null
+          email?: string | null
+          id?: string
+          item_count?: number
+          items?: Json
+          last_activity_at?: string
+          last_reminder_at?: string | null
+          name?: string | null
+          recovered_at?: string | null
+          reminder_count?: number
+          session_id?: string
+          status?: string
+          subtotal_cents?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       admin_alert_log: {
         Row: {
           application_id: string | null
@@ -3080,6 +3134,42 @@ export type Database = {
           status?: string
           stripe_session_id?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      funnel_reminder_log: {
+        Row: {
+          audience: string
+          entity_id: string
+          entity_type: string
+          id: string
+          recipient_email: string | null
+          reminder_number: number
+          sent_at: string
+          stage: string
+          template_name: string | null
+        }
+        Insert: {
+          audience?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          recipient_email?: string | null
+          reminder_number?: number
+          sent_at?: string
+          stage: string
+          template_name?: string | null
+        }
+        Update: {
+          audience?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          recipient_email?: string | null
+          reminder_number?: number
+          sent_at?: string
+          stage?: string
+          template_name?: string | null
         }
         Relationships: []
       }

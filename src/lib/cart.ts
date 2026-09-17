@@ -231,6 +231,8 @@ function commit(next: CartItem[]) {
   items = [...next];
   writeEnvelope(items, captureRegion());
   listeners.forEach((l) => l());
+  // Mirror the basket server-side for the abandoned-bag funnel (fire and forget).
+  void import("@/lib/cartTracking").then((m) => m.syncCart(items)).catch(() => {});
 }
 
 /** Deliberate mutation: mirror the exact result into the checkout basket too. */
@@ -448,6 +450,7 @@ export function mergeGuestCartIntoSession(): CartItem[] {
  * be recovered on rehydrate.
  */
 export function clearCart(reason: "order" | "manual" = "order") {
+  const converted = [...items];
   try {
     if (reason === "order") {
       window.localStorage.setItem(ORDER_PLACED_KEY, "1");
@@ -457,6 +460,11 @@ export function clearCart(reason: "order" | "manual" = "order") {
     /* ignore */
   }
   commit([]);
+  if (reason === "order" && converted.length) {
+    void import("@/lib/cartTracking")
+      .then((m) => m.markCartOrdered(converted))
+      .catch(() => {});
+  }
 }
 
 /**
