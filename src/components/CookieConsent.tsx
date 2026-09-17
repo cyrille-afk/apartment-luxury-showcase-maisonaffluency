@@ -57,6 +57,8 @@ const shouldDeferOnDesignersMobileHero = (): boolean => {
 
 const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
+  const [fading, setFading] = useState(false);
+  const [consented, setConsented] = useState(false);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("mobile_preview") === "1") return;
