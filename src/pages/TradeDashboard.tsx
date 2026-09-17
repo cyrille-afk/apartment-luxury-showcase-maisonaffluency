@@ -10,6 +10,7 @@ import {
 import { startFelixTour } from "@/components/trade/FelixTour";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
+import { NewInquiriesAlert } from "@/components/trade/NewInquiriesAlert";
 import { BoardRecommendations } from "@/components/trade/BoardRecommendations";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -225,6 +226,7 @@ const TradeDashboard = () => {
     <>
       <Helmet><title>Dashboard — Trade Portal — Maison Affluency</title></Helmet>
     <div className="trade-dashboard w-full max-w-[1500px] mx-auto">
+      <NewInquiriesAlert />
       <div className="mb-10 md:mb-14 lg:mb-16 border-b border-border pb-7 md:pb-9">
         <div className="flex items-start justify-between gap-4">
           <div data-felix-target="greeting">
