@@ -92,6 +92,13 @@
       "when": 1789632652211,
       "tag": "0012_add_quote_item_schedule_dates",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1789633900641,
+      "tag": "0013_bespoke_attachment_uploads",
+      "breakpoints": true
     }
   ]
 }

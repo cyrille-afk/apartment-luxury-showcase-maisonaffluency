@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Loader2, Check } from "lucide-react";
+import { X, Loader2, Check, UploadCloud, FileText } from "lucide-react";
 import Turnstile from "@/components/Turnstile";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +26,14 @@ export interface BespokeConfigurationDialogProps {
   imageUrl?: string | null;
 }
 
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+}
+
 export default function BespokeConfigurationDialog({
   isOpen,
   onClose,
@@ -36,12 +44,15 @@ export default function BespokeConfigurationDialog({
   imageUrl = null,
 }: BespokeConfigurationDialogProps) {
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [specs, setSpecs] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [token, setToken] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -60,6 +71,39 @@ export default function BespokeConfigurationDialog({
     .filter(Boolean)
     .join(" ");
 
+  const handleFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Attachments must be 10 MB or smaller.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setAttachment(file);
+  };
+
+  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    handleFiles(e.dataTransfer.files);
+  };
+
+  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const onDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
   const submit = async () => {
     if (sending) return;
     if (specs.trim().length < 10) {
@@ -75,6 +119,30 @@ export default function BespokeConfigurationDialog({
       return;
     }
     setSending(true);
+
+    let attachmentPath: string | undefined;
+    if (attachment) {
+      try {
+        const ext = attachment.name.split(".").pop() || "bin";
+        const safeName = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
+        const path = `${productId ?? "general"}/${safeName}.${ext}`;
+        const { error: uploadErr } = await supabase.storage
+          .from("bespoke-attachments")
+          .upload(path, attachment, { cacheControl: "3600", upsert: false });
+        if (uploadErr) throw uploadErr;
+        attachmentPath = path;
+      } catch (err) {
+        console.error("Attachment upload failed:", err);
+        toast({
+          title: "Attachment upload failed",
+          description: "Please retry or submit without the file.",
+          variant: "destructive",
+        });
+        setSending(false);
+        return;
+      }
+    }
+
     const message = [
       `Target piece: ${targetPiece}`,
       finishLabel ? `Current configuration: ${finishLabel}` : "",
@@ -98,6 +166,7 @@ export default function BespokeConfigurationDialog({
           selectedFinish: finishLabel ?? undefined,
           productId: productId ?? undefined,
           source: "bespoke_configuration",
+          attachmentPath,
           turnstileToken: token || undefined,
         },
       });
@@ -213,6 +282,62 @@ export default function BespokeConfigurationDialog({
                   className="mt-2 w-full resize-none border border-border/60 bg-background px-4 py-3 font-body text-sm leading-relaxed text-foreground placeholder:font-body placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-foreground/40"
                 />
               </label>
+
+              {/* Reference material / fabric swatch upload */}
+              <div className="mt-5">
+                <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  Attach Reference Material / Fabric Swatch (Optional)
+                </span>
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  onDrop={onDrop}
+                  onDragOver={onDragOver}
+                  onDragLeave={onDragLeave}
+                  className={cn(
+                    "mt-2 flex cursor-pointer flex-col items-center justify-center border border-dashed px-6 py-5 transition-colors",
+                    "border-border/60 bg-muted/30 hover:bg-muted/50",
+                    isDragging && "border-foreground/40 bg-muted/50"
+                  )}
+                >
+                  <UploadCloud className="h-4 w-4 text-muted-foreground" strokeWidth={1.25} />
+                  <p className="mt-2 max-w-md text-center font-body text-xs leading-relaxed text-muted-foreground">
+                    drag and drop fabric swatches, grain reference photos, or COM datasheets here, or browse local
+                    files (max 10MB)
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,.pdf,.doc,.docx"
+                    className="sr-only"
+                    onChange={(e) => handleFiles(e.target.files)}
+                  />
+                </div>
+
+                {attachment && (
+                  <div className="mt-3 inline-flex w-full items-center gap-3 border border-border/60 bg-muted/20 px-3 py-2 md:w-auto">
+                    <span className="flex h-8 w-8 flex-none items-center justify-center border border-border/50 bg-background">
+                      <FileText className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.5} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-body text-xs text-foreground" title={attachment.name}>
+                        {attachment.name}
+                      </p>
+                      <p className="font-body text-[10px] text-muted-foreground">{formatBytes(attachment.size)}</p>
+                    </div>
+                    <button
+                      type="button"
+                      aria-label="Remove attachment"
+                      onClick={() => {
+                        setAttachment(null);
+                        if (fileInputRef.current) fileInputRef.current.value = "";
+                      }}
+                      className="flex h-7 w-7 flex-none items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      <X className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    </button>
+                  </div>
+                )}
+              </div>
 
               <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                 <label className="block">

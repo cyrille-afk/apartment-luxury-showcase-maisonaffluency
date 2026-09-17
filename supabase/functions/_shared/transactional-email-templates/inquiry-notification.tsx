@@ -16,6 +16,7 @@ interface Props {
   productName?: string
   designerName?: string
   selectedFinish?: string
+  attachmentUrl?: string
 }
 
 const Row = ({ label, value }: { label: string; value?: string }) => (
@@ -25,7 +26,7 @@ const Row = ({ label, value }: { label: string; value?: string }) => (
   </tr>
 )
 
-const InquiryNotificationEmail = ({ name, company, email, phone, message, productName, designerName, selectedFinish }: Props) => (
+const InquiryNotificationEmail = ({ name, company, email, phone, message, productName, designerName, selectedFinish, attachmentUrl }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>New inquiry from {name || 'a visitor'}</Preview>
@@ -42,6 +43,7 @@ const InquiryNotificationEmail = ({ name, company, email, phone, message, produc
             {productName ? <Row label="Product" value={productName} /> : null}
             {designerName ? <Row label="Designer" value={designerName} /> : null}
             {selectedFinish ? <Row label="Selected finish" value={selectedFinish} /> : null}
+            {attachmentUrl ? <Row label="Attachment" value={attachmentUrl} /> : null}
           </tbody>
         </table>
 

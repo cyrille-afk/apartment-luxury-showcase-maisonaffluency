@@ -3291,6 +3291,7 @@ export type Database = {
         Row: {
           admin_notes: string | null
           assigned_admin_id: string | null
+          attachment_path: string | null
           company: string | null
           concierge_lead_id: string | null
           created_at: string
@@ -3315,6 +3316,7 @@ export type Database = {
         Insert: {
           admin_notes?: string | null
           assigned_admin_id?: string | null
+          attachment_path?: string | null
           company?: string | null
           concierge_lead_id?: string | null
           created_at?: string
@@ -3339,6 +3341,7 @@ export type Database = {
         Update: {
           admin_notes?: string | null
           assigned_admin_id?: string | null
+          attachment_path?: string | null
           company?: string | null
           concierge_lead_id?: string | null
           created_at?: string
