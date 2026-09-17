@@ -494,6 +494,20 @@ export default function TradeBudgetTracker() {
                   </button>
                 )}
               </div>
+              <div className="flex items-center gap-2">
+                <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">Global markup</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={50}
+                  value={globalMarkupPct}
+                  onChange={(e) => setGlobalMarkupPct(Number(e.target.value))}
+                  className="w-28 cursor-pointer"
+                  style={{ accentColor: "hsl(var(--primary))" }}
+                  aria-label="Global markup percentage"
+                />
+                <span className="font-body text-xs tabular-nums text-foreground min-w-[2.5rem]">+{globalMarkupPct}%</span>
+              </div>
               <div className="ml-auto flex items-center gap-2">
                 <Switch id="budget-compact" checked={isCompact} onCheckedChange={setIsCompact} />
                 <Label htmlFor="budget-compact" className="font-body text-xs text-muted-foreground cursor-pointer">
