@@ -3510,17 +3510,30 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             }
           } catch { /* non-fatal */ }
 
-          // Floor-plan upload → Felix announces the Architectural Brief Builder
-          // panel. Slide it open automatically right after the reply lands so
-          // the designer lands straight in the pre-filled fields.
+          // Floor-plan upload → Felix announces the Architectural Brief Builder.
+          // The workspace must stay stationary in the chat timeline: never
+          // auto-mount the panel. Instead append the explicit CTA to Felix's
+          // message and idle until the member clicks it.
           try {
             const announcesPanel = /opening the architectural brief builder panel/i.test(assistantSoFar);
             if (announcesPanel && !briefBuilderOpen) {
-              const prefill = pendingBriefPrefillRef.current || undefined;
-              pendingBriefPrefillRef.current = null;
-              window.setTimeout(() => openBriefBuilder(prefill), 420);
+              setTimeline((prev) => {
+                const last = prev[prev.length - 1];
+                if (!last || last.kind !== "msg" || last.role !== "assistant") return prev;
+                if (last.actions?.some((a) => a.prompt === "__OPEN_BRIEF_BUILDER__")) return prev;
+                const copy = prev.slice();
+                copy[prev.length - 1] = {
+                  ...last,
+                  actions: [
+                    ...(last.actions || []),
+                    { label: "Open Architectural Brief Builder", prompt: "__OPEN_BRIEF_BUILDER__", primary: true },
+                  ],
+                };
+                return copy;
+              });
             }
           } catch { /* non-fatal */ }
+
         },
         onError: (msg) => {
           clearStallTimer();
