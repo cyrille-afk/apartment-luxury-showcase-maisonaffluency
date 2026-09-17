@@ -365,6 +365,12 @@ export default function TradeDeliveryTracker() {
           <DialogHeader className="p-5 text-left">
             <DialogTitle className="font-display text-base">{previewLine?.product_name}</DialogTitle>
             <DialogDescription className="font-body text-xs uppercase tracking-wider">{previewLine?.brand_name}</DialogDescription>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <span className="font-body text-sm font-medium text-foreground">
+                {formatMoney(previewLine?.price_cents ?? null, previewLine?.currency || "EUR")}
+              </span>
+              {statusLabelBadge(previewLine?.slack ?? null)}
+            </div>
           </DialogHeader>
         </DialogContent>
       </Dialog>
