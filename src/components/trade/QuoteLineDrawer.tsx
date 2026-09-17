@@ -177,14 +177,14 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
                 <h3 className="font-body text-[11px] uppercase tracking-[0.18em] text-foreground">Associated purchase order</h3>
               </div>
               <div className="p-4">
-                {item.po_number ? (
+                {(item.po_number || poNumber.trim()) ? (
                   <Link
                     to={`/trade/quotes?id=${item.quote_id}`}
                     className="group inline-flex items-center gap-2.5 rounded-sm border border-border bg-background px-3.5 py-2.5 transition-colors hover:border-foreground/40 hover:bg-muted/50"
                   >
                     <Paperclip className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-foreground" />
                     <span className="font-body text-sm font-medium tracking-wide text-foreground underline-offset-4 group-hover:underline">
-                      {item.po_number}
+                      {item.po_number || poNumber.trim()}
                     </span>
                     <span className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                       View PO file
