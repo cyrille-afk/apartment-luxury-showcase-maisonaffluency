@@ -302,10 +302,59 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
 
-    const companyName = firm || company || "";
     console.log("Received inquiry from:", name, email);
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Verified trade members: resolve the registered business entity title from
+    // their profile (falling back to the approved trade application) so the
+    // concierge alert never reads "Not provided" for a known studio.
+    let companyName = (firm || company || "").trim();
+    if (!companyName && authUserId) {
+      try {
+        const { data: profileRow } = await supabase
+          .from("profiles")
+          .select("company, trade_status")
+          .eq("id", authUserId)
+          .maybeSingle();
+        companyName = (profileRow?.company || "").trim();
+        if (!companyName) {
+          const { data: appRow } = await supabase
+            .from("trade_applications")
+            .select("company_name")
+            .eq("user_id", authUserId)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          companyName = (appRow?.company_name || "").trim();
+        }
+      } catch (e) {
+        console.error("Trade profile company lookup failed:", e);
+      }
+    }
+
+    // Active finish: the client sends the highlighted canvas selection. If it
+    // is still missing (legacy callers), read the piece's own default finish
+    // so the alert carries a real configuration string.
+    let resolvedFinish = (selectedFinish || "").trim();
+    if (!resolvedFinish && (productId || productSlug)) {
+      try {
+        const q = supabase
+          .from("designer_curator_picks")
+          .select("size_variants, materials")
+          .limit(1);
+        const { data: pickRow } = productId
+          ? await q.eq("id", productId).maybeSingle()
+          : await q.eq("slug", productSlug!).maybeSingle();
+        const variants = (pickRow?.size_variants || []) as Array<{ label?: string; base?: string; top?: string }>;
+        const first = variants[0];
+        resolvedFinish =
+          [first?.base, first?.top, first?.label].filter(Boolean).join(" / ").trim() ||
+          (pickRow?.materials || "").trim();
+      } catch (e) {
+        console.error("Default finish lookup failed:", e);
+      }
+    }
 
     const idStem = crypto.randomUUID();
 
