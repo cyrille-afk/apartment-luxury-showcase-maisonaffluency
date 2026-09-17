@@ -1862,10 +1862,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           .eq("quote_id", quoteId)
           .order("sort_order", { ascending: true })
           .order("created_at", { ascending: true });
-        return ((data as any[]) || []).map((e) => ({
+        const rows = ((data as any[]) || []).map((e) => ({
           label: e.label as string,
           amountCents: Number(e.amount_cents) || 0,
         }));
+        // Crating charges live on the lines, but read as one charge on the PDF.
+        if (cratingTotalCents > 0) {
+          rows.unshift({ label: "Crating & packing", amountCents: cratingTotalCents });
+        }
+        return rows;
       })(),
       notes: notes || null,
       // Compliance snapshot: FX pairs actually applied to convert source-currency
