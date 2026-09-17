@@ -1150,11 +1150,21 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         toast.error(`Couldn't read ${f.name}.`);
       }
     }
-    if (accepted.length) setAttachments((prev) => [...prev, ...accepted]);
+    if (accepted.length) {
+      setAttachments((prev) => [...prev, ...accepted]);
+      // Documents are committed to the timeline immediately — the composer is
+      // never a staging area. Mood board images are the single exception:
+      // they belong to Block 3 of the brief, not to a chat turn.
+      if (opts?.role !== "moodboard") {
+        autoSendOnUploadRef.current = true;
+        setAutoSendTick((n) => n + 1);
+      }
+    }
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (moodInputRef.current) moodInputRef.current.value = "";
     return accepted;
   }, [attachments.length]);
+
 
   /**
    * Insert or update a "MOOD BOARD REFERENCE:" line inside Block 3 of the
