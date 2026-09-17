@@ -71,7 +71,7 @@ serve(async (req) => {
 
     const { data: items } = await admin
       .from("trade_quote_items")
-      .select("product_name, finish, quantity")
+      .select("quantity, variant_label, product:trade_products(name)")
       .eq("quote_id", quoteId);
 
     const { data: link, error: linkErr } = await admin
@@ -108,8 +108,8 @@ serve(async (req) => {
           payUrl,
           note,
           lines: (items ?? []).map((i: any) => ({
-            name: i.product_name,
-            finish: i.finish ?? null,
+            name: i.product?.name ?? "Bespoke item",
+            finish: i.variant_label ?? null,
             quantity: i.quantity ?? 1,
           })),
         },
@@ -123,7 +123,13 @@ serve(async (req) => {
 
     await admin
       .from("quote_email_log")
-      .insert({ quote_id: quoteId, recipient_email: recipientEmail, email_type: "client_payment_link" })
+      .insert({
+        quote_id: quoteId,
+        recipient_email: recipientEmail,
+        sent_by: userId,
+        sent_by_email: (claims as any)?.claims?.email ?? (claims as any)?.email ?? "",
+        note: `Payment link sent — ${label}`,
+      })
       .then(() => undefined, () => undefined);
 
     return json({ payUrl, token: link.token });
