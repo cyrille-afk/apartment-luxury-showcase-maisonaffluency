@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X, Filter, Columns3, RotateCcw } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X, Filter, Columns3, RotateCcw, Eye, Trash2, Plus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -91,6 +91,48 @@ const FFE_COLUMNS: { key: FFEColumnKey; label: string; locked?: boolean; width: 
 ];
 
 const FFE_COLS_STORAGE_KEY = "ffe-schedule-hidden-columns-v1";
+const FFE_PRESETS_STORAGE_KEY = "ffe-schedule-view-presets-v1";
+
+const OPTIONAL_KEYS = FFE_COLUMNS.filter((c) => !c.locked).map((c) => c.key);
+
+interface ViewPreset {
+  name: string;
+  hidden: FFEColumnKey[];
+}
+
+const DEFAULT_VIEW_PRESETS: ViewPreset[] = [
+  { name: "Standard View", hidden: [] },
+  {
+    name: "Financial View",
+    // Hide logistics detail; keep price, cost code, totals, and stage/status.
+    hidden: ["po", "lead", "expected", "required", "slack"],
+  },
+  {
+    name: "Logistics View",
+    // Hide price/cost data; keep quantities, dates, tracking refs, and status.
+    hidden: ["cost_code", "unit_trade", "total"],
+  },
+];
+
+function sanitizeHidden(hidden: unknown): FFEColumnKey[] {
+  if (!Array.isArray(hidden)) return [];
+  const valid = new Set(OPTIONAL_KEYS);
+  return hidden.filter((k): k is FFEColumnKey => typeof k === "string" && valid.has(k as FFEColumnKey));
+}
+
+function loadViewPresets(): ViewPreset[] {
+  try {
+    const raw = localStorage.getItem(FFE_PRESETS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((p): p is ViewPreset => !!p && typeof p.name === "string" && p.name.trim().length > 0)
+      .map((p) => ({ name: p.name.trim().slice(0, 60), hidden: sanitizeHidden(p.hidden) }));
+  } catch {
+    return [];
+  }
+}
 
 function loadHiddenColumns(): FFEColumnKey[] {
   try {
@@ -177,6 +219,17 @@ export default function TradeFFESchedule() {
   const [selectedItem, setSelectedItem] = useState<FFEItem | null>(null);
   const [hiddenColumns, setHiddenColumns] = useState<FFEColumnKey[]>(() => loadHiddenColumns());
 
+  const [customPresets, setCustomPresets] = useState<ViewPreset[]>(() => loadViewPresets());
+  const [presetName, setPresetName] = useState("");
+
+  const applyColumns = (next: FFEColumnKey[]) => {
+    setHiddenColumns(next);
+    try {
+      if (next.length) localStorage.setItem(FFE_COLS_STORAGE_KEY, JSON.stringify(next));
+      else localStorage.removeItem(FFE_COLS_STORAGE_KEY);
+    } catch { /* ignore */ }
+  };
+
   const toggleColumn = (key: FFEColumnKey, visible: boolean) => {
     setHiddenColumns((prev) => {
       const next = visible ? prev.filter((k) => k !== key) : [...prev, key];
@@ -189,6 +242,32 @@ export default function TradeFFESchedule() {
     setHiddenColumns([]);
     try { localStorage.removeItem(FFE_COLS_STORAGE_KEY); } catch { /* ignore */ }
   };
+
+  const applyPreset = (preset: ViewPreset) => {
+    applyColumns(sanitizeHidden(preset.hidden));
+    toast({ title: `View applied: ${preset.name}` });
+  };
+
+  const saveCurrentAsPreset = () => {
+    const name = presetName.trim().slice(0, 60);
+    if (!name) return;
+    setCustomPresets((prev) => {
+      const next = [...prev.filter((p) => p.name !== name), { name, hidden: hiddenColumns }];
+      try { localStorage.setItem(FFE_PRESETS_STORAGE_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+      return next;
+    });
+    setPresetName("");
+    toast({ title: `Preset saved: ${name}` });
+  };
+
+  const deletePreset = (name: string) => {
+    setCustomPresets((prev) => {
+      const next = prev.filter((p) => p.name !== name);
+      try { localStorage.setItem(FFE_PRESETS_STORAGE_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+      return next;
+    });
+  };
+
 
   const visibleColumns = useMemo(
     () => FFE_COLUMNS.filter((c) => c.locked || !hiddenColumns.includes(c.key)),
@@ -560,6 +639,80 @@ export default function TradeFFESchedule() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="ml-auto h-8 gap-1.5 font-body text-[11px]">
+                    <Eye className="h-3.5 w-3.5" />
+                    View Presets
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64">
+                  <DropdownMenuLabel className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Preset layouts
+                  </DropdownMenuLabel>
+                  {DEFAULT_VIEW_PRESETS.map((preset) => (
+                    <DropdownMenuItem
+                      key={preset.name}
+                      onClick={() => applyPreset(preset)}
+                      className="font-body text-xs"
+                    >
+                      {preset.name}
+                    </DropdownMenuItem>
+                  ))}
+                  {customPresets.length > 0 && <DropdownMenuSeparator />}
+                  {customPresets.map((preset) => (
+                    <DropdownMenuItem
+                      key={preset.name}
+                      onClick={() => applyPreset(preset)}
+                      className="group font-body text-xs"
+                    >
+                      <span className="min-w-0 flex-1 truncate">{preset.name}</span>
+                      <button
+                        type="button"
+                        aria-label={`Delete preset ${preset.name}`}
+                        className="ml-2 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deletePreset(preset.name);
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <div className="p-1.5" onKeyDown={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        value={presetName}
+                        onChange={(e) => setPresetName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            saveCurrentAsPreset();
+                          }
+                        }}
+                        placeholder="Preset name…"
+                        maxLength={60}
+                        className="h-7 min-w-0 flex-1 rounded border border-border bg-background px-2 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                      />
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        disabled={!presetName.trim()}
+                        onClick={saveCurrentAsPreset}
+                        className="h-7 gap-1 px-2 font-body text-[11px]"
+                      >
+                        <Plus className="h-3 w-3" />
+                        Save
+                      </Button>
+                    </div>
+                    <p className="mt-1 px-0.5 font-body text-[9px] uppercase tracking-wider text-muted-foreground/70">
+                      + Save current layout as preset
+                    </p>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8 gap-1.5 font-body text-[11px]">
                     <Columns3 className="h-3.5 w-3.5" />
                     Columns
                   </Button>
