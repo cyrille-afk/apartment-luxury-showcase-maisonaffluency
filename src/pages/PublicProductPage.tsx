@@ -3,7 +3,7 @@ import { CldPicture } from "@/components/ui/CldPicture";
 import { useParams, useNavigate, Link, useLocation, Navigate } from "react-router-dom";
 import { absoluteUrl } from "@/config/site";
 import { Helmet } from "react-helmet-async";
-import { Heart, Pin, FileText, Layers, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2, Award, Compass } from "lucide-react";
+import { Heart, Pin, FileText, Layers, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2, Award, Compass, History, Scroll } from "lucide-react";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
