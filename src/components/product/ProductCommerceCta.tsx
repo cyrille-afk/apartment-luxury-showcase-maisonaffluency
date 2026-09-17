@@ -314,7 +314,9 @@ export default function ProductCommerceCta({
       projectCity: details.city,
       buyerProfile: details.profile,
     });
-    runIntent(target);
+    // One continuous motion: the sheet finishes closing before the selection
+    // drawer / bespoke dialog takes the canvas — never both on screen at once.
+    window.setTimeout(() => runIntent(target), 260);
   };
 
   const primaryAction = tradeApproved ? undefined : () => startIntent("order");
@@ -626,7 +628,11 @@ export default function ProductCommerceCta({
           onClose={() => setIntakeFor(null)}
           onComplete={completeIntake}
           mode="order"
-          finalLabel={intakeFor === "bespoke" ? "Continue" : undefined}
+          finalLabel={
+            intakeFor === "bespoke"
+              ? "Continue to Bespoke Details"
+              : "Continue to Your Selection"
+          }
           productId={productId}
           productTitle={productTitle}
           designerName={designerName}
