@@ -99,6 +99,13 @@
       "when": 1789633900641,
       "tag": "0013_bespoke_attachment_uploads",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1789634280259,
+      "tag": "0014_fix_bespoke_attachment_rls",
+      "breakpoints": true
     }
   ]
 }
