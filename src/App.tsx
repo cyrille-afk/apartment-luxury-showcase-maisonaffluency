@@ -42,6 +42,7 @@ function ShowroomLegacyRedirect() {
 
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
+const GuestPayPage = lazy(() => import("./pages/GuestPayPage"));
 const TradeLanding = lazy(() => import("./pages/TradeLanding"));
 const TradeApply = lazy(() => import("./pages/TradeApply"));
 const TradeProcessing = lazy(() => import("./pages/TradeProcessing"));
@@ -716,6 +717,7 @@ const App = () => {
                   <Route path="/studios/:slug/insights" element={<Suspense fallback={<PageLoadingSkeleton />}><StudioInsights /></Suspense>} />
                   
                   
+                  <Route path="/pay/:token" element={<Suspense fallback={<PageLoadingSkeleton />}><GuestPayPage /></Suspense>} />
                   <Route path="/board/:token" element={<Suspense fallback={<PageLoadingSkeleton />}><ClientBoardViewer /></Suspense>} />
                   <Route path="/new-in" element={<Suspense fallback={<PageLoadingSkeleton />}><NewIn /></Suspense>} />
                   <Route path="/designer-upload/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><DesignerUpload /></Suspense>} />

@@ -8,6 +8,7 @@ import { formatFxSnapshotLine } from "@/lib/fxSnapshot";
 import { FxSourceBadge } from "@/components/trade/FxSourceBadge";
 import { FxAppliedRates } from "@/components/trade/FxAppliedRates";
 
+import GuestPayLinkCard from "@/components/trade/GuestPayLinkCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useBrandDiscountCaps, effectiveDiscountForBrand, MARGIN_CAP_TOOLTIP } from "@/lib/brandDiscountCap";
@@ -4241,6 +4242,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               </button>
             </div>
           </div>
+        )}
+
+        {isSuperAdmin && (
+          <GuestPayLinkCard
+            quoteId={quoteId}
+            currency={currency}
+            defaultAmountCents={subtotalCents}
+            defaultEmail={shipTo.email}
+          />
         )}
 
         {/* Billing mode selector — show whenever the quote is editable or being paid */}

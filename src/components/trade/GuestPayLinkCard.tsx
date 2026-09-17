@@ -1,0 +1,180 @@
+import { useEffect, useState } from "react";
+import { Copy, Link2, Loader2, Check, Trash2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+type PayLink = {
+  id: string;
+  token: string;
+  amount_cents: number;
+  currency: string;
+  label: string;
+  payer_email: string | null;
+  status: string;
+  created_at: string;
+};
+
+const SYMBOLS: Record<string, string> = { USD: "$", EUR: "€", GBP: "£", SGD: "S$", HKD: "HK$" };
+
+const fmt = (cents: number, currency: string) =>
+  `${SYMBOLS[currency.toUpperCase()] ?? ""}${(cents / 100).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} ${currency.toUpperCase()}`;
+
+interface Props {
+  quoteId: string;
+  currency: string;
+  defaultAmountCents?: number;
+  defaultEmail?: string | null;
+}
+
+/**
+ * Admin-only: mint a login-free Stripe Checkout link for an agreed amount,
+ * then copy it into WhatsApp or email. No trade account needed by the payer.
+ */
+export default function GuestPayLinkCard({ quoteId, currency, defaultAmountCents = 0, defaultEmail }: Props) {
+  const { toast } = useToast();
+  const [links, setLinks] = useState<PayLink[]>([]);
+  const [amount, setAmount] = useState(defaultAmountCents ? (defaultAmountCents / 100).toFixed(2) : "");
+  const [label, setLabel] = useState("Full payment");
+  const [email, setEmail] = useState(defaultEmail ?? "");
+  const [creating, setCreating] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const load = async () => {
+    const { data } = await supabase
+      .from("quote_payment_links")
+      .select("id, token, amount_cents, currency, label, payer_email, status, created_at")
+      .eq("quote_id", quoteId)
+      .order("created_at", { ascending: false });
+    setLinks((data as PayLink[]) ?? []);
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quoteId]);
+
+  const linkUrl = (token: string) => `${window.location.origin}/pay/${token}`;
+
+  const handleCreate = async () => {
+    const cents = Math.round(Number(amount) * 100);
+    if (!Number.isFinite(cents) || cents <= 0) {
+      toast({ title: "Enter an amount", description: "Add the agreed amount before creating the link.", variant: "destructive" });
+      return;
+    }
+    setCreating(true);
+    const { data, error } = await supabase
+      .from("quote_payment_links")
+      .insert({
+        quote_id: quoteId,
+        amount_cents: cents,
+        currency: currency.toUpperCase(),
+        label: label.trim() || "Full payment",
+        payer_email: email.trim() || null,
+      })
+      .select("id, token, amount_cents, currency, label, payer_email, status, created_at")
+      .single();
+    setCreating(false);
+    if (error || !data) {
+      toast({ title: "Could not create link", description: error?.message ?? "Please try again.", variant: "destructive" });
+      return;
+    }
+    setLinks((prev) => [data as PayLink, ...prev]);
+    await navigator.clipboard.writeText(linkUrl((data as PayLink).token)).catch(() => {});
+    toast({ title: "Pay Now link created", description: "The link is copied — paste it into WhatsApp or email." });
+  };
+
+  const handleCopy = async (link: PayLink) => {
+    await navigator.clipboard.writeText(linkUrl(link.token)).catch(() => {});
+    setCopiedId(link.id);
+    setTimeout(() => setCopiedId(null), 1800);
+  };
+
+  const handleRevoke = async (link: PayLink) => {
+    if (!confirm("Revoke this payment link? It will stop working immediately.")) return;
+    const { error } = await supabase.from("quote_payment_links").update({ status: "revoked" }).eq("id", link.id);
+    if (error) {
+      toast({ title: "Could not revoke link", description: error.message, variant: "destructive" });
+      return;
+    }
+    setLinks((prev) => prev.map((l) => (l.id === link.id ? { ...l, status: "revoked" } : l)));
+  };
+
+  return (
+    <div className="border-t border-border p-4 md:p-6 lg:p-8 print:hidden space-y-4">
+      <div>
+        <p className="font-display text-xs uppercase tracking-[0.15em] text-foreground mb-1">Guest Pay Now Link</p>
+        <p className="font-body text-[11px] text-muted-foreground max-w-xl">
+          Agreed a price over WhatsApp or email? Enter the amount, create a secure link and send it to the client —
+          they pay by card on Stripe with no account or sign-in.
+        </p>
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-[140px_1fr_1fr_auto] items-center">
+        <input
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          inputMode="decimal"
+          placeholder={`Amount (${currency.toUpperCase()})`}
+          className="px-3 py-2 border border-border rounded-md bg-background font-body text-xs"
+        />
+        <input
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          placeholder="Label (e.g. 60% deposit)"
+          className="px-3 py-2 border border-border rounded-md bg-background font-body text-xs"
+        />
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          type="email"
+          placeholder="Client email (optional)"
+          className="px-3 py-2 border border-border rounded-md bg-background font-body text-xs"
+        />
+        <button
+          onClick={handleCreate}
+          disabled={creating}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-foreground text-background font-body text-[10px] uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-50"
+        >
+          {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Link2 className="h-3.5 w-3.5" />}
+          {creating ? "Creating…" : "Create link"}
+        </button>
+      </div>
+
+      {links.length > 0 && (
+        <div className="space-y-2">
+          {links.map((link) => (
+            <div key={link.id} className="flex flex-wrap items-center gap-2 justify-between rounded-md border border-border px-3 py-2">
+              <div className="font-body text-[11px] text-foreground/80 min-w-0">
+                <span className="font-medium">{fmt(link.amount_cents, link.currency)}</span> · {link.label}
+                <span className={`ml-2 uppercase tracking-widest text-[9px] ${link.status === "paid" ? "text-primary" : link.status === "revoked" ? "text-destructive" : "text-muted-foreground"}`}>
+                  {link.status}
+                </span>
+                <div className="truncate text-[10px] text-muted-foreground">{linkUrl(link.token)}</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleCopy(link)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md font-body text-[10px] uppercase tracking-[0.1em] hover:bg-muted transition-colors"
+                >
+                  {copiedId === link.id ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                  {copiedId === link.id ? "Copied" : "Copy"}
+                </button>
+                {link.status === "active" && (
+                  <button
+                    onClick={() => handleRevoke(link)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 border border-destructive/30 text-destructive rounded-md font-body text-[10px] uppercase tracking-[0.1em] hover:bg-destructive/10 transition-colors"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
