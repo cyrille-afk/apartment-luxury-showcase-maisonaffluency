@@ -139,6 +139,20 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
                 </span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
               </button>
+              <button
+                onClick={() => go("/trade/admin/sales-funnel")}
+                className={cn(
+                  "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0",
+                  isActive("/trade/admin/sales-funnel") ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
+                )}
+                style={{ animationDelay: `${(coreItems.length + 3) * 50}ms`, animationFillMode: "forwards" }}
+              >
+                <span className="flex items-center gap-3">
+                  <TrendingDown className="h-4 w-4 shrink-0" />
+                  Sales Funnel
+                </span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+              </button>
               <a
                 href="/designers-hero-lock"
                 className={cn(

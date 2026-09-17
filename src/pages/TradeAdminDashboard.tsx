@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate, useNavigate } from "react-router-dom";
 import { E2ETokenCopier } from "@/components/admin/E2ETokenCopier";
 import { NewInquiriesAlert } from "@/components/trade/NewInquiriesAlert";
+import { SalesFunnelCard } from "@/components/trade/SalesFunnelCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -173,6 +174,7 @@ export default function TradeAdminDashboard() {
 
       <div className="max-w-6xl space-y-10">
         <NewInquiriesAlert />
+        <SalesFunnelCard />
         <div>
           <h1 className="font-display text-2xl text-foreground">Admin Dashboard</h1>
           <p className="font-body text-sm text-muted-foreground mt-1">
