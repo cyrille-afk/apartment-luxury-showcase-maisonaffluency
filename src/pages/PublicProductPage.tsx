@@ -2375,23 +2375,23 @@ const PublicProductPageContent: React.FC = () => {
 
               {!isMobileOrPwa && (
                 <section aria-label="Curator notes" className="mt-10 border-t border-border/50 pt-8">
-                  <h2 className="mb-9 font-display text-2xl italic text-foreground">Curator Notes</h2>
-                  <div className="max-w-xl divide-y divide-border/50">
+                  <h2 className="mb-6 font-display text-2xl italic text-foreground">Curator Notes</h2>
+                  <div className="grid grid-cols-3 gap-6">
                     {[
                       { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
                       { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
                       { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
                     ].map(({ label, text, Icon }) => (
-                      <article key={label} className="group flex gap-5 py-7 first:pt-0 last:pb-0">
-                        <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/60 transition-colors duration-150 group-hover:text-foreground" strokeWidth={1.25} />
-                        <div className="min-w-0">
-                          <h3 className="mb-3 font-body text-[10px] uppercase tracking-[0.2em] text-foreground">
+                      <article key={label} className="group flex flex-col gap-3">
+                        <div className="flex items-center gap-2">
+                          <Icon className="h-4 w-4 shrink-0 text-muted-foreground/60 transition-colors duration-150 group-hover:text-foreground" strokeWidth={1.25} />
+                          <h3 className="font-body text-[10px] uppercase tracking-[0.2em] text-foreground">
                             {label}
                           </h3>
-                          <p className="font-body text-sm italic leading-[1.8] text-muted-foreground">
-                            {text}
-                          </p>
                         </div>
+                        <p className="font-body text-sm italic leading-relaxed text-muted-foreground">
+                          {text}
+                        </p>
                       </article>
                     ))}
                   </div>
