@@ -190,9 +190,11 @@ export default function TradeAdminSuppliers() {
   const [saving, setSaving] = useState(false);
 
   const [importOpen, setImportOpen] = useState(false);
+  const [importStep, setImportStep] = useState<"upload" | "review">("upload");
   const [importFile, setImportFile] = useState<File | null>(null);
   const [parsedRows, setParsedRows] = useState<ParsedRow[]>([]);
   const [rowErrors, setRowErrors] = useState<RowError[]>([]);
+  const [excludedRows, setExcludedRows] = useState<Set<number>>(new Set());
   const [importing, setImporting] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
