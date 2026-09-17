@@ -4883,6 +4883,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 );
               }
               if (item.kind === "layout_options") {
+                if (!onboardingGate.completed) return null;
                 return (
                   <div key={i} className="w-full self-start">
                     <LayoutComparisonGrid

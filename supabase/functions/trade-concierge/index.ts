@@ -4853,8 +4853,23 @@ serve(async (req) => {
       });
     }
 
-    const { messages, project_id: bodyProjectId, lang: bodyLang, resume: resumeBody } = await req.json();
+    const { messages, project_id: bodyProjectId, lang: bodyLang, resume: resumeBody, onboarding_gate: bodyOnboardingGate } = await req.json();
     mark("parse_body", { messages: Array.isArray(messages) ? messages.length : 0 });
+
+    const isRealGateFact = (value: unknown) => {
+      const clean = typeof value === "string" ? value.trim() : "";
+      return clean.length > 1 && !/\[[^\]]*\]|^(?:n\/?a|none|unknown|tbd|e\.g\.)$/i.test(clean);
+    };
+    const gateFacts = bodyOnboardingGate && typeof bodyOnboardingGate === "object"
+      ? (bodyOnboardingGate as any).facts
+      : null;
+    const onboardingGateComplete = Boolean(
+      bodyOnboardingGate?.completed === true &&
+      (bodyOnboardingGate?.source === "manual_brief" || bodyOnboardingGate?.source === "sequential_confirmation") &&
+      isRealGateFact(gateFacts?.projectProfile) &&
+      isRealGateFact(gateFacts?.zone) &&
+      isRealGateFact(gateFacts?.budget)
+    );
 
     // ----- Resume-token short-circuit ------------------------------------
     // A reconnecting client sends `{ resume: { stream_id, last_seq } }`.
@@ -4922,6 +4937,12 @@ serve(async (req) => {
     let lastUserMsg = extractText(
       [...messages].reverse().find((m: any) => m.role === "user")?.content,
     );
+    const highLevelVisionWithoutGate = !onboardingGateComplete &&
+      /\b(ff\s*&\s*e|sourc(?:e|ing)|gathering|working on|ideas?)\b/i.test(lastUserMsg) &&
+      /\b(art deco|pre[- ]?war|vibe|aesthetic|visual direction|style|atmosphere|mood)\b/i.test(lastUserMsg);
+    if (highLevelVisionWithoutGate) {
+      return sseTextResponse("An Art Deco prewar co-op is an exceptional canvas. To structure our studio layout options accurately, let's lock in two quick technical specifications: What is our target budget range for this phase, and which specific zones (such as salon seating, dining area, or master lounge) are we curating first?");
+    }
 
     const VISUAL_CONTEXT_MARKER = "[Latest upload visual sourcing context — use this as the retrieval brief, not the button label]";
     const VISUAL_CONTEXT_MARKER_ALT = "[Latest upload visual sourcing context — atmosphere reference only; do NOT let it broaden the typology or palette below]";
