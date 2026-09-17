@@ -677,12 +677,13 @@ export default function TradeFFESchedule() {
                       <DropdownMenuItem
                         key={preset.name}
                         onClick={() => applyPreset(preset)}
-                        className={`group relative flex items-center gap-2 font-body text-xs transition-all duration-200 ${isActive ? "font-semibold bg-accent/40" : ""}`}
+                        className={`group flex items-center gap-2 font-body text-xs transition-all duration-200 ${isActive ? "font-semibold bg-accent/40" : ""}`}
                       >
-                        <span
-                          className={`inline-flex h-2 w-2 shrink-0 rounded-full transition-all duration-200 ${isActive ? "bg-primary scale-100" : "bg-transparent scale-75"}`}
-                          aria-hidden="true"
-                        />
+                        {isActive ? (
+                          <Check className="h-3.5 w-3.5 shrink-0 text-primary transition-all duration-200" />
+                        ) : (
+                          <span className="inline-flex h-3.5 w-3.5 shrink-0 transition-all duration-200" aria-hidden="true" />
+                        )}
                         <span className="min-w-0 flex-1 truncate">{preset.name}</span>
                         <button
                           type="button"
