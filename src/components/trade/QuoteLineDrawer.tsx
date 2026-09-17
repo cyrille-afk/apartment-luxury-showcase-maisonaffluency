@@ -171,6 +171,42 @@ export default function QuoteLineDrawer({ item, onOpenChange }: QuoteLineDrawerP
               </div>
             </section>
 
+            <section className="mt-6 border border-border">
+              <div className="flex items-center gap-2 border-b border-border bg-muted/40 px-4 py-3">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <h3 className="font-body text-[11px] uppercase tracking-[0.18em] text-foreground">Associated purchase order</h3>
+              </div>
+              <div className="p-4">
+                {item.po_number ? (
+                  <Link
+                    to={`/trade/quotes?id=${item.quote_id}`}
+                    className="group inline-flex items-center gap-2.5 rounded-sm border border-border bg-background px-3.5 py-2.5 transition-colors hover:border-foreground/40 hover:bg-muted/50"
+                  >
+                    <Paperclip className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-foreground" />
+                    <span className="font-body text-sm font-medium tracking-wide text-foreground underline-offset-4 group-hover:underline">
+                      {item.po_number}
+                    </span>
+                    <span className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                      View PO file
+                    </span>
+                  </Link>
+                ) : (
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="font-body text-xs italic text-muted-foreground">PO Status: Pending Generation</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="font-body text-xs"
+                      onClick={generatePoReference}
+                      disabled={generatingPo}
+                    >
+                      {generatingPo ? "Generating…" : "Generate PO reference"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </section>
+
             <section className="mt-8 space-y-5">
               <div className="flex items-center gap-2 border-b border-border pb-3">
                 <ReceiptText className="h-4 w-4 text-muted-foreground" />
