@@ -7638,10 +7638,12 @@ export type Database = {
           cost_code: string | null
           created_at: string
           deposit_pct_override: number | null
+          expected_ready_override: string | null
           fabric_currency: string | null
           fabric_id: string | null
           fabric_meters: number | null
           fabric_upcharge_cents: number | null
+          fabrication_start_date: string | null
           id: string
           image_url: string | null
           internal_notes: string | null
@@ -7683,10 +7685,12 @@ export type Database = {
           cost_code?: string | null
           created_at?: string
           deposit_pct_override?: number | null
+          expected_ready_override?: string | null
           fabric_currency?: string | null
           fabric_id?: string | null
           fabric_meters?: number | null
           fabric_upcharge_cents?: number | null
+          fabrication_start_date?: string | null
           id?: string
           image_url?: string | null
           internal_notes?: string | null
@@ -7728,10 +7732,12 @@ export type Database = {
           cost_code?: string | null
           created_at?: string
           deposit_pct_override?: number | null
+          expected_ready_override?: string | null
           fabric_currency?: string | null
           fabric_id?: string | null
           fabric_meters?: number | null
           fabric_upcharge_cents?: number | null
+          fabrication_start_date?: string | null
           id?: string
           image_url?: string | null
           internal_notes?: string | null
