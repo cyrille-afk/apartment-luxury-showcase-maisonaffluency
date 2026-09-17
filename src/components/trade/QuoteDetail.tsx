@@ -653,7 +653,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       // Always include quote→target so the badge reflects the display
       // conversion itself even when every line is already in `currency`.
       if (displayCcy === "gbp" && currency !== "GBP") sourceCurrencies.add(currency);
-      if (sourceCurrencies.size === 0) { setFxRates({}); setFxSource("identity"); setFxPairs([]); setFxAppliedAt(null); return; }
+      if (sourceCurrencies.size === 0) { setFxRates({}); setFxSource("identity"); setFxPairs([]); setFxAppliedAt(null); setFxRefreshing(false); return; }
       const pairs = Array.from(sourceCurrencies).map((src) => ({ src, tgt: targetCcy }));
       const rates = await getFxRates(pairs);
       setFxRates(rates);
@@ -672,10 +672,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         }),
       );
       setFxAppliedAt(new Date());
-
+      setFxRefreshing(false);
     };
     if (items.length > 0) fetchRates();
-  }, [items, currency, displayCcy]);
+    else setFxRefreshing(false);
+  }, [items, currency, displayCcy, fxRefreshTick]);
+
+  /** Manual "Refresh FX rate": dump the 10-min cache and re-run the rate
+   *  fetch, which reprices every converted line, shipping and the totals. */
+  const refreshFxRates = () => {
+    if (fxRefreshing) return;
+    invalidateFxCache();
+    setFxRefreshTick((t) => t + 1);
+  };
 
 
   // Fetch items, currency, and profile
