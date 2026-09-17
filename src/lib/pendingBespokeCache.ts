@@ -18,6 +18,7 @@ export interface PendingBespokeUploadEntry {
   specs: string;
   attachmentName?: string | null;
   attachmentPath?: string | null;
+  projectLocation?: string | null;
   submittedAt: string;
 }
 
