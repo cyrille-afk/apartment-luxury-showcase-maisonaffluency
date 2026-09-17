@@ -71,6 +71,9 @@ export default function BespokeConfigurationDialog({
 
   useEffect(() => {
     if (!isOpen) return;
+    // Fresh sheet on every open — the confirmation state belongs to the
+    // banner (guests) or the Felix log (trade), not to a stale dialog.
+    setSent(false);
     lockBodyScroll();
     return () => unlockBodyScroll();
   }, [isOpen]);
