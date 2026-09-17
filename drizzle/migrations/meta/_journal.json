@@ -141,6 +141,13 @@
       "when": 1789685073681,
       "tag": "0019_inquiry_assignment_timestamps",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1789686954348,
+      "tag": "0020_sales_funnel_abandoned_tracking",
+      "breakpoints": true
     }
   ]
 }
