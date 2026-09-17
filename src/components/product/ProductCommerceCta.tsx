@@ -518,48 +518,19 @@ export default function ProductCommerceCta({
         />
       )}
 
-      {/* Bespoke quote sheet (secondary white button — any breakpoint). The
-          sheet handles submission + its own thank-you state; no cart handoff. */}
+      {/* Bespoke configuration dialog (secondary action — any breakpoint).
+          Centred overlay on the product canvas; never the account wall. */}
       {!tradeApproved && (
-        <OrderIntakeSheet
-          isOpen={quoteOpen}
-          onClose={() => setQuoteOpen(false)}
-          onComplete={() => {
-            /* Quote requests end on the sheet's thank-you screen. */
-          }}
+        <BespokeConfigurationDialog
+          isOpen={bespokeOpen}
+          onClose={() => setBespokeOpen(false)}
+          productId={productId}
           productTitle={productTitle}
           designerName={designerName}
-          priceLabel={retailLabel || rrpLabel || null}
           finishLabel={
             orderFinishLabel || (selectedFinishes.length ? selectedFinishes.join(" / ") : null)
           }
-          finishOptions={finishOptions}
-          finishVariants={finishVariants}
-          baseImageUrl={imageUrl}
-          submitting={placingOrder}
-          mode="quote"
-          productId={productId}
-        />
-      )}
-
-      {/* Mobile 3-step order intake bottom sheet */}
-      {!tradeApproved && (
-        <OrderIntakeSheet
-          isOpen={intakeOpen}
-          onClose={() => setIntakeOpen(false)}
-          onComplete={handleIntakeComplete}
-          productTitle={productTitle}
-          designerName={designerName}
-          priceLabel={retailLabel || rrpLabel || null}
-          finishLabel={
-            orderFinishLabel || (selectedFinishes.length ? selectedFinishes.join(" / ") : null)
-          }
-          finishOptions={finishOptions}
-          finishVariants={finishVariants}
-          baseImageUrl={imageUrl}
-          submitting={placingOrder}
-          mode={isUnpriced ? "quote" : "order"}
-          productId={productId}
+          imageUrl={imageUrl}
         />
       )}
     </>
