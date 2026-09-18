@@ -218,6 +218,13 @@
       "when": 1789705113129,
       "tag": "0030_po_followup_escalation_flags",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1789707919448,
+      "tag": "0031_add_quantity_to_trade_quote_extras",
+      "breakpoints": true
     }
   ]
 }

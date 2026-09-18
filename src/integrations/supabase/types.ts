@@ -8307,6 +8307,7 @@ export type Database = {
           currency: string | null
           id: string
           label: string
+          quantity: number
           quote_id: string
           sort_order: number
           updated_at: string
@@ -8317,6 +8318,7 @@ export type Database = {
           currency?: string | null
           id?: string
           label: string
+          quantity?: number
           quote_id: string
           sort_order?: number
           updated_at?: string
@@ -8327,6 +8329,7 @@ export type Database = {
           currency?: string | null
           id?: string
           label?: string
+          quantity?: number
           quote_id?: string
           sort_order?: number
           updated_at?: string
