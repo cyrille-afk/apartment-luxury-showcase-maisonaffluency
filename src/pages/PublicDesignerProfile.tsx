@@ -11,7 +11,7 @@ import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } 
 import { absoluteUrl } from "@/config/site";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Check, ChevronDown, ChevronUp, Columns3, Columns2, SlidersHorizontal, Square, Grid2X2, Heart } from "lucide-react";
+import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Check, ChevronDown, ChevronUp, Columns3, Columns2, Columns4, SlidersHorizontal, Square, Grid2X2, Heart } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -474,7 +474,7 @@ const PublicDesignerProfile = () => {
     [searchParams, slug]
   );
   const { data: designer, isLoading } = useDesigner(slug, { includeTradeOnly: isTradeUser });
-  const [pickCols, setPickCols] = useState<"auto" | "two" | "one">("auto");
+  const [pickCols, setPickCols] = useState<"auto" | "two" | "one" | "four">("auto");
   const [sortMode, setSortMode] = useState<"default" | "price-asc" | "price-desc" | "new">("default");
   const [activeCategories, setActiveCategories] = useState<string[]>([]);
   const isParentBrand = isParentBrandDesigner(designer);
@@ -1722,6 +1722,9 @@ const PublicDesignerProfile = () => {
                   if (pickCols === "one") {
                     return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3";
                   }
+                  if (pickCols === "four") {
+                    return "grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4";
+                  }
                   if (forceTwoCol) {
                     return "grid-cols-2 sm:grid-cols-2 md:grid-cols-2";
                   }
@@ -1851,6 +1854,18 @@ const PublicDesignerProfile = () => {
                             )}
                           >
                             <Columns2 className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPickCols("four")}
+                            aria-pressed={pickCols === "four"}
+                            aria-label="Four column grid"
+                            className={cn(
+                              "transition-colors duration-300",
+                              pickCols === "four" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            <Columns4 className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
                           </button>
                         </div>
 
