@@ -11,14 +11,11 @@ import { useToast } from "@/hooks/use-toast";
  * First click  -> card is marked `paid`    (drops into Awaiting Settlement).
  * Second click -> card is marked `settled` (drops into Conversions).
  *
- * Never rendered outside a local dev host (preview runs Vite dev mode too, so
- * import.meta.env.DEV alone is not a sufficient guard).
+ * Rendered in dev and in the Lovable preview (both run Vite dev mode), but
+ * never in the published production build, where import.meta.env.DEV is false.
  */
 const isLocalDevHost = () => {
-  if (!import.meta.env.DEV) return false;
-  if (typeof window === "undefined") return false;
-  const h = window.location.hostname;
-  return h === "localhost" || h === "127.0.0.1";
+  return import.meta.env.DEV;
 };
 
 export default function SimulatePaymentLink({
