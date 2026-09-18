@@ -65,7 +65,7 @@ export function useSalesFunnel(days: number) {
             .order("created_at", { ascending: false }),
           supabase
             .from("trade_quote_items")
-            .select("quote_id, image_url, trade_products(product_name, image_url)"),
+            .select("quote_id, image_url, variant_label, trade_products(product_name, image_url, lead_time)"),
           supabase
             .from("quote_payment_links")
             .select("id, quote_id, amount_cents, currency, status, payer_email, created_at, paid_at"),
