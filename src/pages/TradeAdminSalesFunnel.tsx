@@ -104,6 +104,14 @@ const EntryCard = ({ entry, urgent = false }: { entry: FunnelEntry; urgent?: boo
         maisonRef={urgent ? `QU-${entry.id.slice(0, 6).toUpperCase()}` : null}
       />
     )}
+    <SimulatePaymentLink
+      cardId={entry.id}
+      cardStage={entry.originStage ?? (urgent ? "draft_quotes" : "lead_capture")}
+      label={entry.label}
+      email={entry.email}
+      quoteId={urgent ? entry.id : null}
+      alreadyPaid={Boolean(entry.paidViaStripe)}
+    />
   </article>
 );
 
