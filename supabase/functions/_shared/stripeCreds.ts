@@ -146,6 +146,12 @@ export type StripeModeReport = {
   /** Publishable key alias actually used, if any. */
   publishableKeyAlias: "STRIPE_PUBLIC_KEY" | "STRIPE_PUBLISHABLE_KEY" | null;
   hasWebhookSecret: boolean;
+  /**
+   * connected  — a signing secret exists for the active mode.
+   * mismatched — a signing secret exists, but only for the inactive mode.
+   * missing    — no signing secret anywhere.
+   */
+  webhookStatus: "connected" | "mismatched" | "missing";
 };
 
 /**
