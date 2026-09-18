@@ -33,6 +33,7 @@ import { template as clientQuotePayment } from './client-quote-payment.tsx'
 import { template as cartReminder } from './cart-reminder.tsx'
 import { template as quotePaymentReminder } from './quote-payment-reminder.tsx'
 import { template as quoteConfirmationPaymentLink } from './quote-confirmation-payment-link.tsx'
+import { template as quoteConfirmationInternalCopy } from './quote-confirmation-internal-copy.tsx'
 import { template as funnelStallAlert } from './funnel-stall-alert.tsx'
 import { template as poAcknowledgedInternal } from './po-acknowledged-internal.tsx'
 import { template as poLogisticsAlert } from './po-logistics-alert.tsx'
@@ -63,6 +64,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'cart-reminder': cartReminder,
   'quote-payment-reminder': quotePaymentReminder,
   'quote-confirmation-payment-link': quoteConfirmationPaymentLink,
+  'quote-confirmation-internal-copy': quoteConfirmationInternalCopy,
   'funnel-stall-alert': funnelStallAlert,
   'po-acknowledged-internal': poAcknowledgedInternal,
   'po-logistics-alert': poLogisticsAlert,

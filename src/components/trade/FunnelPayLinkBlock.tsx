@@ -6,6 +6,10 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 const CURRENCIES = ["USD", "EUR", "GBP", "SGD", "HKD", "AED", "CHF"] as const;
+const INTERNAL_COPY_RECIPIENTS = [
+  "cyrille@maisonaffluency.com",
+  "gregoire@maisonaffluency.com",
+];
 const SYMBOL: Record<string, string> = {
   USD: "$",
   EUR: "€",
@@ -131,8 +135,50 @@ const FunnelPayLinkBlock = ({
         },
       });
       if (error) throw error;
+
+      const numericAmount = Number(amount.replace(/,/g, "")) || 0;
+      const formattedAmount = `${SYMBOL[currency] || currency}${numericAmount.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
+
+      const internalResults = await Promise.all(
+        INTERNAL_COPY_RECIPIENTS.map((copyEmail) =>
+          supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "quote-confirmation-internal-copy",
+              recipientEmail: copyEmail,
+              idempotencyKey: `quote-confirm-internal-${quoteId ?? label}-${copyEmail}-${Date.now()}`,
+              templateData: {
+                clientEmail: email,
+                productName: productName || label,
+                finish,
+                leadTime,
+                paymentLink: paymentUrl,
+                maisonRef: maisonRef || (quoteId ? `QU-${quoteId.slice(0, 6).toUpperCase()}` : undefined),
+                amount: formattedAmount,
+                currency,
+                paymentKind: paymentKind === "deposit" ? "Deposit · balance to follow" : "Full settlement",
+                testMode,
+              },
+            },
+          })
+        )
+      );
+
+      const internalFailures = internalResults.filter((r) => r.error);
+      if (internalFailures.length > 0) {
+        console.warn("Internal copy failures", internalFailures);
+      }
+
       setEmailSent(true);
-      toast({ title: "Confirmation email sent" });
+      toast({
+        title: "Confirmation email sent",
+        description:
+          internalFailures.length === 0
+            ? "Internal copy sent to Cyrille and Gregoire."
+            : "Client email sent; internal copy failed for some recipients.",
+      });
       setTimeout(() => setEmailSent(false), 6000);
     } catch (err) {
       toast({
