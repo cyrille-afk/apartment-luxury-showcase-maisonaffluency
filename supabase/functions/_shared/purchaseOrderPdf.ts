@@ -1,4 +1,13 @@
-import { PDFDocument, StandardFonts, rgb } from "npm:pdf-lib@1.17.1";
+import { PDFDocument, rgb } from "npm:pdf-lib@1.17.1";
+
+// StandardFonts is not reliably re-exported through the npm CJS interop; the
+// underlying API accepts the font names as plain strings.
+const FONT = {
+  serif: "Times-Roman",
+  serifBold: "Times-Bold",
+  sans: "Helvetica",
+  sansBold: "Helvetica-Bold",
+} as const;
 
 export interface PoPdfLine {
   description: string;
@@ -41,10 +50,10 @@ export async function buildPurchaseOrderPdf(input: PoPdfInput): Promise<Uint8Arr
   pdf.setTitle(`Purchase Order ${input.poNumber}`);
   pdf.setAuthor("Maison Affluency");
 
-  const serif = await pdf.embedFont(StandardFonts.TimesRoman);
-  const serifBold = await pdf.embedFont(StandardFonts.TimesBold);
-  const sans = await pdf.embedFont(StandardFonts.Helvetica);
-  const sansBold = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const serif = await pdf.embedFont(FONT.serif);
+  const serifBold = await pdf.embedFont(FONT.serifBold);
+  const sans = await pdf.embedFont(FONT.sans);
+  const sansBold = await pdf.embedFont(FONT.sansBold);
 
   const W = 595.28;
   const H = 841.89;
