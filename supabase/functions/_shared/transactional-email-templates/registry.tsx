@@ -35,6 +35,7 @@ import { template as quotePaymentReminder } from './quote-payment-reminder.tsx'
 import { template as quoteConfirmationPaymentLink } from './quote-confirmation-payment-link.tsx'
 import { template as funnelStallAlert } from './funnel-stall-alert.tsx'
 import { template as poAcknowledgedInternal } from './po-acknowledged-internal.tsx'
+import { template as poLogisticsAlert } from './po-logistics-alert.tsx'
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
@@ -64,4 +65,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'quote-confirmation-payment-link': quoteConfirmationPaymentLink,
   'funnel-stall-alert': funnelStallAlert,
   'po-acknowledged-internal': poAcknowledgedInternal,
+  'po-logistics-alert': poLogisticsAlert,
 }

@@ -2647,6 +2647,7 @@ export type Database = {
         Row: {
           ack_token: string
           acknowledged_at: string | null
+          acknowledgment_token: string
           created_at: string
           currency: string
           designer_email: string | null
@@ -2669,6 +2670,7 @@ export type Database = {
         Insert: {
           ack_token?: string
           acknowledged_at?: string | null
+          acknowledgment_token?: string
           created_at?: string
           currency?: string
           designer_email?: string | null
@@ -2691,6 +2693,7 @@ export type Database = {
         Update: {
           ack_token?: string
           acknowledged_at?: string | null
+          acknowledgment_token?: string
           created_at?: string
           currency?: string
           designer_email?: string | null
