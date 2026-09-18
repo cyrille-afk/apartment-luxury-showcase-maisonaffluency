@@ -193,6 +193,7 @@ const CartPage = lazy(() => import("./pages/Cart"));
 const CartIdentifyPage = lazy(() => import("./pages/CartIdentify"));
 const OrderConfirmationPage = lazy(() => import("./pages/OrderConfirmation"));
 const SuccessPage = lazy(() => import("./pages/Success"));
+const PaymentFailedPage = lazy(() => import("./pages/PaymentFailed"));
 const CheckoutPage = lazy(() => import("./pages/Checkout"));
 const BankWireInstructionsPage = lazy(() => import("./pages/BankWireInstructions"));
 const ConciergePage = lazy(() => import("./pages/ConciergePage"));
@@ -709,6 +710,7 @@ const App = () => {
                   <Route path="/cart/identify" element={<Suspense fallback={<PageLoadingSkeleton />}><CartIdentifyPage /></Suspense>} />
                   <Route path="/order-confirmation" element={<Suspense fallback={<PageLoadingSkeleton />}><OrderConfirmationPage /></Suspense>} />
                   <Route path="/success" element={<Suspense fallback={<PageLoadingSkeleton />}><SuccessPage /></Suspense>} />
+                  <Route path="/payment-failed" element={<Suspense fallback={<PageLoadingSkeleton />}><PaymentFailedPage /></Suspense>} />
                   <Route path="/checkout" element={<Suspense fallback={<PageLoadingSkeleton />}><CheckoutPage /></Suspense>} />
                   <Route path="/bank-wire-instructions" element={<Suspense fallback={<PageLoadingSkeleton />}><BankWireInstructionsPage /></Suspense>} />
                   <Route path="/concierge" element={<Suspense fallback={<PageLoadingSkeleton />}><ConciergePage /></Suspense>} />
