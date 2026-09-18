@@ -250,6 +250,7 @@ const TradeQuotesAdmin = () => {
 /** Admin detail view — set item prices, add notes, send pricing */
 const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => void }) => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [items, setItems] = useState<AdminQuoteItem[]>([]);
   const [quote, setQuote] = useState<AdminQuote | null>(null);
   const [loading, setLoading] = useState(true);

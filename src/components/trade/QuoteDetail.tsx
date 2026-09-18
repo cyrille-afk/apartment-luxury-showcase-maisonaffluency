@@ -411,6 +411,7 @@ const QuotePdfPreviewPages = ({ blobUrl }: { blobUrl: string | null }) => {
 const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack, onStatusChange }: QuoteDetailProps) => {
   const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { discountPct: tradeDiscountPct, discountLabel: tradeDiscountLabel, tierLabel, tier: currentTier, config: tierConfig } = useTradeDiscount();
   const { clientSafe } = useClientSafeMode();
