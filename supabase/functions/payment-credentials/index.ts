@@ -139,9 +139,14 @@ serve(async (req) => {
 
     const projectRef = (Deno.env.get("SUPABASE_URL") ?? "").replace(/^https?:\/\//, "").split(".")[0];
 
+    const envSecret = (Deno.env.get("STRIPE_SECRET_KEY") ?? "").trim();
+    const envLiveMode = /^(sk|rk)_live_/.test(envSecret);
+
     return new Response(
       JSON.stringify({
-        liveMode: Boolean(row?.live_mode),
+        liveMode: envLiveMode || Boolean(row?.live_mode),
+        envLiveMode,
+        envKeySource: envSecret ? (envLiveMode ? "env_live" : "env_test") : "none",
         publishableKey: mask(row?.live_publishable_key as string | null),
         secretKey: mask(row?.live_secret_key as string | null),
         webhookSecret: mask(row?.live_webhook_secret as string | null),
