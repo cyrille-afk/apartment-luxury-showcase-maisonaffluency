@@ -56,8 +56,16 @@ export function useSalesFunnel(days: number) {
     queryFn: async () => {
       const since = new Date(Date.now() - days * 86400_000).toISOString();
 
-      const [inquiriesRes, quotesRes, quoteItemsRes, linksRes, cartsRes, ordersRes, remindersRes] =
-        await Promise.all([
+      const [
+        inquiriesRes,
+        quotesRes,
+        quoteItemsRes,
+        linksRes,
+        cartsRes,
+        ordersRes,
+        remindersRes,
+        cardPaymentsRes,
+      ] = await Promise.all([
           supabase
             .from("inquiries")
             .select("id, product_name, company, email, created_at, status, linked_quote_id")
