@@ -160,6 +160,18 @@ serve(async (req) => {
           typeof session.payment_intent === "string" ? session.payment_intent : null,
         amountPaid: session.amount_total ?? 0,
       });
+
+      const piId = typeof session.payment_intent === "string" ? session.payment_intent : session.id;
+      await notifyInternalPaymentReceived(supabase, {
+        label: session.metadata?.label || "Sales Funnel payment",
+        amountCents: session.amount_total ?? 0,
+        currency: session.currency || "USD",
+        payerEmail: session.customer_details?.email || session.customer_email || null,
+        quoteRef: session.metadata?.quote_id || null,
+        cardStage: session.metadata?.card_stage || null,
+        paymentIntentId: piId,
+        sessionId: session.id,
+      });
     }
 
     // ===== Guest quote payment link handler =====
