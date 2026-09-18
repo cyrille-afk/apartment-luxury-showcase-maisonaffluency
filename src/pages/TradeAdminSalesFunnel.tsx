@@ -180,17 +180,20 @@ const TradeAdminSalesFunnel = () => {
         </div>
         <div className="flex flex-wrap gap-2">
           {RANGES.map((r) => (
-            <button
+            <Button
               key={r.id}
+              type="button"
+              variant="outline"
+              size="sm"
               onClick={() => setDays(r.id)}
-              className={`border px-3 py-1.5 font-body text-[11px] uppercase tracking-[0.18em] transition-colors ${
+              className={`h-8 rounded-none px-3 font-body text-[11px] uppercase tracking-[0.18em] ${
                 days === r.id
                   ? "border-foreground bg-foreground text-background"
                   : "border-border text-muted-foreground hover:text-foreground"
               }`}
             >
               {r.label}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -261,7 +264,8 @@ const TradeAdminSalesFunnel = () => {
                   ))}
                 </ul>
               )}
-          </div>
+             </div>
+           </div>
         </>
       )}
     </div>
