@@ -101,7 +101,7 @@ serve(async (req) => {
         status: "draft",
         quote_kind: quoteKind,
         source_inquiry_id: inquiry.id,
-        client_name: inquiry.name,
+        client_name: (inquiry.company && String(inquiry.company).trim()) || inquiry.name,
         currency,
         notes: `Auto-drafted from inquiry ${inquiry.id}. Visitor: ${inquiry.name} <${inquiry.email}>${inquiry.phone ? ` · ${inquiry.phone}` : ""}${inquiry.company ? ` · ${inquiry.company}` : ""}\n\nOriginal message:\n${inquiry.message}`,
         admin_notes: inquiry.admin_notes || null,
