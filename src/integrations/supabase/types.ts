@@ -2565,12 +2565,91 @@ export type Database = {
           },
         ]
       }
+      designer_payouts: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          commission_rate_pct: number
+          created_at: string
+          currency: string
+          designer_id: string | null
+          designer_name: string | null
+          designer_net_payout: number
+          discount_absorbed_by: string
+          gross_amount: number
+          id: string
+          line_item_id: string | null
+          notes: string | null
+          order_id: string | null
+          paid_at: string | null
+          payout_status: string
+          platform_fee: number
+          stripe_fee_cents: number
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          trade_discount_applied: number
+          trade_program_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          commission_rate_pct?: number
+          created_at?: string
+          currency?: string
+          designer_id?: string | null
+          designer_name?: string | null
+          designer_net_payout?: number
+          discount_absorbed_by?: string
+          gross_amount?: number
+          id?: string
+          line_item_id?: string | null
+          notes?: string | null
+          order_id?: string | null
+          paid_at?: string | null
+          payout_status?: string
+          platform_fee?: number
+          stripe_fee_cents?: number
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          trade_discount_applied?: number
+          trade_program_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          commission_rate_pct?: number
+          created_at?: string
+          currency?: string
+          designer_id?: string | null
+          designer_name?: string | null
+          designer_net_payout?: number
+          discount_absorbed_by?: string
+          gross_amount?: number
+          id?: string
+          line_item_id?: string | null
+          notes?: string | null
+          order_id?: string | null
+          paid_at?: string | null
+          payout_status?: string
+          platform_fee?: number
+          stripe_fee_cents?: number
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          trade_discount_applied?: number
+          trade_program_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       designers: {
         Row: {
           additional_founders: string[]
           biography: string
           biography_images: string[] | null
           collab_brands: string[]
+          commission_rate_pct: number | null
           country: string | null
           created_at: string
           display_name: string | null
@@ -2598,6 +2677,7 @@ export type Database = {
           source: string
           specialty: string
           subtitle_is_designer: boolean
+          trade_discount_absorption: string
           trade_only: boolean
           updated_at: string
           wide_hero_image_url: string | null
@@ -2607,6 +2687,7 @@ export type Database = {
           biography?: string
           biography_images?: string[] | null
           collab_brands?: string[]
+          commission_rate_pct?: number | null
           country?: string | null
           created_at?: string
           display_name?: string | null
@@ -2634,6 +2715,7 @@ export type Database = {
           source?: string
           specialty?: string
           subtitle_is_designer?: boolean
+          trade_discount_absorption?: string
           trade_only?: boolean
           updated_at?: string
           wide_hero_image_url?: string | null
@@ -2643,6 +2725,7 @@ export type Database = {
           biography?: string
           biography_images?: string[] | null
           collab_brands?: string[]
+          commission_rate_pct?: number | null
           country?: string | null
           created_at?: string
           display_name?: string | null
@@ -2670,6 +2753,7 @@ export type Database = {
           source?: string
           specialty?: string
           subtitle_is_designer?: boolean
+          trade_discount_absorption?: string
           trade_only?: boolean
           updated_at?: string
           wide_hero_image_url?: string | null
