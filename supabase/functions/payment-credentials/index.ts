@@ -156,6 +156,7 @@ serve(async (req) => {
         savedLiveEnabled: report.savedLiveEnabled,
         publishableKeyAlias: report.publishableKeyAlias,
         hasWebhookSecret: report.hasWebhookSecret,
+        webhookStatus: report.webhookStatus,
         envLiveMode,
         envKeySource: envSecret ? (envLiveMode ? "env_live" : "env_test") : "none",
         publishableKey: mask(row?.live_publishable_key as string | null),
