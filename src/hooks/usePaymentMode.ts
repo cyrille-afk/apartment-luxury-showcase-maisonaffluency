@@ -17,15 +17,6 @@ export type PaymentModeStatus = {
   webhookSecret: string | null;
   updatedAt: string | null;
   webhookUrl: string;
-  activeMode?: "live" | "test";
-  activeSource?: "env" | "payment_settings" | "none";
-  activeSourceLabel?: string;
-  envKeyPresent?: boolean;
-  envLiveKey?: boolean;
-  savedLiveConfigured?: boolean;
-  savedLiveEnabled?: boolean;
-  publishableKeyAlias?: "STRIPE_PUBLIC_KEY" | "STRIPE_PUBLISHABLE_KEY" | null;
-  hasWebhookSecret?: boolean;
   webhookStatus?: "connected" | "mismatched" | "missing";
 };
 
