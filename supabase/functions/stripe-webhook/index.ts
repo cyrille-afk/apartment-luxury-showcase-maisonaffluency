@@ -62,6 +62,56 @@ async function settleFunnelCard(
   }
 }
 
+async function notifyInternalPaymentReceived(
+  supabase: ReturnType<typeof createClient>,
+  args: {
+    label: string;
+    amountCents: number;
+    currency: string;
+    payerEmail?: string | null;
+    quoteRef?: string | null;
+    cardStage?: string | null;
+    paymentIntentId: string;
+    sessionId?: string | null;
+  },
+) {
+  try {
+    const fmt = (cents: number) =>
+      ((cents ?? 0) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    const templateData = {
+      label: args.label,
+      amountFormatted: fmt(args.amountCents),
+      currency: (args.currency || "USD").toUpperCase(),
+      payerEmail: args.payerEmail ?? null,
+      quoteRef: args.quoteRef ?? null,
+      cardStage: args.cardStage ?? null,
+      sessionId: args.sessionId ?? args.paymentIntentId,
+      paidAt: new Date().toISOString(),
+      funnelUrl: "https://www.maisonaffluency.com/trade/admin/sales-funnel",
+    };
+
+    const idempotencyKey = `funnel-payment-received-internal-${args.paymentIntentId}`;
+    const recipients = ["cyrille@maisonaffluency.com", "gregoire@maisonaffluency.com"];
+
+    for (const recipient of recipients) {
+      const { error } = await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "funnel-payment-received-internal",
+          recipientEmail: recipient,
+          idempotencyKey,
+          templateData,
+        },
+      });
+      if (error) {
+        console.error(`[STRIPE-WEBHOOK] internal payment notify failed for ${recipient}:`, error);
+      }
+    }
+  } catch (e) {
+    console.error("[STRIPE-WEBHOOK] notifyInternalPaymentReceived error:", e);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204 });
