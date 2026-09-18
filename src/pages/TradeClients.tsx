@@ -621,8 +621,13 @@ export default function TradeClients() {
           <DialogHeader>
             <DialogTitle>{editing?.id ? "Edit client" : "New client"}</DialogTitle>
             <DialogDescription>
-              Visible to all members of {currentStudio.name}.
+              Visible to all members of {currentStudio.name}. Your changes are auto-saved as a draft while you type.
             </DialogDescription>
+            {draftRestored && (
+              <p className="text-xs text-amber-600 mt-1">
+                Draft restored — your previously entered details were recovered.
+              </p>
+            )}
           </DialogHeader>
 
           {editing && (
