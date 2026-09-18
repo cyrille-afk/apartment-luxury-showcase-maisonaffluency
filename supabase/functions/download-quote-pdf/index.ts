@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
   });
   const { data: quote, error: quoteError } = await supabase
     .from("trade_quotes")
-    .select("client_pdf_path, quote_number")
+    .select("id, client_pdf_path")
     .eq("client_pdf_download_token", token)
     .maybeSingle();
 
@@ -37,8 +37,7 @@ Deno.serve(async (req) => {
   }
   if (!quote?.client_pdf_path) return jsonError("The formal quote is unavailable", 404);
 
-  const filename = `${String(quote.quote_number ?? "Maison-Affluency-Quote")}.pdf`
-    .replace(/[^a-zA-Z0-9._-]+/g, "-");
+  const filename = `QU-${String(quote.id).slice(0, 6).toUpperCase()}.pdf`;
   const { data, error } = await supabase.storage
     .from(QUOTE_PDF_BUCKET)
     .createSignedUrl(quote.client_pdf_path, 60, { download: filename });
