@@ -4381,6 +4381,9 @@ export type Database = {
           live_publishable_key: string | null
           live_secret_key: string | null
           live_webhook_secret: string | null
+          test_publishable_key: string | null
+          test_secret_key: string | null
+          test_webhook_secret: string | null
           updated_at: string
           updated_by: string | null
         }
@@ -4390,6 +4393,9 @@ export type Database = {
           live_publishable_key?: string | null
           live_secret_key?: string | null
           live_webhook_secret?: string | null
+          test_publishable_key?: string | null
+          test_secret_key?: string | null
+          test_webhook_secret?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -4399,6 +4405,9 @@ export type Database = {
           live_publishable_key?: string | null
           live_secret_key?: string | null
           live_webhook_secret?: string | null
+          test_publishable_key?: string | null
+          test_secret_key?: string | null
+          test_webhook_secret?: string | null
           updated_at?: string
           updated_by?: string | null
         }
