@@ -505,6 +505,7 @@ export default function TradeAdminPaymentSettings() {
       </section>
 
       <section className="mt-6 rounded-sm border border-border bg-card p-6">
+        <h2 className="font-display text-xl">Production webhook endpoint</h2>
         <p className="mt-2 font-body text-sm text-muted-foreground">
           Add this URL in Stripe → Developers → Webhooks, subscribing to
           <span className="text-foreground"> checkout.session.completed</span> and
