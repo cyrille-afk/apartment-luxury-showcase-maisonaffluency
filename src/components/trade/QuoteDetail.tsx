@@ -2212,6 +2212,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     setPreviewLoading(true);
     try {
       const args = await buildPdfArgs();
+      // Preview is read-only: report problems but never block the preview.
+      void runPreSendChecks(args);
       const url = await previewQuotePdfUrl(args);
       setPreviewUrl(url);
     } catch (err: any) {
