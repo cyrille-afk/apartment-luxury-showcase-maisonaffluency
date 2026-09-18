@@ -168,17 +168,6 @@ const statementBox = {
 }
 const totalLabel = { color: '#555555', fontSize: '13px', padding: '6px 0', fontFamily: 'Arial, sans-serif' }
 const totalAmount = { color: '#1a1a1a', fontSize: '13px', textAlign: 'right' as const, padding: '6px 0', fontFamily: 'Arial, sans-serif' }
-const buttonSection = { textAlign: 'center' as const, margin: '32px 0' }
-const button = {
-  display: 'inline-block',
-  padding: '14px 32px',
-  backgroundColor: '#1a1a1a',
-  color: '#ffffff',
-  textDecoration: 'none',
-  fontSize: '13px',
-  letterSpacing: '0.15em',
-  textTransform: 'uppercase' as const,
-  borderRadius: '24px',
-}
+const link = { color: '#1a1a1a', textDecoration: 'underline', fontSize: '15px', wordBreak: 'break-all' as const }
 const footer = { color: '#333333', lineHeight: '1.8', marginTop: '32px', fontSize: '15px' }
 const footerSmall = { color: '#888888', fontSize: '12px', lineHeight: '1.6', margin: '0' as const, fontFamily: "Georgia, 'Playfair Display', serif" }
