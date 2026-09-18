@@ -123,3 +123,68 @@ export async function loadStripeTestCreds(): Promise<StripeCreds | null> {
   }
   return null;
 }
+
+export type StripeModeReport = {
+  /** Mode the backend will actually charge in. */
+  mode: "live" | "test";
+  /** Where the active secret key comes from. */
+  source: "env" | "payment_settings" | "none";
+  /** Human label for the dashboard, e.g. "Environment variables". */
+  sourceLabel: string;
+  /** Environment secrets present, and whether they are live keys. */
+  envKeyPresent: boolean;
+  envLiveKey: boolean;
+  /** Saved Payment Settings live keys present and switched on. */
+  savedLiveConfigured: boolean;
+  savedLiveEnabled: boolean;
+  /** Publishable key alias actually used, if any. */
+  publishableKeyAlias: "STRIPE_PUBLIC_KEY" | "STRIPE_PUBLISHABLE_KEY" | null;
+  hasWebhookSecret: boolean;
+};
+
+/**
+ * Describes the resolved Stripe configuration for the Payment Settings
+ * dashboard: which mode is active and whether it comes from environment
+ * secrets or from the keys saved in the database.
+ */
+export async function describeStripeMode(): Promise<StripeModeReport> {
+  const envCreds = getEnvStripeCreds();
+  const active = await loadStripeCreds();
+
+  let savedLiveConfigured = false;
+  let savedLiveEnabled = false;
+  try {
+    const { data } = await adminClient()
+      .from("payment_credentials")
+      .select("live_secret_key, live_mode")
+      .eq("id", "live")
+      .maybeSingle();
+    savedLiveConfigured = Boolean(data?.live_secret_key);
+    savedLiveEnabled = Boolean(data?.live_mode);
+  } catch (_e) {
+    // Non-fatal: report what we know from the environment.
+  }
+
+  const sourceLabel =
+    active.source === "env"
+      ? "Environment variables"
+      : active.source === "payment_settings"
+        ? "Saved keys (Payment Settings)"
+        : "No keys configured";
+
+  return {
+    mode: active.liveMode && /^(sk|rk)_live_/.test(active.secretKey) ? "live" : "test",
+    source: active.secretKey ? active.source : "none",
+    sourceLabel,
+    envKeyPresent: Boolean(envCreds.secretKey),
+    envLiveKey: envCreds.liveMode,
+    savedLiveConfigured,
+    savedLiveEnabled,
+    publishableKeyAlias: env("STRIPE_PUBLIC_KEY")
+      ? "STRIPE_PUBLIC_KEY"
+      : env("STRIPE_PUBLISHABLE_KEY")
+        ? "STRIPE_PUBLISHABLE_KEY"
+        : null,
+    hasWebhookSecret: Boolean(active.webhookSecret),
+  };
+}
