@@ -208,12 +208,13 @@ serve(async (req) => {
           },
           { onConflict: "order_id,designer_id" },
         )
-        .select("id, ack_token")
+        .select("id, acknowledgment_token, ack_token")
         .maybeSingle();
       if (poErr) console.error("[PO-DISPATCH] ledger write failed:", poErr.message);
 
-      const acknowledgeUrl = poRow?.ack_token
-        ? `${Deno.env.get("SUPABASE_URL")}/functions/v1/acknowledge-purchase-order?token=${poRow.ack_token}`
+      const ackToken = poRow?.acknowledgment_token ?? poRow?.ack_token ?? null;
+      const acknowledgeUrl = poRow?.id && ackToken
+        ? `https://www.maisonaffluency.com/api/procurement/acknowledge/${poRow.id}?token=${ackToken}`
         : null;
 
       if (recipient) {
