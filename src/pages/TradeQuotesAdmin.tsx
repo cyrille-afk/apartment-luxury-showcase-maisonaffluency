@@ -563,9 +563,17 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
   };
 
   const handleDeleteQuote = async () => {
-    // Delete items first, then the quote
-    await supabase.from("trade_quote_items").delete().eq("quote_id", quoteId);
-    await supabase.from("trade_quotes").delete().eq("id", quoteId);
+    const { error: itemsError } = await supabase.from("trade_quote_items").delete().eq("quote_id", quoteId);
+    const { error, count } = await supabase.from("trade_quotes").delete({ count: "exact" }).eq("id", quoteId);
+    if (error || itemsError || count === 0) {
+      toast({
+        title: "Delete failed",
+        description: (error || itemsError)?.message || "Nothing was deleted — you may not have permission for this quote.",
+        variant: "destructive",
+      });
+      setConfirmDelete(false);
+      return;
+    }
     await queryClient.invalidateQueries({ queryKey: ["sales-funnel"] });
     toast({ title: "Quote deleted" });
     onBack();
