@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { usePaymentMode } from "@/hooks/usePaymentMode";
 
 /**
  * Dev-only testing utility: spoofs a `payment_intent.succeeded` webhook for a
