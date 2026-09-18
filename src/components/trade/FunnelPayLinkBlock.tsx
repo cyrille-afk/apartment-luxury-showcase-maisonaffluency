@@ -62,6 +62,31 @@ const FunnelPayLinkBlock = ({
   const [paymentKind, setPaymentKind] = useState<"full" | "deposit">("full");
   const [testMode, setTestMode] = useState(false);
   const [hasExistingLink, setHasExistingLink] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfChecked, setPdfChecked] = useState(false);
+
+  // Surface whether a formal quote PDF is on file for this quote, so the
+  // operator can see before sending whether the email will carry it.
+  useEffect(() => {
+    if (!quoteId) {
+      setPdfChecked(true);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const url = await signedQuotePdfUrl(quoteId);
+        if (!cancelled) setPdfUrl(url);
+      } catch {
+        /* ignore */
+      } finally {
+        if (!cancelled) setPdfChecked(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [quoteId]);
 
   // Cards already carrying a Stripe link (e.g. Awaiting Settlement after a
   // reload) prefill the amount/currency and unlock the resend-email button.
