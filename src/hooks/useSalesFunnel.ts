@@ -9,6 +9,7 @@ export interface FunnelEntry {
   amountLabel: string | null;
   href: string | null;
   email: string | null;
+  imageUrl: string | null;
 }
 
 export interface FunnelStage {
@@ -47,7 +48,7 @@ export function useSalesFunnel(days: number) {
     queryFn: async () => {
       const since = new Date(Date.now() - days * 86400_000).toISOString();
 
-      const [inquiriesRes, quotesRes, linksRes, cartsRes, ordersRes, remindersRes] =
+      const [inquiriesRes, quotesRes, quoteItemsRes, linksRes, cartsRes, ordersRes, remindersRes] =
         await Promise.all([
           supabase
             .from("inquiries")
@@ -59,6 +60,9 @@ export function useSalesFunnel(days: number) {
             .select("id, client_name, currency, status, created_at, submitted_at, ship_to_email")
             .gte("created_at", since)
             .order("created_at", { ascending: false }),
+          supabase
+            .from("trade_quote_items")
+            .select("quote_id, image_url, trade_products(product_name, image_url)"),
           supabase
             .from("quote_payment_links")
             .select("id, quote_id, amount_cents, currency, status, payer_email, created_at, paid_at"),
@@ -81,6 +85,7 @@ export function useSalesFunnel(days: number) {
       const inquiries = inquiriesRes.data ?? [];
       const quotes = quotesRes.data ?? [];
       const links = linksRes.data ?? [];
+      const quoteItems = quoteItemsRes.data ?? [];
       const carts = cartsRes.data ?? [];
       const orders = ordersRes.data ?? [];
 
@@ -91,6 +96,20 @@ export function useSalesFunnel(days: number) {
       for (const l of links) if (!linkByQuote.has(l.quote_id as string)) linkByQuote.set(l.quote_id as string, l);
 
       const ref = (id: string) => `QU-${id.slice(0, 6).toUpperCase()}`;
+      const firstItemByQuote = new Map<string, (typeof quoteItems)[number]>();
+      for (const item of quoteItems) {
+        if (!firstItemByQuote.has(item.quote_id)) firstItemByQuote.set(item.quote_id, item);
+      }
+      const quoteProduct = (quoteId: string) => {
+        const item = firstItemByQuote.get(quoteId);
+        const product = Array.isArray(item?.trade_products)
+          ? item.trade_products[0]
+          : item?.trade_products;
+        return {
+          name: product?.product_name ?? ref(quoteId),
+          imageUrl: item?.image_url ?? product?.image_url ?? null,
+        };
+      };
 
       const notQuoted = inquiries.filter(
         (i) => !i.linked_quote_id && ["new", "in_review"].includes(i.status ?? "new"),
@@ -121,6 +140,9 @@ export function useSalesFunnel(days: number) {
             amountLabel: money(c.subtotal_cents as number, c.currency as string),
             href: null,
             email: (c.email as string) ?? null,
+            imageUrl:
+              (Array.isArray(c.items) && ((c.items as any[])[0]?.imageUrl || (c.items as any[])[0]?.image_url)) ||
+              null,
           })),
         },
         {
@@ -135,21 +157,26 @@ export function useSalesFunnel(days: number) {
             amountLabel: null,
             href: "/trade/admin/inquiries",
             email: (i.email as string) ?? null,
+            imageUrl: null,
           })),
         },
         {
           key: "draft_quotes",
           title: "Quotes never sent",
           description: "Drafts still sitting with the trade desk",
-          entries: draftQuotes.map((q) => ({
-            id: q.id as string,
-            label: ref(q.id as string),
-            sublabel: q.client_name ?? "Unnamed client",
-            createdAt: q.created_at as string,
-            amountLabel: null,
-            href: `/trade/quotes/${q.id}`,
-            email: (q.ship_to_email as string) ?? null,
-          })),
+          entries: draftQuotes.map((q) => {
+            const product = quoteProduct(q.id as string);
+            return {
+              id: q.id as string,
+              label: product.name,
+              sublabel: q.client_name ?? "Unnamed client",
+              createdAt: q.created_at as string,
+              amountLabel: null,
+              href: `/trade/quotes/${q.id}`,
+              email: (q.ship_to_email as string) ?? null,
+              imageUrl: product.imageUrl,
+            };
+          }),
         },
         {
           key: "sent_unpaid",
@@ -167,6 +194,7 @@ export function useSalesFunnel(days: number) {
               amountLabel: link ? money(link.amount_cents as number, link.currency as string) : null,
               href: `/trade/quotes/${q.id}`,
               email: (link?.payer_email as string) ?? (q.ship_to_email as string) ?? null,
+              imageUrl: quoteProduct(q.id as string).imageUrl,
             };
           }),
         },
@@ -182,6 +210,7 @@ export function useSalesFunnel(days: number) {
             amountLabel: money(o.total_cents as number, o.currency as string),
             href: null,
             email: (o.email as string) ?? null,
+            imageUrl: null,
           })),
         },
       ];
