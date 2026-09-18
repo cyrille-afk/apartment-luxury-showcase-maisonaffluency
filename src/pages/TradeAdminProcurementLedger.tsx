@@ -50,7 +50,7 @@ const GroupBlock = ({
   busy,
 }: {
   group: PayableGroup;
-  onAdvance: (g: PayableGroup, from: InvoiceStatus, to: InvoiceStatus) => void;
+  onAdvance: (g: PayableGroup, from: InvoiceStatus[], to: InvoiceStatus) => void;
   busy: boolean;
 }) => {
   const count = (s: InvoiceStatus) => group.rows.filter((r) => r.invoiceStatus === s).length;
@@ -73,7 +73,7 @@ const GroupBlock = ({
               size="sm"
               variant="outline"
               disabled={busy}
-              onClick={() => onAdvance(group, "pending_invoice_match", "invoice_received")}
+              onClick={() => onAdvance(group, ["pending", "pending_invoice_match"], "invoice_received")}
               className="font-body"
             >
               <FileText className="mr-1.5 h-4 w-4" /> Mark invoice received
@@ -83,7 +83,7 @@ const GroupBlock = ({
             <Button
               size="sm"
               disabled={busy}
-              onClick={() => onAdvance(group, "invoice_received", "approved")}
+              onClick={() => onAdvance(group, ["invoice_received"], "approved")}
               className="font-body"
             >
               <BadgeCheck className="mr-1.5 h-4 w-4" /> Approve invoice
@@ -94,7 +94,7 @@ const GroupBlock = ({
               size="sm"
               variant="outline"
               disabled={busy}
-              onClick={() => onAdvance(group, "approved", "paid")}
+              onClick={() => onAdvance(group, ["approved"], "paid")}
               className="font-body"
             >
               <Check className="mr-1.5 h-4 w-4" /> Mark settled
@@ -185,8 +185,8 @@ export default function TradeAdminProcurementLedger() {
   }
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
-  const advance = async (g: PayableGroup, from: InvoiceStatus, to: InvoiceStatus) => {
-    const ids = g.rows.filter((r) => r.invoiceStatus === from).map((r) => r.id);
+  const advance = async (g: PayableGroup, from: InvoiceStatus[], to: InvoiceStatus) => {
+    const ids = g.rows.filter((r) => from.includes(r.invoiceStatus)).map((r) => r.id);
     if (!ids.length) return;
     try {
       await update.mutateAsync({ ids, status: to });
