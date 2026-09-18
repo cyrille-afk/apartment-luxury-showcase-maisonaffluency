@@ -1903,12 +1903,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       tradeDiscountApplied: discountApplies,
       tierLabel,
       tierBreakdown: tierConfig
-        ? (["silver", "gold", "platinum"] as const).map((t) => ({
-            label: tierConfig[t].label,
-            pct: tierConfig[t].discount_pct,
-            minSpendCents: tierConfig[t].min_spend_cents,
-            active: t === currentTier,
-          }))
+        ? (["silver", "gold", "platinum"] as const).map((t) => {
+            // Thresholds are stored in EUR — convert into the quote currency so
+            // the printed ladder never mislabels EUR figures as HKD/USD/etc.
+            const eur = tierConfig[t].min_spend_cents;
+            const tgt = currency.toUpperCase();
+            const conv = tgt === "EUR" ? eur : (convertCents(eur, "EUR", tgt) ?? eur);
+            return {
+              label: tierConfig[t].label,
+              pct: tierConfig[t].discount_pct,
+              minSpendCents: conv,
+              active: t === currentTier,
+            };
+          })
         : undefined,
       gstEnabled,
       gstRate,
