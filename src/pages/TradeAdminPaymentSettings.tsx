@@ -53,11 +53,27 @@ export default function TradeAdminPaymentSettings() {
   });
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [attemptedSave, setAttemptedSave] = useState(false);
 
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
   const save = async () => {
+    setAttemptedSave(true);
+    const missingField = FIELDS.find((field) => !values[field.key].trim());
+    const invalidField = FIELDS.find((field) => fieldError(field.key));
+    if (missingField || invalidField) {
+      const field = missingField ?? invalidField;
+      toast({
+        title: "Check the highlighted field",
+        description: field
+          ? `${field.label}: ${missingField ? "This value is required." : fieldError(field.key)}`
+          : "Check the three Stripe values.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSaving(true);
     try {
       const { data, error } = await supabase.functions.invoke("payment-credentials", {
@@ -68,9 +84,16 @@ export default function TradeAdminPaymentSettings() {
           webhookSecret: values.webhookSecret.trim(),
         },
       });
-      if (error) throw error;
+      if (error) {
+        const response = (error as { context?: Response }).context;
+        const responseBody = response
+          ? await response.clone().json().catch(() => null) as { error?: string } | null
+          : null;
+        throw new Error(responseBody?.error ?? error.message);
+      }
       if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
       setValues({ publishableKey: "", secretKey: "", webhookSecret: "" });
+      setAttemptedSave(false);
       await refetch();
       await qc.invalidateQueries({ queryKey: ["payment-mode"] });
       toast({ title: "Production credentials saved", description: "Live Stripe mode is now active." });
@@ -110,7 +133,7 @@ export default function TradeAdminPaymentSettings() {
   };
 
   const fieldError = (key: FieldKey): string | null => {
-    const raw = values[key].trim();
+    const raw = values[key].replace(/\s/g, "");
     if (!raw) return null;
     if (key === "publishableKey" && !raw.startsWith("pk_live_")) {
       return raw.startsWith("pk_test_")
@@ -202,7 +225,7 @@ export default function TradeAdminPaymentSettings() {
                   spellCheck={false}
                   placeholder={f.placeholder}
                   value={values[f.key]}
-                  onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
+                  onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value.replace(/\s/g, "") }))}
                   className="pr-10 font-body"
                 />
                 <button
@@ -215,9 +238,9 @@ export default function TradeAdminPaymentSettings() {
                 </button>
               </div>
               <p
-                className={`mt-1 font-body text-xs ${fieldError(f.key) ? "text-destructive" : "text-muted-foreground"}`}
+                className={`mt-1 font-body text-xs ${fieldError(f.key) || (attemptedSave && !values[f.key].trim()) ? "text-destructive" : "text-muted-foreground"}`}
               >
-                {fieldError(f.key) ?? f.hint}
+                {fieldError(f.key) ?? (attemptedSave && !values[f.key].trim() ? "This value is required." : f.hint)}
               </p>
             </div>
           ))}
@@ -225,7 +248,7 @@ export default function TradeAdminPaymentSettings() {
 
         <Button
           onClick={save}
-          disabled={!complete || saving}
+          disabled={saving}
           className="mt-6 w-full bg-[hsl(var(--jade))] font-body text-sm tracking-[0.08em] text-primary-foreground hover:bg-[hsl(var(--jade))]/90 sm:w-auto"
         >
           <Lock className="mr-2 h-4 w-4" />
@@ -234,8 +257,8 @@ export default function TradeAdminPaymentSettings() {
         {!complete && !saving && (
           <p className="mt-3 font-body text-xs text-muted-foreground">
             {invalid
-              ? "Fix the highlighted values above to enable saving."
-              : "All three values are required before saving."}
+              ? "Fix the highlighted value, then press Save again."
+              : "Enter all three values, then press Save. Any problem will be identified precisely."}
           </p>
         )}
       </section>
