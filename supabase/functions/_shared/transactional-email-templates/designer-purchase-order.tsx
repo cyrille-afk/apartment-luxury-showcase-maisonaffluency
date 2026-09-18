@@ -13,6 +13,7 @@ interface DesignerPurchaseOrderProps {
   lineCount?: number
   totalCost?: string | null
   downloadUrl?: string | null
+  acknowledgeUrl?: string | null
 }
 
 const DesignerPurchaseOrderEmail = ({
@@ -22,6 +23,7 @@ const DesignerPurchaseOrderEmail = ({
   lineCount = 1,
   totalCost,
   downloadUrl,
+  acknowledgeUrl,
 }: DesignerPurchaseOrderProps) => (
   <Html lang="en" dir="ltr">
     <Head />
