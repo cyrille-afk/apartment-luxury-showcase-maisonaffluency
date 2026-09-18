@@ -46,6 +46,29 @@ const FIELDS: { key: FieldKey; label: string; hint: string; placeholder: string 
   },
 ];
 
+type TestFieldKey = "testPublishableKey" | "testSecretKey" | "testWebhookSecret";
+
+const TEST_FIELDS: { key: TestFieldKey; label: string; hint: string; placeholder: string }[] = [
+  {
+    key: "testPublishableKey",
+    label: "Test Publishable Key",
+    hint: "Stripe Dashboard (test mode) → Developers → API keys",
+    placeholder: "pk_test_…",
+  },
+  {
+    key: "testSecretKey",
+    label: "Test Secret Key",
+    hint: "Required for the Test mode toggle on funnel cards",
+    placeholder: "sk_test_…",
+  },
+  {
+    key: "testWebhookSecret",
+    label: "Test Webhook Signing Secret",
+    hint: "Optional — only if you add a test-mode webhook endpoint in Stripe",
+    placeholder: "whsec_…",
+  },
+];
+
 export default function TradeAdminPaymentSettings() {
   const { isAdmin, loading } = useAuth();
   const { toast } = useToast();
@@ -67,6 +90,23 @@ export default function TradeAdminPaymentSettings() {
   });
   const [copied, setCopied] = useState(false);
   const [attemptedSave, setAttemptedSave] = useState(false);
+
+  const [testValues, setTestValues] = useState<Record<TestFieldKey, string>>({
+    testPublishableKey: "",
+    testSecretKey: "",
+    testWebhookSecret: "",
+  });
+  const [testRevealed, setTestRevealed] = useState<Record<TestFieldKey, boolean>>({
+    testPublishableKey: false,
+    testSecretKey: false,
+    testWebhookSecret: false,
+  });
+  const [savingTestField, setSavingTestField] = useState<TestFieldKey | null>(null);
+  const [savedTestFields, setSavedTestFields] = useState<Record<TestFieldKey, boolean>>({
+    testPublishableKey: false,
+    testSecretKey: false,
+    testWebhookSecret: false,
+  });
 
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
@@ -177,6 +217,56 @@ export default function TradeAdminPaymentSettings() {
       });
     } finally {
       setSavingField(null);
+    }
+  };
+
+  const testFieldError = (key: TestFieldKey): string | null => {
+    const raw = testValues[key].replace(/\s/g, "");
+    if (!raw) return null;
+    if (key === "testPublishableKey" && !raw.startsWith("pk_test_")) {
+      return "Must start with pk_test_ — toggle Stripe to test mode first.";
+    }
+    if (key === "testSecretKey" && !/^(sk|rk)_test_/.test(raw)) {
+      return "Must start with sk_test_ (or rk_test_ for a restricted key).";
+    }
+    if (key === "testWebhookSecret" && !raw.startsWith("whsec_")) {
+      return "Must start with whsec_.";
+    }
+    return null;
+  };
+
+  const saveTestField = async (key: TestFieldKey) => {
+    const problem = !testValues[key].trim() ? "This value is required." : testFieldError(key);
+    if (problem) {
+      toast({ title: `Check ${TEST_FIELDS.find((f) => f.key === key)?.label}`, description: problem, variant: "destructive" });
+      return;
+    }
+    setSavingTestField(key);
+    try {
+      const { data, error } = await supabase.functions.invoke("payment-credentials", {
+        body: { action: "save_field", field: key, value: testValues[key] },
+      });
+      if (error) {
+        const response = (error as { context?: Response }).context;
+        const responseBody = response
+          ? ((await response.clone().json().catch(() => null)) as { error?: string } | null)
+          : null;
+        throw new Error(responseBody?.error ?? error.message);
+      }
+      if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+      setTestValues((current) => ({ ...current, [key]: "" }));
+      setSavedTestFields((current) => ({ ...current, [key]: true }));
+      setTimeout(() => setSavedTestFields((current) => ({ ...current, [key]: false })), 4000);
+      await refetch();
+      toast({ title: `${TEST_FIELDS.find((f) => f.key === key)?.label} saved securely` });
+    } catch (e) {
+      toast({
+        title: "Could not save this key",
+        description: e instanceof Error ? e.message : "Unexpected error",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingTestField(null);
     }
   };
 
@@ -345,6 +435,73 @@ export default function TradeAdminPaymentSettings() {
               : "Enter all three values, then press Save. Any problem will be identified precisely."}
           </p>
         )}
+      </section>
+
+      <section className="mt-6 rounded-sm border border-amber-500/40 bg-card p-6">
+        <h2 className="font-display text-xl">Test credentials</h2>
+        <p className="mt-2 max-w-xl font-body text-sm text-muted-foreground">
+          Saved separately from live keys. With a test secret key stored, every funnel card gains a{" "}
+          <span className="text-foreground">Test mode</span> toggle that generates Stripe test-mode checkout
+          links — safe with dummy cards such as 4242 4242 4242 4242.
+        </p>
+        <div className="mt-5 space-y-5">
+          {TEST_FIELDS.map((f) => (
+            <div key={f.key}>
+              <Label htmlFor={f.key} className="font-body text-xs uppercase tracking-[0.16em]">
+                {f.label}
+              </Label>
+              <div className="mt-2 flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    id={f.key}
+                    type={testRevealed[f.key] ? "text" : "password"}
+                    autoComplete="off"
+                    spellCheck={false}
+                    placeholder={f.placeholder}
+                    value={testValues[f.key]}
+                    onChange={(e) =>
+                      setTestValues((current) => ({ ...current, [f.key]: e.target.value.replace(/\s/g, "") }))
+                    }
+                    className="pr-10 font-body"
+                  />
+                  <button
+                    type="button"
+                    aria-label={testRevealed[f.key] ? "Hide value" : "Reveal value"}
+                    onClick={() => setTestRevealed((r) => ({ ...r, [f.key]: !r[f.key] }))}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {testRevealed[f.key] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!testValues[f.key].trim() || savingTestField !== null}
+                  onClick={() => saveTestField(f.key)}
+                  className="shrink-0 font-body text-xs"
+                >
+                  {savingTestField === f.key ? "Saving…" : "Save key"}
+                </Button>
+              </div>
+              <p
+                className={`mt-1 font-body text-xs ${
+                  testFieldError(f.key)
+                    ? "text-destructive"
+                    : savedTestFields[f.key]
+                      ? "text-[hsl(var(--jade))]"
+                      : "text-muted-foreground"
+                }`}
+              >
+                {testFieldError(f.key) ??
+                  (savedTestFields[f.key]
+                    ? "Saved ✓ stored securely — the box is intentionally blank."
+                    : status?.[f.key]
+                      ? `Configured: ${status[f.key]}`
+                      : f.hint)}
+              </p>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="mt-6 rounded-sm border border-border bg-card p-6">

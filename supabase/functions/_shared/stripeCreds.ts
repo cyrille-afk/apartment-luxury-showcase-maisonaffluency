@@ -48,3 +48,34 @@ export async function loadStripeCreds(): Promise<StripeCreds> {
 
   return env;
 }
+
+/**
+ * Loads the Stripe TEST-mode credentials saved in `payment_credentials`
+ * (Payment Settings screen). Returns null when no test secret key is saved.
+ */
+export async function loadStripeTestCreds(): Promise<StripeCreds | null> {
+  try {
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } },
+    );
+    const { data } = await admin
+      .from("payment_credentials")
+      .select("test_publishable_key, test_secret_key, test_webhook_secret")
+      .eq("id", "live")
+      .maybeSingle();
+
+    if (data?.test_secret_key) {
+      return {
+        secretKey: data.test_secret_key as string,
+        webhookSecret: (data.test_webhook_secret as string) ?? "",
+        publishableKey: (data.test_publishable_key as string) ?? "",
+        liveMode: false,
+      };
+    }
+  } catch (e) {
+    console.error("[stripeCreds] test creds lookup failed:", e);
+  }
+  return null;
+}

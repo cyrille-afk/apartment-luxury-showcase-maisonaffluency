@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { loadStripeCreds } from "../_shared/stripeCreds.ts";
+import { loadStripeCreds, loadStripeTestCreds } from "../_shared/stripeCreds.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -50,6 +50,7 @@ serve(async (req) => {
     const cardId = body.cardId ? String(body.cardId).slice(0, 120) : null;
     const cardStage = body.cardStage ? String(body.cardStage).slice(0, 60) : null;
     const paymentKind = body.paymentKind === "deposit" ? "deposit" : "full";
+    const testMode = Boolean(body.testMode);
     const expectedTotalCents = Number.isFinite(Number(body.expectedTotalCents))
       ? Math.round(Number(body.expectedTotalCents))
       : null;
@@ -59,7 +60,17 @@ serve(async (req) => {
       throw new Error("Amount must be between 1 and 500,000");
     }
 
-    const creds = await loadStripeCreds();
+    let creds;
+    if (testMode) {
+      creds = await loadStripeTestCreds();
+      if (!creds) {
+        throw new Error(
+          "No Stripe test keys saved. Add them in Payment Settings → Test credentials.",
+        );
+      }
+    } else {
+      creds = await loadStripeCreds();
+    }
     const stripe = new Stripe(creds.secretKey, {
       apiVersion: "2025-08-27.basil",
     });
@@ -80,7 +91,7 @@ serve(async (req) => {
         },
       ],
       metadata: {
-        source: "sales_funnel_adhoc",
+        source: testMode ? "sales_funnel_adhoc_test" : "sales_funnel_adhoc",
         created_by: claims.sub,
         quote_id: quoteId ?? "",
         cardId: cardId ?? "",
@@ -89,7 +100,7 @@ serve(async (req) => {
       },
       payment_intent_data: {
         metadata: {
-          source: "sales_funnel_adhoc",
+          source: testMode ? "sales_funnel_adhoc_test" : "sales_funnel_adhoc",
           cardId: cardId ?? "",
           card_stage: cardStage ?? "",
           payment_kind: paymentKind,

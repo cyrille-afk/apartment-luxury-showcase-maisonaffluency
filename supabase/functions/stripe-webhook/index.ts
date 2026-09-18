@@ -1,15 +1,18 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { loadStripeCreds } from "../_shared/stripeCreds.ts";
+import { loadStripeCreds, loadStripeTestCreds } from "../_shared/stripeCreds.ts";
 
 const creds = await loadStripeCreds();
+const testCreds = await loadStripeTestCreds();
 
 const stripe = new Stripe(creds.secretKey, {
   apiVersion: "2025-08-27.basil",
 });
 
-const endpointSecret = creds.webhookSecret;
+const endpointSecrets = [creds.webhookSecret, testCreds?.webhookSecret].filter(
+  (s): s is string => Boolean(s),
+);
 
 /**
  * Sales funnel Kanban state machine.
@@ -73,12 +76,19 @@ serve(async (req) => {
 
   const body = await req.text();
 
-  let event: Stripe.Event;
-  try {
-    event = await stripe.webhooks.constructEventAsync(body, signature, endpointSecret);
-  } catch (err: any) {
-    console.error("Webhook signature verification failed:", err.message);
-    return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+  let event: Stripe.Event | null = null;
+  let lastErr: Error | null = null;
+  for (const secret of endpointSecrets) {
+    try {
+      event = await stripe.webhooks.constructEventAsync(body, signature, secret);
+      break;
+    } catch (err: any) {
+      lastErr = err;
+    }
+  }
+  if (!event) {
+    console.error("Webhook signature verification failed:", lastErr?.message);
+    return new Response(`Webhook Error: ${lastErr?.message}`, { status: 400 });
   }
 
   if (event.type === "checkout.session.completed") {

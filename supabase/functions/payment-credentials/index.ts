@@ -73,6 +73,9 @@ serve(async (req) => {
         publishableKey: "live_publishable_key",
         secretKey: "live_secret_key",
         webhookSecret: "live_webhook_secret",
+        testPublishableKey: "test_publishable_key",
+        testSecretKey: "test_secret_key",
+        testWebhookSecret: "test_webhook_secret",
       };
       const column = columns[field];
       if (!column) throw new Error("Unknown credential field");
@@ -85,29 +88,39 @@ serve(async (req) => {
       if (field === "webhookSecret" && !value.startsWith("whsec_")) {
         throw new Error("Webhook signing secret must start with whsec_");
       }
+      if (field === "testPublishableKey" && !value.startsWith("pk_test_")) {
+        throw new Error("Test publishable key must start with pk_test_");
+      }
+      if (field === "testSecretKey" && !value.startsWith("sk_test_") && !value.startsWith("rk_test_")) {
+        throw new Error("Test secret key must start with sk_test_ or rk_test_");
+      }
+      if (field === "testWebhookSecret" && !value.startsWith("whsec_")) {
+        throw new Error("Webhook signing secret must start with whsec_");
+      }
 
-      const { data: existing } = await admin
-        .from("payment_credentials")
-        .select("live_publishable_key, live_secret_key, live_webhook_secret")
-        .eq("id", "live")
-        .maybeSingle();
-      const next = {
-        live_publishable_key: existing?.live_publishable_key ?? null,
-        live_secret_key: existing?.live_secret_key ?? null,
-        live_webhook_secret: existing?.live_webhook_secret ?? null,
-        [column]: value,
-      };
-      const allConfigured = Boolean(
-        next.live_publishable_key && next.live_secret_key && next.live_webhook_secret,
-      );
       const { error } = await admin.from("payment_credentials").upsert({
         id: "live",
-        ...next,
-        live_mode: allConfigured,
+        [column]: value,
         updated_by: claims.sub,
         updated_at: new Date().toISOString(),
       });
       if (error) throw error;
+
+      // Keep live_mode accurate after live-field saves.
+      if (!field.startsWith("test")) {
+        const { data: existing } = await admin
+          .from("payment_credentials")
+          .select("live_publishable_key, live_secret_key, live_webhook_secret")
+          .eq("id", "live")
+          .maybeSingle();
+        const allConfigured = Boolean(
+          existing?.live_publishable_key && existing?.live_secret_key && existing?.live_webhook_secret,
+        );
+        await admin
+          .from("payment_credentials")
+          .update({ live_mode: allConfigured, updated_at: new Date().toISOString() })
+          .eq("id", "live");
+      }
     }
 
     if (action === "set_mode") {
@@ -120,7 +133,7 @@ serve(async (req) => {
 
     const { data: row } = await admin
       .from("payment_credentials")
-      .select("live_publishable_key, live_secret_key, live_webhook_secret, live_mode, updated_at")
+      .select("live_publishable_key, live_secret_key, live_webhook_secret, test_publishable_key, test_secret_key, test_webhook_secret, live_mode, updated_at")
       .eq("id", "live")
       .maybeSingle();
 
@@ -132,6 +145,9 @@ serve(async (req) => {
         publishableKey: mask(row?.live_publishable_key as string | null),
         secretKey: mask(row?.live_secret_key as string | null),
         webhookSecret: mask(row?.live_webhook_secret as string | null),
+        testPublishableKey: mask(row?.test_publishable_key as string | null),
+        testSecretKey: mask(row?.test_secret_key as string | null),
+        testWebhookSecret: mask(row?.test_webhook_secret as string | null),
         updatedAt: row?.updated_at ?? null,
         webhookUrl: `https://${projectRef}.supabase.co/functions/v1/stripe-webhook`,
       }),
