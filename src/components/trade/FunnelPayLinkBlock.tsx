@@ -6,6 +6,10 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 const CURRENCIES = ["USD", "EUR", "GBP", "SGD", "HKD", "AED", "CHF"] as const;
+const INTERNAL_COPY_RECIPIENTS = [
+  "cyrille@maisonaffluency.com",
+  "gregoire@maisonaffluency.com",
+];
 const SYMBOL: Record<string, string> = {
   USD: "$",
   EUR: "€",
