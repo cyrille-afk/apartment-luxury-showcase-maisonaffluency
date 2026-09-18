@@ -311,9 +311,20 @@ export default function TradeAdminPaymentSettings() {
                 </Button>
               </div>
               <p
-                className={`mt-1 font-body text-xs ${fieldError(f.key) || (attemptedSave && !values[f.key].trim()) ? "text-destructive" : "text-muted-foreground"}`}
+                className={`mt-1 font-body text-xs ${
+                  fieldError(f.key) || (attemptedSave && !values[f.key].trim() && !status?.[f.key])
+                    ? "text-destructive"
+                    : savedFields[f.key]
+                      ? "text-[hsl(var(--jade))]"
+                      : "text-muted-foreground"
+                }`}
               >
-                {fieldError(f.key) ?? (attemptedSave && !values[f.key].trim() ? "This value is required." : f.hint)}
+                {fieldError(f.key) ??
+                  (savedFields[f.key]
+                    ? "Saved ✓ stored securely — the box is intentionally blank."
+                    : attemptedSave && !values[f.key].trim() && !status?.[f.key]
+                      ? "This value is required."
+                      : f.hint)}
               </p>
             </div>
           ))}
