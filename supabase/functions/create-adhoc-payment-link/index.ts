@@ -59,20 +59,7 @@ serve(async (req) => {
       throw new Error("Amount must be between 1 and 500,000");
     }
 
-    let creds;
-    if (testMode) {
-      creds = await loadStripeTestCreds();
-      if (!creds) {
-        throw new Error(
-          "No Stripe test keys saved. Add them in Payment Settings → Test credentials.",
-        );
-      }
-    } else {
-      creds = await loadStripeCreds();
-    }
-    const stripe = new Stripe(creds.secretKey, {
-      apiVersion: "2025-08-27.basil",
-    });
+    const { stripe, creds } = await getStripe(testMode ? "test" : "auto");
 
     const origin = req.headers.get("origin") || "https://www.maisonaffluency.com";
 
