@@ -2657,10 +2657,13 @@ export type Database = {
           document_path: string | null
           email_error: string | null
           email_status: string
+          escalation_count: number
           id: string
+          last_escalated_at: string | null
           line_count: number
           order_id: string | null
           po_number: string
+          requires_manual_followup: boolean
           stripe_session_id: string | null
           total_purchase_cost_cogs: number
           total_retail_rrp: number
@@ -2680,10 +2683,13 @@ export type Database = {
           document_path?: string | null
           email_error?: string | null
           email_status?: string
+          escalation_count?: number
           id?: string
+          last_escalated_at?: string | null
           line_count?: number
           order_id?: string | null
           po_number: string
+          requires_manual_followup?: boolean
           stripe_session_id?: string | null
           total_purchase_cost_cogs?: number
           total_retail_rrp?: number
@@ -2703,10 +2709,13 @@ export type Database = {
           document_path?: string | null
           email_error?: string | null
           email_status?: string
+          escalation_count?: number
           id?: string
+          last_escalated_at?: string | null
           line_count?: number
           order_id?: string | null
           po_number?: string
+          requires_manual_followup?: boolean
           stripe_session_id?: string | null
           total_purchase_cost_cogs?: number
           total_retail_rrp?: number
@@ -5555,8 +5564,10 @@ export type Database = {
           designer_invoice_reference: string | null
           designer_invoice_status: string
           designer_name: string | null
+          followup_flagged_at: string | null
           id: string
           invoice_received_at: string | null
+          last_escalated_at: string | null
           line_item_id: string | null
           net_maison_margin: number
           notes: string | null
@@ -5565,6 +5576,7 @@ export type Database = {
           po_number: string | null
           purchase_cost_cogs: number
           purchase_order_id: string | null
+          requires_manual_followup: boolean
           retail_discount_applied: number
           retail_rrp: number
           sold_price_gross: number
@@ -5584,8 +5596,10 @@ export type Database = {
           designer_invoice_reference?: string | null
           designer_invoice_status?: string
           designer_name?: string | null
+          followup_flagged_at?: string | null
           id?: string
           invoice_received_at?: string | null
+          last_escalated_at?: string | null
           line_item_id?: string | null
           net_maison_margin?: number
           notes?: string | null
@@ -5594,6 +5608,7 @@ export type Database = {
           po_number?: string | null
           purchase_cost_cogs?: number
           purchase_order_id?: string | null
+          requires_manual_followup?: boolean
           retail_discount_applied?: number
           retail_rrp?: number
           sold_price_gross?: number
@@ -5613,8 +5628,10 @@ export type Database = {
           designer_invoice_reference?: string | null
           designer_invoice_status?: string
           designer_name?: string | null
+          followup_flagged_at?: string | null
           id?: string
           invoice_received_at?: string | null
+          last_escalated_at?: string | null
           line_item_id?: string | null
           net_maison_margin?: number
           notes?: string | null
@@ -5623,6 +5640,7 @@ export type Database = {
           po_number?: string | null
           purchase_cost_cogs?: number
           purchase_order_id?: string | null
+          requires_manual_followup?: boolean
           retail_discount_applied?: number
           retail_rrp?: number
           sold_price_gross?: number
