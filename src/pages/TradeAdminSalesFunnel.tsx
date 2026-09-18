@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, Navigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Mail, TrendingDown } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Mail, PackageOpen, ShoppingBag, TrendingDown } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { useSalesFunnel } from "@/hooks/useSalesFunnel";
+import { useSalesFunnel, type FunnelEntry } from "@/hooks/useSalesFunnel";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { supabaseImageTransform } from "@/lib/supabaseImage";
 
 const RANGES = [
   { id: 7, label: "Last 7 days" },
@@ -21,10 +24,118 @@ const relative = (iso: string) => {
   return `${Math.floor(h / 24)}d ago`;
 };
 
+const EntryCard = ({ entry, urgent = false }: { entry: FunnelEntry; urgent?: boolean }) => (
+  <article
+    className={cn(
+      "group border bg-card p-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft",
+      urgent ? "border-accent/80 shadow-soft" : "border-border hover:border-primary/40",
+    )}
+  >
+    <div className="flex gap-3">
+      <div className="flex h-16 w-14 shrink-0 items-center justify-center overflow-hidden bg-muted">
+        {entry.imageUrl ? (
+          <img
+            src={supabaseImageTransform(entry.imageUrl, { width: 160, quality: 70 })}
+            alt=""
+            className="h-full w-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <PackageOpen className="h-5 w-5 text-muted-foreground/60" aria-hidden="true" />
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="line-clamp-2 font-display text-[15px] leading-tight text-foreground">
+            {entry.label}
+          </h3>
+          <span className="shrink-0 font-body text-[10px] text-muted-foreground">
+            {relative(entry.createdAt)}
+          </span>
+        </div>
+        <p className="mt-1 truncate font-body text-[11px] text-muted-foreground">
+          {entry.email || entry.sublabel}
+        </p>
+        {entry.email && entry.sublabel && (
+          <p className="mt-0.5 truncate font-body text-[10px] text-muted-foreground/80">
+            {entry.sublabel}
+          </p>
+        )}
+      </div>
+    </div>
+    <div className="mt-3 flex items-center justify-between gap-3 border-t border-border/70 pt-2.5">
+      {entry.amountLabel ? (
+        <span className="font-body text-[11px] font-medium text-foreground">{entry.amountLabel}</span>
+      ) : (
+        <span className="font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+          {urgent ? "Draft quotation" : "Follow up"}
+        </span>
+      )}
+      {entry.href ? (
+        <Button asChild variant={urgent ? "default" : "ghost"} size="sm" className="h-7 px-2 text-[10px] uppercase tracking-[0.12em]">
+          <Link to={entry.href}>
+            {urgent ? "Resume draft" : "Open"} <ArrowRight className="h-3 w-3" />
+          </Link>
+        </Button>
+      ) : entry.email ? (
+        <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-[10px] uppercase tracking-[0.12em]">
+          <a href={`mailto:${entry.email}`}><Mail className="h-3 w-3" /> Email</a>
+        </Button>
+      ) : null}
+    </div>
+  </article>
+);
+
+const PipelineColumn = ({
+  title,
+  count,
+  children,
+  className,
+  urgent = false,
+}: {
+  title: string;
+  count: number;
+  children: ReactNode;
+  className?: string;
+  urgent?: boolean;
+}) => (
+  <section className={cn("min-w-[250px] border-t-2 border-border pt-4", urgent && "border-accent", className)}>
+    <div className="mb-4 flex items-center justify-between gap-3 px-1">
+      <div className="flex min-w-0 items-center gap-2">
+        <span className={cn("h-2 w-2 shrink-0 rounded-full bg-primary", urgent && "bg-accent")} />
+        <h2 className="truncate font-body text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">
+          {title}
+        </h2>
+      </div>
+      <span
+        className={cn(
+          "flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full bg-muted px-2 font-body text-xs font-semibold text-foreground",
+          urgent && "bg-accent text-accent-foreground motion-safe:animate-pulse",
+        )}
+      >
+        {count}
+      </span>
+    </div>
+    <div className={cn("min-h-[420px] space-y-3 border border-border bg-muted/30 p-3", urgent && "bg-accent/5")}>{children}</div>
+  </section>
+);
+
+const GroupLabel = ({ children, count }: { children: ReactNode; count: number }) => (
+  <div className="flex items-center justify-between gap-3 px-1 pt-1">
+    <p className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{children}</p>
+    <span className="font-body text-[10px] text-muted-foreground">{count}</span>
+  </div>
+);
+
+const EmptyState = ({ label }: { label: string }) => (
+  <div className="flex min-h-20 items-center justify-center border border-dashed border-border bg-background/60 px-4 text-center">
+    <p className="font-body text-xs text-muted-foreground">{label}</p>
+  </div>
+);
+
 const TradeAdminSalesFunnel = () => {
   const { isAdmin, loading: authLoading } = useAuth();
   const [days, setDays] = useState(90);
-  const [open, setOpen] = useState<string | null>(null);
   const { data, isLoading } = useSalesFunnel(days);
 
   if (authLoading) {
@@ -37,10 +148,17 @@ const TradeAdminSalesFunnel = () => {
   if (!isAdmin) return <Navigate to="/trade/dashboard" replace />;
 
   const stages = data?.stages ?? [];
-  const widest = Math.max(1, ...stages.map((s) => s.entries.length));
+  const stage = (key: string) => stages.find((item) => item.key === key)?.entries ?? [];
+  const bags = stage("abandoned_bags");
+  const requests = stage("not_quoted");
+  const drafts = stage("draft_quotes");
+  const sent = stage("sent_unpaid");
+  const orders = stage("orders_pending");
+  const leadCount = bags.length + requests.length;
+  const settlementCount = sent.length + orders.length;
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-5 py-10 md:px-8">
+    <div className="mx-auto w-full max-w-[1600px] px-5 py-10 md:px-8">
       <Helmet>
         <title>Sales Funnel — Unfinished Quotes & Bags</title>
         <meta name="robots" content="noindex" />
@@ -83,101 +201,49 @@ const TradeAdminSalesFunnel = () => {
         </div>
       ) : (
         <>
-          <div className="mb-10 space-y-3">
-            {stages.map((stage) => {
-              const pct = Math.round((stage.entries.length / widest) * 100);
-              const isOpen = open === stage.key;
-              return (
-                <div key={stage.key} className="border border-border bg-card">
-                  <button
-                    onClick={() => setOpen(isOpen ? null : stage.key)}
-                    className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-baseline justify-between gap-4">
-                        <p className="font-body text-[11px] uppercase tracking-[0.2em] text-foreground">
-                          {stage.title}
-                        </p>
-                        <span className="font-body text-lg text-foreground">
-                          {stage.entries.length}
-                        </span>
-                      </div>
-                      <p className="mt-1 font-body text-xs text-muted-foreground">
-                        {stage.description}
-                      </p>
-                      <div className="mt-3 h-1 w-full bg-muted">
-                        <div className="h-1 bg-foreground/70" style={{ width: `${pct}%` }} />
-                      </div>
-                    </div>
-                  </button>
+          <div className="mb-10 overflow-x-auto pb-3">
+            <div className="grid min-w-[1180px] grid-cols-[0.9fr_1.6fr_1fr_0.78fr] gap-4 xl:gap-5">
+              <PipelineColumn title="Lead Capture" count={leadCount}>
+                <GroupLabel count={bags.length}>Shopping bags abandoned</GroupLabel>
+                {bags.length ? bags.map((entry) => <EntryCard key={entry.id} entry={entry} />) : <EmptyState label="No abandoned bags" />}
+                <GroupLabel count={requests.length}>Requests without a quote</GroupLabel>
+                {requests.length ? requests.map((entry) => <EntryCard key={entry.id} entry={entry} />) : <EmptyState label="All requests are quoted" />}
+              </PipelineColumn>
 
-                  {isOpen && (
-                    <div className="border-t border-border">
-                      {stage.entries.length === 0 ? (
-                        <p className="px-5 py-4 font-body text-sm text-muted-foreground">
-                          Nothing stalled here.
-                        </p>
-                      ) : (
-                        <ul className="divide-y divide-border">
-                          {stage.entries.map((e) => (
-                            <li
-                              key={e.id}
-                              className="flex flex-col gap-2 px-5 py-3 md:flex-row md:items-center md:justify-between"
-                            >
-                              <div className="min-w-0">
-                                <p className="truncate font-body text-sm text-foreground">
-                                  {e.label}
-                                </p>
-                                <p className="truncate font-body text-xs text-muted-foreground">
-                                  {e.sublabel} · {relative(e.createdAt)}
-                                </p>
-                              </div>
-                              <div className="flex shrink-0 items-center gap-4">
-                                {e.amountLabel && (
-                                  <span className="font-body text-xs text-muted-foreground">
-                                    {e.amountLabel}
-                                  </span>
-                                )}
-                                {e.email && (
-                                  <a
-                                    href={`mailto:${e.email}`}
-                                    className="inline-flex items-center gap-1 font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground"
-                                  >
-                                    <Mail className="h-3.5 w-3.5" /> Email
-                                  </a>
-                                )}
-                                {e.href && (
-                                  <Link
-                                    to={e.href}
-                                    className="inline-flex items-center gap-1 font-body text-[11px] uppercase tracking-[0.18em] text-foreground"
-                                  >
-                                    Open <ArrowRight className="h-3.5 w-3.5" />
-                                  </Link>
-                                )}
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  )}
+              <PipelineColumn title="Action Required" count={drafts.length} urgent>
+                <div className="mb-3 flex items-center gap-2 border-b border-accent/40 px-1 pb-3">
+                  <TrendingDown className="h-3.5 w-3.5 text-accent-foreground" />
+                  <p className="font-body text-[10px] uppercase tracking-[0.16em] text-foreground">Quotes never sent</p>
                 </div>
-              );
-            })}
+                {drafts.length ? drafts.map((entry) => <EntryCard key={entry.id} entry={entry} urgent />) : <EmptyState label="No drafts waiting" />}
+              </PipelineColumn>
+
+              <PipelineColumn title="Awaiting Settlement" count={settlementCount}>
+                <GroupLabel count={sent.length}>Quotes sent, not paid</GroupLabel>
+                {sent.length ? sent.map((entry) => <EntryCard key={entry.id} entry={entry} />) : <EmptyState label="No unpaid quotations" />}
+                <GroupLabel count={orders.length}>Orders awaiting payment</GroupLabel>
+                {orders.length ? orders.map((entry) => <EntryCard key={entry.id} entry={entry} />) : <EmptyState label="No orders awaiting payment" />}
+              </PipelineColumn>
+
+              <PipelineColumn title="Conversions" count={data?.converted ?? 0}>
+                <div className="flex min-h-[190px] flex-col items-center justify-center border border-primary/20 bg-primary/5 px-5 text-center">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <Check className="h-4 w-4" />
+                  </span>
+                  <p className="mt-4 font-display text-5xl text-foreground">{data?.converted ?? 0}</p>
+                  <p className="mt-2 font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Completed in this period</p>
+                  <p className="mt-2 font-body text-xs leading-relaxed text-muted-foreground">Paid orders and settled quotations.</p>
+                </div>
+                <div className="flex items-center gap-2 border border-border bg-card p-3">
+                  <ShoppingBag className="h-4 w-4 text-primary" />
+                  <p className="font-body text-xs text-muted-foreground">Closed revenue, ready for fulfilment.</p>
+                </div>
+              </PipelineColumn>
+            </div>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="border border-border bg-card px-5 py-4">
-              <p className="font-body text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-                Completed in this period
-              </p>
-              <p className="mt-2 font-display text-3xl text-foreground">{data?.converted ?? 0}</p>
-              <p className="mt-1 font-body text-xs text-muted-foreground">
-                Paid orders and settled quotations.
-              </p>
-            </div>
-
-            <div className="border border-border bg-card px-5 py-4">
+           <div className="border-t border-border pt-6">
+             <div className="bg-card px-1 py-2">
               <p className="flex items-center gap-2 font-body text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
                 <TrendingDown className="h-3.5 w-3.5" /> Recent automatic reminders
               </p>
@@ -195,7 +261,6 @@ const TradeAdminSalesFunnel = () => {
                   ))}
                 </ul>
               )}
-            </div>
           </div>
         </>
       )}
