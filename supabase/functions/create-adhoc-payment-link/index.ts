@@ -76,7 +76,7 @@ serve(async (req) => {
         created_by: claims.sub,
         quote_id: quoteId ?? "",
       },
-      success_url: `${origin}/trade/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/trade/admin/sales-funnel`,
     });
 
