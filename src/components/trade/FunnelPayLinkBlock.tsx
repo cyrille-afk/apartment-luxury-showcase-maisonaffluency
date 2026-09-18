@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { signedQuotePdfUrl } from "@/lib/publishQuotePdf";
 
 const CURRENCIES = ["USD", "EUR", "GBP", "SGD", "HKD", "AED", "CHF"] as const;
 const INTERNAL_COPY_RECIPIENTS = [
@@ -174,6 +175,17 @@ const FunnelPayLinkBlock = ({
     }
     setSendingEmail(true);
     try {
+      // The email system cannot carry binary attachments, so the formal quote
+      // PDF travels as a secure 90-day signed download link.
+      let quotePdfUrl: string | null = null;
+      if (quoteId) {
+        try {
+          quotePdfUrl = await signedQuotePdfUrl(quoteId);
+        } catch (pdfErr) {
+          console.warn("Could not sign quote PDF", pdfErr);
+        }
+      }
+
       const { error } = await supabase.functions.invoke("send-transactional-email", {
         body: {
           templateName: "quote-confirmation-payment-link",
@@ -185,6 +197,7 @@ const FunnelPayLinkBlock = ({
             finish,
             leadTime,
             paymentLink: url,
+            quotePdfUrl,
             maisonRef: maisonRef || (quoteId ? `QU-${quoteId.slice(0, 6).toUpperCase()}` : undefined),
           },
         },
@@ -243,10 +256,14 @@ const FunnelPayLinkBlock = ({
       setEmailSent(true);
       toast({
         title: "Confirmation email sent",
-        description:
+        description: [
+          quotePdfUrl
+            ? "Formal quote PDF included as a secure download link."
+            : "No quote PDF on file — open the quote and preview it once to publish one.",
           internalFailures.length === 0
             ? "Internal copy sent to Cyrille and Gregoire."
-            : "Client email sent; internal copy failed for some recipients.",
+            : "Internal copy failed for some recipients.",
+        ].join(" "),
       });
       setTimeout(() => setEmailSent(false), 6000);
     } catch (err) {
