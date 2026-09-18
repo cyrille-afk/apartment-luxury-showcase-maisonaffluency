@@ -2615,6 +2615,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               setEmailPreviewLoading(true);
               try {
                 const args = await buildPdfArgs();
+                if (!(await runPreSendChecks(args))) return;
                 const url = await previewQuotePdfUrl(args);
                 setEmailPreviewUrl(url);
                 // Publish the same PDF privately so client emails can link to it.
