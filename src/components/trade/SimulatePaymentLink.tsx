@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { usePaymentMode } from "@/hooks/usePaymentMode";
 
 /**
  * Dev-only testing utility: spoofs a `payment_intent.succeeded` webhook for a
@@ -36,8 +37,11 @@ export default function SimulatePaymentLink({
   const { toast } = useToast();
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
+  const { data: paymentMode } = usePaymentMode(isLocalDevHost());
 
-  if (!isLocalDevHost()) return null;
+  // Hidden in the published build, and hidden entirely once live production
+  // Stripe credentials are active — no simulation tools in front of clients.
+  if (!isLocalDevHost() || paymentMode?.liveMode) return null;
 
   const simulate = async () => {
     setBusy(true);

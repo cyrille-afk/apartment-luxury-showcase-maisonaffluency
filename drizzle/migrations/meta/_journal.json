@@ -162,6 +162,13 @@
       "when": 1789692543664,
       "tag": "0022_funnel_card_payments_admin_write",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1789693336601,
+      "tag": "0023_create_payment_credentials",
+      "breakpoints": true
     }
   ]
 }

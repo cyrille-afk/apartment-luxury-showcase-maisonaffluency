@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderKanban,
   DollarSign, ClipboardList, Package, FileText, Settings, Wrench, UserCircle, Wand2, Image, Users, Inbox,
-  TrendingDown,
+  TrendingDown, Lock,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
@@ -326,6 +326,18 @@ export function TradeSidebar() {
                     >
                       <TrendingDown className="h-4 w-4 shrink-0" />
                       {!collapsed && <span>Sales Funnel</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to="/trade/admin/payment-settings"
+                      className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      activeClassName="text-foreground font-medium"
+                    >
+                      <Lock className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>Payment Settings</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
