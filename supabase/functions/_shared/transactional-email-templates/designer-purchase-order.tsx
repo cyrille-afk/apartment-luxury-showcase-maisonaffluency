@@ -66,6 +66,13 @@ const DesignerPurchaseOrderEmail = ({
           </Section>
         ) : null}
 
+        {acknowledgeUrl ? (
+          <Section style={{ textAlign: 'center' as const, padding: '4px 0 8px' }}>
+            <Button href={acknowledgeUrl} style={ackButton}>Confirm receipt of this PO</Button>
+            <Text style={muted}>One click — no login required.</Text>
+          </Section>
+        ) : null}
+
         <Text style={text}>
           Kindly acknowledge receipt and issue your invoice quoting this purchase order reference so our
           accounts team can match and settle it.
@@ -90,6 +97,7 @@ export const template = {
     lineCount: 2,
     totalCost: 'EUR 8,400.00',
     downloadUrl: 'https://example.com/po.pdf',
+    acknowledgeUrl: 'https://example.com/ack',
   },
 } satisfies TemplateEntry
 
@@ -108,5 +116,10 @@ const button = {
   backgroundColor: '#12352c', color: '#ffffff', fontSize: '13px', letterSpacing: '1.2px',
   textTransform: 'uppercase' as const, padding: '13px 26px', textDecoration: 'none',
   fontFamily: 'Arial, sans-serif', display: 'inline-block',
+}
+const ackButton = {
+  backgroundColor: '#ffffff', color: '#12352c', fontSize: '12px', letterSpacing: '1.2px',
+  textTransform: 'uppercase' as const, padding: '12px 24px', textDecoration: 'none',
+  fontFamily: 'Arial, sans-serif', display: 'inline-block', border: '1px solid #12352c',
 }
 const muted = { fontSize: '11px', color: '#6e6e6e', margin: '10px 0 0', fontFamily: 'Arial, sans-serif' }
