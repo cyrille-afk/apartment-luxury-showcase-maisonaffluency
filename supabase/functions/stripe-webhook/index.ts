@@ -3,6 +3,7 @@ import type Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { loadStripeTestCreds } from "../_shared/stripeCreds.ts";
 import { getStripe } from "../_shared/stripeClient.ts";
+import { recordDesignerPayouts } from "../_shared/recordDesignerPayouts.ts";
 
 const { stripe, creds } = await getStripe("auto");
 const testCreds = await loadStripeTestCreds();
@@ -145,6 +146,24 @@ serve(async (req) => {
           .eq("id", orderId);
         if (orderErr) console.error("[STRIPE-WEBHOOK] shop order update failed:", orderErr);
         else console.log(`[STRIPE-WEBHOOK] Shop order ${orderId} marked as paid`);
+
+        // ===== Multi-vendor commission split =====
+        try {
+          const payoutResult = await recordDesignerPayouts(supabase, {
+            orderId,
+            tradeProgramId: session.metadata?.trade_program_id ?? null,
+            stripeSessionId: session.id,
+            stripePaymentIntentId:
+              typeof session.payment_intent === "string" ? session.payment_intent : null,
+          });
+          if ("error" in payoutResult) {
+            console.error("[STRIPE-WEBHOOK] commission split failed:", payoutResult.error);
+          } else {
+            console.log(`[STRIPE-WEBHOOK] Commission ledger rows: ${payoutResult.inserted}`);
+          }
+        } catch (e) {
+          console.error("[STRIPE-WEBHOOK] commission split error:", e);
+        }
 
         // Order-received confirmation ("Under Review by Paris Logistics").
         // Idempotent via the order_ref key — Stripe retries cannot duplicate it.

@@ -176,6 +176,13 @@
       "when": 1789697765565,
       "tag": "0024_add_test_stripe_credential_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1789702554828,
+      "tag": "0025_create_designer_payouts",
+      "breakpoints": true
     }
   ]
 }
