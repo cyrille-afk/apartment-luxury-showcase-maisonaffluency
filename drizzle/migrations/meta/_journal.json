@@ -225,6 +225,13 @@
       "when": 1789707919448,
       "tag": "0031_add_quantity_to_trade_quote_extras",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1789719164610,
+      "tag": "0032_quote_client_pdf",
+      "breakpoints": true
     }
   ]
 }
