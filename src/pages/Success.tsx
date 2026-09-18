@@ -2,10 +2,20 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Check } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+
+interface AdhocPayment {
+  paid: boolean;
+  amount_cents: number;
+  currency: string;
+  label: string | null;
+  payer_email: string | null;
+  funnel_status: string | null;
+}
 
 interface OrderDetails {
   product_name: string;
@@ -38,7 +48,9 @@ export default function Success() {
   const [params] = useSearchParams();
   const sessionId = params.get("session_id");
 
+  const queryClient = useQueryClient();
   const [order, setOrder] = useState<OrderDetails | null>(null);
+  const [adhoc, setAdhoc] = useState<AdhocPayment | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,6 +64,25 @@ export default function Success() {
     let cancelled = false;
 
     async function fetchOrder() {
+      // 1) Reconcile ad-hoc Sales Funnel payments directly with Stripe so the
+      //    pipeline card flips immediately — no waiting on webhook delivery.
+      try {
+        const { data: verify } = await supabase.functions.invoke("verify-adhoc-payment", {
+          body: { session_id: sessionId },
+        });
+        const v = verify as (AdhocPayment & { card_id?: string | null }) | null;
+        if (!cancelled && v?.paid && v.card_id) {
+          setAdhoc(v);
+          setLoading(false);
+          // Instant funnel sync: drop any cached Sales Funnel data.
+          queryClient.invalidateQueries({ queryKey: ["sales-funnel"] });
+          return;
+        }
+      } catch {
+        // Not an ad-hoc funnel payment — fall through to the orders table.
+      }
+
+      // 2) Standard shop order lookup.
       try {
         const { data, error: fnError } = await supabase.functions.invoke("get-order-by-session", {
           body: { session_id: sessionId },
@@ -65,15 +96,15 @@ export default function Success() {
 
         setOrder((data as any).order as OrderDetails);
       } catch (err: any) {
-        setError(err?.message || "Unable to load order details.");
+        if (!cancelled) setError(err?.message || "Unable to load order details.");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     void fetchOrder();
     return () => { cancelled = true; };
-  }, [sessionId]);
+  }, [sessionId, queryClient]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -109,6 +140,55 @@ export default function Success() {
                 <Skeleton className="h-4 w-2/3" />
                 <Skeleton className="h-4 w-1/2" />
                 <Skeleton className="h-4 w-4/5" />
+              </div>
+            ) : adhoc ? (
+              <div className="rounded-none border border-foreground/10 bg-background p-6 md:p-8">
+                <div className="flex items-center justify-between pb-6 mb-6 border-b border-foreground/10">
+                  <div>
+                    <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                      Payment Status
+                    </p>
+                    <p className="mt-1 font-body text-sm text-foreground">
+                      Payment Confirmed via Stripe
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center px-3 py-1.5 font-body text-[10px] uppercase tracking-[0.18em] bg-foreground text-background">
+                    {adhoc.funnel_status === "settled" ? "Settled" : "Paid"}
+                  </span>
+                </div>
+
+                <dl className="space-y-5">
+                  {adhoc.label ? (
+                    <div>
+                      <dt className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                        Item
+                      </dt>
+                      <dd className="mt-1 font-display text-base md:text-lg text-foreground leading-snug">
+                        {adhoc.label}
+                      </dd>
+                    </div>
+                  ) : null}
+
+                  <div className="flex items-center justify-between pt-4 border-t border-foreground/10">
+                    <dt className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                      Total Paid
+                    </dt>
+                    <dd className="font-display text-lg md:text-xl text-foreground">
+                      {formatOrderCurrency(adhoc.amount_cents, adhoc.currency)}
+                    </dd>
+                  </div>
+
+                  {adhoc.payer_email ? (
+                    <div>
+                      <dt className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                        Confirmation Email
+                      </dt>
+                      <dd className="mt-1 font-body text-sm text-foreground break-all">
+                        {adhoc.payer_email}
+                      </dd>
+                    </div>
+                  ) : null}
+                </dl>
               </div>
             ) : error || !order ? (
               <div className="text-center py-10">
