@@ -10,6 +10,8 @@ export interface FunnelEntry {
   href: string | null;
   email: string | null;
   imageUrl: string | null;
+  finish?: string | null;
+  leadTime?: string | null;
 }
 
 export interface FunnelStage {
