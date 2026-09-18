@@ -61,7 +61,12 @@ export default function TradeAdminPaymentSettings() {
     setSaving(true);
     try {
       const { data, error } = await supabase.functions.invoke("payment-credentials", {
-        body: { action: "save", ...values },
+        body: {
+          action: "save",
+          publishableKey: values.publishableKey.trim(),
+          secretKey: values.secretKey.trim(),
+          webhookSecret: values.webhookSecret.trim(),
+        },
       });
       if (error) throw error;
       if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
