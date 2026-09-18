@@ -46,6 +46,12 @@ serve(async (req) => {
     const label = String(body.label ?? "Maison Affluency").slice(0, 120);
     const payerEmail = body.payerEmail ? String(body.payerEmail).slice(0, 255) : null;
     const quoteId = body.quoteId ? String(body.quoteId) : null;
+    const cardId = body.cardId ? String(body.cardId).slice(0, 120) : null;
+    const cardStage = body.cardStage ? String(body.cardStage).slice(0, 60) : null;
+    const paymentKind = body.paymentKind === "deposit" ? "deposit" : "full";
+    const expectedTotalCents = Number.isFinite(Number(body.expectedTotalCents))
+      ? Math.round(Number(body.expectedTotalCents))
+      : null;
 
     if (!ALLOWED_CURRENCIES.includes(currency)) throw new Error("Unsupported currency");
     if (!Number.isFinite(amountCents) || amountCents < 100 || amountCents > 500_000_00) {
@@ -75,6 +81,18 @@ serve(async (req) => {
         source: "sales_funnel_adhoc",
         created_by: claims.sub,
         quote_id: quoteId ?? "",
+        cardId: cardId ?? "",
+        card_stage: cardStage ?? "",
+        payment_kind: paymentKind,
+      },
+      payment_intent_data: {
+        metadata: {
+          source: "sales_funnel_adhoc",
+          cardId: cardId ?? "",
+          card_stage: cardStage ?? "",
+          payment_kind: paymentKind,
+          quote_id: quoteId ?? "",
+        },
       },
       success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/trade/admin/sales-funnel`,
