@@ -113,7 +113,7 @@ serve(async (req) => {
   const acknowledgedAt = new Date().toISOString();
   const { error: updErr } = await supabase
     .from("designer_purchase_orders")
-    .update({ acknowledged_at: acknowledgedAt, updated_at: acknowledgedAt })
+    .update({ acknowledged_at: acknowledgedAt, requires_manual_followup: false, updated_at: acknowledgedAt })
     .eq("id", po.id)
     .is("acknowledged_at", null);
   if (updErr) {
@@ -124,10 +124,22 @@ serve(async (req) => {
   // Flip the payables ledger lines out of 'Pending Invoice Match'.
   const { error: payablesErr } = await supabase
     .from("purchase_orders_payable")
-    .update({ designer_invoice_status: ACKNOWLEDGED_STATUS, updated_at: acknowledgedAt })
+    .update({
+      designer_invoice_status: ACKNOWLEDGED_STATUS,
+      requires_manual_followup: false,
+      followup_flagged_at: null,
+      updated_at: acknowledgedAt,
+    })
     .eq("purchase_order_id", po.id)
     .eq("designer_invoice_status", "pending_invoice_match");
   if (payablesErr) console.error("[PO-ACK] payables status update failed:", payablesErr.message);
+
+  // Clear any escalation flag raised by the 48-hour follow-up worker.
+  await supabase
+    .from("purchase_orders_payable")
+    .update({ requires_manual_followup: false, followup_flagged_at: null, updated_at: acknowledgedAt })
+    .eq("purchase_order_id", po.id)
+    .eq("requires_manual_followup", true);
 
   const money = `${String(po.currency ?? "usd").toUpperCase()} ${((po.total_purchase_cost_cogs ?? 0) / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
   const alertPayload = {

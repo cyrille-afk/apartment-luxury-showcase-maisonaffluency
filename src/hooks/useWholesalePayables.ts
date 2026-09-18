@@ -34,6 +34,7 @@ export interface PayableRow {
   createdAt: string;
   productTitle: string | null;
   orderRef: string | null;
+  requiresFollowup: boolean;
 }
 
 export interface PayableGroup {
@@ -46,6 +47,7 @@ export interface PayableGroup {
   outstandingPayable: number;
   maisonMargin: number;
   pendingCount: number;
+  followupCount: number;
 }
 
 export function useWholesalePayables(enabled: boolean, status: "all" | InvoiceStatus = "all") {
@@ -102,6 +104,7 @@ export function useWholesalePayables(enabled: boolean, status: "all" | InvoiceSt
         createdAt: r.created_at,
         productTitle: r.line_item_id ? titleByLine.get(r.line_item_id) ?? null : null,
         orderRef: r.order_id ? refByOrder.get(r.order_id) ?? null : null,
+        requiresFollowup: Boolean(r.requires_manual_followup),
       }));
 
       const groups = new Map<string, PayableGroup>();
@@ -119,6 +122,7 @@ export function useWholesalePayables(enabled: boolean, status: "all" | InvoiceSt
             outstandingPayable: 0,
             maisonMargin: 0,
             pendingCount: 0,
+            followupCount: 0,
           };
           groups.set(key, g);
         }
@@ -129,6 +133,7 @@ export function useWholesalePayables(enabled: boolean, status: "all" | InvoiceSt
         if (row.invoiceStatus !== "paid") g.outstandingPayable += row.purchaseCostCogs;
         if (row.invoiceStatus === "pending" || row.invoiceStatus === "pending_invoice_match")
           g.pendingCount += 1;
+        if (row.requiresFollowup) g.followupCount += 1;
       }
 
       return [...groups.values()].sort((a, b) => b.outstandingPayable - a.outstandingPayable);
