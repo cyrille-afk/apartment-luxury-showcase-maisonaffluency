@@ -8,6 +8,56 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
 
 const endpointSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET") || "";
 
+/**
+ * Sales funnel Kanban state machine.
+ * A paid Stripe link carrying metadata.cardId flips its card to
+ * "paid" (Awaiting Settlement) or "settled" (Conversions) when the
+ * payment clears the expected total with zero balance remaining.
+ */
+async function settleFunnelCard(
+  supabase: ReturnType<typeof createClient>,
+  args: { cardId: string; sessionId?: string | null; paymentIntentId?: string | null; amountPaid: number },
+) {
+  try {
+    let query = supabase
+      .from("funnel_card_payments")
+      .select("id, amount_cents, expected_total_cents, payment_kind, status")
+      .eq("card_id", args.cardId)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (args.sessionId) query = query.eq("stripe_session_id", args.sessionId);
+
+    const { data: rows, error } = await query;
+    if (error) {
+      console.error("[STRIPE-WEBHOOK] funnel card lookup failed:", error);
+      return;
+    }
+    const row = rows?.[0];
+    if (!row) {
+      console.warn(`[STRIPE-WEBHOOK] No funnel card record for cardId ${args.cardId}`);
+      return;
+    }
+    if (row.status === "paid" || row.status === "settled") return; // idempotent
+
+    const expected = row.expected_total_cents ?? row.amount_cents ?? 0;
+    const paid = args.amountPaid || row.amount_cents || 0;
+    const fullySettled = row.payment_kind === "full" || (expected > 0 && paid >= expected);
+
+    const { error: updErr } = await supabase
+      .from("funnel_card_payments")
+      .update({
+        status: fullySettled ? "settled" : "paid",
+        paid_at: new Date().toISOString(),
+        stripe_payment_intent_id: args.paymentIntentId ?? null,
+      })
+      .eq("id", row.id);
+    if (updErr) console.error("[STRIPE-WEBHOOK] funnel card update failed:", updErr);
+    else console.log(`[STRIPE-WEBHOOK] Funnel card ${args.cardId} → ${fullySettled ? "settled" : "paid"}`);
+  } catch (e) {
+    console.error("[STRIPE-WEBHOOK] settleFunnelCard error:", e);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204 });
@@ -256,6 +306,19 @@ serve(async (req) => {
   // ---------------------------------------------------------------------
   if (event.type === "payment_intent.succeeded") {
     const pi = event.data.object as Stripe.PaymentIntent;
+
+    if (pi.metadata?.cardId) {
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      );
+      await settleFunnelCard(supabase, {
+        cardId: pi.metadata.cardId,
+        paymentIntentId: pi.id,
+        amountPaid: pi.amount_received ?? pi.amount ?? 0,
+      });
+    }
+
     if (pi.metadata?.payment_type === "onsite_checkout") {
       const supabase = createClient(
         Deno.env.get("SUPABASE_URL") ?? "",
