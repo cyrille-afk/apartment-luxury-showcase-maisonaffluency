@@ -213,7 +213,7 @@ const TradeAdminWhatsAppAlerts = lazy(() => import("./pages/TradeAdminWhatsAppAl
 const TradeAdminPaymentSettings = lazy(() => import("./pages/TradeAdminPaymentSettings"));
 const TradeAdminFunnelTracker = lazy(() => import("./pages/TradeAdminFunnelTracker"));
 const TradeAdminSalesFunnel = lazy(() => import("./pages/TradeAdminSalesFunnel"));
-const TradeAdminCommissions = lazy(() => import("./pages/TradeAdminCommissions"));
+const TradeAdminProcurementLedger = lazy(() => import("./pages/TradeAdminProcurementLedger"));
 const TradeAdminAxonometricCadQa = lazy(() => import("./pages/TradeAdminAxonometricCadQa"));
 const CookieConsent = lazy(() => import("@/components/CookieConsent"));
 
@@ -826,7 +826,8 @@ const App = () => {
                     <Route path="admin/funnel-tracker" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminFunnelTracker /></Suspense>} />
                     <Route path="admin/sales-funnel" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminSalesFunnel /></Suspense>} />
                     <Route path="admin/payment-settings" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminPaymentSettings /></Suspense>} />
-                    <Route path="admin/commissions" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminCommissions /></Suspense>} />
+                    <Route path="admin/procurement-ledger" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminProcurementLedger /></Suspense>} />
+                    <Route path="admin/commissions" element={<Navigate to="/trade/admin/procurement-ledger" replace />} />
                     <Route path="admin/axonometric-cad-qa" element={<TradeAdminAxonometricCadQa />} />
                     <Route path="admin/sync-status" element={<TradeAdminSyncStatus />} />
                     <Route path="admin/brand-lead-times" element={<TradeAdminBrandLeadTimes />} />

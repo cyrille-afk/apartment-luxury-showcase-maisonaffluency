@@ -3,7 +3,7 @@ import type Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { loadStripeTestCreds } from "../_shared/stripeCreds.ts";
 import { getStripe } from "../_shared/stripeClient.ts";
-import { recordDesignerPayouts } from "../_shared/recordDesignerPayouts.ts";
+import { recordPurchaseOrdersPayable } from "../_shared/recordPurchaseOrdersPayable.ts";
 
 const { stripe, creds } = await getStripe("auto");
 const testCreds = await loadStripeTestCreds();
@@ -147,9 +147,9 @@ serve(async (req) => {
         if (orderErr) console.error("[STRIPE-WEBHOOK] shop order update failed:", orderErr);
         else console.log(`[STRIPE-WEBHOOK] Shop order ${orderId} marked as paid`);
 
-        // ===== Multi-vendor commission split =====
+        // ===== Wholesale accounts payable (merchant-of-record) =====
         try {
-          const payoutResult = await recordDesignerPayouts(supabase, {
+          const payoutResult = await recordPurchaseOrdersPayable(supabase, {
             orderId,
             tradeProgramId: session.metadata?.trade_program_id ?? null,
             stripeSessionId: session.id,
@@ -157,9 +157,9 @@ serve(async (req) => {
               typeof session.payment_intent === "string" ? session.payment_intent : null,
           });
           if ("error" in payoutResult) {
-            console.error("[STRIPE-WEBHOOK] commission split failed:", payoutResult.error);
+            console.error("[STRIPE-WEBHOOK] wholesale payable failed:", payoutResult.error);
           } else {
-            console.log(`[STRIPE-WEBHOOK] Commission ledger rows: ${payoutResult.inserted}`);
+            console.log(`[STRIPE-WEBHOOK] Wholesale payable rows: ${payoutResult.inserted}`);
           }
         } catch (e) {
           console.error("[STRIPE-WEBHOOK] commission split error:", e);

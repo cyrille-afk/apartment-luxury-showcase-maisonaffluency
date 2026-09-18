@@ -1,22 +1,24 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, Navigate } from "react-router-dom";
-import { ArrowLeft, BadgeCheck, Check, Wallet } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Check, FileText, Receipt } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
-  useDesignerCommissions,
-  useUpdatePayoutStatus,
-  type DesignerGroup,
-  type PayoutStatus,
-} from "@/hooks/useDesignerCommissions";
+  useWholesalePayables,
+  useUpdateInvoiceStatus,
+  INVOICE_STATUS_LABEL,
+  type PayableGroup,
+  type InvoiceStatus,
+} from "@/hooks/useWholesalePayables";
 
-const FILTERS: { id: "all" | PayoutStatus; label: string }[] = [
+const FILTERS: { id: "all" | InvoiceStatus; label: string }[] = [
   { id: "all", label: "All" },
   { id: "pending", label: "Pending" },
+  { id: "invoice_received", label: "Invoice received" },
   { id: "approved", label: "Approved" },
   { id: "paid", label: "Paid" },
 ];
@@ -27,58 +29,74 @@ const money = (cents: number, currency: string) =>
     maximumFractionDigits: 2,
   })}`;
 
-const StatusPill = ({ status }: { status: PayoutStatus }) => (
+const StatusPill = ({ status }: { status: InvoiceStatus }) => (
   <span
     className={cn(
       "inline-flex items-center px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider",
       status === "pending" && "bg-accent/15 text-accent",
+      status === "invoice_received" && "bg-muted text-foreground",
       status === "approved" && "bg-primary/10 text-primary",
       status === "paid" && "bg-emerald-900/15 text-emerald-800 dark:text-emerald-300",
     )}
   >
-    {status}
+    {INVOICE_STATUS_LABEL[status]}
   </span>
 );
 
 const GroupBlock = ({
   group,
-  onApprove,
-  onMarkPaid,
+  onAdvance,
   busy,
 }: {
-  group: DesignerGroup;
-  onApprove: (g: DesignerGroup) => void;
-  onMarkPaid: (g: DesignerGroup) => void;
+  group: PayableGroup;
+  onAdvance: (g: PayableGroup, from: InvoiceStatus, to: InvoiceStatus) => void;
   busy: boolean;
 }) => {
-  const approvedIds = group.rows.filter((r) => r.payoutStatus === "approved");
+  const count = (s: InvoiceStatus) => group.rows.filter((r) => r.invoiceStatus === s).length;
   return (
     <section className="border border-border bg-card">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/40 px-4 py-3">
         <div>
           <h2 className="font-display text-lg text-foreground">{group.designerName}</h2>
           <p className="font-body text-xs text-muted-foreground">
-            {group.rows.length} line item{group.rows.length === 1 ? "" : "s"} · {group.currency}
+            {group.rows.length} purchase order line{group.rows.length === 1 ? "" : "s"} ·{" "}
+            {group.currency}
             {group.pendingCount > 0 && (
-              <span className="ml-2 text-accent">{group.pendingCount} pending approval</span>
+              <span className="ml-2 text-accent">{group.pendingCount} awaiting invoice</span>
             )}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {group.pendingCount > 0 && (
-            <Button size="sm" disabled={busy} onClick={() => onApprove(group)} className="font-body">
-              <BadgeCheck className="mr-1.5 h-4 w-4" /> Approve for payout
-            </Button>
-          )}
-          {approvedIds.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          {count("pending") > 0 && (
             <Button
               size="sm"
               variant="outline"
               disabled={busy}
-              onClick={() => onMarkPaid(group)}
+              onClick={() => onAdvance(group, "pending", "invoice_received")}
               className="font-body"
             >
-              <Check className="mr-1.5 h-4 w-4" /> Mark paid
+              <FileText className="mr-1.5 h-4 w-4" /> Mark invoice received
+            </Button>
+          )}
+          {count("invoice_received") > 0 && (
+            <Button
+              size="sm"
+              disabled={busy}
+              onClick={() => onAdvance(group, "invoice_received", "approved")}
+              className="font-body"
+            >
+              <BadgeCheck className="mr-1.5 h-4 w-4" /> Approve invoice
+            </Button>
+          )}
+          {count("approved") > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={busy}
+              onClick={() => onAdvance(group, "approved", "paid")}
+              className="font-body"
+            >
+              <Check className="mr-1.5 h-4 w-4" /> Mark settled
             </Button>
           )}
         </div>
@@ -86,15 +104,10 @@ const GroupBlock = ({
 
       <div className="grid grid-cols-2 gap-px bg-border sm:grid-cols-4">
         {[
-          { label: "Gross sales", value: money(group.grossSales, group.currency) },
-          { label: "Total deductions", value: money(group.totalDeductions, group.currency) },
-          { label: "Net earnings", value: money(group.netEarnings, group.currency) },
-          {
-            label: "Effective rate",
-            value: group.grossSales
-              ? `${((group.netEarnings / group.grossSales) * 100).toFixed(1)}%`
-              : "—",
-          },
+          { label: "Sold to buyers", value: money(group.soldGross, group.currency) },
+          { label: "Wholesale cost", value: money(group.wholesalePayable, group.currency) },
+          { label: "Outstanding payable", value: money(group.outstandingPayable, group.currency) },
+          { label: "Maison margin", value: money(group.maisonMargin, group.currency) },
         ].map((stat) => (
           <div key={stat.label} className="bg-card px-4 py-3">
             <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -106,16 +119,16 @@ const GroupBlock = ({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[820px] border-t border-border font-body text-sm">
+        <table className="w-full min-w-[900px] border-t border-border font-body text-sm">
           <thead>
             <tr className="text-left font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
               <th className="px-4 py-2 font-normal">Item</th>
-              <th className="px-4 py-2 text-right font-normal">Gross</th>
-              <th className="px-4 py-2 text-right font-normal">Trade discount</th>
-              <th className="px-4 py-2 text-right font-normal">Stripe fee</th>
-              <th className="px-4 py-2 text-right font-normal">Platform fee</th>
-              <th className="px-4 py-2 text-right font-normal">Net payout</th>
-              <th className="px-4 py-2 font-normal">Status</th>
+              <th className="px-4 py-2 text-right font-normal">Retail RRP</th>
+              <th className="px-4 py-2 text-right font-normal">Wholesale cost</th>
+              <th className="px-4 py-2 text-right font-normal">Sold gross</th>
+              <th className="px-4 py-2 text-right font-normal">Processing fees</th>
+              <th className="px-4 py-2 text-right font-normal">Maison margin</th>
+              <th className="px-4 py-2 font-normal">Invoice</th>
             </tr>
           </thead>
           <tbody>
@@ -124,27 +137,27 @@ const GroupBlock = ({
                 <td className="px-4 py-2.5">
                   <span className="text-foreground">{row.productTitle ?? "Line item"}</span>
                   <span className="ml-2 font-mono text-[10px] text-muted-foreground">
-                    {row.orderRef ?? ""} · {row.commissionRatePct}% ·{" "}
-                    {row.discountAbsorbedBy === "designer" ? "designer-absorbed" : "platform-absorbed"}
+                    {row.orderRef ?? ""} · wholesale −{row.wholesaleDiscountPct}%
+                    {row.invoiceReference ? ` · ${row.invoiceReference}` : ""}
                   </span>
                 </td>
-                <td className="px-4 py-2.5 text-right tabular-nums">
-                  {money(row.grossAmount, row.currency)}
-                </td>
                 <td className="px-4 py-2.5 text-right tabular-nums text-muted-foreground">
-                  −{money(row.tradeDiscountApplied, row.currency)}
-                </td>
-                <td className="px-4 py-2.5 text-right tabular-nums text-muted-foreground">
-                  −{money(row.stripeFeeCents, row.currency)}
-                </td>
-                <td className="px-4 py-2.5 text-right tabular-nums text-muted-foreground">
-                  −{money(row.platformFee, row.currency)}
+                  {money(row.retailRrp, row.currency)}
                 </td>
                 <td className="px-4 py-2.5 text-right font-medium tabular-nums text-foreground">
-                  {money(row.designerNetPayout, row.currency)}
+                  {money(row.purchaseCostCogs, row.currency)}
+                </td>
+                <td className="px-4 py-2.5 text-right tabular-nums">
+                  {money(row.soldPriceGross, row.currency)}
+                </td>
+                <td className="px-4 py-2.5 text-right tabular-nums text-muted-foreground">
+                  −{money(row.stripeProcessingFees, row.currency)}
+                </td>
+                <td className="px-4 py-2.5 text-right tabular-nums text-foreground">
+                  {money(row.netMaisonMargin, row.currency)}
                 </td>
                 <td className="px-4 py-2.5">
-                  <StatusPill status={row.payoutStatus} />
+                  <StatusPill status={row.invoiceStatus} />
                 </td>
               </tr>
             ))}
@@ -155,12 +168,12 @@ const GroupBlock = ({
   );
 };
 
-export default function TradeAdminCommissions() {
+export default function TradeAdminProcurementLedger() {
   const { isAdmin, loading } = useAuth();
   const { toast } = useToast();
-  const [filter, setFilter] = useState<"all" | PayoutStatus>("all");
-  const { data: groups, isLoading } = useDesignerCommissions(!!isAdmin, filter);
-  const update = useUpdatePayoutStatus();
+  const [filter, setFilter] = useState<"all" | InvoiceStatus>("all");
+  const { data: groups, isLoading } = useWholesalePayables(!!isAdmin, filter);
+  const update = useUpdateInvoiceStatus();
 
   if (loading) {
     return (
@@ -171,28 +184,30 @@ export default function TradeAdminCommissions() {
   }
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
-  const run = async (g: DesignerGroup, status: PayoutStatus) => {
-    const ids = g.rows
-      .filter((r) => (status === "approved" ? r.payoutStatus === "pending" : r.payoutStatus === "approved"))
-      .map((r) => r.id);
+  const advance = async (g: PayableGroup, from: InvoiceStatus, to: InvoiceStatus) => {
+    const ids = g.rows.filter((r) => r.invoiceStatus === from).map((r) => r.id);
     if (!ids.length) return;
     try {
-      await update.mutateAsync({ ids, status });
+      await update.mutateAsync({ ids, status: to });
       toast({
-        title: status === "approved" ? "Approved for payout" : "Marked as paid",
-        description: `${g.designerName} — ${ids.length} line item${ids.length === 1 ? "" : "s"}.`,
+        title: `Marked ${INVOICE_STATUS_LABEL[to].toLowerCase()}`,
+        description: `${g.designerName} — ${ids.length} line${ids.length === 1 ? "" : "s"}.`,
       });
     } catch (e: any) {
-      toast({ title: "Update failed", description: e?.message ?? "Please try again.", variant: "destructive" });
+      toast({
+        title: "Update failed",
+        description: e?.message ?? "Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
-  const totalNet = (groups ?? []).reduce((a, g) => a + g.netEarnings, 0);
+  const outstanding = (groups ?? []).reduce((a, g) => a + g.outstandingPayable, 0);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
       <Helmet>
-        <title>Designer Commissions Ledger | Maison Affluency</title>
+        <title>Wholesale Procurement Ledger | Maison Affluency</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
@@ -206,13 +221,14 @@ export default function TradeAdminCommissions() {
       <header className="mt-4 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5">
         <div>
           <h1 className="flex items-center gap-2 font-display text-3xl text-foreground">
-            <Wallet className="h-6 w-6 text-accent" /> Designer Commissions Ledger
+            <Receipt className="h-6 w-6 text-accent" /> Wholesale Procurement Ledger
           </h1>
           <p className="mt-1 font-body text-sm text-muted-foreground">
-            Per-line commission splits recorded at settlement. All figures are exact minor units.
+            Purchase orders Maison Affluency owes its designers. Wholesale cost is locked at
+            settlement and never moves with buyer-side discounts.
           </p>
         </div>
-        <div className="flex gap-1">
+        <div className="flex flex-wrap gap-1">
           {FILTERS.map((f) => (
             <button
               key={f.id}
@@ -236,25 +252,19 @@ export default function TradeAdminCommissions() {
         </div>
       ) : !groups || groups.length === 0 ? (
         <p className="mt-10 font-body text-sm text-muted-foreground">
-          No commission records yet. Ledger entries are created automatically when an order settles.
+          No purchase orders yet. Payable lines are generated automatically when an order settles.
         </p>
       ) : (
         <>
           <p className="mt-5 font-body text-xs text-muted-foreground">
-            {groups.length} designer{groups.length === 1 ? "" : "s"} · net payable{" "}
+            {groups.length} designer{groups.length === 1 ? "" : "s"} · outstanding wholesale{" "}
             <span className="text-foreground">
-              {money(totalNet, groups[0]?.currency ?? "USD")}
+              {money(outstanding, groups[0]?.currency ?? "USD")}
             </span>
           </p>
           <div className="mt-4 space-y-6">
             {groups.map((g) => (
-              <GroupBlock
-                key={g.designerKey}
-                group={g}
-                busy={update.isPending}
-                onApprove={(x) => run(x, "approved")}
-                onMarkPaid={(x) => run(x, "paid")}
-              />
+              <GroupBlock key={g.designerKey} group={g} busy={update.isPending} onAdvance={advance} />
             ))}
           </div>
         </>

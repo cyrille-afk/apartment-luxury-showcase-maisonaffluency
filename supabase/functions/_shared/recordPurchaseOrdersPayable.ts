@@ -1,14 +1,17 @@
-import { calculateSplits, type Absorption, type SplitLineInput } from "./commissionSplit.ts";
+import {
+  calculateProcurement,
+  type ProcurementLineInput,
+} from "./wholesaleProcurement.ts";
 
 type SupabaseLike = {
   from: (table: string) => any;
 };
 
 /**
- * Builds the commission ledger rows for a paid shop order.
+ * Generates the wholesale accounts-payable ledger for a paid shop order.
  * Idempotent: the unique index on line_item_id makes Stripe retries no-ops.
  */
-export async function recordDesignerPayouts(
+export async function recordPurchaseOrdersPayable(
   supabase: SupabaseLike,
   args: {
     orderId: string;
@@ -38,54 +41,56 @@ export async function recordDesignerPayouts(
   if (slugs.length > 0) {
     const { data: designers } = await supabase
       .from("designers")
-      .select("id, slug, name, commission_rate_pct, trade_discount_absorption")
+      .select("id, slug, name, wholesale_discount_pct, commission_rate_pct")
       .in("slug", slugs);
     for (const d of designers ?? []) designerBySlug.set(d.slug, d);
   }
 
-  const lines: SplitLineInput[] = items.map((item: any) => {
+  const lines: ProcurementLineInput[] = items.map((item: any) => {
     const designer = item.designer_slug ? designerBySlug.get(item.designer_slug) : null;
-    const gross =
+    const rrp =
       Number(item.line_total_cents) ||
       Number(item.unit_price_cents ?? 0) * Number(item.quantity ?? 1);
+    // Legacy contracts stored the designer share; wholesale discount is its complement.
+    const legacy =
+      designer?.commission_rate_pct != null ? 100 - Number(designer.commission_rate_pct) : null;
     return {
       lineItemId: item.id,
       designerId: designer?.id ?? null,
       designerName: designer?.name ?? item.designer_name ?? null,
-      grossCents: Math.max(0, Math.round(gross)),
-      commissionRatePct: designer?.commission_rate_pct ?? null,
-      absorption: (designer?.trade_discount_absorption as Absorption) ?? "platform",
+      retailRrpCents: Math.max(0, Math.round(rrp)),
+      wholesaleDiscountPct: designer?.wholesale_discount_pct ?? legacy,
     };
   });
 
-  const split = calculateSplits({
+  const result = calculateProcurement({
     lines,
-    tradeDiscountCents: Number(order.discount_cents ?? 0),
-    tradeProgramId: args.tradeProgramId ?? (Number(order.discount_cents ?? 0) > 0 ? "order_discount" : null),
+    retailDiscountCents: Number(order.discount_cents ?? 0),
+    tradeProgramId: args.tradeProgramId ?? null,
     chargeStripeFees: args.chargeStripeFees,
   });
 
-  const rows = split.lines.map((l) => ({
+  const rows = result.lines.map((l) => ({
     order_id: args.orderId,
     line_item_id: l.lineItemId,
     designer_id: l.designerId,
     designer_name: l.designerName,
     currency: (order.currency || "usd").toLowerCase(),
-    gross_amount: l.grossAmount,
-    trade_discount_applied: l.tradeDiscountApplied,
+    retail_rrp: l.retailRrp,
+    wholesale_discount_pct: l.wholesaleDiscountPct,
+    purchase_cost_cogs: l.purchaseCostCogs,
+    sold_price_gross: l.soldPriceGross,
+    retail_discount_applied: l.retailDiscountApplied,
+    stripe_processing_fees: l.stripeProcessingFees,
+    net_maison_margin: l.netMaisonMargin,
     trade_program_id: args.tradeProgramId ?? null,
-    discount_absorbed_by: l.discountAbsorbedBy,
-    commission_rate_pct: l.commissionRatePct,
-    stripe_fee_cents: l.stripeFeeCents,
-    platform_fee: l.platformFee,
-    designer_net_payout: l.designerNetPayout,
-    payout_status: "pending",
+    designer_invoice_status: "pending",
     stripe_session_id: args.stripeSessionId ?? null,
     stripe_payment_intent_id: args.stripePaymentIntentId ?? null,
   }));
 
   const { error: insErr, data: inserted } = await supabase
-    .from("designer_payouts")
+    .from("purchase_orders_payable")
     .upsert(rows, { onConflict: "line_item_id", ignoreDuplicates: true })
     .select("id");
   if (insErr) return { error: insErr.message };

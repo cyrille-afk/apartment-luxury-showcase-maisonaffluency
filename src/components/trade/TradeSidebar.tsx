@@ -332,12 +332,12 @@ export function TradeSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <NavLink
-                      to="/trade/admin/commissions"
+                      to="/trade/admin/procurement-ledger"
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                       activeClassName="text-foreground font-medium"
                     >
                       <Wallet className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>Designer Commissions</span>}
+                      {!collapsed && <span>Procurement Ledger</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
