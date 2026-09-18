@@ -55,7 +55,14 @@ const GroupBlock = ({
 }) => {
   const count = (s: InvoiceStatus) => group.rows.filter((r) => r.invoiceStatus === s).length;
   return (
-    <section className="border border-border bg-card">
+    <section
+      className={cn(
+        "border bg-card",
+        group.followupCount > 0
+          ? "border-2 border-orange-500 shadow-[0_0_0_3px_rgba(249,115,22,0.12)]"
+          : "border-border",
+      )}
+    >
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/40 px-4 py-3">
         <div>
           <h2 className="font-display text-lg text-foreground">{group.designerName}</h2>
@@ -64,6 +71,11 @@ const GroupBlock = ({
             {group.currency}
             {group.pendingCount > 0 && (
               <span className="ml-2 text-accent">{group.pendingCount} awaiting invoice</span>
+            )}
+            {group.followupCount > 0 && (
+              <span className="ml-2 inline-flex animate-pulse items-center gap-1 bg-orange-500/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-orange-600 dark:text-orange-400">
+                ⚠ {group.followupCount} overdue acknowledgement
+              </span>
             )}
           </p>
         </div>
@@ -137,6 +149,11 @@ const GroupBlock = ({
               <tr key={row.id} className="border-t border-border/60">
                 <td className="px-4 py-2.5">
                   <span className="text-foreground">{row.productTitle ?? "Line item"}</span>
+                  {row.requiresFollowup && (
+                    <span className="ml-2 inline-flex animate-pulse items-center bg-orange-500/15 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-orange-600 dark:text-orange-400">
+                      Follow up
+                    </span>
+                  )}
                   <span className="ml-2 font-mono text-[10px] text-muted-foreground">
                     {row.orderRef ?? ""} · wholesale −{row.wholesaleDiscountPct}%
                     {row.invoiceReference ? ` · ${row.invoiceReference}` : ""}
