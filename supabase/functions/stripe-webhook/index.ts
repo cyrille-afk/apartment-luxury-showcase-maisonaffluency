@@ -76,12 +76,19 @@ serve(async (req) => {
 
   const body = await req.text();
 
-  let event: Stripe.Event;
-  try {
-    event = await stripe.webhooks.constructEventAsync(body, signature, endpointSecret);
-  } catch (err: any) {
-    console.error("Webhook signature verification failed:", err.message);
-    return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+  let event: Stripe.Event | null = null;
+  let lastErr: Error | null = null;
+  for (const secret of endpointSecrets) {
+    try {
+      event = await stripe.webhooks.constructEventAsync(body, signature, secret);
+      break;
+    } catch (err: any) {
+      lastErr = err;
+    }
+  }
+  if (!event) {
+    console.error("Webhook signature verification failed:", lastErr?.message);
+    return new Response(`Webhook Error: ${lastErr?.message}`, { status: 400 });
   }
 
   if (event.type === "checkout.session.completed") {

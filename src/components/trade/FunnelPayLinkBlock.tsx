@@ -53,6 +53,7 @@ const FunnelPayLinkBlock = ({
   const [sendingEmail, setSendingEmail] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [paymentKind, setPaymentKind] = useState<"full" | "deposit">("full");
+  const [testMode, setTestMode] = useState(false);
 
   const handleGenerate = async () => {
     const value = Number(amount.replace(/,/g, ""));
@@ -66,16 +67,23 @@ const FunnelPayLinkBlock = ({
         body: {
           amountCents: Math.round(value * 100),
           currency,
-          label,
+          label: testMode ? `[TEST] ${label}` : label,
           payerEmail: email,
           quoteId: quoteId ?? null,
           cardId: cardId ?? quoteId ?? null,
           cardStage: cardStage ?? null,
           paymentKind,
+          testMode,
           expectedTotalCents: paymentKind === "full" ? Math.round(value * 100) : null,
         },
       });
-      if (error) throw error;
+      if (error) {
+        const response = (error as { context?: Response }).context;
+        const responseBody = response
+          ? ((await response.clone().json().catch(() => null)) as { error?: string } | null)
+          : null;
+        throw new Error(responseBody?.error ?? error.message);
+      }
       if (!data?.url) throw new Error(data?.error || "No link returned");
       try {
         await navigator.clipboard.writeText(data.url);
