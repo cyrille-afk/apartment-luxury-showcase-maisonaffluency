@@ -202,13 +202,14 @@ const FunnelPayLinkBlock = ({
     try {
       // The email system cannot carry binary attachments, so the formal quote
       // PDF travels as a secure 90-day signed download link.
-      let quotePdfUrl: string | null = null;
-      if (quoteId) {
-        try {
-          quotePdfUrl = await signedQuotePdfUrl(quoteId);
-        } catch (pdfErr) {
-          console.warn("Could not sign quote PDF", pdfErr);
-        }
+      if (!quoteId) {
+        throw new Error("This email requires a formal quote PDF.");
+      }
+      const quotePdfUrl = await signedQuotePdfUrl(quoteId);
+      if (!quotePdfUrl) {
+        throw new Error(
+          "The formal quote PDF link could not be verified. Open the quote and wait for ‘Client PDF up to date’ before sending.",
+        );
       }
 
       const { error } = await supabase.functions.invoke("send-transactional-email", {
@@ -282,9 +283,7 @@ const FunnelPayLinkBlock = ({
       toast({
         title: "Confirmation email sent",
         description: [
-          quotePdfUrl
-            ? "Secure formal quote PDF download link included."
-            : "No quote PDF on file — open the quote and preview it once to publish one.",
+          "Secure formal quote PDF download link included.",
           internalFailures.length === 0
             ? "Internal copy sent to Cyrille and Gregoire."
             : "Internal copy failed for some recipients.",
@@ -417,7 +416,7 @@ const FunnelPayLinkBlock = ({
           size="sm"
           variant="outline"
           onClick={handleSendEmail}
-          disabled={sendingEmail || emailSent}
+          disabled={sendingEmail || emailSent || !pdfChecked || !pdfUrl}
           className={cn(
             "h-8 w-full rounded-none border font-body text-[10px] font-semibold uppercase tracking-[0.14em]",
             emailSent
