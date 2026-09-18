@@ -165,6 +165,16 @@ const FunnelPayLinkBlock = ({
         />
       </div>
 
+      <select
+        value={paymentKind}
+        onChange={(e) => setPaymentKind(e.target.value as "full" | "deposit")}
+        aria-label="Payment type"
+        className="w-full border border-border bg-background px-2 py-1.5 font-body text-[10px] font-semibold uppercase tracking-[0.1em] text-foreground outline-none focus:border-gold"
+      >
+        <option value="full">Full settlement</option>
+        <option value="deposit">Deposit · balance to follow</option>
+      </select>
+
       <Button
         type="button"
         size="sm"
