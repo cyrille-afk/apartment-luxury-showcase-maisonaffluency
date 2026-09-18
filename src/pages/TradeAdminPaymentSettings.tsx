@@ -163,6 +163,46 @@ export default function TradeAdminPaymentSettings() {
     }
   };
 
+  // Cross-entry warnings already shown this mount, so typing doesn't re-toast.
+  const crossEntryWarned = useRef<Set<string>>(new Set());
+
+  // Detects an accidental mode cross-entry (live key pasted into a test field
+  // or vice versa) and offers a one-tap mode switch instead of a hard error.
+  const detectCrossEntry = (raw: string, section: "live" | "test") => {
+    const v = raw.trim();
+    const pastedLive = /^(pk|sk|rk)_live_/.test(v);
+    const pastedTest = /^(pk|sk|rk)_test_/.test(v);
+    if (!pastedLive && !pastedTest) return;
+    const kind = pastedLive ? "live" : "test";
+    if (section === kind || crossEntryWarned.current.has(`${section}:${kind}`)) return;
+    crossEntryWarned.current.add(`${section}:${kind}`);
+
+    if (kind === "live") {
+      toast({
+        title: "That looks like a Live Key",
+        description: status?.envLiveKey
+          ? "Live mode is locked on via infrastructure environment variables — paste this key into the Live fields above."
+          : "It looks like you're entering a Live Key. Would you like to switch the system configuration to Live Mode first?",
+        action: status?.envLiveKey ? undefined : (
+          <ToastAction altText="Switch to Live Mode" onClick={() => toggleLiveMode(true)}>
+            Switch to Live Mode
+          </ToastAction>
+        ),
+      });
+    } else {
+      toast({
+        title: "That looks like a Test Key",
+        description:
+          "It looks like you're entering a Test Key. It belongs in the Test credentials section below — or switch the system configuration to Test Mode.",
+        action: status?.envLiveKey ? undefined : (
+          <ToastAction altText="Switch to Test Mode" onClick={() => toggleLiveMode(false)}>
+            Switch to Test Mode
+          </ToastAction>
+        ),
+      });
+    }
+  };
+
   const toggleLiveMode = async (next: boolean) => {
     try {
       const { error } = await supabase.functions.invoke("payment-credentials", {
