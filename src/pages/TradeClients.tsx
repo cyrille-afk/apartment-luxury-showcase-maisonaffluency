@@ -293,24 +293,46 @@ export default function TradeClients() {
 
   const openNew = () => {
     if (!user || !currentStudio) return;
+    const draft = loadDraft(undefined);
     setAttemptedSave(false);
-    setCurrencyManuallyEdited(false);
-    setEditing(emptyClient(currentStudio.id, user.id));
-    setEditingContacts([emptyContact("")]);
+    if (draft) {
+      setEditing(draft.editing);
+      setEditingContacts(draft.contacts);
+      setCurrencyManuallyEdited(draft.currencyManuallyEdited);
+      setDraftRestored(true);
+    } else {
+      setCurrencyManuallyEdited(false);
+      setEditing(emptyClient(currentStudio.id, user.id));
+      setEditingContacts([emptyContact("")]);
+      setDraftRestored(false);
+    }
   };
 
   const openEdit = (c: Client) => {
+    const draft = loadDraft(c.id);
     setAttemptedSave(false);
-    setCurrencyManuallyEdited(Boolean(c.default_currency));
-    setEditing({ ...c });
-    setEditingContacts((contactsByClient[c.id] || []).map((ct) => ({ ...ct })));
+    if (draft) {
+      setEditing(draft.editing);
+      setEditingContacts(draft.contacts);
+      setCurrencyManuallyEdited(draft.currencyManuallyEdited);
+      setDraftRestored(true);
+    } else {
+      setCurrencyManuallyEdited(Boolean(c.default_currency));
+      setEditing({ ...c });
+      setEditingContacts((contactsByClient[c.id] || []).map((ct) => ({ ...ct })));
+      setDraftRestored(false);
+    }
   };
 
   const closeEdit = () => {
+    // Intentional close (Cancel/X) discards the draft; an unexpected page
+    // reload skips this and the draft is restored on next open.
+    clearDraft(editing?.id);
     setEditing(null);
     setEditingContacts([]);
     setAttemptedSave(false);
     setCurrencyManuallyEdited(false);
+    setDraftRestored(false);
   };
 
   const addContactRow = () => setEditingContacts((arr) => [...arr, emptyContact(editing?.id || "")]);
