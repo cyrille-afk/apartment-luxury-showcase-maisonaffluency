@@ -35,6 +35,8 @@ const FunnelPayLinkBlock = ({
   label,
   email,
   quoteId,
+  cardId,
+  cardStage,
   recipientName,
   productName,
   finish,
