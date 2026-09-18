@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabaseImageTransform } from "@/lib/supabaseImage";
 import FunnelPayLinkBlock from "@/components/trade/FunnelPayLinkBlock";
+import SimulatePaymentLink from "@/components/trade/SimulatePaymentLink";
 
 const RANGES = [
   { id: 7, label: "Last 7 days" },
