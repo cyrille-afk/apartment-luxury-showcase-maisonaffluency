@@ -2680,6 +2680,7 @@ export type Database = {
           trade_discount_absorption: string
           trade_only: boolean
           updated_at: string
+          wholesale_discount_pct: number | null
           wide_hero_image_url: string | null
         }
         Insert: {
@@ -2718,6 +2719,7 @@ export type Database = {
           trade_discount_absorption?: string
           trade_only?: boolean
           updated_at?: string
+          wholesale_discount_pct?: number | null
           wide_hero_image_url?: string | null
         }
         Update: {
@@ -2756,6 +2758,7 @@ export type Database = {
           trade_discount_absorption?: string
           trade_only?: boolean
           updated_at?: string
+          wholesale_discount_pct?: number | null
           wide_hero_image_url?: string | null
         }
         Relationships: []
@@ -5463,6 +5466,90 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      purchase_orders_payable: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          currency: string
+          designer_id: string | null
+          designer_invoice_reference: string | null
+          designer_invoice_status: string
+          designer_name: string | null
+          id: string
+          invoice_received_at: string | null
+          line_item_id: string | null
+          net_maison_margin: number
+          notes: string | null
+          order_id: string | null
+          paid_at: string | null
+          purchase_cost_cogs: number
+          retail_discount_applied: number
+          retail_rrp: number
+          sold_price_gross: number
+          stripe_payment_intent_id: string | null
+          stripe_processing_fees: number
+          stripe_session_id: string | null
+          trade_program_id: string | null
+          updated_at: string
+          wholesale_discount_pct: number
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          currency?: string
+          designer_id?: string | null
+          designer_invoice_reference?: string | null
+          designer_invoice_status?: string
+          designer_name?: string | null
+          id?: string
+          invoice_received_at?: string | null
+          line_item_id?: string | null
+          net_maison_margin?: number
+          notes?: string | null
+          order_id?: string | null
+          paid_at?: string | null
+          purchase_cost_cogs?: number
+          retail_discount_applied?: number
+          retail_rrp?: number
+          sold_price_gross?: number
+          stripe_payment_intent_id?: string | null
+          stripe_processing_fees?: number
+          stripe_session_id?: string | null
+          trade_program_id?: string | null
+          updated_at?: string
+          wholesale_discount_pct?: number
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          currency?: string
+          designer_id?: string | null
+          designer_invoice_reference?: string | null
+          designer_invoice_status?: string
+          designer_name?: string | null
+          id?: string
+          invoice_received_at?: string | null
+          line_item_id?: string | null
+          net_maison_margin?: number
+          notes?: string | null
+          order_id?: string | null
+          paid_at?: string | null
+          purchase_cost_cogs?: number
+          retail_discount_applied?: number
+          retail_rrp?: number
+          sold_price_gross?: number
+          stripe_payment_intent_id?: string | null
+          stripe_processing_fees?: number
+          stripe_session_id?: string | null
+          trade_program_id?: string | null
+          updated_at?: string
+          wholesale_discount_pct?: number
+        }
+        Relationships: []
       }
       push_subscriptions: {
         Row: {
