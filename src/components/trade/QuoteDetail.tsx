@@ -48,7 +48,7 @@ import BillingModeCard from "@/components/trade/BillingModeCard";
 import { resolveWoodFinishLabel } from "@/lib/resolveWoodFinishLabel";
 import { splitFinishAndDimensions, formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
 
-const CURRENCIES = ["SGD", "USD", "EUR", "GBP"] as const;
+const CURRENCIES = ["SGD", "USD", "EUR", "GBP", "HKD", "CHF", "AED", "AUD", "CAD", "JPY"] as const;
 type Currency = (typeof CURRENCIES)[number];
 
 interface QuoteItemWithProduct {
