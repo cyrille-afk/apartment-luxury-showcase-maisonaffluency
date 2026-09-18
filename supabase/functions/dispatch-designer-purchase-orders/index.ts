@@ -184,6 +184,38 @@ serve(async (req) => {
       let emailStatus = "no_recipient";
       let emailError: string | null = recipient ? null : "No fulfillment email on file for this designer.";
 
+      // Persist the PO first so its one-click acknowledgement token exists
+      // before the email goes out.
+      const { data: poRow, error: poErr } = await supabase
+        .from("designer_purchase_orders")
+        .upsert(
+          {
+            ...(existing?.id ? { id: existing.id } : {}),
+            po_number: poNumber,
+            order_id: orderId,
+            designer_id: designerId,
+            designer_name: designerName,
+            designer_email: recipient,
+            wholesale_contract_tier: designer?.wholesale_contract_tier ?? null,
+            currency,
+            line_count: lines.length,
+            total_retail_rrp: totalRrp,
+            total_purchase_cost_cogs: totalCogs,
+            document_path: documentPath,
+            email_status: "pending",
+            stripe_session_id: stripeSessionId,
+            updated_at: issuedAt.toISOString(),
+          },
+          { onConflict: "order_id,designer_id" },
+        )
+        .select("id, ack_token")
+        .maybeSingle();
+      if (poErr) console.error("[PO-DISPATCH] ledger write failed:", poErr.message);
+
+      const acknowledgeUrl = poRow?.ack_token
+        ? `${Deno.env.get("SUPABASE_URL")}/functions/v1/acknowledge-purchase-order?token=${poRow.ack_token}`
+        : null;
+
       if (recipient) {
         const { error: mailErr } = await supabase.functions.invoke("send-transactional-email", {
           body: {
@@ -201,6 +233,7 @@ serve(async (req) => {
               lineCount: lines.length,
               totalCost: money(totalCogs, currency),
               downloadUrl,
+              acknowledgeUrl,
             },
           },
         });
@@ -214,33 +247,18 @@ serve(async (req) => {
         }
       }
 
-      const { data: poRow, error: poErr } = await supabase
-        .from("designer_purchase_orders")
-        .upsert(
-          {
-            ...(existing?.id ? { id: existing.id } : {}),
-            po_number: poNumber,
-            order_id: orderId,
-            designer_id: designerId,
-            designer_name: designerName,
-            designer_email: recipient,
-            wholesale_contract_tier: designer?.wholesale_contract_tier ?? null,
-            currency,
-            line_count: lines.length,
-            total_retail_rrp: totalRrp,
-            total_purchase_cost_cogs: totalCogs,
-            document_path: documentPath,
+      if (poRow?.id) {
+        const { error: updErr } = await supabase
+          .from("designer_purchase_orders")
+          .update({
             email_status: emailStatus,
             email_error: emailError,
-            stripe_session_id: stripeSessionId,
             dispatched_at: emailStatus === "sent" ? issuedAt.toISOString() : null,
             updated_at: issuedAt.toISOString(),
-          },
-          { onConflict: "order_id,designer_id" },
-        )
-        .select("id")
-        .maybeSingle();
-      if (poErr) console.error("[PO-DISPATCH] ledger write failed:", poErr.message);
+          })
+          .eq("id", poRow.id);
+        if (updErr) console.error("[PO-DISPATCH] status update failed:", updErr.message);
+      }
 
       // Audit trail on the payable ledger.
       await supabase

@@ -2645,6 +2645,8 @@ export type Database = {
       }
       designer_purchase_orders: {
         Row: {
+          ack_token: string
+          acknowledged_at: string | null
           created_at: string
           currency: string
           designer_email: string | null
@@ -2665,6 +2667,8 @@ export type Database = {
           wholesale_contract_tier: string | null
         }
         Insert: {
+          ack_token?: string
+          acknowledged_at?: string | null
           created_at?: string
           currency?: string
           designer_email?: string | null
@@ -2685,6 +2689,8 @@ export type Database = {
           wholesale_contract_tier?: string | null
         }
         Update: {
+          ack_token?: string
+          acknowledged_at?: string | null
           created_at?: string
           currency?: string
           designer_email?: string | null
