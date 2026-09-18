@@ -261,10 +261,45 @@ const FunnelPayLinkBlock = ({
         )
       );
 
-      const internalFailures = internalResults.filter((r) => r.error);
+      let internalFailures = internalResults.filter((r) => r.error);
+      if (internalFailures.length > 0) {
+        // One silent retry — a stale bundle or transient 4xx must not swallow the copy.
+        const retry = await Promise.all(
+          INTERNAL_COPY_RECIPIENTS.map((copyEmail) =>
+            supabase.functions.invoke("send-transactional-email", {
+              body: {
+                templateName: "quote-confirmation-internal-copy",
+                recipientEmail: copyEmail,
+                idempotencyKey: `quote-confirm-internal-retry-${quoteId ?? label}-${copyEmail}-${Date.now()}`,
+                templateData: {
+                  clientEmail: email,
+                  productName: productName || label,
+                  finish,
+                  leadTime,
+                  paymentLink: url,
+                  quotePdfUrl,
+                  maisonRef: maisonRef || (quoteId ? `QU-${quoteId.slice(0, 6).toUpperCase()}` : undefined),
+                  amount: formattedAmount,
+                  currency,
+                  paymentKind: paymentKind === "deposit" ? "Deposit · balance to follow" : "Full settlement",
+                  testMode,
+                },
+              },
+            })
+          )
+        );
+        internalFailures = retry.filter((r) => r.error);
+      }
       if (internalFailures.length > 0) {
         console.warn("Internal copy failures", internalFailures);
+        toast({
+          title: "Your internal copy did not send",
+          description:
+            "The client email went out, but the copy to Cyrille and Gregoire failed. Reload the page and resend.",
+          variant: "destructive",
+        });
       }
+
 
       // Move the quote out of "Action Required" into "Awaiting Settlement"
       if (quoteId) {
