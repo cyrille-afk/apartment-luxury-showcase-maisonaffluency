@@ -10,9 +10,6 @@ import { buildQuotePdf, type QuotePdfArgs } from "./quotePdf";
 
 export const QUOTE_PDF_BUCKET = "quote-pdfs";
 
-/** Signed link validity for client emails (90 days). */
-export const QUOTE_PDF_LINK_TTL_SECONDS = 60 * 60 * 24 * 90;
-
 function safeName(value: string) {
   return value.replace(/[^a-zA-Z0-9._-]+/g, "-").replace(/^-+|-+$/g, "") || "quote";
 }
