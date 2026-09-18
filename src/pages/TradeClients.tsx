@@ -73,6 +73,32 @@ const emptyContact = (client_id: string): Partial<Contact> => ({
   email: "", phone: "", is_primary: false, notes: "",
 });
 
+// --- Draft autosave -------------------------------------------------------
+// The preview environment can hard-refresh mid-edit (deploys, chunk reloads).
+// Persist the open dialog's content to sessionStorage so nothing is lost.
+type ClientDraft = {
+  editing: Partial<Client>;
+  contacts: Partial<Contact>[];
+  currencyManuallyEdited: boolean;
+};
+
+const draftKey = (id?: string) => `ma_client_draft_${id || "new"}`;
+
+function saveDraft(id: string | undefined, draft: ClientDraft) {
+  try { sessionStorage.setItem(draftKey(id), JSON.stringify(draft)); } catch { /* noop */ }
+}
+
+function loadDraft(id: string | undefined): ClientDraft | null {
+  try {
+    const raw = sessionStorage.getItem(draftKey(id));
+    return raw ? (JSON.parse(raw) as ClientDraft) : null;
+  } catch { return null; }
+}
+
+function clearDraft(id: string | undefined) {
+  try { sessionStorage.removeItem(draftKey(id)); } catch { /* noop */ }
+}
+
 const currencyForCountry = (country: string | null | undefined): string | null => {
   const normalized = country?.trim().toLowerCase();
   if (!normalized) return null;
