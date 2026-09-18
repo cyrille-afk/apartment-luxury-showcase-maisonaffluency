@@ -258,6 +258,7 @@ export default function TradeClients() {
         setEditing(draft.editing);
         setEditingContacts(draft.contacts);
         setCurrencyManuallyEdited(draft.currencyManuallyEdited);
+        setDraftRestored(true);
       } else {
         setEditing({ ...found });
         setEditingContacts((contactsByClient[found.id] || []).map((ct) => ({ ...ct })));
