@@ -62,7 +62,7 @@ const DesignerInstagramSection = memo(({ posts, designerName, compact }: Props) 
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className={compact ? "" : "mt-12 md:mt-16 pt-12 md:pt-16 border-t border-border/40"}
     >
-      <div className={compact ? "flex flex-col md:flex-col-reverse" : ""}>
+      <div className="flex flex-col md:flex-col-reverse">
         {/* Grid — matches homepage Instagram feed layout */}
         <div className={compact ? "grid grid-cols-3 md:grid-cols-4 gap-1 md:gap-1.5" : "grid grid-cols-3 md:grid-cols-4 gap-1 md:gap-1.5 px-4 md:px-12 lg:px-20"}>
             {postsWithImages.slice(0, 6).map((post, index) => (
@@ -76,7 +76,7 @@ const DesignerInstagramSection = memo(({ posts, designerName, compact }: Props) 
         </div>
 
         {/* Section header */}
-        <div className={compact ? "flex items-center gap-3 mt-4 md:justify-center" : "flex items-center justify-center gap-3 mb-8 md:mb-10 px-4 md:px-12"}>
+        <div className={compact ? "flex items-center gap-3 mt-4 md:justify-center" : "flex items-center justify-center gap-3 mb-8 md:mb-10 md:mt-10 px-4 md:px-12"}>
           <div className={compact ? "h-px flex-1 bg-foreground/35" : "h-px flex-1 bg-foreground/35"} />
           <div className="flex items-center gap-2 shrink-0">
             <Instagram className={compact ? "w-3.5 h-3.5 text-foreground/70" : "w-4 h-4 text-foreground"} />
