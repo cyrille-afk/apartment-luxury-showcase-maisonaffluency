@@ -48,6 +48,25 @@ const money = (cents: number | null | undefined, currency: string | null | undef
       })}`;
 
 export function useSalesFunnel(days: number) {
+  const queryClient = useQueryClient();
+
+  // Live pipeline: a Stripe webhook writing a settled card refreshes the board.
+  useEffect(() => {
+    const channel = supabase
+      .channel("funnel-card-payments")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "funnel_card_payments" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["sales-funnel"] });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
   return useQuery<SalesFunnelData>({
     queryKey: ["sales-funnel", days],
     refetchOnWindowFocus: true,
