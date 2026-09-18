@@ -24,7 +24,10 @@ const formatPriceRaw = (cents: number, currency: string) => {
     return v.toFixed(2);
   }
 };
-const currencySymbol = (c: string) => ({ EUR: "€", USD: "$", GBP: "£", SGD: "S$", HKD: "HK$" }[c.toUpperCase()] ?? c);
+const currencySymbol = (c: string) => ({ EUR: "€", USD: "$", GBP: "£", SGD: "S$", HKD: "HK$", AED: "AED", CHF: "CHF", AUD: "A$", CAD: "C$", JPY: "¥" }[c.toUpperCase()] ?? c);
+
+/** Currencies selectable per additional-charge row. */
+const EXTRA_CURRENCIES = ["EUR", "USD", "GBP", "SGD", "HKD", "CHF", "AED", "AUD", "CAD", "JPY"];
 
 type Extra = {
   id: string;
