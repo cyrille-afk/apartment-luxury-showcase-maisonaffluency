@@ -46,6 +46,29 @@ const FIELDS: { key: FieldKey; label: string; hint: string; placeholder: string 
   },
 ];
 
+type TestFieldKey = "testPublishableKey" | "testSecretKey" | "testWebhookSecret";
+
+const TEST_FIELDS: { key: TestFieldKey; label: string; hint: string; placeholder: string }[] = [
+  {
+    key: "testPublishableKey",
+    label: "Test Publishable Key",
+    hint: "Stripe Dashboard (test mode) → Developers → API keys",
+    placeholder: "pk_test_…",
+  },
+  {
+    key: "testSecretKey",
+    label: "Test Secret Key",
+    hint: "Required for the Test mode toggle on funnel cards",
+    placeholder: "sk_test_…",
+  },
+  {
+    key: "testWebhookSecret",
+    label: "Test Webhook Signing Secret",
+    hint: "Optional — only if you add a test-mode webhook endpoint in Stripe",
+    placeholder: "whsec_…",
+  },
+];
+
 export default function TradeAdminPaymentSettings() {
   const { isAdmin, loading } = useAuth();
   const { toast } = useToast();
@@ -67,6 +90,23 @@ export default function TradeAdminPaymentSettings() {
   });
   const [copied, setCopied] = useState(false);
   const [attemptedSave, setAttemptedSave] = useState(false);
+
+  const [testValues, setTestValues] = useState<Record<TestFieldKey, string>>({
+    testPublishableKey: "",
+    testSecretKey: "",
+    testWebhookSecret: "",
+  });
+  const [testRevealed, setTestRevealed] = useState<Record<TestFieldKey, boolean>>({
+    testPublishableKey: false,
+    testSecretKey: false,
+    testWebhookSecret: false,
+  });
+  const [savingTestField, setSavingTestField] = useState<TestFieldKey | null>(null);
+  const [savedTestFields, setSavedTestFields] = useState<Record<TestFieldKey, boolean>>({
+    testPublishableKey: false,
+    testSecretKey: false,
+    testWebhookSecret: false,
+  });
 
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
