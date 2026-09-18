@@ -21,11 +21,15 @@ function safeName(value: string) {
 export async function publishQuotePdf(quoteId: string, args: QuotePdfArgs): Promise<string> {
   const doc = await buildQuotePdf(args);
   const blob = doc.output("blob") as Blob;
-  const path = `${quoteId}/${safeName(args.quoteNumber)}.pdf`;
+  // Every publication gets a unique object name. Reusing one path with upsert
+  // allowed browser/CDN caches to keep serving an older quote after its PDF
+  // had been corrected (most visibly, the pre-wrap totals layout).
+  const version = new Date().toISOString().replace(/[^0-9]/g, "");
+  const path = `${quoteId}/${safeName(args.quoteNumber)}-${version}.pdf`;
 
   const { error: uploadError } = await supabase.storage
     .from(QUOTE_PDF_BUCKET)
-    .upload(path, blob, { contentType: "application/pdf", upsert: true });
+    .upload(path, blob, { contentType: "application/pdf", cacheControl: "0", upsert: false });
   if (uploadError) throw uploadError;
 
   const { error: updateError } = await supabase
