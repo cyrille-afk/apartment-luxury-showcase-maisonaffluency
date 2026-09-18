@@ -490,6 +490,7 @@ export default function TradeAdminPaymentSettings() {
                   value={values[f.key]}
                   onChange={(e) => {
                     const nextValue = e.target.value.replace(/\s/g, "");
+                    detectCrossEntry(nextValue, "live");
                     setValues((current) => {
                       const next = { ...current, [f.key]: nextValue };
                       credentialDraft = next;
@@ -576,9 +577,11 @@ export default function TradeAdminPaymentSettings() {
                     spellCheck={false}
                     placeholder={f.placeholder}
                     value={testValues[f.key]}
-                    onChange={(e) =>
-                      setTestValues((current) => ({ ...current, [f.key]: e.target.value.replace(/\s/g, "") }))
-                    }
+                    onChange={(e) => {
+                      const nextValue = e.target.value.replace(/\s/g, "");
+                      detectCrossEntry(nextValue, "test");
+                      setTestValues((current) => ({ ...current, [f.key]: nextValue }));
+                    }}
                     className="pr-10 font-body"
                   />
                   <button
