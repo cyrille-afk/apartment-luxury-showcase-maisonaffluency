@@ -175,8 +175,9 @@ const TradeAdminSalesFunnel = () => {
   const drafts = stage("draft_quotes");
   const sent = stage("sent_unpaid");
   const orders = stage("orders_pending");
+  const stripePaid = stage("webhook_settled");
   const leadCount = bags.length + requests.length;
-  const settlementCount = sent.length + orders.length;
+  const settlementCount = sent.length + orders.length + stripePaid.length;
 
   return (
     <div className="mx-auto w-full max-w-[1600px] px-5 py-10 md:px-8">
