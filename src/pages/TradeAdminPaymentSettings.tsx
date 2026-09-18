@@ -104,7 +104,28 @@ export default function TradeAdminPaymentSettings() {
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const complete = FIELDS.every((f) => values[f.key].trim().length > 8);
+  const fieldError = (key: FieldKey): string | null => {
+    const raw = values[key].trim();
+    if (!raw) return null;
+    if (key === "publishableKey" && !raw.startsWith("pk_live_")) {
+      return raw.startsWith("pk_test_")
+        ? "That is a test key — paste the pk_live_ key from Stripe's live mode."
+        : "Must start with pk_live_ (check the value is in the right box).";
+    }
+    if (key === "secretKey" && !/^(sk|rk)_live_/.test(raw)) {
+      return raw.startsWith("sk_test_")
+        ? "That is a test key — switch Stripe to live mode and copy the sk_live_ key."
+        : "Must start with sk_live_ (or rk_live_ for a restricted key).";
+    }
+    if (key === "webhookSecret" && !raw.startsWith("whsec_")) {
+      return "Must start with whsec_ — create the webhook endpoint in Stripe first.";
+    }
+    return null;
+  };
+
+  const filled = FIELDS.every((f) => values[f.key].trim().length > 8);
+  const invalid = FIELDS.some((f) => fieldError(f.key));
+  const complete = filled && !invalid;
 
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-10">
