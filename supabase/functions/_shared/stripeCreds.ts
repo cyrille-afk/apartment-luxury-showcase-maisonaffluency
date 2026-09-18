@@ -200,5 +200,6 @@ export async function describeStripeMode(): Promise<StripeModeReport> {
         ? "STRIPE_PUBLISHABLE_KEY"
         : null,
     hasWebhookSecret: Boolean(active.webhookSecret),
+    webhookStatus: active.webhookSecret ? "connected" : otherWebhookSecret ? "mismatched" : "missing",
   };
 }
