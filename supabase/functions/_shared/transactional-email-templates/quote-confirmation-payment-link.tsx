@@ -62,19 +62,18 @@ const QuoteConfirmationPaymentLinkEmail = ({
             through our integrated Stripe gateway:
           </Text>
 
-          {paymentLink ? (
-            <Section style={buttonSection}>
-              <Button style={button} href={paymentLink}>
-                Secure Payment Link
-              </Button>
-            </Section>
-          ) : (
-            <Section style={statementBox}>
-              <Text style={{ ...text, margin: 0 }}>
-                Secure Payment Link: <em>[PASTE STRIPE LINK HERE]</em>
-              </Text>
-            </Section>
-          )}
+          <Text style={text}>
+            Secure Payment Link:{" "}
+            {paymentLink ? (
+              <Link href={paymentLink} style={link}>{paymentLink}</Link>
+            ) : (
+              <em>[PASTE STRIPE LINK HERE]</em>
+            )}
+          </Text>
+
+          <Text style={{ ...text, marginBottom: '12px' }}>
+            <strong>Order Details:</strong>
+          </Text>
 
           <Section style={statementBox}>
             <table width="100%" cellPadding="0" cellSpacing="0" style={{ borderCollapse: 'collapse' as const }}>
