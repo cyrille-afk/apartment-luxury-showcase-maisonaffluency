@@ -61,6 +61,36 @@ serve(async (req) => {
 
     const { stripe } = await getStripe(testMode ? "test" : "auto");
 
+    // Reuse mode: return the URL of the latest active/paid link for a quote
+    // instead of minting a new checkout session (used to resend emails).
+    if (body.reuseExisting && quoteId) {
+      const { data: existing } = await admin
+        .from("quote_payment_links")
+        .select("stripe_session_id, amount_cents, currency, status")
+        .eq("quote_id", quoteId)
+        .in("status", ["active", "paid"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!existing?.stripe_session_id) {
+        throw new Error("No existing payment link stored for this quote");
+      }
+      const existingSession = await stripe.checkout.sessions.retrieve(existing.stripe_session_id);
+      if (!existingSession.url || existingSession.status === "expired") {
+        throw new Error("The stored payment link has expired — generate a new one");
+      }
+      return new Response(
+        JSON.stringify({
+          url: existingSession.url,
+          sessionId: existingSession.id,
+          amountCents: existing.amount_cents,
+          currency: existing.currency,
+          reused: true,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
+      );
+    }
+
     const origin = req.headers.get("origin") || "https://www.maisonaffluency.com";
 
     const session = await stripe.checkout.sessions.create({
