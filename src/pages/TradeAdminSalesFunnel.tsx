@@ -71,10 +71,14 @@ const EntryCard = ({ entry, urgent = false }: { entry: FunnelEntry; urgent?: boo
         <span className="font-body text-[11px] font-medium text-foreground">{entry.amountLabel}</span>
       ) : (
         <span className="font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-          {urgent ? "Draft quotation" : "Follow up"}
+          {entry.paidViaStripe ? "Settled deposit" : urgent ? "Draft quotation" : "Follow up"}
         </span>
       )}
-      {entry.href ? (
+      {entry.paidViaStripe ? (
+        <span className="inline-flex items-center gap-1.5 bg-[hsl(155_45%_16%)] px-2.5 py-1 font-body text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(150_35%_88%)]">
+          <Check className="h-3 w-3" /> Paid via Stripe
+        </span>
+      ) : entry.href ? (
         <Button asChild variant={urgent ? "default" : "ghost"} size="sm" className="h-7 px-2 text-[10px] uppercase tracking-[0.12em]">
           <Link to={entry.href}>
             {urgent ? "Resume draft" : "Open"} <ArrowRight className="h-3 w-3" />
@@ -86,16 +90,20 @@ const EntryCard = ({ entry, urgent = false }: { entry: FunnelEntry; urgent?: boo
         </Button>
       ) : null}
     </div>
-    <FunnelPayLinkBlock
-      label={entry.label}
-      email={entry.email}
-      quoteId={urgent ? entry.id : null}
-      recipientName={entry.sublabel}
-      productName={entry.label}
-      finish={entry.finish}
-      leadTime={entry.leadTime}
-      maisonRef={urgent ? `QU-${entry.id.slice(0, 6).toUpperCase()}` : null}
-    />
+    {!entry.paidViaStripe && (
+      <FunnelPayLinkBlock
+        label={entry.label}
+        email={entry.email}
+        quoteId={urgent ? entry.id : null}
+        cardId={entry.id}
+        cardStage={urgent ? "draft_quotes" : "lead_capture"}
+        recipientName={entry.sublabel}
+        productName={entry.label}
+        finish={entry.finish}
+        leadTime={entry.leadTime}
+        maisonRef={urgent ? `QU-${entry.id.slice(0, 6).toUpperCase()}` : null}
+      />
+    )}
   </article>
 );
 
