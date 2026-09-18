@@ -34,6 +34,7 @@ type Extra = {
   label: string;
   amount_cents: number;
   currency: string | null;
+  quantity: number;
   sort_order: number;
 };
 
@@ -53,6 +54,7 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
   const [loading, setLoading] = useState(true);
   const [draftLabel, setDraftLabel] = useState("");
   const [draftAmount, setDraftAmount] = useState("");
+  const [draftQty, setDraftQty] = useState("1");
   const [draftCurrency, setDraftCurrency] = useState(currency.toUpperCase());
 
   // Follow the quote currency until the user picks something else for the draft row.
