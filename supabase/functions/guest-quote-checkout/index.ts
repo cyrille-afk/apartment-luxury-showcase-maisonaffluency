@@ -69,11 +69,9 @@ serve(async (req) => {
       });
     }
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-      apiVersion: "2025-08-27.basil",
-    });
+    const { stripe } = await getStripe("auto");
 
-    const origin = req.headers.get("origin") || "";
+    const origin = req.headers.get("origin") || "https://www.maisonaffluency.com";
 
     const session = await stripe.checkout.sessions.create({
       customer_email: link.payer_email || undefined,
