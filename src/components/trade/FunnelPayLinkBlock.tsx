@@ -249,6 +249,7 @@ const FunnelPayLinkBlock = ({
                 finish,
                 leadTime,
                 paymentLink: url,
+                quotePdfUrl,
                 maisonRef: maisonRef || (quoteId ? `QU-${quoteId.slice(0, 6).toUpperCase()}` : undefined),
                 amount: formattedAmount,
                 currency,
