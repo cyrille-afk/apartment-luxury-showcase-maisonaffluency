@@ -10,6 +10,8 @@ export interface FunnelEntry {
   href: string | null;
   email: string | null;
   imageUrl: string | null;
+  finish?: string | null;
+  leadTime?: string | null;
 }
 
 export interface FunnelStage {
@@ -63,7 +65,7 @@ export function useSalesFunnel(days: number) {
             .order("created_at", { ascending: false }),
           supabase
             .from("trade_quote_items")
-            .select("quote_id, image_url, trade_products(product_name, image_url)"),
+            .select("quote_id, image_url, variant_label, trade_products(product_name, image_url, lead_time)"),
           supabase
             .from("quote_payment_links")
             .select("id, quote_id, amount_cents, currency, status, payer_email, created_at, paid_at"),
@@ -109,6 +111,8 @@ export function useSalesFunnel(days: number) {
         return {
           name: product?.product_name ?? ref(quoteId),
           imageUrl: item?.image_url ?? product?.image_url ?? null,
+          finish: item?.variant_label ?? null,
+          leadTime: product?.lead_time ?? null,
         };
       };
 
@@ -176,6 +180,8 @@ export function useSalesFunnel(days: number) {
               href: `/trade/quotes/${q.id}`,
               email: (q.ship_to_email as string) ?? null,
               imageUrl: product.imageUrl,
+              finish: product.finish,
+              leadTime: product.leadTime,
             };
           }),
         },

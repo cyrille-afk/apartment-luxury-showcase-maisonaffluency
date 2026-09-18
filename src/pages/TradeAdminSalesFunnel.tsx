@@ -88,6 +88,11 @@ const EntryCard = ({ entry, urgent = false }: { entry: FunnelEntry; urgent?: boo
       label={entry.label}
       email={entry.email}
       quoteId={urgent ? entry.id : null}
+      recipientName={entry.sublabel}
+      productName={entry.label}
+      finish={entry.finish}
+      leadTime={entry.leadTime}
+      maisonRef={urgent ? `QU-${entry.id.slice(0, 6).toUpperCase()}` : null}
     />
   </article>
 );
