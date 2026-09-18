@@ -4374,6 +4374,36 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_credentials: {
+        Row: {
+          id: string
+          live_mode: boolean
+          live_publishable_key: string | null
+          live_secret_key: string | null
+          live_webhook_secret: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          live_mode?: boolean
+          live_publishable_key?: string | null
+          live_secret_key?: string | null
+          live_webhook_secret?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          live_mode?: boolean
+          live_publishable_key?: string | null
+          live_secret_key?: string | null
+          live_webhook_secret?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       personal_email_domains: {
         Row: {
           created_at: string
