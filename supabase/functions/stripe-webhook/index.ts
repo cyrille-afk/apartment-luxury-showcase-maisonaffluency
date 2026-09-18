@@ -165,6 +165,18 @@ serve(async (req) => {
           console.error("[STRIPE-WEBHOOK] commission split error:", e);
         }
 
+        // ===== Purchase order dispatch (one PO per designer in the cart) =====
+        try {
+          const { error: poErr } = await supabase.functions.invoke(
+            "dispatch-designer-purchase-orders",
+            { body: { orderId, stripeSessionId: session.id } },
+          );
+          if (poErr) console.error("[STRIPE-WEBHOOK] PO dispatch failed:", poErr);
+          else console.log(`[STRIPE-WEBHOOK] Purchase orders dispatched for ${orderId}`);
+        } catch (e) {
+          console.error("[STRIPE-WEBHOOK] PO dispatch error:", e);
+        }
+
         // Order-received confirmation ("Under Review by Paris Logistics").
         // Idempotent via the order_ref key — Stripe retries cannot duplicate it.
         try {

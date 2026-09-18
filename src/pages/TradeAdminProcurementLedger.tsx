@@ -18,6 +18,7 @@ import {
 const FILTERS: { id: "all" | InvoiceStatus; label: string }[] = [
   { id: "all", label: "All" },
   { id: "pending", label: "Pending" },
+  { id: "pending_invoice_match", label: "Pending invoice match" },
   { id: "invoice_received", label: "Invoice received" },
   { id: "approved", label: "Approved" },
   { id: "paid", label: "Paid" },
@@ -33,7 +34,7 @@ const StatusPill = ({ status }: { status: InvoiceStatus }) => (
   <span
     className={cn(
       "inline-flex items-center px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider",
-      status === "pending" && "bg-accent/15 text-accent",
+      (status === "pending" || status === "pending_invoice_match") && "bg-accent/15 text-accent",
       status === "invoice_received" && "bg-muted text-foreground",
       status === "approved" && "bg-primary/10 text-primary",
       status === "paid" && "bg-emerald-900/15 text-emerald-800 dark:text-emerald-300",
@@ -49,7 +50,7 @@ const GroupBlock = ({
   busy,
 }: {
   group: PayableGroup;
-  onAdvance: (g: PayableGroup, from: InvoiceStatus, to: InvoiceStatus) => void;
+  onAdvance: (g: PayableGroup, from: InvoiceStatus[], to: InvoiceStatus) => void;
   busy: boolean;
 }) => {
   const count = (s: InvoiceStatus) => group.rows.filter((r) => r.invoiceStatus === s).length;
@@ -67,12 +68,12 @@ const GroupBlock = ({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {count("pending") > 0 && (
+          {count("pending") + count("pending_invoice_match") > 0 && (
             <Button
               size="sm"
               variant="outline"
               disabled={busy}
-              onClick={() => onAdvance(group, "pending", "invoice_received")}
+              onClick={() => onAdvance(group, ["pending", "pending_invoice_match"], "invoice_received")}
               className="font-body"
             >
               <FileText className="mr-1.5 h-4 w-4" /> Mark invoice received
@@ -82,7 +83,7 @@ const GroupBlock = ({
             <Button
               size="sm"
               disabled={busy}
-              onClick={() => onAdvance(group, "invoice_received", "approved")}
+              onClick={() => onAdvance(group, ["invoice_received"], "approved")}
               className="font-body"
             >
               <BadgeCheck className="mr-1.5 h-4 w-4" /> Approve invoice
@@ -93,7 +94,7 @@ const GroupBlock = ({
               size="sm"
               variant="outline"
               disabled={busy}
-              onClick={() => onAdvance(group, "approved", "paid")}
+              onClick={() => onAdvance(group, ["approved"], "paid")}
               className="font-body"
             >
               <Check className="mr-1.5 h-4 w-4" /> Mark settled
@@ -184,8 +185,8 @@ export default function TradeAdminProcurementLedger() {
   }
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
-  const advance = async (g: PayableGroup, from: InvoiceStatus, to: InvoiceStatus) => {
-    const ids = g.rows.filter((r) => r.invoiceStatus === from).map((r) => r.id);
+  const advance = async (g: PayableGroup, from: InvoiceStatus[], to: InvoiceStatus) => {
+    const ids = g.rows.filter((r) => from.includes(r.invoiceStatus)).map((r) => r.id);
     if (!ids.length) return;
     try {
       await update.mutateAsync({ ids, status: to });

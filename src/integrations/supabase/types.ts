@@ -2643,6 +2643,69 @@ export type Database = {
         }
         Relationships: []
       }
+      designer_purchase_orders: {
+        Row: {
+          created_at: string
+          currency: string
+          designer_email: string | null
+          designer_id: string | null
+          designer_name: string | null
+          dispatched_at: string | null
+          document_path: string | null
+          email_error: string | null
+          email_status: string
+          id: string
+          line_count: number
+          order_id: string | null
+          po_number: string
+          stripe_session_id: string | null
+          total_purchase_cost_cogs: number
+          total_retail_rrp: number
+          updated_at: string
+          wholesale_contract_tier: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          designer_email?: string | null
+          designer_id?: string | null
+          designer_name?: string | null
+          dispatched_at?: string | null
+          document_path?: string | null
+          email_error?: string | null
+          email_status?: string
+          id?: string
+          line_count?: number
+          order_id?: string | null
+          po_number: string
+          stripe_session_id?: string | null
+          total_purchase_cost_cogs?: number
+          total_retail_rrp?: number
+          updated_at?: string
+          wholesale_contract_tier?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          designer_email?: string | null
+          designer_id?: string | null
+          designer_name?: string | null
+          dispatched_at?: string | null
+          document_path?: string | null
+          email_error?: string | null
+          email_status?: string
+          id?: string
+          line_count?: number
+          order_id?: string | null
+          po_number?: string
+          stripe_session_id?: string | null
+          total_purchase_cost_cogs?: number
+          total_retail_rrp?: number
+          updated_at?: string
+          wholesale_contract_tier?: string | null
+        }
+        Relationships: []
+      }
       designers: {
         Row: {
           additional_founders: string[]
@@ -2656,6 +2719,7 @@ export type Database = {
           era: string | null
           facets_updated_at: string | null
           founder: string | null
+          fulfillment_email: string | null
           hero_image_url: string | null
           hero_photo_credit: string | null
           id: string
@@ -2680,6 +2744,7 @@ export type Database = {
           trade_discount_absorption: string
           trade_only: boolean
           updated_at: string
+          wholesale_contract_tier: string | null
           wholesale_discount_pct: number | null
           wide_hero_image_url: string | null
         }
@@ -2695,6 +2760,7 @@ export type Database = {
           era?: string | null
           facets_updated_at?: string | null
           founder?: string | null
+          fulfillment_email?: string | null
           hero_image_url?: string | null
           hero_photo_credit?: string | null
           id?: string
@@ -2719,6 +2785,7 @@ export type Database = {
           trade_discount_absorption?: string
           trade_only?: boolean
           updated_at?: string
+          wholesale_contract_tier?: string | null
           wholesale_discount_pct?: number | null
           wide_hero_image_url?: string | null
         }
@@ -2734,6 +2801,7 @@ export type Database = {
           era?: string | null
           facets_updated_at?: string | null
           founder?: string | null
+          fulfillment_email?: string | null
           hero_image_url?: string | null
           hero_photo_credit?: string | null
           id?: string
@@ -2758,6 +2826,7 @@ export type Database = {
           trade_discount_absorption?: string
           trade_only?: boolean
           updated_at?: string
+          wholesale_contract_tier?: string | null
           wholesale_discount_pct?: number | null
           wide_hero_image_url?: string | null
         }
@@ -5484,7 +5553,9 @@ export type Database = {
           notes: string | null
           order_id: string | null
           paid_at: string | null
+          po_number: string | null
           purchase_cost_cogs: number
+          purchase_order_id: string | null
           retail_discount_applied: number
           retail_rrp: number
           sold_price_gross: number
@@ -5511,7 +5582,9 @@ export type Database = {
           notes?: string | null
           order_id?: string | null
           paid_at?: string | null
+          po_number?: string | null
           purchase_cost_cogs?: number
+          purchase_order_id?: string | null
           retail_discount_applied?: number
           retail_rrp?: number
           sold_price_gross?: number
@@ -5538,7 +5611,9 @@ export type Database = {
           notes?: string | null
           order_id?: string | null
           paid_at?: string | null
+          po_number?: string | null
           purchase_cost_cogs?: number
+          purchase_order_id?: string | null
           retail_discount_applied?: number
           retail_rrp?: number
           sold_price_gross?: number
@@ -9527,6 +9602,7 @@ export type Database = {
         }
         Returns: number
       }
+      next_designer_po_number: { Args: never; Returns: string }
       notify_admins_production_render: {
         Args: {
           _engine: string
