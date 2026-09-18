@@ -142,9 +142,35 @@ const FunnelPayLinkBlock = ({
       toast({ title: "No recipient email", variant: "destructive" });
       return;
     }
-    if (!paymentUrl) {
-      toast({ title: "Generate a payment link first", variant: "destructive" });
-      return;
+    let url = paymentUrl;
+    if (!url) {
+      if (!quoteId || !hasExistingLink) {
+        toast({ title: "Generate a payment link first", variant: "destructive" });
+        return;
+      }
+      // Re-fetch the stored checkout session URL for this quote.
+      try {
+        const { data, error } = await supabase.functions.invoke("create-adhoc-payment-link", {
+          body: { reuseExisting: true, quoteId, amountCents: 100, currency },
+        });
+        if (error) {
+          const response = (error as { context?: Response }).context;
+          const responseBody = response
+            ? ((await response.clone().json().catch(() => null)) as { error?: string } | null)
+            : null;
+          throw new Error(responseBody?.error ?? error.message);
+        }
+        if (!data?.url) throw new Error(data?.error || "No link returned");
+        url = data.url;
+        setPaymentUrl(data.url);
+      } catch (err) {
+        toast({
+          title: "Could not recover the payment link",
+          description: (err as Error).message,
+          variant: "destructive",
+        });
+        return;
+      }
     }
     setSendingEmail(true);
     try {
