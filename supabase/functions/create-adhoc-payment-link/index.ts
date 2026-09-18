@@ -134,17 +134,24 @@ serve(async (req) => {
       cancel_url: `${origin}/payment-failed?reason=cancelled&session_id={CHECKOUT_SESSION_ID}`,
     });
 
+    let payToken: string | null = null;
     if (quoteId) {
-      await admin.from("quote_payment_links").insert({
-        quote_id: quoteId,
-        amount_cents: amountCents,
-        currency,
-        label,
-        payer_email: payerEmail,
-        status: "active",
-        stripe_session_id: session.id,
-        created_by: claims.sub,
-      });
+      const { data: inserted, error: linkErr } = await admin
+        .from("quote_payment_links")
+        .insert({
+          quote_id: quoteId,
+          amount_cents: amountCents,
+          currency,
+          label,
+          payer_email: payerEmail,
+          status: "active",
+          stripe_session_id: session.id,
+          created_by: claims.sub,
+        })
+        .select("token")
+        .single();
+      if (linkErr) console.error("[create-adhoc-payment-link] link insert", linkErr);
+      payToken = inserted?.token ?? null;
     }
 
     if (cardId) {
