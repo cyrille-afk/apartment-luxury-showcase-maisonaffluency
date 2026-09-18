@@ -60,6 +60,11 @@ export default function TradeAdminPaymentSettings() {
   });
   const [saving, setSaving] = useState(false);
   const [savingField, setSavingField] = useState<FieldKey | null>(null);
+  const [savedFields, setSavedFields] = useState<Record<FieldKey, boolean>>({
+    publishableKey: false,
+    secretKey: false,
+    webhookSecret: false,
+  });
   const [copied, setCopied] = useState(false);
   const [attemptedSave, setAttemptedSave] = useState(false);
 
@@ -68,7 +73,7 @@ export default function TradeAdminPaymentSettings() {
 
   const save = async () => {
     setAttemptedSave(true);
-    const missingField = FIELDS.find((field) => !values[field.key].trim());
+    const missingField = FIELDS.find((field) => !values[field.key].trim() && !status?.[field.key]);
     const invalidField = FIELDS.find((field) => fieldError(field.key));
     if (missingField || invalidField) {
       const field = missingField ?? invalidField;
@@ -84,22 +89,22 @@ export default function TradeAdminPaymentSettings() {
 
     setSaving(true);
     try {
-      const { data, error } = await supabase.functions.invoke("payment-credentials", {
-        body: {
-          action: "save",
-          publishableKey: values.publishableKey.trim(),
-          secretKey: values.secretKey.trim(),
-          webhookSecret: values.webhookSecret.trim(),
-        },
-      });
-      if (error) {
-        const response = (error as { context?: Response }).context;
-        const responseBody = response
-          ? await response.clone().json().catch(() => null) as { error?: string } | null
-          : null;
-        throw new Error(responseBody?.error ?? error.message);
+      // Save only the boxes that contain a value — keys already stored on the
+      // server stay untouched instead of failing "required" validation.
+      const filledFields = FIELDS.filter((f) => values[f.key].trim());
+      for (const f of filledFields) {
+        const { data, error } = await supabase.functions.invoke("payment-credentials", {
+          body: { action: "save_field", field: f.key, value: values[f.key] },
+        });
+        if (error) {
+          const response = (error as { context?: Response }).context;
+          const responseBody = response
+            ? await response.clone().json().catch(() => null) as { error?: string } | null
+            : null;
+          throw new Error(responseBody?.error ?? error.message);
+        }
+        if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
       }
-      if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
       credentialDraft = { publishableKey: "", secretKey: "", webhookSecret: "" };
       setValues({ ...credentialDraft });
       setAttemptedSave(false);
@@ -156,6 +161,11 @@ export default function TradeAdminPaymentSettings() {
       if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
       credentialDraft = { ...credentialDraft, [key]: "" };
       setValues((current) => ({ ...current, [key]: "" }));
+      // A key saved individually must not linger in "attempted save" state —
+      // the now-empty box would otherwise show "This value is required".
+      setAttemptedSave(false);
+      setSavedFields((current) => ({ ...current, [key]: true }));
+      setTimeout(() => setSavedFields((current) => ({ ...current, [key]: false })), 4000);
       await refetch();
       await qc.invalidateQueries({ queryKey: ["payment-mode"] });
       toast({ title: `${FIELDS.find((field) => field.key === key)?.label} saved securely` });
@@ -301,9 +311,20 @@ export default function TradeAdminPaymentSettings() {
                 </Button>
               </div>
               <p
-                className={`mt-1 font-body text-xs ${fieldError(f.key) || (attemptedSave && !values[f.key].trim()) ? "text-destructive" : "text-muted-foreground"}`}
+                className={`mt-1 font-body text-xs ${
+                  fieldError(f.key) || (attemptedSave && !values[f.key].trim() && !status?.[f.key])
+                    ? "text-destructive"
+                    : savedFields[f.key]
+                      ? "text-[hsl(var(--jade))]"
+                      : "text-muted-foreground"
+                }`}
               >
-                {fieldError(f.key) ?? (attemptedSave && !values[f.key].trim() ? "This value is required." : f.hint)}
+                {fieldError(f.key) ??
+                  (savedFields[f.key]
+                    ? "Saved ✓ stored securely — the box is intentionally blank."
+                    : attemptedSave && !values[f.key].trim() && !status?.[f.key]
+                      ? "This value is required."
+                      : f.hint)}
               </p>
             </div>
           ))}
