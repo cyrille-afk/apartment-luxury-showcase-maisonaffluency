@@ -17,6 +17,7 @@ export type PaymentModeStatus = {
   webhookSecret: string | null;
   updatedAt: string | null;
   webhookUrl: string;
+  webhookStatus?: "connected" | "mismatched" | "missing";
 };
 
 /**

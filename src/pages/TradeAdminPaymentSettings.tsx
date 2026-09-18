@@ -298,6 +298,8 @@ export default function TradeAdminPaymentSettings() {
 
   const filled = FIELDS.every((f) => values[f.key].trim().length > 8);
   const invalid = FIELDS.some((f) => fieldError(f.key));
+  // A live key injected into the runtime wins outright; the toggle is then locked on.
+  const envLocked = Boolean(status?.envLiveKey);
   const complete = filled && !invalid;
 
   return (
@@ -331,10 +333,11 @@ export default function TradeAdminPaymentSettings() {
             </p>
             {!isLoading && (
               <p className="mt-1 font-body text-xs text-muted-foreground">
-                Source:{" "}
-                <span className={status?.liveMode ? "text-[hsl(var(--jade))]" : undefined}>
-                  {status?.activeSourceLabel ?? "No keys configured"}
-                </span>
+                {status?.activeSource === "env"
+                  ? "Injected from Environment Variables"
+                  : status?.activeSource === "payment_settings"
+                    ? "Loaded from Saved Database Settings"
+                    : "No keys configured"}
                 {status?.activeSource === "env" && status?.publishableKeyAlias
                   ? ` · ${status.publishableKeyAlias}`
                   : ""}
@@ -346,34 +349,49 @@ export default function TradeAdminPaymentSettings() {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-3">
-            <span className="font-body text-xs text-muted-foreground">Live mode</span>
-            <Switch
-              checked={Boolean(status?.savedLiveEnabled ?? status?.liveMode)}
-              disabled={Boolean(status?.envLiveKey)}
-              onCheckedChange={toggleLiveMode}
-            />
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex items-center gap-3">
+              <span className="font-body text-xs text-muted-foreground">Live mode</span>
+              <Switch
+                checked={envLocked ? true : Boolean(status?.savedLiveEnabled ?? status?.liveMode)}
+                disabled={envLocked}
+                title={envLocked ? "Live mode is locked via infrastructure environment variables." : undefined}
+                onCheckedChange={toggleLiveMode}
+              />
+            </div>
+            {envLocked && (
+              <span
+                title="Live mode is locked via infrastructure environment variables."
+                className="inline-flex items-center gap-1.5 rounded-sm border border-[hsl(var(--jade))]/40 bg-[hsl(var(--jade))]/10 px-2 py-1 font-body text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--jade))]"
+              >
+                <Lock className="h-3 w-3" /> Locked by environment
+              </span>
+            )}
           </div>
         </div>
 
-        {!isLoading && status?.envLiveKey && (
+        {!isLoading && envLocked && (
           <p className="mt-3 rounded-sm border border-border/70 bg-background px-3 py-2 font-body text-xs text-muted-foreground">
-            Live mode is forced by the environment key <code>STRIPE_SECRET_KEY</code>; the saved keys below are
-            ignored while it is present.
+            Live mode is locked via infrastructure environment variables (<code>STRIPE_SECRET_KEY</code>). Saved
+            database keys are ignored while it is present.
           </p>
         )}
 
         <dl className="mt-5 grid gap-3 sm:grid-cols-3">
           <div className="rounded-sm border border-border/70 bg-background px-3 py-2">
             <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              Environment keys
+              Environment status
             </dt>
             <dd className="mt-1 font-body text-sm">
-              {status?.envKeyPresent ? (status?.envLiveKey ? "Live key present" : "Test key present") : "None"}
+              {status?.envKeyPresent
+                ? status?.envLiveKey
+                  ? "Active key · live"
+                  : "Active key · test"
+                : "Missing"}
             </dd>
           </div>
           <div className="rounded-sm border border-border/70 bg-background px-3 py-2">
-            <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Saved live keys</dt>
+            <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Saved status</dt>
             <dd className="mt-1 font-body text-sm">
               {status?.savedLiveConfigured
                 ? status?.savedLiveEnabled
@@ -383,8 +401,14 @@ export default function TradeAdminPaymentSettings() {
             </dd>
           </div>
           <div className="rounded-sm border border-border/70 bg-background px-3 py-2">
-            <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Webhook secret</dt>
-            <dd className="mt-1 font-body text-sm">{status?.hasWebhookSecret ? "Active" : "Missing"}</dd>
+            <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Webhook status</dt>
+            <dd className="mt-1 font-body text-sm">
+              {status?.webhookStatus === "connected"
+                ? "Connected"
+                : status?.webhookStatus === "mismatched"
+                  ? "Mismatched · secret belongs to the other mode"
+                  : "Failed · no signing secret"}
+            </dd>
           </div>
         </dl>
 

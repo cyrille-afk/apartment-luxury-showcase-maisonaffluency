@@ -60,6 +60,12 @@ function adminClient() {
  * With no production keys anywhere, the result is test mode — never live.
  */
 export async function loadStripeCreds(): Promise<StripeCreds> {
+  const resolved = await resolveStripeCreds();
+  // Absolute fail-safe: only an explicit sk_live_/rk_live_ secret can be live.
+  return { ...resolved, liveMode: /^(sk|rk)_live_/.test(resolved.secretKey.trim()) };
+}
+
+async function resolveStripeCreds(): Promise<StripeCreds> {
   const envCreds = getEnvStripeCreds();
 
   // 1. Environment production keys win outright.
@@ -140,6 +146,12 @@ export type StripeModeReport = {
   /** Publishable key alias actually used, if any. */
   publishableKeyAlias: "STRIPE_PUBLIC_KEY" | "STRIPE_PUBLISHABLE_KEY" | null;
   hasWebhookSecret: boolean;
+  /**
+   * connected  — a signing secret exists for the active mode.
+   * mismatched — a signing secret exists, but only for the inactive mode.
+   * missing    — no signing secret anywhere.
+   */
+  webhookStatus: "connected" | "mismatched" | "missing";
 };
 
 /**
@@ -153,14 +165,16 @@ export async function describeStripeMode(): Promise<StripeModeReport> {
 
   let savedLiveConfigured = false;
   let savedLiveEnabled = false;
+  let otherWebhookSecret = false;
   try {
     const { data } = await adminClient()
       .from("payment_credentials")
-      .select("live_secret_key, live_mode")
+      .select("live_secret_key, live_mode, live_webhook_secret, test_webhook_secret")
       .eq("id", "live")
       .maybeSingle();
     savedLiveConfigured = Boolean(data?.live_secret_key);
     savedLiveEnabled = Boolean(data?.live_mode);
+    otherWebhookSecret = Boolean(data?.live_webhook_secret || data?.test_webhook_secret);
   } catch (_e) {
     // Non-fatal: report what we know from the environment.
   }
@@ -186,5 +200,6 @@ export async function describeStripeMode(): Promise<StripeModeReport> {
         ? "STRIPE_PUBLISHABLE_KEY"
         : null,
     hasWebhookSecret: Boolean(active.webhookSecret),
+    webhookStatus: active.webhookSecret ? "connected" : otherWebhookSecret ? "mismatched" : "missing",
   };
 }
