@@ -78,6 +78,7 @@ import {
   quantitativeValue,
 } from "@/components/product/PublicSpecTable";
 import TradeWorkspace from "@/components/product/TradeWorkspace";
+import EditorialGalleryLandingHint from "@/components/product/EditorialGalleryLandingHint";
 import ProductCommerceCta from "@/components/product/ProductCommerceCta";
 import ProductMotionSelector from "@/components/product/ProductMotionSelector";
 import {
