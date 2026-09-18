@@ -8557,6 +8557,7 @@ export type Database = {
           billing_mode: Database["public"]["Enums"]["billing_mode"]
           client_id: string | null
           client_name: string | null
+          client_pdf_download_token: string
           client_pdf_path: string | null
           client_pdf_updated_at: string | null
           commission_pct: number | null
@@ -8608,6 +8609,7 @@ export type Database = {
           billing_mode?: Database["public"]["Enums"]["billing_mode"]
           client_id?: string | null
           client_name?: string | null
+          client_pdf_download_token?: string
           client_pdf_path?: string | null
           client_pdf_updated_at?: string | null
           commission_pct?: number | null
@@ -8659,6 +8661,7 @@ export type Database = {
           billing_mode?: Database["public"]["Enums"]["billing_mode"]
           client_id?: string | null
           client_name?: string | null
+          client_pdf_download_token?: string
           client_pdf_path?: string | null
           client_pdf_updated_at?: string | null
           commission_pct?: number | null

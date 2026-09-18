@@ -232,6 +232,13 @@
       "when": 1789719164610,
       "tag": "0032_quote_client_pdf",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1789724057499,
+      "tag": "0033_add_stable_quote_pdf_download_token",
+      "breakpoints": true
     }
   ]
 }
