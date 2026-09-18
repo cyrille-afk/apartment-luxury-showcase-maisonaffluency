@@ -253,12 +253,30 @@ export default function TradeClients() {
     if (!editId || autoEditedFor === editId) return;
     const found = clients.find((c) => c.id === editId);
     if (found) {
-      setEditing({ ...found });
-      setEditingContacts((contactsByClient[found.id] || []).map((ct) => ({ ...ct })));
-      setCurrencyManuallyEdited(Boolean(found.default_currency));
+      const draft = loadDraft(found.id);
+      if (draft) {
+        setEditing(draft.editing);
+        setEditingContacts(draft.contacts);
+        setCurrencyManuallyEdited(draft.currencyManuallyEdited);
+      } else {
+        setEditing({ ...found });
+        setEditingContacts((contactsByClient[found.id] || []).map((ct) => ({ ...ct })));
+        setCurrencyManuallyEdited(Boolean(found.default_currency));
+      }
       setAutoEditedFor(editId);
     }
   }, [loading, clients, contactsByClient, autoEditedFor]);
+
+  // Autosave the open dialog as a draft (debounced) so a preview refresh
+  // never wipes in-progress input.
+  const [draftRestored, setDraftRestored] = useState(false);
+  useEffect(() => {
+    if (!editing) return;
+    const t = setTimeout(() => {
+      saveDraft(editing.id, { editing, contacts: editingContacts, currencyManuallyEdited });
+    }, 400);
+    return () => clearTimeout(t);
+  }, [editing, editingContacts, currencyManuallyEdited]);
 
 
   const filtered = useMemo(() => {
