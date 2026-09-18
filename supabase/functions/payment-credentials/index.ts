@@ -44,9 +44,9 @@ serve(async (req) => {
     const action = String(body.action ?? "status");
 
     if (action === "save") {
-      const publishable = String(body.publishableKey ?? "").trim();
-      const secret = String(body.secretKey ?? "").trim();
-      const webhook = String(body.webhookSecret ?? "").trim();
+      const publishable = String(body.publishableKey ?? "").replace(/\s/g, "");
+      const secret = String(body.secretKey ?? "").replace(/\s/g, "");
+      const webhook = String(body.webhookSecret ?? "").replace(/\s/g, "");
 
       if (!publishable.startsWith("pk_live_")) throw new Error("Publishable key must start with pk_live_");
       if (!secret.startsWith("sk_live_") && !secret.startsWith("rk_live_")) {
