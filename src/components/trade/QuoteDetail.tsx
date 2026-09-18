@@ -26,6 +26,7 @@ import AlphabetProductPicker, { type PickerItem } from "@/components/trade/Alpha
 import affluencyLogo from "@/assets/affluency-quote-logo.jpg";
 import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from "@/lib/procurementExcel";
 import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine, type QuotePdfArgs } from "@/lib/quotePdf";
+import { publishQuotePdf } from "@/lib/publishQuotePdf";
 import { downloadInvoicePdf, type InvoiceMode } from "@/lib/invoicePdf";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { HkLandedCostPanel } from "@/components/trade/HkLandedCostPanel";
@@ -2169,6 +2170,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     try {
       const args = await buildPdfArgs();
       await downloadQuotePdf(args);
+      try {
+        await publishQuotePdf(quoteId, args);
+      } catch (pubErr) {
+        console.warn("Could not publish quote PDF", pubErr);
+      }
       toast({ title: "PDF downloaded", description: "Branded quote PDF saved to your device." });
     } catch (err: any) {
       toast({ title: "PDF failed", description: err?.message || "Could not generate PDF.", variant: "destructive" });
@@ -2488,6 +2494,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 const args = await buildPdfArgs();
                 const url = await previewQuotePdfUrl(args);
                 setEmailPreviewUrl(url);
+                // Publish the same PDF privately so client emails can link to it.
+                try {
+                  await publishQuotePdf(quoteId, args);
+                } catch (pubErr) {
+                  console.warn("Could not publish quote PDF", pubErr);
+                }
                 setEmailSubject(`Quote ${quoteNumber} from Maison Affluency${projectName ? ` — ${projectName}` : ""}`);
                 setEmailBody(
                   `Dear ${(clientName || "Client").split(" ")[0]},\n\n` +
