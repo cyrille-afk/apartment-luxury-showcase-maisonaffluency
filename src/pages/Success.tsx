@@ -48,7 +48,9 @@ export default function Success() {
   const [params] = useSearchParams();
   const sessionId = params.get("session_id");
 
+  const queryClient = useQueryClient();
   const [order, setOrder] = useState<OrderDetails | null>(null);
+  const [adhoc, setAdhoc] = useState<AdhocPayment | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,6 +64,25 @@ export default function Success() {
     let cancelled = false;
 
     async function fetchOrder() {
+      // 1) Reconcile ad-hoc Sales Funnel payments directly with Stripe so the
+      //    pipeline card flips immediately — no waiting on webhook delivery.
+      try {
+        const { data: verify } = await supabase.functions.invoke("verify-adhoc-payment", {
+          body: { session_id: sessionId },
+        });
+        const v = verify as (AdhocPayment & { card_id?: string | null }) | null;
+        if (!cancelled && v?.paid && v.card_id) {
+          setAdhoc(v);
+          setLoading(false);
+          // Instant funnel sync: drop any cached Sales Funnel data.
+          queryClient.invalidateQueries({ queryKey: ["sales-funnel"] });
+          return;
+        }
+      } catch {
+        // Not an ad-hoc funnel payment — fall through to the orders table.
+      }
+
+      // 2) Standard shop order lookup.
       try {
         const { data, error: fnError } = await supabase.functions.invoke("get-order-by-session", {
           body: { session_id: sessionId },
@@ -75,15 +96,15 @@ export default function Success() {
 
         setOrder((data as any).order as OrderDetails);
       } catch (err: any) {
-        setError(err?.message || "Unable to load order details.");
+        if (!cancelled) setError(err?.message || "Unable to load order details.");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     void fetchOrder();
     return () => { cancelled = true; };
-  }, [sessionId]);
+  }, [sessionId, queryClient]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
