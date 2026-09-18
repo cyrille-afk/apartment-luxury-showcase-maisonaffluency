@@ -131,11 +131,12 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
       return;
     }
     const amountCents = Math.round(amountEur * 100);
+    const qty = Math.max(1, Math.round(parseFloat(draftQty) || 1));
     const nextSort = extras.length ? Math.max(...extras.map((e) => e.sort_order)) + 1 : 0;
     const { data, error } = await supabase
       .from("trade_quote_extras" as any)
-      .insert({ quote_id: quoteId, label, amount_cents: amountCents, currency: draftCurrency, sort_order: nextSort })
-      .select("id, label, amount_cents, currency, sort_order")
+      .insert({ quote_id: quoteId, label, amount_cents: amountCents, currency: draftCurrency, quantity: qty, sort_order: nextSort })
+      .select("id, label, amount_cents, currency, quantity, sort_order")
       .single();
     if (error || !data) {
       toast({ title: "Error", description: error?.message ?? "Could not add extra", variant: "destructive" });
@@ -144,6 +145,7 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
     setExtras((prev) => [...prev, data as unknown as Extra]);
     setDraftLabel("");
     setDraftAmount("");
+    setDraftQty("1");
   };
 
   const handleRemove = async (id: string) => {
@@ -156,7 +158,7 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
     }
   };
 
-  const handleEdit = async (id: string, patch: Partial<Pick<Extra, "label" | "amount_cents" | "currency">>) => {
+  const handleEdit = async (id: string, patch: Partial<Pick<Extra, "label" | "amount_cents" | "currency" | "quantity">>) => {
     setExtras((curr) => curr.map((e) => (e.id === id ? { ...e, ...patch } : e)));
     const { error } = await supabase.from("trade_quote_extras" as any).update(patch).eq("id", id);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
