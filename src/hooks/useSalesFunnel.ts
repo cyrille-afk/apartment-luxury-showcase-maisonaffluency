@@ -100,7 +100,8 @@ export function useSalesFunnel(days: number) {
             .select("quote_id, image_url, variant_label, trade_products(product_name, image_url, lead_time)"),
           supabase
             .from("quote_payment_links")
-            .select("id, quote_id, amount_cents, currency, status, payer_email, created_at, paid_at"),
+            .select("id, quote_id, amount_cents, currency, status, payer_email, created_at, paid_at")
+            .order("created_at", { ascending: false }),
           supabase
             .from("abandoned_carts")
             .select("*")
@@ -132,8 +133,15 @@ export function useSalesFunnel(days: number) {
       const paidQuoteIds = new Set(
         links.filter((l) => l.status === "paid").map((l) => l.quote_id as string),
       );
+      // Prefer the live link for each quote: paid > active > any, newest first
+      // (links are already ordered created_at desc).
+      const linkRank = (l: (typeof links)[number]) =>
+        l.status === "paid" ? 2 : l.status === "active" ? 1 : 0;
       const linkByQuote = new Map<string, (typeof links)[number]>();
-      for (const l of links) if (!linkByQuote.has(l.quote_id as string)) linkByQuote.set(l.quote_id as string, l);
+      for (const l of links) {
+        const prev = linkByQuote.get(l.quote_id as string);
+        if (!prev || linkRank(l) > linkRank(prev)) linkByQuote.set(l.quote_id as string, l);
+      }
 
       const ref = (id: string) => `QU-${id.slice(0, 6).toUpperCase()}`;
       const firstItemByQuote = new Map<string, (typeof quoteItems)[number]>();
