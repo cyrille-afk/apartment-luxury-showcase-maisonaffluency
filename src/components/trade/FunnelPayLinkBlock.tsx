@@ -172,6 +172,20 @@ const FunnelPayLinkBlock = ({
         console.warn("Internal copy failures", internalFailures);
       }
 
+      // Move the quote out of "Action Required" into "Awaiting Settlement"
+      if (quoteId) {
+        const { error: statusError } = await supabase
+          .from("trade_quotes")
+          .update({ status: "submitted", submitted_at: new Date().toISOString() })
+          .eq("id", quoteId)
+          .eq("status", "draft");
+        if (statusError) {
+          console.warn("Could not update quote status", statusError);
+        } else {
+          queryClient.invalidateQueries({ queryKey: ["sales-funnel"] });
+        }
+      }
+
       setEmailSent(true);
       toast({
         title: "Confirmation email sent",
