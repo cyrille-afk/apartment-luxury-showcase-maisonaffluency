@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabaseImageTransform } from "@/lib/supabaseImage";
 import FunnelPayLinkBlock from "@/components/trade/FunnelPayLinkBlock";
+import SimulatePaymentLink from "@/components/trade/SimulatePaymentLink";
 
 const RANGES = [
   { id: 7, label: "Last 7 days" },
@@ -104,6 +105,14 @@ const EntryCard = ({ entry, urgent = false }: { entry: FunnelEntry; urgent?: boo
         maisonRef={urgent ? `QU-${entry.id.slice(0, 6).toUpperCase()}` : null}
       />
     )}
+    <SimulatePaymentLink
+      cardId={entry.id}
+      cardStage={entry.originStage ?? (urgent ? "draft_quotes" : "lead_capture")}
+      label={entry.label}
+      email={entry.email}
+      quoteId={urgent ? entry.id : null}
+      alreadyPaid={Boolean(entry.paidViaStripe)}
+    />
   </article>
 );
 
