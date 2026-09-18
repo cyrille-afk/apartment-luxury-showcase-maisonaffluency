@@ -124,7 +124,12 @@ export function useUpdatePayoutStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ ids, status }: { ids: string[]; status: PayoutStatus }) => {
-      const patch: Record<string, unknown> = {
+      const patch: {
+        payout_status: PayoutStatus;
+        updated_at: string;
+        approved_at?: string;
+        paid_at?: string;
+      } = {
         payout_status: status,
         updated_at: new Date().toISOString(),
       };
