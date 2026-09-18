@@ -329,12 +329,64 @@ export default function TradeAdminPaymentSettings() {
             <p className="mt-1 font-display text-xl">
               {isLoading ? "Checking…" : status?.liveMode ? "Live production" : "Test / sandbox"}
             </p>
+            {!isLoading && (
+              <p className="mt-1 font-body text-xs text-muted-foreground">
+                Source:{" "}
+                <span className={status?.liveMode ? "text-[hsl(var(--jade))]" : undefined}>
+                  {status?.activeSourceLabel ?? "No keys configured"}
+                </span>
+                {status?.activeSource === "env" && status?.publishableKeyAlias
+                  ? ` · ${status.publishableKeyAlias}`
+                  : ""}
+              </p>
+            )}
+            {!isLoading && !status?.liveMode && (
+              <p className="mt-1 font-body text-xs text-muted-foreground">
+                No live secret key resolved — all charges stay in Stripe test mode.
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <span className="font-body text-xs text-muted-foreground">Live mode</span>
-            <Switch checked={Boolean(status?.liveMode)} onCheckedChange={toggleLiveMode} />
+            <Switch
+              checked={Boolean(status?.savedLiveEnabled ?? status?.liveMode)}
+              disabled={Boolean(status?.envLiveKey)}
+              onCheckedChange={toggleLiveMode}
+            />
           </div>
         </div>
+
+        {!isLoading && status?.envLiveKey && (
+          <p className="mt-3 rounded-sm border border-border/70 bg-background px-3 py-2 font-body text-xs text-muted-foreground">
+            Live mode is forced by the environment key <code>STRIPE_SECRET_KEY</code>; the saved keys below are
+            ignored while it is present.
+          </p>
+        )}
+
+        <dl className="mt-5 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-sm border border-border/70 bg-background px-3 py-2">
+            <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              Environment keys
+            </dt>
+            <dd className="mt-1 font-body text-sm">
+              {status?.envKeyPresent ? (status?.envLiveKey ? "Live key present" : "Test key present") : "None"}
+            </dd>
+          </div>
+          <div className="rounded-sm border border-border/70 bg-background px-3 py-2">
+            <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Saved live keys</dt>
+            <dd className="mt-1 font-body text-sm">
+              {status?.savedLiveConfigured
+                ? status?.savedLiveEnabled
+                  ? "Configured · enabled"
+                  : "Configured · switched off"
+                : "Not configured"}
+            </dd>
+          </div>
+          <div className="rounded-sm border border-border/70 bg-background px-3 py-2">
+            <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Webhook secret</dt>
+            <dd className="mt-1 font-body text-sm">{status?.hasWebhookSecret ? "Active" : "Missing"}</dd>
+          </div>
+        </dl>
 
         <dl className="mt-6 grid gap-3 sm:grid-cols-3">
           {FIELDS.map((f) => (

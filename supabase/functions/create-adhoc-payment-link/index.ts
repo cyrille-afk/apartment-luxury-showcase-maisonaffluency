@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { loadStripeCreds, loadStripeTestCreds } from "../_shared/stripeCreds.ts";
+import { getStripe } from "../_shared/stripeClient.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -60,20 +59,7 @@ serve(async (req) => {
       throw new Error("Amount must be between 1 and 500,000");
     }
 
-    let creds;
-    if (testMode) {
-      creds = await loadStripeTestCreds();
-      if (!creds) {
-        throw new Error(
-          "No Stripe test keys saved. Add them in Payment Settings → Test credentials.",
-        );
-      }
-    } else {
-      creds = await loadStripeCreds();
-    }
-    const stripe = new Stripe(creds.secretKey, {
-      apiVersion: "2025-08-27.basil",
-    });
+    const { stripe } = await getStripe(testMode ? "test" : "auto");
 
     const origin = req.headers.get("origin") || "https://www.maisonaffluency.com";
 

@@ -3,6 +3,15 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type PaymentModeStatus = {
   liveMode: boolean;
+  activeMode?: "live" | "test";
+  activeSource?: "env" | "payment_settings" | "none";
+  activeSourceLabel?: string;
+  envKeyPresent?: boolean;
+  envLiveKey?: boolean;
+  savedLiveConfigured?: boolean;
+  savedLiveEnabled?: boolean;
+  publishableKeyAlias?: "STRIPE_PUBLIC_KEY" | "STRIPE_PUBLISHABLE_KEY" | null;
+  hasWebhookSecret?: boolean;
   publishableKey: string | null;
   secretKey: string | null;
   webhookSecret: string | null;

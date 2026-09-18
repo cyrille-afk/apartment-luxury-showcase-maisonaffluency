@@ -1,14 +1,11 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@18.5.0";
+import type Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { loadStripeCreds, loadStripeTestCreds } from "../_shared/stripeCreds.ts";
+import { loadStripeTestCreds } from "../_shared/stripeCreds.ts";
+import { getStripe } from "../_shared/stripeClient.ts";
 
-const creds = await loadStripeCreds();
+const { stripe, creds } = await getStripe("auto");
 const testCreds = await loadStripeTestCreds();
-
-const stripe = new Stripe(creds.secretKey, {
-  apiVersion: "2025-08-27.basil",
-});
 
 const endpointSecrets = [creds.webhookSecret, testCreds?.webhookSecret].filter(
   (s): s is string => Boolean(s),
