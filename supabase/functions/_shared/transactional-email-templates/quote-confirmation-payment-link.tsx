@@ -15,6 +15,7 @@ interface Props {
   leadTime?: string | null
   paymentLink?: string | null
   maisonRef?: string
+  quotePdfUrl?: string | null
   senderName?: string
   senderTitle?: string
 }
@@ -26,6 +27,7 @@ const QuoteConfirmationPaymentLinkEmail = ({
   leadTime,
   paymentLink,
   maisonRef = '—',
+  quotePdfUrl,
   senderName = 'Cyrille',
   senderTitle = 'Trade Relations | Affluency Etc Pte Ltd',
 }: Props) => {
@@ -94,10 +96,23 @@ const QuoteConfirmationPaymentLinkEmail = ({
             </table>
           </Section>
 
+          {quotePdfUrl ? (
+            <Section style={{ textAlign: 'center' as const, margin: '28px 0' }}>
+              <Link href={quotePdfUrl} style={pdfButton}>
+                Download the formal quote (PDF)
+              </Link>
+              <Text style={pdfNote}>
+                Your full itemised quote, including specifications and totals, is available as a PDF
+                for your procurement records. This secure link remains valid for 90 days.
+              </Text>
+            </Section>
+          ) : null}
+
           <Text style={text}>
             Please note that production scheduling will commence immediately upon settlement confirmation.
-            If your procurement team requires a traditional PDF copy of this invoice for your records,
-            please let us know.
+            {quotePdfUrl
+              ? ' Should you require the quote in any other format, please let us know.'
+              : ' If your procurement team requires a traditional PDF copy of this invoice for your records, please let us know.'}
           </Text>
 
           <Text style={footer}>
@@ -147,6 +162,7 @@ export const template = {
     leadTime: '14–16 weeks',
     paymentLink: 'https://www.maisonaffluency.com/pay/example',
     maisonRef: 'QU-F05C2A',
+    quotePdfUrl: 'https://www.maisonaffluency.com/quote-example.pdf',
     senderName: 'Cyrille',
     senderTitle: 'Trade Relations | Affluency Etc Pte Ltd',
   },
@@ -168,6 +184,19 @@ const statementBox = {
 }
 const totalLabel = { color: '#555555', fontSize: '13px', padding: '6px 0', fontFamily: 'Arial, sans-serif' }
 const totalAmount = { color: '#1a1a1a', fontSize: '13px', textAlign: 'right' as const, padding: '6px 0', fontFamily: 'Arial, sans-serif' }
+const pdfButton = {
+  display: 'inline-block',
+  backgroundColor: '#1a1a1a',
+  color: '#ffffff',
+  padding: '14px 28px',
+  textDecoration: 'none',
+  fontSize: '13px',
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase' as const,
+  fontFamily: 'Arial, sans-serif',
+  borderRadius: '2px',
+}
+const pdfNote = { color: '#777777', fontSize: '12px', lineHeight: '1.7', marginTop: '14px', fontFamily: 'Arial, sans-serif' }
 const link = { color: '#1a1a1a', textDecoration: 'underline', fontSize: '15px', wordBreak: 'break-all' as const }
 const footer = { color: '#333333', lineHeight: '1.8', marginTop: '32px', fontSize: '15px' }
 const footerSmall = { color: '#888888', fontSize: '12px', lineHeight: '1.6', margin: '0' as const, fontFamily: "Georgia, 'Playfair Display', serif" }
