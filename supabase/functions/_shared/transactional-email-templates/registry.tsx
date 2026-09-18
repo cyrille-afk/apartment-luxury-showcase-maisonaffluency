@@ -64,6 +64,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'cart-reminder': cartReminder,
   'quote-payment-reminder': quotePaymentReminder,
   'quote-confirmation-payment-link': quoteConfirmationPaymentLink,
+  'quote-confirmation-internal-copy': quoteConfirmationInternalCopy,
   'funnel-stall-alert': funnelStallAlert,
   'po-acknowledged-internal': poAcknowledgedInternal,
   'po-logistics-alert': poLogisticsAlert,
