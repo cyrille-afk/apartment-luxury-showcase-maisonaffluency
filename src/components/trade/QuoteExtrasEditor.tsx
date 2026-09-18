@@ -203,18 +203,22 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
         <div className="space-y-1.5 mb-2">
           {extras.map((e) => {
             const rowCcy = (e.currency || currency).toUpperCase();
-            const displayCents = toDisplay(e.amount_cents || 0, rowCcy).cents;
+            const qty = Math.max(1, e.quantity || 1);
+            const displayCents = toDisplay((e.amount_cents || 0) * qty, rowCcy).cents;
             const showConversion = rowCcy !== currency.toUpperCase();
             return (
               <div key={e.id} className="flex items-center gap-2">
                 {isReadOnly ? (
                   <>
-                    <span className="flex-1 font-body text-xs text-foreground truncate">{e.label}</span>
+                    <span className="flex-1 font-body text-xs text-foreground truncate">
+                      {e.label}
+                      {qty > 1 && <span className="ml-1 text-muted-foreground">× {qty}</span>}
+                    </span>
                     <span className="font-body text-xs text-foreground tabular-nums">
                       {currencySymbol(currency)}{formatPriceRaw(displayCents, currency)}
                       {showConversion && (
                         <span className="ml-1 text-[10px] text-muted-foreground">
-                          (entered {currencySymbol(rowCcy)}{formatPriceRaw(e.amount_cents, rowCcy)})
+                          (entered {currencySymbol(rowCcy)}{formatPriceRaw(e.amount_cents * qty, rowCcy)})
                         </span>
                       )}
                     </span>
