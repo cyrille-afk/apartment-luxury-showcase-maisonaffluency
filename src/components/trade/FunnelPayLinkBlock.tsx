@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Check, Loader2, Mail, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,7 @@ const FunnelPayLinkBlock = ({
   const [copied, setCopied] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [sendingEmail, setSendingEmail] = useState(false);
+  const queryClient = useQueryClient();
   const [emailSent, setEmailSent] = useState(false);
   const [paymentKind, setPaymentKind] = useState<"full" | "deposit">("full");
   const [testMode, setTestMode] = useState(false);
@@ -169,6 +171,20 @@ const FunnelPayLinkBlock = ({
       const internalFailures = internalResults.filter((r) => r.error);
       if (internalFailures.length > 0) {
         console.warn("Internal copy failures", internalFailures);
+      }
+
+      // Move the quote out of "Action Required" into "Awaiting Settlement"
+      if (quoteId) {
+        const { error: statusError } = await supabase
+          .from("trade_quotes")
+          .update({ status: "submitted", submitted_at: new Date().toISOString() })
+          .eq("id", quoteId)
+          .eq("status", "draft");
+        if (statusError) {
+          console.warn("Could not update quote status", statusError);
+        } else {
+          queryClient.invalidateQueries({ queryKey: ["sales-funnel"] });
+        }
       }
 
       setEmailSent(true);
