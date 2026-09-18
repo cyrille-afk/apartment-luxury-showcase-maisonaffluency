@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Navigate, Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { ToastAction } from "@/components/ui/toast";
 
 type FieldKey = "publishableKey" | "secretKey" | "webhookSecret";
 
@@ -159,6 +160,46 @@ export default function TradeAdminPaymentSettings() {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Cross-entry warnings already shown this mount, so typing doesn't re-toast.
+  const crossEntryWarned = useRef<Set<string>>(new Set());
+
+  // Detects an accidental mode cross-entry (live key pasted into a test field
+  // or vice versa) and offers a one-tap mode switch instead of a hard error.
+  const detectCrossEntry = (raw: string, section: "live" | "test") => {
+    const v = raw.trim();
+    const pastedLive = /^(pk|sk|rk)_live_/.test(v);
+    const pastedTest = /^(pk|sk|rk)_test_/.test(v);
+    if (!pastedLive && !pastedTest) return;
+    const kind = pastedLive ? "live" : "test";
+    if (section === kind || crossEntryWarned.current.has(`${section}:${kind}`)) return;
+    crossEntryWarned.current.add(`${section}:${kind}`);
+
+    if (kind === "live") {
+      toast({
+        title: "That looks like a Live Key",
+        description: status?.envLiveKey
+          ? "Live mode is locked on via infrastructure environment variables — paste this key into the Live fields above."
+          : "It looks like you're entering a Live Key. Would you like to switch the system configuration to Live Mode first?",
+        action: status?.envLiveKey ? undefined : (
+          <ToastAction altText="Switch to Live Mode" onClick={() => toggleLiveMode(true)}>
+            Switch to Live Mode
+          </ToastAction>
+        ),
+      });
+    } else {
+      toast({
+        title: "That looks like a Test Key",
+        description:
+          "It looks like you're entering a Test Key. It belongs in the Test credentials section below — or switch the system configuration to Test Mode.",
+        action: status?.envLiveKey ? undefined : (
+          <ToastAction altText="Switch to Test Mode" onClick={() => toggleLiveMode(false)}>
+            Switch to Test Mode
+          </ToastAction>
+        ),
+      });
     }
   };
 
@@ -449,6 +490,7 @@ export default function TradeAdminPaymentSettings() {
                   value={values[f.key]}
                   onChange={(e) => {
                     const nextValue = e.target.value.replace(/\s/g, "");
+                    detectCrossEntry(nextValue, "live");
                     setValues((current) => {
                       const next = { ...current, [f.key]: nextValue };
                       credentialDraft = next;
@@ -535,9 +577,11 @@ export default function TradeAdminPaymentSettings() {
                     spellCheck={false}
                     placeholder={f.placeholder}
                     value={testValues[f.key]}
-                    onChange={(e) =>
-                      setTestValues((current) => ({ ...current, [f.key]: e.target.value.replace(/\s/g, "") }))
-                    }
+                    onChange={(e) => {
+                      const nextValue = e.target.value.replace(/\s/g, "");
+                      detectCrossEntry(nextValue, "test");
+                      setTestValues((current) => ({ ...current, [f.key]: nextValue }));
+                    }}
                     className="pr-10 font-body"
                   />
                   <button
