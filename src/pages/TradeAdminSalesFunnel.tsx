@@ -30,6 +30,8 @@ const EntryCard = ({ entry, urgent = false }: { entry: FunnelEntry; urgent?: boo
     className={cn(
       "group border bg-card p-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft",
       urgent ? "border-accent/80 shadow-soft" : "border-border hover:border-primary/40",
+      entry.paidViaStripe &&
+        "border-emerald-900/40 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-3 motion-safe:duration-500",
     )}
   >
     <div className="flex gap-3">
