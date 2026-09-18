@@ -153,7 +153,7 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
     }
   };
 
-  const handleEdit = async (id: string, patch: Partial<Pick<Extra, "label" | "amount_cents">>) => {
+  const handleEdit = async (id: string, patch: Partial<Pick<Extra, "label" | "amount_cents" | "currency">>) => {
     setExtras((curr) => curr.map((e) => (e.id === id ? { ...e, ...patch } : e)));
     const { error } = await supabase.from("trade_quote_extras" as any).update(patch).eq("id", id);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
