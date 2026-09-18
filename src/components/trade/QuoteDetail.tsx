@@ -944,7 +944,24 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       setItems(loadedItems);
       if (quoteRes.data?.currency) setCurrency(quoteRes.data.currency as Currency);
       if (quoteRes.data?.client_name) setClientName(quoteRes.data.client_name as string);
-      if ((quoteRes.data as any)?.client_id) setClientId((quoteRes.data as any).client_id as string);
+      if ((quoteRes.data as any)?.client_id) {
+        const linkedClientId = (quoteRes.data as any).client_id as string;
+        setClientId(linkedClientId);
+        // The linked client record is the source of truth for the displayed
+        // name: older quotes may still carry a name derived from the inquiry
+        // (e.g. the email local-part) instead of the real company name.
+        (supabase.from("clients" as any)
+          .select("name")
+          .eq("id", linkedClientId)
+          .maybeSingle() as any
+        ).then(({ data }: any) => {
+          const realName = String(data?.name ?? "").trim();
+          if (realName && realName !== String(quoteRes.data?.client_name ?? "").trim()) {
+            setClientName(realName);
+            supabase.from("trade_quotes").update({ client_name: realName } as any).eq("id", quoteId).then(() => {});
+          }
+        });
+      }
       if ((quoteRes.data as any)?.admin_notes) setAdminNotes((quoteRes.data as any).admin_notes);
       if ((quoteRes.data as any)?.project_id !== undefined) setProjectId((quoteRes.data as any).project_id);
       const q = quoteRes.data as any;
