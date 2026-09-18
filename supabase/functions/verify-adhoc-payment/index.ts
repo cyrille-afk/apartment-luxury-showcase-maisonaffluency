@@ -17,6 +17,55 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
+async function notifyInternalPaymentReceived(
+  supabase: ReturnType<typeof createClient>,
+  args: {
+    label: string;
+    amountCents: number;
+    currency: string;
+    payerEmail?: string | null;
+    quoteRef?: string | null;
+    cardStage?: string | null;
+    paymentIntentId: string;
+    sessionId?: string | null;
+  },
+) {
+  try {
+    const fmt = (cents: number) =>
+      ((cents ?? 0) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    const templateData = {
+      label: args.label,
+      amountFormatted: fmt(args.amountCents),
+      currency: (args.currency || "USD").toUpperCase(),
+      payerEmail: args.payerEmail ?? null,
+      quoteRef: args.quoteRef ?? null,
+      cardStage: args.cardStage ?? null,
+      sessionId: args.sessionId ?? args.paymentIntentId,
+      paidAt: new Date().toISOString(),
+      funnelUrl: "https://www.maisonaffluency.com/trade/admin/sales-funnel",
+    };
+
+    const idempotencyKey = `funnel-payment-received-internal-${args.paymentIntentId}`;
+
+    for (const recipient of INTERNAL_RECIPIENTS) {
+      const { error } = await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "funnel-payment-received-internal",
+          recipientEmail: recipient,
+          idempotencyKey,
+          templateData,
+        },
+      });
+      if (error) {
+        console.error(`[verify-adhoc-payment] internal payment notify failed for ${recipient}:`, error);
+      }
+    }
+  } catch (e) {
+    console.error("[verify-adhoc-payment] notifyInternalPaymentReceived error:", e);
+  }
+}
+
 /**
  * Client-side payment reconciliation for ad-hoc Sales Funnel checkout links.
  *
