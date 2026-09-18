@@ -172,7 +172,9 @@ serve(async (req) => {
       if (cardErr) console.error("[create-adhoc-payment-link] card payment insert", cardErr);
     }
 
-    const payUrl = payToken ? `${publicOrigin}/pay/${payToken}` : session.url;
+    // Test-mode links must go straight to the test Stripe session; the /pay page
+    // always mints live sessions.
+    const payUrl = payToken && !testMode ? `${publicOrigin}/pay/${payToken}` : session.url;
 
     return new Response(JSON.stringify({ url: payUrl, payUrl, token: payToken, stripeUrl: session.url, sessionId: session.id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
