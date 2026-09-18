@@ -68,7 +68,7 @@ const DesignerPurchaseOrderEmail = ({
 
         {acknowledgeUrl ? (
           <Section style={{ textAlign: 'center' as const, padding: '4px 0 8px' }}>
-            <Button href={acknowledgeUrl} style={ackButton}>Confirm receipt of this PO</Button>
+            <Button href={acknowledgeUrl} style={ackButton}>Click Here to Acknowledge Receipt &amp; Confirm Production Allocation</Button>
             <Text style={muted}>One click — no login required.</Text>
           </Section>
         ) : null}
