@@ -183,6 +183,23 @@ const FunnelPayLinkBlock = ({
         <option value="deposit">Deposit · balance to follow</option>
       </select>
 
+      <label
+        className={cn(
+          "flex cursor-pointer items-center gap-2 border px-2 py-1.5 font-body text-[10px] font-semibold uppercase tracking-[0.1em]",
+          testMode
+            ? "border-amber-500/60 bg-amber-500/10 text-amber-700"
+            : "border-border bg-background text-muted-foreground",
+        )}
+      >
+        <input
+          type="checkbox"
+          checked={testMode}
+          onChange={(e) => setTestMode(e.target.checked)}
+          className="h-3 w-3 accent-amber-600"
+        />
+        Test mode · card 4242 4242 4242 4242
+      </label>
+
       <Button
         type="button"
         size="sm"
@@ -192,7 +209,9 @@ const FunnelPayLinkBlock = ({
           "h-8 w-full rounded-none font-body text-[10px] font-semibold uppercase tracking-[0.14em]",
           copied
             ? "bg-emerald-600 text-white hover:bg-emerald-600"
-            : "bg-gold text-accent-foreground hover:bg-gold/90",
+            : testMode
+              ? "bg-amber-600 text-white hover:bg-amber-600/90"
+              : "bg-gold text-accent-foreground hover:bg-gold/90",
         )}
       >
         {loading ? (
@@ -205,7 +224,7 @@ const FunnelPayLinkBlock = ({
           </>
         ) : (
           <>
-            <Zap className="h-3 w-3" /> Generate Stripe link
+            <Zap className="h-3 w-3" /> {testMode ? "Generate test link" : "Generate Stripe link"}
           </>
         )}
       </Button>
