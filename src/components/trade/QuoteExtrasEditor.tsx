@@ -226,7 +226,20 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
                       className="flex-1 bg-background border border-border rounded px-2 py-1 font-body text-xs text-foreground"
                     />
                     <div className="flex items-center gap-1">
-                      <span className="font-body text-xs text-muted-foreground">{currencySymbol(rowCcy)}</span>
+                      <select
+                        value={rowCcy}
+                        onChange={(ev) => {
+                          const next = ev.target.value;
+                          setExtras((curr) => curr.map((x) => (x.id === e.id ? { ...x, currency: next } : x)));
+                          handleEdit(e.id, { currency: next });
+                        }}
+                        aria-label="Charge currency"
+                        className="bg-background border border-border rounded px-1 py-1 font-body text-[11px] text-foreground"
+                      >
+                        {Array.from(new Set([currency.toUpperCase(), ...EXTRA_CURRENCIES, rowCcy])).map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
                       <input
                         type="number"
                         step="0.01"
