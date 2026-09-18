@@ -180,6 +180,8 @@ export function useSalesFunnel(days: number) {
               href: `/trade/quotes/${q.id}`,
               email: (q.ship_to_email as string) ?? null,
               imageUrl: product.imageUrl,
+              finish: product.finish,
+              leadTime: product.leadTime,
             };
           }),
         },
