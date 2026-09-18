@@ -27,6 +27,7 @@ import affluencyLogo from "@/assets/affluency-quote-logo.jpg";
 import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from "@/lib/procurementExcel";
 import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine, type QuotePdfArgs } from "@/lib/quotePdf";
 import { publishQuotePdf } from "@/lib/publishQuotePdf";
+import { checkQuoteConsistency, summariseIssues } from "@/lib/quoteConsistency";
 import { downloadInvoicePdf, type InvoiceMode } from "@/lib/invoicePdf";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { HkLandedCostPanel } from "@/components/trade/HkLandedCostPanel";
