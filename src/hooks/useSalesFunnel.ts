@@ -44,7 +44,8 @@ export function useSalesFunnel(days: number) {
   return useQuery<SalesFunnelData>({
     queryKey: ["sales-funnel", days],
     refetchOnWindowFocus: true,
-    staleTime: 30_000,
+    refetchOnMount: "always",
+    staleTime: 0,
     queryFn: async () => {
       const since = new Date(Date.now() - days * 86400_000).toISOString();
 

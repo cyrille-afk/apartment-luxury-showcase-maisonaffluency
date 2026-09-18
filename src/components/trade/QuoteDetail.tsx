@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
@@ -410,6 +411,7 @@ const QuotePdfPreviewPages = ({ blobUrl }: { blobUrl: string | null }) => {
 const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack, onStatusChange }: QuoteDetailProps) => {
   const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { discountPct: tradeDiscountPct, discountLabel: tradeDiscountLabel, tierLabel, tier: currentTier, config: tierConfig } = useTradeDiscount();
   const { clientSafe } = useClientSafeMode();
@@ -1641,6 +1643,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const handleDelete = async () => {
     await supabase.from("trade_quotes").delete().eq("id", quoteId);
     window.dispatchEvent(new Event("concierge:artifacts-changed"));
+    await queryClient.invalidateQueries({ queryKey: ["sales-funnel"] });
     toast({ title: "Quote deleted" });
     onStatusChange();
   };

@@ -1,4 +1,5 @@
 import { useCallback, useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
@@ -249,6 +250,7 @@ const TradeQuotesAdmin = () => {
 /** Admin detail view — set item prices, add notes, send pricing */
 const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => void }) => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [items, setItems] = useState<AdminQuoteItem[]>([]);
   const [quote, setQuote] = useState<AdminQuote | null>(null);
   const [loading, setLoading] = useState(true);
@@ -564,6 +566,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
     // Delete items first, then the quote
     await supabase.from("trade_quote_items").delete().eq("quote_id", quoteId);
     await supabase.from("trade_quotes").delete().eq("id", quoteId);
+    await queryClient.invalidateQueries({ queryKey: ["sales-funnel"] });
     toast({ title: "Quote deleted" });
     onBack();
   };
