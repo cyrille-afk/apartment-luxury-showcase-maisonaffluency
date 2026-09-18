@@ -24,7 +24,10 @@ const formatPriceRaw = (cents: number, currency: string) => {
     return v.toFixed(2);
   }
 };
-const currencySymbol = (c: string) => ({ EUR: "€", USD: "$", GBP: "£", SGD: "S$", HKD: "HK$" }[c.toUpperCase()] ?? c);
+const currencySymbol = (c: string) => ({ EUR: "€", USD: "$", GBP: "£", SGD: "S$", HKD: "HK$", AED: "AED", CHF: "CHF", AUD: "A$", CAD: "C$", JPY: "¥" }[c.toUpperCase()] ?? c);
+
+/** Currencies selectable per additional-charge row. */
+const EXTRA_CURRENCIES = ["EUR", "USD", "GBP", "SGD", "HKD", "CHF", "AED", "AUD", "CAD", "JPY"];
 
 type Extra = {
   id: string;
@@ -50,6 +53,10 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
   const [loading, setLoading] = useState(true);
   const [draftLabel, setDraftLabel] = useState("");
   const [draftAmount, setDraftAmount] = useState("");
+  const [draftCurrency, setDraftCurrency] = useState(currency.toUpperCase());
+
+  // Follow the quote currency until the user picks something else for the draft row.
+  useEffect(() => { setDraftCurrency(currency.toUpperCase()); }, [currency]);
 
   const toDisplay = (cents: number, from: string): { cents: number; converted: boolean; sameCcy: boolean } => {
     const src = (from || currency).toUpperCase();
@@ -124,7 +131,7 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
     const nextSort = extras.length ? Math.max(...extras.map((e) => e.sort_order)) + 1 : 0;
     const { data, error } = await supabase
       .from("trade_quote_extras" as any)
-      .insert({ quote_id: quoteId, label, amount_cents: amountCents, currency, sort_order: nextSort })
+      .insert({ quote_id: quoteId, label, amount_cents: amountCents, currency: draftCurrency, sort_order: nextSort })
       .select("id, label, amount_cents, currency, sort_order")
       .single();
     if (error || !data) {
@@ -146,7 +153,7 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
     }
   };
 
-  const handleEdit = async (id: string, patch: Partial<Pick<Extra, "label" | "amount_cents">>) => {
+  const handleEdit = async (id: string, patch: Partial<Pick<Extra, "label" | "amount_cents" | "currency">>) => {
     setExtras((curr) => curr.map((e) => (e.id === id ? { ...e, ...patch } : e)));
     const { error } = await supabase.from("trade_quote_extras" as any).update(patch).eq("id", id);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -219,7 +226,20 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
                       className="flex-1 bg-background border border-border rounded px-2 py-1 font-body text-xs text-foreground"
                     />
                     <div className="flex items-center gap-1">
-                      <span className="font-body text-xs text-muted-foreground">{currencySymbol(rowCcy)}</span>
+                      <select
+                        value={rowCcy}
+                        onChange={(ev) => {
+                          const next = ev.target.value;
+                          setExtras((curr) => curr.map((x) => (x.id === e.id ? { ...x, currency: next } : x)));
+                          handleEdit(e.id, { currency: next });
+                        }}
+                        aria-label="Charge currency"
+                        className="bg-background border border-border rounded px-1 py-1 font-body text-[11px] text-foreground"
+                      >
+                        {Array.from(new Set([currency.toUpperCase(), ...EXTRA_CURRENCIES, rowCcy])).map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
                       <input
                         type="number"
                         step="0.01"
@@ -268,7 +288,16 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
             className="flex-1 bg-background border border-border rounded px-2 py-1 font-body text-xs text-foreground"
           />
           <div className="flex items-center gap-1">
-            <span className="font-body text-xs text-muted-foreground">{currencySymbol(currency)}</span>
+            <select
+              value={draftCurrency}
+              onChange={(e) => setDraftCurrency(e.target.value)}
+              aria-label="New charge currency"
+              className="bg-background border border-border rounded px-1 py-1 font-body text-[11px] text-foreground"
+            >
+              {Array.from(new Set([currency.toUpperCase(), ...EXTRA_CURRENCIES])).map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
             <input
               type="number"
               step="0.01"
