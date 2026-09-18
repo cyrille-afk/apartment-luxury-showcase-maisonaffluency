@@ -2183,6 +2183,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const handleDownloadPdf = async () => {
     try {
       const args = await buildPdfArgs();
+      if (!(await runPreSendChecks(args))) return;
       await downloadQuotePdf(args);
       try {
         await publishQuotePdf(quoteId, args);
