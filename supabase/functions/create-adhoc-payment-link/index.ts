@@ -58,7 +58,8 @@ serve(async (req) => {
       throw new Error("Amount must be between 1 and 500,000");
     }
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+    const creds = await loadStripeCreds();
+    const stripe = new Stripe(creds.secretKey, {
       apiVersion: "2025-08-27.basil",
     });
 
