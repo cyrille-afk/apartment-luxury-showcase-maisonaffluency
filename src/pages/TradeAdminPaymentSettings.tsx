@@ -60,6 +60,11 @@ export default function TradeAdminPaymentSettings() {
   });
   const [saving, setSaving] = useState(false);
   const [savingField, setSavingField] = useState<FieldKey | null>(null);
+  const [savedFields, setSavedFields] = useState<Record<FieldKey, boolean>>({
+    publishableKey: false,
+    secretKey: false,
+    webhookSecret: false,
+  });
   const [copied, setCopied] = useState(false);
   const [attemptedSave, setAttemptedSave] = useState(false);
 
