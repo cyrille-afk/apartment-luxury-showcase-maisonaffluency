@@ -141,6 +141,55 @@ export default function Success() {
                 <Skeleton className="h-4 w-1/2" />
                 <Skeleton className="h-4 w-4/5" />
               </div>
+            ) : adhoc ? (
+              <div className="rounded-none border border-foreground/10 bg-background p-6 md:p-8">
+                <div className="flex items-center justify-between pb-6 mb-6 border-b border-foreground/10">
+                  <div>
+                    <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                      Payment Status
+                    </p>
+                    <p className="mt-1 font-body text-sm text-foreground">
+                      Payment Confirmed via Stripe
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center px-3 py-1.5 font-body text-[10px] uppercase tracking-[0.18em] bg-foreground text-background">
+                    {adhoc.funnel_status === "settled" ? "Settled" : "Paid"}
+                  </span>
+                </div>
+
+                <dl className="space-y-5">
+                  {adhoc.label ? (
+                    <div>
+                      <dt className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                        Item
+                      </dt>
+                      <dd className="mt-1 font-display text-base md:text-lg text-foreground leading-snug">
+                        {adhoc.label}
+                      </dd>
+                    </div>
+                  ) : null}
+
+                  <div className="flex items-center justify-between pt-4 border-t border-foreground/10">
+                    <dt className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                      Total Paid
+                    </dt>
+                    <dd className="font-display text-lg md:text-xl text-foreground">
+                      {formatOrderCurrency(adhoc.amount_cents, adhoc.currency)}
+                    </dd>
+                  </div>
+
+                  {adhoc.payer_email ? (
+                    <div>
+                      <dt className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                        Confirmation Email
+                      </dt>
+                      <dd className="mt-1 font-body text-sm text-foreground break-all">
+                        {adhoc.payer_email}
+                      </dd>
+                    </div>
+                  ) : null}
+                </dl>
+              </div>
             ) : error || !order ? (
               <div className="text-center py-10">
                 <p className="font-body text-sm text-muted-foreground">
