@@ -264,6 +264,28 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
                         }}
                         className="w-24 bg-background border border-border rounded px-2 py-1 font-body text-xs text-foreground tabular-nums text-right"
                       />
+                      <span className="text-[10px] text-muted-foreground">×</span>
+                      <input
+                        type="number"
+                        min={1}
+                        step={1}
+                        value={qty.toString()}
+                        aria-label="Charge quantity"
+                        onChange={(ev) => {
+                          const q = Math.max(1, Math.round(parseFloat(ev.target.value) || 1));
+                          setExtras((curr) => curr.map((x) => (x.id === e.id ? { ...x, quantity: q } : x)));
+                        }}
+                        onBlur={(ev) => {
+                          const q = Math.max(1, Math.round(parseFloat(ev.target.value) || 1));
+                          handleEdit(e.id, { quantity: q });
+                        }}
+                        className="w-12 bg-background border border-border rounded px-1 py-1 font-body text-xs text-foreground tabular-nums text-right"
+                      />
+                      {qty > 1 && (
+                        <span className="text-[10px] text-muted-foreground whitespace-nowrap tabular-nums">
+                          = {currencySymbol(rowCcy)}{formatPriceRaw(e.amount_cents * qty, rowCcy)}
+                        </span>
+                      )}
                       {showConversion && (
                         <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                           ≈ {currencySymbol(currency)}{formatPriceRaw(displayCents, currency)}
@@ -314,6 +336,17 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
               onChange={(e) => setDraftAmount(e.target.value)}
               placeholder="0.00"
               className="w-24 bg-background border border-border rounded px-2 py-1 font-body text-xs text-foreground tabular-nums text-right"
+            />
+            <span className="text-[10px] text-muted-foreground">×</span>
+            <input
+              type="number"
+              min={1}
+              step={1}
+              value={draftQty}
+              onChange={(e) => setDraftQty(e.target.value)}
+              aria-label="New charge quantity"
+              title="Quantity"
+              className="w-12 bg-background border border-border rounded px-1 py-1 font-body text-xs text-foreground tabular-nums text-right"
             />
           </div>
           <button
