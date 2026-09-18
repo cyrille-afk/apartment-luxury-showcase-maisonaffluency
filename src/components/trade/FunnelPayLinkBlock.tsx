@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Loader2, Zap } from "lucide-react";
+import { Check, Loader2, Mail, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -20,15 +20,33 @@ interface Props {
   label: string;
   email: string | null;
   quoteId?: string | null;
+  recipientName?: string | null;
+  productName?: string | null;
+  finish?: string | null;
+  leadTime?: string | null;
+  maisonRef?: string | null;
   className?: string;
 }
 
-const FunnelPayLinkBlock = ({ label, email, quoteId, className }: Props) => {
+const FunnelPayLinkBlock = ({
+  label,
+  email,
+  quoteId,
+  recipientName,
+  productName,
+  finish,
+  leadTime,
+  maisonRef,
+  className,
+}: Props) => {
   const { toast } = useToast();
   const [currency, setCurrency] = useState<string>("USD");
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const handleGenerate = async () => {
     const value = Number(amount.replace(/,/g, ""));
@@ -54,6 +72,7 @@ const FunnelPayLinkBlock = ({ label, email, quoteId, className }: Props) => {
       } catch {
         window.prompt("Copy this payment link", data.url);
       }
+      setPaymentUrl(data.url);
       setCopied(true);
       setTimeout(() => setCopied(false), 6000);
     } catch (err) {
@@ -64,6 +83,47 @@ const FunnelPayLinkBlock = ({ label, email, quoteId, className }: Props) => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSendEmail = async () => {
+    if (!email) {
+      toast({ title: "No recipient email", variant: "destructive" });
+      return;
+    }
+    if (!paymentUrl) {
+      toast({ title: "Generate a payment link first", variant: "destructive" });
+      return;
+    }
+    setSendingEmail(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "quote-confirmation-payment-link",
+          recipientEmail: email,
+          idempotencyKey: `quote-confirm-${quoteId ?? label}-${Date.now()}`,
+          templateData: {
+            recipientName: recipientName || undefined,
+            productName: productName || label,
+            finish,
+            leadTime,
+            paymentLink: paymentUrl,
+            maisonRef: maisonRef || (quoteId ? `QU-${quoteId.slice(0, 6).toUpperCase()}` : undefined),
+          },
+        },
+      });
+      if (error) throw error;
+      setEmailSent(true);
+      toast({ title: "Confirmation email sent" });
+      setTimeout(() => setEmailSent(false), 6000);
+    } catch (err) {
+      toast({
+        title: "Could not send confirmation email",
+        description: (err as Error).message,
+        variant: "destructive",
+      });
+    } finally {
+      setSendingEmail(false);
     }
   };
 
@@ -121,6 +181,36 @@ const FunnelPayLinkBlock = ({ label, email, quoteId, className }: Props) => {
           </>
         )}
       </Button>
+
+      {paymentUrl ? (
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={handleSendEmail}
+          disabled={sendingEmail || emailSent}
+          className={cn(
+            "h-8 w-full rounded-none border font-body text-[10px] font-semibold uppercase tracking-[0.14em]",
+            emailSent
+              ? "border-emerald-600 bg-emerald-600/10 text-emerald-700 hover:bg-emerald-600/10"
+              : "border-border bg-background text-foreground hover:bg-muted",
+          )}
+        >
+          {sendingEmail ? (
+            <>
+              <Loader2 className="h-3 w-3 animate-spin" /> Sending email
+            </>
+          ) : emailSent ? (
+            <>
+              <Check className="h-3 w-3" /> Email sent
+            </>
+          ) : (
+            <>
+              <Mail className="h-3 w-3" /> Send confirmation email
+            </>
+          )}
+        </Button>
+      ) : null}
     </div>
   );
 };
