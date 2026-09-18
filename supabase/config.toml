@@ -80,3 +80,6 @@ project_id = "dcrauiygaezoduwdjmsm"
 
   [functions.guest-quote-checkout]
     verify_jwt = false
+
+  [functions.payment-credentials]
+    verify_jwt = false
