@@ -26,7 +26,7 @@ const relative = (iso: string) => {
   return `${Math.floor(h / 24)}d ago`;
 };
 
-const EntryCard = ({ entry, urgent = false }: { entry: FunnelEntry; urgent?: boolean }) => (
+const EntryCard = ({ entry, urgent = false, quoteCard = false }: { entry: FunnelEntry; urgent?: boolean; quoteCard?: boolean }) => (
   <article
     className={cn(
       "group border bg-card p-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft",
@@ -95,14 +95,14 @@ const EntryCard = ({ entry, urgent = false }: { entry: FunnelEntry; urgent?: boo
       <FunnelPayLinkBlock
         label={entry.label}
         email={entry.email}
-        quoteId={urgent ? entry.id : null}
+        quoteId={urgent || quoteCard ? entry.id : null}
         cardId={entry.id}
-        cardStage={urgent ? "draft_quotes" : "lead_capture"}
+        cardStage={urgent ? "draft_quotes" : quoteCard ? "sent_unpaid" : "lead_capture"}
         recipientName={entry.sublabel}
-        productName={entry.label}
+        productName={entry.productName ?? entry.label}
         finish={entry.finish}
         leadTime={entry.leadTime}
-        maisonRef={urgent ? `QU-${entry.id.slice(0, 6).toUpperCase()}` : null}
+        maisonRef={urgent || quoteCard ? `QU-${entry.id.slice(0, 6).toUpperCase()}` : null}
       />
     )}
     <SimulatePaymentLink
@@ -262,7 +262,7 @@ const TradeAdminSalesFunnel = () => {
                   </>
                 )}
                 <GroupLabel count={sent.length}>Quotes sent, not paid</GroupLabel>
-                {sent.length ? sent.map((entry) => <EntryCard key={entry.id} entry={entry} />) : <EmptyState label="No unpaid quotations" />}
+                {sent.length ? sent.map((entry) => <EntryCard key={entry.id} entry={entry} quoteCard />) : <EmptyState label="No unpaid quotations" />}
                 <GroupLabel count={orders.length}>Orders awaiting payment</GroupLabel>
                 {orders.length ? orders.map((entry) => <EntryCard key={entry.id} entry={entry} />) : <EmptyState label="No orders awaiting payment" />}
               </PipelineColumn>

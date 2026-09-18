@@ -17,6 +17,8 @@ export interface FunnelEntry {
   paidViaStripe?: boolean;
   /** Column the card came from before the webhook moved it. */
   originStage?: string;
+  /** Actual product name for quote cards (label may be a quote ref). */
+  productName?: string | null;
 }
 
 export interface FunnelStage {
@@ -236,9 +238,11 @@ export function useSalesFunnel(days: number) {
           description: "Issued quotations awaiting settlement",
           entries: sentUnpaid.map((q) => {
             const link = linkByQuote.get(q.id as string);
+            const product = quoteProduct(q.id as string);
             return {
               id: q.id as string,
               label: ref(q.id as string),
+              productName: product.name,
               sublabel: [q.client_name ?? "Client", link ? "Pay link issued" : "No pay link"]
                 .filter(Boolean)
                 .join(" · "),
@@ -246,7 +250,9 @@ export function useSalesFunnel(days: number) {
               amountLabel: link ? money(link.amount_cents as number, link.currency as string) : null,
               href: `/trade/quotes/${q.id}`,
               email: (link?.payer_email as string) ?? (q.ship_to_email as string) ?? null,
-              imageUrl: quoteProduct(q.id as string).imageUrl,
+              imageUrl: product.imageUrl,
+              finish: product.finish,
+              leadTime: product.leadTime,
             };
           }),
         },
