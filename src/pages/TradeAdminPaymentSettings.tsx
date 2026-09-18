@@ -14,6 +14,17 @@ import { Switch } from "@/components/ui/switch";
 
 type FieldKey = "publishableKey" | "secretKey" | "webhookSecret";
 
+type CredentialDraft = Record<FieldKey, string>;
+
+// Keep an unfinished credential set only in this tab's JavaScript memory.
+// This survives route/auth remounts without writing sensitive values to
+// localStorage or sessionStorage, and disappears on a real browser refresh.
+let credentialDraft: CredentialDraft = {
+  publishableKey: "",
+  secretKey: "",
+  webhookSecret: "",
+};
+
 const FIELDS: { key: FieldKey; label: string; hint: string; placeholder: string }[] = [
   {
     key: "publishableKey",
@@ -41,11 +52,7 @@ export default function TradeAdminPaymentSettings() {
   const qc = useQueryClient();
   const { data: status, isLoading, refetch } = usePaymentMode(isAdmin);
 
-  const [values, setValues] = useState<Record<FieldKey, string>>({
-    publishableKey: "",
-    secretKey: "",
-    webhookSecret: "",
-  });
+  const [values, setValues] = useState<CredentialDraft>(() => ({ ...credentialDraft }));
   const [revealed, setRevealed] = useState<Record<FieldKey, boolean>>({
     publishableKey: false,
     secretKey: false,
@@ -92,7 +99,8 @@ export default function TradeAdminPaymentSettings() {
         throw new Error(responseBody?.error ?? error.message);
       }
       if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
-      setValues({ publishableKey: "", secretKey: "", webhookSecret: "" });
+      credentialDraft = { publishableKey: "", secretKey: "", webhookSecret: "" };
+      setValues({ ...credentialDraft });
       setAttemptedSave(false);
       await refetch();
       await qc.invalidateQueries({ queryKey: ["payment-mode"] });
@@ -225,7 +233,14 @@ export default function TradeAdminPaymentSettings() {
                   spellCheck={false}
                   placeholder={f.placeholder}
                   value={values[f.key]}
-                  onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value.replace(/\s/g, "") }))}
+                  onChange={(e) => {
+                    const nextValue = e.target.value.replace(/\s/g, "");
+                    setValues((current) => {
+                      const next = { ...current, [f.key]: nextValue };
+                      credentialDraft = next;
+                      return next;
+                    });
+                  }}
                   className="pr-10 font-body"
                 />
                 <button
