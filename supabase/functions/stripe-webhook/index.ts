@@ -420,6 +420,16 @@ serve(async (req) => {
         paymentIntentId: pi.id,
         amountPaid: pi.amount_received ?? pi.amount ?? 0,
       });
+
+      await notifyInternalPaymentReceived(supabase, {
+        label: pi.metadata?.label || "Sales Funnel payment",
+        amountCents: pi.amount_received ?? pi.amount ?? 0,
+        currency: pi.currency || "USD",
+        payerEmail: pi.receipt_email || null,
+        quoteRef: pi.metadata?.quote_id || null,
+        cardStage: pi.metadata?.card_stage || null,
+        paymentIntentId: pi.id,
+      });
     }
 
     if (pi.metadata?.payment_type === "onsite_checkout") {
