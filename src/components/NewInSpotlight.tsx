@@ -435,7 +435,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
               </div>
 
               {igWithImages.length > 0 && (
-                <div className="mt-6 pt-4 border-t border-neutral-100 w-full flex flex-col md:flex-col-reverse">
+                <div className="mt-6 pt-4 border-t border-neutral-100 w-full flex flex-col">
                   <div className="flex gap-2.5 items-center h-16 md:h-20 overflow-hidden flex-shrink-0">
                     {igWithImages.slice(0, 6).map((post) => (
                       <a
