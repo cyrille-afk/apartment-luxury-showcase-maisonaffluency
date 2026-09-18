@@ -61,7 +61,12 @@ export default function TradeAdminPaymentSettings() {
     setSaving(true);
     try {
       const { data, error } = await supabase.functions.invoke("payment-credentials", {
-        body: { action: "save", ...values },
+        body: {
+          action: "save",
+          publishableKey: values.publishableKey.trim(),
+          secretKey: values.secretKey.trim(),
+          webhookSecret: values.webhookSecret.trim(),
+        },
       });
       if (error) throw error;
       if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
@@ -104,7 +109,28 @@ export default function TradeAdminPaymentSettings() {
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const complete = FIELDS.every((f) => values[f.key].trim().length > 8);
+  const fieldError = (key: FieldKey): string | null => {
+    const raw = values[key].trim();
+    if (!raw) return null;
+    if (key === "publishableKey" && !raw.startsWith("pk_live_")) {
+      return raw.startsWith("pk_test_")
+        ? "That is a test key — paste the pk_live_ key from Stripe's live mode."
+        : "Must start with pk_live_ (check the value is in the right box).";
+    }
+    if (key === "secretKey" && !/^(sk|rk)_live_/.test(raw)) {
+      return raw.startsWith("sk_test_")
+        ? "That is a test key — switch Stripe to live mode and copy the sk_live_ key."
+        : "Must start with sk_live_ (or rk_live_ for a restricted key).";
+    }
+    if (key === "webhookSecret" && !raw.startsWith("whsec_")) {
+      return "Must start with whsec_ — create the webhook endpoint in Stripe first.";
+    }
+    return null;
+  };
+
+  const filled = FIELDS.every((f) => values[f.key].trim().length > 8);
+  const invalid = FIELDS.some((f) => fieldError(f.key));
+  const complete = filled && !invalid;
 
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-10">
@@ -188,7 +214,11 @@ export default function TradeAdminPaymentSettings() {
                   {revealed[f.key] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              <p className="mt-1 font-body text-xs text-muted-foreground">{f.hint}</p>
+              <p
+                className={`mt-1 font-body text-xs ${fieldError(f.key) ? "text-destructive" : "text-muted-foreground"}`}
+              >
+                {fieldError(f.key) ?? f.hint}
+              </p>
             </div>
           ))}
         </div>
@@ -201,6 +231,13 @@ export default function TradeAdminPaymentSettings() {
           <Lock className="mr-2 h-4 w-4" />
           {saving ? "Saving…" : "Save Production Credentials"}
         </Button>
+        {!complete && !saving && (
+          <p className="mt-3 font-body text-xs text-muted-foreground">
+            {invalid
+              ? "Fix the highlighted values above to enable saving."
+              : "All three values are required before saving."}
+          </p>
+        )}
       </section>
 
       <section className="mt-6 rounded-sm border border-border bg-card p-6">
