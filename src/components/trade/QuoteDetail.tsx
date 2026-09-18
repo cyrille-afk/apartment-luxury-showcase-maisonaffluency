@@ -4241,25 +4241,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         <span>{formatPriceRaw(insurancePremiumCents, currency)}</span>
                       </div>
                     )}
-                    {gstEnabled && subtotalCents > 0 && (() => {
-                      const taxable = goodsAfterDiscountCents + insurancePremiumCents;
-                      return (
-                        <div className="flex justify-between font-body text-xs text-muted-foreground">
-                          <span>{taxLabel} ({gstRate}%)</span>
-                          <span>{formatPriceRaw(Math.round(taxable * gstRate / 100), currency)}</span>
-                        </div>
-                      );
-                    })()}
+                    {gstEnabled && subtotalCents > 0 && (
+                      <div className="flex justify-between font-body text-xs text-muted-foreground">
+                        <span>{taxLabel} ({gstRate}%)</span>
+                        <span>{formatPriceRaw(screenTaxCents, currency)}</span>
+                      </div>
+                    )}
                     {(() => {
-                      const taxable = goodsAfterDiscountCents + insurancePremiumCents;
-                      const goodsTotal = gstEnabled && taxable > 0
-                        ? taxable + Math.round(taxable * gstRate / 100)
-                        : taxable;
-                      const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
-                        ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
-                        : 0;
-                      const total = goodsTotal + cratingTotalCents + shippingQuoteCents + extrasTotalCents;
-                      const depositCents = Math.round(total * 0.6);
+                      const shippingQuoteCents = screenShippingCents;
+                      const total = screenOrderTotalCents;
+                      const depositCents = screenDepositCents;
                       const balanceCents = total - depositCents;
                       return (
                         <>
