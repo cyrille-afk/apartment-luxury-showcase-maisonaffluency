@@ -115,7 +115,7 @@ const formatPriceRaw = (cents: number | null, currency: string = "SGD") => {
 };
 
 const currencySymbol = (c: string) => {
-  const map: Record<string, string> = { SGD: "S$", USD: "US$", EUR: "€", GBP: "£" };
+  const map: Record<string, string> = { SGD: "S$", USD: "US$", EUR: "€", GBP: "£", HKD: "HK$", CHF: "CHF", AED: "AED", AUD: "A$", CAD: "C$", JPY: "¥" };
   return map[c] || c;
 };
 
