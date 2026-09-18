@@ -73,6 +73,32 @@ const emptyContact = (client_id: string): Partial<Contact> => ({
   email: "", phone: "", is_primary: false, notes: "",
 });
 
+// --- Draft autosave -------------------------------------------------------
+// The preview environment can hard-refresh mid-edit (deploys, chunk reloads).
+// Persist the open dialog's content to sessionStorage so nothing is lost.
+type ClientDraft = {
+  editing: Partial<Client>;
+  contacts: Partial<Contact>[];
+  currencyManuallyEdited: boolean;
+};
+
+const draftKey = (id?: string) => `ma_client_draft_${id || "new"}`;
+
+function saveDraft(id: string | undefined, draft: ClientDraft) {
+  try { sessionStorage.setItem(draftKey(id), JSON.stringify(draft)); } catch { /* noop */ }
+}
+
+function loadDraft(id: string | undefined): ClientDraft | null {
+  try {
+    const raw = sessionStorage.getItem(draftKey(id));
+    return raw ? (JSON.parse(raw) as ClientDraft) : null;
+  } catch { return null; }
+}
+
+function clearDraft(id: string | undefined) {
+  try { sessionStorage.removeItem(draftKey(id)); } catch { /* noop */ }
+}
+
 const currencyForCountry = (country: string | null | undefined): string | null => {
   const normalized = country?.trim().toLowerCase();
   if (!normalized) return null;
@@ -227,12 +253,31 @@ export default function TradeClients() {
     if (!editId || autoEditedFor === editId) return;
     const found = clients.find((c) => c.id === editId);
     if (found) {
-      setEditing({ ...found });
-      setEditingContacts((contactsByClient[found.id] || []).map((ct) => ({ ...ct })));
-      setCurrencyManuallyEdited(Boolean(found.default_currency));
+      const draft = loadDraft(found.id);
+      if (draft) {
+        setEditing(draft.editing);
+        setEditingContacts(draft.contacts);
+        setCurrencyManuallyEdited(draft.currencyManuallyEdited);
+        setDraftRestored(true);
+      } else {
+        setEditing({ ...found });
+        setEditingContacts((contactsByClient[found.id] || []).map((ct) => ({ ...ct })));
+        setCurrencyManuallyEdited(Boolean(found.default_currency));
+      }
       setAutoEditedFor(editId);
     }
   }, [loading, clients, contactsByClient, autoEditedFor]);
+
+  // Autosave the open dialog as a draft (debounced) so a preview refresh
+  // never wipes in-progress input.
+  const [draftRestored, setDraftRestored] = useState(false);
+  useEffect(() => {
+    if (!editing) return;
+    const t = setTimeout(() => {
+      saveDraft(editing.id, { editing, contacts: editingContacts, currencyManuallyEdited });
+    }, 400);
+    return () => clearTimeout(t);
+  }, [editing, editingContacts, currencyManuallyEdited]);
 
 
   const filtered = useMemo(() => {
@@ -249,24 +294,46 @@ export default function TradeClients() {
 
   const openNew = () => {
     if (!user || !currentStudio) return;
+    const draft = loadDraft(undefined);
     setAttemptedSave(false);
-    setCurrencyManuallyEdited(false);
-    setEditing(emptyClient(currentStudio.id, user.id));
-    setEditingContacts([emptyContact("")]);
+    if (draft) {
+      setEditing(draft.editing);
+      setEditingContacts(draft.contacts);
+      setCurrencyManuallyEdited(draft.currencyManuallyEdited);
+      setDraftRestored(true);
+    } else {
+      setCurrencyManuallyEdited(false);
+      setEditing(emptyClient(currentStudio.id, user.id));
+      setEditingContacts([emptyContact("")]);
+      setDraftRestored(false);
+    }
   };
 
   const openEdit = (c: Client) => {
+    const draft = loadDraft(c.id);
     setAttemptedSave(false);
-    setCurrencyManuallyEdited(Boolean(c.default_currency));
-    setEditing({ ...c });
-    setEditingContacts((contactsByClient[c.id] || []).map((ct) => ({ ...ct })));
+    if (draft) {
+      setEditing(draft.editing);
+      setEditingContacts(draft.contacts);
+      setCurrencyManuallyEdited(draft.currencyManuallyEdited);
+      setDraftRestored(true);
+    } else {
+      setCurrencyManuallyEdited(Boolean(c.default_currency));
+      setEditing({ ...c });
+      setEditingContacts((contactsByClient[c.id] || []).map((ct) => ({ ...ct })));
+      setDraftRestored(false);
+    }
   };
 
   const closeEdit = () => {
+    // Intentional close (Cancel/X) discards the draft; an unexpected page
+    // reload skips this and the draft is restored on next open.
+    clearDraft(editing?.id);
     setEditing(null);
     setEditingContacts([]);
     setAttemptedSave(false);
     setCurrencyManuallyEdited(false);
+    setDraftRestored(false);
   };
 
   const addContactRow = () => setEditingContacts((arr) => [...arr, emptyContact(editing?.id || "")]);
@@ -555,8 +622,13 @@ export default function TradeClients() {
           <DialogHeader>
             <DialogTitle>{editing?.id ? "Edit client" : "New client"}</DialogTitle>
             <DialogDescription>
-              Visible to all members of {currentStudio.name}.
+              Visible to all members of {currentStudio.name}. Your changes are auto-saved as a draft while you type.
             </DialogDescription>
+            {draftRestored && (
+              <p className="text-xs text-amber-600 mt-1">
+                Draft restored — your previously entered details were recovered.
+              </p>
+            )}
           </DialogHeader>
 
           {editing && (
