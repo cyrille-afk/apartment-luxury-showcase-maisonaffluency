@@ -144,6 +144,19 @@ serve(async (req) => {
           if (upErr) console.error("[verify-adhoc-payment] card update failed", upErr);
           else result.funnel_status = next;
         }
+
+        // Notify internal team regardless of who triggered the transition (idempotent key).
+        const piId = typeof session.payment_intent === "string" ? session.payment_intent : session.id;
+        await notifyInternalPaymentReceived(admin, {
+          label: row.label || meta.label || "Sales Funnel payment",
+          amountCents: session.amount_total ?? row.amount_cents ?? 0,
+          currency: session.currency || row.currency || "USD",
+          payerEmail: session.customer_details?.email ?? session.customer_email ?? null,
+          quoteRef: meta.quote_id || row.quote_id || null,
+          cardStage: meta.card_stage || row.card_stage || null,
+          paymentIntentId: piId,
+          sessionId,
+        });
       }
     }
 
