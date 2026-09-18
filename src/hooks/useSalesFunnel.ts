@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface FunnelEntry {
@@ -12,6 +13,10 @@ export interface FunnelEntry {
   imageUrl: string | null;
   finish?: string | null;
   leadTime?: string | null;
+  /** Set once a Stripe webhook confirmed payment for this card. */
+  paidViaStripe?: boolean;
+  /** Column the card came from before the webhook moved it. */
+  originStage?: string;
 }
 
 export interface FunnelStage {
