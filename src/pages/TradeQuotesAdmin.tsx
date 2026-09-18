@@ -566,6 +566,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
     // Delete items first, then the quote
     await supabase.from("trade_quote_items").delete().eq("quote_id", quoteId);
     await supabase.from("trade_quotes").delete().eq("id", quoteId);
+    await queryClient.invalidateQueries({ queryKey: ["sales-funnel"] });
     toast({ title: "Quote deleted" });
     onBack();
   };
