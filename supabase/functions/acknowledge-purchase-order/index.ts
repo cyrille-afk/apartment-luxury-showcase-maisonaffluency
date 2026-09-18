@@ -6,7 +6,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const LOGISTICS_RECIPIENTS = ["cyrille@maisonaffluency.com", "gregoire@maisonaffluency.com"];
+const LOGISTICS_EMAIL = "logistics@maisonaffluency.com";
+const INTERNAL_RECIPIENTS = ["cyrille@maisonaffluency.com", "gregoire@maisonaffluency.com"];
+const ACKNOWLEDGED_STATUS = "PO Acknowledged by Designer";
 
 const page = (title: string, body: string) =>
   new Response(
@@ -21,43 +23,85 @@ const page = (title: string, body: string) =>
     { status: 200, headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" } },
   );
 
+const invalidLink = () =>
+  page("Invalid link", "This acknowledgement link is not valid. Please use the button in your purchase order email.");
+
+async function postSlackAlert(webhookUrl: string, payload: {
+  poNumber: string; designerName: string; totalCost: string; fulfillmentStatus: string;
+}) {
+  const body = {
+    text: `📦 Designer PO Acknowledged — ${payload.poNumber}`,
+    blocks: [
+      { type: "header", text: { type: "plain_text", text: "📦 Designer PO Acknowledged", emoji: true } },
+      {
+        type: "section",
+        fields: [
+          { type: "mrkdwn", text: `*PO Number*\n${payload.poNumber}` },
+          { type: "mrkdwn", text: `*Designer*\n${payload.designerName}` },
+          { type: "mrkdwn", text: `*Total Wholesale Value*\n${payload.totalCost}` },
+          { type: "mrkdwn", text: `*Fulfillment Status*\n${payload.fulfillmentStatus}` },
+        ],
+      },
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: "Designer has explicitly confirmed receipt of PO. Logistics team can now safely coordinate freight pick-up timelines.",
+        },
+      },
+    ],
+  };
+  const res = await fetch(webhookUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`Slack webhook ${res.status}: ${await res.text()}`);
+}
+
 /**
  * One-click designer acknowledgement of a purchase order.
- * The PO email links here with ?token=<ack_token>. No login required.
- * Records acknowledged_at and alerts the internal logistics team by email.
+ * GET /functions/v1/acknowledge-purchase-order/:po_id?token=<acknowledgment_token>
+ * (legacy ?token=<uuid> form is also accepted). No login required.
+ * Records acknowledged_at, flips payables to 'PO Acknowledged by Designer',
+ * posts a Slack logistics alert and emails the logistics team.
  */
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const url = new URL(req.url);
+  const segments = url.pathname.split("/").filter(Boolean);
+  // Path form: .../acknowledge-purchase-order/<po_id>
+  const fnIdx = segments.indexOf("acknowledge-purchase-order");
+  const poId = fnIdx >= 0 && segments.length > fnIdx + 1 ? segments[fnIdx + 1] : null;
+
   let token = url.searchParams.get("token") ?? "";
   if (!token && req.method === "POST") {
     const body = await req.json().catch(() => ({}));
     if (typeof body?.token === "string") token = body.token;
   }
   token = token.trim();
-  if (!/^[0-9a-f-]{36}$/i.test(token)) {
-    return page("Invalid link", "This acknowledgement link is not valid. Please use the button in your purchase order email.");
-  }
+  if (!/^[0-9a-f-]{36}$/i.test(token)) return invalidLink();
+  if (poId && !/^[0-9a-f-]{36}$/i.test(poId)) return invalidLink();
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
   );
 
-  const { data: po, error } = await supabase
+  let query = supabase
     .from("designer_purchase_orders")
     .select("id, po_number, designer_name, designer_email, acknowledged_at, currency, total_purchase_cost_cogs, line_count")
-    .eq("ack_token", token)
-    .maybeSingle();
+    .or(`acknowledgment_token.eq.${token},ack_token.eq.${token}`);
+  if (poId) query = query.eq("id", poId);
+
+  const { data: po, error } = await query.maybeSingle();
 
   if (error) {
     console.error("[PO-ACK] lookup failed:", error.message);
     return page("Something went wrong", "We could not record your acknowledgement. Please reply to the purchase order email instead.");
   }
-  if (!po) {
-    return page("Invalid link", "This acknowledgement link is not valid. Please use the button in your purchase order email.");
-  }
+  if (!po) return invalidLink();
 
   if (po.acknowledged_at) {
     return page(
@@ -77,16 +121,61 @@ serve(async (req) => {
     return page("Something went wrong", "We could not record your acknowledgement. Please reply to the purchase order email instead.");
   }
 
-  // Internal logistics alert — one send per recipient.
+  // Flip the payables ledger lines out of 'Pending Invoice Match'.
+  const { error: payablesErr } = await supabase
+    .from("purchase_orders_payable")
+    .update({ designer_invoice_status: ACKNOWLEDGED_STATUS, updated_at: acknowledgedAt })
+    .eq("purchase_order_id", po.id)
+    .eq("designer_invoice_status", "pending_invoice_match");
+  if (payablesErr) console.error("[PO-ACK] payables status update failed:", payablesErr.message);
+
   const money = `${String(po.currency ?? "usd").toUpperCase()} ${((po.total_purchase_cost_cogs ?? 0) / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
-  for (const recipient of LOGISTICS_RECIPIENTS) {
+  const alertPayload = {
+    poNumber: po.po_number,
+    designerName: po.designer_name ?? "Designer",
+    totalCost: money,
+    fulfillmentStatus: ACKNOWLEDGED_STATUS,
+  };
+
+  // Slack logistics alert (skipped gracefully until the webhook secret is configured).
+  const slackWebhook = Deno.env.get("SLACK_LOGISTICS_WEBHOOK_URL")?.trim();
+  if (slackWebhook) {
+    try {
+      await postSlackAlert(slackWebhook, alertPayload);
+    } catch (e) {
+      console.error("[PO-ACK] Slack alert failed:", (e as Error).message);
+    }
+  } else {
+    console.warn("[PO-ACK] SLACK_LOGISTICS_WEBHOOK_URL not configured; skipping Slack alert.");
+  }
+
+  // Logistics team email with the alert subject line.
+  const { error: logisticsErr } = await supabase.functions.invoke("send-transactional-email", {
+    body: {
+      templateName: "po-logistics-alert",
+      recipientEmail: LOGISTICS_EMAIL,
+      idempotencyKey: `po-logistics-${po.po_number}`,
+      templateData: {
+        poNumber: po.po_number,
+        designerName: alertPayload.designerName,
+        designerEmail: po.designer_email ?? null,
+        acknowledgedAt: new Date(acknowledgedAt).toUTCString(),
+        totalCost: money,
+        fulfillmentStatus: ACKNOWLEDGED_STATUS,
+      },
+    },
+  });
+  if (logisticsErr) console.error(`[PO-ACK] logistics alert failed:`, logisticsErr.message ?? logisticsErr);
+
+  // Existing internal alert — one send per recipient.
+  for (const recipient of INTERNAL_RECIPIENTS) {
     const { error: mailErr } = await supabase.functions.invoke("send-transactional-email", {
       body: {
         templateName: "po-acknowledged-internal",
         recipientEmail: recipient,
         idempotencyKey: `po-ack-${po.po_number}-${recipient}`,
         templateData: {
-          designerName: po.designer_name ?? "Designer",
+          designerName: alertPayload.designerName,
           designerEmail: po.designer_email ?? null,
           poNumber: po.po_number,
           acknowledgedAt: new Date(acknowledgedAt).toUTCString(),
