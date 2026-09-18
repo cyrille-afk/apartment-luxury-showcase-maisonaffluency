@@ -50,6 +50,7 @@ serve(async (req) => {
     const cardId = body.cardId ? String(body.cardId).slice(0, 120) : null;
     const cardStage = body.cardStage ? String(body.cardStage).slice(0, 60) : null;
     const paymentKind = body.paymentKind === "deposit" ? "deposit" : "full";
+    const testMode = Boolean(body.testMode);
     const expectedTotalCents = Number.isFinite(Number(body.expectedTotalCents))
       ? Math.round(Number(body.expectedTotalCents))
       : null;
@@ -59,7 +60,17 @@ serve(async (req) => {
       throw new Error("Amount must be between 1 and 500,000");
     }
 
-    const creds = await loadStripeCreds();
+    let creds;
+    if (testMode) {
+      creds = await loadStripeTestCreds();
+      if (!creds) {
+        throw new Error(
+          "No Stripe test keys saved. Add them in Payment Settings → Test credentials.",
+        );
+      }
+    } else {
+      creds = await loadStripeCreds();
+    }
     const stripe = new Stripe(creds.secretKey, {
       apiVersion: "2025-08-27.basil",
     });
