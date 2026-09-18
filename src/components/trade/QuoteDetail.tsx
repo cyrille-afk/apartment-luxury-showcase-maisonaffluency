@@ -50,6 +50,10 @@ import BillingModeCard from "@/components/trade/BillingModeCard";
 import { resolveWoodFinishLabel } from "@/lib/resolveWoodFinishLabel";
 import { splitFinishAndDimensions, formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
 
+// null = no override (fall back to product default); 0 = In Stock; >0 = explicit weeks
+const getLeadWeeksOverride = (value: number | null): number | null =>
+  value != null && value >= 0 ? value : null;
+
 const CURRENCIES = ["SGD", "USD", "EUR", "GBP", "HKD", "CHF", "AED", "AUD", "CAD", "JPY"] as const;
 type Currency = (typeof CURRENCIES)[number];
 
