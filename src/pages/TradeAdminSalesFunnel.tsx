@@ -244,6 +244,14 @@ const TradeAdminSalesFunnel = () => {
               </PipelineColumn>
 
               <PipelineColumn title="Awaiting Settlement" count={settlementCount}>
+                {stripePaid.length > 0 && (
+                  <>
+                    <GroupLabel count={stripePaid.length}>Paid via Stripe</GroupLabel>
+                    {stripePaid.map((entry) => (
+                      <EntryCard key={entry.id} entry={entry} />
+                    ))}
+                  </>
+                )}
                 <GroupLabel count={sent.length}>Quotes sent, not paid</GroupLabel>
                 {sent.length ? sent.map((entry) => <EntryCard key={entry.id} entry={entry} />) : <EmptyState label="No unpaid quotations" />}
                 <GroupLabel count={orders.length}>Orders awaiting payment</GroupLabel>
