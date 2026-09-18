@@ -89,6 +89,21 @@ Deno.serve(async (req) => {
     )
   }
 
+  if (
+    (templateName === 'quote-confirmation-payment-link' ||
+      templateName === 'quote-confirmation-internal-copy') &&
+    (typeof templateData.quotePdfUrl !== 'string' ||
+      !templateData.quotePdfUrl.startsWith('https://'))
+  ) {
+    return new Response(
+      JSON.stringify({ error: 'A verified formal quote PDF link is required before sending' }),
+      {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    )
+  }
+
   // 1. Look up template from registry (early — needed to resolve recipient)
   const template = TEMPLATES[templateName]
 

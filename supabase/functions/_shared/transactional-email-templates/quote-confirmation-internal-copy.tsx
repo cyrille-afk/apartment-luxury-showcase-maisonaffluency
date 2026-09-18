@@ -14,6 +14,7 @@ interface Props {
   finish?: string | null
   leadTime?: string | null
   paymentLink?: string | null
+  quotePdfUrl?: string | null
   maisonRef?: string
   amount?: string
   currency?: string
@@ -27,6 +28,7 @@ const QuoteConfirmationInternalCopyEmail = ({
   finish,
   leadTime,
   paymentLink,
+  quotePdfUrl,
   maisonRef = '—',
   amount = '—',
   currency = '',
@@ -102,6 +104,15 @@ const QuoteConfirmationInternalCopyEmail = ({
             )}
           </Text>
 
+          <Text style={text}>
+            Formal Quote PDF:{' '}
+            {quotePdfUrl ? (
+              <Link href={quotePdfUrl} style={link}>Download the formal quote (PDF)</Link>
+            ) : (
+              <strong>NOT INCLUDED — CLIENT EMAIL MUST NOT BE SENT</strong>
+            )}
+          </Text>
+
           <Text style={footer}>
             This is an internal copy only. Do not forward to the client.
           </Text>
@@ -137,7 +148,6 @@ export const template = {
   component: QuoteConfirmationInternalCopyEmail,
   subject: (data: Record<string, any>) =>
     `Internal copy: quote confirmation sent — ${data?.productName ?? 'Client selection'}`,
-  to: 'cyrille@maisonaffluency.com',
   displayName: 'Quote Confirmation — Internal Copy',
   previewData: {
     clientEmail: 'info@agnihk.com',
@@ -145,6 +155,7 @@ export const template = {
     finish: 'Bronze / Silk',
     leadTime: '14–16 weeks',
     paymentLink: 'https://www.maisonaffluency.com/pay/example',
+    quotePdfUrl: 'https://www.maisonaffluency.com/quote-example.pdf',
     maisonRef: 'QU-F05C2A',
     amount: 'HK$ 100.00',
     currency: 'HKD',
