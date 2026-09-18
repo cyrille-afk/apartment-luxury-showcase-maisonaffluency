@@ -182,7 +182,7 @@ const FunnelPayLinkBlock = ({
         )}
       </Button>
 
-      {paymentUrl ? (
+      {paymentUrl && email ? (
         <Button
           type="button"
           size="sm"
