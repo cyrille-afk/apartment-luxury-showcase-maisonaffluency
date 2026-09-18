@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { loadStripeCreds } from "../_shared/stripeCreds.ts";
+import { loadStripeCreds, loadStripeTestCreds } from "../_shared/stripeCreds.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -91,7 +91,7 @@ serve(async (req) => {
         },
       ],
       metadata: {
-        source: "sales_funnel_adhoc",
+        source: testMode ? "sales_funnel_adhoc_test" : "sales_funnel_adhoc",
         created_by: claims.sub,
         quote_id: quoteId ?? "",
         cardId: cardId ?? "",
@@ -100,7 +100,7 @@ serve(async (req) => {
       },
       payment_intent_data: {
         metadata: {
-          source: "sales_funnel_adhoc",
+          source: testMode ? "sales_funnel_adhoc_test" : "sales_funnel_adhoc",
           cardId: cardId ?? "",
           card_stage: cardStage ?? "",
           payment_kind: paymentKind,
