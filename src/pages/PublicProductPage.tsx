@@ -2314,6 +2314,13 @@ const PublicProductPageContent: React.FC = () => {
               )}
               ref={galleryScrollRef}
             >
+              <EditorialGalleryLandingHint
+                className="absolute top-4 left-4 z-40"
+                onClick={() => {
+                  const el = galleryScrollRef.current;
+                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+              />
               <ProductImageGallery
                 images={visibleImages}
                 alt={product.title}
