@@ -69,6 +69,10 @@ const FunnelPayLinkBlock = ({
           label,
           payerEmail: email,
           quoteId: quoteId ?? null,
+          cardId: cardId ?? quoteId ?? null,
+          cardStage: cardStage ?? null,
+          paymentKind,
+          expectedTotalCents: paymentKind === "full" ? Math.round(value * 100) : null,
         },
       });
       if (error) throw error;
