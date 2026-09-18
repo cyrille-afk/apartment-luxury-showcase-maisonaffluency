@@ -165,14 +165,16 @@ export async function describeStripeMode(): Promise<StripeModeReport> {
 
   let savedLiveConfigured = false;
   let savedLiveEnabled = false;
+  let otherWebhookSecret = false;
   try {
     const { data } = await adminClient()
       .from("payment_credentials")
-      .select("live_secret_key, live_mode")
+      .select("live_secret_key, live_mode, live_webhook_secret, test_webhook_secret")
       .eq("id", "live")
       .maybeSingle();
     savedLiveConfigured = Boolean(data?.live_secret_key);
     savedLiveEnabled = Boolean(data?.live_mode);
+    otherWebhookSecret = Boolean(data?.live_webhook_secret || data?.test_webhook_secret);
   } catch (_e) {
     // Non-fatal: report what we know from the environment.
   }
