@@ -142,7 +142,14 @@ export function useUpdateInvoiceStatus() {
       invoiceReference?: string;
     }) => {
       const now = new Date().toISOString();
-      const patch: Record<string, unknown> = {
+      const patch: {
+        designer_invoice_status: InvoiceStatus;
+        updated_at: string;
+        invoice_received_at?: string;
+        approved_at?: string;
+        paid_at?: string;
+        designer_invoice_reference?: string;
+      } = {
         designer_invoice_status: status,
         updated_at: now,
       };
