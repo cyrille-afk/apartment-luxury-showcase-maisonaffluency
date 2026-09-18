@@ -41,20 +41,21 @@ export async function publishQuotePdf(quoteId: string, args: QuotePdfArgs): Prom
   return path;
 }
 
-/** Mint a long-lived signed URL for a previously published quote PDF. */
+/** Build a stable private download URL that mints a fresh short-lived storage signature per click. */
 export async function signedQuotePdfUrl(quoteId: string): Promise<string | null> {
   const { data: quote } = await supabase
     .from("trade_quotes")
-    .select("client_pdf_path")
+    .select("client_pdf_path, client_pdf_download_token")
     .eq("id", quoteId)
     .maybeSingle();
 
-  const path = (quote as { client_pdf_path?: string | null } | null)?.client_pdf_path;
-  if (!path) return null;
+  const record = quote as {
+    client_pdf_path?: string | null;
+    client_pdf_download_token?: string | null;
+  } | null;
+  if (!record?.client_pdf_path || !record.client_pdf_download_token) return null;
 
-  const { data, error } = await supabase.storage
-    .from(QUOTE_PDF_BUCKET)
-    .createSignedUrl(path, QUOTE_PDF_LINK_TTL_SECONDS);
-  if (error) return null;
-  return data?.signedUrl ?? null;
+  const backendUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+  if (!backendUrl) return null;
+  return `${backendUrl}/functions/v1/download-quote-pdf?token=${encodeURIComponent(record.client_pdf_download_token)}`;
 }
