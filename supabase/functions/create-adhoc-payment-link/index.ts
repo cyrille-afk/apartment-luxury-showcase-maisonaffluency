@@ -59,7 +59,7 @@ serve(async (req) => {
       throw new Error("Amount must be between 1 and 500,000");
     }
 
-    const { stripe, creds } = await getStripe(testMode ? "test" : "auto");
+    const { stripe } = await getStripe(testMode ? "test" : "auto");
 
     const origin = req.headers.get("origin") || "https://www.maisonaffluency.com";
 
