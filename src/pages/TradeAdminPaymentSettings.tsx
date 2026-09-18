@@ -220,6 +220,56 @@ export default function TradeAdminPaymentSettings() {
     }
   };
 
+  const testFieldError = (key: TestFieldKey): string | null => {
+    const raw = testValues[key].replace(/\s/g, "");
+    if (!raw) return null;
+    if (key === "testPublishableKey" && !raw.startsWith("pk_test_")) {
+      return "Must start with pk_test_ — toggle Stripe to test mode first.";
+    }
+    if (key === "testSecretKey" && !/^(sk|rk)_test_/.test(raw)) {
+      return "Must start with sk_test_ (or rk_test_ for a restricted key).";
+    }
+    if (key === "testWebhookSecret" && !raw.startsWith("whsec_")) {
+      return "Must start with whsec_.";
+    }
+    return null;
+  };
+
+  const saveTestField = async (key: TestFieldKey) => {
+    const problem = !testValues[key].trim() ? "This value is required." : testFieldError(key);
+    if (problem) {
+      toast({ title: `Check ${TEST_FIELDS.find((f) => f.key === key)?.label}`, description: problem, variant: "destructive" });
+      return;
+    }
+    setSavingTestField(key);
+    try {
+      const { data, error } = await supabase.functions.invoke("payment-credentials", {
+        body: { action: "save_field", field: key, value: testValues[key] },
+      });
+      if (error) {
+        const response = (error as { context?: Response }).context;
+        const responseBody = response
+          ? ((await response.clone().json().catch(() => null)) as { error?: string } | null)
+          : null;
+        throw new Error(responseBody?.error ?? error.message);
+      }
+      if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+      setTestValues((current) => ({ ...current, [key]: "" }));
+      setSavedTestFields((current) => ({ ...current, [key]: true }));
+      setTimeout(() => setSavedTestFields((current) => ({ ...current, [key]: false })), 4000);
+      await refetch();
+      toast({ title: `${TEST_FIELDS.find((f) => f.key === key)?.label} saved securely` });
+    } catch (e) {
+      toast({
+        title: "Could not save this key",
+        description: e instanceof Error ? e.message : "Unexpected error",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingTestField(null);
+    }
+  };
+
   const copyWebhook = async () => {
     if (!status?.webhookUrl) return;
     await navigator.clipboard.writeText(status.webhookUrl);
