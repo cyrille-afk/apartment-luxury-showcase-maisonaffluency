@@ -89,22 +89,22 @@ export default function TradeAdminPaymentSettings() {
 
     setSaving(true);
     try {
-      const { data, error } = await supabase.functions.invoke("payment-credentials", {
-        body: {
-          action: "save",
-          publishableKey: values.publishableKey.trim(),
-          secretKey: values.secretKey.trim(),
-          webhookSecret: values.webhookSecret.trim(),
-        },
-      });
-      if (error) {
-        const response = (error as { context?: Response }).context;
-        const responseBody = response
-          ? await response.clone().json().catch(() => null) as { error?: string } | null
-          : null;
-        throw new Error(responseBody?.error ?? error.message);
+      // Save only the boxes that contain a value — keys already stored on the
+      // server stay untouched instead of failing "required" validation.
+      const filledFields = FIELDS.filter((f) => values[f.key].trim());
+      for (const f of filledFields) {
+        const { data, error } = await supabase.functions.invoke("payment-credentials", {
+          body: { action: "save_field", field: f.key, value: values[f.key] },
+        });
+        if (error) {
+          const response = (error as { context?: Response }).context;
+          const responseBody = response
+            ? await response.clone().json().catch(() => null) as { error?: string } | null
+            : null;
+          throw new Error(responseBody?.error ?? error.message);
+        }
+        if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
       }
-      if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
       credentialDraft = { publishableKey: "", secretKey: "", webhookSecret: "" };
       setValues({ ...credentialDraft });
       setAttemptedSave(false);
