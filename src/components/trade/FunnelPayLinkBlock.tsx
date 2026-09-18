@@ -184,7 +184,7 @@ const FunnelPayLinkBlock = ({
             productName: productName || label,
             finish,
             leadTime,
-            paymentLink: paymentUrl,
+            paymentLink: url,
             maisonRef: maisonRef || (quoteId ? `QU-${quoteId.slice(0, 6).toUpperCase()}` : undefined),
           },
         },
@@ -209,7 +209,7 @@ const FunnelPayLinkBlock = ({
                 productName: productName || label,
                 finish,
                 leadTime,
-                paymentLink: paymentUrl,
+                paymentLink: url,
                 maisonRef: maisonRef || (quoteId ? `QU-${quoteId.slice(0, 6).toUpperCase()}` : undefined),
                 amount: formattedAmount,
                 currency,
@@ -344,7 +344,7 @@ const FunnelPayLinkBlock = ({
         )}
       </Button>
 
-      {paymentUrl && email ? (
+      {(paymentUrl || (quoteId && hasExistingLink)) && email ? (
         <Button
           type="button"
           size="sm"
