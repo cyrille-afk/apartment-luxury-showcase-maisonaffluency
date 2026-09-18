@@ -2294,6 +2294,109 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     ? Math.round(insuranceBaseCents * insuranceRateBps / 10000)
     : 0;
 
+  /**
+   * Single source of truth for the on-screen totals, built with exactly the
+   * same order of operations as the PDF totals block (see `drawTotals` in
+   * src/lib/quotePdf.ts). Crating + additional charges sit in the tax base,
+   * and the deposit uses the weighted per-line percentage — never a flat 60%.
+   */
+  const depositPctLive = computeWeightedDepositPct(
+    items.map((it) => {
+      const rawPrice = it.unit_price_cents ?? catalogSourcePriceCents(it) ?? 0;
+      const lineCents = (convertCents(rawPrice, itemPriceCurrency(it, currency), currency) ?? 0) * it.quantity;
+      const p = it.trade_products as any;
+      return {
+        lineCents,
+        deposit_pct_override: it.deposit_pct_override,
+        lead_weeks_override: getLeadWeeksOverride(it.lead_time_weeks_override),
+        stock_status_override: p?.stock_status_override ?? null,
+        lead_weeks_max_override: p?.lead_weeks_max_override ?? null,
+      };
+    }),
+  );
+  const screenChargesCents = cratingTotalCents + extrasTotalCents;
+  const screenTaxBaseCents = goodsAfterDiscountCents + insurancePremiumCents + screenChargesCents;
+  const screenTaxCents = gstEnabled && screenTaxBaseCents > 0
+    ? Math.round(screenTaxBaseCents * gstRate / 100)
+    : 0;
+  const screenShippingCents = freightInQuoteCcyCents;
+  const screenOrderTotalCents = screenTaxBaseCents + screenTaxCents + screenShippingCents;
+  const screenDepositCents = Math.round(screenOrderTotalCents * depositPctLive);
+
+  /**
+   * Pre-send guard: recompute the PDF totals from the very arguments about to
+   * be printed and compare them with the editor's numbers, plus tier ladder,
+   * currency conversion and deposit integrity. Returns false when a blocking
+   * problem was found (the caller aborts the download/publish/email).
+   */
+  const runPreSendChecks = async (args: QuotePdfArgs): Promise<boolean> => {
+    try {
+      const { data: extraRowsRaw } = await supabase
+        .from("trade_quote_extras" as any)
+        .select("label, amount_cents, currency, quantity")
+        .eq("quote_id", quoteId);
+      const missingFxPairs: string[] = [];
+      const seenPairs = new Set<string>();
+      const notePair = (from: string) => {
+        const src = (from || currency).toUpperCase();
+        const tgt = currency.toUpperCase();
+        const key = `${src}/${tgt}`;
+        if (src === tgt || seenPairs.has(key)) return;
+        seenPairs.add(key);
+        const probe = convertCents(10_000, src, tgt);
+        if (probe === 10_000) missingFxPairs.push(key);
+      };
+      items.forEach((it) => notePair(itemPriceCurrency(it, currency)));
+      ((extraRowsRaw as any[]) || []).forEach((r) => notePair(String(r.currency || currency)));
+
+      const result = checkQuoteConsistency({
+        screen: {
+          currency,
+          subtotalCents,
+          discountCents: tradeDiscountCents,
+          extrasCents: screenChargesCents,
+          insuranceCents: insurancePremiumCents,
+          taxCents: screenTaxCents,
+          shippingCents: screenShippingCents,
+          orderTotalCents: screenOrderTotalCents,
+        },
+        pdf: args as any,
+        extraRows: ((extraRowsRaw as any[]) || []).map((r) => ({
+          label: r.label,
+          currency: r.currency,
+          amountCents: Number(r.amount_cents) || 0,
+          quantity: Number(r.quantity) || 1,
+        })),
+        tierConfigEur: tierConfig
+          ? (["silver", "gold", "platinum"] as const).map((t) => ({
+              tier: t,
+              label: tierConfig[t].label,
+              pct: tierConfig[t].discount_pct,
+              minSpendEurCents: tierConfig[t].min_spend_cents,
+            }))
+          : undefined,
+        activeTier: currentTier ?? null,
+        missingFxPairs,
+      });
+
+      if (result.issues.length === 0) return true;
+      const blocking = result.issues.filter((i) => i.severity === "error");
+      if (blocking.length > 0) {
+        toast({
+          title: "Quote checks failed — nothing sent",
+          description: summariseIssues(blocking),
+          variant: "destructive",
+        });
+        return false;
+      }
+      toast({ title: "Quote checks — please review", description: summariseIssues(result.issues) });
+      return true;
+    } catch (err) {
+      console.warn("Quote consistency check could not run", err);
+      return true; // never block on the checker itself failing
+    }
+  };
+
   /** GBP DDP landed-cost amounts for the totals toggle (Paris → London). */
   const gbp = useGbpLandedCost({
     goodsAfterDiscountCents: isUkDestination ? insuredBaseCents : 0,
