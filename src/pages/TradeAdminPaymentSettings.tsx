@@ -437,8 +437,74 @@ export default function TradeAdminPaymentSettings() {
         )}
       </section>
 
+      <section className="mt-6 rounded-sm border border-amber-500/40 bg-card p-6">
+        <h2 className="font-display text-xl">Test credentials</h2>
+        <p className="mt-2 max-w-xl font-body text-sm text-muted-foreground">
+          Saved separately from live keys. With a test secret key stored, every funnel card gains a{" "}
+          <span className="text-foreground">Test mode</span> toggle that generates Stripe test-mode checkout
+          links — safe with dummy cards such as 4242 4242 4242 4242.
+        </p>
+        <div className="mt-5 space-y-5">
+          {TEST_FIELDS.map((f) => (
+            <div key={f.key}>
+              <Label htmlFor={f.key} className="font-body text-xs uppercase tracking-[0.16em]">
+                {f.label}
+              </Label>
+              <div className="mt-2 flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    id={f.key}
+                    type={testRevealed[f.key] ? "text" : "password"}
+                    autoComplete="off"
+                    spellCheck={false}
+                    placeholder={f.placeholder}
+                    value={testValues[f.key]}
+                    onChange={(e) =>
+                      setTestValues((current) => ({ ...current, [f.key]: e.target.value.replace(/\s/g, "") }))
+                    }
+                    className="pr-10 font-body"
+                  />
+                  <button
+                    type="button"
+                    aria-label={testRevealed[f.key] ? "Hide value" : "Reveal value"}
+                    onClick={() => setTestRevealed((r) => ({ ...r, [f.key]: !r[f.key] }))}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {testRevealed[f.key] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!testValues[f.key].trim() || savingTestField !== null}
+                  onClick={() => saveTestField(f.key)}
+                  className="shrink-0 font-body text-xs"
+                >
+                  {savingTestField === f.key ? "Saving…" : "Save key"}
+                </Button>
+              </div>
+              <p
+                className={`mt-1 font-body text-xs ${
+                  testFieldError(f.key)
+                    ? "text-destructive"
+                    : savedTestFields[f.key]
+                      ? "text-[hsl(var(--jade))]"
+                      : "text-muted-foreground"
+                }`}
+              >
+                {testFieldError(f.key) ??
+                  (savedTestFields[f.key]
+                    ? "Saved ✓ stored securely — the box is intentionally blank."
+                    : status?.[f.key]
+                      ? `Configured: ${status[f.key]}`
+                      : f.hint)}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="mt-6 rounded-sm border border-border bg-card p-6">
-        <h2 className="font-display text-xl">Production webhook endpoint</h2>
         <p className="mt-2 font-body text-sm text-muted-foreground">
           Add this URL in Stripe → Developers → Webhooks, subscribing to
           <span className="text-foreground"> checkout.session.completed</span> and
