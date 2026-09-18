@@ -4303,7 +4303,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             <div className="mt-3 pt-3 border-t border-dashed border-border space-y-1.5">
                               <div className="flex justify-between font-body text-xs">
                                 <span className={isDepositPaid || isFullyPaid ? "text-emerald-600" : "text-foreground"}>
-                                  {isDepositPaid || isFullyPaid ? "✓ " : ""}60% Deposit Due Now
+                                  {isDepositPaid || isFullyPaid ? "✓ " : ""}{Math.round(depositPctLive * 100)}% Deposit Due Now
                                 </span>
                                 <span className={isDepositPaid || isFullyPaid ? "text-emerald-600 font-medium" : "text-foreground font-medium"}>
                                   {currencySymbol(currency)} {formatPriceRaw(depositCents, currency)}
@@ -4311,7 +4311,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               </div>
                               <div className="flex justify-between font-body text-xs">
                                 <span className={isFullyPaid ? "text-emerald-600" : "text-muted-foreground"}>
-                                  {isFullyPaid ? "✓ " : "🔒 "}40% Balance Before Shipment
+                                  {isFullyPaid ? "✓ " : "🔒 "}{Math.round((1 - depositPctLive) * 100)}% Balance Before Shipment
                                 </span>
                                 <span className={isFullyPaid ? "text-emerald-600 font-medium" : "text-muted-foreground"}>
                                   {currencySymbol(currency)} {formatPriceRaw(balanceCents, currency)}
