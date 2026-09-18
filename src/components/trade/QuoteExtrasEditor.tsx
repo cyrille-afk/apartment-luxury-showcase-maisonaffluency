@@ -131,7 +131,7 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
     const nextSort = extras.length ? Math.max(...extras.map((e) => e.sort_order)) + 1 : 0;
     const { data, error } = await supabase
       .from("trade_quote_extras" as any)
-      .insert({ quote_id: quoteId, label, amount_cents: amountCents, currency, sort_order: nextSort })
+      .insert({ quote_id: quoteId, label, amount_cents: amountCents, currency: draftCurrency, sort_order: nextSort })
       .select("id, label, amount_cents, currency, sort_order")
       .single();
     if (error || !data) {
