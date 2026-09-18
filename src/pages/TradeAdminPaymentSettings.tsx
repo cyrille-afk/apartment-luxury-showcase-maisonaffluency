@@ -14,6 +14,17 @@ import { Switch } from "@/components/ui/switch";
 
 type FieldKey = "publishableKey" | "secretKey" | "webhookSecret";
 
+type CredentialDraft = Record<FieldKey, string>;
+
+// Keep an unfinished credential set only in this tab's JavaScript memory.
+// This survives route/auth remounts without writing sensitive values to
+// localStorage or sessionStorage, and disappears on a real browser refresh.
+let credentialDraft: CredentialDraft = {
+  publishableKey: "",
+  secretKey: "",
+  webhookSecret: "",
+};
+
 const FIELDS: { key: FieldKey; label: string; hint: string; placeholder: string }[] = [
   {
     key: "publishableKey",
@@ -41,17 +52,14 @@ export default function TradeAdminPaymentSettings() {
   const qc = useQueryClient();
   const { data: status, isLoading, refetch } = usePaymentMode(isAdmin);
 
-  const [values, setValues] = useState<Record<FieldKey, string>>({
-    publishableKey: "",
-    secretKey: "",
-    webhookSecret: "",
-  });
+  const [values, setValues] = useState<CredentialDraft>(() => ({ ...credentialDraft }));
   const [revealed, setRevealed] = useState<Record<FieldKey, boolean>>({
     publishableKey: false,
     secretKey: false,
     webhookSecret: false,
   });
   const [saving, setSaving] = useState(false);
+  const [savingField, setSavingField] = useState<FieldKey | null>(null);
   const [copied, setCopied] = useState(false);
   const [attemptedSave, setAttemptedSave] = useState(false);
 
@@ -92,7 +100,8 @@ export default function TradeAdminPaymentSettings() {
         throw new Error(responseBody?.error ?? error.message);
       }
       if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
-      setValues({ publishableKey: "", secretKey: "", webhookSecret: "" });
+      credentialDraft = { publishableKey: "", secretKey: "", webhookSecret: "" };
+      setValues({ ...credentialDraft });
       setAttemptedSave(false);
       await refetch();
       await qc.invalidateQueries({ queryKey: ["payment-mode"] });
@@ -122,6 +131,42 @@ export default function TradeAdminPaymentSettings() {
         description: e instanceof Error ? e.message : "Unexpected error",
         variant: "destructive",
       });
+    }
+  };
+
+  const saveField = async (key: FieldKey) => {
+    setAttemptedSave(true);
+    const problem = !values[key].trim() ? "This value is required." : fieldError(key);
+    if (problem) {
+      toast({ title: `Check ${FIELDS.find((field) => field.key === key)?.label}`, description: problem, variant: "destructive" });
+      return;
+    }
+    setSavingField(key);
+    try {
+      const { data, error } = await supabase.functions.invoke("payment-credentials", {
+        body: { action: "save_field", field: key, value: values[key] },
+      });
+      if (error) {
+        const response = (error as { context?: Response }).context;
+        const responseBody = response
+          ? await response.clone().json().catch(() => null) as { error?: string } | null
+          : null;
+        throw new Error(responseBody?.error ?? error.message);
+      }
+      if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+      credentialDraft = { ...credentialDraft, [key]: "" };
+      setValues((current) => ({ ...current, [key]: "" }));
+      await refetch();
+      await qc.invalidateQueries({ queryKey: ["payment-mode"] });
+      toast({ title: `${FIELDS.find((field) => field.key === key)?.label} saved securely` });
+    } catch (e) {
+      toast({
+        title: "Could not save this key",
+        description: e instanceof Error ? e.message : "Unexpected error",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingField(null);
     }
   };
 
@@ -217,25 +262,43 @@ export default function TradeAdminPaymentSettings() {
               <Label htmlFor={f.key} className="font-body text-xs uppercase tracking-[0.16em]">
                 {f.label}
               </Label>
-              <div className="relative mt-2">
-                <Input
+              <div className="mt-2 flex gap-2">
+                <div className="relative flex-1">
+                  <Input
                   id={f.key}
                   type={revealed[f.key] ? "text" : "password"}
                   autoComplete="off"
                   spellCheck={false}
                   placeholder={f.placeholder}
                   value={values[f.key]}
-                  onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value.replace(/\s/g, "") }))}
-                  className="pr-10 font-body"
-                />
-                <button
+                  onChange={(e) => {
+                    const nextValue = e.target.value.replace(/\s/g, "");
+                    setValues((current) => {
+                      const next = { ...current, [f.key]: nextValue };
+                      credentialDraft = next;
+                      return next;
+                    });
+                  }}
+                    className="pr-10 font-body"
+                  />
+                  <button
                   type="button"
                   aria-label={revealed[f.key] ? "Hide value" : "Reveal value"}
                   onClick={() => setRevealed((r) => ({ ...r, [f.key]: !r[f.key] }))}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {revealed[f.key] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!values[f.key].trim() || savingField !== null || saving}
+                  onClick={() => saveField(f.key)}
+                  className="shrink-0 font-body text-xs"
                 >
-                  {revealed[f.key] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
+                  {savingField === f.key ? "Saving…" : "Save key"}
+                </Button>
               </div>
               <p
                 className={`mt-1 font-body text-xs ${fieldError(f.key) || (attemptedSave && !values[f.key].trim()) ? "text-destructive" : "text-muted-foreground"}`}
@@ -252,7 +315,7 @@ export default function TradeAdminPaymentSettings() {
           className="mt-6 w-full bg-[hsl(var(--jade))] font-body text-sm tracking-[0.08em] text-primary-foreground hover:bg-[hsl(var(--jade))]/90 sm:w-auto"
         >
           <Lock className="mr-2 h-4 w-4" />
-          {saving ? "Saving…" : "Save Production Credentials"}
+          {saving ? "Saving…" : status?.liveMode ? "Replace All Production Credentials" : "Save All Production Credentials"}
         </Button>
         {!complete && !saving && (
           <p className="mt-3 font-body text-xs text-muted-foreground">

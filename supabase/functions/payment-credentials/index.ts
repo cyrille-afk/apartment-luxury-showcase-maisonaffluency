@@ -66,6 +66,50 @@ serve(async (req) => {
       if (error) throw error;
     }
 
+    if (action === "save_field") {
+      const field = String(body.field ?? "");
+      const value = String(body.value ?? "").replace(/\s/g, "");
+      const columns: Record<string, string> = {
+        publishableKey: "live_publishable_key",
+        secretKey: "live_secret_key",
+        webhookSecret: "live_webhook_secret",
+      };
+      const column = columns[field];
+      if (!column) throw new Error("Unknown credential field");
+      if (field === "publishableKey" && !value.startsWith("pk_live_")) {
+        throw new Error("Publishable key must start with pk_live_");
+      }
+      if (field === "secretKey" && !value.startsWith("sk_live_") && !value.startsWith("rk_live_")) {
+        throw new Error("Secret key must start with sk_live_ or rk_live_");
+      }
+      if (field === "webhookSecret" && !value.startsWith("whsec_")) {
+        throw new Error("Webhook signing secret must start with whsec_");
+      }
+
+      const { data: existing } = await admin
+        .from("payment_credentials")
+        .select("live_publishable_key, live_secret_key, live_webhook_secret")
+        .eq("id", "live")
+        .maybeSingle();
+      const next = {
+        live_publishable_key: existing?.live_publishable_key ?? null,
+        live_secret_key: existing?.live_secret_key ?? null,
+        live_webhook_secret: existing?.live_webhook_secret ?? null,
+        [column]: value,
+      };
+      const allConfigured = Boolean(
+        next.live_publishable_key && next.live_secret_key && next.live_webhook_secret,
+      );
+      const { error } = await admin.from("payment_credentials").upsert({
+        id: "live",
+        ...next,
+        live_mode: allConfigured,
+        updated_by: claims.sub,
+        updated_at: new Date().toISOString(),
+      });
+      if (error) throw error;
+    }
+
     if (action === "set_mode") {
       const { error } = await admin
         .from("payment_credentials")
