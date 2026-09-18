@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { getStripe } from "../_shared/stripeCreds.ts";
+import { getStripe } from "../_shared/stripeClient.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -37,7 +37,7 @@ serve(async (req) => {
       return json({ error: "Invalid session identifier." }, 400);
     }
 
-    const mode = sessionId.startsWith("cs_test_") ? "test" : "live";
+    const mode = sessionId.startsWith("cs_test_") ? "test" : "auto";
     const { stripe } = await getStripe(mode);
 
     const session = await stripe.checkout.sessions.retrieve(sessionId);
@@ -52,10 +52,7 @@ serve(async (req) => {
       status: session.payment_status,
       amount_cents: session.amount_total ?? 0,
       currency: (session.currency ?? "usd").toUpperCase(),
-      label:
-        (session.line_items ? undefined : undefined) ??
-        meta.label ??
-        null,
+      label: meta.label ?? null,
       payer_email: session.customer_details?.email ?? session.customer_email ?? null,
       card_id: cardId || null,
       quote_id: quoteId || null,
