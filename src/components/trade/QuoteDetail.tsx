@@ -4591,18 +4591,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         )}
 
         {isSuperAdmin && (() => {
-          const taxable = goodsAfterDiscountCents + insurancePremiumCents;
-          const goodsTotal = gstEnabled && taxable > 0 ? taxable + Math.round(taxable * gstRate / 100) : taxable;
-          const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
-            ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
-            : 0;
-          const orderTotalCents = goodsTotal + cratingTotalCents + shippingQuoteCents + extrasTotalCents;
+          const orderTotalCents = screenOrderTotalCents;
           return (
             <GuestPayLinkCard
               quoteId={quoteId}
               currency={currency}
               orderTotalCents={orderTotalCents}
-              depositPct={0.6}
+              depositPct={depositPctLive}
               defaultEmail={shipTo.email || clientApproval.email}
             />
           );
