@@ -2632,6 +2632,21 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <span className="hidden sm:inline">Download PDF</span>
             <span className="sm:hidden">PDF</span>
           </button>
+          {pdfSyncState !== "idle" && (
+            <span
+              className={`inline-flex items-center gap-1.5 px-2 py-1 font-body text-[11px] ${
+                pdfSyncState === "error" ? "text-destructive" : "text-muted-foreground"
+              }`}
+              title="The client's emailed download link always serves the latest version of this quote"
+            >
+              {pdfSyncState === "syncing" && <DotCircleLoader size="sm" className="h-3 w-3" />}
+              {pdfSyncState === "syncing"
+                ? "Updating client PDF…"
+                : pdfSyncState === "synced"
+                  ? "Client PDF up to date"
+                  : "Client PDF not updated"}
+            </span>
+          )}
           {(() => {
             // Invoice / Proforma button — visible once the quote is confirmed.
             // agent_commission → "Tax Invoice" (issued to end client at MSRP, requires end-client billing).
