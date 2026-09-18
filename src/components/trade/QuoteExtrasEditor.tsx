@@ -288,7 +288,16 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
             className="flex-1 bg-background border border-border rounded px-2 py-1 font-body text-xs text-foreground"
           />
           <div className="flex items-center gap-1">
-            <span className="font-body text-xs text-muted-foreground">{currencySymbol(currency)}</span>
+            <select
+              value={draftCurrency}
+              onChange={(e) => setDraftCurrency(e.target.value)}
+              aria-label="New charge currency"
+              className="bg-background border border-border rounded px-1 py-1 font-body text-[11px] text-foreground"
+            >
+              {Array.from(new Set([currency.toUpperCase(), ...EXTRA_CURRENCIES])).map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
             <input
               type="number"
               step="0.01"
