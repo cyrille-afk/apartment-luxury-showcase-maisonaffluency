@@ -31,6 +31,7 @@ import { template as purchaseOrderDispatch } from './purchase-order-dispatch.tsx
 import { template as clientQuotePayment } from './client-quote-payment.tsx'
 import { template as cartReminder } from './cart-reminder.tsx'
 import { template as quotePaymentReminder } from './quote-payment-reminder.tsx'
+import { template as quoteConfirmationPaymentLink } from './quote-confirmation-payment-link.tsx'
 import { template as funnelStallAlert } from './funnel-stall-alert.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
