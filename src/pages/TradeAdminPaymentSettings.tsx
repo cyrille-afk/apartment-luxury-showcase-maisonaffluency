@@ -73,7 +73,7 @@ export default function TradeAdminPaymentSettings() {
 
   const save = async () => {
     setAttemptedSave(true);
-    const missingField = FIELDS.find((field) => !values[field.key].trim());
+    const missingField = FIELDS.find((field) => !values[field.key].trim() && !status?.[field.key]);
     const invalidField = FIELDS.find((field) => fieldError(field.key));
     if (missingField || invalidField) {
       const field = missingField ?? invalidField;
