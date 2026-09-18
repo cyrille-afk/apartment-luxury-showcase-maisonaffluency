@@ -205,7 +205,7 @@ const TradeAdminSalesFunnel = () => {
       ) : (
         <>
           <div className="mb-10 overflow-x-auto pb-3">
-            <div className="grid min-w-[1180px] grid-cols-[0.9fr_1.6fr_1fr_0.78fr] gap-4 xl:gap-5">
+            <div className="grid min-w-[960px] grid-cols-[0.88fr_1.45fr_1fr_0.8fr] gap-3 xl:gap-5">
               <PipelineColumn title="Lead Capture" count={leadCount}>
                 <GroupLabel count={bags.length}>Shopping bags abandoned</GroupLabel>
                 {bags.length ? bags.map((entry) => <EntryCard key={entry.id} entry={entry} />) : <EmptyState label="No abandoned bags" />}
