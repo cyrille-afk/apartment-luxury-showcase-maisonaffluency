@@ -3137,6 +3137,63 @@ export type Database = {
         }
         Relationships: []
       }
+      funnel_card_payments: {
+        Row: {
+          amount_cents: number
+          card_id: string
+          card_stage: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          expected_total_cents: number | null
+          id: string
+          label: string | null
+          paid_at: string | null
+          payer_email: string | null
+          payment_kind: string
+          quote_id: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          card_id: string
+          card_stage?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          expected_total_cents?: number | null
+          id?: string
+          label?: string | null
+          paid_at?: string | null
+          payer_email?: string | null
+          payment_kind?: string
+          quote_id?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          card_id?: string
+          card_stage?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          expected_total_cents?: number | null
+          id?: string
+          label?: string | null
+          paid_at?: string | null
+          payer_email?: string | null
+          payment_kind?: string
+          quote_id?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+        }
+        Relationships: []
+      }
       funnel_reminder_log: {
         Row: {
           audience: string

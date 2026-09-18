@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface FunnelEntry {
@@ -12,6 +13,10 @@ export interface FunnelEntry {
   imageUrl: string | null;
   finish?: string | null;
   leadTime?: string | null;
+  /** Set once a Stripe webhook confirmed payment for this card. */
+  paidViaStripe?: boolean;
+  /** Column the card came from before the webhook moved it. */
+  originStage?: string;
 }
 
 export interface FunnelStage {
@@ -43,6 +48,25 @@ const money = (cents: number | null | undefined, currency: string | null | undef
       })}`;
 
 export function useSalesFunnel(days: number) {
+  const queryClient = useQueryClient();
+
+  // Live pipeline: a Stripe webhook writing a settled card refreshes the board.
+  useEffect(() => {
+    const channel = supabase
+      .channel("funnel-card-payments")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "funnel_card_payments" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["sales-funnel"] });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
   return useQuery<SalesFunnelData>({
     queryKey: ["sales-funnel", days],
     refetchOnWindowFocus: true,
@@ -51,8 +75,16 @@ export function useSalesFunnel(days: number) {
     queryFn: async () => {
       const since = new Date(Date.now() - days * 86400_000).toISOString();
 
-      const [inquiriesRes, quotesRes, quoteItemsRes, linksRes, cartsRes, ordersRes, remindersRes] =
-        await Promise.all([
+      const [
+        inquiriesRes,
+        quotesRes,
+        quoteItemsRes,
+        linksRes,
+        cartsRes,
+        ordersRes,
+        remindersRes,
+        cardPaymentsRes,
+      ] = await Promise.all([
           supabase
             .from("inquiries")
             .select("id, product_name, company, email, created_at, status, linked_quote_id")
@@ -83,6 +115,11 @@ export function useSalesFunnel(days: number) {
             .select("id, stage, recipient_email, audience, sent_at, reminder_number")
             .order("sent_at", { ascending: false })
             .limit(40),
+          supabase
+            .from("funnel_card_payments")
+            .select("card_id, card_stage, status, amount_cents, currency, paid_at, label, payer_email")
+            .in("status", ["paid", "settled"])
+            .order("paid_at", { ascending: false }),
         ]);
 
       const inquiries = inquiriesRes.data ?? [];
@@ -222,8 +259,51 @@ export function useSalesFunnel(days: number) {
         },
       ];
 
-      const converted =
+      let converted =
         orders.filter((o) => o.status === "paid").length + paidQuoteIds.size;
+
+      // ----- Stripe webhook state machine ---------------------------------
+      // Cards whose Stripe link was paid move out of Lead Capture / Action
+      // Required and drop into Awaiting Settlement; fully settled cards go
+      // straight to Conversions.
+      const cardPayments = cardPaymentsRes.data ?? [];
+      const cardStatus = new Map<string, "paid" | "settled">();
+      for (const p of cardPayments) {
+        const existing = cardStatus.get(p.card_id as string);
+        if (existing === "settled") continue;
+        cardStatus.set(p.card_id as string, p.status === "settled" ? "settled" : "paid");
+      }
+
+      const movedToSettlement: FunnelEntry[] = [];
+      if (cardStatus.size > 0) {
+        for (const s of stages) {
+          const kept: FunnelEntry[] = [];
+          for (const entry of s.entries) {
+            const status = cardStatus.get(entry.id);
+            if (!status) {
+              kept.push(entry);
+              continue;
+            }
+            if (status === "settled") {
+              converted += 1;
+              continue;
+            }
+            if (s.key === "sent_unpaid" || s.key === "orders_pending") {
+              kept.push({ ...entry, paidViaStripe: true });
+            } else {
+              movedToSettlement.push({ ...entry, paidViaStripe: true, originStage: s.key });
+            }
+          }
+          s.entries = kept;
+        }
+      }
+
+      stages.push({
+        key: "webhook_settled",
+        title: "Paid via Stripe",
+        description: "Moved automatically by a Stripe webhook",
+        entries: movedToSettlement,
+      });
 
       return { stages, converted, reminders: remindersRes.data ?? [] };
     },

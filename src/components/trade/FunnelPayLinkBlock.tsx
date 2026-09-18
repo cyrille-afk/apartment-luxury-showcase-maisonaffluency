@@ -20,6 +20,9 @@ interface Props {
   label: string;
   email: string | null;
   quoteId?: string | null;
+  /** Dashboard card identity — mapped back by the Stripe webhook. */
+  cardId?: string | null;
+  cardStage?: string | null;
   recipientName?: string | null;
   productName?: string | null;
   finish?: string | null;
@@ -32,6 +35,8 @@ const FunnelPayLinkBlock = ({
   label,
   email,
   quoteId,
+  cardId,
+  cardStage,
   recipientName,
   productName,
   finish,
@@ -47,6 +52,7 @@ const FunnelPayLinkBlock = ({
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [paymentKind, setPaymentKind] = useState<"full" | "deposit">("full");
 
   const handleGenerate = async () => {
     const value = Number(amount.replace(/,/g, ""));
@@ -63,6 +69,10 @@ const FunnelPayLinkBlock = ({
           label,
           payerEmail: email,
           quoteId: quoteId ?? null,
+          cardId: cardId ?? quoteId ?? null,
+          cardStage: cardStage ?? null,
+          paymentKind,
+          expectedTotalCents: paymentKind === "full" ? Math.round(value * 100) : null,
         },
       });
       if (error) throw error;
@@ -154,6 +164,16 @@ const FunnelPayLinkBlock = ({
           className="min-w-0 flex-1 bg-transparent px-2 py-2 font-body text-[13px] text-foreground outline-none placeholder:text-muted-foreground/60"
         />
       </div>
+
+      <select
+        value={paymentKind}
+        onChange={(e) => setPaymentKind(e.target.value as "full" | "deposit")}
+        aria-label="Payment type"
+        className="w-full border border-border bg-background px-2 py-1.5 font-body text-[10px] font-semibold uppercase tracking-[0.1em] text-foreground outline-none focus:border-gold"
+      >
+        <option value="full">Full settlement</option>
+        <option value="deposit">Deposit · balance to follow</option>
+      </select>
 
       <Button
         type="button"

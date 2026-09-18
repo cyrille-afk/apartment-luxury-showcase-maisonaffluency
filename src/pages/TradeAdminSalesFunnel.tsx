@@ -30,6 +30,8 @@ const EntryCard = ({ entry, urgent = false }: { entry: FunnelEntry; urgent?: boo
     className={cn(
       "group border bg-card p-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft",
       urgent ? "border-accent/80 shadow-soft" : "border-border hover:border-primary/40",
+      entry.paidViaStripe &&
+        "border-emerald-900/40 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-3 motion-safe:duration-500",
     )}
   >
     <div className="flex gap-3">
@@ -69,10 +71,14 @@ const EntryCard = ({ entry, urgent = false }: { entry: FunnelEntry; urgent?: boo
         <span className="font-body text-[11px] font-medium text-foreground">{entry.amountLabel}</span>
       ) : (
         <span className="font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-          {urgent ? "Draft quotation" : "Follow up"}
+          {entry.paidViaStripe ? "Settled deposit" : urgent ? "Draft quotation" : "Follow up"}
         </span>
       )}
-      {entry.href ? (
+      {entry.paidViaStripe ? (
+        <span className="inline-flex items-center gap-1.5 bg-[hsl(155_45%_16%)] px-2.5 py-1 font-body text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(150_35%_88%)]">
+          <Check className="h-3 w-3" /> Paid via Stripe
+        </span>
+      ) : entry.href ? (
         <Button asChild variant={urgent ? "default" : "ghost"} size="sm" className="h-7 px-2 text-[10px] uppercase tracking-[0.12em]">
           <Link to={entry.href}>
             {urgent ? "Resume draft" : "Open"} <ArrowRight className="h-3 w-3" />
@@ -84,16 +90,20 @@ const EntryCard = ({ entry, urgent = false }: { entry: FunnelEntry; urgent?: boo
         </Button>
       ) : null}
     </div>
-    <FunnelPayLinkBlock
-      label={entry.label}
-      email={entry.email}
-      quoteId={urgent ? entry.id : null}
-      recipientName={entry.sublabel}
-      productName={entry.label}
-      finish={entry.finish}
-      leadTime={entry.leadTime}
-      maisonRef={urgent ? `QU-${entry.id.slice(0, 6).toUpperCase()}` : null}
-    />
+    {!entry.paidViaStripe && (
+      <FunnelPayLinkBlock
+        label={entry.label}
+        email={entry.email}
+        quoteId={urgent ? entry.id : null}
+        cardId={entry.id}
+        cardStage={urgent ? "draft_quotes" : "lead_capture"}
+        recipientName={entry.sublabel}
+        productName={entry.label}
+        finish={entry.finish}
+        leadTime={entry.leadTime}
+        maisonRef={urgent ? `QU-${entry.id.slice(0, 6).toUpperCase()}` : null}
+      />
+    )}
   </article>
 );
 
@@ -165,8 +175,9 @@ const TradeAdminSalesFunnel = () => {
   const drafts = stage("draft_quotes");
   const sent = stage("sent_unpaid");
   const orders = stage("orders_pending");
+  const stripePaid = stage("webhook_settled");
   const leadCount = bags.length + requests.length;
-  const settlementCount = sent.length + orders.length;
+  const settlementCount = sent.length + orders.length + stripePaid.length;
 
   return (
     <div className="mx-auto w-full max-w-[1600px] px-5 py-10 md:px-8">
@@ -233,6 +244,14 @@ const TradeAdminSalesFunnel = () => {
               </PipelineColumn>
 
               <PipelineColumn title="Awaiting Settlement" count={settlementCount}>
+                {stripePaid.length > 0 && (
+                  <>
+                    <GroupLabel count={stripePaid.length}>Paid via Stripe</GroupLabel>
+                    {stripePaid.map((entry) => (
+                      <EntryCard key={entry.id} entry={entry} />
+                    ))}
+                  </>
+                )}
                 <GroupLabel count={sent.length}>Quotes sent, not paid</GroupLabel>
                 {sent.length ? sent.map((entry) => <EntryCard key={entry.id} entry={entry} />) : <EmptyState label="No unpaid quotations" />}
                 <GroupLabel count={orders.length}>Orders awaiting payment</GroupLabel>
