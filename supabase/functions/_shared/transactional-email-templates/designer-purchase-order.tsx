@@ -118,8 +118,8 @@ const button = {
   fontFamily: 'Arial, sans-serif', display: 'inline-block',
 }
 const ackButton = {
-  backgroundColor: '#ffffff', color: '#12352c', fontSize: '12px', letterSpacing: '1.2px',
-  textTransform: 'uppercase' as const, padding: '12px 24px', textDecoration: 'none',
-  fontFamily: 'Arial, sans-serif', display: 'inline-block', border: '1px solid #12352c',
+  backgroundColor: '#12352c', color: '#ffffff', fontSize: '12px', letterSpacing: '1.2px',
+  textTransform: 'uppercase' as const, padding: '13px 26px', textDecoration: 'none',
+  fontFamily: 'Arial, sans-serif', display: 'inline-block',
 }
 const muted = { fontSize: '11px', color: '#6e6e6e', margin: '10px 0 0', fontFamily: 'Arial, sans-serif' }
