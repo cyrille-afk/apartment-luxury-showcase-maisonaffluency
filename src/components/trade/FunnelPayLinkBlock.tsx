@@ -20,6 +20,9 @@ interface Props {
   label: string;
   email: string | null;
   quoteId?: string | null;
+  /** Dashboard card identity — mapped back by the Stripe webhook. */
+  cardId?: string | null;
+  cardStage?: string | null;
   recipientName?: string | null;
   productName?: string | null;
   finish?: string | null;
