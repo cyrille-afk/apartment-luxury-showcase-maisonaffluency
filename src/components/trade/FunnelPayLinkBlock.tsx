@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Check, Loader2, Mail, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,6 +60,33 @@ const FunnelPayLinkBlock = ({
   const [emailSent, setEmailSent] = useState(false);
   const [paymentKind, setPaymentKind] = useState<"full" | "deposit">("full");
   const [testMode, setTestMode] = useState(false);
+  const [hasExistingLink, setHasExistingLink] = useState(false);
+
+  // Cards already carrying a Stripe link (e.g. Awaiting Settlement after a
+  // reload) prefill the amount/currency and unlock the resend-email button.
+  useEffect(() => {
+    if (!quoteId) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("quote_payment_links")
+        .select("amount_cents, currency, status")
+        .eq("quote_id", quoteId)
+        .in("status", ["active", "paid"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (cancelled || !data) return;
+      setHasExistingLink(true);
+      if (data.amount_cents) setAmount((data.amount_cents / 100).toLocaleString("en-US"));
+      if (data.currency && CURRENCIES.includes(data.currency as (typeof CURRENCIES)[number])) {
+        setCurrency(data.currency);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [quoteId]);
 
   const handleGenerate = async () => {
     const value = Number(amount.replace(/,/g, ""));
