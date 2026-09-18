@@ -2,10 +2,20 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Check } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+
+interface AdhocPayment {
+  paid: boolean;
+  amount_cents: number;
+  currency: string;
+  label: string | null;
+  payer_email: string | null;
+  funnel_status: string | null;
+}
 
 interface OrderDetails {
   product_name: string;
