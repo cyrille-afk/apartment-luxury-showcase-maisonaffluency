@@ -8,6 +8,7 @@ import { useSalesFunnel, type FunnelEntry } from "@/hooks/useSalesFunnel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabaseImageTransform } from "@/lib/supabaseImage";
+import FunnelPayLinkBlock from "@/components/trade/FunnelPayLinkBlock";
 
 const RANGES = [
   { id: 7, label: "Last 7 days" },
@@ -83,6 +84,11 @@ const EntryCard = ({ entry, urgent = false }: { entry: FunnelEntry; urgent?: boo
         </Button>
       ) : null}
     </div>
+    <FunnelPayLinkBlock
+      label={entry.label}
+      email={entry.email}
+      quoteId={urgent ? entry.id : null}
+    />
   </article>
 );
 
