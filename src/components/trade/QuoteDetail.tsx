@@ -27,6 +27,7 @@ import affluencyLogo from "@/assets/affluency-quote-logo.jpg";
 import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from "@/lib/procurementExcel";
 import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine, type QuotePdfArgs } from "@/lib/quotePdf";
 import { publishQuotePdf } from "@/lib/publishQuotePdf";
+import { checkQuoteConsistency, summariseIssues } from "@/lib/quoteConsistency";
 import { downloadInvoicePdf, type InvoiceMode } from "@/lib/invoicePdf";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { HkLandedCostPanel } from "@/components/trade/HkLandedCostPanel";
@@ -2182,6 +2183,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const handleDownloadPdf = async () => {
     try {
       const args = await buildPdfArgs();
+      if (!(await runPreSendChecks(args))) return;
       await downloadQuotePdf(args);
       try {
         await publishQuotePdf(quoteId, args);
@@ -2210,6 +2212,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     setPreviewLoading(true);
     try {
       const args = await buildPdfArgs();
+      // Preview is read-only: report problems but never block the preview.
+      void runPreSendChecks(args);
       const url = await previewQuotePdfUrl(args);
       setPreviewUrl(url);
     } catch (err: any) {
@@ -2293,6 +2297,109 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const insurancePremiumCents = insuranceEnabled && insuranceBaseCents > 0
     ? Math.round(insuranceBaseCents * insuranceRateBps / 10000)
     : 0;
+
+  /**
+   * Single source of truth for the on-screen totals, built with exactly the
+   * same order of operations as the PDF totals block (see `drawTotals` in
+   * src/lib/quotePdf.ts). Crating + additional charges sit in the tax base,
+   * and the deposit uses the weighted per-line percentage — never a flat 60%.
+   */
+  const depositPctLive = computeWeightedDepositPct(
+    items.map((it) => {
+      const rawPrice = it.unit_price_cents ?? catalogSourcePriceCents(it) ?? 0;
+      const lineCents = (convertCents(rawPrice, itemPriceCurrency(it, currency), currency) ?? 0) * it.quantity;
+      const p = it.trade_products as any;
+      return {
+        lineCents,
+        deposit_pct_override: it.deposit_pct_override,
+        lead_weeks_override: getLeadWeeksOverride(it.lead_time_weeks_override),
+        stock_status_override: p?.stock_status_override ?? null,
+        lead_weeks_max_override: p?.lead_weeks_max_override ?? null,
+      };
+    }),
+  );
+  const screenChargesCents = cratingTotalCents + extrasTotalCents;
+  const screenTaxBaseCents = goodsAfterDiscountCents + insurancePremiumCents + screenChargesCents;
+  const screenTaxCents = gstEnabled && screenTaxBaseCents > 0
+    ? Math.round(screenTaxBaseCents * gstRate / 100)
+    : 0;
+  const screenShippingCents = freightInQuoteCcyCents;
+  const screenOrderTotalCents = screenTaxBaseCents + screenTaxCents + screenShippingCents;
+  const screenDepositCents = Math.round(screenOrderTotalCents * depositPctLive);
+
+  /**
+   * Pre-send guard: recompute the PDF totals from the very arguments about to
+   * be printed and compare them with the editor's numbers, plus tier ladder,
+   * currency conversion and deposit integrity. Returns false when a blocking
+   * problem was found (the caller aborts the download/publish/email).
+   */
+  const runPreSendChecks = async (args: QuotePdfArgs): Promise<boolean> => {
+    try {
+      const { data: extraRowsRaw } = await supabase
+        .from("trade_quote_extras" as any)
+        .select("label, amount_cents, currency, quantity")
+        .eq("quote_id", quoteId);
+      const missingFxPairs: string[] = [];
+      const seenPairs = new Set<string>();
+      const notePair = (from: string) => {
+        const src = (from || currency).toUpperCase();
+        const tgt = currency.toUpperCase();
+        const key = `${src}/${tgt}`;
+        if (src === tgt || seenPairs.has(key)) return;
+        seenPairs.add(key);
+        const probe = convertCents(10_000, src, tgt);
+        if (probe === 10_000) missingFxPairs.push(key);
+      };
+      items.forEach((it) => notePair(itemPriceCurrency(it, currency)));
+      ((extraRowsRaw as any[]) || []).forEach((r) => notePair(String(r.currency || currency)));
+
+      const result = checkQuoteConsistency({
+        screen: {
+          currency,
+          subtotalCents,
+          discountCents: tradeDiscountCents,
+          extrasCents: screenChargesCents,
+          insuranceCents: insurancePremiumCents,
+          taxCents: screenTaxCents,
+          shippingCents: screenShippingCents,
+          orderTotalCents: screenOrderTotalCents,
+        },
+        pdf: args as any,
+        extraRows: ((extraRowsRaw as any[]) || []).map((r) => ({
+          label: r.label,
+          currency: r.currency,
+          amountCents: Number(r.amount_cents) || 0,
+          quantity: Number(r.quantity) || 1,
+        })),
+        tierConfigEur: tierConfig
+          ? (["silver", "gold", "platinum"] as const).map((t) => ({
+              tier: t,
+              label: tierConfig[t].label,
+              pct: tierConfig[t].discount_pct,
+              minSpendEurCents: tierConfig[t].min_spend_cents,
+            }))
+          : undefined,
+        activeTier: currentTier ?? null,
+        missingFxPairs,
+      });
+
+      if (result.issues.length === 0) return true;
+      const blocking = result.issues.filter((i) => i.severity === "error");
+      if (blocking.length > 0) {
+        toast({
+          title: "Quote checks failed — nothing sent",
+          description: summariseIssues(blocking),
+          variant: "destructive",
+        });
+        return false;
+      }
+      toast({ title: "Quote checks — please review", description: summariseIssues(result.issues) });
+      return true;
+    } catch (err) {
+      console.warn("Quote consistency check could not run", err);
+      return true; // never block on the checker itself failing
+    }
+  };
 
   /** GBP DDP landed-cost amounts for the totals toggle (Paris → London). */
   const gbp = useGbpLandedCost({
@@ -2508,6 +2615,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               setEmailPreviewLoading(true);
               try {
                 const args = await buildPdfArgs();
+                if (!(await runPreSendChecks(args))) return;
                 const url = await previewQuotePdfUrl(args);
                 setEmailPreviewUrl(url);
                 // Publish the same PDF privately so client emails can link to it.
@@ -4133,25 +4241,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         <span>{formatPriceRaw(insurancePremiumCents, currency)}</span>
                       </div>
                     )}
-                    {gstEnabled && subtotalCents > 0 && (() => {
-                      const taxable = goodsAfterDiscountCents + insurancePremiumCents;
-                      return (
-                        <div className="flex justify-between font-body text-xs text-muted-foreground">
-                          <span>{taxLabel} ({gstRate}%)</span>
-                          <span>{formatPriceRaw(Math.round(taxable * gstRate / 100), currency)}</span>
-                        </div>
-                      );
-                    })()}
+                    {gstEnabled && subtotalCents > 0 && (
+                      <div className="flex justify-between font-body text-xs text-muted-foreground">
+                        <span>{taxLabel} ({gstRate}%)</span>
+                        <span>{formatPriceRaw(screenTaxCents, currency)}</span>
+                      </div>
+                    )}
                     {(() => {
-                      const taxable = goodsAfterDiscountCents + insurancePremiumCents;
-                      const goodsTotal = gstEnabled && taxable > 0
-                        ? taxable + Math.round(taxable * gstRate / 100)
-                        : taxable;
-                      const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
-                        ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
-                        : 0;
-                      const total = goodsTotal + cratingTotalCents + shippingQuoteCents + extrasTotalCents;
-                      const depositCents = Math.round(total * 0.6);
+                      const shippingQuoteCents = screenShippingCents;
+                      const total = screenOrderTotalCents;
+                      const depositCents = screenDepositCents;
                       const balanceCents = total - depositCents;
                       return (
                         <>
@@ -4204,7 +4303,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             <div className="mt-3 pt-3 border-t border-dashed border-border space-y-1.5">
                               <div className="flex justify-between font-body text-xs">
                                 <span className={isDepositPaid || isFullyPaid ? "text-emerald-600" : "text-foreground"}>
-                                  {isDepositPaid || isFullyPaid ? "✓ " : ""}60% Deposit Due Now
+                                  {isDepositPaid || isFullyPaid ? "✓ " : ""}{Math.round(depositPctLive * 100)}% Deposit Due Now
                                 </span>
                                 <span className={isDepositPaid || isFullyPaid ? "text-emerald-600 font-medium" : "text-foreground font-medium"}>
                                   {currencySymbol(currency)} {formatPriceRaw(depositCents, currency)}
@@ -4212,7 +4311,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               </div>
                               <div className="flex justify-between font-body text-xs">
                                 <span className={isFullyPaid ? "text-emerald-600" : "text-muted-foreground"}>
-                                  {isFullyPaid ? "✓ " : "🔒 "}40% Balance Before Shipment
+                                  {isFullyPaid ? "✓ " : "🔒 "}{Math.round((1 - depositPctLive) * 100)}% Balance Before Shipment
                                 </span>
                                 <span className={isFullyPaid ? "text-emerald-600 font-medium" : "text-muted-foreground"}>
                                   {currencySymbol(currency)} {formatPriceRaw(balanceCents, currency)}
@@ -4492,18 +4591,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         )}
 
         {isSuperAdmin && (() => {
-          const taxable = goodsAfterDiscountCents + insurancePremiumCents;
-          const goodsTotal = gstEnabled && taxable > 0 ? taxable + Math.round(taxable * gstRate / 100) : taxable;
-          const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
-            ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
-            : 0;
-          const orderTotalCents = goodsTotal + cratingTotalCents + shippingQuoteCents + extrasTotalCents;
+          const orderTotalCents = screenOrderTotalCents;
           return (
             <GuestPayLinkCard
               quoteId={quoteId}
               currency={currency}
               orderTotalCents={orderTotalCents}
-              depositPct={0.6}
+              depositPct={depositPctLive}
               defaultEmail={shipTo.email || clientApproval.email}
             />
           );
