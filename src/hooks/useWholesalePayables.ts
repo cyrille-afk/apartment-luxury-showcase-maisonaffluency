@@ -1,10 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type InvoiceStatus = "pending" | "invoice_received" | "approved" | "paid";
+export type InvoiceStatus =
+  | "pending"
+  | "pending_invoice_match"
+  | "invoice_received"
+  | "approved"
+  | "paid";
 
 export const INVOICE_STATUS_LABEL: Record<InvoiceStatus, string> = {
   pending: "Pending",
+  pending_invoice_match: "Pending invoice match",
   invoice_received: "Invoice received",
   approved: "Approved",
   paid: "Paid",
@@ -121,7 +127,8 @@ export function useWholesalePayables(enabled: boolean, status: "all" | InvoiceSt
         g.wholesalePayable += row.purchaseCostCogs;
         g.maisonMargin += row.netMaisonMargin;
         if (row.invoiceStatus !== "paid") g.outstandingPayable += row.purchaseCostCogs;
-        if (row.invoiceStatus === "pending") g.pendingCount += 1;
+        if (row.invoiceStatus === "pending" || row.invoiceStatus === "pending_invoice_match")
+          g.pendingCount += 1;
       }
 
       return [...groups.values()].sort((a, b) => b.outstandingPayable - a.outstandingPayable);
