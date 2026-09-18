@@ -52,6 +52,7 @@ const FunnelPayLinkBlock = ({
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [paymentKind, setPaymentKind] = useState<"full" | "deposit">("full");
 
   const handleGenerate = async () => {
     const value = Number(amount.replace(/,/g, ""));
