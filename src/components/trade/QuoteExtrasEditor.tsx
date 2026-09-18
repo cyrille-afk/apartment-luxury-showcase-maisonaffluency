@@ -82,8 +82,8 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
       setLoading(true);
       const { data, error } = await supabase
         .from("trade_quote_extras" as any)
-        .select("id, label, amount_cents, currency, sort_order")
-        .eq("quote_id", quoteId)
+      .select("id, label, amount_cents, currency, quantity, sort_order")
+      .eq("quote_id", quoteId)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
       if (cancelled) return;
@@ -103,8 +103,9 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
   // the per-row display, and the validation banner below.
   const rowConversions = extras.map((e) => {
     const rowCcy = (e.currency || currency).toUpperCase();
-    const conv = toDisplay(e.amount_cents || 0, rowCcy);
-    return { id: e.id, label: e.label, rowCcy, native: e.amount_cents || 0, ...conv };
+    const qty = Math.max(1, e.quantity || 1);
+    const conv = toDisplay((e.amount_cents || 0) * qty, rowCcy);
+    return { id: e.id, label: e.label, rowCcy, qty, native: e.amount_cents || 0, ...conv };
   });
 
   const total = rowConversions.reduce((s, r) => s + r.cents, 0);
