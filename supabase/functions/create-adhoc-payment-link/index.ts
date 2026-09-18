@@ -172,7 +172,9 @@ serve(async (req) => {
       if (cardErr) console.error("[create-adhoc-payment-link] card payment insert", cardErr);
     }
 
-    return new Response(JSON.stringify({ url: session.url, sessionId: session.id }), {
+    const payUrl = payToken ? `${publicOrigin}/pay/${payToken}` : session.url;
+
+    return new Response(JSON.stringify({ url: payUrl, payUrl, token: payToken, stripeUrl: session.url, sessionId: session.id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
