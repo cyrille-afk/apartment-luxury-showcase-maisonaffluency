@@ -298,6 +298,8 @@ export default function TradeAdminPaymentSettings() {
 
   const filled = FIELDS.every((f) => values[f.key].trim().length > 8);
   const invalid = FIELDS.some((f) => fieldError(f.key));
+  // A live key injected into the runtime wins outright; the toggle is then locked on.
+  const envLocked = Boolean(status?.envLiveKey);
   const complete = filled && !invalid;
 
   return (
