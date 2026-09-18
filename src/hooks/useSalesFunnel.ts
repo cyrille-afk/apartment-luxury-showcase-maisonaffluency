@@ -111,6 +111,8 @@ export function useSalesFunnel(days: number) {
         return {
           name: product?.product_name ?? ref(quoteId),
           imageUrl: item?.image_url ?? product?.image_url ?? null,
+          finish: item?.variant_label ?? null,
+          leadTime: product?.lead_time ?? null,
         };
       };
 
