@@ -148,7 +148,6 @@ export const template = {
   component: QuoteConfirmationInternalCopyEmail,
   subject: (data: Record<string, any>) =>
     `Internal copy: quote confirmation sent — ${data?.productName ?? 'Client selection'}`,
-  to: 'cyrille@maisonaffluency.com',
   displayName: 'Quote Confirmation — Internal Copy',
   previewData: {
     clientEmail: 'info@agnihk.com',
