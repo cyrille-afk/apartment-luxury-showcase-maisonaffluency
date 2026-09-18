@@ -39,6 +39,18 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    // ===== Sales funnel card payment (metadata.cardId) =====
+    const funnelCardId = session.metadata?.cardId;
+    if (funnelCardId && session.payment_status === "paid") {
+      await settleFunnelCard(supabase, {
+        cardId: funnelCardId,
+        sessionId: session.id,
+        paymentIntentId:
+          typeof session.payment_intent === "string" ? session.payment_intent : null,
+        amountPaid: session.amount_total ?? 0,
+      });
+    }
+
     // ===== Guest quote payment link handler =====
     if (paymentType === "guest_quote_link") {
       const linkId = session.metadata?.payment_link_id;
