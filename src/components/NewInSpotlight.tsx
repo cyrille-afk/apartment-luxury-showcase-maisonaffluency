@@ -435,11 +435,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
               </div>
 
               {igWithImages.length > 0 && (
-                <div className="mt-6 pt-4 border-t border-neutral-100 w-full">
-                  <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-neutral-400 font-normal mb-3">
-                    <Instagram className="w-3.5 h-3.5" strokeWidth={1.5} />
-                    From the Studio
-                  </span>
+                <div className="mt-6 pt-4 border-t border-neutral-100 w-full flex flex-col md:flex-col-reverse">
                   <div className="flex gap-2.5 items-center h-16 md:h-20 overflow-hidden flex-shrink-0">
                     {igWithImages.slice(0, 6).map((post) => (
                       <a
@@ -459,6 +455,10 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                       </a>
                     ))}
                   </div>
+                  <span className="inline-flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.18em] text-neutral-400 font-normal mt-3 md:mt-4 md:mb-0">
+                    <Instagram className="w-3.5 h-3.5" strokeWidth={1.5} />
+                    From the Studio
+                  </span>
                 </div>
               )}
             </div>
