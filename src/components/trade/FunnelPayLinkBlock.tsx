@@ -56,6 +56,7 @@ const FunnelPayLinkBlock = ({
   const [copied, setCopied] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [sendingEmail, setSendingEmail] = useState(false);
+  const queryClient = useQueryClient();
   const [emailSent, setEmailSent] = useState(false);
   const [paymentKind, setPaymentKind] = useState<"full" | "deposit">("full");
   const [testMode, setTestMode] = useState(false);
