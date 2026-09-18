@@ -60,6 +60,12 @@ function adminClient() {
  * With no production keys anywhere, the result is test mode — never live.
  */
 export async function loadStripeCreds(): Promise<StripeCreds> {
+  const resolved = await resolveStripeCreds();
+  // Absolute fail-safe: only an explicit sk_live_/rk_live_ secret can be live.
+  return { ...resolved, liveMode: /^(sk|rk)_live_/.test(resolved.secretKey.trim()) };
+}
+
+async function resolveStripeCreds(): Promise<StripeCreds> {
   const envCreds = getEnvStripeCreds();
 
   // 1. Environment production keys win outright.
