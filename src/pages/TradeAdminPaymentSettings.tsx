@@ -214,7 +214,11 @@ export default function TradeAdminPaymentSettings() {
                   {revealed[f.key] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              <p className="mt-1 font-body text-xs text-muted-foreground">{f.hint}</p>
+              <p
+                className={`mt-1 font-body text-xs ${fieldError(f.key) ? "text-destructive" : "text-muted-foreground"}`}
+              >
+                {fieldError(f.key) ?? f.hint}
+              </p>
             </div>
           ))}
         </div>
@@ -227,6 +231,13 @@ export default function TradeAdminPaymentSettings() {
           <Lock className="mr-2 h-4 w-4" />
           {saving ? "Saving…" : "Save Production Credentials"}
         </Button>
+        {!complete && !saving && (
+          <p className="mt-3 font-body text-xs text-muted-foreground">
+            {invalid
+              ? "Fix the highlighted values above to enable saving."
+              : "All three values are required before saving."}
+          </p>
+        )}
       </section>
 
       <section className="mt-6 rounded-sm border border-border bg-card p-6">
