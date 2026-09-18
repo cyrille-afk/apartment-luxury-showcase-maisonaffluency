@@ -1195,22 +1195,35 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   const showBalanceRow = balance > 0;
 
   const rowH = 18;
+  // Wrap long labels (e.g. "PREMIUM PACKING & CUSTOM WOOD CRATES × 4") so they
+  // never run under the right-aligned amount. Measure each value, wrap the
+  // label into the remaining width, and give multi-line rows extra height.
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9.5);
+  const wrappedRows = rows.map((r) => {
+    const valueW = doc.getTextWidth(r.value || "");
+    const maxLabelW = blockW - 28 - valueW - 16;
+    const labelLines = doc.splitTextToSize(r.label || "", Math.max(80, maxLabelW)) as string[];
+    const height = rowH + (labelLines.length - 1) * 11;
+    return { ...r, labelLines, height };
+  });
+  const rowsTotalH = wrappedRows.reduce((s, r) => s + r.height, 0);
   const disclaimer = shippingEstimateCents > 0 && showBalanceRow
     ? "Shipping & FX are estimates. Freight is re-quoted around 2 weeks before delivery using live carrier rates and FX; any variance is settled with the balance invoice."
     : "";
   const disclaimerLines = disclaimer ? doc.splitTextToSize(disclaimer, blockW - 28) : [];
-  const totalH = rows.length * rowH + 80 + disclaimerLines.length * 9 + (disclaimerLines.length ? 10 : 0) - (showBalanceRow ? 0 : 14);
+  const totalH = rowsTotalH + 80 + disclaimerLines.length * 9 + (disclaimerLines.length ? 10 : 0) - (showBalanceRow ? 0 : 14);
   doc.rect(x, cy, blockW, totalH, "F");
 
   cy += 16;
-  rows.forEach((r) => {
+  wrappedRows.forEach((r) => {
     doc.setFont("helvetica", r.strong ? "bold" : "normal");
     doc.setFontSize(9.5);
     doc.setTextColor(r.muted ? MUTED[0] : FG[0], r.muted ? MUTED[1] : FG[1], r.muted ? MUTED[2] : FG[2]);
-    doc.text(r.label, x + 14, cy);
+    doc.text(r.labelLines, x + 14, cy, { lineHeightFactor: 1.25 });
     doc.setTextColor(FG[0], FG[1], FG[2]);
     doc.text(r.value, x + blockW - 14, cy, { align: "right" });
-    cy += rowH;
+    cy += r.height;
   });
 
   // grand total
