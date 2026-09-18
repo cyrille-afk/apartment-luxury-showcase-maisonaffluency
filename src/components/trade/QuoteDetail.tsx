@@ -1928,14 +1928,17 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       extras: await (async () => {
         const { data } = await supabase
           .from("trade_quote_extras" as any)
-          .select("label, amount_cents, sort_order")
+          .select("label, amount_cents, quantity, sort_order")
           .eq("quote_id", quoteId)
           .order("sort_order", { ascending: true })
           .order("created_at", { ascending: true });
-        const rows = ((data as any[]) || []).map((e) => ({
-          label: e.label as string,
-          amountCents: Number(e.amount_cents) || 0,
-        }));
+        const rows = ((data as any[]) || []).map((e) => {
+          const qty = Math.max(1, Number(e.quantity) || 1);
+          return {
+            label: qty > 1 ? `${e.label} × ${qty}` : (e.label as string),
+            amountCents: (Number(e.amount_cents) || 0) * qty,
+          };
+        });
         // Crating charges live on the lines, but read as one charge on the PDF.
         if (cratingTotalCents > 0) {
           rows.unshift({ label: "Crating & packing", amountCents: cratingTotalCents });

@@ -34,6 +34,7 @@ type Extra = {
   label: string;
   amount_cents: number;
   currency: string | null;
+  quantity: number;
   sort_order: number;
 };
 
@@ -53,6 +54,7 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
   const [loading, setLoading] = useState(true);
   const [draftLabel, setDraftLabel] = useState("");
   const [draftAmount, setDraftAmount] = useState("");
+  const [draftQty, setDraftQty] = useState("1");
   const [draftCurrency, setDraftCurrency] = useState(currency.toUpperCase());
 
   // Follow the quote currency until the user picks something else for the draft row.
@@ -80,8 +82,8 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
       setLoading(true);
       const { data, error } = await supabase
         .from("trade_quote_extras" as any)
-        .select("id, label, amount_cents, currency, sort_order")
-        .eq("quote_id", quoteId)
+      .select("id, label, amount_cents, currency, quantity, sort_order")
+      .eq("quote_id", quoteId)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
       if (cancelled) return;
@@ -101,8 +103,9 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
   // the per-row display, and the validation banner below.
   const rowConversions = extras.map((e) => {
     const rowCcy = (e.currency || currency).toUpperCase();
-    const conv = toDisplay(e.amount_cents || 0, rowCcy);
-    return { id: e.id, label: e.label, rowCcy, native: e.amount_cents || 0, ...conv };
+    const qty = Math.max(1, e.quantity || 1);
+    const conv = toDisplay((e.amount_cents || 0) * qty, rowCcy);
+    return { id: e.id, label: e.label, rowCcy, qty, native: e.amount_cents || 0, ...conv };
   });
 
   const total = rowConversions.reduce((s, r) => s + r.cents, 0);
@@ -128,11 +131,12 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
       return;
     }
     const amountCents = Math.round(amountEur * 100);
+    const qty = Math.max(1, Math.round(parseFloat(draftQty) || 1));
     const nextSort = extras.length ? Math.max(...extras.map((e) => e.sort_order)) + 1 : 0;
     const { data, error } = await supabase
       .from("trade_quote_extras" as any)
-      .insert({ quote_id: quoteId, label, amount_cents: amountCents, currency: draftCurrency, sort_order: nextSort })
-      .select("id, label, amount_cents, currency, sort_order")
+      .insert({ quote_id: quoteId, label, amount_cents: amountCents, currency: draftCurrency, quantity: qty, sort_order: nextSort })
+      .select("id, label, amount_cents, currency, quantity, sort_order")
       .single();
     if (error || !data) {
       toast({ title: "Error", description: error?.message ?? "Could not add extra", variant: "destructive" });
@@ -141,6 +145,7 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
     setExtras((prev) => [...prev, data as unknown as Extra]);
     setDraftLabel("");
     setDraftAmount("");
+    setDraftQty("1");
   };
 
   const handleRemove = async (id: string) => {
@@ -153,7 +158,7 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
     }
   };
 
-  const handleEdit = async (id: string, patch: Partial<Pick<Extra, "label" | "amount_cents" | "currency">>) => {
+  const handleEdit = async (id: string, patch: Partial<Pick<Extra, "label" | "amount_cents" | "currency" | "quantity">>) => {
     setExtras((curr) => curr.map((e) => (e.id === id ? { ...e, ...patch } : e)));
     const { error } = await supabase.from("trade_quote_extras" as any).update(patch).eq("id", id);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -198,18 +203,22 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
         <div className="space-y-1.5 mb-2">
           {extras.map((e) => {
             const rowCcy = (e.currency || currency).toUpperCase();
-            const displayCents = toDisplay(e.amount_cents || 0, rowCcy).cents;
+            const qty = Math.max(1, e.quantity || 1);
+            const displayCents = toDisplay((e.amount_cents || 0) * qty, rowCcy).cents;
             const showConversion = rowCcy !== currency.toUpperCase();
             return (
               <div key={e.id} className="flex items-center gap-2">
                 {isReadOnly ? (
                   <>
-                    <span className="flex-1 font-body text-xs text-foreground truncate">{e.label}</span>
+                    <span className="flex-1 font-body text-xs text-foreground truncate">
+                      {e.label}
+                      {qty > 1 && <span className="ml-1 text-muted-foreground">× {qty}</span>}
+                    </span>
                     <span className="font-body text-xs text-foreground tabular-nums">
                       {currencySymbol(currency)}{formatPriceRaw(displayCents, currency)}
                       {showConversion && (
                         <span className="ml-1 text-[10px] text-muted-foreground">
-                          (entered {currencySymbol(rowCcy)}{formatPriceRaw(e.amount_cents, rowCcy)})
+                          (entered {currencySymbol(rowCcy)}{formatPriceRaw(e.amount_cents * qty, rowCcy)})
                         </span>
                       )}
                     </span>
@@ -255,6 +264,28 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
                         }}
                         className="w-24 bg-background border border-border rounded px-2 py-1 font-body text-xs text-foreground tabular-nums text-right"
                       />
+                      <span className="text-[10px] text-muted-foreground">×</span>
+                      <input
+                        type="number"
+                        min={1}
+                        step={1}
+                        value={qty.toString()}
+                        aria-label="Charge quantity"
+                        onChange={(ev) => {
+                          const q = Math.max(1, Math.round(parseFloat(ev.target.value) || 1));
+                          setExtras((curr) => curr.map((x) => (x.id === e.id ? { ...x, quantity: q } : x)));
+                        }}
+                        onBlur={(ev) => {
+                          const q = Math.max(1, Math.round(parseFloat(ev.target.value) || 1));
+                          handleEdit(e.id, { quantity: q });
+                        }}
+                        className="w-12 bg-background border border-border rounded px-1 py-1 font-body text-xs text-foreground tabular-nums text-right"
+                      />
+                      {qty > 1 && (
+                        <span className="text-[10px] text-muted-foreground whitespace-nowrap tabular-nums">
+                          = {currencySymbol(rowCcy)}{formatPriceRaw(e.amount_cents * qty, rowCcy)}
+                        </span>
+                      )}
                       {showConversion && (
                         <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                           ≈ {currencySymbol(currency)}{formatPriceRaw(displayCents, currency)}
@@ -305,6 +336,17 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
               onChange={(e) => setDraftAmount(e.target.value)}
               placeholder="0.00"
               className="w-24 bg-background border border-border rounded px-2 py-1 font-body text-xs text-foreground tabular-nums text-right"
+            />
+            <span className="text-[10px] text-muted-foreground">×</span>
+            <input
+              type="number"
+              min={1}
+              step={1}
+              value={draftQty}
+              onChange={(e) => setDraftQty(e.target.value)}
+              aria-label="New charge quantity"
+              title="Quantity"
+              className="w-12 bg-background border border-border rounded px-1 py-1 font-body text-xs text-foreground tabular-nums text-right"
             />
           </div>
           <button

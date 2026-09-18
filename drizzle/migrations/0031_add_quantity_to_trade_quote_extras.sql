@@ -1,0 +1,1 @@
+ALTER TABLE public.trade_quote_extras ADD COLUMN quantity INTEGER NOT NULL DEFAULT 1;
