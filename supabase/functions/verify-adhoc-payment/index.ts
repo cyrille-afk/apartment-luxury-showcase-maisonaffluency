@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getStripe } from "../_shared/stripeClient.ts";
 
+const INTERNAL_RECIPIENTS = ["cyrille@maisonaffluency.com", "gregoire@maisonaffluency.com"];
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -14,6 +16,55 @@ const json = (body: unknown, status = 200) =>
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+
+async function notifyInternalPaymentReceived(
+  supabase: ReturnType<typeof createClient>,
+  args: {
+    label: string;
+    amountCents: number;
+    currency: string;
+    payerEmail?: string | null;
+    quoteRef?: string | null;
+    cardStage?: string | null;
+    paymentIntentId: string;
+    sessionId?: string | null;
+  },
+) {
+  try {
+    const fmt = (cents: number) =>
+      ((cents ?? 0) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    const templateData = {
+      label: args.label,
+      amountFormatted: fmt(args.amountCents),
+      currency: (args.currency || "USD").toUpperCase(),
+      payerEmail: args.payerEmail ?? null,
+      quoteRef: args.quoteRef ?? null,
+      cardStage: args.cardStage ?? null,
+      sessionId: args.sessionId ?? args.paymentIntentId,
+      paidAt: new Date().toISOString(),
+      funnelUrl: "https://www.maisonaffluency.com/trade/admin/sales-funnel",
+    };
+
+    const idempotencyKey = `funnel-payment-received-internal-${args.paymentIntentId}`;
+
+    for (const recipient of INTERNAL_RECIPIENTS) {
+      const { error } = await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "funnel-payment-received-internal",
+          recipientEmail: recipient,
+          idempotencyKey,
+          templateData,
+        },
+      });
+      if (error) {
+        console.error(`[verify-adhoc-payment] internal payment notify failed for ${recipient}:`, error);
+      }
+    }
+  } catch (e) {
+    console.error("[verify-adhoc-payment] notifyInternalPaymentReceived error:", e);
+  }
+}
 
 /**
  * Client-side payment reconciliation for ad-hoc Sales Funnel checkout links.
@@ -93,6 +144,19 @@ serve(async (req) => {
           if (upErr) console.error("[verify-adhoc-payment] card update failed", upErr);
           else result.funnel_status = next;
         }
+
+        // Notify internal team regardless of who triggered the transition (idempotent key).
+        const piId = typeof session.payment_intent === "string" ? session.payment_intent : session.id;
+        await notifyInternalPaymentReceived(admin, {
+          label: row.label || meta.label || "Sales Funnel payment",
+          amountCents: session.amount_total ?? row.amount_cents ?? 0,
+          currency: session.currency || row.currency || "USD",
+          payerEmail: session.customer_details?.email ?? session.customer_email ?? null,
+          quoteRef: meta.quote_id || row.quote_id || null,
+          cardStage: meta.card_stage || row.card_stage || null,
+          paymentIntentId: piId,
+          sessionId,
+        });
       }
     }
 
