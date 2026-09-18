@@ -53,6 +53,10 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
   const [loading, setLoading] = useState(true);
   const [draftLabel, setDraftLabel] = useState("");
   const [draftAmount, setDraftAmount] = useState("");
+  const [draftCurrency, setDraftCurrency] = useState(currency.toUpperCase());
+
+  // Follow the quote currency until the user picks something else for the draft row.
+  useEffect(() => { setDraftCurrency(currency.toUpperCase()); }, [currency]);
 
   const toDisplay = (cents: number, from: string): { cents: number; converted: boolean; sameCcy: boolean } => {
     const src = (from || currency).toUpperCase();
