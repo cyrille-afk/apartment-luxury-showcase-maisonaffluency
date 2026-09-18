@@ -111,6 +111,24 @@ serve(async (req) => {
       });
     }
 
+    if (cardId) {
+      const { error: cardErr } = await admin.from("funnel_card_payments").insert({
+        card_id: cardId,
+        card_stage: cardStage,
+        label,
+        amount_cents: amountCents,
+        expected_total_cents: expectedTotalCents ?? (paymentKind === "full" ? amountCents : null),
+        currency,
+        payment_kind: paymentKind,
+        status: "pending",
+        stripe_session_id: session.id,
+        payer_email: payerEmail,
+        quote_id: quoteId,
+        created_by: claims.sub,
+      });
+      if (cardErr) console.error("[create-adhoc-payment-link] card payment insert", cardErr);
+    }
+
     return new Response(JSON.stringify({ url: session.url, sessionId: session.id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
