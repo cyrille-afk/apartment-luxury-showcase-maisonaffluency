@@ -283,7 +283,7 @@ const FunnelPayLinkBlock = ({
         title: "Confirmation email sent",
         description: [
           quotePdfUrl
-            ? "Formal quote PDF included as a secure download link."
+            ? "Secure formal quote PDF download link included."
             : "No quote PDF on file — open the quote and preview it once to publish one.",
           internalFailures.length === 0
             ? "Internal copy sent to Cyrille and Gregoire."
@@ -397,7 +397,7 @@ const FunnelPayLinkBlock = ({
         >
           <span className="flex items-center gap-1.5">
             <FileText className="h-3 w-3" />
-            {pdfUrl ? "Quote PDF attached" : "No quote PDF attached"}
+            {pdfUrl ? "Quote PDF link ready" : "No quote PDF link"}
           </span>
           {pdfUrl ? (
             <a href={pdfUrl} target="_blank" rel="noreferrer" className="underline">

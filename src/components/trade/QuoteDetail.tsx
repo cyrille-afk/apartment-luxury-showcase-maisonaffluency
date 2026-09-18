@@ -2196,7 +2196,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       }
       toast({
         title: "PDF downloaded",
-        description: "Saved to your device and attached to this quote — client emails now carry a secure download link.",
+        description: "Saved to your device and published securely — client emails can now include its download link.",
       });
     } catch (err: any) {
       toast({ title: "PDF failed", description: err?.message || "Could not generate PDF.", variant: "destructive" });
@@ -2703,7 +2703,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 setEmailSubject(`Quote ${quoteNumber} from Maison Affluency${projectName ? ` — ${projectName}` : ""}`);
                 setEmailBody(
                   `Dear ${(clientName || "Client").split(" ")[0]},\n\n` +
-                  `Please find attached your quote ${quoteNumber}${projectName ? ` for ${projectName}` : ""}.\n\n` +
+                  `Please use the secure PDF download link below to view quote ${quoteNumber}${projectName ? ` for ${projectName}` : ""}.\n\n` +
                   `Do let us know if you have any questions or would like to proceed.\n\n` +
                   `With kind regards,\nMaison Affluency`
                 );
