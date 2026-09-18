@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { getStripe } from "../_shared/stripeClient.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -69,11 +69,9 @@ serve(async (req) => {
       });
     }
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-      apiVersion: "2025-08-27.basil",
-    });
+    const { stripe } = await getStripe("auto");
 
-    const origin = req.headers.get("origin") || "";
+    const origin = req.headers.get("origin") || "https://www.maisonaffluency.com";
 
     const session = await stripe.checkout.sessions.create({
       customer_email: link.payer_email || undefined,
@@ -111,6 +109,22 @@ serve(async (req) => {
       .from("quote_payment_links")
       .update({ stripe_session_id: session.id })
       .eq("id", link.id);
+
+    // Keep the sales-funnel card pointed at the session the client actually pays.
+    const { data: pendingCard } = await supabase
+      .from("funnel_card_payments")
+      .select("id")
+      .eq("quote_id", link.quote_id)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (pendingCard?.id) {
+      await supabase
+        .from("funnel_card_payments")
+        .update({ stripe_session_id: session.id })
+        .eq("id", pendingCard.id);
+    }
 
     return json({ url: session.url });
   } catch (error) {

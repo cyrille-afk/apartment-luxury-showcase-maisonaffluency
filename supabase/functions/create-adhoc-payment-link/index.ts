@@ -63,26 +63,33 @@ serve(async (req) => {
 
     // Reuse mode: return the URL of the latest active/paid link for a quote
     // instead of minting a new checkout session (used to resend emails).
+    // Durable shareable links always point at our own /pay/:token page, which
+    // mints a fresh Stripe session on click. Raw checkout.stripe.com URLs are
+    // single-use, expire, and get mangled by email clients.
+    const rawOrigin = req.headers.get("origin") || "";
+    const publicOrigin = /^https:\/\/(www\.)?maisonaffluency\.com$/.test(rawOrigin)
+      ? rawOrigin
+      : "https://www.maisonaffluency.com";
+
     if (body.reuseExisting && quoteId) {
       const { data: existing } = await admin
         .from("quote_payment_links")
-        .select("stripe_session_id, amount_cents, currency, status")
+        .select("token, stripe_session_id, amount_cents, currency, status")
         .eq("quote_id", quoteId)
         .in("status", ["active", "paid"])
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (!existing?.stripe_session_id) {
+      if (!existing?.token) {
         throw new Error("No existing payment link stored for this quote");
       }
-      const existingSession = await stripe.checkout.sessions.retrieve(existing.stripe_session_id);
-      if (!existingSession.url || existingSession.status === "expired") {
-        throw new Error("The stored payment link has expired — generate a new one");
-      }
+      const payUrl = `${publicOrigin}/pay/${existing.token}`;
       return new Response(
         JSON.stringify({
-          url: existingSession.url,
-          sessionId: existingSession.id,
+          url: payUrl,
+          payUrl,
+          token: existing.token,
+          sessionId: existing.stripe_session_id,
           amountCents: existing.amount_cents,
           currency: existing.currency,
           reused: true,
@@ -91,7 +98,7 @@ serve(async (req) => {
       );
     }
 
-    const origin = req.headers.get("origin") || "https://www.maisonaffluency.com";
+    const origin = rawOrigin || "https://www.maisonaffluency.com";
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -127,17 +134,24 @@ serve(async (req) => {
       cancel_url: `${origin}/payment-failed?reason=cancelled&session_id={CHECKOUT_SESSION_ID}`,
     });
 
+    let payToken: string | null = null;
     if (quoteId) {
-      await admin.from("quote_payment_links").insert({
-        quote_id: quoteId,
-        amount_cents: amountCents,
-        currency,
-        label,
-        payer_email: payerEmail,
-        status: "active",
-        stripe_session_id: session.id,
-        created_by: claims.sub,
-      });
+      const { data: inserted, error: linkErr } = await admin
+        .from("quote_payment_links")
+        .insert({
+          quote_id: quoteId,
+          amount_cents: amountCents,
+          currency,
+          label,
+          payer_email: payerEmail,
+          status: "active",
+          stripe_session_id: session.id,
+          created_by: claims.sub,
+        })
+        .select("token")
+        .single();
+      if (linkErr) console.error("[create-adhoc-payment-link] link insert", linkErr);
+      payToken = inserted?.token ?? null;
     }
 
     if (cardId) {
@@ -158,7 +172,11 @@ serve(async (req) => {
       if (cardErr) console.error("[create-adhoc-payment-link] card payment insert", cardErr);
     }
 
-    return new Response(JSON.stringify({ url: session.url, sessionId: session.id }), {
+    // Test-mode links must go straight to the test Stripe session; the /pay page
+    // always mints live sessions.
+    const payUrl = payToken && !testMode ? `${publicOrigin}/pay/${payToken}` : session.url;
+
+    return new Response(JSON.stringify({ url: payUrl, payUrl, token: payToken, stripeUrl: session.url, sessionId: session.id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
