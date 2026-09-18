@@ -156,6 +156,11 @@ export default function TradeAdminPaymentSettings() {
       if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
       credentialDraft = { ...credentialDraft, [key]: "" };
       setValues((current) => ({ ...current, [key]: "" }));
+      // A key saved individually must not linger in "attempted save" state —
+      // the now-empty box would otherwise show "This value is required".
+      setAttemptedSave(false);
+      setSavedFields((current) => ({ ...current, [key]: true }));
+      setTimeout(() => setSavedFields((current) => ({ ...current, [key]: false })), 4000);
       await refetch();
       await qc.invalidateQueries({ queryKey: ["payment-mode"] });
       toast({ title: `${FIELDS.find((field) => field.key === key)?.label} saved securely` });
