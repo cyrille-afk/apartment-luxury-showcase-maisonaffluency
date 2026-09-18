@@ -2405,6 +2405,66 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     }
   };
 
+  /**
+   * Keep the client-facing PDF in sync with the quote.
+   *
+   * Client emails carry a secure link to the published PDF, so any edit to the
+   * quote would otherwise leave the client downloading a stale document. Once a
+   * PDF has been published for this quote, every meaningful data change
+   * re-renders and re-uploads it to the same path (the emailed link stays
+   * valid). Debounced so typing doesn't thrash storage.
+   */
+  const [pdfSyncState, setPdfSyncState] = useState<"idle" | "syncing" | "synced" | "error">("idle");
+  const lastPublishedSignature = useRef<string | null>(null);
+  const pdfSignature = JSON.stringify([
+    currency,
+    subtotalCents,
+    tradeDiscountCents,
+    screenChargesCents,
+    insurancePremiumCents,
+    screenTaxCents,
+    gstRate,
+    gstEnabled,
+    screenShippingCents,
+    screenOrderTotalCents,
+    screenDepositCents,
+    clientName,
+    items.map((it) => [it.id, it.quantity, it.unit_price_cents, it.unit_price_currency, it.variant_label, it.notes]),
+  ]);
+
+  useEffect(() => {
+    if (loading || perLineLoading || items.length === 0) return;
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const { data } = await supabase
+          .from("trade_quotes")
+          .select("client_pdf_path")
+          .eq("id", quoteId)
+          .maybeSingle();
+        const alreadyPublished = (data as { client_pdf_path?: string | null } | null)?.client_pdf_path;
+        // Nothing attached to client emails yet — nothing to keep fresh.
+        if (!alreadyPublished) return;
+        if (lastPublishedSignature.current === pdfSignature) return;
+        if (cancelled) return;
+        setPdfSyncState("syncing");
+        const args = await buildPdfArgs();
+        await publishQuotePdf(quoteId, args);
+        if (cancelled) return;
+        lastPublishedSignature.current = pdfSignature;
+        setPdfSyncState("synced");
+      } catch (err) {
+        console.warn("Could not refresh the client quote PDF", err);
+        if (!cancelled) setPdfSyncState("error");
+      }
+    }, 2500);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pdfSignature, loading, perLineLoading, quoteId, items.length]);
+
   /** GBP DDP landed-cost amounts for the totals toggle (Paris → London). */
   const gbp = useGbpLandedCost({
     goodsAfterDiscountCents: isUkDestination ? insuredBaseCents : 0,
