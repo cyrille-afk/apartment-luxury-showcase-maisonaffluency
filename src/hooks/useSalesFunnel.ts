@@ -96,6 +96,11 @@ export function useSalesFunnel(days: number) {
             .select("id, stage, recipient_email, audience, sent_at, reminder_number")
             .order("sent_at", { ascending: false })
             .limit(40),
+          supabase
+            .from("funnel_card_payments")
+            .select("card_id, card_stage, status, amount_cents, currency, paid_at, label, payer_email")
+            .in("status", ["paid", "settled"])
+            .order("paid_at", { ascending: false }),
         ]);
 
       const inquiries = inquiriesRes.data ?? [];
