@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { describeStripeMode } from "../_shared/stripeCreds.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -141,10 +142,20 @@ serve(async (req) => {
 
     const envSecret = (Deno.env.get("STRIPE_SECRET_KEY") ?? "").trim();
     const envLiveMode = /^(sk|rk)_live_/.test(envSecret);
+    const report = await describeStripeMode();
 
     return new Response(
       JSON.stringify({
-        liveMode: envLiveMode || Boolean(row?.live_mode),
+        liveMode: report.mode === "live",
+        activeMode: report.mode,
+        activeSource: report.source,
+        activeSourceLabel: report.sourceLabel,
+        envKeyPresent: report.envKeyPresent,
+        envLiveKey: report.envLiveKey,
+        savedLiveConfigured: report.savedLiveConfigured,
+        savedLiveEnabled: report.savedLiveEnabled,
+        publishableKeyAlias: report.publishableKeyAlias,
+        hasWebhookSecret: report.hasWebhookSecret,
         envLiveMode,
         envKeySource: envSecret ? (envLiveMode ? "env_live" : "env_test") : "none",
         publishableKey: mask(row?.live_publishable_key as string | null),
