@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, Loader2, Mail, Zap } from "lucide-react";
+import { Check, FileText, Loader2, Mail, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -62,6 +62,31 @@ const FunnelPayLinkBlock = ({
   const [paymentKind, setPaymentKind] = useState<"full" | "deposit">("full");
   const [testMode, setTestMode] = useState(false);
   const [hasExistingLink, setHasExistingLink] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfChecked, setPdfChecked] = useState(false);
+
+  // Surface whether a formal quote PDF is on file for this quote, so the
+  // operator can see before sending whether the email will carry it.
+  useEffect(() => {
+    if (!quoteId) {
+      setPdfChecked(true);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const url = await signedQuotePdfUrl(quoteId);
+        if (!cancelled) setPdfUrl(url);
+      } catch {
+        /* ignore */
+      } finally {
+        if (!cancelled) setPdfChecked(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [quoteId]);
 
   // Cards already carrying a Stripe link (e.g. Awaiting Settlement after a
   // reload) prefill the amount/currency and unlock the resend-email button.
@@ -360,6 +385,31 @@ const FunnelPayLinkBlock = ({
           </>
         )}
       </Button>
+
+      {quoteId && pdfChecked ? (
+        <div
+          className={cn(
+            "flex items-center justify-between gap-2 border px-2 py-1.5 font-body text-[10px] font-semibold uppercase tracking-[0.1em]",
+            pdfUrl
+              ? "border-emerald-600/50 bg-emerald-600/10 text-emerald-700"
+              : "border-amber-500/60 bg-amber-500/10 text-amber-700",
+          )}
+        >
+          <span className="flex items-center gap-1.5">
+            <FileText className="h-3 w-3" />
+            {pdfUrl ? "Quote PDF attached" : "No quote PDF attached"}
+          </span>
+          {pdfUrl ? (
+            <a href={pdfUrl} target="_blank" rel="noreferrer" className="underline">
+              View
+            </a>
+          ) : (
+            <a href={`/trade/quotes?quote=${quoteId}`} className="underline">
+              Publish
+            </a>
+          )}
+        </div>
+      ) : null}
 
       {(paymentUrl || (quoteId && hasExistingLink)) && email ? (
         <Button

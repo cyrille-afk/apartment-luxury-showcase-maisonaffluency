@@ -2175,7 +2175,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       } catch (pubErr) {
         console.warn("Could not publish quote PDF", pubErr);
       }
-      toast({ title: "PDF downloaded", description: "Branded quote PDF saved to your device." });
+      toast({
+        title: "PDF downloaded",
+        description: "Saved to your device and attached to this quote — client emails now carry a secure download link.",
+      });
     } catch (err: any) {
       toast({ title: "PDF failed", description: err?.message || "Could not generate PDF.", variant: "destructive" });
     }
