@@ -24,9 +24,12 @@ type AuditResult = {
     paymentStatus: string | null;
     amountTotal: number | null;
     currency: string | null;
+    zeroDecimal?: boolean;
     email: string | null;
+    receiptEmail?: string | null;
   };
   orderRecorded: boolean;
+  orderLookupFailed?: boolean;
   order: {
     product_name: string;
     amount_total: number;
