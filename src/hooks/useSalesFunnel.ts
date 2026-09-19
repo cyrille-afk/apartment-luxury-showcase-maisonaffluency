@@ -1,6 +1,6 @@
-import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 
 export interface FunnelEntry {
   id: string;
