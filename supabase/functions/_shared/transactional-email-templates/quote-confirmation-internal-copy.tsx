@@ -86,7 +86,7 @@ const QuoteConfirmationInternalCopyEmail = ({
                 </tr>
                 <tr>
                   <td style={totalLabel}>Amount</td>
-                  <td style={totalAmount}>{amount} {currency}</td>
+                  <td style={totalAmount}>{formatCurrency(amount, currency)}</td>
                 </tr>
                 <tr>
                   <td style={totalLabel}>Mode</td>
