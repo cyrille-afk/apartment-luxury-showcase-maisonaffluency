@@ -43,6 +43,11 @@ type AuditResult = {
 const CURRENCIES = ["hkd", "usd", "eur", "gbp", "sgd", "aed"];
 const STORAGE_KEY = "ma_dev_checkout_mode";
 
+// Stripe reports minor units, except for zero-decimal currencies.
+function formatAmount(minor: number, zeroDecimal?: boolean) {
+  return zeroDecimal ? String(minor) : (minor / 100).toFixed(2);
+}
+
 export default function DevCheckoutTest() {
   const { isAdmin, isSuperAdmin, loading } = useAuth();
   const { toast } = useToast();
