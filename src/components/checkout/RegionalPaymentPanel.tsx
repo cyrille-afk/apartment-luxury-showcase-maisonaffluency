@@ -22,7 +22,7 @@ import {
   type TradePaymentChannel,
 } from "@/config/tradePaymentChannels";
 import type { ProformaLine } from "@/lib/proformaInvoicePdf";
-import { computeTaxCents, resolveTaxRule, taxRowLabel } from "@/config/taxRules";
+import { resolveTaxTreatment, type BuyerType } from "@/config/taxRules";
 
 export interface RegionalPaymentPanelProps {
   orderRef: string;
@@ -31,6 +31,10 @@ export interface RegionalPaymentPanelProps {
   /** ISO 3166-1 alpha-2 destination code — drives the canonical tax rule. */
   countryIso?: string | null;
   currency: string;
+  /** Private consumer or registered business — drives the tax treatment. */
+  buyerType?: BuyerType;
+  /** Buyer's own VAT / GST registration number. */
+  buyerTaxId?: string | null;
   buyer: { name: string; email: string; phone?: string | null; address?: string | null };
   lines: ProformaLine[];
   subtotalCents: number;
@@ -79,6 +83,8 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
     country,
     countryIso,
     currency,
+    buyerType = "private",
+    buyerTaxId,
     buyer,
     lines,
     subtotalCents,
@@ -95,24 +101,21 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
 
   // Single source of truth: the same rule engine the checkout summary and the
   // PaymentIntent use, so the invoiced total always matches the page total.
-  const rule = useMemo(
-    () => resolveTaxRule(countryIso ?? country, currency),
-    [countryIso, country, currency],
-  );
-  const tax = useMemo(
+  const treatment = useMemo(
     () =>
-      rule
-        ? { rate: rule.rate, label: taxRowLabel(rule) }
-        : { rate: 0, label: "Tax (zero-rated)" },
-    [rule],
+      resolveTaxTreatment({
+        country: countryIso ?? country,
+        currency,
+        buyerType,
+        buyerTaxId,
+        goodsCents: Math.max(0, subtotalCents - discountCents),
+        shippingCents,
+      }),
+    [countryIso, country, currency, buyerType, buyerTaxId, subtotalCents, discountCents, shippingCents],
   );
-  const taxableCents = Math.max(0, subtotalCents - discountCents) + shippingCents;
-  const taxCents = computeTaxCents(
-    Math.max(0, subtotalCents - discountCents),
-    shippingCents,
-    rule,
-  );
-  const totalCents = taxableCents + taxCents;
+  const tax = { rate: treatment.rate, label: treatment.label };
+  const taxCents = treatment.taxCents;
+  const totalCents = Math.max(0, subtotalCents - discountCents) + shippingCents + taxCents;
 
   const [busy, setBusy] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -152,6 +155,8 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
       shippingLabel,
       taxCents,
       taxLabel: tax.label,
+      taxStatement: treatment.statement,
+      buyerTaxId: treatment.buyerTaxId,
       totalCents,
       channel,
     });
@@ -173,6 +178,12 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
         shippingLabel,
         taxCents,
         taxLabel: tax.label,
+        taxTreatment: treatment.treatment,
+        taxRate: treatment.rate,
+        taxStatement: treatment.statement,
+        buyerType,
+        buyerTaxId: treatment.buyerTaxId,
+        buyerTaxCountry: treatment.countryIso,
         totalCents,
       },
     });
