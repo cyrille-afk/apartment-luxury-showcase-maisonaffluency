@@ -25,6 +25,10 @@ interface OrderReceivedProps {
   subtotalFormatted?: string
   shippingFormatted?: string | null
   taxLineFormatted?: string
+  /** Destination-aware tax row label, e.g. "VAT (20%)" or "GST (9%)". */
+  taxLabel?: string
+  /** Invoice-grade statement, e.g. UK reverse-charge wording. */
+  taxStatement?: string | null
   totalFormatted?: string
   currency?: string
 }
@@ -37,6 +41,8 @@ const OrderReceivedEmail = ({
   subtotalFormatted = '—',
   shippingFormatted,
   taxLineFormatted,
+  taxLabel = 'Taxes',
+  taxStatement,
   totalFormatted = '—',
   currency = 'EUR',
 }: OrderReceivedProps) => (
@@ -124,11 +130,18 @@ const OrderReceivedEmail = ({
                 </tr>
               ) : null}
               <tr>
-                <td style={totalLabel}>Taxes (Import GST)</td>
+                <td style={totalLabel}>{taxLabel}</td>
                 <td style={totalAmount}>
-                  {taxLineFormatted ? formatCurrency(taxLineFormatted, currency) : 'Zero-rated at checkout / Deferred to Border Customs'}
+                  {taxLineFormatted ? formatCurrency(taxLineFormatted, currency) : '—'}
                 </td>
               </tr>
+              {taxStatement ? (
+                <tr>
+                  <td colSpan={2} style={{ ...totalLabel, fontSize: '12px', opacity: 0.75 }}>
+                    {taxStatement}
+                  </td>
+                </tr>
+              ) : null}
               <tr>
                 <td colSpan={2}><Hr style={dividerSubtle} /></td>
               </tr>
@@ -209,7 +222,9 @@ export const template = {
     ],
     subtotalFormatted: '€16,455.00',
     shippingFormatted: '€2,468.25',
-    taxLineFormatted: '€0.00 (Zero-rated at checkout / Deferred to Border Customs)',
+    taxLineFormatted: '€0.00',
+    taxLabel: 'VAT (0%)',
+    taxStatement: 'Zero-rated export. Import VAT and duty are assessed at the destination border.',
     totalFormatted: '€18,923.25',
   },
 } satisfies TemplateEntry
