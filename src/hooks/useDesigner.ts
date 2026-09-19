@@ -50,6 +50,9 @@ const CURATOR_PICK_GRID_COLUMNS = [
 /** Same set plus trade pricing (absent from the public view by design). */
 const CURATOR_PICK_GRID_COLUMNS_TRADE = `${CURATOR_PICK_GRID_COLUMNS}, trade_price_cents, price_per_sqm_cents`;
 
+/** Loose row shape for the explicit grid column selects above. */
+type PickRow = Record<string, any>;
+
 /** Strip attribution suffixes ("by X", "for Y", "X Edition", etc.) so the
  *  same product surfaced under both a parent brand (MSE) and its child designer
  *  (Lazzarini & Pickering) collapses into a single pick. */
