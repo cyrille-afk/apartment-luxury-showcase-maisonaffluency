@@ -63,6 +63,43 @@ async function settleFunnelCard(
   }
 }
 
+/**
+ * Kill-switch: once a payment lands, every pending/scheduled reminder for that
+ * quote (or card) is resolved and the automation is permanently paused.
+ */
+async function cancelFunnelReminders(
+  supabase: ReturnType<typeof createClient>,
+  entityIds: (string | null | undefined)[],
+) {
+  const ids = [...new Set(entityIds.filter(Boolean) as string[])];
+  if (ids.length === 0) return;
+  const types = ["quote_unpaid", "cart", "funnel_card"];
+  try {
+    for (const id of ids) {
+      await supabase
+        .from("funnel_reminder_log")
+        .update({ resolved_at: new Date().toISOString(), resolved_reason: "payment_received" })
+        .in("entity_type", types)
+        .eq("entity_id", id)
+        .is("resolved_at", null);
+
+      await supabase.from("funnel_reminder_pauses").upsert(
+        types.map((entity_type) => ({
+          entity_type,
+          entity_id: id,
+          paused: true,
+          reason: "payment_received",
+          updated_at: new Date().toISOString(),
+        })),
+        { onConflict: "entity_type,entity_id" },
+      );
+    }
+    console.log(`[STRIPE-WEBHOOK] Reminders cancelled for ${ids.join(", ")}`);
+  } catch (e) {
+    console.error("[STRIPE-WEBHOOK] cancelFunnelReminders error:", e);
+  }
+}
+
 async function notifyInternalPaymentReceived(
   supabase: ReturnType<typeof createClient>,
   args: {
