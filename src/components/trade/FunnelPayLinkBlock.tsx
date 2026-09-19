@@ -341,6 +341,81 @@ const FunnelPayLinkBlock = ({
     }
   };
 
+  // Admin-only test send: identical email + layout, but delivered to the
+  // logged-in admin's own account email with a [TEST PREVIEW] subject prefix.
+  const handleSendTestToAdmin = async () => {
+    const adminEmail = user?.email;
+    if (!adminEmail) {
+      toast({ title: "No admin account email on file", variant: "destructive" });
+      return;
+    }
+    let url = paymentUrl;
+    if (!url) {
+      if (!quoteId || !hasExistingLink) {
+        toast({ title: "Generate a payment link first", variant: "destructive" });
+        return;
+      }
+      try {
+        const { data, error } = await supabase.functions.invoke("create-adhoc-payment-link", {
+          body: { reuseExisting: true, quoteId, amountCents: 100, currency },
+        });
+        if (error) throw error;
+        if (!data?.url) throw new Error(data?.error || "No link returned");
+        url = data.url;
+        setPaymentUrl(data.url);
+      } catch (err) {
+        toast({
+          title: "Could not recover the payment link",
+          description: (err as Error).message,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    setSendingTest(true);
+    try {
+      if (!quoteId) throw new Error("This email requires a formal quote PDF.");
+      const quotePdfUrl = await signedQuotePdfUrl(quoteId);
+      if (!quotePdfUrl) {
+        throw new Error(
+          "The formal quote PDF link could not be verified. Open the quote and wait for ‘Client PDF up to date’ before sending.",
+        );
+      }
+      const { error } = await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "quote-confirmation-payment-link",
+          recipientEmail: adminEmail,
+          idempotencyKey: `quote-confirm-test-${quoteId ?? label}-${Date.now()}`,
+          templateData: {
+            testPreview: true,
+            recipientName: recipientName || undefined,
+            productName: productName || label,
+            finish,
+            leadTime,
+            paymentLink: url,
+            quotePdfUrl,
+            maisonRef: maisonRef || (quoteId ? `QU-${quoteId.slice(0, 6).toUpperCase()}` : undefined),
+          },
+        },
+      });
+      if (error) throw error;
+      setTestSent(true);
+      toast({
+        title: "Test preview sent",
+        description: `Delivered to ${adminEmail} with a [TEST PREVIEW] subject. The client received nothing.`,
+      });
+      setTimeout(() => setTestSent(false), 6000);
+    } catch (err) {
+      toast({
+        title: "Could not send test preview",
+        description: (err as Error).message,
+        variant: "destructive",
+      });
+    } finally {
+      setSendingTest(false);
+    }
+  };
+
   return (
     <div className={cn("mt-3 space-y-2 border-t border-border/70 pt-3 font-body", className)}>
       <div className="flex items-stretch border border-border bg-background focus-within:border-gold">
