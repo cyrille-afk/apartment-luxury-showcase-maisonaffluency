@@ -411,6 +411,8 @@ serve(async (req) => {
 
     if (quoteId && session.payment_status === "paid") {
       console.log(`[STRIPE-WEBHOOK] Payment completed for quote ${quoteId}, type: ${paymentType}`);
+      await cancelFunnelReminders(supabase, [quoteId]);
+
 
       if (paymentType === "deposit") {
         // Deposit paid → move to deposit_paid (allow from priced or confirmed,
