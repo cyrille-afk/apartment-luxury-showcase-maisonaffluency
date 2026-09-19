@@ -595,6 +595,10 @@ function OrderSummary({
                   Invoiced separately
                 </dd>
               </div>
+              <p className="mt-1.5 font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
+                Estimated {money(summary.importTotalCents, currency)}. We prepay these at the border
+                and invoice them separately — not part of the order total below.
+              </p>
               <dl className="mt-1.5 space-y-1 font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
                 {summary.importDutyCents > 0 && (
                   <div className="flex items-baseline justify-between gap-6">
