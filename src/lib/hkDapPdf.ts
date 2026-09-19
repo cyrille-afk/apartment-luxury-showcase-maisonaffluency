@@ -257,23 +257,27 @@ export function renderHkDapPage(doc: jsPDF, args: HkDapPageArgs): void {
   y += 14;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
-  const notes = [
-    hasOrigins
-      ? `Indicative estimate. Freight is summed from per-line packing across ${origins!.length} shipment${origins!.length > 1 ? "s" : ""} (${origins!.reduce((s, o) => s + o.totalCbm, 0).toFixed(2)} CBM · ${Math.round(origins!.reduce((s, o) => s + o.totalKg, 0))} kg) - actual crating may vary on confirmation. Modes (sea LCL / air freight) are taken from each line's chosen mode.`
-      : `Indicative estimate. Freight is calculated on declared volume (${cbm.toFixed(2)} CBM) and weight (${kg} kg) - actual crating may vary on confirmation.`,
-    `Hong Kong is a free port: no import duty and no sales tax / VAT. DAP terms cover origin handling, international freight, HK customs clearance and inland delivery to the consignee address. Receiver is responsible for any local building access or installation fees.`,
-    ...(qt
-      ? [
-          `This estimate is built from the quote itself: every figure above is taken from the order total on the quote page, so the DAP total equals the amount quoted.${qt.fxLabel ? ` FX: ${qt.fxLabel}` : ""}`,
-        ]
-      : [
-          `FX: ${quoteCurrency} to HKD via EUR pivot @ ${hkd.fxEurHkd?.toFixed(4)} (EUR to HKD) including a +${(FX_BUFFER * 100).toFixed(0)}% buffer to cushion currency movement between quote and invoice. Final HKD invoice issued on order confirmation.`,
-          ...(hkd.fxIsFallback
-            ? [`Note: Live FX feed unavailable at the time of generation - figures use a fallback indicative rate. Treat the HKD total as approximate.`]
-            : []),
-        ]),
-    `Working currency on the quote remains ${quoteCurrency}. This document is a courtesy landed-cost view for the Hong Kong end-client.`,
-  ];
+  const notes = qt
+    ? [
+        hasOrigins
+          ? `Indicative estimate. Freight is summed from per-line packing across ${origins!.length} shipment${origins!.length > 1 ? "s" : ""}.`
+          : `Indicative estimate. Freight is calculated on declared volume and weight — actual crating may vary on confirmation.`,
+        `Hong Kong is a free port: no import duty and no sales tax / VAT.`,
+        ...(qt.fxLabel ? [qt.fxLabel] : []),
+        `Treat the final HKD total as dynamically synchronized with the primary invoice document.`,
+        `Working currency on the quote remains ${quoteCurrency}.`,
+      ]
+    : [
+        hasOrigins
+          ? `Indicative estimate. Freight is summed from per-line packing across ${origins!.length} shipment${origins!.length > 1 ? "s" : ""} (${origins!.reduce((s, o) => s + o.totalCbm, 0).toFixed(2)} CBM · ${Math.round(origins!.reduce((s, o) => s + o.totalKg, 0))} kg) - actual crating may vary on confirmation. Modes (sea LCL / air freight) are taken from each line's chosen mode.`
+          : `Indicative estimate. Freight is calculated on declared volume (${cbm.toFixed(2)} CBM) and weight (${kg} kg) - actual crating may vary on confirmation.`,
+        `Hong Kong is a free port: no import duty and no sales tax / VAT. DAP terms cover origin handling, international freight, HK customs clearance and inland delivery to the consignee address. Receiver is responsible for any local building access or installation fees.`,
+        `FX: ${quoteCurrency} to HKD via EUR pivot @ ${hkd.fxEurHkd?.toFixed(4)} (EUR to HKD) including a +${(FX_BUFFER * 100).toFixed(0)}% buffer to cushion currency movement between quote and invoice. Final HKD invoice issued on order confirmation.`,
+        ...(hkd.fxIsFallback
+          ? [`Note: Live FX feed unavailable at the time of generation - figures use a fallback indicative rate. Treat the HKD total as approximate.`]
+          : []),
+        `Working currency on the quote remains ${quoteCurrency}. This document is a courtesy landed-cost view for the Hong Kong end-client.`,
+      ];
   notes.forEach((n) => {
     const wrapped = doc.splitTextToSize(n, pageW - 2 * M);
     doc.text(wrapped, M, y);
