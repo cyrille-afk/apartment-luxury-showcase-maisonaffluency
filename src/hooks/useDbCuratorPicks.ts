@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { CuratorPick } from "@/components/FeaturedDesigners";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 import { queryKeys } from "@/lib/queryKeys";
+import { getCachedCatalog } from "@/lib/catalogSource";
 
 export interface DbProductItem {
   pick: CuratorPick;
