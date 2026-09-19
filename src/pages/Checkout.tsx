@@ -1614,7 +1614,12 @@ export default function Checkout() {
   // currency: pick Singapore/SGD and every figure — and the charge itself —
   // is converted into SGD before any subtotal / freight / tax maths runs.
   const settlementCurrency = useSettlementCurrency();
-  const { lines: grossLines, ready: fxReady } = useCurrencyNormalizedLines(rawLines, settlementCurrency);
+  const {
+    lines: grossLines,
+    ready: fxReady,
+    fxLock,
+    refreshFxLock,
+  } = useCurrencyNormalizedLines(rawLines, settlementCurrency);
   // Account-level tier discount. The hook drives the first paint; the value
   // returned by the PaymentIntent is authoritative once it arrives, so the
   // displayed total always equals the amount Stripe will charge.
