@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Content-Type": "text/html; charset=utf-8",
-  "Cache-Control": "public, max-age=3600, s-maxage=86400",
+  "Cache-Control": "public, max-age=60, s-maxage=3600, stale-while-revalidate=86400",
   "X-Robots-Tag": "noindex, nofollow",
 };
 

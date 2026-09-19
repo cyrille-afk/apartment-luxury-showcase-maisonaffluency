@@ -53,3 +53,33 @@ describe("public catalogue cache policy", () => {
     expect(headers["Cache-Control"]).toBe(PUBLIC_CATALOG_CACHE_CONTROL);
   });
 });
+
+describe("session cookie isolation", () => {
+  it("forces no-store when a Supabase auth cookie is present, even without a bearer token", () => {
+    const req = new Request("https://x/catalog-manifest", {
+      headers: { Cookie: "sb-dcrauiygaezoduwdjmsm-auth-token=abc123; theme=dark" },
+    });
+    expect(isAuthenticatedRequest(req)).toBe(true);
+    expect(publicCacheHeaders(req)["Cache-Control"]).toBe(PRIVATE_CACHE_CONTROL);
+  });
+
+  it("detects chunked ssr auth cookies", () => {
+    const req = new Request("https://x/catalog-manifest", {
+      headers: { Cookie: "sb-dcrauiygaezoduwdjmsm-auth-token.0=part; sb-dcrauiygaezoduwdjmsm-auth-token.1=part" },
+    });
+    expect(isAuthenticatedRequest(req)).toBe(true);
+  });
+
+  it("ignores unrelated cookies", () => {
+    const req = new Request("https://x/catalog-manifest", {
+      headers: { Cookie: "theme=dark; ma_cart_v1=xyz" },
+    });
+    expect(isAuthenticatedRequest(req)).toBe(false);
+    expect(publicCacheHeaders(req)["Cache-Control"]).toBe(PUBLIC_CATALOG_CACHE_CONTROL);
+  });
+
+  it("varies shared cache entries on Cookie as well as Authorization", () => {
+    const headers = publicCacheHeaders(new Request("https://x/catalog-manifest"));
+    expect(headers.Vary).toBe("Accept-Encoding, Authorization, Cookie");
+  });
+});
