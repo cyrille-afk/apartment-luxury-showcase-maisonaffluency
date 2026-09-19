@@ -87,7 +87,6 @@ serve(async (req) => {
     event_id: event.id,
     event_type: event.type,
     payload: event as unknown as Record<string, unknown>,
-    ack_ms: elapsed(),
   });
 
   if (error) {
