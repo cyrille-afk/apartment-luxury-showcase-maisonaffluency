@@ -16,6 +16,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getStripe } from "../_shared/stripeClient.ts";
 import { processStripeEvent } from "../_shared/stripeEventProcessor.ts";
 import { nextQueueState } from "../_shared/webhookQueueRetry.ts";
+import { notifyParkedQueueJob } from "../_shared/parkedJobAlert.ts";
 
 const { stripe } = await getStripe("auto");
 
