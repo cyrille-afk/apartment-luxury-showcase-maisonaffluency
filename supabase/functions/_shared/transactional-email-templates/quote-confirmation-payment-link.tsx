@@ -50,7 +50,7 @@ const QuoteConfirmationPaymentLinkEmail = ({
           </Section>
           <Hr style={divider} />
 
-          <Heading style={h1}>{recipientName ? `Dear ${recipientName},` : 'Dear Client,'}</Heading>
+          <Heading style={h1}>{recipientName ? `Dear ${recipientName}.` : 'Dear Client.'}</Heading>
 
           <Text style={text}>
             Thank you for your inquiry on the {SITE_NAME} platform regarding the{' '}
