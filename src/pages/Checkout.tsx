@@ -1840,6 +1840,23 @@ export default function Checkout() {
     return "card";
   });
   const wire = method === "wire";
+
+  /**
+   * Above a typical corporate card ceiling we lead with bank transfer and
+   * offer a deposit plan, rather than letting the buyer meet a decline.
+   */
+  const highValue = isHighValueOrder(summary.displayTotalCents, summary.currency);
+  const [depositPct, setDepositPct] = useState<DepositPct>(0);
+  const routedHighValue = useRef(false);
+  useEffect(() => {
+    if (!highValue || routedHighValue.current) return;
+    routedHighValue.current = true;
+    setMethod((m) => (m === "card" ? "wire" : m));
+  }, [highValue]);
+  useEffect(() => {
+    if (!highValue) setDepositPct(0);
+  }, [highValue]);
+
   // In wire mode there is no Stripe address element, so the global shipping
   // destination drives the tax country shown in the summary.
   const pageDestination = useShippingDestination();
