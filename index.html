@@ -177,18 +177,16 @@
     <link rel="preload" as="font" type="font/woff2" href="/fonts/Cinzel-Bold.woff2" crossorigin fetchpriority="high" />
 
 
-    <!-- Mobile hero preload — intentionally capped at 768px. This keeps the
-         LCP transfer small on throttled phones while preserving a crisp source
-         for the full-width mobile crop. Keep this srcset byte-identical to the
-         mobile AVIF source in #static-hero so the request is reused. -->
+    <!-- Mobile hero preload — includes Retina candidates so high-DPR phones
+         never upscale the 480px rendition across a full-width hero. -->
     <link
       rel="preload"
       as="image"
       type="image/avif"
-      href="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_768%2Cq_auto:eco%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj"
-      imagesrcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_360%2Cq_auto:eco%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 360w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_480%2Cq_auto:eco%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 480w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_640%2Cq_auto:eco%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 640w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_768%2Cq_auto:eco%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 768w"
+      href="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_960%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj"
+      imagesrcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_480%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 480w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_780%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 780w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_960%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 960w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1280%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 1280w"
       imagesizes="100vw"
-      media="(max-width: 767px)"
+      media="(max-width: 640px)"
       fetchpriority="high"
     />
     <!-- Desktop landscape preload — AVIF -->
@@ -199,7 +197,7 @@
       href="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1440%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj"
       imagesrcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_828%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 828w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1080%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 1080w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1440%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 1440w"
       imagesizes="100vw"
-      media="(min-width: 768px)"
+      media="(min-width: 641px)"
       fetchpriority="high"
     />
 
@@ -324,21 +322,21 @@
       <!-- Mobile AVIF (preferred), with Retina-width candidates -->
       <source
         type="image/avif"
-        media="(max-width: 767px)"
-        srcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_360%2Cq_auto:eco%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 360w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_480%2Cq_auto:eco%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 480w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_640%2Cq_auto:eco%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 640w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_768%2Cq_auto:eco%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 768w"
+        media="(max-width: 640px)"
+        srcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_480%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 480w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_780%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 780w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_960%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 960w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1280%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 1280w"
         sizes="100vw"
       />
       <!-- Mobile WebP fallback -->
       <source
         type="image/webp"
-        media="(max-width: 767px)"
-        srcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_360%2Cq_auto:eco%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 360w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_480%2Cq_auto:eco%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 480w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_640%2Cq_auto:eco%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 640w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_768%2Cq_auto:eco%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 768w"
+        media="(max-width: 640px)"
+        srcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_480%2Cq_auto:good%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 480w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_780%2Cq_auto:good%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 780w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_960%2Cq_auto:good%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 960w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1280%2Cq_auto:good%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 1280w"
         sizes="100vw"
       />
       <!-- Desktop AVIF (preferred) -->
       <source
         type="image/avif"
-        media="(min-width: 768px)"
+        media="(min-width: 641px)"
         srcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_828%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 828w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1080%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 1080w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1440%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 1440w"
         sizes="100vw"
       />
