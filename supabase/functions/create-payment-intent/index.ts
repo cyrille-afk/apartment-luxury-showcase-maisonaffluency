@@ -227,7 +227,12 @@ serve(async (req) => {
         tax_rate: String(treatment.rate),
         tax_statement: (treatment.statement ?? "").slice(0, 400),
         merchant_tax_registration: treatment.registrationLine ?? "",
+        payment_plan: depositPct > 0 ? `deposit_${Math.round(depositPct * 100)}` : "full",
+        order_total_cents: String(amount),
+        deposit_charged_cents: String(chargeAmount),
+        balance_due_cents: String(balanceDueCents),
         line_items: JSON.stringify(
+
 
           items.map((i) => ({ t: i.title, f: i.finish, u: i.unitAmount, q: i.quantity })),
         ).slice(0, 500),
