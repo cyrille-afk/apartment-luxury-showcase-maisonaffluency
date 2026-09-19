@@ -10043,6 +10043,7 @@ export type Database = {
       webhook_events_has_work: { Args: never; Returns: boolean }
       webhook_queue_dispatch: { Args: never; Returns: undefined }
       webhook_queue_status: { Args: never; Returns: Json }
+      webhook_worker_watchdog_dispatch: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role:
