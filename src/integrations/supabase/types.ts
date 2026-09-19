@@ -4593,6 +4593,7 @@ export type Database = {
           test_webhook_secret: string | null
           updated_at: string
           updated_by: string | null
+          whatsapp_recipients: string | null
         }
         Insert: {
           id?: string
@@ -4605,6 +4606,7 @@ export type Database = {
           test_webhook_secret?: string | null
           updated_at?: string
           updated_by?: string | null
+          whatsapp_recipients?: string | null
         }
         Update: {
           id?: string
@@ -4617,6 +4619,7 @@ export type Database = {
           test_webhook_secret?: string | null
           updated_at?: string
           updated_by?: string | null
+          whatsapp_recipients?: string | null
         }
         Relationships: []
       }
