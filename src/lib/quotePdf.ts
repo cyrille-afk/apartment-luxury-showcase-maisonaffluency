@@ -1112,6 +1112,84 @@ function drawTable(
 }
 
 // -------- Totals block --------------------------------------------------
+/**
+ * Single source of truth for the money printed on page 1 — reused by the
+ * landed-cost annex so both pages can never drift apart.
+ */
+export function computeQuoteTotals(args: QuotePdfArgs) {
+  const extrasList = (args.extras || []).filter((e) => (e?.amountCents || 0) !== 0);
+  const extrasTotalCents = extrasList.reduce((s, e) => s + (e.amountCents || 0), 0);
+  const discountCents = args.tradeDiscountApplied
+    ? (typeof args.tradeDiscountCents === "number"
+        ? Math.round(args.tradeDiscountCents)
+        : Math.round(args.subtotalCents * args.tradeDiscountPct))
+    : 0;
+  const afterDiscount = args.subtotalCents - discountCents;
+  const insuranceCents = args.insurancePremiumCents || 0;
+  const baseForGst = afterDiscount + extrasTotalCents + insuranceCents;
+  const gstCents = args.gstEnabled ? Math.round(baseForGst * args.gstRate / 100) : 0;
+  const shippingEstimateCents = Math.max(0, Math.round(args.shippingEstimateCents || 0));
+  const grand = baseForGst + gstCents + shippingEstimateCents;
+  return {
+    extrasList,
+    extrasTotalCents,
+    discountCents,
+    afterDiscount,
+    insuranceCents,
+    gstCents,
+    shippingEstimateCents,
+    grand,
+  };
+}
+
+/**
+ * Convert the page-1 totals into HKD for the courtesy landed-cost annex.
+ * The rate comes from the quote's own FX snapshot (the same stamp printed on
+ * page 1) — there is no hardcoded pivot rate anywhere in this path.
+ */
+function buildHkQuoteTotals(args: QuotePdfArgs) {
+  const currency = (args.currency || "").toUpperCase();
+  let rate: number | null = currency === "HKD" ? 1 : null;
+  let fxLabel: string | null = null;
+
+  if (rate == null && args.fxSnapshot) {
+    const pairs = args.fxSnapshot.pairs;
+    const direct = pairs.find(
+      (p) => p.src.toUpperCase() === currency && p.tgt.toUpperCase() === "HKD",
+    );
+    const inverse = pairs.find(
+      (p) => p.src.toUpperCase() === "HKD" && p.tgt.toUpperCase() === currency,
+    );
+    if (direct && direct.rate > 0) rate = direct.rate;
+    else if (inverse && inverse.rate > 0) rate = 1 / inverse.rate;
+  }
+  if (rate == null) return null;
+
+  // FX stamp shown on page 1 — reused verbatim so both pages cite one rate.
+  const eurHkd = args.fxSnapshot?.pairs.find(
+    (p) => p.src.toUpperCase() === "EUR" && p.tgt.toUpperCase() === "HKD",
+  );
+  if (args.fxSnapshot && eurHkd) {
+    fxLabel = `EUR/HKD ${eurHkd.rate.toFixed(4)}${eurHkd.source ? ` (${eurHkd.source})` : ""} applied ${fmtDate(args.fxSnapshot.appliedAt)} — identical to the rate used on the quote page.`;
+  } else if (currency === "HKD") {
+    fxLabel = "Quote is issued in HKD — no conversion applied to this estimate.";
+  }
+
+  const t = computeQuoteTotals(args);
+  const toHkd = (cents: number) => Math.round(cents * rate!);
+  return {
+    fxLabel,
+    goodsHkdCents: toHkd(t.afterDiscount),
+    extras: t.extrasList.map((e) => ({ label: e.label, amountCents: toHkd(e.amountCents) })),
+    insuranceHkdCents: toHkd(t.insuranceCents),
+    gstHkdCents: toHkd(t.gstCents),
+    gstRate: args.gstEnabled ? args.gstRate : 0,
+    shippingHkdCents: toHkd(t.shippingEstimateCents),
+    // Rounded from the page-1 grand total so the annex lands on the same figure.
+    orderTotalHkdCents: toHkd(t.grand),
+  };
+}
+
 function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, contentW: number): number {
   const blockW = 280;
   const x = M + contentW - blockW;
