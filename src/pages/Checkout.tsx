@@ -591,8 +591,8 @@ function OrderSummary({
                 <dt className="min-w-0 flex-1 text-muted-foreground">
                   Estimated import duties &amp; {summary.importTaxName || "VAT"} (DDP)
                 </dt>
-                <dd className="shrink-0 whitespace-nowrap tabular-nums font-medium">
-                  {money(summary.importTotalCents, currency)}
+                <dd className="shrink-0 whitespace-nowrap text-right font-medium">
+                  Invoiced separately
                 </dd>
               </div>
               <dl className="mt-1.5 space-y-1 font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
