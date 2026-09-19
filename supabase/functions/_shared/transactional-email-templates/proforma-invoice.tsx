@@ -66,7 +66,7 @@ const ProformaInvoiceEmail = ({
               </tr>
               <tr>
                 <td style={grandLabel}>Total due</td>
-                <td style={grandAmount}>{totalFormatted} {currency}</td>
+                <td style={grandAmount}>{formatCurrency(totalFormatted, currency)}</td>
               </tr>
             </tbody>
           </table>
