@@ -9259,6 +9259,48 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_worker_health: {
+        Row: {
+          boot_ok: boolean
+          consecutive_failures: number
+          last_claimed: number
+          last_error: string | null
+          last_failed: number
+          last_failure_at: string | null
+          last_processed: number
+          last_start_at: string | null
+          last_success_at: string | null
+          updated_at: string
+          worker: string
+        }
+        Insert: {
+          boot_ok?: boolean
+          consecutive_failures?: number
+          last_claimed?: number
+          last_error?: string | null
+          last_failed?: number
+          last_failure_at?: string | null
+          last_processed?: number
+          last_start_at?: string | null
+          last_success_at?: string | null
+          updated_at?: string
+          worker: string
+        }
+        Update: {
+          boot_ok?: boolean
+          consecutive_failures?: number
+          last_claimed?: number
+          last_error?: string | null
+          last_failed?: number
+          last_failure_at?: string | null
+          last_processed?: number
+          last_start_at?: string | null
+          last_success_at?: string | null
+          updated_at?: string
+          worker?: string
+        }
+        Relationships: []
+      }
       whatsapp_delivery_events: {
         Row: {
           channel: string
@@ -9906,6 +9948,18 @@ export type Database = {
         }
         Returns: string
       }
+      record_webhook_worker_heartbeat: {
+        Args: {
+          p_boot_ok?: boolean
+          p_claimed?: number
+          p_error?: string
+          p_failed?: number
+          p_ok: boolean
+          p_processed?: number
+          p_worker: string
+        }
+        Returns: undefined
+      }
       redeem_portal_invite: {
         Args: {
           _code: string
@@ -9989,6 +10043,7 @@ export type Database = {
       webhook_events_has_work: { Args: never; Returns: boolean }
       webhook_queue_dispatch: { Args: never; Returns: undefined }
       webhook_queue_status: { Args: never; Returns: Json }
+      webhook_worker_watchdog_dispatch: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role:
