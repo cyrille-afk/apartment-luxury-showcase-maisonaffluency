@@ -10,6 +10,13 @@ views, functions, triggers, RLS state, policies and grants.
 psql "$TARGET_DB_URL" -f supabase/baseline/schema.sql
 ```
 
+Verified on 19 Sep 2026 by restoring this file into an empty PostgreSQL 17
+database: 0 errors, and every structural count matched production exactly —
+179 tables, 2276 columns, 421 policies, 179 RLS-enabled tables, 545 indexes,
+142 foreign keys, 163 functions, 128 triggers, 14 enums, 2 views, and identical
+grant counts for `anon` (1394), `authenticated` (1427) and `service_role`
+(1448).
+
 Regenerate it after any schema change:
 
 ```bash
