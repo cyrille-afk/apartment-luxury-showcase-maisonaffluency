@@ -97,7 +97,7 @@ async function cancelFunnelReminders(supabase: Supa, entityIds: (string | null |
 async function sendOrderReceivedEmail(supabase: Supa, orderId: string) {
   const { data: order } = await supabase
     .from("shop_orders")
-    .select("order_ref, email, full_name, currency, subtotal_cents, shipping_cents, total_cents")
+    .select("order_ref, email, full_name, currency, subtotal_cents, shipping_cents, total_cents, tax_cents, tax_label, tax_statement")
     .eq("id", orderId)
     .single();
   if (!order?.email) return;
