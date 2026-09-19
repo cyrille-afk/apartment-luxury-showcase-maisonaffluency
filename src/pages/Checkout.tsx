@@ -921,6 +921,100 @@ const PAYNOW_TAB: { id: PaymentMethod; label: string; hint: string } = {
   hint: "Scan with any Singapore banking app",
 };
 
+/**
+ * High-value settlement routing.
+ *
+ * Shown only above the corporate-card ceiling for the settlement currency:
+ * states plainly that a single card charge is unlikely to authorise, points to
+ * the transfer rail (Faster Payments / SEPA / SWIFT, issued per currency), and
+ * offers a deposit-by-card plan with the balance settled by transfer.
+ */
+function HighValueRouting({
+  summary,
+  method,
+  setMethod,
+  depositPct,
+  setDepositPct,
+}: {
+  summary: CheckoutSummary;
+  method: PaymentMethod;
+  setMethod: (m: PaymentMethod) => void;
+  depositPct: DepositPct;
+  setDepositPct: (p: DepositPct) => void;
+}) {
+  const { currency, displayTotalCents } = summary;
+  const limit = cardPracticalLimitCents(currency);
+  const plans: { pct: DepositPct; label: string }[] = [
+    { pct: 0, label: "Pay in full" },
+    { pct: 0.3, label: "30% deposit" },
+    { pct: 0.5, label: "50% deposit" },
+  ];
+  return (
+    <section className="mt-6 w-full space-y-4 border border-foreground/15 bg-muted/20 px-5 py-5">
+      <p className="text-[10px] font-light uppercase tracking-[0.24em] text-muted-foreground">
+        Settlement for orders above {money(limit, currency)}
+      </p>
+      <p className="text-xs font-light leading-relaxed text-muted-foreground">
+        This order totals {money(displayTotalCents, currency)}. Most corporate cards decline a
+        single charge of this size. Bank transfer is the usual route — your dedicated{" "}
+        {currency.toUpperCase()} account details are issued instantly on the transfer tab, and
+        funds clear same day on local rails. You may also place a deposit by card and settle the
+        balance by transfer.
+      </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            setDepositPct(0);
+            setMethod("wire");
+          }}
+          className={cn(
+            "border px-4 py-2 text-[10px] font-light uppercase tracking-[0.22em] transition-colors",
+            method === "wire"
+              ? "border-foreground bg-foreground text-background"
+              : "border-border hover:border-foreground",
+          )}
+        >
+          Settle by transfer
+        </button>
+        {plans
+          .filter((p) => p.pct !== 0)
+          .map((p) => (
+            <button
+              key={String(p.pct)}
+              type="button"
+              onClick={() => {
+                setDepositPct(p.pct);
+                setMethod("card");
+              }}
+              className={cn(
+                "border px-4 py-2 text-[10px] font-light uppercase tracking-[0.22em] transition-colors",
+                method === "card" && depositPct === p.pct
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border hover:border-foreground",
+              )}
+            >
+              {p.label} by card · {money(depositAmountCents(displayTotalCents, p.pct), currency)}
+            </button>
+          ))}
+      </div>
+      {method === "card" && depositPct > 0 && (
+        <p className="font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
+          You are charged {money(depositAmountCents(displayTotalCents, depositPct), currency)} now.
+          The balance of{" "}
+          {money(displayTotalCents - depositAmountCents(displayTotalCents, depositPct), currency)}{" "}
+          is invoiced with transfer instructions and due before despatch.
+        </p>
+      )}
+      <p className="font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
+        Buying against a purchase order? Choose transfer — the proforma invoice we issue carries
+        your PO reference and serves as the document your finance team pays against.
+      </p>
+    </section>
+  );
+}
+
+
 function DeliveryPaymentOptions({
   method,
   setMethod,
