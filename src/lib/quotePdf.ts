@@ -172,7 +172,7 @@ export interface QuotePdfArgs {
     origins?: { country: string; modeLabel: string; hkdCents: number; eurCents: number }[];
   } | null;
   /** Full HK DAP estimate appended as a dedicated final page when provided. */
-  hkDapPage?: HkDapPageArgs | null;
+  hkDapPage?: Omit<HkDapPageArgs, "quoteTotals"> | null;
   /** Full UK DDP estimate appended as a dedicated final page when provided. */
   ukDdpPage?: UkDdpPageArgs | null;
   /** Weighted deposit fraction (0..1). Defaults to 0.6. When 1, balance row is hidden. */
@@ -423,7 +423,7 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
         netSubtotalCents: quoteTotals.afterDiscount,
         premiumPackingCents: quoteTotals.extrasTotalCents,
         orderTotalCents: quoteTotals.grand,
-        fxLabel: buildPageOneFxLabel(args),
+        fxLabel: args.fxSnapshot ? formatFxSnapshotLine(args.fxSnapshot) : null,
       }),
     });
   }
@@ -1179,83 +1179,6 @@ export function computeQuoteTotals(args: QuotePdfArgs): ComputedQuoteTotals {
   });
 }
 
-/**
- * Convert the page-1 totals into HKD for the courtesy landed-cost annex.
- * The rate comes from the quote's own FX snapshot (the same stamp printed on
- * page 1) — there is no hardcoded pivot rate anywhere in this path.
- */
-function buildHkQuoteTotals(args: QuotePdfArgs, totals: ComputedQuoteTotals) {
-  const currency = (args.currency || "").toUpperCase();
-  let rate: number | null = currency === "HKD" ? 1 : null;
-  let fxLabel: string | null = null;
-
-  if (rate == null && args.fxSnapshot) {
-    const pairs = args.fxSnapshot.pairs;
-    const direct = pairs.find(
-      (p) => p.src.toUpperCase() === currency && p.tgt.toUpperCase() === "HKD",
-    );
-    const inverse = pairs.find(
-      (p) => p.src.toUpperCase() === "HKD" && p.tgt.toUpperCase() === currency,
-    );
-    if (direct && direct.rate > 0) rate = direct.rate;
-    else if (inverse && inverse.rate > 0) rate = 1 / inverse.rate;
-    else {
-      // EUR pivot, still strictly from the quote's own live snapshot — never a
-      // hardcoded rate. (quote ccy → EUR → HKD)
-      const eurToHkd = pairs.find(
-        (p) => p.src.toUpperCase() === "EUR" && p.tgt.toUpperCase() === "HKD",
-      );
-      const ccyToEur = pairs.find(
-        (p) => p.src.toUpperCase() === currency && p.tgt.toUpperCase() === "EUR",
-      );
-      const eurToCcy = pairs.find(
-        (p) => p.src.toUpperCase() === "EUR" && p.tgt.toUpperCase() === currency,
-      );
-      if (eurToHkd && eurToHkd.rate > 0) {
-        if (ccyToEur && ccyToEur.rate > 0) rate = ccyToEur.rate * eurToHkd.rate;
-        else if (eurToCcy && eurToCcy.rate > 0) rate = eurToHkd.rate / eurToCcy.rate;
-      }
-    }
-  }
-  if (rate == null) return null;
-
-  // FX stamp shown on page 1 — reused verbatim so both pages cite one rate.
-  const eurHkd = args.fxSnapshot?.pairs.find(
-    (p) => p.src.toUpperCase() === "EUR" && p.tgt.toUpperCase() === "HKD",
-  );
-  if (args.fxSnapshot && eurHkd) {
-    const stamp = args.fxSnapshot.appliedAt.toLocaleString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-      timeZone: "Asia/Hong_Kong",
-    });
-    const sourceLabel = eurHkd.source
-      ? `via live ${eurHkd.source.charAt(0).toUpperCase()}${eurHkd.source.slice(1)} feed`
-      : "live FX feed";
-    fxLabel = `FX applied: ${stamp} GMT+8 — EUR/HKD ${eurHkd.rate.toFixed(4)} (${sourceLabel}).`;
-  } else if (currency === "HKD") {
-    fxLabel = "Quote is issued in HKD — no conversion applied to this estimate.";
-  }
-
-  const resolvedRate = rate;
-  const toHkd = (cents: number) => Math.round(cents * resolvedRate);
-  return {
-    fxLabel,
-    goodsHkdCents: toHkd(totals.afterDiscount),
-    extras: totals.extrasList.map((e) => ({ label: e.label, amountCents: toHkd(e.amountCents) })),
-    insuranceHkdCents: toHkd(totals.insuranceCents),
-    gstHkdCents: toHkd(totals.gstCents),
-    gstRate: args.gstEnabled ? args.gstRate : 0,
-    shippingHkdCents: toHkd(totals.shippingEstimateCents),
-    // Rounded from the page-1 grand total so the annex lands on the same figure.
-    orderTotalHkdCents: toHkd(totals.grand),
-  };
-}
-
 function drawTotals(doc: jsPDF, args: QuotePdfArgs, totals: ComputedQuoteTotals, M: number, y: number, contentW: number): number {
   const blockW = 280;
   const x = M + contentW - blockW;
@@ -1716,13 +1639,11 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
   });
 
   y += 10;
-  // Bank box — two stacked, clearly separated blocks:
-  // EUR account (Lithuania) first, then Global SWIFT (Singapore).
+  // Bank box — two side-by-side, vertically aligned transfer options.
   // The box is tall, so page-break before it rather than splitting it.
   y = ensureSpace(doc, y, 218, doc.internal.pageSize.getHeight());
-  const rowH = 11;
-  const labelW = 150; // fixed label column so IBAN / BIC / Account / SWIFT align on one grid
-  const boxH = 208;
+  const rowH = 16;
+  const boxH = 154;
   doc.setFillColor(250, 249, 246);
   doc.rect(M, y, contentW, boxH, "F");
   doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
@@ -1742,9 +1663,13 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
   doc.setFontSize(8.5);
   doc.text("1 Grange Garden, #16-05, Singapore, 249631, Singapore", M + 12, y + 40);
 
-  const rowX = M + 12;
+  const gutter = 20;
+  const colW = (contentW - 24 - gutter) / 2;
+  const leftX = M + 12;
+  const rightX = leftX + colW + gutter;
+  const labelW = 74;
   // Row renderer: muted small-caps label in a fixed-width column + value beside it.
-  const drawRow = (rowY: number, label: string, value: string, muted = false) => {
+  const drawRow = (rowX: number, rowY: number, label: string, value: string, muted = false) => {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7);
     doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
@@ -1754,35 +1679,26 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
     doc.setTextColor(...(muted ? MUTED : FG) as [number, number, number]);
     doc.text(value, rowX + labelW, rowY);
   };
-  const blockHeader = (rowY: number, label: string) => {
+  const blockHeader = (rowX: number, rowY: number, label: string) => {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7.5);
     doc.setTextColor(JADE[0], JADE[1], JADE[2]);
     doc.text(label, rowX, rowY);
   };
 
-  // Block 1 — EUR transfers (Europe / SEPA, Lithuania)
-  let ry = y + 58;
-  blockHeader(ry, "EUR TRANSFERS (EUROPE · SEPA)");
-  drawRow(ry + rowH, "IBAN", "LT73 3250 0692 1856 8740");
-  drawRow(ry + rowH * 2, "BIC", "REVOLT21");
-  drawRow(ry + rowH * 3, "Bank", "Revolut Bank UAB");
-  drawRow(ry + rowH * 4, "Bank address", "Konstitucijos ave. 21B, Vilnius, Lithuania", true);
+  const ry = y + 62;
+  blockHeader(leftX, ry, "Option A: EUR SEPA Transfers (Revolut Lithuania)");
+  drawRow(leftX, ry + rowH, "IBAN", "LT73 3250 0692 1856 8740");
+  drawRow(leftX, ry + rowH * 2, "BIC", "REVOLT21");
+  drawRow(leftX, ry + rowH * 3, "Bank", "Revolut Bank UAB");
+  drawRow(leftX, ry + rowH * 4, "Address", "Konstitucijos ave. 21B, Vilnius", true);
 
-  // Divider between the two account blocks
-  ry += rowH * 4 + 12;
-  doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
-  doc.setLineWidth(0.4);
-  doc.line(M + 12, ry, M + contentW - 12, ry);
-
-  // Block 2 — Global wires (Rest of world, via Singapore)
-  ry += 12;
-  blockHeader(ry, "GLOBAL WIRES (REST OF WORLD · USD/HKD/SGD)");
-  drawRow(ry + rowH, "Account number", "885111609218375");
-  drawRow(ry + rowH * 2, "SWIFT/BIC", "REVOSGS2");
-  drawRow(ry + rowH * 3, "Intermediary bank SWIFT (Barclays)", "BARCDEFF");
-  drawRow(ry + rowH * 4, "Bank", "Revolut Technologies Singapore Pte. Ltd");
-  drawRow(ry + rowH * 5, "Bank address", "6 Battery Road, Floor 6-01, 049909, Singapore", true);
+  doc.line(rightX - gutter / 2, ry - 10, rightX - gutter / 2, y + boxH - 12);
+  blockHeader(rightX, ry, "Option B: Global SWIFT Wires (Revolut Singapore)");
+  drawRow(rightX, ry + rowH, "Account", "885111609218375");
+  drawRow(rightX, ry + rowH * 2, "SWIFT/BIC", "REVOSGS2");
+  drawRow(rightX, ry + rowH * 3, "Intermediary", "BARCDEFF");
+  drawRow(rightX, ry + rowH * 4, "Bank", "Revolut Technologies Singapore", true);
 
   return y + boxH;
 }
