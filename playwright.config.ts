@@ -2,6 +2,8 @@ import { defineConfig, devices } from "@playwright/test";
 
 const PORT = Number(process.env.PW_PORT ?? 4173);
 const BASE_URL = process.env.PW_BASE_URL ?? `http://localhost:${PORT}`;
+// Live provider smoke runs hit third-party sandboxes only — no app server needed.
+const SMOKE_ONLY = process.argv.includes("smoke-live") || process.argv.includes("--project=smoke-live");
 const CHROMIUM_EXECUTABLE_PATH =
   process.env.PW_CHROMIUM_EXECUTABLE_PATH ||
   process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
@@ -97,7 +99,7 @@ export default defineConfig({
       },
     },
   ],
-  webServer: process.env.PW_BASE_URL
+  webServer: process.env.PW_BASE_URL || SMOKE_ONLY
     ? undefined
     : {
         command: `bun run build && bun run preview -- --port ${PORT} --strictPort`,
