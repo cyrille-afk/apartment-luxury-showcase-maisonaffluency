@@ -1137,6 +1137,10 @@ function PaymentForm({
 
   const { chargeTotalCents: total, currency } = summary;
   const paynow = method === "paynow";
+  // With a deposit plan the card is charged the deposit only; the balance is
+  // invoiced with transfer instructions.
+  const chargeNow = depositAmountCents(total, depositPct);
+
 
   const confirm = async () => {
     if (!paymentReady || !stripe || !elements) return;
