@@ -15,6 +15,7 @@ import { TradeCopilotProvider } from "@/contexts/TradeCopilotContext";
 import { VisualiserMaterialProvider } from "@/contexts/VisualiserMaterialContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { StudioProvider } from "@/hooks/useStudio";
+import { RealtimeMultiplexerProvider } from "@/contexts/RealtimeMultiplexerContext";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import { releaseDesignersLandingScrollLock } from "@/lib/designersScrollLock";
 import { clearDarkIosChrome } from "@/lib/iosChrome";
