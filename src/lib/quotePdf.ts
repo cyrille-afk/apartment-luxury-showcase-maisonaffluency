@@ -1674,8 +1674,13 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
   });
 
   y += 10;
-  // Bank box
-  const boxH = 130;
+  // Bank box — two stacked, clearly separated blocks:
+  // EUR account (Lithuania) first, then Global SWIFT (Singapore).
+  // The box is tall, so page-break before it rather than splitting it.
+  y = ensureSpace(doc, y, 218, doc.internal.pageSize.getHeight());
+  const rowH = 11;
+  const labelW = 150; // fixed label column so IBAN / BIC / Account / SWIFT align on one grid
+  const boxH = 208;
   doc.setFillColor(250, 249, 246);
   doc.rect(M, y, contentW, boxH, "F");
   doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
@@ -1695,33 +1700,47 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
   doc.setFontSize(8.5);
   doc.text("1 Grange Garden, #16-05, Singapore, 249631, Singapore", M + 12, y + 40);
 
-  // Two columns: EUR (SEPA) | Global SWIFT
-  const colW = (contentW - 24) / 2;
-  const leftX = M + 12;
-  const rightX = M + 12 + colW;
-  const colY = y + 56;
+  const rowX = M + 12;
+  // Row renderer: muted small-caps label in a fixed-width column + value beside it.
+  const drawRow = (rowY: number, label: string, value: string, muted = false) => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+    doc.text(label.toUpperCase(), rowX, rowY);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...(muted ? MUTED : FG) as [number, number, number]);
+    doc.text(value, rowX + labelW, rowY);
+  };
+  const blockHeader = (rowY: number, label: string) => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.5);
+    doc.setTextColor(JADE[0], JADE[1], JADE[2]);
+    doc.text(label, rowX, rowY);
+  };
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
-  doc.setTextColor(JADE[0], JADE[1], JADE[2]);
-  doc.text("MAIN · EUR (SEPA)", leftX, colY);
-  doc.text("GLOBAL · SWIFT (OUTSIDE EEA)", rightX, colY);
+  // Block 1 — EUR transfers (Europe / SEPA, Lithuania)
+  let ry = y + 58;
+  blockHeader(ry, "EUR TRANSFERS (EUROPE · SEPA)");
+  drawRow(ry + rowH, "IBAN", "LT73 3250 0692 1856 8740");
+  drawRow(ry + rowH * 2, "BIC", "REVOLT21");
+  drawRow(ry + rowH * 3, "Bank", "Revolut Bank UAB");
+  drawRow(ry + rowH * 4, "Bank address", "Konstitucijos ave. 21B, Vilnius, Lithuania", true);
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.5);
-  doc.setTextColor(FG[0], FG[1], FG[2]);
-  doc.text("IBAN: LT73 3250 0692 1856 8740", leftX, colY + 12);
-  doc.text("BIC: REVOLT21", leftX, colY + 24);
-  doc.text("Bank: Revolut Bank UAB", leftX, colY + 36);
-  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-  doc.text("Konstitucijos ave. 21B, Vilnius, Lithuania", leftX, colY + 48);
+  // Divider between the two account blocks
+  ry += rowH * 4 + 12;
+  doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
+  doc.setLineWidth(0.4);
+  doc.line(M + 12, ry, M + contentW - 12, ry);
 
-  doc.setTextColor(FG[0], FG[1], FG[2]);
-  doc.text("Account: 885111609218375", rightX, colY + 12);
-  doc.text("SWIFT/BIC: REVOSGS2  ·  Intermediary: BARCDEFF", rightX, colY + 24);
-  doc.text("Bank: Revolut Technologies Singapore Pte. Ltd", rightX, colY + 36);
-  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-  doc.text("6 Battery Road, Floor 6-01, 049909, Singapore", rightX, colY + 48);
+  // Block 2 — Global wires (Rest of world, via Singapore)
+  ry += 12;
+  blockHeader(ry, "GLOBAL WIRES (REST OF WORLD · USD/HKD/SGD)");
+  drawRow(ry + rowH, "Account number", "885111609218375");
+  drawRow(ry + rowH * 2, "SWIFT/BIC", "REVOSGS2");
+  drawRow(ry + rowH * 3, "Intermediary bank SWIFT (Barclays)", "BARCDEFF");
+  drawRow(ry + rowH * 4, "Bank", "Revolut Technologies Singapore Pte. Ltd");
+  drawRow(ry + rowH * 5, "Bank address", "6 Battery Road, Floor 6-01, 049909, Singapore", true);
 
   return y + boxH;
 }
