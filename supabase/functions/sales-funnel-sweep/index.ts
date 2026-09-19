@@ -270,7 +270,7 @@ Deno.serve(async (req) => {
   }
 
   return new Response(
-    JSON.stringify({ ok: true, dryRun, sent, stalled: internalRows.length }),
+    JSON.stringify({ ok: true, dryRun, weekendHold: isWeekend, sent, deferred, stalled: internalRows.length }),
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
   )
 })
