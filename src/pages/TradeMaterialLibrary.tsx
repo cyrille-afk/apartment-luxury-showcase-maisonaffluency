@@ -106,25 +106,14 @@ export default function TradeMaterialLibrary() {
     },
   });
 
-  useEffect(() => {
-    const channel = supabase
-      .channel("material-library-fabrics-live")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "fabrics" },
-        () => queryClient.invalidateQueries({ queryKey: ["material-library-fabrics"] }),
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "product_fabrics" },
-        () => queryClient.invalidateQueries({ queryKey: ["material-library-links"] }),
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
+  useRealtimeTables(["fabrics", "product_fabrics"], (event) => {
+    queryClient.invalidateQueries({
+      queryKey:
+        event.table === "fabrics"
+          ? ["material-library-fabrics"]
+          : ["material-library-links"],
+    });
+  });
 
   const supplierOptions = useMemo(() => {
     const collator = new Intl.Collator("en", { sensitivity: "base", numeric: true });
