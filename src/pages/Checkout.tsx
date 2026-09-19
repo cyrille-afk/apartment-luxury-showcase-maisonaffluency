@@ -2061,6 +2061,9 @@ export default function Checkout() {
           // PayNow needs its own PaymentIntent: the payment method type is
           // fixed at creation and cannot be swapped on an existing intent.
           paymentMethod: intentMethod,
+          // Session-locked conversion rates the shown total was priced at.
+          fxLockedAt: fxLock?.lockedAt ?? "",
+          fxLockedRates: fxLock?.rates ?? null,
         };
 
 
