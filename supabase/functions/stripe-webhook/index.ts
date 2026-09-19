@@ -27,13 +27,33 @@ const endpointSecrets = [creds.webhookSecret, testCreds?.webhookSecret].filter(
   (s): s is string => Boolean(s),
 );
 
-const ok = (body: Record<string, unknown>) =>
-  new Response(JSON.stringify({ received: true, ...body }), {
-    headers: { "Content-Type": "application/json" },
+const ok = (body: Record<string, unknown>, ackMs: number) =>
+  new Response(JSON.stringify({ received: true, ack_ms: ackMs, ...body }), {
+    headers: { "Content-Type": "application/json", "X-Ack-Ms": String(ackMs) },
     status: 200,
   });
 
+/** One machine-readable telemetry line per webhook, for the live SLA check. */
+const logAck = (
+  outcome: string,
+  ackMs: number,
+  eventId: string | null,
+  eventType: string | null,
+) =>
+  console.log(
+    `[STRIPE-WEBHOOK][ACK] ${JSON.stringify({
+      outcome,
+      ack_ms: ackMs,
+      within_sla_2s: ackMs < 2000,
+      event_id: eventId,
+      event_type: eventType,
+      at: new Date().toISOString(),
+    })}`,
+  );
+
 serve(async (req) => {
+  const startedAt = performance.now();
+  const elapsed = () => Math.round(performance.now() - startedAt);
   if (req.method === "OPTIONS") return new Response(null, { status: 204 });
 
   const signature = req.headers.get("stripe-signature");
@@ -52,6 +72,7 @@ serve(async (req) => {
     }
   }
   if (!event) {
+    logAck("signature_rejected", elapsed(), null, null);
     console.error("[STRIPE-WEBHOOK] signature verification failed:", lastErr?.message);
     return new Response(`Webhook Error: ${lastErr?.message}`, { status: 400 });
   }
@@ -66,14 +87,18 @@ serve(async (req) => {
     event_id: event.id,
     event_type: event.type,
     payload: event as unknown as Record<string, unknown>,
+    ack_ms: elapsed(),
   });
 
   if (error) {
     // 23505 = this event was already recorded → Stripe retry, acknowledge it.
     if ((error as any).code === "23505") {
-      console.log(`[STRIPE-WEBHOOK] Duplicate event ${event.id} ignored`);
-      return ok({ duplicate: true });
+      const ackMs = elapsed();
+      logAck("duplicate_dropped", ackMs, event.id, event.type);
+      console.log(`[STRIPE-WEBHOOK] Duplicate event ${event.id} ignored in ${ackMs}ms`);
+      return ok({ duplicate: true }, ackMs);
     }
+    logAck("enqueue_failed", elapsed(), event.id, event.type);
     console.error("[STRIPE-WEBHOOK] failed to enqueue event:", error);
     // 500 → Stripe retries, and the retry will enqueue successfully.
     return new Response(JSON.stringify({ error: "enqueue_failed" }), {
@@ -82,6 +107,8 @@ serve(async (req) => {
     });
   }
 
-  console.log(`[STRIPE-WEBHOOK] Queued ${event.type} (${event.id})`);
-  return ok({ queued: true });
+  const ackMs = elapsed();
+  logAck("queued", ackMs, event.id, event.type);
+  console.log(`[STRIPE-WEBHOOK] Queued ${event.type} (${event.id}) in ${ackMs}ms`);
+  return ok({ queued: true }, ackMs);
 });
