@@ -64,6 +64,9 @@ export async function getCachedCatalog(): Promise<CatalogSnapshot | null> {
   try {
     const manifest = await getCatalogManifest();
     if (!manifest?.picks?.length || !manifest?.designers?.length) return null;
+    // A stale static manifest (deployed before the slug field was added) can't
+    // resolve product URLs — fall back to direct queries rather than 404.
+    if (manifest.picks[0].slug === undefined) return null;
     return { picks: manifest.picks, designers: manifest.designers };
   } catch {
     return null;
