@@ -1094,6 +1094,7 @@ function PaymentForm({
   setBuyerType,
   buyerGstNumber,
   setBuyerGstNumber,
+  depositPct = 0,
 }: {
   summary: CheckoutSummary;
   account: { email: string; role: string; company?: string } | null;
@@ -1102,6 +1103,7 @@ function PaymentForm({
   onPaid: (ref: string) => void;
   method: PaymentMethod;
   optionsSlot: React.ReactNode;
+  depositPct?: DepositPct;
   onCountryChange?: (code: string | null) => void;
   buyerType: BuyerType;
   setBuyerType: (v: BuyerType) => void;
