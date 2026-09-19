@@ -37,7 +37,7 @@ const args: QuotePdfArgs = {
   clientName: "AGNI Limited",
   clientBilling: {
     city: "Kowloon Bay",
-    postalCode: "HKD",
+    postalCode: "Kowloon Bay HKD",
     country: "Hong Kong",
   },
   currency: "HKD",
@@ -80,13 +80,24 @@ describe("HK DAP annex synchronisation", () => {
       path.resolve(process.cwd(), "node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"),
     ).href;
     const pdf = await pdfjs.getDocument({ data: buf, useSystemFonts: false }).promise;
-    const last = await pdf.getPage(pdf.numPages);
-    const text = (await last.getTextContent()).items.map((i: any) => i.str).join(" ");
+    const pageText = async (pageNumber: number) => {
+      const page = await pdf.getPage(pageNumber);
+      return (await page.getTextContent()).items.map((i: any) => i.str).join(" ");
+    };
+    const firstText = await pageText(1);
+    const secondText = await pageText(2);
+    const text = await pageText(pdf.numPages);
 
     expect(text).toContain("308,435.61");
+    expect(text).toContain("Goods, net of trade discount");
+    expect(text).toContain("Premium Packing");
     expect(text).not.toContain("1,745,261");
     expect(text).not.toContain("8.4746");
     expect(text).not.toContain("fallback");
-    expect(text).not.toContain("Kowloon Bay HKD");
+    expect(firstText).not.toContain("Kowloon Bay HKD");
+    expect(firstText.match(/Kowloon Bay/g)?.length).toBe(1);
+    expect(secondText).toContain("Option A: EUR SEPA Transfers (Revolut Lithuania)");
+    expect(secondText).toContain("Option B: Global SWIFT Wires (Revolut Singapore)");
+    expect(secondText).toContain("BARCDEFF");
   });
 });

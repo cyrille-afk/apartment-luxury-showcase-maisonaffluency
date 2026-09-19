@@ -2083,19 +2083,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               min: hkd.breakdown?.transit_days_min ?? null,
               max: hkd.breakdown?.transit_days_max ?? null,
             },
-            hkd,
-            origins: livePerLine.shipments.length && hkd.fxEurHkd
-              ? livePerLine.shipments.map((s) => {
-                  const eurCents = s.shippingEurCents + s.dutyEurCents + s.vatEurCents;
-                  return {
-                    country: s.origin,
-                    modeLabel: labelForMode(s.mode),
-                    totalCbm: s.totalCbm,
-                    totalKg: s.totalKg,
-                    hkdCents: Math.round(eurCents * (hkd.fxEurHkd || 0) * (1 + FX_BUFFER)),
-                  };
-                })
-              : undefined,
+            shipmentCount: livePerLine.shipments.length || 1,
           }
         : null,
     };
