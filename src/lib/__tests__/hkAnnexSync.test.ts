@@ -3,6 +3,7 @@
  * same order total, no fallback FX pivot, no independent goods value.
  */
 import { describe, it, expect } from "vitest";
+import { writeFileSync } from "node:fs";
 import { buildQuotePdf, type QuotePdfArgs } from "../quotePdf";
 
 const hkd = {
@@ -73,6 +74,7 @@ describe("HK DAP annex synchronisation", () => {
     const doc = await buildQuotePdf(args);
     const blob = doc.output("blob");
     const buf = new Uint8Array(await blob.arrayBuffer());
+    writeFileSync("/tmp/maison-affluency-hk-quote-qa.pdf", buf);
     const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
     const path = await import("node:path");
     const url = await import("node:url");
