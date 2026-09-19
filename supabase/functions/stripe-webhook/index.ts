@@ -563,6 +563,17 @@ serve(async (req) => {
         } else {
           console.log(`[STRIPE-WEBHOOK] Quote ${quoteId} marked as deposit_paid`);
         }
+
+        // 🚨 Internal team alert the second the deposit clears.
+        await notifyDepositCleared(supabase, {
+          quoteId,
+          paymentKind: "deposit",
+          amountCents: session.amount_total ?? 0,
+          currency: session.currency || "USD",
+          payerEmail: session.customer_details?.email || session.customer_email || null,
+          sessionId: session.id,
+          isLive: session.livemode === true,
+        });
       } else if (paymentType === "balance") {
         // Balance paid → move to paid
         const { error } = await supabase
@@ -576,6 +587,17 @@ serve(async (req) => {
         } else {
           console.log(`[STRIPE-WEBHOOK] Quote ${quoteId} marked as paid`);
         }
+
+        // 🚨 Internal team alert on final balance too.
+        await notifyDepositCleared(supabase, {
+          quoteId,
+          paymentKind: "balance",
+          amountCents: session.amount_total ?? 0,
+          currency: session.currency || "USD",
+          payerEmail: session.customer_details?.email || session.customer_email || null,
+          sessionId: session.id,
+          isLive: session.livemode === true,
+        });
       }
     }
   }
