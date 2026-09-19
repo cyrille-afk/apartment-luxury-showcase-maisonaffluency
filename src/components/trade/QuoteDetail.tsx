@@ -1401,6 +1401,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     setCurrency(c);
     setCurrencyOpen(false);
     await supabase.from("trade_quotes").update({ currency: c }).eq("id", quoteId);
+    // Re-lock the quote's FX rate from the server rate table so the printed
+    // document and the on-screen totals can never drift apart later.
+    await lockQuoteExchangeRate(quoteId, c);
   };
 
   const handleUpdateQuantity = async (itemId: string, newQty: number) => {
