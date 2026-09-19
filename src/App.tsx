@@ -212,6 +212,7 @@ const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => (
 const TradeAdminDuplicates = lazy(() => import("./pages/TradeAdminDuplicates"));
 const TradeAdminWhatsAppAlerts = lazy(() => import("./pages/TradeAdminWhatsAppAlerts"));
 const TradeAdminPaymentSettings = lazy(() => import("./pages/TradeAdminPaymentSettings"));
+const DevCheckoutTest = lazy(() => import("./pages/DevCheckoutTest"));
 const TradeAdminFunnelTracker = lazy(() => import("./pages/TradeAdminFunnelTracker"));
 const TradeAdminSalesFunnel = lazy(() => import("./pages/TradeAdminSalesFunnel"));
 const TradeAdminProcurementLedger = lazy(() => import("./pages/TradeAdminProcurementLedger"));
@@ -713,6 +714,7 @@ const App = () => {
                   <Route path="/order-confirmation" element={<Suspense fallback={<PageLoadingSkeleton />}><OrderConfirmationPage /></Suspense>} />
                   <Route path="/success" element={<Suspense fallback={<PageLoadingSkeleton />}><SuccessPage /></Suspense>} />
                   <Route path="/payment-failed" element={<Suspense fallback={<PageLoadingSkeleton />}><PaymentFailedPage /></Suspense>} />
+                  <Route path="/dev-checkout-test" element={<Suspense fallback={<PageLoadingSkeleton />}><DevCheckoutTest /></Suspense>} />
                   <Route path="/api/procurement/acknowledge/:poId" element={<Suspense fallback={<PageLoadingSkeleton />}><PoAcknowledgePage /></Suspense>} />
                   <Route path="/checkout" element={<Suspense fallback={<PageLoadingSkeleton />}><CheckoutPage /></Suspense>} />
                   <Route path="/bank-wire-instructions" element={<Suspense fallback={<PageLoadingSkeleton />}><BankWireInstructionsPage /></Suspense>} />

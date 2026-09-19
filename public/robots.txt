@@ -62,6 +62,7 @@ Disallow: /ateliers/*-og.html$
 Disallow: /ateliers/*-og-v2.html$
 Disallow: /ateliers/*-card.html$
 Disallow: /collectibles/*-og.html$
+Disallow: /dev-checkout-test
 
 User-agent: ia_archiver
 Disallow: /
