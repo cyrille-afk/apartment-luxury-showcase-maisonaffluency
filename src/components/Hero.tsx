@@ -2,15 +2,28 @@ import { useEffect, useState, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackEvent, trackCTA } from "@/lib/analytics";
+import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
+import { setDarkIosChrome, clearDarkIosChrome } from "@/lib/iosChrome";
 // Appointment dialog (plus its Turnstile widget) is click-only: keep it out of
 // the homepage critical path.
 const PrivateTourDialog = lazy(() => import("@/components/PrivateTourDialog"));
 
 const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
 const HERO_ID = "v1781920000/AffluencySG_194-22.jpg_macpwj";
-const HERO_MOBILE_WEBP = `${HERO_BASE}/c_scale,w_960,q_auto:good,f_webp/${HERO_ID}`;
-const HERO_DESKTOP_WEBP = `${HERO_BASE}/c_scale,w_1440,q_auto:good,f_webp/${HERO_ID}`;
-const HERO_FALLBACK_JPEG = `${HERO_BASE}/c_scale,w_1440,q_auto:good,f_jpg/${HERO_ID}`;
+// Safari/WebKit JPEG recovery. Portrait crop for phones, landscape for
+// desktop — a portrait crop stretched across a wide viewport zooms the hero.
+const HERO_SAFARI_FALLBACK = `${HERO_BASE}/c_scale,w_960,q_auto:good,f_jpg/${HERO_ID}`;
+const HERO_SAFARI_FALLBACK_DESKTOP = `${HERO_BASE}/c_scale,w_1440,q_auto:good,f_jpg/${HERO_ID}`;
+
+// Warm the /designers route chunk (and its lazy hero) before the user taps the
+// CTA — the biggest chunk of perceived latency was code-splitting on click.
+let designersPrefetched = false;
+const prefetchDesigners = () => {
+  if (designersPrefetched) return;
+  designersPrefetched = true;
+  void import("@/pages/PublicDesigners").catch(() => {});
+  void import("@/components/DesignersHoverHero").catch(() => {});
+};
 
 const revealBelowFold = () => {
   window.dispatchEvent(new CustomEvent("ma:reveal-below-fold"));
@@ -41,6 +54,51 @@ const Hero = () => {
   useEffect(() => {
     if (tourOpen) setTourMounted(true);
   }, [tourOpen]);
+  const [showImageFallback, setShowImageFallback] = useState(false);
+  const isPwa = isPwaStandaloneDisplay();
+
+  useEffect(() => {
+    // The hero is a full-bleed dark image: paint the iOS chrome black while
+    // it is mounted, and restore the light chrome for every other route.
+    setDarkIosChrome();
+    return () => clearDarkIosChrome();
+  }, []);
+
+  useEffect(() => {
+    // NOTE: no proactive UA-based fallback. Every Chromium UA also contains
+    // "AppleWebKit", so the old check made *all* browsers download a second
+    // high-priority JPEG hero (~150 KB) on top of the preloaded AVIF/WebP —
+    // a duplicate LCP candidate that pushed mobile LCP past 7 s. The
+    // error/naturalWidth verification below still recovers real WebKit
+    // decode failures, and only then pays for the JPEG.
+
+    const copy = document.getElementById("static-hero-copy");
+    if (copy) copy.style.display = "none";
+    const pic = document.getElementById("static-hero");
+    if (pic) pic.style.setProperty("display", "block", "important");
+    document.getElementById("static-designers-hero")?.style.setProperty("display", "none", "important");
+    document.getElementById("static-designers-hero-overlay")?.style.setProperty("display", "none", "important");
+
+    // Some iOS Safari/PWA versions select the AVIF <source> but occasionally
+    // fail to decode or repaint it from cache. A failed selected <source> does
+    // not reliably fall through to the WebP <source>, leaving only the grey
+    // picture background. Recover with a JPEG rendered inside this hero.
+    const staticImage = pic?.querySelector("img");
+    const recoverImage = () => setShowImageFallback(true);
+    const verifyImage = () => {
+      if (!staticImage || (staticImage.complete && staticImage.naturalWidth === 0)) {
+        recoverImage();
+      }
+    };
+    staticImage?.addEventListener("error", recoverImage);
+    if (staticImage?.complete) verifyImage();
+    const verificationTimer = window.setTimeout(verifyImage, 1800);
+
+    return () => {
+      window.clearTimeout(verificationTimer);
+      staticImage?.removeEventListener("error", recoverImage);
+    };
+  }, []);
 
   const openTour = () => {
     trackCTA.bookAppointment("Hero Secondary CTA");
@@ -49,22 +107,28 @@ const Hero = () => {
 
   return (
     <section
-      className="relative flex h-[100svh] min-h-[100svh] w-full flex-col justify-between overflow-hidden md:h-screen"
+      className={`relative flex w-full flex-col justify-between md:h-screen md:overflow-hidden ${
+        isPwa ? "min-h-[100dvh]" : "h-[100svh] min-h-[100svh] overflow-hidden"
+      }`}
     >
-      <picture className="absolute inset-0 block h-full w-full bg-foreground">
-        <source media="(max-width: 768px)" srcSet={HERO_MOBILE_WEBP} type="image/webp" />
-        <source media="(min-width: 769px)" srcSet={HERO_DESKTOP_WEBP} type="image/webp" />
-        <img
-          src={HERO_FALLBACK_JPEG}
-          width="1440"
-          height="960"
-          alt="Luxury living room with Asian-inspired murals and designer furniture"
-          className="h-full w-full object-cover object-[50%_40%]"
-          loading="eager"
-          decoding="async"
-          fetchPriority="high"
-        />
-      </picture>
+      {/* Hero image is rendered by the static <picture id="static-hero"> in
+          index.html (fixed, z-index:0, painted from the preloaded bytes
+          before React boots). We intentionally do NOT re-render the image
+          here — a second <picture> creates a duplicate LCP candidate and
+          extra decode work that pushes LCP later on throttled CPUs. */}
+      {showImageFallback && (
+        <picture>
+          <source media="(min-width: 768px)" srcSet={HERO_SAFARI_FALLBACK_DESKTOP} />
+          <img
+            src={HERO_SAFARI_FALLBACK}
+            alt="Luxury living room with Asian-inspired murals and designer furniture"
+            className="absolute inset-0 h-full w-full object-cover object-[50%_40%]"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+          />
+        </picture>
+      )}
 
       {/* Legibility scrim: bottom-45% fade on mobile/PWA, subtler 35% fade on desktop */}
       <div
@@ -75,7 +139,13 @@ const Hero = () => {
 
       {/* Text overlay — desktop keeps the previous anchored-top editorial layout;
           mobile/PWA uses a bottom-aligned editorial link stack over the wallpaper. */}
-      <div className="ma-home-hero-copy relative z-10 flex h-full min-h-0 flex-1 flex-col items-start justify-start px-6 pb-0 pt-[calc(env(safe-area-inset-top)+14rem)] md:px-32 md:pb-20 md:pt-[24rem] lg:px-48">
+      <div className={`ma-home-hero-copy relative z-10 flex flex-1 flex-col items-start justify-start px-6 md:h-full md:min-h-0 md:justify-start md:px-32 md:pb-20 md:pt-[24rem] lg:px-48 ${
+        isPwa
+          ? // Standalone has no browser toolbar, so a fixed rem pad reads too high on
+            // the taller viewport — anchor the copy proportionally instead.
+            "min-h-screen pt-[calc(env(safe-area-inset-top)+29vh)] md:pt-[24rem] pb-[calc(env(safe-area-inset-bottom)+2rem)]"
+          : "h-full min-h-0 pt-[calc(env(safe-area-inset-top)+14rem)] pb-0"
+      }`}>
 
         <div className="w-full max-w-xl md:max-w-4xl md:text-left">
           <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
@@ -90,11 +160,15 @@ const Hero = () => {
 
             <button
               type="button"
+              onPointerEnter={prefetchDesigners}
+              onTouchStart={prefetchDesigners}
               onClick={() => {
                 trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" });
                 navigate("/designers");
               }}
-              className="group mt-16 flex translate-x-4 items-center gap-4 border border-white/20 bg-white/5 px-6 py-3.5 font-body text-[11px] font-medium uppercase tracking-[0.25em] text-white backdrop-blur-sm transition-all duration-500 ease-out hover:translate-x-12 hover:border-white hover:bg-white hover:text-black md:mt-20 md:translate-x-8"
+              className={`group flex translate-x-4 items-center gap-4 border border-white/20 bg-white/5 px-6 py-3.5 font-body text-[11px] font-medium uppercase tracking-[0.25em] text-white backdrop-blur-sm transition-all duration-500 ease-out hover:translate-x-12 hover:border-white hover:bg-white hover:text-black md:mt-20 md:translate-x-8 ${
+              isPwa ? "mt-28" : "mt-16"
+            }`}
             >
               <span>Explore the Collection</span>
               <span aria-hidden="true" className="inline-block transition-transform duration-500 ease-out group-hover:translate-x-1.5">→</span>
@@ -105,7 +179,11 @@ const Hero = () => {
         {/* Mobile / PWA — secondary CTAs centered above the iOS navigation bar */}
         <nav
           aria-label="Hero secondary actions"
-          className="absolute inset-x-6 bottom-[calc(env(safe-area-inset-bottom)+2.5rem)] flex w-auto flex-col items-center gap-5 md:hidden"
+          className={`flex w-full flex-col items-center gap-5 md:hidden ${
+            isPwa
+              ? "mt-auto pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-8"
+              : "absolute inset-x-6 bottom-[calc(env(safe-area-inset-bottom)+2.5rem)] w-auto"
+          }`}
         >
           <button
             type="button"

@@ -285,11 +285,15 @@ function HomeRouteSync() {
   const location = useLocation();
   useEffect(() => {
     const isHome = location.pathname === "/" || location.pathname === "";
+    const staticHero = document.getElementById("static-hero");
+    const staticHeroCopy = document.getElementById("static-hero-copy");
     const staticDesignersHero = document.getElementById("static-designers-hero");
     const staticDesignersOverlay = document.getElementById("static-designers-hero-overlay");
 
     if (isHome) {
       document.body.setAttribute("data-home", "");
+      staticHero?.style.setProperty("display", "block", "important");
+      staticHeroCopy?.style.setProperty("display", "none", "important");
       staticDesignersHero?.style.setProperty("display", "none", "important");
       staticDesignersOverlay?.style.setProperty("display", "none", "important");
       document.documentElement.style.removeProperty("background-image");
@@ -302,6 +306,8 @@ function HomeRouteSync() {
       document.body.style.removeProperty("background-repeat");
     } else {
       document.body.removeAttribute("data-home");
+      staticHero?.style.setProperty("display", "none", "important");
+      staticHeroCopy?.style.setProperty("display", "none", "important");
     }
   }, [location.pathname]);
   return null;
