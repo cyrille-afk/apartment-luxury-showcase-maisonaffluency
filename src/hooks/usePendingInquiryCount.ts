@@ -28,18 +28,11 @@ export function usePendingInquiryCount() {
   useEffect(() => {
     if (!isAdmin) return;
     load();
-    const channel = supabase
-      .channel(channelName)
-      .on("postgres_changes", { event: "*", schema: "public", table: "inquiries" }, () => load())
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_quotes" }, () => load())
-      .subscribe();
-    const poll = setInterval(load, 60000);
-    return () => {
-      supabase.removeChannel(channel);
-      clearInterval(poll);
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
+
+  // Event-driven: the 60s poll is gone, the shared socket drives refreshes.
+  useRealtimeTables(["inquiries", "trade_quotes"], () => load(), isAdmin);
 
   return count;
 }
