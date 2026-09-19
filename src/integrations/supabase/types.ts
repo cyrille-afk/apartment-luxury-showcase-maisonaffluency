@@ -9186,6 +9186,7 @@ export type Database = {
       }
       webhook_events: {
         Row: {
+          ack_ms: number | null
           attempts: number
           created_at: string
           event_id: string
@@ -9202,6 +9203,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ack_ms?: number | null
           attempts?: number
           created_at?: string
           event_id: string
@@ -9218,6 +9220,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ack_ms?: number | null
           attempts?: number
           created_at?: string
           event_id?: string
@@ -9419,6 +9422,7 @@ export type Database = {
       claim_webhook_events: {
         Args: { batch_size?: number }
         Returns: {
+          ack_ms: number | null
           attempts: number
           created_at: string
           event_id: string
