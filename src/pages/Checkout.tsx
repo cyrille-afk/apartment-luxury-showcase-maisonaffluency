@@ -1351,7 +1351,8 @@ function StickyTotals({
         rel="noopener noreferrer"
         className="mt-3 block text-center text-xs text-muted-foreground underline underline-offset-4"
       >
-        Need assistance with card limits? Text a private concierge advisor instantly
+        Card above your limit? Settle by bank transfer or pay a deposit above — or text a private
+        concierge advisor
       </a>
     </div>
   );
