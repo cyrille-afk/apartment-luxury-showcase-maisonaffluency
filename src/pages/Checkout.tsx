@@ -2352,11 +2352,22 @@ export default function Checkout() {
         <div className="min-w-0">
           {(() => {
             const optionsSlot = (
-              <DeliveryPaymentOptions
-                method={method}
-                setMethod={setMethod}
-                paynowAvailable={summary.currency.toLowerCase() === "sgd"}
-              />
+              <>
+                {highValue && (
+                  <HighValueRouting
+                    summary={summary}
+                    method={method}
+                    setMethod={setMethod}
+                    depositPct={depositPct}
+                    setDepositPct={setDepositPct}
+                  />
+                )}
+                <DeliveryPaymentOptions
+                  method={method}
+                  setMethod={setMethod}
+                  paynowAvailable={summary.currency.toLowerCase() === "sgd"}
+                />
+              </>
             );
             if (method === "wire") {
               return (
