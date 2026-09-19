@@ -381,8 +381,8 @@ html.product-detail-root .product-page-root {
   html.product-detail-root .product-page-root {
     width: 100%;
     height: 100dvh !important;
-    min-height: 100dvh;
     min-height: -webkit-fill-available;
+    min-height: 100dvh;
     overflow: hidden !important;
   }
 
