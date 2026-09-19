@@ -59,6 +59,12 @@ import { convertCents, useFxRates } from "@/components/trade/CurrencyToggle";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 import { useCurrencyNormalizedLines, useSettlementCurrency } from "@/lib/checkout/multiCurrency";
 import { CartFxLock, fxLockMinutesLeft } from "@/lib/checkout/fxLock";
+import {
+  DepositPct,
+  cardPracticalLimitCents,
+  depositAmountCents,
+  isHighValueOrder,
+} from "@/config/highValuePayment";
 import { getCustomsRegion } from "@/lib/checkout/customsRegions";
 
 
