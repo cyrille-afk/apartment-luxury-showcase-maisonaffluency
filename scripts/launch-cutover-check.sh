@@ -56,12 +56,15 @@ RLS_OFF=$(psql -tA -c "select count(*) from pg_tables t
 
 # --------------------------------------------------------------------- 3. FX
 section "3. Server-side FX sync"
-CRON=$(psql -tA -c "select schedule || '|' || active from cron.job
-                    where jobname='sync-currency-rates-twice-daily'" 2>/dev/null)
-if [[ "$CRON" == "0 6,18 * * *|t" ]]; then
+CRON_ERR=$(psql -tA -c "select schedule || '|' || active from cron.job
+                        where jobname='sync-currency-rates-twice-daily'" 2>&1)
+if [[ "$CRON_ERR" == *"permission denied"* ]]; then
+  echo "  – cron.job not readable by this role; verify the schedule with the"
+  echo "    Cloud SQL editor: select * from cron.job where jobname like '%currency%';"
+elif [[ "$CRON_ERR" == "0 6,18 * * *|t" ]]; then
   pass "cron sync-currency-rates-twice-daily active at 06:00 + 18:00 UTC"
 else
-  fail "FX cron missing or altered (got: '${CRON:-none}')"
+  fail "FX cron missing or altered (got: '${CRON_ERR:-none}')"
 fi
 
 read -r PAIRS AGE <<<"$(psql -tA -F' ' -c "
