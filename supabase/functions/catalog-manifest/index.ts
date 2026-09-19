@@ -36,6 +36,10 @@ const PICK_COLUMNS = [
   "category",
   "subcategory",
   "pdf_url",
+  "pdf_urls",
+  "pdf_filename",
+  "photo_credit",
+  "edition",
   "designer_id",
   "variant_placeholder",
   "base_axis_label",
@@ -45,12 +49,6 @@ const PICK_COLUMNS = [
   "created_at",
 ].join(",");
 
-const CACHE_HEADERS = {
-  // Browsers + Cloudflare / Netlify / Lovable CDN honor s-maxage + SWR.
-  "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=86400",
-  // The response is identical for every anon caller, so no Vary needed on auth.
-  Vary: "Accept-Encoding",
-};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
