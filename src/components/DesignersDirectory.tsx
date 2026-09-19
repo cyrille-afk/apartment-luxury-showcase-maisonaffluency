@@ -9,6 +9,7 @@ import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, P
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
+import { getCachedCatalog } from "@/lib/catalogSource";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthGate } from "@/hooks/useAuthGate";
@@ -205,6 +206,17 @@ function useDesignerCategories() {
   return useQuery({
     queryKey: queryKeys.designerCategoryMap(),
     queryFn: async () => {
+      // Anonymous visitors read the CDN-cached manifest instead of Postgres.
+      const cached = await getCachedCatalog();
+      if (cached) {
+        return cached.picks.map((p) => ({
+          designer_id: p.designer_id,
+          category: p.category,
+          subcategory: p.subcategory,
+          tags: p.tags,
+          origin: p.origin,
+        }));
+      }
       const { data, error } = await supabase
         .from("designer_curator_picks_public")
         .select("designer_id, category, subcategory, tags, origin");
@@ -220,13 +232,28 @@ function useDesignerFirstPickImage() {
   return useQuery({
     queryKey: queryKeys.designerFirstPickImage(),
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("designer_curator_picks_public")
-        .select("designer_id, image_url, sort_order, created_at")
-        .not("image_url", "is", null)
-        .order("sort_order", { ascending: true, nullsFirst: false })
-        .order("created_at", { ascending: true });
-      if (error) throw error;
+      const cached = await getCachedCatalog();
+      let data: Array<{ designer_id: string; image_url: string | null }> | null = null;
+      if (cached) {
+        data = [...cached.picks]
+          .filter((p) => p.image_url)
+          .sort((a, b) => {
+            const ao = a.sort_order ?? Number.MAX_SAFE_INTEGER;
+            const bo = b.sort_order ?? Number.MAX_SAFE_INTEGER;
+            if (ao !== bo) return ao - bo;
+            return String(a.created_at || "").localeCompare(String(b.created_at || ""));
+          })
+          .map((p) => ({ designer_id: p.designer_id, image_url: p.image_url }));
+      } else {
+        const res = await supabase
+          .from("designer_curator_picks_public")
+          .select("designer_id, image_url, sort_order, created_at")
+          .not("image_url", "is", null)
+          .order("sort_order", { ascending: true, nullsFirst: false })
+          .order("created_at", { ascending: true });
+        if (res.error) throw res.error;
+        data = (res.data || []) as Array<{ designer_id: string; image_url: string | null }>;
+      }
       const map: Record<string, string> = {};
       for (const row of (data || []) as Array<{ designer_id: string; image_url: string | null }>) {
         if (!row.designer_id || !row.image_url) continue;
@@ -311,16 +338,26 @@ function useFullCuratorPicks(enabled: boolean) {
   return useQuery({
     queryKey: queryKeys.curatorPicksDirectory(),
     queryFn: async () => {
-      const [{ data: picks }, { data: designers }] = await Promise.all([
-        applyCuratorPickOrder(
+      const cached = await getCachedCatalog();
+      let picks: any[] | null;
+      let designers: Array<{ id: string; name: string; slug: string }> | null;
+      if (cached) {
+        picks = cached.picks as any[];
+        designers = cached.designers as any[];
+      } else {
+        const [picksRes, designersRes] = await Promise.all([
+          applyCuratorPickOrder(
+            supabase
+              .from("designer_curator_picks_public")
+              .select("id, designer_id, sort_order, created_at, image_url, hover_image_url, title, subtitle, category, subcategory, tags, materials, dimensions, pdf_url, origin")
+          ),
           supabase
-            .from("designer_curator_picks_public")
-            .select("id, designer_id, sort_order, created_at, image_url, hover_image_url, title, subtitle, category, subcategory, tags, materials, dimensions, pdf_url, origin")
-        ),
-        supabase
-          .from("designers")
-          .select("id, name, slug"),
-      ]);
+            .from("designers")
+            .select("id, name, slug"),
+        ]);
+        picks = picksRes.data as any[] | null;
+        designers = designersRes.data as any[] | null;
+      }
       if (!picks) return [];
       const designerMap = new Map((designers || []).map((d: any) => [d.id, { name: d.name, slug: d.slug }]));
       // Picks whose designer isn't in the public list belong to trade-only/unpublished

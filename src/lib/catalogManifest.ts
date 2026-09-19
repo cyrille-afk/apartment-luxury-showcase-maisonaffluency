@@ -12,6 +12,11 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as strin
 
 export interface CatalogManifestPick {
   id: string;
+  slug?: string | null;
+  pdf_urls?: any | null;
+  pdf_filename?: string | null;
+  photo_credit?: string | null;
+  edition?: string | null;
   title: string;
   subtitle: string | null;
   image_url: string | null;

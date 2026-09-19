@@ -21,6 +21,7 @@ const OUT = path.join(ROOT, "public/catalog-manifest.json");
 
 const PICK_COLUMNS = [
   "id",
+  "slug",
   "title",
   "subtitle",
   "image_url",
@@ -32,6 +33,10 @@ const PICK_COLUMNS = [
   "category",
   "subcategory",
   "pdf_url",
+  "pdf_urls",
+  "pdf_filename",
+  "photo_credit",
+  "edition",
   "designer_id",
   "variant_placeholder",
   "base_axis_label",
@@ -78,8 +83,7 @@ async function main() {
     supabase
       .from("designers")
       .select("id, name, slug, display_name, source, founder, era, country, is_published, trade_only")
-      .eq("is_published", true)
-      .eq("trade_only", false),
+      .eq("is_published", true),
   ]);
 
   if (picksRes.error || designersRes.error) {
