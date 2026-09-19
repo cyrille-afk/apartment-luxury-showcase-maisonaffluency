@@ -30,6 +30,21 @@ export interface HkDapPageArgs {
   /** When provided, the PDF lists each origin shipment with its mode
    *  instead of showing the single panel-level "Mode" cell. */
   origins?: PdfOriginShipment[];
+  /**
+   * Figures taken straight from page 1 of the quote (already in HKD, using the
+   * quote's own FX stamp). When present they override every internally
+   * estimated number so the annex total equals the printed Order total.
+   */
+  quoteTotals?: {
+    fxLabel: string | null;
+    goodsHkdCents: number;
+    extras: { label: string; amountCents: number }[];
+    insuranceHkdCents: number;
+    gstHkdCents: number;
+    gstRate: number;
+    shippingHkdCents: number;
+    orderTotalHkdCents: number;
+  } | null;
 }
 // Back-compat alias
 type BuildPdfArgs = HkDapPageArgs;
