@@ -224,10 +224,11 @@ export function designerPicksQueryOptions(designerId: string | undefined, public
       }
       const { data, error } = await supabase
         .from("designer_curator_picks")
-        .select("*")
+        .select(CURATOR_PICK_GRID_COLUMNS_TRADE)
         .eq("designer_id", designerId)
         .eq("is_hidden", false)
-        .order("sort_order", { ascending: true });
+        .order("sort_order", { ascending: true })
+        .returns<PickRow[]>();
       if (error) throw error;
       return dedupePicks((data || []).map((d) => ({
         ...d,
