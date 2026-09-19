@@ -13,7 +13,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import type Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { getStripe } from "../_shared/stripeClient.ts";
 import { processStripeEvent } from "../_shared/stripeEventProcessor.ts";
 
@@ -22,6 +21,11 @@ const { stripe } = await getStripe("auto");
 const BATCH_SIZE = 5;
 /** Backoff per attempt number (seconds): 15s, 1m, 5m, 30m, 2h. */
 const BACKOFF_SECONDS = [15, 60, 300, 1800, 7200];
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
