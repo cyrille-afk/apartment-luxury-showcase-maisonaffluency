@@ -544,7 +544,7 @@ export default function ProductCommerceCta({
         <div
           data-mobile-commerce-dock
           ref={dockMeasureRef}
-          className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 px-4 pt-3 pb-[env(safe-area-inset-bottom,16px)]"
+          className="mobile-product-commerce-dock md:hidden fixed bottom-0 left-0 right-0 z-[9999] bg-white border-t border-gray-200 px-4 pt-3 pb-[max(16px,env(safe-area-inset-bottom,0px))]"
         >
           <div className="flex min-h-11 w-full items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
