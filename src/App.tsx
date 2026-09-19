@@ -916,6 +916,7 @@ const App = () => {
         </WishlistProvider>
         </CompareProvider>
         </StudioProvider>
+        </RealtimeMultiplexerProvider>
         </AuthProvider>
       </HelmetProvider>
     </Suspense>
