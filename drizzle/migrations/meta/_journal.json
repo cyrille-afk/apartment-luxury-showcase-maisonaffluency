@@ -302,6 +302,13 @@
       "when": 1789824820849,
       "tag": "0042_webhook_events_queue",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1789826901290,
+      "tag": "0043_webhook_queue_status_rpc",
+      "breakpoints": true
     }
   ]
 }

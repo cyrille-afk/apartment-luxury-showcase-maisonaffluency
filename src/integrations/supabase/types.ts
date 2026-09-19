@@ -9961,6 +9961,7 @@ export type Database = {
       validate_portal_session: { Args: { _token: string }; Returns: Json }
       webhook_events_has_work: { Args: never; Returns: boolean }
       webhook_queue_dispatch: { Args: never; Returns: undefined }
+      webhook_queue_status: { Args: never; Returns: Json }
     }
     Enums: {
       app_role:
