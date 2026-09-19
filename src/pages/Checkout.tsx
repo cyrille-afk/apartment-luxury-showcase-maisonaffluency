@@ -1326,6 +1326,8 @@ function WireForm({
           country={destinationCountry}
           countryIso={destination.iso}
           currency={currency}
+          buyerType={buyerType}
+          buyerTaxId={buyerGstNumber}
           buyer={{
             name: account ? account.email : name,
             email: account ? account.email : email,
