@@ -711,7 +711,11 @@ function drawCompanyAndMeta(
   const cityRegion = [b.city, b.region].filter(Boolean).join(", ");
   // Guard against a currency code accidentally saved in the postal-code field
   // (e.g. "HKD" or "Kowloon Bay HKD") — never print it inside the address.
-  const cityLine = [cityRegion, cleanPostalCode(b.postalCode)].filter(Boolean).join(" ");
+  const billingPostal = cleanPostalCode(b.postalCode);
+  const cityLine = [
+    cityRegion,
+    billingPostal && billingPostal.toLowerCase() !== cityRegion.toLowerCase() ? billingPostal : "",
+  ].filter(Boolean).join(" ");
   if (cityLine) addr.push(cityLine);
   if (b.country) addr.push(b.country);
 
