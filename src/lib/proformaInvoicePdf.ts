@@ -42,6 +42,10 @@ export interface ProformaArgs {
   shippingLabel?: string | null;
   taxCents: number;
   taxLabel: string;
+  /** Invoice-grade tax statement, e.g. VAT reverse-charge wording. */
+  taxStatement?: string | null;
+  /** Buyer's own VAT / GST registration number, printed under Bill To. */
+  buyerTaxId?: string | null;
   totalCents: number;
   channel: TradePaymentChannel;
 }
@@ -152,6 +156,7 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
     args.buyer.name,
     args.buyer.email,
     args.buyer.phone || "",
+    args.buyerTaxId ? `VAT / GST Reg. No. ${args.buyerTaxId}` : "",
     ...(args.buyer.address ? doc.splitTextToSize(args.buyer.address, contentW * 0.55) : []),
   ].filter(Boolean) as string[];
   billLines.forEach((line, i) => doc.text(line, M, y + 16 + i * 13));
@@ -230,6 +235,15 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
     args.shippingCents > 0 ? money(args.shippingCents, args.currency) : "To be quoted",
   );
   totalRow(args.taxLabel, args.taxCents > 0 ? money(args.taxCents, args.currency) : "—");
+  if (args.taxStatement) {
+    ensureRoom(26);
+    doc.setFontSize(7.5);
+    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+    const noteLines = doc.splitTextToSize(args.taxStatement, contentW) as string[];
+    noteLines.forEach((t, i) => doc.text(t, M, y + i * 10));
+    y += noteLines.length * 10 + 6;
+    doc.setTextColor(FG[0], FG[1], FG[2]);
+  }
   y += 4;
   rule(y);
   y += 18;
