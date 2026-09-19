@@ -5,6 +5,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Img, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.tsx'
+import { formatCurrency } from './currency.ts'
 
 const SITE_NAME = 'Maison Affluency'
 
@@ -53,10 +54,10 @@ const CommissionStatementEmail = ({
 }: CommissionStatementProps) => {
   const showFx = !!(payoutCurrency && payoutCurrency.toUpperCase() !== currency.toUpperCase() && fxRate && commissionPayoutFormatted)
   return (
-  <Html lang="en" dir="ltr">
-    <Head />
-    <Preview>Commission statement for order {quoteNumber} — {commissionFormatted} {currency}</Preview>
-    <Body style={main}>
+    <Html lang="en" dir="ltr">
+      <Head />
+      <Preview>Commission statement for order {quoteNumber} — {formatCurrency(commissionFormatted, currency)}</Preview>
+      <Body style={main}>
       <Container style={container}>
         <Section style={logoSection}>
           <Img
@@ -88,7 +89,7 @@ const CommissionStatementEmail = ({
                     <Text style={lineName}>{item.name}</Text>
                     <Text style={lineQty}>Qty {item.quantity}</Text>
                   </td>
-                  <td style={lineAmount}>{item.msrpFormatted}</td>
+                  <td style={lineAmount}>{formatCurrency(item.msrpFormatted, currency)}</td>
                 </tr>
               ))}
               <tr>
@@ -96,7 +97,7 @@ const CommissionStatementEmail = ({
               </tr>
               <tr>
                 <td style={totalLabel}>Subtotal MSRP</td>
-                <td style={totalAmount}>{subtotalFormatted} {currency}</td>
+                <td style={totalAmount}>{formatCurrency(subtotalFormatted, currency)}</td>
               </tr>
               <tr>
                 <td style={totalLabel}>Commission rate</td>
@@ -107,7 +108,7 @@ const CommissionStatementEmail = ({
               </tr>
               <tr>
                 <td style={grandLabel}>Commission due</td>
-                <td style={grandAmount}>{commissionFormatted} {currency}</td>
+                <td style={grandAmount}>{formatCurrency(commissionFormatted, currency)}</td>
               </tr>
               {showFx ? (
                 <>
@@ -121,7 +122,7 @@ const CommissionStatementEmail = ({
                   </tr>
                   <tr>
                     <td style={grandLabel}>Wired amount</td>
-                    <td style={grandAmount}>{commissionPayoutFormatted} {payoutCurrency}</td>
+                    <td style={grandAmount}>{formatCurrency(commissionPayoutFormatted, payoutCurrency)}</td>
                   </tr>
                 </>
               ) : null}
