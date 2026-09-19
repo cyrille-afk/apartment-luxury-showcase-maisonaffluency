@@ -1737,7 +1737,7 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
   doc.text("GLOBAL WIRES (REST OF WORLD · USD/HKD/SGD)", rightX, colY);
   drawRow(rightX, colY + rowH, "Account", "885111609218375");
   drawRow(rightX, colY + rowH * 2, "SWIFT/BIC", "REVOSGS2");
-  drawRow(rightX, colY + rowH * 3, "Intermediary", "BARCDEFF (Barclays)");
+  drawRow(rightX, colY + rowH * 3, "Intermediary bank SWIFT (Barclays)", "BARCDEFF", false, 108);
   drawRow(rightX, colY + rowH * 4, "Bank", "Revolut Technologies Singapore Pte. Ltd");
   drawRow(rightX, colY + rowH * 5, "Address", "6 Battery Road, Floor 6-01, 049909, Singapore", true);
 
