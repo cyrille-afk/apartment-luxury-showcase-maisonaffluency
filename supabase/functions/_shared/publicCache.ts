@@ -14,7 +14,7 @@ export const PUBLIC_CATALOG_CACHE_CONTROL =
 
 export const PRIVATE_CACHE_CONTROL = "no-store, private";
 
-export const CACHE_VARY = "Accept-Encoding, Authorization";
+export const CACHE_VARY = "Accept-Encoding, Authorization, Cookie";
 
 /** Extract the bearer token from an Authorization header value. */
 export function bearerToken(authHeader: string | null | undefined): string | null {
