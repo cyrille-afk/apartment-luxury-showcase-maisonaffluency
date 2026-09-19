@@ -38,6 +38,7 @@ import { template as funnelStallAlert } from './funnel-stall-alert.tsx'
 import { template as poAcknowledgedInternal } from './po-acknowledged-internal.tsx'
 import { template as poLogisticsAlert } from './po-logistics-alert.tsx'
 import { template as funnelPaymentReceivedInternal } from './funnel-payment-received-internal.tsx'
+import { template as depositClearedInternal } from './deposit-cleared-internal.tsx'
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
@@ -70,4 +71,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'po-acknowledged-internal': poAcknowledgedInternal,
   'po-logistics-alert': poLogisticsAlert,
   'funnel-payment-received-internal': funnelPaymentReceivedInternal,
+  'deposit-cleared-internal': depositClearedInternal,
 }
