@@ -2181,6 +2181,9 @@ export default function Checkout() {
           // Session-locked conversion rates the shown total was priced at.
           fxLockedAt: fxLock?.lockedAt ?? "",
           fxLockedRates: fxLock?.rates ?? null,
+          // Deposit plan for high-value orders (0, 0.3 or 0.5). The server
+          // re-validates and charges only the deposit, invoicing the balance.
+          depositPct,
         };
 
 
