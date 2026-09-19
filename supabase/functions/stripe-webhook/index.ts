@@ -199,6 +199,8 @@ serve(async (req) => {
         amountPaid: session.amount_total ?? 0,
       });
 
+      await cancelFunnelReminders(supabase, [funnelCardId, session.metadata?.quote_id]);
+
       const piId = typeof session.payment_intent === "string" ? session.payment_intent : session.id;
       await notifyInternalPaymentReceived(supabase, {
         label: session.metadata?.label || "Sales Funnel payment",
