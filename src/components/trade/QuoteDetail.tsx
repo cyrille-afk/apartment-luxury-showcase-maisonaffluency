@@ -950,6 +950,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
       setItems(loadedItems);
       if (quoteRes.data?.currency) setCurrency(quoteRes.data.currency as Currency);
+      // Backfill the FX lock the first time an unstamped quote is opened, so
+      // every quote carries the rate it was priced at.
+      {
+        const lockedRate = Number((quoteRes.data as { exchange_rate_at_creation?: number } | null)?.exchange_rate_at_creation);
+        if (!Number.isFinite(lockedRate) || lockedRate <= 0) {
+          void lockQuoteExchangeRate(quoteId, (quoteRes.data?.currency as string) || "SGD");
+        }
+      }
       if (quoteRes.data?.client_name) setClientName(quoteRes.data.client_name as string);
       if ((quoteRes.data as any)?.client_id) {
         const linkedClientId = (quoteRes.data as any).client_id as string;
