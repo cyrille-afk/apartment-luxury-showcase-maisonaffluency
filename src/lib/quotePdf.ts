@@ -414,9 +414,18 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
     appendUkDdpPage(doc, args.ukDdpPage);
   }
   if (args.hkDapPage) {
-    // Page 3 inherits the same object used to draw page 1. Its landed-cost
-    // estimator is deliberately excluded from every displayed monetary field.
-    appendHkDapPage(doc, { ...args.hkDapPage, quoteTotals: buildHkQuoteTotals(args, quoteTotals) });
+    // Page 3 receives the exact immutable cents used by Page 1. No conversion,
+    // landed-cost model, or alternate arithmetic is permitted in the annex.
+    appendHkDapPage(doc, {
+      ...args.hkDapPage,
+      quoteTotals: Object.freeze({
+        currency: args.currency,
+        netSubtotalCents: quoteTotals.afterDiscount,
+        premiumPackingCents: quoteTotals.extrasTotalCents,
+        orderTotalCents: quoteTotals.grand,
+        fxLabel: buildPageOneFxLabel(args),
+      }),
+    });
   }
 
   return doc;
