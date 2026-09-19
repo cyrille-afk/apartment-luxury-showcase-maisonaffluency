@@ -251,7 +251,7 @@ serve(async (req) => {
         const sameMethod = (existing.payment_method_types ?? []).includes(requestedMethod);
         if (updatable && existing.currency === currency && sameMethod) {
           intent = await stripe.paymentIntents.update(reuseId, {
-            amount,
+            amount: chargeAmount,
             description,
             metadata,
           });
@@ -263,7 +263,7 @@ serve(async (req) => {
 
     if (!intent) {
       intent = await stripe.paymentIntents.create({
-        amount,
+        amount: chargeAmount,
         currency,
         customer: customerId,
         receipt_email: email ?? undefined,
@@ -281,6 +281,9 @@ serve(async (req) => {
       clientSecret: intent.client_secret,
       paymentIntentId: intent.id,
       amount,
+      depositPct,
+      chargedAmount: chargeAmount,
+      balanceDueCents,
       currency,
       paymentMethod: requestedMethod,
       discountPct,
