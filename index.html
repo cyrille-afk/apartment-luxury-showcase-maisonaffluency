@@ -177,27 +177,21 @@
     <link rel="preload" as="font" type="font/woff2" href="/fonts/Cinzel-Bold.woff2" crossorigin fetchpriority="high" />
 
 
-    <!-- Mobile hero preload — includes Retina candidates so high-DPR phones
-         never upscale the 480px rendition across a full-width hero. -->
+    <!-- Native hero preloads match the two <picture> sources exactly. -->
     <link
       rel="preload"
       as="image"
-      type="image/avif"
-      href="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_960%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj"
-      imagesrcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_480%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 480w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_780%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 780w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_960%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 960w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1280%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 1280w"
-      imagesizes="100vw"
-      media="(max-width: 640px)"
+      type="image/webp"
+      href="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale,w_960,q_auto:good,f_webp/v1781920000/AffluencySG_194-22.jpg_macpwj"
+      media="(max-width: 768px)"
       fetchpriority="high"
     />
-    <!-- Desktop landscape preload — AVIF -->
     <link
       rel="preload"
       as="image"
-      type="image/avif"
-      href="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1440%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj"
-      imagesrcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_828%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 828w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1080%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 1080w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1440%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 1440w"
-      imagesizes="100vw"
-      media="(min-width: 641px)"
+      type="image/webp"
+      href="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale,w_1440,q_auto:good,f_webp/v1781920000/AffluencySG_194-22.jpg_macpwj"
+      media="(min-width: 769px)"
       fetchpriority="high"
     />
 
@@ -265,7 +259,7 @@
         // and the <noscript> block below remains for non-JS crawlers.
         var __css = document.createElement('style');
         var __hideStaticDesigners = __isDesigners ? '' : '#static-designers-hero{display:none !important;}';
-        __css.textContent = '#seo-content{display:none !important;}#static-hero{display:none !important;}#static-hero-copy{display:none !important;}' + __hideStaticDesigners;
+        __css.textContent = '#seo-content{display:none !important;}' + __hideStaticDesigners;
         document.head.appendChild(__css);
       }
 
@@ -311,76 +305,6 @@
 </head>
 
   <body>
-    <!--
-      Static hero — rendered OUTSIDE #root so React's createRoot().render()
-      cannot wipe it. It paints from the preloaded bytes before React boots
-      and stays the LCP candidate even on a 6x-throttled CPU. It is absolute,
-      not fixed, so it scrolls away with the hero text instead of behaving as
-      a pinned background. Removed entirely on non-home routes by the inline script.
-    -->
-    <picture id="static-hero" style="position:absolute;inset:0;width:100vw;height:100vh;z-index:0;display:block;background:#111;pointer-events:none;">
-      <!-- Mobile AVIF (preferred), with Retina-width candidates -->
-      <source
-        type="image/avif"
-        media="(max-width: 640px)"
-        srcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_480%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 480w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_780%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 780w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_960%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 960w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1280%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 1280w"
-        sizes="100vw"
-      />
-      <!-- Mobile WebP fallback -->
-      <source
-        type="image/webp"
-        media="(max-width: 640px)"
-        srcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_480%2Cq_auto:good%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 480w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_780%2Cq_auto:good%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 780w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_960%2Cq_auto:good%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 960w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1280%2Cq_auto:good%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 1280w"
-        sizes="100vw"
-      />
-      <!-- Desktop AVIF (preferred) -->
-      <source
-        type="image/avif"
-        media="(min-width: 641px)"
-        srcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_828%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 828w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1080%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 1080w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1440%2Cq_auto:good%2Cf_avif/v1781920000/AffluencySG_194-22.jpg_macpwj 1440w"
-        sizes="100vw"
-      />
-      <img
-        src="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1440%2Cq_auto:good%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj"
-        srcset="https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_828%2Cq_auto:good%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 828w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1080%2Cq_auto:good%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 1080w, https://res.cloudinary.com/dif1oamtj/image/upload/c_scale%2Cw_1440%2Cq_auto:good%2Cf_webp/v1781920000/AffluencySG_194-22.jpg_macpwj 1440w"
-        sizes="100vw"
-        width="1440"
-        height="960"
-        alt="Luxury living room with Asian-inspired murals and designer furniture"
-        fetchpriority="high"
-        decoding="async"
-        loading="eager"
-        style="width:100%;height:100%;object-fit:cover;object-position:50% 40%;"
-
-      />
-    </picture>
-    <div id="static-hero-copy" aria-hidden="true" style="display:flex;position:absolute;inset:0;z-index:0;pointer-events:none;align-items:flex-start;justify-content:flex-start;padding:24rem 10rem 8rem;color:#fff;font-family:'Playfair Display',Georgia,serif;">
-      <div style="max-width:56rem;">
-        <div style="font-size:clamp(2rem,3.6vw,3.25rem);line-height:1.08;margin:0 0 2rem;text-shadow:0 2px 12px rgba(0,0,0,.45);">
-          <span class="static-hero-desktop">Modern Masters. Iconic Design.</span>
-          <span class="static-hero-mobile">Modern Masters.<br />Iconic Design.</span>
-        </div>
-        <p style="display:inline-block;margin:0;font-size:clamp(1rem,2vw,1.5rem);line-height:1.45;font-weight:500;text-shadow:0 1px 3px rgba(0,0,0,.55);background:radial-gradient(ellipse at center,rgba(0,0,0,.38) 60%,transparent 100%);padding:.35rem .6rem;">
-          A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
-        </p>
-      </div>
-    </div>
-    <style>
-      .static-hero-mobile { display: none; }
-      @media (max-width: 767px) {
-        :root { --home-hero-mobile-pad-top: 16rem; }
-        #static-hero-copy { padding: var(--home-hero-mobile-pad-top) 1.5rem 8rem !important; }
-        #static-hero-copy > div > div { font-size: 1.875rem !important; line-height: 1.2 !important; }
-        #static-hero-copy p { font-size: 1rem !important; line-height: 1.625 !important; }
-        .static-hero-desktop { display: none; }
-        .static-hero-mobile { display: inline; }
-      }
-      @media (max-width: 767px) and (display-mode: standalone) {
-        :root { --home-hero-mobile-pad-top: calc(env(safe-area-inset-top) + 29vh); }
-      }
-
-    </style>
-
     <!--
       Static /designers hero — inlined so the LCP element paints from the
       preloaded bytes before React hydrates DesignersHoverHero. Hidden by
