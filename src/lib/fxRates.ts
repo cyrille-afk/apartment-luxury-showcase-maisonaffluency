@@ -97,11 +97,19 @@ export function summarizeFxSources(sources: FxSource[]): FxSource {
 export function describeFxSource(s: FxSource): { label: string; tone: "live" | "fallback" | "hardcoded" | "none"; detail: string } {
   switch (s) {
     case "identity":     return { label: "No conversion",     tone: "none",      detail: "Source and target currencies match — no FX applied." };
-    case "frankfurter":  return { label: "Live ECB rates",    tone: "live",      detail: "Rates fetched live from frankfurter.app (European Central Bank)." };
+    case "database":     return { label: "Database rates",    tone: "live",      detail: describeSyncedAt() };
+    case "locked":       return { label: "Locked rate",       tone: "live",      detail: "Rate stamped onto this quote when it was created — it cannot drift." };
+    case "frankfurter":  return { label: "Live ECB rates",    tone: "live",      detail: "Rates fetched from frankfurter.app (European Central Bank)." };
     case "open-er-api":  return { label: "Live fallback",     tone: "fallback",  detail: "Primary provider unreachable — using open.er-api.com." };
-    case "hardcoded":    return { label: "Offline rates",     tone: "hardcoded", detail: "Both live providers unreachable — using the bundled reference table (approximate)." };
+    case "hardcoded":    return { label: "Offline rates",     tone: "hardcoded", detail: "Server rate table unreachable — using the bundled reference table (approximate)." };
     default:             return { label: "Rates pending",     tone: "none",      detail: "FX rates not resolved yet." };
   }
+}
+
+function describeSyncedAt(): string {
+  const at = getFxTableSyncedAt();
+  if (!at) return "Rates served from the platform rate table, synced twice daily.";
+  return `Rates served from the platform rate table — last synced ${new Date(at).toLocaleString()}.`;
 }
 
 /** Drop cached rates (all pairs, or one pair) so the next getFxRate call
