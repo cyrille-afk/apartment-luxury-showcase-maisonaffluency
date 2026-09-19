@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Inbox, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 
 interface NewInquiry {
   id: string;
