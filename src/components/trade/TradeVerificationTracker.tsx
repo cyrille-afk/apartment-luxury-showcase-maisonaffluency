@@ -27,7 +27,6 @@ export default function TradeVerificationTracker() {
   const [app, setApp] = useState<AppRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const pollRef = useRef<number | null>(null);
 
   const load = useCallback(async () => {
     if (!user?.id) return;
