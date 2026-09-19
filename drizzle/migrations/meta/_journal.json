@@ -330,6 +330,13 @@
       "when": 1789830224839,
       "tag": "0046_webhook_ack_latency_telemetry",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1789831477151,
+      "tag": "0047_shop_orders_buyer_tax_identity",
+      "breakpoints": true
     }
   ]
 }
