@@ -19,23 +19,37 @@ export function useDbCuratorPicks() {
   return useQuery({
     queryKey: queryKeys.curatorPicksGrid(),
     queryFn: async (): Promise<DbProductItem[]> => {
-      // Fetch published designers (incl. founder to resolve parent hierarchy)
-      const { data: designers } = await supabase
-        .from("designers")
-        .select("id, name, slug, display_name, source, founder")
-        .eq("is_published", true);
+      // Anonymous visitors read the CDN-cached catalogue manifest; signed-in
+      // trade users fall through to the live, permission-scoped queries.
+      const cachedCatalog = await getCachedCatalog();
+
+      let designers: Array<{ id: string; name: string; slug: string; display_name: string | null; source: string | null; founder: string | null }>;
+      let picksRaw: any[] | null;
+
+      if (cachedCatalog) {
+        designers = cachedCatalog.designers as any[];
+        picksRaw = cachedCatalog.picks as any[];
+      } else {
+        // Fetch published designers (incl. founder to resolve parent hierarchy)
+        const { data: designerRows } = await supabase
+          .from("designers")
+          .select("id, name, slug, display_name, source, founder")
+          .eq("is_published", true);
+        designers = (designerRows || []) as any[];
+
+        // Fetch all picks via public view
+        const { data } = await applyCuratorPickOrder(
+          supabase
+            .from("designer_curator_picks_public" as any)
+            // Slim listing fetch: no description / gallery_images / size_variants /
+            // variant_* — those are lazily fetched on card open (lightbox / product page).
+            .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, category, subcategory, tags, photo_credit, edition, pdf_url, pdf_filename, pdf_urls, designer_id, sort_order, created_at")
+        );
+        picksRaw = data as any[] | null;
+      }
 
       if (!designers?.length) return [];
 
-
-      // Fetch all picks via public view
-      const { data: picksRaw } = await applyCuratorPickOrder(
-        supabase
-          .from("designer_curator_picks_public" as any)
-          // Slim listing fetch: no description / gallery_images / size_variants /
-          // variant_* — those are lazily fetched on card open (lightbox / product page).
-          .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, category, subcategory, tags, photo_credit, edition, pdf_url, pdf_filename, pdf_urls, designer_id, sort_order, created_at")
-      );
 
       // Defensive client-side sort using identical rules (in case the view drops ORDER BY through joins).
       const picks = picksRaw ? sortCuratorPicks(picksRaw as any[]) : [];
