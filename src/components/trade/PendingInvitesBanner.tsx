@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Mail, Clock, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
 import { Button } from "@/components/ui/button";
