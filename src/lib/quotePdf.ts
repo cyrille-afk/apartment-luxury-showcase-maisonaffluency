@@ -1709,7 +1709,7 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
   doc.line(rightX - 12, y + 52, rightX - 12, y + boxH - 10);
 
   // Per-block row renderer: muted small-caps label + value on a fixed grid
-  const drawRow = (x: number, rowY: number, label: string, value: string, muted = false) => {
+  const drawRow = (x: number, rowY: number, label: string, value: string, muted = false, lw = labelW) => {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7);
     doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
@@ -1717,7 +1717,7 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(...(muted ? MUTED : FG) as [number, number, number]);
-    doc.text(value, x + labelW, rowY);
+    doc.text(value, x + lw, rowY);
   };
 
   // Left block — EUR transfers (Europe / SEPA)
