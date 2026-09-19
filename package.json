@@ -21,7 +21,9 @@
     "lighthouse:mobile": "node scripts/lighthouse-mobile.mjs",
     "audit:og": "python3 scripts/audit-og-bridges.py --warnings",
     "check:product-images": "python3 scripts/check-product-image-parity.py",
-    "audit:meta-descriptions": "node scripts/audit-meta-descriptions.mjs"
+    "audit:meta-descriptions": "node scripts/audit-meta-descriptions.mjs",
+    "test:unit": "vitest run",
+    "test:commerce": "vitest run src/config/taxRules.test.ts src/config/landedCost.test.ts src/lib/shippingEstimator.fallback.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

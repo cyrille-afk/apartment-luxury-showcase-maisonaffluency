@@ -1,0 +1,46 @@
+name: Commerce — tax, landed cost & shipping
+
+# Guards the international B2B money paths: UK VAT treatment, DDP/DDU landed
+# cost, and the consolidation-hub fallback for unsupported shipping lanes.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/config/taxRules*"
+      - "src/config/shippingZones.ts"
+      - "src/config/landedCost.test.ts"
+      - "src/lib/shippingEstimator*"
+      - "src/hooks/useShippingCountry.ts"
+      - "src/hooks/useIncoterm.ts"
+      - "package.json"
+      - "vitest.config.ts"
+      - ".github/workflows/commerce-tax-shipping-tests.yml"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  unit:
+    name: Tax, landed cost & lane fallback
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: UK VAT / GST treatment
+        run: bunx vitest run src/config/taxRules.test.ts
+
+      - name: DDP & DDU landed cost
+        run: bunx vitest run src/config/landedCost.test.ts
+
+      - name: Unsupported shipping-lane fallback
+        run: bunx vitest run src/lib/shippingEstimator.fallback.test.ts
+
+      - name: Typecheck
+        run: bunx tsgo --noEmit -p tsconfig.app.json
