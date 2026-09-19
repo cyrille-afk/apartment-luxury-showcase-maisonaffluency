@@ -9309,6 +9309,10 @@ export type Database = {
         Args: { _studio_id: string; _user_id: string }
         Returns: boolean
       }
+      can_view_client_board: {
+        Args: { _board_id: string; _user_id: string }
+        Returns: boolean
+      }
       can_view_project: {
         Args: { _project_id: string; _user_id: string }
         Returns: boolean
@@ -9537,6 +9541,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_valid_studio_invite: {
+        Args: {
+          _role: Database["public"]["Enums"]["studio_role"]
+          _studio_id: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_verified_access: { Args: { _user_id: string }; Returns: boolean }
       invoke_scrape_products_with_retry: { Args: never; Returns: undefined }
       is_approved_trade_user: { Args: { _user_id?: string }; Returns: boolean }
@@ -9685,6 +9697,14 @@ export type Database = {
           _requester_name: string
         }
         Returns: undefined
+      }
+      owns_client_board: {
+        Args: { _board_id: string; _user_id: string }
+        Returns: boolean
+      }
+      owns_trade_quote: {
+        Args: { _quote_id: string; _user_id: string }
+        Returns: boolean
       }
       parse_dimensions_to_mm: {
         Args: { dim_text: string }
