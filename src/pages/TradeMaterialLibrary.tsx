@@ -2,6 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { useEffect, useMemo, useState } from "react";
 import { Search, Layers } from "lucide-react";
 import { Input } from "@/components/ui/input";
