@@ -164,6 +164,17 @@ serve(async (req) => {
       roundDollar(goodsAmount) + roundDollar(deliveryCents) + roundDollar(taxCents);
     if (amount < 100 || amount > 100_000_00 * 100) return json({ error: "Price out of range." }, 400);
 
+    // ---- Deposit / balance split ----------------------------------------
+    // High-value orders rarely clear on a corporate card in one charge. The
+    // buyer may settle a deposit by card now; the balance is invoiced and
+    // settled by bank transfer. Only the two published plans are honoured.
+    const requestedDeposit = Number(body?.depositPct);
+    const depositPct = requestedDeposit === 0.3 || requestedDeposit === 0.5 ? requestedDeposit : 0;
+    const chargeAmount = depositPct > 0 ? roundDollar(Math.round(amount * depositPct)) : amount;
+    const balanceDueCents = amount - chargeAmount;
+    if (chargeAmount < 100) return json({ error: "Deposit amount out of range." }, 400);
+
+
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) return json({ error: "Payments are not configured." }, 500);
