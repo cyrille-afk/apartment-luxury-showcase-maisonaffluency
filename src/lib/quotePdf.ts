@@ -1713,11 +1713,13 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7);
     doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-    doc.text(label.toUpperCase(), x, rowY);
+    const up = label.toUpperCase();
+    doc.text(up, x, rowY);
+    const valueX = x + Math.max(lw, doc.getTextWidth(up) + 8);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(...(muted ? MUTED : FG) as [number, number, number]);
-    doc.text(value, x + lw, rowY);
+    doc.text(value, valueX, rowY);
   };
 
   // Left block — EUR transfers (Europe / SEPA)
