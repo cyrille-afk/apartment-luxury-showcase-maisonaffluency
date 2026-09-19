@@ -58,6 +58,7 @@ import { CORPORATE_IDENTITY } from "@/config/tradePaymentChannels";
 import { convertCents, useFxRates } from "@/components/trade/CurrencyToggle";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 import { useCurrencyNormalizedLines, useSettlementCurrency } from "@/lib/checkout/multiCurrency";
+import { CartFxLock, fxLockMinutesLeft } from "@/lib/checkout/fxLock";
 import { getCustomsRegion } from "@/lib/checkout/customsRegions";
 
 
@@ -384,6 +385,8 @@ function OrderSummary({
   buyerGstNumber,
   isLoading,
   onIncotermChange,
+  fxLock,
+  onRefreshFx,
 }: {
   lines: CheckoutLine[];
   summary: CheckoutSummary;
@@ -391,6 +394,10 @@ function OrderSummary({
   buyerGstNumber: string;
   isLoading?: boolean;
   onIncotermChange?: (next: Incoterm) => void;
+  /** Session-locked conversion rates the basket was priced at. */
+  fxLock?: CartFxLock | null;
+  /** Re-prices the basket at today's rates. */
+  onRefreshFx?: () => void;
 }) {
   const { currency } = summary;
   // The delivery-term store keeps the selector and the page maths in sync
@@ -751,6 +758,20 @@ function OrderSummary({
             {summary.estimatedShippingCents > 0 && (
               <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
                 Includes estimated freight deposit — final freight confirmed by your advisor.
+              </p>
+            )}
+            {fxLock && (
+              <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                Exchange rate held for this order — {fxLockMinutesLeft(fxLock)} min remaining.
+                {onRefreshFx && (
+                  <button
+                    type="button"
+                    onClick={onRefreshFx}
+                    className="ml-2 underline underline-offset-2 hover:text-foreground"
+                  >
+                    Refresh rate
+                  </button>
+                )}
               </p>
             )}
           </div>
@@ -1593,7 +1614,12 @@ export default function Checkout() {
   // currency: pick Singapore/SGD and every figure — and the charge itself —
   // is converted into SGD before any subtotal / freight / tax maths runs.
   const settlementCurrency = useSettlementCurrency();
-  const { lines: grossLines, ready: fxReady } = useCurrencyNormalizedLines(rawLines, settlementCurrency);
+  const {
+    lines: grossLines,
+    ready: fxReady,
+    fxLock,
+    refreshFxLock,
+  } = useCurrencyNormalizedLines(rawLines, settlementCurrency);
   // Account-level tier discount. The hook drives the first paint; the value
   // returned by the PaymentIntent is authoritative once it arrives, so the
   // displayed total always equals the amount Stripe will charge.
@@ -2035,6 +2061,9 @@ export default function Checkout() {
           // PayNow needs its own PaymentIntent: the payment method type is
           // fixed at creation and cannot be swapped on an existing intent.
           paymentMethod: intentMethod,
+          // Session-locked conversion rates the shown total was priced at.
+          fxLockedAt: fxLock?.lockedAt ?? "",
+          fxLockedRates: fxLock?.rates ?? null,
         };
 
 
@@ -2370,6 +2399,8 @@ export default function Checkout() {
             // Initial load only — re-syncing a PaymentIntent (payment method /
             // destination change) must never hide the totals the buyer is reading.
             isLoading={!fxReady || rawLines === null}
+            fxLock={fxLock}
+            onRefreshFx={refreshFxLock}
           />
         </div>
         </div>

@@ -10,8 +10,14 @@
  * (a EUR €11,100 chair + a USD $5,950 lamp therefore settles in EUR).
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { convertCentsWithFallback, getFxRates } from "@/lib/fxRates";
+import {
+  CartFxLock,
+  clearFxLock,
+  readFxLock,
+  writeFxLock,
+} from "@/lib/checkout/fxLock";
 import { useShippingDestination } from "@/lib/shippingDestination";
 
 export type MinimalLine = {
@@ -54,10 +60,18 @@ export function resolveBaseCurrency(
   return entries[0][0];
 }
 
-/** Live rates for every foreign currency present → base. */
+/**
+ * Rates for every foreign currency present → base.
+ *
+ * The first pass locks the rates for the session (see `fxLock.ts`), so the
+ * total the shopper is quoted while browsing is the total they are charged.
+ * `refreshLock` drops the lock and re-prices at today's rates.
+ */
 export function useFxToBase(lines: MinimalLine[] | null | undefined, base: string) {
   const [rates, setRates] = useState<Record<string, number>>({});
   const [resolvedPairsKey, setResolvedPairsKey] = useState("");
+  const [lock, setLock] = useState<CartFxLock | null>(null);
+  const [refreshToken, setRefreshToken] = useState(0);
   const pairsKey = useMemo(
     () =>
       [...new Set((lines ?? []).map((l) => code(l.currency)))]
@@ -72,19 +86,34 @@ export function useFxToBase(lines: MinimalLine[] | null | undefined, base: strin
     if (!srcs.length) {
       setRates({});
       setResolvedPairsKey("");
+      setLock(null);
+      return;
+    }
+    // A live lock wins over a fresh lookup: the quoted total must not move
+    // underneath the buyer between browsing and paying.
+    const held = readFxLock(base, pairsKey);
+    if (held) {
+      setRates(held.rates);
+      setLock(held);
+      setResolvedPairsKey(pairsKey);
       return;
     }
     getFxRates(srcs.map((src) => ({ src, tgt: base }))).then((r) => {
-      if (!cancelled) {
-        setRates(r);
-        setResolvedPairsKey(pairsKey);
-      }
+      if (cancelled) return;
+      setRates(r);
+      setLock(writeFxLock(base, pairsKey, r));
+      setResolvedPairsKey(pairsKey);
     });
     return () => {
       cancelled = true;
     };
-  }, [pairsKey, base]);
-  return { rates, ready: resolvedPairsKey === pairsKey };
+  }, [pairsKey, base, refreshToken]);
+  const refreshLock = useCallback(() => {
+    clearFxLock();
+    setResolvedPairsKey("");
+    setRefreshToken((n) => n + 1);
+  }, []);
+  return { rates, ready: resolvedPairsKey === pairsKey, lock, refreshLock };
 }
 
 export type NormalizedLine<T> = T & {
@@ -95,18 +124,27 @@ export type NormalizedLine<T> = T & {
 };
 
 /**
- * Converts every line into one base currency using live rates (hardcoded
- * cross-rate table as a safe fallback so checkout is never blocked).
+ * Converts every line into one base currency using session-locked rates
+ * (hardcoded cross-rate table as a safe fallback so checkout is never blocked).
  */
 export function useCurrencyNormalizedLines<T extends MinimalLine>(
   lines: T[] | null,
   preferredBase?: string | null,
-): { base: string; lines: NormalizedLine<T>[] | null; mixed: boolean; ready: boolean } {
+): {
+  base: string;
+  lines: NormalizedLine<T>[] | null;
+  mixed: boolean;
+  ready: boolean;
+  /** Rates the basket was priced at, and when they were locked. */
+  fxLock: CartFxLock | null;
+  /** Re-prices the basket at current rates. */
+  refreshFxLock: () => void;
+} {
   const base = useMemo(
     () => resolveBaseCurrency(lines, preferredBase),
     [lines, preferredBase],
   );
-  const { rates, ready } = useFxToBase(lines, base);
+  const { rates, ready, lock, refreshLock } = useFxToBase(lines, base);
   const mixed = useMemo(
     () => new Set((lines ?? []).map((l) => code(l.currency))).size > 1,
     [lines],
@@ -125,5 +163,5 @@ export function useCurrencyNormalizedLines<T extends MinimalLine>(
       } as NormalizedLine<T>;
     });
   }, [lines, base, rates]);
-  return { base, lines: normalized, mixed, ready };
+  return { base, lines: normalized, mixed, ready, fxLock: lock, refreshFxLock: refreshLock };
 }
