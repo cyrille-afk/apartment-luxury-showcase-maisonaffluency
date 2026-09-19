@@ -179,28 +179,28 @@ Deno.serve(async (req) => {
       commissionPayoutCents = Number(timeline.commission_payout_cents)
     } else {
       try {
-        const fxResp = await fetch(
-          `https://api.frankfurter.app/latest?from=${quoteCurrency}&to=${payoutCurrency}`,
-        )
-        if (fxResp.ok) {
-          const fxJson = await fxResp.json() as { rates?: Record<string, number>; date?: string }
-          const r = fxJson?.rates?.[payoutCurrency.toUpperCase()]
-          if (typeof r === 'number' && r > 0) {
-            fxRate = r
-            fxSource = `frankfurter.app (ECB ${fxJson.date ?? ''})`.trim()
-            payoutCurrencyOut = payoutCurrency.toUpperCase()
-            commissionPayoutCents = Math.round(commissionCents * r)
-            await admin.from('order_timeline').update({
-              commission_fx_rate: fxRate,
-              commission_fx_source: fxSource,
-              commission_fx_locked_at: new Date().toISOString(),
-              commission_payout_currency: payoutCurrencyOut,
-              commission_payout_cents: commissionPayoutCents,
-            }).eq('id', timeline.id)
-          }
+        const { data: fxRow } = await admin
+          .from('currency_rates')
+          .select('rate,source,rate_date')
+          .eq('base_currency', quoteCurrency)
+          .eq('target_currency', payoutCurrency.toUpperCase())
+          .maybeSingle()
+        const r = Number(fxRow?.rate)
+        if (Number.isFinite(r) && r > 0) {
+          fxRate = r
+          fxSource = `currency_rates (${fxRow?.source ?? 'platform'} ${fxRow?.rate_date ?? ''})`.trim()
+          payoutCurrencyOut = payoutCurrency.toUpperCase()
+          commissionPayoutCents = Math.round(commissionCents * r)
+          await admin.from('order_timeline').update({
+            commission_fx_rate: fxRate,
+            commission_fx_source: fxSource,
+            commission_fx_locked_at: new Date().toISOString(),
+            commission_payout_currency: payoutCurrencyOut,
+            commission_payout_cents: commissionPayoutCents,
+          }).eq('id', timeline.id)
         }
       } catch (e) {
-        console.error('FX fetch failed; falling back to quote currency', e)
+        console.error('FX lookup failed; falling back to quote currency', e)
       }
     }
   }
