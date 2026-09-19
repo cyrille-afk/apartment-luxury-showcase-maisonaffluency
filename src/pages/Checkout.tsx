@@ -58,6 +58,7 @@ import { CORPORATE_IDENTITY } from "@/config/tradePaymentChannels";
 import { convertCents, useFxRates } from "@/components/trade/CurrencyToggle";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 import { useCurrencyNormalizedLines, useSettlementCurrency } from "@/lib/checkout/multiCurrency";
+import { CartFxLock, fxLockMinutesLeft } from "@/lib/checkout/fxLock";
 import { getCustomsRegion } from "@/lib/checkout/customsRegions";
 
 
