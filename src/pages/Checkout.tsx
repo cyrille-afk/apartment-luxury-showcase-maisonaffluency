@@ -19,6 +19,8 @@ import { OrderSummarySkeleton } from "@/components/checkout/OrderSummarySkeleton
 import { VisaMark, MastercardMark, BankTransferMark } from "@/components/checkout/PaymentMarks";
 import { TransferReferenceNote } from "@/components/checkout/TransferReferenceNote";
 import { useEstimatedShipping, ESTIMATED_SHIPPING_NOTE } from "@/hooks/useShippingCountry";
+import { useIncoterm } from "@/hooks/useIncoterm";
+import type { Incoterm } from "@/config/shippingZones";
 import { getCurrentDestination, useShippingDestination } from "@/lib/shippingDestination";
 import RegionalLogisticsNote from "@/components/trade/RegionalLogisticsNote";
 import RegionalPaymentPanel from "@/components/checkout/RegionalPaymentPanel";
@@ -160,6 +162,14 @@ export type CheckoutSummary = {
   importTaxName: string | null;
   /** Plain-language explanation of the landed-cost estimate. */
   importNote: string | null;
+  /** Delivery term in force: DDP (we prepay) or DDU (buyer pays at border). */
+  incoterm: Incoterm;
+  /** True when the destination clears customs, so the choice is offered. */
+  incotermSelectable: boolean;
+  /** Prepaid customs handling included in the delivery line under DDP. */
+  ddpHandlingCents: number;
+  /** Import charges the buyer settles with the carrier under DDU. 0 for DDP. */
+  deferredImportCents: number;
   /** Consumption tax (GST/VAT) due per the configurable rules. 0 otherwise. */
   taxCents: number;
   /** Row label for the tax line, e.g. "GST (9%)". */
@@ -373,14 +383,20 @@ function OrderSummary({
   buyerType,
   buyerGstNumber,
   isLoading,
+  onIncotermChange,
 }: {
   lines: CheckoutLine[];
   summary: CheckoutSummary;
   buyerType: BuyerType;
   buyerGstNumber: string;
   isLoading?: boolean;
+  onIncotermChange?: (next: Incoterm) => void;
 }) {
   const { currency } = summary;
+  // The delivery-term store keeps the selector and the page maths in sync
+  // whether this summary is the desktop aside or the mobile drawer.
+  const [, setIncotermStore] = useIncoterm();
+  const applyIncoterm = onIncotermChange ?? setIncotermStore;
   const fxRates = useFxRates();
   const usdSgd = useUsdToSgdRate();
   // Single source of truth — never re-derive a total in a UI block.
@@ -500,6 +516,42 @@ function OrderSummary({
               </dd>
             </div>
           )}
+          {summary.incotermSelectable && (
+            <div className="border-t border-border/60 pt-4">
+              <p className="font-light text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                Delivery Terms
+              </p>
+              <div className="mt-2 grid grid-cols-2 gap-2" role="radiogroup" aria-label="Delivery terms">
+                {(["DDP", "DDU"] as const).map((term) => {
+                  const active = summary.incoterm === term;
+                  return (
+                    <button
+                      key={term}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      onClick={() => applyIncoterm(term)}
+                      className={cn(
+                        "border px-3 py-2.5 text-left transition-colors",
+                        active
+                          ? "border-foreground bg-foreground/[0.04]"
+                          : "border-border/70 hover:border-foreground/40",
+                      )}
+                    >
+                      <span className="block font-body text-xs font-medium tracking-[0.08em]">
+                        {term}
+                      </span>
+                      <span className="mt-0.5 block font-light text-[10px] leading-snug text-muted-foreground">
+                        {term === "DDP"
+                          ? "Duties & import tax prepaid"
+                          : "Duties & import tax at the border"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           <div>
             {/* Label + badge on the left, the amount as one unbreakable unit. */}
             <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
@@ -521,6 +573,12 @@ function OrderSummary({
                 <dd className="shrink-0 whitespace-nowrap text-right text-muted-foreground">To be Quoted by Advisor</dd>
               )}
             </div>
+            {summary.ddpHandlingCents > 0 && (
+              <p className="mt-1.5 font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
+                Includes {money(summary.ddpHandlingCents, currency)} prepaid customs handling (DDP).
+                Choose DDU to remove it and clear the goods yourself.
+              </p>
+            )}
             {showEuropeanLogisticsNotice && (
               <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500 italic">
                 Note: For European fulfillments, this shipping fee serves as an initial transit deposit. Our Paris logistics team manually reviews every order within 24 hours to secure optimal white-glove courier routing.
@@ -554,6 +612,27 @@ function OrderSummary({
                 </div>
                 {summary.importNote && <p className="pt-1 italic">{summary.importNote}</p>}
               </dl>
+            </div>
+          )}
+          {summary.deferredImportCents > 0 && (
+            <div className="border-t border-border/60 pt-4">
+              <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+                <dt className="min-w-0 flex-1 text-muted-foreground">
+                  Import duties &amp; {summary.importTaxName || "VAT"} (DDU)
+                </dt>
+                <dd className="shrink-0 whitespace-nowrap text-right font-medium">
+                  Not collected now
+                </dd>
+              </div>
+              <p className="mt-1.5 font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
+                Estimated {money(summary.deferredImportCents, currency)}, invoiced to you by the
+                carrier before delivery. Not part of the order total below.
+              </p>
+              {summary.importNote && (
+                <p className="mt-1 font-light text-[10px] leading-relaxed tracking-[0.06em] italic text-muted-foreground">
+                  {summary.importNote}
+                </p>
+              )}
             </div>
           )}
           <div className="border-t border-border/60 pt-4">
@@ -1571,6 +1650,7 @@ export default function Checkout() {
   }, [user]);
   // Summary math: line items keep their standard catalogue prices; the tier
   // discount is applied once at cart level, exactly like the backend charge.
+  const [incoterm, setIncoterm] = useIncoterm();
   const estimate = useEstimatedShipping(
     (grossLines ?? []).map((l) => ({
       title: l.title,
@@ -1585,6 +1665,7 @@ export default function Checkout() {
     grossLines?.length
       ? Math.max(0, orderSubtotal(grossLines) - cappedDiscountCents(grossLines))
       : 0,
+    incoterm,
   );
   const [buyerType, setBuyerType] = useState<BuyerType>("private");
   const [buyerGstNumber, setBuyerGstNumber] = useState("");
@@ -1669,6 +1750,10 @@ export default function Checkout() {
       importTotalCents: treatment.charged ? 0 : estimate.landed.totalCents,
       importTaxName: treatment.charged ? null : estimate.landed.taxName,
       importNote: treatment.charged ? null : estimate.landed.note,
+      incoterm,
+      incotermSelectable: estimate.incotermSelectable && !treatment.charged,
+      ddpHandlingCents: estimatedShippingCents > 0 ? estimate.ddpHandlingCents : 0,
+      deferredImportCents: treatment.charged ? 0 : estimate.landed.deferredTotalCents,
       taxCents,
       taxLabel: serverTax?.label ?? treatment.label,
       taxRegistrationLine: treatment.registrationLine,
@@ -1687,7 +1772,7 @@ export default function Checkout() {
       chargeTotalCents: totals.chargeTotalCents,
     };
 
-  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, estimate.capped, estimate.notice, formCountry, serverTax, buyerType, buyerGstNumber]);
+  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, estimate.capped, estimate.notice, estimate.ddpHandlingCents, estimate.incotermSelectable, estimate.landed, incoterm, formCountry, serverTax, buyerType, buyerGstNumber]);
 
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);

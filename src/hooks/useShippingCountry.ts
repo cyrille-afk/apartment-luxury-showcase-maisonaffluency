@@ -6,7 +6,10 @@ import {
   getShippingZone,
   getLandedCostEstimate,
   getLandedCostRule,
+  getDdpHandlingCents,
   EMPTY_LANDED_COST,
+  DEFAULT_INCOTERM,
+  type Incoterm,
   type LandedCostEstimate,
   type ShippingEstimateItem,
 } from "@/config/shippingZones";
@@ -72,6 +75,16 @@ export type EstimatedShipping = {
   landed: LandedCostEstimate;
   /** Freight + import charges, in the target currency. */
   landedTotalCents: number;
+  /** Delivery term the figures were computed under. */
+  incoterm: Incoterm;
+  /** Prepaid customs handling included in `cents` under DDP. */
+  ddpHandlingCents: number;
+  /** Base freight before the DDP handling uplift. */
+  baseFreightCents: number;
+  /** Import charges the buyer settles at the border under DDU. 0 under DDP. */
+  deferredImportCents: number;
+  /** True when this destination clears customs and the choice is meaningful. */
+  incotermSelectable: boolean;
 };
 
 /**
@@ -88,6 +101,8 @@ export function useEstimatedShipping(
   targetCurrency?: string | null,
   /** Order value (goods, after discount) in the same currency, minor units. */
   orderValueCents?: number | null,
+  /** Delivery term chosen by the buyer (DDP collects import charges now). */
+  incoterm: Incoterm = DEFAULT_INCOTERM,
 ): EstimatedShipping {
   const fxRates = useFxRates();
   // Stable dependency: only the fields that influence the freight maths.
@@ -137,11 +152,15 @@ export function useEstimatedShipping(
           goodsCents: orderValueCents ?? 0,
           freightCents: cap.cents,
           clearanceInOrderCurrencyCents: clearance,
+          incoterm,
         })
-      : EMPTY_LANDED_COST;
+      : { ...EMPTY_LANDED_COST, incoterm };
+    // DDP freight carries the forwarder's prepaid customs handling; DDU does not.
+    const handling = getDdpHandlingCents(code, cap.cents, incoterm);
+    const freightCents = cap.cents + handling;
     return {
       countryCode: code,
-      cents: cap.cents,
+      cents: freightCents,
       uncappedCents: cap.uncappedCents,
       capped: cap.capped,
       notice: cap.notice,
@@ -150,10 +169,15 @@ export function useEstimatedShipping(
       available: rate != null && !unconvertible,
       cbm: getCartCbm(items ?? null),
       landed,
-      landedTotalCents: cap.cents + landed.totalCents,
+      landedTotalCents: freightCents + landed.totalCents,
+      incoterm,
+      ddpHandlingCents: handling,
+      baseFreightCents: cap.cents,
+      deferredImportCents: landed.deferredTotalCents,
+      incotermSelectable: Boolean(rule),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countryCode, signature, targetCurrency, fxRates, orderValueCents]);
+  }, [countryCode, signature, targetCurrency, fxRates, orderValueCents, incoterm]);
 }
 
 
