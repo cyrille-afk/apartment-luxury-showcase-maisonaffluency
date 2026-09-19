@@ -122,6 +122,13 @@ const moneyDecimal = (cents: number, currency: string) => {
 };
 
 
+/**
+ * Destination in force for tax purposes. Provided once by the page so the
+ * buyer-type block and the summary read the same rule without prop drilling.
+ */
+const CheckoutTaxCountryContext = createContext<string | null>(null);
+const useTaxCountry = () => useContext(CheckoutTaxCountryContext);
+
 /* ------------------------------------------------------------------ */
 /* Order summary math — gross prices, one cart-level discount row      */
 /* ------------------------------------------------------------------ */
@@ -158,6 +165,12 @@ export type CheckoutSummary = {
   taxCountry: string | null;
   /** Whether freight is inside the taxable base. */
   taxShipping: boolean;
+  /** How the supply is treated: standard, reverse charge, export, etc. */
+  taxTreatment: TaxTreatment;
+  /** Invoice-grade statement printed on documents and confirmations. */
+  taxStatement: string;
+  /** Buyer's own VAT/GST registration, when valid for the destination. */
+  buyerTaxId: string | null;
   /** Delivery shown in the summary: confirmed freight, else the estimate. */
   deliveryCents: number;
   /** THE Order Total: goods − discount + delivery + tax. Used by every UI block. */
@@ -237,7 +250,7 @@ function AccountBlock({ email, role, company }: { email: string; role: string; c
 }
 
 /* ------------------------------------------------------------------ */
-/* Buyer type — Singapore B2B zero-rating toggle                       */
+/* Buyer type — destination-aware VAT / GST registration capture       */
 /* ------------------------------------------------------------------ */
 function BuyerTypeSection({
   buyerType,
@@ -250,8 +263,15 @@ function BuyerTypeSection({
   buyerGstNumber: string;
   setBuyerGstNumber: (v: string) => void;
 }) {
+  // The destination decides which registration we ask for and how it reads.
+  const taxCountry = useTaxCountry();
+  const rule = useMemo(
+    () => TAX_RULES.find((r) => r.country === (taxCountry || "").toUpperCase()) ?? null,
+    [taxCountry],
+  );
   const business = buyerType === "business";
-  const valid = business && isSingaporeUenValid(buyerGstNumber);
+  const valid = business && isBuyerTaxIdValid(rule, buyerGstNumber);
+  const idLabel = rule?.buyerIdLabel ?? "VAT / GST Registration Number";
   const field =
     "h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground";
 
@@ -267,7 +287,7 @@ function BuyerTypeSection({
       >
         {[
           { id: "private" as BuyerType, label: "Private Consumer" },
-          { id: "business" as BuyerType, label: "GST-Registered Business" },
+          { id: "business" as BuyerType, label: businessToggleLabel(rule) },
         ].map((opt, i) => {
           const active = buyerType === opt.id;
           return (
@@ -306,7 +326,7 @@ function BuyerTypeSection({
             maxLength={20}
             value={buyerGstNumber}
             onChange={(e) => setBuyerGstNumber(e.target.value.toUpperCase())}
-            placeholder="Singapore GST / UEN Number"
+            placeholder={idLabel}
             className={field}
           />
           <p
@@ -316,8 +336,11 @@ function BuyerTypeSection({
             )}
           >
             {valid
-              ? "Valid UEN — tax will be B2B zero-rated."
-              : "Enter a valid Singapore UEN (e.g., 201717288Z)."}
+              ? rule?.reverseCharge
+                ? `Valid ${rule.name} number — this supply is reverse charged; you account for ${rule.name}.`
+                : `Valid registration — tax will be B2B zero-rated.`
+              : rule?.buyerIdHint ??
+                "Enter your business VAT / GST registration number so it appears on your invoice."}
           </p>
         </div>
       )}
