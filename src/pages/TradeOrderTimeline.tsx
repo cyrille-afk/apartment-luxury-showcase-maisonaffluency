@@ -174,9 +174,12 @@ export default function TradeOrderTimeline() {
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["order-timelines", projectFilter],
     queryFn: async () => {
+      // Tracker board reads only the OrderTimeline interface fields.
       let q = supabase
         .from("order_timeline")
-        .select("*")
+        .select(
+          "id, quote_id, user_id, project_id, kanban_status, deposit_paid_at, production_start_at, production_end_at, balance_due_at, balance_paid_at, shipping_start_at, shipping_end_at, customs_start_at, customs_cleared_at, estimated_delivery_at, actual_delivery_at, production_weeks, shipping_weeks, customs_days, admin_notes, created_at, updated_at",
+        )
         .order("created_at", { ascending: false });
       if (projectFilter) q = q.eq("project_id", projectFilter);
       const { data, error } = await q;

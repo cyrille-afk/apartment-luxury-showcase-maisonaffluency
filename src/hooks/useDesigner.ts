@@ -8,6 +8,51 @@ import { queryKeys } from "@/lib/queryKeys";
 
 const HIDDEN_DESIGNER_SLUGS = new Set(["gabriel-hendifar"]);
 
+/**
+ * Grid/list column set for curator picks.
+ *
+ * Product grids never render the heavy detail payload (gallery_images,
+ * gallery_captions, variant_image_map, materials_description, axis labels,
+ * logistics/crating fields, embeddings). Those are lazily fetched per product
+ * by `useCuratorPickDetail` when a card or detail page opens.
+ */
+const CURATOR_PICK_GRID_COLUMNS = [
+  "id",
+  "designer_id",
+  "slug",
+  "title",
+  "subtitle",
+  "description",
+  "image_url",
+  "hover_image_url",
+  "category",
+  "subcategory",
+  "tags",
+  "materials",
+  "dimensions",
+  "origin",
+  "photo_credit",
+  "edition",
+  "edition_number",
+  "edition_signing",
+  "pdf_url",
+  "pdf_urls",
+  "pdf_filename",
+  "lead_time",
+  "is_upholstered",
+  "price_prefix",
+  "currency",
+  "size_variants",
+  "sort_order",
+  "created_at",
+].join(", ");
+
+/** Same set plus trade pricing (absent from the public view by design). */
+const CURATOR_PICK_GRID_COLUMNS_TRADE = `${CURATOR_PICK_GRID_COLUMNS}, trade_price_cents, price_per_sqm_cents`;
+
+/** Loose row shape for the explicit grid column selects above. */
+type PickRow = Record<string, any>;
+
 /** Strip attribution suffixes ("by X", "for Y", "X Edition", etc.) so the
  *  same product surfaced under both a parent brand (MSE) and its child designer
  *  (Lazzarini & Pickering) collapses into a single pick. */
@@ -163,8 +208,9 @@ export function designerPicksQueryOptions(designerId: string | undefined, public
         const { data, error } = await applyCuratorPickOrder(
           supabase
             .from("designer_curator_picks_public")
-            .select("*")
+            .select(CURATOR_PICK_GRID_COLUMNS)
             .eq("designer_id", designerId)
+            .returns<PickRow[]>()
         );
         if (error) throw error;
         return sortCuratorPicks(dedupePicks((data || []).map((d) => ({
@@ -178,10 +224,11 @@ export function designerPicksQueryOptions(designerId: string | undefined, public
       }
       const { data, error } = await supabase
         .from("designer_curator_picks")
-        .select("*")
+        .select(CURATOR_PICK_GRID_COLUMNS_TRADE)
         .eq("designer_id", designerId)
         .eq("is_hidden", false)
-        .order("sort_order", { ascending: true });
+        .order("sort_order", { ascending: true })
+        .returns<PickRow[]>();
       if (error) throw error;
       return dedupePicks((data || []).map((d) => ({
         ...d,
@@ -241,8 +288,9 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
         const { data, error } = await applyCuratorPickOrder(
           supabase
             .from("designer_curator_picks_public")
-            .select("*")
+            .select(CURATOR_PICK_GRID_COLUMNS)
             .in("designer_id", designerIds)
+            .returns<PickRow[]>()
         );
         if (error) throw error;
         return sortCuratorPicks(dedupePicks((data || []).map((d) => ({
@@ -259,10 +307,11 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
 
       const { data, error } = await supabase
         .from("designer_curator_picks")
-        .select("*")
+        .select(CURATOR_PICK_GRID_COLUMNS_TRADE)
         .in("designer_id", designerIds)
         .eq("is_hidden", false)
-        .order("sort_order", { ascending: true });
+        .order("sort_order", { ascending: true })
+        .returns<PickRow[]>();
 
       if (error) throw error;
 
