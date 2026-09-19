@@ -685,7 +685,13 @@ function drawCompanyAndMeta(
   if (b.line1) addr.push(b.line1);
   if (b.line2) addr.push(b.line2);
   const cityRegion = [b.city, b.region].filter(Boolean).join(", ");
-  const cityLine = [cityRegion, b.postalCode].filter(Boolean).join(" ");
+  // Guard against a currency code accidentally saved in the postal-code field
+  // (e.g. "Hong Kong HKD") — never print it inside the address.
+  const postal = (b.postalCode || "").trim();
+  const postalIsCurrencyCode =
+    /^[A-Za-z]{3}$/.test(postal) &&
+    ["HKD", "USD", "EUR", "GBP", "SGD", "AED", "CHF", "AUD", "CAD", "JPY", "CNY"].includes(postal.toUpperCase());
+  const cityLine = [cityRegion, postalIsCurrencyCode ? "" : postal].filter(Boolean).join(" ");
   if (cityLine) addr.push(cityLine);
   if (b.country) addr.push(b.country);
 
