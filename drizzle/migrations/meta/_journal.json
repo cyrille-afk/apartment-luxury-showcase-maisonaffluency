@@ -260,6 +260,13 @@
       "when": 1789821780915,
       "tag": "0036_realtime_publication_for_multiplexer",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1789822197053,
+      "tag": "0037_realtime_publication_product_fabrics",
+      "breakpoints": true
     }
   ]
 }
