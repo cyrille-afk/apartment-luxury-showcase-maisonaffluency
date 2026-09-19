@@ -1676,6 +1676,8 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
   y += 10;
   // Bank box — two stacked, clearly separated blocks:
   // EUR account (Lithuania) first, then Global SWIFT (Singapore).
+  // The box is tall, so page-break before it rather than splitting it.
+  y = ensureSpace(doc, y, 218, doc.internal.pageSize.getHeight());
   const rowH = 11;
   const labelW = 150; // fixed label column so IBAN / BIC / Account / SWIFT align on one grid
   const boxH = 208;
