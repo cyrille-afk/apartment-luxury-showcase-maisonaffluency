@@ -3071,6 +3071,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">Currency</span>
               <div className="relative">
                 <button
+                  data-testid="quote-currency-trigger"
                   onClick={() => setCurrencyOpen(!currencyOpen)}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors"
                 >
@@ -3082,6 +3083,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     {CURRENCIES.map((c) => (
                       <button
                         key={c}
+                        data-testid={`quote-currency-option-${c}`}
                         onClick={() => handleCurrencyChange(c)}
                         className={`block w-full text-left px-3 py-2 font-body text-xs hover:bg-muted transition-colors ${
                           c === currency ? "text-primary font-medium" : "text-foreground"

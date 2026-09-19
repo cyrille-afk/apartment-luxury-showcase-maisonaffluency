@@ -56,6 +56,24 @@ export default defineConfig({
       },
     },
     {
+      // Backend integration suite (checkout, FX locking, webhook queue).
+      // Lives in ./tests, runs serially: it writes real queue/quote rows.
+      name: "integration",
+      testDir: "./tests",
+      testMatch: /checkout-flow\.spec\.ts/,
+      fullyParallel: false,
+      workers: 1,
+      timeout: 180_000,
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1280, height: 900 },
+        launchOptions: {
+          args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"],
+          ...(CHROMIUM_EXECUTABLE_PATH ? { executablePath: CHROMIUM_EXECUTABLE_PATH } : {}),
+        },
+      },
+    },
+    {
       name: "cart-webkit",
       testMatch: /cart-multi-browser-persistence\.spec\.ts/,
       grep: /WebKit/,

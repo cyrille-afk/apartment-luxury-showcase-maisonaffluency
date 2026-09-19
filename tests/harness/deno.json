@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "npm:@supabase/supabase-js@2.57.2": "./stubs/supabase-js.ts",
+    "npm:@supabase/supabase-js@2": "./stubs/supabase-js.ts"
+  },
+  "lint": { "rules": { "tags": ["recommended"] } }
+}
