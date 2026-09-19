@@ -112,18 +112,15 @@ export function useStudioBridge() {
 
   useEffect(() => {
     load();
-    if (!user) return;
-    const channel = supabase
-      // Unique topic per mount: StrictMode remounts would otherwise reuse a
-      // subscribed channel and throw on `.on()`.
-      .channel(`studio-bridge-${user.id}-${Math.random().toString(36).slice(2)}`)
-
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "client_board_items" }, () => load())
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [user, load]);
+
+  useRealtimeTables(
+    "client_board_items",
+    (event) => {
+      if (event.eventType === "INSERT") load();
+    },
+    !!user,
+  );
 
   /** Marks every currently listed item as reviewed on the desktop. */
   const markAllSeen = useCallback(async () => {
