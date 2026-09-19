@@ -1799,11 +1799,13 @@ function renderLinkedParagraph(
 
   const flushLine = () => {
     if (current.length) {
-      // Recompute x positions for a clean left-aligned line.
+      // Recompute x positions for a clean left-aligned line; each non-final
+      // word carries a literal trailing space so text extraction keeps spaces.
       let cursor = 0;
-      const pieces: LinePiece[] = current.map((p) => {
+      const pieces: LinePiece[] = current.map((p, idx) => {
         const px = x + cursor;
-        cursor += doc.getTextWidth(p.text) + (cursor > 0 ? spaceW : 0);
+        const trailing = idx < current.length - 1 ? " " : "";
+        cursor += doc.getTextWidth(p.text + trailing);
         return { ...p, x: px };
       });
       lines.push(pieces);
@@ -1824,13 +1826,15 @@ function renderLinkedParagraph(
   flushLine();
 
   for (const line of lines) {
-    for (const piece of line) {
+    for (let i = 0; i < line.length; i++) {
+      const piece = line[i];
+      const trailing = i < line.length - 1 ? " " : "";
       if (piece.url) {
         doc.setTextColor(JADE[0], JADE[1], JADE[2]);
       } else {
         doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
       }
-      doc.text(piece.text, piece.x, y);
+      doc.text(piece.text + trailing, piece.x, y);
       if (piece.url) {
         const pieceW = doc.getTextWidth(piece.text);
         doc.setDrawColor(JADE[0], JADE[1], JADE[2]);
@@ -1844,6 +1848,7 @@ function renderLinkedParagraph(
 
   return y;
 }
+
 
 
 
