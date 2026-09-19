@@ -20,10 +20,32 @@ describe("UK landed cost", () => {
     });
     expect(est.available).toBe(true);
     expect(est.dutyCents).toBe(0);
-    expect(est.vatCents).toBe(1_040_000); // 20% of 52,000
+    // DDP adds 2.5% prepaid customs handling on freight (£50), so the CIF
+    // value assessed is £52,050.
+    expect(est.handlingCents).toBe(5_000);
+    expect(est.vatCents).toBe(1_041_000);
     expect(est.clearanceCents).toBe(15_000);
-    expect(est.totalCents).toBe(1_055_000);
+    expect(est.totalCents).toBe(1_056_000);
+    expect(est.deferredTotalCents).toBe(0);
     expect(est.taxName).toBe("UK VAT");
+  });
+
+  it("defers the border charges and drops the handling fee under DDU", () => {
+    const ddu = getLandedCostEstimate({
+      countryCode: "GB",
+      goodsCents: 5_000_000,
+      freightCents: 200_000,
+      incoterm: "DDU",
+    });
+    expect(ddu.incoterm).toBe("DDU");
+    expect(ddu.handlingCents).toBe(0);
+    // Nothing is collected at checkout...
+    expect(ddu.totalCents).toBe(0);
+    expect(ddu.vatCents).toBe(0);
+    // ...but the buyer is shown what the carrier will invoice: 20% of £52,000
+    // plus the £150 clearance fee.
+    expect(ddu.deferredTotalCents).toBe(1_055_000);
+    expect(ddu.note).toContain("Delivered Duty Unpaid");
   });
 
   it("applies a converted clearance fee when supplied", () => {
