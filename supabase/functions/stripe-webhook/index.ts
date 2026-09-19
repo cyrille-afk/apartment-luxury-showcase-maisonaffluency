@@ -5,6 +5,7 @@ import { loadStripeTestCreds } from "../_shared/stripeCreds.ts";
 import { getStripe } from "../_shared/stripeClient.ts";
 import { recordPurchaseOrdersPayable } from "../_shared/recordPurchaseOrdersPayable.ts";
 import { formatCurrency } from "../_shared/transactional-email-templates/currency.ts";
+import { sendAdminWhatsApp } from "../_shared/twilioWhatsAppSender.ts";
 
 const { stripe, creds } = await getStripe("auto");
 const testCreds = await loadStripeTestCreds();
@@ -279,6 +280,45 @@ async function notifyDepositCleared(
         },
       });
       if (error) console.error(`[STRIPE-WEBHOOK] deposit alert email failed for ${recipient}:`, error);
+    }
+
+    // ----- 3) WhatsApp operational chat alert (group-aware) -----
+    const whatsappBody = [
+      `${args.isLive ? "🚨" : "🧪 [TEST ALERT]"} ${headline}`,
+      ``,
+      `Quote ${quoteRef} for ${clientName} has successfully paid ${formatCurrency(amountFormatted, currency)} via Stripe.`,
+      itemsSummary ? `Items: ${itemsSummary}` : null,
+      ``,
+      `Review: ${funnelUrl}`,
+    ].filter(Boolean).join("\n");
+
+    try {
+      const waResult = await sendAdminWhatsApp({ body: whatsappBody });
+      if (!waResult.ok) {
+        console.error(`[STRIPE-WEBHOOK] deposit WhatsApp alert failed: ${waResult.error}`);
+      } else {
+        console.log("[STRIPE-WEBHOOK] Deposit alert posted to WhatsApp");
+      }
+      // Audit trail mirrors the alert log so delivery history is visible.
+      await supabase.from("admin_alert_log").insert({
+        channel: "twilio_whatsapp",
+        event: args.paymentKind === "balance" ? "deposit_balance_cleared" : "deposit_cleared",
+        status: waResult.ok ? "sent" : "failed",
+        provider_message_id: waResult.sid,
+        payload: {
+          quote_id: args.quoteId,
+          session_id: args.sessionId,
+          client_name: clientName,
+          amount_cents: args.amountCents,
+          currency,
+          items_summary: itemsSummary,
+          is_live: args.isLive,
+          funnel_url: funnelUrl,
+        },
+        error: waResult.error,
+      }).catch((e: any) => console.error("[STRIPE-WEBHOOK] admin_alert_log insert failed:", e));
+    } catch (e) {
+      console.error("[STRIPE-WEBHOOK] deposit WhatsApp alert error:", e);
     }
   } catch (e) {
     console.error("[STRIPE-WEBHOOK] notifyDepositCleared error:", e);

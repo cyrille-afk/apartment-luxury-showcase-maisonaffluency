@@ -23,6 +23,7 @@ import {
   type ExtractedIdentifier,
 } from "./regional.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { sendAdminWhatsApp } from "../_shared/twilioWhatsAppSender.ts";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 // Stage 1 — fast, cost-effective multimodal parse of the credential document.
@@ -162,8 +163,6 @@ async function notifyAdmin(admin: any, app: any, aiError: string, attempts: numb
   }
 }
 
-const TWILIO_GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
-
 // Twilio failure → persist the error in Supabase and email the operator, so a
 // flagged application is never lost even if WhatsApp delivery is down.
 async function whatsappFallback(
@@ -223,12 +222,6 @@ async function sendWhatsAppFlagAlert(
   confidence: number,
   reasoning: string,
 ) {
-  const to = Deno.env.get("ADMIN_WHATSAPP_TO");
-  const from = Deno.env.get("TWILIO_WHATSAPP_FROM");
-  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-  const twilioKey = Deno.env.get("TWILIO_API_KEY");
-  if (!to || !from || !lovableKey || !twilioKey) return;
-
   // Deep link opens the exact application drawer on the triage dashboard.
   const link = `${TRIAGE_URL}?application=${app.id}&open=1`;
   const location = [app.city, app.country].filter(Boolean).join(", ") || "(unknown)";
@@ -257,56 +250,34 @@ A new professional has requested access to the global trade program. The AI veri
 Review credentials and approve international net pricing instantly:
 👉 ${link}`;
 
+  const result = await sendAdminWhatsApp({ body });
+  if (!result.ok) {
+    console.error(`Twilio WhatsApp alert failed: ${result.error}`);
+    await whatsappFallback(admin, app, confidence, reasoning, result.error ?? "unknown");
+    return;
+  }
+
+  // Audit trail: record every delivered alert with its full payload.
   try {
-    const res = await fetch(`${TWILIO_GATEWAY_URL}/Messages.json`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${lovableKey}`,
-        "X-Connection-Api-Key": twilioKey,
-        "Content-Type": "application/x-www-form-urlencoded",
+    await admin.from("admin_alert_log").insert({
+      channel: "twilio_whatsapp",
+      event: "trade_application_flagged",
+      application_id: app.id,
+      status: "sent",
+      provider_message_id: result.sid,
+      payload: {
+        message: body,
+        company_name: app.company_name,
+        applicant_name: applicantName,
+        country: app.country,
+        confidence_score: confidence,
+        reason: reasoning,
+        triage_url: link,
       },
-      body: new URLSearchParams({ To: to, From: from, Body: body }),
+      error: null,
     });
-    if (!res.ok) {
-      const errBody = await res.text();
-      console.error(`Twilio WhatsApp alert failed [${res.status}]: ${errBody}`);
-      await whatsappFallback(admin, app, confidence, reasoning, `Twilio ${res.status}: ${errBody}`);
-      return;
-    }
-    // Audit trail: record every delivered alert with its full payload.
-    let sid: string | null = null;
-    try {
-      const json = await res.json();
-      sid = json?.sid ?? null;
-    } catch (_) {
-      // body not JSON — still log the send
-    }
-    try {
-      await admin.from("admin_alert_log").insert({
-        channel: "twilio_whatsapp",
-        event: "trade_application_flagged",
-        application_id: app.id,
-        status: "sent",
-        provider_message_id: sid,
-        payload: {
-          to,
-          from,
-          message: body,
-          company_name: app.company_name,
-          applicant_name: applicantName,
-          country: app.country,
-          confidence_score: confidence,
-          reason: reasoning,
-          triage_url: link,
-        },
-        error: null,
-      });
-    } catch (_) {
-      // non-fatal
-    }
-  } catch (err) {
-    console.error("Twilio WhatsApp alert error:", err);
-    await whatsappFallback(admin, app, confidence, reasoning, err instanceof Error ? err.message : String(err));
+  } catch (_) {
+    // non-fatal
   }
 }
 

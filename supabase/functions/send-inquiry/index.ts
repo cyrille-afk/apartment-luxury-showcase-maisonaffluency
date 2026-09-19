@@ -1,6 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { z } from "https://esm.sh/zod@3.22.4";
+import {
+  getWhatsAppStatusCallback,
+  sendAdminWhatsApp,
+} from "../_shared/twilioWhatsAppSender.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -103,11 +107,9 @@ async function sendQuoteWhatsAppAlert(
   supabase: any,
   inquiry: { id: string; name: string; email: string; phone: string; company?: string; productName?: string; selectedFinish?: string },
 ) {
-  const to = Deno.env.get("ADMIN_WHATSAPP_TO");
-  const from = Deno.env.get("TWILIO_WHATSAPP_FROM");
   const lovableKey = Deno.env.get("LOVABLE_API_KEY");
   const twilioKey = Deno.env.get("TWILIO_API_KEY");
-  if (!to || !from || !lovableKey || !twilioKey) return;
+  if (!lovableKey || !twilioKey) return;
 
   // Every variable is trimmed and collapsed so the WhatsApp layout never shows
   // ragged spacing, stray line breaks or an empty row.
@@ -132,28 +134,7 @@ async function sendQuoteWhatsAppAlert(
     "Open the internal Admin Dashboard panel at /trade/admin/trade-review to review and reply.",
   ].join("\n");
 
-  // Ask Twilio to POST delivery updates back to us so the admin page has a
-  // real history instead of only on-demand lookups.
-  const callbackSecret = Deno.env.get("TWILIO_STATUS_CALLBACK_SECRET");
-  const statusCallback = callbackSecret
-    ? `${Deno.env.get("SUPABASE_URL")}/functions/v1/twilio-status-callback?s=${encodeURIComponent(callbackSecret)}`
-    : null;
-
-  const post = (params: Record<string, string>) =>
-    fetch(`${TWILIO_GATEWAY_URL}/Messages.json`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${lovableKey}`,
-        "X-Connection-Api-Key": twilioKey,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        To: to,
-        From: from,
-        ...(statusCallback ? { StatusCallback: statusCallback } : {}),
-        ...params,
-      }),
-    });
+  const statusCallback = getWhatsAppStatusCallback();
 
   try {
     // Only use the template once Meta/WhatsApp has approved it; otherwise the
@@ -163,50 +144,54 @@ async function sendQuoteWhatsAppAlert(
     let usedTemplate = approval.approved;
     let firstError: string | null = approval.approved ? null : `template not used (status: ${approval.status})`;
 
-    let res = approval.approved
-      ? await post({ ContentSid: QUOTE_TEMPLATE_SID, ContentVariables: JSON.stringify(vars) })
-      : await post({ Body: body });
+    const send = async () => {
+      if (usedTemplate) {
+        const result = await sendAdminWhatsApp({
+          body,
+          contentSid: QUOTE_TEMPLATE_SID,
+          contentVariables: vars,
+          statusCallback,
+        });
+        return result;
+      }
+      return await sendAdminWhatsApp({ body, statusCallback });
+    };
+
+    let result = await send();
 
     // Template send rejected despite approval → fall back to freeform.
-    if (!res.ok && usedTemplate) {
-      firstError = `template ${res.status}: ${(await res.text()).slice(0, 800)}`;
+    if (!result.ok && usedTemplate) {
+      firstError = result.error ?? "template send failed";
       usedTemplate = false;
-      res = await post({ Body: body });
+      result = await sendAdminWhatsApp({ body, statusCallback });
     }
 
-
-    if (!res.ok) {
-      const errBody = await res.text();
-      console.error(`Quote WhatsApp alert failed [${res.status}]: ${errBody}`);
+    if (!result.ok) {
+      console.error(`Quote WhatsApp alert failed: ${result.error}`);
       await supabase.from("admin_alert_log").insert({
         channel: "twilio_whatsapp",
         event: "quote_request",
         status: "failed",
         payload: { inquiry_id: inquiry.id, product: inquiry.productName, email: inquiry.email, used_template: usedTemplate },
-        error: [firstError, `Twilio ${res.status}: ${String(errBody).slice(0, 1200)}`].filter(Boolean).join(" | "),
+        error: [firstError, result.error].filter(Boolean).join(" | "),
       });
       return;
     }
-
-    let sid: string | null = null;
-    let status: string | null = null;
-    let errorCode: number | null = null;
-    try {
-      const json = await res.json();
-      sid = json?.sid ?? null;
-      status = json?.status ?? null;
-      errorCode = json?.error_code ?? null;
-    } catch (_) { /* non-JSON */ }
 
     // Twilio accepts the request (HTTP 201) even when WhatsApp later refuses
     // it, so record the queued status and any immediate error code.
     await supabase.from("admin_alert_log").insert({
       channel: "twilio_whatsapp",
       event: "quote_request",
-      status: errorCode ? "failed" : "sent",
-      provider_message_id: sid,
-      payload: { inquiry_id: inquiry.id, to, from, message: body, used_template: usedTemplate, template_status: approval.status, twilio_status: status },
-      error: errorCode ? `Twilio error_code ${errorCode}` : firstError,
+      status: "sent",
+      provider_message_id: result.sid,
+      payload: {
+        inquiry_id: inquiry.id,
+        used_template: usedTemplate,
+        template_status: approval.status,
+        twilio_status: result.status,
+      },
+      error: null,
     });
   } catch (err) {
     console.error("Quote WhatsApp alert error:", err);
