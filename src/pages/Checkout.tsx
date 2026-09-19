@@ -2286,6 +2286,18 @@ export default function Checkout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [method, grossLines, syncIntent]);
 
+  // Changing the deposit plan changes the amount actually charged now, so the
+  // PaymentIntent must be re-priced.
+  const depositRef = useRef<DepositPct>(depositPct);
+  useEffect(() => {
+    if (!initialised.current || !grossLines?.length) return;
+    if (depositRef.current === depositPct) return;
+    depositRef.current = depositPct;
+    void syncIntent(shipping, method === "paynow" ? "paynow" : "card");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [depositPct, grossLines]);
+
+
   // Maison Affluency monochrome theme for Stripe Elements: sharp 0px corners,
   // pure-black focus/primary states, thin hairline borders, serif labels.
   const appearance = useMemo(
