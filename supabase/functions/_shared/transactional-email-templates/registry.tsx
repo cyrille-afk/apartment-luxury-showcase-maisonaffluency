@@ -40,6 +40,7 @@ import { template as poLogisticsAlert } from './po-logistics-alert.tsx'
 import { template as funnelPaymentReceivedInternal } from './funnel-payment-received-internal.tsx'
 import { template as depositClearedInternal } from './deposit-cleared-internal.tsx'
 import { template as queueJobParked } from './queue-job-parked.tsx'
+import { template as webhookWorkerUnhealthy } from './webhook-worker-unhealthy.tsx'
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
@@ -74,4 +75,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'funnel-payment-received-internal': funnelPaymentReceivedInternal,
   'deposit-cleared-internal': depositClearedInternal,
   'queue-job-parked': queueJobParked,
+  'webhook-worker-unhealthy': webhookWorkerUnhealthy,
 }
