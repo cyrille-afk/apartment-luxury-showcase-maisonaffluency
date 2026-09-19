@@ -2,13 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
-import {
-  resolveTaxRule,
-  computeTaxCents,
-  taxRowLabel,
-  B2B_TAX_LABEL,
-  isSingaporeUenValid,
-} from "../_shared/taxRules.ts";
+import { resolveTaxTreatment, normaliseBuyerTaxId } from "../_shared/taxRules.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -127,19 +121,18 @@ serve(async (req) => {
     // match (see _shared/taxRules.ts). Everything else is zero-rated.
     const shippingCountry =
       typeof body?.shippingCountry === "string" ? body.shippingCountry.trim().toUpperCase() : "";
-    const taxRule = resolveTaxRule(shippingCountry, currency);
-
-    // B2B Singapore zero-rating: a GST-registered business supplying a valid
-    // Singapore UEN is not charged GST on the invoice.
     const buyerType =
-      typeof body?.buyerType === "string" ? body.buyerType.toLowerCase() : "private";
-    const buyerGstNumber =
-      typeof body?.buyerGstNumber === "string" ? body.buyerGstNumber.trim().toUpperCase() : "";
-    const isB2BZeroRated =
-      buyerType === "business" &&
-      isSingaporeUenValid(buyerGstNumber) &&
-      taxRule !== null &&
-      taxRule.country === "SG";
+      typeof body?.buyerType === "string" && body.buyerType.toLowerCase() === "business"
+        ? "business"
+        : "private";
+    // Accept the generic field, keeping the legacy Singapore-only name working.
+    const buyerTaxId = normaliseBuyerTaxId(
+      typeof body?.buyerTaxId === "string"
+        ? body.buyerTaxId
+        : typeof body?.buyerGstNumber === "string"
+          ? body.buyerGstNumber
+          : "",
+    );
 
     // GST and the collected order total use the full CIF value: goods + freight.
     // Until freight is confirmed, the validated country estimate is the delivery
@@ -151,12 +144,17 @@ serve(async (req) => {
         : 0;
     if (estimatedFreightCents > 5_000_000) return json({ error: "Shipping amount out of range." }, 400);
     const freightForTaxCents = shippingCents > 0 ? shippingCents : estimatedFreightCents;
-    const taxCents = isB2BZeroRated
-      ? 0
-      : computeTaxCents(goodsAmount, freightForTaxCents, taxRule);
-    const taxLabel = isB2BZeroRated
-      ? B2B_TAX_LABEL
-      : (taxRule ? taxRowLabel(taxRule) : null);
+    // One engine decides the rate, wording and registration for every country.
+    const treatment = resolveTaxTreatment({
+      country: shippingCountry,
+      currency,
+      buyerType,
+      buyerTaxId,
+      goodsCents: goodsAmount,
+      shippingCents: freightForTaxCents,
+    });
+    const taxCents = treatment.taxCents;
+    const taxLabel = treatment.label;
 
     const deliveryCents = shippingCents > 0 ? shippingCents : estimatedFreightCents;
     // Checkout presents whole-currency rows. Charge their exact displayed sum
@@ -204,7 +202,13 @@ serve(async (req) => {
         tax_cents: String(taxCents),
         tax_label: taxLabel ?? "",
         buyer_type: buyerType,
-        buyer_gst_number: buyerGstNumber,
+        buyer_gst_number: buyerTaxId,
+        buyer_tax_id: buyerTaxId,
+        buyer_tax_country: treatment.countryIso ?? "",
+        tax_treatment: treatment.treatment,
+        tax_rate: String(treatment.rate),
+        tax_statement: (treatment.statement ?? "").slice(0, 400),
+        merchant_tax_registration: treatment.registrationLine ?? "",
         line_items: JSON.stringify(
 
           items.map((i) => ({ t: i.title, f: i.finish, u: i.unitAmount, q: i.quantity })),
@@ -265,7 +269,10 @@ serve(async (req) => {
       shippingLabel,
       taxCents,
       taxLabel,
-      taxRate: taxRule?.rate ?? 0,
+      taxRate: treatment.rate,
+      taxTreatment: treatment.treatment,
+      taxStatement: treatment.statement,
+      buyerTaxId: treatment.buyerTaxId,
 
     });
   } catch (err) {
