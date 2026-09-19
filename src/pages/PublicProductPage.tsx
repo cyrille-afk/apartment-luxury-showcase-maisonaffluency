@@ -4,7 +4,6 @@ import { useParams, useNavigate, Link, useLocation, Navigate } from "react-route
 import { absoluteUrl } from "@/config/site";
 import { Helmet } from "react-helmet-async";
 import { Heart, Pin, FileText, Layers, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2, Award, Compass } from "lucide-react";
-import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
@@ -1366,6 +1365,7 @@ const PublicProductPageContent: React.FC = () => {
   const isMobileOrPwa = isMobile || isPwa;
   const [creationOpen, setCreationOpen] = useState(false);
   const galleryScrollRef = React.useRef<HTMLDivElement | null>(null);
+  const productScrollRef = React.useRef<HTMLDivElement | null>(null);
   // On mobile/PWA, when a finish selection updates the gallery image, only
   // scroll if the product image is genuinely off-screen above the viewport.
   // Never scroll when it's already (partly) visible — doing so pushed the
@@ -1380,14 +1380,18 @@ const PublicProductPageContent: React.FC = () => {
     const headerOffset = 80;
     // Visible enough already → leave the scroll position untouched.
     if (rect.bottom > headerOffset + 80 && rect.top < window.innerHeight) return;
-    const y = rect.top + window.scrollY - headerOffset;
-    window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+    const scroller = productScrollRef.current;
+    if (scroller) {
+      scroller.scrollTo({
+        top: Math.max(0, scroller.scrollTop + rect.top - headerOffset),
+        behavior: "smooth",
+      });
+    }
   }, [galleryJumpNonce]);
 
 
   // Mobile/PWA: shrink the product image once the user scrolls past a small threshold.
   const [galleryCompact, setGalleryCompact] = useState(false);
-  const { direction: scrollDir, scrollY } = useScrollDirection({ threshold: 6, topOffset: 80 });
 
   // The TRADE/RETAIL tab section was removed — the sticky bottom dock now
   // owns pricing/ordering for every audience, so it is always visible.
@@ -1454,7 +1458,7 @@ const PublicProductPageContent: React.FC = () => {
     let ticking = false;
     const measure = () => {
       ticking = false;
-      const y = window.scrollY;
+      const y = productScrollRef.current?.scrollTop ?? window.scrollY;
       const el = galleryScrollRef.current;
       // Hysteresis: collapse once the user has genuinely started reading,
       // expand again only right at the very top of the page.
@@ -1486,13 +1490,14 @@ const PublicProductPageContent: React.FC = () => {
       window.requestAnimationFrame(measure);
     };
     measure();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    const scrollTarget = productScrollRef.current ?? window;
+    scrollTarget.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("touchstart", armExpansion, { passive: true });
     window.addEventListener("touchmove", armExpansion, { passive: true });
     window.addEventListener("wheel", armExpansion, { passive: true });
     window.addEventListener("keydown", armExpansion);
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      scrollTarget.removeEventListener("scroll", onScroll);
       window.removeEventListener("touchstart", armExpansion);
       window.removeEventListener("touchmove", armExpansion);
       window.removeEventListener("wheel", armExpansion);
@@ -1517,7 +1522,9 @@ const PublicProductPageContent: React.FC = () => {
     const delta = after - before; // negative when it shrank
     if (delta < -4) {
       compactLockUntilRef.current = Date.now() + 600;
-      window.scrollTo({ top: Math.max(32, window.scrollY + delta) });
+      const scroller = productScrollRef.current;
+      if (scroller) scroller.scrollTo({ top: Math.max(32, scroller.scrollTop + delta) });
+      else window.scrollTo({ top: Math.max(32, window.scrollY + delta) });
     }
   }, [galleryCompact]);
 
@@ -1534,6 +1541,7 @@ const PublicProductPageContent: React.FC = () => {
 
 
   useEffect(() => {
+    productScrollRef.current?.scrollTo({ top: 0 });
     window.scrollTo({ top: 0 });
     // Reset gallery to first image on product change — the route component is
     // reused across slug changes, so a stale activeIndex from the previous
@@ -2266,7 +2274,7 @@ const PublicProductPageContent: React.FC = () => {
 
 
 
-        <div data-product-scroll-region className="product-page-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto md:contents">
+        <div ref={productScrollRef} data-product-scroll-region className="product-page-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto md:contents">
         <main className="w-full pt-[var(--header-h)] pb-0 md:pb-20 max-w-7xl mx-auto px-4 md:px-5 lg:px-8">
           <button
             type="button"
