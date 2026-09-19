@@ -660,6 +660,43 @@ export default function TradeAdminPaymentSettings() {
       </section>
 
       <section className="mt-6 rounded-sm border border-border bg-card p-6">
+        <h2 className="font-display text-xl">Team notification directory</h2>
+        <p className="mt-2 max-w-xl font-body text-sm text-muted-foreground">
+          WhatsApp does not allow automated posting into a group chat, so every deposit alert and itemised
+          checklist is broadcast individually — at the same moment — to each number below. Separate numbers with
+          commas, in international format.
+        </p>
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+          <Input
+            id="whatsappRecipients"
+            autoComplete="off"
+            spellCheck={false}
+            placeholder="+6591393850, +85267347405"
+            value={recipientsValue}
+            onChange={(e) => {
+              setRecipientsDirty(true);
+              setRecipientsState(e.target.value);
+            }}
+            className="flex-1 font-body"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            disabled={savingRecipients || !recipientsDirty}
+            onClick={saveRecipients}
+            className="shrink-0 font-body text-xs"
+          >
+            {savingRecipients ? "Saving…" : "Save directory"}
+          </Button>
+        </div>
+        <p className="mt-1 font-body text-xs text-muted-foreground">
+          {recipientCount > 0
+            ? `${recipientCount} recipient${recipientCount === 1 ? "" : "s"} will receive every payment and quote alert.`
+            : "No recipients yet — alerts will fall back to the legacy admin number."}
+        </p>
+      </section>
+
+      <section className="mt-6 rounded-sm border border-border bg-card p-6">
         <h2 className="font-display text-xl">Production webhook endpoint</h2>
         <p className="mt-2 font-body text-sm text-muted-foreground">
           Add this URL in Stripe → Developers → Webhooks, subscribing to
