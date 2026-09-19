@@ -153,7 +153,7 @@ const QuoteConfirmationPaymentLinkEmail = ({
 export const template = {
   component: QuoteConfirmationPaymentLinkEmail,
   subject: (data: Record<string, any>) =>
-    `Quote Confirmation & Payment Link: ${data?.productName ?? 'Your Selection'} (${data?.maisonRef ?? SITE_NAME} Ref)`,
+    `${data?.testPreview ? '[TEST PREVIEW] ' : ''}Quote Confirmation & Payment Link: ${data?.productName ?? 'Your Selection'} (${data?.maisonRef ?? SITE_NAME} Ref)`,
   displayName: 'Quote Confirmation & Payment Link',
   previewData: {
     recipientName: 'Agni HK Team',

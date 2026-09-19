@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, FileText, Loader2, Mail, Zap } from "lucide-react";
+import { Check, FileText, FlaskConical, Loader2, Mail, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { signedQuotePdfUrl } from "@/lib/publishQuotePdf";
 
@@ -58,6 +59,9 @@ const FunnelPayLinkBlock = ({
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [sendingEmail, setSendingEmail] = useState(false);
   const queryClient = useQueryClient();
+  const { isAdmin, user } = useAuth();
+  const [sendingTest, setSendingTest] = useState(false);
+  const [testSent, setTestSent] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [paymentKind, setPaymentKind] = useState<"full" | "deposit">("full");
   const [testMode, setTestMode] = useState(false);
@@ -337,6 +341,81 @@ const FunnelPayLinkBlock = ({
     }
   };
 
+  // Admin-only test send: identical email + layout, but delivered to the
+  // logged-in admin's own account email with a [TEST PREVIEW] subject prefix.
+  const handleSendTestToAdmin = async () => {
+    const adminEmail = user?.email;
+    if (!adminEmail) {
+      toast({ title: "No admin account email on file", variant: "destructive" });
+      return;
+    }
+    let url = paymentUrl;
+    if (!url) {
+      if (!quoteId || !hasExistingLink) {
+        toast({ title: "Generate a payment link first", variant: "destructive" });
+        return;
+      }
+      try {
+        const { data, error } = await supabase.functions.invoke("create-adhoc-payment-link", {
+          body: { reuseExisting: true, quoteId, amountCents: 100, currency },
+        });
+        if (error) throw error;
+        if (!data?.url) throw new Error(data?.error || "No link returned");
+        url = data.url;
+        setPaymentUrl(data.url);
+      } catch (err) {
+        toast({
+          title: "Could not recover the payment link",
+          description: (err as Error).message,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    setSendingTest(true);
+    try {
+      if (!quoteId) throw new Error("This email requires a formal quote PDF.");
+      const quotePdfUrl = await signedQuotePdfUrl(quoteId);
+      if (!quotePdfUrl) {
+        throw new Error(
+          "The formal quote PDF link could not be verified. Open the quote and wait for ‘Client PDF up to date’ before sending.",
+        );
+      }
+      const { error } = await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "quote-confirmation-payment-link",
+          recipientEmail: adminEmail,
+          idempotencyKey: `quote-confirm-test-${quoteId ?? label}-${Date.now()}`,
+          templateData: {
+            testPreview: true,
+            recipientName: recipientName || undefined,
+            productName: productName || label,
+            finish,
+            leadTime,
+            paymentLink: url,
+            quotePdfUrl,
+            maisonRef: maisonRef || (quoteId ? `QU-${quoteId.slice(0, 6).toUpperCase()}` : undefined),
+          },
+        },
+      });
+      if (error) throw error;
+      setTestSent(true);
+      toast({
+        title: "Test preview sent",
+        description: `Delivered to ${adminEmail} with a [TEST PREVIEW] subject. The client received nothing.`,
+      });
+      setTimeout(() => setTestSent(false), 6000);
+    } catch (err) {
+      toast({
+        title: "Could not send test preview",
+        description: (err as Error).message,
+        variant: "destructive",
+      });
+    } finally {
+      setSendingTest(false);
+    }
+  };
+
   return (
     <div className={cn("mt-3 space-y-2 border-t border-border/70 pt-3 font-body", className)}>
       <div className="flex items-stretch border border-border bg-background focus-within:border-gold">
@@ -468,33 +547,64 @@ const FunnelPayLinkBlock = ({
       ) : null}
 
       {(paymentUrl || (quoteId && hasExistingLink)) && email ? (
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={handleSendEmail}
-          disabled={sendingEmail || emailSent || !pdfChecked || !pdfUrl}
-          className={cn(
-            "h-8 w-full rounded-none border font-body text-[10px] font-semibold uppercase tracking-[0.14em]",
-            emailSent
-              ? "border-emerald-600 bg-emerald-600/10 text-emerald-700 hover:bg-emerald-600/10"
-              : "border-border bg-background text-foreground hover:bg-muted",
-          )}
-        >
-          {sendingEmail ? (
-            <>
-              <Loader2 className="h-3 w-3 animate-spin" /> Sending email
-            </>
-          ) : emailSent ? (
-            <>
-              <Check className="h-3 w-3" /> Email sent
-            </>
-          ) : (
-            <>
-              <Mail className="h-3 w-3" /> Send confirmation email
-            </>
-          )}
-        </Button>
+        <div className="space-y-1.5">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleSendEmail}
+            disabled={sendingEmail || emailSent || sendingTest || !pdfChecked || !pdfUrl}
+            className={cn(
+              "h-8 w-full rounded-none border font-body text-[10px] font-semibold uppercase tracking-[0.14em]",
+              emailSent
+                ? "border-emerald-600 bg-emerald-600/10 text-emerald-700 hover:bg-emerald-600/10"
+                : "border-border bg-background text-foreground hover:bg-muted",
+            )}
+          >
+            {sendingEmail ? (
+              <>
+                <Loader2 className="h-3 w-3 animate-spin" /> Sending email
+              </>
+            ) : emailSent ? (
+              <>
+                <Check className="h-3 w-3" /> Email sent
+              </>
+            ) : (
+              <>
+                <Mail className="h-3 w-3" /> Send confirmation email
+              </>
+            )}
+          </Button>
+          {isAdmin ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={handleSendTestToAdmin}
+              disabled={sendingTest || testSent || sendingEmail || !pdfChecked || !pdfUrl}
+              className={cn(
+                "h-8 w-full rounded-none border font-body text-[10px] font-semibold uppercase tracking-[0.14em]",
+                testSent
+                  ? "border-emerald-600 bg-emerald-600/10 text-emerald-700 hover:bg-emerald-600/10"
+                  : "border-dashed border-gold/70 bg-gold/5 text-foreground hover:bg-gold/10",
+              )}
+            >
+              {sendingTest ? (
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin" /> Sending test
+                </>
+              ) : testSent ? (
+                <>
+                  <Check className="h-3 w-3" /> Test sent to you
+                </>
+              ) : (
+                <>
+                  <FlaskConical className="h-3 w-3" /> Send test to admin
+                </>
+              )}
+            </Button>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );
