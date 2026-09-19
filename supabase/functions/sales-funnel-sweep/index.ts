@@ -75,6 +75,14 @@ Deno.serve(async (req) => {
     templateName: string,
     templateData: Record<string, unknown>,
   ) => {
+    if (isPaused(type, id)) {
+      deferred.push(`${stage} paused manually (${type}:${id})`)
+      return false
+    }
+    if (isWeekend) {
+      deferred.push(`${stage} held for Monday 09:00 (${type}:${id})`)
+      return false
+    }
     if (await alreadySent(type, id, n)) return false
     if (dryRun) {
       sent.push(`[dry] ${stage} → ${email}`)
