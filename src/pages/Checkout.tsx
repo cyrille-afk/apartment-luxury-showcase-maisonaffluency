@@ -26,13 +26,19 @@ import { useRegionalLogistics, mapCountryToRegionTier } from "@/hooks/useRegiona
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import {
   resolveTaxRule,
+  resolveTaxTreatment,
+  businessToggleLabel,
+  isBuyerTaxIdValid,
+  normaliseBuyerTaxId,
   computeTaxCents,
   taxRowLabel,
   taxRegistrationLine,
   isSingaporeUenValid,
   B2B_TAX_LABEL,
   type BuyerType,
+  type TaxTreatment,
 } from "@/config/taxRules";
+
 import {
   assertCheckoutCopy,
   buildVerifiedTotals,
