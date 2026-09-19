@@ -76,25 +76,27 @@ serve(async (req) => {
       console.log(`[WEBHOOK-WORKER] Processed ${row.event_type} (${row.event_id})`);
     } catch (e) {
       failed++;
-      const msg = e instanceof Error ? e.message : String(e);
-      const exhausted = row.attempts >= row.max_attempts;
-      const delay = BACKOFF_SECONDS[Math.min(row.attempts, BACKOFF_SECONDS.length - 1)];
+      const next = nextQueueState({
+        attempts: row.attempts,
+        maxAttempts: row.max_attempts,
+        error: e,
+      });
 
       await supabase
         .from("webhook_events")
         .update({
-          status: exhausted ? "failed" : "pending",
-          last_error: msg.slice(0, 2000),
-          locked_at: null,
-          next_attempt_at: new Date(Date.now() + delay * 1000).toISOString(),
-          updated_at: new Date().toISOString(),
+          status: next.status,
+          last_error: next.last_error,
+          locked_at: next.locked_at,
+          next_attempt_at: next.next_attempt_at,
+          updated_at: next.updated_at,
         })
         .eq("id", row.id);
 
       console.error(
         `[WEBHOOK-WORKER] ${row.event_type} (${row.event_id}) attempt ${row.attempts} failed${
-          exhausted ? " — parked for review" : `, retrying in ${delay}s`
-        }: ${msg}`,
+          next.exhausted ? " — parked for review" : `, retrying in ${next.delaySeconds}s`
+        }: ${next.last_error}`,
       );
     }
   }
