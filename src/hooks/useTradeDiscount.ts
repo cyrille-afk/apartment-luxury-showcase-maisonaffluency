@@ -4,9 +4,9 @@
  * so admins can edit them without code changes. Falls back to sensible defaults
  * (silver 10%, gold 15%, platinum 20%) while loading or for unauthenticated users.
  */
-import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { useAuth } from "@/hooks/useAuth";
 
 export type TradeTier = "silver" | "gold" | "platinum";
