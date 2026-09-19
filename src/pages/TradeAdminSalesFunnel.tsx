@@ -93,6 +93,12 @@ const EntryCard = ({ entry, urgent = false, quoteCard = false }: { entry: Funnel
       ) : null}
     </div>
     {!entry.paidViaStripe && (
+      <FunnelReminderPauseToggle
+        entityType={urgent || quoteCard ? "quote_unpaid" : entry.email && !entry.href ? "cart" : "funnel_card"}
+        entityId={entry.id}
+      />
+    )}
+    {!entry.paidViaStripe && (
       <FunnelPayLinkBlock
         label={entry.label}
         email={entry.email}
