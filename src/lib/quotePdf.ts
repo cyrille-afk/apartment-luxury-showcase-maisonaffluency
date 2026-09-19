@@ -1176,7 +1176,19 @@ function buildHkQuoteTotals(args: QuotePdfArgs) {
     (p) => p.src.toUpperCase() === "EUR" && p.tgt.toUpperCase() === "HKD",
   );
   if (args.fxSnapshot && eurHkd) {
-    fxLabel = `EUR/HKD ${eurHkd.rate.toFixed(4)}${eurHkd.source ? ` (${eurHkd.source})` : ""} applied ${fmtDate(args.fxSnapshot.appliedAt)} — identical to the rate used on the quote page.`;
+    const stamp = args.fxSnapshot.appliedAt.toLocaleString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Hong_Kong",
+    });
+    const sourceLabel = eurHkd.source
+      ? `via live ${eurHkd.source.charAt(0).toUpperCase()}${eurHkd.source.slice(1)} feed`
+      : "live FX feed";
+    fxLabel = `FX applied: ${stamp} GMT+8 — EUR/HKD ${eurHkd.rate.toFixed(4)} (${sourceLabel}).`;
   } else if (currency === "HKD") {
     fxLabel = "Quote is issued in HKD — no conversion applied to this estimate.";
   }
