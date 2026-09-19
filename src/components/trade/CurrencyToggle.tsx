@@ -1,37 +1,30 @@
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { getFxRates } from "@/lib/fxRates";
 
 export type DisplayCurrency = "original" | "SGD" | "EUR" | "USD" | "GBP" | "CHF" | "AED" | "HKD" | "AUD";
 
 const SUPPORTED_CURRENCIES: DisplayCurrency[] = ["SGD", "EUR", "USD", "GBP", "CHF", "AED", "HKD", "AUD"];
 
-/** Cache live rates so multiple components don't re-fetch */
+/** Cache rates so multiple components don't re-query */
 let _rateCache: { rates: Record<string, number>; ts: number } | null = null;
 const CACHE_TTL = 5 * 60 * 1000; // 5 min
 
+/**
+ * Rates come from the platform rate table (synced server-side twice daily)
+ * via the shared fxRates helper — never from a browser call to a provider.
+ */
 async function fetchLiveRates(): Promise<Record<string, number>> {
   if (_rateCache && Date.now() - _rateCache.ts < CACHE_TTL) return _rateCache.rates;
 
-  const rates: Record<string, number> = {};
-  // Fetch rates from each currency to all others
-  await Promise.all(
-    SUPPORTED_CURRENCIES.map(async (src) => {
-      const targets = SUPPORTED_CURRENCIES.filter((c) => c !== src).join(",");
-      try {
-        const res = await fetch(`https://api.frankfurter.dev/v1/latest?base=${src}&symbols=${targets}`);
-        const data = await res.json();
-        if (data.rates) {
-          for (const [tgt, rate] of Object.entries(data.rates)) {
-            rates[`${src}_${tgt}`] = rate as number;
-          }
-        }
-      } catch {
-        // silently fail — fallback rates used
-      }
-    })
-  );
+  const pairs: Array<{ src: string; tgt: string }> = [];
+  for (const src of SUPPORTED_CURRENCIES) {
+    for (const tgt of SUPPORTED_CURRENCIES) {
+      if (src !== tgt) pairs.push({ src, tgt });
+    }
+  }
 
-  // Self-rates
+  const rates = await getFxRates(pairs);
   for (const c of SUPPORTED_CURRENCIES) rates[`${c}_${c}`] = 1;
 
   if (Object.keys(rates).length > SUPPORTED_CURRENCIES.length) {
