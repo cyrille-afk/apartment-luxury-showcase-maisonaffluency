@@ -74,6 +74,17 @@ export default defineConfig({
       },
     },
     {
+      // LIVE provider smoke tests (Stripe testmode + Resend test mode).
+      // Never part of the default run: `bun run test:smoke:providers` only.
+      name: "smoke-live",
+      testDir: "./tests/smoke",
+      testMatch: /api-providers\.spec\.ts/,
+      fullyParallel: false,
+      workers: 1,
+      timeout: 120_000,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
       name: "cart-webkit",
       testMatch: /cart-multi-browser-persistence\.spec\.ts/,
       grep: /WebKit/,
