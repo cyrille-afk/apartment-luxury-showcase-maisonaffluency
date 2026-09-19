@@ -1747,16 +1747,110 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
 
 // -------- Terms & Conditions --------------------------------------------
 function drawTermsAndConditions(doc: jsPDF, M: number, y: number, contentW: number): number {
+  // Low-opacity divider separating the legal block from bank details above.
+  doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
+  doc.setLineWidth(0.4);
+  doc.line(M, y, M + contentW, y);
+  y += 12;
+
   sectionTitle(doc, "Terms & conditions", M, y);
-  y += 16;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-  const t = "The terms and conditions will be given separately and shall apply to the quotation given for the supply of any items detailed herein. Please read carefully.";
-  const w = doc.splitTextToSize(t, contentW);
-  doc.text(w, M, y);
-  return y + w.length * 11;
+  y += 20;
+
+  const segments: { text: string; url?: string }[] = [
+    { text: "By confirming this quotation, executing a bank transfer, or completing a digital payment via Stripe, the client explicitly agrees to the " },
+    { text: "Maison Affluency Trade Terms of Sale.", url: "https://maisonaffluency.com" },
+    { text: " For any questions, please contact " },
+    { text: "hello@maisonaffluency.com", url: "mailto:hello@maisonaffluency.com" },
+    { text: " or visit " },
+    { text: "maisonaffluency.com.", url: "https://maisonaffluency.com" },
+  ];
+
+
+  y = renderLinkedParagraph(doc, M, y, contentW, 8, segments, 11);
+  return y;
 }
+
+function renderLinkedParagraph(
+  doc: jsPDF,
+  x: number,
+  y: number,
+  maxW: number,
+  fontSize: number,
+  segments: { text: string; url?: string }[],
+  lineHeight: number,
+): number {
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(fontSize);
+
+  type Word = { text: string; url?: string };
+  type LinePiece = { text: string; url?: string; x: number };
+
+  const words: Word[] = [];
+  for (const seg of segments) {
+    for (const word of seg.text.split(/\s+/)) {
+      if (word) words.push({ text: word, url: seg.url });
+    }
+  }
+
+  const spaceW = doc.getTextWidth(" ");
+  const lines: LinePiece[][] = [];
+  let current: Word[] = [];
+  let lineWidth = 0;
+
+  const flushLine = () => {
+    if (current.length) {
+      // Recompute x positions for a clean left-aligned line; each non-final
+      // word carries a literal trailing space so text extraction keeps spaces.
+      let cursor = 0;
+      const pieces: LinePiece[] = current.map((p, idx) => {
+        const px = x + cursor;
+        const trailing = idx < current.length - 1 ? " " : "";
+        cursor += doc.getTextWidth(p.text + trailing);
+        return { ...p, x: px };
+      });
+      lines.push(pieces);
+      current = [];
+      lineWidth = 0;
+    }
+  };
+
+  for (const word of words) {
+    const wordW = doc.getTextWidth(word.text);
+    const extra = lineWidth > 0 ? spaceW : 0;
+    if (lineWidth + extra + wordW > maxW && current.length) {
+      flushLine();
+    }
+    current.push({ text: word.text, url: word.url });
+    lineWidth += (lineWidth > 0 ? spaceW : 0) + wordW;
+  }
+  flushLine();
+
+  for (const line of lines) {
+    for (let i = 0; i < line.length; i++) {
+      const piece = line[i];
+      const trailing = i < line.length - 1 ? " " : "";
+      if (piece.url) {
+        doc.setTextColor(JADE[0], JADE[1], JADE[2]);
+      } else {
+        doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+      }
+      doc.text(piece.text + trailing, piece.x, y);
+      if (piece.url) {
+        const pieceW = doc.getTextWidth(piece.text);
+        doc.setDrawColor(JADE[0], JADE[1], JADE[2]);
+        doc.setLineWidth(0.25);
+        doc.line(piece.x, y + 1.2, piece.x + pieceW, y + 1.2);
+        doc.link(piece.x, y - fontSize + 1, pieceW, fontSize + 3, { url: piece.url });
+      }
+    }
+    y += lineHeight;
+  }
+
+  return y;
+}
+
+
+
 
 // -------- Helpers -------------------------------------------------------
 function sectionTitle(doc: jsPDF, label: string, x: number, y: number) {
