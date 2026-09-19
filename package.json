@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test:e2e": "playwright test",
+    "test:e2e:checkout": "playwright test --project=integration",
     "test:e2e:mobile-parallax": "playwright test e2e/parallax-interlude-mobile.spec.ts",
     "test:e2e:mobile-pwa": "playwright test e2e/mobile-pwa-a11y.spec.ts",
     "test:e2e:ios-zoom": "playwright test e2e/ios-focus-zoom.spec.ts",
