@@ -547,33 +547,64 @@ const FunnelPayLinkBlock = ({
       ) : null}
 
       {(paymentUrl || (quoteId && hasExistingLink)) && email ? (
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={handleSendEmail}
-          disabled={sendingEmail || emailSent || !pdfChecked || !pdfUrl}
-          className={cn(
-            "h-8 w-full rounded-none border font-body text-[10px] font-semibold uppercase tracking-[0.14em]",
-            emailSent
-              ? "border-emerald-600 bg-emerald-600/10 text-emerald-700 hover:bg-emerald-600/10"
-              : "border-border bg-background text-foreground hover:bg-muted",
-          )}
-        >
-          {sendingEmail ? (
-            <>
-              <Loader2 className="h-3 w-3 animate-spin" /> Sending email
-            </>
-          ) : emailSent ? (
-            <>
-              <Check className="h-3 w-3" /> Email sent
-            </>
-          ) : (
-            <>
-              <Mail className="h-3 w-3" /> Send confirmation email
-            </>
-          )}
-        </Button>
+        <div className="space-y-1.5">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleSendEmail}
+            disabled={sendingEmail || emailSent || sendingTest || !pdfChecked || !pdfUrl}
+            className={cn(
+              "h-8 w-full rounded-none border font-body text-[10px] font-semibold uppercase tracking-[0.14em]",
+              emailSent
+                ? "border-emerald-600 bg-emerald-600/10 text-emerald-700 hover:bg-emerald-600/10"
+                : "border-border bg-background text-foreground hover:bg-muted",
+            )}
+          >
+            {sendingEmail ? (
+              <>
+                <Loader2 className="h-3 w-3 animate-spin" /> Sending email
+              </>
+            ) : emailSent ? (
+              <>
+                <Check className="h-3 w-3" /> Email sent
+              </>
+            ) : (
+              <>
+                <Mail className="h-3 w-3" /> Send confirmation email
+              </>
+            )}
+          </Button>
+          {isAdmin ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={handleSendTestToAdmin}
+              disabled={sendingTest || testSent || sendingEmail || !pdfChecked || !pdfUrl}
+              className={cn(
+                "h-8 w-full rounded-none border font-body text-[10px] font-semibold uppercase tracking-[0.14em]",
+                testSent
+                  ? "border-emerald-600 bg-emerald-600/10 text-emerald-700 hover:bg-emerald-600/10"
+                  : "border-dashed border-gold/70 bg-gold/5 text-foreground hover:bg-gold/10",
+              )}
+            >
+              {sendingTest ? (
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin" /> Sending test
+                </>
+              ) : testSent ? (
+                <>
+                  <Check className="h-3 w-3" /> Test sent to you
+                </>
+              ) : (
+                <>
+                  <FlaskConical className="h-3 w-3" /> Send test to admin
+                </>
+              )}
+            </Button>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );
