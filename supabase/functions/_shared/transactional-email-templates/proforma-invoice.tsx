@@ -5,6 +5,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Img, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.tsx'
+import { formatCurrency } from './currency.ts'
 
 const SITE_NAME = 'Maison Affluency'
 
@@ -25,10 +26,10 @@ const ProformaInvoiceEmail = ({
   channelLabel = 'Bank transfer',
   downloadUrl,
 }: ProformaInvoiceProps) => (
-  <Html lang="en" dir="ltr">
-    <Head />
-    <Preview>Pro-forma invoice {orderRef} — {totalFormatted} {currency}</Preview>
-    <Body style={main}>
+    <Html lang="en" dir="ltr">
+      <Head />
+      <Preview>Pro-forma invoice {orderRef} — {formatCurrency(totalFormatted, currency)}</Preview>
+      <Body style={main}>
       <Container style={container}>
         <Section style={logoSection}>
           <Img
