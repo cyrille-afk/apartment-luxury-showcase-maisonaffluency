@@ -91,6 +91,12 @@ export interface QuotePdfArgs {
   subtotalCents: number;
   tradeDiscountPct: number;          // 0..1 (e.g. 0.08)
   tradeDiscountApplied: boolean;
+  /**
+   * Exact discount total shown on screen (sum of per-line, brand-capped
+   * discounts). When provided it wins over `subtotalCents × pct`, so a quote
+   * containing a margin-capped supplier prints the same figure as the editor.
+   */
+  tradeDiscountCents?: number | null;
   /** Active tier label (e.g. "Silver"). When provided, shown in the discount row + ladder. */
   tierLabel?: string | null;
   /** Tier ladder rendered under totals so the client understands why this rate applied. */
@@ -1120,7 +1126,9 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   const extrasTotalCents = extrasList.reduce((s, e) => s + (e.amountCents || 0), 0);
   rows.push({ label: "Subtotal", value: fmtMoney(args.subtotalCents, args.currency) });
   const discountCents = args.tradeDiscountApplied
-    ? Math.round(args.subtotalCents * args.tradeDiscountPct)
+    ? (typeof args.tradeDiscountCents === "number"
+        ? Math.round(args.tradeDiscountCents)
+        : Math.round(args.subtotalCents * args.tradeDiscountPct))
     : 0;
   if (discountCents > 0) {
     const pctTxt = `${(args.tradeDiscountPct * 100).toFixed(args.tradeDiscountPct * 100 % 1 === 0 ? 0 : 1)}%`;

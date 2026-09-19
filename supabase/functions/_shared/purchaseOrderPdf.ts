@@ -1,12 +1,12 @@
-import { PDFDocument, rgb } from "npm:pdf-lib@1.17.1";
+import { PDFDocument, StandardFonts, rgb } from "npm:pdf-lib@1.17.1";
 
-// StandardFonts is not reliably re-exported through the npm CJS interop; the
-// underlying API accepts the font names as plain strings.
+// Prefer the library's own StandardFonts enum; fall back to the literal PDF
+// base-14 names if the CJS interop does not surface it.
 const FONT = {
-  serif: "Times-Roman",
-  serifBold: "Times-Bold",
-  sans: "Helvetica",
-  sansBold: "Helvetica-Bold",
+  serif: StandardFonts?.TimesRoman ?? "Times-Roman",
+  serifBold: StandardFonts?.TimesRomanBold ?? "Times-Bold",
+  sans: StandardFonts?.Helvetica ?? "Helvetica",
+  sansBold: StandardFonts?.HelveticaBold ?? "Helvetica-Bold",
 } as const;
 
 export interface PoPdfLine {

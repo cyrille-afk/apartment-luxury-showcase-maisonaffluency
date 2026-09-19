@@ -32,6 +32,8 @@ export interface PdfTotalsInput {
   subtotalCents: number;
   tradeDiscountPct: number;
   tradeDiscountApplied?: boolean;
+  /** Exact per-line (cap-aware) discount total, when the PDF was given one. */
+  tradeDiscountCents?: number | null;
   extras?: Array<{ label?: string; amountCents: number }> | null;
   insurancePremiumCents?: number | null;
   gstEnabled?: boolean;
