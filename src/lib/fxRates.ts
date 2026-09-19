@@ -116,45 +116,55 @@ export function invalidateFxCache(src?: string, tgt?: string): void {
   lastSources.clear();
 }
 
-const fetchWithTimeout = async (url: string, ms = 4000): Promise<Response> => {
-  const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), ms);
-  try {
-    return await fetch(url, { signal: controller.signal });
-  } finally {
-    clearTimeout(t);
-  }
-};
+/* ------------------------------------------------------------------ *
+ * Database rate table (single source of truth)
+ * ------------------------------------------------------------------ */
 
-const fromFrankfurter = async (src: string, tgt: string): Promise<number | null> => {
-  try {
-    const res = await fetchWithTimeout(
-      `https://api.frankfurter.dev/v1/latest?base=${src}&symbols=${tgt}`,
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    const r = data?.rates?.[tgt];
-    return typeof r === "number" && r > 0 ? r : null;
-  } catch {
-    return null;
-  }
-};
+let tablePromise: Promise<void> | null = null;
+let tableLoadedAt = 0;
+/** Newest `last_updated_at` across the loaded rows (server sync timestamp). */
+let tableSyncedAt: number | null = null;
 
-const fromOpenErApi = async (src: string, tgt: string): Promise<number | null> => {
-  try {
-    const res = await fetchWithTimeout(`https://open.er-api.com/v6/latest/${src}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const r = data?.rates?.[tgt];
-    return typeof r === "number" && r > 0 ? r : null;
-  } catch {
-    return null;
+/** When the rate table was last synced server-side, or null if unknown. */
+export function getFxTableSyncedAt(): number | null {
+  return tableSyncedAt;
+}
+
+async function loadRateTable(): Promise<void> {
+  const { data, error } = await supabase
+    .from("currency_rates")
+    .select("base_currency,target_currency,rate,last_updated_at");
+  if (error || !data?.length) return;
+
+  const now = Date.now();
+  let newest = 0;
+  for (const row of data) {
+    const rate = Number(row.rate);
+    if (!Number.isFinite(rate) || rate <= 0) continue;
+    const key = `${row.base_currency}_${row.target_currency}`;
+    cache.set(key, { rate, ts: now, source: "database" });
+    lastSources.set(key, "database");
+    const updated = row.last_updated_at ? Date.parse(row.last_updated_at) : 0;
+    if (updated > newest) newest = updated;
   }
-};
+  if (newest) tableSyncedAt = newest;
+  tableLoadedAt = now;
+}
+
+/** Load the server rate table once per session (re-loaded after the TTL). */
+async function ensureRateTable(): Promise<void> {
+  if (tablePromise && Date.now() - tableLoadedAt < CACHE_TTL) {
+    await tablePromise;
+    return;
+  }
+  tablePromise = loadRateTable().catch(() => undefined);
+  await tablePromise;
+}
 
 /**
  * Resolve the FX rate to multiply `src` amounts by to get `tgt` amounts.
- * Always resolves. Uses cache → frankfurter → open.er-api → hardcoded fallback.
+ * Always resolves. Uses session cache → currency_rates table → bundled
+ * offline table. No provider is ever called from the browser.
  */
 export async function getFxRate(src: string, tgt: string): Promise<number> {
   if (src === tgt) return 1;
@@ -166,17 +176,17 @@ export async function getFxRate(src: string, tgt: string): Promise<number> {
     return cached.rate;
   }
 
-  let source: FxSource = "hardcoded";
-  let live = await fromFrankfurter(src, tgt);
-  if (live != null) source = "frankfurter";
-  if (live == null) {
-    live = await fromOpenErApi(src, tgt);
-    if (live != null) source = "open-er-api";
+  await ensureRateTable();
+
+  const fresh = cache.get(key);
+  if (fresh) {
+    lastSources.set(key, fresh.source);
+    return fresh.rate;
   }
 
-  const rate = live ?? FALLBACK_RATES[key] ?? 1;
-  cache.set(key, { rate, ts: Date.now(), source });
-  lastSources.set(key, source);
+  const rate = FALLBACK_RATES[key] ?? 1;
+  cache.set(key, { rate, ts: Date.now(), source: "hardcoded" });
+  lastSources.set(key, "hardcoded");
   return rate;
 }
 
