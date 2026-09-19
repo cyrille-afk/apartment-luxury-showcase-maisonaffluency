@@ -61,6 +61,15 @@ const fmtHkd = (cents: number) =>
     maximumFractionDigits: 0,
   }).format((cents || 0) / 100);
 
+/** Cent-accurate HKD, used when the annex mirrors the printed quote total. */
+const fmtHkdExact = (cents: number) =>
+  new Intl.NumberFormat("en-HK", {
+    style: "currency",
+    currency: "HKD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format((cents || 0) / 100);
+
 /**
  * Render the HK DAP estimate onto the *current* page of `doc`.
  * Assumes the page is fresh (e.g. just created via `doc.addPage()` or a new jsPDF).
