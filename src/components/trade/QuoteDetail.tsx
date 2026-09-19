@@ -1906,6 +1906,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       subtotalCents,
       tradeDiscountPct,
       tradeDiscountApplied: discountApplies,
+      // Print the exact cap-aware per-line total the editor shows.
+      tradeDiscountCents,
       tierLabel,
       tierBreakdown: tierConfig
         ? (["silver", "gold", "platinum"] as const).map((t) => {

@@ -55,7 +55,9 @@ export function computePdfTotals(args: PdfTotalsInput): QuoteTotalsBreakdown {
     .filter((e) => (e?.amountCents || 0) !== 0)
     .reduce((s, e) => s + (e.amountCents || 0), 0);
   const discountCents = args.tradeDiscountApplied
-    ? Math.round(subtotalCents * (args.tradeDiscountPct || 0))
+    ? (typeof args.tradeDiscountCents === "number"
+        ? Math.round(args.tradeDiscountCents)
+        : Math.round(subtotalCents * (args.tradeDiscountPct || 0)))
     : 0;
   const afterDiscountCents = subtotalCents - discountCents;
   const insuranceCents = Math.max(0, Math.round(args.insurancePremiumCents || 0));
