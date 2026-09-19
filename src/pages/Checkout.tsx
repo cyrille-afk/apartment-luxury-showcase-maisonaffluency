@@ -2244,7 +2244,7 @@ export default function Checkout() {
         setSyncing(false);
       }
     },
-    [grossLines, stripePromise, formCountry, estimate.cents],
+    [grossLines, stripePromise, formCountry, estimate.cents, depositPct],
   );
 
 
