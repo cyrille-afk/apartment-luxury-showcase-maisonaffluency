@@ -115,6 +115,7 @@ test.describe("1 · Trade auth & cache bypass", () => {
     // Tier discount badge, e.g. "SILVER –10%".
     await expect(page.locator("text=/–\\s?\\d{1,2}%/").first()).toBeVisible({ timeout: 20_000 });
   });
+  });
 });
 
 // ───────────────────────────────────────────────────────────────────────────
