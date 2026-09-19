@@ -102,8 +102,8 @@ const QuoteConfirmationPaymentLinkEmail = ({
                 Download the formal quote (PDF)
               </Link>
               <Text style={pdfNote}>
-                Your full itemised quote, including specifications and totals, is available as a PDF
-                for your procurement records. This secure link remains valid for 90 days.
+                Your itemized quote is securely attached below as a digital PDF for your procurement
+                records.
               </Text>
             </Section>
           ) : null}
