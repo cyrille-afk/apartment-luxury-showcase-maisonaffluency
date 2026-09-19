@@ -288,6 +288,13 @@
       "when": 1789823783468,
       "tag": "0040_index_remaining_unindexed_fks",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1789824093294,
+      "tag": "0041_currency_rates_authority",
+      "breakpoints": true
     }
   ]
 }
