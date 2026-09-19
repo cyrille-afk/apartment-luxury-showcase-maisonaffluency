@@ -52,22 +52,10 @@ export function useTierConfig() {
 
   // Any admin edit to the tier table pushes straight into every open quote /
   // pricing view — no refresh, no cache wait.
-  useEffect(() => {
-    const channel = supabase
-      .channel(`trade-tier-config-${crypto.randomUUID()}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "trade_tier_config" },
-        () => {
-          qc.invalidateQueries({ queryKey: ["trade-tier-config"] });
-          qc.invalidateQueries({ queryKey: ["trade-tier"] });
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [qc]);
+  useRealtimeTables("trade_tier_config", () => {
+    qc.invalidateQueries({ queryKey: ["trade-tier-config"] });
+    qc.invalidateQueries({ queryKey: ["trade-tier"] });
+  });
 
   return useQuery({
     queryKey: ["trade-tier-config"],
