@@ -654,6 +654,7 @@ const App = () => {
     <Suspense fallback={null}>
       <HelmetProvider>
         <AuthProvider>
+        <RealtimeMultiplexerProvider>
         <StudioProvider>
         <CompareProvider>
         <WishlistProvider>
