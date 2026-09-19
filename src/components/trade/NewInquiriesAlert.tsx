@@ -58,18 +58,10 @@ export function NewInquiriesAlert() {
   useEffect(() => {
     if (!isAdmin) return;
     load();
-    const channel = supabase
-      .channel("dashboard-new-inquiries")
-      .on("postgres_changes", { event: "*", schema: "public", table: "inquiries" }, () => load())
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_quotes" }, () => load())
-      .subscribe();
-    const poll = setInterval(load, 60000);
-    return () => {
-      supabase.removeChannel(channel);
-      clearInterval(poll);
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
+
+  useRealtimeTables(["inquiries", "trade_quotes"], () => load(), isAdmin);
 
   if (!isAdmin || items.length === 0) return null;
 
