@@ -288,8 +288,9 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
         const { data, error } = await applyCuratorPickOrder(
           supabase
             .from("designer_curator_picks_public")
-            .select("*")
+            .select(CURATOR_PICK_GRID_COLUMNS)
             .in("designer_id", designerIds)
+            .returns<PickRow[]>()
         );
         if (error) throw error;
         return sortCuratorPicks(dedupePicks((data || []).map((d) => ({
