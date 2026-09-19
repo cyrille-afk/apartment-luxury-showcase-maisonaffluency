@@ -35,6 +35,11 @@ const args: QuotePdfArgs = {
   createdAt: new Date("2026-09-18T12:00:00Z"),
   expiryAt: new Date("2026-10-18T12:00:00Z"),
   clientName: "AGNI Limited",
+  clientBilling: {
+    city: "Kowloon Bay",
+    postalCode: "HKD",
+    country: "Hong Kong",
+  },
   currency: "HKD",
   lines: [
     {
@@ -82,5 +87,6 @@ describe("HK DAP annex synchronisation", () => {
     expect(text).not.toContain("1,745,261");
     expect(text).not.toContain("8.4746");
     expect(text).not.toContain("fallback");
+    expect(text).not.toContain("Kowloon Bay HKD");
   });
 });
