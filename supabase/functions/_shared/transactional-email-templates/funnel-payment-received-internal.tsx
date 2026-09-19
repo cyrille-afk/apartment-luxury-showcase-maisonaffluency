@@ -5,6 +5,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.tsx'
+import { formatCurrency } from './currency.ts'
 
 interface Props {
   label?: string
@@ -29,10 +30,10 @@ const FunnelPaymentReceivedInternalEmail = ({
   paidAt = new Date().toISOString(),
   funnelUrl = 'https://www.maisonaffluency.com/trade/admin/sales-funnel',
 }: Props) => (
-  <Html lang="en" dir="ltr">
-    <Head />
-    <Preview>Payment received — {label} ({amountFormatted} {currency})</Preview>
-    <Body style={main}>
+    <Html lang="en" dir="ltr">
+      <Head />
+      <Preview>Payment received — {label} ({formatCurrency(amountFormatted, currency)})</Preview>
+      <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Payment received via Stripe</Heading>
         <Text style={text}>
@@ -49,7 +50,7 @@ const FunnelPaymentReceivedInternalEmail = ({
               </tr>
               <tr>
                 <td style={cell}>Amount received</td>
-                <td style={cellRight}>{amountFormatted} {currency}</td>
+                <td style={cellRight}>{formatCurrency(amountFormatted, currency)}</td>
               </tr>
               {payerEmail ? (
                 <tr>
@@ -95,7 +96,7 @@ const FunnelPaymentReceivedInternalEmail = ({
 export const template = {
   component: FunnelPaymentReceivedInternalEmail,
   subject: (data: Record<string, any>) =>
-    `Payment received — ${data?.label ?? 'Sales Funnel card'} (${data?.amountFormatted ?? '—'} ${data?.currency ?? ''})`,
+    `Payment received — ${data?.label ?? 'Sales Funnel card'} (${formatCurrency(data?.amountFormatted, data?.currency)})`,
   displayName: 'Sales Funnel Payment Received (internal)',
   previewData: {
     label: 'Erato Wall Light — Agni HK',
