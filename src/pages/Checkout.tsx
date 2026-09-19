@@ -863,8 +863,12 @@ function PaymentForm({
   buyerGstNumber: string;
   setBuyerGstNumber: (v: string) => void;
 }) {
-  const sgB2BApplicable =
-    summary.taxCountry === "SG" && summary.currency.toLowerCase() === "sgd";
+  // Show the registration field wherever a destination rule can change the
+  // treatment (SG zero-rating, UK reverse charge, …).
+  const sgB2BApplicable = Boolean(
+    resolveTaxRule(summary.taxCountry, summary.currency) ||
+      TAX_RULES.some((r) => r.country === summary.taxCountry),
+  );
   const stripe = useStripe();
   const elements = useElements();
   // Header / "Shipping destination & currency" modal selection. Saving there
@@ -1216,8 +1220,12 @@ function WireForm({
   buyerGstNumber: string;
   setBuyerGstNumber: (v: string) => void;
 }) {
-  const sgB2BApplicable =
-    summary.taxCountry === "SG" && summary.currency.toLowerCase() === "sgd";
+  // Show the registration field wherever a destination rule can change the
+  // treatment (SG zero-rating, UK reverse charge, …).
+  const sgB2BApplicable = Boolean(
+    resolveTaxRule(summary.taxCountry, summary.currency) ||
+      TAX_RULES.some((r) => r.country === summary.taxCountry),
+  );
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
