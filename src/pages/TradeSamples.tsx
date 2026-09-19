@@ -102,17 +102,18 @@ const TradeSamples = () => {
 
   useEffect(() => {
     fetchRequests();
-    if (!user) return;
-
-    const channel = supabase
-      .channel(`sample-requests-${user.id}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_sample_requests", filter: `user_id=eq.${user.id}` }, () => {
-        fetchRequests();
-      })
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  useRealtimeTables(
+    "trade_sample_requests",
+    (event) => {
+      const row = (event.new ?? event.old) as { user_id?: string } | null;
+      if (row?.user_id && row.user_id !== user?.id) return;
+      fetchRequests();
+    },
+    !!user,
+  );
 
   const resetForm = () => {
     setProductName(""); setBrandName(""); setClientName(""); setProjectName("");
