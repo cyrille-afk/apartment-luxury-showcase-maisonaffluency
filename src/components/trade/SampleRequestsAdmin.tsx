@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import {
