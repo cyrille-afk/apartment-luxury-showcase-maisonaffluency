@@ -1737,11 +1737,17 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
   doc.setFontSize(7.5);
   doc.setTextColor(JADE[0], JADE[1], JADE[2]);
   doc.text("GLOBAL WIRES (REST OF WORLD · USD/HKD/SGD)", rightX, colY);
-  drawRow(rightX, colY + rowH, "Account", "885111609218375");
-  drawRow(rightX, colY + rowH * 2, "SWIFT/BIC", "REVOSGS2");
-  drawRow(rightX, colY + rowH * 3, "Intermediary bank SWIFT (Barclays)", "BARCDEFF");
-  drawRow(rightX, colY + rowH * 4, "Bank", "Revolut Technologies Singapore Pte. Ltd");
-  drawRow(rightX, colY + rowH * 5, "Address", "6 Battery Road, Floor 6-01, 049909, Singapore", true);
+  // One shared label column for the whole block so every value aligns vertically,
+  // sized to the longest label ("Intermediary bank SWIFT (Barclays)").
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7);
+  const rightLabels = ["ACCOUNT", "SWIFT/BIC", "INTERMEDIARY BANK SWIFT (BARCLAYS)", "BANK", "ADDRESS"];
+  const rightLabelW = Math.max(...rightLabels.map((l) => doc.getTextWidth(l))) + 8;
+  drawRow(rightX, colY + rowH, "Account", "885111609218375", false, rightLabelW);
+  drawRow(rightX, colY + rowH * 2, "SWIFT/BIC", "REVOSGS2", false, rightLabelW);
+  drawRow(rightX, colY + rowH * 3, "Intermediary bank SWIFT (Barclays)", "BARCDEFF", false, rightLabelW);
+  drawRow(rightX, colY + rowH * 4, "Bank", "Revolut Technologies Singapore Pte. Ltd", false, rightLabelW);
+  drawRow(rightX, colY + rowH * 5, "Address", "6 Battery Road, Floor 6-01, 049909, Singapore", true, rightLabelW);
 
   return y + boxH;
 }
