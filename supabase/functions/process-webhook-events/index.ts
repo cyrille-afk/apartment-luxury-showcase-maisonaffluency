@@ -15,12 +15,11 @@ import type Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getStripe } from "../_shared/stripeClient.ts";
 import { processStripeEvent } from "../_shared/stripeEventProcessor.ts";
+import { nextQueueState } from "../_shared/webhookQueueRetry.ts";
 
 const { stripe } = await getStripe("auto");
 
 const BATCH_SIZE = 5;
-/** Backoff per attempt number (seconds): 15s, 1m, 5m, 30m, 2h. */
-const BACKOFF_SECONDS = [15, 60, 300, 1800, 7200];
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
