@@ -10,8 +10,14 @@
  * (a EUR €11,100 chair + a USD $5,950 lamp therefore settles in EUR).
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { convertCentsWithFallback, getFxRates } from "@/lib/fxRates";
+import {
+  CartFxLock,
+  clearFxLock,
+  readFxLock,
+  writeFxLock,
+} from "@/lib/checkout/fxLock";
 import { useShippingDestination } from "@/lib/shippingDestination";
 
 export type MinimalLine = {
