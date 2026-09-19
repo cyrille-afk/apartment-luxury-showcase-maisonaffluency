@@ -65,8 +65,14 @@ Deno.serve(async (req) => {
   try {
     // Anon key + RLS: the public policy on designer_curator_picks_public
     // already scopes to visible / published / non-trade-only rows.
+    // A signed-in trade user is served with their own JWT (and never cached).
+    const authHeader = req.headers.get("Authorization");
+    const authenticated = isAuthenticatedRequest(req);
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: { persistSession: false },
+      ...(authenticated && authHeader
+        ? { global: { headers: { Authorization: authHeader } } }
+        : {}),
     });
 
     const [picksRes, designersRes] = await Promise.all([
@@ -94,7 +100,7 @@ Deno.serve(async (req) => {
       status: 200,
       headers: {
         ...corsHeaders,
-        ...CACHE_HEADERS,
+        ...publicCacheHeaders(req),
         "Content-Type": "application/json; charset=utf-8",
       },
     });
