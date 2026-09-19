@@ -1783,8 +1783,7 @@ function renderLinkedParagraph(
   doc.setFontSize(fontSize);
 
   type Word = { text: string; url?: string };
-  type Piece = { text: string; url?: string; x: number };
-  type Line = Piece[];
+  type LinePiece = { text: string; url?: string; x: number };
 
   const words: Word[] = [];
   for (const seg of segments) {
@@ -1794,15 +1793,15 @@ function renderLinkedParagraph(
   }
 
   const spaceW = doc.getTextWidth(" ");
-  const lines: Line[] = [];
-  let current: Piece[] = [];
+  const lines: LinePiece[][] = [];
+  let current: Word[] = [];
   let lineWidth = 0;
 
   const flushLine = () => {
     if (current.length) {
       // Recompute x positions for a clean left-aligned line.
       let cursor = 0;
-      const pieces: Piece[] = current.map((p) => {
+      const pieces: LinePiece[] = current.map((p) => {
         const px = x + cursor;
         cursor += doc.getTextWidth(p.text) + (cursor > 0 ? spaceW : 0);
         return { ...p, x: px };
@@ -1825,28 +1824,27 @@ function renderLinkedParagraph(
   flushLine();
 
   for (const line of lines) {
-    let cursor = x;
     for (const piece of line) {
       if (piece.url) {
         doc.setTextColor(JADE[0], JADE[1], JADE[2]);
       } else {
         doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
       }
-      const pieceW = doc.getTextWidth(piece.text);
-      doc.text(piece.text, cursor, y);
+      doc.text(piece.text, piece.x, y);
       if (piece.url) {
+        const pieceW = doc.getTextWidth(piece.text);
         doc.setDrawColor(JADE[0], JADE[1], JADE[2]);
         doc.setLineWidth(0.25);
-        doc.line(cursor, y + 1.2, cursor + pieceW, y + 1.2);
-        doc.link(cursor, y - fontSize + 1, pieceW, fontSize + 3, { url: piece.url });
+        doc.line(piece.x, y + 1.2, piece.x + pieceW, y + 1.2);
+        doc.link(piece.x, y - fontSize + 1, pieceW, fontSize + 3, { url: piece.url });
       }
-      cursor += pieceW + spaceW;
     }
     y += lineHeight;
   }
 
   return y;
 }
+
 
 
 // -------- Helpers -------------------------------------------------------
