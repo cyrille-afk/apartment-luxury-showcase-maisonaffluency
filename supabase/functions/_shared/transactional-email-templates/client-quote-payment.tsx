@@ -5,6 +5,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Img, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.tsx'
+import { formatCurrency } from './currency.ts'
 
 const SITE_NAME = 'Maison Affluency'
 
@@ -35,10 +36,10 @@ const ClientQuotePaymentEmail = ({
   lines = [],
   note,
 }: ClientQuotePaymentProps) => (
-  <Html lang="en" dir="ltr">
-    <Head />
-    <Preview>Your quotation {quoteRef} — {amountFormatted} {currency}</Preview>
-    <Body style={main}>
+    <Html lang="en" dir="ltr">
+      <Head />
+      <Preview>Your quotation {quoteRef} — {formatCurrency(amountFormatted, currency)}</Preview>
+      <Body style={main}>
       <Container style={container}>
         <Section style={logoSection}>
           <Img
@@ -79,7 +80,7 @@ const ClientQuotePaymentEmail = ({
                 </tr>
                 <tr>
                   <td style={grandLabel}>{label}</td>
-                  <td style={grandAmount}>{amountFormatted} {currency}</td>
+                  <td style={grandAmount}>{formatCurrency(amountFormatted, currency)}</td>
                 </tr>
               </tbody>
             </table>
@@ -94,7 +95,7 @@ const ClientQuotePaymentEmail = ({
                 </tr>
                 <tr>
                   <td style={grandLabel}>{label}</td>
-                  <td style={grandAmount}>{amountFormatted} {currency}</td>
+                  <td style={grandAmount}>{formatCurrency(amountFormatted, currency)}</td>
                 </tr>
               </tbody>
             </table>
@@ -104,7 +105,7 @@ const ClientQuotePaymentEmail = ({
         {payUrl ? (
           <Section style={buttonSection}>
             <Button style={button} href={payUrl}>
-              Pay Now — {amountFormatted} {currency}
+              Pay Now — {formatCurrency(amountFormatted, currency)}
             </Button>
           </Section>
         ) : null}
@@ -148,7 +149,7 @@ const ClientQuotePaymentEmail = ({
 export const template = {
   component: ClientQuotePaymentEmail,
   subject: (data: Record<string, any>) =>
-    `Your quotation ${data?.quoteRef ?? ''} — Maison Affluency`,
+    `Your quotation ${data?.quoteRef ?? ''} — ${formatCurrency(data?.amountFormatted, data?.currency)}`, 
   displayName: 'Client Quotation & Payment Link',
   previewData: {
     recipientName: 'Agni HK',
