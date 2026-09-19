@@ -7,6 +7,7 @@ import {
   getLandedCostEstimate,
   getLandedCostRule,
   getDdpHandlingCents,
+  DDP_HANDLING_FLAT_CURRENCY,
   EMPTY_LANDED_COST,
   DEFAULT_INCOTERM,
   type Incoterm,
@@ -146,6 +147,17 @@ export function useEstimatedShipping(
       rule && ruleCcy && target && target !== ruleCcy
         ? convertCents(rule.clearanceCents, ruleCcy, target as DisplayCurrency, fxRates)
         : rule?.clearanceCents ?? 0;
+    // The forwarder's flat DDP handling fee is quoted in EUR — convert it
+    // into the order currency the same way as the clearance fee.
+    const handlingFlat =
+      rule && target && target !== DDP_HANDLING_FLAT_CURRENCY
+        ? convertCents(
+            rule.ddpHandlingFlatCents,
+            DDP_HANDLING_FLAT_CURRENCY,
+            target as DisplayCurrency,
+            fxRates,
+          )
+        : rule?.ddpHandlingFlatCents ?? 0;
     const landed = rule
       ? getLandedCostEstimate({
           countryCode: code,
@@ -153,10 +165,11 @@ export function useEstimatedShipping(
           freightCents: cap.cents,
           clearanceInOrderCurrencyCents: clearance,
           incoterm,
+          handlingFlatInOrderCurrencyCents: handlingFlat,
         })
       : { ...EMPTY_LANDED_COST, incoterm };
     // DDP freight carries the forwarder's prepaid customs handling; DDU does not.
-    const handling = getDdpHandlingCents(code, cap.cents, incoterm);
+    const handling = getDdpHandlingCents(code, cap.cents, incoterm, handlingFlat);
     const freightCents = cap.cents + handling;
     return {
       countryCode: code,
