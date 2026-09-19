@@ -309,6 +309,20 @@
       "when": 1789826901290,
       "tag": "0043_webhook_queue_status_rpc",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1789827999922,
+      "tag": "0044_admin_queue_console_rpcs",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1789828119977,
+      "tag": "0045_lock_admin_queue_rpcs_from_anon",
+      "breakpoints": true
     }
   ]
 }

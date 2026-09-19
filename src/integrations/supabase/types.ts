@@ -9386,6 +9386,8 @@ export type Database = {
           total_users: number
         }[]
       }
+      admin_queue_overview: { Args: never; Returns: Json }
+      admin_requeue_webhook_event: { Args: { p_id: string }; Returns: Json }
       admin_reset_onboarding_for_user: {
         Args: { _user_id: string }
         Returns: undefined
