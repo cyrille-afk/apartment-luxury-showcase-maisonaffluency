@@ -59,6 +59,12 @@ import { convertCents, useFxRates } from "@/components/trade/CurrencyToggle";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 import { useCurrencyNormalizedLines, useSettlementCurrency } from "@/lib/checkout/multiCurrency";
 import { CartFxLock, fxLockMinutesLeft } from "@/lib/checkout/fxLock";
+import {
+  DepositPct,
+  cardPracticalLimitCents,
+  depositAmountCents,
+  isHighValueOrder,
+} from "@/config/highValuePayment";
 import { getCustomsRegion } from "@/lib/checkout/customsRegions";
 
 
@@ -915,6 +921,100 @@ const PAYNOW_TAB: { id: PaymentMethod; label: string; hint: string } = {
   hint: "Scan with any Singapore banking app",
 };
 
+/**
+ * High-value settlement routing.
+ *
+ * Shown only above the corporate-card ceiling for the settlement currency:
+ * states plainly that a single card charge is unlikely to authorise, points to
+ * the transfer rail (Faster Payments / SEPA / SWIFT, issued per currency), and
+ * offers a deposit-by-card plan with the balance settled by transfer.
+ */
+function HighValueRouting({
+  summary,
+  method,
+  setMethod,
+  depositPct,
+  setDepositPct,
+}: {
+  summary: CheckoutSummary;
+  method: PaymentMethod;
+  setMethod: (m: PaymentMethod) => void;
+  depositPct: DepositPct;
+  setDepositPct: (p: DepositPct) => void;
+}) {
+  const { currency, displayTotalCents } = summary;
+  const limit = cardPracticalLimitCents(currency);
+  const plans: { pct: DepositPct; label: string }[] = [
+    { pct: 0, label: "Pay in full" },
+    { pct: 0.3, label: "30% deposit" },
+    { pct: 0.5, label: "50% deposit" },
+  ];
+  return (
+    <section className="mt-6 w-full space-y-4 border border-foreground/15 bg-muted/20 px-5 py-5">
+      <p className="text-[10px] font-light uppercase tracking-[0.24em] text-muted-foreground">
+        Settlement for orders above {money(limit, currency)}
+      </p>
+      <p className="text-xs font-light leading-relaxed text-muted-foreground">
+        This order totals {money(displayTotalCents, currency)}. Most corporate cards decline a
+        single charge of this size. Bank transfer is the usual route — your dedicated{" "}
+        {currency.toUpperCase()} account details are issued instantly on the transfer tab, and
+        funds clear same day on local rails. You may also place a deposit by card and settle the
+        balance by transfer.
+      </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            setDepositPct(0);
+            setMethod("wire");
+          }}
+          className={cn(
+            "border px-4 py-2 text-[10px] font-light uppercase tracking-[0.22em] transition-colors",
+            method === "wire"
+              ? "border-foreground bg-foreground text-background"
+              : "border-border hover:border-foreground",
+          )}
+        >
+          Settle by transfer
+        </button>
+        {plans
+          .filter((p) => p.pct !== 0)
+          .map((p) => (
+            <button
+              key={String(p.pct)}
+              type="button"
+              onClick={() => {
+                setDepositPct(p.pct);
+                setMethod("card");
+              }}
+              className={cn(
+                "border px-4 py-2 text-[10px] font-light uppercase tracking-[0.22em] transition-colors",
+                method === "card" && depositPct === p.pct
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border hover:border-foreground",
+              )}
+            >
+              {p.label} by card · {money(depositAmountCents(displayTotalCents, p.pct), currency)}
+            </button>
+          ))}
+      </div>
+      {method === "card" && depositPct > 0 && (
+        <p className="font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
+          You are charged {money(depositAmountCents(displayTotalCents, depositPct), currency)} now.
+          The balance of{" "}
+          {money(displayTotalCents - depositAmountCents(displayTotalCents, depositPct), currency)}{" "}
+          is invoiced with transfer instructions and due before despatch.
+        </p>
+      )}
+      <p className="font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
+        Buying against a purchase order? Choose transfer — the proforma invoice we issue carries
+        your PO reference and serves as the document your finance team pays against.
+      </p>
+    </section>
+  );
+}
+
+
 function DeliveryPaymentOptions({
   method,
   setMethod,
@@ -994,6 +1094,7 @@ function PaymentForm({
   setBuyerType,
   buyerGstNumber,
   setBuyerGstNumber,
+  depositPct = 0,
 }: {
   summary: CheckoutSummary;
   account: { email: string; role: string; company?: string } | null;
@@ -1002,6 +1103,7 @@ function PaymentForm({
   onPaid: (ref: string) => void;
   method: PaymentMethod;
   optionsSlot: React.ReactNode;
+  depositPct?: DepositPct;
   onCountryChange?: (code: string | null) => void;
   buyerType: BuyerType;
   setBuyerType: (v: BuyerType) => void;
@@ -1035,6 +1137,10 @@ function PaymentForm({
 
   const { chargeTotalCents: total, currency } = summary;
   const paynow = method === "paynow";
+  // With a deposit plan the card is charged the deposit only; the balance is
+  // invoiced with transfer instructions.
+  const chargeNow = depositAmountCents(total, depositPct);
+
 
   const confirm = async () => {
     if (!paymentReady || !stripe || !elements) return;
@@ -1193,8 +1299,10 @@ function PaymentForm({
           cta={
             paymentReady
               ? paynow
-                ? `Generate PayNow QR · ${money(total, currency)}`
-                : `Confirm & securely pay ${money(total, currency)}`
+                ? `Generate PayNow QR · ${money(chargeNow, currency)}`
+                : depositPct > 0
+                  ? `Pay ${Math.round(depositPct * 100)}% deposit ${money(chargeNow, currency)}`
+                  : `Confirm & securely pay ${money(total, currency)}`
               : "Preparing secure payment…"
           }
           busy={submitting}
@@ -1243,7 +1351,8 @@ function StickyTotals({
         rel="noopener noreferrer"
         className="mt-3 block text-center text-xs text-muted-foreground underline underline-offset-4"
       >
-        Need assistance with card limits? Text a private concierge advisor instantly
+        Card above your limit? Settle by bank transfer or pay a deposit above — or text a private
+        concierge advisor
       </a>
     </div>
   );
@@ -1840,6 +1949,23 @@ export default function Checkout() {
     return "card";
   });
   const wire = method === "wire";
+
+  /**
+   * Above a typical corporate card ceiling we lead with bank transfer and
+   * offer a deposit plan, rather than letting the buyer meet a decline.
+   */
+  const highValue = isHighValueOrder(summary.displayTotalCents, summary.currency);
+  const [depositPct, setDepositPct] = useState<DepositPct>(0);
+  const routedHighValue = useRef(false);
+  useEffect(() => {
+    if (!highValue || routedHighValue.current) return;
+    routedHighValue.current = true;
+    setMethod((m) => (m === "card" ? "wire" : m));
+  }, [highValue]);
+  useEffect(() => {
+    if (!highValue) setDepositPct(0);
+  }, [highValue]);
+
   // In wire mode there is no Stripe address element, so the global shipping
   // destination drives the tax country shown in the summary.
   const pageDestination = useShippingDestination();
@@ -2064,6 +2190,9 @@ export default function Checkout() {
           // Session-locked conversion rates the shown total was priced at.
           fxLockedAt: fxLock?.lockedAt ?? "",
           fxLockedRates: fxLock?.rates ?? null,
+          // Deposit plan for high-value orders (0, 0.3 or 0.5). The server
+          // re-validates and charges only the deposit, invoicing the balance.
+          depositPct,
         };
 
 
@@ -2124,7 +2253,7 @@ export default function Checkout() {
         setSyncing(false);
       }
     },
-    [grossLines, stripePromise, formCountry, estimate.cents],
+    [grossLines, stripePromise, formCountry, estimate.cents, depositPct],
   );
 
 
@@ -2165,6 +2294,18 @@ export default function Checkout() {
     void syncIntent(shipping, next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [method, grossLines, syncIntent]);
+
+  // Changing the deposit plan changes the amount actually charged now, so the
+  // PaymentIntent must be re-priced.
+  const depositRef = useRef<DepositPct>(depositPct);
+  useEffect(() => {
+    if (!initialised.current || !grossLines?.length) return;
+    if (depositRef.current === depositPct) return;
+    depositRef.current = depositPct;
+    void syncIntent(shipping, method === "paynow" ? "paynow" : "card");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [depositPct, grossLines]);
+
 
   // Maison Affluency monochrome theme for Stripe Elements: sharp 0px corners,
   // pure-black focus/primary states, thin hairline borders, serif labels.
@@ -2329,11 +2470,22 @@ export default function Checkout() {
         <div className="min-w-0">
           {(() => {
             const optionsSlot = (
-              <DeliveryPaymentOptions
-                method={method}
-                setMethod={setMethod}
-                paynowAvailable={summary.currency.toLowerCase() === "sgd"}
-              />
+              <>
+                {highValue && (
+                  <HighValueRouting
+                    summary={summary}
+                    method={method}
+                    setMethod={setMethod}
+                    depositPct={depositPct}
+                    setDepositPct={setDepositPct}
+                  />
+                )}
+                <DeliveryPaymentOptions
+                  method={method}
+                  setMethod={setMethod}
+                  paynowAvailable={summary.currency.toLowerCase() === "sgd"}
+                />
+              </>
             );
             if (method === "wire") {
               return (
