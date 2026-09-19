@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import {
   LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderKanban,
   DollarSign, ClipboardList, Package, FileText, Settings, Wrench, UserCircle, Wand2, Image, Users, Inbox,
@@ -68,27 +69,27 @@ export function TradeSidebar() {
       .then(({ data }) => { if ((data as any)?.avatar_url) setAvatarUrl((data as any).avatar_url); });
   }, [user]);
 
-  useEffect(() => {
+  const fetchCounts = useCallback(async () => {
     if (!isAdmin) return;
-    const fetchCounts = async () => {
-      const [quotes, apps, samples] = await Promise.all([
-        supabase.from("trade_quotes").select("*", { count: "exact", head: true }).eq("status", "submitted"),
-        supabase.from("trade_applications").select("*", { count: "exact", head: true }).eq("status", "pending"),
-        supabase.from("trade_sample_requests").select("*", { count: "exact", head: true }).eq("status", "requested"),
-      ]);
-      setSubmittedQuotes(quotes.count || 0);
-      setPendingApps(apps.count || 0);
-      setPendingSamples(samples.count || 0);
-    };
-    fetchCounts();
-    const channel = supabase
-      .channel("admin-badges")
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_quotes", filter: "status=eq.submitted" }, () => fetchCounts())
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_applications", filter: "status=eq.pending" }, () => fetchCounts())
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_sample_requests", filter: "status=eq.requested" }, () => fetchCounts())
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    const [quotes, apps, samples] = await Promise.all([
+      supabase.from("trade_quotes").select("id", { count: "exact", head: true }).eq("status", "submitted"),
+      supabase.from("trade_applications").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      supabase.from("trade_sample_requests").select("id", { count: "exact", head: true }).eq("status", "requested"),
+    ]);
+    setSubmittedQuotes(quotes.count || 0);
+    setPendingApps(apps.count || 0);
+    setPendingSamples(samples.count || 0);
   }, [isAdmin]);
+
+  useEffect(() => {
+    void fetchCounts();
+  }, [fetchCounts]);
+
+  useRealtimeTables(
+    ["trade_quotes", "trade_applications", "trade_sample_requests"],
+    () => void fetchCounts(),
+    isAdmin,
+  );
 
   const totalBadge = submittedQuotes + pendingApps + pendingSamples;
 

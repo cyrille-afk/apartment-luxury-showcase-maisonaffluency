@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 
 /**
  * The mobile → desktop bridge.
@@ -112,18 +113,15 @@ export function useStudioBridge() {
 
   useEffect(() => {
     load();
-    if (!user) return;
-    const channel = supabase
-      // Unique topic per mount: StrictMode remounts would otherwise reuse a
-      // subscribed channel and throw on `.on()`.
-      .channel(`studio-bridge-${user.id}-${Math.random().toString(36).slice(2)}`)
-
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "client_board_items" }, () => load())
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [user, load]);
+
+  useRealtimeTables(
+    "client_board_items",
+    (event) => {
+      if (event.eventType === "INSERT") load();
+    },
+    !!user,
+  );
 
   /** Marks every currently listed item as reviewed on the desktop. */
   const markAllSeen = useCallback(async () => {
@@ -168,19 +166,18 @@ export function useStudioAlerts() {
 
   useEffect(() => {
     load();
-    if (!user) return;
-    const channel = supabase
-      .channel(`studio-alerts-${user.id}-${Math.random().toString(36).slice(2)}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "studio_alerts", filter: `user_id=eq.${user.id}` },
-        () => load(),
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [user, load]);
+
+  useRealtimeTables(
+    "studio_alerts",
+    (event) => {
+      if (event.eventType !== "INSERT") return;
+      const row = event.new as { user_id?: string } | null;
+      if (row?.user_id && row.user_id !== user?.id) return;
+      load();
+    },
+    !!user,
+  );
 
   const dismiss = useCallback(async (id: string) => {
     await supabase.from("studio_alerts").update({ read_at: new Date().toISOString() }).eq("id", id);

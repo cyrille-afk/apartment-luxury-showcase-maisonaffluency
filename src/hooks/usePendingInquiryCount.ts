@@ -1,15 +1,11 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-
-function makeChannelName() {
-  return `pending-inquiry-count-${crypto.randomUUID()}`;
-}
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 
 export function usePendingInquiryCount() {
   const { isAdmin } = useAuth();
   const [count, setCount] = useState(0);
-  const [channelName] = useState(makeChannelName);
 
   const load = async () => {
     const [{ data: inquiries, error }, { data: draftQuotes }] = await Promise.all([
@@ -32,18 +28,11 @@ export function usePendingInquiryCount() {
   useEffect(() => {
     if (!isAdmin) return;
     load();
-    const channel = supabase
-      .channel(channelName)
-      .on("postgres_changes", { event: "*", schema: "public", table: "inquiries" }, () => load())
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_quotes" }, () => load())
-      .subscribe();
-    const poll = setInterval(load, 60000);
-    return () => {
-      supabase.removeChannel(channel);
-      clearInterval(poll);
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
+
+  // Event-driven: the 60s poll is gone, the shared socket drives refreshes.
+  useRealtimeTables(["inquiries", "trade_quotes"], () => load(), isAdmin);
 
   return count;
 }

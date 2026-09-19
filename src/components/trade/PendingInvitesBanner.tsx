@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Mail, Clock, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
 import { Button } from "@/components/ui/button";
@@ -53,21 +54,15 @@ export function PendingInvitesBanner() {
   }, [user?.id]);
 
   // Keep invites in sync if the underlying table changes (e.g. accepted elsewhere)
-  useEffect(() => {
-    if (!user?.email) return;
-    const channel = supabase
-      .channel("pending-invites-" + user.id)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "studio_invites", filter: `email=eq.${user.email}` },
-        () => load(false)
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, user?.email]);
+  useRealtimeTables(
+    "studio_invites",
+    (event) => {
+      const row = (event.new ?? event.old) as { email?: string } | null;
+      if (row?.email && row.email !== user?.email) return;
+      load(false);
+    },
+    !!user?.email,
+  );
 
   const handleAccept = async (inv: PendingInvite) => {
     if (!user || inv.is_expired) return;

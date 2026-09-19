@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 
 export type EligibleTier = "gold" | "platinum";
 
@@ -40,19 +41,10 @@ export function useClientTierUpgrades(studioId?: string | null) {
   }, [studioId]);
 
   useEffect(() => {
-    let active = true;
     refresh();
-    const channel = supabase
-      .channel(`client-tier-upgrades-${Math.random().toString(36).slice(2)}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "clients" }, () => {
-        if (active) refresh();
-      })
-      .subscribe();
-    return () => {
-      active = false;
-      supabase.removeChannel(channel);
-    };
   }, [refresh]);
+
+  useRealtimeTables("clients", () => refresh());
 
   return { flags, count: Object.keys(flags).length, loading, refresh };
 }

@@ -1,4 +1,5 @@
-import { lazy, Suspense, useState, useEffect, useMemo } from "react";
+import { lazy, Suspense, useState, useEffect, useMemo, useCallback } from "react";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { LayoutDashboard, ChevronUp } from "lucide-react";
 import { Outlet, Navigate, useLocation, Link } from "react-router-dom";
@@ -362,22 +363,20 @@ const TradeLayout = () => {
   }, [location.pathname]);
 
   // Fetch submitted quotes count for admin badge (shared between sidebar & mobile menu)
-  useEffect(() => {
+  const fetchSubmittedCount = useCallback(async () => {
     if (!isAdmin) return;
-    const fetchCount = async () => {
-      const { count } = await supabase
-        .from("trade_quotes")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "submitted");
-      setSubmittedCount(count || 0);
-    };
-    fetchCount();
-    const channel = supabase
-      .channel("trade-quotes-badge-layout")
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_quotes", filter: "status=eq.submitted" }, () => fetchCount())
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    const { count } = await supabase
+      .from("trade_quotes")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "submitted");
+    setSubmittedCount(count || 0);
   }, [isAdmin]);
+
+  useEffect(() => {
+    void fetchSubmittedCount();
+  }, [fetchSubmittedCount]);
+
+  useRealtimeTables("trade_quotes", () => void fetchSubmittedCount(), isAdmin);
 
   if (loading) {
     return (

@@ -15,6 +15,7 @@ import { TradeCopilotProvider } from "@/contexts/TradeCopilotContext";
 import { VisualiserMaterialProvider } from "@/contexts/VisualiserMaterialContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { StudioProvider } from "@/hooks/useStudio";
+import { RealtimeMultiplexerProvider } from "@/contexts/RealtimeMultiplexerContext";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import { releaseDesignersLandingScrollLock } from "@/lib/designersScrollLock";
 import { clearDarkIosChrome } from "@/lib/iosChrome";
@@ -654,6 +655,7 @@ const App = () => {
     <Suspense fallback={null}>
       <HelmetProvider>
         <AuthProvider>
+        <RealtimeMultiplexerProvider>
         <StudioProvider>
         <CompareProvider>
         <WishlistProvider>
@@ -915,6 +917,7 @@ const App = () => {
         </WishlistProvider>
         </CompareProvider>
         </StudioProvider>
+        </RealtimeMultiplexerProvider>
         </AuthProvider>
       </HelmetProvider>
     </Suspense>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import {
@@ -94,12 +95,10 @@ export default function SampleRequestsAdmin() {
   useEffect(() => {
     if (!isAdmin) return;
     fetchAll();
-    const channel = supabase
-      .channel("admin-sample-requests")
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_sample_requests" }, fetchAll)
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
+
+  useRealtimeTables("trade_sample_requests", () => fetchAll(), isAdmin);
 
   if (!isAdmin) return null;
 

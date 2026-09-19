@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useState, ReactNode, use
 // of JS into the entry bundle and lengthened the first main-thread task.
 const getSupabase = async () => (await import("@/integrations/supabase/client")).supabase;
 import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 
 export type StudioRole = "owner" | "admin" | "editor" | "viewer";
 
@@ -74,30 +75,15 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   }, [fetchStudios]);
 
   // Background refresh when studio memberships change for this user
-  useEffect(() => {
-    if (!user) return;
-    let cleanup: (() => void) | null = null;
-    let cancelled = false;
-
-    void (async () => {
-      const supabase = await getSupabase();
-      if (cancelled) return;
-      const channel = supabase
-        .channel("studio-memberships-" + user.id)
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "studio_members", filter: `user_id=eq.${user.id}` },
-          () => fetchStudios(false)
-        )
-        .subscribe();
-      cleanup = () => { supabase.removeChannel(channel); };
-    })();
-
-    return () => {
-      cancelled = true;
-      cleanup?.();
-    };
-  }, [user, fetchStudios]);
+  useRealtimeTables(
+    "studio_members",
+    (event) => {
+      const row = (event.new ?? event.old) as { user_id?: string } | null;
+      if (row?.user_id && row.user_id !== user?.id) return;
+      fetchStudios(false);
+    },
+    !!user,
+  );
 
   // Pick a default if none stored or stored one not in list
   useEffect(() => {

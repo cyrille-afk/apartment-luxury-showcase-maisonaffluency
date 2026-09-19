@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Loader2, ShieldCheck, Clock, AlertTriangle, Upload, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { useToast } from "@/hooks/use-toast";
 
 interface AppRow {
@@ -26,7 +27,6 @@ export default function TradeVerificationTracker() {
   const [app, setApp] = useState<AppRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const pollRef = useRef<number | null>(null);
 
   const load = useCallback(async () => {
     if (!user?.id) return;
@@ -45,18 +45,17 @@ export default function TradeVerificationTracker() {
     load();
   }, [load]);
 
-  // Poll while a verdict is still pending so the tracker updates live.
-  useEffect(() => {
-    const pending = app && app.status === "pending" && !app.ai_verified_at;
-    if (!pending) {
-      if (pollRef.current) window.clearInterval(pollRef.current);
-      return;
-    }
-    pollRef.current = window.setInterval(load, 6000);
-    return () => {
-      if (pollRef.current) window.clearInterval(pollRef.current);
-    };
-  }, [app, load]);
+  // Event-driven: the verification edge function's write-back pushes straight
+  // through the shared realtime socket instead of a 6-second poll.
+  useRealtimeTables(
+    "trade_applications",
+    (event) => {
+      const row = (event.new ?? event.old) as { user_id?: string } | null;
+      if (row?.user_id && row.user_id !== user?.id) return;
+      load();
+    },
+    !!user?.id,
+  );
 
   const uploadCredential = async (file: File) => {
     if (!user?.id || !app) return;

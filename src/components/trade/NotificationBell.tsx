@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Bell, X, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 
@@ -64,7 +65,7 @@ export function NotificationBell() {
     const fetchNotifications = async () => {
       const { data } = await (supabase as any)
         .from("notifications")
-        .select("*")
+        .select("id, type, title, message, link, is_read, created_at, metadata")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(20);
@@ -72,27 +73,21 @@ export function NotificationBell() {
     };
 
     fetchNotifications();
-
-    const channel = supabase
-      .channel(`notifications-${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "notifications",
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload: any) => {
-          setNotifications((prev) => [payload.new as Notification, ...prev]);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [user]);
+
+  // Shared realtime socket: the per-user server filter now runs client-side.
+  useRealtimeTables(
+    "notifications",
+    (event) => {
+      if (event.eventType !== "INSERT") return;
+      const row = event.new as Notification & { user_id?: string };
+      if (!row || (row.user_id && row.user_id !== user?.id)) return;
+      setNotifications((prev) =>
+        prev.some((n) => n.id === row.id) ? prev : [row, ...prev],
+      );
+    },
+    !!user,
+  );
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 

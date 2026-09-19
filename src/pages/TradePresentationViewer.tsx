@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { useExportCurrency } from "@/lib/displayMoney";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { Navigate, useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, ChevronLeft, Download, Maximize2, Minimize2, MessageSquare, Send, FileDown, Loader2, Link2, Check } from "lucide-react";
@@ -108,17 +109,17 @@ const TradePresentationViewer = () => {
     enabled: !!id,
   });
 
-  // Realtime comments subscription
-  useEffect(() => {
-    if (!id || !user?.id) return;
-    const channel = supabase
-      .channel(`user:${user.id}-presentation-comments-${id}`, { config: { private: true } })
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "presentation_comments", filter: `presentation_id=eq.${id}` }, () => {
-        queryClient.invalidateQueries({ queryKey: ["presentation-comments", id] });
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [id, queryClient, user?.id]);
+  // Realtime comments via the shared socket
+  useRealtimeTables(
+    "presentation_comments",
+    (event) => {
+      if (event.eventType !== "INSERT") return;
+      const row = event.new as { presentation_id?: string } | null;
+      if (row?.presentation_id && row.presentation_id !== id) return;
+      queryClient.invalidateQueries({ queryKey: ["presentation-comments", id] });
+    },
+    !!id && !!user?.id,
+  );
 
   // Auto-scroll comments
   useEffect(() => {
