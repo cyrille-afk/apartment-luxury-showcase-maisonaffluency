@@ -94,12 +94,10 @@ export default function SampleRequestsAdmin() {
   useEffect(() => {
     if (!isAdmin) return;
     fetchAll();
-    const channel = supabase
-      .channel("admin-sample-requests")
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_sample_requests" }, fetchAll)
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
+
+  useRealtimeTables("trade_sample_requests", () => fetchAll(), isAdmin);
 
   if (!isAdmin) return null;
 
