@@ -79,9 +79,11 @@ test.describe("1 · Trade auth & cache bypass", () => {
     await ctx.dispose();
   });
 
-  test("authenticated trade requests are never cached and show trade pricing", async ({ page }) => {
+  // Skipped before any browser is launched when credentials are absent.
+  test.describe(() => {
     test.skip(!haveTrade, "Set E2E_TRADE_EMAIL / E2E_TRADE_PASSWORD to run.");
 
+  test("authenticated trade requests are never cached and show trade pricing", async ({ page }) => {
     const session = await signIn(TRADE_EMAIL!, TRADE_PASSWORD!);
 
     // --- header assertion: same endpoint, now with a user JWT ---
