@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 
 export type EligibleTier = "gold" | "platinum";
 
