@@ -74,7 +74,9 @@ serve(async (req) => {
       }
       const testMode = Boolean((body as any).testMode);
       const { stripe, liveMode } = await getStripe(testMode ? "test" : "auto");
-      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      const session = await stripe.checkout.sessions.retrieve(sessionId, {
+        expand: ["payment_intent"],
+      });
 
       // `orders.transaction_id` is the Checkout Session id written by the
       // stripe-webhook direct_checkout branch. Duplicates are tolerated by the
