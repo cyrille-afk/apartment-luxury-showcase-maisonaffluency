@@ -760,6 +760,20 @@ function OrderSummary({
                 Includes estimated freight deposit — final freight confirmed by your advisor.
               </p>
             )}
+            {fxLock && (
+              <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-muted-foreground">
+                Exchange rate held for this order — {fxLockMinutesLeft(fxLock)} min remaining.
+                {onRefreshFx && (
+                  <button
+                    type="button"
+                    onClick={onRefreshFx}
+                    className="ml-2 underline underline-offset-2 hover:text-foreground"
+                  >
+                    Refresh rate
+                  </button>
+                )}
+              </p>
+            )}
           </div>
         </dl>
 
