@@ -5,6 +5,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Img, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.tsx'
+import { formatCurrency } from './currency.ts'
 
 const SITE_NAME = 'Maison Affluency'
 
@@ -66,7 +67,7 @@ const PaymentConfirmedEmail = ({
               {taxLabel && taxFormatted ? (
                 <tr>
                   <td style={totalLabel}>{taxLabel}</td>
-                  <td style={totalAmount}>{taxFormatted} {currency}</td>
+                  <td style={totalAmount}>{formatCurrency(taxFormatted, currency)}</td>
                 </tr>
               ) : null}
               <tr>
@@ -74,7 +75,7 @@ const PaymentConfirmedEmail = ({
               </tr>
               <tr>
                 <td style={grandLabel}>Amount received</td>
-                <td style={grandAmount}>{totalFormatted} {currency}</td>
+                <td style={grandAmount}>{formatCurrency(totalFormatted, currency)}</td>
               </tr>
             </tbody>
           </table>

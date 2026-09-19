@@ -3,6 +3,7 @@ import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
 import { convertCents, SETTLEMENT_CURRENCIES } from "./fxConvert.ts";
+import { formatCurrency } from "../_shared/transactional-email-templates/currency.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -31,15 +32,6 @@ interface IncomingItem {
 
 /** Fallback settlement currency when the shopper has locked none. */
 const DEFAULT_CURRENCY = "usd";
-
-const CURRENCY_SYMBOLS: Record<string, string> = { usd: "$", eur: "€", gbp: "£", sgd: "S$", hkd: "HK$" };
-/** "USD $18,923.25" — ISO code + symbol so currencies are never ambiguous in email. */
-const fmtMoney = (cents: number, cur: string) => {
-  const c = (cur || "usd").toLowerCase();
-  const amount = ((cents ?? 0) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  return `${c.toUpperCase()} ${CURRENCY_SYMBOLS[c] ?? ""}${amount}`;
-};
-
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -326,17 +318,18 @@ serve(async (req) => {
               recipientName: fullName ?? "",
               orderRef: order.order_ref,
               firstItemTitle: lines[0]?.title ?? "Order",
+              currency,
               items: lines.map((l: any) => ({
                 title: l.title,
                 designerName: l.designer_name,
                 configuration: l.finish_label,
                 quantity: l.quantity,
-                priceFormatted: fmtMoney(l.unit_price_cents, currency),
+                priceFormatted: formatCurrency(l.unit_price_cents, currency),
               })),
-              subtotalFormatted: fmtMoney(grossSubtotal, currency),
-              shippingFormatted: shipping > 0 ? fmtMoney(shipping, currency) : null,
-              taxLineFormatted: `${fmtMoney(0, currency)} (Zero-rated at checkout / Deferred to Border Customs)`,
-              totalFormatted: fmtMoney(total, currency),
+              subtotalFormatted: formatCurrency(grossSubtotal, currency),
+              shippingFormatted: shipping > 0 ? formatCurrency(shipping, currency) : null,
+              taxLineFormatted: `${formatCurrency(0, currency)} (Zero-rated at checkout / Deferred to Border Customs)`,
+              totalFormatted: formatCurrency(total, currency),
             },
           },
         });

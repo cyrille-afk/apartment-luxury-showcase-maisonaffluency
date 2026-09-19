@@ -4,6 +4,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { loadStripeTestCreds } from "../_shared/stripeCreds.ts";
 import { getStripe } from "../_shared/stripeClient.ts";
 import { recordPurchaseOrdersPayable } from "../_shared/recordPurchaseOrdersPayable.ts";
+import { formatCurrency } from "../_shared/transactional-email-templates/currency.ts";
 
 const { stripe, creds } = await getStripe("auto");
 const testCreds = await loadStripeTestCreds();
@@ -253,10 +254,7 @@ serve(async (req) => {
             .eq("order_id", orderId);
 
           if (order?.email) {
-            const symbols: Record<string, string> = { usd: "$", eur: "€", gbp: "£", sgd: "S$", hkd: "HK$" };
-            const cur = (order.currency || "usd").toLowerCase();
-            const fmt = (cents: number) =>
-              `${cur.toUpperCase()} ${symbols[cur] ?? ""}${((cents ?? 0) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            const currency = order.currency || "usd";
 
             const { error: mailErr } = await supabase.functions.invoke("send-transactional-email", {
               body: {
@@ -267,17 +265,18 @@ serve(async (req) => {
                   recipientName: order.full_name ?? "",
                   orderRef: order.order_ref,
                   firstItemTitle: items?.[0]?.title ?? "Order",
+                  currency,
                   items: (items ?? []).map((l: any) => ({
                     title: l.title,
                     designerName: l.designer_name,
                     configuration: l.finish_label,
                     quantity: l.quantity,
-                    priceFormatted: fmt(l.unit_price_cents),
+                    priceFormatted: formatCurrency(l.unit_price_cents, currency),
                   })),
-                  subtotalFormatted: fmt(order.subtotal_cents),
-                  shippingFormatted: Number(order.shipping_cents) > 0 ? fmt(order.shipping_cents) : null,
-                  taxLineFormatted: `${fmt(0)} (Zero-rated at checkout / Deferred to Border Customs)`,
-                  totalFormatted: fmt(order.total_cents),
+                  subtotalFormatted: formatCurrency(order.subtotal_cents, currency),
+                  shippingFormatted: Number(order.shipping_cents) > 0 ? formatCurrency(order.shipping_cents, currency) : null,
+                  taxLineFormatted: `${formatCurrency(0, currency)} (Zero-rated at checkout / Deferred to Border Customs)`,
+                  totalFormatted: formatCurrency(order.total_cents, currency),
                 },
               },
             });
