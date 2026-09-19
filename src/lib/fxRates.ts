@@ -1,21 +1,25 @@
 /**
  * Reliable FX rate lookup for quote pricing.
  *
- * Why this exists:
- *   frankfurter.app is intermittently unreachable (CORS/DNS refusals from the
- *   preview + prod origins), and api.exchangerate.host now demands an API key.
- *   Quote pages were silently falling back to "no conversion" — a line stored
- *   in EUR would display verbatim under an SGD quote, and toggling the quote
- *   currency looked like it did nothing.
+ * Authority lives on the server. The `currency_rates` table is refreshed twice
+ * daily by the `sync-currency-rates` edge function (validated, drift-guarded,
+ * all cross pairs derived from one EUR base). The browser never calls
+ * frankfurter.app or open.er-api.com directly — those origins were flaky and
+ * each tab hammered them with its own per-pair cache.
  *
  * Strategy:
- *   1. Try frankfurter.app (ECB rates, free, no key).
- *   2. On failure, try open.er-api.com (free, CORS-friendly, no key).
- *   3. On failure, use the hardcoded FALLBACK_RATES table below.
+ *   1. Session cache (loaded in one query for every pair).
+ *   2. `currency_rates` table in the database.
+ *   3. Bundled FALLBACK_RATES table below (approximate, last resort).
+ *
+ * Quotes additionally stamp `exchange_rate_at_creation` onto the row, so a
+ * sent quote is always re-rendered at the rate it was priced at.
  *
  * The helper always resolves — it never throws — so callers can await it and
- * be guaranteed a usable number. Rates are cached in-memory for 10 minutes.
+ * be guaranteed a usable number.
  */
+
+import { supabase } from "@/integrations/supabase/client";
 
 /** Approximate cross rates (last reviewed 2026-09-03 vs open.er-api.com).
  *  Guarantees conversion never no-ops when the network is down. Kept in sync
