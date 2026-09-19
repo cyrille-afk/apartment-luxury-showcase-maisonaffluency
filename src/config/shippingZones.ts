@@ -337,9 +337,13 @@ export interface LandedCostRule {
   /**
    * Prepaid customs handling applied to freight when the buyer chooses DDP:
    * the forwarder acts as importer of record, advances the border charges and
-   * bills a percentage of the freight for doing so. Not charged under DDU.
+   * bills a flat fee plus a percentage of the freight for doing so. The flat
+   * fee is denominated in EUR (see DDP_HANDLING_FLAT_CURRENCY). Not charged
+   * under DDU.
    */
   ddpHandlingPercent: number;
+  /** Flat DDP handling fee, in minor units of DDP_HANDLING_FLAT_CURRENCY. */
+  ddpHandlingFlatCents: number;
   /** Plain-language explanation shown when the buyer chooses DDU. */
   dduNote: string;
 }
@@ -361,7 +365,8 @@ export const LANDED_COST_RULES: LandedCostRule[] = [
     currency: "GBP",
     taxName: "UK VAT",
     note: "Delivered Duty Paid to London: UK import VAT at 20% of the goods and freight value, plus customs clearance. Collected by your advisor before despatch.",
-    ddpHandlingPercent: 2.5,
+    ddpHandlingPercent: 2,
+    ddpHandlingFlatCents: 8_000, // €80 flat handling fee (forwarder-confirmed)
     dduNote: "Delivered Duty Unpaid to London: freight only. HMRC import VAT at 20% of the goods and freight value, plus customs clearance, are invoiced to you by the carrier before delivery.",
   },
   {
@@ -373,7 +378,8 @@ export const LANDED_COST_RULES: LandedCostRule[] = [
     currency: "CHF",
     taxName: "Swiss import VAT",
     note: "Switzerland is outside the EU customs union: import VAT at 8.1% and clearance are assessed at the border.",
-    ddpHandlingPercent: 2.5,
+    ddpHandlingPercent: 2,
+    ddpHandlingFlatCents: 8_000, // €80 flat handling fee (forwarder-confirmed)
     dduNote: "Delivered Duty Unpaid: freight only. Swiss import VAT at 8.1% and customs clearance are billed to you by the carrier at the border.",
   },
   {
@@ -385,7 +391,8 @@ export const LANDED_COST_RULES: LandedCostRule[] = [
     currency: "AED",
     taxName: "UAE VAT",
     note: "UAE import duty at 5% plus 5% VAT on the landed value.",
-    ddpHandlingPercent: 2.5,
+    ddpHandlingPercent: 2,
+    ddpHandlingFlatCents: 8_000, // €80 flat handling fee (forwarder-confirmed)
     dduNote: "Delivered Duty Unpaid: freight only. UAE import duty (5%), VAT (5%) and clearance are settled by you with the carrier on arrival.",
   },
 ];
@@ -441,16 +448,32 @@ export const EMPTY_LANDED_COST: LandedCostEstimate = {
  * Prepaid customs handling the forwarder charges for acting as importer of
  * record under DDP. Returns 0 for DDU or destinations that need no clearance.
  */
+/** Currency the flat DDP handling fee is quoted in by the forwarder. */
+export const DDP_HANDLING_FLAT_CURRENCY = "EUR";
+
 export function getDdpHandlingCents(
   countryCode: string | null | undefined,
   freightCents: number,
   incoterm: Incoterm = DEFAULT_INCOTERM,
+  /**
+   * Flat fee already converted into the order currency. Defaults to the raw
+   * EUR amount, which is correct only when the order currency is EUR.
+   */
+  flatInOrderCurrencyCents?: number | null,
 ): number {
   if (incoterm !== "DDP") return 0;
   const rule = getLandedCostRule(countryCode);
   if (!rule) return 0;
   const freight = Math.max(0, Math.round(freightCents || 0));
-  return Math.round(freight * (rule.ddpHandlingPercent / 100));
+  const flat = Math.max(
+    0,
+    Math.round(
+      flatInOrderCurrencyCents == null
+        ? rule.ddpHandlingFlatCents
+        : flatInOrderCurrencyCents,
+    ),
+  );
+  return Math.round(freight * (rule.ddpHandlingPercent / 100)) + flat;
 }
 
 /**
@@ -466,6 +489,8 @@ export function getLandedCostEstimate(input: {
   clearanceInOrderCurrencyCents?: number | null;
   /** DDP collects the import charges now; DDU defers them to the border. */
   incoterm?: Incoterm;
+  /** Flat DDP handling fee already converted into the order currency. */
+  handlingFlatInOrderCurrencyCents?: number | null;
 }): LandedCostEstimate {
   const rule = getLandedCostRule(input.countryCode);
   const goods = Math.max(0, Math.round(input.goodsCents || 0));
@@ -474,7 +499,12 @@ export function getLandedCostEstimate(input: {
   // `freightCents` is the base freight; DDP adds prepaid customs handling on
   // top, and that uplift is part of the CIF value the border tax is assessed on.
   const baseFreight = Math.max(0, Math.round(input.freightCents || 0));
-  const handling = getDdpHandlingCents(rule.country, baseFreight, incoterm);
+  const handling = getDdpHandlingCents(
+    rule.country,
+    baseFreight,
+    incoterm,
+    input.handlingFlatInOrderCurrencyCents,
+  );
   const freight = baseFreight + handling;
   const duty = Math.round(goods * (rule.dutyPercent / 100));
   const vatBase = goods + duty + (rule.vatOnFreight ? freight : 0);
