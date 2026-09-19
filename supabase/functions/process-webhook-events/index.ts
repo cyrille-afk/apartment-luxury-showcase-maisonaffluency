@@ -16,6 +16,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getStripe } from "../_shared/stripeClient.ts";
 import { processStripeEvent } from "../_shared/stripeEventProcessor.ts";
 import { nextQueueState } from "../_shared/webhookQueueRetry.ts";
+import { notifyParkedQueueJob } from "../_shared/parkedJobAlert.ts";
 
 const { stripe } = await getStripe("auto");
 
@@ -98,6 +99,24 @@ serve(async (req) => {
           next.exhausted ? " — parked for review" : `, retrying in ${next.delaySeconds}s`
         }: ${next.last_error}`,
       );
+
+      // 🛑 Backoff pool exhausted → the job is parked. Alert ops immediately
+      // (Slack Block Kit + email fallback). Never let alerting break the loop.
+      if (next.exhausted) {
+        try {
+          await notifyParkedQueueJob(supabase, {
+            queueRowId: row.id,
+            eventId: row.event_id,
+            eventType: row.event_type,
+            attempts: row.attempts,
+            maxAttempts: row.max_attempts,
+            error: e,
+            payload: row.payload,
+          });
+        } catch (alertErr) {
+          console.error("[WEBHOOK-WORKER] parked-job alert failed:", alertErr);
+        }
+      }
     }
   }
 
