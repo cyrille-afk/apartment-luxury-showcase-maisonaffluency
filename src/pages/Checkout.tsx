@@ -543,7 +543,7 @@ function OrderSummary({
                       </span>
                       <span className="mt-0.5 block font-light text-[10px] leading-snug text-muted-foreground">
                         {term === "DDP"
-                          ? "Duties & import tax prepaid"
+                          ? "We prepay duties, invoiced separately"
                           : "Duties & import tax at the border"}
                       </span>
                     </button>
@@ -591,10 +591,14 @@ function OrderSummary({
                 <dt className="min-w-0 flex-1 text-muted-foreground">
                   Estimated import duties &amp; {summary.importTaxName || "VAT"} (DDP)
                 </dt>
-                <dd className="shrink-0 whitespace-nowrap tabular-nums font-medium">
-                  {money(summary.importTotalCents, currency)}
+                <dd className="shrink-0 whitespace-nowrap text-right font-medium">
+                  Invoiced separately
                 </dd>
               </div>
+              <p className="mt-1.5 font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
+                Estimated {money(summary.importTotalCents, currency)}. We prepay these at the border
+                and invoice them separately — not part of the order total below.
+              </p>
               <dl className="mt-1.5 space-y-1 font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
                 {summary.importDutyCents > 0 && (
                   <div className="flex items-baseline justify-between gap-6">
