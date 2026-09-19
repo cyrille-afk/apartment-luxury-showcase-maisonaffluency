@@ -150,6 +150,141 @@ async function notifyInternalPaymentReceived(
   }
 }
 
+/**
+ * 🚨 Deposit-cleared team alert.
+ * Fires the instant a quote deposit (or final balance) clears on Stripe.
+ * Posts to the internal Slack/Teams webhook when one is configured
+ * (SLACK_PAYMENTS_WEBHOOK_URL, falling back to SLACK_LOGISTICS_WEBHOOK_URL)
+ * AND emails the internal trade desk. Test-mode sessions are clearly tagged
+ * "[TEST ALERT]" instead of the 🚨 headline. Idempotent per Stripe session.
+ */
+async function notifyDepositCleared(
+  supabase: ReturnType<typeof createClient>,
+  args: {
+    quoteId: string;
+    paymentKind: "deposit" | "balance";
+    amountCents: number;
+    currency: string;
+    payerEmail?: string | null;
+    sessionId: string;
+    isLive: boolean;
+  },
+) {
+  try {
+    // ----- Pull client + item context straight from the quote record -----
+    const { data: quote } = await supabase
+      .from("trade_quotes")
+      .select("client_name, currency, ship_to_email, client_id")
+      .eq("id", args.quoteId)
+      .maybeSingle();
+
+    const clientName = quote?.client_name?.trim() || "Client";
+    const currency = (args.currency || quote?.currency || "USD").toUpperCase();
+
+    const { data: items } = await supabase
+      .from("trade_quote_items")
+      .select("product_id, quantity")
+      .eq("quote_id", args.quoteId);
+
+    let itemsSummary = "";
+    if (items && items.length > 0) {
+      const pickIds = [...new Set(items.map((i: any) => i.product_id).filter(Boolean))];
+      const { data: picks } = pickIds.length
+        ? await supabase.from("designer_curator_picks").select("id, title, designer_name").in("id", pickIds)
+        : { data: [] as any[] };
+      const byId = new Map((picks ?? []).map((p: any) => [p.id, p]));
+      itemsSummary = items
+        .map((i: any) => {
+          const p: any = byId.get(i.product_id);
+          const title = [p?.designer_name, p?.title].filter(Boolean).join(" ") || "Item";
+          return `${i.quantity ?? 1} × ${title}`;
+        })
+        .join(", ");
+    }
+
+    const quoteRef = args.quoteId.slice(0, 8);
+    const fmt = (cents: number) =>
+      ((cents ?? 0) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const amountFormatted = fmt(args.amountCents);
+    const funnelUrl = "https://www.maisonaffluency.com/trade/admin/sales-funnel";
+    const headline = args.paymentKind === "balance" ? "BALANCE CLEARED" : "NEW DEPOSIT CLEARED";
+    const alertLine =
+      `${args.isLive ? "🚨" : "🧪 [TEST ALERT]"} ${headline}: Quote ${quoteRef} for ${clientName} ` +
+      `has successfully paid ${formatCurrency(amountFormatted, currency)} via Stripe.` +
+      (itemsSummary ? `\nItems: ${itemsSummary}` : "") +
+      `\nReview: ${funnelUrl}`;
+
+    // ----- 1) Slack / Teams outgoing webhook (optional) -----
+    const slackWebhook =
+      Deno.env.get("SLACK_PAYMENTS_WEBHOOK_URL")?.trim() ||
+      Deno.env.get("SLACK_LOGISTICS_WEBHOOK_URL")?.trim();
+    if (slackWebhook) {
+      try {
+        const resp = await fetch(slackWebhook, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: alertLine,
+            blocks: [
+              {
+                type: "section",
+                text: { type: "mrkdwn", text: alertLine },
+              },
+              {
+                type: "actions",
+                elements: [
+                  {
+                    type: "button",
+                    text: { type: "plain_text", text: "Open Sales Funnel" },
+                    url: funnelUrl,
+                    style: "primary",
+                  },
+                ],
+              },
+            ],
+          }),
+        });
+        if (!resp.ok) console.error(`[STRIPE-WEBHOOK] deposit Slack alert HTTP ${resp.status}`);
+        else console.log("[STRIPE-WEBHOOK] Deposit alert posted to Slack");
+      } catch (e) {
+        console.error("[STRIPE-WEBHOOK] deposit Slack alert failed:", e);
+      }
+    } else {
+      console.warn("[STRIPE-WEBHOOK] No SLACK_PAYMENTS_WEBHOOK_URL configured; email alert only.");
+    }
+
+    // ----- 2) Internal email alert (always) -----
+    const templateData = {
+      headline,
+      clientName,
+      quoteRef,
+      amountFormatted,
+      currency,
+      itemsSummary: itemsSummary || "—",
+      payerEmail: args.payerEmail ?? quote?.ship_to_email ?? null,
+      paymentKind: args.paymentKind,
+      isLive: args.isLive,
+      paidAt: new Date().toISOString(),
+      funnelUrl,
+    };
+    const idempotencyKey = `deposit-cleared-internal-${args.sessionId}`;
+    const recipients = ["cyrille@maisonaffluency.com", "gregoire@maisonaffluency.com"];
+    for (const recipient of recipients) {
+      const { error } = await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "deposit-cleared-internal",
+          recipientEmail: recipient,
+          idempotencyKey,
+          templateData,
+        },
+      });
+      if (error) console.error(`[STRIPE-WEBHOOK] deposit alert email failed for ${recipient}:`, error);
+    }
+  } catch (e) {
+    console.error("[STRIPE-WEBHOOK] notifyDepositCleared error:", e);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204 });
@@ -428,6 +563,17 @@ serve(async (req) => {
         } else {
           console.log(`[STRIPE-WEBHOOK] Quote ${quoteId} marked as deposit_paid`);
         }
+
+        // 🚨 Internal team alert the second the deposit clears.
+        await notifyDepositCleared(supabase, {
+          quoteId,
+          paymentKind: "deposit",
+          amountCents: session.amount_total ?? 0,
+          currency: session.currency || "USD",
+          payerEmail: session.customer_details?.email || session.customer_email || null,
+          sessionId: session.id,
+          isLive: session.livemode === true,
+        });
       } else if (paymentType === "balance") {
         // Balance paid → move to paid
         const { error } = await supabase
@@ -441,6 +587,17 @@ serve(async (req) => {
         } else {
           console.log(`[STRIPE-WEBHOOK] Quote ${quoteId} marked as paid`);
         }
+
+        // 🚨 Internal team alert on final balance too.
+        await notifyDepositCleared(supabase, {
+          quoteId,
+          paymentKind: "balance",
+          amountCents: session.amount_total ?? 0,
+          currency: session.currency || "USD",
+          payerEmail: session.customer_details?.email || session.customer_email || null,
+          sessionId: session.id,
+          isLive: session.livemode === true,
+        });
       }
     }
   }
