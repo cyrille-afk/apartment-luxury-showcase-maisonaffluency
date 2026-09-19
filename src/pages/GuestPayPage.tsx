@@ -14,11 +14,15 @@ type LinkInfo = {
 
 const SYMBOLS: Record<string, string> = { USD: "$", EUR: "€", GBP: "£", SGD: "S$", HKD: "HK$" };
 
-const formatAmount = (cents: number, currency: string) =>
-  `${currency} ${SYMBOLS[currency] ?? ""}${(cents / 100).toLocaleString("en-US", {
+const formatAmount = (cents: number, currency: string) => {
+  const code = currency.toUpperCase();
+  const symbol = SYMBOLS[code];
+  const amount = (cents / 100).toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })}`;
+  });
+  return symbol ? `${symbol}${amount}` : `${code} ${amount}`;
+};
 
 export default function GuestPayPage() {
   const { token } = useParams<{ token: string }>();
