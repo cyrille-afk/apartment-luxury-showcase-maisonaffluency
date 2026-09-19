@@ -41,6 +41,20 @@ Deno.serve(async (req) => {
   const sent: string[] = []
   const internalRows: { stage: string; label: string; age: string }[] = []
 
+  // Weekend protection: client reminders never fire on Saturday or Sunday.
+  // The daily 09:00 job simply defers them to Monday morning.
+  const weekday = new Date().getUTCDay()
+  const isWeekend = weekday === 0 || weekday === 6
+  const deferred: string[] = []
+
+  // Manual "Pause reminders" overrides set from the Sales Funnel board.
+  const { data: pauseRows } = await supabase
+    .from('funnel_reminder_pauses')
+    .select('entity_type, entity_id, paused')
+    .eq('paused', true)
+  const paused = new Set((pauseRows ?? []).map((p) => `${p.entity_type}:${p.entity_id}`))
+  const isPaused = (type: string, id: string) => paused.has(`${type}:${id}`)
+
   const alreadySent = async (type: string, id: string, n: number) => {
     const { data } = await supabase
       .from('funnel_reminder_log')
