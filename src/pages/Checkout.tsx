@@ -1553,23 +1553,20 @@ export default function Checkout() {
     // Country-based base freight is the checkout delivery amount until an
     // advisor replaces it with a confirmed quote.
     const estimatedShippingCents = shippingCents > 0 ? 0 : estimate.cents;
-    // Tax follows the configurable rules (destination + currency must match).
-    const rule = resolveTaxRule(formCountry, currency);
-    const b2bZeroRated =
-      buyerType === "business" &&
-      isSingaporeUenValid(buyerGstNumber) &&
-      rule &&
-      formCountry?.toUpperCase() === "SG" &&
-      currency.toLowerCase() === "sgd";
-    // GST applies to the full CIF value: goods + the delivery shown in the
-    // summary (confirmed freight, else the estimate).
+    // Tax follows the configurable rules (destination + currency + buyer
+    // registration). One engine decides the rate, the label and the wording.
     const deliveryForTaxCents = shippingCents > 0 ? shippingCents : estimatedShippingCents;
-    const localTaxCents = b2bZeroRated
-      ? 0
-      : computeTaxCents(subtotalCents - discountCents, deliveryForTaxCents, rule);
+    const treatment = resolveTaxTreatment({
+      country: formCountry,
+      currency,
+      buyerType,
+      buyerTaxId: buyerGstNumber,
+      goodsCents: subtotalCents - discountCents,
+      shippingCents: deliveryForTaxCents,
+    });
     // The PaymentIntent is authoritative: once the server has priced the order
     // the displayed tax and total equal the amount actually charged.
-    const taxCents = serverTax !== null ? serverTax.cents : localTaxCents;
+    const taxCents = serverTax !== null ? serverTax.cents : treatment.taxCents;
     // One derivation for every figure on the page.
     const totals = deriveCheckoutTotals({
       subtotalCents,
@@ -1578,20 +1575,7 @@ export default function Checkout() {
       estimatedShippingCents,
       taxCents,
     });
-    // Breakdown inputs: the base the rate is applied to, plus a plain-language
-    // explanation of why the order is taxed or zero-rated.
-    const taxableBaseCents = rule
-      ? Math.max(0, subtotalCents - discountCents) +
-        (rule.taxShipping ? Math.max(0, deliveryForTaxCents) : 0)
-      : 0;
-    const destination = (formCountry || "").trim().toUpperCase() || null;
-    const taxStatusNote = b2bZeroRated
-      ? "B2B zero-rated for GST-registered Singapore businesses. You may claim the input tax on your GST return."
-      : rule
-        ? `${rule.name} charged on ${rule.taxShipping ? "goods and delivery" : "goods"} for ${destination} orders billed in ${currency.toUpperCase()}.`
-        : !destination
-          ? "Select a destination country to see whether tax applies."
-          : `Zero-rated — no ${currency.toUpperCase()} tax rule applies to shipments to ${destination}.`;
+    const destination = treatment.countryIso;
     return {
       currency,
       subtotalCents,
@@ -1604,23 +1588,23 @@ export default function Checkout() {
       freightNotice: estimatedShippingCents > 0 ? estimate.notice : null,
       shippingZoneLabel: estimate.zoneLabel ?? null,
       taxCents,
-      taxLabel: b2bZeroRated
-        ? B2B_TAX_LABEL
-        : taxCents > 0
-          ? (serverTax?.label ?? (rule ? taxRowLabel(rule) : null))
-          : null,
-      taxRegistrationLine: taxCents > 0 ? taxRegistrationLine(rule) : null,
-      taxRate: b2bZeroRated ? 0 : (rule?.rate ?? 0),
-      taxableBaseCents,
-      taxApplied: b2bZeroRated ? true : Boolean(rule),
-      taxStatusNote,
+      taxLabel: serverTax?.label ?? treatment.label,
+      taxRegistrationLine: treatment.registrationLine,
+      taxRate: treatment.rate,
+      taxableBaseCents: treatment.taxableBaseCents,
+      taxApplied: treatment.charged,
+      taxStatusNote: treatment.note,
       taxCountry: destination,
-      taxShipping: Boolean(rule?.taxShipping),
+      taxShipping: Boolean(treatment.rule?.taxShipping),
+      taxTreatment: treatment.treatment,
+      taxStatement: treatment.statement,
+      buyerTaxId: treatment.buyerTaxId,
       deliveryCents: totals.deliveryCents,
       totalCents: totals.totalCents,
       displayTotalCents: totals.displayTotalCents,
       chargeTotalCents: totals.chargeTotalCents,
     };
+
   }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, estimate.capped, estimate.notice, formCountry, serverTax, buyerType, buyerGstNumber]);
 
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
