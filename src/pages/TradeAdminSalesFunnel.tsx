@@ -213,7 +213,8 @@ const TradeAdminSalesFunnel = () => {
         <div>
           <h1 className="font-display text-3xl text-foreground md:text-4xl">Sales funnel</h1>
           <p className="mt-2 font-body text-sm text-muted-foreground">
-            Everything that started but never completed — with automatic reminders sent daily.
+            Everything that started but never completed — with automatic reminders sent on a spaced
+            schedule or paused manually.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
