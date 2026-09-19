@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useState, ReactNode, use
 // of JS into the entry bundle and lengthened the first main-thread task.
 const getSupabase = async () => (await import("@/integrations/supabase/client")).supabase;
 import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 
 export type StudioRole = "owner" | "admin" | "editor" | "viewer";
 
