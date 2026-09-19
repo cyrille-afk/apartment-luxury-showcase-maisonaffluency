@@ -149,7 +149,7 @@ const ClientQuotePaymentEmail = ({
 export const template = {
   component: ClientQuotePaymentEmail,
   subject: (data: Record<string, any>) =>
-    `Your quotation ${data?.quoteRef ?? ''} — ${formatCurrency(data?.amountFormatted, data?.currency)}`, 
+    `Your quotation ${data?.quoteRef ?? ''} — Maison Affluency`,
   displayName: 'Client Quotation & Payment Link',
   previewData: {
     recipientName: 'Agni HK',
