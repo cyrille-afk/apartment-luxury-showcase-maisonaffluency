@@ -91,10 +91,12 @@ export function getFxMeta(src: string, tgt: string): { source: FxSource; fetched
 export function summarizeFxSources(sources: FxSource[]): FxSource {
   const rank: Record<FxSource, number> = {
     "identity": 0,
-    "frankfurter": 1,
-    "open-er-api": 2,
-    "hardcoded": 3,
-    "unknown": 4,
+    "locked": 1,
+    "database": 2,
+    "frankfurter": 3,
+    "open-er-api": 4,
+    "hardcoded": 5,
+    "unknown": 6,
   };
   let worst: FxSource = "identity";
   for (const s of sources) if (rank[s] > rank[worst]) worst = s;
