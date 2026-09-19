@@ -384,6 +384,8 @@ function OrderSummary({
   buyerGstNumber,
   isLoading,
   onIncotermChange,
+  fxLock,
+  onRefreshFx,
 }: {
   lines: CheckoutLine[];
   summary: CheckoutSummary;
@@ -391,6 +393,10 @@ function OrderSummary({
   buyerGstNumber: string;
   isLoading?: boolean;
   onIncotermChange?: (next: Incoterm) => void;
+  /** Session-locked conversion rates the basket was priced at. */
+  fxLock?: CartFxLock | null;
+  /** Re-prices the basket at today's rates. */
+  onRefreshFx?: () => void;
 }) {
   const { currency } = summary;
   // The delivery-term store keeps the selector and the page maths in sync
