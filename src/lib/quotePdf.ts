@@ -400,7 +400,8 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
     appendUkDdpPage(doc, args.ukDdpPage);
   }
   if (args.hkDapPage) {
-    appendHkDapPage(doc, args.hkDapPage);
+    // Page 3 must mirror page 1 exactly: same FX rate, same stamp, same total.
+    appendHkDapPage(doc, { ...args.hkDapPage, quoteTotals: buildHkQuoteTotals(args) });
   }
 
   return doc;
