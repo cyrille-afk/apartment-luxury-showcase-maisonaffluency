@@ -76,7 +76,9 @@ test.describe("Public product iOS canvas", () => {
 
     await expectDarkProductCanvas(page, "initial");
 
-    await page.evaluate(() => window.scrollTo(0, Math.max(1, document.documentElement.scrollHeight / 2)));
+    await page.locator("[data-product-scroll-region]").evaluate((element) => {
+      element.scrollTop = Math.max(1, element.scrollHeight / 2);
+    });
     await page.waitForTimeout(100);
     await expectDarkProductCanvas(page, "scrolled");
 
@@ -119,7 +121,9 @@ test.describe("Public product iOS canvas", () => {
   test("@pixel product and purchasing panel retain their intended surfaces", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "mobile-chrome", "mobile-only visual guard");
 
-    await page.evaluate(() => window.scrollTo(0, Math.max(1, document.documentElement.scrollHeight / 2)));
+    await page.locator("[data-product-scroll-region]").evaluate((element) => {
+      element.scrollTop = Math.max(1, element.scrollHeight / 2);
+    });
     await page.waitForTimeout(100);
     await expect(page).toHaveScreenshot("product-dark-canvas-scrolled.png", {
       fullPage: false,
