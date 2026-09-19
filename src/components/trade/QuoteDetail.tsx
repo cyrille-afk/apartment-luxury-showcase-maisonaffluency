@@ -1635,6 +1635,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       if (insertRes.error || !insertRes.data) throw insertRes.error || new Error("Could not create new draft");
       const newId = insertRes.data.id as string;
 
+      // Lock the FX rate for the new revision from the server rate table.
+      await lockQuoteExchangeRate(newId, (draft as { currency?: string }).currency || currency);
+
       // 3) Copy line items
       const lines = (itemsRes.data || []).map((it: any) => ({ ...it, quote_id: newId }));
       if (lines.length > 0) {
