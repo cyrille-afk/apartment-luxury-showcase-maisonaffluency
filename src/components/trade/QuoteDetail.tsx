@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getDestinationTax } from "@/lib/destinationTax";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
 import { getFxRates, FALLBACK_RATES, getFxSource, getFxMeta, invalidateFxCache, summarizeFxSources, describeFxSource, type FxSource } from "@/lib/fxRates";
+import { lockQuoteExchangeRate } from "@/lib/quoteFxLock";
 import { formatFxSnapshotLine } from "@/lib/fxSnapshot";
 import { FxSourceBadge } from "@/components/trade/FxSourceBadge";
 import { FxAppliedRates } from "@/components/trade/FxAppliedRates";
