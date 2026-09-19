@@ -1,6 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { queryKeys } from "@/lib/queryKeys";
+import { getCachedCatalog, type CatalogSnapshot } from "@/lib/catalogSource";
 
 function slugify(s: string) {
   return String(s)
@@ -45,11 +46,23 @@ export async function fetchPublicProductPage(
     new Set([designer.display_name, designer.name].filter(Boolean)),
   );
 
+  // Anonymous visitors resolve the designer's pick list from the CDN-cached
+  // catalogue manifest; only the single matched product is read live from the
+  // database (indexed lookup by id) for its heavy detail fields.
+  const cachedCatalog: CatalogSnapshot | null = await getCachedCatalog();
+  const cachedDesignerPicks = cachedCatalog && designer.id
+    ? cachedCatalog.picks
+        .filter((p) => p.designer_id === designer.id)
+        .sort((a, b) => (a.sort_order ?? Number.MAX_SAFE_INTEGER) - (b.sort_order ?? Number.MAX_SAFE_INTEGER))
+    : null;
+
   // Fetch picks and the trade-product image fallback in parallel;
   // trade_products is queried by brand so it can run concurrently
   // with picks rather than waiting for the product match.
   const [picksResult, tradeMatchesResult] = await Promise.all([
-    designer.id
+    cachedCatalog
+      ? Promise.resolve({ data: (cachedDesignerPicks || []) as any[] })
+      : designer.id
       ? supabase
           .from("designer_curator_picks_public" as any)
           .select(publicPickFields)
@@ -97,7 +110,27 @@ export async function fetchPublicProductPage(
     const familyNames = Array.from(
       new Set([designer.name, designer.display_name, designer.founder].filter(Boolean)),
     ) as string[];
-    if (familyNames.length > 0) {
+    if (cachedCatalog) {
+      const lowered = new Set(familyNames.map((n) => n.toLowerCase()));
+      const familyIds = cachedCatalog.designers
+        .filter(
+          (d) =>
+            d.id !== designer.id &&
+            ((d.founder && lowered.has(d.founder.toLowerCase())) ||
+              (d.name && lowered.has(d.name.toLowerCase()))),
+        )
+        .map((d) => d.id);
+      if (familyIds.length > 0) {
+        const familyPicks = cachedCatalog.picks
+          .filter((p) => familyIds.includes(p.designer_id))
+          .sort((a, b) => (a.sort_order ?? Number.MAX_SAFE_INTEGER) - (b.sort_order ?? Number.MAX_SAFE_INTEGER)) as any[];
+        const found = matchPick(familyPicks);
+        if (found) {
+          picks = familyPicks;
+          product = found;
+        }
+      }
+    } else if (familyNames.length > 0) {
       const { data: family } = await supabase
         .from("designers")
         .select("id")
@@ -125,16 +158,35 @@ export async function fetchPublicProductPage(
   // Last resort: resolve the product by its canonical slug anywhere in the
   // public catalog (covers cross-brand links and unknown designer slugs).
   if (!product) {
-    const { data: globalPicks } = await supabase
-      .from("designer_curator_picks_public" as any)
-      .select(publicPickFields)
-      .eq("slug", productSlug)
-      .limit(1);
-    const found = matchPick(globalPicks as any[] | null);
+    let globalPicks: any[] | null = null;
+    if (cachedCatalog) {
+      globalPicks = cachedCatalog.picks.filter((p) => p.slug === productSlug).slice(0, 1) as any[];
+    } else {
+      const { data } = await supabase
+        .from("designer_curator_picks_public" as any)
+        .select(publicPickFields)
+        .eq("slug", productSlug)
+        .limit(1);
+      globalPicks = data as any[] | null;
+    }
+    const found = matchPick(globalPicks);
     if (found) {
       picks = globalPicks as any[];
       product = found;
     }
+  }
+
+  if (!product) return null;
+
+  // The manifest carries only listing fields — hydrate the matched product with
+  // its full detail row (single indexed lookup, not a list scan).
+  if (cachedCatalog && product) {
+    const { data: fullRow } = await supabase
+      .from("designer_curator_picks_public" as any)
+      .select(publicPickFields)
+      .eq("id", (product as any).id)
+      .maybeSingle();
+    if (fullRow) product = { ...(product as any), ...(fullRow as any) };
   }
 
   if (!product) return null;
