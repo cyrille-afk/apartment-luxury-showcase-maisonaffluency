@@ -412,7 +412,7 @@ const FunnelPayLinkBlock = ({
           </>
         ) : copied ? (
           <>
-            <Check className="h-3 w-3" /> Link copied
+            <Check className="h-3 w-3" /> Link copied · not sent yet
           </>
         ) : (
           <>
@@ -420,6 +420,27 @@ const FunnelPayLinkBlock = ({
           </>
         )}
       </Button>
+
+      {paymentUrl ? (
+        <div
+          className={cn(
+            "space-y-1 border px-2 py-1.5 font-body text-[10px]",
+            paymentUrl.includes("cs_test_") || testMode
+              ? "border-amber-500/60 bg-amber-500/10 text-amber-700"
+              : "border-emerald-600/50 bg-emerald-600/10 text-emerald-700",
+          )}
+        >
+          <div className="font-semibold uppercase tracking-[0.1em]">
+            {paymentUrl.includes("cs_test_") || testMode
+              ? "Test link created — no real payment possible"
+              : "Live link created — nothing emailed yet"}
+          </div>
+          <a href={paymentUrl} target="_blank" rel="noreferrer" className="block break-all underline">
+            {paymentUrl}
+          </a>
+        </div>
+      ) : null}
+
 
       {quoteId && pdfChecked ? (
         <div
