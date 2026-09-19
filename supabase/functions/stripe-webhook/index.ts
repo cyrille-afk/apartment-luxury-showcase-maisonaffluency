@@ -462,6 +462,8 @@ serve(async (req) => {
         amountPaid: pi.amount_received ?? pi.amount ?? 0,
       });
 
+      await cancelFunnelReminders(supabase, [pi.metadata.cardId, pi.metadata?.quote_id as string]);
+
       await notifyInternalPaymentReceived(supabase, {
         label: pi.metadata?.label || "Sales Funnel payment",
         amountCents: pi.amount_received ?? pi.amount ?? 0,
