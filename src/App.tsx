@@ -212,6 +212,7 @@ const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => (
 const TradeAdminDuplicates = lazy(() => import("./pages/TradeAdminDuplicates"));
 const TradeAdminWhatsAppAlerts = lazy(() => import("./pages/TradeAdminWhatsAppAlerts"));
 const TradeAdminPaymentSettings = lazy(() => import("./pages/TradeAdminPaymentSettings"));
+const DevCheckoutTest = lazy(() => import("./pages/DevCheckoutTest"));
 const TradeAdminFunnelTracker = lazy(() => import("./pages/TradeAdminFunnelTracker"));
 const TradeAdminSalesFunnel = lazy(() => import("./pages/TradeAdminSalesFunnel"));
 const TradeAdminProcurementLedger = lazy(() => import("./pages/TradeAdminProcurementLedger"));
