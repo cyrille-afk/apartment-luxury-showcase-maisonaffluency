@@ -207,6 +207,7 @@ export function designerPicksQueryOptions(designerId: string | undefined, public
             .from("designer_curator_picks_public")
             .select(CURATOR_PICK_GRID_COLUMNS)
             .eq("designer_id", designerId)
+            .returns<PickRow[]>()
         );
         if (error) throw error;
         return sortCuratorPicks(dedupePicks((data || []).map((d) => ({
