@@ -36,16 +36,27 @@ async function ratesFor(base: string): Promise<Record<string, number>> {
   const hit = cache.get(key);
   if (hit && Date.now() - hit.at < TTL_MS) return hit.rates;
   try {
-    const res = await fetch(`https://open.er-api.com/v6/latest/${key}`, {
-      signal: AbortSignal.timeout(5000),
-    });
-    const data = await res.json();
-    if (data?.result === "success" && data?.rates) {
-      cache.set(key, { rates: data.rates, at: Date.now() });
-      return data.rates;
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { auth: { persistSession: false } },
+    );
+    const { data, error } = await supabase
+      .from("currency_rates")
+      .select("target_currency,rate")
+      .eq("base_currency", key);
+    if (error) throw error;
+    if (data?.length) {
+      const rates: Record<string, number> = {};
+      for (const row of data) {
+        const r = Number(row.rate);
+        if (Number.isFinite(r) && r > 0) rates[row.target_currency] = r;
+      }
+      cache.set(key, { rates, at: Date.now() });
+      return rates;
     }
   } catch (e) {
-    console.error("[fxConvert] rate fetch failed", key, String(e));
+    console.error("[fxConvert] rate table lookup failed", key, String(e));
   }
   return {};
 }
