@@ -230,6 +230,7 @@ serve(async (req) => {
             .update({ status: "deposit_paid" })
             .eq("id", quoteId);
           if (qErr) console.error("[STRIPE-WEBHOOK] quote status update failed:", qErr);
+          await cancelFunnelReminders(supabase, [quoteId]);
         }
       }
       return new Response(JSON.stringify({ received: true }), {
