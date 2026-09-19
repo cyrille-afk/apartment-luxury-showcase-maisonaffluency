@@ -1168,6 +1168,23 @@ function buildHkQuoteTotals(args: QuotePdfArgs) {
     );
     if (direct && direct.rate > 0) rate = direct.rate;
     else if (inverse && inverse.rate > 0) rate = 1 / inverse.rate;
+    else {
+      // EUR pivot, still strictly from the quote's own live snapshot — never a
+      // hardcoded rate. (quote ccy → EUR → HKD)
+      const eurToHkd = pairs.find(
+        (p) => p.src.toUpperCase() === "EUR" && p.tgt.toUpperCase() === "HKD",
+      );
+      const ccyToEur = pairs.find(
+        (p) => p.src.toUpperCase() === currency && p.tgt.toUpperCase() === "EUR",
+      );
+      const eurToCcy = pairs.find(
+        (p) => p.src.toUpperCase() === "EUR" && p.tgt.toUpperCase() === currency,
+      );
+      if (eurToHkd && eurToHkd.rate > 0) {
+        if (ccyToEur && ccyToEur.rate > 0) rate = ccyToEur.rate * eurToHkd.rate;
+        else if (eurToCcy && eurToCcy.rate > 0) rate = eurToHkd.rate / eurToCcy.rate;
+      }
+    }
   }
   if (rate == null) return null;
 
