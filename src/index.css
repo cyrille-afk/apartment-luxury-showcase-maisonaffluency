@@ -373,6 +373,37 @@ html.product-detail-root .product-page-root {
   min-height: 100dvh;
 }
 
+/* The mobile product action bar is portaled directly beneath body. Keep its
+   containing block tied to Safari's dynamic viewport and reserve the physical
+   home-indicator inset inside the bar rather than moving the bar itself. */
+@media (max-width: 767px) {
+  html.product-detail-root .product-configurator-canvas {
+    min-height: 100dvh;
+  }
+
+  .mobile-product-commerce-dock {
+    position: fixed !important;
+    inset-inline: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 0px)) !important;
+    z-index: 9999 !important;
+    transform: none !important;
+    overscroll-behavior: none;
+  }
+}
+
+@media (max-width: 339px) {
+  .mobile-product-commerce-summary {
+    display: none !important;
+  }
+
+  .mobile-product-commerce-action {
+    width: 100% !important;
+  }
+}
+
 /* The public product surface remains light, while its outer document canvas is
    dark so iOS elastic scrolling and retracting browser chrome reveal no white gap. */
 html.public-product-canvas,

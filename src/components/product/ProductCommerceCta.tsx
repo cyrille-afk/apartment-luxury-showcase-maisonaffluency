@@ -544,10 +544,10 @@ export default function ProductCommerceCta({
         <div
           data-mobile-commerce-dock
           ref={dockMeasureRef}
-          className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 px-4 pt-3 pb-[env(safe-area-inset-bottom,16px)]"
+          className="mobile-product-commerce-dock md:hidden fixed bottom-0 left-0 right-0 z-[9999] bg-white border-t border-gray-200 px-4 pt-3 pb-[max(16px,env(safe-area-inset-bottom,0px))]"
         >
           <div className="flex min-h-11 w-full items-center justify-between gap-3">
-              <div className="min-w-0 flex-1">
+              <div className="mobile-product-commerce-summary min-w-0 flex-1">
                 {tradeApproved && netLabel ? (
                   <div className="flex flex-col">
                     <span className="font-body text-[9px] tracking-[0.04em] text-muted-foreground truncate">
@@ -581,7 +581,7 @@ export default function ProductCommerceCta({
                 disabled={placingOrder}
                 className={cn(
                   primaryBtn,
-                  "h-11 shrink-0 w-auto px-7 whitespace-nowrap",
+                  "mobile-product-commerce-action h-11 shrink-0 w-auto px-7 whitespace-nowrap",
                   isUnpriced && "px-4 text-[11px] tracking-wide",
                   "active:scale-[0.98] transition-transform duration-150"
                 )}
