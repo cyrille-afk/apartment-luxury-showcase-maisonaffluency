@@ -134,7 +134,13 @@ const TradeQuotesAdmin = () => {
 
   const fetchQuotes = async () => {
     setLoading(true);
-    let query = supabase.from("trade_quotes").select("*").order("updated_at", { ascending: false });
+    // Admin list cards: explicit columns only (full row is fetched on the detail view).
+    let query = supabase
+      .from("trade_quotes")
+      .select(
+        "id, user_id, client_id, status, notes, admin_notes, client_name, currency, submitted_at, responded_at, confirmed_at, created_at, updated_at, billing_mode, landed_cost_cbm, landed_cost_kg, landed_cost_mode",
+      )
+      .order("updated_at", { ascending: false });
     if (filter !== "all") {
       query = query.eq("status", filter);
     } else {
