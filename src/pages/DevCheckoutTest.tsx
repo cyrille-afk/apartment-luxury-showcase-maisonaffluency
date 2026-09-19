@@ -227,7 +227,13 @@ export default function DevCheckoutTest() {
 
         {cancelled && (
           <p className="mt-6 text-sm text-muted-foreground">
-            Checkout was cancelled — nothing was charged.
+            Checkout was cancelled — nothing was charged. You can run it again above.
+          </p>
+        )}
+
+        {malformedSession && (
+          <p className="mt-6 text-sm text-destructive">
+            The returned session reference is not a valid Stripe session id, so no audit was run.
           </p>
         )}
 
@@ -241,7 +247,10 @@ export default function DevCheckoutTest() {
                 size="sm"
                 className="gap-2"
                 disabled={auditing}
-                onClick={() => runAudit(returnedSession)}
+                onClick={() => {
+                  setTimedOut(false);
+                  void runAudit(returnedSession);
+                }}
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${auditing ? "animate-spin" : ""}`} />
                 Re-check
@@ -255,22 +264,52 @@ export default function DevCheckoutTest() {
                 label="Amount"
                 value={
                   audit?.session?.amountTotal != null
-                    ? `${(audit.session.amountTotal / 100).toFixed(2)} ${(audit.session.currency ?? "").toUpperCase()}`
+                    ? `${formatAmount(audit.session.amountTotal, audit.session.zeroDecimal)} ${(audit.session.currency ?? "").toUpperCase()}`
                     : "…"
                 }
               />
               <Row label="Buyer" value={audit?.session?.email ?? "…"} />
+              <Row
+                label="Stripe receipt email"
+                value={audit?.session?.receiptEmail ?? audit?.session?.email ?? "…"}
+              />
               <Row
                 label="Order in database"
                 value={
                   audit
                     ? audit.orderRecorded
                       ? `Recorded · ${audit.order?.status}`
-                      : "Waiting for webhook…"
+                      : timedOut
+                        ? "Not recorded yet"
+                        : "Waiting for webhook…"
                     : "…"
                 }
               />
             </dl>
+
+            {!audit?.orderRecorded && waiting && (
+              <div className="mt-5 flex items-center gap-2 rounded border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Waiting for Stripe to confirm the order in the database — this usually takes a few
+                seconds.
+              </div>
+            )}
+
+            {!audit?.orderRecorded && timedOut && (
+              <div className="mt-5 flex items-start gap-2 rounded border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-400">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>
+                  The payment is recorded at Stripe but no order row appeared within 30 seconds.
+                  Use Re-check; if it stays empty the webhook is not reaching the site.
+                </span>
+              </div>
+            )}
+
+            {audit?.orderLookupFailed && (
+              <p className="mt-4 text-sm text-destructive">
+                The order lookup itself failed — the database could not be read.
+              </p>
+            )}
 
             {audit?.orderRecorded && (
               <div className="mt-5 flex items-center gap-2 rounded border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-emerald-700 dark:text-emerald-400">
@@ -289,8 +328,11 @@ export default function DevCheckoutTest() {
               className="mt-5"
               onClick={() => {
                 params.delete("session_id");
+                params.delete("cancelled");
                 setParams(params, { replace: true });
                 setAudit(null);
+                setAuditError(null);
+                setTimedOut(false);
               }}
             >
               Clear
