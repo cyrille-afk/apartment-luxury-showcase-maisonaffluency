@@ -23,6 +23,7 @@ import {
   type ExtractedIdentifier,
 } from "./regional.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { sendAdminWhatsApp } from "../_shared/twilioWhatsAppSender.ts";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 // Stage 1 — fast, cost-effective multimodal parse of the credential document.
