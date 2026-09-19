@@ -1275,6 +1275,7 @@ function WireForm({
           address,
           buyerType,
           buyerGstNumber,
+          buyerTaxId: normaliseBuyerTaxId(buyerGstNumber),
         },
       });
       if (error) throw error;
@@ -1536,6 +1537,28 @@ export default function Checkout() {
   );
   const [buyerType, setBuyerType] = useState<BuyerType>("private");
   const [buyerGstNumber, setBuyerGstNumber] = useState("");
+  // A verified trade partner already gave us their VAT / GST registration on
+  // their application — never ask a second time.
+  const vatPrefilled = useRef(false);
+  useEffect(() => {
+    if (!user?.id || vatPrefilled.current) return;
+    vatPrefilled.current = true;
+    supabase
+      .from("trade_applications")
+      .select("tax_vat_id, status")
+      .eq("user_id", user.id)
+      .eq("status", "approved")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        const id = normaliseBuyerTaxId((data as any)?.tax_vat_id);
+        if (id) {
+          setBuyerGstNumber((prev) => prev || id);
+          setBuyerType("business");
+        }
+      });
+  }, [user?.id]);
   // Approved trade profiles are corporate buyers by definition.
   const businessPrefilled = useRef(false);
   useEffect(() => {
@@ -2085,6 +2108,7 @@ export default function Checkout() {
   }
 
   return (
+    <CheckoutTaxCountryContext.Provider value={summary.taxCountry}>
     <div className="min-h-screen bg-background text-foreground">
       <Helmet>
         <title>Secure Checkout — Maison Affluency</title>
@@ -2262,5 +2286,6 @@ export default function Checkout() {
         </section>
       </main>
     </div>
+    </CheckoutTaxCountryContext.Provider>
   );
 }
