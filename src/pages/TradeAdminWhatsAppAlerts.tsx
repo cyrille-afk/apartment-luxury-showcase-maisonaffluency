@@ -116,23 +116,15 @@ export default function TradeAdminWhatsAppAlerts() {
   }, [isAdmin, load]);
 
   // Real-time: new Twilio webhook events append to the history without a refresh.
-  useEffect(() => {
-    if (!isAdmin) return;
-    const channel = supabase
-      .channel("whatsapp-delivery-events")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "whatsapp_delivery_events" },
-        (payload) => {
-          const e = payload.new as DeliveryEvent;
-          setEvents((prev) => ({ ...prev, [e.message_sid]: [...(prev[e.message_sid] ?? []), e] }));
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [isAdmin]);
+  useRealtimeTables(
+    "whatsapp_delivery_events",
+    (event) => {
+      if (event.eventType !== "INSERT") return;
+      const e = event.new as DeliveryEvent;
+      setEvents((prev) => ({ ...prev, [e.message_sid]: [...(prev[e.message_sid] ?? []), e] }));
+    },
+    isAdmin,
+  );
 
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
