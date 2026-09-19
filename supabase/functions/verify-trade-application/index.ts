@@ -163,8 +163,6 @@ async function notifyAdmin(admin: any, app: any, aiError: string, attempts: numb
   }
 }
 
-const TWILIO_GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
-
 // Twilio failure → persist the error in Supabase and email the operator, so a
 // flagged application is never lost even if WhatsApp delivery is down.
 async function whatsappFallback(
