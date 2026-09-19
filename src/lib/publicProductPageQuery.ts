@@ -189,8 +189,6 @@ export async function fetchPublicProductPage(
     if (fullRow) product = { ...(product as any), ...(fullRow as any) };
   }
 
-  if (!product) return null;
-
   // If the route designer was unresolvable (trade-only or unknown parent slug),
   // adopt the designer that actually owns the matched pick.
   if (!designer.id && (product as any).designer_id) {
