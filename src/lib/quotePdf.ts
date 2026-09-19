@@ -209,6 +209,17 @@ const fmtMoney = (cents: number | null | undefined, currency: string): string =>
 const fmtDate = (d: Date) =>
   d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
+const CURRENCY_CODES = new Set(["HKD", "USD", "EUR", "GBP", "SGD", "AED", "CHF", "AUD", "CAD", "JPY", "CNY"]);
+
+/** Prevent a currency selector value from leaking into a postal address. */
+const cleanPostalCode = (value?: string | null): string => {
+  const postal = (value || "").trim();
+  if (!postal) return "";
+  const parts = postal.split(/\s+/);
+  while (parts.length > 0 && CURRENCY_CODES.has((parts.at(-1) || "").toUpperCase())) parts.pop();
+  return parts.join(" ");
+};
+
 /**
  * Fetch an image URL and return a base64 data URL suitable for jsPDF.addImage.
  * Uses Cloudinary auto-optimization for non-Cloudinary URLs (proxy → CORS-safe).
@@ -245,6 +256,9 @@ async function fetchImageDataUrl(url: string): Promise<{ data: string; w: number
 
 export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
+  // Compute all monetary state once. Page 1 and every appended annex receive
+  // this exact immutable snapshot rather than reconstructing quote maths.
+  const quoteTotals = computeQuoteTotals(args);
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const M = 48;
@@ -310,7 +324,7 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
 
   // ---- Totals block (right aligned)
   y = ensureSpace(doc, y, 220, pageH);
-  y = drawTotals(doc, args, M, y, contentW);
+  y = drawTotals(doc, args, quoteTotals, M, y, contentW);
 
   // ---- FX audit line (compliance) — shown whenever a snapshot was passed,
   //      even if all rates are identity, so the client sees a timestamped
@@ -400,8 +414,9 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
     appendUkDdpPage(doc, args.ukDdpPage);
   }
   if (args.hkDapPage) {
-    // Page 3 must mirror page 1 exactly: same FX rate, same stamp, same total.
-    appendHkDapPage(doc, { ...args.hkDapPage, quoteTotals: buildHkQuoteTotals(args) });
+    // Page 3 inherits the same object used to draw page 1. Its landed-cost
+    // estimator is deliberately excluded from every displayed monetary field.
+    appendHkDapPage(doc, { ...args.hkDapPage, quoteTotals: buildHkQuoteTotals(args, quoteTotals) });
   }
 
   return doc;
@@ -686,12 +701,8 @@ function drawCompanyAndMeta(
   if (b.line2) addr.push(b.line2);
   const cityRegion = [b.city, b.region].filter(Boolean).join(", ");
   // Guard against a currency code accidentally saved in the postal-code field
-  // (e.g. "Hong Kong HKD") — never print it inside the address.
-  const postal = (b.postalCode || "").trim();
-  const postalIsCurrencyCode =
-    /^[A-Za-z]{3}$/.test(postal) &&
-    ["HKD", "USD", "EUR", "GBP", "SGD", "AED", "CHF", "AUD", "CAD", "JPY", "CNY"].includes(postal.toUpperCase());
-  const cityLine = [cityRegion, postalIsCurrencyCode ? "" : postal].filter(Boolean).join(" ");
+  // (e.g. "HKD" or "Kowloon Bay HKD") — never print it inside the address.
+  const cityLine = [cityRegion, cleanPostalCode(b.postalCode)].filter(Boolean).join(" ");
   if (cityLine) addr.push(cityLine);
   if (b.country) addr.push(b.country);
 
@@ -778,7 +789,7 @@ function drawCompanyAndMeta(
   if (s.address1) shipAddr.push(s.address1);
   if (s.address2) shipAddr.push(s.address2);
   const sCityRegion = [s.city, s.state].filter(Boolean).join(", ");
-  const sCityLine = [sCityRegion, s.postalCode].filter(Boolean).join(" ");
+  const sCityLine = [sCityRegion, cleanPostalCode(s.postalCode)].filter(Boolean).join(" ");
   if (sCityLine) shipAddr.push(sCityLine);
   if (s.country) shipAddr.push(s.country);
   const shipHasAny = shipDifferent && (
@@ -1122,7 +1133,18 @@ function drawTable(
  * Single source of truth for the money printed on page 1 — reused by the
  * landed-cost annex so both pages can never drift apart.
  */
-export function computeQuoteTotals(args: QuotePdfArgs) {
+export interface ComputedQuoteTotals {
+  readonly extrasList: ReadonlyArray<{ label: string; amountCents: number }>;
+  readonly extrasTotalCents: number;
+  readonly discountCents: number;
+  readonly afterDiscount: number;
+  readonly insuranceCents: number;
+  readonly gstCents: number;
+  readonly shippingEstimateCents: number;
+  readonly grand: number;
+}
+
+export function computeQuoteTotals(args: QuotePdfArgs): ComputedQuoteTotals {
   const extrasList = (args.extras || []).filter((e) => (e?.amountCents || 0) !== 0);
   const extrasTotalCents = extrasList.reduce((s, e) => s + (e.amountCents || 0), 0);
   const discountCents = args.tradeDiscountApplied
@@ -1136,8 +1158,8 @@ export function computeQuoteTotals(args: QuotePdfArgs) {
   const gstCents = args.gstEnabled ? Math.round(baseForGst * args.gstRate / 100) : 0;
   const shippingEstimateCents = Math.max(0, Math.round(args.shippingEstimateCents || 0));
   const grand = baseForGst + gstCents + shippingEstimateCents;
-  return {
-    extrasList,
+  return Object.freeze({
+    extrasList: Object.freeze(extrasList.map((extra) => Object.freeze({ ...extra }))),
     extrasTotalCents,
     discountCents,
     afterDiscount,
@@ -1145,7 +1167,7 @@ export function computeQuoteTotals(args: QuotePdfArgs) {
     gstCents,
     shippingEstimateCents,
     grand,
-  };
+  });
 }
 
 /**
@@ -1153,7 +1175,7 @@ export function computeQuoteTotals(args: QuotePdfArgs) {
  * The rate comes from the quote's own FX snapshot (the same stamp printed on
  * page 1) — there is no hardcoded pivot rate anywhere in this path.
  */
-function buildHkQuoteTotals(args: QuotePdfArgs) {
+function buildHkQuoteTotals(args: QuotePdfArgs, totals: ComputedQuoteTotals) {
   const currency = (args.currency || "").toUpperCase();
   let rate: number | null = currency === "HKD" ? 1 : null;
   let fxLabel: string | null = null;
@@ -1210,22 +1232,22 @@ function buildHkQuoteTotals(args: QuotePdfArgs) {
     fxLabel = "Quote is issued in HKD — no conversion applied to this estimate.";
   }
 
-  const t = computeQuoteTotals(args);
-  const toHkd = (cents: number) => Math.round(cents * rate!);
+  const resolvedRate = rate;
+  const toHkd = (cents: number) => Math.round(cents * resolvedRate);
   return {
     fxLabel,
-    goodsHkdCents: toHkd(t.afterDiscount),
-    extras: t.extrasList.map((e) => ({ label: e.label, amountCents: toHkd(e.amountCents) })),
-    insuranceHkdCents: toHkd(t.insuranceCents),
-    gstHkdCents: toHkd(t.gstCents),
+    goodsHkdCents: toHkd(totals.afterDiscount),
+    extras: totals.extrasList.map((e) => ({ label: e.label, amountCents: toHkd(e.amountCents) })),
+    insuranceHkdCents: toHkd(totals.insuranceCents),
+    gstHkdCents: toHkd(totals.gstCents),
     gstRate: args.gstEnabled ? args.gstRate : 0,
-    shippingHkdCents: toHkd(t.shippingEstimateCents),
+    shippingHkdCents: toHkd(totals.shippingEstimateCents),
     // Rounded from the page-1 grand total so the annex lands on the same figure.
-    orderTotalHkdCents: toHkd(t.grand),
+    orderTotalHkdCents: toHkd(totals.grand),
   };
 }
 
-function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, contentW: number): number {
+function drawTotals(doc: jsPDF, args: QuotePdfArgs, totals: ComputedQuoteTotals, M: number, y: number, contentW: number): number {
   const blockW = 280;
   const x = M + contentW - blockW;
   let cy = y;
@@ -1236,14 +1258,9 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   const rows: { label: string; value: string; strong?: boolean; muted?: boolean }[] = [];
   // Additional charges (crating, hand-loading, surcharges) are NOT discountable.
   // They render as full lines after the Net subtotal / before shipping.
-  const extrasList = (args.extras || []).filter((e) => (e?.amountCents || 0) !== 0);
-  const extrasTotalCents = extrasList.reduce((s, e) => s + (e.amountCents || 0), 0);
+  const extrasList = totals.extrasList;
   rows.push({ label: "Subtotal", value: fmtMoney(args.subtotalCents, args.currency) });
-  const discountCents = args.tradeDiscountApplied
-    ? (typeof args.tradeDiscountCents === "number"
-        ? Math.round(args.tradeDiscountCents)
-        : Math.round(args.subtotalCents * args.tradeDiscountPct))
-    : 0;
+  const discountCents = totals.discountCents;
   if (discountCents > 0) {
     const pctTxt = `${(args.tradeDiscountPct * 100).toFixed(args.tradeDiscountPct * 100 % 1 === 0 ? 0 : 1)}%`;
     rows.push({
@@ -1254,7 +1271,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
       muted: true,
     });
   }
-  const afterDiscount = args.subtotalCents - discountCents;
+  const afterDiscount = totals.afterDiscount;
   if (discountCents > 0) {
     rows.push({ label: "Net subtotal", value: fmtMoney(afterDiscount, args.currency) });
   }
@@ -1274,8 +1291,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
       muted: true,
     });
   }
-  const baseForGst = afterDiscount + extrasTotalCents + (args.insurancePremiumCents || 0);
-  const gstCents = args.gstEnabled ? Math.round(baseForGst * args.gstRate / 100) : 0;
+  const gstCents = totals.gstCents;
   if (args.gstEnabled) {
     rows.push({
       label: `GST (${args.gstRate}%)`,
@@ -1283,7 +1299,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
       muted: true,
     });
   }
-  const shippingEstimateCents = Math.max(0, Math.round(args.shippingEstimateCents || 0));
+  const shippingEstimateCents = totals.shippingEstimateCents;
   if (shippingEstimateCents > 0) {
     const baseLabel = args.shippingModeLabel
       ? `${args.shippingModeLabel} estimate`
@@ -1308,7 +1324,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
       });
     }
   }
-  const grand = baseForGst + gstCents + shippingEstimateCents;
+  const grand = totals.grand;
   const depositPct = Math.max(0, Math.min(1, args.depositPct ?? 0.6));
   const deposit = Math.round(grand * depositPct);
   const balance = grand - deposit;
