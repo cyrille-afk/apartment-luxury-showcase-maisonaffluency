@@ -2151,7 +2151,7 @@ const PublicProductPageContent: React.FC = () => {
   };
 
   return (
-    <div className="product-configurator-canvas min-h-[100dvh] motion-safe:animate-fade-in">
+    <div className="product-configurator-canvas min-h-[100dvh] overflow-x-hidden motion-safe:animate-fade-in">
       {(() => {
         const canonical = absoluteUrl(location.pathname);
         const ogImg = toOgImage(product.image_url || images[0] || null);
@@ -2237,7 +2237,7 @@ const PublicProductPageContent: React.FC = () => {
         );
       })()}
 
-      <div className="product-page-root flex min-h-[100dvh] flex-col bg-background text-foreground">
+      <div className="product-page-root flex h-[100dvh] min-h-[-webkit-fill-available] flex-col overflow-hidden bg-background text-foreground md:h-auto md:min-h-[100dvh] md:overflow-visible">
         <Navigation borderless />
 
         {/* Desktop slim sticky purchase bar — price + button labels follow the
@@ -2266,7 +2266,8 @@ const PublicProductPageContent: React.FC = () => {
 
 
 
-        <main className="flex-1 w-full pt-[var(--header-h)] pb-[120px] md:pb-20 max-w-7xl mx-auto px-4 md:px-5 lg:px-8">
+        <div data-product-scroll-region className="product-page-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto md:contents">
+        <main className="w-full pt-[var(--header-h)] pb-0 md:pb-20 max-w-7xl mx-auto px-4 md:px-5 lg:px-8">
           <button
             type="button"
             onClick={() => navigate(fromPath || fallbackGridPath)}
@@ -3125,13 +3126,13 @@ const PublicProductPageContent: React.FC = () => {
               </div>
             </div>
           )}
+          <div data-mobile-commerce-buffer className="h-24 md:hidden" aria-hidden="true" />
         </main>
 
         <Footer />
-      </div>
+        </div>
 
-      {/* One authoritative mobile dock, outside the product layout and footer.
-          ProductCommerceCta portals its fixed surface directly to document.body. */}
+      {/* One authoritative mobile dock, isolated from the scrolling product copy. */}
       {showPublicCommerce && (
         <ProductCommerceCta
           productId={product.id}
@@ -3173,6 +3174,7 @@ const PublicProductPageContent: React.FC = () => {
           redirectTo={location.pathname + location.search}
         />
       )}
+      </div>
       <GalleryDetailsFloatingNav
         showAfterElementId="related-picks-section"
         azHref="/designers"
