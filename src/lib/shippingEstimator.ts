@@ -38,9 +38,31 @@ export interface ShippingBreakdown {
   transit_days_min: number | null;
   transit_days_max: number | null;
   available: boolean;
+  /**
+   * True when no direct lane existed and the estimate was derived from a
+   * consolidation-hub lane (e.g. an Italian maker routed via the French hub).
+   */
+  is_indicative?: boolean;
+  /** Origin actually priced when `is_indicative` is true. */
+  proxy_origin?: string | null;
   reason?: string;
   detail: Array<{ label: string; value_cents: number; method: string }>;
 }
+
+/**
+ * Consolidation hubs used when a maker's own country has no published lane
+ * to the destination. European makers consolidate through the French hub
+ * before the cross-Channel / export leg, so the hub lane plus a transfer
+ * uplift is a far better answer than "contact us".
+ */
+const CONSOLIDATION_HUBS: Record<string, string> = {
+  FR: "FR", MC: "FR", BE: "FR", LU: "FR", NL: "FR", DE: "FR", CH: "FR",
+  IT: "FR", ES: "FR", PT: "FR", AT: "FR", DK: "FR", SE: "FR", IE: "FR",
+  GB: "FR", GR: "FR", PL: "FR", CZ: "FR",
+};
+
+/** Uplift applied to a hub lane to cover the inland leg to the hub. */
+const HUB_TRANSFER_UPLIFT = 0.12;
 
 const EMPTY_BREAKDOWN = (currency = "EUR", reason?: string): ShippingBreakdown => ({
   freight_cents: 0, fuel_cents: 0, insurance_cents: 0, duty_cents: 0, vat_cents: 0,
@@ -81,16 +103,42 @@ export async function estimateShipping(input: EstimatorInput): Promise<ShippingB
 
   const { data: lanes, error: lanesError } = await lanesQuery;
   if (lanesError) throw lanesError;
-  if (!lanes || lanes.length === 0) {
+
+  let workingLanes = lanes ?? [];
+  let proxyOrigin: string | null = null;
+
+  if (workingLanes.length === 0) {
+    // Fall back to the consolidation hub for the maker's region before
+    // giving up — an indicative figure beats an empty shipping line.
+    const hub = CONSOLIDATION_HUBS[input.origin_country.toUpperCase()];
+    if (hub && hub !== input.origin_country.toUpperCase()) {
+      let hubQuery = supabase
+        .from("shipping_lanes")
+        .select("*")
+        .eq("origin_country", hub)
+        .eq("dest_country", input.dest_country)
+        .eq("active", true);
+      if (input.preferred_mode) hubQuery = hubQuery.eq("mode", input.preferred_mode);
+      const { data: hubLanes, error: hubErr } = await hubQuery;
+      if (hubErr) throw hubErr;
+      if (hubLanes?.length) {
+        workingLanes = hubLanes;
+        proxyOrigin = hub;
+      }
+    }
+  }
+
+  if (workingLanes.length === 0) {
     return EMPTY_BREAKDOWN(currency, "No lane configured — contact us for a manual quote.");
   }
+  const lanes2 = workingLanes;
 
   // 2) Brackets for those lanes (today within validity)
   const today = new Date().toISOString().slice(0, 10);
   const { data: brackets, error: brErr } = await supabase
     .from("shipping_rate_brackets")
     .select("*")
-    .in("lane_id", lanes.map(l => l.id))
+    .in("lane_id", lanes2.map(l => l.id))
     .lte("valid_from", today);
   if (brErr) throw brErr;
 
@@ -104,7 +152,7 @@ export async function estimateShipping(input: EstimatorInput): Promise<ShippingB
 
   // For each lane, compute freight, pick cheapest
   let best: { lane: any; bracket: any; freight: number; chargeableKg: number } | null = null;
-  for (const lane of lanes) {
+  for (const lane of lanes2) {
     const laneKg = chargeableKgFor(lane.mode);
     const candidates = (brackets || []).filter(b =>
       b.lane_id === lane.id &&
@@ -188,6 +236,7 @@ export async function estimateShipping(input: EstimatorInput): Promise<ShippingB
     if (vat > 0) detail.push({ label: `Import VAT/GST (${d.vat_percent}%)`, value_cents: vat, method: "percent" });
   }
 
+  if (proxyOrigin) best.freight = Math.round(best.freight * (1 + HUB_TRANSFER_UPLIFT));
   const total = best.freight + fuel + insurance + customs + handling + lastMile + duty + vat;
 
   return {
@@ -207,6 +256,11 @@ export async function estimateShipping(input: EstimatorInput): Promise<ShippingB
     transit_days_min: best.lane.transit_days_min,
     transit_days_max: best.lane.transit_days_max,
     available: true,
+    is_indicative: proxyOrigin != null,
+    proxy_origin: proxyOrigin,
+    reason: proxyOrigin
+      ? `Indicative rate: no direct ${input.origin_country} → ${input.dest_country} lane, priced via the ${proxyOrigin} consolidation hub including a ${Math.round(HUB_TRANSFER_UPLIFT * 100)}% inland transfer uplift.`
+      : undefined,
     detail,
   };
 }
