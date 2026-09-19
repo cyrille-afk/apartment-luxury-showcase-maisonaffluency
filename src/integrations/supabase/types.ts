@@ -9184,6 +9184,57 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_events: {
+        Row: {
+          attempts: number
+          created_at: string
+          event_id: string
+          event_type: string
+          id: string
+          last_error: string | null
+          locked_at: string | null
+          max_attempts: number
+          next_attempt_at: string
+          payload: Json
+          processed_at: string | null
+          provider: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          event_id: string
+          event_type: string
+          id?: string
+          last_error?: string | null
+          locked_at?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          payload?: Json
+          processed_at?: string | null
+          provider?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          event_id?: string
+          event_type?: string
+          id?: string
+          last_error?: string | null
+          locked_at?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          payload?: Json
+          processed_at?: string | null
+          provider?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       whatsapp_delivery_events: {
         Row: {
           channel: string
@@ -9362,6 +9413,31 @@ export type Database = {
       can_view_studio: {
         Args: { _studio_id: string; _user_id: string }
         Returns: boolean
+      }
+      claim_webhook_events: {
+        Args: { batch_size?: number }
+        Returns: {
+          attempts: number
+          created_at: string
+          event_id: string
+          event_type: string
+          id: string
+          last_error: string | null
+          locked_at: string | null
+          max_attempts: number
+          next_attempt_at: string
+          payload: Json
+          processed_at: string | null
+          provider: string
+          status: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "webhook_events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       compute_curator_pick_slug: {
         Args: { _subtitle: string; _title: string }
@@ -9883,6 +9959,7 @@ export type Database = {
         Returns: string
       }
       validate_portal_session: { Args: { _token: string }; Returns: Json }
+      webhook_events_has_work: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role:
