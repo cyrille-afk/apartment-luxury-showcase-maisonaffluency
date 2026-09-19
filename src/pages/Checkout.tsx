@@ -1299,8 +1299,10 @@ function PaymentForm({
           cta={
             paymentReady
               ? paynow
-                ? `Generate PayNow QR · ${money(total, currency)}`
-                : `Confirm & securely pay ${money(total, currency)}`
+                ? `Generate PayNow QR · ${money(chargeNow, currency)}`
+                : depositPct > 0
+                  ? `Pay ${Math.round(depositPct * 100)}% deposit ${money(chargeNow, currency)}`
+                  : `Confirm & securely pay ${money(total, currency)}`
               : "Preparing secure payment…"
           }
           busy={submitting}
