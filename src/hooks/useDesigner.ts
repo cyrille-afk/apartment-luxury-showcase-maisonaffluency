@@ -307,10 +307,11 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
 
       const { data, error } = await supabase
         .from("designer_curator_picks")
-        .select("*")
+        .select(CURATOR_PICK_GRID_COLUMNS_TRADE)
         .in("designer_id", designerIds)
         .eq("is_hidden", false)
-        .order("sort_order", { ascending: true });
+        .order("sort_order", { ascending: true })
+        .returns<PickRow[]>();
 
       if (error) throw error;
 
