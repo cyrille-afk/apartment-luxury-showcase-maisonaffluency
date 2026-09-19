@@ -59,7 +59,7 @@ export function formatCurrency(
     return str.replace(trailingCode, "").trim();
   }
 
-  // Starts with "CODE SYMBOL amount" (e.g. "EUR €11,100.00").
+  // Starts with "CODE SYMBOL amount" (e.g. "EUR €11,100.00" or "EUR€11,100.00").
   if (symbol) {
     const leadingCodeSymbol = new RegExp(
       `^${code}\\s*${escapeRegex(symbol)}\\s*`,
@@ -67,7 +67,7 @@ export function formatCurrency(
     );
     const cleaned = str.replace(leadingCodeSymbol, "");
     if (cleaned !== str) {
-      return cleaned.replace(trailingCode, "").trim();
+      return `${symbol}${cleaned.replace(trailingCode, "").trim()}`;
     }
   }
 
