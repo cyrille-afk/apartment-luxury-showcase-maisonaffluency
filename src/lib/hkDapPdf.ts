@@ -67,6 +67,10 @@ const fmtHkd = (cents: number) =>
  */
 export function renderHkDapPage(doc: jsPDF, args: HkDapPageArgs): void {
   const { quoteRef, clientName, quoteCurrency, cbm, kg, mode, carrier, transitDays, hkd, origins } = args;
+  // Page-1 figures win whenever they are available.
+  const qt = args.quoteTotals ?? null;
+  /** Exact cents when mirroring the quote; rounded when purely indicative. */
+  const money = (cents: number) => (qt ? fmtHkdExact(cents) : fmtHkd(cents));
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const M = 56;
