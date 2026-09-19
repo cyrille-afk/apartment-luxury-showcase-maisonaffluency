@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, createContext, useContext } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { Elements, PaymentElement, AddressElement, ExpressCheckoutElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
@@ -25,6 +25,7 @@ import RegionalPaymentPanel from "@/components/checkout/RegionalPaymentPanel";
 import { useRegionalLogistics, mapCountryToRegionTier } from "@/hooks/useRegionalLogistics";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import {
+  TAX_RULES,
   resolveTaxRule,
   resolveTaxTreatment,
   businessToggleLabel,
@@ -381,11 +382,8 @@ function OrderSummary({
           "SGD",
           fxRates,
         );
-  const isB2BZeroRated =
-    buyerType === "business" &&
-    isSingaporeUenValid(buyerGstNumber) &&
-    summary.taxCountry === "SG" &&
-    currency.toLowerCase() === "sgd";
+  const isB2BZeroRated = summary.taxTreatment === "b2b_zero_rated";
+  const isReverseCharge = summary.taxTreatment === "reverse_charge";
 
   const sgImportGstThreshold = useMemo(() => {
     if (summary.taxCountry !== "SG" || isB2BZeroRated || summary.taxApplied) return null;
@@ -531,12 +529,10 @@ function OrderSummary({
             ) : (
               <div className="flex items-baseline justify-between gap-6">
                 <dt className="text-muted-foreground">
-                  {isB2BZeroRated
-                    ? B2B_TAX_LABEL
-                    : summary.taxLabel || (summary.taxApplied ? "Tax" : "Tax (zero-rated)")}
+                  {summary.taxLabel || (summary.taxApplied ? "Tax" : "Tax (zero-rated)")}
                 </dt>
                 <dd className="tabular-nums font-medium">
-                  {isB2BZeroRated
+                  {isB2BZeroRated || isReverseCharge
                     ? moneyDecimal(0, currency)
                     : summary.taxApplied
                       ? money(summary.taxCents, currency)
@@ -569,9 +565,11 @@ function OrderSummary({
                       <dd className="tabular-nums">
                         {isB2BZeroRated
                           ? "0% — B2B zero-rated"
-                          : summary.taxApplied
-                            ? `${Number((summary.taxRate * 100).toFixed(2))}%`
-                            : "0% — zero-rated"}
+                          : isReverseCharge
+                            ? "0% — reverse charge"
+                            : summary.taxApplied
+                              ? `${Number((summary.taxRate * 100).toFixed(2))}%`
+                              : "0% — zero-rated"}
                       </dd>
                     </div>
                     <div className="flex items-baseline justify-between gap-6">
@@ -584,11 +582,7 @@ function OrderSummary({
                     </div>
                   </dl>
                 )}
-                <p>
-                  {isB2BZeroRated
-                    ? "B2B zero-rated for GST-registered Singapore businesses. You may claim the input tax on your GST return."
-                    : summary.taxStatusNote}
-                </p>
+                <p>{summary.taxStatusNote}</p>
                 <p>
                   (Equivalent to Approx. {money(sgdEquivalentCents, "SGD")} based on current rates)
                 </p>
@@ -607,9 +601,13 @@ function OrderSummary({
                     </p>
                   </>
                 )}
-                {isB2BZeroRated ? (
-                  <p>Buyer GST / UEN: {buyerGstNumber.trim().toUpperCase()}</p>
-                ) : summary.taxRegistrationLine ? (
+                {summary.buyerTaxId ? (
+                  <p>
+                    Buyer {summary.taxCountry === "GB" ? "VAT" : "GST / UEN"} No.:{" "}
+                    {summary.buyerTaxId}
+                  </p>
+                ) : null}
+                {summary.taxRegistrationLine ? (
                   <p>{summary.taxRegistrationLine}</p>
                 ) : null}
               </div>
