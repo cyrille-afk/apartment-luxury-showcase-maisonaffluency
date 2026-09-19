@@ -314,11 +314,15 @@ export default function TradeAdminPaymentSettings() {
     }
   };
 
+  // Saved directory is the source of truth until the admin starts editing.
+  const recipientsValue = recipientsDirty ? recipients : (status?.whatsappRecipients ?? "");
+  const recipientCount = recipientsValue.split(/[,\n;]/).filter((v) => v.trim()).length;
+
   const saveRecipients = async () => {
     setSavingRecipients(true);
     try {
       const { data, error } = await supabase.functions.invoke("payment-credentials", {
-        body: { action: "save_recipients", recipients: recipients },
+        body: { action: "save_recipients", recipients: recipientsValue },
       });
       if (error) {
         const response = (error as { context?: Response }).context;
