@@ -5,6 +5,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Link, Img, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.tsx'
+import { formatCurrency } from './currency.ts'
 
 const SITE_NAME = 'Maison Affluency'
 
