@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, ArrowLeft, Loader2, RefreshCw, ShieldAlert, Activity, Wifi, WifiOff } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Loader2, RefreshCw, ShieldAlert, Activity, Wifi, WifiOff, HeartPulse } from "lucide-react";
 import { useRealtimeTables, useRealtimeConnected } from "@/contexts/RealtimeMultiplexerContext";
 
 type ParkedRow = {
@@ -47,6 +47,21 @@ type RecentEvent = {
   processed_at: string | null;
 };
 
+type WorkerHealth = {
+  last_start_at: string | null;
+  last_success_at: string | null;
+  last_failure_at: string | null;
+  last_error: string | null;
+  consecutive_failures: number;
+  boot_ok: boolean;
+};
+
+type PendingAge = {
+  oldest_pending_age_seconds: number | null;
+  oldest_pending_event_id: string | null;
+  stalled_over_10m: number | null;
+};
+
 type Overview = {
   pending: number;
   processing: number;
@@ -56,6 +71,8 @@ type Overview = {
   has_work: boolean;
   ack_latency: AckLatency | null;
   recent: RecentEvent[] | null;
+  worker_health: WorkerHealth | null;
+  pending_age: PendingAge | null;
 };
 
 const STATUS_STYLES: Record<string, string> = {
@@ -257,6 +274,71 @@ export default function TradeAdminQueue() {
         <MetricCard label="Parked for review" value={overview?.parked} critical loading={overviewLoading} />
         <MetricCard label="Succeeded (24h)" value={overview?.processed_24h} loading={overviewLoading} />
       </div>
+
+      {(() => {
+        const h = overview?.worker_health ?? null;
+        const age = overview?.pending_age ?? null;
+        const oldestMinutes = Math.floor((age?.oldest_pending_age_seconds ?? 0) / 60);
+        const lastSuccessMinutes = h?.last_success_at
+          ? Math.floor((Date.now() - new Date(h.last_success_at).getTime()) / 60000)
+          : null;
+        const bootFailed = h ? h.boot_ok === false : false;
+        const stalled = oldestMinutes >= 15;
+        const failing = (h?.consecutive_failures ?? 0) >= 3;
+        const unhealthy = bootFailed || stalled || failing;
+
+        return (
+          <>
+            <div className="mb-4 flex items-center gap-2">
+              <HeartPulse className={`h-4 w-4 ${unhealthy ? "text-destructive" : "text-emerald-600"}`} />
+              <h2 className="font-serif text-xl">Worker health</h2>
+              <Badge
+                variant="outline"
+                className={unhealthy ? "border-destructive/40 text-destructive animate-pulse" : "border-emerald-500/40 text-emerald-600"}
+              >
+                {unhealthy ? "Attention required" : "Healthy"}
+              </Badge>
+            </div>
+
+            <Card className={`mb-10 p-5 ${unhealthy ? "border-destructive/40" : ""}`}>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <div>
+                  <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Startup check</div>
+                  <div className={`mt-2 font-serif text-2xl ${bootFailed ? "text-destructive" : "text-emerald-600"}`}>
+                    {h == null ? "—" : bootFailed ? "Failed" : "OK"}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Last successful run</div>
+                  <div className="mt-2 font-serif text-2xl">
+                    {lastSuccessMinutes == null ? "—" : `${lastSuccessMinutes} min ago`}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Oldest pending</div>
+                  <div className={`mt-2 font-serif text-2xl ${stalled ? "text-destructive" : ""}`}>
+                    {age?.oldest_pending_age_seconds ? `${oldestMinutes} min` : "—"}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Consecutive failures</div>
+                  <div className={`mt-2 font-serif text-2xl ${failing ? "text-destructive" : ""}`}>
+                    {h?.consecutive_failures ?? 0}
+                  </div>
+                </div>
+              </div>
+              <p className="mt-4 text-xs text-muted-foreground">
+                {h?.last_error
+                  ? `Last error: ${h.last_error.slice(0, 220)}`
+                  : "The watchdog probes the worker every 10 minutes and alerts operations if the startup check fails or an event waits longer than 15 minutes."}
+                {(age?.stalled_over_10m ?? 0) > 0
+                  ? ` ${age?.stalled_over_10m} event(s) queued for over 10 minutes.`
+                  : ""}
+              </p>
+            </Card>
+          </>
+        );
+      })()}
 
       <div className="mb-4 flex items-center gap-2">
         <Activity className="h-4 w-4 text-muted-foreground" />
