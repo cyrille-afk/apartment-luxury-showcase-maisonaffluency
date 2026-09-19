@@ -53,21 +53,9 @@ export function useSalesFunnel(days: number) {
   const queryClient = useQueryClient();
 
   // Live pipeline: a Stripe webhook writing a settled card refreshes the board.
-  useEffect(() => {
-    const channel = supabase
-      .channel("funnel-card-payments")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "funnel_card_payments" },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["sales-funnel"] });
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
+  useRealtimeTables(["funnel_card_payments", "trade_quotes"], () => {
+    queryClient.invalidateQueries({ queryKey: ["sales-funnel"] });
+  });
 
   return useQuery<SalesFunnelData>({
     queryKey: ["sales-funnel", days],
