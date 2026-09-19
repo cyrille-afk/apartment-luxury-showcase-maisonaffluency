@@ -281,6 +281,13 @@
       "when": 1789823548235,
       "tag": "0039_hot_path_fk_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1789823783468,
+      "tag": "0040_index_remaining_unindexed_fks",
+      "breakpoints": true
     }
   ]
 }
