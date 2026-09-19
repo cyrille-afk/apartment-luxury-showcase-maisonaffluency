@@ -90,6 +90,9 @@ export default function TradeAdminPaymentSettings() {
     webhookSecret: false,
   });
   const [copied, setCopied] = useState(false);
+  const [recipients, setRecipientsState] = useState("");
+  const [recipientsDirty, setRecipientsDirty] = useState(false);
+  const [savingRecipients, setSavingRecipients] = useState(false);
   const [attemptedSave, setAttemptedSave] = useState(false);
 
   const [testValues, setTestValues] = useState<Record<TestFieldKey, string>>({
@@ -308,6 +311,34 @@ export default function TradeAdminPaymentSettings() {
       });
     } finally {
       setSavingTestField(null);
+    }
+  };
+
+  const saveRecipients = async () => {
+    setSavingRecipients(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("payment-credentials", {
+        body: { action: "save_recipients", recipients: recipients },
+      });
+      if (error) {
+        const response = (error as { context?: Response }).context;
+        const responseBody = response
+          ? ((await response.clone().json().catch(() => null)) as { error?: string } | null)
+          : null;
+        throw new Error(responseBody?.error ?? error.message);
+      }
+      if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+      setRecipientsDirty(false);
+      await refetch();
+      toast({ title: "Team notification directory saved", description: "Every alert now goes to each number individually." });
+    } catch (e) {
+      toast({
+        title: "Could not save the directory",
+        description: e instanceof Error ? e.message : "Unexpected error",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingRecipients(false);
     }
   };
 
