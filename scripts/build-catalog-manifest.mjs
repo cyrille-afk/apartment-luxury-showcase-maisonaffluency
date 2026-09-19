@@ -83,8 +83,7 @@ async function main() {
     supabase
       .from("designers")
       .select("id, name, slug, display_name, source, founder, era, country, is_published, trade_only")
-      .eq("is_published", true)
-      .eq("trade_only", false),
+      .eq("is_published", true),
   ]);
 
   if (picksRes.error || designersRes.error) {
