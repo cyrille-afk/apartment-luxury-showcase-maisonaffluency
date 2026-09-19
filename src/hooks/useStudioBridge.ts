@@ -165,19 +165,18 @@ export function useStudioAlerts() {
 
   useEffect(() => {
     load();
-    if (!user) return;
-    const channel = supabase
-      .channel(`studio-alerts-${user.id}-${Math.random().toString(36).slice(2)}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "studio_alerts", filter: `user_id=eq.${user.id}` },
-        () => load(),
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [user, load]);
+
+  useRealtimeTables(
+    "studio_alerts",
+    (event) => {
+      if (event.eventType !== "INSERT") return;
+      const row = event.new as { user_id?: string } | null;
+      if (row?.user_id && row.user_id !== user?.id) return;
+      load();
+    },
+    !!user,
+  );
 
   const dismiss = useCallback(async (id: string) => {
     await supabase.from("studio_alerts").update({ read_at: new Date().toISOString() }).eq("id", id);
