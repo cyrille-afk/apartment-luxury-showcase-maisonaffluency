@@ -57,9 +57,15 @@ export default function DevCheckoutTest() {
   const [auditing, setAuditing] = useState(false);
   const [audit, setAudit] = useState<AuditResult | null>(null);
   const [auditError, setAuditError] = useState<string | null>(null);
+  const [waiting, setWaiting] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
   const pollRef = useRef<number | null>(null);
 
-  const returnedSession = params.get("session_id");
+  const rawSession = params.get("session_id");
+  const returnedSession = rawSession && /^cs_(test|live)_[A-Za-z0-9]{10,}$/.test(rawSession)
+    ? rawSession
+    : null;
+  const malformedSession = Boolean(rawSession) && !returnedSession;
   const cancelled = params.get("cancelled") === "1";
 
   useEffect(() => {
@@ -69,7 +75,6 @@ export default function DevCheckoutTest() {
   const runAudit = useCallback(
     async (sessionId: string, silent = false) => {
       if (!silent) setAuditing(true);
-      setAuditError(null);
       try {
         const { data, error } = await supabase.functions.invoke("dev-checkout-test", {
           body: { action: "audit", sessionId, testMode: sessionId.startsWith("cs_test_") },
@@ -77,8 +82,11 @@ export default function DevCheckoutTest() {
         if (error) throw error;
         if ((data as any)?.error) throw new Error((data as any).error);
         setAudit(data as AuditResult);
+        setAuditError(null);
         return data as AuditResult;
       } catch (err: any) {
+        // Transient network / cold-start failures must not blank the panel —
+        // keep the last good reading and surface the problem inline.
         setAuditError(err?.message || "Unable to audit this session.");
         return null;
       } finally {
@@ -89,19 +97,39 @@ export default function DevCheckoutTest() {
   );
 
   // Post-redirect: audit the returned session and poll until the webhook lands.
+  // Webhook delivery is eventually consistent, so absence of an order row is a
+  // "still waiting" state, never an error.
   useEffect(() => {
     if (!returnedSession || !(isAdmin || isSuperAdmin)) return;
     let attempts = 0;
-    void runAudit(returnedSession);
+    let stopped = false;
+    setTimedOut(false);
+    setWaiting(true);
+
+    const stop = () => {
+      stopped = true;
+      if (pollRef.current) window.clearInterval(pollRef.current);
+      pollRef.current = null;
+      setWaiting(false);
+    };
+
+    void runAudit(returnedSession).then((first) => {
+      if (!stopped && first?.orderRecorded) stop();
+    });
+
     pollRef.current = window.setInterval(async () => {
       attempts += 1;
       const result = await runAudit(returnedSession, true);
-      if (result?.orderRecorded || attempts >= 10) {
-        if (pollRef.current) window.clearInterval(pollRef.current);
-        pollRef.current = null;
+      if (result?.orderRecorded) {
+        stop();
+      } else if (attempts >= 10) {
+        setTimedOut(true);
+        stop();
       }
     }, 3000);
+
     return () => {
+      stopped = true;
       if (pollRef.current) window.clearInterval(pollRef.current);
       pollRef.current = null;
     };
