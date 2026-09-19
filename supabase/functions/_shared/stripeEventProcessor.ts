@@ -97,7 +97,7 @@ async function cancelFunnelReminders(supabase: Supa, entityIds: (string | null |
 async function sendOrderReceivedEmail(supabase: Supa, orderId: string) {
   const { data: order } = await supabase
     .from("shop_orders")
-    .select("order_ref, email, full_name, currency, subtotal_cents, shipping_cents, total_cents")
+    .select("order_ref, email, full_name, currency, subtotal_cents, shipping_cents, total_cents, tax_cents, tax_label, tax_statement")
     .eq("id", orderId)
     .single();
   if (!order?.email) return;
@@ -128,7 +128,9 @@ async function sendOrderReceivedEmail(supabase: Supa, orderId: string) {
         })),
         subtotalFormatted: formatCurrency(order.subtotal_cents, currency),
         shippingFormatted: Number(order.shipping_cents) > 0 ? formatCurrency(order.shipping_cents, currency) : null,
-        taxLineFormatted: `${formatCurrency(0, currency)} (Zero-rated at checkout / Deferred to Border Customs)`,
+        taxLineFormatted: formatCurrency(Number(order.tax_cents ?? 0), currency),
+        taxLabel: order.tax_label ?? "Taxes",
+        taxStatement: order.tax_statement ?? null,
         totalFormatted: formatCurrency(order.total_cents, currency),
       },
     },

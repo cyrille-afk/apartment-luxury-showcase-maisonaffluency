@@ -104,6 +104,12 @@ serve(async (req) => {
       shipping_cents: shippingCents,
       tax_cents: taxCents,
       tax_label: str(body?.taxLabel, 160) || null,
+      tax_treatment: str(body?.taxTreatment, 40) || null,
+      tax_rate: Number.isFinite(Number(body?.taxRate)) ? Number(body?.taxRate) : null,
+      tax_statement: str(body?.taxStatement, 400) || null,
+      buyer_type: str(body?.buyerType, 20) || null,
+      buyer_tax_id: str(body?.buyerTaxId, 40) || null,
+      buyer_tax_country: str(body?.buyerTaxCountry, 2) || null,
       total_cents: totalCents,
     };
 

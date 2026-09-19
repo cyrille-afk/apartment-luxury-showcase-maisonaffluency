@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, createContext, useContext } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { Elements, PaymentElement, AddressElement, ExpressCheckoutElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
@@ -25,14 +25,21 @@ import RegionalPaymentPanel from "@/components/checkout/RegionalPaymentPanel";
 import { useRegionalLogistics, mapCountryToRegionTier } from "@/hooks/useRegionalLogistics";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import {
+  TAX_RULES,
   resolveTaxRule,
+  resolveTaxTreatment,
+  businessToggleLabel,
+  isBuyerTaxIdValid,
+  normaliseBuyerTaxId,
   computeTaxCents,
   taxRowLabel,
   taxRegistrationLine,
   isSingaporeUenValid,
   B2B_TAX_LABEL,
   type BuyerType,
+  type TaxTreatment,
 } from "@/config/taxRules";
+
 import {
   assertCheckoutCopy,
   buildVerifiedTotals,
@@ -116,6 +123,13 @@ const moneyDecimal = (cents: number, currency: string) => {
 };
 
 
+/**
+ * Destination in force for tax purposes. Provided once by the page so the
+ * buyer-type block and the summary read the same rule without prop drilling.
+ */
+const CheckoutTaxCountryContext = createContext<string | null>(null);
+const useTaxCountry = () => useContext(CheckoutTaxCountryContext);
+
 /* ------------------------------------------------------------------ */
 /* Order summary math — gross prices, one cart-level discount row      */
 /* ------------------------------------------------------------------ */
@@ -152,6 +166,12 @@ export type CheckoutSummary = {
   taxCountry: string | null;
   /** Whether freight is inside the taxable base. */
   taxShipping: boolean;
+  /** How the supply is treated: standard, reverse charge, export, etc. */
+  taxTreatment: TaxTreatment;
+  /** Invoice-grade statement printed on documents and confirmations. */
+  taxStatement: string;
+  /** Buyer's own VAT/GST registration, when valid for the destination. */
+  buyerTaxId: string | null;
   /** Delivery shown in the summary: confirmed freight, else the estimate. */
   deliveryCents: number;
   /** THE Order Total: goods − discount + delivery + tax. Used by every UI block. */
@@ -231,7 +251,7 @@ function AccountBlock({ email, role, company }: { email: string; role: string; c
 }
 
 /* ------------------------------------------------------------------ */
-/* Buyer type — Singapore B2B zero-rating toggle                       */
+/* Buyer type — destination-aware VAT / GST registration capture       */
 /* ------------------------------------------------------------------ */
 function BuyerTypeSection({
   buyerType,
@@ -244,8 +264,15 @@ function BuyerTypeSection({
   buyerGstNumber: string;
   setBuyerGstNumber: (v: string) => void;
 }) {
+  // The destination decides which registration we ask for and how it reads.
+  const taxCountry = useTaxCountry();
+  const rule = useMemo(
+    () => TAX_RULES.find((r) => r.country === (taxCountry || "").toUpperCase()) ?? null,
+    [taxCountry],
+  );
   const business = buyerType === "business";
-  const valid = business && isSingaporeUenValid(buyerGstNumber);
+  const valid = business && isBuyerTaxIdValid(rule, buyerGstNumber);
+  const idLabel = rule?.buyerIdLabel ?? "VAT / GST Registration Number";
   const field =
     "h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground";
 
@@ -261,7 +288,7 @@ function BuyerTypeSection({
       >
         {[
           { id: "private" as BuyerType, label: "Private Consumer" },
-          { id: "business" as BuyerType, label: "GST-Registered Business" },
+          { id: "business" as BuyerType, label: businessToggleLabel(rule) },
         ].map((opt, i) => {
           const active = buyerType === opt.id;
           return (
@@ -300,7 +327,7 @@ function BuyerTypeSection({
             maxLength={20}
             value={buyerGstNumber}
             onChange={(e) => setBuyerGstNumber(e.target.value.toUpperCase())}
-            placeholder="Singapore GST / UEN Number"
+            placeholder={idLabel}
             className={field}
           />
           <p
@@ -310,8 +337,11 @@ function BuyerTypeSection({
             )}
           >
             {valid
-              ? "Valid UEN — tax will be B2B zero-rated."
-              : "Enter a valid Singapore UEN (e.g., 201717288Z)."}
+              ? rule?.reverseCharge
+                ? `Valid ${rule.name} number — this supply is reverse charged; you account for ${rule.name}.`
+                : `Valid registration — tax will be B2B zero-rated.`
+              : rule?.buyerIdHint ??
+                "Enter your business VAT / GST registration number so it appears on your invoice."}
           </p>
         </div>
       )}
@@ -352,11 +382,8 @@ function OrderSummary({
           "SGD",
           fxRates,
         );
-  const isB2BZeroRated =
-    buyerType === "business" &&
-    isSingaporeUenValid(buyerGstNumber) &&
-    summary.taxCountry === "SG" &&
-    currency.toLowerCase() === "sgd";
+  const isB2BZeroRated = summary.taxTreatment === "b2b_zero_rated";
+  const isReverseCharge = summary.taxTreatment === "reverse_charge";
 
   const sgImportGstThreshold = useMemo(() => {
     if (summary.taxCountry !== "SG" || isB2BZeroRated || summary.taxApplied) return null;
@@ -502,12 +529,10 @@ function OrderSummary({
             ) : (
               <div className="flex items-baseline justify-between gap-6">
                 <dt className="text-muted-foreground">
-                  {isB2BZeroRated
-                    ? B2B_TAX_LABEL
-                    : summary.taxLabel || (summary.taxApplied ? "Tax" : "Tax (zero-rated)")}
+                  {summary.taxLabel || (summary.taxApplied ? "Tax" : "Tax (zero-rated)")}
                 </dt>
                 <dd className="tabular-nums font-medium">
-                  {isB2BZeroRated
+                  {isB2BZeroRated || isReverseCharge
                     ? moneyDecimal(0, currency)
                     : summary.taxApplied
                       ? money(summary.taxCents, currency)
@@ -540,9 +565,11 @@ function OrderSummary({
                       <dd className="tabular-nums">
                         {isB2BZeroRated
                           ? "0% — B2B zero-rated"
-                          : summary.taxApplied
-                            ? `${Number((summary.taxRate * 100).toFixed(2))}%`
-                            : "0% — zero-rated"}
+                          : isReverseCharge
+                            ? "0% — reverse charge"
+                            : summary.taxApplied
+                              ? `${Number((summary.taxRate * 100).toFixed(2))}%`
+                              : "0% — zero-rated"}
                       </dd>
                     </div>
                     <div className="flex items-baseline justify-between gap-6">
@@ -555,11 +582,7 @@ function OrderSummary({
                     </div>
                   </dl>
                 )}
-                <p>
-                  {isB2BZeroRated
-                    ? "B2B zero-rated for GST-registered Singapore businesses. You may claim the input tax on your GST return."
-                    : summary.taxStatusNote}
-                </p>
+                <p>{summary.taxStatusNote}</p>
                 <p>
                   (Equivalent to Approx. {money(sgdEquivalentCents, "SGD")} based on current rates)
                 </p>
@@ -578,9 +601,13 @@ function OrderSummary({
                     </p>
                   </>
                 )}
-                {isB2BZeroRated ? (
-                  <p>Buyer GST / UEN: {buyerGstNumber.trim().toUpperCase()}</p>
-                ) : summary.taxRegistrationLine ? (
+                {summary.buyerTaxId ? (
+                  <p>
+                    Buyer {summary.taxCountry === "GB" ? "VAT" : "GST / UEN"} No.:{" "}
+                    {summary.buyerTaxId}
+                  </p>
+                ) : null}
+                {summary.taxRegistrationLine ? (
                   <p>{summary.taxRegistrationLine}</p>
                 ) : null}
               </div>
@@ -836,8 +863,12 @@ function PaymentForm({
   buyerGstNumber: string;
   setBuyerGstNumber: (v: string) => void;
 }) {
-  const sgB2BApplicable =
-    summary.taxCountry === "SG" && summary.currency.toLowerCase() === "sgd";
+  // Show the registration field wherever a destination rule can change the
+  // treatment (SG zero-rating, UK reverse charge, …).
+  const sgB2BApplicable = Boolean(
+    resolveTaxRule(summary.taxCountry, summary.currency) ||
+      TAX_RULES.some((r) => r.country === summary.taxCountry),
+  );
   const stripe = useStripe();
   const elements = useElements();
   // Header / "Shipping destination & currency" modal selection. Saving there
@@ -1189,8 +1220,12 @@ function WireForm({
   buyerGstNumber: string;
   setBuyerGstNumber: (v: string) => void;
 }) {
-  const sgB2BApplicable =
-    summary.taxCountry === "SG" && summary.currency.toLowerCase() === "sgd";
+  // Show the registration field wherever a destination rule can change the
+  // treatment (SG zero-rating, UK reverse charge, …).
+  const sgB2BApplicable = Boolean(
+    resolveTaxRule(summary.taxCountry, summary.currency) ||
+      TAX_RULES.some((r) => r.country === summary.taxCountry),
+  );
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -1248,6 +1283,7 @@ function WireForm({
           address,
           buyerType,
           buyerGstNumber,
+          buyerTaxId: normaliseBuyerTaxId(buyerGstNumber),
         },
       });
       if (error) throw error;
@@ -1298,6 +1334,8 @@ function WireForm({
           country={destinationCountry}
           countryIso={destination.iso}
           currency={currency}
+          buyerType={buyerType}
+          buyerTaxId={buyerGstNumber}
           buyer={{
             name: account ? account.email : name,
             email: account ? account.email : email,
@@ -1509,6 +1547,28 @@ export default function Checkout() {
   );
   const [buyerType, setBuyerType] = useState<BuyerType>("private");
   const [buyerGstNumber, setBuyerGstNumber] = useState("");
+  // A verified trade partner already gave us their VAT / GST registration on
+  // their application — never ask a second time.
+  const vatPrefilled = useRef(false);
+  useEffect(() => {
+    if (!user?.id || vatPrefilled.current) return;
+    vatPrefilled.current = true;
+    supabase
+      .from("trade_applications")
+      .select("tax_vat_id, status")
+      .eq("user_id", user.id)
+      .eq("status", "approved")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        const id = normaliseBuyerTaxId((data as any)?.tax_vat_id);
+        if (id) {
+          setBuyerGstNumber((prev) => prev || id);
+          setBuyerType("business");
+        }
+      });
+  }, [user?.id]);
   // Approved trade profiles are corporate buyers by definition.
   const businessPrefilled = useRef(false);
   useEffect(() => {
@@ -1526,23 +1586,20 @@ export default function Checkout() {
     // Country-based base freight is the checkout delivery amount until an
     // advisor replaces it with a confirmed quote.
     const estimatedShippingCents = shippingCents > 0 ? 0 : estimate.cents;
-    // Tax follows the configurable rules (destination + currency must match).
-    const rule = resolveTaxRule(formCountry, currency);
-    const b2bZeroRated =
-      buyerType === "business" &&
-      isSingaporeUenValid(buyerGstNumber) &&
-      rule &&
-      formCountry?.toUpperCase() === "SG" &&
-      currency.toLowerCase() === "sgd";
-    // GST applies to the full CIF value: goods + the delivery shown in the
-    // summary (confirmed freight, else the estimate).
+    // Tax follows the configurable rules (destination + currency + buyer
+    // registration). One engine decides the rate, the label and the wording.
     const deliveryForTaxCents = shippingCents > 0 ? shippingCents : estimatedShippingCents;
-    const localTaxCents = b2bZeroRated
-      ? 0
-      : computeTaxCents(subtotalCents - discountCents, deliveryForTaxCents, rule);
+    const treatment = resolveTaxTreatment({
+      country: formCountry,
+      currency,
+      buyerType,
+      buyerTaxId: buyerGstNumber,
+      goodsCents: subtotalCents - discountCents,
+      shippingCents: deliveryForTaxCents,
+    });
     // The PaymentIntent is authoritative: once the server has priced the order
     // the displayed tax and total equal the amount actually charged.
-    const taxCents = serverTax !== null ? serverTax.cents : localTaxCents;
+    const taxCents = serverTax !== null ? serverTax.cents : treatment.taxCents;
     // One derivation for every figure on the page.
     const totals = deriveCheckoutTotals({
       subtotalCents,
@@ -1551,20 +1608,7 @@ export default function Checkout() {
       estimatedShippingCents,
       taxCents,
     });
-    // Breakdown inputs: the base the rate is applied to, plus a plain-language
-    // explanation of why the order is taxed or zero-rated.
-    const taxableBaseCents = rule
-      ? Math.max(0, subtotalCents - discountCents) +
-        (rule.taxShipping ? Math.max(0, deliveryForTaxCents) : 0)
-      : 0;
-    const destination = (formCountry || "").trim().toUpperCase() || null;
-    const taxStatusNote = b2bZeroRated
-      ? "B2B zero-rated for GST-registered Singapore businesses. You may claim the input tax on your GST return."
-      : rule
-        ? `${rule.name} charged on ${rule.taxShipping ? "goods and delivery" : "goods"} for ${destination} orders billed in ${currency.toUpperCase()}.`
-        : !destination
-          ? "Select a destination country to see whether tax applies."
-          : `Zero-rated — no ${currency.toUpperCase()} tax rule applies to shipments to ${destination}.`;
+    const destination = treatment.countryIso;
     return {
       currency,
       subtotalCents,
@@ -1577,23 +1621,23 @@ export default function Checkout() {
       freightNotice: estimatedShippingCents > 0 ? estimate.notice : null,
       shippingZoneLabel: estimate.zoneLabel ?? null,
       taxCents,
-      taxLabel: b2bZeroRated
-        ? B2B_TAX_LABEL
-        : taxCents > 0
-          ? (serverTax?.label ?? (rule ? taxRowLabel(rule) : null))
-          : null,
-      taxRegistrationLine: taxCents > 0 ? taxRegistrationLine(rule) : null,
-      taxRate: b2bZeroRated ? 0 : (rule?.rate ?? 0),
-      taxableBaseCents,
-      taxApplied: b2bZeroRated ? true : Boolean(rule),
-      taxStatusNote,
+      taxLabel: serverTax?.label ?? treatment.label,
+      taxRegistrationLine: treatment.registrationLine,
+      taxRate: treatment.rate,
+      taxableBaseCents: treatment.taxableBaseCents,
+      taxApplied: treatment.charged,
+      taxStatusNote: treatment.note,
       taxCountry: destination,
-      taxShipping: Boolean(rule?.taxShipping),
+      taxShipping: Boolean(treatment.rule?.taxShipping),
+      taxTreatment: treatment.treatment,
+      taxStatement: treatment.statement,
+      buyerTaxId: treatment.buyerTaxId,
       deliveryCents: totals.deliveryCents,
       totalCents: totals.totalCents,
       displayTotalCents: totals.displayTotalCents,
       chargeTotalCents: totals.chargeTotalCents,
     };
+
   }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, estimate.capped, estimate.notice, formCountry, serverTax, buyerType, buyerGstNumber]);
 
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
@@ -2074,6 +2118,7 @@ export default function Checkout() {
   }
 
   return (
+    <CheckoutTaxCountryContext.Provider value={summary.taxCountry}>
     <div className="min-h-screen bg-background text-foreground">
       <Helmet>
         <title>Secure Checkout — Maison Affluency</title>
@@ -2251,5 +2296,6 @@ export default function Checkout() {
         </section>
       </main>
     </div>
+    </CheckoutTaxCountryContext.Provider>
   );
 }

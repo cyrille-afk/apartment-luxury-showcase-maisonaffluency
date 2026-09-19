@@ -4,6 +4,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
 import { convertCents, SETTLEMENT_CURRENCIES } from "./fxConvert.ts";
 import { formatCurrency } from "../_shared/transactional-email-templates/currency.ts";
+import { resolveTaxTreatment, normaliseBuyerTaxId } from "../_shared/taxRules.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -270,7 +271,30 @@ serve(async (req) => {
       shippingConfirmed && Number.isFinite(rawShipping) && rawShipping > 0
         ? Math.min(rawShipping, subtotal)
         : 0;
-    const total = subtotal + shipping;
+    // Destination tax: one engine decides the rate, wording and registration.
+    const shippingCountry =
+      typeof body?.shippingCountry === "string" ? body.shippingCountry : "";
+    const buyerType =
+      typeof body?.buyerType === "string" && body.buyerType.toLowerCase() === "business"
+        ? "business"
+        : "private";
+    const buyerTaxId = normaliseBuyerTaxId(
+      typeof body?.buyerTaxId === "string"
+        ? body.buyerTaxId
+        : typeof body?.buyerGstNumber === "string"
+          ? body.buyerGstNumber
+          : "",
+    );
+    const treatment = resolveTaxTreatment({
+      country: shippingCountry,
+      currency,
+      buyerType,
+      buyerTaxId,
+      goodsCents: subtotal,
+      shippingCents: shipping,
+    });
+    const taxCents = treatment.taxCents;
+    const total = subtotal + shipping + taxCents;
 
 
     const orderRef = `MA-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
@@ -290,6 +314,15 @@ serve(async (req) => {
         discount_pct: discountPct,
         discount_label: discountLabel,
         shipping_cents: shipping,
+        tax_cents: taxCents,
+        tax_label: treatment.label,
+        tax_rate: treatment.rate,
+        tax_treatment: treatment.treatment,
+        tax_statement: treatment.statement,
+        buyer_type: buyerType,
+        buyer_tax_id: treatment.buyerTaxId,
+        buyer_tax_country: treatment.countryIso,
+        merchant_tax_registration: treatment.registrationLine,
         total_cents: total,
         notes,
       })
@@ -328,7 +361,9 @@ serve(async (req) => {
               })),
               subtotalFormatted: formatCurrency(grossSubtotal, currency),
               shippingFormatted: shipping > 0 ? formatCurrency(shipping, currency) : null,
-              taxLineFormatted: `${formatCurrency(0, currency)} (Zero-rated at checkout / Deferred to Border Customs)`,
+              taxLineFormatted: formatCurrency(taxCents, currency),
+              taxLabel: treatment.label,
+              taxStatement: treatment.statement,
               totalFormatted: formatCurrency(total, currency),
             },
           },

@@ -6663,6 +6663,9 @@ export type Database = {
       }
       shop_orders: {
         Row: {
+          buyer_tax_country: string | null
+          buyer_tax_id: string | null
+          buyer_type: string | null
           created_at: string
           currency: string
           discount_cents: number
@@ -6672,6 +6675,7 @@ export type Database = {
           full_name: string | null
           id: string
           marked_paid_by: string | null
+          merchant_tax_registration: string | null
           notes: string | null
           order_ref: string
           paid_at: string | null
@@ -6689,11 +6693,17 @@ export type Database = {
           subtotal_cents: number
           tax_cents: number
           tax_label: string | null
+          tax_rate: number | null
+          tax_statement: string | null
+          tax_treatment: string | null
           total_cents: number
           updated_at: string
           user_id: string | null
         }
         Insert: {
+          buyer_tax_country?: string | null
+          buyer_tax_id?: string | null
+          buyer_type?: string | null
           created_at?: string
           currency?: string
           discount_cents?: number
@@ -6703,6 +6713,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           marked_paid_by?: string | null
+          merchant_tax_registration?: string | null
           notes?: string | null
           order_ref: string
           paid_at?: string | null
@@ -6720,11 +6731,17 @@ export type Database = {
           subtotal_cents?: number
           tax_cents?: number
           tax_label?: string | null
+          tax_rate?: number | null
+          tax_statement?: string | null
+          tax_treatment?: string | null
           total_cents?: number
           updated_at?: string
           user_id?: string | null
         }
         Update: {
+          buyer_tax_country?: string | null
+          buyer_tax_id?: string | null
+          buyer_type?: string | null
           created_at?: string
           currency?: string
           discount_cents?: number
@@ -6734,6 +6751,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           marked_paid_by?: string | null
+          merchant_tax_registration?: string | null
           notes?: string | null
           order_ref?: string
           paid_at?: string | null
@@ -6751,6 +6769,9 @@ export type Database = {
           subtotal_cents?: number
           tax_cents?: number
           tax_label?: string | null
+          tax_rate?: number | null
+          tax_statement?: string | null
+          tax_treatment?: string | null
           total_cents?: number
           updated_at?: string
           user_id?: string | null
