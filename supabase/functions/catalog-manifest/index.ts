@@ -6,20 +6,25 @@
 // lazily via useCuratorPickDetail when a card is opened.
 //
 // Cached by the browser AND any intermediate CDN via a plain GET + Cache-Control:
-//   public, s-maxage=300, stale-while-revalidate=86400
+//   public, s-maxage=3600, stale-while-revalidate=86400
 //
-// -> 5 min fresh at the edge, 24 h stale-while-revalidate window. This is the
+// -> 1 h fresh at the edge, 24 h stale-while-revalidate window. This is the
 // single high-traffic listing that was showing up as the top slow query
 // (SELECT on designer_curator_picks_public, 1200+ calls, 155 ms mean).
+//
+// Signed-in trade users bypass the shared cache entirely (no-store, private)
+// and are served with their own JWT so RLS applies their pricing visibility.
 
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { isAuthenticatedRequest, publicCacheHeaders } from "../_shared/publicCache.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
 const PICK_COLUMNS = [
   "id",
+  "slug",
   "title",
   "subtitle",
   "image_url",
