@@ -142,11 +142,13 @@ Deno.serve(async (req) => {
   }
 
   // ---------- 2. Quotes sent but never paid ----------
+  // Spaced grace period: first chase 5 days after the quote went out,
+  // the final one a further 7 days later.
   const { data: sentQuotes } = await supabase
     .from('trade_quotes')
     .select('id, client_name, currency, submitted_at, ship_to_email, ship_to_name')
     .eq('status', 'submitted')
-    .lt('submitted_at', HOURS(72))
+    .lt('submitted_at', HOURS(120))
     .limit(200)
 
   for (const q of sentQuotes ?? []) {
