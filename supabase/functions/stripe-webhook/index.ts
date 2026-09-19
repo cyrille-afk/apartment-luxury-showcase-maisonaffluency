@@ -4,6 +4,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { loadStripeTestCreds } from "../_shared/stripeCreds.ts";
 import { getStripe } from "../_shared/stripeClient.ts";
 import { recordPurchaseOrdersPayable } from "../_shared/recordPurchaseOrdersPayable.ts";
+import { formatCurrency } from "../_shared/transactional-email-templates/currency.ts";
 
 const { stripe, creds } = await getStripe("auto");
 const testCreds = await loadStripeTestCreds();
