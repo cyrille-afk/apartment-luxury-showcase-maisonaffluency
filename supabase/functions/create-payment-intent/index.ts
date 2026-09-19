@@ -203,6 +203,13 @@ serve(async (req) => {
         tax_label: taxLabel ?? "",
         buyer_type: buyerType,
         buyer_gst_number: buyerTaxId,
+        // FX lock the basket was priced at in the browser, so the rate the
+        // buyer agreed to is recoverable from the payment itself.
+        fx_locked_at: typeof body?.fxLockedAt === "string" ? body.fxLockedAt.slice(0, 40) : "",
+        fx_locked_rates:
+          body?.fxLockedRates && typeof body.fxLockedRates === "object"
+            ? JSON.stringify(body.fxLockedRates).slice(0, 400)
+            : "",
         buyer_tax_id: buyerTaxId,
         buyer_tax_country: treatment.countryIso ?? "",
         tax_treatment: treatment.treatment,
