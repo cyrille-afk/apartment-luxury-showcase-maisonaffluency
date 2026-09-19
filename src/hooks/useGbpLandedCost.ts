@@ -8,6 +8,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { estimateShipping, ShippingBreakdown } from "@/lib/shippingEstimator";
+import { getFxRate, getFxSource } from "@/lib/fxRates";
 
 export const FX_BUFFER = 0.02; // +2% safety margin on EUR→GBP
 
