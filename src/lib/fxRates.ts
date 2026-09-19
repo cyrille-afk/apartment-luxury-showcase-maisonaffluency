@@ -53,7 +53,14 @@ export const FALLBACK_RATES: Record<string, number> = {
   CAD_CHF: 0.5866, CAD_AED: 2.6488, CAD_HKD: 5.6558, CAD_AUD: 1.0073, CAD_JPY: 114.7414,
 };
 
-export type FxSource = "identity" | "frankfurter" | "open-er-api" | "hardcoded" | "unknown";
+export type FxSource =
+  | "identity"
+  | "locked"
+  | "database"
+  | "frankfurter"
+  | "open-er-api"
+  | "hardcoded"
+  | "unknown";
 
 type CacheEntry = { rate: number; ts: number; source: FxSource };
 export const FX_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
