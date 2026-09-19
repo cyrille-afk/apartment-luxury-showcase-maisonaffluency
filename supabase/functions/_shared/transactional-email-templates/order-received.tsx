@@ -5,6 +5,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Img, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.tsx'
+import { formatCurrency } from './currency.ts'
 
 const SITE_NAME = 'Maison Affluency'
 
@@ -25,6 +26,7 @@ interface OrderReceivedProps {
   shippingFormatted?: string | null
   taxLineFormatted?: string
   totalFormatted?: string
+  currency?: string
 }
 
 const OrderReceivedEmail = ({
@@ -36,6 +38,7 @@ const OrderReceivedEmail = ({
   shippingFormatted,
   taxLineFormatted,
   totalFormatted = '—',
+  currency = 'EUR',
 }: OrderReceivedProps) => (
   <Html lang="en" dir="ltr">
     <Head />
@@ -88,7 +91,7 @@ const OrderReceivedEmail = ({
                     </tr>
                   ) : null}
                   <tr>
-                    <td style={itemMeta}>Price: {item.priceFormatted}</td>
+                    <td style={itemMeta}>Price: {formatCurrency(item.priceFormatted, currency)}</td>
                   </tr>
                   <tr>
                     <td style={{ ...itemMeta, paddingBottom: '12px' }}>
@@ -112,18 +115,18 @@ const OrderReceivedEmail = ({
             <tbody>
               <tr>
                 <td style={totalLabel}>Subtotal</td>
-                <td style={totalAmount}>{subtotalFormatted}</td>
+                <td style={totalAmount}>{formatCurrency(subtotalFormatted, currency)}</td>
               </tr>
               {shippingFormatted ? (
                 <tr>
                   <td style={totalLabel}>Front Door Premium Delivery (Deposit)</td>
-                  <td style={totalAmount}>{shippingFormatted}</td>
+                  <td style={totalAmount}>{formatCurrency(shippingFormatted, currency)}</td>
                 </tr>
               ) : null}
               <tr>
                 <td style={totalLabel}>Taxes (Import GST)</td>
                 <td style={totalAmount}>
-                  {taxLineFormatted ?? 'Zero-rated at checkout / Deferred to Border Customs'}
+                  {taxLineFormatted ? formatCurrency(taxLineFormatted, currency) : 'Zero-rated at checkout / Deferred to Border Customs'}
                 </td>
               </tr>
               <tr>
@@ -131,7 +134,7 @@ const OrderReceivedEmail = ({
               </tr>
               <tr>
                 <td style={grandLabel}>Total Amount Authorized</td>
-                <td style={grandAmount}>{totalFormatted}</td>
+                <td style={grandAmount}>{formatCurrency(totalFormatted, currency)}</td>
               </tr>
             </tbody>
           </table>
@@ -187,26 +190,27 @@ export const template = {
     recipientName: 'Mr Laurent',
     orderRef: 'MA-2026-10243',
     firstItemTitle: 'Koumac Armchair',
+    currency: 'EUR',
     items: [
       {
         title: 'Koumac Armchair',
         designerName: 'Thierry Lemaire',
         configuration: 'Swivel Base / Upholstery: Sheepskin / Plinth: Polished Brass',
-        priceFormatted: 'EUR €11,100.00',
+        priceFormatted: '€11,100.00',
         quantity: 1,
       },
       {
         title: 'Lantern Table Lamp',
         designerName: 'Apparatus Studio',
         configuration: 'Tarnished Silver [Lacquered] / Slip-Cast Porcelain',
-        priceFormatted: 'EUR €5,355.00',
+        priceFormatted: '€5,355.00',
         quantity: 1,
       },
     ],
-    subtotalFormatted: 'EUR €16,455.00',
-    shippingFormatted: 'EUR €2,468.25',
-    taxLineFormatted: 'EUR €0.00 (Zero-rated at checkout / Deferred to Border Customs)',
-    totalFormatted: 'EUR €18,923.25',
+    subtotalFormatted: '€16,455.00',
+    shippingFormatted: '€2,468.25',
+    taxLineFormatted: '€0.00 (Zero-rated at checkout / Deferred to Border Customs)',
+    totalFormatted: '€18,923.25',
   },
 } satisfies TemplateEntry
 
