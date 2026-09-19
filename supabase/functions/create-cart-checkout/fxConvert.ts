@@ -3,10 +3,15 @@
  *
  * The shopper locks a destination + currency in the header modal (Singapore →
  * SGD). Catalogue prices are stored in their native currency (EUR, USD…), so
- * the order must be converted before it is recorded and invoiced. Rates are
- * fetched from open.er-api.com (free, no key) and cached in memory for 10
- * minutes; a hardcoded table guarantees checkout is never blocked.
+ * the order must be converted before it is recorded and invoiced.
+ *
+ * Rates come from the platform `currency_rates` table (refreshed twice daily
+ * by the `sync-currency-rates` function), so checkout, quotes and the browser
+ * all price from the same numbers. Cached in memory for 10 minutes; a
+ * hardcoded table guarantees checkout is never blocked.
  */
+
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 export const SETTLEMENT_CURRENCIES = [
   "usd", "eur", "gbp", "sgd", "chf", "aed", "hkd", "aud",
