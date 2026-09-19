@@ -205,7 +205,7 @@ export function designerPicksQueryOptions(designerId: string | undefined, public
         const { data, error } = await applyCuratorPickOrder(
           supabase
             .from("designer_curator_picks_public")
-            .select("*")
+            .select(CURATOR_PICK_GRID_COLUMNS)
             .eq("designer_id", designerId)
         );
         if (error) throw error;
