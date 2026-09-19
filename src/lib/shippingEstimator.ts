@@ -181,6 +181,9 @@ export async function estimateShipping(input: EstimatorInput): Promise<ShippingB
     .eq("active", true);
 
   let fuel = 0, insurance = 0, customs = 0, handling = 0, lastMile = 0;
+  // Hub-routed estimates carry the inland leg to the consolidation hub.
+  if (proxyOrigin) best.freight = Math.round(best.freight * (1 + HUB_TRANSFER_UPLIFT));
+
   const detail: ShippingBreakdown["detail"] = [
     { label: `Freight (${best.lane.carrier_name} · ${labelForMode(best.lane.mode)})`, value_cents: best.freight, method: "base" },
   ];
@@ -236,7 +239,6 @@ export async function estimateShipping(input: EstimatorInput): Promise<ShippingB
     if (vat > 0) detail.push({ label: `Import VAT/GST (${d.vat_percent}%)`, value_cents: vat, method: "percent" });
   }
 
-  if (proxyOrigin) best.freight = Math.round(best.freight * (1 + HUB_TRANSFER_UPLIFT));
   const total = best.freight + fuel + insurance + customs + handling + lastMile + duty + vat;
 
   return {
