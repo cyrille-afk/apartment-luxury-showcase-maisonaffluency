@@ -173,10 +173,22 @@ Deno.serve(async (req) => {
     }
 
     const ageDays = Math.floor((Date.now() - new Date(q.submitted_at as string).getTime()) / 86400_000)
-    const n = ageDays >= 7 ? 2 : 1
-    if (n === 2 && !(await alreadySent('quote_unpaid', q.id, 1))) {
-      // Never skip straight to the final reminder.
-      continue
+    if (ageDays < 5) continue
+
+    const { data: firstReminder } = await supabase
+      .from('funnel_reminder_log')
+      .select('sent_at')
+      .eq('entity_type', 'quote_unpaid')
+      .eq('entity_id', q.id)
+      .eq('reminder_number', 1)
+      .maybeSingle()
+
+    let n = 1
+    if (firstReminder) {
+      const sinceFirst =
+        (Date.now() - new Date(firstReminder.sent_at as string).getTime()) / 86400_000
+      if (sinceFirst < 7) continue // still inside the 7-day grace window
+      n = 2
     }
     await send('quote_unpaid', q.id, n, 'Sent quote unpaid', email, 'quote-payment-reminder', {
       recipientName: link.payer_name || q.ship_to_name || q.client_name,
