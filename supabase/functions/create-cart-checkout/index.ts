@@ -3,6 +3,7 @@ import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
 import { convertCents, SETTLEMENT_CURRENCIES } from "./fxConvert.ts";
+import { formatCurrency } from "../_shared/transactional-email-templates/currency.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -31,15 +32,6 @@ interface IncomingItem {
 
 /** Fallback settlement currency when the shopper has locked none. */
 const DEFAULT_CURRENCY = "usd";
-
-const CURRENCY_SYMBOLS: Record<string, string> = { usd: "$", eur: "€", gbp: "£", sgd: "S$", hkd: "HK$" };
-/** "USD $18,923.25" — ISO code + symbol so currencies are never ambiguous in email. */
-const fmtMoney = (cents: number, cur: string) => {
-  const c = (cur || "usd").toLowerCase();
-  const amount = ((cents ?? 0) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  return `${c.toUpperCase()} ${CURRENCY_SYMBOLS[c] ?? ""}${amount}`;
-};
-
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
