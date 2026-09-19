@@ -2067,6 +2067,39 @@ export type Database = {
         }
         Relationships: []
       }
+      currency_rates: {
+        Row: {
+          base_currency: string
+          created_at: string
+          id: string
+          last_updated_at: string
+          rate: number
+          rate_date: string | null
+          source: string
+          target_currency: string
+        }
+        Insert: {
+          base_currency: string
+          created_at?: string
+          id?: string
+          last_updated_at?: string
+          rate: number
+          rate_date?: string | null
+          source?: string
+          target_currency: string
+        }
+        Update: {
+          base_currency?: string
+          created_at?: string
+          id?: string
+          last_updated_at?: string
+          rate?: number
+          rate_date?: string | null
+          source?: string
+          target_currency?: string
+        }
+        Relationships: []
+      }
       custom_inquiries: {
         Row: {
           company: string | null
@@ -8603,6 +8636,9 @@ export type Database = {
           currency: string
           designer_payout_account_id: string | null
           end_client_billing: Json | null
+          exchange_rate_at_creation: number | null
+          exchange_rate_base_currency: string | null
+          exchange_rate_locked_at: string | null
           id: string
           incoterm: string | null
           insurance_enabled: boolean
@@ -8655,6 +8691,9 @@ export type Database = {
           currency?: string
           designer_payout_account_id?: string | null
           end_client_billing?: Json | null
+          exchange_rate_at_creation?: number | null
+          exchange_rate_base_currency?: string | null
+          exchange_rate_locked_at?: string | null
           id?: string
           incoterm?: string | null
           insurance_enabled?: boolean
@@ -8707,6 +8746,9 @@ export type Database = {
           currency?: string
           designer_payout_account_id?: string | null
           end_client_billing?: Json | null
+          exchange_rate_at_creation?: number | null
+          exchange_rate_base_currency?: string | null
+          exchange_rate_locked_at?: string | null
           id?: string
           incoterm?: string | null
           insurance_enabled?: boolean
@@ -9452,6 +9494,10 @@ export type Database = {
           start_time: string
           status: string
         }[]
+      }
+      get_currency_rate: {
+        Args: { _base: string; _target: string }
+        Returns: number
       }
       get_designer_engagement: {
         Args: { _since: string }

@@ -1,21 +1,25 @@
 /**
  * Reliable FX rate lookup for quote pricing.
  *
- * Why this exists:
- *   frankfurter.app is intermittently unreachable (CORS/DNS refusals from the
- *   preview + prod origins), and api.exchangerate.host now demands an API key.
- *   Quote pages were silently falling back to "no conversion" — a line stored
- *   in EUR would display verbatim under an SGD quote, and toggling the quote
- *   currency looked like it did nothing.
+ * Authority lives on the server. The `currency_rates` table is refreshed twice
+ * daily by the `sync-currency-rates` edge function (validated, drift-guarded,
+ * all cross pairs derived from one EUR base). The browser never calls
+ * frankfurter.app or open.er-api.com directly — those origins were flaky and
+ * each tab hammered them with its own per-pair cache.
  *
  * Strategy:
- *   1. Try frankfurter.app (ECB rates, free, no key).
- *   2. On failure, try open.er-api.com (free, CORS-friendly, no key).
- *   3. On failure, use the hardcoded FALLBACK_RATES table below.
+ *   1. Session cache (loaded in one query for every pair).
+ *   2. `currency_rates` table in the database.
+ *   3. Bundled FALLBACK_RATES table below (approximate, last resort).
+ *
+ * Quotes additionally stamp `exchange_rate_at_creation` onto the row, so a
+ * sent quote is always re-rendered at the rate it was priced at.
  *
  * The helper always resolves — it never throws — so callers can await it and
- * be guaranteed a usable number. Rates are cached in-memory for 10 minutes.
+ * be guaranteed a usable number.
  */
+
+import { supabase } from "@/integrations/supabase/client";
 
 /** Approximate cross rates (last reviewed 2026-09-03 vs open.er-api.com).
  *  Guarantees conversion never no-ops when the network is down. Kept in sync
@@ -53,7 +57,14 @@ export const FALLBACK_RATES: Record<string, number> = {
   CAD_CHF: 0.5866, CAD_AED: 2.6488, CAD_HKD: 5.6558, CAD_AUD: 1.0073, CAD_JPY: 114.7414,
 };
 
-export type FxSource = "identity" | "frankfurter" | "open-er-api" | "hardcoded" | "unknown";
+export type FxSource =
+  | "identity"
+  | "locked"
+  | "database"
+  | "frankfurter"
+  | "open-er-api"
+  | "hardcoded"
+  | "unknown";
 
 type CacheEntry = { rate: number; ts: number; source: FxSource };
 export const FX_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
@@ -84,10 +95,12 @@ export function getFxMeta(src: string, tgt: string): { source: FxSource; fetched
 export function summarizeFxSources(sources: FxSource[]): FxSource {
   const rank: Record<FxSource, number> = {
     "identity": 0,
-    "frankfurter": 1,
-    "open-er-api": 2,
-    "hardcoded": 3,
-    "unknown": 4,
+    "locked": 1,
+    "database": 2,
+    "frankfurter": 3,
+    "open-er-api": 4,
+    "hardcoded": 5,
+    "unknown": 6,
   };
   let worst: FxSource = "identity";
   for (const s of sources) if (rank[s] > rank[worst]) worst = s;
@@ -97,11 +110,19 @@ export function summarizeFxSources(sources: FxSource[]): FxSource {
 export function describeFxSource(s: FxSource): { label: string; tone: "live" | "fallback" | "hardcoded" | "none"; detail: string } {
   switch (s) {
     case "identity":     return { label: "No conversion",     tone: "none",      detail: "Source and target currencies match — no FX applied." };
-    case "frankfurter":  return { label: "Live ECB rates",    tone: "live",      detail: "Rates fetched live from frankfurter.app (European Central Bank)." };
+    case "database":     return { label: "Database rates",    tone: "live",      detail: describeSyncedAt() };
+    case "locked":       return { label: "Locked rate",       tone: "live",      detail: "Rate stamped onto this quote when it was created — it cannot drift." };
+    case "frankfurter":  return { label: "Live ECB rates",    tone: "live",      detail: "Rates fetched from frankfurter.app (European Central Bank)." };
     case "open-er-api":  return { label: "Live fallback",     tone: "fallback",  detail: "Primary provider unreachable — using open.er-api.com." };
-    case "hardcoded":    return { label: "Offline rates",     tone: "hardcoded", detail: "Both live providers unreachable — using the bundled reference table (approximate)." };
+    case "hardcoded":    return { label: "Offline rates",     tone: "hardcoded", detail: "Server rate table unreachable — using the bundled reference table (approximate)." };
     default:             return { label: "Rates pending",     tone: "none",      detail: "FX rates not resolved yet." };
   }
+}
+
+function describeSyncedAt(): string {
+  const at = getFxTableSyncedAt();
+  if (!at) return "Rates served from the platform rate table, synced twice daily.";
+  return `Rates served from the platform rate table — last synced ${new Date(at).toLocaleString()}.`;
 }
 
 /** Drop cached rates (all pairs, or one pair) so the next getFxRate call
@@ -116,45 +137,55 @@ export function invalidateFxCache(src?: string, tgt?: string): void {
   lastSources.clear();
 }
 
-const fetchWithTimeout = async (url: string, ms = 4000): Promise<Response> => {
-  const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), ms);
-  try {
-    return await fetch(url, { signal: controller.signal });
-  } finally {
-    clearTimeout(t);
-  }
-};
+/* ------------------------------------------------------------------ *
+ * Database rate table (single source of truth)
+ * ------------------------------------------------------------------ */
 
-const fromFrankfurter = async (src: string, tgt: string): Promise<number | null> => {
-  try {
-    const res = await fetchWithTimeout(
-      `https://api.frankfurter.dev/v1/latest?base=${src}&symbols=${tgt}`,
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    const r = data?.rates?.[tgt];
-    return typeof r === "number" && r > 0 ? r : null;
-  } catch {
-    return null;
-  }
-};
+let tablePromise: Promise<void> | null = null;
+let tableLoadedAt = 0;
+/** Newest `last_updated_at` across the loaded rows (server sync timestamp). */
+let tableSyncedAt: number | null = null;
 
-const fromOpenErApi = async (src: string, tgt: string): Promise<number | null> => {
-  try {
-    const res = await fetchWithTimeout(`https://open.er-api.com/v6/latest/${src}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const r = data?.rates?.[tgt];
-    return typeof r === "number" && r > 0 ? r : null;
-  } catch {
-    return null;
+/** When the rate table was last synced server-side, or null if unknown. */
+export function getFxTableSyncedAt(): number | null {
+  return tableSyncedAt;
+}
+
+async function loadRateTable(): Promise<void> {
+  const { data, error } = await supabase
+    .from("currency_rates")
+    .select("base_currency,target_currency,rate,last_updated_at");
+  if (error || !data?.length) return;
+
+  const now = Date.now();
+  let newest = 0;
+  for (const row of data) {
+    const rate = Number(row.rate);
+    if (!Number.isFinite(rate) || rate <= 0) continue;
+    const key = `${row.base_currency}_${row.target_currency}`;
+    cache.set(key, { rate, ts: now, source: "database" });
+    lastSources.set(key, "database");
+    const updated = row.last_updated_at ? Date.parse(row.last_updated_at) : 0;
+    if (updated > newest) newest = updated;
   }
-};
+  if (newest) tableSyncedAt = newest;
+  tableLoadedAt = now;
+}
+
+/** Load the server rate table once per session (re-loaded after the TTL). */
+async function ensureRateTable(): Promise<void> {
+  if (tablePromise && Date.now() - tableLoadedAt < CACHE_TTL) {
+    await tablePromise;
+    return;
+  }
+  tablePromise = loadRateTable().catch(() => undefined);
+  await tablePromise;
+}
 
 /**
  * Resolve the FX rate to multiply `src` amounts by to get `tgt` amounts.
- * Always resolves. Uses cache → frankfurter → open.er-api → hardcoded fallback.
+ * Always resolves. Uses session cache → currency_rates table → bundled
+ * offline table. No provider is ever called from the browser.
  */
 export async function getFxRate(src: string, tgt: string): Promise<number> {
   if (src === tgt) return 1;
@@ -166,17 +197,17 @@ export async function getFxRate(src: string, tgt: string): Promise<number> {
     return cached.rate;
   }
 
-  let source: FxSource = "hardcoded";
-  let live = await fromFrankfurter(src, tgt);
-  if (live != null) source = "frankfurter";
-  if (live == null) {
-    live = await fromOpenErApi(src, tgt);
-    if (live != null) source = "open-er-api";
+  await ensureRateTable();
+
+  const fresh = cache.get(key);
+  if (fresh) {
+    lastSources.set(key, fresh.source);
+    return fresh.rate;
   }
 
-  const rate = live ?? FALLBACK_RATES[key] ?? 1;
-  cache.set(key, { rate, ts: Date.now(), source });
-  lastSources.set(key, source);
+  const rate = FALLBACK_RATES[key] ?? 1;
+  cache.set(key, { rate, ts: Date.now(), source: "hardcoded" });
+  lastSources.set(key, "hardcoded");
   return rate;
 }
 

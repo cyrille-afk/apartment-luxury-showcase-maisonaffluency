@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getDestinationTax } from "@/lib/destinationTax";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
 import { getFxRates, FALLBACK_RATES, getFxSource, getFxMeta, invalidateFxCache, summarizeFxSources, describeFxSource, type FxSource } from "@/lib/fxRates";
+import { lockQuoteExchangeRate } from "@/lib/quoteFxLock";
 import { formatFxSnapshotLine } from "@/lib/fxSnapshot";
 import { FxSourceBadge } from "@/components/trade/FxSourceBadge";
 import { FxAppliedRates } from "@/components/trade/FxAppliedRates";
@@ -705,7 +706,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku, origin, stock_status_override, lead_weeks_min_override, lead_weeks_max_override, source_pick_id, size_variants), fabric:fabrics!fabric_id(name, tier, price_per_lm_cents, currency, image_url), wood_fabric:fabrics!wood_fabric_id(name, image_url)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
-        supabase.from("trade_quotes").select("currency, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at, landed_cost_cbm, landed_cost_kg, landed_cost_mode, ship_to_same_as_bill, incoterm, ship_to_name, ship_to_attention, ship_to_address1, ship_to_address2, ship_to_city, ship_to_state, ship_to_postal_code, ship_to_country, ship_to_phone, ship_to_email, ship_to_notes").eq("id", quoteId).single(),
+        supabase.from("trade_quotes").select("currency, exchange_rate_at_creation, exchange_rate_base_currency, exchange_rate_locked_at, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at, landed_cost_cbm, landed_cost_kg, landed_cost_mode, ship_to_same_as_bill, incoterm, ship_to_name, ship_to_attention, ship_to_address1, ship_to_address2, ship_to_city, ship_to_state, ship_to_postal_code, ship_to_country, ship_to_phone, ship_to_email, ship_to_notes").eq("id", quoteId).single(),
         user ? supabase.from("profiles").select("company, first_name, last_name").eq("id", user.id).single() : null,
       ]);
       let loadedItems = (itemsRes.data as QuoteItemWithProduct[]) || [];
@@ -949,6 +950,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
       setItems(loadedItems);
       if (quoteRes.data?.currency) setCurrency(quoteRes.data.currency as Currency);
+      // Backfill the FX lock the first time an unstamped quote is opened, so
+      // every quote carries the rate it was priced at.
+      {
+        const lockedRate = Number((quoteRes.data as { exchange_rate_at_creation?: number } | null)?.exchange_rate_at_creation);
+        if (!Number.isFinite(lockedRate) || lockedRate <= 0) {
+          void lockQuoteExchangeRate(quoteId, (quoteRes.data?.currency as string) || "SGD");
+        }
+      }
       if (quoteRes.data?.client_name) setClientName(quoteRes.data.client_name as string);
       if ((quoteRes.data as any)?.client_id) {
         const linkedClientId = (quoteRes.data as any).client_id as string;
@@ -1401,6 +1410,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     setCurrency(c);
     setCurrencyOpen(false);
     await supabase.from("trade_quotes").update({ currency: c }).eq("id", quoteId);
+    // Re-lock the quote's FX rate from the server rate table so the printed
+    // document and the on-screen totals can never drift apart later.
+    await lockQuoteExchangeRate(quoteId, c);
   };
 
   const handleUpdateQuantity = async (itemId: string, newQty: number) => {
@@ -1630,6 +1642,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       const insertRes = await supabase.from("trade_quotes").insert(draft).select("id").single();
       if (insertRes.error || !insertRes.data) throw insertRes.error || new Error("Could not create new draft");
       const newId = insertRes.data.id as string;
+
+      // Lock the FX rate for the new revision from the server rate table.
+      await lockQuoteExchangeRate(newId, (draft as { currency?: string }).currency || currency);
 
       // 3) Copy line items
       const lines = (itemsRes.data || []).map((it: any) => ({ ...it, quote_id: newId }));

@@ -3,10 +3,15 @@
  *
  * The shopper locks a destination + currency in the header modal (Singapore →
  * SGD). Catalogue prices are stored in their native currency (EUR, USD…), so
- * the order must be converted before it is recorded and invoiced. Rates are
- * fetched from open.er-api.com (free, no key) and cached in memory for 10
- * minutes; a hardcoded table guarantees checkout is never blocked.
+ * the order must be converted before it is recorded and invoiced.
+ *
+ * Rates come from the platform `currency_rates` table (refreshed twice daily
+ * by the `sync-currency-rates` function), so checkout, quotes and the browser
+ * all price from the same numbers. Cached in memory for 10 minutes; a
+ * hardcoded table guarantees checkout is never blocked.
  */
+
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 export const SETTLEMENT_CURRENCIES = [
   "usd", "eur", "gbp", "sgd", "chf", "aed", "hkd", "aud",
@@ -31,16 +36,27 @@ async function ratesFor(base: string): Promise<Record<string, number>> {
   const hit = cache.get(key);
   if (hit && Date.now() - hit.at < TTL_MS) return hit.rates;
   try {
-    const res = await fetch(`https://open.er-api.com/v6/latest/${key}`, {
-      signal: AbortSignal.timeout(5000),
-    });
-    const data = await res.json();
-    if (data?.result === "success" && data?.rates) {
-      cache.set(key, { rates: data.rates, at: Date.now() });
-      return data.rates;
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { auth: { persistSession: false } },
+    );
+    const { data, error } = await supabase
+      .from("currency_rates")
+      .select("target_currency,rate")
+      .eq("base_currency", key);
+    if (error) throw error;
+    if (data?.length) {
+      const rates: Record<string, number> = {};
+      for (const row of data) {
+        const r = Number(row.rate);
+        if (Number.isFinite(r) && r > 0) rates[row.target_currency] = r;
+      }
+      cache.set(key, { rates, at: Date.now() });
+      return rates;
     }
   } catch (e) {
-    console.error("[fxConvert] rate fetch failed", key, String(e));
+    console.error("[fxConvert] rate table lookup failed", key, String(e));
   }
   return {};
 }

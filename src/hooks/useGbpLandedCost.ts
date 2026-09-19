@@ -8,6 +8,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { estimateShipping, ShippingBreakdown } from "@/lib/shippingEstimator";
+import { getFxRate, getFxSource } from "@/lib/fxRates";
 
 export const FX_BUFFER = 0.02; // +2% safety margin on EUR→GBP
 
@@ -77,35 +78,19 @@ export const FALLBACK_TO_EUR: Record<string, number> = {
 };
 const FALLBACK_EUR_TO_GBP = 0.85;
 
-/** Try frankfurter → exchangerate.host → hardcoded fallback. Always resolves. */
+/** Read the platform rate table → hardcoded fallback. Always resolves.
+ *  The browser never calls an FX provider directly. */
 export const fetchFx = async (
   from: string,
   to: string
 ): Promise<{ rate: number; isFallback: boolean }> => {
   if (from === to) return { rate: 1, isFallback: false };
-  const withTimeout = (url: string, ms = 4000) => {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), ms);
-    return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(t));
-  };
-  // Source 1 — Frankfurter
   try {
-    const r = await withTimeout(`https://api.frankfurter.app/latest?from=${from}&to=${to}`);
-    if (r.ok) {
-      const d = await r.json();
-      const v = d?.rates?.[to];
-      if (typeof v === "number" && v > 0) return { rate: v, isFallback: false };
+    const v = await getFxRate(from, to);
+    if (typeof v === "number" && v > 0 && getFxSource(from, to) === "database") {
+      return { rate: v, isFallback: false };
     }
-  } catch { /* try next */ }
-  // Source 2 — exchangerate.host
-  try {
-    const r = await withTimeout(`https://api.exchangerate.host/latest?base=${from}&symbols=${to}`);
-    if (r.ok) {
-      const d = await r.json();
-      const v = d?.rates?.[to];
-      if (typeof v === "number" && v > 0) return { rate: v, isFallback: false };
-    }
-  } catch { /* fall through */ }
+  } catch { /* fall through to the bundled table */ }
   // Source 3 — hardcoded fallback
   if (to === "EUR" && FALLBACK_TO_EUR[from]) {
     return { rate: FALLBACK_TO_EUR[from], isFallback: true };

@@ -135,20 +135,31 @@ function resolveVariantPriceFromPick(pick: any | null, variantLabel: string | nu
 }
 
 
-/** Fetch FX rates for the given source currencies into the target. Returns map[src] = rate. */
+/** Resolve FX rates for the given source currencies into the target from the
+ *  platform `currency_rates` table. Returns map[src] = rate. */
 async function fetchFxRates(sources: string[], target: string): Promise<Record<string, number>> {
   const out: Record<string, number> = { [target]: 1 };
   const unique = Array.from(new Set(sources.map((s) => s.toUpperCase()).filter((s) => s && s !== target)));
-  await Promise.all(unique.map(async (src) => {
+  if (unique.length) {
     try {
-      const res = await fetch(`https://api.frankfurter.app/latest?from=${src}&to=${target}`);
-      const data = await res.json();
-      const rate = data?.rates?.[target];
-      if (typeof rate === "number" && rate > 0) out[src] = rate;
+      const admin = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+        { auth: { persistSession: false } },
+      );
+      const { data } = await admin
+        .from("currency_rates")
+        .select("base_currency,rate")
+        .eq("target_currency", target.toUpperCase())
+        .in("base_currency", unique);
+      for (const row of data ?? []) {
+        const rate = Number(row.rate);
+        if (Number.isFinite(rate) && rate > 0) out[row.base_currency] = rate;
+      }
     } catch (err) {
-      console.error(`FX fetch ${src}->${target} failed:`, err);
+      console.error(`FX lookup -> ${target} failed:`, err);
     }
-  }));
+  }
   return out;
 }
 
