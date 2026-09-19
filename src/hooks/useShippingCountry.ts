@@ -4,6 +4,10 @@ import {
   getCartCbm,
   getEstimatedShipping,
   getShippingZone,
+  getLandedCostEstimate,
+  getLandedCostRule,
+  EMPTY_LANDED_COST,
+  type LandedCostEstimate,
   type ShippingEstimateItem,
 } from "@/config/shippingZones";
 import {
@@ -64,6 +68,10 @@ export type EstimatedShipping = {
   available: boolean;
   /** Total crated volume of the cart used for the estimate. */
   cbm: number;
+  /** Destination import charges (duty, VAT/GST, clearance) — DDP estimate. */
+  landed: LandedCostEstimate;
+  /** Freight + import charges, in the target currency. */
+  landedTotalCents: number;
 };
 
 /**
@@ -114,6 +122,23 @@ export function useEstimatedShipping(
     // Fragile/luxury safety net: freight above 15% of the order value is
     // shown as an initial deposit pending advisor validation.
     const cap = applyFreightCap(shown, orderValueCents ?? 0);
+    // Delivered Duty Paid: destination import charges on top of freight.
+    // Third countries (UK post-Brexit, Switzerland, UAE) clear customs on
+    // entry, so the buyer sees the real landed cost before they commit.
+    const rule = getLandedCostRule(code);
+    const ruleCcy = rule?.currency ?? null;
+    const clearance =
+      rule && ruleCcy && target && target !== ruleCcy
+        ? convertCents(rule.clearanceCents, ruleCcy, target as DisplayCurrency, fxRates)
+        : rule?.clearanceCents ?? 0;
+    const landed = rule
+      ? getLandedCostEstimate({
+          countryCode: code,
+          goodsCents: orderValueCents ?? 0,
+          freightCents: cap.cents,
+          clearanceInOrderCurrencyCents: clearance,
+        })
+      : EMPTY_LANDED_COST;
     return {
       countryCode: code,
       cents: cap.cents,
@@ -124,6 +149,8 @@ export function useEstimatedShipping(
       zoneLabel: zone?.label ?? null,
       available: rate != null && !unconvertible,
       cbm: getCartCbm(items ?? null),
+      landed,
+      landedTotalCents: cap.cents + landed.totalCents,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryCode, signature, targetCurrency, fxRates, orderValueCents]);

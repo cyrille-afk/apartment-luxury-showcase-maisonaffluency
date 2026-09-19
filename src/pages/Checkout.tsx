@@ -148,6 +148,18 @@ export type CheckoutSummary = {
   freightNotice: string | null;
   /** Display name of the matched shipping zone (e.g. "Asia Pacific"). */
   shippingZoneLabel: string | null;
+  /** Estimated import duty at the destination border (DDP), minor units. */
+  importDutyCents: number;
+  /** Estimated import VAT/GST at the destination border, minor units. */
+  importVatCents: number;
+  /** Estimated customs clearance / brokerage fee, minor units. */
+  importClearanceCents: number;
+  /** Duty + import VAT + clearance. 0 when the destination needs no clearance. */
+  importTotalCents: number;
+  /** Name of the destination import tax, e.g. "UK VAT". */
+  importTaxName: string | null;
+  /** Plain-language explanation of the landed-cost estimate. */
+  importNote: string | null;
   /** Consumption tax (GST/VAT) due per the configurable rules. 0 otherwise. */
   taxCents: number;
   /** Row label for the tax line, e.g. "GST (9%)". */
@@ -515,6 +527,35 @@ function OrderSummary({
               </p>
             )}
           </div>
+          {summary.importTotalCents > 0 && (
+            <div className="border-t border-border/60 pt-4">
+              <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+                <dt className="min-w-0 flex-1 text-muted-foreground">
+                  Estimated import duties &amp; {summary.importTaxName || "VAT"} (DDP)
+                </dt>
+                <dd className="shrink-0 whitespace-nowrap tabular-nums font-medium">
+                  {money(summary.importTotalCents, currency)}
+                </dd>
+              </div>
+              <dl className="mt-1.5 space-y-1 font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
+                {summary.importDutyCents > 0 && (
+                  <div className="flex items-baseline justify-between gap-6">
+                    <dt>Import duty</dt>
+                    <dd className="tabular-nums">{money(summary.importDutyCents, currency)}</dd>
+                  </div>
+                )}
+                <div className="flex items-baseline justify-between gap-6">
+                  <dt>{summary.importTaxName || "Import VAT"}</dt>
+                  <dd className="tabular-nums">{money(summary.importVatCents, currency)}</dd>
+                </div>
+                <div className="flex items-baseline justify-between gap-6">
+                  <dt>Customs clearance</dt>
+                  <dd className="tabular-nums">{money(summary.importClearanceCents, currency)}</dd>
+                </div>
+                {summary.importNote && <p className="pt-1 italic">{summary.importNote}</p>}
+              </dl>
+            </div>
+          )}
           <div className="border-t border-border/60 pt-4">
             {sgBorderGst ? (
               <>
@@ -1620,6 +1661,14 @@ export default function Checkout() {
       freightCapped: estimatedShippingCents > 0 && estimate.capped,
       freightNotice: estimatedShippingCents > 0 ? estimate.notice : null,
       shippingZoneLabel: estimate.zoneLabel ?? null,
+      // Landed cost is shown only when the destination tax is NOT collected at
+      // checkout — otherwise the buyer would see the same VAT twice.
+      importDutyCents: treatment.charged ? 0 : estimate.landed.dutyCents,
+      importVatCents: treatment.charged ? 0 : estimate.landed.vatCents,
+      importClearanceCents: treatment.charged ? 0 : estimate.landed.clearanceCents,
+      importTotalCents: treatment.charged ? 0 : estimate.landed.totalCents,
+      importTaxName: treatment.charged ? null : estimate.landed.taxName,
+      importNote: treatment.charged ? null : estimate.landed.note,
       taxCents,
       taxLabel: serverTax?.label ?? treatment.label,
       taxRegistrationLine: treatment.registrationLine,

@@ -23,9 +23,18 @@ export const SHIPPING_ZONES: Record<string, ShippingZone> = {
     currency: "EUR",
     countries: [
       "FR", "DE", "IT", "ES", "NL", "BE", "IE", "PT", "AT",
-      "LU", "MC", "GR", "GB",
+      "LU", "MC", "GR",
     ],
     label: "Domestic EU",
+  },
+  // Post-Brexit the United Kingdom is a third country: every shipment is
+  // customs-cleared on entry and carries import VAT, so it can never be
+  // priced as Domestic EU freight.
+  unitedKingdom: {
+    baseRate: 1450,
+    currency: "GBP",
+    countries: ["GB", "GG", "JE", "IM"],
+    label: "United Kingdom (DDP)",
   },
   // Switzerland sits outside the EU customs union: shipments cross a third-
   // country border and are cleared, taxed and duty-assessed on entry.
@@ -297,4 +306,143 @@ export function getShippingZone(countryCode: string): ShippingZone | null {
 /** Resolves the display label of the shipping zone for a country code (e.g. "Asia Pacific"). */
 export function getShippingZoneLabel(countryCode: string): string | null {
   return getShippingZone(countryCode)?.label ?? null;
+}
+
+
+/* ------------------------------------------------------------------ */
+/* Landed cost (DDP)                                                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Import charges payable when the goods cross the destination border.
+ * Percentages are applied to the value in the order currency; the clearance
+ * fee is quoted in the rule's own currency and converted by the caller.
+ */
+export interface LandedCostRule {
+  /** ISO 3166-1 alpha-2 destination. */
+  country: string;
+  /** Import duty on the goods value, percent. */
+  dutyPercent: number;
+  /** Import VAT / GST, percent. */
+  vatPercent: number;
+  /** Whether freight is included in the VAT base (CIF valuation). */
+  vatOnFreight: boolean;
+  /** Customs brokerage / clearance fee, in minor units of `currency`. */
+  clearanceCents: number;
+  currency: string;
+  /** Short name of the destination tax, e.g. "UK VAT". */
+  taxName: string;
+  /** Plain-language explanation shown beside the estimate. */
+  note: string;
+}
+
+export const LANDED_COST_RULES: LandedCostRule[] = [
+  {
+    country: "GB",
+    // HS 94 furniture and lighting enter the UK duty-free; VAT is the charge
+    // that matters, and it is assessed on the CIF value.
+    dutyPercent: 0,
+    vatPercent: 20,
+    vatOnFreight: true,
+    clearanceCents: 15_000,
+    currency: "GBP",
+    taxName: "UK VAT",
+    note: "Delivered Duty Paid to London: UK import VAT at 20% of the goods and freight value, plus customs clearance. Collected by your advisor before despatch.",
+  },
+  {
+    country: "CH",
+    dutyPercent: 0,
+    vatPercent: 8.1,
+    vatOnFreight: true,
+    clearanceCents: 18_000,
+    currency: "CHF",
+    taxName: "Swiss import VAT",
+    note: "Switzerland is outside the EU customs union: import VAT at 8.1% and clearance are assessed at the border.",
+  },
+  {
+    country: "AE",
+    dutyPercent: 5,
+    vatPercent: 5,
+    vatOnFreight: true,
+    clearanceCents: 90_000,
+    currency: "AED",
+    taxName: "UAE VAT",
+    note: "UAE import duty at 5% plus 5% VAT on the landed value.",
+  },
+];
+
+const LANDED_BY_COUNTRY = new Map(LANDED_COST_RULES.map((r) => [r.country, r]));
+
+/** Resolves the import-charge rule for a destination. Unknown → null. */
+export function getLandedCostRule(countryCode?: string | null): LandedCostRule | null {
+  if (!countryCode) return null;
+  return LANDED_BY_COUNTRY.get(countryCode.trim().toUpperCase()) ?? null;
+}
+
+export interface LandedCostEstimate {
+  available: boolean;
+  dutyCents: number;
+  vatCents: number;
+  clearanceCents: number;
+  /** Duty + VAT + clearance — the import charges only, not the goods. */
+  totalCents: number;
+  dutyPercent: number;
+  vatPercent: number;
+  taxName: string | null;
+  note: string | null;
+  rule: LandedCostRule | null;
+}
+
+export const EMPTY_LANDED_COST: LandedCostEstimate = {
+  available: false,
+  dutyCents: 0,
+  vatCents: 0,
+  clearanceCents: 0,
+  totalCents: 0,
+  dutyPercent: 0,
+  vatPercent: 0,
+  taxName: null,
+  note: null,
+  rule: null,
+};
+
+/**
+ * Estimates the import charges for a destination.
+ * `goodsCents` and `freightCents` must already be expressed in the order
+ * currency; `clearanceInOrderCurrencyCents` lets the caller pass the
+ * converted clearance fee (defaults to the rule's own currency amount).
+ */
+export function getLandedCostEstimate(input: {
+  countryCode?: string | null;
+  goodsCents: number;
+  freightCents?: number;
+  clearanceInOrderCurrencyCents?: number | null;
+}): LandedCostEstimate {
+  const rule = getLandedCostRule(input.countryCode);
+  const goods = Math.max(0, Math.round(input.goodsCents || 0));
+  if (!rule || goods <= 0) return EMPTY_LANDED_COST;
+  const freight = Math.max(0, Math.round(input.freightCents || 0));
+  const duty = Math.round(goods * (rule.dutyPercent / 100));
+  const vatBase = goods + duty + (rule.vatOnFreight ? freight : 0);
+  const vat = Math.round(vatBase * (rule.vatPercent / 100));
+  const clearance = Math.max(
+    0,
+    Math.round(
+      input.clearanceInOrderCurrencyCents == null
+        ? rule.clearanceCents
+        : input.clearanceInOrderCurrencyCents,
+    ),
+  );
+  return {
+    available: true,
+    dutyCents: duty,
+    vatCents: vat,
+    clearanceCents: clearance,
+    totalCents: duty + vat + clearance,
+    dutyPercent: rule.dutyPercent,
+    vatPercent: rule.vatPercent,
+    taxName: rule.taxName,
+    note: rule.note,
+    rule,
+  };
 }
