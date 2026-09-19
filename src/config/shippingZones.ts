@@ -337,9 +337,13 @@ export interface LandedCostRule {
   /**
    * Prepaid customs handling applied to freight when the buyer chooses DDP:
    * the forwarder acts as importer of record, advances the border charges and
-   * bills a percentage of the freight for doing so. Not charged under DDU.
+   * bills a flat fee plus a percentage of the freight for doing so. The flat
+   * fee is denominated in EUR (see DDP_HANDLING_FLAT_CURRENCY). Not charged
+   * under DDU.
    */
   ddpHandlingPercent: number;
+  /** Flat DDP handling fee, in minor units of DDP_HANDLING_FLAT_CURRENCY. */
+  ddpHandlingFlatCents: number;
   /** Plain-language explanation shown when the buyer chooses DDU. */
   dduNote: string;
 }
