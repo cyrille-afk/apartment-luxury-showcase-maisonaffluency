@@ -74,13 +74,23 @@ serve(async (req) => {
       }
       const testMode = Boolean((body as any).testMode);
       const { stripe, liveMode } = await getStripe(testMode ? "test" : "auto");
-      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      const session = await stripe.checkout.sessions.retrieve(sessionId, {
+        expand: ["payment_intent"],
+      });
 
-      const { data: order } = await admin
+      // `orders.transaction_id` is the Checkout Session id written by the
+      // stripe-webhook direct_checkout branch. Duplicates are tolerated by the
+      // webhook, so read the newest row rather than assuming exactly one.
+      const { data: orders, error: orderErr } = await admin
         .from("orders")
         .select("id, product_name, amount_total, currency, status, customer_email, created_at")
         .eq("transaction_id", sessionId)
-        .maybeSingle();
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (orderErr) console.error("[dev-checkout-test] order lookup failed", orderErr);
+      const order = orders?.[0] ?? null;
+
+      const zeroDecimal = ZERO_DECIMAL.has(String(session.currency ?? "").toLowerCase());
 
       return json({
         mode: liveMode ? "live" : "test",
@@ -90,11 +100,17 @@ serve(async (req) => {
           paymentStatus: session.payment_status,
           amountTotal: session.amount_total,
           currency: session.currency,
+          zeroDecimal,
           email: session.customer_details?.email ?? session.customer_email ?? null,
+          receiptEmail:
+            (session.payment_intent && typeof session.payment_intent !== "string"
+              ? (session.payment_intent as { receipt_email?: string | null }).receipt_email
+              : null) ?? null,
           url: session.url ?? null,
         },
         orderRecorded: Boolean(order),
-        order: order ?? null,
+        orderLookupFailed: Boolean(orderErr),
+        order,
       });
     }
 
@@ -110,18 +126,20 @@ serve(async (req) => {
       );
     }
 
-    const majorAmount = testMode
-      ? (LIVE_VERIFICATION_AMOUNT[currency] ?? 10)
-      : (LIVE_VERIFICATION_AMOUNT[currency] ?? 10);
+    const majorAmount = LIVE_VERIFICATION_AMOUNT[currency] ?? 10;
     const unitAmount = ZERO_DECIMAL.has(currency)
       ? Math.round(majorAmount)
       : Math.round(majorAmount * 100);
 
     const origin = req.headers.get("origin") || SITE_URL;
+    const buyerEmail = claims.email ?? undefined;
+    const productName = liveMode
+      ? "Checkout Verification (Internal)"
+      : "[TEST] Checkout Verification (Internal)";
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      customer_email: claims.email ?? undefined,
+      customer_email: buyerEmail,
       line_items: [
         {
           quantity: 1,
@@ -129,14 +147,16 @@ serve(async (req) => {
             currency,
             unit_amount: unitAmount,
             product_data: {
-              name: liveMode
-                ? "Checkout Verification (Internal)"
-                : "[TEST] Checkout Verification (Internal)",
+              name: productName,
               description: "Temporary internal verification of the storefront checkout pipeline.",
             },
           },
         },
       ],
+      // Stripe's native receipt is driven by receipt_email on the PaymentIntent.
+      payment_intent_data: buyerEmail
+        ? { receipt_email: buyerEmail, description: productName }
+        : { description: productName },
       // Same handler path as the real storefront so the audit exercises
       // the production webhook branch end to end.
       success_url: `${origin}/dev-checkout-test?session_id={CHECKOUT_SESSION_ID}`,
@@ -144,8 +164,9 @@ serve(async (req) => {
       metadata: {
         payment_type: "direct_checkout",
         user_id: String(claims.sub),
-        product_title: liveMode ? "Checkout Verification (Internal)" : "[TEST] Checkout Verification (Internal)",
+        product_title: productName,
         selected_finish: "",
+        customer_email: buyerEmail ?? "",
         dev_checkout_audit: "true",
       },
     });

@@ -24,9 +24,12 @@ type AuditResult = {
     paymentStatus: string | null;
     amountTotal: number | null;
     currency: string | null;
+    zeroDecimal?: boolean;
     email: string | null;
+    receiptEmail?: string | null;
   };
   orderRecorded: boolean;
+  orderLookupFailed?: boolean;
   order: {
     product_name: string;
     amount_total: number;
@@ -39,6 +42,11 @@ type AuditResult = {
 
 const CURRENCIES = ["hkd", "usd", "eur", "gbp", "sgd", "aed"];
 const STORAGE_KEY = "ma_dev_checkout_mode";
+
+// Stripe reports minor units, except for zero-decimal currencies.
+function formatAmount(minor: number, zeroDecimal?: boolean) {
+  return zeroDecimal ? String(minor) : (minor / 100).toFixed(2);
+}
 
 export default function DevCheckoutTest() {
   const { isAdmin, isSuperAdmin, loading } = useAuth();
@@ -54,9 +62,15 @@ export default function DevCheckoutTest() {
   const [auditing, setAuditing] = useState(false);
   const [audit, setAudit] = useState<AuditResult | null>(null);
   const [auditError, setAuditError] = useState<string | null>(null);
+  const [waiting, setWaiting] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
   const pollRef = useRef<number | null>(null);
 
-  const returnedSession = params.get("session_id");
+  const rawSession = params.get("session_id");
+  const returnedSession = rawSession && /^cs_(test|live)_[A-Za-z0-9]{10,}$/.test(rawSession)
+    ? rawSession
+    : null;
+  const malformedSession = Boolean(rawSession) && !returnedSession;
   const cancelled = params.get("cancelled") === "1";
 
   useEffect(() => {
@@ -66,7 +80,6 @@ export default function DevCheckoutTest() {
   const runAudit = useCallback(
     async (sessionId: string, silent = false) => {
       if (!silent) setAuditing(true);
-      setAuditError(null);
       try {
         const { data, error } = await supabase.functions.invoke("dev-checkout-test", {
           body: { action: "audit", sessionId, testMode: sessionId.startsWith("cs_test_") },
@@ -74,8 +87,11 @@ export default function DevCheckoutTest() {
         if (error) throw error;
         if ((data as any)?.error) throw new Error((data as any).error);
         setAudit(data as AuditResult);
+        setAuditError(null);
         return data as AuditResult;
       } catch (err: any) {
+        // Transient network / cold-start failures must not blank the panel —
+        // keep the last good reading and surface the problem inline.
         setAuditError(err?.message || "Unable to audit this session.");
         return null;
       } finally {
@@ -86,19 +102,39 @@ export default function DevCheckoutTest() {
   );
 
   // Post-redirect: audit the returned session and poll until the webhook lands.
+  // Webhook delivery is eventually consistent, so absence of an order row is a
+  // "still waiting" state, never an error.
   useEffect(() => {
     if (!returnedSession || !(isAdmin || isSuperAdmin)) return;
     let attempts = 0;
-    void runAudit(returnedSession);
+    let stopped = false;
+    setTimedOut(false);
+    setWaiting(true);
+
+    const stop = () => {
+      stopped = true;
+      if (pollRef.current) window.clearInterval(pollRef.current);
+      pollRef.current = null;
+      setWaiting(false);
+    };
+
+    void runAudit(returnedSession).then((first) => {
+      if (!stopped && first?.orderRecorded) stop();
+    });
+
     pollRef.current = window.setInterval(async () => {
       attempts += 1;
       const result = await runAudit(returnedSession, true);
-      if (result?.orderRecorded || attempts >= 10) {
-        if (pollRef.current) window.clearInterval(pollRef.current);
-        pollRef.current = null;
+      if (result?.orderRecorded) {
+        stop();
+      } else if (attempts >= 10) {
+        setTimedOut(true);
+        stop();
       }
     }, 3000);
+
     return () => {
+      stopped = true;
       if (pollRef.current) window.clearInterval(pollRef.current);
       pollRef.current = null;
     };
@@ -196,7 +232,13 @@ export default function DevCheckoutTest() {
 
         {cancelled && (
           <p className="mt-6 text-sm text-muted-foreground">
-            Checkout was cancelled — nothing was charged.
+            Checkout was cancelled — nothing was charged. You can run it again above.
+          </p>
+        )}
+
+        {malformedSession && (
+          <p className="mt-6 text-sm text-destructive">
+            The returned session reference is not a valid Stripe session id, so no audit was run.
           </p>
         )}
 
@@ -210,7 +252,10 @@ export default function DevCheckoutTest() {
                 size="sm"
                 className="gap-2"
                 disabled={auditing}
-                onClick={() => runAudit(returnedSession)}
+                onClick={() => {
+                  setTimedOut(false);
+                  void runAudit(returnedSession);
+                }}
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${auditing ? "animate-spin" : ""}`} />
                 Re-check
@@ -224,22 +269,52 @@ export default function DevCheckoutTest() {
                 label="Amount"
                 value={
                   audit?.session?.amountTotal != null
-                    ? `${(audit.session.amountTotal / 100).toFixed(2)} ${(audit.session.currency ?? "").toUpperCase()}`
+                    ? `${formatAmount(audit.session.amountTotal, audit.session.zeroDecimal)} ${(audit.session.currency ?? "").toUpperCase()}`
                     : "…"
                 }
               />
               <Row label="Buyer" value={audit?.session?.email ?? "…"} />
+              <Row
+                label="Stripe receipt email"
+                value={audit?.session?.receiptEmail ?? audit?.session?.email ?? "…"}
+              />
               <Row
                 label="Order in database"
                 value={
                   audit
                     ? audit.orderRecorded
                       ? `Recorded · ${audit.order?.status}`
-                      : "Waiting for webhook…"
+                      : timedOut
+                        ? "Not recorded yet"
+                        : "Waiting for webhook…"
                     : "…"
                 }
               />
             </dl>
+
+            {!audit?.orderRecorded && waiting && (
+              <div className="mt-5 flex items-center gap-2 rounded border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Waiting for Stripe to confirm the order in the database — this usually takes a few
+                seconds.
+              </div>
+            )}
+
+            {!audit?.orderRecorded && timedOut && (
+              <div className="mt-5 flex items-start gap-2 rounded border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-400">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>
+                  The payment is recorded at Stripe but no order row appeared within 30 seconds.
+                  Use Re-check; if it stays empty the webhook is not reaching the site.
+                </span>
+              </div>
+            )}
+
+            {audit?.orderLookupFailed && (
+              <p className="mt-4 text-sm text-destructive">
+                The order lookup itself failed — the database could not be read.
+              </p>
+            )}
 
             {audit?.orderRecorded && (
               <div className="mt-5 flex items-center gap-2 rounded border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-emerald-700 dark:text-emerald-400">
@@ -258,8 +333,11 @@ export default function DevCheckoutTest() {
               className="mt-5"
               onClick={() => {
                 params.delete("session_id");
+                params.delete("cancelled");
                 setParams(params, { replace: true });
                 setAudit(null);
+                setAuditError(null);
+                setTimedOut(false);
               }}
             >
               Clear
