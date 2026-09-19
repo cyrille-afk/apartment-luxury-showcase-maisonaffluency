@@ -124,6 +124,35 @@ serve(async (req) => {
       }
     }
 
+    if (action === "save_recipients") {
+      // Team Notification Directory — comma separated E.164 WhatsApp numbers.
+      const raw = String(body.recipients ?? "");
+      const parsed: string[] = [];
+      const invalid: string[] = [];
+      for (const part of raw.split(/[,\n;]/)) {
+        const trimmed = part.trim();
+        if (!trimmed) continue;
+        const digits = trimmed.replace(/^whatsapp:/i, "").replace(/[^\d+]/g, "");
+        if (!/^\+?\d{7,15}$/.test(digits)) {
+          invalid.push(trimmed);
+          continue;
+        }
+        const normalised = digits.startsWith("+") ? digits : `+${digits}`;
+        if (!parsed.includes(normalised)) parsed.push(normalised);
+      }
+      if (invalid.length) {
+        throw new Error(`Not a valid phone number: ${invalid.join(", ")} — use international format, e.g. +6591393850`);
+      }
+
+      const { error } = await admin.from("payment_credentials").upsert({
+        id: "live",
+        whatsapp_recipients: parsed.join(", "),
+        updated_by: claims.sub,
+        updated_at: new Date().toISOString(),
+      });
+      if (error) throw error;
+    }
+
     if (action === "set_mode") {
       const { error } = await admin
         .from("payment_credentials")
@@ -134,7 +163,7 @@ serve(async (req) => {
 
     const { data: row } = await admin
       .from("payment_credentials")
-      .select("live_publishable_key, live_secret_key, live_webhook_secret, test_publishable_key, test_secret_key, test_webhook_secret, live_mode, updated_at")
+      .select("live_publishable_key, live_secret_key, live_webhook_secret, test_publishable_key, test_secret_key, test_webhook_secret, whatsapp_recipients, live_mode, updated_at")
       .eq("id", "live")
       .maybeSingle();
 
@@ -165,6 +194,7 @@ serve(async (req) => {
         testPublishableKey: mask(row?.test_publishable_key as string | null),
         testSecretKey: mask(row?.test_secret_key as string | null),
         testWebhookSecret: mask(row?.test_webhook_secret as string | null),
+        whatsappRecipients: (row?.whatsapp_recipients as string | null) ?? "",
         updatedAt: row?.updated_at ?? null,
         webhookUrl: `https://${projectRef}.supabase.co/functions/v1/stripe-webhook`,
       }),

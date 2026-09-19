@@ -1,12 +1,15 @@
 // Shared Twilio WhatsApp sender via the Lovable connector gateway.
 //
-// Destination precedence:
-//   1. ADMIN_WHATSAPP_GROUP_ID  — shared operational chat / broadcast list
-//   2. ADMIN_WHATSAPP_TO        — legacy individual admin number
+// Broadcast model: WhatsApp Cloud API (and therefore Twilio) cannot post into a
+// WhatsApp group. Instead we loop over a recipient directory and send the same
+// alert individually to every team member.
 //
-// Note: standard Twilio WhatsApp messages expect E.164 phone numbers
-// (e.g. whatsapp:+6591234567). Group IDs only work when your Twilio/Meta
-// setup supports them (e.g. Twilio Conversations or an approved group proxy).
+// Recipient precedence:
+//   1. payment_credentials.whatsapp_recipients — "Team Notification Directory"
+//      managed from the admin Payment Settings panel (comma separated E.164).
+//   2. ADMIN_WHATSAPP_TO — legacy single admin number fallback.
+
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const TWILIO_GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
 
@@ -15,6 +18,8 @@ export interface WhatsAppSendResult {
   sid: string | null;
   status: string | null;
   error: string | null;
+  /** Per-recipient outcome for audit logging. */
+  recipients?: { to: string; ok: boolean; sid: string | null; error: string | null }[];
 }
 
 export interface WhatsAppSendOptions {
@@ -27,12 +32,46 @@ export interface WhatsAppSendOptions {
   statusCallback?: string | null;
 }
 
-export function getAdminWhatsAppDestination(): string | null {
-  return (
-    Deno.env.get("ADMIN_WHATSAPP_GROUP_ID")?.trim() ||
-    Deno.env.get("ADMIN_WHATSAPP_TO")?.trim() ||
-    null
-  );
+/** Normalises a raw entry into `whatsapp:+E164`, or null when unusable. */
+export function normaliseWhatsAppNumber(raw: string): string | null {
+  const trimmed = raw.trim().replace(/^whatsapp:/i, "");
+  const digits = trimmed.replace(/[^\d+]/g, "");
+  if (!/^\+?\d{7,15}$/.test(digits)) return null;
+  return `whatsapp:${digits.startsWith("+") ? digits : `+${digits}`}`;
+}
+
+export function parseRecipientList(raw: string | null | undefined): string[] {
+  if (!raw) return [];
+  const seen = new Set<string>();
+  for (const part of raw.split(/[,\n;]/)) {
+    const value = normaliseWhatsAppNumber(part);
+    if (value) seen.add(value);
+  }
+  return [...seen];
+}
+
+/** Reads the admin-managed directory, falling back to the legacy env number. */
+export async function getAdminWhatsAppRecipients(): Promise<string[]> {
+  let stored: string | null = null;
+  try {
+    const url = Deno.env.get("SUPABASE_URL");
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (url && serviceKey) {
+      const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
+      const { data } = await admin
+        .from("payment_credentials")
+        .select("whatsapp_recipients")
+        .eq("id", "live")
+        .maybeSingle();
+      stored = (data?.whatsapp_recipients as string | null) ?? null;
+    }
+  } catch (e) {
+    console.error("[whatsapp] could not read recipient directory:", e);
+  }
+
+  const list = parseRecipientList(stored);
+  if (list.length) return list;
+  return parseRecipientList(Deno.env.get("ADMIN_WHATSAPP_TO"));
 }
 
 export function getWhatsAppStatusCallback(): string | null {
@@ -42,23 +81,13 @@ export function getWhatsAppStatusCallback(): string | null {
   return `${supabaseUrl}/functions/v1/twilio-status-callback?s=${encodeURIComponent(callbackSecret)}`;
 }
 
-export async function sendAdminWhatsApp(
+async function sendOne(
+  to: string,
+  from: string,
+  lovableKey: string,
+  twilioKey: string,
   opts: WhatsAppSendOptions,
-): Promise<WhatsAppSendResult> {
-  const to = getAdminWhatsAppDestination();
-  const from = Deno.env.get("TWILIO_WHATSAPP_FROM")?.trim();
-  const lovableKey = Deno.env.get("LOVABLE_API_KEY")?.trim();
-  const twilioKey = Deno.env.get("TWILIO_API_KEY")?.trim();
-
-  if (!to || !from || !lovableKey || !twilioKey) {
-    return {
-      ok: false,
-      sid: null,
-      status: null,
-      error: "Missing WhatsApp credentials (TO/GROUP_ID, FROM, LOVABLE_API_KEY, TWILIO_API_KEY)",
-    };
-  }
-
+): Promise<{ to: string; ok: boolean; sid: string | null; status: string | null; error: string | null }> {
   const params: Record<string, string> = { To: to, From: from };
   if (opts.statusCallback) params.StatusCallback = opts.statusCallback;
 
@@ -80,30 +109,59 @@ export async function sendAdminWhatsApp(
       body: new URLSearchParams(params),
     });
 
-    let sid: string | null = null;
-    let status: string | null = null;
-    let error: string | null = null;
-
     if (!res.ok) {
       const body = await res.text();
-      error = `Twilio ${res.status}: ${body.slice(0, 800)}`;
-    } else {
-      try {
-        const json = await res.json();
-        sid = json?.sid ?? null;
-        status = json?.status ?? null;
-      } catch (_) {
-        // non-JSON success body — still treat as sent
-      }
+      return { to, ok: false, sid: null, status: null, error: `Twilio ${res.status}: ${body.slice(0, 500)}` };
     }
 
-    return { ok: res.ok, sid, status, error };
+    const json = await res.json().catch(() => null);
+    return { to, ok: true, sid: json?.sid ?? null, status: json?.status ?? null, error: null };
   } catch (err) {
+    return {
+      to,
+      ok: false,
+      sid: null,
+      status: null,
+      error: String(err instanceof Error ? err.message : err).slice(0, 500),
+    };
+  }
+}
+
+/**
+ * Broadcasts one alert to every number in the team directory, in parallel.
+ * `ok` is true when at least one recipient received the message.
+ */
+export async function sendAdminWhatsApp(
+  opts: WhatsAppSendOptions,
+): Promise<WhatsAppSendResult> {
+  const from = Deno.env.get("TWILIO_WHATSAPP_FROM")?.trim();
+  const lovableKey = Deno.env.get("LOVABLE_API_KEY")?.trim();
+  const twilioKey = Deno.env.get("TWILIO_API_KEY")?.trim();
+  const recipients = await getAdminWhatsAppRecipients();
+
+  if (!recipients.length || !from || !lovableKey || !twilioKey) {
     return {
       ok: false,
       sid: null,
       status: null,
-      error: String(err instanceof Error ? err.message : err).slice(0, 800),
+      error: !recipients.length
+        ? "No WhatsApp recipients configured (Payment Settings → Team Notification Directory)"
+        : "Missing WhatsApp credentials (TWILIO_WHATSAPP_FROM, LOVABLE_API_KEY, TWILIO_API_KEY)",
     };
   }
+
+  const results = await Promise.all(
+    recipients.map((to) => sendOne(to, from, lovableKey, twilioKey, opts)),
+  );
+
+  const delivered = results.filter((r) => r.ok);
+  const failed = results.filter((r) => !r.ok);
+
+  return {
+    ok: delivered.length > 0,
+    sid: delivered[0]?.sid ?? null,
+    status: delivered[0]?.status ?? null,
+    error: failed.length ? failed.map((r) => `${r.to} → ${r.error}`).join(" | ").slice(0, 900) : null,
+    recipients: results.map((r) => ({ to: r.to, ok: r.ok, sid: r.sid, error: r.error })),
+  };
 }

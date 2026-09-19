@@ -15,6 +15,7 @@ export type PaymentModeStatus = {
   publishableKey: string | null;
   secretKey: string | null;
   webhookSecret: string | null;
+  whatsappRecipients?: string;
   updatedAt: string | null;
   webhookUrl: string;
   webhookStatus?: "connected" | "mismatched" | "missing";

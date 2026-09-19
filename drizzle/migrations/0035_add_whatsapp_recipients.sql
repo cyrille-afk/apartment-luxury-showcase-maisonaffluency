@@ -1,0 +1,1 @@
+ALTER TABLE public.payment_credentials ADD COLUMN IF NOT EXISTS whatsapp_recipients text;
