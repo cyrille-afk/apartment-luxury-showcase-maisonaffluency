@@ -83,3 +83,9 @@ project_id = "dcrauiygaezoduwdjmsm"
 
   [functions.payment-credentials]
     verify_jwt = false
+
+  [functions.download-quote-pdf]
+    verify_jwt = false
+
+  [functions.acknowledge-purchase-order]
+    verify_jwt = false
