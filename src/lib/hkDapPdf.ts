@@ -133,14 +133,16 @@ export function renderHkDapPage(doc: jsPDF, args: HkDapPageArgs): void {
     doc.setFontSize(8.5);
     doc.setTextColor(JADE_SOFT[0], JADE_SOFT[1], JADE_SOFT[2]);
     doc.text("ORIGINS & MODES", M, y);
-    doc.text("SHIPPING (HKD)", pageW - M, y, { align: "right" });
+    // When the annex mirrors the quote, shipping is shown once below as the
+    // quoted figure — per-origin estimates would contradict it.
+    if (!qt) doc.text("SHIPPING (HKD)", pageW - M, y, { align: "right" });
     y += 12;
     doc.setTextColor(FG[0], FG[1], FG[2]);
     doc.setFontSize(9.5);
     origins!.forEach((o) => {
       const left = `${o.country} -> HK  ·  ${o.modeLabel}  ·  ${o.totalCbm.toFixed(2)} CBM  ·  ${Math.round(o.totalKg)} kg`;
       doc.text(left, M, y);
-      doc.text(fmtHkd(o.hkdCents), pageW - M, y, { align: "right" });
+      if (!qt) doc.text(fmtHkd(o.hkdCents), pageW - M, y, { align: "right" });
       y += 14;
     });
     y += 8;
