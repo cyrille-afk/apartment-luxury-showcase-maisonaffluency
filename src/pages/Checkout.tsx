@@ -2396,6 +2396,8 @@ export default function Checkout() {
             // Initial load only — re-syncing a PaymentIntent (payment method /
             // destination change) must never hide the totals the buyer is reading.
             isLoading={!fxReady || rawLines === null}
+            fxLock={fxLock}
+            onRefreshFx={refreshFxLock}
           />
         </div>
         </div>
