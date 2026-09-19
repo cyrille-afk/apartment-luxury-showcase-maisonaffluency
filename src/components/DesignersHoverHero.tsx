@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { designerPicksQueryOptions, designerQueryOptions, useAllDesignersLite } from "@/hooks/useDesigner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { applyCuratorPickOrder } from "@/lib/curatorPickSort";
+import { getCachedCatalog } from "@/lib/catalogSource";
 import { sortNameKey, lastNameInitial, displayDesignerName } from "@/lib/nameFormat";
 import { cldResponsiveImg } from "@/lib/cloudinary";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
@@ -414,13 +415,23 @@ function useFeaturedDesigners() {
       if (designers.length === 0) return [];
 
       const ids = designers.map((d) => d.id);
-      const { data: picks, error: picksError } = await applyCuratorPickOrder(
-        supabase
-          .from("designer_curator_picks_public" as any)
-          .select("designer_id, image_url")
-          .in("designer_id", ids)
-      );
-      if (picksError) throw picksError;
+      const cached = await getCachedCatalog();
+      let picks: any[] | null;
+      if (cached) {
+        const idSet = new Set(ids);
+        picks = [...cached.picks]
+          .filter((p) => idSet.has(p.designer_id))
+          .sort((a, b) => (a.sort_order ?? Number.MAX_SAFE_INTEGER) - (b.sort_order ?? Number.MAX_SAFE_INTEGER)) as any[];
+      } else {
+        const { data, error: picksError } = await applyCuratorPickOrder(
+          supabase
+            .from("designer_curator_picks_public" as any)
+            .select("designer_id, image_url")
+            .in("designer_id", ids)
+        );
+        if (picksError) throw picksError;
+        picks = data as any[] | null;
+      }
 
       const firstPickByDesigner = new Map<string, string>();
       for (const row of (picks || []) as any[]) {
@@ -451,12 +462,21 @@ function useAllFirstPickImages() {
     queryKey: queryKeys.designersAllFirstPickImages(),
     staleTime: 1000 * 60 * 30,
     queryFn: async () => {
-      const { data, error } = await applyCuratorPickOrder(
-        supabase
-          .from("designer_curator_picks_public" as any)
-          .select("designer_id, image_url")
-      );
-      if (error) throw error;
+      const cached = await getCachedCatalog();
+      let data: any[] | null;
+      if (cached) {
+        data = [...cached.picks].sort(
+          (a, b) => (a.sort_order ?? Number.MAX_SAFE_INTEGER) - (b.sort_order ?? Number.MAX_SAFE_INTEGER),
+        ) as any[];
+      } else {
+        const res = await applyCuratorPickOrder(
+          supabase
+            .from("designer_curator_picks_public" as any)
+            .select("designer_id, image_url")
+        );
+        if (res.error) throw res.error;
+        data = res.data as any[] | null;
+      }
       const map = new Map<string, string>();
       for (const row of (data || []) as any[]) {
         if (!row?.designer_id || !row?.image_url) continue;
