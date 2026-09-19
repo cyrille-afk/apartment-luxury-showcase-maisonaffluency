@@ -163,7 +163,7 @@ serve(async (req) => {
 
     const { data: row } = await admin
       .from("payment_credentials")
-      .select("live_publishable_key, live_secret_key, live_webhook_secret, test_publishable_key, test_secret_key, test_webhook_secret, live_mode, updated_at")
+      .select("live_publishable_key, live_secret_key, live_webhook_secret, test_publishable_key, test_secret_key, test_webhook_secret, whatsapp_recipients, live_mode, updated_at")
       .eq("id", "live")
       .maybeSingle();
 
@@ -194,6 +194,7 @@ serve(async (req) => {
         testPublishableKey: mask(row?.test_publishable_key as string | null),
         testSecretKey: mask(row?.test_secret_key as string | null),
         testWebhookSecret: mask(row?.test_webhook_secret as string | null),
+        whatsappRecipients: (row?.whatsapp_recipients as string | null) ?? "",
         updatedAt: row?.updated_at ?? null,
         webhookUrl: `https://${projectRef}.supabase.co/functions/v1/stripe-webhook`,
       }),
