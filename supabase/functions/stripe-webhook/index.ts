@@ -109,5 +109,21 @@ serve(async (req) => {
   const ackMs = elapsed();
   logAck("queued", ackMs, event.id, event.type);
   console.log(`[STRIPE-WEBHOOK] Queued ${event.type} (${event.id}) in ${ackMs}ms`);
+
+  // Stamp the full acknowledgement time on the row AFTER responding, so the
+  // admin latency panel measures the real end-to-end 200 OK, not just the time
+  // before the enqueue write. Never blocks the response.
+  const stamp = supabase
+    .from("webhook_events")
+    .update({ ack_ms: ackMs })
+    .eq("provider", "stripe")
+    .eq("event_id", event.id)
+    .then(() => undefined, () => undefined);
+  try {
+    (globalThis as any).EdgeRuntime?.waitUntil?.(stamp);
+  } catch {
+    /* no-op outside the edge runtime */
+  }
+
   return ok({ queued: true }, ackMs);
 });
