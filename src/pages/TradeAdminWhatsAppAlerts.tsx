@@ -4,6 +4,7 @@ import { Navigate } from "react-router-dom";
 import { RefreshCw } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { useToast } from "@/hooks/use-toast";
 
 type AlertRow = {
