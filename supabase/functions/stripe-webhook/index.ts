@@ -63,6 +63,43 @@ async function settleFunnelCard(
   }
 }
 
+/**
+ * Kill-switch: once a payment lands, every pending/scheduled reminder for that
+ * quote (or card) is resolved and the automation is permanently paused.
+ */
+async function cancelFunnelReminders(
+  supabase: ReturnType<typeof createClient>,
+  entityIds: (string | null | undefined)[],
+) {
+  const ids = [...new Set(entityIds.filter(Boolean) as string[])];
+  if (ids.length === 0) return;
+  const types = ["quote_unpaid", "cart", "funnel_card"];
+  try {
+    for (const id of ids) {
+      await supabase
+        .from("funnel_reminder_log")
+        .update({ resolved_at: new Date().toISOString(), resolved_reason: "payment_received" })
+        .in("entity_type", types)
+        .eq("entity_id", id)
+        .is("resolved_at", null);
+
+      await supabase.from("funnel_reminder_pauses").upsert(
+        types.map((entity_type) => ({
+          entity_type,
+          entity_id: id,
+          paused: true,
+          reason: "payment_received",
+          updated_at: new Date().toISOString(),
+        })),
+        { onConflict: "entity_type,entity_id" },
+      );
+    }
+    console.log(`[STRIPE-WEBHOOK] Reminders cancelled for ${ids.join(", ")}`);
+  } catch (e) {
+    console.error("[STRIPE-WEBHOOK] cancelFunnelReminders error:", e);
+  }
+}
+
 async function notifyInternalPaymentReceived(
   supabase: ReturnType<typeof createClient>,
   args: {
@@ -162,6 +199,8 @@ serve(async (req) => {
         amountPaid: session.amount_total ?? 0,
       });
 
+      await cancelFunnelReminders(supabase, [funnelCardId, session.metadata?.quote_id]);
+
       const piId = typeof session.payment_intent === "string" ? session.payment_intent : session.id;
       await notifyInternalPaymentReceived(supabase, {
         label: session.metadata?.label || "Sales Funnel payment",
@@ -191,6 +230,7 @@ serve(async (req) => {
             .update({ status: "deposit_paid" })
             .eq("id", quoteId);
           if (qErr) console.error("[STRIPE-WEBHOOK] quote status update failed:", qErr);
+          await cancelFunnelReminders(supabase, [quoteId]);
         }
       }
       return new Response(JSON.stringify({ received: true }), {
@@ -371,6 +411,8 @@ serve(async (req) => {
 
     if (quoteId && session.payment_status === "paid") {
       console.log(`[STRIPE-WEBHOOK] Payment completed for quote ${quoteId}, type: ${paymentType}`);
+      await cancelFunnelReminders(supabase, [quoteId]);
+
 
       if (paymentType === "deposit") {
         // Deposit paid → move to deposit_paid (allow from priced or confirmed,
@@ -419,6 +461,8 @@ serve(async (req) => {
         paymentIntentId: pi.id,
         amountPaid: pi.amount_received ?? pi.amount ?? 0,
       });
+
+      await cancelFunnelReminders(supabase, [pi.metadata.cardId, pi.metadata?.quote_id as string]);
 
       await notifyInternalPaymentReceived(supabase, {
         label: pi.metadata?.label || "Sales Funnel payment",

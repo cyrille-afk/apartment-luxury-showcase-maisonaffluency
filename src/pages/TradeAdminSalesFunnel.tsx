@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabaseImageTransform } from "@/lib/supabaseImage";
 import FunnelPayLinkBlock from "@/components/trade/FunnelPayLinkBlock";
+import FunnelReminderPauseToggle from "@/components/trade/FunnelReminderPauseToggle";
 import SimulatePaymentLink from "@/components/trade/SimulatePaymentLink";
 
 const RANGES = [
@@ -91,6 +92,12 @@ const EntryCard = ({ entry, urgent = false, quoteCard = false }: { entry: Funnel
         </Button>
       ) : null}
     </div>
+    {!entry.paidViaStripe && (
+      <FunnelReminderPauseToggle
+        entityType={urgent || quoteCard ? "quote_unpaid" : entry.email && !entry.href ? "cart" : "funnel_card"}
+        entityId={entry.id}
+      />
+    )}
     {!entry.paidViaStripe && (
       <FunnelPayLinkBlock
         label={entry.label}
@@ -206,7 +213,8 @@ const TradeAdminSalesFunnel = () => {
         <div>
           <h1 className="font-display text-3xl text-foreground md:text-4xl">Sales funnel</h1>
           <p className="mt-2 font-body text-sm text-muted-foreground">
-            Everything that started but never completed — with automatic reminders sent daily.
+            Everything that started but never completed — with automatic reminders sent on a spaced
+            schedule or paused manually.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

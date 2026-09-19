@@ -239,6 +239,13 @@
       "when": 1789724057499,
       "tag": "0033_add_stable_quote_pdf_download_token",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1789784971208,
+      "tag": "0034_funnel_reminder_pauses",
+      "breakpoints": true
     }
   ]
 }

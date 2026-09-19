@@ -3376,6 +3376,8 @@ export type Database = {
           id: string
           recipient_email: string | null
           reminder_number: number
+          resolved_at: string | null
+          resolved_reason: string | null
           sent_at: string
           stage: string
           template_name: string | null
@@ -3387,6 +3389,8 @@ export type Database = {
           id?: string
           recipient_email?: string | null
           reminder_number?: number
+          resolved_at?: string | null
+          resolved_reason?: string | null
           sent_at?: string
           stage: string
           template_name?: string | null
@@ -3398,9 +3402,38 @@ export type Database = {
           id?: string
           recipient_email?: string | null
           reminder_number?: number
+          resolved_at?: string | null
+          resolved_reason?: string | null
           sent_at?: string
           stage?: string
           template_name?: string | null
+        }
+        Relationships: []
+      }
+      funnel_reminder_pauses: {
+        Row: {
+          entity_id: string
+          entity_type: string
+          paused: boolean
+          reason: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          entity_id: string
+          entity_type: string
+          paused?: boolean
+          reason?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          entity_id?: string
+          entity_type?: string
+          paused?: boolean
+          reason?: string | null
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }

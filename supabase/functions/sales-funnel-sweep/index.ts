@@ -41,6 +41,20 @@ Deno.serve(async (req) => {
   const sent: string[] = []
   const internalRows: { stage: string; label: string; age: string }[] = []
 
+  // Weekend protection: client reminders never fire on Saturday or Sunday.
+  // The daily 09:00 job simply defers them to Monday morning.
+  const weekday = new Date().getUTCDay()
+  const isWeekend = weekday === 0 || weekday === 6
+  const deferred: string[] = []
+
+  // Manual "Pause reminders" overrides set from the Sales Funnel board.
+  const { data: pauseRows } = await supabase
+    .from('funnel_reminder_pauses')
+    .select('entity_type, entity_id, paused')
+    .eq('paused', true)
+  const paused = new Set((pauseRows ?? []).map((p) => `${p.entity_type}:${p.entity_id}`))
+  const isPaused = (type: string, id: string) => paused.has(`${type}:${id}`)
+
   const alreadySent = async (type: string, id: string, n: number) => {
     const { data } = await supabase
       .from('funnel_reminder_log')
@@ -61,6 +75,14 @@ Deno.serve(async (req) => {
     templateName: string,
     templateData: Record<string, unknown>,
   ) => {
+    if (isPaused(type, id)) {
+      deferred.push(`${stage} paused manually (${type}:${id})`)
+      return false
+    }
+    if (isWeekend) {
+      deferred.push(`${stage} held for Monday 09:00 (${type}:${id})`)
+      return false
+    }
     if (await alreadySent(type, id, n)) return false
     if (dryRun) {
       sent.push(`[dry] ${stage} → ${email}`)
@@ -120,11 +142,13 @@ Deno.serve(async (req) => {
   }
 
   // ---------- 2. Quotes sent but never paid ----------
+  // Spaced grace period: first chase 5 days after the quote went out,
+  // the final one a further 7 days later.
   const { data: sentQuotes } = await supabase
     .from('trade_quotes')
     .select('id, client_name, currency, submitted_at, ship_to_email, ship_to_name')
     .eq('status', 'submitted')
-    .lt('submitted_at', HOURS(72))
+    .lt('submitted_at', HOURS(120))
     .limit(200)
 
   for (const q of sentQuotes ?? []) {
@@ -149,10 +173,22 @@ Deno.serve(async (req) => {
     }
 
     const ageDays = Math.floor((Date.now() - new Date(q.submitted_at as string).getTime()) / 86400_000)
-    const n = ageDays >= 7 ? 2 : 1
-    if (n === 2 && !(await alreadySent('quote_unpaid', q.id, 1))) {
-      // Never skip straight to the final reminder.
-      continue
+    if (ageDays < 5) continue
+
+    const { data: firstReminder } = await supabase
+      .from('funnel_reminder_log')
+      .select('sent_at')
+      .eq('entity_type', 'quote_unpaid')
+      .eq('entity_id', q.id)
+      .eq('reminder_number', 1)
+      .maybeSingle()
+
+    let n = 1
+    if (firstReminder) {
+      const sinceFirst =
+        (Date.now() - new Date(firstReminder.sent_at as string).getTime()) / 86400_000
+      if (sinceFirst < 7) continue // still inside the 7-day grace window
+      n = 2
     }
     await send('quote_unpaid', q.id, n, 'Sent quote unpaid', email, 'quote-payment-reminder', {
       recipientName: link.payer_name || q.ship_to_name || q.client_name,
@@ -234,7 +270,7 @@ Deno.serve(async (req) => {
   }
 
   return new Response(
-    JSON.stringify({ ok: true, dryRun, sent, stalled: internalRows.length }),
+    JSON.stringify({ ok: true, dryRun, weekendHold: isWeekend, sent, deferred, stalled: internalRows.length }),
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
   )
 })
