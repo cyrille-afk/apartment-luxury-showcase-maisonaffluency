@@ -1,6 +1,5 @@
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { createPortal } from "react-dom";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getCart, shouldUseFullPageCart, useCart } from "@/lib/cart";
 import { Loader2, Minus, Plus } from "lucide-react";
@@ -28,7 +27,7 @@ import { setStickyCommerceDockHeight } from "@/lib/stickyCommerceDock";
  * Axonometric Studio entry lives outside this box, directly under the finish
  * selectors (see AxonometricStudioButton).
  *
- * On mobile a fixed sticky bottom dock keeps price + primary action within
+ * On mobile an in-flow sticky bottom dock keeps price + primary action within
  * reach while scrolling.
  */
 
@@ -372,18 +371,25 @@ export default function ProductCommerceCta({
 
   // Publish the dock's measured height so the floating action buttons can lift
   // above it. Height is 0 when the dock is display:none (desktop) or unmounted.
-  const dockMeasureRef = useCallback((node: HTMLDivElement | null) => {
-    if (!node) {
+  const [dockNode, setDockNode] = useState<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!dockNode) {
       setStickyCommerceDockHeight(0);
-      return;
+      return undefined;
     }
-    const publish = () => setStickyCommerceDockHeight(node.getBoundingClientRect().height);
+    const publish = () => setStickyCommerceDockHeight(dockNode.getBoundingClientRect().height);
     publish();
     const ro = new ResizeObserver(publish);
-    ro.observe(node);
+    ro.observe(dockNode);
     const mql = window.matchMedia("(min-width: 768px)");
     mql.addEventListener("change", publish);
-  }, []);
+    return () => {
+      ro.disconnect();
+      mql.removeEventListener("change", publish);
+      setStickyCommerceDockHeight(0);
+    };
+  }, [dockNode]);
 
   // Mobile: PLACE ORDER follows the same in-canvas selection drawer path.
   const handleMobilePrimary = () => {
@@ -538,13 +544,14 @@ export default function ProductCommerceCta({
       </div>
       )}
 
-      {/* Mobile dock: portaled directly under body, outside every product/layout
-          wrapper. Its position and height never depend on page scroll state. */}
-      {dock && typeof document !== "undefined" && createPortal(
+      {/* Mobile dock: an in-flow sibling of the product scroll region. Safari
+          therefore keeps it inside the dynamic viewport instead of compositing
+          it beneath the browser toolbar. */}
+      {dock && (
         <div
           data-mobile-commerce-dock
-          ref={dockMeasureRef}
-          className="mobile-product-commerce-dock md:hidden fixed bottom-0 left-0 right-0 z-[9999] bg-white border-t border-gray-200 px-4 pt-3 pb-[max(16px,env(safe-area-inset-bottom,0px))]"
+          ref={setDockNode}
+          className="mobile-product-commerce-dock md:hidden sticky bottom-0 z-50 w-full bg-background border-t border-border px-4 pt-3 pb-[max(16px,env(safe-area-inset-bottom,0px))]"
         >
           <div className="flex min-h-11 w-full items-center justify-between gap-3">
               <div className="mobile-product-commerce-summary min-w-0 flex-1">
@@ -589,8 +596,7 @@ export default function ProductCommerceCta({
                 {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : mobilePrimaryLabel}
               </button>
           </div>
-        </div>,
-        document.body
+        </div>
       )}
 
       {/* Slide-out mini-cart drawer (State A order confirmation) */}
