@@ -543,7 +543,7 @@ function OrderSummary({
                       </span>
                       <span className="mt-0.5 block font-light text-[10px] leading-snug text-muted-foreground">
                         {term === "DDP"
-                          ? "Duties & import tax prepaid"
+                          ? "We prepay duties, invoiced separately"
                           : "Duties & import tax at the border"}
                       </span>
                     </button>
