@@ -600,6 +600,8 @@ export const resolveTaxTreatment = (input: TaxTreatmentInput): TaxTreatmentResul
     registrationLine: taxRegistrationLine(rule),
     merchantTaxIdentifier: MERCHANT_TAX_IDENTIFIERS.sgUen,
     requiresDdpClearance: true,
+    customsRoute: "CARRIER_DDP",
+    iossNumber: null,
   };
 };
 
