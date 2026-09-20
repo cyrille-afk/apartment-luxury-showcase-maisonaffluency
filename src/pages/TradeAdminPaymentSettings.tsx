@@ -518,13 +518,30 @@ export default function TradeAdminPaymentSettings() {
           {FIELDS.map((f) => (
             <div key={f.key} className="rounded-sm border border-border/70 bg-background px-3 py-2">
               <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{f.label}</dt>
-              <dd className="mt-1 font-body text-sm">
+              <dd className="mt-1 flex items-center justify-between gap-2 font-body text-sm">
                 {status?.[f.key] ? (
                   <span className="inline-flex items-center gap-1.5 text-[hsl(var(--jade))]">
                     <ShieldCheck className="h-3.5 w-3.5" /> {status[f.key]}
                   </span>
                 ) : (
                   <span className="text-muted-foreground">Not configured</span>
+                )}
+                {status?.[f.key] && (
+                  <button
+                    type="button"
+                    aria-label={`Copy saved ${f.label}`}
+                    onClick={() => copySavedField(f.key)}
+                    className="text-muted-foreground hover:text-foreground"
+                    title="Copy saved key to clipboard"
+                  >
+                    {revealedSaved[f.key] ? (
+                      <Check className="h-3.5 w-3.5 text-[hsl(var(--jade))]" />
+                    ) : copyingSaved === f.key ? (
+                      <span className="font-body text-[10px]">…</span>
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
+                  </button>
                 )}
               </dd>
             </div>
