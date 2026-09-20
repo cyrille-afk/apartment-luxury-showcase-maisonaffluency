@@ -5634,6 +5634,78 @@ export type Database = {
           },
         ]
       }
+      prospect_studios: {
+        Row: {
+          aesthetic_label: string | null
+          aesthetic_summary: string | null
+          business_email: string
+          claimed_at: string | null
+          created_at: string
+          email_error: string | null
+          email_sent_at: string | null
+          email_sent_status: boolean
+          enriched_at: string | null
+          enrichment_attempts: number
+          enrichment_error: string | null
+          enrichment_status: string
+          founder_name: string | null
+          id: string
+          lead_source: string
+          matched_designers: Json
+          recent_design_keywords: string[]
+          studio_name: string
+          updated_at: string
+          website_summary: string | null
+          website_url: string | null
+        }
+        Insert: {
+          aesthetic_label?: string | null
+          aesthetic_summary?: string | null
+          business_email: string
+          claimed_at?: string | null
+          created_at?: string
+          email_error?: string | null
+          email_sent_at?: string | null
+          email_sent_status?: boolean
+          enriched_at?: string | null
+          enrichment_attempts?: number
+          enrichment_error?: string | null
+          enrichment_status?: string
+          founder_name?: string | null
+          id?: string
+          lead_source?: string
+          matched_designers?: Json
+          recent_design_keywords?: string[]
+          studio_name: string
+          updated_at?: string
+          website_summary?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          aesthetic_label?: string | null
+          aesthetic_summary?: string | null
+          business_email?: string
+          claimed_at?: string | null
+          created_at?: string
+          email_error?: string | null
+          email_sent_at?: string | null
+          email_sent_status?: boolean
+          enriched_at?: string | null
+          enrichment_attempts?: number
+          enrichment_error?: string | null
+          enrichment_status?: string
+          founder_name?: string | null
+          id?: string
+          lead_source?: string
+          matched_designers?: Json
+          recent_design_keywords?: string[]
+          studio_name?: string
+          updated_at?: string
+          website_summary?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       provenance_certificates: {
         Row: {
           appreciation_notes: string | null
@@ -10092,6 +10164,38 @@ export type Database = {
       can_view_studio: {
         Args: { _studio_id: string; _user_id: string }
         Returns: boolean
+      }
+      claim_prospect_enrichment: {
+        Args: { batch_size?: number }
+        Returns: {
+          aesthetic_label: string | null
+          aesthetic_summary: string | null
+          business_email: string
+          claimed_at: string | null
+          created_at: string
+          email_error: string | null
+          email_sent_at: string | null
+          email_sent_status: boolean
+          enriched_at: string | null
+          enrichment_attempts: number
+          enrichment_error: string | null
+          enrichment_status: string
+          founder_name: string | null
+          id: string
+          lead_source: string
+          matched_designers: Json
+          recent_design_keywords: string[]
+          studio_name: string
+          updated_at: string
+          website_summary: string | null
+          website_url: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "prospect_studios"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       claim_webhook_events: {
         Args: { batch_size?: number }
