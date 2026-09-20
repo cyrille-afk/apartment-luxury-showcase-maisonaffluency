@@ -174,6 +174,8 @@ serve(async (req) => {
     business_email: businessEmail,
     website_url: websiteUrl,
     source_index: sourceIndex,
+    ...(country ? { country } : {}),
+    ...(city ? { city } : {}),
     aesthetic_profile: aesthetic,
     predicted_designer_matches: matched.length ? matched : null,
     campaign_status: protectedStatus
