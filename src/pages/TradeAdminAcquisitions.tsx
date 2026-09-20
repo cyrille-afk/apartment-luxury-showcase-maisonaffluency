@@ -105,6 +105,7 @@ const TradeAdminAcquisitions = () => {
   const [dispatching, setDispatching] = useState(false);
   const [repairing, setRepairing] = useState(false);
   const [exiting, setExiting] = useState<Set<string>>(new Set());
+  const [igFirstOnly, setIgFirstOnly] = useState(false);
   const [activeCountry, setActiveCountry] = useState<string>(DEFAULT_COUNTRY);
   const [activeCity, setActiveCity] = useState<string>(DEFAULT_CITY);
 
