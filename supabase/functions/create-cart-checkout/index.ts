@@ -8,6 +8,11 @@ import { resolveTaxTreatment, normaliseBuyerTaxId } from "../_shared/taxRules.ts
 import { applyIossEnv } from "../_shared/iossConfig.ts";
 import { buildOrderDeliveryMessage } from "../_shared/orderDeliveryMessaging.ts";
 import { verifyVatNumber } from "../_shared/vatValidation.ts";
+import {
+  evaluateAllocation,
+  evaluateRegionalCompliance,
+  loadAllocationRules,
+} from "../_shared/tradeGuardrails.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -92,6 +97,34 @@ serve(async (req) => {
     for (const row of priced || []) {
       if (row.source_pick_id) byPick.set(row.source_pick_id, row);
       if (row.id) byPick.set(row.id, row);
+    }
+
+    // ---- Bulk inventory reserve gate -----------------------------------
+    // Restricted pieces (ultra-rare, artisan, low stock) may not be swept in a
+    // single order; breaching carts route to an allocation inquiry instead.
+    const allocationRules = await loadAllocationRules(supabaseAdmin, pickIds);
+    const allocation = evaluateAllocation(
+      rawItems.map((item) => {
+        const rule = allocationRules.get(String(item.pickId));
+        return {
+          pickId: String(item.pickId),
+          title: String(item.title || "Collectible piece"),
+          quantity: Math.round(Number(item.quantity) || 1),
+          isAllocationRestricted: rule?.restricted ?? false,
+          allocationUnitCap: rule?.cap ?? null,
+          availableStockUnits: rule?.stock ?? null,
+        };
+      }),
+    );
+    if (!allocation.cleared) {
+      return json(
+        {
+          error: allocation.message,
+          code: "allocation_inquiry_required",
+          breaches: allocation.breaches,
+        },
+        409,
+      );
     }
 
     const norm = (s: unknown) => String(s ?? "").trim().toLowerCase();
@@ -375,6 +408,17 @@ serve(async (req) => {
     });
 
 
+    // ---- Geographic shipment enforcement -------------------------------
+    // Tax relief claimed on one registry but delivered into another region is
+    // the parallel-export signature: halt automated checkout for review.
+    const compliance = evaluateRegionalCompliance({
+      buyerTaxCountry: treatment.buyerTaxIdVerified ? treatment.countryIso : null,
+      shippingCountry,
+      treatment: treatment.treatment,
+      buyerTaxIdVerified: treatment.buyerTaxIdVerified,
+      taxCents,
+    });
+
     const orderRef = `MA-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
     const { data: order, error: orderErr } = await supabaseAdmin
@@ -385,7 +429,15 @@ serve(async (req) => {
         email: buyerEmail,
         full_name: fullName,
         payment_method: method,
-        status: method === "bank_transfer" ? "awaiting_bank_transfer" : "pending",
+        status: !compliance.cleared
+          ? "pending_regional_compliance_review"
+          : method === "bank_transfer"
+          ? "awaiting_bank_transfer"
+          : "pending",
+        compliance_review_status: compliance.status,
+        compliance_review_reason: compliance.reason,
+        compliance_flagged_at: compliance.cleared ? null : new Date().toISOString(),
+        buyer_registry_country: compliance.registryCountry,
         currency,
         subtotal_cents: grossSubtotal,
         discount_cents: discountCents,
@@ -443,6 +495,15 @@ serve(async (req) => {
       }),
     );
     if (itemsErr) console.error("[create-cart-checkout] item insert failed", itemsErr);
+
+    if (!compliance.cleared) {
+      return json({
+        orderRef: order.order_ref,
+        mode: "compliance_review",
+        status: "pending_regional_compliance_review",
+        message: compliance.reason,
+      });
+    }
 
     if (method === "bank_transfer") {
       // Order-received confirmation — card orders get it from the Stripe
