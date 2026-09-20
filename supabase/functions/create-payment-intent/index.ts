@@ -192,7 +192,10 @@ serve(async (req) => {
     // so the action label, bank-wire amount, invoice, and PaymentIntent agree.
     const roundDollar = (cents: number) => Math.round(cents / 100) * 100;
     const amount =
-      roundDollar(goodsAmount) + roundDollar(deliveryCents) + roundDollar(taxCents);
+      roundDollar(goodsAmount) +
+      roundDollar(deliveryCents) +
+      roundDollar(taxCents) +
+      roundDollar(clearanceFeeCents);
     if (amount < 100 || amount > 100_000_00 * 100) return json({ error: "Price out of range." }, 400);
 
     // ---- Deposit / balance split ----------------------------------------
