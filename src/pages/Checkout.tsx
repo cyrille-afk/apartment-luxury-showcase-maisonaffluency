@@ -2027,13 +2027,29 @@ export default function Checkout() {
     // Tax follows the configurable rules (destination + currency + buyer
     // registration). One engine decides the rate, the label and the wording.
     const deliveryForTaxCents = shippingCents > 0 ? shippingCents : estimatedShippingCents;
+    // Per-line customs manifest: HS6 + duty rate + origin, bound to the line
+    // value so landed cost and the ship-from routing are reproducible.
+    const goodsAfterDiscount = Math.max(0, subtotalCents - discountCents);
+    const discountRatio = subtotalCents > 0 ? goodsAfterDiscount / subtotalCents : 1;
+    const customsLines: CustomsLine[] = grossLines.map((l) => ({
+      hs6Code: l.hs6Code ?? null,
+      dutyRate: l.dutyRate ?? null,
+      originCountry: l.pickupCountry ?? l.origin ?? null,
+      lineTotalCents: Math.round(lineSubtotal(l) * discountRatio),
+    }));
     const treatment = resolveTaxTreatment({
       country: formCountry,
       currency,
       buyerType,
       buyerTaxId: buyerGstNumber,
-      goodsCents: subtotalCents - discountCents,
+      // Reverse charge / B2B zero-rating only on an authority-verified number.
+      buyerTaxIdVerified: vatCheck.verified,
+      goodsCents: goodsAfterDiscount,
       shippingCents: deliveryForTaxCents,
+      // The €150 gate is only exact when the order is priced in EUR; any other
+      // currency falls back to the order value, which the server re-checks.
+      goodsEurCents: currency.toUpperCase() === "EUR" ? goodsAfterDiscount : null,
+      lines: customsLines,
     });
     // The PaymentIntent is authoritative: once the server has priced the order
     // the displayed tax and total equal the amount actually charged.
@@ -2045,6 +2061,7 @@ export default function Checkout() {
       shippingCents,
       estimatedShippingCents,
       taxCents,
+      clearanceFeeCents: treatment.clearanceFeeCents,
     });
     const destination = treatment.countryIso;
     return {
