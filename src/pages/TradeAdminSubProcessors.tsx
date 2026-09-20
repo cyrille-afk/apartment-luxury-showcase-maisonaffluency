@@ -175,6 +175,109 @@ const TradeAdminSubProcessors = () => {
     });
   };
 
+  /** Upload a counter-signed PDF: the edge function authenticates the bytes. */
+  const uploadAgreement = async (file: File) => {
+    if (!active) return;
+    if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
+      toast.error("Only PDF agreements are accepted.");
+      return;
+    }
+    if (file.size > MAX_DPA_BYTES) {
+      toast.error("The agreement exceeds the 10 MB limit.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const fileBase64 = await fileToBase64(file);
+      const { data, error } = await supabase.functions.invoke("upload-compliance-dpa", {
+        body: { vendorId: active.id, fileName: file.name, fileBase64 },
+      });
+      const failure = (data as { error?: string } | null)?.error;
+      if (error || failure) throw new Error(failure || error?.message || "Upload failed.");
+      const result = data as {
+        path: string;
+        sha256: string;
+        sizeBytes: number;
+        fileName: string;
+      };
+      setActive((prev) =>
+        prev
+          ? {
+              ...prev,
+              signed_dpa_path: result.path,
+              signed_dpa_filename: result.fileName,
+              signed_dpa_sha256: result.sha256,
+              signed_dpa_size_bytes: result.sizeBytes,
+              signed_dpa_uploaded_at: new Date().toISOString(),
+            }
+          : prev,
+      );
+      queryClient.invalidateQueries({ queryKey: ["sub-processor-registry"] });
+      toast.success("Counter-signed agreement stored securely.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "The agreement could not be stored.");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  /** Short-lived (15 minute) authenticated link — never a public URL. */
+  const openAgreement = async (row: Row) => {
+    if (!row.signed_dpa_path) return;
+    setDownloading(row.id);
+    const { data, error } = await supabase.storage
+      .from(DPA_BUCKET)
+      .createSignedUrl(row.signed_dpa_path, 900);
+    setDownloading(null);
+    if (error || !data?.signedUrl) {
+      toast.error(error?.message ?? "The secure link could not be generated.");
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const removeAgreement = async () => {
+    if (!active?.signed_dpa_path) return;
+    setUploading(true);
+    const path = active.signed_dpa_path;
+    const { error: storageErr } = await supabase.storage.from(DPA_BUCKET).remove([path]);
+    if (storageErr) {
+      setUploading(false);
+      toast.error(storageErr.message);
+      return;
+    }
+    const { error } = await supabase
+      .from("sub_processor_registry")
+      .update({
+        signed_dpa_path: null,
+        signed_dpa_filename: null,
+        signed_dpa_sha256: null,
+        signed_dpa_size_bytes: null,
+        signed_dpa_uploaded_at: null,
+      })
+      .eq("id", active.id);
+    setUploading(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setActive((prev) =>
+      prev
+        ? {
+            ...prev,
+            signed_dpa_path: null,
+            signed_dpa_filename: null,
+            signed_dpa_sha256: null,
+            signed_dpa_size_bytes: null,
+            signed_dpa_uploaded_at: null,
+          }
+        : prev,
+    );
+    queryClient.invalidateQueries({ queryKey: ["sub-processor-registry"] });
+    toast.success("Agreement removed.");
+  };
+
   const save = async () => {
     if (!active) return;
     // An executed agreement is meaningless without the counter-signature date
