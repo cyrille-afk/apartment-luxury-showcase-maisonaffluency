@@ -43,4 +43,4 @@ jobs:
         run: bunx vitest run src/lib/shippingEstimator.fallback.test.ts
 
       - name: Typecheck
-        run: bunx tsgo --noEmit -p tsconfig.app.json
+        run: bunx tsc --noEmit -p tsconfig.app.json
