@@ -1,7 +1,9 @@
 /**
  * Google Analytics event tracking utility.
- * Wraps gtag calls so components stay clean.
+ * Every call is gated on affirmative analytics consent — no event may leave
+ * the browser before the visitor has actively opted in.
  */
+import { hasConsent } from "@/lib/consent/consentStore";
 
 type GAEventParams = Record<string, string | number | boolean>;
 
@@ -9,10 +11,13 @@ export const trackEvent = (
   eventName: string,
   params?: GAEventParams
 ) => {
-  if (typeof window !== "undefined" && (window as any).gtag) {
+  if (typeof window === "undefined") return;
+  if (!hasConsent("analytics")) return;
+  if ((window as any).gtag) {
     (window as any).gtag("event", eventName, params);
   }
 };
+
 
 /** Pre-built helpers for common CTA clicks */
 export const trackCTA = {
