@@ -7,7 +7,7 @@
 
 export type RegionTier = "ASEAN" | "GCC" | "ROW";
 
-export type PaymentChannelId = "swift";
+export type PaymentChannelId = "swift" | "gb_faster_payments";
 
 export interface PaymentDetailRow {
   label: string;
