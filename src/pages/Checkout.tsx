@@ -2181,6 +2181,13 @@ export default function Checkout() {
           paymentIntentId: intentIdRef.current || undefined,
           // Destination country — drives Singapore GST server-side.
           shippingCountry: formCountry ?? "",
+          incoterm: summary?.incoterm ?? incoterm,
+          importDutyCents: summary?.importDutyCents ?? 0,
+          importVatCents: summary?.importVatCents ?? 0,
+          importClearanceCents: summary?.importClearanceCents ?? 0,
+          ddpHandlingCents: summary?.ddpHandlingCents ?? 0,
+          importTotalCents: summary?.importTotalCents ?? 0,
+          deferredImportCents: summary?.deferredImportCents ?? 0,
           // B2B zero-rating: only applies to SG GST-registered businesses.
           buyerType,
           buyerGstNumber,
@@ -2253,7 +2260,7 @@ export default function Checkout() {
         setSyncing(false);
       }
     },
-    [grossLines, stripePromise, formCountry, estimate.cents, depositPct],
+    [grossLines, stripePromise, formCountry, estimate.cents, depositPct, summary, incoterm],
   );
 
 

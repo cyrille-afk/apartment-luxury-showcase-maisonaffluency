@@ -5,6 +5,7 @@ import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
 import { convertCents, SETTLEMENT_CURRENCIES } from "./fxConvert.ts";
 import { formatCurrency } from "../_shared/transactional-email-templates/currency.ts";
 import { resolveTaxTreatment, normaliseBuyerTaxId } from "../_shared/taxRules.ts";
+import { buildOrderDeliveryMessage } from "../_shared/orderDeliveryMessaging.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -296,6 +297,23 @@ serve(async (req) => {
     const taxCents = treatment.taxCents;
     const total = subtotal + shipping + taxCents;
 
+    const deliveryTerm = body?.incoterm === "DDP" ? "DDP" : body?.incoterm === "DDU" ? "DDU" : null;
+    const boundedCents = (value: unknown) => {
+      const parsed = Math.round(Number(value) || 0);
+      return Number.isFinite(parsed) ? Math.min(Math.max(parsed, 0), 100_000_000) : 0;
+    };
+    const deliveryMessage = buildOrderDeliveryMessage({
+      shippingCountry,
+      deliveryTerm,
+      taxStatement: treatment.statement,
+      importDutyCents: boundedCents(body?.importDutyCents),
+      importTaxCents: boundedCents(body?.importVatCents),
+      importClearanceCents: boundedCents(body?.importClearanceCents),
+      ddpHandlingCents: boundedCents(body?.ddpHandlingCents),
+      importTotalCents: boundedCents(body?.importTotalCents),
+      deferredImportCents: boundedCents(body?.deferredImportCents),
+    });
+
 
     const orderRef = `MA-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
@@ -323,6 +341,15 @@ serve(async (req) => {
         buyer_tax_id: treatment.buyerTaxId,
         buyer_tax_country: treatment.countryIso,
         merchant_tax_registration: treatment.registrationLine,
+        shipping_country: shippingCountry || null,
+        delivery_term: deliveryTerm,
+        import_duty_cents: deliveryMessage.importDutyCents,
+        import_tax_cents: deliveryMessage.importTaxCents,
+        import_clearance_cents: deliveryMessage.importClearanceCents,
+        ddp_handling_cents: deliveryMessage.ddpHandlingCents,
+        import_total_cents: deliveryMessage.importTotalCents,
+        deferred_import_cents: deliveryMessage.deferredImportCents,
+        customs_statement: deliveryMessage.customsStatement,
         total_cents: total,
         notes,
       })
@@ -364,6 +391,15 @@ serve(async (req) => {
               taxLineFormatted: formatCurrency(taxCents, currency),
               taxLabel: treatment.label,
               taxStatement: treatment.statement,
+              destination: deliveryMessage.destination,
+              deliveryTerm: deliveryMessage.deliveryTerm,
+              customsStatement: deliveryMessage.customsStatement,
+              importChargesFormatted: deliveryMessage.importTotalCents > 0
+                ? formatCurrency(deliveryMessage.importTotalCents, currency)
+                : null,
+              deferredImportFormatted: deliveryMessage.deferredImportCents > 0
+                ? formatCurrency(deliveryMessage.deferredImportCents, currency)
+                : null,
               totalFormatted: formatCurrency(total, currency),
             },
           },
