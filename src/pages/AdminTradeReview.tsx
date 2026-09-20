@@ -55,7 +55,14 @@ interface FlaggedApplication {
   profiles?: { first_name: string | null; last_name: string | null; email: string | null } | null;
 }
 
-const REVIEW_STATUSES = ["flagged_for_review", "flagged", "system_retry"];
+// Every AI outcome lands in this queue: the model screens, a human decides.
+const REVIEW_STATUSES = [
+  "pending_human_review",
+  "flagged_for_review",
+  "flagged",
+  "system_retry",
+  "pending",
+];
 
 type Filter = "flagged" | "all" | "approved" | "rejected";
 
@@ -211,6 +218,12 @@ export default function AdminTradeReview() {
           reviewed_at: new Date().toISOString(),
           reviewed_by: user?.id,
           next_retry_at: null,
+          // GDPR: a rejected applicant's identity document is deleted 14 days
+          // after the decision, leaving only the audit trail behind.
+          credential_purge_after:
+            decision === "rejected"
+              ? new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+              : null,
         } as never)
         .eq("id", app.id);
       if (error) throw error;

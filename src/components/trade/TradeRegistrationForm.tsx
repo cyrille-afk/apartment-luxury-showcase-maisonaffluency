@@ -347,7 +347,8 @@ const TradeRegistrationForm = ({
 
       toast({
         title: "Application Submitted",
-        description: "Get verified instantly — our automated system reviews global design credentials in real time.",
+        description:
+          "Your credentials are being screened, then reviewed personally by our trade team. We will email you as soon as your account is approved.",
       });
 
       navigate(appRow?.id ? `/trade/processing?app=${appRow.id}` : "/trade/processing", { replace: true });
@@ -358,24 +359,50 @@ const TradeRegistrationForm = ({
     }
   };
 
+  // The browser no longer writes to the credentials bucket. The file goes to a
+  // hardened endpoint that authenticates its binary signature, rate limits the
+  // sender and hashes it against every document ever submitted before storing.
   const uploadCredential = async (file: File) => {
     setUploading(true);
     setFileError("");
     const task = (async (): Promise<string | null> => {
-      const ext = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "pdf";
-      const folder = `anon/${crypto.randomUUID()}`;
-      const path = `${folder}/credential-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("trade-credentials")
-        .upload(path, file, { contentType: file.type || undefined });
-      if (upErr) {
+      try {
+        const fileBase64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onerror = () => reject(new Error("read_failed"));
+          reader.onload = () => {
+            const res = String(reader.result || "");
+            resolve(res.slice(res.indexOf(",") + 1));
+          };
+          reader.readAsDataURL(file);
+        });
+
+        const { data, error } = await supabase.functions.invoke("upload-trade-credential", {
+          body: {
+            fileBase64,
+            fileName: file.name,
+            contentType: file.type || "",
+            email: form.email || "",
+          },
+        });
+
+        const path = (data as { path?: string } | null)?.path;
+        if (error || !path) {
+          const message =
+            (data as { error?: string } | null)?.error ||
+            "Your document could not be uploaded. Please attach a genuine PDF, PNG or JPEG.";
+          setFileError(message);
+          toast({ title: "Upload rejected", description: message, variant: "destructive" });
+          setUploadedPath(null);
+          return null;
+        }
+        setUploadedPath(path);
+        return path;
+      } catch {
         setFileError("Your document could not be uploaded. Please try again.");
-        toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
         setUploadedPath(null);
         return null;
       }
-      setUploadedPath(path);
-      return path;
     })().finally(() => setUploading(false));
     uploadPromiseRef.current = task;
     return task;

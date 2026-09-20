@@ -1,6 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
-  AUTO_APPROVE_AT,
+  HUMAN_REVIEW_AT,
   MALFORMED_ID_CEILING,
   countryCode,
   credentialGuidance,
@@ -153,14 +153,26 @@ Deno.test("every mock document matches its expected validity", () => {
   }
 });
 
-// ── Confidence thresholds ────────────────────────────────────────────
-Deno.test("threshold: >= 85 auto-approves, < 85 goes to triage", () => {
-  assertEquals(AUTO_APPROVE_AT, 85);
-  assertEquals(decideVerification(92, []).status, "approved");
-  assertEquals(decideVerification(85, []).status, "approved");
+// ── Screening thresholds (no outcome grants access) ──────────────────
+Deno.test("threshold: >= 85 screens clean, < 85 is flagged — neither approves", () => {
+  assertEquals(HUMAN_REVIEW_AT, 85);
+  assertEquals(decideVerification(92, []).status, "pending_human_review");
+  assertEquals(decideVerification(85, []).status, "pending_human_review");
   assertEquals(decideVerification(84, []).status, "flagged_for_review");
-  assertEquals(decideVerification(84, []).autoApprove, false);
+  assertEquals(decideVerification(84, []).screenedClean, false);
   assertEquals(decideVerification(0, []).status, "flagged_for_review");
+  // No score can ever produce an approved status.
+  for (const score of [0, 50, 85, 100]) {
+    assertEquals(decideVerification(score, []).status === "approved" as never, false);
+  }
+});
+
+Deno.test("screening: a fraud flag overrides a perfect score", () => {
+  const clean = decideVerification(100, []);
+  assertEquals(clean.status, "pending_human_review");
+  const flagged = decideVerification(100, [], ["duplicate_document"]);
+  assertEquals(flagged.status, "flagged_for_review");
+  assertEquals(flagged.screenedClean, false);
 });
 
 Deno.test("threshold: scores are clamped and rounded", () => {
@@ -181,12 +193,12 @@ Deno.test("threshold: a malformed corporate ID caps confidence at 70", () => {
   assertEquals(decision.malformed.length, 1);
 });
 
-Deno.test("threshold: a valid regional credential at 85 is approved end to end", () => {
+Deno.test("threshold: a valid regional credential at 85 screens clean end to end", () => {
   for (const id of ["sg-acra-valid", "ae-ded-trn-valid", "sa-cr-valid", "qa-gcc-trn-valid"]) {
     const d = doc(id);
     const ids = validateIdentifiers(d.extractedIdentifiers, d.country);
     const decision = decideVerification(85, ids);
-    assertEquals(decision.status, "approved", `${id} should auto-approve at 85`);
+    assertEquals(decision.status, "pending_human_review", `${id} should screen clean at 85`);
     assertEquals(decision.malformed.length, 0, `${id} should have no malformed IDs`);
   }
 });

@@ -223,8 +223,12 @@ export function validateIdentifiers(
 }
 
 // ── Confidence thresholds ────────────────────────────────────────────
-/** Auto-approval threshold (confidence_score out of 100). */
-export const AUTO_APPROVE_AT = 85;
+/**
+ * Screening threshold. The model is a screening utility only: a high score
+ * routes the file to the fast human queue, it NEVER grants trade access or
+ * tax-exempt pricing. There is no auto-approval path anywhere in this system.
+ */
+export const HUMAN_REVIEW_AT = 85;
 /** Ceiling applied when any extracted corporate ID is structurally malformed. */
 export const MALFORMED_ID_CEILING = 70;
 
@@ -233,28 +237,33 @@ export type VerificationDecision = {
   confidenceScore: number;
   /** Score exactly as returned by the model (clamped to 0-100). */
   rawScore: number;
-  status: "approved" | "flagged_for_review";
-  autoApprove: boolean;
+  /** Both outcomes wait for a human; they differ only in queue priority. */
+  status: "pending_human_review" | "flagged_for_review";
+  /** True when the AI extracted the business data cleanly. Never an approval. */
+  screenedClean: boolean;
   malformed: ExtractedIdentifier[];
 };
 
 /**
- * Pure threshold logic: clamp the model score, cap it when a corporate ID is
- * structurally suspicious, and decide auto-approval vs human triage.
+ * Pure screening logic: clamp the model score, cap it when a corporate ID is
+ * structurally suspicious, and decide which human queue the file lands in.
  */
 export function decideVerification(
   rawConfidence: unknown,
   identifiers: ExtractedIdentifier[],
+  fraudFlags: string[] = [],
 ): VerificationDecision {
   const rawScore = Math.max(0, Math.min(100, Math.round(Number(rawConfidence) || 0)));
   const malformed = identifiers.filter((i) => i.valid === false);
   const confidenceScore = malformed.length ? Math.min(rawScore, MALFORMED_ID_CEILING) : rawScore;
-  const autoApprove = confidenceScore >= AUTO_APPROVE_AT;
+  // Any fraud heuristic (duplicate binary, tampered metadata) forces the
+  // application into the flagged queue regardless of the score.
+  const screenedClean = confidenceScore >= HUMAN_REVIEW_AT && fraudFlags.length === 0;
   return {
     rawScore,
     confidenceScore,
-    autoApprove,
-    status: autoApprove ? "approved" : "flagged_for_review",
+    screenedClean,
+    status: screenedClean ? "pending_human_review" : "flagged_for_review",
     malformed,
   };
 }

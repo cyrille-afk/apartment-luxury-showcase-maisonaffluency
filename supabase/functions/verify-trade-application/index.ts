@@ -8,14 +8,16 @@
 //      interior design / architecture practice, whether the site or document
 //      matches the applicant/company, and whether the Tax/VAT ID is
 //      structurally plausible for the stated country.
-//   4. Auto-approves on high confidence (grants trade_user, sets
-//      tax_exempt_status, sends the welcome email) or flags for manual review.
+//   4. Screens the file for fraud signals (fake type, recycled binary,
+//      tampered metadata) and routes every application to a human queue.
 //
-// Fail-safe: any error leaves the application in `flagged` so a human decides.
+// This function NEVER approves anyone. It cannot grant trade_user, cannot set
+// tax_exempt_status and sends no welcome email: a store administrator must
+// click Approve. Any error leaves the application flagged so a human decides.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import {
-  AUTO_APPROVE_AT,
+  HUMAN_REVIEW_AT,
   credentialGuidance,
   decideVerification,
   regionFor,
@@ -24,6 +26,8 @@ import {
 } from "./regional.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { sendAdminWhatsApp } from "../_shared/twilioWhatsAppSender.ts";
+import { sha256Hex, verifyFileSignature } from "../_shared/fileSignature.ts";
+import { screenDocumentMetadata } from "./fraudScreen.ts";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 // Stage 1 — fast, cost-effective multimodal parse of the credential document.
@@ -33,7 +37,7 @@ const VERDICT_MODEL = "openai/gpt-5.6-sol";
 const TRIAGE_URL = "https://www.maisonaffluency.com/admin/trade-review";
 const AI_TIMEOUT_MS = 45_000;
 const SITE_TIMEOUT_MS = 12_000;
-// AUTO_APPROVE_AT (85) is imported from ./regional.ts
+// HUMAN_REVIEW_AT (85) is imported from ./regional.ts — queue priority only.
 const MAX_ATTEMPTS = 2;
 const RETRY_DELAY_MIN = 15;
 
@@ -466,6 +470,11 @@ Deno.serve(async (req) => {
   // PDFs by link), so both paths give the model the full document contents.
   let docPart: Record<string, unknown> | null = null;
   let docNote = "No credential document uploaded.";
+  // Fraud heuristics collected before the model runs. Any entry forces human
+  // triage; none of them can ever produce an approval.
+  const fraudFlags: { code: string; detail: string }[] = [];
+  let credentialSha: string | null = null;
+  let duplicateOf: string | null = null;
   if (app.credential_document_path) {
     // 5-minute signed read URL so the model has explicit access to the file.
     const { data: signed } = await admin.storage
@@ -478,19 +487,44 @@ Deno.serve(async (req) => {
     if (!file || file.size === 0) {
       docNote = "Credential document could not be retrieved from storage.";
     } else {
-      let type = file.type || "";
-      if (!type || type === "application/octet-stream") {
-        const ext = app.credential_document_path.split(".").pop()?.toLowerCase() || "";
-        type = ext === "pdf"
-          ? "application/pdf"
-          : ext === "png"
-            ? "image/png"
-            : ext === "webp"
-              ? "image/webp"
-              : ext === "jpg" || ext === "jpeg"
-                ? "image/jpeg"
-                : type || "application/octet-stream";
+      // The stored bytes are the only trustworthy description of the file:
+      // authenticate the signature rather than trusting the extension.
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const verdictSig = verifyFileSignature(bytes, app.credential_document_path, file.type || "");
+      let type = verdictSig.ok ? verdictSig.mime : "application/octet-stream";
+      if (!verdictSig.ok) {
+        fraudFlags.push({ code: "invalid_signature", detail: verdictSig.reason });
+      } else if (verdictSig.note) {
+        fraudFlags.push({ code: "type_mismatch", detail: verdictSig.note });
       }
+
+      // Recycled binary: the same document already submitted elsewhere.
+      credentialSha = await sha256Hex(bytes);
+      const { data: priorDocs } = await admin
+        .from("trade_credential_documents")
+        .select("id, application_id, created_at")
+        .eq("sha256", credentialSha)
+        .order("created_at", { ascending: true })
+        .limit(2);
+      const prior = (priorDocs || []).find(
+        (d: { application_id: string | null }) => d.application_id && d.application_id !== applicationId,
+      );
+      if (prior) {
+        duplicateOf = prior.id;
+        fraudFlags.push({
+          code: "duplicate_document",
+          detail: "This exact document file has already been submitted with another application.",
+        });
+      }
+      // Bind the stored hash log entry to this application.
+      await admin
+        .from("trade_credential_documents")
+        .update({ application_id: applicationId, user_id: app.user_id })
+        .eq("storage_path", app.credential_document_path)
+        .is("application_id", null);
+
+      for (const f of screenDocumentMetadata(bytes, type)) fraudFlags.push(f);
+
       const kb = Math.round(file.size / 1024);
 
       if (type.startsWith("image/") && signed?.signedUrl) {
@@ -684,36 +718,43 @@ Be conservative: if the website is unreachable, password-protected or the eviden
   });
   const identifiers: ExtractedIdentifier[] = validateIdentifiers(merged, app.country);
 
-  // A suspicious corporate ID always goes to a human, whatever the model said.
-  const decision = decideVerification(verdict.confidence_score, identifiers);
-  const { rawScore, confidenceScore, autoApprove, malformed, status } = decision;
+  // Screening only: a suspicious corporate ID or any fraud flag pushes the
+  // application into the flagged queue. Neither outcome grants anything.
+  const decision = decideVerification(
+    verdict.confidence_score,
+    identifiers,
+    fraudFlags.map((f) => f.code),
+  );
+  const { rawScore, confidenceScore, screenedClean, malformed, status } = decision;
 
   const idNote = malformed.length
     ? ` Structural check flagged ${malformed.length} improperly formatted corporate ID(s): ${malformed
         .map((i) => `${i.type} "${i.value}" — ${i.note}`)
         .join("; ")}`
     : "";
-  const notes = `${verdict.reasoning || verdict.notes || ""}${idNote}`.trim();
+  const fraudNote = fraudFlags.length
+    ? ` Fraud screening: ${fraudFlags.map((f) => f.detail).join(" ")}`
+    : "";
+  const notes = `${verdict.reasoning || verdict.notes || ""}${idNote}${fraudNote}`.trim();
 
   const alreadyAlerted = app.last_flag_alert_fingerprint === evidenceFingerprint;
-  const emailAlreadySent = !!app.approval_email_sent_at;
 
   await admin
     .from("trade_applications")
     .update({
       status,
-      tax_exempt_status: autoApprove,
+      // Tax exemption is a human decision, never an AI one.
+      tax_exempt_status: false,
       verification_notes: notes,
       ai_confidence: confidenceScore,
       verification_attempts: attempts,
       next_retry_at: null,
       last_verification_error: null,
       verification_fingerprint: evidenceFingerprint,
-      ...(autoApprove
-        ? {}
-        : alreadyAlerted
-          ? {}
-          : { last_flag_alert_fingerprint: evidenceFingerprint }),
+      credential_sha256: credentialSha,
+      credential_duplicate_of: duplicateOf,
+      fraud_flags: fraudFlags,
+      ...(alreadyAlerted ? {} : { last_flag_alert_fingerprint: evidenceFingerprint }),
       ai_result: {
         ...verdict,
         confidence_score: confidenceScore,
@@ -722,9 +763,10 @@ Be conservative: if the website is unreachable, password-protected or the eviden
         region: regionFor(app.country),
         extracted_identifiers: identifiers,
         identifier_warnings: malformed.length,
+        fraud_flags: fraudFlags,
+        screening_only: true,
       },
       ai_verified_at: new Date().toISOString(),
-      ...(autoApprove ? { reviewed_at: new Date().toISOString() } : {}),
     })
     .eq("id", applicationId);
 
@@ -739,52 +781,28 @@ Be conservative: if the website is unreachable, password-protected or the eviden
     attempt: attempts,
     details: {
       model_confidence_score: rawScore,
-      auto_approve: autoApprove,
+      screened_clean: screenedClean,
+      auto_approve: false,
+      fraud_flags: fraudFlags,
+      credential_sha256: credentialSha,
       website_status: site.status,
       region: regionFor(app.country),
       identifier_warnings: malformed.length,
       fingerprint: evidenceFingerprint,
+      human_review_threshold: HUMAN_REVIEW_AT,
     },
   });
 
-  // One alert per distinct evidence set.
-  if (!autoApprove && !alreadyAlerted) {
+  // Every application now needs a human; alert once per distinct evidence set.
+  if (!alreadyAlerted) {
     await notifyFlagged(app, applicantName, confidenceScore, notes, admin);
   }
 
-  if (autoApprove) {
-    await admin.from("user_roles").upsert(
-      { user_id: app.user_id, role: "trade_user" },
-      { onConflict: "user_id,role" },
-    );
-    // Welcome email exactly once per application, whatever the evidence set.
-    if (profile?.email && !emailAlreadySent) {
-      const { error: claimErr } = await admin
-        .from("trade_applications")
-        .update({ approval_email_sent_at: new Date().toISOString() })
-        .eq("id", applicationId)
-        .is("approval_email_sent_at", null);
-      if (!claimErr) {
-        try {
-          await admin.functions.invoke("send-transactional-email", {
-            body: {
-              templateName: "trade-welcome-auto",
-              recipientEmail: profile.email,
-              idempotencyKey: `trade-welcome-auto-${applicationId}`,
-              templateData: {
-                name: applicantName,
-                companyName: app.company_name,
-                country: app.country,
-              },
-            },
-          });
-        } catch (_) {
-          // non-fatal
-        }
-      }
-    }
-  }
-
-
-  return json({ status, confidence_score: confidenceScore, reasoning: notes });
+  return json({
+    status,
+    confidence_score: confidenceScore,
+    reasoning: notes,
+    fraud_flags: fraudFlags,
+    requires_human_review: true,
+  });
 });
