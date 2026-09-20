@@ -428,6 +428,13 @@
       "when": 1789874061993,
       "tag": "0060_order_customs_route_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1789874372574,
+      "tag": "0061_sub_processor_registry",
+      "breakpoints": true
     }
   ]
 }
