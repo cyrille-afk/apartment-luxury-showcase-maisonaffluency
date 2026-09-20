@@ -7,7 +7,7 @@
  * (`has_role`) on `sub_processor_registry`; the UI guard below is convenience,
  * not the control.
  */
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
