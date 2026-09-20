@@ -89,7 +89,43 @@ export default function TradeAdminConciergeLeads() {
 
       const { data, error } = await query;
       if (error) throw error;
-      return (data || []) as LeadRow[];
+      const leads = (data || []) as LeadRow[];
+
+      // Relational lookup: resolve display names from profiles + trade_profiles
+      const userIds = [...new Set(leads.map((l) => l.user_id).filter(Boolean))] as string[];
+      const profileByUser = new Map<string, { company: string | null; fullName: string | null; email: string | null }>();
+
+      if (userIds.length > 0) {
+        const [{ data: profiles }, { data: tradeProfiles }] = await Promise.all([
+          supabase.from("profiles").select("id, first_name, last_name, company, email").in("id", userIds),
+          supabase.from("trade_profiles").select("user_id, vat_company_name").in("user_id", userIds),
+        ]);
+        const vatCompany = new Map((tradeProfiles || []).map((t) => [t.user_id, t.vat_company_name]));
+        for (const p of profiles || []) {
+          const fullName = [p.first_name, p.last_name].filter(Boolean).join(" ").trim() || null;
+          profileByUser.set(p.id, {
+            company: p.company || vatCompany.get(p.id) || null,
+            fullName,
+            email: p.email || null,
+          });
+        }
+        for (const t of tradeProfiles || []) {
+          if (!profileByUser.has(t.user_id) && t.vat_company_name) {
+            profileByUser.set(t.user_id, { company: t.vat_company_name, fullName: null, email: null });
+          }
+        }
+      }
+
+      return leads.map((l) => {
+        if (l.name?.trim()) return l;
+        const p = l.user_id ? profileByUser.get(l.user_id) : undefined;
+        const resolved =
+          p?.company ||
+          p?.fullName ||
+          (p?.email ? p.email.split("@")[0] : null) ||
+          (l.user_id ? "Trade Guest" : "Anonymous Guest Curator");
+        return { ...l, name: resolved };
+      });
     },
   });
 
