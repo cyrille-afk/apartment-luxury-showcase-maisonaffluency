@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
     })
     .eq("id", vendorId);
   if (updateErr) {
-    await admin.storage.from(BUCKET).remove([path]).catch?.(() => {});
+    await admin.storage.from(BUCKET).remove([path]);
     return json({ error: updateErr.message }, 500);
   }
 
