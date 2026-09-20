@@ -78,8 +78,10 @@ export type Database = {
           created_at: string
           email_error: string | null
           email_sent_at: string | null
+          executive_emails: string[]
           founder_name: string | null
           id: string
+          instagram_handle: string | null
           predicted_designer_matches: string[] | null
           source_index: string | null
           studio_name: string
@@ -95,8 +97,10 @@ export type Database = {
           created_at?: string
           email_error?: string | null
           email_sent_at?: string | null
+          executive_emails?: string[]
           founder_name?: string | null
           id?: string
+          instagram_handle?: string | null
           predicted_designer_matches?: string[] | null
           source_index?: string | null
           studio_name: string
@@ -112,8 +116,10 @@ export type Database = {
           created_at?: string
           email_error?: string | null
           email_sent_at?: string | null
+          executive_emails?: string[]
           founder_name?: string | null
           id?: string
+          instagram_handle?: string | null
           predicted_designer_matches?: string[] | null
           source_index?: string | null
           studio_name?: string

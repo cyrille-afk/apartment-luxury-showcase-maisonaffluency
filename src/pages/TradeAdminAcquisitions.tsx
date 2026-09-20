@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { ExternalLink, Loader2, Send, ShieldAlert, Sparkles } from "lucide-react";
+import { ExternalLink, Instagram, Loader2, Send, ShieldAlert, Sparkles } from "lucide-react";
 
 type Lead = {
   id: string;
@@ -34,6 +34,8 @@ type Lead = {
   created_at: string;
   country: string | null;
   city: string | null;
+  instagram_handle: string | null;
+  executive_emails: string[] | null;
 };
 
 const DEFAULT_COUNTRY = "Singapore";
@@ -64,7 +66,7 @@ const TradeAdminAcquisitions = () => {
       const { data, error } = await supabase
         .from("acquisition_leads")
         .select(
-          "id, studio_name, founder_name, business_email, website_url, source_index, aesthetic_profile, predicted_designer_matches, campaign_status, verified_at, email_sent_at, email_error, created_at, country, city",
+          "id, studio_name, founder_name, business_email, website_url, source_index, aesthetic_profile, predicted_designer_matches, campaign_status, verified_at, email_sent_at, email_error, created_at, country, city, instagram_handle, executive_emails",
         )
         .eq("campaign_status", "enriched")
         .order("created_at", { ascending: false })
@@ -128,7 +130,7 @@ const TradeAdminAcquisitions = () => {
       const city = r.city?.trim() || r.country?.trim() || "Unassigned";
       if (country !== activeCountry || city !== activeCity) return false;
       if (!q) return true;
-      return [r.studio_name, r.founder_name, r.business_email, r.aesthetic_profile]
+      return [r.studio_name, r.founder_name, r.business_email, r.aesthetic_profile, r.instagram_handle, ...(r.executive_emails ?? [])]
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(q));
     });
@@ -301,7 +303,7 @@ const TradeAdminAcquisitions = () => {
                     aria-label="Select all leads"
                   />
                 </th>
-                {["Studio Name", "Contact", "Aesthetic Profile", "Matched Designers", "Verification"].map(
+                {["Studio Name", "Contact", "Instagram", "Aesthetic Profile", "Matched Designers", "Verification"].map(
                   (h) => (
                     <th
                       key={h}
@@ -316,14 +318,14 @@ const TradeAdminAcquisitions = () => {
             <tbody>
               {isLoading && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-16 text-center text-sm text-muted-foreground">
+                  <td colSpan={7} className="px-5 py-16 text-center text-sm text-muted-foreground">
                     Loading leads…
                   </td>
                 </tr>
               )}
               {!isLoading && filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-16 text-center text-sm text-muted-foreground">
+                  <td colSpan={7} className="px-5 py-16 text-center text-sm text-muted-foreground">
                     No enriched leads awaiting outbound in {activeCity}.
                   </td>
                 </tr>
@@ -359,7 +361,35 @@ const TradeAdminAcquisitions = () => {
                   </td>
                   <td className="px-5 py-6">
                     <div className="text-sm text-foreground">{lead.founder_name ?? "—"}</div>
-                    <div className="text-[12px] text-muted-foreground">{lead.business_email}</div>
+                    {(lead.executive_emails ?? []).length > 0 ? (
+                      <div className="mt-0.5 space-y-0.5">
+                        {(lead.executive_emails ?? []).map((email) => (
+                          <div key={email} className="text-[12px] text-foreground">
+                            {email}
+                          </div>
+                        ))}
+                        <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                          Executive-vetted
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-[12px] text-muted-foreground">{lead.business_email}</div>
+                    )}
+                  </td>
+                  <td className="px-5 py-6">
+                    {lead.instagram_handle ? (
+                      <a
+                        href={`https://instagram.com/${lead.instagram_handle.replace(/^@+/, "")}`}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="inline-flex items-center gap-1.5 text-[12px] text-foreground underline-offset-4 hover:underline"
+                      >
+                        <Instagram className="h-3.5 w-3.5" />
+                        {`@${lead.instagram_handle.replace(/^@+/, "")}`}
+                      </a>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">—</span>
+                    )}
                   </td>
                   <td className="max-w-xs px-5 py-6 text-sm leading-relaxed text-muted-foreground">
                     {lead.aesthetic_profile ?? "—"}

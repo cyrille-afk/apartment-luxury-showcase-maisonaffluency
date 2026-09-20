@@ -38,6 +38,7 @@ type Lead = {
   studio_name: string;
   founder_name: string | null;
   business_email: string;
+  executive_emails: string[] | null;
   aesthetic_profile: string | null;
   predicted_designer_matches: string[] | null;
   campaign_status: string;
@@ -132,7 +133,7 @@ serve(async (req) => {
   const { data, error } = await supabase
     .from("acquisition_leads")
     .select(
-      "id, studio_name, founder_name, business_email, aesthetic_profile, predicted_designer_matches, campaign_status",
+      "id, studio_name, founder_name, business_email, executive_emails, aesthetic_profile, predicted_designer_matches, campaign_status",
     )
     .in("id", ids);
   if (error) return json({ error: "Could not load leads" }, 500);
@@ -163,9 +164,15 @@ serve(async (req) => {
       continue;
     }
 
+    // Executive-vetted contacts win over the generic studio catch-all.
+    const vetted = (Array.isArray(row.executive_emails) ? row.executive_emails : [])
+      .map((e) => String(e ?? "").trim())
+      .filter((e) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e));
+    const recipients = vetted.length > 0 ? vetted : [row.business_email];
+
     const outcome = await sendLovableEmail(
       {
-        to: row.business_email,
+        to: recipients,
         subject: `${row.studio_name}: an invitation to the Maison Affluency trade house`,
         html: renderInvitation(row, roster),
         label: "acquisition-trade-invitation",
