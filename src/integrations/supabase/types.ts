@@ -6804,6 +6804,7 @@ export type Database = {
           currency: string
           customer_po_number: string | null
           customs_clearance_cents: number
+          customs_route: string | null
           customs_statement: string | null
           ddp_handling_cents: number
           deferred_import_cents: number
@@ -6823,6 +6824,7 @@ export type Database = {
           import_tax_cents: number
           import_total_cents: number
           marked_paid_by: string | null
+          merchant_ioss_number: string | null
           merchant_tax_identifier: string | null
           merchant_tax_registration: string | null
           notes: string | null
@@ -6867,6 +6869,7 @@ export type Database = {
           currency?: string
           customer_po_number?: string | null
           customs_clearance_cents?: number
+          customs_route?: string | null
           customs_statement?: string | null
           ddp_handling_cents?: number
           deferred_import_cents?: number
@@ -6886,6 +6889,7 @@ export type Database = {
           import_tax_cents?: number
           import_total_cents?: number
           marked_paid_by?: string | null
+          merchant_ioss_number?: string | null
           merchant_tax_identifier?: string | null
           merchant_tax_registration?: string | null
           notes?: string | null
@@ -6930,6 +6934,7 @@ export type Database = {
           currency?: string
           customer_po_number?: string | null
           customs_clearance_cents?: number
+          customs_route?: string | null
           customs_statement?: string | null
           ddp_handling_cents?: number
           deferred_import_cents?: number
@@ -6949,6 +6954,7 @@ export type Database = {
           import_tax_cents?: number
           import_total_cents?: number
           marked_paid_by?: string | null
+          merchant_ioss_number?: string | null
           merchant_tax_identifier?: string | null
           merchant_tax_registration?: string | null
           notes?: string | null
