@@ -2201,6 +2201,7 @@ export type Database = {
           description: string | null
           designer_id: string
           dimensions: string | null
+          duty_rate: number | null
           edition: string | null
           edition_number: string | null
           edition_signing: string | null
@@ -2215,6 +2216,7 @@ export type Database = {
           hover_image_url: string | null
           hs_code: string | null
           hs_code_rules: Json
+          hs6_code: string | null
           id: string
           image_url: string
           is_contract_grade: boolean
@@ -2266,6 +2268,7 @@ export type Database = {
           description?: string | null
           designer_id: string
           dimensions?: string | null
+          duty_rate?: number | null
           edition?: string | null
           edition_number?: string | null
           edition_signing?: string | null
@@ -2280,6 +2283,7 @@ export type Database = {
           hover_image_url?: string | null
           hs_code?: string | null
           hs_code_rules?: Json
+          hs6_code?: string | null
           id?: string
           image_url?: string
           is_contract_grade?: boolean
@@ -2331,6 +2335,7 @@ export type Database = {
           description?: string | null
           designer_id?: string
           dimensions?: string | null
+          duty_rate?: number | null
           edition?: string | null
           edition_number?: string | null
           edition_signing?: string | null
@@ -2345,6 +2350,7 @@ export type Database = {
           hover_image_url?: string | null
           hs_code?: string | null
           hs_code_rules?: Json
+          hs6_code?: string | null
           id?: string
           image_url?: string
           is_contract_grade?: boolean
@@ -6607,12 +6613,15 @@ export type Database = {
           created_at: string
           designer_name: string | null
           designer_slug: string | null
+          duty_rate: number | null
           finish_label: string | null
+          hs6_code: string | null
           id: string
           image_url: string | null
           lead_time: string | null
           line_total_cents: number
           order_id: string
+          origin_country: string | null
           pick_id: string | null
           product_slug: string | null
           quantity: number
@@ -6623,12 +6632,15 @@ export type Database = {
           created_at?: string
           designer_name?: string | null
           designer_slug?: string | null
+          duty_rate?: number | null
           finish_label?: string | null
+          hs6_code?: string | null
           id?: string
           image_url?: string | null
           lead_time?: string | null
           line_total_cents?: number
           order_id: string
+          origin_country?: string | null
           pick_id?: string | null
           product_slug?: string | null
           quantity?: number
@@ -6639,12 +6651,15 @@ export type Database = {
           created_at?: string
           designer_name?: string | null
           designer_slug?: string | null
+          duty_rate?: number | null
           finish_label?: string | null
+          hs6_code?: string | null
           id?: string
           image_url?: string | null
           lead_time?: string | null
           line_total_cents?: number
           order_id?: string
+          origin_country?: string | null
           pick_id?: string | null
           product_slug?: string | null
           quantity?: number
@@ -6666,12 +6681,15 @@ export type Database = {
           budget_approved_at: string | null
           buyer_tax_country: string | null
           buyer_tax_id: string | null
+          buyer_tax_id_verification_source: string | null
+          buyer_tax_id_verified: boolean
           buyer_type: string | null
           company_name: string | null
           company_registration_number: string | null
           created_at: string
           currency: string
           customer_po_number: string | null
+          customs_clearance_cents: number
           customs_statement: string | null
           ddp_handling_cents: number
           deferred_import_cents: number
@@ -6680,6 +6698,10 @@ export type Database = {
           discount_label: string | null
           discount_pct: number
           email: string | null
+          estimated_duty_cents: number
+          export_evidence_captured_at: string | null
+          export_evidence_declaration_hash: string | null
+          export_evidence_tracking_id: string | null
           full_name: string | null
           id: string
           import_clearance_cents: number
@@ -6687,6 +6709,7 @@ export type Database = {
           import_tax_cents: number
           import_total_cents: number
           marked_paid_by: string | null
+          merchant_tax_identifier: string | null
           merchant_tax_registration: string | null
           notes: string | null
           order_ref: string
@@ -6700,6 +6723,8 @@ export type Database = {
           po_review_status: string | null
           proforma_invoice_path: string | null
           region_tier: string | null
+          requires_ddp_clearance: boolean
+          ship_from_country: string | null
           shipping_address: string | null
           shipping_cents: number
           shipping_country: string | null
@@ -6719,12 +6744,15 @@ export type Database = {
           budget_approved_at?: string | null
           buyer_tax_country?: string | null
           buyer_tax_id?: string | null
+          buyer_tax_id_verification_source?: string | null
+          buyer_tax_id_verified?: boolean
           buyer_type?: string | null
           company_name?: string | null
           company_registration_number?: string | null
           created_at?: string
           currency?: string
           customer_po_number?: string | null
+          customs_clearance_cents?: number
           customs_statement?: string | null
           ddp_handling_cents?: number
           deferred_import_cents?: number
@@ -6733,6 +6761,10 @@ export type Database = {
           discount_label?: string | null
           discount_pct?: number
           email?: string | null
+          estimated_duty_cents?: number
+          export_evidence_captured_at?: string | null
+          export_evidence_declaration_hash?: string | null
+          export_evidence_tracking_id?: string | null
           full_name?: string | null
           id?: string
           import_clearance_cents?: number
@@ -6740,6 +6772,7 @@ export type Database = {
           import_tax_cents?: number
           import_total_cents?: number
           marked_paid_by?: string | null
+          merchant_tax_identifier?: string | null
           merchant_tax_registration?: string | null
           notes?: string | null
           order_ref: string
@@ -6753,6 +6786,8 @@ export type Database = {
           po_review_status?: string | null
           proforma_invoice_path?: string | null
           region_tier?: string | null
+          requires_ddp_clearance?: boolean
+          ship_from_country?: string | null
           shipping_address?: string | null
           shipping_cents?: number
           shipping_country?: string | null
@@ -6772,12 +6807,15 @@ export type Database = {
           budget_approved_at?: string | null
           buyer_tax_country?: string | null
           buyer_tax_id?: string | null
+          buyer_tax_id_verification_source?: string | null
+          buyer_tax_id_verified?: boolean
           buyer_type?: string | null
           company_name?: string | null
           company_registration_number?: string | null
           created_at?: string
           currency?: string
           customer_po_number?: string | null
+          customs_clearance_cents?: number
           customs_statement?: string | null
           ddp_handling_cents?: number
           deferred_import_cents?: number
@@ -6786,6 +6824,10 @@ export type Database = {
           discount_label?: string | null
           discount_pct?: number
           email?: string | null
+          estimated_duty_cents?: number
+          export_evidence_captured_at?: string | null
+          export_evidence_declaration_hash?: string | null
+          export_evidence_tracking_id?: string | null
           full_name?: string | null
           id?: string
           import_clearance_cents?: number
@@ -6793,6 +6835,7 @@ export type Database = {
           import_tax_cents?: number
           import_total_cents?: number
           marked_paid_by?: string | null
+          merchant_tax_identifier?: string | null
           merchant_tax_registration?: string | null
           notes?: string | null
           order_ref?: string
@@ -6806,6 +6849,8 @@ export type Database = {
           po_review_status?: string | null
           proforma_invoice_path?: string | null
           region_tier?: string | null
+          requires_ddp_clearance?: boolean
+          ship_from_country?: string | null
           shipping_address?: string | null
           shipping_cents?: number
           shipping_country?: string | null
@@ -8184,6 +8229,7 @@ export type Database = {
           depth_mm: number | null
           description: string | null
           dimensions: string | null
+          duty_rate: number | null
           embedded_at: string | null
           embedding: string | null
           embedding_source_hash: string | null
@@ -8193,6 +8239,7 @@ export type Database = {
           height_mm: number | null
           hs_code: string | null
           hs_code_rules: Json
+          hs6_code: string | null
           id: string
           image_url: string | null
           in_situ_sg: boolean
@@ -8253,6 +8300,7 @@ export type Database = {
           depth_mm?: number | null
           description?: string | null
           dimensions?: string | null
+          duty_rate?: number | null
           embedded_at?: string | null
           embedding?: string | null
           embedding_source_hash?: string | null
@@ -8262,6 +8310,7 @@ export type Database = {
           height_mm?: number | null
           hs_code?: string | null
           hs_code_rules?: Json
+          hs6_code?: string | null
           id?: string
           image_url?: string | null
           in_situ_sg?: boolean
@@ -8322,6 +8371,7 @@ export type Database = {
           depth_mm?: number | null
           description?: string | null
           dimensions?: string | null
+          duty_rate?: number | null
           embedded_at?: string | null
           embedding?: string | null
           embedding_source_hash?: string | null
@@ -8331,6 +8381,7 @@ export type Database = {
           height_mm?: number | null
           hs_code?: string | null
           hs_code_rules?: Json
+          hs6_code?: string | null
           id?: string
           image_url?: string | null
           in_situ_sg?: boolean
