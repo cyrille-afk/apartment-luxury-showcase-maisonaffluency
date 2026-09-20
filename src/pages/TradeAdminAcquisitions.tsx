@@ -404,7 +404,7 @@ const TradeAdminAcquisitions = () => {
         </div>
 
         <div className="overflow-x-auto border border-border">
-          <table className="w-full min-w-[960px] text-left">
+          <table className="w-full min-w-[1080px] text-left">
             <thead>
               <tr className="border-b border-border bg-muted/30">
                 <th className="w-12 px-5 py-4">
