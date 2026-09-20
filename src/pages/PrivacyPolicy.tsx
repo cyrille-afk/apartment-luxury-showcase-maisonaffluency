@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import DataRightsRequest from "@/components/privacy/DataRightsRequest";
 
 const PrivacyPolicy = () => {
   return (
