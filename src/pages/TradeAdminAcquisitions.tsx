@@ -53,6 +53,8 @@ const TradeAdminAcquisitions = () => {
   const [search, setSearch] = useState("");
   const [dispatching, setDispatching] = useState(false);
   const [exiting, setExiting] = useState<Set<string>>(new Set());
+  const [activeCountry, setActiveCountry] = useState<string>(DEFAULT_COUNTRY);
+  const [activeCity, setActiveCity] = useState<string>(DEFAULT_CITY);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["acquisition-leads", "enriched"],
@@ -62,7 +64,7 @@ const TradeAdminAcquisitions = () => {
       const { data, error } = await supabase
         .from("acquisition_leads")
         .select(
-          "id, studio_name, founder_name, business_email, website_url, source_index, aesthetic_profile, predicted_designer_matches, campaign_status, verified_at, email_sent_at, email_error, created_at",
+          "id, studio_name, founder_name, business_email, website_url, source_index, aesthetic_profile, predicted_designer_matches, campaign_status, verified_at, email_sent_at, email_error, created_at, country, city",
         )
         .eq("campaign_status", "enriched")
         .order("created_at", { ascending: false })
@@ -72,15 +74,65 @@ const TradeAdminAcquisitions = () => {
     },
   });
 
+  // Geographic model: country → cities, derived from live rows. Rows without
+  // geography are grouped under "Unassigned" so nothing is hidden silently.
+  const geo = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (const r of rows) {
+      const country = r.country?.trim() || "Unassigned";
+      const city = r.city?.trim() || r.country?.trim() || "Unassigned";
+      if (!map.has(country)) map.set(country, new Set());
+      map.get(country)!.add(city);
+    }
+    const countries = Array.from(map.keys()).sort((a, b) => {
+      if (a === DEFAULT_COUNTRY) return -1;
+      if (b === DEFAULT_COUNTRY) return 1;
+      if (a === "Unassigned") return 1;
+      if (b === "Unassigned") return -1;
+      return a.localeCompare(b);
+    });
+    return { map, countries };
+  }, [rows]);
+
+  const cities = useMemo(() => {
+    const set = geo.map.get(activeCountry);
+    return set ? Array.from(set).sort((a, b) => a.localeCompare(b)) : [];
+  }, [geo, activeCountry]);
+
+  // Keep the active geography valid as data changes.
+  useEffect(() => {
+    if (geo.countries.length === 0) return;
+    if (!geo.map.has(activeCountry)) {
+      setActiveCountry(geo.countries[0]);
+      return;
+    }
+    const set = geo.map.get(activeCountry)!;
+    if (!set.has(activeCity)) {
+      const sorted = Array.from(set).sort((a, b) => a.localeCompare(b));
+      setActiveCity(
+        activeCountry === DEFAULT_COUNTRY && set.has(DEFAULT_CITY) ? DEFAULT_CITY : sorted[0],
+      );
+    }
+  }, [geo, activeCountry, activeCity]);
+
+  // Changing geography clears the selection so campaigns only ever fire on
+  // the visible cohort.
+  useEffect(() => {
+    setSelected(new Set());
+  }, [activeCountry, activeCity]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((r) =>
-      [r.studio_name, r.founder_name, r.business_email, r.aesthetic_profile]
+    return rows.filter((r) => {
+      const country = r.country?.trim() || "Unassigned";
+      const city = r.city?.trim() || r.country?.trim() || "Unassigned";
+      if (country !== activeCountry || city !== activeCity) return false;
+      if (!q) return true;
+      return [r.studio_name, r.founder_name, r.business_email, r.aesthetic_profile]
         .filter(Boolean)
-        .some((v) => String(v).toLowerCase().includes(q)),
-    );
-  }, [rows, search]);
+        .some((v) => String(v).toLowerCase().includes(q));
+    });
+  }, [rows, search, activeCountry, activeCity]);
 
   const toggle = (id: string) =>
     setSelected((prev) => {
