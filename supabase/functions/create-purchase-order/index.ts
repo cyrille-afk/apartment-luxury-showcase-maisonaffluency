@@ -3,6 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { sendLovableEmail } from "../_shared/lovableEmail.ts";
 import { buildOrderDeliveryMessage } from "../_shared/orderDeliveryMessaging.ts";
 import { isBuyerTaxIdValid, resolveTaxRule, resolveTaxTreatment } from "../_shared/taxRules.ts";
+import { applyIossEnv } from "../_shared/iossConfig.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -164,6 +165,8 @@ serve(async (req) => {
       buyer_type: "business",
       buyer_tax_id: treatment.buyerTaxId,
       buyer_tax_country: "GB",
+      customs_route: treatment.customsRoute,
+      merchant_ioss_number: treatment.iossNumber,
       total_cents: totalCents,
       shipping_country: "GB",
       delivery_term: delivery.deliveryTerm,
