@@ -93,6 +93,9 @@ project_id = "dcrauiygaezoduwdjmsm"
   [functions.ingest-prospect-leads]
     verify_jwt = false
 
+  [functions.enrich-acquisition-lead]
+    verify_jwt = false
+
   [functions.enrich-prospect-aesthetics]
     verify_jwt = false
 
