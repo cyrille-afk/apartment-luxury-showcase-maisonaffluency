@@ -180,12 +180,13 @@ const TradeAdminAcquisitions = () => {
       const country = r.country?.trim() || "Unassigned";
       const city = r.city?.trim() || r.country?.trim() || "Unassigned";
       if (country !== activeCountry || city !== activeCity) return false;
+      if (igFirstOnly && outreachVector(r) !== "instagram") return false;
       if (!q) return true;
       return [r.studio_name, r.founder_name, r.business_email, r.aesthetic_profile, r.instagram_handle, ...(r.executive_emails ?? [])]
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(q));
     });
-  }, [rows, search, activeCountry, activeCity]);
+  }, [rows, search, activeCountry, activeCity, igFirstOnly]);
 
   const toggle = (id: string) =>
     setSelected((prev) => {
