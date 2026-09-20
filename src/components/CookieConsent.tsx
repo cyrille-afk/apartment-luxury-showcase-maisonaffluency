@@ -252,14 +252,14 @@ const CookieConsent = () => {
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                className={baseButton}
+                className={neutralButton}
                 onClick={() => commit(DENY_ALL, "reject_all")}
               >
                 Reject all
               </button>
               <button
                 type="button"
-                className={`${baseButton} ${primaryButton}`}
+                className={accentButton}
                 onClick={() => commit(ALLOW_ALL, "accept_all")}
               >
                 Accept all
@@ -267,7 +267,7 @@ const CookieConsent = () => {
               {managing ? (
                 <button
                   type="button"
-                  className={baseButton}
+                  className={neutralButton}
                   onClick={() => commit({ ...draft, necessary: true }, "custom")}
                 >
                   Save choices
@@ -275,7 +275,7 @@ const CookieConsent = () => {
               ) : (
                 <button
                   type="button"
-                  className={baseButton}
+                  className={neutralButton}
                   onClick={() => setManaging(true)}
                 >
                   Manage preferences
