@@ -149,12 +149,9 @@ serve(async (req) => {
     const payload = await res.json();
     const choice = payload?.choices?.[0];
     const raw = String(choice?.message?.content ?? "");
-    console.log(
-      "[enrich-acquisition-lead] finish",
-      choice?.finish_reason,
-      JSON.stringify(payload?.usage ?? {}),
-      raw.slice(0, 300),
-    );
+    if (choice?.finish_reason && choice.finish_reason !== "stop") {
+      console.warn("[enrich-acquisition-lead] finish_reason", choice.finish_reason);
+    }
     const parsed = JSON.parse(raw || "{}");
     aesthetic = str(parsed?.aesthetic, 200);
     matched = (Array.isArray(parsed?.matched_designers) ? parsed.matched_designers : [])
