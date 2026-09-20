@@ -642,7 +642,7 @@ const TradeAdminAcquisitions = () => {
                       <span className="text-sm text-muted-foreground">—</span>
                     )}
                   </td>
-                  <td className="max-w-xs px-5 py-6 text-sm leading-relaxed text-muted-foreground">
+                  <td className="px-5 py-6 text-sm leading-relaxed text-muted-foreground whitespace-normal">
                     {lead.aesthetic_profile ?? "—"}
                   </td>
                   <td className="px-5 py-6">
