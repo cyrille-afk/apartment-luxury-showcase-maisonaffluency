@@ -174,3 +174,28 @@ test.describe("Live provider smoke — Stripe signature & webhook ingestion", ()
     await api.dispose();
   });
 });
+
+test.describe("Live provider smoke — contract drift", () => {
+  test.beforeAll(() => requireOrSkip(Boolean(STRIPE_KEY), "STRIPE_TEST_SECRET_KEY not set — drift check skipped."));
+  test.skip(!STRIPE_KEY && !STRICT, "STRIPE_TEST_SECRET_KEY not set — drift check skipped.");
+
+  test("pinned Stripe API version still accepted by the live API", async () => {
+    const pinned = "2025-08-27.basil" as Stripe.LatestApiVersion;
+    const stripe = new Stripe(STRIPE_KEY!, { apiVersion: pinned });
+
+    // A real round-trip on the pinned version. If Stripe retires or breaks it,
+    // this call fails here rather than silently in production.
+    const list = await stripe.paymentIntents.list({ limit: 1 });
+    expect(Array.isArray(list.data), "unexpected payload shape from Stripe").toBe(true);
+
+    const account = await stripe.accounts.retrieve();
+    expect(account.id, "Stripe account lookup failed on the pinned API version").toBeTruthy();
+
+    // Surface (do not fail on) an account default newer than our pin, so the
+    // scheduled run's log shows drift before it becomes breaking.
+    const current = (list.lastResponse?.headers as Record<string, string> | undefined)?.["stripe-version"];
+    if (current && current !== pinned) {
+      console.warn(`[drift] Stripe responded with API version ${current}, code pins ${pinned}`);
+    }
+  });
+});
