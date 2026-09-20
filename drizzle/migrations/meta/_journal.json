@@ -484,6 +484,13 @@
       "when": 1789887575293,
       "tag": "0068_acquisition_leads_pipeline",
       "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1789905549805,
+      "tag": "0069_acquisition_leads_geo_columns",
+      "breakpoints": true
     }
   ]
 }

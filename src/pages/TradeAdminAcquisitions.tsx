@@ -5,7 +5,7 @@
  * tailored outbound sequence. Admin-only — RLS is the real control, the
  * guard below is convenience.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -32,7 +32,12 @@ type Lead = {
   email_sent_at: string | null;
   email_error: string | null;
   created_at: string;
+  country: string | null;
+  city: string | null;
 };
+
+const DEFAULT_COUNTRY = "Singapore";
+const DEFAULT_CITY = "Singapore";
 
 const fmtDate = (iso: string | null) =>
   iso
@@ -48,6 +53,8 @@ const TradeAdminAcquisitions = () => {
   const [search, setSearch] = useState("");
   const [dispatching, setDispatching] = useState(false);
   const [exiting, setExiting] = useState<Set<string>>(new Set());
+  const [activeCountry, setActiveCountry] = useState<string>(DEFAULT_COUNTRY);
+  const [activeCity, setActiveCity] = useState<string>(DEFAULT_CITY);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["acquisition-leads", "enriched"],
@@ -57,7 +64,7 @@ const TradeAdminAcquisitions = () => {
       const { data, error } = await supabase
         .from("acquisition_leads")
         .select(
-          "id, studio_name, founder_name, business_email, website_url, source_index, aesthetic_profile, predicted_designer_matches, campaign_status, verified_at, email_sent_at, email_error, created_at",
+          "id, studio_name, founder_name, business_email, website_url, source_index, aesthetic_profile, predicted_designer_matches, campaign_status, verified_at, email_sent_at, email_error, created_at, country, city",
         )
         .eq("campaign_status", "enriched")
         .order("created_at", { ascending: false })
@@ -67,15 +74,65 @@ const TradeAdminAcquisitions = () => {
     },
   });
 
+  // Geographic model: country → cities, derived from live rows. Rows without
+  // geography are grouped under "Unassigned" so nothing is hidden silently.
+  const geo = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (const r of rows) {
+      const country = r.country?.trim() || "Unassigned";
+      const city = r.city?.trim() || r.country?.trim() || "Unassigned";
+      if (!map.has(country)) map.set(country, new Set());
+      map.get(country)!.add(city);
+    }
+    const countries = Array.from(map.keys()).sort((a, b) => {
+      if (a === DEFAULT_COUNTRY) return -1;
+      if (b === DEFAULT_COUNTRY) return 1;
+      if (a === "Unassigned") return 1;
+      if (b === "Unassigned") return -1;
+      return a.localeCompare(b);
+    });
+    return { map, countries };
+  }, [rows]);
+
+  const cities = useMemo(() => {
+    const set = geo.map.get(activeCountry);
+    return set ? Array.from(set).sort((a, b) => a.localeCompare(b)) : [];
+  }, [geo, activeCountry]);
+
+  // Keep the active geography valid as data changes.
+  useEffect(() => {
+    if (geo.countries.length === 0) return;
+    if (!geo.map.has(activeCountry)) {
+      setActiveCountry(geo.countries[0]);
+      return;
+    }
+    const set = geo.map.get(activeCountry)!;
+    if (!set.has(activeCity)) {
+      const sorted = Array.from(set).sort((a, b) => a.localeCompare(b));
+      setActiveCity(
+        activeCountry === DEFAULT_COUNTRY && set.has(DEFAULT_CITY) ? DEFAULT_CITY : sorted[0],
+      );
+    }
+  }, [geo, activeCountry, activeCity]);
+
+  // Changing geography clears the selection so campaigns only ever fire on
+  // the visible cohort.
+  useEffect(() => {
+    setSelected(new Set());
+  }, [activeCountry, activeCity]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((r) =>
-      [r.studio_name, r.founder_name, r.business_email, r.aesthetic_profile]
+    return rows.filter((r) => {
+      const country = r.country?.trim() || "Unassigned";
+      const city = r.city?.trim() || r.country?.trim() || "Unassigned";
+      if (country !== activeCountry || city !== activeCity) return false;
+      if (!q) return true;
+      return [r.studio_name, r.founder_name, r.business_email, r.aesthetic_profile]
         .filter(Boolean)
-        .some((v) => String(v).toLowerCase().includes(q)),
-    );
-  }, [rows, search]);
+        .some((v) => String(v).toLowerCase().includes(q));
+    });
+  }, [rows, search, activeCountry, activeCity]);
 
   const toggle = (id: string) =>
     setSelected((prev) => {
@@ -179,6 +236,48 @@ const TradeAdminAcquisitions = () => {
           </Button>
         </header>
 
+        {/* Country tabs */}
+        <nav className="flex flex-wrap gap-x-8 gap-y-2 border-b border-border pt-8" aria-label="Filter by country">
+          {geo.countries.map((country) => {
+            const isActive = country === activeCountry;
+            return (
+              <button
+                key={country}
+                type="button"
+                onClick={() => setActiveCountry(country)}
+                className={`-mb-px border-b-2 pb-3 text-[11px] uppercase tracking-[0.25em] transition-colors ${
+                  isActive
+                    ? "border-foreground text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {country}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* City pills */}
+        <div className="flex flex-wrap gap-2 pt-5" aria-label="Filter by city">
+          {cities.map((city) => {
+            const isActive = city === activeCity;
+            return (
+              <button
+                key={city}
+                type="button"
+                onClick={() => setActiveCity(city)}
+                className={`border px-4 py-1.5 text-[11px] uppercase tracking-[0.2em] transition-colors ${
+                  isActive
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border text-muted-foreground hover:border-foreground hover:text-foreground"
+                }`}
+              >
+                {city}
+              </button>
+            );
+          })}
+        </div>
+
         <div className="flex flex-col gap-4 py-8 md:flex-row md:items-center md:justify-between">
           <Input
             value={search}
@@ -187,7 +286,7 @@ const TradeAdminAcquisitions = () => {
             className="h-11 max-w-md rounded-none border-border"
           />
           <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-            {filtered.length} enriched lead{filtered.length === 1 ? "" : "s"}
+            Pending enriched leads in {activeCity}: {filtered.length}
           </p>
         </div>
 
@@ -225,7 +324,7 @@ const TradeAdminAcquisitions = () => {
               {!isLoading && filtered.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-5 py-16 text-center text-sm text-muted-foreground">
-                    No enriched leads awaiting outbound.
+                    No enriched leads awaiting outbound in {activeCity}.
                   </td>
                 </tr>
               )}

@@ -73,6 +73,8 @@ export type Database = {
           aesthetic_profile: string | null
           business_email: string
           campaign_status: string
+          city: string | null
+          country: string | null
           created_at: string
           email_error: string | null
           email_sent_at: string | null
@@ -88,6 +90,8 @@ export type Database = {
           aesthetic_profile?: string | null
           business_email: string
           campaign_status?: string
+          city?: string | null
+          country?: string | null
           created_at?: string
           email_error?: string | null
           email_sent_at?: string | null
@@ -103,6 +107,8 @@ export type Database = {
           aesthetic_profile?: string | null
           business_email?: string
           campaign_status?: string
+          city?: string | null
+          country?: string | null
           created_at?: string
           email_error?: string | null
           email_sent_at?: string | null
