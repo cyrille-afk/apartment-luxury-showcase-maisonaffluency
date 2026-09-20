@@ -718,36 +718,43 @@ Be conservative: if the website is unreachable, password-protected or the eviden
   });
   const identifiers: ExtractedIdentifier[] = validateIdentifiers(merged, app.country);
 
-  // A suspicious corporate ID always goes to a human, whatever the model said.
-  const decision = decideVerification(verdict.confidence_score, identifiers);
-  const { rawScore, confidenceScore, autoApprove, malformed, status } = decision;
+  // Screening only: a suspicious corporate ID or any fraud flag pushes the
+  // application into the flagged queue. Neither outcome grants anything.
+  const decision = decideVerification(
+    verdict.confidence_score,
+    identifiers,
+    fraudFlags.map((f) => f.code),
+  );
+  const { rawScore, confidenceScore, screenedClean, malformed, status } = decision;
 
   const idNote = malformed.length
     ? ` Structural check flagged ${malformed.length} improperly formatted corporate ID(s): ${malformed
         .map((i) => `${i.type} "${i.value}" — ${i.note}`)
         .join("; ")}`
     : "";
-  const notes = `${verdict.reasoning || verdict.notes || ""}${idNote}`.trim();
+  const fraudNote = fraudFlags.length
+    ? ` Fraud screening: ${fraudFlags.map((f) => f.detail).join(" ")}`
+    : "";
+  const notes = `${verdict.reasoning || verdict.notes || ""}${idNote}${fraudNote}`.trim();
 
   const alreadyAlerted = app.last_flag_alert_fingerprint === evidenceFingerprint;
-  const emailAlreadySent = !!app.approval_email_sent_at;
 
   await admin
     .from("trade_applications")
     .update({
       status,
-      tax_exempt_status: autoApprove,
+      // Tax exemption is a human decision, never an AI one.
+      tax_exempt_status: false,
       verification_notes: notes,
       ai_confidence: confidenceScore,
       verification_attempts: attempts,
       next_retry_at: null,
       last_verification_error: null,
       verification_fingerprint: evidenceFingerprint,
-      ...(autoApprove
-        ? {}
-        : alreadyAlerted
-          ? {}
-          : { last_flag_alert_fingerprint: evidenceFingerprint }),
+      credential_sha256: credentialSha,
+      credential_duplicate_of: duplicateOf,
+      fraud_flags: fraudFlags,
+      ...(alreadyAlerted ? {} : { last_flag_alert_fingerprint: evidenceFingerprint }),
       ai_result: {
         ...verdict,
         confidence_score: confidenceScore,
@@ -756,9 +763,10 @@ Be conservative: if the website is unreachable, password-protected or the eviden
         region: regionFor(app.country),
         extracted_identifiers: identifiers,
         identifier_warnings: malformed.length,
+        fraud_flags: fraudFlags,
+        screening_only: true,
       },
       ai_verified_at: new Date().toISOString(),
-      ...(autoApprove ? { reviewed_at: new Date().toISOString() } : {}),
     })
     .eq("id", applicationId);
 
@@ -773,52 +781,28 @@ Be conservative: if the website is unreachable, password-protected or the eviden
     attempt: attempts,
     details: {
       model_confidence_score: rawScore,
-      auto_approve: autoApprove,
+      screened_clean: screenedClean,
+      auto_approve: false,
+      fraud_flags: fraudFlags,
+      credential_sha256: credentialSha,
       website_status: site.status,
       region: regionFor(app.country),
       identifier_warnings: malformed.length,
       fingerprint: evidenceFingerprint,
+      human_review_threshold: HUMAN_REVIEW_AT,
     },
   });
 
-  // One alert per distinct evidence set.
-  if (!autoApprove && !alreadyAlerted) {
+  // Every application now needs a human; alert once per distinct evidence set.
+  if (!alreadyAlerted) {
     await notifyFlagged(app, applicantName, confidenceScore, notes, admin);
   }
 
-  if (autoApprove) {
-    await admin.from("user_roles").upsert(
-      { user_id: app.user_id, role: "trade_user" },
-      { onConflict: "user_id,role" },
-    );
-    // Welcome email exactly once per application, whatever the evidence set.
-    if (profile?.email && !emailAlreadySent) {
-      const { error: claimErr } = await admin
-        .from("trade_applications")
-        .update({ approval_email_sent_at: new Date().toISOString() })
-        .eq("id", applicationId)
-        .is("approval_email_sent_at", null);
-      if (!claimErr) {
-        try {
-          await admin.functions.invoke("send-transactional-email", {
-            body: {
-              templateName: "trade-welcome-auto",
-              recipientEmail: profile.email,
-              idempotencyKey: `trade-welcome-auto-${applicationId}`,
-              templateData: {
-                name: applicantName,
-                companyName: app.company_name,
-                country: app.country,
-              },
-            },
-          });
-        } catch (_) {
-          // non-fatal
-        }
-      }
-    }
-  }
-
-
-  return json({ status, confidence_score: confidenceScore, reasoning: notes });
+  return json({
+    status,
+    confidence_score: confidenceScore,
+    reasoning: notes,
+    fraud_flags: fraudFlags,
+    requires_human_review: true,
+  });
 });
