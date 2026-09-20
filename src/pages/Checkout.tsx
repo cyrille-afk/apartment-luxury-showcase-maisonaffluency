@@ -655,6 +655,10 @@ function OrderSummary({
                 <dd className="shrink-0 whitespace-nowrap text-right text-muted-foreground">To be Quoted by Advisor</dd>
               )}
             </div>
+            <CrossBorderFreightBreakdown
+              invoice={crossBorder}
+              format={(cents) => money(cents, currency)}
+            />
             {summary.ddpHandlingCents > 0 && (
               <p className="mt-1.5 font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
                 Includes {money(summary.ddpHandlingCents, currency)} prepaid customs handling (DDP).
@@ -722,7 +726,10 @@ function OrderSummary({
             </div>
           )}
           <div className="border-t border-border/60 pt-4">
-            {sgBorderGst ? (
+            {crossBorderExempt ? (
+              // Verified B2B registration — no local VAT / sales-tax line at all.
+              <CrossBorderTaxNotice invoice={crossBorder} />
+            ) : sgBorderGst ? (
               <>
                 <div className="flex items-baseline justify-between gap-6">
                   <dt className="text-muted-foreground">Tax (Import GST)</dt>
