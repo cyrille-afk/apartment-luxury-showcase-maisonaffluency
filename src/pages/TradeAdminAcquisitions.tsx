@@ -370,7 +370,7 @@ const TradeAdminAcquisitions = () => {
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
-      <div className="mx-auto max-w-[1400px] px-6 py-12 md:px-12 md:py-16">
+      <div className="w-full px-8 py-12 md:px-10 md:py-16">
         <header className="flex flex-col gap-6 border-b border-border pb-8 md:flex-row md:items-end md:justify-between">
           <div className="space-y-3">
             <p className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
@@ -496,8 +496,8 @@ const TradeAdminAcquisitions = () => {
           </p>
         </div>
 
-        <div className="overflow-x-auto border border-border">
-          <table className="w-full min-w-[1080px] text-left">
+        <div className="w-full overflow-x-auto border border-border">
+          <table className="w-full table-auto text-left">
             <thead>
               <tr className="border-b border-border bg-muted/30">
                 <th className="w-12 px-5 py-4">
@@ -508,19 +508,19 @@ const TradeAdminAcquisitions = () => {
                   />
                 </th>
                 {[
-                  "Studio Name",
-                  "Contact",
-                  "Outreach Vector",
-                  "Instagram",
-                  "Aesthetic Profile",
-                  "Matched Designers",
-                  "Verification",
+                  { label: "Studio Name", width: "min-w-[180px] w-[14%]" },
+                  { label: "Contact", width: "min-w-[180px] w-[14%]" },
+                  { label: "Outreach Vector", width: "min-w-[160px] w-[12%]" },
+                  { label: "Instagram", width: "min-w-[140px] w-[10%]" },
+                  { label: "Aesthetic Profile", width: "min-w-[280px] w-[24%]" },
+                  { label: "Matched Designers", width: "min-w-[220px] w-[16%]" },
+                  { label: "Verification", width: "min-w-[140px] w-[10%]" },
                 ].map((h) => (
                   <th
-                    key={h}
-                    className="px-5 py-4 text-[10px] uppercase tracking-[0.25em] text-muted-foreground"
+                    key={h.label}
+                    className={`${h.width} px-5 py-4 text-[10px] uppercase tracking-[0.25em] text-muted-foreground`}
                   >
-                    {h}
+                    {h.label}
                   </th>
                 ))}
               </tr>
@@ -642,7 +642,7 @@ const TradeAdminAcquisitions = () => {
                       <span className="text-sm text-muted-foreground">—</span>
                     )}
                   </td>
-                  <td className="max-w-xs px-5 py-6 text-sm leading-relaxed text-muted-foreground">
+                  <td className="px-5 py-6 text-sm leading-relaxed text-muted-foreground whitespace-normal">
                     {lead.aesthetic_profile ?? "—"}
                   </td>
                   <td className="px-5 py-6">
