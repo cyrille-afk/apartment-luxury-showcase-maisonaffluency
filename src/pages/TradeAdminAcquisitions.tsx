@@ -425,6 +425,20 @@ const TradeAdminAcquisitions = () => {
               )}
               Execute IG &amp; Executive Data Repair
             </button>
+
+            <button
+              type="button"
+              onClick={calibrateHandles}
+              disabled={calibrating}
+              className="inline-flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground disabled:opacity-50"
+            >
+              {calibrating ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Instagram className="h-3 w-3" />
+              )}
+              Execute Live Handle Calibration Loop
+            </button>
           </div>
         </header>
 
