@@ -5,6 +5,8 @@ import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import { Lock, Check, Loader2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { hasConsent } from "@/lib/consent/consentStore";
+
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getCart, clearCart, rehydrateCart, useCart } from "@/lib/cart";
