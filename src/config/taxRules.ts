@@ -366,6 +366,11 @@ export interface TaxTreatmentResult {
   merchantTaxIdentifier: string | null;
   /** True when the consignment must be tendered to the carrier as DDP. */
   requiresDdpClearance: boolean;
+  /** Cross-border routing recorded on the order for audit. */
+  customsRoute: CustomsRoute | null;
+  /** IOSS number to append to the electronic customs manifest, when routing
+   *  under our own registration. */
+  iossNumber: string | null;
   countryIso: string | null;
   shipFromCountry: string | null;
 }
