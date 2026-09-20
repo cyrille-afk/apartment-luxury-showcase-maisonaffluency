@@ -355,6 +355,30 @@ export default function TradeAdminPaymentSettings() {
     setTimeout(() => setCopied(false), 2500);
   };
 
+  const copySavedField = async (field: string) => {
+    if (!status?.[field as keyof PaymentModeStatus]) return;
+    setCopyingSaved(field);
+    try {
+      const { data, error } = await supabase.functions.invoke("payment-credentials", {
+        body: { action: "reveal_field", field },
+      });
+      if (error) throw error;
+      const value = (data as { value?: string })?.value ?? "";
+      if (!value) throw new Error("No saved value found");
+      await navigator.clipboard.writeText(value);
+      setRevealedSaved((r) => ({ ...r, [field]: true }));
+      setTimeout(() => setRevealedSaved((r) => ({ ...r, [field]: false })), 2500);
+    } catch (e) {
+      toast({
+        title: "Could not copy saved key",
+        description: e instanceof Error ? e.message : "Unexpected error",
+        variant: "destructive",
+      });
+    } finally {
+      setCopyingSaved(null);
+    }
+  };
+
   const fieldError = (key: FieldKey): string | null => {
     const raw = values[key].replace(/\s/g, "");
     if (!raw) return null;
