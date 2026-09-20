@@ -15,7 +15,9 @@ import { Check, Copy, Download, Loader2, Lock, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import StripeBankTransferPanel from "@/components/checkout/StripeBankTransferPanel";
 import {
+  SWIFT,
   channelsForRegion,
   type PaymentChannelId,
   type RegionTier,
@@ -95,9 +97,16 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
     onRecorded,
   } = props;
 
-  const channels = useMemo(() => channelsForRegion(regionTier), [regionTier]);
+  const channels = useMemo(
+    () => channelsForRegion(regionTier, currency),
+    [regionTier, currency],
+  );
   const [channelId, setChannelId] = useState<PaymentChannelId>(channels[0].id);
   const channel: TradePaymentChannel = channels.find((c) => c.id === channelId) ?? channels[0];
+  // Currency changes swap the available rails (GBP gains the UK domestic one).
+  useEffect(() => {
+    if (!channels.some((c) => c.id === channelId)) setChannelId(channels[0].id);
+  }, [channels, channelId]);
 
   // Single source of truth: the same rule engine the checkout summary and the
   // PaymentIntent use, so the invoiced total always matches the page total.
@@ -307,17 +316,47 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
         </div>
       )}
 
-      <dl className="divide-y divide-border border border-border">
-        {channel.rows.map((row) => (
-          <div key={row.label} className="flex items-start justify-between gap-4 px-4 py-3">
-            <dt className="shrink-0 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{row.label}</dt>
-            <dd className="flex min-w-0 items-center gap-3 text-right">
-              <span className="truncate text-sm tabular-nums">{row.value}</span>
-              {row.copyable && <CopyValue value={row.value} />}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      {channel.id === "gb_faster_payments" ? (
+        <StripeBankTransferPanel
+          currency="gbp"
+          email={buyer.email}
+          items={lines.map((l) => ({
+            title: l.title,
+            designer: l.designer || undefined,
+            selectedFinish: l.finishLabel || undefined,
+            price: l.unitCents / 100,
+            quantity: l.quantity,
+          }))}
+          shippingConfirmed={shippingCents > 0}
+          shippingCents={shippingCents}
+          orderReference={orderRef}
+          fallback={
+            <dl className="divide-y divide-border border border-border">
+              {SWIFT.rows.map((row) => (
+                <div key={row.label} className="flex items-start justify-between gap-4 px-4 py-3">
+                  <dt className="shrink-0 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{row.label}</dt>
+                  <dd className="flex min-w-0 items-center gap-3 text-right">
+                    <span className="truncate text-sm tabular-nums">{row.value}</span>
+                    {row.copyable && <CopyValue value={row.value} />}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          }
+        />
+      ) : (
+        <dl className="divide-y divide-border border border-border">
+          {channel.rows.map((row) => (
+            <div key={row.label} className="flex items-start justify-between gap-4 px-4 py-3">
+              <dt className="shrink-0 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{row.label}</dt>
+              <dd className="flex min-w-0 items-center gap-3 text-right">
+                <span className="truncate text-sm tabular-nums">{row.value}</span>
+                {row.copyable && <CopyValue value={row.value} />}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      )}
 
       <div className="border border-foreground px-4 py-4">
         <p className="text-sm">
