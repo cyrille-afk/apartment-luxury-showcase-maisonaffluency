@@ -127,6 +127,7 @@ serve(async (req) => {
   ].join("\n");
 
   let aesthetic: string | null = null;
+  let instagram: string | null = null;
   let matched: string[] = [];
 
   try {
@@ -186,6 +187,7 @@ serve(async (req) => {
     source_index: sourceIndex,
     ...(country ? { country } : {}),
     ...(city ? { city } : {}),
+    instagram_handle: instagram,
     aesthetic_profile: aesthetic,
     predicted_designer_matches: matched.length ? matched : null,
     campaign_status: protectedStatus
