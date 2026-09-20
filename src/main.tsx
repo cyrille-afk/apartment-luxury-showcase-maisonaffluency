@@ -6,6 +6,10 @@ import BuildUpdateBanner from "./components/BuildUpdateBanner";
 import { isPwaStandaloneDisplay } from "./lib/pwaMode";
 import { loadOgBridgeIndex } from "./lib/ogBridgeResolver";
 import { startEnvironmentIndexingGuard } from "./lib/environmentIndexingGuard";
+import { bootIossRouting } from "./config/iossConfig";
+
+// Align the browser's tax preview with the server's EU routing switch.
+bootIossRouting();
 
 // Block indexing + rewrite canonicals on any preview/staging/dev host.
 startEnvironmentIndexingGuard();
