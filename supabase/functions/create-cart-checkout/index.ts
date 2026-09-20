@@ -6,6 +6,7 @@ import { convertCents, SETTLEMENT_CURRENCIES } from "./fxConvert.ts";
 import { formatCurrency } from "../_shared/transactional-email-templates/currency.ts";
 import { resolveTaxTreatment, normaliseBuyerTaxId } from "../_shared/taxRules.ts";
 import { buildOrderDeliveryMessage } from "../_shared/orderDeliveryMessaging.ts";
+import { verifyVatNumber } from "../_shared/vatValidation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
