@@ -1,6 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
-  AUTO_APPROVE_AT,
+  HUMAN_REVIEW_AT,
   MALFORMED_ID_CEILING,
   countryCode,
   credentialGuidance,
@@ -193,12 +193,12 @@ Deno.test("threshold: a malformed corporate ID caps confidence at 70", () => {
   assertEquals(decision.malformed.length, 1);
 });
 
-Deno.test("threshold: a valid regional credential at 85 is approved end to end", () => {
+Deno.test("threshold: a valid regional credential at 85 screens clean end to end", () => {
   for (const id of ["sg-acra-valid", "ae-ded-trn-valid", "sa-cr-valid", "qa-gcc-trn-valid"]) {
     const d = doc(id);
     const ids = validateIdentifiers(d.extractedIdentifiers, d.country);
     const decision = decideVerification(85, ids);
-    assertEquals(decision.status, "approved", `${id} should auto-approve at 85`);
+    assertEquals(decision.status, "pending_human_review", `${id} should screen clean at 85`);
     assertEquals(decision.malformed.length, 0, `${id} should have no malformed IDs`);
   }
 });
