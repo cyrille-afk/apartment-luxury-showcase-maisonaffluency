@@ -156,6 +156,8 @@ export const isTestEnvironment = (): boolean => {
   return (
     h === "localhost" ||
     h === "127.0.0.1" ||
+    h === "lovable.dev" ||
+    h.endsWith(".lovable.dev") ||
     h.endsWith(".lovable.app") ||
     h.endsWith(".lovableproject.com")
   );
