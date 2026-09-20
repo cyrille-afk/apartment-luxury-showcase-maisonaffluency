@@ -103,8 +103,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  const gate = await requireAdmin(req);
-  if (!gate.ok) return json({ error: gate.error ?? "Unauthorized" }, gate.status ?? 401);
+  const auth = await requireAdmin(req, "repair-acquisition-contacts");
+  if (!auth.ok) return json(auth.body, auth.status);
 
   const apiKey = Deno.env.get("LOVABLE_API_KEY");
   if (!apiKey) return json({ error: "AI is not configured" }, 500);
