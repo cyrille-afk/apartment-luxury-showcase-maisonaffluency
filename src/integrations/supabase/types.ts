@@ -7534,6 +7534,7 @@ export type Database = {
           credential_duplicate_of: string | null
           credential_purge_after: string | null
           credential_sha256: string | null
+          document_hash: string | null
           edit_completed_at: string | null
           edit_completed_by_name: string | null
           edit_token_expires_at: string | null
@@ -7578,6 +7579,7 @@ export type Database = {
           credential_duplicate_of?: string | null
           credential_purge_after?: string | null
           credential_sha256?: string | null
+          document_hash?: string | null
           edit_completed_at?: string | null
           edit_completed_by_name?: string | null
           edit_token_expires_at?: string | null
@@ -7622,6 +7624,7 @@ export type Database = {
           credential_duplicate_of?: string | null
           credential_purge_after?: string | null
           credential_sha256?: string | null
+          document_hash?: string | null
           edit_completed_at?: string | null
           edit_completed_by_name?: string | null
           edit_token_expires_at?: string | null
