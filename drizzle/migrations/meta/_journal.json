@@ -435,6 +435,13 @@
       "when": 1789874372574,
       "tag": "0061_sub_processor_registry",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1789874984627,
+      "tag": "0062_trade_guardrails_credit_allocation_compliance",
+      "breakpoints": true
     }
   ]
 }

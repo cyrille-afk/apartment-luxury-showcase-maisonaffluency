@@ -290,6 +290,75 @@ export type Database = {
         }
         Relationships: []
       }
+      allocation_inquiries: {
+        Row: {
+          allocation_cap: number | null
+          company: string | null
+          created_at: string
+          designer_name: string | null
+          destination_country: string | null
+          email: string
+          finish_label: string | null
+          full_name: string | null
+          handled_at: string | null
+          handled_by: string | null
+          id: string
+          intended_use: string | null
+          message: string | null
+          phone: string | null
+          pick_id: string | null
+          product_title: string
+          requested_quantity: number
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          allocation_cap?: number | null
+          company?: string | null
+          created_at?: string
+          designer_name?: string | null
+          destination_country?: string | null
+          email: string
+          finish_label?: string | null
+          full_name?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          intended_use?: string | null
+          message?: string | null
+          phone?: string | null
+          pick_id?: string | null
+          product_title: string
+          requested_quantity: number
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          allocation_cap?: number | null
+          company?: string | null
+          created_at?: string
+          designer_name?: string | null
+          destination_country?: string | null
+          email?: string
+          finish_label?: string | null
+          full_name?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          intended_use?: string | null
+          message?: string | null
+          phone?: string | null
+          pick_id?: string | null
+          product_title?: string
+          requested_quantity?: number
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       analytics_rate_limits: {
         Row: {
           bucket_key: string
@@ -2303,7 +2372,9 @@ export type Database = {
       }
       designer_curator_picks: {
         Row: {
+          allocation_unit_cap: number
           allow_com_col: boolean
+          available_stock_units: number | null
           base_axis_label: string | null
           category: string | null
           com_meters: number | null
@@ -2333,6 +2404,7 @@ export type Database = {
           hs6_code: string | null
           id: string
           image_url: string
+          is_allocation_restricted: boolean
           is_contract_grade: boolean
           is_hidden: boolean
           is_upholstered: boolean | null
@@ -2370,7 +2442,9 @@ export type Database = {
           wood_label_override: string | null
         }
         Insert: {
+          allocation_unit_cap?: number
           allow_com_col?: boolean
+          available_stock_units?: number | null
           base_axis_label?: string | null
           category?: string | null
           com_meters?: number | null
@@ -2400,6 +2474,7 @@ export type Database = {
           hs6_code?: string | null
           id?: string
           image_url?: string
+          is_allocation_restricted?: boolean
           is_contract_grade?: boolean
           is_hidden?: boolean
           is_upholstered?: boolean | null
@@ -2437,7 +2512,9 @@ export type Database = {
           wood_label_override?: string | null
         }
         Update: {
+          allocation_unit_cap?: number
           allow_com_col?: boolean
+          available_stock_units?: number | null
           base_axis_label?: string | null
           category?: string | null
           com_meters?: number | null
@@ -2467,6 +2544,7 @@ export type Database = {
           hs6_code?: string | null
           id?: string
           image_url?: string
+          is_allocation_restricted?: boolean
           is_contract_grade?: boolean
           is_hidden?: boolean
           is_upholstered?: boolean | null
@@ -5405,6 +5483,8 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          catalog_abuse_flagged_at: string | null
+          catalog_abuse_strikes: number
           company: string
           concierge_name: string | null
           country: string | null
@@ -5425,6 +5505,8 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          catalog_abuse_flagged_at?: string | null
+          catalog_abuse_strikes?: number
           company?: string
           concierge_name?: string | null
           country?: string | null
@@ -5447,6 +5529,8 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          catalog_abuse_flagged_at?: string | null
+          catalog_abuse_strikes?: number
           company?: string
           concierge_name?: string | null
           country?: string | null
@@ -6793,6 +6877,7 @@ export type Database = {
       shop_orders: {
         Row: {
           budget_approved_at: string | null
+          buyer_registry_country: string | null
           buyer_tax_country: string | null
           buyer_tax_id: string | null
           buyer_tax_id_verification_source: string | null
@@ -6800,7 +6885,13 @@ export type Database = {
           buyer_type: string | null
           company_name: string | null
           company_registration_number: string | null
+          compliance_flagged_at: string | null
+          compliance_review_reason: string | null
+          compliance_review_status: string | null
           created_at: string
+          credit_check_status: string | null
+          credit_exposure_eur_cents: number | null
+          credit_limit_eur_cents: number | null
           currency: string
           customer_po_number: string | null
           customs_clearance_cents: number
@@ -6858,6 +6949,7 @@ export type Database = {
         }
         Insert: {
           budget_approved_at?: string | null
+          buyer_registry_country?: string | null
           buyer_tax_country?: string | null
           buyer_tax_id?: string | null
           buyer_tax_id_verification_source?: string | null
@@ -6865,7 +6957,13 @@ export type Database = {
           buyer_type?: string | null
           company_name?: string | null
           company_registration_number?: string | null
+          compliance_flagged_at?: string | null
+          compliance_review_reason?: string | null
+          compliance_review_status?: string | null
           created_at?: string
+          credit_check_status?: string | null
+          credit_exposure_eur_cents?: number | null
+          credit_limit_eur_cents?: number | null
           currency?: string
           customer_po_number?: string | null
           customs_clearance_cents?: number
@@ -6923,6 +7021,7 @@ export type Database = {
         }
         Update: {
           budget_approved_at?: string | null
+          buyer_registry_country?: string | null
           buyer_tax_country?: string | null
           buyer_tax_id?: string | null
           buyer_tax_id_verification_source?: string | null
@@ -6930,7 +7029,13 @@ export type Database = {
           buyer_type?: string | null
           company_name?: string | null
           company_registration_number?: string | null
+          compliance_flagged_at?: string | null
+          compliance_review_reason?: string | null
+          compliance_review_status?: string | null
           created_at?: string
+          credit_check_status?: string | null
+          credit_exposure_eur_cents?: number | null
+          credit_limit_eur_cents?: number | null
           currency?: string
           customer_po_number?: string | null
           customs_clearance_cents?: number
@@ -7804,6 +7909,27 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_catalog_rate_limits: {
+        Row: {
+          bucket_key: string
+          flagged_at: string | null
+          hits: number
+          window_start: string
+        }
+        Insert: {
+          bucket_key: string
+          flagged_at?: string | null
+          hits?: number
+          window_start?: string
+        }
+        Update: {
+          bucket_key?: string
+          flagged_at?: string | null
+          hits?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
       trade_concierge_actions: {
         Row: {
           args: Json
@@ -7985,6 +8111,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      trade_credit_profiles: {
+        Row: {
+          approved_credit_limit_eur_cents: number
+          created_at: string
+          credit_currency: string
+          first_order_limit_eur_cents: number
+          first_order_settled_at: string | null
+          net_terms_enabled: boolean
+          outstanding_balance_eur_cents: number
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          settled_order_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved_credit_limit_eur_cents?: number
+          created_at?: string
+          credit_currency?: string
+          first_order_limit_eur_cents?: number
+          first_order_settled_at?: string | null
+          net_terms_enabled?: boolean
+          outstanding_balance_eur_cents?: number
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          settled_order_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved_credit_limit_eur_cents?: number
+          created_at?: string
+          credit_currency?: string
+          first_order_limit_eur_cents?: number
+          first_order_settled_at?: string | null
+          net_terms_enabled?: boolean
+          outstanding_balance_eur_cents?: number
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          settled_order_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       trade_credits: {
         Row: {
@@ -8500,9 +8674,11 @@ export type Database = {
       }
       trade_products: {
         Row: {
+          allocation_unit_cap: number
           asia_lead_time_days: number | null
           available_finishes: string[]
           available_from: string | null
+          available_stock_units: number | null
           base_axis_label: string | null
           brand_name: string
           category: string
@@ -8528,6 +8704,7 @@ export type Database = {
           image_url: string | null
           in_situ_sg: boolean
           is_active: boolean
+          is_allocation_restricted: boolean
           is_contract_grade: boolean
           is_hidden: boolean
           is_upholstered: boolean | null
@@ -8571,9 +8748,11 @@ export type Database = {
           wood_label_override: string | null
         }
         Insert: {
+          allocation_unit_cap?: number
           asia_lead_time_days?: number | null
           available_finishes?: string[]
           available_from?: string | null
+          available_stock_units?: number | null
           base_axis_label?: string | null
           brand_name: string
           category?: string
@@ -8599,6 +8778,7 @@ export type Database = {
           image_url?: string | null
           in_situ_sg?: boolean
           is_active?: boolean
+          is_allocation_restricted?: boolean
           is_contract_grade?: boolean
           is_hidden?: boolean
           is_upholstered?: boolean | null
@@ -8642,9 +8822,11 @@ export type Database = {
           wood_label_override?: string | null
         }
         Update: {
+          allocation_unit_cap?: number
           asia_lead_time_days?: number | null
           available_finishes?: string[]
           available_from?: string | null
+          available_stock_units?: number | null
           base_axis_label?: string | null
           brand_name?: string
           category?: string
@@ -8670,6 +8852,7 @@ export type Database = {
           image_url?: string | null
           in_situ_sg?: boolean
           is_active?: boolean
+          is_allocation_restricted?: boolean
           is_contract_grade?: boolean
           is_hidden?: boolean
           is_upholstered?: boolean | null
@@ -9787,8 +9970,11 @@ export type Database = {
       }
       trade_products_public_rrp: {
         Row: {
+          allocation_unit_cap: number | null
+          available_stock_units: number | null
           currency: string | null
           id: string | null
+          is_allocation_restricted: boolean | null
           price_prefix: string | null
           price_unit: string | null
           rrp_price_cents: number | null
@@ -9945,6 +10131,15 @@ export type Database = {
         Returns: Database["public"]["Enums"]["studio_role"]
       }
       email_queue_dispatch: { Args: never; Returns: undefined }
+      enforce_trade_catalog_rate_limit: {
+        Args: {
+          _actor: string
+          _endpoint: string
+          _limit?: number
+          _window_seconds?: number
+        }
+        Returns: Json
+      }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number

@@ -4,6 +4,12 @@ import { sendLovableEmail } from "../_shared/lovableEmail.ts";
 import { buildOrderDeliveryMessage } from "../_shared/orderDeliveryMessaging.ts";
 import { isBuyerTaxIdValid, resolveTaxRule, resolveTaxTreatment } from "../_shared/taxRules.ts";
 import { applyIossEnv } from "../_shared/iossConfig.ts";
+import {
+  evaluateCreditLimit,
+  evaluateRegionalCompliance,
+  loadCreditProfile,
+  toEurCents,
+} from "../_shared/tradeGuardrails.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -125,6 +131,35 @@ serve(async (req) => {
       return json({ error: "Purchase orders are available for GBP orders above £20,000." }, 400);
     }
 
+    // ---- Net-terms credit ceiling (EUR denominated) --------------------
+    // A purchase order draws on approved credit; the first order is capped
+    // harder until the account has settled an invoice with us.
+    const creditProfile = await loadCreditProfile(admin, userId);
+    const orderTotalEurCents = await toEurCents(admin, totalCents, currency);
+    const credit = evaluateCreditLimit({
+      paymentTerms,
+      orderTotalEurCents,
+      profile: creditProfile,
+    });
+    if (!credit.approved) {
+      return json({
+        error: credit.reason,
+        code: "credit_limit_exceeded",
+        creditLimitEurCents: credit.limitEurCents,
+        exposureEurCents: credit.exposureEurCents,
+        status: credit.status,
+      }, 403);
+    }
+
+    // ---- Registry vs destination (grey-market interception) ------------
+    const compliance = evaluateRegionalCompliance({
+      buyerTaxCountry: "GB",
+      shippingCountry,
+      treatment: treatment.treatment,
+      buyerTaxIdVerified: true,
+      taxCents: treatment.taxCents,
+    });
+
     const delivery = buildOrderDeliveryMessage({
       shippingCountry,
       deliveryTerm: str(body?.incoterm, 3),
@@ -152,7 +187,14 @@ serve(async (req) => {
       shipping_address: str(buyer?.address, 600) || null,
       payment_method: "purchase_order",
       payment_channel: "corporate_po",
-      status: "pending_po_review",
+      status: compliance.cleared ? "pending_po_review" : "pending_regional_compliance_review",
+      compliance_review_status: compliance.status,
+      compliance_review_reason: compliance.reason,
+      compliance_flagged_at: compliance.cleared ? null : new Date().toISOString(),
+      buyer_registry_country: compliance.registryCountry,
+      credit_check_status: credit.status,
+      credit_limit_eur_cents: credit.usesCredit ? credit.limitEurCents : null,
+      credit_exposure_eur_cents: credit.usesCredit ? credit.exposureEurCents : null,
       currency,
       subtotal_cents: subtotalCents,
       discount_cents: discountCents,
@@ -216,7 +258,13 @@ serve(async (req) => {
       }, admin),
     ]);
 
-    return json({ orderId: order.id, orderRef, status: "pending_po_review" });
+    return json({
+      orderId: order.id,
+      orderRef,
+      status: compliance.cleared ? "pending_po_review" : "pending_regional_compliance_review",
+      complianceReview: compliance.status,
+      creditLimitEurCents: credit.usesCredit ? credit.limitEurCents : null,
+    });
   } catch (error) {
     console.error("[create-purchase-order] error", error);
     return json({ error: "Unable to submit the purchase order." }, 500);

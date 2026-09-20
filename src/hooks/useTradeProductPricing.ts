@@ -13,43 +13,56 @@ export interface TradeProductPricingRow {
   lead_time_weeks_max: number | null;
   stock_status_override: string | null;
   spec_sheet_url: string | null;
+  is_allocation_restricted?: boolean | null;
+  allocation_unit_cap?: number | null;
+  available_stock_units?: number | null;
 }
 
-const COLS =
-  "id, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, lead_time, lead_time_weeks_min, lead_time_weeks_max, stock_status_override, spec_sheet_url";
+export class TradeCatalogRateLimitError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "TradeCatalogRateLimitError";
+  }
+}
 
 /**
  * Trade-only pricing lookup for a public product page.
  *
- * Resolves the `trade_products` twin of a curator pick (via `source_pick_id`,
- * falling back to a direct id match). Only ever called from the authenticated
- * Trade Workspace — signed-out visitors never mount it, so no pricing request
- * leaves the browser for public sessions.
+ * Wholesale prices are served through the `trade-catalog-pricing` gateway
+ * rather than read from the table directly, so every request is counted
+ * server-side and harvesting cadences are throttled (429) and flagged.
  */
 export function useTradeProductPricing(pickId: string | null | undefined, enabled = true) {
   return useQuery({
     queryKey: ["trade-product-pricing", pickId],
     enabled: !!pickId && enabled,
     staleTime: 5 * 60_000,
+    retry: (count, error) => !(error instanceof TradeCatalogRateLimitError) && count < 2,
     queryFn: async (): Promise<TradeProductPricingRow | null> => {
       if (!pickId) return null;
 
-      const bySource = await supabase
-        .from("trade_products")
-        .select(COLS)
-        .eq("source_pick_id", pickId)
-        .eq("is_active", true)
-        .limit(1)
-        .maybeSingle();
-      if (bySource.data) return bySource.data as unknown as TradeProductPricingRow;
+      const { data, error } = await supabase.functions.invoke("trade-catalog-pricing", {
+        body: { pickIds: [pickId] },
+      });
 
-      const byId = await supabase
-        .from("trade_products")
-        .select(COLS)
-        .eq("id", pickId)
-        .limit(1)
-        .maybeSingle();
-      return (byId.data as unknown as TradeProductPricingRow) || null;
+      if (error) {
+        const status = (error as { context?: { status?: number } })?.context?.status;
+        if (status === 429) {
+          throw new TradeCatalogRateLimitError(
+            "Pricing requests are temporarily throttled on this account.",
+          );
+        }
+        throw error;
+      }
+
+      const products = (data as { products?: TradeProductPricingRow[] } | null)?.products ?? [];
+      if (!products.length) return null;
+
+      // Prefer the twin resolved through source_pick_id, then a direct id match.
+      const bySource = products.find(
+        (row) => (row as { source_pick_id?: string }).source_pick_id === pickId,
+      );
+      return bySource ?? products.find((row) => row.id === pickId) ?? products[0];
     },
   });
 }
