@@ -55,7 +55,8 @@ secret-less CI stay green.
 
 | Var | Required for | Notes |
 |---|---|---|
-| `RESEND_TEST_API_KEY` | Resend ping | `re_…` test key |
+| `RESEND_TEST_API_KEY` | Resend ping | preferred; `re_…` test key |
+| `RESEND_API_KEY` | Resend ping fallback | used when `RESEND_TEST_API_KEY` is absent |
 | `RESEND_TEST_FROM` | optional | default `Maison Affluency <onboarding@resend.dev>` |
 | `RESEND_TEST_TO` | optional | default `delivered@resend.dev` (Resend sandbox sink) |
 | `STRIPE_TEST_SECRET_KEY` | Stripe signature test | `sk_test_…`, used for SDK signing utilities |

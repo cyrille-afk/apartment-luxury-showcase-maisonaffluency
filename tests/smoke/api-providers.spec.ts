@@ -12,7 +12,7 @@
  * local mocked runs and secret-less CI stay green.
  *
  * Env:
- *   RESEND_TEST_API_KEY          re_… test key (Resend sandbox)
+ *   RESEND_TEST_API_KEY          re_… test key (Resend sandbox); falls back to RESEND_API_KEY
  *   RESEND_TEST_FROM             verified sender, default `onboarding@resend.dev`
  *   RESEND_TEST_TO               sandbox target, default `delivered@resend.dev`
  *   STRIPE_TEST_SECRET_KEY       sk_test_… (Stripe testmode SDK utilities)
@@ -27,7 +27,7 @@ import { Resend } from "resend";
 import { env, SUPABASE_URL, signIn } from "../support/e2eEnv";
 
 // ---------------------------------------------------------------- env guards
-const RESEND_KEY = env("RESEND_TEST_API_KEY");
+const RESEND_KEY = env("RESEND_TEST_API_KEY") ?? env("RESEND_API_KEY");
 const RESEND_FROM = env("RESEND_TEST_FROM") ?? "Maison Affluency <onboarding@resend.dev>";
 const RESEND_TO = env("RESEND_TEST_TO") ?? "delivered@resend.dev";
 
@@ -56,8 +56,10 @@ function requireOrSkip(have: boolean, reason: string) {
 }
 
 test.describe("Live provider smoke — Resend", () => {
-  test.beforeAll(() => requireOrSkip(haveResend, "RESEND_TEST_API_KEY not set — live Resend smoke skipped."));
-  test.skip(!haveResend && !STRICT, "RESEND_TEST_API_KEY not set — live Resend smoke skipped.");
+  test.beforeAll(() =>
+    requireOrSkip(haveResend, "RESEND_TEST_API_KEY or RESEND_API_KEY not set — live Resend smoke skipped."),
+  );
+  test.skip(!haveResend && !STRICT, "RESEND_TEST_API_KEY or RESEND_API_KEY not set — live Resend smoke skipped.");
 
   test("test-mode receipt is accepted and returns a message id", async () => {
     const resend = new Resend(RESEND_KEY!);
