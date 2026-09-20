@@ -496,8 +496,11 @@ const TradeAdminAcquisitions = () => {
           </p>
         </div>
 
-        <div className="w-full overflow-x-auto border border-border">
-          <table className="w-full table-auto text-left">
+        {/* Responsive table container: horizontal scrolling is isolated to the
+            data grid; the header toolbar and geographic tabs stay locked to the
+            viewport width above it. */}
+        <div className="w-full overflow-x-auto border border-border scrollbar-thin">
+          <table className="min-w-[1200px] w-full table-auto text-left">
             <thead>
               <tr className="border-b border-border bg-muted/30">
                 <th className="w-12 px-5 py-4">
