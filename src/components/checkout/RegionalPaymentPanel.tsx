@@ -95,7 +95,10 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
     onRecorded,
   } = props;
 
-  const channels = useMemo(() => channelsForRegion(regionTier), [regionTier]);
+  const channels = useMemo(
+    () => channelsForRegion(regionTier, currency),
+    [regionTier, currency],
+  );
   const [channelId, setChannelId] = useState<PaymentChannelId>(channels[0].id);
   const channel: TradePaymentChannel = channels.find((c) => c.id === channelId) ?? channels[0];
 
