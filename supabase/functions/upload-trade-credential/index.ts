@@ -179,6 +179,9 @@ Deno.serve(async (req) => {
       email_domain: emailDomain,
       ip_hash: ipHash,
       duplicate_of: prior?.id ?? null,
+      active_content_flags: scan.flags,
+      quarantined: scan.severity !== "clean",
+      scan_verdict: { severity: scan.severity, reasons: scan.reasons },
     })
     .select("id")
     .maybeSingle();
