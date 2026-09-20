@@ -414,6 +414,13 @@
       "when": 1789870176661,
       "tag": "0058_trade_fraud_alert_webhook_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1789873323512,
+      "tag": "0059_gdpr_dsar_document_quarantine_registry_verification",
+      "breakpoints": true
     }
   ]
 }

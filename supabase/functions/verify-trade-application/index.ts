@@ -28,6 +28,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { sendAdminWhatsApp } from "../_shared/twilioWhatsAppSender.ts";
 import { sha256Hex, verifyFileSignature } from "../_shared/fileSignature.ts";
 import { screenDocumentMetadata } from "./fraudScreen.ts";
+import { verifyVatNumber } from "../_shared/vatValidation.ts";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 // Stage 1 — fast, cost-effective multimodal parse of the credential document.
@@ -473,6 +474,55 @@ Deno.serve(async (req) => {
   // Fraud heuristics collected before the model runs. Any entry forces human
   // triage; none of them can ever produce an approval.
   const fraudFlags: { code: string; detail: string }[] = [];
+
+  // ── Authoritative registry check (VIES / HMRC aggregator) ────────────────
+  // A language model can only judge whether an identifier *looks* plausible.
+  // A trade account carries tier discounts and tax treatment, so the declared
+  // VAT / GST number is now checked against the official register. The check
+  // fails closed: a timeout or outage leaves the application unverified rather
+  // than quietly passing it through.
+  let registry: {
+    checked: boolean;
+    verified: boolean;
+    source: string;
+    registered_name?: string | null;
+    registered_address?: string | null;
+    reason?: string;
+    tax_id?: string;
+  } = { checked: false, verified: false, source: "not_provided" };
+
+  if (app.tax_vat_id) {
+    const result = await verifyVatNumber(String(app.tax_vat_id), app.country);
+    registry = {
+      checked: true,
+      verified: result.valid,
+      source: result.source,
+      registered_name: result.name ?? null,
+      registered_address: result.address ?? null,
+      reason: result.reason,
+      tax_id: result.taxId,
+    };
+    if (!result.valid) {
+      fraudFlags.push({
+        code: result.source === "unavailable" ? "registry_unavailable" : "registry_mismatch",
+        detail:
+          result.source === "unavailable"
+            ? `The official register could not confirm ${result.taxId} (${result.reason || "no response"}). Treated as unverified.`
+            : `${result.taxId} is not an active registration in the official register.`,
+      });
+    } else if (result.name && app.company_name) {
+      // Registered name must resemble the declared trading name.
+      const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const a = norm(result.name);
+      const b = norm(String(app.company_name));
+      if (a && b && !a.includes(b) && !b.includes(a)) {
+        fraudFlags.push({
+          code: "registry_name_mismatch",
+          detail: `The register lists "${result.name}" for ${result.taxId}, not "${app.company_name}".`,
+        });
+      }
+    }
+  }
   let credentialSha: string | null = null;
   let duplicateOf: string | null = null;
   if (app.credential_document_path) {
@@ -753,6 +803,9 @@ Be conservative: if the website is unreachable, password-protected or the eviden
       verification_fingerprint: evidenceFingerprint,
       credential_sha256: credentialSha,
       credential_duplicate_of: duplicateOf,
+      registry_verified: registry.verified,
+      registry_verification: registry,
+      registry_checked_at: registry.checked ? new Date().toISOString() : null,
       fraud_flags: fraudFlags,
       ...(alreadyAlerted ? {} : { last_flag_alert_fingerprint: evidenceFingerprint }),
       ai_result: {
@@ -765,6 +818,7 @@ Be conservative: if the website is unreachable, password-protected or the eviden
         identifier_warnings: malformed.length,
         fraud_flags: fraudFlags,
         screening_only: true,
+        registry_verification: registry,
       },
       ai_verified_at: new Date().toISOString(),
     })

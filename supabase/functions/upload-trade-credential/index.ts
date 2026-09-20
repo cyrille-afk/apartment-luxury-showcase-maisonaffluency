@@ -13,6 +13,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { sha256Hex, verifyFileSignature } from "../_shared/fileSignature.ts";
+import { isBlockingVerdict, scanActiveContent } from "../_shared/activeContentScan.ts";
 
 const MAX_BYTES = 15 * 1024 * 1024; // 15 MB
 const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
@@ -128,6 +129,24 @@ Deno.serve(async (req) => {
     return json({ error: verdict.reason }, 415);
   }
 
+  // ── Active-content screening ─────────────────────────────────────────────
+  // A structurally valid PDF can still run JavaScript, fire an /OpenAction or
+  // carry an embedded payload the moment a reviewer opens it. Weaponised
+  // documents are refused outright; anything unscannable or merely suspicious
+  // is stored in quarantine so nobody downloads it before a decision.
+  const scan = scanActiveContent(bytes, verdict.mime);
+  if (isBlockingVerdict(scan)) {
+    await logAttempt(false, `active_content:${scan.flags.join(",")}`);
+    return json(
+      {
+        error:
+          "This document contains active content (scripts or embedded files) and cannot be accepted. Please upload a flattened PDF or an image export.",
+        flags: scan.flags,
+      },
+      415,
+    );
+  }
+
   // ── Duplicate / recycled document heuristic ──────────────────────────────
   const sha256 = await sha256Hex(bytes);
   const { data: priorRows } = await admin
@@ -160,6 +179,9 @@ Deno.serve(async (req) => {
       email_domain: emailDomain,
       ip_hash: ipHash,
       duplicate_of: prior?.id ?? null,
+      active_content_flags: scan.flags,
+      quarantined: scan.severity !== "clean",
+      scan_verdict: { severity: scan.severity, reasons: scan.reasons },
     })
     .select("id")
     .maybeSingle();
@@ -176,5 +198,7 @@ Deno.serve(async (req) => {
     duplicate: !!prior,
     duplicateOf: prior?.id ?? null,
     signatureNote: verdict.note || null,
+    quarantined: scan.severity !== "clean",
+    activeContentFlags: scan.flags,
   });
 });

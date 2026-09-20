@@ -2199,6 +2199,69 @@ export type Database = {
         }
         Relationships: []
       }
+      data_subject_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          details: string | null
+          due_at: string
+          email: string
+          erased_tables: Json | null
+          export_storage_path: string | null
+          fulfilled_at: string | null
+          fulfilled_by: string | null
+          id: string
+          ip_hash: string | null
+          request_type: string
+          requested_at: string
+          status: string
+          updated_at: string
+          user_id: string | null
+          verification_token_hash: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          details?: string | null
+          due_at?: string
+          email: string
+          erased_tables?: Json | null
+          export_storage_path?: string | null
+          fulfilled_at?: string | null
+          fulfilled_by?: string | null
+          id?: string
+          ip_hash?: string | null
+          request_type: string
+          requested_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          verification_token_hash?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          details?: string | null
+          due_at?: string
+          email?: string
+          erased_tables?: Json | null
+          export_storage_path?: string | null
+          fulfilled_at?: string | null
+          fulfilled_by?: string | null
+          id?: string
+          ip_hash?: string | null
+          request_type?: string
+          requested_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          verification_token_hash?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       descriptor_taxonomy: {
         Row: {
           category: string
@@ -7549,6 +7612,9 @@ export type Database = {
           message: string | null
           next_retry_at: string | null
           region_tier: Database["public"]["Enums"]["region_tier"]
+          registry_checked_at: string | null
+          registry_verification: Json | null
+          registry_verified: boolean
           reviewed_at: string | null
           reviewed_by: string | null
           status: Database["public"]["Enums"]["trade_application_status"]
@@ -7594,6 +7660,9 @@ export type Database = {
           message?: string | null
           next_retry_at?: string | null
           region_tier?: Database["public"]["Enums"]["region_tier"]
+          registry_checked_at?: string | null
+          registry_verification?: Json | null
+          registry_verified?: boolean
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["trade_application_status"]
@@ -7639,6 +7708,9 @@ export type Database = {
           message?: string | null
           next_retry_at?: string | null
           region_tier?: Database["public"]["Enums"]["region_tier"]
+          registry_checked_at?: string | null
+          registry_verification?: Json | null
+          registry_verified?: boolean
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["trade_application_status"]
@@ -7773,6 +7845,7 @@ export type Database = {
       }
       trade_credential_documents: {
         Row: {
+          active_content_flags: string[]
           application_id: string | null
           byte_size: number | null
           created_at: string
@@ -7783,11 +7856,14 @@ export type Database = {
           ip_hash: string | null
           mime_type: string | null
           purge_after: string | null
+          quarantined: boolean
+          scan_verdict: Json | null
           sha256: string
           storage_path: string
           user_id: string | null
         }
         Insert: {
+          active_content_flags?: string[]
           application_id?: string | null
           byte_size?: number | null
           created_at?: string
@@ -7798,11 +7874,14 @@ export type Database = {
           ip_hash?: string | null
           mime_type?: string | null
           purge_after?: string | null
+          quarantined?: boolean
+          scan_verdict?: Json | null
           sha256: string
           storage_path: string
           user_id?: string | null
         }
         Update: {
+          active_content_flags?: string[]
           application_id?: string | null
           byte_size?: number | null
           created_at?: string
@@ -7813,6 +7892,8 @@ export type Database = {
           ip_hash?: string | null
           mime_type?: string | null
           purge_after?: string | null
+          quarantined?: boolean
+          scan_verdict?: Json | null
           sha256?: string
           storage_path?: string
           user_id?: string | null

@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import DataRightsRequest from "@/components/privacy/DataRightsRequest";
 
 const PrivacyPolicy = () => {
   return (
@@ -139,9 +140,10 @@ const PrivacyPolicy = () => {
                 </li>
               </ul>
               <p className="mt-3">
-                To exercise any of your data rights, please submit a formal request to our compliance queue at{" "}
-                <a href="mailto:privacy@maisonaffluency.com" className="text-primary hover:underline">privacy@maisonaffluency.com</a>. Our legal desk will respond and execute your verification requests within 30 days.
+                You can submit a formal request below, or write to{" "}
+                <a href="mailto:privacy@maisonaffluency.com" className="text-primary hover:underline">privacy@maisonaffluency.com</a>. Every request is logged with a statutory 30-day deadline and answered by our compliance desk.
               </p>
+              <DataRightsRequest />
             </section>
           </div>
 
