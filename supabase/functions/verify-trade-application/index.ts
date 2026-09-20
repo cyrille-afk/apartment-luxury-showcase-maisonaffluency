@@ -28,6 +28,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { sendAdminWhatsApp } from "../_shared/twilioWhatsAppSender.ts";
 import { sha256Hex, verifyFileSignature } from "../_shared/fileSignature.ts";
 import { screenDocumentMetadata } from "./fraudScreen.ts";
+import { verifyVatNumber } from "../_shared/vatValidation.ts";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 // Stage 1 — fast, cost-effective multimodal parse of the credential document.
