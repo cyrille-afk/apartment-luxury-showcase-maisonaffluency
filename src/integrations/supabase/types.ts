@@ -6663,11 +6663,15 @@ export type Database = {
       }
       shop_orders: {
         Row: {
+          budget_approved_at: string | null
           buyer_tax_country: string | null
           buyer_tax_id: string | null
           buyer_type: string | null
+          company_name: string | null
+          company_registration_number: string | null
           created_at: string
           currency: string
+          customer_po_number: string | null
           customs_statement: string | null
           ddp_handling_cents: number
           deferred_import_cents: number
@@ -6692,6 +6696,8 @@ export type Database = {
           payment_method: string
           payment_receipt_path: string | null
           phone: string | null
+          po_payment_terms: string | null
+          po_review_status: string | null
           proforma_invoice_path: string | null
           region_tier: string | null
           shipping_address: string | null
@@ -6710,11 +6716,15 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          budget_approved_at?: string | null
           buyer_tax_country?: string | null
           buyer_tax_id?: string | null
           buyer_type?: string | null
+          company_name?: string | null
+          company_registration_number?: string | null
           created_at?: string
           currency?: string
+          customer_po_number?: string | null
           customs_statement?: string | null
           ddp_handling_cents?: number
           deferred_import_cents?: number
@@ -6739,6 +6749,8 @@ export type Database = {
           payment_method?: string
           payment_receipt_path?: string | null
           phone?: string | null
+          po_payment_terms?: string | null
+          po_review_status?: string | null
           proforma_invoice_path?: string | null
           region_tier?: string | null
           shipping_address?: string | null
@@ -6757,11 +6769,15 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          budget_approved_at?: string | null
           buyer_tax_country?: string | null
           buyer_tax_id?: string | null
           buyer_type?: string | null
+          company_name?: string | null
+          company_registration_number?: string | null
           created_at?: string
           currency?: string
+          customer_po_number?: string | null
           customs_statement?: string | null
           ddp_handling_cents?: number
           deferred_import_cents?: number
@@ -6786,6 +6802,8 @@ export type Database = {
           payment_method?: string
           payment_receipt_path?: string | null
           phone?: string | null
+          po_payment_terms?: string | null
+          po_review_status?: string | null
           proforma_invoice_path?: string | null
           region_tier?: string | null
           shipping_address?: string | null
