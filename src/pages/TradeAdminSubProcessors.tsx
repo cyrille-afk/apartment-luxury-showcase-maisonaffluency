@@ -436,6 +436,25 @@ const TradeAdminSubProcessors = () => {
                   {row.dpa_reference && (
                     <p className="mt-1 text-[0.65rem] text-muted-foreground">{row.dpa_reference}</p>
                   )}
+                  {row.signed_dpa_path && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 h-7 px-2 text-[0.65rem]"
+                      disabled={downloading === row.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void openAgreement(row);
+                      }}
+                    >
+                      {downloading === row.id ? (
+                        <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
+                      ) : (
+                        <Download className="mr-1.5 h-3 w-3" />
+                      )}
+                      Signed PDF
+                    </Button>
+                  )}
                 </td>
                 <td className="px-5 py-4 align-top text-xs">
                   <span className={isStale(row.last_reviewed_at) ? "text-destructive" : "text-muted-foreground"}>
