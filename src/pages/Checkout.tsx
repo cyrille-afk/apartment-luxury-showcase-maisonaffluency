@@ -208,6 +208,20 @@ export type CheckoutSummary = {
   taxStatement: string;
   /** Buyer's own VAT/GST registration, when valid for the destination. */
   buyerTaxId: string | null;
+  /** True only when VIES / HMRC confirmed that registration. */
+  buyerTaxIdVerified: boolean;
+  /** Our identifier stamped on the invoice for this routing (UEN/VAT/IOSS). */
+  merchantTaxIdentifier: string | null;
+  /** True when the consignment must be tendered to the carrier as DDP. */
+  requiresDdpClearance: boolean;
+  /** Flat carrier customs-clearance fee charged on DDP consignments. */
+  clearanceFeeCents: number;
+  /** Ad-valorem duty estimated from the HS6 manifest. */
+  estimatedDutyCents: number;
+  /** ISO-2 country the consignment ships from, when resolvable. */
+  shipFromCountry: string | null;
+  /** Per-line customs manifest sent to the server and stored on the order. */
+  customsLines: CustomsLine[];
   /** Delivery shown in the summary: confirmed freight, else the estimate. */
   deliveryCents: number;
   /** THE Order Total: goods − discount + delivery + tax. Used by every UI block. */
