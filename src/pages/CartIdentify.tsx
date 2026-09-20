@@ -26,6 +26,11 @@ import {
 } from "@/lib/cart";
 import { setCartContact } from "@/lib/cartTracking";
 import { clearSecureBasket } from "@/lib/checkout/secureBasket";
+import { evaluateAllocation } from "@/config/tradeGuardrails";
+import {
+  AllocationInquiryDialog,
+  type AllocationInquiryLine,
+} from "@/components/cart/AllocationInquiryDialog";
 
 type Method = "card" | "bank_transfer";
 
@@ -99,8 +104,52 @@ export default function CartIdentify() {
   const orderTotal = discount.totalFor(subtotal) + freightEstimate.cents;
 
 
+  // Allocation reserve gate — restricted pieces cannot be swept at checkout.
+  const [allocationBreaches, setAllocationBreaches] = useState<AllocationInquiryLine[]>([]);
+  const [allocationOpen, setAllocationOpen] = useState(false);
+  const [allocationContact, setAllocationContact] = useState<{ email?: string; name?: string }>({});
+
+  const allocationBlocked = async (contactEmail?: string, fullName?: string) => {
+    const pickIds = Array.from(new Set(items.map((i: CartItem) => i.pickId).filter(Boolean)));
+    if (!pickIds.length) return false;
+    const { data } = await supabase
+      .from("trade_products_public_rrp")
+      .select("id, source_pick_id, is_allocation_restricted, allocation_unit_cap, available_stock_units")
+      .or(pickIds.map((id) => `source_pick_id.eq.${id},id.eq.${id}`).join(","));
+    const rules = new Map<string, any>();
+    for (const row of (data ?? []) as any[]) {
+      if (row.source_pick_id) rules.set(String(row.source_pick_id), row);
+      if (row.id) rules.set(String(row.id), row);
+    }
+    const decision = evaluateAllocation(
+      items.map((i: CartItem) => {
+        const rule = rules.get(String(i.pickId));
+        return {
+          pickId: String(i.pickId),
+          title: i.title,
+          quantity: i.quantity,
+          isAllocationRestricted: rule?.is_allocation_restricted ?? false,
+          allocationUnitCap: rule?.allocation_unit_cap ?? null,
+          availableStockUnits: rule?.available_stock_units ?? null,
+        };
+      }),
+    );
+    if (decision.cleared) return false;
+    setAllocationBreaches(
+      decision.breaches.map((b) => {
+        const line = items.find((i: CartItem) => String(i.pickId) === b.pickId);
+        return { ...b, designerName: line?.designerName ?? null, finishLabel: line?.finishLabel ?? null };
+      }),
+    );
+    setAllocationContact({ email: contactEmail ?? user?.email ?? undefined, name: fullName });
+    setAllocationOpen(true);
+    toast.message(decision.message || "This piece is held under allocation.");
+    return true;
+  };
+
   const startCheckout = async (contactEmail?: string, fullName?: string) => {
     if (!items.length) return;
+    if (await allocationBlocked(contactEmail, fullName)) return;
     // Remember who this basket belongs to so it can be recovered if abandoned.
     setCartContact(contactEmail ?? user?.email ?? null, fullName ?? null);
     // Card payments use the branded in-page checkout (/checkout) so the
@@ -152,6 +201,10 @@ export default function CartIdentify() {
         },
       });
       if (error) throw error;
+      if ((data as any)?.code === "allocation_inquiry_required") {
+        await allocationBlocked(contactEmail, fullName);
+        return;
+      }
       if ((data as any)?.error) throw new Error((data as any).error);
       clearCart();
       clearSecureBasket("order");
