@@ -6668,12 +6668,20 @@ export type Database = {
           buyer_type: string | null
           created_at: string
           currency: string
+          customs_statement: string | null
+          ddp_handling_cents: number
+          deferred_import_cents: number
+          delivery_term: string | null
           discount_cents: number
           discount_label: string | null
           discount_pct: number
           email: string | null
           full_name: string | null
           id: string
+          import_clearance_cents: number
+          import_duty_cents: number
+          import_tax_cents: number
+          import_total_cents: number
           marked_paid_by: string | null
           merchant_tax_registration: string | null
           notes: string | null
@@ -6688,6 +6696,7 @@ export type Database = {
           region_tier: string | null
           shipping_address: string | null
           shipping_cents: number
+          shipping_country: string | null
           status: string
           stripe_session_id: string | null
           subtotal_cents: number
@@ -6706,12 +6715,20 @@ export type Database = {
           buyer_type?: string | null
           created_at?: string
           currency?: string
+          customs_statement?: string | null
+          ddp_handling_cents?: number
+          deferred_import_cents?: number
+          delivery_term?: string | null
           discount_cents?: number
           discount_label?: string | null
           discount_pct?: number
           email?: string | null
           full_name?: string | null
           id?: string
+          import_clearance_cents?: number
+          import_duty_cents?: number
+          import_tax_cents?: number
+          import_total_cents?: number
           marked_paid_by?: string | null
           merchant_tax_registration?: string | null
           notes?: string | null
@@ -6726,6 +6743,7 @@ export type Database = {
           region_tier?: string | null
           shipping_address?: string | null
           shipping_cents?: number
+          shipping_country?: string | null
           status?: string
           stripe_session_id?: string | null
           subtotal_cents?: number
@@ -6744,12 +6762,20 @@ export type Database = {
           buyer_type?: string | null
           created_at?: string
           currency?: string
+          customs_statement?: string | null
+          ddp_handling_cents?: number
+          deferred_import_cents?: number
+          delivery_term?: string | null
           discount_cents?: number
           discount_label?: string | null
           discount_pct?: number
           email?: string | null
           full_name?: string | null
           id?: string
+          import_clearance_cents?: number
+          import_duty_cents?: number
+          import_tax_cents?: number
+          import_total_cents?: number
           marked_paid_by?: string | null
           merchant_tax_registration?: string | null
           notes?: string | null
@@ -6764,6 +6790,7 @@ export type Database = {
           region_tier?: string | null
           shipping_address?: string | null
           shipping_cents?: number
+          shipping_country?: string | null
           status?: string
           stripe_session_id?: string | null
           subtotal_cents?: number
