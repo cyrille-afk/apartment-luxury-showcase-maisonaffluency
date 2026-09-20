@@ -1,0 +1,1 @@
+create unique index if not exists product_embeddings_product_id_uniq on public.product_embeddings(product_id);
