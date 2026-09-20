@@ -46,6 +46,55 @@ const fmtDate = (iso: string | null) =>
     ? new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
     : "—";
 
+const GENERIC_EMAIL_PREFIXES = new Set([
+  "admin",
+  "info",
+  "contact",
+  "hello",
+  "support",
+  "sales",
+  "enquiries",
+  "enquiry",
+  "inquiries",
+  "inquiry",
+  "mail",
+  "office",
+  "team",
+  "studio",
+  "press",
+  "media",
+  "marketing",
+  "partnerships",
+  "reception",
+  "general",
+  "enquire",
+  "service",
+  "services",
+  "booking",
+  "reservations",
+  "reservation",
+  "frontdesk",
+  "front",
+  "main",
+  "info.sg",
+  "enquiries.sg",
+  "enquiry.sg",
+  "inquiries.sg",
+  "inquiry.sg",
+]);
+
+const isGenericEmail = (email: string): boolean => {
+  const local = email.split("@")[0]?.toLowerCase().trim() ?? "";
+  return GENERIC_EMAIL_PREFIXES.has(local);
+};
+
+const outreachVector = (lead: Lead): "instagram" | "resend" => {
+  const directEmails = (lead.executive_emails ?? []).filter((e) => !isGenericEmail(e));
+  if (directEmails.length > 0) return "resend";
+  if (lead.business_email && !isGenericEmail(lead.business_email)) return "resend";
+  return "instagram";
+};
+
 const TradeAdminAcquisitions = () => {
   const { user, isAdmin, loading } = useAuth();
   const queryClient = useQueryClient();
