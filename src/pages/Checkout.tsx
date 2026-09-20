@@ -2102,13 +2102,20 @@ export default function Checkout() {
       taxTreatment: treatment.treatment,
       taxStatement: treatment.statement,
       buyerTaxId: treatment.buyerTaxId,
+      buyerTaxIdVerified: treatment.buyerTaxIdVerified,
+      merchantTaxIdentifier: treatment.merchantTaxIdentifier,
+      requiresDdpClearance: treatment.requiresDdpClearance,
+      clearanceFeeCents: treatment.clearanceFeeCents,
+      estimatedDutyCents: treatment.dutyCents,
+      shipFromCountry: treatment.shipFromCountry,
+      customsLines,
       deliveryCents: totals.deliveryCents,
       totalCents: totals.totalCents,
       displayTotalCents: totals.displayTotalCents,
       chargeTotalCents: totals.chargeTotalCents,
     };
 
-  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, estimate.capped, estimate.notice, estimate.ddpHandlingCents, estimate.incotermSelectable, estimate.landed, incoterm, formCountry, serverTax, buyerType, buyerGstNumber]);
+  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, estimate.capped, estimate.notice, estimate.ddpHandlingCents, estimate.incotermSelectable, estimate.landed, incoterm, formCountry, serverTax, buyerType, buyerGstNumber, vatCheck.verified]);
 
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
