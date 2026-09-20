@@ -97,4 +97,4 @@ Allow: /
 User-agent: cohere-ai
 Disallow: /
 
-Sitemap: https://maisonaffluency.com/sitemap.xml
+Sitemap: https://www.maisonaffluency.com/sitemap.xml

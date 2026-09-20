@@ -31,17 +31,17 @@ Collectible furniture, lighting, decorative objects, bespoke interiors, contempo
 
 ## Pages
 
-- [Home](https://maisonaffluency.com): Curated luxury collectible design gallery in Singapore.
-- [Designers & Ateliers](https://maisonaffluency.com/designers): Directory of featured designers, makers, and ateliers.
-- [Collectibles](https://maisonaffluency.com/collectibles): Museum-grade collectible furniture and objects.
-- [Gallery](https://maisonaffluency.com/gallery): Curated apartment showcase rooms and vignettes.
-- [Apartment Tour](https://maisonaffluency.com/apartment-tour): Virtual walkthrough of the Singapore showroom.
-- [New In](https://maisonaffluency.com/new-in): Latest additions to the catalogue.
-- [Journal](https://maisonaffluency.com/journal): Editorials, designer interviews, and collection stories.
-- [Studios](https://maisonaffluency.com/studios): Featured interior design studios and projects.
-- [Trade Program](https://maisonaffluency.com/trade-program): B2B programme for architects and interior designers.
-- [Trade Registration](https://maisonaffluency.com/trade/register): Apply for trade access.
-- [Contact](https://maisonaffluency.com/contact): Inquiries, appointments, and concierge.
+- [Home](https://www.maisonaffluency.com): Curated luxury collectible design gallery in Singapore.
+- [Designers & Ateliers](https://www.maisonaffluency.com/designers): Directory of featured designers, makers, and ateliers.
+- [Collectibles](https://www.maisonaffluency.com/collectibles): Museum-grade collectible furniture and objects.
+- [Gallery](https://www.maisonaffluency.com/gallery): Curated apartment showcase rooms and vignettes.
+- [Apartment Tour](https://www.maisonaffluency.com/apartment-tour): Virtual walkthrough of the Singapore showroom.
+- [New In](https://www.maisonaffluency.com/new-in): Latest additions to the catalogue.
+- [Journal](https://www.maisonaffluency.com/journal): Editorials, designer interviews, and collection stories.
+- [Studios](https://www.maisonaffluency.com/studios): Featured interior design studios and projects.
+- [Trade Program](https://www.maisonaffluency.com/trade-program): B2B programme for architects and interior designers.
+- [Trade Registration](https://www.maisonaffluency.com/trade/register): Apply for trade access.
+- [Contact](https://www.maisonaffluency.com/contact): Inquiries, appointments, and concierge.
 
 ## Social
 

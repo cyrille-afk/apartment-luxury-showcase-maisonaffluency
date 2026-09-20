@@ -14,7 +14,7 @@ banner, mobile bottom bar). iOS caches the manifest at install time, so
 ### 1. Reinstall the app on iPhone
 
 1. Long-press the **Maison Affluency** icon on the Home Screen → **Remove App** → **Delete from Home Screen**.
-2. Open **Safari** (not Chrome) and go to `https://maisonaffluency.com`.
+2. Open **Safari** (not Chrome) and go to `https://www.maisonaffluency.com`.
    - Important: the Lovable preview URL won't reflect manifest changes — only the live domain does.
 3. Fully reload: tap the address bar → pull down to refresh, or close and reopen the Safari tab.
 4. Tap the **Share** icon (square with arrow ↑) at the bottom.
@@ -55,7 +55,7 @@ to see theme-color, display mode, or icon changes.
 ### 1. Reinstall on Android
 
 1. Long-press the **Maison Affluency** icon on the home screen → **Remove** (or drag to "Uninstall").
-2. Open **Chrome** and go to `https://maisonaffluency.com`.
+2. Open **Chrome** and go to `https://www.maisonaffluency.com`.
    - The Lovable preview URL won't reflect manifest changes — only the live domain does.
 3. Pull down to refresh, or tap the **⋮ menu** → **Reload**.
 4. Tap **⋮ menu** → **Add to Home screen** → **Add** (or **Install** if Chrome shows an app install prompt).

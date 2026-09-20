@@ -81,7 +81,7 @@ describe("Biography PDF footer URL", () => {
     // Mirror EXACTLY the expression used in PublicDesignerProfile.tsx
     // so a regression there (e.g. reverting to window.location.href)
     // would also be caught by changing the source of truth here.
-    const profileUrl = `https://maisonaffluency.com${window.location.pathname}`;
+    const profileUrl = `https://www.maisonaffluency.com${window.location.pathname}`;
 
     render(
       <BiographyPdfButton
@@ -103,7 +103,7 @@ describe("Biography PDF footer URL", () => {
     expect(args.profileUrl).toBeDefined();
     // Canonical host is the apex domain — www. was retired in the domain unification.
     expect(args.profileUrl).toMatch(/^https:\/\/maisonaffluency\.com\//);
-    expect(args.profileUrl).toBe("https://maisonaffluency.com/designers/thierry-lemaire");
+    expect(args.profileUrl).toBe("https://www.maisonaffluency.com/designers/thierry-lemaire");
 
     // Hard guard: nothing in the payload may leak the preview hostname.
     const serialized = JSON.stringify(args);
@@ -115,8 +115,8 @@ describe("Biography PDF footer URL", () => {
     // This is a pure-logic assertion of the expression PublicDesignerProfile uses.
     // If anyone changes that expression to `window.location.href` or
     // `window.location.origin + pathname`, this assertion fails.
-    const derived = `https://maisonaffluency.com${typeof window !== "undefined" ? window.location.pathname : ""}`;
-    expect(derived).toBe("https://maisonaffluency.com/designers/thierry-lemaire");
+    const derived = `https://www.maisonaffluency.com${typeof window !== "undefined" ? window.location.pathname : ""}`;
+    expect(derived).toBe("https://www.maisonaffluency.com/designers/thierry-lemaire");
     expect(derived).not.toContain("lovable.app");
     expect(derived).not.toContain(window.location.hostname);
   });

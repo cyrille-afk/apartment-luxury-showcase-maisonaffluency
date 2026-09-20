@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SITE_URL = "https://maisonaffluency.com";
+const SITE_URL = "https://www.maisonaffluency.com";
 const TRADE_LANDING_PATH = "/trade/landing";
 
 serve(async (req) => {

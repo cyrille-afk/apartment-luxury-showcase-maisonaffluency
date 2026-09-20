@@ -18,7 +18,7 @@ export default function CategorySeo({ category, subcategory, categorySlug, subca
   const path = subcategorySlug
     ? `/products-category/${categorySlug}/${subcategorySlug}`
     : `/products-category/${categorySlug}`;
-  const canonical = `https://maisonaffluency.com${path}`;
+  const canonical = `https://www.maisonaffluency.com${path}`;
   const title = `${label} — Maison Affluency`;
   const description = subcategory
     ? `Explore curated ${subcategory.toLowerCase()} from world-renowned designers and ateliers — collectible ${category.toLowerCase()} at Maison Affluency.`
@@ -30,15 +30,15 @@ export default function CategorySeo({ category, subcategory, categorySlug, subca
     name: title,
     description,
     url: canonical,
-    isPartOf: { "@type": "WebSite", name: "Maison Affluency", url: "https://maisonaffluency.com" },
+    isPartOf: { "@type": "WebSite", name: "Maison Affluency", url: "https://www.maisonaffluency.com" },
   };
 
   const crumbsLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://maisonaffluency.com" },
-      { "@type": "ListItem", position: 2, name: category, item: `https://maisonaffluency.com/products-category/${categorySlug}` },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.maisonaffluency.com" },
+      { "@type": "ListItem", position: 2, name: category, item: `https://www.maisonaffluency.com/products-category/${categorySlug}` },
       ...(subcategory && subcategorySlug
         ? [{ "@type": "ListItem", position: 3, name: subcategory, item: canonical }]
         : []),

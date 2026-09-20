@@ -126,7 +126,7 @@ export const template = {
     currency: 'SGD',
     totalFormatted: '42,180.00',
     channelLabel: 'Corporate PayNow',
-    downloadUrl: 'https://maisonaffluency.com',
+    downloadUrl: 'https://www.maisonaffluency.com',
   },
 } satisfies TemplateEntry
 

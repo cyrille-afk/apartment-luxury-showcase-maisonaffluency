@@ -137,7 +137,7 @@ const CommissionStatementEmail = ({
         </Text>
 
         <Section style={buttonSection}>
-          <Button style={button} href={`https://maisonaffluency.com/trade/orders`}>
+          <Button style={button} href={`https://www.maisonaffluency.com/trade/orders`}>
             View Order Timeline
           </Button>
         </Section>

@@ -155,7 +155,7 @@ async function renderSnapshot(url, env) {
   try {
     const page = await browser.newPage();
     await page.setUserAgent(
-      "Mozilla/5.0 (compatible; MaisonAffluencyPrerender/1.0; +https://maisonaffluency.com)"
+      "Mozilla/5.0 (compatible; MaisonAffluencyPrerender/1.0; +https://www.maisonaffluency.com)"
     );
     // Block heavy assets we don't need in the snapshot — speeds up render and
     // reduces Browser Rendering minutes.

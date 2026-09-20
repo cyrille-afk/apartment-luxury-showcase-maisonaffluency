@@ -64,7 +64,7 @@ const Email = ({ name }: Props) => (
         </table>
 
         <Section style={buttonSection}>
-          <Button style={button} href="https://maisonaffluency.com/designers">
+          <Button style={button} href="https://www.maisonaffluency.com/designers">
             Explore the Collection
           </Button>
         </Section>

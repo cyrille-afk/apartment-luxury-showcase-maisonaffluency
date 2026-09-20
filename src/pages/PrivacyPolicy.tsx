@@ -11,7 +11,7 @@ const PrivacyPolicy = () => {
         <meta name="description" content="Privacy and Cookie Policy for Maison Affluency — how we collect, use, and protect your personal and corporate data." />
         <meta property="og:title" content="Privacy & Cookie Policy — Maison Affluency" />
         <meta property="og:description" content="How Maison Affluency collects, uses and protects your personal and corporate data." />
-        <meta property="og:url" content="https://maisonaffluency.com/privacy" />
+        <meta property="og:url" content="https://www.maisonaffluency.com/privacy" />
         <meta property="og:type" content="website" />
       </Helmet>
 

@@ -567,7 +567,7 @@ const TradeLanding = () => {
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:alt" content="Maison Affluency Trade Program" />
-        <meta property="og:url" content="https://maisonaffluency.com/trade-program" />
+        <meta property="og:url" content="https://www.maisonaffluency.com/trade-program" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Trade Program — Maison Affluency" />
         <meta name="twitter:description" content="Join Maison Affluency's Trade Program for architects and interior designers — exclusive pricing, dedicated advisors, custom sourcing, and insured shipping." />
@@ -576,7 +576,7 @@ const TradeLanding = () => {
           "@context": "https://schema.org",
           "@type": "WebPage",
           "name": "Trade Program — Maison Affluency",
-          "url": "https://maisonaffluency.com/trade-program",
+          "url": "https://www.maisonaffluency.com/trade-program",
           "description": "Exclusive trade program for architects and interior designers offering trade pricing, dedicated client advisors, custom requests, material libraries, and consolidated insured shipping.",
           "publisher": { "@type": "Organization", "name": "Maison Affluency" },
           "mainEntity": {
@@ -585,7 +585,7 @@ const TradeLanding = () => {
             "provider": {
               "@type": "Organization",
               "name": "Maison Affluency",
-              "url": "https://maisonaffluency.com"
+              "url": "https://www.maisonaffluency.com"
             },
             "description": "B2B programme for interior designers, architects, and luxury hospitality professionals. Includes trade pricing, bespoke quotations, dedicated client advisors, custom sourcing, samples & swatches, and consolidated insured shipping.",
             "areaServed": { "@type": "Place", "name": "Asia-Pacific" },

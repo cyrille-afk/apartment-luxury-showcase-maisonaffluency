@@ -20,5 +20,5 @@ CREATE POLICY "Admins can manage competitor traffic"
 
 -- Also add a row for Maison Affluency itself (our own site)
 INSERT INTO public.competitor_galleries (name, website_url, location, region, description, scrape_status)
-VALUES ('Maison Affluency', 'https://maisonaffluency.com', 'Singapore', 'asia', 'Our own site — baseline for comparison', 'n/a')
+VALUES ('Maison Affluency', 'https://www.maisonaffluency.com', 'Singapore', 'asia', 'Our own site — baseline for comparison', 'n/a')
 ON CONFLICT DO NOTHING;

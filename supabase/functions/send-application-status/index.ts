@@ -92,7 +92,7 @@ const handler = async (req: Request): Promise<Response> => {
           You now have full access to exclusive trade pricing, our curated product library, branded quote builder, and dedicated concierge support.
         </p>
         <div style="text-align: center; margin: 32px 0;">
-          <a href="https://maisonaffluency.com/trade/login" 
+          <a href="https://www.maisonaffluency.com/trade/login" 
              style="display: inline-block; padding: 14px 32px; background-color: #1a1a1a; color: #ffffff; text-decoration: none; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; border-radius: 24px;">
             Access Your Trade Portal
           </a>

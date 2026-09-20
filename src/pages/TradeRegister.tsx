@@ -185,7 +185,7 @@ const TradeRegister = () => {
         <meta property="og:title" content={isPublicSignup ? "Create Account — Maison Affluency" : "Apply — Trade Program — Maison Affluency"} />
         <meta property="og:description" content={isPublicSignup ? "Browse curators' picks, save favourites, and download spec sheets." : "Register for exclusive trade pricing and dedicated support for design professionals."} />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://maisonaffluency.com/trade/register" />
+        <meta property="og:url" content="https://www.maisonaffluency.com/trade/register" />
         <meta property="og:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772600100/IMG_3387_1_p1mhex" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="robots" content="index, follow" />

@@ -2221,8 +2221,8 @@ const FeaturedDesigners = () => {
                 their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture.
               </p>
               <ShareMenu
-                url={withOgCacheBust("https://maisonaffluency.com/designers-og.html")}
-                message={`Designers & Makers On View — Maison Affluency: ${withOgCacheBust("https://maisonaffluency.com/designers-og.html")}`}
+                url={withOgCacheBust("https://www.maisonaffluency.com/designers-og.html")}
+                message={`Designers & Makers On View — Maison Affluency: ${withOgCacheBust("https://www.maisonaffluency.com/designers-og.html")}`}
               />
             </div>
           </div>

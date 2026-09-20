@@ -26,7 +26,7 @@ const TradeApply = () => {
           property="og:description"
           content="Register for exclusive trade pricing and dedicated support for design professionals."
         />
-        <meta property="og:url" content="https://maisonaffluency.com/trade/apply" />
+        <meta property="og:url" content="https://www.maisonaffluency.com/trade/apply" />
         <meta property="og:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772600100/IMG_3387_1_p1mhex" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>

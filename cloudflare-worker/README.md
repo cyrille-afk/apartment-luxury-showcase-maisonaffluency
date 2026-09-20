@@ -87,7 +87,7 @@ After deploy, run the same crawler-UA curl from before:
 ```bash
 for url in "/" "/designers" "/journal" "/designers/alexander-lamont" "/journal/thierry-lemaire-radical-simplicity"; do
   echo "=== $url ==="
-  curl -sA "Googlebot" -D- "https://maisonaffluency.com$url" -o /tmp/snap.html
+  curl -sA "Googlebot" -D- "https://www.maisonaffluency.com$url" -o /tmp/snap.html
   grep -oE '<title>[^<]*</title>' /tmp/snap.html | head -1
   grep -c '<div id="root">' /tmp/snap.html
 done
@@ -105,7 +105,7 @@ Sanity check that real users still pass through:
 
 ```bash
 curl -sA "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)" -D- \
-  "https://maisonaffluency.com/" -o /dev/null | grep -i x-prerender
+  "https://www.maisonaffluency.com/" -o /dev/null | grep -i x-prerender
 # Should print nothing — real users bypass the renderer.
 ```
 

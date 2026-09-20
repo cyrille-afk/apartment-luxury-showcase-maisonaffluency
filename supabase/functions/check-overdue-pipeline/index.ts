@@ -122,7 +122,7 @@ serve(async (req: Request) => {
             <tbody>${articleRows}</tbody>
           </table>
           <div style="margin-top:24px;text-align:center;">
-            <a href="https://maisonaffluency.com/trade/journal" style="display:inline-block;padding:10px 28px;background:#1a202c;color:#ffffff;text-decoration:none;font-size:13px;font-weight:600;border-radius:24px;letter-spacing:0.5px;">Open Editorial Pipeline</a>
+            <a href="https://www.maisonaffluency.com/trade/journal" style="display:inline-block;padding:10px 28px;background:#1a202c;color:#ffffff;text-decoration:none;font-size:13px;font-weight:600;border-radius:24px;letter-spacing:0.5px;">Open Editorial Pipeline</a>
           </div>
         </div>
         <div style="padding:16px 24px;border-top:1px solid #edf2f7;">

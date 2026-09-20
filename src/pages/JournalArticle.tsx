@@ -137,7 +137,7 @@ const JournalArticlePage = () => {
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDesc} />
         <meta property="og:type" content="article" />
-        <meta property="og:url" content={`https://maisonaffluency.com/journal/${article.slug}`} />
+        <meta property="og:url" content={`https://www.maisonaffluency.com/journal/${article.slug}`} />
         {article.cover_image_url && <meta property="og:image" content={article.cover_image_url} />}
         <meta property="article:published_time" content={article.published_at || ""} />
         <meta property="article:author" content={article.author} />
@@ -152,12 +152,12 @@ const JournalArticlePage = () => {
           "publisher": {
             "@type": "Organization",
             "name": "Maison Affluency",
-            "url": "https://maisonaffluency.com",
+            "url": "https://www.maisonaffluency.com",
             "logo": { "@type": "ImageObject", "url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1772085523/affluency-logo-icon_mpchum.jpg" },
           },
           "datePublished": article.published_at,
           "dateModified": article.updated_at,
-          "mainEntityOfPage": `https://maisonaffluency.com/journal/${article.slug}`,
+          "mainEntityOfPage": `https://www.maisonaffluency.com/journal/${article.slug}`,
           "articleSection": CATEGORY_LABELS[article.category],
           "keywords": article.tags?.join(", "),
         })}</script>
@@ -165,9 +165,9 @@ const JournalArticlePage = () => {
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           "itemListElement": [
-            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://maisonaffluency.com" },
-            { "@type": "ListItem", "position": 2, "name": "Journal", "item": "https://maisonaffluency.com/journal" },
-            { "@type": "ListItem", "position": 3, "name": article.title, "item": `https://maisonaffluency.com/journal/${article.slug}` },
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.maisonaffluency.com" },
+            { "@type": "ListItem", "position": 2, "name": "Journal", "item": "https://www.maisonaffluency.com/journal" },
+            { "@type": "ListItem", "position": 3, "name": article.title, "item": `https://www.maisonaffluency.com/journal/${article.slug}` },
           ],
         })}</script>
       </Helmet>
@@ -201,8 +201,8 @@ const JournalArticlePage = () => {
             <div className="max-w-4xl w-full mx-auto relative">
               <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4 z-10">
               <ShareMenu
-                url={`https://maisonaffluency.com/journal/${article.slug}-og.html`}
-                message={`${article.title} — Maison Affluency: https://maisonaffluency.com/journal/${article.slug}-og.html`}
+                url={`https://www.maisonaffluency.com/journal/${article.slug}-og.html`}
+                message={`${article.title} — Maison Affluency: https://www.maisonaffluency.com/journal/${article.slug}-og.html`}
                 className="flex items-center gap-1.5 bg-black/50 backdrop-blur-md text-white/90 hover:text-white px-3 py-2 rounded-full transition-colors"
                 iconSize="w-4 h-4"
                 showLabel={false}

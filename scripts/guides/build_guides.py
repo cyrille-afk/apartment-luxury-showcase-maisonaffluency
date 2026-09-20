@@ -193,7 +193,7 @@ PWA_CHECKLIST = {
             ("p", "Always test on the live <i>maisonaffluency.com</i> domain. Staging or preview environments may run inside an iframe and won't reflect manifest, theme-color or display-mode changes."),
             ("table", [
                 ("1.  Remove the existing icon", "Long-press the Maison Affluency icon on the Home Screen → <b>Remove App</b> → <b>Delete from Home Screen</b>."),
-                ("2.  Open Safari", "Not Chrome. Navigate to <i>https://maisonaffluency.com</i>."),
+                ("2.  Open Safari", "Not Chrome. Navigate to <i>https://www.maisonaffluency.com</i>."),
                 ("3.  Force a fresh load", "Pull down to refresh, or close and reopen the Safari tab."),
                 ("4.  Add to Home Screen", "Tap the <b>Share</b> icon (square with arrow ↑) → scroll to <b>Add to Home Screen</b> → <b>Add</b>."),
                 ("5.  Launch from the icon", "Open the app from the Home Screen icon, not from Safari, otherwise you'll see browser chrome."),
@@ -217,7 +217,7 @@ PWA_CHECKLIST = {
             ("p", "Android Chrome also pins the manifest at install time, so reinstall to see theme-color, display-mode or icon updates."),
             ("table", [
                 ("1.  Remove the existing icon", "Long-press the Maison Affluency icon → <b>Remove</b> (or drag to <i>Uninstall</i>)."),
-                ("2.  Open Chrome",              "Navigate to <i>https://maisonaffluency.com</i>."),
+                ("2.  Open Chrome",              "Navigate to <i>https://www.maisonaffluency.com</i>."),
                 ("3.  Force a fresh load",       "Pull down to refresh, or tap the <b>⋮ menu</b> → <b>Reload</b>."),
                 ("4.  Add to Home screen",       "Tap <b>⋮ menu</b> → <b>Add to Home screen</b> → <b>Add</b> (or <b>Install</b> if the app install prompt appears)."),
                 ("5.  Launch from the icon",     "Open the app from the home screen icon, not from a Chrome tab."),

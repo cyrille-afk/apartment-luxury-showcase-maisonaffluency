@@ -23,7 +23,7 @@ const FeaturedMagazineUpdateEmail = ({
   coverImageUrl,
   ctaUrl,
 }: FeaturedMagazineUpdateProps) => {
-  const link = ctaUrl || 'https://maisonaffluency.com/trade/landing'
+  const link = ctaUrl || 'https://www.maisonaffluency.com/trade/landing'
   return (
     <Html lang="en" dir="ltr">
       <Head />
@@ -118,7 +118,7 @@ export const template = {
     issueTitle: 'Architectural Digest US — May 2026',
     brandName: 'Architectural Digest',
     coverImageUrl: 'https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-wordmark.jpg',
-    ctaUrl: 'https://maisonaffluency.com/trade/landing',
+    ctaUrl: 'https://www.maisonaffluency.com/trade/landing',
   },
 } satisfies TemplateEntry
 

@@ -251,7 +251,7 @@ const TRADE_GATE_COPY: Record<string, { title: string; description: string; h1: 
 
 function TradePublicGate({ path }: { path: string }) {
   const copy = TRADE_GATE_COPY[path] ?? TRADE_GATE_COPY["/trade"];
-  const canonical = `https://maisonaffluency.com${path}`;
+  const canonical = `https://www.maisonaffluency.com${path}`;
 
   return (
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-4 py-16">
