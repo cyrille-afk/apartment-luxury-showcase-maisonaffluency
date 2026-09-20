@@ -1,0 +1,91 @@
+name: Provider Contract Smoke (live, un-mocked)
+
+# Guards against "ghost assertions": the mocked suites keep passing while a
+# provider (Stripe / Resend) changes a payload shape, signature scheme or
+# validation schema. This job talks to the real sandboxes on a schedule, so
+# drift surfaces here instead of in production.
+
+on:
+  schedule:
+    - cron: "0 5 * * *" # 05:00 UTC daily
+  workflow_dispatch:
+  push:
+    paths:
+      - "supabase/functions/stripe-webhook/**"
+      - "supabase/functions/_shared/lovableEmail.ts"
+      - "tests/smoke/**"
+
+concurrency:
+  group: provider-contract-smoke
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    env:
+      # Missing credentials must FAIL, never silently skip.
+      SMOKE_STRICT: "1"
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      RESEND_TEST_API_KEY: ${{ secrets.RESEND_TEST_API_KEY }}
+      RESEND_TEST_FROM: ${{ secrets.RESEND_TEST_FROM }}
+      RESEND_TEST_TO: ${{ secrets.RESEND_TEST_TO }}
+      STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
+      STRIPE_WEBHOOK_TEST_SECRET: ${{ secrets.STRIPE_WEBHOOK_TEST_SECRET }}
+      SMOKE_WEBHOOK_URL: ${{ secrets.SMOKE_WEBHOOK_URL }}
+      E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+      E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: Run live provider contract smoke
+        run: bun run test:smoke:providers
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: provider-contract-smoke-report
+          path: playwright-report
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Open an alert issue on contract drift
+        if: failure() && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = 'Provider contract smoke FAILED — Stripe/Resend drift suspected';
+            const { data: open } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'provider-drift',
+            });
+            const body = [
+              'The scheduled un-mocked provider smoke run failed.',
+              '',
+              'Likely causes: Stripe webhook signature/payload change, retired API version,',
+              'or a Resend API validation schema change. Mocked suites will still be green.',
+              '',
+              `Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            ].join('\n');
+            if (open.length) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: open[0].number, body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title, body, labels: ['provider-drift'],
+              });
+            }

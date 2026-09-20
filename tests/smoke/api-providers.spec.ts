@@ -42,8 +42,22 @@ const ADMIN_PASSWORD = env("E2E_ADMIN_PASSWORD");
 const haveResend = Boolean(RESEND_KEY?.startsWith("re_"));
 const haveStripe = Boolean(STRIPE_KEY?.startsWith("sk_test_") && STRIPE_WEBHOOK_SECRET && WEBHOOK_URL);
 
+/**
+ * SMOKE_STRICT=1 (set by the scheduled contract workflow) turns a missing
+ * credential into a hard failure instead of a silent skip. A skipped provider
+ * contract check in CI is itself a ghost assertion.
+ */
+const STRICT = env("SMOKE_STRICT") === "1" || env("SMOKE_STRICT") === "true";
+
+function requireOrSkip(have: boolean, reason: string) {
+  if (have) return;
+  if (STRICT) throw new Error(`SMOKE_STRICT: ${reason}`);
+  test.skip(true, reason);
+}
+
 test.describe("Live provider smoke — Resend", () => {
-  test.skip(!haveResend, "RESEND_TEST_API_KEY not set — live Resend smoke skipped.");
+  test.beforeAll(() => requireOrSkip(haveResend, "RESEND_TEST_API_KEY not set — live Resend smoke skipped."));
+  test.skip(!haveResend && !STRICT, "RESEND_TEST_API_KEY not set — live Resend smoke skipped.");
 
   test("test-mode receipt is accepted and returns a message id", async () => {
     const resend = new Resend(RESEND_KEY!);
@@ -75,8 +89,14 @@ test.describe("Live provider smoke — Resend", () => {
 });
 
 test.describe("Live provider smoke — Stripe signature & webhook ingestion", () => {
+  test.beforeAll(() =>
+    requireOrSkip(
+      haveStripe,
+      "STRIPE_TEST_SECRET_KEY / STRIPE_WEBHOOK_TEST_SECRET / webhook URL not set — live Stripe smoke skipped.",
+    ),
+  );
   test.skip(
-    !haveStripe,
+    !haveStripe && !STRICT,
     "STRIPE_TEST_SECRET_KEY / STRIPE_WEBHOOK_TEST_SECRET / webhook URL not set — live Stripe smoke skipped.",
   );
 
@@ -152,5 +172,30 @@ test.describe("Live provider smoke — Stripe signature & webhook ingestion", ()
     }
 
     await api.dispose();
+  });
+});
+
+test.describe("Live provider smoke — contract drift", () => {
+  test.beforeAll(() => requireOrSkip(Boolean(STRIPE_KEY), "STRIPE_TEST_SECRET_KEY not set — drift check skipped."));
+  test.skip(!STRIPE_KEY && !STRICT, "STRIPE_TEST_SECRET_KEY not set — drift check skipped.");
+
+  test("pinned Stripe API version still accepted by the live API", async () => {
+    const pinned = "2025-08-27.basil" as Stripe.LatestApiVersion;
+    const stripe = new Stripe(STRIPE_KEY!, { apiVersion: pinned });
+
+    // A real round-trip on the pinned version. If Stripe retires or breaks it,
+    // this call fails here rather than silently in production.
+    const list = await stripe.paymentIntents.list({ limit: 1 });
+    expect(Array.isArray(list.data), "unexpected payload shape from Stripe").toBe(true);
+
+    const account = await stripe.accounts.retrieve();
+    expect(account.id, "Stripe account lookup failed on the pinned API version").toBeTruthy();
+
+    // Surface (do not fail on) an account default newer than our pin, so the
+    // scheduled run's log shows drift before it becomes breaking.
+    const current = (list.lastResponse?.headers as Record<string, string> | undefined)?.["stripe-version"];
+    if (current && current !== pinned) {
+      console.warn(`[drift] Stripe responded with API version ${current}, code pins ${pinned}`);
+    }
   });
 });
