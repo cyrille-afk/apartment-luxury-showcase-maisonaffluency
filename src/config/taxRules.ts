@@ -427,6 +427,9 @@ export const resolveTaxTreatment = (input: TaxTreatmentInput): TaxTreatmentResul
     countryIso,
     shipFromCountry: shipFrom,
     dutyCents,
+    // Only the two cross-border import branches below set a routing.
+    customsRoute: null as CustomsRoute | null,
+    iossNumber: null as string | null,
   };
 
   if (!rule) {
