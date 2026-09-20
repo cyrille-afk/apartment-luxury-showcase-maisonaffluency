@@ -160,6 +160,7 @@ const TradeAdminAcquisitions = () => {
   const [igFirstOnly, setIgFirstOnly] = useState(false);
   const [activeCountry, setActiveCountry] = useState<string>(DEFAULT_COUNTRY);
   const [activeCity, setActiveCity] = useState<string>(DEFAULT_CITY);
+  const [calibrating, setCalibrating] = useState(false);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["acquisition-leads", "enriched"],
