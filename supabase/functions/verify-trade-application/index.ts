@@ -803,6 +803,9 @@ Be conservative: if the website is unreachable, password-protected or the eviden
       verification_fingerprint: evidenceFingerprint,
       credential_sha256: credentialSha,
       credential_duplicate_of: duplicateOf,
+      registry_verified: registry.verified,
+      registry_verification: registry,
+      registry_checked_at: registry.checked ? new Date().toISOString() : null,
       fraud_flags: fraudFlags,
       ...(alreadyAlerted ? {} : { last_flag_alert_fingerprint: evidenceFingerprint }),
       ai_result: {
