@@ -2428,6 +2428,12 @@ export default function Checkout() {
           // B2B zero-rating: only applies to SG GST-registered businesses.
           buyerType,
           buyerGstNumber,
+          // Only a VIES / HMRC-confirmed number may zero-rate; the server
+          // re-validates before it prices the order.
+          buyerTaxIdVerified: summary?.buyerTaxIdVerified ?? false,
+          shipFromCountry: summary?.shipFromCountry ?? "",
+          customsLines: summary?.customsLines ?? [],
+          clearanceFeeCents: summary?.clearanceFeeCents ?? 0,
           // PayNow needs its own PaymentIntent: the payment method type is
           // fixed at creation and cannot be swapped on an existing intent.
           paymentMethod: intentMethod,
