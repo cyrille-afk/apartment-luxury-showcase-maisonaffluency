@@ -53,7 +53,31 @@ export const SWIFT: TradePaymentChannel = {
   ],
 };
 
-export function channelsForRegion(_region: RegionTier): TradePaymentChannel[] {
+/**
+ * GBP domestic rail. Stripe issues a dedicated UK sort code / account number
+ * per order, so no static coordinates are published here — the details grid is
+ * rendered live by the Stripe bank-transfer panel. Faster Payments settles the
+ * same day; CHAPS is offered for amounts above the £1m FPS ceiling and Bacs
+ * for buyers whose treasury runs a three-day batch.
+ */
+export const GB_FASTER_PAYMENTS: TradePaymentChannel = {
+  id: "gb_faster_payments",
+  label: "UK Faster Payments / Bacs (GBP)",
+  hint: "Same-day domestic settlement · no FX spread",
+  rows: [],
+  instructions: [
+    "Faster Payments clears the same business day for amounts up to £1,000,000 per transfer.",
+    "Above that ceiling, send by CHAPS the same day, or by Bacs if your treasury runs a three-day batch.",
+    "Pay in GBP to the dedicated UK account issued for this order — it is unique to you and reconciles automatically.",
+    "Quote the Order ID as the payment reference.",
+  ],
+};
+
+export function channelsForRegion(
+  _region: RegionTier,
+  currency?: string | null,
+): TradePaymentChannel[] {
+  if (String(currency || "").toUpperCase() === "GBP") return [GB_FASTER_PAYMENTS, SWIFT];
   return [SWIFT];
 }
 
