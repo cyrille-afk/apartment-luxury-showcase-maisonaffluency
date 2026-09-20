@@ -29,6 +29,14 @@ const TERM_LABELS: Record<string, string> = {
   cia_stage: "Cash in advance / stage payments",
 };
 const GBP_HIGH_VALUE_CENTS = 2_000_000;
+type PurchaseOrderLine = {
+  title: string;
+  designer_name: string | null;
+  finish_label: string | null;
+  quantity: number;
+  unit_price_cents: number;
+  line_total_cents: number;
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -87,7 +95,7 @@ serve(async (req) => {
     if (!email.includes("@")) return json({ error: "A valid corporate email is required." }, 400);
     const rawLines = Array.isArray(body?.lines) ? body.lines.slice(0, 60) : [];
     if (!rawLines.length) return json({ error: "At least one line item is required." }, 400);
-    const lines = rawLines.map((line: Record<string, unknown>) => {
+    const lines: PurchaseOrderLine[] = rawLines.map((line: Record<string, unknown>) => {
       const quantity = Math.min(Math.max(int(line.quantity) || 1, 1), 999);
       const unitPrice = int(line.unitCents);
       return {
