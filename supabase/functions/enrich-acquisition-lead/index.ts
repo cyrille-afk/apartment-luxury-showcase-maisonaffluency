@@ -24,7 +24,9 @@ const json = (body: unknown, status = 200) =>
   });
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = modelFor("balanced");
+// Caller explicitly named this model for the acquisition enrichment node.
+const MODEL = "openai/gpt-6-astra";
+void modelFor; void tokenBudget;
 
 const str = (v: unknown, max: number): string | null => {
   if (typeof v !== "string") return null;
@@ -82,14 +84,19 @@ serve(async (req) => {
     return json({ error: "Invalid JSON body" }, 400);
   }
 
+  // Accept both the original scraping-tool keys and the direct social
+  // vector keys (directEmail / instagramHandle / geographicCity).
   const studioName = str(body.studioName, 200);
-  const businessEmail = str(body.businessEmail, 255)?.toLowerCase() ?? null;
+  const businessEmail =
+    (str(body.businessEmail, 255) ?? str(body.directEmail, 255))?.toLowerCase() ?? null;
   const founderName = str(body.founderName, 160);
   const websiteUrl = safeUrl(body.websiteUrl);
   const snippet = str(body.rawScrapedSnippet, 6000);
   const sourceIndex = str(body.sourceIndex, 60) ?? "AD100_Index";
   const country = str(body.country, 80);
-  const city = str(body.city, 80);
+  const city = str(body.city, 80) ?? str(body.geographicCity, 80);
+  // A caller-supplied verified handle always wins over AI detection.
+  const providedInstagram = sanitizeInstagram(body.instagramHandle ?? body.instagram_handle);
 
   if (!studioName || !businessEmail || !EMAIL_RE.test(businessEmail)) {
     return json({ error: "Missing or invalid studioName / businessEmail." }, 400);
