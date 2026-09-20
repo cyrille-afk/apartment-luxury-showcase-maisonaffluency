@@ -4,7 +4,7 @@ import { Navigate, Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, Copy, Eye, EyeOff, Lock, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { usePaymentMode } from "@/hooks/usePaymentMode";
+import { usePaymentMode, type PaymentModeStatus } from "@/hooks/usePaymentMode";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
