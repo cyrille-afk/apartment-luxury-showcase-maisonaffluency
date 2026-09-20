@@ -19,7 +19,9 @@ const usePageTracking = () => {
 
   useEffect(() => {
     const sendPageView = () => {
+      if (!hasConsent("analytics")) return false;
       if (typeof window !== "undefined" && (window as any).gtag) {
+
         (window as any).gtag("event", "page_view", {
           page_path: location.pathname + location.search + location.hash,
           page_title: document.title,
