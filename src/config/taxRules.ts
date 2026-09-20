@@ -545,9 +545,17 @@ export const resolveTaxTreatment = (input: TaxTreatmentInput): TaxTreatmentResul
       : goodsCents;
   const lowValue =
     !!rule.lowValueThresholdCents && thresholdBase <= rule.lowValueThresholdCents;
-  const clearanceFeeCents = lowValue ? 0 : (rule.clearanceFeeCents ?? 0);
+  const iossNumber = merchantIossNumber();
+  // Low-value EU consignments only escape the carrier brokerage fee once we
+  // clear them ourselves under IOSS. Until then every EU parcel, either side
+  // of €150, is a carrier-cleared DDP import and carries the flat fee.
+  const routesViaMerchantIoss = rule.region === "EU" && lowValue && !!iossNumber;
+  const clearanceFeeCents =
+    routesViaMerchantIoss || (rule.region === "GB" && lowValue)
+      ? 0
+      : (rule.clearanceFeeCents ?? 0);
 
-  if (rule.region === "EU" && lowValue && MERCHANT_TAX_IDENTIFIERS.ioss) {
+  if (routesViaMerchantIoss) {
     return {
       ...shell,
       rule,
@@ -559,10 +567,12 @@ export const resolveTaxTreatment = (input: TaxTreatmentInput): TaxTreatmentResul
       label: `${taxRowLabel(rule)} — IOSS`,
       charged: true,
       note: `Consignment at or below €150. ${rule.name} is collected at checkout under the Import One-Stop Shop; no further charges on delivery.`,
-      statement: `Import One-Stop Shop supply. ${taxRowLabel(rule)} collected at the point of sale. IOSS identifier ${MERCHANT_TAX_IDENTIFIERS.ioss}.`,
-      registrationLine: `IOSS No. ${MERCHANT_TAX_IDENTIFIERS.ioss}`,
-      merchantTaxIdentifier: MERCHANT_TAX_IDENTIFIERS.ioss,
+      statement: `Import One-Stop Shop supply. ${taxRowLabel(rule)} collected at the point of sale. IOSS identifier ${iossNumber}.`,
+      registrationLine: `IOSS No. ${iossNumber}`,
+      merchantTaxIdentifier: iossNumber,
       requiresDdpClearance: false,
+      customsRoute: "MERCHANT_IOSS",
+      iossNumber,
     };
   }
 
