@@ -138,7 +138,7 @@ const TradeAdminSubProcessors = () => {
       const { data, error } = await supabase
         .from("sub_processor_registry")
         .select(
-          "id, vendor_name, service, purpose, data_categories, entity_country, hosting_regions, website, privacy_url, dpa_url, dpa_status, dpa_reference, dpa_countersigned_at, transfer_mechanism, last_reviewed_at, notes, is_active, sort_order",
+          "id, vendor_name, service, purpose, data_categories, entity_country, hosting_regions, website, privacy_url, dpa_url, dpa_status, dpa_reference, dpa_countersigned_at, transfer_mechanism, last_reviewed_at, notes, is_active, sort_order, signed_dpa_path, signed_dpa_filename, signed_dpa_sha256, signed_dpa_size_bytes, signed_dpa_uploaded_at",
         )
         .order("sort_order", { ascending: true })
         .order("vendor_name", { ascending: true });
