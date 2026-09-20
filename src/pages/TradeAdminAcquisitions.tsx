@@ -442,8 +442,10 @@ const TradeAdminAcquisitions = () => {
               )}
               {!isLoading && filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-5 py-16 text-center text-sm text-muted-foreground">
-                    No enriched leads awaiting outbound in {activeCity}.
+                  <td colSpan={8} className="px-5 py-16 text-center text-sm text-muted-foreground">
+                    {igFirstOnly
+                      ? `No Instagram-first leads awaiting outbound in ${activeCity}.`
+                      : `No enriched leads awaiting outbound in ${activeCity}.`}
                   </td>
                 </tr>
               )}
