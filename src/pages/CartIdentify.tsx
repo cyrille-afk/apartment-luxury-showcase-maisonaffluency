@@ -548,6 +548,15 @@ export default function CartIdentify() {
           </aside>
         </div>
       </div>
+
+      <AllocationInquiryDialog
+        open={allocationOpen}
+        onOpenChange={setAllocationOpen}
+        breaches={allocationBreaches}
+        destinationCountry={shipDest.iso}
+        defaultEmail={allocationContact.email}
+        defaultName={allocationContact.name}
+      />
     </div>
   );
 }
