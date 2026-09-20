@@ -314,17 +314,47 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
         </div>
       )}
 
-      <dl className="divide-y divide-border border border-border">
-        {channel.rows.map((row) => (
-          <div key={row.label} className="flex items-start justify-between gap-4 px-4 py-3">
-            <dt className="shrink-0 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{row.label}</dt>
-            <dd className="flex min-w-0 items-center gap-3 text-right">
-              <span className="truncate text-sm tabular-nums">{row.value}</span>
-              {row.copyable && <CopyValue value={row.value} />}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      {channel.id === "gb_faster_payments" ? (
+        <StripeBankTransferPanel
+          currency="gbp"
+          email={buyer.email}
+          items={lines.map((l) => ({
+            title: l.title,
+            designer: l.designer || undefined,
+            selectedFinish: l.finishLabel || undefined,
+            price: l.unitCents / 100,
+            quantity: l.quantity,
+          }))}
+          shippingConfirmed={shippingCents > 0}
+          shippingCents={shippingCents}
+          orderReference={orderRef}
+          fallback={
+            <dl className="divide-y divide-border border border-border">
+              {SWIFT.rows.map((row) => (
+                <div key={row.label} className="flex items-start justify-between gap-4 px-4 py-3">
+                  <dt className="shrink-0 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{row.label}</dt>
+                  <dd className="flex min-w-0 items-center gap-3 text-right">
+                    <span className="truncate text-sm tabular-nums">{row.value}</span>
+                    {row.copyable && <CopyValue value={row.value} />}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          }
+        />
+      ) : (
+        <dl className="divide-y divide-border border border-border">
+          {channel.rows.map((row) => (
+            <div key={row.label} className="flex items-start justify-between gap-4 px-4 py-3">
+              <dt className="shrink-0 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{row.label}</dt>
+              <dd className="flex min-w-0 items-center gap-3 text-right">
+                <span className="truncate text-sm tabular-nums">{row.value}</span>
+                {row.copyable && <CopyValue value={row.value} />}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      )}
 
       <div className="border border-foreground px-4 py-4">
         <p className="text-sm">
