@@ -83,6 +83,58 @@ const GENERIC_EMAIL_PREFIXES = new Set([
   "inquiry.sg",
 ]);
 
+// Temporary authoritative handle mapping for the first 44 enriched leads.
+// Keys are exact studio_name values from acquisition_leads.
+const KNOWN_INSTAGRAM_HANDLES: Record<string, string> = {
+  SCDA: "scdaarchitects",
+  Elicyon: "elicyon",
+  "S.R. Gambrel": "stevengambrel",
+  "Ashe Leandro": "asheleandro",
+  "Aamer Architects": "aamerarchitects",
+  "Albion Nord": "albionnord",
+  "Alvisi Kirimoto": "alvisikirimoto",
+  "ao-ft": "ao_ft",
+  "AR43 Architects": "ar43architects",
+  "Archer Humphryes Architects": "archerhumphryes",
+  "Architects 61": "architects61",
+  Archmongers: "archmongers",
+  "Brewin Design Office": "brewindesignoffice",
+  "Chris Dyson Architects": "chrisdysonarchitects",
+  "Coffey Residential": "coffeyresidential",
+  "Common Ground Workshop": "commongroundworkshop",
+  "Delve Architects": "delvearchitects",
+  "Design Intervention": "designintervention",
+  "Formwerkz Architects": "formwerkzarchitects",
+  "Found Associates": "foundassociates",
+  "Gregory Phillips Architects": "gregoryphillipsarchitects",
+  "Guz Architects": "guzarchitects",
+  "Hayhurst and Co.": "hayhurstandco",
+  "HUT Architecture": "hutarchitecture",
+  "HYLA Architects": "hylaarchitects",
+  "James Alder Architects": "jamesalderarchitects",
+  "Jamie Fobert Architects": "jamiefobertarchitects",
+  "Janine Stone & Co": "janinestoneandco",
+  "Joya Architects": "joyaarchitects",
+  "K2LD Architects": "k2ldarchitects",
+  "LA London": "la_london",
+  "Ming Architects": "mingarchitects",
+  "MOYA Architects": "moyaarchitects",
+  "ONG&ONG": "ongong",
+  "READ Architecture": "readarchitecture",
+  "Red Bean Architects": "redbeanarchitects",
+  "Rigby & Rigby": "rigbyandrigby",
+  "SHH Architecture & Interior Design": "shh_architecture",
+  "Spatial Affairs Bureau": "spatialaffairsbureau",
+  "Studio iF": "studioif",
+  "Studio Indigo": "studioindigo",
+  "Studio McW": "studiomcw",
+  "Taylor Howes": "taylorhowes",
+  "Treehaus Architects": "treehausarchitects",
+  "Unknown Works": "unknown_works",
+  "Wallflower Architecture + Design": "wallflowerarchitecture",
+  "YARD Architects": "yardarchitects",
+};
+
 const isGenericEmail = (email: string): boolean => {
   const local = email.split("@")[0]?.toLowerCase().trim() ?? "";
   return GENERIC_EMAIL_PREFIXES.has(local);
@@ -108,6 +160,7 @@ const TradeAdminAcquisitions = () => {
   const [igFirstOnly, setIgFirstOnly] = useState(false);
   const [activeCountry, setActiveCountry] = useState<string>(DEFAULT_COUNTRY);
   const [activeCity, setActiveCity] = useState<string>(DEFAULT_CITY);
+  const [calibrating, setCalibrating] = useState(false);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["acquisition-leads", "enriched"],
@@ -267,6 +320,32 @@ const TradeAdminAcquisitions = () => {
     }
   };
 
+  // Temporary backfill: apply the authoritative Instagram handle mapping above
+  // to any enriched lead whose handle is currently empty.
+  const calibrateHandles = async () => {
+    setCalibrating(true);
+    const pending = toast.loading("Calibrating live Instagram handles…");
+    try {
+      let updated = 0;
+      for (const lead of rows) {
+        const handle = KNOWN_INSTAGRAM_HANDLES[lead.studio_name.trim()];
+        if (!handle || lead.instagram_handle) continue;
+        const { error } = await supabase
+          .from("acquisition_leads")
+          .update({ instagram_handle: handle })
+          .eq("id", lead.id);
+        if (error) throw error;
+        updated++;
+      }
+      toast.success(`${updated} Instagram handles calibrated.`, { id: pending });
+      await queryClient.invalidateQueries({ queryKey: ["acquisition-leads", "enriched"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Calibration failed.", { id: pending });
+    } finally {
+      setCalibrating(false);
+    }
+  };
+
   if (loading) return <div className="p-10 text-sm text-muted-foreground">Loading…</div>;
 
   if (!enabled) {
@@ -345,6 +424,20 @@ const TradeAdminAcquisitions = () => {
                 <Sparkles className="h-3 w-3" />
               )}
               Execute IG &amp; Executive Data Repair
+            </button>
+
+            <button
+              type="button"
+              onClick={calibrateHandles}
+              disabled={calibrating}
+              className="inline-flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground disabled:opacity-50"
+            >
+              {calibrating ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Instagram className="h-3 w-3" />
+              )}
+              Execute Live Handle Calibration Loop
             </button>
           </div>
         </header>
