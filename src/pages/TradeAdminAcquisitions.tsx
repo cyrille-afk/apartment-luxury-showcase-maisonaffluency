@@ -236,6 +236,48 @@ const TradeAdminAcquisitions = () => {
           </Button>
         </header>
 
+        {/* Country tabs */}
+        <nav className="flex flex-wrap gap-x-8 gap-y-2 border-b border-border pt-8" aria-label="Filter by country">
+          {geo.countries.map((country) => {
+            const isActive = country === activeCountry;
+            return (
+              <button
+                key={country}
+                type="button"
+                onClick={() => setActiveCountry(country)}
+                className={`-mb-px border-b-2 pb-3 text-[11px] uppercase tracking-[0.25em] transition-colors ${
+                  isActive
+                    ? "border-foreground text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {country}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* City pills */}
+        <div className="flex flex-wrap gap-2 pt-5" aria-label="Filter by city">
+          {cities.map((city) => {
+            const isActive = city === activeCity;
+            return (
+              <button
+                key={city}
+                type="button"
+                onClick={() => setActiveCity(city)}
+                className={`border px-4 py-1.5 text-[11px] uppercase tracking-[0.2em] transition-colors ${
+                  isActive
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border text-muted-foreground hover:border-foreground hover:text-foreground"
+                }`}
+              >
+                {city}
+              </button>
+            );
+          })}
+        </div>
+
         <div className="flex flex-col gap-4 py-8 md:flex-row md:items-center md:justify-between">
           <Input
             value={search}
@@ -244,7 +286,7 @@ const TradeAdminAcquisitions = () => {
             className="h-11 max-w-md rounded-none border-border"
           />
           <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-            {filtered.length} enriched lead{filtered.length === 1 ? "" : "s"}
+            Pending enriched leads in {activeCity}: {filtered.length}
           </p>
         </div>
 
