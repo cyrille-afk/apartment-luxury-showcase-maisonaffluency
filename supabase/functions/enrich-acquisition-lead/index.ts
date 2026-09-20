@@ -152,7 +152,7 @@ serve(async (req) => {
     matched = (Array.isArray(parsed?.matched_designers) ? parsed.matched_designers : [])
       .map((n: unknown) => byName.get(String(n ?? "").trim().toLowerCase()))
       .filter((n: string | undefined): n is string => Boolean(n))
-      .slice(0, 2);
+      .slice(0, 3);
   } catch (e) {
     console.error(
       "[enrich-acquisition-lead] analysis failed",
