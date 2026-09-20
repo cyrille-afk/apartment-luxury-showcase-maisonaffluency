@@ -7,7 +7,7 @@
  * (`has_role`) on `sub_processor_registry`; the UI guard below is convenience,
  * not the control.
  */
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -36,11 +36,28 @@ import {
 import {
   ArrowLeft,
   CheckCircle2,
+  Download,
   ExternalLink,
   FileText,
   Loader2,
   ShieldAlert,
+  Trash2,
+  UploadCloud,
 } from "lucide-react";
+
+const DPA_BUCKET = "compliance-agreements";
+const MAX_DPA_BYTES = 10 * 1024 * 1024;
+
+const fileToBase64 = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result ?? "");
+      resolve(result.slice(result.indexOf(",") + 1));
+    };
+    reader.onerror = () => reject(new Error("The file could not be read."));
+    reader.readAsDataURL(file);
+  });
 
 type DpaStatus = "pending" | "signed" | "executed";
 
@@ -63,6 +80,11 @@ type Row = {
   notes: string | null;
   is_active: boolean;
   sort_order: number;
+  signed_dpa_path: string | null;
+  signed_dpa_filename: string | null;
+  signed_dpa_sha256: string | null;
+  signed_dpa_size_bytes: number | null;
+  signed_dpa_uploaded_at: string | null;
 };
 
 const STATUS_LABEL: Record<DpaStatus, string> = {
@@ -100,6 +122,10 @@ const TradeAdminSubProcessors = () => {
 
   const [active, setActive] = useState<Row | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [downloading, setDownloading] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [form, setForm] = useState({
     dpa_status: "pending" as DpaStatus,
     dpa_reference: "",
@@ -116,7 +142,7 @@ const TradeAdminSubProcessors = () => {
       const { data, error } = await supabase
         .from("sub_processor_registry")
         .select(
-          "id, vendor_name, service, purpose, data_categories, entity_country, hosting_regions, website, privacy_url, dpa_url, dpa_status, dpa_reference, dpa_countersigned_at, transfer_mechanism, last_reviewed_at, notes, is_active, sort_order",
+          "id, vendor_name, service, purpose, data_categories, entity_country, hosting_regions, website, privacy_url, dpa_url, dpa_status, dpa_reference, dpa_countersigned_at, transfer_mechanism, last_reviewed_at, notes, is_active, sort_order, signed_dpa_path, signed_dpa_filename, signed_dpa_sha256, signed_dpa_size_bytes, signed_dpa_uploaded_at",
         )
         .order("sort_order", { ascending: true })
         .order("vendor_name", { ascending: true });
@@ -147,6 +173,109 @@ const TradeAdminSubProcessors = () => {
       dpa_url: row.dpa_url ?? "",
       notes: row.notes ?? "",
     });
+  };
+
+  /** Upload a counter-signed PDF: the edge function authenticates the bytes. */
+  const uploadAgreement = async (file: File) => {
+    if (!active) return;
+    if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
+      toast.error("Only PDF agreements are accepted.");
+      return;
+    }
+    if (file.size > MAX_DPA_BYTES) {
+      toast.error("The agreement exceeds the 10 MB limit.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const fileBase64 = await fileToBase64(file);
+      const { data, error } = await supabase.functions.invoke("upload-compliance-dpa", {
+        body: { vendorId: active.id, fileName: file.name, fileBase64 },
+      });
+      const failure = (data as { error?: string } | null)?.error;
+      if (error || failure) throw new Error(failure || error?.message || "Upload failed.");
+      const result = data as {
+        path: string;
+        sha256: string;
+        sizeBytes: number;
+        fileName: string;
+      };
+      setActive((prev) =>
+        prev
+          ? {
+              ...prev,
+              signed_dpa_path: result.path,
+              signed_dpa_filename: result.fileName,
+              signed_dpa_sha256: result.sha256,
+              signed_dpa_size_bytes: result.sizeBytes,
+              signed_dpa_uploaded_at: new Date().toISOString(),
+            }
+          : prev,
+      );
+      queryClient.invalidateQueries({ queryKey: ["sub-processor-registry"] });
+      toast.success("Counter-signed agreement stored securely.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "The agreement could not be stored.");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  /** Short-lived (15 minute) authenticated link — never a public URL. */
+  const openAgreement = async (row: Row) => {
+    if (!row.signed_dpa_path) return;
+    setDownloading(row.id);
+    const { data, error } = await supabase.storage
+      .from(DPA_BUCKET)
+      .createSignedUrl(row.signed_dpa_path, 900);
+    setDownloading(null);
+    if (error || !data?.signedUrl) {
+      toast.error(error?.message ?? "The secure link could not be generated.");
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const removeAgreement = async () => {
+    if (!active?.signed_dpa_path) return;
+    setUploading(true);
+    const path = active.signed_dpa_path;
+    const { error: storageErr } = await supabase.storage.from(DPA_BUCKET).remove([path]);
+    if (storageErr) {
+      setUploading(false);
+      toast.error(storageErr.message);
+      return;
+    }
+    const { error } = await supabase
+      .from("sub_processor_registry")
+      .update({
+        signed_dpa_path: null,
+        signed_dpa_filename: null,
+        signed_dpa_sha256: null,
+        signed_dpa_size_bytes: null,
+        signed_dpa_uploaded_at: null,
+      })
+      .eq("id", active.id);
+    setUploading(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setActive((prev) =>
+      prev
+        ? {
+            ...prev,
+            signed_dpa_path: null,
+            signed_dpa_filename: null,
+            signed_dpa_sha256: null,
+            signed_dpa_size_bytes: null,
+            signed_dpa_uploaded_at: null,
+          }
+        : prev,
+    );
+    queryClient.invalidateQueries({ queryKey: ["sub-processor-registry"] });
+    toast.success("Agreement removed.");
   };
 
   const save = async () => {
@@ -307,6 +436,25 @@ const TradeAdminSubProcessors = () => {
                   {row.dpa_reference && (
                     <p className="mt-1 text-[0.65rem] text-muted-foreground">{row.dpa_reference}</p>
                   )}
+                  {row.signed_dpa_path && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 h-7 px-2 text-[0.65rem]"
+                      disabled={downloading === row.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void openAgreement(row);
+                      }}
+                    >
+                      {downloading === row.id ? (
+                        <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
+                      ) : (
+                        <Download className="mr-1.5 h-3 w-3" />
+                      )}
+                      Signed PDF
+                    </Button>
+                  )}
                 </td>
                 <td className="px-5 py-4 align-top text-xs">
                   <span className={isStale(row.last_reviewed_at) ? "text-destructive" : "text-muted-foreground"}>
@@ -421,7 +569,104 @@ const TradeAdminSubProcessors = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="dpa-url">Executed agreement link</Label>
+                <Label>Counter-signed agreement (PDF)</Label>
+                {active.signed_dpa_path ? (
+                  <div className="rounded-sm border border-border bg-muted/30 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm">
+                          {active.signed_dpa_filename ?? "Signed agreement.pdf"}
+                        </p>
+                        <p className="mt-1 text-[0.65rem] text-muted-foreground">
+                          Stored {fmtDate(active.signed_dpa_uploaded_at)}
+                          {active.signed_dpa_size_bytes
+                            ? ` · ${(active.signed_dpa_size_bytes / 1_048_576).toFixed(2)} MB`
+                            : ""}
+                        </p>
+                        {active.signed_dpa_sha256 && (
+                          <p className="mt-1 break-all font-mono text-[0.6rem] text-muted-foreground">
+                            SHA-256 {active.signed_dpa_sha256}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex shrink-0 gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={downloading === active.id}
+                          onClick={() => void openAgreement(active)}
+                        >
+                          {downloading === active.id ? (
+                            <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Download className="mr-2 h-3.5 w-3.5" />
+                          )}
+                          Open
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={uploading}
+                          onClick={() => void removeAgreement()}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="mt-3 text-[0.65rem] text-muted-foreground">
+                      Links expire after 15 minutes. The file is never publicly addressable.
+                    </p>
+                  </div>
+                ) : (
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => !uploading && fileInputRef.current?.click()}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click();
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setDragging(true);
+                    }}
+                    onDragLeave={() => setDragging(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setDragging(false);
+                      const file = e.dataTransfer.files?.[0];
+                      if (file) void uploadAgreement(file);
+                    }}
+                    className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-sm border border-dashed p-8 text-center transition-colors ${
+                      dragging ? "border-foreground bg-muted/50" : "border-border hover:bg-muted/30"
+                    }`}
+                  >
+                    {uploading ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    ) : (
+                      <UploadCloud className="h-5 w-5 text-muted-foreground" />
+                    )}
+                    <p className="text-sm">
+                      {uploading ? "Verifying and storing…" : "Drop the counter-signed PDF here"}
+                    </p>
+                    <p className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+                      PDF only · up to 10 MB
+                    </p>
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) void uploadAgreement(file);
+                  }}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="dpa-url">Executed agreement link (external)</Label>
                 <Input
                   id="dpa-url"
                   placeholder="https://…"

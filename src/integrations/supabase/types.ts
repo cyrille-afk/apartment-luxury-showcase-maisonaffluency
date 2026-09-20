@@ -7588,6 +7588,12 @@ export type Database = {
           purpose: string
           reviewed_by: string | null
           service: string
+          signed_dpa_filename: string | null
+          signed_dpa_path: string | null
+          signed_dpa_sha256: string | null
+          signed_dpa_size_bytes: number | null
+          signed_dpa_uploaded_at: string | null
+          signed_dpa_uploaded_by: string | null
           sort_order: number
           transfer_mechanism: string | null
           updated_at: string
@@ -7611,6 +7617,12 @@ export type Database = {
           purpose: string
           reviewed_by?: string | null
           service: string
+          signed_dpa_filename?: string | null
+          signed_dpa_path?: string | null
+          signed_dpa_sha256?: string | null
+          signed_dpa_size_bytes?: number | null
+          signed_dpa_uploaded_at?: string | null
+          signed_dpa_uploaded_by?: string | null
           sort_order?: number
           transfer_mechanism?: string | null
           updated_at?: string
@@ -7634,6 +7646,12 @@ export type Database = {
           purpose?: string
           reviewed_by?: string | null
           service?: string
+          signed_dpa_filename?: string | null
+          signed_dpa_path?: string | null
+          signed_dpa_sha256?: string | null
+          signed_dpa_size_bytes?: number | null
+          signed_dpa_uploaded_at?: string | null
+          signed_dpa_uploaded_by?: string | null
           sort_order?: number
           transfer_mechanism?: string | null
           updated_at?: string
@@ -10353,6 +10371,7 @@ export type Database = {
           contact_email: string
         }[]
       }
+      is_compliance_officer: { Args: { _user_id: string }; Returns: boolean }
       is_personal_email_domain: { Args: { _email: string }; Returns: boolean }
       is_public_sitemap_product: { Args: { _id: string }; Returns: boolean }
       is_studio_owner: {

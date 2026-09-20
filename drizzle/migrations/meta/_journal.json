@@ -442,6 +442,13 @@
       "when": 1789874984627,
       "tag": "0062_trade_guardrails_credit_allocation_compliance",
       "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1789875556587,
+      "tag": "0063_compliance_agreements_storage_and_dpa_path",
+      "breakpoints": true
     }
   ]
 }
