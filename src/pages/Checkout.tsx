@@ -1103,6 +1103,144 @@ function DeliveryPaymentOptions({
   );
 }
 
+type PoTerms = "cia_stage" | "net_30" | "one_percent_10_net_30" | "net_60";
+
+function PurchaseOrderForm({
+  lines,
+  summary,
+  account,
+  email,
+  company,
+  buyerVatId,
+  buyerName,
+  onDone,
+  optionsSlot,
+}: {
+  lines: CheckoutLine[];
+  summary: CheckoutSummary;
+  account: { email: string; role: string; company?: string } | null;
+  email: string;
+  company: string;
+  buyerVatId: string;
+  buyerName: string;
+  onDone: (reference: string) => void;
+  optionsSlot: React.ReactNode;
+}) {
+  const draftKey = "ma_uk_corporate_po_draft";
+  const [form, setForm] = useState(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(draftKey) || "{}");
+      return {
+        companyName: String(saved.companyName || company),
+        companyRegistrationNumber: String(saved.companyRegistrationNumber || ""),
+        buyerVatId: String(saved.buyerVatId || buyerVatId),
+        poNumber: String(saved.poNumber || ""),
+        deliveryAddress: String(saved.deliveryAddress || ""),
+        paymentTerms: (saved.paymentTerms || "cia_stage") as PoTerms,
+        budgetApproved: Boolean(saved.budgetApproved),
+      };
+    } catch {
+      return { companyName: company, companyRegistrationNumber: "", buyerVatId, poNumber: "", deliveryAddress: "", paymentTerms: "cia_stage" as PoTerms, budgetApproved: false };
+    }
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  useEffect(() => {
+    try { sessionStorage.setItem(draftKey, JSON.stringify(form)); } catch { /* private mode */ }
+  }, [form]);
+  useEffect(() => {
+    if (buyerVatId) setForm((prev) => ({ ...prev, buyerVatId: prev.buyerVatId || buyerVatId }));
+    if (company) setForm((prev) => ({ ...prev, companyName: prev.companyName || company }));
+  }, [buyerVatId, company]);
+  const update = (key: keyof typeof form, value: string | boolean) => setForm((prev) => ({ ...prev, [key]: value }));
+  const validVat = isBuyerTaxIdValid(resolveTaxRule("GB", "gbp"), form.buyerVatId);
+  const canSubmit = Boolean(account?.email && form.companyName.trim() && form.companyRegistrationNumber.trim() && validVat && form.poNumber.trim() && form.deliveryAddress.trim() && form.budgetApproved);
+  const submit = async () => {
+    if (!canSubmit || submitting) return;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-purchase-order", {
+        body: {
+          currency: summary.currency,
+          shippingCountry: summary.taxCountry,
+          buyerType: "business",
+          buyerTaxId: form.buyerVatId,
+          companyName: form.companyName,
+          companyRegistrationNumber: form.companyRegistrationNumber,
+          poNumber: form.poNumber,
+          paymentTerms: form.paymentTerms,
+          budgetApproved: form.budgetApproved,
+          buyer: { email, name: buyerName, address: form.deliveryAddress },
+          lines: lines.map((line) => ({
+            title: line.title,
+            designer: line.designer,
+            finishLabel: line.finishLabel,
+            unitCents: line.unitCents,
+            quantity: lineQty(line),
+          })),
+          discountCents: summary.discountCents,
+          discountLabel: summary.discountLabel,
+          shippingCents: summary.deliveryCents,
+          incoterm: summary.incoterm,
+          importDutyCents: summary.importDutyCents,
+          importVatCents: summary.importVatCents,
+          importClearanceCents: summary.importClearanceCents,
+          ddpHandlingCents: summary.ddpHandlingCents,
+          importTotalCents: summary.importTotalCents,
+          deferredImportCents: summary.deferredImportCents,
+        },
+      });
+      if (error || data?.error) throw new Error(data?.error || error?.message || "Unable to submit purchase order.");
+      try { sessionStorage.removeItem(draftKey); } catch { /* private mode */ }
+      toast.success("Purchase order submitted for review");
+      onDone(data.orderRef);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Unable to submit purchase order.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+  const fieldClass = "mt-2 h-12 w-full rounded-none border border-border bg-background px-4 text-sm outline-none focus:border-foreground";
+  return (
+    <div>
+      {optionsSlot}
+      <section className="mt-8 border border-border bg-cream/40 p-5 sm:p-7">
+        <p className="text-[10px] uppercase tracking-[0.26em] text-muted-foreground">UK corporate purchase order</p>
+        <h2 className="mt-3 font-display text-2xl font-normal">Submit for credit and terms review</h2>
+        <p className="mt-3 max-w-2xl text-xs font-light leading-relaxed text-muted-foreground">
+          Your PO reserves the request for review; it does not release production or constitute payment. Maison Affluency will verify corporate identity, credit, availability and the final settlement schedule.
+        </p>
+        {!account && <p className="mt-5 border border-destructive/30 p-3 text-xs text-destructive">Sign in with an approved Trade account to submit a purchase order.</p>}
+        <div className="mt-7 grid gap-5 sm:grid-cols-2">
+          <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Legal company name<input value={form.companyName} onChange={(e) => update("companyName", e.target.value)} className={fieldClass} autoComplete="organization" /></label>
+          <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Companies House / registration number<input value={form.companyRegistrationNumber} onChange={(e) => update("companyRegistrationNumber", e.target.value)} className={fieldClass} autoCapitalize="characters" /></label>
+          <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">UK VAT number<input value={form.buyerVatId} onChange={(e) => update("buyerVatId", e.target.value)} className={cn(fieldClass, form.buyerVatId && !validVat && "border-destructive")} placeholder="GB123456789" /></label>
+          <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Your PO reference<input value={form.poNumber} onChange={(e) => update("poNumber", e.target.value)} className={fieldClass} placeholder="PO-2026-001" /></label>
+          <label className="sm:col-span-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">UK delivery address<textarea value={form.deliveryAddress} onChange={(e) => update("deliveryAddress", e.target.value)} className="mt-2 min-h-24 w-full rounded-none border border-border bg-background px-4 py-3 text-sm normal-case tracking-normal outline-none focus:border-foreground" /></label>
+          <label className="sm:col-span-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Requested payment terms
+            <select value={form.paymentTerms} onChange={(e) => update("paymentTerms", e.target.value)} className={fieldClass}>
+              <option value="cia_stage">Cash in advance / staged payments</option>
+              <option value="net_30">Net 30 days</option>
+              <option value="one_percent_10_net_30">1% 10 / Net 30</option>
+              <option value="net_60">Net 60 days — verified enterprise only</option>
+            </select>
+          </label>
+        </div>
+        <label className="mt-6 flex items-start gap-3 text-xs font-light leading-relaxed text-muted-foreground">
+          <input type="checkbox" checked={form.budgetApproved} onChange={(e) => update("budgetApproved", e.target.checked)} className="mt-0.5 h-4 w-4" />
+          I confirm that this purchase has received internal budget approval and that I am authorised to submit this PO for the company named above.
+        </label>
+        <p className="mt-5 text-[10px] leading-relaxed text-muted-foreground">Requested terms are not automatic. Net 30/60 requires credit approval; Maison Affluency may require cash in advance, staged payments or a deposit before production.</p>
+        {submitError && <p role="alert" className="mt-4 text-xs text-destructive">{submitError}</p>}
+        <Button type="button" onClick={submit} disabled={!canSubmit || submitting} className="mt-6 h-12 w-full rounded-none text-[11px] uppercase tracking-[0.22em]">
+          {submitting ? <><Loader2 className="animate-spin" /> Submitting</> : `Submit PO for review · ${money(summary.displayTotalCents, summary.currency)}`}
+        </Button>
+      </section>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* Card / express payment form                                         */
 /* ------------------------------------------------------------------ */
