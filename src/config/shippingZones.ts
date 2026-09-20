@@ -365,8 +365,8 @@ export const LANDED_COST_RULES: LandedCostRule[] = [
     currency: "GBP",
     taxName: "UK VAT",
     note: "Delivered Duty Paid to London: UK import VAT at 20% of the goods and freight value, plus customs clearance. Collected by your advisor before despatch.",
-    ddpHandlingPercent: 2,
-    ddpHandlingFlatCents: 8_000, // €80 flat handling fee (forwarder-confirmed)
+    ddpHandlingPercent: 40,
+    ddpHandlingFlatCents: 2_000, // €20 flat + 40% freight surcharge (forwarder-confirmed)
     dduNote: "Delivered Duty Unpaid to London: freight only. HMRC import VAT at 20% of the goods and freight value, plus customs clearance, are invoiced to you by the carrier before delivery.",
   },
   {
@@ -378,8 +378,8 @@ export const LANDED_COST_RULES: LandedCostRule[] = [
     currency: "CHF",
     taxName: "Swiss import VAT",
     note: "Switzerland is outside the EU customs union: import VAT at 8.1% and clearance are assessed at the border.",
-    ddpHandlingPercent: 2,
-    ddpHandlingFlatCents: 8_000, // €80 flat handling fee (forwarder-confirmed)
+    ddpHandlingPercent: 40,
+    ddpHandlingFlatCents: 2_000, // €20 flat + 40% freight surcharge (forwarder-confirmed)
     dduNote: "Delivered Duty Unpaid: freight only. Swiss import VAT at 8.1% and customs clearance are billed to you by the carrier at the border.",
   },
   {
@@ -391,8 +391,8 @@ export const LANDED_COST_RULES: LandedCostRule[] = [
     currency: "AED",
     taxName: "UAE VAT",
     note: "UAE import duty at 5% plus 5% VAT on the landed value.",
-    ddpHandlingPercent: 2,
-    ddpHandlingFlatCents: 8_000, // €80 flat handling fee (forwarder-confirmed)
+    ddpHandlingPercent: 40,
+    ddpHandlingFlatCents: 2_000, // €20 flat + 40% freight surcharge (forwarder-confirmed)
     dduNote: "Delivered Duty Unpaid: freight only. UAE import duty (5%), VAT (5%) and clearance are settled by you with the carrier on arrival.",
   },
 ];
