@@ -218,6 +218,12 @@ export default function AdminTradeReview() {
           reviewed_at: new Date().toISOString(),
           reviewed_by: user?.id,
           next_retry_at: null,
+          // GDPR: a rejected applicant's identity document is deleted 14 days
+          // after the decision, leaving only the audit trail behind.
+          credential_purge_after:
+            decision === "rejected"
+              ? new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+              : null,
         } as never)
         .eq("id", app.id);
       if (error) throw error;
