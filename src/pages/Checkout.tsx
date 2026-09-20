@@ -240,22 +240,26 @@ export const deriveCheckoutTotals = (input: {
   // 10,188 + 1,471 + 917 ≠ 12,575. Round each component to whole dollars
   // first, then add: displayTotal is ALWAYS row-consistent.
   const roundDollar = (c: number) => Math.round(c / 100) * 100;
+  const rowSum =
+    roundDollar(goodsCents) +
+    roundDollar(deliveryCents) +
+    roundDollar(taxCents) +
+    roundDollar(clearanceFeeCents);
   return {
     goodsCents,
     deliveryCents,
     taxCents,
-    /** Displayed everywhere: subtotal + delivery + tax. Nothing else. */
-    totalCents: goodsCents + deliveryCents + taxCents,
+    clearanceFeeCents,
+    /** Displayed everywhere: subtotal + delivery + tax + DDP clearance. */
+    totalCents: goodsCents + deliveryCents + taxCents + clearanceFeeCents,
     /**
-     * Row-consistent display total: roundDollar(goods) + roundDollar(delivery)
-     * + roundDollar(tax), so the total always equals the sum of the rows the
-     * buyer sees. Use this for ORDER TOTAL and every action-button amount.
+     * Row-consistent display total: every component rounded to whole dollars
+     * first, so the total always equals the sum of the rows the buyer sees.
+     * Use this for ORDER TOTAL and every action-button amount.
      */
-    displayTotalCents:
-      roundDollar(goodsCents) + roundDollar(deliveryCents) + roundDollar(taxCents),
+    displayTotalCents: rowSum,
     /** Collected now: exactly matches the total promised throughout checkout. */
-    chargeTotalCents:
-      roundDollar(goodsCents) + roundDollar(deliveryCents) + roundDollar(taxCents),
+    chargeTotalCents: rowSum,
   };
 };
 
