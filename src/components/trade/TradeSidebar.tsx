@@ -3,7 +3,7 @@ import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import {
   LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderKanban,
   DollarSign, ClipboardList, Package, FileText, Settings, Wrench, UserCircle, Wand2, Image, Users, Inbox,
-  TrendingDown, Lock, Wallet, Activity,
+  TrendingDown, Lock, Wallet, Activity, ShieldCheck,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";

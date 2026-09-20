@@ -97,3 +97,6 @@ User-agent: cohere-ai
 Disallow: /
 
 Sitemap: https://maisonaffluency.com/sitemap.xml
+
+# Internal compliance reference
+Disallow: /compliance/
