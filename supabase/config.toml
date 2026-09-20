@@ -104,3 +104,6 @@ project_id = "dcrauiygaezoduwdjmsm"
 
   [functions.dispatch-acquisition-campaign]
     verify_jwt = false
+
+  [functions.repair-acquisition-contacts]
+    verify_jwt = false

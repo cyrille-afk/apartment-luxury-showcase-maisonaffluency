@@ -54,6 +54,7 @@ const TradeAdminAcquisitions = () => {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [dispatching, setDispatching] = useState(false);
+  const [repairing, setRepairing] = useState(false);
   const [exiting, setExiting] = useState<Set<string>>(new Set());
   const [activeCountry, setActiveCountry] = useState<string>(DEFAULT_COUNTRY);
   const [activeCity, setActiveCity] = useState<string>(DEFAULT_CITY);
@@ -184,6 +185,37 @@ const TradeAdminAcquisitions = () => {
     }
   };
 
+  // Temporary patch utility: fills missing Instagram handles and executive
+  // emails on leads that were ingested before those fields existed.
+  const repairContacts = async () => {
+    setRepairing(true);
+    const pending = toast.loading("Repairing Instagram & executive contact data…");
+    try {
+      const { data, error } = await supabase.functions.invoke("repair-acquisition-contacts", {
+        body: {},
+      });
+      const failure = (data as { error?: string } | null)?.error;
+      if (error || failure) throw new Error(failure || error?.message || "Repair failed.");
+      const result = data as {
+        scanned: number;
+        repaired: number;
+        unresolved: number;
+        failed: number;
+      };
+      toast.success(
+        `${result.repaired} of ${result.scanned} leads repaired.` +
+          (result.unresolved ? ` ${result.unresolved} without verified data.` : "") +
+          (result.failed ? ` ${result.failed} failed.` : ""),
+        { id: pending },
+      );
+      await queryClient.invalidateQueries({ queryKey: ["acquisition-leads", "enriched"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Repair failed.", { id: pending });
+    } finally {
+      setRepairing(false);
+    }
+  };
+
   if (loading) return <div className="p-10 text-sm text-muted-foreground">Loading…</div>;
 
   if (!enabled) {
@@ -223,19 +255,35 @@ const TradeAdminAcquisitions = () => {
             </p>
           </div>
 
-          <Button
-            onClick={deploySequences}
-            disabled={dispatching || selected.size === 0}
-            className="h-12 rounded-none px-6 text-[11px] uppercase tracking-[0.2em]"
-          >
-            {dispatching ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="mr-2 h-4 w-4" />
-            )}
-            Deploy Tailored Outbound Sequences via Resend
-            {selected.size > 0 ? ` (${selected.size})` : ""}
-          </Button>
+          <div className="flex flex-col items-stretch gap-2 md:items-end">
+            <Button
+              onClick={deploySequences}
+              disabled={dispatching || selected.size === 0}
+              className="h-12 rounded-none px-6 text-[11px] uppercase tracking-[0.2em]"
+            >
+              {dispatching ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="mr-2 h-4 w-4" />
+              )}
+              Deploy Tailored Outbound Sequences via Resend
+              {selected.size > 0 ? ` (${selected.size})` : ""}
+            </Button>
+
+            <button
+              type="button"
+              onClick={repairContacts}
+              disabled={repairing}
+              className="inline-flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground disabled:opacity-50"
+            >
+              {repairing ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Sparkles className="h-3 w-3" />
+              )}
+              Execute IG &amp; Executive Data Repair
+            </button>
+          </div>
         </header>
 
         {/* Country tabs */}
