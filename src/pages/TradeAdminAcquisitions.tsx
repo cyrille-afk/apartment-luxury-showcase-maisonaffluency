@@ -324,7 +324,7 @@ const TradeAdminAcquisitions = () => {
               {!isLoading && filtered.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-5 py-16 text-center text-sm text-muted-foreground">
-                    No enriched leads awaiting outbound.
+                    No enriched leads awaiting outbound in {activeCity}.
                   </td>
                 </tr>
               )}
