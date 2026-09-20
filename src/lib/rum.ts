@@ -55,9 +55,10 @@ const getConnectionType = (): string => {
 };
 
 const send = (lcpMs: number, entry: LcpEntry | null) => {
-  // Only beacon for users who accepted cookies (gtag is loaded by __loadGA4
-  // after consent). Declines stay analytics-silent.
+  // Only beacon when analytics consent is active and unexpired.
   if (typeof window === "undefined" || typeof window.gtag !== "function") return;
+  if (!hasConsent("analytics")) return;
+
 
   const bannerMountedAt = window.__cookieBannerMountedAt;
   const bannerBeforeLcp =
