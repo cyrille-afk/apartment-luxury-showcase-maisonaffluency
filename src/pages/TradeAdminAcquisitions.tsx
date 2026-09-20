@@ -54,6 +54,7 @@ const TradeAdminAcquisitions = () => {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [dispatching, setDispatching] = useState(false);
+  const [repairing, setRepairing] = useState(false);
   const [exiting, setExiting] = useState<Set<string>>(new Set());
   const [activeCountry, setActiveCountry] = useState<string>(DEFAULT_COUNTRY);
   const [activeCity, setActiveCity] = useState<string>(DEFAULT_CITY);
