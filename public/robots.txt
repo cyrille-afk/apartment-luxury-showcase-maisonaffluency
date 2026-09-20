@@ -43,6 +43,7 @@ Disallow: /api/
 Disallow: /trade/admin
 Disallow: /trade/admin/trade-review
 Disallow: /admin/trade-review
+Disallow: /compliance/
 Disallow: /pay/
 Disallow: /concierge
 Disallow: /collectibles

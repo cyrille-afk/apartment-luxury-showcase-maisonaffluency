@@ -7465,6 +7465,78 @@ export type Database = {
         }
         Relationships: []
       }
+      sub_processor_registry: {
+        Row: {
+          created_at: string
+          data_categories: string
+          dpa_countersigned_at: string | null
+          dpa_reference: string | null
+          dpa_status: Database["public"]["Enums"]["dpa_status"]
+          dpa_url: string | null
+          entity_country: string
+          hosting_regions: string | null
+          id: string
+          is_active: boolean
+          last_reviewed_at: string | null
+          notes: string | null
+          privacy_url: string | null
+          purpose: string
+          reviewed_by: string | null
+          service: string
+          sort_order: number
+          transfer_mechanism: string | null
+          updated_at: string
+          vendor_name: string
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          data_categories: string
+          dpa_countersigned_at?: string | null
+          dpa_reference?: string | null
+          dpa_status?: Database["public"]["Enums"]["dpa_status"]
+          dpa_url?: string | null
+          entity_country: string
+          hosting_regions?: string | null
+          id?: string
+          is_active?: boolean
+          last_reviewed_at?: string | null
+          notes?: string | null
+          privacy_url?: string | null
+          purpose: string
+          reviewed_by?: string | null
+          service: string
+          sort_order?: number
+          transfer_mechanism?: string | null
+          updated_at?: string
+          vendor_name: string
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          data_categories?: string
+          dpa_countersigned_at?: string | null
+          dpa_reference?: string | null
+          dpa_status?: Database["public"]["Enums"]["dpa_status"]
+          dpa_url?: string | null
+          entity_country?: string
+          hosting_regions?: string | null
+          id?: string
+          is_active?: boolean
+          last_reviewed_at?: string | null
+          notes?: string | null
+          privacy_url?: string | null
+          purpose?: string
+          reviewed_by?: string | null
+          service?: string
+          sort_order?: number
+          transfer_mechanism?: string | null
+          updated_at?: string
+          vendor_name?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       suppliers: {
         Row: {
           active: boolean
@@ -10406,6 +10478,7 @@ export type Database = {
         | "contract"
         | "other"
       client_type: "company" | "studio" | "individual"
+      dpa_status: "pending" | "signed" | "executed"
       journal_category:
         | "designer_interview"
         | "collection_story"
@@ -10590,6 +10663,7 @@ export const Constants = {
         "other",
       ],
       client_type: ["company", "studio", "individual"],
+      dpa_status: ["pending", "signed", "executed"],
       journal_category: [
         "designer_interview",
         "collection_story",
