@@ -4,7 +4,7 @@ import { Navigate, Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, Copy, Eye, EyeOff, Lock, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { usePaymentMode } from "@/hooks/usePaymentMode";
+import { usePaymentMode, type PaymentModeStatus } from "@/hooks/usePaymentMode";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -90,6 +90,8 @@ export default function TradeAdminPaymentSettings() {
     webhookSecret: false,
   });
   const [copied, setCopied] = useState(false);
+  const [revealedSaved, setRevealedSaved] = useState<Record<string, boolean>>({});
+  const [copyingSaved, setCopyingSaved] = useState<string | null>(null);
   const [recipients, setRecipientsState] = useState("");
   const [recipientsDirty, setRecipientsDirty] = useState(false);
   const [savingRecipients, setSavingRecipients] = useState(false);
@@ -353,6 +355,30 @@ export default function TradeAdminPaymentSettings() {
     setTimeout(() => setCopied(false), 2500);
   };
 
+  const copySavedField = async (field: string) => {
+    if (!status?.[field as keyof PaymentModeStatus]) return;
+    setCopyingSaved(field);
+    try {
+      const { data, error } = await supabase.functions.invoke("payment-credentials", {
+        body: { action: "reveal_field", field },
+      });
+      if (error) throw error;
+      const value = (data as { value?: string })?.value ?? "";
+      if (!value) throw new Error("No saved value found");
+      await navigator.clipboard.writeText(value);
+      setRevealedSaved((r) => ({ ...r, [field]: true }));
+      setTimeout(() => setRevealedSaved((r) => ({ ...r, [field]: false })), 2500);
+    } catch (e) {
+      toast({
+        title: "Could not copy saved key",
+        description: e instanceof Error ? e.message : "Unexpected error",
+        variant: "destructive",
+      });
+    } finally {
+      setCopyingSaved(null);
+    }
+  };
+
   const fieldError = (key: FieldKey): string | null => {
     const raw = values[key].replace(/\s/g, "");
     if (!raw) return null;
@@ -492,13 +518,30 @@ export default function TradeAdminPaymentSettings() {
           {FIELDS.map((f) => (
             <div key={f.key} className="rounded-sm border border-border/70 bg-background px-3 py-2">
               <dt className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{f.label}</dt>
-              <dd className="mt-1 font-body text-sm">
+              <dd className="mt-1 flex items-center justify-between gap-2 font-body text-sm">
                 {status?.[f.key] ? (
                   <span className="inline-flex items-center gap-1.5 text-[hsl(var(--jade))]">
                     <ShieldCheck className="h-3.5 w-3.5" /> {status[f.key]}
                   </span>
                 ) : (
                   <span className="text-muted-foreground">Not configured</span>
+                )}
+                {status?.[f.key] && (
+                  <button
+                    type="button"
+                    aria-label={`Copy saved ${f.label}`}
+                    onClick={() => copySavedField(f.key)}
+                    className="text-muted-foreground hover:text-foreground"
+                    title="Copy saved key to clipboard"
+                  >
+                    {revealedSaved[f.key] ? (
+                      <Check className="h-3.5 w-3.5 text-[hsl(var(--jade))]" />
+                    ) : copyingSaved === f.key ? (
+                      <span className="font-body text-[10px]">…</span>
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
+                  </button>
                 )}
               </dd>
             </div>
@@ -638,22 +681,41 @@ export default function TradeAdminPaymentSettings() {
                   {savingTestField === f.key ? "Saving…" : "Save key"}
                 </Button>
               </div>
-              <p
-                className={`mt-1 font-body text-xs ${
-                  testFieldError(f.key)
-                    ? "text-destructive"
-                    : savedTestFields[f.key]
-                      ? "text-[hsl(var(--jade))]"
-                      : "text-muted-foreground"
-                }`}
-              >
-                {testFieldError(f.key) ??
-                  (savedTestFields[f.key]
-                    ? "Saved ✓ stored securely — the box is intentionally blank."
-                    : status?.[f.key]
-                      ? `Configured: ${status[f.key]}`
-                      : f.hint)}
-              </p>
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <p
+                  className={`font-body text-xs ${
+                    testFieldError(f.key)
+                      ? "text-destructive"
+                      : savedTestFields[f.key]
+                        ? "text-[hsl(var(--jade))]"
+                        : "text-muted-foreground"
+                  }`}
+                >
+                  {testFieldError(f.key) ??
+                    (savedTestFields[f.key]
+                      ? "Saved ✓ stored securely — the box is intentionally blank."
+                      : status?.[f.key]
+                        ? `Configured: ${status[f.key]}`
+                        : f.hint)}
+                </p>
+                {status?.[f.key] && (
+                  <button
+                    type="button"
+                    aria-label={`Copy saved ${f.label}`}
+                    onClick={() => copySavedField(f.key)}
+                    className="text-muted-foreground hover:text-foreground"
+                    title="Copy saved key to clipboard"
+                  >
+                    {revealedSaved[f.key] ? (
+                      <Check className="h-3.5 w-3.5 text-[hsl(var(--jade))]" />
+                    ) : copyingSaved === f.key ? (
+                      <span className="font-body text-[10px]">…</span>
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>

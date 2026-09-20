@@ -161,6 +161,30 @@ serve(async (req) => {
       if (error) throw error;
     }
 
+    if (action === "reveal_field") {
+      const field = String(body.field ?? "");
+      const columns: Record<string, string> = {
+        publishableKey: "live_publishable_key",
+        secretKey: "live_secret_key",
+        webhookSecret: "live_webhook_secret",
+        testPublishableKey: "test_publishable_key",
+        testSecretKey: "test_secret_key",
+        testWebhookSecret: "test_webhook_secret",
+      };
+      const column = columns[field];
+      if (!column) throw new Error("Unknown credential field");
+      const { data: revealRow, error: revealErr } = await admin
+        .from("payment_credentials")
+        .select(column)
+        .eq("id", "live")
+        .maybeSingle();
+      if (revealErr) throw revealErr;
+      return new Response(
+        JSON.stringify({ value: (revealRow?.[column] as string | null) ?? "" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
+      );
+    }
+
     const { data: row } = await admin
       .from("payment_credentials")
       .select("live_publishable_key, live_secret_key, live_webhook_secret, test_publishable_key, test_secret_key, test_webhook_secret, whatsapp_recipients, live_mode, updated_at")
