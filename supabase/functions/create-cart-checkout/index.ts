@@ -286,16 +286,72 @@ serve(async (req) => {
           ? body.buyerGstNumber
           : "",
     );
+    // The client never decides whether a registration is verified: re-run the
+    // VIES / HMRC check here. Anything but a confirmed "valid" charges
+    // standard destination VAT.
+    const verification =
+      buyerType === "business" && buyerTaxId
+        ? await verifyVatNumber(buyerTaxId, shippingCountry)
+        : null;
+
+    // ---- Customs manifest (HS6 + duty rate + origin), read from the catalogue
+    // so landed cost is reproducible from the order record alone.
+    const customsByPick = new Map<string, { hs6: string | null; duty: number | null; origin: string | null }>();
+    {
+      const ids = Array.from(
+        new Set(
+          (lines as any[])
+            .map((l) => {
+              const row = byPick.get(String(l.pick_id));
+              return String(row?.source_pick_id || row?.id || l.pick_id || "");
+            })
+            .filter(Boolean),
+        ),
+      );
+      if (ids.length) {
+        const { data: customsRows } = await supabaseAdmin
+          .from("designer_curator_picks")
+          .select("id, hs6_code, duty_rate, origin")
+          .in("id", ids);
+        for (const r of customsRows || []) {
+          customsByPick.set(String((r as any).id), {
+            hs6: (r as any).hs6_code ?? null,
+            duty: Number.isFinite(Number((r as any).duty_rate)) ? Number((r as any).duty_rate) : null,
+            origin: (r as any).origin ?? null,
+          });
+        }
+      }
+    }
+    const discountRatio = grossSubtotal > 0 ? subtotal / grossSubtotal : 1;
+    const customsLineFor = (l: any) => {
+      const row = byPick.get(String(l.pick_id));
+      const resolvedId = String(row?.source_pick_id || row?.id || l.pick_id || "");
+      const c = customsByPick.get(resolvedId);
+      return {
+        hs6Code: c?.hs6 ?? null,
+        dutyRate: c?.duty ?? null,
+        originCountry: c?.origin ?? null,
+        lineTotalCents: Math.round(l.line_total_cents * discountRatio),
+      };
+    };
+    const customsLines = (lines as any[]).map(customsLineFor);
+
     const treatment = resolveTaxTreatment({
       country: shippingCountry,
       currency,
       buyerType,
       buyerTaxId,
+      buyerTaxIdVerified: verification?.valid === true,
       goodsCents: subtotal,
       shippingCents: shipping,
+      goodsEurCents: currency.toUpperCase() === "EUR" ? subtotal : null,
+      shipFromCountry:
+        typeof body?.shipFromCountry === "string" ? body.shipFromCountry.toUpperCase() : null,
+      lines: customsLines,
     });
     const taxCents = treatment.taxCents;
-    const total = subtotal + shipping + taxCents;
+    const clearanceFeeCents = treatment.clearanceFeeCents;
+    const total = subtotal + shipping + taxCents + clearanceFeeCents;
 
     const deliveryTerm = body?.incoterm === "DDP" ? "DDP" : body?.incoterm === "DDU" ? "DDU" : null;
     const boundedCents = (value: unknown) => {
