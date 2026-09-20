@@ -133,7 +133,9 @@ serve(async (req) => {
       headers: { "Lovable-API-Key": apiKey, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: tokenBudget("tasteProfile"),
+        // Roster-grounded JSON reply; a tight budget truncates the object and
+        // the parse fails, so keep explicit headroom here.
+        max_tokens: Math.max(600, tokenBudget("tasteProfile")),
         response_format: { type: "json_object" },
         messages: [{ role: "user", content: prompt }],
       }),
