@@ -466,6 +466,11 @@ Deno.serve(async (req) => {
   // PDFs by link), so both paths give the model the full document contents.
   let docPart: Record<string, unknown> | null = null;
   let docNote = "No credential document uploaded.";
+  // Fraud heuristics collected before the model runs. Any entry forces human
+  // triage; none of them can ever produce an approval.
+  const fraudFlags: { code: string; detail: string }[] = [];
+  let credentialSha: string | null = null;
+  let duplicateOf: string | null = null;
   if (app.credential_document_path) {
     // 5-minute signed read URL so the model has explicit access to the file.
     const { data: signed } = await admin.storage
