@@ -2929,18 +2929,80 @@ function buildPlanDirective(extracted: ExtractedBrief): string {
   ].filter(Boolean).join("\n");
 }
 
-/** Retrieve top-K relevant catalog pieces via pgvector instead of loading 2000 rows. */
+// ============================================================
+// Canonical RAG retrieval — runs ENTIRELY against the
+// `match_products` pgvector RPC (product_embeddings table).
+//   1. Embed the architect's brief (text-embedding-3-small, 1536 dims).
+//   2. RPC match_products(query_embedding, 0.78 threshold, 5 matches).
+//   3. ZERO-MATCH INTERCEPT: empty array OR top similarity < 0.78 →
+//      hard-stop; return a terminal zero-match directive instead of
+//      passing any data payload to the LLM generation phase.
+//   4. SUCCESS: pass exact content_chunk / verbatim_title /
+//      designer_name into the curatorial context window.
+// ============================================================
+const MATCH_PRODUCTS_THRESHOLD = 0.78;
+const MATCH_PRODUCTS_LIMIT = 5;
+
+type ProductMatchRow = {
+  id: string;
+  product_id: string;
+  designer_name: string;
+  verbatim_title: string;
+  dimensions_json: any;
+  design_taxonomy: string[] | null;
+  content_chunk: string;
+  similarity: number;
+};
+
+/** Map a match_products row into the internal catalog-row shape the rest of the pipeline consumes. */
+function mapProductMatch(r: ProductMatchRow): any {
+  const dj = r.dimensions_json || {};
+  const dims = ["width_mm", "depth_mm", "height_mm"]
+    .map((k) => (typeof dj[k] === "number" && dj[k] > 0 ? `${k.replace("_mm", "").toUpperCase()} ${dj[k]} mm` : null))
+    .filter(Boolean)
+    .join(" × ");
+  return {
+    id: r.product_id,
+    title: r.verbatim_title,
+    designer: r.designer_name,
+    description: r.content_chunk,
+    materials: Array.isArray(r.design_taxonomy) ? r.design_taxonomy.join(", ") : "",
+    dimensions: dims || null,
+    dimensions_json: r.dimensions_json ?? null,
+    similarity: typeof r.similarity === "number" ? r.similarity : null,
+    source: "product_embeddings",
+  };
+}
+
+/** Terminal zero-match directive — no data payload reaches the generation phase. */
+function buildZeroMatchIntercept(query: string, nearest: ProductMatchRow | null): { contextText: string; rows: any[] } {
+  const nearestLine = nearest
+    ? `Closest verified record in the Maison Affluency Curation (use it verbatim as THE ARCHITECTURAL COUNTER-PROPOSAL): "${nearest.verbatim_title}" by ${nearest.designer_name} (similarity ${Number(nearest.similarity ?? 0).toFixed(3)}, below the 0.78 verification floor).`
+    : "The Curation holds no adjacent record for this brief; omit the counter-proposal step rather than inventing one.";
+  return {
+    contextText: [
+      "ZERO-MATCH INTERCEPT — DETERMINISTIC, NON-NEGOTIABLE. The pgvector retrieval against the Maison Affluency Curation returned zero verified records at the 0.78 similarity floor for this spatial brief. The generation phase receives NO catalog payload.",
+      "You MUST abort any selection / proposal / tearsheet / quote plan for this turn and answer ONLY with the ZERO-MATCH PROTOCOL structure defined above: state the exact constraint intersection that produced the gap, present the counter-proposal below, offer 2–3 constraint-relaxation pivots, and end with the relaxation pivot question. No tearsheet card. No other pieces. No apologetic filler.",
+      `Constraint intersection that produced the gap: ${query.slice(0, 300)}`,
+      nearestLine,
+    ].join("\n"),
+    rows: [],
+  };
+}
+
+/** Retrieve the top-5 verified catalog pieces via the match_products RPC. */
 async function loadRelevantPieces(
 
   supabase: ConciergeDbClient,
   apiKey: string,
   query: string,
   userId: string | null,
-  k = 40,
+  k = MATCH_PRODUCTS_LIMIT,
   hardConstraints?: HardConstraints,
 ): Promise<{ contextText: string; rows: any[] } | null> {
   if (!apiKey || !query?.trim()) return null;
   try {
+    // Step 1 — 1536-dim embedding of the spatial brief (text-embedding-3-small via LOVABLE_API_KEY).
     const vec = await embedQuery(apiKey, query);
     if (!vec) return null;
     logAiUsage({
@@ -2948,152 +3010,96 @@ async function loadRelevantPieces(
       model: "openai/text-embedding-3-small",
       usage: { prompt_tokens: Math.ceil(query.length / 4), completion_tokens: 0, total_tokens: Math.ceil(query.length / 4) },
     }).catch(() => {});
-    // Over-fetch when hard constraints will filter the shortlist, so we still
-    // have enough survivors for the AI to reason over. Dimension constraints
-    // are strict + can drop unknown-dim rows, so they widen the multiplier too.
+
+    // Step 2 — match_products RPC at the strict 0.78 verification floor, top 5.
+    const { data: rawData, error } = await supabase.rpc("match_products", {
+      query_embedding: vec as any,
+      match_threshold: MATCH_PRODUCTS_THRESHOLD,
+      match_count: MATCH_PRODUCTS_LIMIT,
+    });
+    if (error) {
+      // Infrastructure failure (not a zero-match): let the caller fall back.
+      console.error("match_products rpc failed:", error.message);
+      return null;
+    }
+    const matches = (Array.isArray(rawData) ? rawData : []) as ProductMatchRow[];
+    const topSimilarity = matches.length ? Number(matches[0]?.similarity ?? 0) : 0;
+
+    // Step 3 — ZERO-MATCH INTERCEPT: empty array OR top similarity strictly below 0.78
+    // → hard-stop the pipeline. Fetch the single nearest record (threshold 0) solely
+    // to name the closest verbatim title inside the counter-proposal.
+    if (matches.length === 0 || !(topSimilarity >= MATCH_PRODUCTS_THRESHOLD)) {
+      console.warn("[concierge RAG] ZERO-MATCH INTERCEPT", {
+        matches: matches.length,
+        topSimilarity,
+        threshold: MATCH_PRODUCTS_THRESHOLD,
+        query: query.slice(0, 160),
+      });
+      let nearest: ProductMatchRow | null = matches[0] ?? null;
+      if (!nearest) {
+        try {
+          const { data: nearestRows } = await supabase.rpc("match_products", {
+            query_embedding: vec as any,
+            match_threshold: 0,
+            match_count: 1,
+          });
+          nearest = Array.isArray(nearestRows) && nearestRows.length ? (nearestRows[0] as ProductMatchRow) : null;
+        } catch { /* nearest title is best-effort */ }
+      }
+      return buildZeroMatchIntercept(query, nearest);
+    }
+
+    // Step 4 — SUCCESS STATE: exact content_chunk / verbatim_title / designer_name
+    // fields feed the curatorial context window.
+    let data = matches.map(mapProductMatch);
+
+    // Post-retrieval guards: the same hard-constraint and dimension predicates the
+    // SQL path uses. If they empty the verified shortlist, that IS a zero-match.
     const dimConstraints: DimensionConstraints | null = inferDimensionConstraints(query);
-    const leadConstraints: LeadTimeConstraints | null = inferLeadTimeConstraints(query);
     const wantsConstraintFilter = !!hardConstraints && (
       (hardConstraints.materials?.length || 0) +
       (hardConstraints.colors?.length || 0) +
       (hardConstraints.categories?.length || 0) > 0
     );
-    const wantsDimFilter = !!dimConstraints;
-    const wantsLeadFilter = !!leadConstraints;
-    const matchCount = (wantsConstraintFilter || wantsDimFilter || wantsLeadFilter) ? Math.min(k * 4, 200) : k;
-    const { data: rawData, error } = await supabase.rpc("match_catalog", {
-      query_embedding: vec as any,
-      match_count: matchCount,
-    });
-    if (error || !Array.isArray(rawData) || rawData.length < 5) {
-      if (error) console.error("match_catalog rpc failed:", error.message);
-      return null;
+    if (wantsConstraintFilter) {
+      const pre = data.length;
+      data = filterRowsByHardConstraints(data, hardConstraints!);
+      console.log(`[concierge RAG] hard-constraint filter pre=${pre} kept=${data.length}`);
     }
-    // Post-filter the pgvector shortlist with the same token dictionary the
-    // SQL path uses, so hard constraints (color, material, category, brand
-    // exclusion) apply identically whether we use vector or bulk SQL.
-    let filtered = wantsConstraintFilter
-      ? filterRowsByHardConstraints(rawData, hardConstraints!)
-      : rawData;
-    // Hard dimension constraints — deterministic mm parse; unknowns dropped in
-    // strict mode, safety-valve keeps them only if <2 survivors.
-    if (wantsDimFilter) {
-      const dimRes = filterRowsByDimensionConstraints(filtered as any[], dimConstraints);
-      console.log(`[concierge RAG dim] pre=${filtered.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
-      filtered = dimRes.kept as any[];
-    }
-    // Hard lead-time ceiling / floor / in-stock-only — parsed from row.lead_time
-    // with brand_lead_times fallback for unresolved rows.
-    if (wantsLeadFilter) {
-      const brandIdx = await getBrandLeadTimeIndex(supabase);
-      const leadRes = filterRowsByLeadTimeConstraints(filtered as any[], leadConstraints!, brandIdx);
-      console.log(`[concierge RAG lead] pre=${filtered.length} kept=${leadRes.kept.length} dropped=${leadRes.dropped} unknownDropped=${leadRes.unknownDropped} fellBack=${leadRes.fellBack} constraints=${JSON.stringify(leadConstraints)}`);
-      filtered = leadRes.kept as any[];
-    }
-    let data = filtered.slice(0, k);
-    let usedFallback = false;
-    if (data.length < 3 && !wantsConstraintFilter) {
-      // Filter too strict — fall back to the unfiltered top-K so the UI still
-      // renders a curated Private Exhibition set rather than looking empty.
-      console.warn("[concierge RAG] hard constraints filtered <3 rows; falling back to unfiltered top-K", {
-        constraints: hardConstraints,
-        dimConstraints,
-        preFilter: rawData.length,
-        postFilter: filtered.length,
-      });
-      data = (rawData as any[]).slice(0, k);
-      usedFallback = true;
-    } else if (data.length < 3 && wantsConstraintFilter) {
-      console.warn("[concierge RAG] hard constraints filtered <3 rows; keeping strict shortlist", {
-        constraints: hardConstraints,
-        dimConstraints,
-        preFilter: rawData.length,
-        postFilter: filtered.length,
-      });
+    if (dimConstraints && data.length) {
+      const dimRes = filterRowsByDimensionConstraints(data as any[], dimConstraints);
+      console.log(`[concierge RAG dim] pre=${data.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
+      data = dimRes.kept as any[];
     }
     if (data.length === 0) {
-      return { contextText: "", rows: [] };
+      let nearest: ProductMatchRow | null = null;
+      try {
+        const { data: nearestRows } = await supabase.rpc("match_products", {
+          query_embedding: vec as any,
+          match_threshold: 0,
+          match_count: 1,
+        });
+        nearest = Array.isArray(nearestRows) && nearestRows.length ? (nearestRows[0] as ProductMatchRow) : null;
+      } catch { /* best-effort */ }
+      return buildZeroMatchIntercept(query, nearest);
     }
-    const fmtLead = (r: any) => (r.lead_time ? String(r.lead_time).trim() : "");
-    const fmtStock = (r: any) => (r.stock_status ? String(r.stock_status).trim() : "");
-    const fmtShip = (r: any) =>
-      r.default_ship_mode
-        ? ({ sea_lcl: "sea (LCL)", sea_fcl: "sea (FCL)", air: "air", road: "road", courier: "courier" } as Record<string, string>)[
-            String(r.default_ship_mode)
-          ] || String(r.default_ship_mode)
-        : "";
-    const fmtPrice = (r: any) => {
-      if (!r.trade_price_cents || r.trade_price_cents <= 0) return "Price upon Request";
-      const amt = Math.round(r.trade_price_cents / 100).toLocaleString("en-US");
-      const cur = r.currency || "EUR";
-      const px = r.price_prefix ? `${r.price_prefix} ` : "";
-      return `${px}${cur} ${amt}`;
-    };
 
+    data = data.slice(0, MATCH_PRODUCTS_LIMIT);
     const lines = data.map((r: any) => {
-      const meta = [r.subcategory || r.category, r.materials].filter(Boolean).join(" · ");
-      const facts = [
-        fmtLead(r) && `lead ${fmtLead(r)}`,
-        fmtStock(r) && `stock ${fmtStock(r)}`,
-        r.origin && `origin ${r.origin}`,
-        fmtShip(r) && `ships ${fmtShip(r)}`,
-        `price ${fmtPrice(r)}`,
-      ]
-        .filter(Boolean)
-        .join(" · ");
-      return `- "${r.title}" by ${r.designer}${meta ? ` (${meta})` : ""} — ${facts} [id: ${r.id}]`;
+      const meta = [r.materials, r.dimensions].filter(Boolean).join(" · ");
+      const sim = typeof r.similarity === "number" ? `similarity ${r.similarity.toFixed(3)}` : "";
+      return `- "${r.title}" by ${r.designer}${meta ? ` (${meta})` : ""} — ${r.description}${sim ? ` [${sim}]` : ""} [id: ${r.id}]`;
     });
 
-    // ---- Aggregate "collective" context so the model can reason across the set ----
-    const parseLeadWeeks = (s: string): [number, number] | null => {
-      if (!s) return null;
-      const m = String(s).toLowerCase().match(/(\d+)(?:\s*[–-]\s*(\d+))?\s*(week|wk|month|mo)/);
-      if (!m) return null;
-      const mult = m[3].startsWith("mo") ? 4 : 1;
-      const lo = parseInt(m[1], 10) * mult;
-      const hi = m[2] ? parseInt(m[2], 10) * mult : lo;
-      return [lo, hi];
-    };
-    const leadRanges = data.map((r: any) => parseLeadWeeks(r.lead_time || "")).filter(Boolean) as [number, number][];
-    const withLead = leadRanges.length;
-    const leadMin = withLead ? Math.min(...leadRanges.map((r) => r[0])) : null;
-    const leadMax = withLead ? Math.max(...leadRanges.map((r) => r[1])) : null;
-    const inStockCount = data.filter((r: any) => /in[\s_-]?stock|available|ready/i.test(String(r.stock_status || ""))).length;
-    const originCounts: Record<string, number> = {};
-    for (const r of data as any[]) if (r.origin) originCounts[r.origin] = (originCounts[r.origin] || 0) + 1;
-    const topOrigins = Object.entries(originCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(([o, n]) => `${o} (${n})`)
-      .join(", ");
-    const materialCounts: Record<string, number> = {};
-    for (const r of data as any[]) {
-      const mats = String(r.materials || "")
-        .split(/[,;/·]+/)
-        .map((m: string) => m.trim().toLowerCase())
-        .filter(Boolean);
-      for (const m of mats) materialCounts[m] = (materialCounts[m] || 0) + 1;
-    }
-    const topMaterials = Object.entries(materialCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([m, n]) => `${m} (${n})`)
-      .join(", ");
-
     const summaryBits = [
-      `${data.length} pieces retrieved`,
-      withLead ? `lead-time range ${leadMin}–${leadMax} weeks (parsed from ${withLead}/${data.length} items)` : null,
-      inStockCount ? `${inStockCount} flagged in stock / ready` : null,
-      topOrigins ? `origins: ${topOrigins}` : null,
-      topMaterials ? `common materials: ${topMaterials}` : null,
-    ].filter(Boolean);
+      `${data.length} verified pieces retrieved above the ${MATCH_PRODUCTS_THRESHOLD} similarity floor`,
+      `top similarity ${topSimilarity.toFixed(3)}`,
+    ];
 
     const contextText = [
-      usedFallback
-        ? "Note: the user's hard constraints (colour / material / typology) yielded zero exact matches, so the lines below are the CLOSEST curated pieces by semantic relevance — offered as a fallback Private Exhibition so the client never sees an empty edit. When you present them, acknowledge in one short sentence that these are the nearest matches (not exact) and invite the user to relax one axis for a tighter fit. Never claim they satisfy every stated constraint."
-        : "Note: the lines below are the curated pieces most semantically relevant to the user's latest query (top-K retrieval, not the full Curation). If the user asks for a broad scan and nothing here matches, say so plainly and ask whether to broaden typology/material constraints inside the Maison Affluency Curation.",
+      "Note: the lines below are verified semantic matches from the Maison Affluency Curation (pgvector retrieval, similarity ≥ 0.78). Each carries its scholarly content_chunk — re-voice it through the curatorial persona; never copy the raw chunk verbatim into client-facing prose, and keep exact titles, designers, dimensions and ids unchanged. If the user asks for a broader scan than these verified matches cover, say so plainly and ask whether to broaden typology/material constraints inside the Maison Affluency Curation.",
       "",
-      `Collective context (reason across the whole set, not just individual items): ${summaryBits.join(" · ")}. Use this to make holistic statements when relevant (e.g. "all of these ship within 4 weeks", "the whole edit is European-made", "most pieces share an oak / brass palette"). Only assert a collective fact when it truly holds for every item you propose.`,
+      `Collective context: ${summaryBits.join(" · ")}.`,
       "",
       lines.join("\n"),
     ].join("\n");
