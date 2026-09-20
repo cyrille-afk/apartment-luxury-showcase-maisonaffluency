@@ -1,50 +1,59 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Shield } from "lucide-react";
+import {
+  ALLOW_ALL,
+  DENY_ALL,
+  CONSENT_EVENT,
+  type ConsentScopes,
+  bootstrapConsent,
+  getScopes,
+  needsConsentPrompt,
+  saveConsent,
+} from "@/lib/consent/consentStore";
 
 /**
- * Minimal GDPR cookie consent banner.
- * Blocks GA4 until the user explicitly accepts.
- * Persists choice in BOTH localStorage ('cookie_consent') and a 1-year
- * first-party cookie ('cookie_consent') so the banner never remounts
- * after accept/decline — even if localStorage is cleared.
+ * GDPR / CNIL compliant consent layer.
+ *
+ * Layer 1 — three equally weighted actions: Accept All, Reject All,
+ *           Manage Preferences. No dark patterns, no pre-ticked boxes.
+ * Layer 2 — granular per-category toggles (necessary locked on).
+ * Always  — a persistent shield trigger so consent can be withdrawn anytime.
+ *
+ * Runs on every surface: public routes, /trade/* and the installed PWA.
  */
-const CONSENT_KEY = "cookie_consent";
-const CONSENT_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
-const readConsentCookie = (): string | null => {
-  try {
-    const match = document.cookie.match(
-      new RegExp("(?:^|; )" + CONSENT_KEY + "=([^;]*)")
-    );
-    return match ? decodeURIComponent(match[1]) : null;
-  } catch {
-    return null;
-  }
-};
-
-const writeConsent = (value: "accepted" | "declined") => {
-  try { localStorage.setItem(CONSENT_KEY, value); } catch { /* ignore */ }
-  try {
-    const secure = window.location.protocol === "https:" ? "; Secure" : "";
-    document.cookie =
-      `${CONSENT_KEY}=${encodeURIComponent(value)}; Max-Age=${CONSENT_MAX_AGE}` +
-      `; Path=/; SameSite=Lax${secure}`;
-  } catch { /* ignore */ }
-};
-
-const readConsent = (): string | null => {
-  let v: string | null = null;
-  try { v = localStorage.getItem(CONSENT_KEY); } catch { /* ignore */ }
-  if (!v) v = readConsentCookie();
-  // Heal: if only one store has it, mirror to the other.
-  if (v === "accepted" || v === "declined") {
-    try {
-      if (localStorage.getItem(CONSENT_KEY) !== v) localStorage.setItem(CONSENT_KEY, v);
-    } catch { /* ignore */ }
-    if (readConsentCookie() !== v) writeConsent(v);
-  }
-  return v;
-};
+const CATEGORIES: {
+  key: keyof ConsentScopes;
+  label: string;
+  description: string;
+  locked?: boolean;
+}[] = [
+  {
+    key: "necessary",
+    label: "Strictly necessary",
+    description:
+      "Sign-in, basket, security and fraud prevention. Required for the site to work.",
+    locked: true,
+  },
+  {
+    key: "functional",
+    label: "Functional",
+    description:
+      "Remembers your currency, saved views and concierge conversation preferences.",
+  },
+  {
+    key: "analytics",
+    label: "Analytics",
+    description:
+      "Anonymous measurement of pages and journeys so we can improve the experience.",
+  },
+  {
+    key: "marketing",
+    label: "Marketing & targeting",
+    description:
+      "Advertising measurement and advanced fraud telemetry from our payment partner.",
+  },
+];
 
 const shouldDeferOnDesignersMobileHero = (): boolean => {
   if (typeof window === "undefined") return false;
@@ -58,59 +67,35 @@ const shouldDeferOnDesignersMobileHero = (): boolean => {
 const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
   const [fading, setFading] = useState(false);
-  const [consented, setConsented] = useState(false);
+  const [managing, setManaging] = useState(false);
+  const [draft, setDraft] = useState<ConsentScopes>(DENY_ALL);
+
+  useEffect(() => {
+    bootstrapConsent();
+  }, []);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("mobile_preview") === "1") return;
-    // Consent is a public-site concern. Never cover authenticated trade/admin
-    // workspaces, where the fixed banner can obstruct editor controls.
-    if (window.location.pathname.startsWith("/trade")) return;
-    const isStandaloneHomeLaunch =
-      window.location.pathname === "/" &&
-      !window.location.hash &&
-      (
-        new URLSearchParams(window.location.search).get("source") === "pwa" ||
-        window.matchMedia?.("(display-mode: standalone)").matches ||
-        (window.navigator as any).standalone === true
-      );
-    if (isStandaloneHomeLaunch) return;
+    if (!needsConsentPrompt()) return;
 
-    const consent = readConsent();
-    if (consent) {
-      setConsented(true);
-      return;
-    }
-
-
-    // Never mount during the LCP measurement window. Lighthouse keeps
-    // updating LCP until the page reaches network idle, so it's not enough
-    // to wait for the first LCP entry — the hero image often finalises
-    // later and we must let it win. Strategy:
-    //   1. Wait for window 'load' (all sub-resources, incl. hero, decoded).
-    //   2. Then wait an additional idle/3s buffer so any late LCP candidate
-    //      has been recorded before we inject a fixed bottom <p>.
-    //   3. Hard ceiling of 12s in case 'load' never fires.
     let cancelled = false;
     const timers: number[] = [];
-    const markMounted = () => {
+
+    const showBanner = () => {
+      if (cancelled) return;
+      cancelled = true;
       try {
         (window as unknown as { __cookieBannerMountedAt?: number }).__cookieBannerMountedAt =
           performance.now();
       } catch {
         /* ignore */
       }
-    };
-
-    const showBanner = () => {
-      if (cancelled) return;
-      cancelled = true;
-      markMounted();
+      setDraft(getScopes());
       setVisible(true);
     };
 
     const reveal = () => {
       if (cancelled) return;
-
       if (shouldDeferOnDesignersMobileHero()) {
         const release = () => {
           window.removeEventListener("unlockDesignersScroll", release);
@@ -126,33 +111,24 @@ const CookieConsent = () => {
         window.addEventListener("resize", onScroll, { passive: true });
         return;
       }
-
       showBanner();
     };
 
     const afterLoad = () => {
       if (cancelled) return;
-      const ric: typeof window.requestIdleCallback | undefined =
-        (window as any).requestIdleCallback;
-      if (ric) {
-        ric(reveal, { timeout: 3000 });
-      } else {
-        timers.push(window.setTimeout(reveal, 3000));
-      }
+      const ric: typeof window.requestIdleCallback | undefined = (window as any)
+        .requestIdleCallback;
+      if (ric) ric(reveal, { timeout: 3000 });
+      else timers.push(window.setTimeout(reveal, 3000));
     };
 
     const onLoad = () => {
-      // Extra 1.5s after load so any tail LCP entries settle.
       timers.push(window.setTimeout(afterLoad, 1500));
     };
 
-    if (document.readyState === "complete") {
-      onLoad();
-    } else {
-      window.addEventListener("load", onLoad, { once: true });
-    }
+    if (document.readyState === "complete") onLoad();
+    else window.addEventListener("load", onLoad, { once: true });
 
-    // Hard ceiling: even if 'load' never fires, show after 12s.
     timers.push(window.setTimeout(reveal, 12000));
 
     return () => {
@@ -161,7 +137,6 @@ const CookieConsent = () => {
       timers.forEach(clearTimeout);
     };
   }, []);
-
 
   useEffect(() => {
     const sync = () => {
@@ -172,73 +147,128 @@ const CookieConsent = () => {
     return () => window.removeEventListener("mobile-preview-open-change", sync);
   }, []);
 
-  const dismissWithFade = (after?: () => void) => {
-    setFading(true);
-    window.setTimeout(() => {
-      after?.();
-      setVisible(false);
-      setFading(false);
-      setConsented(true);
-    }, 300);
-  };
-
-  const accept = () => {
-    dismissWithFade(() => {
-      writeConsent("accepted");
-      // Load GA4 immediately
-      if (typeof (window as any).__loadGA4 === "function") {
-        (window as any).__loadGA4();
-      }
-    });
-  };
-
-  const decline = () => {
-    dismissWithFade(() => {
-      writeConsent("declined");
-      try { localStorage.setItem("ga_optout", "1"); } catch { /* ignore */ }
-    });
-  };
+  const commit = useCallback(
+    (scopes: ConsentScopes, method: "accept_all" | "reject_all" | "custom") => {
+      setFading(true);
+      window.setTimeout(() => {
+        saveConsent(scopes, method);
+        setVisible(false);
+        setManaging(false);
+        setFading(false);
+      }, 250);
+    },
+    []
+  );
 
   const reopen = () => {
-    setConsented(false);
+    setDraft(getScopes());
+    setManaging(true);
     setFading(false);
     setVisible(true);
   };
 
+  useEffect(() => {
+    const open = () => reopen();
+    window.addEventListener("ma-open-consent", open);
+    return () => window.removeEventListener("ma-open-consent", open);
+  }, []);
+
+  useEffect(() => {
+    const onChange = () => setDraft(getScopes());
+    window.addEventListener(CONSENT_EVENT, onChange);
+    return () => window.removeEventListener(CONSENT_EVENT, onChange);
+  }, []);
+
+  const equalButton =
+    "flex-1 min-w-[112px] rounded-full border border-border/60 bg-background/80 px-4 py-2 text-[11px] uppercase tracking-[0.15em] text-foreground font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
   return (
     <>
       {visible && (
         <div
-          className={`fixed bottom-6 left-6 z-50 max-w-[340px] transition-opacity duration-300 ease-in-out ${
+          role="dialog"
+          aria-modal="false"
+          aria-label="Cookie preferences"
+          className={`fixed bottom-4 left-4 right-4 sm:right-auto z-50 sm:max-w-[420px] transition-opacity duration-300 ease-in-out ${
             fading ? "opacity-0" : "opacity-100"
           }`}
         >
-          <div className="bg-card/70 backdrop-blur-md border border-border/40 rounded-full shadow-lg px-5 py-3 flex items-center gap-4">
-            <p className="text-xs tracking-[0.12em] lowercase text-muted-foreground leading-snug flex-1">
-              we use cookies to tune your studio ecosystem.
-            </p>
+          <div className="bg-card/95 backdrop-blur-md border border-border/50 rounded-2xl shadow-xl p-5 space-y-4">
+            <div className="space-y-1.5">
+              <p className="text-xs uppercase tracking-[0.18em] text-foreground font-medium">
+                Your privacy choices
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                We use strictly necessary cookies to run this site. With your permission we
+                also use functional, analytics and marketing cookies. You can change or
+                withdraw your choice at any time.{" "}
+                <a href="/privacy" className="underline underline-offset-2 hover:text-foreground">
+                  Privacy policy
+                </a>
+              </p>
+            </div>
 
-            <div className="flex items-center gap-3 shrink-0">
-              <button
-                onClick={decline}
-                className="text-xs uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Preferences
+            {managing && (
+              <ul className="space-y-3 border-t border-border/40 pt-3">
+                {CATEGORIES.map((c) => {
+                  const checked = c.locked ? true : (draft[c.key] as boolean);
+                  return (
+                    <li key={c.key} className="flex items-start gap-3">
+                      <input
+                        id={`consent-${c.key}`}
+                        type="checkbox"
+                        checked={checked}
+                        disabled={c.locked}
+                        onChange={(e) =>
+                          setDraft((d) => ({ ...d, [c.key]: e.target.checked }))
+                        }
+                        className="mt-0.5 h-4 w-4 accent-primary disabled:opacity-60"
+                      />
+                      <label htmlFor={`consent-${c.key}`} className="flex-1 cursor-pointer">
+                        <span className="block text-[11px] uppercase tracking-[0.14em] text-foreground">
+                          {c.label}
+                          {c.locked && (
+                            <span className="ml-2 normal-case tracking-normal text-muted-foreground">
+                              (always on)
+                            </span>
+                          )}
+                        </span>
+                        <span className="block text-xs text-muted-foreground leading-snug">
+                          {c.description}
+                        </span>
+                      </label>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className={equalButton} onClick={() => commit(DENY_ALL, "reject_all")}>
+                Reject all
               </button>
-              <button
-                onClick={accept}
-                className="text-xs uppercase tracking-[0.15em] text-foreground hover:text-muted-foreground transition-colors font-medium"
-              >
-                Accept
+              <button type="button" className={equalButton} onClick={() => commit(ALLOW_ALL, "accept_all")}>
+                Accept all
               </button>
+              {managing ? (
+                <button
+                  type="button"
+                  className={equalButton}
+                  onClick={() => commit({ ...draft, necessary: true }, "custom")}
+                >
+                  Save choices
+                </button>
+              ) : (
+                <button type="button" className={equalButton} onClick={() => setManaging(true)}>
+                  Manage preferences
+                </button>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Persistent privacy trigger — reopen settings anytime */}
-      {!visible && consented && (
+      {!visible && (
         <button
           onClick={reopen}
           aria-label="Cookie preferences"
@@ -251,12 +281,6 @@ const CookieConsent = () => {
   );
 };
 
-export const hasCookieConsent = (): boolean => {
-  if (typeof window === "undefined") return false;
-  try { if (window.localStorage.getItem(CONSENT_KEY) === "accepted") return true; }
-  catch { /* ignore */ }
-  return readConsentCookie() === "accepted";
-};
-
+export const hasCookieConsent = (): boolean => getScopes().analytics;
 
 export default CookieConsent;

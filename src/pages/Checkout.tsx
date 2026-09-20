@@ -5,6 +5,8 @@ import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import { Lock, Check, Loader2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { hasConsent } from "@/lib/consent/consentStore";
+
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getCart, clearCart, rehydrateCart, useCart } from "@/lib/cart";
@@ -2495,7 +2497,15 @@ export default function Checkout() {
             ? { cents: serverShippingCents, label: String(pi?.shippingLabel || "") }
             : null,
         );
-        if (needsConfig) setStripePromise(loadStripe(cfg.publishableKey));
+        if (needsConfig)
+          setStripePromise(
+            loadStripe(cfg.publishableKey, {
+              // Stripe's advanced fraud telemetry is a marketing-category
+              // third-party beacon: only enabled with explicit consent.
+              advancedFraudSignals: hasConsent("marketing"),
+            } as Parameters<typeof loadStripe>[1]),
+          );
+
         setClientSecret(pi.clientSecret);
       } catch (err: any) {
         setError(err?.message || "Unable to start checkout.");

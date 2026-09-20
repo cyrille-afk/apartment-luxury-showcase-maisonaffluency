@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { initScrollDepthTracking } from "@/lib/analytics";
+import { hasConsent } from "@/lib/consent/consentStore";
+
 
 /**
  * Tracks page views in GA4. Waits for gtag to be available
@@ -17,7 +19,9 @@ const usePageTracking = () => {
 
   useEffect(() => {
     const sendPageView = () => {
+      if (!hasConsent("analytics")) return false;
       if (typeof window !== "undefined" && (window as any).gtag) {
+
         (window as any).gtag("event", "page_view", {
           page_path: location.pathname + location.search + location.hash,
           page_title: document.title,
