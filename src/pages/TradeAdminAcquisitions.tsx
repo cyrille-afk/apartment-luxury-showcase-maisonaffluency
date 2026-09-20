@@ -508,19 +508,19 @@ const TradeAdminAcquisitions = () => {
                   />
                 </th>
                 {[
-                  "Studio Name",
-                  "Contact",
-                  "Outreach Vector",
-                  "Instagram",
-                  "Aesthetic Profile",
-                  "Matched Designers",
-                  "Verification",
+                  { label: "Studio Name", width: "min-w-[180px] w-[14%]" },
+                  { label: "Contact", width: "min-w-[180px] w-[14%]" },
+                  { label: "Outreach Vector", width: "min-w-[160px] w-[12%]" },
+                  { label: "Instagram", width: "min-w-[140px] w-[10%]" },
+                  { label: "Aesthetic Profile", width: "min-w-[280px] w-[24%]" },
+                  { label: "Matched Designers", width: "min-w-[220px] w-[16%]" },
+                  { label: "Verification", width: "min-w-[140px] w-[10%]" },
                 ].map((h) => (
                   <th
-                    key={h}
-                    className="px-5 py-4 text-[10px] uppercase tracking-[0.25em] text-muted-foreground"
+                    key={h.label}
+                    className={`${h.width} px-5 py-4 text-[10px] uppercase tracking-[0.25em] text-muted-foreground`}
                   >
-                    {h}
+                    {h.label}
                   </th>
                 ))}
               </tr>
