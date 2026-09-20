@@ -66,12 +66,12 @@ const readCookie = (name: string): string | null => {
   }
 };
 
-const writeCookie = (name: string, value: string) => {
+const writeCookie = (name: string, value: string, maxAgeMs = CONSENT_MAX_AGE_MS) => {
   try {
     const secure = window.location.protocol === "https:" ? "; Secure" : "";
     document.cookie =
       `${name}=${encodeURIComponent(value)}; Max-Age=${Math.floor(
-        CONSENT_MAX_AGE_MS / 1000
+        maxAgeMs / 1000
       )}; Path=/; SameSite=Lax${secure}`;
   } catch {
     /* ignore */
@@ -168,19 +168,40 @@ const TEST_PROMPT_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000; // once a week
 export const needsConsentPrompt = (): boolean => {
   if (readConsent() !== null) return false;
   // On test environments the banner re-appears at most once a week, even when
-  // the stored record cannot persist (partitioned storage, wiped cookies).
+  // one browser store is partitioned or cleared by the embedded preview.
   if (isTestEnvironment()) {
     const now = Date.now();
+    let localUntil = 0;
     try {
-      const until = Number(localStorage.getItem(PROMPT_SUPPRESS_KEY) || 0);
-      if (Number.isFinite(until) && now < until) return false;
-      localStorage.setItem(
-        PROMPT_SUPPRESS_KEY,
-        String(now + TEST_PROMPT_INTERVAL_MS)
-      );
+      localUntil = Number(localStorage.getItem(PROMPT_SUPPRESS_KEY) || 0);
     } catch {
-      /* storage unavailable — fall through and prompt */
+      /* local storage unavailable — use the cookie mirror */
     }
+    const cookieUntil = Number(readCookie(PROMPT_SUPPRESS_KEY) || 0);
+    const until = Math.max(
+      Number.isFinite(localUntil) ? localUntil : 0,
+      Number.isFinite(cookieUntil) ? cookieUntil : 0
+    );
+    if (now < until) {
+      // Heal whichever store the preview discarded.
+      try {
+        localStorage.setItem(PROMPT_SUPPRESS_KEY, String(until));
+      } catch {
+        /* ignore */
+      }
+      if (cookieUntil !== until) {
+        writeCookie(PROMPT_SUPPRESS_KEY, String(until), until - now);
+      }
+      return false;
+    }
+
+    const nextPromptAt = now + TEST_PROMPT_INTERVAL_MS;
+    try {
+      localStorage.setItem(PROMPT_SUPPRESS_KEY, String(nextPromptAt));
+    } catch {
+      /* cookie remains the fallback */
+    }
+    writeCookie(PROMPT_SUPPRESS_KEY, String(nextPromptAt), TEST_PROMPT_INTERVAL_MS);
   }
   return true;
 };
