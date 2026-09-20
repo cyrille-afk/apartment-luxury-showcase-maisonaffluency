@@ -498,6 +498,13 @@
       "when": 1789908968410,
       "tag": "0070_acquisition_leads_instagram_executive_emails",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1789940653784,
+      "tag": "0071_acquisition_discovery_node_fields",
+      "breakpoints": true
     }
   ]
 }
