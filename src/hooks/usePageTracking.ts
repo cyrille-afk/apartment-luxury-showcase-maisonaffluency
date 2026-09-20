@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { initScrollDepthTracking } from "@/lib/analytics";
+import { hasConsent } from "@/lib/consent/consentStore";
+
 
 /**
  * Tracks page views in GA4. Waits for gtag to be available
