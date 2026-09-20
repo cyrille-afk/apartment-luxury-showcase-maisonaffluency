@@ -41,7 +41,9 @@ import {
   B2B_TAX_LABEL,
   type BuyerType,
   type TaxTreatment,
+  type CustomsLine,
 } from "@/config/taxRules";
+import { useVatVerification } from "@/lib/tax/useVatVerification";
 
 import {
   assertCheckoutCopy,
