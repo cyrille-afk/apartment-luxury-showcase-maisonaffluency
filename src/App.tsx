@@ -764,6 +764,7 @@ const App = () => {
 
                     <Route path="admin/mcp-usage" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminMcpUsage /></Suspense>} />
                     <Route path="admin/queue" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminQueue /></Suspense>} />
+                    <Route path="admin/privacy-requests" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminPrivacyRequests /></Suspense>} />
 
                     <Route path="registered-users" element={<TradeRegisteredUsers />} />
                     <Route path="description-writer" element={<TradeDescriptionWriter />} />
