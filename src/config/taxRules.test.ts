@@ -23,7 +23,9 @@ describe("resolveTaxTreatment — United Kingdom", () => {
     });
     expect(r.rate).toBe(0.2);
     expect(r.taxCents).toBe(2_000);
-    expect(r.treatment).toBe("standard");
+    // Below the £135 threshold: VAT prepaid at checkout, no clearance fee.
+    expect(r.treatment).toBe("ddp_import");
+    expect(r.clearanceFeeCents).toBe(0);
   });
 
   it("reverse charges only when the registration is authority-verified", () => {
@@ -52,7 +54,7 @@ describe("resolveTaxTreatment — United Kingdom", () => {
       goodsCents: 10_000,
       shippingCents: 0,
     });
-    expect(r.treatment).toBe("standard");
+    expect(r.treatment).toBe("ddp_import");
     expect(r.taxCents).toBe(2_000);
     expect(r.buyerTaxIdVerified).toBe(false);
   });
@@ -63,7 +65,6 @@ describe("resolveTaxTreatment — United Kingdom", () => {
       currency: "GBP",
       buyerType: "business",
       buyerTaxId: "GB123456789",
-      buyerTaxIdVerified: true,
       ...base,
     });
     expect(r.treatment).toBe("ddp_import");
