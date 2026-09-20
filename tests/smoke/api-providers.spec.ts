@@ -42,8 +42,22 @@ const ADMIN_PASSWORD = env("E2E_ADMIN_PASSWORD");
 const haveResend = Boolean(RESEND_KEY?.startsWith("re_"));
 const haveStripe = Boolean(STRIPE_KEY?.startsWith("sk_test_") && STRIPE_WEBHOOK_SECRET && WEBHOOK_URL);
 
+/**
+ * SMOKE_STRICT=1 (set by the scheduled contract workflow) turns a missing
+ * credential into a hard failure instead of a silent skip. A skipped provider
+ * contract check in CI is itself a ghost assertion.
+ */
+const STRICT = env("SMOKE_STRICT") === "1" || env("SMOKE_STRICT") === "true";
+
+function requireOrSkip(have: boolean, reason: string) {
+  if (have) return;
+  if (STRICT) throw new Error(`SMOKE_STRICT: ${reason}`);
+  test.skip(true, reason);
+}
+
 test.describe("Live provider smoke — Resend", () => {
-  test.skip(!haveResend, "RESEND_TEST_API_KEY not set — live Resend smoke skipped.");
+  test.beforeAll(() => requireOrSkip(haveResend, "RESEND_TEST_API_KEY not set — live Resend smoke skipped."));
+  test.skip(!haveResend && !STRICT, "RESEND_TEST_API_KEY not set — live Resend smoke skipped.");
 
   test("test-mode receipt is accepted and returns a message id", async () => {
     const resend = new Resend(RESEND_KEY!);
@@ -75,8 +89,14 @@ test.describe("Live provider smoke — Resend", () => {
 });
 
 test.describe("Live provider smoke — Stripe signature & webhook ingestion", () => {
+  test.beforeAll(() =>
+    requireOrSkip(
+      haveStripe,
+      "STRIPE_TEST_SECRET_KEY / STRIPE_WEBHOOK_TEST_SECRET / webhook URL not set — live Stripe smoke skipped.",
+    ),
+  );
   test.skip(
-    !haveStripe,
+    !haveStripe && !STRICT,
     "STRIPE_TEST_SECRET_KEY / STRIPE_WEBHOOK_TEST_SECRET / webhook URL not set — live Stripe smoke skipped.",
   );
 
