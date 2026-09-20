@@ -36,11 +36,28 @@ import {
 import {
   ArrowLeft,
   CheckCircle2,
+  Download,
   ExternalLink,
   FileText,
   Loader2,
   ShieldAlert,
+  Trash2,
+  UploadCloud,
 } from "lucide-react";
+
+const DPA_BUCKET = "compliance-agreements";
+const MAX_DPA_BYTES = 10 * 1024 * 1024;
+
+const fileToBase64 = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result ?? "");
+      resolve(result.slice(result.indexOf(",") + 1));
+    };
+    reader.onerror = () => reject(new Error("The file could not be read."));
+    reader.readAsDataURL(file);
+  });
 
 type DpaStatus = "pending" | "signed" | "executed";
 
