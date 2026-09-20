@@ -90,6 +90,8 @@ export default function TradeAdminPaymentSettings() {
     webhookSecret: false,
   });
   const [copied, setCopied] = useState(false);
+  const [revealedSaved, setRevealedSaved] = useState<Record<string, boolean>>({});
+  const [copyingSaved, setCopyingSaved] = useState<string | null>(null);
   const [recipients, setRecipientsState] = useState("");
   const [recipientsDirty, setRecipientsDirty] = useState(false);
   const [savingRecipients, setSavingRecipients] = useState(false);
