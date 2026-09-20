@@ -2214,9 +2214,9 @@ const PublicProductPageContent: React.FC = () => {
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Home", item: "https://maisonaffluency.com" },
-            { "@type": "ListItem", position: 2, name: "Designers", item: "https://maisonaffluency.com/designers" },
-            { "@type": "ListItem", position: 3, name: designerDisplay, item: `https://maisonaffluency.com/designers/${designer.slug}` },
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://www.maisonaffluency.com" },
+            { "@type": "ListItem", position: 2, name: "Designers", item: "https://www.maisonaffluency.com/designers" },
+            { "@type": "ListItem", position: 3, name: designerDisplay, item: `https://www.maisonaffluency.com/designers/${designer.slug}` },
             { "@type": "ListItem", position: 4, name: product.title, item: canonical },
           ],
         };

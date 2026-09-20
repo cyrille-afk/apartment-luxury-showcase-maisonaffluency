@@ -2352,7 +2352,7 @@ const TradeDesignersAdmin = () => {
                       ? merged.image_url
                       : null
                   }
-                  profileUrl={`https://maisonaffluency.com/designers/${merged.slug}`}
+                  profileUrl={`https://www.maisonaffluency.com/designers/${merged.slug}`}
                 />
               );
             })()}

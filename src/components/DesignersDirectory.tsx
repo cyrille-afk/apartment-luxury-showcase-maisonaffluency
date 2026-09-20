@@ -521,7 +521,7 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
 
 // ─── Share helper ────────────────────────────────────────────────────────────
 function buildShareUrl(slug: string): string {
-  return `https://maisonaffluency.com/designers/${slug}-og.html?v=20260329&t=${Date.now()}`;
+  return `https://www.maisonaffluency.com/designers/${slug}-og.html?v=20260329&t=${Date.now()}`;
 }
 
 function handleDesignerShare(e: React.MouseEvent, item: Designer, displayName: string) {
@@ -1957,8 +1957,8 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                     </h2>
                     <div className="md:hidden flex-shrink-0 mt-1 -mr-1">
                       <ShareMenu
-                        url={withOgCacheBust("https://maisonaffluency.com/designers-og.html")}
-                        message={`${hero ? hero.title : "Designers & Makers On View"} — Maison Affluency: ${withOgCacheBust("https://maisonaffluency.com/designers-og.html")}`}
+                        url={withOgCacheBust("https://www.maisonaffluency.com/designers-og.html")}
+                        message={`${hero ? hero.title : "Designers & Makers On View"} — Maison Affluency: ${withOgCacheBust("https://www.maisonaffluency.com/designers-og.html")}`}
                       />
                     </div>
                   </div>
@@ -1969,8 +1969,8 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                   </p>
                   <div className="hidden md:inline-flex">
                     <ShareMenu
-                      url={withOgCacheBust("https://maisonaffluency.com/designers-og.html")}
-                      message={`${hero ? hero.title : "Designers & Makers On View"} — Maison Affluency: ${withOgCacheBust("https://maisonaffluency.com/designers-og.html")}`}
+                      url={withOgCacheBust("https://www.maisonaffluency.com/designers-og.html")}
+                      message={`${hero ? hero.title : "Designers & Makers On View"} — Maison Affluency: ${withOgCacheBust("https://www.maisonaffluency.com/designers-og.html")}`}
                     />
                   </div>
                 </div>

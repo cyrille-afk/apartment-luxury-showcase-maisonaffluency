@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Copy, ExternalLink, RefreshCw } from "lucide-react";
 
-const DOMAIN = "https://maisonaffluency.com";
+const DOMAIN = "https://www.maisonaffluency.com";
 
 const CORE_PATHS = [
   "/",

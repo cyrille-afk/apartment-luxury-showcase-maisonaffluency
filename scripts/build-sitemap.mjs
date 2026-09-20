@@ -8,7 +8,7 @@
  * prerendered, because it runs immediately after prerender-routes.mjs and
  * derives routes from the same source-of-truth queries.
  *
- * The sitemap points to canonical URLs on https://maisonaffluency.com.
+ * The sitemap points to canonical URLs on https://www.maisonaffluency.com.
  */
 import { writeFile, mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
@@ -31,7 +31,7 @@ try {
 const DIST = path.join(ROOT, "dist");
 // Single global production origin. Every <loc> in the tree is built from this
 // exact prefix — never a relative path, never a staging/preview host, never www.
-const BASE_URL = "https://maisonaffluency.com";
+const BASE_URL = "https://www.maisonaffluency.com";
 
 // ----- Domain lock ----------------------------------------------------------
 // A sitemap may only ever be generated for the production domain. If the build

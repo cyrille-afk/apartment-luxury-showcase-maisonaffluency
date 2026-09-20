@@ -3,30 +3,30 @@
 # NOTE: Lovable hosting does NOT read this file (its SPA fallback is built in).
 # These rules take effect only if the site is deployed to Netlify.
 
-# 1. Canonical host — www and any preview/staging remnant go to the apex domain
-https://www.maisonaffluency.com/*        https://maisonaffluency.com/:splat   301!
-https://:project.lovable.app/*           https://maisonaffluency.com/:splat   301!
+# 1. Canonical host — apex and any preview/staging remnant go to the www domain
+https://maisonaffluency.com/*            https://www.maisonaffluency.com/:splat   301!
+https://:project.lovable.app/*           https://www.maisonaffluency.com/:splat   301!
 
 # 2. Deprecated / placeholder paths -> live catalogue (permanent)
-/products                                https://maisonaffluency.com/designers   301!
-/products/*                              https://maisonaffluency.com/designers   301!
-/shop                                    https://maisonaffluency.com/designers   301!
-/shop/*                                  https://maisonaffluency.com/designers   301!
-/catalog                                 https://maisonaffluency.com/designers   301!
-/catalog/*                               https://maisonaffluency.com/designers   301!
-/catalogue                               https://maisonaffluency.com/designers   301!
-/catalogue/*                             https://maisonaffluency.com/designers   301!
-/collection                              https://maisonaffluency.com/designers   301!
-/collection/*                            https://maisonaffluency.com/designers   301!
-/home                                    https://maisonaffluency.com/            301!
-/index.html                              https://maisonaffluency.com/            301!
-/index.php                               https://maisonaffluency.com/            301!
-/test                                    https://maisonaffluency.com/            301!
-/test/*                                  https://maisonaffluency.com/            301!
-/preview                                 https://maisonaffluency.com/            301!
-/preview/*                               https://maisonaffluency.com/            301!
-/staging                                 https://maisonaffluency.com/            301!
-/staging/*                               https://maisonaffluency.com/            301!
+/products                                https://www.maisonaffluency.com/designers   301!
+/products/*                              https://www.maisonaffluency.com/designers   301!
+/shop                                    https://www.maisonaffluency.com/designers   301!
+/shop/*                                  https://www.maisonaffluency.com/designers   301!
+/catalog                                 https://www.maisonaffluency.com/designers   301!
+/catalog/*                               https://www.maisonaffluency.com/designers   301!
+/catalogue                               https://www.maisonaffluency.com/designers   301!
+/catalogue/*                             https://www.maisonaffluency.com/designers   301!
+/collection                              https://www.maisonaffluency.com/designers   301!
+/collection/*                            https://www.maisonaffluency.com/designers   301!
+/home                                    https://www.maisonaffluency.com/            301!
+/index.html                              https://www.maisonaffluency.com/            301!
+/index.php                               https://www.maisonaffluency.com/            301!
+/test                                    https://www.maisonaffluency.com/            301!
+/test/*                                  https://www.maisonaffluency.com/            301!
+/preview                                 https://www.maisonaffluency.com/            301!
+/preview/*                               https://www.maisonaffluency.com/            301!
+/staging                                 https://www.maisonaffluency.com/            301!
+/staging/*                               https://www.maisonaffluency.com/            301!
 
 # 3. Real application routes must still resolve to the SPA shell (200)
 /                                        /index.html   200

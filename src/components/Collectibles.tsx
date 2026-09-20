@@ -764,8 +764,8 @@ const Collectibles = () => {
                   Collectible design refers to unique or limited-edition, often handmade, functional art pieces—such as furniture, lighting, and ceramics—that bridge the gap between art and utility. These items, characterized by high-level craftsmanship, storytelling, and investment potential, are often sought after for their artistic value and ability to enhance.
                 </p>
                 <ShareMenu
-                  url={withOgCacheBust("https://maisonaffluency.com/collectibles-og.html")}
-                  message={`Collectible Design On View — Maison Affluency: ${withOgCacheBust("https://maisonaffluency.com/collectibles-og.html")}`}
+                  url={withOgCacheBust("https://www.maisonaffluency.com/collectibles-og.html")}
+                  message={`Collectible Design On View — Maison Affluency: ${withOgCacheBust("https://www.maisonaffluency.com/collectibles-og.html")}`}
                 />
               </div>
             </div>

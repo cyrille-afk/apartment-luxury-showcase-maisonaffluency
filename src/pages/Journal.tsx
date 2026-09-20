@@ -42,7 +42,7 @@ const Journal = () => {
         <meta property="og:title" content="Journal — Maison Affluency" />
         <meta property="og:description" content="Design stories, designer interviews, and curatorial insights." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://maisonaffluency.com/journal" />
+        <meta property="og:url" content="https://www.maisonaffluency.com/journal" />
         <meta property="og:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772516480/WhatsApp_Image_2026-03-03_at_1.40.10_PM_cs23b7.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Journal — Maison Affluency" />
@@ -52,9 +52,9 @@ const Journal = () => {
           "@context": "https://schema.org",
           "@type": "Blog",
           "name": "Maison Affluency Journal",
-          "url": "https://maisonaffluency.com/journal",
+          "url": "https://www.maisonaffluency.com/journal",
           "description": "Design stories, designer interviews, and curatorial insights from Singapore's premier collectible furniture destination.",
-          "publisher": { "@type": "Organization", "name": "Maison Affluency", "url": "https://maisonaffluency.com" },
+          "publisher": { "@type": "Organization", "name": "Maison Affluency", "url": "https://www.maisonaffluency.com" },
         })}</script>
       </Helmet>
 

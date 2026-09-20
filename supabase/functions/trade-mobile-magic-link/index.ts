@@ -10,7 +10,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const ALLOWED_ORIGINS = [
-  "https://maisonaffluency.com",
+  "https://www.maisonaffluency.com",
   "https://www.maisonaffluency.com",
   "https://apartment-luxury-showcase-maisonaffluency.lovable.app",
   "https://id-preview--02208d51-b513-401f-a97f-9e38a2a4260f.lovable.app",

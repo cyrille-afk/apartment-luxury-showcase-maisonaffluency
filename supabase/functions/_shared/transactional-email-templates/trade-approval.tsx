@@ -105,7 +105,7 @@ const TradeApprovalEmail = ({ name, companyName }: TradeApprovalProps) => (
         </table>
 
         <Section style={buttonSection}>
-          <Button style={button} href="https://maisonaffluency.com/trade/login">
+          <Button style={button} href="https://www.maisonaffluency.com/trade/login">
             Access Your Trade Portal
           </Button>
         </Section>

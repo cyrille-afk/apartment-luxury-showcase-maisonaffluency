@@ -132,7 +132,7 @@ const ConciergePage: React.FC = () => {
     window.dispatchEvent(new PopStateEvent("popstate"));
   }, [prefillSearch]);
 
-  const canonical = "https://maisonaffluency.com/concierge";
+  const canonical = "https://www.maisonaffluency.com/concierge";
 
   // While the very first auth check resolves, render nothing.
   if (authLoading && !authorized) return null;

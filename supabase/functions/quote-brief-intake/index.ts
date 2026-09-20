@@ -206,9 +206,9 @@ Deno.serve(async (req) => {
     if ((existing?.length ?? 0) === 0) {
       const origin = (() => {
         try {
-          return pageUrl ? new URL(pageUrl).origin : "https://maisonaffluency.com";
+          return pageUrl ? new URL(pageUrl).origin : "https://www.maisonaffluency.com";
         } catch {
-          return "https://maisonaffluency.com";
+          return "https://www.maisonaffluency.com";
         }
       })();
       await supabase.auth.admin.inviteUserByEmail(email, {

@@ -1720,11 +1720,11 @@ function drawTermsAndConditions(doc: jsPDF, M: number, y: number, contentW: numb
 
   const segments: { text: string; url?: string }[] = [
     { text: "By confirming this quotation, executing a bank transfer, or completing a digital payment via Stripe, the client explicitly agrees to the " },
-    { text: "Maison Affluency Trade Terms of Sale.", url: "https://maisonaffluency.com" },
+    { text: "Maison Affluency Trade Terms of Sale.", url: "https://www.maisonaffluency.com" },
     { text: " For any questions, please contact " },
     { text: "hello@maisonaffluency.com", url: "mailto:hello@maisonaffluency.com" },
     { text: " or visit " },
-    { text: "maisonaffluency.com.", url: "https://maisonaffluency.com" },
+    { text: "maisonaffluency.com.", url: "https://www.maisonaffluency.com" },
   ];
 
 

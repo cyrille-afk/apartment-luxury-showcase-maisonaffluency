@@ -89,7 +89,7 @@ export default function TradeSpecSheet() {
     : "View Maison Affluency trade product spec sheets, including dimensions, materials, finishes and downloadable documentation for registered users.";
 
   const canonicalUrl = useMemo(() => {
-    const base = "https://maisonaffluency.com/trade/spec-sheet";
+    const base = "https://www.maisonaffluency.com/trade/spec-sheet";
     if (!product) return base;
     const qs = new URLSearchParams();
     if (params.get("brand")) qs.set("brand", params.get("brand")!);

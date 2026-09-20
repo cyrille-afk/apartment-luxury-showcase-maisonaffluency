@@ -38,12 +38,12 @@ const Email = ({ name }: Props) => (
         </Text>
         <Text style={text}>
           Our public collection remains open to you at{' '}
-          <a href="https://maisonaffluency.com" style={link}>maisonaffluency.com</a>,
+          <a href="https://www.maisonaffluency.com" style={link}>maisonaffluency.com</a>,
           and we would be glad to reconsider a future application should your circumstances evolve.
         </Text>
         <Text style={text}>
           If you are a design professional, our Trade Program may be a more suitable path — you are welcome to apply at{' '}
-          <a href="https://maisonaffluency.com/trade/register" style={link}>maisonaffluency.com/trade/register</a>.
+          <a href="https://www.maisonaffluency.com/trade/register" style={link}>maisonaffluency.com/trade/register</a>.
         </Text>
         <Text style={footer}>
           With appreciation,<br />

@@ -1,7 +1,7 @@
 /**
  * Trade Program share-link guard.
  *
- * The clean URL https://maisonaffluency.com/trade-program is a client-rendered
+ * The clean URL https://www.maisonaffluency.com/trade-program is a client-rendered
  * SPA route. Social crawlers (WhatsApp, facebookexternalhit, Twitterbot) do not run
  * JavaScript, so they only see the static index.html head — which is the HOMEPAGE
  * title/description/image. Sharing the clean URL therefore silently falls back to the
@@ -22,14 +22,14 @@
 export const CLEAN_URL_OG_VERIFIED = false;
 
 export const TRADE_PROGRAM_CLEAN_URL =
-  "https://maisonaffluency.com/trade-program";
+  "https://www.maisonaffluency.com/trade-program";
 
 /** Static OG bridge — always serves the Trade Program title/description/image. */
 export const TRADE_PROGRAM_BRIDGE_URL =
-  "https://maisonaffluency.com/trade-program-share.html";
+  "https://www.maisonaffluency.com/trade-program-share.html";
 
 export const TRADE_PROGRAM_SHARE_IMAGE =
-  "https://maisonaffluency.com/trade-program-hero-authentic-v3.jpg";
+  "https://www.maisonaffluency.com/trade-program-hero-authentic-v3.jpg";
 
 /**
  * Returns the URL that is safe to hand to a social crawler.

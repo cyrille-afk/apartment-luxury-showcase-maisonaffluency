@@ -11,7 +11,7 @@ import CollectiblesHoverHero from "@/components/CollectiblesHoverHero";
 import { useAuth } from "@/hooks/useAuth";
 import { collectibleGateRedirect } from "@/lib/collectibleGate";
 
-const CANONICAL = "https://maisonaffluency.com/collectibles";
+const CANONICAL = "https://www.maisonaffluency.com/collectibles";
 const OG_IMAGE =
   "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg";
 
@@ -67,7 +67,7 @@ const PublicCollectibles = () => {
       itemListElement: featured.slice(0, 20).map((d, i) => ({
         "@type": "ListItem",
         position: i + 1,
-        url: `https://maisonaffluency.com/designers/${d.id}`,
+        url: `https://www.maisonaffluency.com/designers/${d.id}`,
         name: `${d.curatorPicks[0].title} — ${d.name}`,
         image: d.curatorPicks[0].image,
       })),
@@ -82,7 +82,7 @@ const PublicCollectibles = () => {
       isPartOf: {
         "@type": "WebSite",
         name: "Maison Affluency",
-        url: "https://maisonaffluency.com",
+        url: "https://www.maisonaffluency.com",
       },
     };
 

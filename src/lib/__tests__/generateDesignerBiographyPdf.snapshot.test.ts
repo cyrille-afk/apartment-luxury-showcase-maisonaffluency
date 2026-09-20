@@ -119,7 +119,7 @@ async function renderAndParse(): Promise<ParsedPage[]> {
     specialty: "Lighting & objects",
     biography: APPARATUS_BIO,
     heroImageUrl: "https://res.cloudinary.com/example/image/upload/hero.jpg",
-    profileUrl: "https://maisonaffluency.com/designers/apparatus-studio",
+    profileUrl: "https://www.maisonaffluency.com/designers/apparatus-studio",
     recipientName: "Cyrille Delval",
     downloadedAt: new Date("2026-04-29T12:00:00Z"),
   });

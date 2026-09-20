@@ -178,7 +178,7 @@ const TradeAdminSharePreview = () => {
                 id="url"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://maisonaffluency.com/designers/..."
+                placeholder="https://www.maisonaffluency.com/designers/..."
                 autoFocus
               />
             </div>

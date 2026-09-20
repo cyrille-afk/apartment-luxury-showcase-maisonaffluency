@@ -7,7 +7,7 @@ import {
 import type { TemplateEntry } from './registry.tsx'
 
 const SITE_NAME = "Maison Affluency"
-const SITE_URL = "https://maisonaffluency.com"
+const SITE_URL = "https://www.maisonaffluency.com"
 const TRACK_URL = "https://dcrauiygaezoduwdjmsm.supabase.co/functions/v1/track-email-click"
 
 // Wrap a destination URL with click tracking so we can attribute clicks
@@ -81,7 +81,7 @@ const WelcomeRegistrationEmail = ({ firstName, recipientEmail }: WelcomeRegistra
 
         <Text style={textMuted}>
           If you are an architect, interior designer, or hospitality professional, consider applying to our{' '}
-          <a href="https://maisonaffluency.com/trade-program" style={link}>Trade Program</a>{' '}
+          <a href="https://www.maisonaffluency.com/trade-program" style={link}>Trade Program</a>{' '}
           for exclusive trade pricing and dedicated concierge support.
         </Text>
 
