@@ -101,6 +101,10 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
   );
   const [channelId, setChannelId] = useState<PaymentChannelId>(channels[0].id);
   const channel: TradePaymentChannel = channels.find((c) => c.id === channelId) ?? channels[0];
+  // Currency changes swap the available rails (GBP gains the UK domestic one).
+  useEffect(() => {
+    if (!channels.some((c) => c.id === channelId)) setChannelId(channels[0].id);
+  }, [channels, channelId]);
 
   // Single source of truth: the same rule engine the checkout summary and the
   // PaymentIntent use, so the invoiced total always matches the page total.
