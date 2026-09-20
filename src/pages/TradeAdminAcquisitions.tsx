@@ -414,16 +414,22 @@ const TradeAdminAcquisitions = () => {
                     aria-label="Select all leads"
                   />
                 </th>
-                {["Studio Name", "Contact", "Instagram", "Aesthetic Profile", "Matched Designers", "Verification"].map(
-                  (h) => (
-                    <th
-                      key={h}
-                      className="px-5 py-4 text-[10px] uppercase tracking-[0.25em] text-muted-foreground"
-                    >
-                      {h}
-                    </th>
-                  ),
-                )}
+                {[
+                  "Studio Name",
+                  "Contact",
+                  "Outreach Vector",
+                  "Instagram",
+                  "Aesthetic Profile",
+                  "Matched Designers",
+                  "Verification",
+                ].map((h) => (
+                  <th
+                    key={h}
+                    className="px-5 py-4 text-[10px] uppercase tracking-[0.25em] text-muted-foreground"
+                  >
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
