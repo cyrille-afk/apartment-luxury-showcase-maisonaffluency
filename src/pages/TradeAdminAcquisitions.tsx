@@ -449,7 +449,9 @@ const TradeAdminAcquisitions = () => {
                   </td>
                 </tr>
               )}
-              {filtered.map((lead) => (
+              {filtered.map((lead) => {
+                const vector = outreachVector(lead);
+                return (
                 <tr
                   key={lead.id}
                   className={`border-b border-border/70 align-top transition-all duration-500 ${
