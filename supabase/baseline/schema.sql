@@ -8634,7 +8634,13 @@ CREATE TABLE public.shop_orders (
     ddp_handling_cents integer DEFAULT 0 NOT NULL,
     import_total_cents integer DEFAULT 0 NOT NULL,
     deferred_import_cents integer DEFAULT 0 NOT NULL,
-    customs_statement text
+    customs_statement text,
+    customer_po_number text,
+    company_name text,
+    company_registration_number text,
+    po_payment_terms text,
+    budget_approved_at timestamp with time zone,
+    po_review_status text
 );
 
 
