@@ -179,11 +179,11 @@ const CookieConsent = () => {
     return () => window.removeEventListener(CONSENT_EVENT, onChange);
   }, []);
 
-  const baseButton =
+  const neutralButton =
     "flex-1 min-w-[112px] px-4 py-2.5 text-[11px] uppercase tracking-[0.15em] font-medium transition-all duration-300 border border-neutral-700 bg-transparent text-neutral-300 hover:border-neutral-500 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neutral-500";
 
-  const primaryButton =
-    "border-[#C5A880]/40 text-[#C5A880] hover:border-[#C5A880] hover:text-[#DFD0B8]";
+  const accentButton =
+    "flex-1 min-w-[112px] px-4 py-2.5 text-[11px] uppercase tracking-[0.15em] font-medium transition-all duration-300 border border-[#C5A880]/40 bg-transparent text-[#C5A880] hover:border-[#C5A880] hover:text-[#DFD0B8] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#C5A880]/50";
 
   return (
     <>
