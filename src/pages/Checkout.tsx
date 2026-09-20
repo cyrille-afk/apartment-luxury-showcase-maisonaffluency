@@ -705,6 +705,15 @@ function OrderSummary({
                 </dd>
               </div>
             )}
+            {/* DDP consignments carry a flat carrier clearance fee. */}
+            {summary.clearanceFeeCents > 0 && (
+              <div className="flex items-baseline justify-between gap-6">
+                <dt className="text-muted-foreground">Customs clearance (DDP)</dt>
+                <dd className="tabular-nums font-medium">
+                  {money(summary.clearanceFeeCents, currency)}
+                </dd>
+              </div>
+            )}
             {/* Every freight / customs / FX explanation lives behind one link. */}
             <details className="group mt-2">
               <summary className="flex cursor-pointer list-none items-center justify-between font-light text-[10px] uppercase tracking-[0.14em] text-muted-foreground [&::-webkit-details-marker]:hidden">
