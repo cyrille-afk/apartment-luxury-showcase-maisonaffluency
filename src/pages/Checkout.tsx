@@ -3,6 +3,7 @@ import { useLocation, useNavigate, Link } from "react-router-dom";
 import { Elements, PaymentElement, AddressElement, ExpressCheckoutElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import { Lock, Check, Loader2, Copy } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -64,6 +65,7 @@ import {
   cardPracticalLimitCents,
   depositAmountCents,
   isHighValueOrder,
+  isUkCorporatePurchaseOrderEligible,
 } from "@/config/highValuePayment";
 import { getCustomsRegion } from "@/lib/checkout/customsRegions";
 
@@ -902,7 +904,7 @@ function ConditionalNotes() {
 /* ------------------------------------------------------------------ */
 /* Delivery & payment options — shipping module + payment method tabs  */
 /* ------------------------------------------------------------------ */
-type PaymentMethod = "card" | "wire" | "wallet" | "paynow";
+type PaymentMethod = "card" | "wire" | "wallet" | "paynow" | "purchase_order";
 
 const METHOD_TABS: { id: PaymentMethod; label: string; hint: string }[] = [
   { id: "card", label: "Secure Card Payment", hint: "Visa · Mastercard · Amex" },
@@ -935,12 +937,14 @@ function HighValueRouting({
   setMethod,
   depositPct,
   setDepositPct,
+  purchaseOrderEligible,
 }: {
   summary: CheckoutSummary;
   method: PaymentMethod;
   setMethod: (m: PaymentMethod) => void;
   depositPct: DepositPct;
   setDepositPct: (p: DepositPct) => void;
+  purchaseOrderEligible: boolean;
 }) {
   const { currency, displayTotalCents } = summary;
   const limit = cardPracticalLimitCents(currency);
@@ -977,6 +981,19 @@ function HighValueRouting({
         >
           Settle by transfer
         </button>
+        {purchaseOrderEligible && (
+          <Button
+            type="button"
+            variant={method === "purchase_order" ? "default" : "outline"}
+            onClick={() => {
+              setDepositPct(0);
+              setMethod("purchase_order");
+            }}
+            className="h-auto rounded-none px-4 py-2 text-[10px] font-light uppercase tracking-[0.22em]"
+          >
+            Submit purchase order
+          </Button>
+        )}
         {plans
           .filter((p) => p.pct !== 0)
           .map((p) => (
@@ -1007,8 +1024,8 @@ function HighValueRouting({
         </p>
       )}
       <p className="font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
-        Buying against a purchase order? Choose transfer — the proforma invoice we issue carries
-        your PO reference and serves as the document your finance team pays against.
+        Approved UK corporate buyers may submit a purchase order for review. Production is released
+        only after identity, credit and final payment terms are approved.
       </p>
     </section>
   );
@@ -1019,12 +1036,20 @@ function DeliveryPaymentOptions({
   method,
   setMethod,
   paynowAvailable,
+  purchaseOrderEligible,
 }: {
   method: PaymentMethod;
   setMethod: (m: PaymentMethod) => void;
   paynowAvailable: boolean;
+  purchaseOrderEligible: boolean;
 }) {
-  const tabs = paynowAvailable ? [...METHOD_TABS, PAYNOW_TAB] : METHOD_TABS;
+  const tabs = [
+    ...METHOD_TABS,
+    ...(paynowAvailable ? [PAYNOW_TAB] : []),
+    ...(purchaseOrderEligible
+      ? [{ id: "purchase_order" as PaymentMethod, label: "Purchase Order", hint: "Corporate approval route" }]
+      : []),
+  ];
   return (
     <section className="mt-6 w-full space-y-5 border-t border-border pt-8">
       <h2 className="text-[11px] font-light uppercase tracking-[0.26em] text-muted-foreground">
@@ -1035,7 +1060,7 @@ function DeliveryPaymentOptions({
         aria-label="Payment method"
         className={cn(
           "grid w-full grid-cols-1 border border-neutral-200",
-          tabs.length === 4 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3",
+          tabs.length >= 4 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3",
         )}
       >
         {tabs.map((tab, i) => {
