@@ -93,6 +93,9 @@ export type CheckoutLine = {
   /** Product provenance — used to trigger region-specific logistics copy. */
   origin?: string | null;
   pickupCountry?: string | null;
+  /** Customs classification bound to the line for landed-cost accuracy. */
+  hs6Code?: string | null;
+  dutyRate?: number | null;
 };
 
 /* All amounts below are derived only from cart line items — see checkoutGuardrails. */
