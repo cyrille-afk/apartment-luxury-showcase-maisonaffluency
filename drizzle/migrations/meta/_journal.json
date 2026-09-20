@@ -379,6 +379,13 @@
       "when": 1789867702439,
       "tag": "0053_trade_application_pending_human_review_status",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1789867731641,
+      "tag": "0054_trade_credential_security_and_retention",
+      "breakpoints": true
     }
   ]
 }

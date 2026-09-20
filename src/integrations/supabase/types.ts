@@ -7478,11 +7478,16 @@ export type Database = {
           corporate_reg_number: string | null
           country: string
           created_at: string
+          credential_deleted_at: string | null
           credential_document_path: string | null
+          credential_duplicate_of: string | null
+          credential_purge_after: string | null
+          credential_sha256: string | null
           edit_completed_at: string | null
           edit_completed_by_name: string | null
           edit_token_expires_at: string | null
           edit_token_hash: string | null
+          fraud_flags: Json
           id: string
           instagram_handle: string | null
           is_certified_professional: boolean
@@ -7517,11 +7522,16 @@ export type Database = {
           corporate_reg_number?: string | null
           country?: string
           created_at?: string
+          credential_deleted_at?: string | null
           credential_document_path?: string | null
+          credential_duplicate_of?: string | null
+          credential_purge_after?: string | null
+          credential_sha256?: string | null
           edit_completed_at?: string | null
           edit_completed_by_name?: string | null
           edit_token_expires_at?: string | null
           edit_token_hash?: string | null
+          fraud_flags?: Json
           id?: string
           instagram_handle?: string | null
           is_certified_professional?: boolean
@@ -7556,11 +7566,16 @@ export type Database = {
           corporate_reg_number?: string | null
           country?: string
           created_at?: string
+          credential_deleted_at?: string | null
           credential_document_path?: string | null
+          credential_duplicate_of?: string | null
+          credential_purge_after?: string | null
+          credential_sha256?: string | null
           edit_completed_at?: string | null
           edit_completed_by_name?: string | null
           edit_token_expires_at?: string | null
           edit_token_hash?: string | null
+          fraud_flags?: Json
           id?: string
           instagram_handle?: string | null
           is_certified_professional?: boolean
@@ -7701,6 +7716,62 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      trade_credential_documents: {
+        Row: {
+          application_id: string | null
+          byte_size: number | null
+          created_at: string
+          deleted_at: string | null
+          duplicate_of: string | null
+          email_domain: string | null
+          id: string
+          ip_hash: string | null
+          mime_type: string | null
+          purge_after: string | null
+          sha256: string
+          storage_path: string
+          user_id: string | null
+        }
+        Insert: {
+          application_id?: string | null
+          byte_size?: number | null
+          created_at?: string
+          deleted_at?: string | null
+          duplicate_of?: string | null
+          email_domain?: string | null
+          id?: string
+          ip_hash?: string | null
+          mime_type?: string | null
+          purge_after?: string | null
+          sha256: string
+          storage_path: string
+          user_id?: string | null
+        }
+        Update: {
+          application_id?: string | null
+          byte_size?: number | null
+          created_at?: string
+          deleted_at?: string | null
+          duplicate_of?: string | null
+          email_domain?: string | null
+          id?: string
+          ip_hash?: string | null
+          mime_type?: string | null
+          purge_after?: string | null
+          sha256?: string
+          storage_path?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_credential_documents_duplicate_of_fkey"
+            columns: ["duplicate_of"]
+            isOneToOne: false
+            referencedRelation: "trade_credential_documents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trade_credits: {
         Row: {
@@ -9093,6 +9164,33 @@ export type Database = {
           tier?: Database["public"]["Enums"]["trade_tier"]
           updated_at?: string
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      trade_upload_attempts: {
+        Row: {
+          accepted: boolean
+          created_at: string
+          email_domain: string | null
+          id: string
+          ip_hash: string | null
+          reason: string | null
+        }
+        Insert: {
+          accepted?: boolean
+          created_at?: string
+          email_domain?: string | null
+          id?: string
+          ip_hash?: string | null
+          reason?: string | null
+        }
+        Update: {
+          accepted?: boolean
+          created_at?: string
+          email_domain?: string | null
+          id?: string
+          ip_hash?: string | null
+          reason?: string | null
         }
         Relationships: []
       }
