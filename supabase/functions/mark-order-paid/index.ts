@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveTaxRule, taxRowLabel, taxRegistrationLine } from "../_shared/taxRules.ts";
+import { buildOrderDeliveryMessage } from "../_shared/orderDeliveryMessaging.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -41,7 +42,7 @@ serve(async (req) => {
 
     const { data: order, error: readErr } = await supabase
       .from("shop_orders")
-      .select("id, order_ref, email, full_name, currency, total_cents, tax_cents, tax_label, paid_at, payment_confirmation_sent_at")
+      .select("id, order_ref, email, full_name, currency, total_cents, tax_cents, tax_label, tax_statement, merchant_tax_registration, buyer_tax_country, shipping_country, delivery_term, import_duty_cents, import_tax_cents, import_clearance_cents, ddp_handling_cents, import_total_cents, deferred_import_cents, customs_statement, paid_at, payment_confirmation_sent_at")
       .eq("id", orderId)
       .single();
     if (readErr || !order) return json({ error: "Order not found." }, 404);
@@ -72,9 +73,25 @@ serve(async (req) => {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         }).format((order.total_cents ?? 0) / 100);
-        // Tax is itemised on the receipt, with our GST registration number.
+        // Tax and customs wording comes from the immutable destination snapshot.
         const taxCents = Number(order.tax_cents ?? 0);
-        const taxRule = taxCents > 0 ? resolveTaxRule("SG", order.currency ?? "") : null;
+        const destinationCountry = order.shipping_country || order.buyer_tax_country || "";
+        const taxRule = taxCents > 0 ? resolveTaxRule(destinationCountry, order.currency ?? "") : null;
+        const delivery = buildOrderDeliveryMessage({
+          shippingCountry: destinationCountry,
+          deliveryTerm: order.delivery_term,
+          taxStatement: order.tax_statement,
+          importDutyCents: order.import_duty_cents,
+          importTaxCents: order.import_tax_cents,
+          importClearanceCents: order.import_clearance_cents,
+          ddpHandlingCents: order.ddp_handling_cents,
+          importTotalCents: order.import_total_cents,
+          deferredImportCents: order.deferred_import_cents,
+        });
+        const money = (cents: number) => new Intl.NumberFormat("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(cents / 100);
         const taxFormatted =
           taxCents > 0
             ? new Intl.NumberFormat("en-US", {
@@ -95,7 +112,13 @@ serve(async (req) => {
               totalFormatted,
               taxLabel: taxCents > 0 ? (order.tax_label || (taxRule ? taxRowLabel(taxRule) : null)) : null,
               taxFormatted,
-              taxRegistrationLine: taxCents > 0 ? taxRegistrationLine(taxRule) : null,
+              taxRegistrationLine: order.merchant_tax_registration || (taxCents > 0 ? taxRegistrationLine(taxRule) : null),
+              taxStatement: order.tax_statement ?? null,
+              destination: delivery.destination,
+              deliveryTerm: delivery.deliveryTerm,
+              customsStatement: order.customs_statement ?? delivery.customsStatement,
+              importChargesFormatted: delivery.importTotalCents > 0 ? money(delivery.importTotalCents) : null,
+              deferredImportFormatted: delivery.deferredImportCents > 0 ? money(delivery.deferredImportCents) : null,
               receivedOn: new Date(paidAt).toLocaleDateString("en-GB", {
                 day: "2-digit",
                 month: "short",

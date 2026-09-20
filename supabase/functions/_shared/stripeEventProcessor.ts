@@ -18,6 +18,7 @@ import type Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { recordPurchaseOrdersPayable } from "./recordPurchaseOrdersPayable.ts";
 import { formatCurrency } from "./transactional-email-templates/currency.ts";
+import { buildOrderDeliveryMessage } from "./orderDeliveryMessaging.ts";
 
 type Supa = ReturnType<typeof createClient>;
 
@@ -97,7 +98,7 @@ async function cancelFunnelReminders(supabase: Supa, entityIds: (string | null |
 async function sendOrderReceivedEmail(supabase: Supa, orderId: string) {
   const { data: order } = await supabase
     .from("shop_orders")
-    .select("order_ref, email, full_name, currency, subtotal_cents, shipping_cents, total_cents, tax_cents, tax_label, tax_statement")
+    .select("order_ref, email, full_name, currency, subtotal_cents, shipping_cents, total_cents, tax_cents, tax_label, tax_statement, shipping_country, delivery_term, import_duty_cents, import_tax_cents, import_clearance_cents, ddp_handling_cents, import_total_cents, deferred_import_cents, customs_statement")
     .eq("id", orderId)
     .single();
   if (!order?.email) return;
@@ -108,6 +109,17 @@ async function sendOrderReceivedEmail(supabase: Supa, orderId: string) {
     .eq("order_id", orderId);
 
   const currency = order.currency || "usd";
+  const delivery = buildOrderDeliveryMessage({
+    shippingCountry: order.shipping_country,
+    deliveryTerm: order.delivery_term,
+    taxStatement: order.tax_statement,
+    importDutyCents: order.import_duty_cents,
+    importTaxCents: order.import_tax_cents,
+    importClearanceCents: order.import_clearance_cents,
+    ddpHandlingCents: order.ddp_handling_cents,
+    importTotalCents: order.import_total_cents,
+    deferredImportCents: order.deferred_import_cents,
+  });
   const { error: mailErr } = await supabase.functions.invoke("send-transactional-email", {
     body: {
       templateName: "order-received",
@@ -131,6 +143,11 @@ async function sendOrderReceivedEmail(supabase: Supa, orderId: string) {
         taxLineFormatted: formatCurrency(Number(order.tax_cents ?? 0), currency),
         taxLabel: order.tax_label ?? "Taxes",
         taxStatement: order.tax_statement ?? null,
+        destination: delivery.destination,
+        deliveryTerm: delivery.deliveryTerm,
+        customsStatement: order.customs_statement ?? delivery.customsStatement,
+        importChargesFormatted: delivery.importTotalCents > 0 ? formatCurrency(delivery.importTotalCents, currency) : null,
+        deferredImportFormatted: delivery.deferredImportCents > 0 ? formatCurrency(delivery.deferredImportCents, currency) : null,
         totalFormatted: formatCurrency(order.total_cents, currency),
       },
     },
