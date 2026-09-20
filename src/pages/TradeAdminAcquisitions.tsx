@@ -435,7 +435,7 @@ const TradeAdminAcquisitions = () => {
             <tbody>
               {isLoading && (
                 <tr>
-                  <td colSpan={7} className="px-5 py-16 text-center text-sm text-muted-foreground">
+                  <td colSpan={8} className="px-5 py-16 text-center text-sm text-muted-foreground">
                     Loading leads…
                   </td>
                 </tr>
