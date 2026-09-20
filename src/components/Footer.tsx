@@ -18,14 +18,13 @@ const Footer = () => {
             {" "}·{" "}
             <button
               onClick={() => {
-                localStorage.removeItem("cookie_consent");
-                localStorage.removeItem("ga_optout");
-                window.location.reload();
+                window.dispatchEvent(new CustomEvent("ma-open-consent"));
               }}
               className="text-background underline underline-offset-2 hover:text-accent transition-colors"
             >
               Cookie Settings
             </button>
+
           </span>
         </div>
 
