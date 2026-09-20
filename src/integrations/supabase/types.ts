@@ -71,58 +71,79 @@ export type Database = {
       acquisition_leads: {
         Row: {
           aesthetic_profile: string | null
+          aesthetic_score: number | null
           business_email: string
           campaign_status: string
           city: string | null
           country: string | null
           created_at: string
+          discovery_node: string | null
           email_error: string | null
           email_sent_at: string | null
+          enrichment_provider: string | null
           executive_emails: string[]
           founder_name: string | null
+          founder_title: string | null
           id: string
           instagram_handle: string | null
+          last_ingested_at: string | null
+          linkedin_url: string | null
           predicted_designer_matches: string[] | null
           source_index: string | null
           studio_name: string
+          tagged_designer: string | null
           verified_at: string | null
           website_url: string | null
         }
         Insert: {
           aesthetic_profile?: string | null
+          aesthetic_score?: number | null
           business_email: string
           campaign_status?: string
           city?: string | null
           country?: string | null
           created_at?: string
+          discovery_node?: string | null
           email_error?: string | null
           email_sent_at?: string | null
+          enrichment_provider?: string | null
           executive_emails?: string[]
           founder_name?: string | null
+          founder_title?: string | null
           id?: string
           instagram_handle?: string | null
+          last_ingested_at?: string | null
+          linkedin_url?: string | null
           predicted_designer_matches?: string[] | null
           source_index?: string | null
           studio_name: string
+          tagged_designer?: string | null
           verified_at?: string | null
           website_url?: string | null
         }
         Update: {
           aesthetic_profile?: string | null
+          aesthetic_score?: number | null
           business_email?: string
           campaign_status?: string
           city?: string | null
           country?: string | null
           created_at?: string
+          discovery_node?: string | null
           email_error?: string | null
           email_sent_at?: string | null
+          enrichment_provider?: string | null
           executive_emails?: string[]
           founder_name?: string | null
+          founder_title?: string | null
           id?: string
           instagram_handle?: string | null
+          last_ingested_at?: string | null
+          linkedin_url?: string | null
           predicted_designer_matches?: string[] | null
           source_index?: string | null
           studio_name?: string
+          tagged_designer?: string | null
           verified_at?: string | null
           website_url?: string | null
         }
