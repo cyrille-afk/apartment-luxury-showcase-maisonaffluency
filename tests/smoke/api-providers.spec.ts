@@ -12,7 +12,7 @@
  * local mocked runs and secret-less CI stay green.
  *
  * Env:
- *   RESEND_TEST_API_KEY          re_… test key (Resend sandbox)
+ *   RESEND_TEST_API_KEY          re_… test key (Resend sandbox); falls back to RESEND_API_KEY
  *   RESEND_TEST_FROM             verified sender, default `onboarding@resend.dev`
  *   RESEND_TEST_TO               sandbox target, default `delivered@resend.dev`
  *   STRIPE_TEST_SECRET_KEY       sk_test_… (Stripe testmode SDK utilities)
