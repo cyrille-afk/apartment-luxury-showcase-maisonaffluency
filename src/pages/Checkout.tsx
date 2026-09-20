@@ -227,10 +227,13 @@ export const deriveCheckoutTotals = (input: {
   estimatedShippingCents: number;
   /** Tax due on goods (+ confirmed freight when the rule taxes shipping). */
   taxCents: number;
+  /** Flat carrier customs-clearance fee on DDP consignments. 0 otherwise. */
+  clearanceFeeCents?: number;
 }) => {
   const goodsCents = Math.max(0, input.subtotalCents - input.discountCents);
   const deliveryCents = input.shippingCents > 0 ? input.shippingCents : input.estimatedShippingCents;
   const taxCents = Math.max(0, input.taxCents);
+  const clearanceFeeCents = Math.max(0, input.clearanceFeeCents ?? 0);
   // FX conversion can leave fractional cents (e.g. 10,187.55). Every summary
   // row displays Math.round(cents/100) dollars, so the displayed ORDER TOTAL
   // must be the sum of those displayed rows — otherwise the page shows
