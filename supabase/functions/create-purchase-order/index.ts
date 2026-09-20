@@ -77,6 +77,10 @@ serve(async (req) => {
     if (!isBuyerTaxIdValid(ukTaxRule, buyerTaxId)) return json({ error: "A valid UK VAT number is required." }, 400);
     if (body?.budgetApproved !== true) return json({ error: "Internal budget approval must be confirmed." }, 400);
     if (!TERMS.has(paymentTerms)) return json({ error: "Select valid requested payment terms." }, 400);
+    const requestKey = str(body?.requestKey, 36).toLowerCase();
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(requestKey)) {
+      return json({ error: "A valid purchase-order submission key is required." }, 400);
+    }
 
     const buyer = body?.buyer ?? {};
     const email = str(buyer?.email, 200);
@@ -122,7 +126,13 @@ serve(async (req) => {
       importTotalCents: int(body?.importTotalCents),
       deferredImportCents: int(body?.deferredImportCents),
     });
-    const orderRef = `PO-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+    const orderRef = `PO-${requestKey.toUpperCase()}`;
+    const { data: existing } = await admin.from("shop_orders")
+      .select("id, order_ref, status")
+      .eq("order_ref", orderRef)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (existing) return json({ orderId: existing.id, orderRef: existing.order_ref, status: existing.status, duplicate: true });
     const { data: order, error: orderError } = await admin.from("shop_orders").insert({
       order_ref: orderRef,
       user_id: userId,
@@ -162,7 +172,7 @@ serve(async (req) => {
       po_payment_terms: paymentTerms,
       budget_approved_at: new Date().toISOString(),
       po_review_status: "pending",
-      notes: `Requested terms: ${TERM_LABELS[paymentTerms]}. Subject to credit and order review.`,
+      notes: `Requested terms: ${TERM_LABELS[paymentTerms]}. Subject to credit and order review. Submission ${requestKey}.`,
     }).select("id").single();
     if (orderError || !order) {
       console.error("[create-purchase-order] order insert failed", orderError);

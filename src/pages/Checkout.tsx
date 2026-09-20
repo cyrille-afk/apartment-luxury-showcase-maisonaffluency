@@ -1127,6 +1127,7 @@ function PurchaseOrderForm({
   optionsSlot: React.ReactNode;
 }) {
   const draftKey = "ma_uk_corporate_po_draft";
+  const [requestKey] = useState(() => crypto.randomUUID());
   const [form, setForm] = useState(() => {
     try {
       const saved = JSON.parse(sessionStorage.getItem(draftKey) || "{}");
@@ -1171,6 +1172,7 @@ function PurchaseOrderForm({
           poNumber: form.poNumber,
           paymentTerms: form.paymentTerms,
           budgetApproved: form.budgetApproved,
+          requestKey,
           buyer: { email, name: buyerName, address: form.deliveryAddress },
           lines: lines.map((line) => ({
             title: line.title,
@@ -2135,6 +2137,9 @@ export default function Checkout() {
   useEffect(() => {
     if (!highValue) setDepositPct(0);
   }, [highValue]);
+  useEffect(() => {
+    if (method === "purchase_order" && !purchaseOrderEligible) setMethod("wire");
+  }, [method, purchaseOrderEligible]);
 
   // In wire mode there is no Stripe address element, so the global shipping
   // destination drives the tax country shown in the summary.

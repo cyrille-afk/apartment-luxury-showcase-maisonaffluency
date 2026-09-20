@@ -13709,6 +13709,8 @@ CREATE INDEX shop_order_items_order_idx ON public.shop_order_items USING btree (
 
 CREATE INDEX shop_orders_status_idx ON public.shop_orders USING btree (status, created_at DESC);
 
+CREATE INDEX shop_orders_po_review_status_idx ON public.shop_orders USING btree (po_review_status, created_at DESC) WHERE (payment_method = 'purchase_order'::text);
+
 
 --
 -- Name: shop_orders_user_idx; Type: INDEX; Schema: public; Owner: -
