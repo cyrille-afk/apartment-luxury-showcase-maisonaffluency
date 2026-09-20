@@ -139,6 +139,7 @@ serve(async (req) => {
       .join("\n"),
     "",
     "Name the aesthetic in 2-6 words (e.g. 'monastic brutalism', 'austere luxury').",
+    "Phrase it in the Maison Affluency design-scholar register: materiality, provenance, craftsmanship, and historical context over lifestyle adjectives.",
     "Then choose exactly 3 roster designers this studio would naturally specify.",
     "Using your knowledge base and digital mapping of the studio's name, founder, and website, locate the verified, official Instagram handle for this studio.",
     'Return it as a clean string under "instagram_handle" WITHOUT the @ prefix (e.g. "studio_handle_here"). If the studio has no verified presence, return null. Never guess a handle you are not confident is official.',
@@ -177,7 +178,7 @@ serve(async (req) => {
     }
     const parsed = JSON.parse(raw || "{}");
     aesthetic = str(parsed?.aesthetic, 200);
-    instagram = sanitizeInstagram(parsed?.instagram_handle);
+    instagram = providedInstagram ?? sanitizeInstagram(parsed?.instagram_handle);
     matched = (Array.isArray(parsed?.matched_designers) ? parsed.matched_designers : [])
       .map((n: unknown) => byName.get(String(n ?? "").trim().toLowerCase()))
       .filter((n: string | undefined): n is string => Boolean(n))
