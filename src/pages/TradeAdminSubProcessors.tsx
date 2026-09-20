@@ -122,6 +122,10 @@ const TradeAdminSubProcessors = () => {
 
   const [active, setActive] = useState<Row | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [downloading, setDownloading] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [form, setForm] = useState({
     dpa_status: "pending" as DpaStatus,
     dpa_reference: "",
