@@ -227,7 +227,7 @@ export default function Cart() {
         body: {
           method,
           currency: currency.toLowerCase(),
-          shippingCountry: shipDest.iso || "",
+          shippingCountry: destination.iso || "",
           email: user.email || undefined,
           items: items.map((i) => ({
             pickId: i.pickId,
