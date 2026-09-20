@@ -6,10 +6,10 @@ const PrivacyPolicy = () => {
   return (
     <>
       <Helmet>
-        <title>Privacy Policy | Maison Affluency</title>
-        <meta name="description" content="Privacy Policy for Maison Affluency — how we collect, use, and protect your personal data." />
-        <meta property="og:title" content="Privacy Policy — Maison Affluency" />
-        <meta property="og:description" content="How Maison Affluency collects, uses and protects your personal data." />
+        <title>Privacy & Cookie Policy | Maison Affluency</title>
+        <meta name="description" content="Privacy and Cookie Policy for Maison Affluency — how we collect, use, and protect your personal and corporate data." />
+        <meta property="og:title" content="Privacy & Cookie Policy — Maison Affluency" />
+        <meta property="og:description" content="How Maison Affluency collects, uses and protects your personal and corporate data." />
         <meta property="og:url" content="https://maisonaffluency.com/privacy" />
         <meta property="og:type" content="website" />
       </Helmet>
@@ -21,88 +21,126 @@ const PrivacyPolicy = () => {
             Back to Home
           </Link>
 
-          <h1 className="font-display text-3xl md:text-4xl mb-2">Privacy Policy</h1>
-          <p className="text-muted-foreground text-sm mb-12">Last updated: 17 March 2026</p>
+          <h1 className="font-display text-3xl md:text-4xl mb-2">Maison Affluency — Privacy & Cookie Policy</h1>
+          <div className="text-muted-foreground text-sm mb-12 space-y-1">
+            <p><span className="font-medium text-foreground">Last Updated:</span> 20 September 2026</p>
+            <p><span className="font-medium text-foreground">Effective Date:</span> 20 September 2026</p>
+            <p><span className="font-medium text-foreground">Data Controller:</span> Maison Affluency Private Limited (Singapore UEN: 201717288Z)</p>
+            <p><span className="font-medium text-foreground">Contact:</span>{" "}
+              <a href="mailto:privacy@maisonaffluency.com" className="text-primary hover:underline">privacy@maisonaffluency.com</a>
+            </p>
+          </div>
 
-          <div className="space-y-8 font-body text-sm leading-relaxed text-muted-foreground">
+          <div className="space-y-10 font-body text-sm leading-relaxed text-muted-foreground">
             <section>
-              <h2 className="font-display text-lg text-foreground mb-3">1. Introduction</h2>
+              <h2 className="font-display text-lg text-foreground mb-3">1. Overview & Data Architecture</h2>
+              <p className="mb-3">
+                At Maison Affluency, we are committed to handling your personal and corporate data with complete transparency. This policy outlines how we collect, process, and protect your information across our public website, our premium PWA standalone applications, and our dedicated <code className="px-1.5 py-0.5 bg-muted rounded text-xs">/trade/*</code> business workspaces.
+              </p>
               <p>
-                Maison Affluency ("we", "our", or "us") operates the website maisonaffluency.com. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our trade portal services.
+                As a Singapore-headquartered entity serving a global clientele, we operate under a strict <strong className="text-foreground">Zero-Pre-Consent model</strong>. No non-essential tracking pixels, analytics, or third-party behavioral scripts will fire within your browser or device until you grant explicit, affirmative consent via our preference management center.
               </p>
             </section>
 
             <section>
-              <h2 className="font-display text-lg text-foreground mb-3">2. Information We Collect</h2>
-              <p className="mb-3">We may collect the following types of information:</p>
-              <ul className="list-disc pl-6 space-y-2">
-                <li><strong className="text-foreground">Personal Information:</strong> Name, email address, phone number, company name, job title, and other details you provide when registering for our trade portal or contacting us.</li>
-                <li><strong className="text-foreground">Account Information:</strong> Login credentials and profile information associated with your trade account.</li>
-                <li><strong className="text-foreground">Usage Data:</strong> Information about how you interact with our website, including pages visited, time spent, and navigation patterns.</li>
-                <li><strong className="text-foreground">Device Information:</strong> Browser type, operating system, IP address, and device identifiers.</li>
+              <h2 className="font-display text-lg text-foreground mb-3">2. Granular Cookie & Tracking Infrastructure</h2>
+              <p className="mb-4">
+                We classify our automated data collection tokens into four distinct tiers. You can modify or withdraw your preferences at any time by clicking the permanent <strong className="text-foreground">Privacy Shield Icon</strong> in the bottom-left corner of your screen.
+              </p>
+
+              <div className="overflow-x-auto rounded-lg border border-border">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="px-4 py-3 font-display text-foreground font-medium">Cookie Category</th>
+                      <th className="px-4 py-3 font-display text-foreground font-medium">Function & Description</th>
+                      <th className="px-4 py-3 font-display text-foreground font-medium">Default Status</th>
+                      <th className="px-4 py-3 font-display text-foreground font-medium">Processors Involved</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    <tr>
+                      <td className="px-4 py-3 align-top font-medium text-foreground">Strictly Necessary</td>
+                      <td className="px-4 py-3 align-top">Essential for core platform security, secure user authentication, and shopping cart persistence.</td>
+                      <td className="px-4 py-3 align-top font-medium text-foreground">Always Active</td>
+                      <td className="px-4 py-3 align-top">Supabase Auth, Stripe (Advanced Fraud Telemetry)</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-3 align-top font-medium text-foreground">Functional</td>
+                      <td className="px-4 py-3 align-top">Remembers local display currencies, localization selections, and basic UI system preferences.</td>
+                      <td className="px-4 py-3 align-top italic">Disabled until consented</td>
+                      <td className="px-4 py-3 align-top">Local Storage Framework</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-3 align-top font-medium text-foreground">Analytics</td>
+                      <td className="px-4 py-3 align-top">Measures traffic volume, customer navigation journeys, and page speed diagnostics to improve our user experience.</td>
+                      <td className="px-4 py-3 align-top italic">Disabled until consented</td>
+                      <td className="px-4 py-3 align-top">Google Analytics 4, Hotjar</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-3 align-top font-medium text-foreground">Marketing & Targeting</td>
+                      <td className="px-4 py-3 align-top">Tracks campaign performance and controls the delivery of curated product updates and messaging.</td>
+                      <td className="px-4 py-3 align-top italic">Disabled until consented</td>
+                      <td className="px-4 py-3 align-top">Resend Tracking, Twilio, Meta Pixel</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <p className="mt-4 italic">
+                Note: In compliance with EU GDPR Article 7(1), every modification of your tracking preferences is securely logged in an immutable, server-side ledger with an encrypted device fingerprint, timestamp, and policy version code to serve as our legally binding audit trail.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="font-display text-lg text-foreground mb-3">3. Trade Registration & Anti-Fraud Gating</h2>
+              <p className="mb-3">
+                When a corporate entity applies for wholesale access via our <strong className="text-foreground">Trade Registration Form</strong>, we enforce stringent server-side verification protocols to protect our platform integrity:
+              </p>
+              <ul className="list-disc pl-6 space-y-3">
+                <li>
+                  <strong className="text-foreground">Data Collected:</strong> Registered Corporate Name, Legal Operating Address, UK/EU VAT numbers, local tax registrations (e.g., Singapore UEN), and identity verification documents (e.g., passports, trade licences).
+                </li>
+                <li>
+                  <strong className="text-foreground">Automated Screening & Human Verification:</strong> Uploaded files undergo binary signature verification and cryptographic SHA-256 fingerprinting to detect duplicate or altered records. An AI sub-routine screens metadata for manipulation flags; however, <strong className="text-foreground">no automated decision-making occurs</strong>. All accounts are securely held in a <code className="px-1.5 py-0.5 bg-muted rounded text-xs">Pending_Human_Review</code> queue until approved by an administrator.
+                </li>
+                <li>
+                  <strong className="text-foreground">Strict Deletion Windows:</strong> If a trade application is rejected by our compliance team, all uploaded verification documents (passports, licences) are <strong className="text-foreground">permanently and automatically deleted from our cloud storage arrays after exactly 14 days</strong>. Only an anonymised historical decision record is retained.
+                </li>
               </ul>
             </section>
 
             <section>
-              <h2 className="font-display text-lg text-foreground mb-3">3. How We Use Your Information</h2>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>To provide and maintain our services, including the trade portal</li>
-                <li>To process trade applications and manage your account</li>
-                <li>To send you relevant communications about products, pricing, and services</li>
-                <li>To improve our website and user experience</li>
-                <li>To comply with legal obligations</li>
+              <h2 className="font-display text-lg text-foreground mb-3">4. International Cross-Border Transfers & Taxation</h2>
+              <p className="mb-3">
+                Because Maison Affluency manages logistics from its Singapore hub using a <strong className="text-foreground">Delivered Duty Paid (DDP) clearance model</strong>, your transaction and address data are handled under specific operational guardrails:
+              </p>
+              <ul className="list-disc pl-6 space-y-3">
+                <li>
+                  <strong className="text-foreground">Third-Party Processing:</strong> To calculate decimal-accurate localized checkout taxes, your input VAT or corporate tax numbers are verified in real-time using secure aggregators accessing the <strong className="text-foreground">EU VIES</strong> and <strong className="text-foreground">UK HMRC API</strong> networks.
+                </li>
+                <li>
+                  <strong className="text-foreground">Landed Cost Data:</strong> Line-item descriptions and matched <strong className="text-foreground">HS6 Customs Codes</strong> are securely transmitted to our partner carriers (including DHL Express, FedEx, and UPS) to process cross-border clearance and statutory customs manifests on your behalf.
+                </li>
+                <li>
+                  <strong className="text-foreground">Data Hosting:</strong> Our database architecture utilizes secure global nodes. Transfers of European citizen data to non-EU cloud environments are protected via Standard Contractual Clauses (SCCs) embedded within our service level contracts.
+                </li>
               </ul>
             </section>
 
             <section>
-              <h2 className="font-display text-lg text-foreground mb-3">4. Information Sharing</h2>
-              <p>
-                We do not sell your personal information. We may share your data with trusted third-party service providers who assist us in operating our website and conducting our business, subject to confidentiality agreements. These include authentication providers (such as Google for sign-in), hosting services, and email delivery services.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="font-display text-lg text-foreground mb-3">5. Data Security</h2>
-              <p>
-                We implement appropriate technical and organisational measures to protect your personal information against unauthorised access, alteration, disclosure, or destruction. However, no method of transmission over the internet is 100% secure.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="font-display text-lg text-foreground mb-3">6. Cookies</h2>
-              <p>
-                We use essential cookies to maintain your session and authentication state. We do not use third-party tracking or advertising cookies.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="font-display text-lg text-foreground mb-3">7. Your Rights</h2>
-              <p>
-                Depending on your jurisdiction, you may have the right to access, correct, delete, or restrict the processing of your personal data. To exercise these rights, please contact us at the email address below.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="font-display text-lg text-foreground mb-3">8. Third-Party Services</h2>
-              <p>
-                Our website may use third-party services, including Google OAuth for authentication. When you sign in with Google, their privacy policy applies to the data they collect. We encourage you to review their policies.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="font-display text-lg text-foreground mb-3">9. Changes to This Policy</h2>
-              <p>
-                We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated revision date.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="font-display text-lg text-foreground mb-3">10. Contact Us</h2>
-              <p>
-                If you have questions about this Privacy Policy, please contact us at:{" "}
-                <a href="mailto:hello@maisonaffluency.com" className="text-primary hover:underline">
-                  hello@maisonaffluency.com
-                </a>
+              <h2 className="font-display text-lg text-foreground mb-3">5. Data Retention & Your Legal Rights</h2>
+              <ul className="list-disc pl-6 space-y-3">
+                <li>
+                  <strong className="text-foreground">Retention Limits:</strong> Marketing funnel tokens and abandoned cart tracking records are retained for a maximum of <strong className="text-foreground">180 days</strong> before automatic expiration. Confirmed transactional invoice data is retained for a mandatory <strong className="text-foreground">7-year period</strong> to satisfy Singapore corporate accounting and tax law regulations.
+                </li>
+                <li>
+                  <strong className="text-foreground">Your Rights:</strong> Regardless of your geographic location, Maison Affluency extends fundamental privacy rights to all users. You have the right to request a <strong className="text-foreground">complete export of your data profile</strong>, ask for the <strong className="text-foreground">rectification of inaccurate information</strong>, or invoke your <strong className="text-foreground">right to erasure ("Right to be Forgotten")</strong> for non-tax records.
+                </li>
+              </ul>
+              <p className="mt-3">
+                To exercise any of your data rights, please submit a formal request to our compliance queue at{" "}
+                <a href="mailto:privacy@maisonaffluency.com" className="text-primary hover:underline">privacy@maisonaffluency.com</a>. Our legal desk will respond and execute your verification requests within 30 days.
               </p>
             </section>
           </div>
