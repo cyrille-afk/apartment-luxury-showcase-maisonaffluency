@@ -58,6 +58,58 @@ export const MERCHANT_TAX_IDENTIFIERS = {
   euOss: null as string | null,
 };
 
+/**
+ * How an EU consignment reaches the buyer.
+ *  CARRIER_DDP    the forwarder imports on our behalf; destination VAT is
+ *                 prepaid at checkout and a flat clearance fee is charged.
+ *  MERCHANT_IOSS  we account for the VAT ourselves under our own IOSS
+ *                 registration; no carrier clearance fee, and the IOSS number
+ *                 travels on the electronic customs manifest.
+ */
+export type CustomsRoute = "CARRIER_DDP" | "MERCHANT_IOSS";
+
+/**
+ * Interim routing switch. Today every EU consignment — below and above €150 —
+ * leaves Singapore under the carrier-backed DDP channel, because we hold no
+ * IOSS registration. The moment one is obtained, flip
+ * `processIossViaMerchant` on and supply the number; the engine then splits
+ * low-value B2C consignments onto the IOSS route by itself.
+ *
+ * Runtime configured rather than read from the environment here, so this file
+ * stays dependency-free and identical on the server and in the browser.
+ */
+export interface IossRoutingConfig {
+  processIossViaMerchant: boolean;
+  euIossNumber: string | null;
+}
+
+const iossRouting: IossRoutingConfig = {
+  processIossViaMerchant: false,
+  euIossNumber: null,
+};
+
+export const configureIossRouting = (patch: Partial<IossRoutingConfig>): void => {
+  if (typeof patch.processIossViaMerchant === "boolean") {
+    iossRouting.processIossViaMerchant = patch.processIossViaMerchant;
+  }
+  if (patch.euIossNumber !== undefined) {
+    const n = (patch.euIossNumber || "").trim().toUpperCase();
+    iossRouting.euIossNumber = n || null;
+  }
+};
+
+export const getIossRouting = (): IossRoutingConfig => ({ ...iossRouting });
+
+/**
+ * The IOSS identifier to charge under, or `null` when the merchant route is
+ * off or unconfigured. Both conditions must hold — a number without the switch
+ * (or a switch without a number) keeps every consignment on carrier DDP.
+ */
+export const merchantIossNumber = (): string | null =>
+  iossRouting.processIossViaMerchant && iossRouting.euIossNumber
+    ? iossRouting.euIossNumber
+    : null;
+
 /** IOSS applies to consignments with an intrinsic value at or below €150. */
 export const IOSS_THRESHOLD_EUR_CENTS = 150_00;
 /** HMRC low-value consignment threshold: £135. */
