@@ -56,8 +56,10 @@ function requireOrSkip(have: boolean, reason: string) {
 }
 
 test.describe("Live provider smoke — Resend", () => {
-  test.beforeAll(() => requireOrSkip(haveResend, "RESEND_TEST_API_KEY not set — live Resend smoke skipped."));
-  test.skip(!haveResend && !STRICT, "RESEND_TEST_API_KEY not set — live Resend smoke skipped.");
+  test.beforeAll(() =>
+    requireOrSkip(haveResend, "RESEND_TEST_API_KEY or RESEND_API_KEY not set — live Resend smoke skipped."),
+  );
+  test.skip(!haveResend && !STRICT, "RESEND_TEST_API_KEY or RESEND_API_KEY not set — live Resend smoke skipped.");
 
   test("test-mode receipt is accepted and returns a message id", async () => {
     const resend = new Resend(RESEND_KEY!);
