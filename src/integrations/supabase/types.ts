@@ -1885,6 +1885,57 @@ export type Database = {
         }
         Relationships: []
       }
+      consent_audit_log: {
+        Row: {
+          created_at: string
+          decided_at: string
+          id: string
+          ip_hash: string | null
+          method: string
+          path: string | null
+          policy_version: string
+          scope_analytics: boolean
+          scope_functional: boolean
+          scope_marketing: boolean
+          scope_necessary: boolean
+          subject_hash: string
+          surface: string | null
+          user_agent_hash: string | null
+        }
+        Insert: {
+          created_at?: string
+          decided_at: string
+          id?: string
+          ip_hash?: string | null
+          method: string
+          path?: string | null
+          policy_version: string
+          scope_analytics?: boolean
+          scope_functional?: boolean
+          scope_marketing?: boolean
+          scope_necessary?: boolean
+          subject_hash: string
+          surface?: string | null
+          user_agent_hash?: string | null
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string
+          id?: string
+          ip_hash?: string | null
+          method?: string
+          path?: string | null
+          policy_version?: string
+          scope_analytics?: boolean
+          scope_functional?: boolean
+          scope_marketing?: boolean
+          scope_necessary?: boolean
+          subject_hash?: string
+          surface?: string | null
+          user_agent_hash?: string | null
+        }
+        Relationships: []
+      }
       content_audit_log: {
         Row: {
           changed_by: string | null

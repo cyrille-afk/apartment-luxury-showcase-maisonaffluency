@@ -393,6 +393,13 @@
       "when": 1789867982772,
       "tag": "0055_schedule_trade_credential_retention_purge",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1789868515701,
+      "tag": "0056_consent_audit_log",
+      "breakpoints": true
     }
   ]
 }
