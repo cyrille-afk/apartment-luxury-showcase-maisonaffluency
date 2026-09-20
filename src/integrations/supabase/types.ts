@@ -68,6 +68,54 @@ export type Database = {
         }
         Relationships: []
       }
+      acquisition_leads: {
+        Row: {
+          aesthetic_profile: string | null
+          business_email: string
+          campaign_status: string
+          created_at: string
+          email_error: string | null
+          email_sent_at: string | null
+          founder_name: string | null
+          id: string
+          predicted_designer_matches: string[] | null
+          source_index: string | null
+          studio_name: string
+          verified_at: string | null
+          website_url: string | null
+        }
+        Insert: {
+          aesthetic_profile?: string | null
+          business_email: string
+          campaign_status?: string
+          created_at?: string
+          email_error?: string | null
+          email_sent_at?: string | null
+          founder_name?: string | null
+          id?: string
+          predicted_designer_matches?: string[] | null
+          source_index?: string | null
+          studio_name: string
+          verified_at?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          aesthetic_profile?: string | null
+          business_email?: string
+          campaign_status?: string
+          created_at?: string
+          email_error?: string | null
+          email_sent_at?: string | null
+          founder_name?: string | null
+          id?: string
+          predicted_designer_matches?: string[] | null
+          source_index?: string | null
+          studio_name?: string
+          verified_at?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       admin_alert_log: {
         Row: {
           application_id: string | null
