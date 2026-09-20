@@ -407,6 +407,13 @@
       "when": 1789869826697,
       "tag": "0057_add_trade_application_fraud_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1789870176661,
+      "tag": "0058_trade_fraud_alert_webhook_trigger",
+      "breakpoints": true
     }
   ]
 }
