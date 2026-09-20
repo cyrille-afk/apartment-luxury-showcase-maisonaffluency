@@ -156,6 +156,7 @@ serve(async (req) => {
     }
     const parsed = JSON.parse(raw || "{}");
     aesthetic = str(parsed?.aesthetic, 200);
+    instagram = sanitizeInstagram(parsed?.instagram_handle);
     matched = (Array.isArray(parsed?.matched_designers) ? parsed.matched_designers : [])
       .map((n: unknown) => byName.get(String(n ?? "").trim().toLowerCase()))
       .filter((n: string | undefined): n is string => Boolean(n))
