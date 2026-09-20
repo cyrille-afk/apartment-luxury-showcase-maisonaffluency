@@ -37,7 +37,7 @@ const VERDICT_MODEL = "openai/gpt-5.6-sol";
 const TRIAGE_URL = "https://www.maisonaffluency.com/admin/trade-review";
 const AI_TIMEOUT_MS = 45_000;
 const SITE_TIMEOUT_MS = 12_000;
-// AUTO_APPROVE_AT (85) is imported from ./regional.ts
+// HUMAN_REVIEW_AT (85) is imported from ./regional.ts — queue priority only.
 const MAX_ATTEMPTS = 2;
 const RETRY_DELAY_MIN = 15;
 
