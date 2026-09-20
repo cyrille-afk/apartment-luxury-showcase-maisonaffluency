@@ -8,8 +8,12 @@
  */
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { CATALOG_RATE_LIMIT, CATALOG_RATE_WINDOW_SECONDS } from "../_shared/tradeGuardrails.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 const PRICING_COLUMNS =
   "id, source_pick_id, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, lead_time, lead_time_weeks_min, lead_time_weeks_max, stock_status_override, spec_sheet_url, is_allocation_restricted, allocation_unit_cap, available_stock_units";
