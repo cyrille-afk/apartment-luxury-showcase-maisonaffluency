@@ -464,6 +464,37 @@ function OrderSummary({
   const isB2BZeroRated = summary.taxTreatment === "b2b_zero_rated";
   const isReverseCharge = summary.taxTreatment === "reverse_charge";
 
+  /* Cross-border matrix — background call, never blocks this summary. */
+  const crossBorderItems = useMemo(
+    () =>
+      lines.map((line) => ({
+        pickId: line.pickId ?? null,
+        unitCents: line.unitCents,
+        quantity: lineQty(line),
+        originCountry: line.pickupCountry ?? line.origin ?? null,
+        hs6Code: line.hs6Code ?? null,
+        dutyRate: line.dutyRate ?? null,
+      })),
+    [lines],
+  );
+  const { invoice: crossBorder } = useCrossBorderInvoice(
+    crossBorderItems,
+    summary.taxCountry,
+    currency,
+  );
+  /** Verified B2B registration — every local VAT line is withdrawn. */
+  const crossBorderExempt = isReverseChargeExempt(crossBorder);
+  useEffect(() => {
+    if (crossBorderExempt && summary.taxCents > 0) {
+      // Engine disagreement: keep the charged figure, record it quietly.
+      logInvoiceIncident("exempt_status_with_charged_tax", {
+        taxCents: summary.taxCents,
+        destination: summary.taxCountry,
+      });
+    }
+  }, [crossBorderExempt, summary.taxCents, summary.taxCountry]);
+
+
   const sgImportGstThreshold = useMemo(() => {
     if (summary.taxCountry !== "SG" || isB2BZeroRated || summary.taxApplied) return null;
     const usdAmount =
