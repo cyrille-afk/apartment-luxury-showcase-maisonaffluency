@@ -20,12 +20,12 @@ describe("UK landed cost", () => {
     });
     expect(est.available).toBe(true);
     expect(est.dutyCents).toBe(0);
-    // DDP handling is the forwarder-confirmed €80 flat + 2% of freight
-    // (£40 + £80 = £120 here), so the CIF value assessed is £52,120.
-    expect(est.handlingCents).toBe(12_000);
-    expect(est.vatCents).toBe(1_042_400);
+    // DDP handling is the forwarder-confirmed €20 flat + 40% of freight
+    // (£800 + £20 = £820 here), so the CIF value assessed is £52,820.
+    expect(est.handlingCents).toBe(82_000);
+    expect(est.vatCents).toBe(1_056_400);
     expect(est.clearanceCents).toBe(15_000);
-    expect(est.totalCents).toBe(1_057_400);
+    expect(est.totalCents).toBe(1_071_400);
     expect(est.deferredTotalCents).toBe(0);
     expect(est.taxName).toBe("UK VAT");
   });
@@ -63,10 +63,10 @@ describe("UK landed cost", () => {
       countryCode: "GB",
       goodsCents: 100_000,
       freightCents: 100_000,
-      handlingFlatInOrderCurrencyCents: 6_900, // €80 → £69
+      handlingFlatInOrderCurrencyCents: 2_000, // €20 flat
     });
-    // 2% of £1,000 (£20) + £69 flat.
-    expect(est.handlingCents).toBe(8_900);
+    // 40% of £1,000 (£400) + £20 flat.
+    expect(est.handlingCents).toBe(42_000);
   });
 
   it("returns nothing for destinations that need no import clearance", () => {
