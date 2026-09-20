@@ -10194,6 +10194,7 @@ export type Database = {
         | "flagged"
         | "flagged_for_review"
         | "system_retry"
+        | "pending_human_review"
       trade_tier: "standard" | "silver" | "gold" | "platinum"
     }
     CompositeTypes: {
@@ -10380,6 +10381,7 @@ export const Constants = {
         "flagged",
         "flagged_for_review",
         "system_retry",
+        "pending_human_review",
       ],
       trade_tier: ["standard", "silver", "gold", "platinum"],
     },
