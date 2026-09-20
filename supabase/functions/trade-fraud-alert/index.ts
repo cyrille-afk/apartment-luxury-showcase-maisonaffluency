@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
 
   const { data: row, error } = await admin
     .from("trade_applications")
-    .select("id, company_name, email, document_hash, fraud_flags, status")
+    .select("id, user_id, company_name, document_hash, fraud_flags, status")
     .eq("id", applicationId)
     .maybeSingle();
 
@@ -94,8 +94,14 @@ Deno.serve(async (req) => {
     );
   }
 
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("email")
+    .eq("id", row.user_id)
+    .maybeSingle();
+
   const company = escapeHtml(row.company_name || "Unknown");
-  const email = escapeHtml(row.email || "N/A");
+  const email = escapeHtml(profile?.email || "N/A");
   const hash = escapeHtml(row.document_hash || "N/A");
   const flags = (row.fraud_flags || []).map(escapeHtml).join(", ");
 
