@@ -818,6 +818,7 @@ Be conservative: if the website is unreachable, password-protected or the eviden
         identifier_warnings: malformed.length,
         fraud_flags: fraudFlags,
         screening_only: true,
+        registry_verification: registry,
       },
       ai_verified_at: new Date().toISOString(),
     })
