@@ -8634,7 +8634,13 @@ CREATE TABLE public.shop_orders (
     ddp_handling_cents integer DEFAULT 0 NOT NULL,
     import_total_cents integer DEFAULT 0 NOT NULL,
     deferred_import_cents integer DEFAULT 0 NOT NULL,
-    customs_statement text
+    customs_statement text,
+    customer_po_number text,
+    company_name text,
+    company_registration_number text,
+    po_payment_terms text,
+    budget_approved_at timestamp with time zone,
+    po_review_status text
 );
 
 
@@ -13702,6 +13708,8 @@ CREATE INDEX shop_order_items_order_idx ON public.shop_order_items USING btree (
 --
 
 CREATE INDEX shop_orders_status_idx ON public.shop_orders USING btree (status, created_at DESC);
+
+CREATE INDEX shop_orders_po_review_status_idx ON public.shop_orders USING btree (po_review_status, created_at DESC) WHERE (payment_method = 'purchase_order'::text);
 
 
 --

@@ -3,6 +3,7 @@ import { useLocation, useNavigate, Link } from "react-router-dom";
 import { Elements, PaymentElement, AddressElement, ExpressCheckoutElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import { Lock, Check, Loader2, Copy } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -64,6 +65,7 @@ import {
   cardPracticalLimitCents,
   depositAmountCents,
   isHighValueOrder,
+  isUkCorporatePurchaseOrderEligible,
 } from "@/config/highValuePayment";
 import { getCustomsRegion } from "@/lib/checkout/customsRegions";
 
@@ -902,7 +904,7 @@ function ConditionalNotes() {
 /* ------------------------------------------------------------------ */
 /* Delivery & payment options — shipping module + payment method tabs  */
 /* ------------------------------------------------------------------ */
-type PaymentMethod = "card" | "wire" | "wallet" | "paynow";
+type PaymentMethod = "card" | "wire" | "wallet" | "paynow" | "purchase_order";
 
 const METHOD_TABS: { id: PaymentMethod; label: string; hint: string }[] = [
   { id: "card", label: "Secure Card Payment", hint: "Visa · Mastercard · Amex" },
@@ -935,12 +937,14 @@ function HighValueRouting({
   setMethod,
   depositPct,
   setDepositPct,
+  purchaseOrderEligible,
 }: {
   summary: CheckoutSummary;
   method: PaymentMethod;
   setMethod: (m: PaymentMethod) => void;
   depositPct: DepositPct;
   setDepositPct: (p: DepositPct) => void;
+  purchaseOrderEligible: boolean;
 }) {
   const { currency, displayTotalCents } = summary;
   const limit = cardPracticalLimitCents(currency);
@@ -977,6 +981,19 @@ function HighValueRouting({
         >
           Settle by transfer
         </button>
+        {purchaseOrderEligible && (
+          <Button
+            type="button"
+            variant={method === "purchase_order" ? "default" : "outline"}
+            onClick={() => {
+              setDepositPct(0);
+              setMethod("purchase_order");
+            }}
+            className="h-auto rounded-none px-4 py-2 text-[10px] font-light uppercase tracking-[0.22em]"
+          >
+            Submit purchase order
+          </Button>
+        )}
         {plans
           .filter((p) => p.pct !== 0)
           .map((p) => (
@@ -1007,8 +1024,8 @@ function HighValueRouting({
         </p>
       )}
       <p className="font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
-        Buying against a purchase order? Choose transfer — the proforma invoice we issue carries
-        your PO reference and serves as the document your finance team pays against.
+        Approved UK corporate buyers may submit a purchase order for review. Production is released
+        only after identity, credit and final payment terms are approved.
       </p>
     </section>
   );
@@ -1019,12 +1036,20 @@ function DeliveryPaymentOptions({
   method,
   setMethod,
   paynowAvailable,
+  purchaseOrderEligible,
 }: {
   method: PaymentMethod;
   setMethod: (m: PaymentMethod) => void;
   paynowAvailable: boolean;
+  purchaseOrderEligible: boolean;
 }) {
-  const tabs = paynowAvailable ? [...METHOD_TABS, PAYNOW_TAB] : METHOD_TABS;
+  const tabs = [
+    ...METHOD_TABS,
+    ...(paynowAvailable ? [PAYNOW_TAB] : []),
+    ...(purchaseOrderEligible
+      ? [{ id: "purchase_order" as PaymentMethod, label: "Purchase Order", hint: "Corporate approval route" }]
+      : []),
+  ];
   return (
     <section className="mt-6 w-full space-y-5 border-t border-border pt-8">
       <h2 className="text-[11px] font-light uppercase tracking-[0.26em] text-muted-foreground">
@@ -1035,7 +1060,7 @@ function DeliveryPaymentOptions({
         aria-label="Payment method"
         className={cn(
           "grid w-full grid-cols-1 border border-neutral-200",
-          tabs.length === 4 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3",
+          tabs.length >= 4 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3",
         )}
       >
         {tabs.map((tab, i) => {
@@ -1075,6 +1100,146 @@ function DeliveryPaymentOptions({
         })}
       </div>
     </section>
+  );
+}
+
+type PoTerms = "cia_stage" | "net_30" | "one_percent_10_net_30" | "net_60";
+
+function PurchaseOrderForm({
+  lines,
+  summary,
+  account,
+  email,
+  company,
+  buyerVatId,
+  buyerName,
+  onDone,
+  optionsSlot,
+}: {
+  lines: CheckoutLine[];
+  summary: CheckoutSummary;
+  account: { email: string; role: string; company?: string } | null;
+  email: string;
+  company: string;
+  buyerVatId: string;
+  buyerName: string;
+  onDone: (reference: string) => void;
+  optionsSlot: React.ReactNode;
+}) {
+  const draftKey = "ma_uk_corporate_po_draft";
+  const [requestKey] = useState(() => crypto.randomUUID());
+  const [form, setForm] = useState(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(draftKey) || "{}");
+      return {
+        companyName: String(saved.companyName || company),
+        companyRegistrationNumber: String(saved.companyRegistrationNumber || ""),
+        buyerVatId: String(saved.buyerVatId || buyerVatId),
+        poNumber: String(saved.poNumber || ""),
+        deliveryAddress: String(saved.deliveryAddress || ""),
+        paymentTerms: (saved.paymentTerms || "cia_stage") as PoTerms,
+        budgetApproved: Boolean(saved.budgetApproved),
+      };
+    } catch {
+      return { companyName: company, companyRegistrationNumber: "", buyerVatId, poNumber: "", deliveryAddress: "", paymentTerms: "cia_stage" as PoTerms, budgetApproved: false };
+    }
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  useEffect(() => {
+    try { sessionStorage.setItem(draftKey, JSON.stringify(form)); } catch { /* private mode */ }
+  }, [form]);
+  useEffect(() => {
+    if (buyerVatId) setForm((prev) => ({ ...prev, buyerVatId: prev.buyerVatId || buyerVatId }));
+    if (company) setForm((prev) => ({ ...prev, companyName: prev.companyName || company }));
+  }, [buyerVatId, company]);
+  const update = (key: keyof typeof form, value: string | boolean) => setForm((prev) => ({ ...prev, [key]: value }));
+  const validVat = isBuyerTaxIdValid(resolveTaxRule("GB", "gbp"), form.buyerVatId);
+  const canSubmit = Boolean(account?.email && form.companyName.trim() && form.companyRegistrationNumber.trim() && validVat && form.poNumber.trim() && form.deliveryAddress.trim() && form.budgetApproved);
+  const submit = async () => {
+    if (!canSubmit || submitting) return;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-purchase-order", {
+        body: {
+          currency: summary.currency,
+          shippingCountry: summary.taxCountry,
+          buyerType: "business",
+          buyerTaxId: form.buyerVatId,
+          companyName: form.companyName,
+          companyRegistrationNumber: form.companyRegistrationNumber,
+          poNumber: form.poNumber,
+          paymentTerms: form.paymentTerms,
+          budgetApproved: form.budgetApproved,
+          requestKey,
+          buyer: { email, name: buyerName, address: form.deliveryAddress },
+          lines: lines.map((line) => ({
+            title: line.title,
+            designer: line.designer,
+            finishLabel: line.finishLabel,
+            unitCents: line.unitCents,
+            quantity: lineQty(line),
+          })),
+          discountCents: summary.discountCents,
+          discountLabel: summary.discountLabel,
+          shippingCents: summary.deliveryCents,
+          incoterm: summary.incoterm,
+          importDutyCents: summary.importDutyCents,
+          importVatCents: summary.importVatCents,
+          importClearanceCents: summary.importClearanceCents,
+          ddpHandlingCents: summary.ddpHandlingCents,
+          importTotalCents: summary.importTotalCents,
+          deferredImportCents: summary.deferredImportCents,
+        },
+      });
+      if (error || data?.error) throw new Error(data?.error || error?.message || "Unable to submit purchase order.");
+      try { sessionStorage.removeItem(draftKey); } catch { /* private mode */ }
+      toast.success("Purchase order submitted for review");
+      onDone(data.orderRef);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Unable to submit purchase order.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+  const fieldClass = "mt-2 h-12 w-full rounded-none border border-border bg-background px-4 text-sm outline-none focus:border-foreground";
+  return (
+    <div>
+      {optionsSlot}
+      <section className="mt-8 border border-border bg-cream/40 p-5 sm:p-7">
+        <p className="text-[10px] uppercase tracking-[0.26em] text-muted-foreground">UK corporate purchase order</p>
+        <h2 className="mt-3 font-display text-2xl font-normal">Submit for credit and terms review</h2>
+        <p className="mt-3 max-w-2xl text-xs font-light leading-relaxed text-muted-foreground">
+          Your PO reserves the request for review; it does not release production or constitute payment. Maison Affluency will verify corporate identity, credit, availability and the final settlement schedule.
+        </p>
+        {!account && <p className="mt-5 border border-destructive/30 p-3 text-xs text-destructive">Sign in with an approved Trade account to submit a purchase order.</p>}
+        <div className="mt-7 grid gap-5 sm:grid-cols-2">
+          <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Legal company name<input value={form.companyName} onChange={(e) => update("companyName", e.target.value)} className={fieldClass} autoComplete="organization" /></label>
+          <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Companies House / registration number<input value={form.companyRegistrationNumber} onChange={(e) => update("companyRegistrationNumber", e.target.value)} className={fieldClass} autoCapitalize="characters" /></label>
+          <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">UK VAT number<input value={form.buyerVatId} onChange={(e) => update("buyerVatId", e.target.value)} className={cn(fieldClass, form.buyerVatId && !validVat && "border-destructive")} placeholder="GB123456789" /></label>
+          <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Your PO reference<input value={form.poNumber} onChange={(e) => update("poNumber", e.target.value)} className={fieldClass} placeholder="PO-2026-001" /></label>
+          <label className="sm:col-span-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">UK delivery address<textarea value={form.deliveryAddress} onChange={(e) => update("deliveryAddress", e.target.value)} className="mt-2 min-h-24 w-full rounded-none border border-border bg-background px-4 py-3 text-sm normal-case tracking-normal outline-none focus:border-foreground" /></label>
+          <label className="sm:col-span-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Requested payment terms
+            <select value={form.paymentTerms} onChange={(e) => update("paymentTerms", e.target.value)} className={fieldClass}>
+              <option value="cia_stage">Cash in advance / staged payments</option>
+              <option value="net_30">Net 30 days</option>
+              <option value="one_percent_10_net_30">1% 10 / Net 30</option>
+              <option value="net_60">Net 60 days — verified enterprise only</option>
+            </select>
+          </label>
+        </div>
+        <label className="mt-6 flex items-start gap-3 text-xs font-light leading-relaxed text-muted-foreground">
+          <input type="checkbox" checked={form.budgetApproved} onChange={(e) => update("budgetApproved", e.target.checked)} className="mt-0.5 h-4 w-4" />
+          I confirm that this purchase has received internal budget approval and that I am authorised to submit this PO for the company named above.
+        </label>
+        <p className="mt-5 text-[10px] leading-relaxed text-muted-foreground">Requested terms are not automatic. Net 30/60 requires credit approval; Maison Affluency may require cash in advance, staged payments or a deposit before production.</p>
+        {submitError && <p role="alert" className="mt-4 text-xs text-destructive">{submitError}</p>}
+        <Button type="button" onClick={submit} disabled={!canSubmit || submitting} className="mt-6 h-12 w-full rounded-none text-[11px] uppercase tracking-[0.22em]">
+          {submitting ? <><Loader2 className="animate-spin" /> Submitting</> : `Submit PO for review · ${money(summary.displayTotalCents, summary.currency)}`}
+        </Button>
+      </section>
+    </div>
   );
 }
 
@@ -1955,6 +2120,13 @@ export default function Checkout() {
    * offer a deposit plan, rather than letting the buyer meet a decline.
    */
   const highValue = isHighValueOrder(summary.displayTotalCents, summary.currency);
+  const purchaseOrderEligible = isUkCorporatePurchaseOrderEligible({
+    totalCents: summary.displayTotalCents,
+    currency: summary.currency,
+    destinationCountry: summary.taxCountry,
+    buyerType,
+    tradeApproved,
+  });
   const [depositPct, setDepositPct] = useState<DepositPct>(0);
   const routedHighValue = useRef(false);
   useEffect(() => {
@@ -1965,6 +2137,9 @@ export default function Checkout() {
   useEffect(() => {
     if (!highValue) setDepositPct(0);
   }, [highValue]);
+  useEffect(() => {
+    if (method === "purchase_order" && !purchaseOrderEligible) setMethod("wire");
+  }, [method, purchaseOrderEligible]);
 
   // In wire mode there is no Stripe address element, so the global shipping
   // destination drives the tax country shown in the summary.
@@ -2410,6 +2585,8 @@ export default function Checkout() {
         <p className="mt-3 text-sm text-muted-foreground">
           {wire
             ? "Your wire instructions are on their way. Reference "
+            : method === "purchase_order"
+              ? "Your purchase order is awaiting corporate review. Reference "
             : "Your acquisition is confirmed. Reference "}
           <span className="text-foreground">{confirmed}</span>.
         </p>
@@ -2498,12 +2675,14 @@ export default function Checkout() {
                     setMethod={setMethod}
                     depositPct={depositPct}
                     setDepositPct={setDepositPct}
+                    purchaseOrderEligible={purchaseOrderEligible}
                   />
                 )}
                 <DeliveryPaymentOptions
                   method={method}
                   setMethod={setMethod}
                   paynowAvailable={summary.currency.toLowerCase() === "sgd"}
+                  purchaseOrderEligible={purchaseOrderEligible}
                 />
               </>
             );
@@ -2521,6 +2700,21 @@ export default function Checkout() {
                   setBuyerType={setBuyerType}
                   buyerGstNumber={buyerGstNumber}
                   setBuyerGstNumber={setBuyerGstNumber}
+                />
+              );
+            }
+            if (method === "purchase_order") {
+              return (
+                <PurchaseOrderForm
+                  lines={grossLines}
+                  summary={summary}
+                  account={account}
+                  email={email}
+                  company={tradeCompany}
+                  buyerVatId={buyerGstNumber}
+                  buyerName={checkoutForm.guestName || [profile?.first_name, profile?.last_name].filter(Boolean).join(" ")}
+                  onDone={completeOrder}
+                  optionsSlot={optionsSlot}
                 />
               );
             }

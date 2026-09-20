@@ -33,6 +33,21 @@ export function isHighValueOrder(totalCents: number, currency: string): boolean 
   return Number.isFinite(totalCents) && totalCents > cardPracticalLimitCents(currency);
 }
 
+/** Corporate PO checkout is deliberately limited to high-value GBP orders delivered in the UK. */
+export function isUkCorporatePurchaseOrderEligible(input: {
+  totalCents: number;
+  currency: string;
+  destinationCountry: string | null | undefined;
+  buyerType: string;
+  tradeApproved: boolean;
+}): boolean {
+  return input.tradeApproved &&
+    input.buyerType === "business" &&
+    input.destinationCountry?.toUpperCase() === "GB" &&
+    input.currency.toUpperCase() === "GBP" &&
+    isHighValueOrder(input.totalCents, input.currency);
+}
+
 /** Deposit plans the server honours (see `create-payment-intent`). */
 export const DEPOSIT_PLANS = [0.3, 0.5] as const;
 export type DepositPct = (typeof DEPOSIT_PLANS)[number] | 0;
