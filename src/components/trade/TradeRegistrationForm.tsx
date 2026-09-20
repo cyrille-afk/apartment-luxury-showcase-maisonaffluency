@@ -347,7 +347,8 @@ const TradeRegistrationForm = ({
 
       toast({
         title: "Application Submitted",
-        description: "Get verified instantly — our automated system reviews global design credentials in real time.",
+        description:
+          "Your credentials are being screened, then reviewed personally by our trade team. We will email you as soon as your account is approved.",
       });
 
       navigate(appRow?.id ? `/trade/processing?app=${appRow.id}` : "/trade/processing", { replace: true });
