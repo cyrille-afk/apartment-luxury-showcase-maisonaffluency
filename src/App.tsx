@@ -742,6 +742,7 @@ const App = () => {
                   <Route path="/trade/mobile-launch" element={<Suspense fallback={null}><TradeMobileLaunch /></Suspense>} />
                   <Route path="/admin/trade-review" element={<Suspense fallback={<PageLoadingSkeleton />}><AdminTradeReview /></Suspense>} />
                   <Route path="/admin/queue" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminQueue /></Suspense>} />
+                  <Route path="/admin/privacy-requests" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminPrivacyRequests /></Suspense>} />
                   <Route path="/trade" element={<Suspense fallback={null}><TradeErrorBoundary><TradeLayout /></TradeErrorBoundary></Suspense>}>
                     <Route index element={<TradeDashboard />} />
                     <Route path="dashboard" element={<TradeDashboard />} />
