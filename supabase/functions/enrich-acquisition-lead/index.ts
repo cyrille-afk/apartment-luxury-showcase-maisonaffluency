@@ -75,6 +75,8 @@ serve(async (req) => {
   const websiteUrl = safeUrl(body.websiteUrl);
   const snippet = str(body.rawScrapedSnippet, 6000);
   const sourceIndex = str(body.sourceIndex, 60) ?? "AD100_Index";
+  const country = str(body.country, 80);
+  const city = str(body.city, 80);
 
   if (!studioName || !businessEmail || !EMAIL_RE.test(businessEmail)) {
     return json({ error: "Missing or invalid studioName / businessEmail." }, 400);
