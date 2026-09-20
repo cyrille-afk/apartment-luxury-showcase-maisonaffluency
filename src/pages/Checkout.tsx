@@ -2118,6 +2118,13 @@ export default function Checkout() {
    * offer a deposit plan, rather than letting the buyer meet a decline.
    */
   const highValue = isHighValueOrder(summary.displayTotalCents, summary.currency);
+  const purchaseOrderEligible = isUkCorporatePurchaseOrderEligible({
+    totalCents: summary.displayTotalCents,
+    currency: summary.currency,
+    destinationCountry: summary.taxCountry,
+    buyerType,
+    tradeApproved,
+  });
   const [depositPct, setDepositPct] = useState<DepositPct>(0);
   const routedHighValue = useRef(false);
   useEffect(() => {
@@ -2573,6 +2580,8 @@ export default function Checkout() {
         <p className="mt-3 text-sm text-muted-foreground">
           {wire
             ? "Your wire instructions are on their way. Reference "
+            : method === "purchase_order"
+              ? "Your purchase order is awaiting corporate review. Reference "
             : "Your acquisition is confirmed. Reference "}
           <span className="text-foreground">{confirmed}</span>.
         </p>
@@ -2661,12 +2670,14 @@ export default function Checkout() {
                     setMethod={setMethod}
                     depositPct={depositPct}
                     setDepositPct={setDepositPct}
+                    purchaseOrderEligible={purchaseOrderEligible}
                   />
                 )}
                 <DeliveryPaymentOptions
                   method={method}
                   setMethod={setMethod}
                   paynowAvailable={summary.currency.toLowerCase() === "sgd"}
+                  purchaseOrderEligible={purchaseOrderEligible}
                 />
               </>
             );
@@ -2684,6 +2695,21 @@ export default function Checkout() {
                   setBuyerType={setBuyerType}
                   buyerGstNumber={buyerGstNumber}
                   setBuyerGstNumber={setBuyerGstNumber}
+                />
+              );
+            }
+            if (method === "purchase_order") {
+              return (
+                <PurchaseOrderForm
+                  lines={grossLines}
+                  summary={summary}
+                  account={account}
+                  email={email}
+                  company={tradeCompany}
+                  buyerVatId={buyerGstNumber}
+                  buyerName={checkoutForm.guestName || [profile?.first_name, profile?.last_name].filter(Boolean).join(" ")}
+                  onDone={completeOrder}
+                  optionsSlot={optionsSlot}
                 />
               );
             }
