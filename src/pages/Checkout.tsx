@@ -2495,7 +2495,15 @@ export default function Checkout() {
             ? { cents: serverShippingCents, label: String(pi?.shippingLabel || "") }
             : null,
         );
-        if (needsConfig) setStripePromise(loadStripe(cfg.publishableKey));
+        if (needsConfig)
+          setStripePromise(
+            loadStripe(cfg.publishableKey, {
+              // Stripe's advanced fraud telemetry is a marketing-category
+              // third-party beacon: only enabled with explicit consent.
+              advancedFraudSignals: hasConsent("marketing"),
+            } as Parameters<typeof loadStripe>[1]),
+          );
+
         setClientSecret(pi.clientSecret);
       } catch (err: any) {
         setError(err?.message || "Unable to start checkout.");
