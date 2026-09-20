@@ -41,7 +41,9 @@ import {
   B2B_TAX_LABEL,
   type BuyerType,
   type TaxTreatment,
+  type CustomsLine,
 } from "@/config/taxRules";
+import { useVatVerification } from "@/lib/tax/useVatVerification";
 
 import {
   assertCheckoutCopy,
@@ -91,6 +93,9 @@ export type CheckoutLine = {
   /** Product provenance — used to trigger region-specific logistics copy. */
   origin?: string | null;
   pickupCountry?: string | null;
+  /** Customs classification bound to the line for landed-cost accuracy. */
+  hs6Code?: string | null;
+  dutyRate?: number | null;
 };
 
 /* All amounts below are derived only from cart line items — see checkoutGuardrails. */
@@ -203,6 +208,20 @@ export type CheckoutSummary = {
   taxStatement: string;
   /** Buyer's own VAT/GST registration, when valid for the destination. */
   buyerTaxId: string | null;
+  /** True only when VIES / HMRC confirmed that registration. */
+  buyerTaxIdVerified: boolean;
+  /** Our identifier stamped on the invoice for this routing (UEN/VAT/IOSS). */
+  merchantTaxIdentifier: string | null;
+  /** True when the consignment must be tendered to the carrier as DDP. */
+  requiresDdpClearance: boolean;
+  /** Flat carrier customs-clearance fee charged on DDP consignments. */
+  clearanceFeeCents: number;
+  /** Ad-valorem duty estimated from the HS6 manifest. */
+  estimatedDutyCents: number;
+  /** ISO-2 country the consignment ships from, when resolvable. */
+  shipFromCountry: string | null;
+  /** Per-line customs manifest sent to the server and stored on the order. */
+  customsLines: CustomsLine[];
   /** Delivery shown in the summary: confirmed freight, else the estimate. */
   deliveryCents: number;
   /** THE Order Total: goods − discount + delivery + tax. Used by every UI block. */
@@ -227,32 +246,39 @@ export const deriveCheckoutTotals = (input: {
   estimatedShippingCents: number;
   /** Tax due on goods (+ confirmed freight when the rule taxes shipping). */
   taxCents: number;
+  /** Flat carrier customs-clearance fee on DDP consignments. 0 otherwise. */
+  clearanceFeeCents?: number;
 }) => {
   const goodsCents = Math.max(0, input.subtotalCents - input.discountCents);
   const deliveryCents = input.shippingCents > 0 ? input.shippingCents : input.estimatedShippingCents;
   const taxCents = Math.max(0, input.taxCents);
+  const clearanceFeeCents = Math.max(0, input.clearanceFeeCents ?? 0);
   // FX conversion can leave fractional cents (e.g. 10,187.55). Every summary
   // row displays Math.round(cents/100) dollars, so the displayed ORDER TOTAL
   // must be the sum of those displayed rows — otherwise the page shows
   // 10,188 + 1,471 + 917 ≠ 12,575. Round each component to whole dollars
   // first, then add: displayTotal is ALWAYS row-consistent.
   const roundDollar = (c: number) => Math.round(c / 100) * 100;
+  const rowSum =
+    roundDollar(goodsCents) +
+    roundDollar(deliveryCents) +
+    roundDollar(taxCents) +
+    roundDollar(clearanceFeeCents);
   return {
     goodsCents,
     deliveryCents,
     taxCents,
-    /** Displayed everywhere: subtotal + delivery + tax. Nothing else. */
-    totalCents: goodsCents + deliveryCents + taxCents,
+    clearanceFeeCents,
+    /** Displayed everywhere: subtotal + delivery + tax + DDP clearance. */
+    totalCents: goodsCents + deliveryCents + taxCents + clearanceFeeCents,
     /**
-     * Row-consistent display total: roundDollar(goods) + roundDollar(delivery)
-     * + roundDollar(tax), so the total always equals the sum of the rows the
-     * buyer sees. Use this for ORDER TOTAL and every action-button amount.
+     * Row-consistent display total: every component rounded to whole dollars
+     * first, so the total always equals the sum of the rows the buyer sees.
+     * Use this for ORDER TOTAL and every action-button amount.
      */
-    displayTotalCents:
-      roundDollar(goodsCents) + roundDollar(deliveryCents) + roundDollar(taxCents),
+    displayTotalCents: rowSum,
     /** Collected now: exactly matches the total promised throughout checkout. */
-    chargeTotalCents:
-      roundDollar(goodsCents) + roundDollar(deliveryCents) + roundDollar(taxCents),
+    chargeTotalCents: rowSum,
   };
 };
 
@@ -676,6 +702,15 @@ function OrderSummary({
                     : summary.taxApplied
                       ? money(summary.taxCents, currency)
                       : <span className="text-muted-foreground">—</span>}
+                </dd>
+              </div>
+            )}
+            {/* DDP consignments carry a flat carrier clearance fee. */}
+            {summary.clearanceFeeCents > 0 && (
+              <div className="flex items-baseline justify-between gap-6">
+                <dt className="text-muted-foreground">Customs clearance (DDP)</dt>
+                <dd className="tabular-nums font-medium">
+                  {money(summary.clearanceFeeCents, currency)}
                 </dd>
               </div>
             )}
@@ -2003,6 +2038,9 @@ export default function Checkout() {
       setBuyerType("business");
     }
   }, [tradeCompany]);
+  // Live VIES / HMRC validation. Only a verified registration may trigger a
+  // reverse charge or B2B zero-rating; anything else is destination VAT.
+  const vatCheck = useVatVerification(buyerGstNumber, formCountry, buyerType === "business");
   const summary = useMemo<CheckoutSummary | null>(() => {
     if (!grossLines?.length) return null;
     const currency = orderCurrency(grossLines);
@@ -2015,13 +2053,29 @@ export default function Checkout() {
     // Tax follows the configurable rules (destination + currency + buyer
     // registration). One engine decides the rate, the label and the wording.
     const deliveryForTaxCents = shippingCents > 0 ? shippingCents : estimatedShippingCents;
+    // Per-line customs manifest: HS6 + duty rate + origin, bound to the line
+    // value so landed cost and the ship-from routing are reproducible.
+    const goodsAfterDiscount = Math.max(0, subtotalCents - discountCents);
+    const discountRatio = subtotalCents > 0 ? goodsAfterDiscount / subtotalCents : 1;
+    const customsLines: CustomsLine[] = grossLines.map((l) => ({
+      hs6Code: l.hs6Code ?? null,
+      dutyRate: l.dutyRate ?? null,
+      originCountry: l.pickupCountry ?? l.origin ?? null,
+      lineTotalCents: Math.round(lineSubtotal(l) * discountRatio),
+    }));
     const treatment = resolveTaxTreatment({
       country: formCountry,
       currency,
       buyerType,
       buyerTaxId: buyerGstNumber,
-      goodsCents: subtotalCents - discountCents,
+      // Reverse charge / B2B zero-rating only on an authority-verified number.
+      buyerTaxIdVerified: vatCheck.verified,
+      goodsCents: goodsAfterDiscount,
       shippingCents: deliveryForTaxCents,
+      // The €150 gate is only exact when the order is priced in EUR; any other
+      // currency falls back to the order value, which the server re-checks.
+      goodsEurCents: currency.toUpperCase() === "EUR" ? goodsAfterDiscount : null,
+      lines: customsLines,
     });
     // The PaymentIntent is authoritative: once the server has priced the order
     // the displayed tax and total equal the amount actually charged.
@@ -2033,6 +2087,7 @@ export default function Checkout() {
       shippingCents,
       estimatedShippingCents,
       taxCents,
+      clearanceFeeCents: treatment.clearanceFeeCents,
     });
     const destination = treatment.countryIso;
     return {
@@ -2070,13 +2125,20 @@ export default function Checkout() {
       taxTreatment: treatment.treatment,
       taxStatement: treatment.statement,
       buyerTaxId: treatment.buyerTaxId,
+      buyerTaxIdVerified: treatment.buyerTaxIdVerified,
+      merchantTaxIdentifier: treatment.merchantTaxIdentifier,
+      requiresDdpClearance: treatment.requiresDdpClearance,
+      clearanceFeeCents: treatment.clearanceFeeCents,
+      estimatedDutyCents: treatment.dutyCents,
+      shipFromCountry: treatment.shipFromCountry,
+      customsLines,
       deliveryCents: totals.deliveryCents,
       totalCents: totals.totalCents,
       displayTotalCents: totals.displayTotalCents,
       chargeTotalCents: totals.chargeTotalCents,
     };
 
-  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, estimate.capped, estimate.notice, estimate.ddpHandlingCents, estimate.incotermSelectable, estimate.landed, incoterm, formCountry, serverTax, buyerType, buyerGstNumber]);
+  }, [grossLines, effectiveDiscountPct, discountRowLabel, shipping, estimate.cents, estimate.zoneLabel, estimate.capped, estimate.notice, estimate.ddpHandlingCents, estimate.incotermSelectable, estimate.landed, incoterm, formCountry, serverTax, buyerType, buyerGstNumber, vatCheck.verified]);
 
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -2366,6 +2428,12 @@ export default function Checkout() {
           // B2B zero-rating: only applies to SG GST-registered businesses.
           buyerType,
           buyerGstNumber,
+          // Only a VIES / HMRC-confirmed number may zero-rate; the server
+          // re-validates before it prices the order.
+          buyerTaxIdVerified: summary?.buyerTaxIdVerified ?? false,
+          shipFromCountry: summary?.shipFromCountry ?? "",
+          customsLines: summary?.customsLines ?? [],
+          clearanceFeeCents: summary?.clearanceFeeCents ?? 0,
           // PayNow needs its own PaymentIntent: the payment method type is
           // fixed at creation and cannot be swapped on an existing intent.
           paymentMethod: intentMethod,

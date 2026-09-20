@@ -6,6 +6,7 @@ import { convertCents, SETTLEMENT_CURRENCIES } from "./fxConvert.ts";
 import { formatCurrency } from "../_shared/transactional-email-templates/currency.ts";
 import { resolveTaxTreatment, normaliseBuyerTaxId } from "../_shared/taxRules.ts";
 import { buildOrderDeliveryMessage } from "../_shared/orderDeliveryMessaging.ts";
+import { verifyVatNumber } from "../_shared/vatValidation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -286,16 +287,72 @@ serve(async (req) => {
           ? body.buyerGstNumber
           : "",
     );
+    // The client never decides whether a registration is verified: re-run the
+    // VIES / HMRC check here. Anything but a confirmed "valid" charges
+    // standard destination VAT.
+    const verification =
+      buyerType === "business" && buyerTaxId
+        ? await verifyVatNumber(buyerTaxId, shippingCountry)
+        : null;
+
+    // ---- Customs manifest (HS6 + duty rate + origin), read from the catalogue
+    // so landed cost is reproducible from the order record alone.
+    const customsByPick = new Map<string, { hs6: string | null; duty: number | null; origin: string | null }>();
+    {
+      const ids = Array.from(
+        new Set(
+          (lines as any[])
+            .map((l) => {
+              const row = byPick.get(String(l.pick_id));
+              return String(row?.source_pick_id || row?.id || l.pick_id || "");
+            })
+            .filter(Boolean),
+        ),
+      );
+      if (ids.length) {
+        const { data: customsRows } = await supabaseAdmin
+          .from("designer_curator_picks")
+          .select("id, hs6_code, duty_rate, origin")
+          .in("id", ids);
+        for (const r of customsRows || []) {
+          customsByPick.set(String((r as any).id), {
+            hs6: (r as any).hs6_code ?? null,
+            duty: Number.isFinite(Number((r as any).duty_rate)) ? Number((r as any).duty_rate) : null,
+            origin: (r as any).origin ?? null,
+          });
+        }
+      }
+    }
+    const discountRatio = grossSubtotal > 0 ? subtotal / grossSubtotal : 1;
+    const customsLineFor = (l: any) => {
+      const row = byPick.get(String(l.pick_id));
+      const resolvedId = String(row?.source_pick_id || row?.id || l.pick_id || "");
+      const c = customsByPick.get(resolvedId);
+      return {
+        hs6Code: c?.hs6 ?? null,
+        dutyRate: c?.duty ?? null,
+        originCountry: c?.origin ?? null,
+        lineTotalCents: Math.round(l.line_total_cents * discountRatio),
+      };
+    };
+    const customsLines = (lines as any[]).map(customsLineFor);
+
     const treatment = resolveTaxTreatment({
       country: shippingCountry,
       currency,
       buyerType,
       buyerTaxId,
+      buyerTaxIdVerified: verification?.valid === true,
       goodsCents: subtotal,
       shippingCents: shipping,
+      goodsEurCents: currency.toUpperCase() === "EUR" ? subtotal : null,
+      shipFromCountry:
+        typeof body?.shipFromCountry === "string" ? body.shipFromCountry.toUpperCase() : null,
+      lines: customsLines,
     });
     const taxCents = treatment.taxCents;
-    const total = subtotal + shipping + taxCents;
+    const clearanceFeeCents = treatment.clearanceFeeCents;
+    const total = subtotal + shipping + taxCents + clearanceFeeCents;
 
     const deliveryTerm = body?.incoterm === "DDP" ? "DDP" : body?.incoterm === "DDU" ? "DDU" : null;
     const boundedCents = (value: unknown) => {
@@ -341,6 +398,13 @@ serve(async (req) => {
         buyer_tax_id: treatment.buyerTaxId,
         buyer_tax_country: treatment.countryIso,
         merchant_tax_registration: treatment.registrationLine,
+        merchant_tax_identifier: treatment.merchantTaxIdentifier,
+        buyer_tax_id_verified: treatment.buyerTaxIdVerified,
+        buyer_tax_id_verification_source: verification?.source ?? null,
+        ship_from_country: treatment.shipFromCountry,
+        customs_clearance_cents: clearanceFeeCents,
+        estimated_duty_cents: treatment.dutyCents,
+        requires_ddp_clearance: treatment.requiresDdpClearance,
         shipping_country: shippingCountry || null,
         delivery_term: deliveryTerm,
         import_duty_cents: deliveryMessage.importDutyCents,
@@ -361,7 +425,17 @@ serve(async (req) => {
     }
 
     const { error: itemsErr } = await supabaseAdmin.from("shop_order_items").insert(
-      lines.map(({ currency: _c, ...l }) => ({ ...l, order_id: order.id })),
+      lines.map(({ currency: _c, ...l }) => {
+        // Freeze the classification used to price duty on this order.
+        const customs = customsLineFor(l);
+        return {
+          ...l,
+          order_id: order.id,
+          hs6_code: customs.hs6Code,
+          duty_rate: customs.dutyRate,
+          origin_country: customs.originCountry,
+        };
+      }),
     );
     if (itemsErr) console.error("[create-cart-checkout] item insert failed", itemsErr);
 
