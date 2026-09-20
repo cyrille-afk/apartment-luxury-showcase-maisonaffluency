@@ -2010,6 +2010,9 @@ export default function Checkout() {
       setBuyerType("business");
     }
   }, [tradeCompany]);
+  // Live VIES / HMRC validation. Only a verified registration may trigger a
+  // reverse charge or B2B zero-rating; anything else is destination VAT.
+  const vatCheck = useVatVerification(buyerGstNumber, formCountry, buyerType === "business");
   const summary = useMemo<CheckoutSummary | null>(() => {
     if (!grossLines?.length) return null;
     const currency = orderCurrency(grossLines);
