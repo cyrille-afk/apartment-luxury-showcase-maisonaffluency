@@ -101,8 +101,8 @@ describe("Biography PDF footer URL", () => {
 
     const args = (generateSpy.mock.calls[0] as unknown[])[0] as { profileUrl?: string };
     expect(args.profileUrl).toBeDefined();
-    // Canonical host is the apex domain — www. was retired in the domain unification.
-    expect(args.profileUrl).toMatch(/^https:\/\/maisonaffluency\.com\//);
+    // Canonical host is www.maisonaffluency.com (matches Google's indexed version).
+    expect(args.profileUrl).toMatch(/^https:\/\/www\.maisonaffluency\.com\//);
     expect(args.profileUrl).toBe("https://www.maisonaffluency.com/designers/thierry-lemaire");
 
     // Hard guard: nothing in the payload may leak the preview hostname.
