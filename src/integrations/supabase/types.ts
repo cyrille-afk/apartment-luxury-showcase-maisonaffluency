@@ -2379,6 +2379,9 @@ export type Database = {
           category: string | null
           com_meters: number | null
           crate_specs: Json
+          crated_depth_mm: number | null
+          crated_height_mm: number | null
+          crated_width_mm: number | null
           created_at: string
           currency: string
           default_ship_mode: string | null
@@ -2425,6 +2428,7 @@ export type Database = {
           pickup_postcode: string | null
           price_per_sqm_cents: number | null
           price_prefix: string | null
+          requires_white_glove: boolean | null
           seat_height_mm: number | null
           size_variants: Json | null
           slug: string | null
@@ -2438,6 +2442,7 @@ export type Database = {
           trade_price_cents: number | null
           variant_image_map: Json | null
           variant_placeholder: string | null
+          weight_kg: number | null
           width_mm: number | null
           wood_label_override: string | null
         }
@@ -2449,6 +2454,9 @@ export type Database = {
           category?: string | null
           com_meters?: number | null
           crate_specs?: Json
+          crated_depth_mm?: number | null
+          crated_height_mm?: number | null
+          crated_width_mm?: number | null
           created_at?: string
           currency?: string
           default_ship_mode?: string | null
@@ -2495,6 +2503,7 @@ export type Database = {
           pickup_postcode?: string | null
           price_per_sqm_cents?: number | null
           price_prefix?: string | null
+          requires_white_glove?: boolean | null
           seat_height_mm?: number | null
           size_variants?: Json | null
           slug?: string | null
@@ -2508,6 +2517,7 @@ export type Database = {
           trade_price_cents?: number | null
           variant_image_map?: Json | null
           variant_placeholder?: string | null
+          weight_kg?: number | null
           width_mm?: number | null
           wood_label_override?: string | null
         }
@@ -2519,6 +2529,9 @@ export type Database = {
           category?: string | null
           com_meters?: number | null
           crate_specs?: Json
+          crated_depth_mm?: number | null
+          crated_height_mm?: number | null
+          crated_width_mm?: number | null
           created_at?: string
           currency?: string
           default_ship_mode?: string | null
@@ -2565,6 +2578,7 @@ export type Database = {
           pickup_postcode?: string | null
           price_per_sqm_cents?: number | null
           price_prefix?: string | null
+          requires_white_glove?: boolean | null
           seat_height_mm?: number | null
           size_variants?: Json | null
           slug?: string | null
@@ -2578,6 +2592,7 @@ export type Database = {
           trade_price_cents?: number | null
           variant_image_map?: Json | null
           variant_placeholder?: string | null
+          weight_kg?: number | null
           width_mm?: number | null
           wood_label_override?: string | null
         }
@@ -8261,6 +8276,10 @@ export type Database = {
           settled_order_count: number
           updated_at: string
           user_id: string
+          vat_company_name: string | null
+          vat_last_checked_at: string | null
+          vat_number: string | null
+          vat_valid_status: boolean | null
         }
         Insert: {
           approved_credit_limit_eur_cents?: number
@@ -8276,6 +8295,10 @@ export type Database = {
           settled_order_count?: number
           updated_at?: string
           user_id: string
+          vat_company_name?: string | null
+          vat_last_checked_at?: string | null
+          vat_number?: string | null
+          vat_valid_status?: boolean | null
         }
         Update: {
           approved_credit_limit_eur_cents?: number
@@ -8291,6 +8314,10 @@ export type Database = {
           settled_order_count?: number
           updated_at?: string
           user_id?: string
+          vat_company_name?: string | null
+          vat_last_checked_at?: string | null
+          vat_number?: string | null
+          vat_valid_status?: boolean | null
         }
         Relationships: []
       }
@@ -9038,6 +9065,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      trade_profiles: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          vat_company_name: string | null
+          vat_last_checked_at: string | null
+          vat_number: string | null
+          vat_valid_status: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          vat_company_name?: string | null
+          vat_last_checked_at?: string | null
+          vat_number?: string | null
+          vat_valid_status?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          vat_company_name?: string | null
+          vat_last_checked_at?: string | null
+          vat_number?: string | null
+          vat_valid_status?: boolean | null
+        }
+        Relationships: []
       }
       trade_program_signups: {
         Row: {

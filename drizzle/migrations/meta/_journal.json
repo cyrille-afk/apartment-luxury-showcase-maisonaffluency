@@ -470,6 +470,13 @@
       "when": 1789880104858,
       "tag": "0066_product_embeddings_unique_product",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1789885652858,
+      "tag": "0067_extend_crating_vat_profiles",
+      "breakpoints": true
     }
   ]
 }
