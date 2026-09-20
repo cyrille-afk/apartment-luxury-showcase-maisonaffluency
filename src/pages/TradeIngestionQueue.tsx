@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Loader2, Play, Upload, RefreshCw, Trash2 } from "lucide-react";
+import CanonicalRagMigration from "@/components/trade/CanonicalRagMigration";
 
 interface QueueRow {
   id: string;
@@ -197,6 +198,8 @@ export default function TradeIngestionQueue() {
           Ingested products land hidden and inactive for manual price review.
         </p>
       </header>
+
+      <CanonicalRagMigration />
 
       <section className="space-y-3">
         <Textarea
