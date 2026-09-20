@@ -190,7 +190,9 @@ const euRule = (country: string, rate: number): TaxRule => ({
   name: "VAT",
   // Import VAT is assessed on the CIF value — goods plus freight.
   taxShipping: true,
-  registrationNumber: MERCHANT_TAX_IDENTIFIERS.ioss,
+  // No standing EU registration is printed on the rule: the routing branch
+  // decides between the carrier DDP line and our own IOSS number.
+  registrationNumber: null,
   buyerIdLabel: "EU VAT Number",
   buyerIdPattern: EU_VAT_PATTERNS[country],
   buyerIdHint: `Enter a valid ${country} VAT number, including the country prefix.`,
