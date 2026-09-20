@@ -179,8 +179,11 @@ const CookieConsent = () => {
     return () => window.removeEventListener(CONSENT_EVENT, onChange);
   }, []);
 
-  const equalButton =
-    "flex-1 min-w-[112px] rounded-full border border-border/60 bg-background/80 px-4 py-2 text-[11px] uppercase tracking-[0.15em] text-foreground font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  const baseButton =
+    "flex-1 min-w-[112px] px-4 py-2.5 text-[11px] uppercase tracking-[0.15em] font-medium transition-all duration-300 border border-neutral-700 bg-transparent text-neutral-300 hover:border-neutral-500 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neutral-500";
+
+  const primaryButton =
+    "border-[#C5A880]/40 text-[#C5A880] hover:border-[#C5A880] hover:text-[#DFD0B8]";
 
   return (
     <>
@@ -193,23 +196,26 @@ const CookieConsent = () => {
             fading ? "opacity-0" : "opacity-100"
           }`}
         >
-          <div className="bg-card/95 backdrop-blur-md border border-border/50 rounded-2xl shadow-xl p-5 space-y-4">
-            <div className="space-y-1.5">
-              <p className="text-xs uppercase tracking-[0.18em] text-foreground font-medium">
+          <div className="bg-[#121212]/95 backdrop-blur-md border border-neutral-800 rounded-sm shadow-2xl p-6 space-y-5">
+            <div className="space-y-2">
+              <p className="text-xs uppercase tracking-[0.15em] text-neutral-200 font-light">
                 Your privacy choices
               </p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-xs text-neutral-400 font-light leading-relaxed">
                 We use strictly necessary cookies to run this site. With your permission we
                 also use functional, analytics and marketing cookies. You can change or
                 withdraw your choice at any time.{" "}
-                <a href="/privacy" className="underline underline-offset-2 hover:text-foreground">
+                <a
+                  href="/privacy"
+                  className="underline underline-offset-2 text-neutral-300 hover:text-white transition-colors duration-300"
+                >
                   Privacy policy
                 </a>
               </p>
             </div>
 
             {managing && (
-              <ul className="space-y-3 border-t border-border/40 pt-3">
+              <ul className="space-y-3 border-t border-neutral-800 pt-4">
                 {CATEGORIES.map((c) => {
                   const checked = c.locked ? true : (draft[c.key] as boolean);
                   return (
@@ -222,18 +228,18 @@ const CookieConsent = () => {
                         onChange={(e) =>
                           setDraft((d) => ({ ...d, [c.key]: e.target.checked }))
                         }
-                        className="mt-0.5 h-4 w-4 accent-primary disabled:opacity-60"
+                        className="mt-0.5 h-4 w-4 accent-[#C5A880] disabled:opacity-60"
                       />
                       <label htmlFor={`consent-${c.key}`} className="flex-1 cursor-pointer">
-                        <span className="block text-[11px] uppercase tracking-[0.14em] text-foreground">
+                        <span className="block text-[11px] uppercase tracking-[0.14em] text-neutral-200 font-medium">
                           {c.label}
                           {c.locked && (
-                            <span className="ml-2 normal-case tracking-normal text-muted-foreground">
+                            <span className="ml-2 normal-case tracking-normal text-neutral-500 font-light">
                               (always on)
                             </span>
                           )}
                         </span>
-                        <span className="block text-xs text-muted-foreground leading-snug">
+                        <span className="block text-xs text-neutral-500 leading-snug font-light">
                           {c.description}
                         </span>
                       </label>
@@ -244,22 +250,34 @@ const CookieConsent = () => {
             )}
 
             <div className="flex flex-wrap gap-2">
-              <button type="button" className={equalButton} onClick={() => commit(DENY_ALL, "reject_all")}>
+              <button
+                type="button"
+                className={baseButton}
+                onClick={() => commit(DENY_ALL, "reject_all")}
+              >
                 Reject all
               </button>
-              <button type="button" className={equalButton} onClick={() => commit(ALLOW_ALL, "accept_all")}>
+              <button
+                type="button"
+                className={`${baseButton} ${primaryButton}`}
+                onClick={() => commit(ALLOW_ALL, "accept_all")}
+              >
                 Accept all
               </button>
               {managing ? (
                 <button
                   type="button"
-                  className={equalButton}
+                  className={baseButton}
                   onClick={() => commit({ ...draft, necessary: true }, "custom")}
                 >
                   Save choices
                 </button>
               ) : (
-                <button type="button" className={equalButton} onClick={() => setManaging(true)}>
+                <button
+                  type="button"
+                  className={baseButton}
+                  onClick={() => setManaging(true)}
+                >
                   Manage preferences
                 </button>
               )}
@@ -272,7 +290,7 @@ const CookieConsent = () => {
         <button
           onClick={reopen}
           aria-label="Cookie preferences"
-          className="fixed bottom-6 left-6 z-50 p-2 text-muted-foreground/50 hover:text-foreground transition-colors duration-300"
+          className="fixed bottom-6 left-6 z-50 p-2 text-neutral-500 hover:text-white transition-colors duration-300"
         >
           <Shield className="w-3 h-3" />
         </button>
