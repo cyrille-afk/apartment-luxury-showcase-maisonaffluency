@@ -33,6 +33,19 @@ const str = (v: unknown, max: number): string | null => {
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const IG_HANDLE_RE = /^[a-zA-Z0-9._]{1,30}$/;
+
+// Normalize to a bare handle: strip @ prefixes, full Instagram URLs, and
+// anything that is not a valid handle returns null.
+function sanitizeInstagram(v: unknown): string | null {
+  const raw = str(v, 200);
+  if (!raw) return null;
+  let h = raw;
+  const m = h.match(/instagram\.com\/([^/?#\s]+)/i);
+  if (m) h = m[1];
+  h = h.replace(/^@+/, "").trim();
+  return IG_HANDLE_RE.test(h) ? h.toLowerCase() : null;
+}
 
 function safeUrl(v: unknown): string | null {
   const raw = str(v, 500);
@@ -210,6 +223,7 @@ serve(async (req) => {
     success: true,
     enriched,
     aesthetic,
+    instagram_handle: instagram,
     matched_designers: matched,
     campaign_status: row.campaign_status,
     message: `Lead data for ${studioName} stored${enriched ? " and enriched" : " (analysis pending)"}.`,
