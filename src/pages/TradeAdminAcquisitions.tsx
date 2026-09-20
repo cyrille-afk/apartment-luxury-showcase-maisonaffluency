@@ -370,7 +370,7 @@ const TradeAdminAcquisitions = () => {
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
-      <div className="mx-auto max-w-[1400px] px-6 py-12 md:px-12 md:py-16">
+      <div className="w-full px-8 py-12 md:px-10 md:py-16">
         <header className="flex flex-col gap-6 border-b border-border pb-8 md:flex-row md:items-end md:justify-between">
           <div className="space-y-3">
             <p className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
