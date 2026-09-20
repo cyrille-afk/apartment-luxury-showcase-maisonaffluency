@@ -133,6 +133,7 @@ export default function CartIdentify() {
         body: {
           method,
           currency: currency.toLowerCase(),
+          shippingCountry: shipDest.iso || "",
           email: contactEmail || undefined,
           fullName: fullName || undefined,
           items: items.map((i: CartItem) => ({

@@ -226,6 +226,8 @@ export default function Cart() {
       const { data, error } = await supabase.functions.invoke("create-cart-checkout", {
         body: {
           method,
+          currency: currency.toLowerCase(),
+          shippingCountry: shipDest.iso || "",
           email: user.email || undefined,
           items: items.map((i) => ({
             pickId: i.pickId,
