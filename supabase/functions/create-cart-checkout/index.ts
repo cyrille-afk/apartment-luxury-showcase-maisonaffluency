@@ -424,7 +424,17 @@ serve(async (req) => {
     }
 
     const { error: itemsErr } = await supabaseAdmin.from("shop_order_items").insert(
-      lines.map(({ currency: _c, ...l }) => ({ ...l, order_id: order.id })),
+      lines.map(({ currency: _c, ...l }) => {
+        // Freeze the classification used to price duty on this order.
+        const customs = customsLineFor(l);
+        return {
+          ...l,
+          order_id: order.id,
+          hs6_code: customs.hs6Code,
+          duty_rate: customs.dutyRate,
+          origin_country: customs.originCountry,
+        };
+      }),
     );
     if (itemsErr) console.error("[create-cart-checkout] item insert failed", itemsErr);
 
