@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { ExternalLink, Instagram, Loader2, Send, ShieldAlert, Sparkles } from "lucide-react";
+import { AlertTriangle, ExternalLink, Instagram, Loader2, Mail, Send, ShieldAlert, Sparkles } from "lucide-react";
 
 type Lead = {
   id: string;
@@ -46,6 +46,55 @@ const fmtDate = (iso: string | null) =>
     ? new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
     : "—";
 
+const GENERIC_EMAIL_PREFIXES = new Set([
+  "admin",
+  "info",
+  "contact",
+  "hello",
+  "support",
+  "sales",
+  "enquiries",
+  "enquiry",
+  "inquiries",
+  "inquiry",
+  "mail",
+  "office",
+  "team",
+  "studio",
+  "press",
+  "media",
+  "marketing",
+  "partnerships",
+  "reception",
+  "general",
+  "enquire",
+  "service",
+  "services",
+  "booking",
+  "reservations",
+  "reservation",
+  "frontdesk",
+  "front",
+  "main",
+  "info.sg",
+  "enquiries.sg",
+  "enquiry.sg",
+  "inquiries.sg",
+  "inquiry.sg",
+]);
+
+const isGenericEmail = (email: string): boolean => {
+  const local = email.split("@")[0]?.toLowerCase().trim() ?? "";
+  return GENERIC_EMAIL_PREFIXES.has(local);
+};
+
+const outreachVector = (lead: Lead): "instagram" | "resend" => {
+  const directEmails = (lead.executive_emails ?? []).filter((e) => !isGenericEmail(e));
+  if (directEmails.length > 0) return "resend";
+  if (lead.business_email && !isGenericEmail(lead.business_email)) return "resend";
+  return "instagram";
+};
+
 const TradeAdminAcquisitions = () => {
   const { user, isAdmin, loading } = useAuth();
   const queryClient = useQueryClient();
@@ -56,6 +105,7 @@ const TradeAdminAcquisitions = () => {
   const [dispatching, setDispatching] = useState(false);
   const [repairing, setRepairing] = useState(false);
   const [exiting, setExiting] = useState<Set<string>>(new Set());
+  const [igFirstOnly, setIgFirstOnly] = useState(false);
   const [activeCountry, setActiveCountry] = useState<string>(DEFAULT_COUNTRY);
   const [activeCity, setActiveCity] = useState<string>(DEFAULT_CITY);
 
@@ -130,12 +180,13 @@ const TradeAdminAcquisitions = () => {
       const country = r.country?.trim() || "Unassigned";
       const city = r.city?.trim() || r.country?.trim() || "Unassigned";
       if (country !== activeCountry || city !== activeCity) return false;
+      if (igFirstOnly && outreachVector(r) !== "instagram") return false;
       if (!q) return true;
       return [r.studio_name, r.founder_name, r.business_email, r.aesthetic_profile, r.instagram_handle, ...(r.executive_emails ?? [])]
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(q));
     });
-  }, [rows, search, activeCountry, activeCity]);
+  }, [rows, search, activeCountry, activeCity, igFirstOnly]);
 
   const toggle = (id: string) =>
     setSelected((prev) => {
@@ -257,6 +308,18 @@ const TradeAdminAcquisitions = () => {
 
           <div className="flex flex-col items-stretch gap-2 md:items-end">
             <Button
+              variant="outline"
+              onClick={() => setIgFirstOnly((v) => !v)}
+              className={`h-10 rounded-none px-5 text-[11px] uppercase tracking-[0.2em] ${
+                igFirstOnly
+                  ? "border-foreground bg-foreground text-background hover:bg-foreground/90"
+                  : "border-border text-foreground"
+              }`}
+            >
+              <Instagram className="mr-2 h-4 w-4" />
+              {igFirstOnly ? "Showing Instagram-First Targets" : "Show Instagram-First Targets Only"}
+            </Button>
+            <Button
               onClick={deploySequences}
               disabled={dispatching || selected.size === 0}
               className="h-12 rounded-none px-6 text-[11px] uppercase tracking-[0.2em]"
@@ -341,7 +404,7 @@ const TradeAdminAcquisitions = () => {
         </div>
 
         <div className="overflow-x-auto border border-border">
-          <table className="w-full min-w-[960px] text-left">
+          <table className="w-full min-w-[1080px] text-left">
             <thead>
               <tr className="border-b border-border bg-muted/30">
                 <th className="w-12 px-5 py-4">
@@ -351,34 +414,44 @@ const TradeAdminAcquisitions = () => {
                     aria-label="Select all leads"
                   />
                 </th>
-                {["Studio Name", "Contact", "Instagram", "Aesthetic Profile", "Matched Designers", "Verification"].map(
-                  (h) => (
-                    <th
-                      key={h}
-                      className="px-5 py-4 text-[10px] uppercase tracking-[0.25em] text-muted-foreground"
-                    >
-                      {h}
-                    </th>
-                  ),
-                )}
+                {[
+                  "Studio Name",
+                  "Contact",
+                  "Outreach Vector",
+                  "Instagram",
+                  "Aesthetic Profile",
+                  "Matched Designers",
+                  "Verification",
+                ].map((h) => (
+                  <th
+                    key={h}
+                    className="px-5 py-4 text-[10px] uppercase tracking-[0.25em] text-muted-foreground"
+                  >
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {isLoading && (
                 <tr>
-                  <td colSpan={7} className="px-5 py-16 text-center text-sm text-muted-foreground">
+                  <td colSpan={8} className="px-5 py-16 text-center text-sm text-muted-foreground">
                     Loading leads…
                   </td>
                 </tr>
               )}
               {!isLoading && filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-5 py-16 text-center text-sm text-muted-foreground">
-                    No enriched leads awaiting outbound in {activeCity}.
+                  <td colSpan={8} className="px-5 py-16 text-center text-sm text-muted-foreground">
+                    {igFirstOnly
+                      ? `No Instagram-first leads awaiting outbound in ${activeCity}.`
+                      : `No enriched leads awaiting outbound in ${activeCity}.`}
                   </td>
                 </tr>
               )}
-              {filtered.map((lead) => (
+              {filtered.map((lead) => {
+                const vector = outreachVector(lead);
+                return (
                 <tr
                   key={lead.id}
                   className={`border-b border-border/70 align-top transition-all duration-500 ${
@@ -425,12 +498,49 @@ const TradeAdminAcquisitions = () => {
                     )}
                   </td>
                   <td className="px-5 py-6">
+                    {vector === "instagram" ? (
+                      <div className="space-y-2">
+                        <Badge
+                          variant="outline"
+                          className="rounded-none border-destructive/30 text-[11px] font-normal text-destructive"
+                        >
+                          <AlertTriangle className="mr-1.5 h-3 w-3" />
+                          🚨 Route via Instagram DM
+                        </Badge>
+                        {lead.instagram_handle && (
+                          <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                            Handle:
+                            <a
+                              href={`https://instagram.com/${lead.instagram_handle.replace(/^@+/, "")}`}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                              className="ml-1 inline-flex items-center gap-1 font-medium text-foreground underline-offset-4 hover:underline"
+                            >
+                              <Instagram className="h-3 w-3" />
+                              {`@${lead.instagram_handle.replace(/^@+/, "")}`}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <Badge
+                        variant="outline"
+                        className="rounded-none border-border text-[11px] font-normal text-foreground"
+                      >
+                        <Mail className="mr-1.5 h-3 w-3" />
+                        ✉️ Deploy via Resend Email
+                      </Badge>
+                    )}
+                  </td>
+                  <td className="px-5 py-6">
                     {lead.instagram_handle ? (
                       <a
                         href={`https://instagram.com/${lead.instagram_handle.replace(/^@+/, "")}`}
                         target="_blank"
                         rel="noreferrer noopener"
-                        className="inline-flex items-center gap-1.5 text-[12px] text-foreground underline-offset-4 hover:underline"
+                        className={`inline-flex items-center gap-1.5 text-[12px] underline-offset-4 hover:underline ${
+                          vector === "instagram" ? "font-medium text-foreground" : "text-muted-foreground"
+                        }`}
                       >
                         <Instagram className="h-3.5 w-3.5" />
                         {`@${lead.instagram_handle.replace(/^@+/, "")}`}
@@ -476,7 +586,7 @@ const TradeAdminAcquisitions = () => {
                     </div>
                   </td>
                 </tr>
-              ))}
+              );})}
             </tbody>
           </table>
         </div>
