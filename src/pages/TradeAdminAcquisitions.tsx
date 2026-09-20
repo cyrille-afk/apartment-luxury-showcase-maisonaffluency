@@ -255,19 +255,35 @@ const TradeAdminAcquisitions = () => {
             </p>
           </div>
 
-          <Button
-            onClick={deploySequences}
-            disabled={dispatching || selected.size === 0}
-            className="h-12 rounded-none px-6 text-[11px] uppercase tracking-[0.2em]"
-          >
-            {dispatching ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="mr-2 h-4 w-4" />
-            )}
-            Deploy Tailored Outbound Sequences via Resend
-            {selected.size > 0 ? ` (${selected.size})` : ""}
-          </Button>
+          <div className="flex flex-col items-stretch gap-2 md:items-end">
+            <Button
+              onClick={deploySequences}
+              disabled={dispatching || selected.size === 0}
+              className="h-12 rounded-none px-6 text-[11px] uppercase tracking-[0.2em]"
+            >
+              {dispatching ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="mr-2 h-4 w-4" />
+              )}
+              Deploy Tailored Outbound Sequences via Resend
+              {selected.size > 0 ? ` (${selected.size})` : ""}
+            </Button>
+
+            <button
+              type="button"
+              onClick={repairContacts}
+              disabled={repairing}
+              className="inline-flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground disabled:opacity-50"
+            >
+              {repairing ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Sparkles className="h-3 w-3" />
+              )}
+              Execute IG &amp; Executive Data Repair
+            </button>
+          </div>
         </header>
 
         {/* Country tabs */}
