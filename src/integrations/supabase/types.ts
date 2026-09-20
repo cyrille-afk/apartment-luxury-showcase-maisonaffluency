@@ -10114,6 +10114,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      purge_rejected_trade_credentials_dispatch: {
+        Args: never
+        Returns: undefined
+      }
       purge_stale_concierge_streams: { Args: never; Returns: undefined }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }

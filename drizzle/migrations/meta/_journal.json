@@ -386,6 +386,13 @@
       "when": 1789867731641,
       "tag": "0054_trade_credential_security_and_retention",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1789867982772,
+      "tag": "0055_schedule_trade_credential_retention_purge",
+      "breakpoints": true
     }
   ]
 }
