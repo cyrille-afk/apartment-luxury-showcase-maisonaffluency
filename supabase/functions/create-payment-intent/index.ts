@@ -144,17 +144,42 @@ serve(async (req) => {
         : 0;
     if (estimatedFreightCents > 5_000_000) return json({ error: "Shipping amount out of range." }, 400);
     const freightForTaxCents = shippingCents > 0 ? shippingCents : estimatedFreightCents;
+    // The client's "verified" flag is never trusted: re-run the authority check
+    // here. Invalid, unsupported or unavailable ⇒ standard destination VAT.
+    const verification =
+      buyerType === "business" && buyerTaxId
+        ? await verifyVatNumber(buyerTaxId, shippingCountry)
+        : null;
+    // Per-line customs manifest (HS6 + duty rate + origin) bound to the order.
+    const customsLines = Array.isArray(body?.customsLines)
+      ? (body.customsLines as unknown[]).slice(0, 200).map((raw) => {
+          const l = (raw ?? {}) as Record<string, unknown>;
+          return {
+            hs6Code: typeof l.hs6Code === "string" ? l.hs6Code.slice(0, 12) : null,
+            dutyRate: Number.isFinite(Number(l.dutyRate)) ? Number(l.dutyRate) : null,
+            originCountry:
+              typeof l.originCountry === "string" ? l.originCountry.slice(0, 40) : null,
+            lineTotalCents: Math.max(0, Math.round(Number(l.lineTotalCents) || 0)),
+          };
+        })
+      : [];
     // One engine decides the rate, wording and registration for every country.
     const treatment = resolveTaxTreatment({
       country: shippingCountry,
       currency,
       buyerType,
       buyerTaxId,
+      buyerTaxIdVerified: verification?.valid === true,
       goodsCents: goodsAmount,
       shippingCents: freightForTaxCents,
+      goodsEurCents: currency.toUpperCase() === "EUR" ? goodsAmount : null,
+      shipFromCountry:
+        typeof body?.shipFromCountry === "string" ? body.shipFromCountry.toUpperCase() : null,
+      lines: customsLines,
     });
     const taxCents = treatment.taxCents;
     const taxLabel = treatment.label;
+    const clearanceFeeCents = treatment.clearanceFeeCents;
 
     const deliveryCents = shippingCents > 0 ? shippingCents : estimatedFreightCents;
     const deliveryTerm = body?.incoterm === "DDP" ? "DDP" : body?.incoterm === "DDU" ? "DDU" : "";
