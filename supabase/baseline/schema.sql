@@ -8618,7 +8618,23 @@ CREATE TABLE public.shop_orders (
     phone text,
     paid_at timestamp with time zone,
     marked_paid_by uuid,
-    payment_confirmation_sent_at timestamp with time zone
+    payment_confirmation_sent_at timestamp with time zone,
+    buyer_type text,
+    buyer_tax_id text,
+    buyer_tax_country text,
+    tax_treatment text,
+    tax_rate numeric,
+    tax_statement text,
+    merchant_tax_registration text,
+    shipping_country text,
+    delivery_term text,
+    import_duty_cents integer DEFAULT 0 NOT NULL,
+    import_tax_cents integer DEFAULT 0 NOT NULL,
+    import_clearance_cents integer DEFAULT 0 NOT NULL,
+    ddp_handling_cents integer DEFAULT 0 NOT NULL,
+    import_total_cents integer DEFAULT 0 NOT NULL,
+    deferred_import_cents integer DEFAULT 0 NOT NULL,
+    customs_statement text
 );
 
 

@@ -2181,6 +2181,13 @@ export default function Checkout() {
           paymentIntentId: intentIdRef.current || undefined,
           // Destination country — drives Singapore GST server-side.
           shippingCountry: formCountry ?? "",
+          incoterm: summary?.incoterm ?? incoterm,
+          importDutyCents: summary?.importDutyCents ?? 0,
+          importVatCents: summary?.importVatCents ?? 0,
+          importClearanceCents: summary?.importClearanceCents ?? 0,
+          ddpHandlingCents: summary?.ddpHandlingCents ?? 0,
+          importTotalCents: summary?.importTotalCents ?? 0,
+          deferredImportCents: summary?.deferredImportCents ?? 0,
           // B2B zero-rating: only applies to SG GST-registered businesses.
           buyerType,
           buyerGstNumber,
@@ -2253,7 +2260,7 @@ export default function Checkout() {
         setSyncing(false);
       }
     },
-    [grossLines, stripePromise, formCountry, estimate.cents, depositPct],
+    [grossLines, stripePromise, formCountry, estimate.cents, depositPct, summary, incoterm],
   );
 
 
@@ -2409,6 +2416,19 @@ export default function Checkout() {
         <p className="mt-2 text-sm text-muted-foreground">
           A private advisor will contact you shortly to arrange delivery.
         </p>
+        {summary.taxStatement && (
+          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{summary.taxStatement}</p>
+        )}
+        {summary.incoterm === "DDP" && (
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            Delivered Duty Paid to {summary.shippingZoneLabel || "your selected destination"}. The import and customs charges shown are prepaid by Maison Affluency.
+          </p>
+        )}
+        {summary.incoterm === "DDU" && (
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            Delivered Duty Unpaid to {summary.shippingZoneLabel || "your selected destination"}. Estimated border charges are excluded from the order total and payable to the carrier or customs authority.
+          </p>
+        )}
         {summary.taxCents > 0 && summary.taxLabel && (
           <p className="mt-4 font-light text-[11px] tracking-[0.06em] text-muted-foreground">
             Includes {summary.taxLabel} {money(summary.taxCents, summary.currency)}

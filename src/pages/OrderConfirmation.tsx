@@ -38,7 +38,7 @@ export default function OrderConfirmation() {
         <p className="mt-6 font-body text-sm leading-relaxed text-muted-foreground">
           {bank
             ? "Your pieces are reserved. Our concierge will email you the bank transfer details and a pro-forma invoice within one business day. Production begins once funds are received."
-            : "Your payment has been received. Our concierge will confirm production lead times, delivery scheduling and any duties applicable to your destination within one business day."}
+            : "Your payment has been received. The tax and customs treatment agreed at checkout is recorded on your order confirmation. Our concierge will confirm production lead times and delivery scheduling within one business day."}
         </p>
 
         <Link

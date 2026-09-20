@@ -157,6 +157,11 @@ serve(async (req) => {
     const taxLabel = treatment.label;
 
     const deliveryCents = shippingCents > 0 ? shippingCents : estimatedFreightCents;
+    const deliveryTerm = body?.incoterm === "DDP" ? "DDP" : body?.incoterm === "DDU" ? "DDU" : "";
+    const metadataCents = (value: unknown) => {
+      const parsed = Math.round(Number(value) || 0);
+      return String(Number.isFinite(parsed) ? Math.min(Math.max(parsed, 0), 100_000_000) : 0);
+    };
     // Checkout presents whole-currency rows. Charge their exact displayed sum
     // so the action label, bank-wire amount, invoice, and PaymentIntent agree.
     const roundDollar = (cents: number) => Math.round(cents / 100) * 100;
@@ -210,6 +215,13 @@ serve(async (req) => {
         delivery_cents: String(deliveryCents),
         shipping_label: shippingLabel,
         shipping_country: shippingCountry,
+        delivery_term: deliveryTerm,
+        import_duty_cents: metadataCents(body?.importDutyCents),
+        import_tax_cents: metadataCents(body?.importVatCents),
+        import_clearance_cents: metadataCents(body?.importClearanceCents),
+        ddp_handling_cents: metadataCents(body?.ddpHandlingCents),
+        import_total_cents: metadataCents(body?.importTotalCents),
+        deferred_import_cents: metadataCents(body?.deferredImportCents),
         tax_cents: String(taxCents),
         tax_label: taxLabel ?? "",
         buyer_type: buyerType,
