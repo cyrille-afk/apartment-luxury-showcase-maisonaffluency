@@ -198,5 +198,7 @@ Deno.serve(async (req) => {
     duplicate: !!prior,
     duplicateOf: prior?.id ?? null,
     signatureNote: verdict.note || null,
+    quarantined: scan.severity !== "clean",
+    activeContentFlags: scan.flags,
   });
 });
