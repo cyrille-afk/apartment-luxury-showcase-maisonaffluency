@@ -1,4 +1,6 @@
+import { hasConsent } from "@/lib/consent/consentStore";
 /**
+
  * Real-user monitoring for Largest Contentful Paint.
  *
  * Reports the final LCP value (after the page is hidden / unloaded, when
