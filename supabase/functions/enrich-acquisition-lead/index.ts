@@ -190,6 +190,8 @@ serve(async (req) => {
     );
   }
 
+  // A caller-verified handle survives even when the AI analysis fails.
+  instagram = instagram ?? providedInstagram;
   const enriched = Boolean(aesthetic && matched.length > 0);
 
   // Idempotent on business_email. Never regress a lead already contacted or won.
