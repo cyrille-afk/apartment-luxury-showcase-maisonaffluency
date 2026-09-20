@@ -15,7 +15,9 @@ import { Check, Copy, Download, Loader2, Lock, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import StripeBankTransferPanel from "@/components/checkout/StripeBankTransferPanel";
 import {
+  SWIFT,
   channelsForRegion,
   type PaymentChannelId,
   type RegionTier,
