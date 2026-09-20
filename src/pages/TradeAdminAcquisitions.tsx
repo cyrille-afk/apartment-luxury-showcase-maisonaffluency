@@ -308,6 +308,18 @@ const TradeAdminAcquisitions = () => {
 
           <div className="flex flex-col items-stretch gap-2 md:items-end">
             <Button
+              variant="outline"
+              onClick={() => setIgFirstOnly((v) => !v)}
+              className={`h-10 rounded-none px-5 text-[11px] uppercase tracking-[0.2em] ${
+                igFirstOnly
+                  ? "border-foreground bg-foreground text-background hover:bg-foreground/90"
+                  : "border-border text-foreground"
+              }`}
+            >
+              <Instagram className="mr-2 h-4 w-4" />
+              {igFirstOnly ? "Showing Instagram-First Targets" : "Show Instagram-First Targets Only"}
+            </Button>
+            <Button
               onClick={deploySequences}
               disabled={dispatching || selected.size === 0}
               className="h-12 rounded-none px-6 text-[11px] uppercase tracking-[0.2em]"
