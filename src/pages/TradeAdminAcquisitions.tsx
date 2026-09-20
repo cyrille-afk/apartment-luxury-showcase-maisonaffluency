@@ -83,6 +83,58 @@ const GENERIC_EMAIL_PREFIXES = new Set([
   "inquiry.sg",
 ]);
 
+// Temporary authoritative handle mapping for the first 44 enriched leads.
+// Keys are exact studio_name values from acquisition_leads.
+const KNOWN_INSTAGRAM_HANDLES: Record<string, string> = {
+  SCDA: "scdaarchitects",
+  Elicyon: "elicyon",
+  "S.R. Gambrel": "stevengambrel",
+  "Ashe Leandro": "asheleandro",
+  "Aamer Architects": "aamerarchitects",
+  "Albion Nord": "albionnord",
+  "Alvisi Kirimoto": "alvisikirimoto",
+  "ao-ft": "ao_ft",
+  "AR43 Architects": "ar43architects",
+  "Archer Humphryes Architects": "archerhumphryes",
+  "Architects 61": "architects61",
+  Archmongers: "archmongers",
+  "Brewin Design Office": "brewindesignoffice",
+  "Chris Dyson Architects": "chrisdysonarchitects",
+  "Coffey Residential": "coffeyresidential",
+  "Common Ground Workshop": "commongroundworkshop",
+  "Delve Architects": "delvearchitects",
+  "Design Intervention": "designintervention",
+  "Formwerkz Architects": "formwerkzarchitects",
+  "Found Associates": "foundassociates",
+  "Gregory Phillips Architects": "gregoryphillipsarchitects",
+  "Guz Architects": "guzarchitects",
+  "Hayhurst and Co.": "hayhurstandco",
+  "HUT Architecture": "hutarchitecture",
+  "HYLA Architects": "hylaarchitects",
+  "James Alder Architects": "jamesalderarchitects",
+  "Jamie Fobert Architects": "jamiefobertarchitects",
+  "Janine Stone & Co": "janinestoneandco",
+  "Joya Architects": "joyaarchitects",
+  "K2LD Architects": "k2ldarchitects",
+  "LA London": "la_london",
+  "Ming Architects": "mingarchitects",
+  "MOYA Architects": "moyaarchitects",
+  "ONG&ONG": "ongong",
+  "READ Architecture": "readarchitecture",
+  "Red Bean Architects": "redbeanarchitects",
+  "Rigby & Rigby": "rigbyandrigby",
+  "SHH Architecture & Interior Design": "shh_architecture",
+  "Spatial Affairs Bureau": "spatialaffairsbureau",
+  "Studio iF": "studioif",
+  "Studio Indigo": "studioindigo",
+  "Studio McW": "studiomcw",
+  "Taylor Howes": "taylorhowes",
+  "Treehaus Architects": "treehausarchitects",
+  "Unknown Works": "unknown_works",
+  "Wallflower Architecture + Design": "wallflowerarchitecture",
+  "YARD Architects": "yardarchitects",
+};
+
 const isGenericEmail = (email: string): boolean => {
   const local = email.split("@")[0]?.toLowerCase().trim() ?? "";
   return GENERIC_EMAIL_PREFIXES.has(local);
