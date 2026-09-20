@@ -83,6 +83,7 @@ const TradeAdminMcpUsage = lazy(() => import("./pages/TradeAdminMcpUsage"));
 const TradeAdminQueue = lazy(() => import("./pages/TradeAdminQueue"));
 const TradeAdminPrivacyRequests = lazy(() => import("./pages/TradeAdminPrivacyRequests"));
 const TradeAdminSubProcessors = lazy(() => import("./pages/TradeAdminSubProcessors"));
+const TradeAdminOutbound = lazy(() => import("./pages/TradeAdminOutbound"));
 const DpaTemplate = lazy(() => import("./pages/DpaTemplate"));
 const TradePayoutStatement = lazy(() => import("./pages/TradePayoutStatement"));
 
@@ -747,6 +748,7 @@ const App = () => {
                   <Route path="/admin/queue" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminQueue /></Suspense>} />
                   <Route path="/admin/privacy-requests" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminPrivacyRequests /></Suspense>} />
                   <Route path="/admin/compliance/sub-processors" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminSubProcessors /></Suspense>} />
+                  <Route path="/admin/outbound" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminOutbound /></Suspense>} />
                   <Route path="/compliance/dpa-template" element={<Suspense fallback={<PageLoadingSkeleton />}><DpaTemplate /></Suspense>} />
                   <Route path="/trade" element={<Suspense fallback={null}><TradeErrorBoundary><TradeLayout /></TradeErrorBoundary></Suspense>}>
                     <Route index element={<TradeDashboard />} />
@@ -770,6 +772,7 @@ const App = () => {
                     <Route path="admin/queue" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminQueue /></Suspense>} />
                     <Route path="admin/privacy-requests" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminPrivacyRequests /></Suspense>} />
                     <Route path="admin/compliance/sub-processors" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminSubProcessors /></Suspense>} />
+                    <Route path="admin/outbound" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminOutbound /></Suspense>} />
 
                     <Route path="registered-users" element={<TradeRegisteredUsers />} />
                     <Route path="description-writer" element={<TradeDescriptionWriter />} />
