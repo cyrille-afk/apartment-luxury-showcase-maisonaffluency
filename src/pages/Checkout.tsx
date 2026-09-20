@@ -72,6 +72,12 @@ import {
   isUkCorporatePurchaseOrderEligible,
 } from "@/config/highValuePayment";
 import { getCustomsRegion } from "@/lib/checkout/customsRegions";
+import { useCrossBorderInvoice } from "@/hooks/useCrossBorderInvoice";
+import {
+  CrossBorderFreightBreakdown,
+  CrossBorderTaxNotice,
+} from "@/components/checkout/CrossBorderInvoiceNotice";
+import { isReverseChargeExempt, logInvoiceIncident } from "@/lib/checkout/crossBorderInvoice";
 
 
 const CONCIERGE_WHATSAPP = "https://wa.me/6591393850";
@@ -89,6 +95,8 @@ export type CheckoutLine = {
   leadTime?: string | null;
   productPath?: string | null;
   quantity?: number;
+  /** Catalogue pick id — lets the cross-border matrix read crating metrics. */
+  pickId?: string | null;
   /** Freight class hints — drive the shipping estimate multiplier. */
   category?: string | null;
   shippingModifier?: number | null;
@@ -2327,6 +2335,7 @@ export default function Checkout() {
           ? `/designers/${item.designerSlug}/${item.productSlug}`
           : null,
         quantity: item.quantity,
+        pickId: item.pickId ?? null,
         origin: item.origin ?? null,
         pickupCountry: item.pickupCountry ?? null,
       })).filter(valid);
