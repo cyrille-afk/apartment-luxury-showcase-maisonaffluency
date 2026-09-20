@@ -5,7 +5,7 @@
  * tailored outbound sequence. Admin-only — RLS is the real control, the
  * guard below is convenience.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -32,7 +32,12 @@ type Lead = {
   email_sent_at: string | null;
   email_error: string | null;
   created_at: string;
+  country: string | null;
+  city: string | null;
 };
+
+const DEFAULT_COUNTRY = "Singapore";
+const DEFAULT_CITY = "Singapore";
 
 const fmtDate = (iso: string | null) =>
   iso
