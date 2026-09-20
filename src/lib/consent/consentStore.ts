@@ -149,8 +149,41 @@ export const getScopes = (): ConsentScopes => readConsent()?.scopes ?? DENY_ALL;
 export const hasConsent = (category: ConsentCategory): boolean =>
   category === "necessary" ? true : getScopes()[category] === true;
 
+/** Preview/staging hosts (never production). */
+export const isTestEnvironment = (): boolean => {
+  if (!isBrowser()) return false;
+  const h = window.location.hostname;
+  return (
+    h === "localhost" ||
+    h === "127.0.0.1" ||
+    h.endsWith(".lovable.app") ||
+    h.endsWith(".lovableproject.com")
+  );
+};
+
+const PROMPT_SUPPRESS_KEY = "ma_consent_prompt_suppress_until";
+const TEST_PROMPT_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000; // once a week
+
 /** True when the banner must be shown (no record, expired, or policy bumped). */
-export const needsConsentPrompt = (): boolean => readConsent() === null;
+export const needsConsentPrompt = (): boolean => {
+  if (readConsent() !== null) return false;
+  // On test environments the banner re-appears at most once a week, even when
+  // the stored record cannot persist (partitioned storage, wiped cookies).
+  if (isTestEnvironment()) {
+    const now = Date.now();
+    try {
+      const until = Number(localStorage.getItem(PROMPT_SUPPRESS_KEY) || 0);
+      if (Number.isFinite(until) && now < until) return false;
+      localStorage.setItem(
+        PROMPT_SUPPRESS_KEY,
+        String(now + TEST_PROMPT_INTERVAL_MS)
+      );
+    } catch {
+      /* storage unavailable — fall through and prompt */
+    }
+  }
+  return true;
+};
 
 export const saveConsent = (
   scopes: ConsentScopes,
