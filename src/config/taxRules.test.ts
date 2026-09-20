@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import {
   EU_VAT_RATES,
   TAX_RULES,
@@ -7,6 +7,7 @@ import {
   resolveShipFrom,
   resolveTaxRule,
   resolveTaxTreatment,
+  configureIossRouting,
 } from "./taxRules";
 
 const base = { goodsCents: 5_000_000, shippingCents: 100_000 };
@@ -222,5 +223,49 @@ describe("resolveTaxTreatment — no rule", () => {
     });
     expect(r.taxCents).toBe(0);
     expect(r.charged).toBe(false);
+  });
+});
+
+describe("EU import routing — carrier DDP vs merchant IOSS", () => {
+  const eu = (goodsCents: number) =>
+    resolveTaxTreatment({
+      country: "FR",
+      currency: "EUR",
+      buyerType: "private",
+      buyerTaxId: null,
+      goodsCents,
+      shippingCents: 0,
+      goodsEurCents: goodsCents,
+    });
+
+  afterEach(() => configureIossRouting({ processIossViaMerchant: false, euIossNumber: null }));
+
+  it("routes every EU consignment as carrier DDP while the switch is off", () => {
+    for (const goods of [100_00, 500_00]) {
+      const r = eu(goods);
+      expect(r.treatment).toBe("ddp_import");
+      expect(r.customsRoute).toBe("CARRIER_DDP");
+      expect(r.clearanceFeeCents).toBeGreaterThan(0);
+      expect(r.iossNumber).toBeNull();
+    }
+  });
+
+  it("moves sub-€150 consignments onto IOSS once registered", () => {
+    configureIossRouting({ processIossViaMerchant: true, euIossNumber: "IM3720000000" });
+    const low = eu(100_00);
+    expect(low.treatment).toBe("ioss");
+    expect(low.customsRoute).toBe("MERCHANT_IOSS");
+    expect(low.clearanceFeeCents).toBe(0);
+    expect(low.taxCents).toBe(20_00);
+    expect(low.iossNumber).toBe("IM3720000000");
+
+    const high = eu(500_00);
+    expect(high.customsRoute).toBe("CARRIER_DDP");
+    expect(high.clearanceFeeCents).toBeGreaterThan(0);
+  });
+
+  it("stays on carrier DDP when the switch is on but no number is configured", () => {
+    configureIossRouting({ processIossViaMerchant: true, euIossNumber: null });
+    expect(eu(100_00).customsRoute).toBe("CARRIER_DDP");
   });
 });

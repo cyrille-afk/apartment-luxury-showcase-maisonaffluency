@@ -3,6 +3,7 @@ import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
 import { resolveTaxTreatment, normaliseBuyerTaxId } from "../_shared/taxRules.ts";
+import { applyIossEnv } from "../_shared/iossConfig.ts";
 import { verifyVatNumber } from "../_shared/vatValidation.ts";
 
 const corsHeaders = {
@@ -165,6 +166,9 @@ serve(async (req) => {
         })
       : [];
     // One engine decides the rate, wording and registration for every country.
+    // EU routing (carrier DDP vs our own IOSS) is read from the environment on
+    // every request, so flipping the switch needs no redeploy of this file.
+    applyIossEnv();
     const treatment = resolveTaxTreatment({
       country: shippingCountry,
       currency,
@@ -274,6 +278,8 @@ serve(async (req) => {
         customs_clearance_cents: String(clearanceFeeCents),
         estimated_duty_cents: String(treatment.dutyCents),
         requires_ddp_clearance: String(treatment.requiresDdpClearance),
+        customs_route: treatment.customsRoute ?? "",
+        merchant_ioss_number: treatment.iossNumber ?? "",
         ship_from_country: treatment.shipFromCountry ?? "",
         payment_plan: depositPct > 0 ? `deposit_${Math.round(depositPct * 100)}` : "full",
         order_total_cents: String(amount),

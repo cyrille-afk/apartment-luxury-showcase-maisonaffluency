@@ -58,6 +58,58 @@ export const MERCHANT_TAX_IDENTIFIERS = {
   euOss: null as string | null,
 };
 
+/**
+ * How an EU consignment reaches the buyer.
+ *  CARRIER_DDP    the forwarder imports on our behalf; destination VAT is
+ *                 prepaid at checkout and a flat clearance fee is charged.
+ *  MERCHANT_IOSS  we account for the VAT ourselves under our own IOSS
+ *                 registration; no carrier clearance fee, and the IOSS number
+ *                 travels on the electronic customs manifest.
+ */
+export type CustomsRoute = "CARRIER_DDP" | "MERCHANT_IOSS";
+
+/**
+ * Interim routing switch. Today every EU consignment — below and above €150 —
+ * leaves Singapore under the carrier-backed DDP channel, because we hold no
+ * IOSS registration. The moment one is obtained, flip
+ * `processIossViaMerchant` on and supply the number; the engine then splits
+ * low-value B2C consignments onto the IOSS route by itself.
+ *
+ * Runtime configured rather than read from the environment here, so this file
+ * stays dependency-free and identical on the server and in the browser.
+ */
+export interface IossRoutingConfig {
+  processIossViaMerchant: boolean;
+  euIossNumber: string | null;
+}
+
+const iossRouting: IossRoutingConfig = {
+  processIossViaMerchant: false,
+  euIossNumber: null,
+};
+
+export const configureIossRouting = (patch: Partial<IossRoutingConfig>): void => {
+  if (typeof patch.processIossViaMerchant === "boolean") {
+    iossRouting.processIossViaMerchant = patch.processIossViaMerchant;
+  }
+  if (patch.euIossNumber !== undefined) {
+    const n = (patch.euIossNumber || "").trim().toUpperCase();
+    iossRouting.euIossNumber = n || null;
+  }
+};
+
+export const getIossRouting = (): IossRoutingConfig => ({ ...iossRouting });
+
+/**
+ * The IOSS identifier to charge under, or `null` when the merchant route is
+ * off or unconfigured. Both conditions must hold — a number without the switch
+ * (or a switch without a number) keeps every consignment on carrier DDP.
+ */
+export const merchantIossNumber = (): string | null =>
+  iossRouting.processIossViaMerchant && iossRouting.euIossNumber
+    ? iossRouting.euIossNumber
+    : null;
+
 /** IOSS applies to consignments with an intrinsic value at or below €150. */
 export const IOSS_THRESHOLD_EUR_CENTS = 150_00;
 /** HMRC low-value consignment threshold: £135. */
@@ -138,7 +190,9 @@ const euRule = (country: string, rate: number): TaxRule => ({
   name: "VAT",
   // Import VAT is assessed on the CIF value — goods plus freight.
   taxShipping: true,
-  registrationNumber: MERCHANT_TAX_IDENTIFIERS.ioss,
+  // No standing EU registration is printed on the rule: the routing branch
+  // decides between the carrier DDP line and our own IOSS number.
+  registrationNumber: null,
   buyerIdLabel: "EU VAT Number",
   buyerIdPattern: EU_VAT_PATTERNS[country],
   buyerIdHint: `Enter a valid ${country} VAT number, including the country prefix.`,
@@ -312,6 +366,11 @@ export interface TaxTreatmentResult {
   merchantTaxIdentifier: string | null;
   /** True when the consignment must be tendered to the carrier as DDP. */
   requiresDdpClearance: boolean;
+  /** Cross-border routing recorded on the order for audit. */
+  customsRoute: CustomsRoute | null;
+  /** IOSS number to append to the electronic customs manifest, when routing
+   *  under our own registration. */
+  iossNumber: string | null;
   countryIso: string | null;
   shipFromCountry: string | null;
 }
@@ -368,6 +427,9 @@ export const resolveTaxTreatment = (input: TaxTreatmentInput): TaxTreatmentResul
     countryIso,
     shipFromCountry: shipFrom,
     dutyCents,
+    // Only the two cross-border import branches below set a routing.
+    customsRoute: null as CustomsRoute | null,
+    iossNumber: null as string | null,
   };
 
   if (!rule) {
@@ -483,9 +545,17 @@ export const resolveTaxTreatment = (input: TaxTreatmentInput): TaxTreatmentResul
       : goodsCents;
   const lowValue =
     !!rule.lowValueThresholdCents && thresholdBase <= rule.lowValueThresholdCents;
-  const clearanceFeeCents = lowValue ? 0 : (rule.clearanceFeeCents ?? 0);
+  const iossNumber = merchantIossNumber();
+  // Low-value EU consignments only escape the carrier brokerage fee once we
+  // clear them ourselves under IOSS. Until then every EU parcel, either side
+  // of €150, is a carrier-cleared DDP import and carries the flat fee.
+  const routesViaMerchantIoss = rule.region === "EU" && lowValue && !!iossNumber;
+  const clearanceFeeCents =
+    routesViaMerchantIoss || (rule.region === "GB" && lowValue)
+      ? 0
+      : (rule.clearanceFeeCents ?? 0);
 
-  if (rule.region === "EU" && lowValue && MERCHANT_TAX_IDENTIFIERS.ioss) {
+  if (routesViaMerchantIoss) {
     return {
       ...shell,
       rule,
@@ -497,10 +567,12 @@ export const resolveTaxTreatment = (input: TaxTreatmentInput): TaxTreatmentResul
       label: `${taxRowLabel(rule)} — IOSS`,
       charged: true,
       note: `Consignment at or below €150. ${rule.name} is collected at checkout under the Import One-Stop Shop; no further charges on delivery.`,
-      statement: `Import One-Stop Shop supply. ${taxRowLabel(rule)} collected at the point of sale. IOSS identifier ${MERCHANT_TAX_IDENTIFIERS.ioss}.`,
-      registrationLine: `IOSS No. ${MERCHANT_TAX_IDENTIFIERS.ioss}`,
-      merchantTaxIdentifier: MERCHANT_TAX_IDENTIFIERS.ioss,
+      statement: `Import One-Stop Shop supply. ${taxRowLabel(rule)} collected at the point of sale. IOSS identifier ${iossNumber}.`,
+      registrationLine: `IOSS No. ${iossNumber}`,
+      merchantTaxIdentifier: iossNumber,
       requiresDdpClearance: false,
+      customsRoute: "MERCHANT_IOSS",
+      iossNumber,
     };
   }
 
@@ -528,6 +600,8 @@ export const resolveTaxTreatment = (input: TaxTreatmentInput): TaxTreatmentResul
     registrationLine: taxRegistrationLine(rule),
     merchantTaxIdentifier: MERCHANT_TAX_IDENTIFIERS.sgUen,
     requiresDdpClearance: true,
+    customsRoute: "CARRIER_DDP",
+    iossNumber: null,
   };
 };
 

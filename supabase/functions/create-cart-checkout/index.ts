@@ -5,6 +5,7 @@ import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
 import { convertCents, SETTLEMENT_CURRENCIES } from "./fxConvert.ts";
 import { formatCurrency } from "../_shared/transactional-email-templates/currency.ts";
 import { resolveTaxTreatment, normaliseBuyerTaxId } from "../_shared/taxRules.ts";
+import { applyIossEnv } from "../_shared/iossConfig.ts";
 import { buildOrderDeliveryMessage } from "../_shared/orderDeliveryMessaging.ts";
 import { verifyVatNumber } from "../_shared/vatValidation.ts";
 
@@ -337,6 +338,8 @@ serve(async (req) => {
     };
     const customsLines = (lines as any[]).map(customsLineFor);
 
+    // EU routing (carrier DDP vs our own IOSS) resolved from the environment.
+    applyIossEnv();
     const treatment = resolveTaxTreatment({
       country: shippingCountry,
       currency,
@@ -405,6 +408,8 @@ serve(async (req) => {
         customs_clearance_cents: clearanceFeeCents,
         estimated_duty_cents: treatment.dutyCents,
         requires_ddp_clearance: treatment.requiresDdpClearance,
+        customs_route: treatment.customsRoute,
+        merchant_ioss_number: treatment.iossNumber,
         shipping_country: shippingCountry || null,
         delivery_term: deliveryTerm,
         import_duty_cents: deliveryMessage.importDutyCents,
@@ -547,6 +552,8 @@ serve(async (req) => {
         order_id: order.id,
         order_ref: order.order_ref,
         expected_total_cents: String(total),
+        customs_route: treatment.customsRoute ?? "",
+        merchant_ioss_number: treatment.iossNumber ?? "",
       },
     });
 
