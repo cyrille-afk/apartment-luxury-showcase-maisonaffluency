@@ -483,19 +483,44 @@ Deno.serve(async (req) => {
     if (!file || file.size === 0) {
       docNote = "Credential document could not be retrieved from storage.";
     } else {
-      let type = file.type || "";
-      if (!type || type === "application/octet-stream") {
-        const ext = app.credential_document_path.split(".").pop()?.toLowerCase() || "";
-        type = ext === "pdf"
-          ? "application/pdf"
-          : ext === "png"
-            ? "image/png"
-            : ext === "webp"
-              ? "image/webp"
-              : ext === "jpg" || ext === "jpeg"
-                ? "image/jpeg"
-                : type || "application/octet-stream";
+      // The stored bytes are the only trustworthy description of the file:
+      // authenticate the signature rather than trusting the extension.
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const verdictSig = verifyFileSignature(bytes, app.credential_document_path, file.type || "");
+      let type = verdictSig.ok ? verdictSig.mime : "application/octet-stream";
+      if (!verdictSig.ok) {
+        fraudFlags.push({ code: "invalid_signature", detail: verdictSig.reason });
+      } else if (verdictSig.note) {
+        fraudFlags.push({ code: "type_mismatch", detail: verdictSig.note });
       }
+
+      // Recycled binary: the same document already submitted elsewhere.
+      credentialSha = await sha256Hex(bytes);
+      const { data: priorDocs } = await admin
+        .from("trade_credential_documents")
+        .select("id, application_id, created_at")
+        .eq("sha256", credentialSha)
+        .order("created_at", { ascending: true })
+        .limit(2);
+      const prior = (priorDocs || []).find(
+        (d: { application_id: string | null }) => d.application_id && d.application_id !== applicationId,
+      );
+      if (prior) {
+        duplicateOf = prior.id;
+        fraudFlags.push({
+          code: "duplicate_document",
+          detail: "This exact document file has already been submitted with another application.",
+        });
+      }
+      // Bind the stored hash log entry to this application.
+      await admin
+        .from("trade_credential_documents")
+        .update({ application_id: applicationId, user_id: app.user_id })
+        .eq("storage_path", app.credential_document_path)
+        .is("application_id", null);
+
+      for (const f of screenDocumentMetadata(bytes, type)) fraudFlags.push(f);
+
       const kb = Math.round(file.size / 1024);
 
       if (type.startsWith("image/") && signed?.signedUrl) {
