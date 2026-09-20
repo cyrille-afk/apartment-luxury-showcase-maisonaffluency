@@ -552,6 +552,8 @@ serve(async (req) => {
         order_id: order.id,
         order_ref: order.order_ref,
         expected_total_cents: String(total),
+        customs_route: treatment.customsRoute ?? "",
+        merchant_ioss_number: treatment.iossNumber ?? "",
       },
     });
 

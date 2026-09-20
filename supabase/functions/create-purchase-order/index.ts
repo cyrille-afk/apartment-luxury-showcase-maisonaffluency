@@ -111,6 +111,7 @@ serve(async (req) => {
     const subtotalCents = lines.reduce((sum, line) => sum + line.line_total_cents, 0);
     const discountCents = Math.min(int(body?.discountCents), subtotalCents);
     const shippingCents = int(body?.shippingCents);
+    applyIossEnv();
     const treatment = resolveTaxTreatment({
       country: shippingCountry,
       currency,
