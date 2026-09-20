@@ -185,6 +185,37 @@ const TradeAdminAcquisitions = () => {
     }
   };
 
+  // Temporary patch utility: fills missing Instagram handles and executive
+  // emails on leads that were ingested before those fields existed.
+  const repairContacts = async () => {
+    setRepairing(true);
+    const pending = toast.loading("Repairing Instagram & executive contact data…");
+    try {
+      const { data, error } = await supabase.functions.invoke("repair-acquisition-contacts", {
+        body: {},
+      });
+      const failure = (data as { error?: string } | null)?.error;
+      if (error || failure) throw new Error(failure || error?.message || "Repair failed.");
+      const result = data as {
+        scanned: number;
+        repaired: number;
+        unresolved: number;
+        failed: number;
+      };
+      toast.success(
+        `${result.repaired} of ${result.scanned} leads repaired.` +
+          (result.unresolved ? ` ${result.unresolved} without verified data.` : "") +
+          (result.failed ? ` ${result.failed} failed.` : ""),
+        { id: pending },
+      );
+      await queryClient.invalidateQueries({ queryKey: ["acquisition-leads", "enriched"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Repair failed.", { id: pending });
+    } finally {
+      setRepairing(false);
+    }
+  };
+
   if (loading) return <div className="p-10 text-sm text-muted-foreground">Loading…</div>;
 
   if (!enabled) {
