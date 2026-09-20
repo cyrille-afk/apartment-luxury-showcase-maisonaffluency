@@ -5309,6 +5309,50 @@ export type Database = {
           },
         ]
       }
+      product_embeddings: {
+        Row: {
+          content_chunk: string
+          created_at: string
+          design_taxonomy: string[] | null
+          designer_name: string
+          dimensions_json: Json | null
+          embedding: string | null
+          id: string
+          product_id: string
+          verbatim_title: string
+        }
+        Insert: {
+          content_chunk: string
+          created_at?: string
+          design_taxonomy?: string[] | null
+          designer_name: string
+          dimensions_json?: Json | null
+          embedding?: string | null
+          id?: string
+          product_id: string
+          verbatim_title: string
+        }
+        Update: {
+          content_chunk?: string
+          created_at?: string
+          design_taxonomy?: string[] | null
+          designer_name?: string
+          dimensions_json?: Json | null
+          embedding?: string | null
+          id?: string
+          product_id?: string
+          verbatim_title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_embeddings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "designer_curator_picks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_fabric_swatches_public: {
         Row: {
           category: string | null
@@ -10544,6 +10588,23 @@ export type Database = {
           title: string
           trade_price_cents: number
           width_mm: number
+        }[]
+      }
+      match_products: {
+        Args: {
+          match_count: number
+          match_threshold: number
+          query_embedding: string
+        }
+        Returns: {
+          content_chunk: string
+          design_taxonomy: string[]
+          designer_name: string
+          dimensions_json: Json
+          id: string
+          product_id: string
+          similarity: number
+          verbatim_title: string
         }[]
       }
       match_roster_public: {

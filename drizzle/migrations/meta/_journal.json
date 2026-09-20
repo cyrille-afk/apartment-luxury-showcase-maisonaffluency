@@ -456,6 +456,13 @@
       "when": 1789877112277,
       "tag": "0064_prospect_studios_outbound_pipeline",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1789880000797,
+      "tag": "0065_create_product_embeddings",
+      "breakpoints": true
     }
   ]
 }
