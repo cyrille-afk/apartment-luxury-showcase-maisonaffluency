@@ -90,6 +90,7 @@ export default function CartNavButton({
               ? `/designers/${i.designerSlug}/${i.productSlug}`
               : null,
           quantity: i.quantity,
+          pickId: i.pickId ?? null,
         })),
       },
     });
