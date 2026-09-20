@@ -129,6 +129,24 @@ Deno.serve(async (req) => {
     return json({ error: verdict.reason }, 415);
   }
 
+  // ── Active-content screening ─────────────────────────────────────────────
+  // A structurally valid PDF can still run JavaScript, fire an /OpenAction or
+  // carry an embedded payload the moment a reviewer opens it. Weaponised
+  // documents are refused outright; anything unscannable or merely suspicious
+  // is stored in quarantine so nobody downloads it before a decision.
+  const scan = scanActiveContent(bytes, verdict.mime);
+  if (isBlockingVerdict(scan)) {
+    await logAttempt(false, `active_content:${scan.flags.join(",")}`);
+    return json(
+      {
+        error:
+          "This document contains active content (scripts or embedded files) and cannot be accepted. Please upload a flattened PDF or an image export.",
+        flags: scan.flags,
+      },
+      415,
+    );
+  }
+
   // ── Duplicate / recycled document heuristic ──────────────────────────────
   const sha256 = await sha256Hex(bytes);
   const { data: priorRows } = await admin
