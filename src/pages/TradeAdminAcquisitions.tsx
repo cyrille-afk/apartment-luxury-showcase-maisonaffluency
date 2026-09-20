@@ -595,29 +595,13 @@ const TradeAdminAcquisitions = () => {
                   </td>
                   <td className="px-5 py-6">
                     {vector === "instagram" ? (
-                      <div className="space-y-2">
-                        <Badge
-                          variant="outline"
-                          className="rounded-none border-destructive/30 text-[11px] font-normal text-destructive"
-                        >
-                          <AlertTriangle className="mr-1.5 h-3 w-3" />
-                          🚨 Route via Instagram DM
-                        </Badge>
-                        {lead.instagram_handle && (
-                          <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                            Handle:
-                            <a
-                              href={`https://instagram.com/${lead.instagram_handle.replace(/^@+/, "")}`}
-                              target="_blank"
-                              rel="noreferrer noopener"
-                              className="ml-1 inline-flex items-center gap-1 font-medium text-foreground underline-offset-4 hover:underline"
-                            >
-                              <Instagram className="h-3 w-3" />
-                              {`@${lead.instagram_handle.replace(/^@+/, "")}`}
-                            </a>
-                          </div>
-                        )}
-                      </div>
+                      <Badge
+                        variant="outline"
+                        className="rounded-none border-destructive/30 text-[11px] font-normal text-destructive"
+                      >
+                        <AlertTriangle className="mr-1.5 h-3 w-3" />
+                        🚨 Route via Instagram DM
+                      </Badge>
                     ) : (
                       <Badge
                         variant="outline"
