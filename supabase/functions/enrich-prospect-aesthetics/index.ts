@@ -38,6 +38,7 @@ type Prospect = {
   website_url: string | null;
   website_summary: string | null;
   recent_design_keywords: string[] | null;
+  enrichment_attempts?: number;
 };
 
 type DesignerRow = {
