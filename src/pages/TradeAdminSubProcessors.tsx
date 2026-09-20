@@ -80,6 +80,11 @@ type Row = {
   notes: string | null;
   is_active: boolean;
   sort_order: number;
+  signed_dpa_path: string | null;
+  signed_dpa_filename: string | null;
+  signed_dpa_sha256: string | null;
+  signed_dpa_size_bytes: number | null;
+  signed_dpa_uploaded_at: string | null;
 };
 
 const STATUS_LABEL: Record<DpaStatus, string> = {
