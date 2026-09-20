@@ -24,7 +24,9 @@ const json = (body: unknown, status = 200) =>
   });
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = modelFor("balanced");
+// Caller explicitly named this model for the acquisition enrichment node.
+const MODEL = "openai/gpt-6-astra";
+void modelFor; void tokenBudget;
 
 const str = (v: unknown, max: number): string | null => {
   if (typeof v !== "string") return null;
@@ -82,14 +84,19 @@ serve(async (req) => {
     return json({ error: "Invalid JSON body" }, 400);
   }
 
+  // Accept both the original scraping-tool keys and the direct social
+  // vector keys (directEmail / instagramHandle / geographicCity).
   const studioName = str(body.studioName, 200);
-  const businessEmail = str(body.businessEmail, 255)?.toLowerCase() ?? null;
+  const businessEmail =
+    (str(body.businessEmail, 255) ?? str(body.directEmail, 255))?.toLowerCase() ?? null;
   const founderName = str(body.founderName, 160);
   const websiteUrl = safeUrl(body.websiteUrl);
   const snippet = str(body.rawScrapedSnippet, 6000);
   const sourceIndex = str(body.sourceIndex, 60) ?? "AD100_Index";
   const country = str(body.country, 80);
-  const city = str(body.city, 80);
+  const city = str(body.city, 80) ?? str(body.geographicCity, 80);
+  // A caller-supplied verified handle always wins over AI detection.
+  const providedInstagram = sanitizeInstagram(body.instagramHandle ?? body.instagram_handle);
 
   if (!studioName || !businessEmail || !EMAIL_RE.test(businessEmail)) {
     return json({ error: "Missing or invalid studioName / businessEmail." }, 400);
@@ -132,6 +139,7 @@ serve(async (req) => {
       .join("\n"),
     "",
     "Name the aesthetic in 2-6 words (e.g. 'monastic brutalism', 'austere luxury').",
+    "Phrase it in the Maison Affluency design-scholar register: materiality, provenance, craftsmanship, and historical context over lifestyle adjectives.",
     "Then choose exactly 3 roster designers this studio would naturally specify.",
     "Using your knowledge base and digital mapping of the studio's name, founder, and website, locate the verified, official Instagram handle for this studio.",
     'Return it as a clean string under "instagram_handle" WITHOUT the @ prefix (e.g. "studio_handle_here"). If the studio has no verified presence, return null. Never guess a handle you are not confident is official.',
@@ -170,7 +178,7 @@ serve(async (req) => {
     }
     const parsed = JSON.parse(raw || "{}");
     aesthetic = str(parsed?.aesthetic, 200);
-    instagram = sanitizeInstagram(parsed?.instagram_handle);
+    instagram = providedInstagram ?? sanitizeInstagram(parsed?.instagram_handle);
     matched = (Array.isArray(parsed?.matched_designers) ? parsed.matched_designers : [])
       .map((n: unknown) => byName.get(String(n ?? "").trim().toLowerCase()))
       .filter((n: string | undefined): n is string => Boolean(n))
@@ -182,6 +190,8 @@ serve(async (req) => {
     );
   }
 
+  // A caller-verified handle survives even when the AI analysis fails.
+  instagram = instagram ?? providedInstagram;
   const enriched = Boolean(aesthetic && matched.length > 0);
 
   // Idempotent on business_email. Never regress a lead already contacted or won.
