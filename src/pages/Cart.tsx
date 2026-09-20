@@ -21,6 +21,11 @@ import { ShippingCountryIndicator } from "@/components/checkout/ShippingCountryI
 import { getFxRates, convertCentsWithFallback } from "@/lib/fxRates";
 import { resolveBaseCurrency, useSettlementCurrency } from "@/lib/checkout/multiCurrency";
 import { getCustomsRegion } from "@/lib/checkout/customsRegions";
+import { useCrossBorderInvoice } from "@/hooks/useCrossBorderInvoice";
+import {
+  CrossBorderFreightBreakdown,
+  CrossBorderTaxNotice,
+} from "@/components/checkout/CrossBorderInvoiceNotice";
 
 
 
@@ -154,6 +159,25 @@ export default function Cart() {
         ),
       ),
     [items],
+  );
+
+  // Background cross-border matrix — verified B2B tax posture + freight
+  // breakdown. Any failure leaves the baseline figures above untouched.
+  const crossBorderItems = useMemo(
+    () =>
+      items.map((i) => ({
+        pickId: i.pickId,
+        unitCents: toDisplay(i.unitPriceCents, i.currency),
+        quantity: i.quantity,
+        originCountry: i.pickupCountry ?? i.origin ?? null,
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [items, currency, fxRates],
+  );
+  const { invoice: crossBorder } = useCrossBorderInvoice(
+    crossBorderItems,
+    destination.iso,
+    currency,
   );
 
   const sgdRate = useUsdToSgdRate();
