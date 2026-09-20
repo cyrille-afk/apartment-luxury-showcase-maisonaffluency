@@ -13,6 +13,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { sha256Hex, verifyFileSignature } from "../_shared/fileSignature.ts";
+import { isBlockingVerdict, scanActiveContent } from "../_shared/activeContentScan.ts";
 
 const MAX_BYTES = 15 * 1024 * 1024; // 15 MB
 const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
