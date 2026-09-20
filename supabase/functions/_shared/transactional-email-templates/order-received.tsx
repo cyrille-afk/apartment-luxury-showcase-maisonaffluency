@@ -29,6 +29,11 @@ interface OrderReceivedProps {
   taxLabel?: string
   /** Invoice-grade statement, e.g. UK reverse-charge wording. */
   taxStatement?: string | null
+  destination?: string | null
+  deliveryTerm?: 'DDP' | 'DDU' | null
+  customsStatement?: string | null
+  importChargesFormatted?: string | null
+  deferredImportFormatted?: string | null
   totalFormatted?: string
   currency?: string
 }
@@ -43,6 +48,11 @@ const OrderReceivedEmail = ({
   taxLineFormatted,
   taxLabel = 'Taxes',
   taxStatement,
+  destination,
+  deliveryTerm,
+  customsStatement,
+  importChargesFormatted,
+  deferredImportFormatted,
   totalFormatted = '—',
   currency = 'EUR',
 }: OrderReceivedProps) => (
@@ -142,6 +152,31 @@ const OrderReceivedEmail = ({
                   </td>
                 </tr>
               ) : null}
+              {deliveryTerm ? (
+                <tr>
+                  <td style={totalLabel}>Delivery term{destination ? ` · ${destination}` : ''}</td>
+                  <td style={totalAmount}>{deliveryTerm}</td>
+                </tr>
+              ) : null}
+              {importChargesFormatted ? (
+                <tr>
+                  <td style={totalLabel}>Prepaid import &amp; customs charges</td>
+                  <td style={totalAmount}>{formatCurrency(importChargesFormatted, currency)}</td>
+                </tr>
+              ) : null}
+              {deferredImportFormatted ? (
+                <tr>
+                  <td style={totalLabel}>Estimated charges payable at border</td>
+                  <td style={totalAmount}>{formatCurrency(deferredImportFormatted, currency)}</td>
+                </tr>
+              ) : null}
+              {customsStatement ? (
+                <tr>
+                  <td colSpan={2} style={{ ...totalLabel, fontSize: '12px', opacity: 0.75 }}>
+                    {customsStatement}
+                  </td>
+                </tr>
+              ) : null}
               <tr>
                 <td colSpan={2}><Hr style={dividerSubtle} /></td>
               </tr>
@@ -158,9 +193,8 @@ const OrderReceivedEmail = ({
         ) : null}
 
         <Text style={text}>
-          Our Paris logistics team personally reviews every order within 24 hours to secure the
-          optimal white-glove courier route and transit pricing for your specific pieces. Your
-          advisor will confirm production lead times and final delivery arrangements shortly.
+          Our logistics team personally reviews every order within 24 hours. Your advisor will
+          confirm production lead times and the delivery arrangements recorded above shortly.
         </Text>
 
         <Text style={footer}>
@@ -225,6 +259,10 @@ export const template = {
     taxLineFormatted: '€0.00',
     taxLabel: 'VAT (0%)',
     taxStatement: 'Zero-rated export. Import VAT and duty are assessed at the destination border.',
+    destination: 'United Kingdom',
+    deliveryTerm: 'DDU',
+    deferredImportFormatted: '£3,500.00',
+    customsStatement: 'Delivered Duty Unpaid (DDU) for delivery to United Kingdom. Estimated border charges are excluded from the order total.',
     totalFormatted: '€18,923.25',
   },
 } satisfies TemplateEntry

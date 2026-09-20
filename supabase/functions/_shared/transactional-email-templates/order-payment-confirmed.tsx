@@ -19,6 +19,12 @@ interface PaymentConfirmedProps {
   taxLabel?: string | null
   taxFormatted?: string | null
   taxRegistrationLine?: string | null
+  taxStatement?: string | null
+  destination?: string | null
+  deliveryTerm?: 'DDP' | 'DDU' | null
+  customsStatement?: string | null
+  importChargesFormatted?: string | null
+  deferredImportFormatted?: string | null
 }
 
 const PaymentConfirmedEmail = ({
@@ -31,6 +37,12 @@ const PaymentConfirmedEmail = ({
   taxLabel,
   taxFormatted,
   taxRegistrationLine,
+  taxStatement,
+  destination,
+  deliveryTerm,
+  customsStatement,
+  importChargesFormatted,
+  deferredImportFormatted,
 }: PaymentConfirmedProps) => (
   <Html lang="en" dir="ltr">
     <Head />
@@ -70,6 +82,24 @@ const PaymentConfirmedEmail = ({
                   <td style={totalAmount}>{formatCurrency(taxFormatted, currency)}</td>
                 </tr>
               ) : null}
+              {deliveryTerm ? (
+                <tr>
+                  <td style={totalLabel}>Delivery term{destination ? ` · ${destination}` : ''}</td>
+                  <td style={totalAmount}>{deliveryTerm}</td>
+                </tr>
+              ) : null}
+              {importChargesFormatted ? (
+                <tr>
+                  <td style={totalLabel}>Prepaid import &amp; customs charges</td>
+                  <td style={totalAmount}>{formatCurrency(importChargesFormatted, currency)}</td>
+                </tr>
+              ) : null}
+              {deferredImportFormatted ? (
+                <tr>
+                  <td style={totalLabel}>Estimated charges payable at border</td>
+                  <td style={totalAmount}>{formatCurrency(deferredImportFormatted, currency)}</td>
+                </tr>
+              ) : null}
               <tr>
                 <td colSpan={2}><Hr style={dividerSubtle} /></td>
               </tr>
@@ -84,6 +114,8 @@ const PaymentConfirmedEmail = ({
         {taxRegistrationLine ? (
           <Text style={footerSmall}>{taxRegistrationLine}</Text>
         ) : null}
+        {taxStatement ? <Text style={footerSmall}>{taxStatement}</Text> : null}
+        {customsStatement ? <Text style={footerSmall}>{customsStatement}</Text> : null}
 
         <Text style={text}>
           {leadTimeNote
@@ -141,6 +173,8 @@ export const template = {
     taxLabel: 'GST (9%)',
     taxFormatted: '3,483.30',
     taxRegistrationLine: 'GST Reg. No. UEN 201717288Z',
+    destination: 'Singapore',
+    taxStatement: 'Singapore GST collected at checkout.',
   },
 } satisfies TemplateEntry
 
