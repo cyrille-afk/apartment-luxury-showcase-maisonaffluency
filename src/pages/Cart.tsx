@@ -21,6 +21,11 @@ import { ShippingCountryIndicator } from "@/components/checkout/ShippingCountryI
 import { getFxRates, convertCentsWithFallback } from "@/lib/fxRates";
 import { resolveBaseCurrency, useSettlementCurrency } from "@/lib/checkout/multiCurrency";
 import { getCustomsRegion } from "@/lib/checkout/customsRegions";
+import { useCrossBorderInvoice } from "@/hooks/useCrossBorderInvoice";
+import {
+  CrossBorderFreightBreakdown,
+  CrossBorderTaxNotice,
+} from "@/components/checkout/CrossBorderInvoiceNotice";
 
 
 
@@ -156,6 +161,25 @@ export default function Cart() {
     [items],
   );
 
+  // Background cross-border matrix — verified B2B tax posture + freight
+  // breakdown. Any failure leaves the baseline figures above untouched.
+  const crossBorderItems = useMemo(
+    () =>
+      items.map((i) => ({
+        pickId: i.pickId,
+        unitCents: toDisplay(i.unitPriceCents, i.currency),
+        quantity: i.quantity,
+        originCountry: i.pickupCountry ?? i.origin ?? null,
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [items, currency, fxRates],
+  );
+  const { invoice: crossBorder } = useCrossBorderInvoice(
+    crossBorderItems,
+    destination.iso,
+    currency,
+  );
+
   const sgdRate = useUsdToSgdRate();
   const sgdEquivalent = useMemo(() => {
     if (currency !== "USD") return null;
@@ -214,6 +238,7 @@ export default function Cart() {
                 ? `/designers/${i.designerSlug}/${i.productSlug}`
                 : null,
             quantity: i.quantity,
+            pickId: i.pickId ?? null,
             origin: i.origin ?? null,
             pickupCountry: i.pickupCountry ?? null,
           })),
@@ -529,6 +554,10 @@ export default function Cart() {
                         </dd>
                       )}
                     </div>
+                    <CrossBorderFreightBreakdown
+                      invoice={crossBorder}
+                      format={(cents) => formatUsd(cents)}
+                    />
                     {freightEstimate.capped && freightEstimate.notice && (
                       <p className="mt-1.5 font-light text-[10px] tracking-[0.06em] text-foreground">
                         {freightEstimate.notice}
@@ -554,6 +583,7 @@ export default function Cart() {
                         (Approx. SGD ${sgdEquivalent.toLocaleString("en-US")})
                       </p>
                     )}
+                    <CrossBorderTaxNotice invoice={crossBorder} />
 
                     {/* All fine print consolidated into one quiet disclosure. */}
                     <details className="group mt-3 border-t border-border/60 pt-3">

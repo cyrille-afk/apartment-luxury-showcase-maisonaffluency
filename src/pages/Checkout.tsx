@@ -72,6 +72,12 @@ import {
   isUkCorporatePurchaseOrderEligible,
 } from "@/config/highValuePayment";
 import { getCustomsRegion } from "@/lib/checkout/customsRegions";
+import { useCrossBorderInvoice } from "@/hooks/useCrossBorderInvoice";
+import {
+  CrossBorderFreightBreakdown,
+  CrossBorderTaxNotice,
+} from "@/components/checkout/CrossBorderInvoiceNotice";
+import { isReverseChargeExempt, logInvoiceIncident } from "@/lib/checkout/crossBorderInvoice";
 
 
 const CONCIERGE_WHATSAPP = "https://wa.me/6591393850";
@@ -89,6 +95,8 @@ export type CheckoutLine = {
   leadTime?: string | null;
   productPath?: string | null;
   quantity?: number;
+  /** Catalogue pick id — lets the cross-border matrix read crating metrics. */
+  pickId?: string | null;
   /** Freight class hints — drive the shipping estimate multiplier. */
   category?: string | null;
   shippingModifier?: number | null;
@@ -456,6 +464,37 @@ function OrderSummary({
   const isB2BZeroRated = summary.taxTreatment === "b2b_zero_rated";
   const isReverseCharge = summary.taxTreatment === "reverse_charge";
 
+  /* Cross-border matrix — background call, never blocks this summary. */
+  const crossBorderItems = useMemo(
+    () =>
+      lines.map((line) => ({
+        pickId: line.pickId ?? null,
+        unitCents: line.unitCents,
+        quantity: lineQty(line),
+        originCountry: line.pickupCountry ?? line.origin ?? null,
+        hs6Code: line.hs6Code ?? null,
+        dutyRate: line.dutyRate ?? null,
+      })),
+    [lines],
+  );
+  const { invoice: crossBorder } = useCrossBorderInvoice(
+    crossBorderItems,
+    summary.taxCountry,
+    currency,
+  );
+  /** Verified B2B registration — every local VAT line is withdrawn. */
+  const crossBorderExempt = isReverseChargeExempt(crossBorder);
+  useEffect(() => {
+    if (crossBorderExempt && summary.taxCents > 0) {
+      // Engine disagreement: keep the charged figure, record it quietly.
+      logInvoiceIncident("exempt_status_with_charged_tax", {
+        taxCents: summary.taxCents,
+        destination: summary.taxCountry,
+      });
+    }
+  }, [crossBorderExempt, summary.taxCents, summary.taxCountry]);
+
+
   const sgImportGstThreshold = useMemo(() => {
     if (summary.taxCountry !== "SG" || isB2BZeroRated || summary.taxApplied) return null;
     const usdAmount =
@@ -616,6 +655,10 @@ function OrderSummary({
                 <dd className="shrink-0 whitespace-nowrap text-right text-muted-foreground">To be Quoted by Advisor</dd>
               )}
             </div>
+            <CrossBorderFreightBreakdown
+              invoice={crossBorder}
+              format={(cents) => money(cents, currency)}
+            />
             {summary.ddpHandlingCents > 0 && (
               <p className="mt-1.5 font-light text-[10px] leading-relaxed tracking-[0.06em] text-muted-foreground">
                 Includes {money(summary.ddpHandlingCents, currency)} prepaid customs handling (DDP).
@@ -683,7 +726,10 @@ function OrderSummary({
             </div>
           )}
           <div className="border-t border-border/60 pt-4">
-            {sgBorderGst ? (
+            {crossBorderExempt ? (
+              // Verified B2B registration — no local VAT / sales-tax line at all.
+              <CrossBorderTaxNotice invoice={crossBorder} />
+            ) : sgBorderGst ? (
               <>
                 <div className="flex items-baseline justify-between gap-6">
                   <dt className="text-muted-foreground">Tax (Import GST)</dt>
@@ -2327,6 +2373,7 @@ export default function Checkout() {
           ? `/designers/${item.designerSlug}/${item.productSlug}`
           : null,
         quantity: item.quantity,
+        pickId: item.pickId ?? null,
         origin: item.origin ?? null,
         pickupCountry: item.pickupCountry ?? null,
       })).filter(valid);
