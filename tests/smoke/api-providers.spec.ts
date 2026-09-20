@@ -27,7 +27,7 @@ import { Resend } from "resend";
 import { env, SUPABASE_URL, signIn } from "../support/e2eEnv";
 
 // ---------------------------------------------------------------- env guards
-const RESEND_KEY = env("RESEND_TEST_API_KEY");
+const RESEND_KEY = env("RESEND_TEST_API_KEY") ?? env("RESEND_API_KEY");
 const RESEND_FROM = env("RESEND_TEST_FROM") ?? "Maison Affluency <onboarding@resend.dev>";
 const RESEND_TO = env("RESEND_TEST_TO") ?? "delivered@resend.dev";
 
