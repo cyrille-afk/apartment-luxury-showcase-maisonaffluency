@@ -238,21 +238,14 @@ serve(async (req) => {
       const message = e instanceof Error ? e.message : String(e);
       console.error(`[enrich-prospect-aesthetics] ${prospect.id} failed: ${message}`);
       // Attempts are incremented at claim time; three strikes parks the row.
+      const attempts = Number(prospect.enrichment_attempts ?? 0);
       await supabase
         .from("prospect_studios")
         .update({
-          enrichment_status: (prospect as Prospect & { enrichment_attempts?: number })
-            .enrichment_attempts && false
-            ? "failed"
-            : "pending",
+          enrichment_status: attempts >= 3 ? "failed" : "pending",
           enrichment_error: message.slice(0, 300),
         })
         .eq("id", prospect.id);
-      await supabase
-        .from("prospect_studios")
-        .update({ enrichment_status: "failed" })
-        .eq("id", prospect.id)
-        .gte("enrichment_attempts", 3);
     }
   }
 
