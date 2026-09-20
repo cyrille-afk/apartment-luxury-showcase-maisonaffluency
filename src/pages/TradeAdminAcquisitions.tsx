@@ -320,6 +320,32 @@ const TradeAdminAcquisitions = () => {
     }
   };
 
+  // Temporary backfill: apply the authoritative Instagram handle mapping above
+  // to any enriched lead whose handle is currently empty.
+  const calibrateHandles = async () => {
+    setCalibrating(true);
+    const pending = toast.loading("Calibrating live Instagram handles…");
+    try {
+      let updated = 0;
+      for (const lead of rows) {
+        const handle = KNOWN_INSTAGRAM_HANDLES[lead.studio_name.trim()];
+        if (!handle || lead.instagram_handle) continue;
+        const { error } = await supabase
+          .from("acquisition_leads")
+          .update({ instagram_handle: handle })
+          .eq("id", lead.id);
+        if (error) throw error;
+        updated++;
+      }
+      toast.success(`${updated} Instagram handles calibrated.`, { id: pending });
+      await queryClient.invalidateQueries({ queryKey: ["acquisition-leads", "enriched"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Calibration failed.", { id: pending });
+    } finally {
+      setCalibrating(false);
+    }
+  };
+
   if (loading) return <div className="p-10 text-sm text-muted-foreground">Loading…</div>;
 
   if (!enabled) {
