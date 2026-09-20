@@ -549,7 +549,7 @@ const TradeAdminAcquisitions = () => {
                     </div>
                   </td>
                 </tr>
-              ))}
+              );})}
             </tbody>
           </table>
         </div>
