@@ -681,22 +681,41 @@ export default function TradeAdminPaymentSettings() {
                   {savingTestField === f.key ? "Saving…" : "Save key"}
                 </Button>
               </div>
-              <p
-                className={`mt-1 font-body text-xs ${
-                  testFieldError(f.key)
-                    ? "text-destructive"
-                    : savedTestFields[f.key]
-                      ? "text-[hsl(var(--jade))]"
-                      : "text-muted-foreground"
-                }`}
-              >
-                {testFieldError(f.key) ??
-                  (savedTestFields[f.key]
-                    ? "Saved ✓ stored securely — the box is intentionally blank."
-                    : status?.[f.key]
-                      ? `Configured: ${status[f.key]}`
-                      : f.hint)}
-              </p>
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <p
+                  className={`font-body text-xs ${
+                    testFieldError(f.key)
+                      ? "text-destructive"
+                      : savedTestFields[f.key]
+                        ? "text-[hsl(var(--jade))]"
+                        : "text-muted-foreground"
+                  }`}
+                >
+                  {testFieldError(f.key) ??
+                    (savedTestFields[f.key]
+                      ? "Saved ✓ stored securely — the box is intentionally blank."
+                      : status?.[f.key]
+                        ? `Configured: ${status[f.key]}`
+                        : f.hint)}
+                </p>
+                {status?.[f.key] && (
+                  <button
+                    type="button"
+                    aria-label={`Copy saved ${f.label}`}
+                    onClick={() => copySavedField(f.key)}
+                    className="text-muted-foreground hover:text-foreground"
+                    title="Copy saved key to clipboard"
+                  >
+                    {revealedSaved[f.key] ? (
+                      <Check className="h-3.5 w-3.5 text-[hsl(var(--jade))]" />
+                    ) : copyingSaved === f.key ? (
+                      <span className="font-body text-[10px]">…</span>
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
