@@ -8,14 +8,16 @@
 //      interior design / architecture practice, whether the site or document
 //      matches the applicant/company, and whether the Tax/VAT ID is
 //      structurally plausible for the stated country.
-//   4. Auto-approves on high confidence (grants trade_user, sets
-//      tax_exempt_status, sends the welcome email) or flags for manual review.
+//   4. Screens the file for fraud signals (fake type, recycled binary,
+//      tampered metadata) and routes every application to a human queue.
 //
-// Fail-safe: any error leaves the application in `flagged` so a human decides.
+// This function NEVER approves anyone. It cannot grant trade_user, cannot set
+// tax_exempt_status and sends no welcome email: a store administrator must
+// click Approve. Any error leaves the application flagged so a human decides.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import {
-  AUTO_APPROVE_AT,
+  HUMAN_REVIEW_AT,
   credentialGuidance,
   decideVerification,
   regionFor,
@@ -24,6 +26,8 @@ import {
 } from "./regional.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { sendAdminWhatsApp } from "../_shared/twilioWhatsAppSender.ts";
+import { sha256Hex, verifyFileSignature } from "../_shared/fileSignature.ts";
+import { screenDocumentMetadata } from "./fraudScreen.ts";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 // Stage 1 — fast, cost-effective multimodal parse of the credential document.
