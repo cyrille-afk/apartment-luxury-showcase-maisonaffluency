@@ -89,3 +89,12 @@ project_id = "dcrauiygaezoduwdjmsm"
 
   [functions.acknowledge-purchase-order]
     verify_jwt = false
+
+  [functions.ingest-prospect-leads]
+    verify_jwt = false
+
+  [functions.enrich-prospect-aesthetics]
+    verify_jwt = false
+
+  [functions.dispatch-prospect-campaign]
+    verify_jwt = false
