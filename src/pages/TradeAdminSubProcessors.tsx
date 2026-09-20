@@ -569,7 +569,104 @@ const TradeAdminSubProcessors = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="dpa-url">Executed agreement link</Label>
+                <Label>Counter-signed agreement (PDF)</Label>
+                {active.signed_dpa_path ? (
+                  <div className="rounded-sm border border-border bg-muted/30 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm">
+                          {active.signed_dpa_filename ?? "Signed agreement.pdf"}
+                        </p>
+                        <p className="mt-1 text-[0.65rem] text-muted-foreground">
+                          Stored {fmtDate(active.signed_dpa_uploaded_at)}
+                          {active.signed_dpa_size_bytes
+                            ? ` · ${(active.signed_dpa_size_bytes / 1_048_576).toFixed(2)} MB`
+                            : ""}
+                        </p>
+                        {active.signed_dpa_sha256 && (
+                          <p className="mt-1 break-all font-mono text-[0.6rem] text-muted-foreground">
+                            SHA-256 {active.signed_dpa_sha256}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex shrink-0 gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={downloading === active.id}
+                          onClick={() => void openAgreement(active)}
+                        >
+                          {downloading === active.id ? (
+                            <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Download className="mr-2 h-3.5 w-3.5" />
+                          )}
+                          Open
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={uploading}
+                          onClick={() => void removeAgreement()}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="mt-3 text-[0.65rem] text-muted-foreground">
+                      Links expire after 15 minutes. The file is never publicly addressable.
+                    </p>
+                  </div>
+                ) : (
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => !uploading && fileInputRef.current?.click()}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click();
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setDragging(true);
+                    }}
+                    onDragLeave={() => setDragging(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setDragging(false);
+                      const file = e.dataTransfer.files?.[0];
+                      if (file) void uploadAgreement(file);
+                    }}
+                    className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-sm border border-dashed p-8 text-center transition-colors ${
+                      dragging ? "border-foreground bg-muted/50" : "border-border hover:bg-muted/30"
+                    }`}
+                  >
+                    {uploading ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    ) : (
+                      <UploadCloud className="h-5 w-5 text-muted-foreground" />
+                    )}
+                    <p className="text-sm">
+                      {uploading ? "Verifying and storing…" : "Drop the counter-signed PDF here"}
+                    </p>
+                    <p className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+                      PDF only · up to 10 MB
+                    </p>
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) void uploadAgreement(file);
+                  }}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="dpa-url">Executed agreement link (external)</Label>
                 <Input
                   id="dpa-url"
                   placeholder="https://…"
