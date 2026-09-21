@@ -654,7 +654,7 @@ const TradeAdminAcquisitions = () => {
                         href={`https://instagram.com/${(lead.instagram_handle ?? "").replace(/^@+/, "")}`}
                         target="_blank"
                         rel="noreferrer noopener"
-                        className="inline-flex h-9 items-center gap-2 border border-destructive/40 px-4 text-[10px] uppercase tracking-[0.18em] text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
+                        className="inline-flex h-9 items-center gap-2 whitespace-nowrap border border-destructive/40 px-4 text-[10px] uppercase tracking-[0.18em] text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
                       >
                         <Instagram className="h-3.5 w-3.5" />
                         Route via Instagram DM
