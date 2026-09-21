@@ -36,7 +36,6 @@ const DEFAULT_STEPS: Step[] = [
 
 const STORAGE_KEY = "trade_quick_tour_step";
 export const TOUR_DONE_KEY = "trade_quick_tour_done";
-const AUTOSTART_KEY = "trade_tour_autostart_v1";
 
 export function QuickTour() {
   const navigate = useNavigate();
@@ -102,42 +101,6 @@ export function QuickTour() {
       setActive(true);
     } catch {}
   }, [STEPS.length]);
-
-  // First landing of a freshly converted Trade Member: the tour leads and Felix
-  // stays closed until it concludes. Runs at most once per member.
-  useEffect(() => {
-    if (!location.pathname.startsWith("/trade")) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        if (
-          localStorage.getItem(TOUR_DONE_KEY) ||
-          localStorage.getItem(AUTOSTART_KEY) ||
-          localStorage.getItem(STORAGE_KEY)
-        ) return;
-        // The welcome / name-your-copilot overlay leads. The tour starts the
-        // moment it completes (it dispatches trade-tour:start itself).
-        if (localStorage.getItem("ma:copilot-onboarded") !== "1") return;
-
-        const { data: sess } = await supabase.auth.getSession();
-        const uid = sess.session?.user?.id;
-        if (!uid || cancelled) return;
-        const { data } = await supabase
-          .from("profiles")
-          .select("created_at")
-          .eq("id", uid)
-          .maybeSingle();
-        const created = data?.created_at ? Date.parse(data.created_at) : NaN;
-        if (!Number.isFinite(created) || Date.now() - created > 7 * 24 * 60 * 60 * 1000) return;
-        if (cancelled) return;
-        localStorage.setItem(AUTOSTART_KEY, String(Date.now()));
-        window.dispatchEvent(new Event("trade-tour:start"));
-      } catch {
-        /* storage or session unavailable */
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [location.pathname]);
 
   // Dedup tour_step_view fires per session so refresh/back navigation don't double-count.
   const viewedStepsRef = useRef<Set<string>>(new Set());

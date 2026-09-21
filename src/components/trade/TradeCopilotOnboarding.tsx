@@ -32,8 +32,9 @@ function useOnboardingOpen(): { open: boolean; markDone: () => void } {
   const markDone = useCallback(() => {
     setOpen(false);
     try { localStorage.setItem(STORAGE_KEY, "1"); } catch {}
-    // Hand over to the guided workspace tour.
-    try { window.dispatchEvent(new Event("trade-tour:start")); } catch {}
+    // Hand over to the seven-step website presentation, not the separate
+    // page-guide tour.
+    try { window.dispatchEvent(new Event("felix-tour:start")); } catch {}
   }, []);
 
 
@@ -96,7 +97,7 @@ export default function TradeCopilotOnboarding() {
   return (
     <div
       id={OVERLAY_ID}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur-sm px-6"
+      className="fixed inset-0 z-[140] flex items-center justify-center bg-background/70 backdrop-blur-lg px-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="copilot-welcome-title"
