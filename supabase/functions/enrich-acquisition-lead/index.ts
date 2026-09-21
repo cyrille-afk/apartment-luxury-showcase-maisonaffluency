@@ -140,7 +140,8 @@ serve(async (req) => {
     "",
     "Name the aesthetic in 2-6 words (e.g. 'monastic brutalism', 'austere luxury').",
     "Phrase it in the Maison Affluency design-scholar register: materiality, provenance, craftsmanship, and historical context over lifestyle adjectives.",
-    "Then choose exactly 3 roster designers this studio would naturally specify.",
+    "For matched_designers, include a roster designer only when the supplied scraped excerpt explicitly names that designer as used, specified, installed, credited, tagged, or collaborated with by this studio.",
+    "Aesthetic compatibility is not evidence. Never infer product use or a commercial relationship. Return an empty matched_designers array when no explicit evidence is supplied.",
     "Using your knowledge base and digital mapping of the studio's name, founder, and website, locate the verified, official Instagram handle for this studio.",
     'Return it as a clean string under "instagram_handle" WITHOUT the @ prefix (e.g. "studio_handle_here"). If the studio has no verified presence, return null. Never guess a handle you are not confident is official.',
     'Reply as JSON only: {"aesthetic":"...","matched_designers":["..."],"instagram_handle":"studio_handle_here"}',
@@ -179,9 +180,11 @@ serve(async (req) => {
     const parsed = JSON.parse(raw || "{}");
     aesthetic = str(parsed?.aesthetic, 200);
     instagram = providedInstagram ?? sanitizeInstagram(parsed?.instagram_handle);
+    const sourceEvidence = snippet.toLocaleLowerCase();
     matched = (Array.isArray(parsed?.matched_designers) ? parsed.matched_designers : [])
       .map((n: unknown) => byName.get(String(n ?? "").trim().toLowerCase()))
       .filter((n: string | undefined): n is string => Boolean(n))
+      .filter((name: string) => sourceEvidence.includes(name.toLocaleLowerCase()))
       .slice(0, 3);
   } catch (e) {
     console.error(

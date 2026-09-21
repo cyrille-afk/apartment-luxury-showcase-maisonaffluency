@@ -516,7 +516,7 @@ const TradeAdminAcquisitions = () => {
                   { label: "Outreach Vector", width: "min-w-[160px] w-[12%]" },
                   { label: "Instagram", width: "min-w-[140px] w-[10%]" },
                   { label: "Aesthetic Profile", width: "min-w-[280px] w-[24%]" },
-                  { label: "Matched Designers", width: "min-w-[220px] w-[16%]" },
+                  { label: "Source-Verified Links", width: "min-w-[220px] w-[16%]" },
                   { label: "Verification", width: "min-w-[140px] w-[10%]" },
                 ].map((h) => (
                   <th
