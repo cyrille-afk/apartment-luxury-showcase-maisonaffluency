@@ -512,6 +512,13 @@
       "when": 1789951679897,
       "tag": "0072_acquisition_leads_blank_slate_matches",
       "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1789957111563,
+      "tag": "0073_trade_profiles_activation_columns",
+      "breakpoints": true
     }
   ]
 }

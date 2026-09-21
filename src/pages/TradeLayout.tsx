@@ -35,6 +35,7 @@ const AIConcierge = lazy(() => import("@/components/trade/AIConcierge").then(m =
 const QuickTour = lazy(() => import("@/components/trade/QuickTour").then(m => ({ default: m.QuickTour })));
 const BriefWizard = lazy(() => import("@/components/trade/BriefWizard").then(m => ({ default: m.BriefWizard })));
 const TradeCopilotOnboarding = lazy(() => import("@/components/trade/TradeCopilotOnboarding"));
+const ActivationWelcome = lazy(() => import("@/components/trade/ActivationWelcome"));
 
 const ROUTE_TITLES: Record<string, string> = {
   "/trade": "Dashboard",
@@ -509,6 +510,8 @@ const TradeLayout = () => {
         <CompareFab />
         <CompareDrawer />
         <AIConcierge />
+        <ActivationWelcome />
+
         <QuickTour />
         <BriefWizard />
         <BackToTopButton />

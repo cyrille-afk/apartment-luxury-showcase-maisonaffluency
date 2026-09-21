@@ -81,7 +81,7 @@ function renderTemplateA(lead: Lead, designers: string, link: string): string {
     `I have been following ${studio}&rsquo;s recent work. I am reaching out because I recently launched Maison Affluency, a global sourcing platform engineered exclusively for elite interior architects. We have unified over 170 master furniture and lighting designers under a single digital architecture${designerClause}`,
     `Unlike legacy distribution networks that rely on slow, manual paper quoting, we operate as a technology-first partner providing instant global net pricing and RAG-driven curatorial advisory directly on your private workspace.`,
     `Given the caliber of your portfolio, I have pre-approved ${studio} for full international trade status and global tax-exempt invoicing.`,
-    `You can activate your workspace instantly through your private portal key: <a href="${link}" style="color:#1A1A1A;text-decoration:underline;">${SITE}/trade-program</a>`,
+    `You can activate your workspace instantly through your private portal key: <a href="${link}" style="color:#1A1A1A;text-decoration:underline;">${SITE}/trade/activate</a>`,
     `Warm regards,<br />Cyrille Delval<br />Founder, Maison Affluency`,
   ]);
 }
@@ -254,7 +254,7 @@ serve(async (req) => {
         ? vetted
         : [row.business_email];
 
-    const link = `${SITE}/trade-program?portal=${encodeURIComponent(row.id)}`;
+    const link = `${SITE}/trade/activate?token=${encodeURIComponent(row.id)}`;
     const html =
       variant === "B"
         ? renderTemplateB(row, designers)
