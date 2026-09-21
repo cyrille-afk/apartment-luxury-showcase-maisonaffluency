@@ -298,7 +298,7 @@ const TradeAdminAcquisitions = () => {
           (result.skipped ? ` ${result.skipped} skipped.` : "") +
           (result.failed ? ` ${result.failed} failed.` : ""),
       );
-      setSelected(new Set());
+      if (!testMode) setSelected(new Set());
       window.setTimeout(() => {
         setExiting(new Set());
         queryClient.invalidateQueries({ queryKey: ["acquisition-leads", "enriched"] });
