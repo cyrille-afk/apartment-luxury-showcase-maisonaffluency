@@ -4,6 +4,7 @@ import { X, FileDown, UserPlus } from "lucide-react";
 import { createPortal } from "react-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { ensureStorageHeadroom } from "@/lib/storageReclaim";
 import { useToast } from "@/hooks/use-toast";
 
 /**
@@ -58,6 +59,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
+      ensureStorageHeadroom();
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
