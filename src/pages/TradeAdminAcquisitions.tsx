@@ -48,6 +48,45 @@ const fmtDate = (iso: string | null) =>
     ? new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
     : "—";
 
+const statusBadge = (lead: Lead) => {
+  const status = lead.campaign_status;
+  const error = lead.email_error;
+
+  if (status === "activated") {
+    return {
+      label: "Activated",
+      className:
+        "rounded-none border-emerald-500/40 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/10",
+    };
+  }
+  if (status === "sent") {
+    return {
+      label: "Sent",
+      className:
+        "rounded-none border-amber-500/40 bg-amber-500/10 text-amber-600 hover:bg-amber-500/10",
+    };
+  }
+  if (error) {
+    return {
+      label: "Send Error",
+      className:
+        "rounded-none border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/10",
+    };
+  }
+  if (status === "enriched") {
+    return {
+      label: "Enriched",
+      className:
+        "rounded-none border-blue-500/40 bg-blue-500/10 text-blue-600 hover:bg-blue-500/10",
+    };
+  }
+  return {
+    label: "Unprocessed",
+    className:
+      "rounded-none border-border bg-muted/30 text-muted-foreground hover:bg-muted/30",
+  };
+};
+
 const GENERIC_EMAIL_PREFIXES = new Set([
   "admin",
   "info",
