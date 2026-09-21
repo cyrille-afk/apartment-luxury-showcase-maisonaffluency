@@ -1816,6 +1816,13 @@ const DesignersHoverHero = () => {
     </div>
   );
 
+  const handleCurationMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!curationGridRef.current || !curationCursorRef.current) return;
+    const rect = curationGridRef.current.getBoundingClientRect();
+    curationCursorRef.current.style.left = `${e.clientX - rect.left}px`;
+    curationCursorRef.current.style.top = `${e.clientY - rect.top}px`;
+  };
+
   return (
     <section
       ref={sectionRef}
