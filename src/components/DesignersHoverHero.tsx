@@ -249,13 +249,13 @@ function DesignerGridCard({
         {showDiscoverCta && (
           <span
             aria-hidden="true"
-            className="mt-2 flex items-center gap-2 overflow-hidden text-[8px] uppercase tracking-[0.35em] font-body font-medium text-white/0 transition-all duration-500 ease-out group-hover:text-white/80"
+            className="mt-2 flex items-center gap-2 overflow-hidden text-[8px] uppercase tracking-[0.35em] font-body font-medium text-white/80 opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
           >
-            <span className="w-5 h-px bg-white/40 transition-colors duration-500 group-hover:bg-white/70" />
-            <span className="-translate-x-2 opacity-0 transition-all duration-500 ease-out delay-100 group-hover:translate-x-0 group-hover:opacity-100">
+            <span className="w-5 h-px bg-white/70" />
+            <span className="-translate-x-2 transition-transform duration-500 ease-out delay-100 group-hover:translate-x-0">
               Discover the Curation
             </span>
-            <span className="opacity-0 transition-all duration-500 ease-out delay-200 group-hover:opacity-70 group-hover:translate-x-0.5">
+            <span className="opacity-70 transition-transform duration-500 ease-out delay-200 group-hover:translate-x-0.5">
               →
             </span>
           </span>
