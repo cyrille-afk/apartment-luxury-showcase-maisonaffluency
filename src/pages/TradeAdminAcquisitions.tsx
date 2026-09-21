@@ -157,7 +157,13 @@ const TradeAdminAcquisitions = () => {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [dispatching, setDispatching] = useState(false);
-  const [testMode, setTestMode] = useState(false);
+  const [testMode, setTestMode] = useState(() => {
+    try {
+      return localStorage.getItem("ma_acquisitions_test_mode") === "true";
+    } catch {
+      return false;
+    }
+  });
   const [repairing, setRepairing] = useState(false);
   const [exiting, setExiting] = useState<Set<string>>(new Set());
   const [igFirstOnly, setIgFirstOnly] = useState(false);
@@ -272,9 +278,16 @@ const TradeAdminAcquisitions = () => {
   const toggleAll = () =>
     setSelected(allVisibleSelected ? new Set() : new Set(filtered.map((r) => r.id)));
 
+  // Persist test mode across re-renders, refetches, and execution loops.
+  useEffect(() => {
+    try {
+      localStorage.setItem("ma_acquisitions_test_mode", String(testMode));
+    } catch {}
+  }, [testMode]);
+
   const deploySequences = async () => {
     const ids = Array.from(selected);
-    if (ids.length === 0) return;
+    if (ids.length === 0 || dispatching) return;
     setDispatching(true);
     try {
       const { data, error } = await supabase.functions.invoke("dispatch-acquisition-campaign", {
@@ -289,6 +302,8 @@ const TradeAdminAcquisitions = () => {
         results: { id: string; status: string }[];
       };
 
+      // In Test Mode rows must remain visible for later production dispatch,
+      // so we never trigger the exit/slide-out animation.
       const sentIds = testMode
         ? []
         : (result.results ?? []).filter((r) => r.status === "sent").map((r) => r.id);
@@ -440,7 +455,7 @@ const TradeAdminAcquisitions = () => {
             </label>
             <Button
               onClick={deploySequences}
-              disabled={dispatching || selected.size === 0}
+              disabled={selected.size === 0}
               className="h-12 rounded-none px-6 text-[11px] uppercase tracking-[0.2em]"
             >
               {dispatching ? (
