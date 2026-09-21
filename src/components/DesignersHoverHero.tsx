@@ -163,6 +163,37 @@ function DesignerGridCard({
   const lqip = gridImageLqip(baseRaw);
   const displayName = displayDesignerName(designer.name);
   const [loaded, setLoaded] = useState(false);
+  // Native loading="lazy" is unreliable for images that mount inside an
+  // already-visible overflow container (Safari never fires the load when
+  // switching directory letters). Gate rendering on a mount-time rect check
+  // with an IntersectionObserver fallback instead.
+  const cardRef = useRef<HTMLAnchorElement>(null);
+  const [nearViewport, setNearViewport] = useState(priority);
+  useEffect(() => {
+    if (nearViewport) return;
+    const el = cardRef.current;
+    if (!el) { setNearViewport(true); return; }
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight + 600 && rect.bottom > -600) {
+      setNearViewport(true);
+      return;
+    }
+    if (typeof IntersectionObserver === "undefined") {
+      setNearViewport(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setNearViewport(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "600px 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [nearViewport]);
   const rememberLetter = () => {
     rememberDesignersAzLetter(lastNameInitial(designer.name));
   };
