@@ -2631,7 +2631,7 @@ const DesignersHoverHero = () => {
                     </div>
                   </div>
 
-                  {/* Desktop: same grouped card grid as mobile, using the designer's card photo */}
+                  {/* Desktop: use each designer's first Curators' Pick, with portrait fallback. */}
                   <div className="hidden lg:block">
                     <div className="flex flex-col pb-2">
                       {isSearching ? (
@@ -2646,7 +2646,6 @@ const DesignersHoverHero = () => {
                                 <DesignerGridCard
                                   key={d.slug}
                                   designer={d}
-                                  useCardPhoto
                                   onNavigate={() => setSearchOpen(false)}
                                 />
                               ))}
@@ -2668,7 +2667,6 @@ const DesignersHoverHero = () => {
                                   <DesignerGridCard
                                     key={d.slug}
                                     designer={d}
-                                    useCardPhoto
                                     priority={i < 8}
                                     onNavigate={() => setSearchOpen(false)}
                                   />
