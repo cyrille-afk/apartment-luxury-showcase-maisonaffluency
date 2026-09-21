@@ -210,7 +210,7 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
 /** Inline Curator Picks manager for each designer */
 const IMMEDIATE_PICK_AUTOSAVE_FIELDS = new Set<string>(["title"]);
 
-function CuratorPicksManager({ designerId, designerName }: { designerId: string; designerName?: string }) {
+function CuratorPicksManager({ designerId, designerName, designerSlug }: { designerId: string; designerName?: string; designerSlug?: string }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   type PdfEntry = { label: string; url: string; filename?: string };
@@ -270,9 +270,38 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
       return;
     }
 
-    setPicks(sortCuratorPicks((data as any[]) || []) as any);
+    let merged = ((data as any[]) || []);
+
+    // Arnold Madsen owns no picks of his own: his portrait surfaces Dagmar's
+    // pieces explicitly attributed to him (subtitle "Arnold Madsen"), so his
+    // editor mirrors those same rows from Dagmar's list (tagged "via Dagmar").
+    if (designerSlug === "arnold-madsen") {
+      const { data: dagmar } = await supabase
+        .from("designers")
+        .select("id")
+        .eq("slug", "dagmar-london")
+        .maybeSingle();
+      if (dagmar?.id) {
+        const { data: attributed } = await applyCuratorPickOrder(
+          supabase
+            .from("designer_curator_picks")
+            .select("*")
+            .eq("designer_id", dagmar.id)
+            .ilike("subtitle", "Arnold Madsen%")
+        );
+        const ownIds = new Set(merged.map((p) => p.id));
+        merged = [
+          ...merged,
+          ...(((attributed as any[]) || [])
+            .filter((p) => !ownIds.has(p.id))
+            .map((p) => ({ ...p, _via: "Dagmar" }))),
+        ];
+      }
+    }
+
+    setPicks(sortCuratorPicks(merged) as any);
     setLoaded(true);
-  }, [designerId, toast]);
+  }, [designerId, designerSlug, toast]);
 
   useEffect(() => {
     void loadPicks();
@@ -540,6 +569,9 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                 </Badge>
               )}
               {pick.category && <Badge variant="outline" className="text-[10px]">{pick.category}</Badge>}
+              {(pick as any)._via && (
+                <Badge variant="outline" className="text-[10px]">via {(pick as any)._via}</Badge>
+              )}
               {(() => {
                 const idx = picks.findIndex((p) => p.id === pick.id);
                 return (
@@ -2831,7 +2863,7 @@ const TradeDesignersAdmin = () => {
                       />
 
                       {/* Curator Picks */}
-                      <CuratorPicksManager designerId={d.id} designerName={d.name} />
+                      <CuratorPicksManager designerId={d.id} designerName={d.name} designerSlug={(d as any).slug} />
 
                       <div className="flex items-center gap-3 flex-wrap">
                         <div className="flex items-center gap-2">
