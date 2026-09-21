@@ -9149,8 +9149,11 @@ export type Database = {
       }
       trade_profiles: {
         Row: {
+          activated_from_lead_id: string | null
+          approval_status: string
           created_at: string
           id: string
+          tax_exempt_status: boolean
           updated_at: string
           user_id: string
           vat_company_name: string | null
@@ -9159,8 +9162,11 @@ export type Database = {
           vat_valid_status: boolean | null
         }
         Insert: {
+          activated_from_lead_id?: string | null
+          approval_status?: string
           created_at?: string
           id?: string
+          tax_exempt_status?: boolean
           updated_at?: string
           user_id: string
           vat_company_name?: string | null
@@ -9169,8 +9175,11 @@ export type Database = {
           vat_valid_status?: boolean | null
         }
         Update: {
+          activated_from_lead_id?: string | null
+          approval_status?: string
           created_at?: string
           id?: string
+          tax_exempt_status?: boolean
           updated_at?: string
           user_id?: string
           vat_company_name?: string | null
