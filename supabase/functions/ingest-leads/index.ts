@@ -322,7 +322,7 @@ serve(async (req) => {
       enrichment_provider: b.enrichmentProvider,
       aesthetic_profile: aesthetic,
       aesthetic_score: score,
-      predicted_designer_matches: matched.length ? matched : null,
+      predicted_designer_matches: matched,
       last_ingested_at: new Date().toISOString(),
       ...(b.country ? { country: b.country } : {}),
       ...(b.city ? { city: b.city } : {}),
