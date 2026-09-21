@@ -81,7 +81,7 @@ function supabaseTransform(src: string, width: number, quality = 65): string {
 function gridImageTransform(src: string | null | undefined, width = 600): string | undefined {
   if (!src) return undefined;
   if (isCloudinaryUpload(src)) {
-    const h = Math.round((width * 4) / 3);
+    const h = Math.round((width * 5) / 4);
     return src.replace(
       "/image/upload/",
       `/image/upload/w_${width},h_${h},c_pad,g_center,b_auto,q_auto:eco,f_auto/`
