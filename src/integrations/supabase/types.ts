@@ -88,7 +88,7 @@ export type Database = {
           instagram_handle: string | null
           last_ingested_at: string | null
           linkedin_url: string | null
-          predicted_designer_matches: string[] | null
+          predicted_designer_matches: string[]
           source_index: string | null
           studio_name: string
           tagged_designer: string | null
@@ -114,7 +114,7 @@ export type Database = {
           instagram_handle?: string | null
           last_ingested_at?: string | null
           linkedin_url?: string | null
-          predicted_designer_matches?: string[] | null
+          predicted_designer_matches?: string[]
           source_index?: string | null
           studio_name: string
           tagged_designer?: string | null
@@ -140,7 +140,7 @@ export type Database = {
           instagram_handle?: string | null
           last_ingested_at?: string | null
           linkedin_url?: string | null
-          predicted_designer_matches?: string[] | null
+          predicted_designer_matches?: string[]
           source_index?: string | null
           studio_name?: string
           tagged_designer?: string | null
