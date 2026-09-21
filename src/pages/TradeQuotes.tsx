@@ -72,7 +72,7 @@ const TradeQuotes = () => {
     // List view only needs the card fields — never the full 50-column row.
     let query = supabase
       .from("trade_quotes")
-      .select("id, user_id, status, notes, submitted_at, created_at, updated_at, project_id, studio_id")
+      .select("id, user_id, status, notes, submitted_at, created_at, updated_at, project_id, studio_id, currency")
       .order("created_at", { ascending: false });
     
     // Scope to current studio so all teammates see each other's work.
