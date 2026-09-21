@@ -439,8 +439,36 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
             </div>
           </div>
 
+          {igWithImages.length > 0 && (
+            <div className="mt-10 pt-6 border-t border-neutral-100 w-full flex flex-col">
+              <div className="flex gap-2.5 items-center h-16 md:h-20 overflow-hidden flex-shrink-0">
+                {igWithImages.slice(0, 6).map((post) => (
+                  <a
+                    key={post.id}
+                    href={post.post_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative block h-full aspect-square flex-shrink-0 overflow-hidden bg-[hsl(var(--canvas))]"
+                  >
+                    <CldPicture
+                      src={post.image_url!}
+                      alt={post.caption || `${displayName} — From the Studio`}
+                      className="h-full w-full object-contain object-center transition-transform duration-700 ease-out scale-[1.15] group-hover:scale-[1.22]" />
+                    <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
+                      <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </div>
+                  </a>
+                ))}
+              </div>
+              <span className="inline-flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.18em] text-neutral-400 font-normal mt-3 md:mt-4">
+                <Instagram className="w-3.5 h-3.5" strokeWidth={1.5} />
+                From the Studio
+              </span>
+            </div>
+          )}
+
           {/* Full-width Curators' Picks — independent from either hero column */}
-          <div className="mt-4 w-full">
+          <div className="mt-8 w-full">
             {renderCuratorsPicksSection({
               barClassName: "flex justify-between items-center w-full border-b border-neutral-100 py-2 mt-2 mb-3 text-[11px] uppercase tracking-widest text-neutral-800",
               titleClassName: "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-800",
@@ -548,6 +576,40 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
               </button>
             </div>
 
+            {igWithImages.length > 0 && (
+              <div className="mt-16 pt-8 border-t border-border/30">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-px flex-1 bg-foreground/15" />
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Instagram className="w-3.5 h-3.5 text-foreground/60" />
+                    <span className="font-display text-[10px] md:text-[11px] tracking-[0.2em] uppercase text-foreground/60 font-semibold">
+                      From the Studio
+                    </span>
+                  </div>
+                  <div className="h-px flex-1 bg-foreground/15" />
+                </div>
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-1">
+                  {igWithImages.slice(0, 6).map((post, index) => (
+                    <a
+                      key={post.id}
+                      href={post.post_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`group relative block aspect-square overflow-hidden bg-muted ${index >= 3 ? "hidden md:block" : ""}`}
+                    >
+                      <CldPicture
+                        src={post.image_url!}
+                        alt={post.caption || `${displayName} — From the Studio`}
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out scale-[1.15] group-hover:scale-[1.22]" />
+                      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
+                        <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
           </motion.div>
         </div>
       </section>
@@ -567,43 +629,6 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
       )}>
         {renderCuratorsPicksSection()}
       </section>
-
-      {/* From the Studio — moved below Curators' Picks */}
-      {igWithImages.length > 0 && (
-        <section className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 pb-10 md:pb-24">
-          <div className="pt-8 border-t border-border/30">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-px flex-1 bg-foreground/15" />
-              <div className="flex items-center gap-2 shrink-0">
-                <Instagram className="w-3.5 h-3.5 text-foreground/60" />
-                <span className="font-display text-[10px] md:text-[11px] tracking-[0.2em] uppercase text-foreground/60 font-semibold">
-                  From the Studio
-                </span>
-              </div>
-              <div className="h-px flex-1 bg-foreground/15" />
-            </div>
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-1">
-              {igWithImages.slice(0, 6).map((post, index) => (
-                <a
-                  key={post.id}
-                  href={post.post_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`group relative block aspect-square overflow-hidden bg-muted ${index >= 3 ? "hidden md:block" : ""}`}
-                >
-                  <CldPicture
-                    src={post.image_url!}
-                    alt={post.caption || `${displayName} — From the Studio`}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out scale-[1.15] group-hover:scale-[1.22]" />
-                  <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
-                    <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       <PublicProductLightbox
         product={lightboxItem}
