@@ -173,11 +173,7 @@ const DesignerAssignSelect = ({ leadId, studioName, value, onChange }: Props) =>
               <ChevronDown className="h-3 w-3" />
             </button>
           </PopoverTrigger>
-          <PopoverContent
-            align="start"
-            className="w-64 rounded-none border-border p-0"
-            onPointerDownOutside={() => setOpen(false)}
-          >
+          <PopoverContent align="start" className="w-64 rounded-none border-border p-0">
             <div className="flex flex-col bg-popover">
               {/* Sticky search */}
               <div className="sticky top-0 z-10 border-b border-border bg-popover p-2">
