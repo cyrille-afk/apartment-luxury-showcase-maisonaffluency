@@ -173,7 +173,7 @@ const TradeAdminAcquisitions = () => {
         .select(
           "id, studio_name, founder_name, business_email, website_url, source_index, aesthetic_profile, predicted_designer_matches, campaign_status, verified_at, email_sent_at, email_error, created_at, country, city, instagram_handle, executive_emails",
         )
-        .eq("campaign_status", "enriched")
+        .in("campaign_status", ["unprocessed", "enriched"])
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
