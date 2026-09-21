@@ -5,7 +5,7 @@
  * `predicted_designer_matches` array for that lead immediately — no save step,
  * no dialog. A discreet "✓ Assigned" marker confirms and fades.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronDown, X } from "lucide-react";
 import { toast } from "sonner";
