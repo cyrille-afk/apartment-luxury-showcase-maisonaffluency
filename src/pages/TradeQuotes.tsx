@@ -56,6 +56,9 @@ const TradeQuotes = () => {
   const designerLabel = useDesignerDisplayName(designerFilter);
   const [projectFilterName, setProjectFilterName] = useState<string | null>(null);
   const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [metrics, setMetrics] = useState<{ currency: string; committed: number; escrowed: number; outstanding: number }>({
+    currency: "EUR", committed: 0, escrowed: 0, outstanding: 0,
+  });
   const [matchingQuoteIds, setMatchingQuoteIds] = useState<Set<string> | null>(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
