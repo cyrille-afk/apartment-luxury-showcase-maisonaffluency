@@ -266,6 +266,7 @@ function DesignerGridCard({
             loaded ? "opacity-100" : "opacity-0"
           )}
         />
+        ) : null
       ) : (
         <span className="absolute inset-0 flex items-center justify-center text-white/30">
           <ImageIcon className="h-8 w-8" aria-hidden />
