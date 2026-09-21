@@ -454,7 +454,7 @@ const TradeAdminAcquisitions = () => {
               </button>
             </label>
             <Button
-              onClick={deploySequences}
+              onClick={() => deploySequences()}
               disabled={selected.size === 0}
               className="h-12 rounded-none px-6 text-[11px] uppercase tracking-[0.2em]"
             >
