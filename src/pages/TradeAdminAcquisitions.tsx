@@ -251,6 +251,14 @@ const TradeAdminAcquisitions = () => {
     );
   };
 
+  // Editable aesthetic profile: reflect the write in the cached rows so the
+  // cell stays consistent without a full refetch.
+  const applyAesthetic = (id: string, next: string | null) => {
+    queryClient.setQueryData<Lead[]>(["acquisition-leads", "enriched"], (prev) =>
+      (prev ?? []).map((r) => (r.id === id ? { ...r, aesthetic_profile: next } : r)),
+    );
+  };
+
   const toggle = (id: string) =>
     setSelected((prev) => {
       const next = new Set(prev);
