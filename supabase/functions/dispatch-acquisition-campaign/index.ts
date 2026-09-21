@@ -72,36 +72,26 @@ function shell(paragraphs: string[], link: string = SITE): string {
   </div>`;
 }
 
-/** Template A — automated direct access (high-confidence profiles). */
+/** Maison Affluency priority trade invitation. */
 function renderTemplateA(lead: Lead, designers: string, link: string): string {
   const studio = esc(lead.studio_name);
   const designerClause = designers
-    ? `&mdash;including direct, friction-free access to pieces by ${designers}.`
-    : ".";
+    ? `Given the caliber of your work, we have already indexed direct access to pieces from creators like ${designers} specifically aligned with your aesthetic.`
+    : `Given the caliber of your work, we have already indexed direct access to exceptional pieces specifically aligned with your aesthetic.`;
   return shell([
-    `Dear ${esc(lead.founder_name || "Studio Director")},`,
-    `I have been following ${studio}&rsquo;s recent work. I am reaching out because I recently launched Maison Affluency, a global sourcing platform engineered exclusively for elite interior architects. We have unified over 170 master furniture and lighting designers under a single digital architecture${designerClause}`,
-    `Unlike legacy distribution networks that rely on slow, manual paper quoting, we operate as a technology-first partner providing instant global net pricing and RAG-driven curatorial advisory directly on your private workspace.`,
-    `Given the caliber of your portfolio, I have pre-approved ${studio} for full international trade status and global tax-exempt invoicing.`,
-    `You can activate your workspace instantly through your private portal key: <a href="${link}" style="color:#1A1A1A;text-decoration:underline;text-underline-offset:3px;">${SITE}/trade/activate</a>`,
+    `Dear Team at ${studio},`,
+    `I have been closely following your studio&rsquo;s footprint, particularly your focus on sourcing exceptional pieces for your portfolio.`,
+    `We recently launched Maison Affluency&mdash;a dedicated, technology-first sourcing platform built strictly for elite interior architects. Our focus is eliminating the slow, manual paper quoting legacy networks rely on, replacing it with instant global net pricing and dedicated curatorial advisory tailored to your project workspaces.`,
+    `We have unified over 170 master furniture and lighting designers under a single architecture. ${designerClause}`,
+    `We would love to extend full international trade status and seamless global invoicing privileges to your firm.`,
+    `If you are open to it, I would be delighted to host a brief 5-minute walkthrough of the portal for your principal team, or I can send over our <a href="${link}" style="color:#1A1A1A;text-decoration:underline;text-underline-offset:3px;">private credential key</a> directly to this email.`,
     `Warm regards,<br />Cyrille Delval<br />Founder, Maison Affluency`,
   ], link);
 }
 
 /** Template B — personal savant override (hand-curated triage). */
 function renderTemplateB(lead: Lead, designers: string, link: string = SITE): string {
-  const studio = esc(lead.studio_name);
-  const designerClause = designers
-    ? `, including direct, friction-free access to pieces by ${designers}.`
-    : ".";
-  return shell([
-    `Dear ${esc(lead.founder_name || "Studio Director")},`,
-    `I personally reviewed your studio&rsquo;s portfolio today and wanted to welcome you to the Maison Affluency global trade program. The caliber of work coming out of ${studio} is exceptional, and it is a privilege to partner with you.`,
-    `Your trade status has been finalized. Net professional pricing is now unlocked globally across our portfolio of 170+ master designers${designerClause}`,
-    `As a designer myself, I built Maison Affluency to solve the friction of elite sourcing. I highly recommend utilizing our integrated AI Curatorial Guide for your current mood boards. I have trained the engine with deep design syntax, allowing it to interpret complex architectural context and track down highly specific collector pieces across global supply chains in seconds.`,
-    `Should you or your team ever need direct concierge support for a high-net-worth residential commission, simply reply directly to this message.`,
-    `Sincerely,<br />Cyrille Delval<br />Founder, Maison Affluency`,
-  ], link);
+  return renderTemplateA(lead, designers, link);
 }
 
 function renderLegacyInvitation(lead: Lead, roster: Map<string, string>): string {
@@ -261,10 +251,7 @@ serve(async (req) => {
       variant === "B"
         ? renderTemplateB(row, designers, link)
         : renderTemplateA(row, designers, link);
-    const baseSubject =
-      variant === "B"
-        ? "Personal Welcome to the Maison Affluency Trade Program"
-        : `Sourcing framework for ${row.studio_name} / Maison Affluency`;
+    const baseSubject = `Priority trade access for ${row.studio_name} / Maison Affluency`;
     const subject = testMode ? `[TEST-MODE] ${baseSubject}` : baseSubject;
 
     const outcome = await sendLovableEmail(
