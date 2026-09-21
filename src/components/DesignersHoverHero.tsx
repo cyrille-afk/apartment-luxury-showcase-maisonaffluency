@@ -19,7 +19,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import SilentLink from "@/components/SilentLink";
-import { Search, X, ImageIcon } from "lucide-react";
+import { Search, X, ImageIcon, ArrowRight } from "lucide-react";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
@@ -284,14 +284,16 @@ function DesignerGridCard({
         {showDiscoverCta && (
           <span
             aria-hidden="true"
-            className="mt-2 flex items-center gap-2 overflow-hidden text-[8px] uppercase tracking-[0.35em] font-body font-medium text-white/80 opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
+            className="mt-2 inline-flex overflow-hidden text-[8px] uppercase tracking-[0.35em] font-body font-medium text-white/80 opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
           >
-            <span className="w-5 h-px bg-white/70" />
-            <span className="-translate-x-2 transition-transform duration-500 ease-out delay-100 group-hover:translate-x-0">
-              Discover the Curation
-            </span>
-            <span className="opacity-70 transition-transform duration-500 ease-out delay-200 group-hover:translate-x-0.5">
-              →
+            <span className="relative inline-flex items-center whitespace-nowrap pl-0 pr-14 transition-[padding] duration-300 group-hover:pl-20 group-hover:pr-0">
+              <span className="pointer-events-none absolute left-0 top-1/2 h-px w-12 translate-x-2 -translate-y-1/2 bg-current opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
+              <span className="relative z-10">Discover the Curation</span>
+              <span className="pointer-events-none absolute right-5 top-1/2 h-px w-8 -translate-y-1/2 bg-current opacity-100 transition-all duration-300 group-hover:translate-x-6 group-hover:opacity-0" />
+              <ArrowRight
+                className="pointer-events-none absolute right-0 top-1/2 h-3.5 w-3.5 -translate-y-1/2 transition-all duration-300 group-hover:-translate-x-1 group-hover:opacity-0"
+                strokeWidth={1.25}
+              />
             </span>
           </span>
         )}
