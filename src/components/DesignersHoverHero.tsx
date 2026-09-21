@@ -84,7 +84,7 @@ function gridImageTransform(src: string | null | undefined, width = 600): string
     const h = Math.round((width * 4) / 3);
     return src.replace(
       "/image/upload/",
-      `/image/upload/w_${width},h_${h},c_fill,g_auto,q_auto:eco,f_auto/`
+      `/image/upload/w_${width},h_${h},c_pad,g_center,b_auto,q_auto:eco,f_auto/`
     );
   }
   if (isSupabaseObject(src)) return supabaseTransform(src, width, 65);
@@ -111,7 +111,7 @@ function gridImageLqip(src: string | null | undefined): string | undefined {
   if (isCloudinaryUpload(src)) {
     return src.replace(
       "/image/upload/",
-      "/image/upload/w_24,h_30,c_fill,g_auto,q_auto:low,e_blur:400,f_auto/"
+      "/image/upload/w_24,h_30,c_pad,g_center,b_auto,q_auto:low,e_blur:400,f_auto/"
     );
   }
   if (isSupabaseObject(src)) return supabaseTransform(src, 24, 30);
