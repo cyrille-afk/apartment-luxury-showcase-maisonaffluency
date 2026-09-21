@@ -594,7 +594,10 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
             ? makeSwatchAxisFilter(topOptions)
             : undefined
         }
-        showUpholsterySection={isProductUpholstered(product)}
+        showUpholsterySection={
+          isProductUpholstered(product)
+          && (!isDualAxis || isUpholsteryAxisLabel(baseAxisLabelRaw) || isUpholsteryAxisLabel(topAxisLabelRaw))
+        }
         showWoodSection
         onHasFabricsChange={setHasLinkedFabrics}
         onWoodFinishesAvailable={setLinkedWoodFinishes}
