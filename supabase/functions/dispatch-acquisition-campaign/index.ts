@@ -48,7 +48,11 @@ function renderInvitation(lead: Lead, roster: Map<string, string>): string {
   const greeting = lead.founder_name
     ? `Dear ${esc(lead.founder_name)}`
     : "Dear Studio Director";
-  const matches = (lead.predicted_designer_matches ?? []).slice(0, 3);
+  // Manual curatorial assignment is authoritative: inject exactly the
+  // designers selected on the lead, in order, with no cap.
+  const matches = (lead.predicted_designer_matches ?? [])
+    .map((n) => String(n ?? "").trim())
+    .filter(Boolean);
 
   const designerBlocks = matches
     .map((name) => {

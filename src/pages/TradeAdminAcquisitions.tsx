@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import DesignerAssignSelect from "@/components/trade/DesignerAssignSelect";
 import { AlertTriangle, ExternalLink, Instagram, Loader2, Mail, Send, ShieldAlert, Sparkles } from "lucide-react";
 
 type Lead = {
@@ -172,7 +173,7 @@ const TradeAdminAcquisitions = () => {
         .select(
           "id, studio_name, founder_name, business_email, website_url, source_index, aesthetic_profile, predicted_designer_matches, campaign_status, verified_at, email_sent_at, email_error, created_at, country, city, instagram_handle, executive_emails",
         )
-        .eq("campaign_status", "enriched")
+        .in("campaign_status", ["unprocessed", "enriched"])
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
@@ -240,6 +241,14 @@ const TradeAdminAcquisitions = () => {
         .some((v) => String(v).toLowerCase().includes(q));
     });
   }, [rows, search, activeCountry, activeCity, igFirstOnly]);
+
+  // Manual curatorial assignment: reflect the write in the cached rows so the
+  // grid never flickers or waits for a refetch.
+  const applyMatches = (id: string, next: string[]) => {
+    queryClient.setQueryData<Lead[]>(["acquisition-leads", "enriched"], (prev) =>
+      (prev ?? []).map((r) => (r.id === id ? { ...r, predicted_designer_matches: next } : r)),
+    );
+  };
 
   const toggle = (id: string) =>
     setSelected((prev) => {
@@ -633,21 +642,12 @@ const TradeAdminAcquisitions = () => {
                     {lead.aesthetic_profile ?? "—"}
                   </td>
                   <td className="px-5 py-6">
-                    <div className="flex flex-wrap gap-2">
-                      {(lead.predicted_designer_matches ?? []).length === 0 && (
-                        <span className="text-sm text-muted-foreground">—</span>
-                      )}
-                      {(lead.predicted_designer_matches ?? []).map((name) => (
-                        <Badge
-                          key={name}
-                          variant="outline"
-                          className="rounded-none border-border text-[11px] font-normal"
-                        >
-                          <Sparkles className="mr-1 h-3 w-3" />
-                          {name}
-                        </Badge>
-                      ))}
-                    </div>
+                    <DesignerAssignSelect
+                      leadId={lead.id}
+                      studioName={lead.studio_name}
+                      value={lead.predicted_designer_matches ?? []}
+                      onChange={(next) => applyMatches(lead.id, next)}
+                    />
                   </td>
                   <td className="px-5 py-6">
                     <Badge
