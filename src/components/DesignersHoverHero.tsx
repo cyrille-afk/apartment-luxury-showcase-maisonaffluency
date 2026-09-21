@@ -142,12 +142,15 @@ function DesignerGridCard({
   onNavigate,
   priority = false,
   useCardPhoto = false,
+  showDiscoverCta = false,
 }: {
   designer: { slug: string; name: string; first_pick_image_url?: string | null; hero_image_url: string | null; image_url: string | null };
   onNavigate?: () => void;
   priority?: boolean;
   /** Use the designer's own card photo (studio/portrait) instead of the first curator pick. */
   useCardPhoto?: boolean;
+  /** Desktop directory grid: reveal a "Discover the Curation" label under the name on hover. */
+  showDiscoverCta?: boolean;
 }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -243,6 +246,20 @@ function DesignerGridCard({
         <span className="block font-serif text-sm leading-tight text-white drop-shadow-[0_1px_4px_rgba(0,0,0,1)]">
           {displayName}
         </span>
+        {showDiscoverCta && (
+          <span
+            aria-hidden="true"
+            className="mt-2 flex items-center gap-2 overflow-hidden text-[8px] uppercase tracking-[0.35em] font-body font-medium text-white/80 opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
+          >
+            <span className="w-5 h-px bg-white/70" />
+            <span className="-translate-x-2 transition-transform duration-500 ease-out delay-100 group-hover:translate-x-0">
+              Discover the Curation
+            </span>
+            <span className="opacity-70 transition-transform duration-500 ease-out delay-200 group-hover:translate-x-0.5">
+              →
+            </span>
+          </span>
+        )}
       </div>
     </SilentLink>
   );
@@ -747,9 +764,6 @@ const DesignersHoverHero = () => {
   const suppressNavClickRef = useRef(false);
   const portalRef = useRef<HTMLAnchorElement>(null);
   const portalCursorRef = useRef<HTMLDivElement>(null);
-  const curationGridRef = useRef<HTMLDivElement>(null);
-  const curationCursorRef = useRef<HTMLDivElement>(null);
-  const [showCurationCursor, setShowCurationCursor] = useState(false);
 
   const activeSlugRef = useRef<string | null>(null);
   useEffect(() => {
@@ -1816,12 +1830,6 @@ const DesignersHoverHero = () => {
     </div>
   );
 
-  const handleCurationMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!curationGridRef.current || !curationCursorRef.current) return;
-    const rect = curationGridRef.current.getBoundingClientRect();
-    curationCursorRef.current.style.left = `${e.clientX - rect.left}px`;
-    curationCursorRef.current.style.top = `${e.clientY - rect.top}px`;
-  };
 
   return (
     <section
@@ -2642,13 +2650,7 @@ const DesignersHoverHero = () => {
                   </div>
 
                   {/* Desktop: use each designer's first Curators' Pick, with portrait fallback. */}
-                  <div
-                    ref={curationGridRef}
-                    onMouseEnter={() => setShowCurationCursor(true)}
-                    onMouseLeave={() => setShowCurationCursor(false)}
-                    onMouseMove={handleCurationMove}
-                    className="relative hidden lg:block cursor-none group"
-                  >
+                  <div className="relative hidden lg:block">
                     <div className="flex flex-col pb-2">
                       {isSearching ? (
                         flatResults.length === 0 ? (
@@ -2662,6 +2664,7 @@ const DesignersHoverHero = () => {
                                 <DesignerGridCard
                                   key={d.slug}
                                   designer={d}
+                                  showDiscoverCta
                                   onNavigate={() => setSearchOpen(false)}
                                 />
                               ))}
@@ -2684,6 +2687,7 @@ const DesignersHoverHero = () => {
                                     key={d.slug}
                                     designer={d}
                                     priority={i < 8}
+                                    showDiscoverCta
                                     onNavigate={() => setSearchOpen(false)}
                                   />
                                 ))}
@@ -2692,23 +2696,6 @@ const DesignersHoverHero = () => {
                           );
                         })()
                       )}
-                    </div>
-
-                    {/* Kinetic "Discover Curation" cursor — follows the mouse over the desktop directory grid */}
-                    <div
-                      ref={curationCursorRef}
-                      className={cn(
-                        "absolute pointer-events-none z-50 transition-opacity duration-300 ease-out",
-                        showCurationCursor ? "opacity-100" : "opacity-0"
-                      )}
-                      style={{ transform: "translate(-50%, -50%)" }}
-                    >
-                      <div className="relative w-20 h-20 rounded-full bg-black/25 backdrop-blur-md border border-white/15 flex flex-col items-center justify-center shadow-2xl transition-transform duration-500 ease-out scale-[0.72] group-hover:scale-100">
-                        <div className="absolute inset-1.5 rounded-full border border-dashed border-white/10 animate-[spin_20s_linear_infinite]" />
-                        <span className="font-serif italic text-white text-[11px] tracking-[0.2em]">Discover</span>
-                        <div className="w-5 h-px bg-white/40 my-1" />
-                        <span className="text-white/40 text-[7px] uppercase tracking-[0.3em] font-body">Curation</span>
-                      </div>
                     </div>
                   </div>
 
