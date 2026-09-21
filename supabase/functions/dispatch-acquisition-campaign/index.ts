@@ -218,47 +218,83 @@ serve(async (req) => {
 
   const results: { id: string; studio: string; status: string; reason?: string }[] = [];
 
+  // Test mode routes every message to the signed-in admin and never stamps
+  // the row as sent, so the lead stays live for production deployment.
+  const testMode = body.testMode === true;
+  const adminEmail = String((auth.claims as { email?: unknown }).email ?? "").trim();
+  if (testMode && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(adminEmail)) {
+    return json({ error: "No admin email on this session for test mode" }, 400);
+  }
+  const variant = body.variant === "B" ? "B" : "A";
+
   for (const row of (data ?? []) as Lead[]) {
-    if ((row.campaign_status === "sent" || row.campaign_status === "converted") && !body.resend) {
+    if (
+      !testMode &&
+      (row.campaign_status === "sent" || row.campaign_status === "converted") &&
+      !body.resend
+    ) {
       results.push({ id: row.id, studio: row.studio_name, status: "skipped", reason: "already_sent" });
       continue;
     }
-    const matches = Array.isArray(row.predicted_designer_matches)
+    const matches = (Array.isArray(row.predicted_designer_matches)
       ? row.predicted_designer_matches
-      : [];
-    if (matches.length === 0) {
-      results.push({ id: row.id, studio: row.studio_name, status: "skipped", reason: "not_enriched" });
-      continue;
-    }
+      : [])
+      .map((n) => String(n ?? "").trim())
+      .filter(Boolean);
+    const designers = designerString(matches);
+    void roster;
 
     // Executive-vetted contacts win over the generic studio catch-all.
     const vetted = (Array.isArray(row.executive_emails) ? row.executive_emails : [])
       .map((e) => String(e ?? "").trim())
       .filter((e) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e));
-    const recipients = vetted.length > 0 ? vetted : [row.business_email];
+    const recipients = testMode
+      ? [adminEmail]
+      : vetted.length > 0
+        ? vetted
+        : [row.business_email];
+
+    const link = `${SITE}/trade-program?portal=${encodeURIComponent(row.id)}`;
+    const html =
+      variant === "B"
+        ? renderTemplateB(row, designers)
+        : renderTemplateA(row, designers, link);
+    const baseSubject =
+      variant === "B"
+        ? "Personal Welcome to the Maison Affluency Trade Program"
+        : `Sourcing framework for ${row.studio_name} / Maison Affluency`;
+    const subject = testMode ? `[TEST-MODE] ${baseSubject}` : baseSubject;
 
     const outcome = await sendLovableEmail(
       {
         to: recipients,
-        subject: `${row.studio_name}: an invitation to the Maison Affluency trade house`,
-        html: renderInvitation(row, roster),
+        subject,
+        html,
         label: "acquisition-trade-invitation",
-        idempotencyKey: `acquisition-invite-${row.id}`,
+        idempotencyKey: testMode
+          ? `acquisition-invite-test-${row.id}-${Date.now()}`
+          : `acquisition-invite-${variant}-${row.id}`,
         replyTo: "cyrille@maisonaffluency.com",
       },
       supabase,
     );
 
     if (outcome.queued.length > 0) {
-      await supabase
-        .from("acquisition_leads")
-        .update({
-          campaign_status: "sent",
-          email_sent_at: new Date().toISOString(),
-          email_error: null,
-        })
-        .eq("id", row.id);
-      results.push({ id: row.id, studio: row.studio_name, status: "sent" });
+      if (!testMode) {
+        await supabase
+          .from("acquisition_leads")
+          .update({
+            campaign_status: "sent",
+            email_sent_at: new Date().toISOString(),
+            email_error: null,
+          })
+          .eq("id", row.id);
+      }
+      results.push({
+        id: row.id,
+        studio: row.studio_name,
+        status: testMode ? "test_sent" : "sent",
+      });
     } else {
       const reason = outcome.suppressed.length
         ? "suppressed"
