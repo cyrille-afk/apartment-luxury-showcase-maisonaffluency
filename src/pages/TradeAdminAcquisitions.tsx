@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import DesignerAssignSelect from "@/components/trade/DesignerAssignSelect";
 import { AlertTriangle, ExternalLink, Instagram, Loader2, Mail, Send, ShieldAlert, Sparkles } from "lucide-react";
 
 type Lead = {
@@ -240,6 +241,14 @@ const TradeAdminAcquisitions = () => {
         .some((v) => String(v).toLowerCase().includes(q));
     });
   }, [rows, search, activeCountry, activeCity, igFirstOnly]);
+
+  // Manual curatorial assignment: reflect the write in the cached rows so the
+  // grid never flickers or waits for a refetch.
+  const applyMatches = (id: string, next: string[]) => {
+    queryClient.setQueryData<Lead[]>(["acquisition-leads", "enriched"], (prev) =>
+      (prev ?? []).map((r) => (r.id === id ? { ...r, predicted_designer_matches: next } : r)),
+    );
+  };
 
   const toggle = (id: string) =>
     setSelected((prev) => {
