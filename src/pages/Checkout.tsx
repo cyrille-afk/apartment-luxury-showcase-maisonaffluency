@@ -2229,14 +2229,21 @@ export default function Checkout() {
    * Above a typical corporate card ceiling we lead with bank transfer and
    * offer a deposit plan, rather than letting the buyer meet a decline.
    */
-  const highValue = isHighValueOrder(summary.displayTotalCents, summary.currency);
-  const purchaseOrderEligible = isUkCorporatePurchaseOrderEligible({
-    totalCents: summary.displayTotalCents,
-    currency: summary.currency,
-    destinationCountry: summary.taxCountry,
-    buyerType,
-    tradeApproved,
-  });
+  // `summary` is null until the basket and FX have hydrated, so every read
+  // here must tolerate that first render — otherwise checkout throws before
+  // the payment form can mount.
+  const highValue = summary
+    ? isHighValueOrder(summary.displayTotalCents, summary.currency)
+    : false;
+  const purchaseOrderEligible = summary
+    ? isUkCorporatePurchaseOrderEligible({
+        totalCents: summary.displayTotalCents,
+        currency: summary.currency,
+        destinationCountry: summary.taxCountry,
+        buyerType,
+        tradeApproved,
+      })
+    : false;
   const [depositPct, setDepositPct] = useState<DepositPct>(0);
   const routedHighValue = useRef(false);
   useEffect(() => {
