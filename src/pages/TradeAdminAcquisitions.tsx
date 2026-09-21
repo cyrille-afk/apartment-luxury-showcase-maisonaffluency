@@ -633,21 +633,12 @@ const TradeAdminAcquisitions = () => {
                     {lead.aesthetic_profile ?? "—"}
                   </td>
                   <td className="px-5 py-6">
-                    <div className="flex flex-wrap gap-2">
-                      {(lead.predicted_designer_matches ?? []).length === 0 && (
-                        <span className="text-sm text-muted-foreground">—</span>
-                      )}
-                      {(lead.predicted_designer_matches ?? []).map((name) => (
-                        <Badge
-                          key={name}
-                          variant="outline"
-                          className="rounded-none border-border text-[11px] font-normal"
-                        >
-                          <Sparkles className="mr-1 h-3 w-3" />
-                          {name}
-                        </Badge>
-                      ))}
-                    </div>
+                    <DesignerAssignSelect
+                      leadId={lead.id}
+                      studioName={lead.studio_name}
+                      value={lead.predicted_designer_matches ?? []}
+                      onChange={(next) => applyMatches(lead.id, next)}
+                    />
                   </td>
                   <td className="px-5 py-6">
                     <Badge
