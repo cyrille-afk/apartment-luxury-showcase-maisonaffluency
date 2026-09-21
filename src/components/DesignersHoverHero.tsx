@@ -2678,23 +2678,6 @@ const DesignersHoverHero = () => {
                         })()
                       )}
                     </div>
-
-                    {/* Kinetic "Discover Curation" cursor — follows the mouse over the desktop directory grid */}
-                    <div
-                      ref={curationCursorRef}
-                      className={cn(
-                        "absolute pointer-events-none z-50 transition-opacity duration-300 ease-out",
-                        showCurationCursor ? "opacity-100" : "opacity-0"
-                      )}
-                      style={{ transform: "translate(-50%, -50%)" }}
-                    >
-                      <div className="relative w-20 h-20 rounded-full bg-black/25 backdrop-blur-md border border-white/15 flex flex-col items-center justify-center shadow-2xl transition-transform duration-500 ease-out scale-[0.72] group-hover:scale-100">
-                        <div className="absolute inset-1.5 rounded-full border border-dashed border-white/10 animate-[spin_20s_linear_infinite]" />
-                        <span className="font-serif italic text-white text-[11px] tracking-[0.2em]">Discover</span>
-                        <div className="w-5 h-px bg-white/40 my-1" />
-                        <span className="text-white/40 text-[7px] uppercase tracking-[0.3em] font-body">Curation</span>
-                      </div>
-                    </div>
                   </div>
 
                 </>
