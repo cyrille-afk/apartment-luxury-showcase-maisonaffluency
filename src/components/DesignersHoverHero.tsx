@@ -2664,6 +2664,7 @@ const DesignersHoverHero = () => {
                                 <DesignerGridCard
                                   key={d.slug}
                                   designer={d}
+                                  showDiscoverCta
                                   onNavigate={() => setSearchOpen(false)}
                                 />
                               ))}
@@ -2686,6 +2687,7 @@ const DesignersHoverHero = () => {
                                     key={d.slug}
                                     designer={d}
                                     priority={i < 8}
+                                    showDiscoverCta
                                     onNavigate={() => setSearchOpen(false)}
                                   />
                                 ))}
