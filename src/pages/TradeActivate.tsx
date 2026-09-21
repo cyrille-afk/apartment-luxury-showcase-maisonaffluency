@@ -57,6 +57,7 @@ const TradeActivate: React.FC = () => {
           localStorage.removeItem("trade_quick_tour_done");
           localStorage.removeItem("trade_tour_autostart_v1");
           localStorage.removeItem("trade_quick_tour_step");
+          localStorage.removeItem("felix_dashboard_tour_seen_v1");
 
           sessionStorage.setItem(
             "ma_activation_welcome",
