@@ -277,7 +277,7 @@ const TradeAdminAcquisitions = () => {
     setDispatching(true);
     try {
       const { data, error } = await supabase.functions.invoke("dispatch-acquisition-campaign", {
-        body: { ids },
+        body: { ids, testMode },
       });
       const failure = (data as { error?: string } | null)?.error;
       if (error || failure) throw new Error(failure || error?.message || "Dispatch failed.");
