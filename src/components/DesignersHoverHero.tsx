@@ -261,7 +261,7 @@ function DesignerGridCard({
           onLoad={() => setLoaded(true)}
           onError={() => setLoaded(true)}
           className={cn(
-            "absolute inset-0 h-full w-full object-cover scale-105 transition-transform duration-700 ease-out group-hover:scale-100",
+            "absolute inset-0 h-full w-full object-contain scale-100 transition-transform duration-700 ease-out group-hover:scale-[1.03]",
             "transition-opacity",
             loaded ? "opacity-100" : "opacity-0"
           )}
