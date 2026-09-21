@@ -50,6 +50,7 @@ const TradeActivate: React.FC = () => {
         }
 
         try {
+          sessionStorage.setItem("ma_activation_guide", "1");
           sessionStorage.setItem(
             "ma_activation_welcome",
             JSON.stringify({

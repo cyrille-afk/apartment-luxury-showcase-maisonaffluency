@@ -32,7 +32,16 @@ export const ActivationWelcome: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (params.get("guide") !== "1") return;
+    let wanted = params.get("guide") === "1";
+    try {
+      if (sessionStorage.getItem("ma_activation_guide") === "1") {
+        wanted = true;
+        sessionStorage.removeItem("ma_activation_guide");
+      }
+    } catch {
+      /* storage optional */
+    }
+    if (!wanted) return;
     const t = setTimeout(() => {
       document
         .querySelector<HTMLButtonElement>('[aria-label="Open AI Concierge"]')
