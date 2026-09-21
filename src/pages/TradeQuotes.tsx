@@ -115,8 +115,34 @@ const TradeQuotes = () => {
     (profilesRes.data || []).forEach((p: any) => { profileMap[p.id] = p; });
 
     const itemCounts: Record<string, number> = {};
+    const quoteTotals: Record<string, number> = {};
     (itemsRes.data || []).forEach((item: any) => {
       itemCounts[item.quote_id] = (itemCounts[item.quote_id] || 0) + 1;
+      const qty = Number(item.quantity) || 0;
+      const unit = (Number(item.unit_price_cents) || 0) + (Number(item.fabric_upcharge_cents) || 0);
+      quoteTotals[item.quote_id] =
+        (quoteTotals[item.quote_id] || 0) + qty * unit + (Number(item.crating_cents) || 0);
+    });
+
+    // Real ledger metrics — never demo figures.
+    const active = (quotesData || []).filter((q: any) => q.status !== "cancelled");
+    const currency =
+      (active.find((q: any) => q.currency)?.currency as string | undefined) || "EUR";
+    const sumFor = (rows: any[]) =>
+      rows.reduce((acc, q) => acc + (quoteTotals[q.id] || 0), 0);
+    const committed = sumFor(active);
+    const depositStages = ["deposit_paid", "confirmed"];
+    const escrowed = Math.round(
+      sumFor(active.filter((q: any) => depositStages.includes(q.status))) / 2,
+    );
+    const outstanding = sumFor(
+      active.filter((q: any) => q.status !== "paid" && q.status !== "draft"),
+    ) - escrowed;
+    setMetrics({
+      currency,
+      committed,
+      escrowed,
+      outstanding: Math.max(0, outstanding),
     });
 
     const projectMap: Record<string, string> = {};
