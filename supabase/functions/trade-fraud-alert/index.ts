@@ -127,18 +127,33 @@ Deno.serve(async (req) => {
       <p style="font-size:11px;color:#999;margin-top:16px;text-align:center;">Maison Affluency — Automated Security Alert</p>
     </div>`;
 
-  const result = await sendLovableEmail({
-    to: ADMIN_EMAILS,
-    subject: `🚨 CRITICAL: Trade Fraud Alert - ${row.company_name || "Unknown"}`,
-    html,
-    label: "trade-fraud-alert",
-    idempotencyKey: `trade-fraud-alert:${row.id}`,
-  });
+  // The fraud check itself has already succeeded and the flag is persisted.
+  // A delivery failure must not bubble out as a 500, or the database webhook
+  // retries the whole alert in a tight loop.
+  try {
+    const result = await sendLovableEmail({
+      to: ADMIN_EMAILS,
+      subject: `🚨 CRITICAL: Trade Fraud Alert - ${row.company_name || "Unknown"}`,
+      html,
+      label: "trade-fraud-alert",
+      idempotencyKey: `trade-fraud-alert:${row.id}`,
+    });
 
-  return new Response(
-    JSON.stringify({ success: true, queued: result.queued, suppressed: result.suppressed, failed: result.failed }),
-    { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-  );
+    return new Response(
+      JSON.stringify({ success: true, queued: result.queued, suppressed: result.suppressed, failed: result.failed }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  } catch (err) {
+    console.error("trade-fraud-alert send failed:", {
+      applicationId: row.id,
+      message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+    });
+    return new Response(
+      JSON.stringify({ success: false, queued: false, error: "Alert delivery failed" }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
 });
 
 function escapeHtml(input: string | null | undefined): string {
