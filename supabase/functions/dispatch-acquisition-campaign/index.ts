@@ -174,7 +174,12 @@ serve(async (req) => {
   const auth = await requireAdmin(req, "dispatch-acquisition-campaign");
   if (!auth.ok) return json(auth.body, auth.status);
 
-  let body: { ids?: unknown; resend?: boolean } = {};
+  let body: {
+    ids?: unknown;
+    resend?: boolean;
+    testMode?: boolean;
+    variant?: string;
+  } = {};
   try {
     body = await req.json();
   } catch {
