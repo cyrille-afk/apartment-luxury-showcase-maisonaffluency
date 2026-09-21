@@ -44,7 +44,65 @@ type Lead = {
   campaign_status: string;
 };
 
-function renderInvitation(lead: Lead, roster: Map<string, string>): string {
+/** Manual A–Z selections rendered as one editorial sentence fragment. */
+function designerString(matches: string[]): string {
+  if (matches.length === 0) return "";
+  if (matches.length === 1) return esc(matches[0]);
+  if (matches.length === 2) return `${esc(matches[0])} and ${esc(matches[1])}`;
+  return `${matches.slice(0, -1).map(esc).join(", ")}, and ${esc(matches[matches.length - 1])}`;
+}
+
+const P =
+  'style="font-family:Georgia,serif;font-size:15px;line-height:1.85;color:#1A1A1A;margin:0 0 18px;"';
+
+function shell(paragraphs: string[]): string {
+  return `
+  <div style="background:#FAF9F6;padding:40px 0;">
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;margin:0 auto;background:#FAF9F6;">
+      <tr>
+        <td style="padding:8px 32px 28px;">
+          <div style="font-family:Georgia,serif;font-size:18px;letter-spacing:3px;color:#1A1A1A;">MAISON AFFLUENCY</div>
+          <div style="height:1px;background:#1A1A1A;opacity:0.18;margin-top:14px;"></div>
+        </td>
+      </tr>
+      <tr><td style="padding:0 32px 40px;">${paragraphs.map((p) => `<p ${P}>${p}</p>`).join("")}</td></tr>
+    </table>
+  </div>`;
+}
+
+/** Template A — automated direct access (high-confidence profiles). */
+function renderTemplateA(lead: Lead, designers: string, link: string): string {
+  const studio = esc(lead.studio_name);
+  const designerClause = designers
+    ? `&mdash;including direct, friction-free access to pieces by ${designers}.`
+    : ".";
+  return shell([
+    `Dear ${esc(lead.founder_name || "Studio Director")},`,
+    `I have been following ${studio}&rsquo;s recent work. I am reaching out because I recently launched Maison Affluency, a global sourcing platform engineered exclusively for elite interior architects. We have unified over 170 master furniture and lighting designers under a single digital architecture${designerClause}`,
+    `Unlike legacy distribution networks that rely on slow, manual paper quoting, we operate as a technology-first partner providing instant global net pricing and RAG-driven curatorial advisory directly on your private workspace.`,
+    `Given the caliber of your portfolio, I have pre-approved ${studio} for full international trade status and global tax-exempt invoicing.`,
+    `You can activate your workspace instantly through your private portal key: <a href="${link}" style="color:#1A1A1A;text-decoration:underline;">${link}</a>`,
+    `Warm regards,<br />Cyrille Delva<br />Founder, Maison Affluency`,
+  ]);
+}
+
+/** Template B — personal savant override (hand-curated triage). */
+function renderTemplateB(lead: Lead, designers: string): string {
+  const studio = esc(lead.studio_name);
+  const designerClause = designers
+    ? `, including direct, friction-free access to pieces by ${designers}.`
+    : ".";
+  return shell([
+    `Dear ${esc(lead.founder_name || "Studio Director")},`,
+    `I personally reviewed your studio&rsquo;s portfolio today and wanted to welcome you to the Maison Affluency global trade program. The caliber of work coming out of ${studio} is exceptional, and it is a privilege to partner with you.`,
+    `Your trade status has been finalized. Net professional pricing is now unlocked globally across our portfolio of 170+ master designers${designerClause}`,
+    `As a designer myself, I built Maison Affluency to solve the friction of elite sourcing. I highly recommend utilizing our integrated AI Curatorial Guide for your current mood boards. I have trained the engine with deep design syntax, allowing it to interpret complex architectural context and track down highly specific collector pieces across global supply chains in seconds.`,
+    `Should you or your team ever need direct concierge support for a high-net-worth residential commission, simply reply directly to this message.`,
+    `Sincerely,<br />Cyrille Delva<br />Founder, Maison Affluency`,
+  ]);
+}
+
+function renderLegacyInvitation(lead: Lead, roster: Map<string, string>): string {
   const greeting = lead.founder_name
     ? `Dear ${esc(lead.founder_name)}`
     : "Dear Studio Director";
