@@ -600,7 +600,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                       <CldPicture
                         src={post.image_url!}
                         alt={post.caption || `${displayName} — From the Studio`}
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out scale-[1.08] group-hover:scale-[1.15]" />
                       <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
                         <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       </div>
