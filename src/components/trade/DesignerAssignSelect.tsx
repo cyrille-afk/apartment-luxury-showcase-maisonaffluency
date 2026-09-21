@@ -4,22 +4,17 @@
  * Multi-select over the canonical designer registry. Every toggle writes the
  * `predicted_designer_matches` array for that lead immediately — no save step,
  * no dialog. A discreet "✓ Assigned" marker confirms and fades.
+ *
+ * Dropdown uses alphabetical accordion groups: collapsed by default, search
+ * auto-expands groups that contain matches and hides groups with no matches.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Check, ChevronDown, X } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 
 type Props = {
   leadId: string;
@@ -41,7 +36,7 @@ export const useDesignerRegistry = () =>
         .limit(1000);
       if (error) throw error;
       const names = (data ?? [])
-        .map((d) => (d.display_name?.trim() || d.name?.trim() || ""))
+        .map((d) => d.display_name?.trim() || d.name?.trim() || "")
         .filter(Boolean);
       return Array.from(new Set(names)).sort((a, b) =>
         a.localeCompare(b, "en", { sensitivity: "base" }),
@@ -54,6 +49,8 @@ const DesignerAssignSelect = ({ leadId, studioName, value, onChange }: Props) =>
   const [open, setOpen] = useState(false);
   const [assigned, setAssigned] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const timer = useRef<number | null>(null);
 
   const groups = useMemo(() => {
@@ -71,7 +68,34 @@ const DesignerAssignSelect = ({ leadId, studioName, value, onChange }: Props) =>
     });
   }, [registry]);
 
-  useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current); }, []);
+  const q = search.trim().toLowerCase();
+  const filteredGroups = useMemo(() => {
+    if (!q) return groups;
+    return groups
+      .map(([letter, names]) => [letter, names.filter((n) => n.toLowerCase().includes(q))] as const)
+      .filter(([, names]) => names.length > 0);
+  }, [groups, q]);
+
+  // Search override: expand matching groups, collapse all when cleared.
+  useEffect(() => {
+    if (!q) {
+      setExpanded(new Set());
+      return;
+    }
+    const matching = new Set(filteredGroups.map(([letter]) => letter));
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      for (const letter of matching) next.add(letter);
+      return next;
+    });
+  }, [q, filteredGroups]);
+
+  useEffect(
+    () => () => {
+      if (timer.current) window.clearTimeout(timer.current);
+    },
+    [],
+  );
 
   const flash = () => {
     setAssigned(true);
@@ -99,6 +123,19 @@ const DesignerAssignSelect = ({ leadId, studioName, value, onChange }: Props) =>
   const toggle = (name: string) =>
     persist(value.includes(name) ? value.filter((n) => n !== name) : [...value, name]);
 
+  const toggleLetter = (letter: string) =>
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(letter)) next.delete(letter);
+      else next.add(letter);
+      return next;
+    });
+
+  const removeBadge = (e: React.MouseEvent, name: string) => {
+    e.stopPropagation();
+    toggle(name);
+  };
+
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-1.5">
@@ -115,7 +152,7 @@ const DesignerAssignSelect = ({ leadId, studioName, value, onChange }: Props) =>
             <button
               type="button"
               aria-label={`Remove ${name}`}
-              onClick={() => toggle(name)}
+              onClick={(e) => removeBadge(e, name)}
               className="ml-1.5 text-muted-foreground transition-colors hover:text-destructive"
             >
               <X className="h-3 w-3" />
@@ -137,41 +174,73 @@ const DesignerAssignSelect = ({ leadId, studioName, value, onChange }: Props) =>
             </button>
           </PopoverTrigger>
           <PopoverContent align="start" className="w-64 rounded-none border-border p-0">
-            <Command className="rounded-none bg-popover">
-              <CommandInput
-                placeholder="Search designers…"
-                className="sticky top-0 z-10 border-b border-border bg-popover text-sm"
-              />
-              <CommandList className="max-h-60 overflow-y-auto">
-                <CommandEmpty className="py-6 text-center text-xs text-muted-foreground">
-                  {isLoading ? "Loading registry…" : "No designer found."}
-                </CommandEmpty>
-                {groups.map(([letter, names]) => (
-                  <CommandGroup
-                    key={letter}
-                    heading={letter}
-                    className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.15em] [&_[cmdk-group-heading]]:text-muted-foreground"
-                  >
-                    {names.map((name) => {
-                      const active = value.includes(name);
-                      return (
-                        <CommandItem
-                          key={name}
-                          value={name}
-                          onSelect={() => toggle(name)}
-                          className="cursor-pointer rounded-none text-[13px]"
-                        >
-                          <Check
-                            className={`mr-2 h-3.5 w-3.5 ${active ? "opacity-100" : "opacity-0"}`}
-                          />
-                          {name}
-                        </CommandItem>
-                      );
-                    })}
-                  </CommandGroup>
-                ))}
-              </CommandList>
-            </Command>
+            <div className="flex flex-col bg-popover">
+              {/* Sticky search */}
+              <div className="sticky top-0 z-10 border-b border-border bg-popover p-2">
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search designers…"
+                  className="w-full rounded-none border border-border bg-background px-2.5 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-foreground focus:outline-none"
+                />
+              </div>
+
+              {/* Scrollable accordion list */}
+              <div className="max-h-64 overflow-y-auto px-1 py-1">
+                {isLoading && (
+                  <div className="py-6 text-center text-xs text-muted-foreground">
+                    Loading registry…
+                  </div>
+                )}
+                {!isLoading && filteredGroups.length === 0 && (
+                  <div className="py-6 text-center text-xs text-muted-foreground">
+                    No designer found.
+                  </div>
+                )}
+                {filteredGroups.map(([letter, names]) => {
+                  const isExpanded = expanded.has(letter);
+                  return (
+                    <div key={letter} className="border-b border-border/60 last:border-b-0">
+                      <button
+                        type="button"
+                        onClick={() => toggleLetter(letter)}
+                        className="flex w-full items-center justify-between px-2 py-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        <span>{letter}</span>
+                        <ChevronRight
+                          className={`h-3.5 w-3.5 transition-transform duration-200 ${
+                            isExpanded ? "rotate-90" : ""
+                          }`}
+                        />
+                      </button>
+                      {isExpanded && (
+                        <div className="pb-1">
+                          {names.map((name) => {
+                            const active = value.includes(name);
+                            return (
+                              <button
+                                key={name}
+                                type="button"
+                                onClick={() => toggle(name)}
+                                className="flex w-full items-center px-2 py-1.5 text-left text-[13px] text-foreground transition-colors hover:bg-muted/50"
+                              >
+                                <Check
+                                  className={`mr-2 h-3.5 w-3.5 flex-shrink-0 ${
+                                    active ? "opacity-100" : "opacity-0"
+                                  }`}
+                                />
+                                <span className="truncate">{name}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </PopoverContent>
         </Popover>
 
