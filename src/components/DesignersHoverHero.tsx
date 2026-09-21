@@ -2633,13 +2633,7 @@ const DesignersHoverHero = () => {
                   </div>
 
                   {/* Desktop: use each designer's first Curators' Pick, with portrait fallback. */}
-                  <div
-                    ref={curationGridRef}
-                    onMouseEnter={() => setShowCurationCursor(true)}
-                    onMouseLeave={() => setShowCurationCursor(false)}
-                    onMouseMove={handleCurationMove}
-                    className="relative hidden lg:block cursor-none group"
-                  >
+                  <div className="relative hidden lg:block">
                     <div className="flex flex-col pb-2">
                       {isSearching ? (
                         flatResults.length === 0 ? (
