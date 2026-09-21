@@ -44,7 +44,7 @@ export default function TradeCopilotOnboarding() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [confirmedName, setConfirmedName] = useState("");
 
-  const displayName = profile?.first_name?.trim() || "Designer";
+  const displayName = profile?.company?.trim() || profile?.first_name?.trim() || "Designer";
   const persistedName = profile?.concierge_name?.trim();
 
   useEffect(() => {
