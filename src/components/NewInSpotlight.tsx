@@ -548,40 +548,6 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
               </button>
             </div>
 
-            {/* From the Studio */}
-            {igWithImages.length > 0 && (
-              <div className="mt-10 pt-8 border-t border-border/30">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="h-px flex-1 bg-foreground/15" />
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Instagram className="w-3.5 h-3.5 text-foreground/60" />
-                    <span className="font-display text-[10px] md:text-[11px] tracking-[0.2em] uppercase text-foreground/60 font-semibold">
-                      From the Studio
-                    </span>
-                  </div>
-                  <div className="h-px flex-1 bg-foreground/15" />
-                </div>
-                <div className="grid grid-cols-3 md:grid-cols-6 gap-1">
-                  {igWithImages.slice(0, 6).map((post, index) => (
-                    <a
-                      key={post.id}
-                      href={post.post_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`group relative block aspect-square overflow-hidden bg-muted ${index >= 3 ? "hidden md:block" : ""}`}
-                    >
-                      <CldPicture
-                        src={post.image_url!}
-                        alt={post.caption || `${displayName} — From the Studio`}
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out scale-[1.15] group-hover:scale-[1.22]" />
-                      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
-                        <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
           </motion.div>
         </div>
       </section>
