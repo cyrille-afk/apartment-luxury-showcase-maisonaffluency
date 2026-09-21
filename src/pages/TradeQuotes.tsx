@@ -101,7 +101,10 @@ const TradeQuotes = () => {
         ? supabase.from("profiles").select("id, first_name, last_name, company, email").in("id", userIds)
         : Promise.resolve({ data: [] as any[] }),
       quoteIds.length > 0
-        ? supabase.from("trade_quote_items").select("quote_id").in("quote_id", quoteIds)
+        ? supabase
+            .from("trade_quote_items")
+            .select("quote_id, quantity, unit_price_cents, fabric_upcharge_cents, crating_cents")
+            .in("quote_id", quoteIds)
         : Promise.resolve({ data: [] as any[] }),
       projectIds.length > 0
         ? supabase.from("projects" as any).select("id, name").in("id", projectIds)
