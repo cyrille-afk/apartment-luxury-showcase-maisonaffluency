@@ -85,11 +85,11 @@ function renderTemplateA(lead: Lead, designers: string, link: string): string {
     `Given the caliber of your portfolio, I have pre-approved ${studio} for full international trade status and global tax-exempt invoicing.`,
     `You can activate your workspace instantly through your private portal key: <a href="${link}" style="color:#1A1A1A;text-decoration:underline;text-underline-offset:3px;">${SITE}/trade/activate</a>`,
     `Warm regards,<br />Cyrille Delval<br />Founder, Maison Affluency`,
-  ]);
+  ], link);
 }
 
 /** Template B — personal savant override (hand-curated triage). */
-function renderTemplateB(lead: Lead, designers: string): string {
+function renderTemplateB(lead: Lead, designers: string, link: string = SITE): string {
   const studio = esc(lead.studio_name);
   const designerClause = designers
     ? `, including direct, friction-free access to pieces by ${designers}.`
@@ -101,7 +101,7 @@ function renderTemplateB(lead: Lead, designers: string): string {
     `As a designer myself, I built Maison Affluency to solve the friction of elite sourcing. I highly recommend utilizing our integrated AI Curatorial Guide for your current mood boards. I have trained the engine with deep design syntax, allowing it to interpret complex architectural context and track down highly specific collector pieces across global supply chains in seconds.`,
     `Should you or your team ever need direct concierge support for a high-net-worth residential commission, simply reply directly to this message.`,
     `Sincerely,<br />Cyrille Delval<br />Founder, Maison Affluency`,
-  ]);
+  ], link);
 }
 
 function renderLegacyInvitation(lead: Lead, roster: Map<string, string>): string {
@@ -259,7 +259,7 @@ serve(async (req) => {
     const link = `${SITE}/trade/activate?token=${encodeURIComponent(row.id)}`;
     const html =
       variant === "B"
-        ? renderTemplateB(row, designers)
+        ? renderTemplateB(row, designers, link)
         : renderTemplateA(row, designers, link);
     const baseSubject =
       variant === "B"
