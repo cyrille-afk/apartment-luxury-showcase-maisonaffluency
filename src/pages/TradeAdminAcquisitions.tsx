@@ -285,8 +285,8 @@ const TradeAdminAcquisitions = () => {
     } catch {}
   }, [testMode]);
 
-  const deploySequences = async () => {
-    const ids = Array.from(selected);
+  const deploySequences = async (overrideIds?: string[]) => {
+    const ids = overrideIds ?? Array.from(selected);
     if (ids.length === 0 || dispatching) return;
     setDispatching(true);
     try {
