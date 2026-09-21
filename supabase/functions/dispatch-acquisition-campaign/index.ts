@@ -61,7 +61,7 @@ function shell(paragraphs: string[]): string {
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;margin:0 auto;background:#FAF9F6;">
       <tr>
         <td style="padding:8px 32px 28px;">
-          <div style="font-family:Georgia,serif;font-size:18px;letter-spacing:3px;color:#1A1A1A;">MAISON AFFLUENCY</div>
+          <img src="${SITE}/assets/affluency-email-logo.jpeg" alt="Maison Affluency" width="180" height="36" style="display:block;width:180px;height:36px;border:0;" />
           <div style="height:1px;background:#1A1A1A;opacity:0.18;margin-top:14px;"></div>
         </td>
       </tr>
@@ -81,8 +81,8 @@ function renderTemplateA(lead: Lead, designers: string, link: string): string {
     `I have been following ${studio}&rsquo;s recent work. I am reaching out because I recently launched Maison Affluency, a global sourcing platform engineered exclusively for elite interior architects. We have unified over 170 master furniture and lighting designers under a single digital architecture${designerClause}`,
     `Unlike legacy distribution networks that rely on slow, manual paper quoting, we operate as a technology-first partner providing instant global net pricing and RAG-driven curatorial advisory directly on your private workspace.`,
     `Given the caliber of your portfolio, I have pre-approved ${studio} for full international trade status and global tax-exempt invoicing.`,
-    `You can activate your workspace instantly through your private portal key: <a href="${link}" style="color:#1A1A1A;text-decoration:underline;">${link}</a>`,
-    `Warm regards,<br />Cyrille Delva<br />Founder, Maison Affluency`,
+    `You can activate your workspace instantly through your private portal key: <a href="${link}" style="color:#1A1A1A;text-decoration:underline;">${SITE}/trade-program</a>`,
+    `Warm regards,<br />Cyrille Delval<br />Founder, Maison Affluency`,
   ]);
 }
 
@@ -98,7 +98,7 @@ function renderTemplateB(lead: Lead, designers: string): string {
     `Your trade status has been finalized. Net professional pricing is now unlocked globally across our portfolio of 170+ master designers${designerClause}`,
     `As a designer myself, I built Maison Affluency to solve the friction of elite sourcing. I highly recommend utilizing our integrated AI Curatorial Guide for your current mood boards. I have trained the engine with deep design syntax, allowing it to interpret complex architectural context and track down highly specific collector pieces across global supply chains in seconds.`,
     `Should you or your team ever need direct concierge support for a high-net-worth residential commission, simply reply directly to this message.`,
-    `Sincerely,<br />Cyrille Delva<br />Founder, Maison Affluency`,
+    `Sincerely,<br />Cyrille Delval<br />Founder, Maison Affluency`,
   ]);
 }
 
