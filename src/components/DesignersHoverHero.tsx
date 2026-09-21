@@ -142,12 +142,15 @@ function DesignerGridCard({
   onNavigate,
   priority = false,
   useCardPhoto = false,
+  showDiscoverCta = false,
 }: {
   designer: { slug: string; name: string; first_pick_image_url?: string | null; hero_image_url: string | null; image_url: string | null };
   onNavigate?: () => void;
   priority?: boolean;
   /** Use the designer's own card photo (studio/portrait) instead of the first curator pick. */
   useCardPhoto?: boolean;
+  /** Desktop directory grid: reveal a "Discover the Curation" label under the name on hover. */
+  showDiscoverCta?: boolean;
 }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
