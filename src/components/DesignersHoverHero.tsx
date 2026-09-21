@@ -247,6 +247,7 @@ function DesignerGridCard({
         </div>
       )}
       {url ? (
+        nearViewport ? (
         <img
           src={url}
           srcSet={srcSet}
@@ -254,7 +255,7 @@ function DesignerGridCard({
           width={600}
           height={750}
           alt=""
-          loading={priority ? "eager" : "lazy"}
+          loading="eager"
           {...(priority ? { fetchpriority: "high" as any } : {})}
           decoding="async"
           onLoad={() => setLoaded(true)}
