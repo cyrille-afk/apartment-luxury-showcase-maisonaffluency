@@ -1222,7 +1222,8 @@ const PublicDesignerProfile = () => {
                   src={wideHeroImage}
                   alt={`${name} interior`}
                   className="absolute inset-0 w-full h-full object-cover"
- priority />
+                  style={{ objectPosition: (designer as any).hero_image_position || "center" }}
+  priority />
               </div>
             )}
 
