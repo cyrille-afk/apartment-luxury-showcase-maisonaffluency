@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import DesignerAssignSelect from "@/components/trade/DesignerAssignSelect";
+import AestheticProfileInput from "@/components/trade/AestheticProfileInput";
 import { AlertTriangle, ExternalLink, Instagram, Loader2, Mail, Send, ShieldAlert, Sparkles } from "lucide-react";
 
 type Lead = {
@@ -247,6 +248,14 @@ const TradeAdminAcquisitions = () => {
   const applyMatches = (id: string, next: string[]) => {
     queryClient.setQueryData<Lead[]>(["acquisition-leads", "enriched"], (prev) =>
       (prev ?? []).map((r) => (r.id === id ? { ...r, predicted_designer_matches: next } : r)),
+    );
+  };
+
+  // Editable aesthetic profile: reflect the write in the cached rows so the
+  // cell stays consistent without a full refetch.
+  const applyAesthetic = (id: string, next: string | null) => {
+    queryClient.setQueryData<Lead[]>(["acquisition-leads", "enriched"], (prev) =>
+      (prev ?? []).map((r) => (r.id === id ? { ...r, aesthetic_profile: next } : r)),
     );
   };
 
@@ -638,8 +647,13 @@ const TradeAdminAcquisitions = () => {
                       <span className="text-sm text-muted-foreground">—</span>
                     )}
                   </td>
-                  <td className="px-5 py-6 text-sm leading-relaxed text-muted-foreground whitespace-normal">
-                    {lead.aesthetic_profile ?? "—"}
+                  <td className="px-5 py-6">
+                    <AestheticProfileInput
+                      leadId={lead.id}
+                      studioName={lead.studio_name}
+                      value={lead.aesthetic_profile}
+                      onChange={(next) => applyAesthetic(lead.id, next)}
+                    />
                   </td>
                   <td className="px-5 py-6">
                     <DesignerAssignSelect
