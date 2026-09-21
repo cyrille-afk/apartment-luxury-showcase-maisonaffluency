@@ -56,6 +56,21 @@ const DesignerAssignSelect = ({ leadId, studioName, value, onChange }: Props) =>
   const [saving, setSaving] = useState(false);
   const timer = useRef<number | null>(null);
 
+  const groups = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const name of registry) {
+      const first = name.charAt(0).toUpperCase();
+      const letter = /^[A-Z]$/.test(first) ? first : "#";
+      if (!map.has(letter)) map.set(letter, []);
+      map.get(letter)!.push(name);
+    }
+    return Array.from(map.entries()).sort(([a], [b]) => {
+      if (a === "#") return 1;
+      if (b === "#") return -1;
+      return a.localeCompare(b);
+    });
+  }, [registry]);
+
   useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current); }, []);
 
   const flash = () => {
