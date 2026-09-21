@@ -506,7 +506,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               "transition-[transform,opacity] duration-300 ease-out",
             )}
           >
-            {isMobileOrPwa && galleryHintMounted && (
+            {galleryHintMounted && (
               <span
                 aria-hidden="true"
                 className={cn(
