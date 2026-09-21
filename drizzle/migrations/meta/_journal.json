@@ -519,6 +519,13 @@
       "when": 1789957111563,
       "tag": "0073_trade_profiles_activation_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1789980433492,
+      "tag": "0074_add_hero_image_position_to_designers",
+      "breakpoints": true
     }
   ]
 }
