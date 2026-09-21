@@ -5,7 +5,7 @@
  * `predicted_designer_matches` array for that lead immediately — no save step,
  * no dialog. A discreet "✓ Assigned" marker confirms and fades.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronDown, X } from "lucide-react";
 import { toast } from "sonner";
@@ -55,6 +55,21 @@ const DesignerAssignSelect = ({ leadId, studioName, value, onChange }: Props) =>
   const [assigned, setAssigned] = useState(false);
   const [saving, setSaving] = useState(false);
   const timer = useRef<number | null>(null);
+
+  const groups = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const name of registry) {
+      const first = name.charAt(0).toUpperCase();
+      const letter = /^[A-Z]$/.test(first) ? first : "#";
+      if (!map.has(letter)) map.set(letter, []);
+      map.get(letter)!.push(name);
+    }
+    return Array.from(map.entries()).sort(([a], [b]) => {
+      if (a === "#") return 1;
+      if (b === "#") return -1;
+      return a.localeCompare(b);
+    });
+  }, [registry]);
 
   useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current); }, []);
 
@@ -123,29 +138,38 @@ const DesignerAssignSelect = ({ leadId, studioName, value, onChange }: Props) =>
           </PopoverTrigger>
           <PopoverContent align="start" className="w-64 rounded-none border-border p-0">
             <Command className="rounded-none bg-popover">
-              <CommandInput placeholder="Search designers…" className="text-sm" />
-              <CommandList className="max-h-64">
+              <CommandInput
+                placeholder="Search designers…"
+                className="sticky top-0 z-10 border-b border-border bg-popover text-sm"
+              />
+              <CommandList className="max-h-60 overflow-y-auto">
                 <CommandEmpty className="py-6 text-center text-xs text-muted-foreground">
                   {isLoading ? "Loading registry…" : "No designer found."}
                 </CommandEmpty>
-                <CommandGroup>
-                  {registry.map((name) => {
-                    const active = value.includes(name);
-                    return (
-                      <CommandItem
-                        key={name}
-                        value={name}
-                        onSelect={() => toggle(name)}
-                        className="cursor-pointer rounded-none text-[13px]"
-                      >
-                        <Check
-                          className={`mr-2 h-3.5 w-3.5 ${active ? "opacity-100" : "opacity-0"}`}
-                        />
-                        {name}
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
+                {groups.map(([letter, names]) => (
+                  <CommandGroup
+                    key={letter}
+                    heading={letter}
+                    className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.15em] [&_[cmdk-group-heading]]:text-muted-foreground"
+                  >
+                    {names.map((name) => {
+                      const active = value.includes(name);
+                      return (
+                        <CommandItem
+                          key={name}
+                          value={name}
+                          onSelect={() => toggle(name)}
+                          className="cursor-pointer rounded-none text-[13px]"
+                        >
+                          <Check
+                            className={`mr-2 h-3.5 w-3.5 ${active ? "opacity-100" : "opacity-0"}`}
+                          />
+                          {name}
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                ))}
               </CommandList>
             </Command>
           </PopoverContent>
