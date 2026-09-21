@@ -71,7 +71,8 @@ function supabaseTransform(src: string, width: number, quality = 65): string {
     "/storage/v1/render/image/public/"
   );
   const sep = rendered.includes("?") ? "&" : "?";
-  return `${rendered}${sep}width=${width}&quality=${quality}&resize=cover`;
+  const height = Math.round((width * 5) / 4);
+  return `${rendered}${sep}width=${width}&height=${height}&quality=${quality}&resize=cover`;
 }
 
 /**
@@ -84,7 +85,7 @@ function gridImageTransform(src: string | null | undefined, width = 600): string
     const h = Math.round((width * 5) / 4);
     return src.replace(
       "/image/upload/",
-      `/image/upload/w_${width},h_${h},c_pad,g_center,b_auto,q_auto:eco,f_auto/`
+      `/image/upload/w_${width},h_${h},c_fill,g_center,q_auto:eco,f_auto/`
     );
   }
   if (isSupabaseObject(src)) return supabaseTransform(src, width, 65);
@@ -111,7 +112,7 @@ function gridImageLqip(src: string | null | undefined): string | undefined {
   if (isCloudinaryUpload(src)) {
     return src.replace(
       "/image/upload/",
-      "/image/upload/w_24,h_30,c_pad,g_center,b_auto,q_auto:low,e_blur:400,f_auto/"
+      "/image/upload/w_24,h_30,c_fill,g_center,q_auto:low,e_blur:400,f_auto/"
     );
   }
   if (isSupabaseObject(src)) return supabaseTransform(src, 24, 30);
@@ -261,7 +262,7 @@ function DesignerGridCard({
           onLoad={() => setLoaded(true)}
           onError={() => setLoaded(true)}
           className={cn(
-            "absolute inset-0 h-full w-full object-contain scale-100 transition-transform duration-700 ease-out group-hover:scale-[1.03]",
+            "absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]",
             "transition-opacity",
             loaded ? "opacity-100" : "opacity-0"
           )}
