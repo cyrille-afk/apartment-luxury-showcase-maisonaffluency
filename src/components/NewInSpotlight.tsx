@@ -450,6 +450,10 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                         <CldPicture
                           src={post.image_url!}
                           alt={post.caption || `${displayName} — From the Studio`}
+                          priority
+                          widths={[128, 192]}
+                          mobileWidths={[128, 192]}
+                          sizes="(min-width: 768px) 106px, 80px"
                           className="h-full w-full object-cover object-center transition-transform duration-700 ease-out scale-[1.10] group-hover:scale-[1.15]" />
                         <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
                           <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -457,8 +461,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                       </a>
                     ))}
                   </div>
-                  <span className="inline-flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.18em] text-neutral-400 font-normal mt-3 md:mt-4 md:mb-0">
-                    <Instagram className="w-3.5 h-3.5" strokeWidth={1.5} />
+                  <span className="relative self-center text-[10px] uppercase tracking-[0.18em] text-neutral-400 font-normal mt-3 md:mt-4 md:mb-0">
+                    <Instagram className="absolute right-full top-1/2 mr-2 w-3.5 h-3.5 -translate-y-1/2" strokeWidth={1.5} />
                     From the Studio
                   </span>
                 </div>
@@ -580,9 +584,9 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
               <div className="mt-10 pt-8 border-t border-border/30">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="h-px flex-1 bg-foreground/15" />
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Instagram className="w-3.5 h-3.5 text-foreground/60" />
-                    <span className="font-display text-[10px] md:text-[11px] tracking-[0.2em] uppercase text-foreground/60 font-semibold">
+                  <div className="relative shrink-0">
+                    <Instagram className="absolute right-full top-1/2 mr-2 w-3.5 h-3.5 -translate-y-1/2 text-foreground/60" />
+                    <span className="block font-display text-[10px] md:text-[11px] tracking-[0.2em] uppercase text-foreground/60 font-semibold">
                       From the Studio
                     </span>
                   </div>
@@ -600,6 +604,10 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                       <CldPicture
                         src={post.image_url!}
                         alt={post.caption || `${displayName} — From the Studio`}
+                        priority
+                        widths={[128, 192]}
+                        mobileWidths={[128, 192]}
+                        sizes="(min-width: 768px) 106px, 30vw"
                         className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out scale-[1.10] group-hover:scale-[1.15]" />
                       <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
                         <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
