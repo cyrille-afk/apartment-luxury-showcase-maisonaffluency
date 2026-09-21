@@ -18,14 +18,16 @@ function useOnboardingOpen(): { open: boolean; markDone: () => void } {
 
   useEffect(() => {
     if (loading) return;
-    // Only on the trade dashboard, for approved trade users who haven't
-    // completed the overlay (profile flag or this browser).
-    // The dashboard is the index route of /trade (with /trade/dashboard as an alias).
+    // Any trade workspace page qualifies: /trade and /trade/dashboard redirect
+    // straight to /trade/the-collection, so gating on the dashboard path alone
+    // closed the welcome the instant the redirect landed.
     const p = pathname.replace(/\/+$/, "");
-    const onDashboard = p === "/trade" || p === "/trade/dashboard";
+    const inWorkspace = p === "/trade" || (p.startsWith("/trade/") && !p.startsWith("/trade/admin"));
     const completed = profile?.has_seen_trade_intro === true || localStorage.getItem(STORAGE_KEY) === "1";
-    setOpen(isTradeUser && onDashboard && !completed);
+    // Once opened, stay open until the user finishes (markDone closes it).
+    setOpen((prev) => prev || (isTradeUser && inWorkspace && !completed));
   }, [profile?.has_seen_trade_intro, loading, isTradeUser, pathname]);
+
 
   const markDone = useCallback(() => {
     setOpen(false);
