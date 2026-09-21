@@ -7,6 +7,10 @@ import { isPwaStandaloneDisplay } from "./lib/pwaMode";
 import { loadOgBridgeIndex } from "./lib/ogBridgeResolver";
 import { startEnvironmentIndexingGuard } from "./lib/environmentIndexingGuard";
 import { bootIossRouting } from "./config/iossConfig";
+import { ensureStorageHeadroom } from "./lib/storageReclaim";
+
+// Keep room for the login session: a full browser store makes sign-in fail.
+ensureStorageHeadroom();
 
 // Align the browser's tax preview with the server's EU routing switch.
 bootIossRouting();
