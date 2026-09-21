@@ -310,7 +310,8 @@ serve(async (req) => {
   }
 
   return json({
-    sent: results.filter((r) => r.status === "sent").length,
+    testMode,
+    sent: results.filter((r) => r.status === "sent" || r.status === "test_sent").length,
     skipped: results.filter((r) => r.status === "skipped").length,
     failed: results.filter((r) => r.status === "failed").length,
     results,
