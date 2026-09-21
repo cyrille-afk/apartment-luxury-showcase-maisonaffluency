@@ -56,6 +56,9 @@ const TradeQuotes = () => {
   const designerLabel = useDesignerDisplayName(designerFilter);
   const [projectFilterName, setProjectFilterName] = useState<string | null>(null);
   const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [metrics, setMetrics] = useState<{ currency: string; committed: number; escrowed: number; outstanding: number }>({
+    currency: "EUR", committed: 0, escrowed: 0, outstanding: 0,
+  });
   const [matchingQuoteIds, setMatchingQuoteIds] = useState<Set<string> | null>(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -72,7 +75,7 @@ const TradeQuotes = () => {
     // List view only needs the card fields — never the full 50-column row.
     let query = supabase
       .from("trade_quotes")
-      .select("id, user_id, status, notes, submitted_at, created_at, updated_at, project_id, studio_id")
+      .select("id, user_id, status, notes, submitted_at, created_at, updated_at, project_id, studio_id, currency")
       .order("created_at", { ascending: false });
     
     // Scope to current studio so all teammates see each other's work.
@@ -101,7 +104,10 @@ const TradeQuotes = () => {
         ? supabase.from("profiles").select("id, first_name, last_name, company, email").in("id", userIds)
         : Promise.resolve({ data: [] as any[] }),
       quoteIds.length > 0
-        ? supabase.from("trade_quote_items").select("quote_id").in("quote_id", quoteIds)
+        ? supabase
+            .from("trade_quote_items")
+            .select("quote_id, quantity, unit_price_cents, fabric_upcharge_cents, crating_cents")
+            .in("quote_id", quoteIds)
         : Promise.resolve({ data: [] as any[] }),
       projectIds.length > 0
         ? supabase.from("projects" as any).select("id, name").in("id", projectIds)
@@ -112,8 +118,34 @@ const TradeQuotes = () => {
     (profilesRes.data || []).forEach((p: any) => { profileMap[p.id] = p; });
 
     const itemCounts: Record<string, number> = {};
+    const quoteTotals: Record<string, number> = {};
     (itemsRes.data || []).forEach((item: any) => {
       itemCounts[item.quote_id] = (itemCounts[item.quote_id] || 0) + 1;
+      const qty = Number(item.quantity) || 0;
+      const unit = (Number(item.unit_price_cents) || 0) + (Number(item.fabric_upcharge_cents) || 0);
+      quoteTotals[item.quote_id] =
+        (quoteTotals[item.quote_id] || 0) + qty * unit + (Number(item.crating_cents) || 0);
+    });
+
+    // Real ledger metrics — never demo figures.
+    const active = (quotesData || []).filter((q: any) => q.status !== "cancelled");
+    const currency =
+      (active.find((q: any) => q.currency)?.currency as string | undefined) || "EUR";
+    const sumFor = (rows: any[]) =>
+      rows.reduce((acc, q) => acc + (quoteTotals[q.id] || 0), 0);
+    const committed = sumFor(active);
+    const depositStages = ["deposit_paid", "confirmed"];
+    const escrowed = Math.round(
+      sumFor(active.filter((q: any) => depositStages.includes(q.status))) / 2,
+    );
+    const outstanding = sumFor(
+      active.filter((q: any) => q.status !== "paid" && q.status !== "draft"),
+    ) - escrowed;
+    setMetrics({
+      currency,
+      committed,
+      escrowed,
+      outstanding: Math.max(0, outstanding),
     });
 
     const projectMap: Record<string, string> = {};
@@ -366,11 +398,19 @@ const TradeQuotes = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-8 border-t border-b border-border">
-          {[
-            { value: "SG$ 284,500", label: "PORTFOLIO VALUE COMMITTED" },
-            { value: "SG$ 142,250", label: "ESCROWED DEPOSITS IN PRODUCTION" },
-            { value: "SG$ 142,250", label: "OUTSTANDING PROCUREMENT BALANCES" },
-          ].map((metric) => (
+          {(() => {
+            const fmt = (cents: number) =>
+              new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: metrics.currency || "EUR",
+                maximumFractionDigits: 0,
+              }).format(Math.round(cents / 100));
+            return [
+              { value: fmt(metrics.committed), label: "PORTFOLIO VALUE COMMITTED" },
+              { value: fmt(metrics.escrowed), label: "ESCROWED DEPOSITS IN PRODUCTION" },
+              { value: fmt(metrics.outstanding), label: "OUTSTANDING PROCUREMENT BALANCES" },
+            ];
+          })().map((metric) => (
             <div key={metric.label} className="space-y-1">
               <p className="font-display text-2xl md:text-3xl font-light text-foreground tracking-tight">
                 {metric.value}
