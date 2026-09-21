@@ -1222,7 +1222,8 @@ const PublicDesignerProfile = () => {
                   src={wideHeroImage}
                   alt={`${name} interior`}
                   className="absolute inset-0 w-full h-full object-cover"
- priority />
+                  style={{ objectPosition: (designer as any).hero_image_position || "center" }}
+  priority />
               </div>
             )}
 
@@ -1497,8 +1498,8 @@ const PublicDesignerProfile = () => {
                       src={heroImage}
                       alt={name}
                       className="absolute inset-0 w-full h-full object-cover"
-                      style={{ objectPosition: "center bottom" }}
- priority />
+                      style={{ objectPosition: (designer as any).hero_image_position || "center" }}
+  priority />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
                   {/* Mobile share icon inside hero */}

@@ -3065,6 +3065,7 @@ export type Database = {
           facets_updated_at: string | null
           founder: string | null
           fulfillment_email: string | null
+          hero_image_position: string | null
           hero_image_url: string | null
           hero_photo_credit: string | null
           id: string
@@ -3106,6 +3107,7 @@ export type Database = {
           facets_updated_at?: string | null
           founder?: string | null
           fulfillment_email?: string | null
+          hero_image_position?: string | null
           hero_image_url?: string | null
           hero_photo_credit?: string | null
           id?: string
@@ -3147,6 +3149,7 @@ export type Database = {
           facets_updated_at?: string | null
           founder?: string | null
           fulfillment_email?: string | null
+          hero_image_position?: string | null
           hero_image_url?: string | null
           hero_photo_credit?: string | null
           id?: string

@@ -399,7 +399,9 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 <CldPicture
                   src={portraitImage}
                   alt={`${displayName} portrait`}
-                  className="w-full h-full object-cover object-center" />
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: (designer as any).hero_image_position || "center" }}
+                />
               </div>
             </div>
 
@@ -495,7 +497,9 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
               <CldPicture
                 src={portraitImage}
                 alt={`${displayName} portrait`}
-                className="w-full h-full object-cover" />
+                className="w-full h-full object-cover"
+                style={{ objectPosition: (designer as any).hero_image_position || "center" }}
+              />
             </div>
           </motion.div>
 
