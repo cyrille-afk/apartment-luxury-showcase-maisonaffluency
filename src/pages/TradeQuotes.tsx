@@ -398,11 +398,19 @@ const TradeQuotes = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-8 border-t border-b border-border">
-          {[
-            { value: "SG$ 284,500", label: "PORTFOLIO VALUE COMMITTED" },
-            { value: "SG$ 142,250", label: "ESCROWED DEPOSITS IN PRODUCTION" },
-            { value: "SG$ 142,250", label: "OUTSTANDING PROCUREMENT BALANCES" },
-          ].map((metric) => (
+          {(() => {
+            const fmt = (cents: number) =>
+              new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: metrics.currency || "EUR",
+                maximumFractionDigits: 0,
+              }).format(Math.round(cents / 100));
+            return [
+              { value: fmt(metrics.committed), label: "PORTFOLIO VALUE COMMITTED" },
+              { value: fmt(metrics.escrowed), label: "ESCROWED DEPOSITS IN PRODUCTION" },
+              { value: fmt(metrics.outstanding), label: "OUTSTANDING PROCUREMENT BALANCES" },
+            ];
+          })().map((metric) => (
             <div key={metric.label} className="space-y-1">
               <p className="font-display text-2xl md:text-3xl font-light text-foreground tracking-tight">
                 {metric.value}
