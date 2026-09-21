@@ -747,7 +747,10 @@ const DesignersHoverHero = () => {
   const suppressNavClickRef = useRef(false);
   const portalRef = useRef<HTMLAnchorElement>(null);
   const portalCursorRef = useRef<HTMLDivElement>(null);
-  
+  const curationGridRef = useRef<HTMLDivElement>(null);
+  const curationCursorRef = useRef<HTMLDivElement>(null);
+  const [showCurationCursor, setShowCurationCursor] = useState(false);
+
   const activeSlugRef = useRef<string | null>(null);
   useEffect(() => {
     activeSlugRef.current = activeSlug;
