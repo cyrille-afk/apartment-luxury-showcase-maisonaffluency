@@ -55,16 +55,16 @@ function designerString(matches: string[]): string {
 const P =
   'style="font-family:Georgia,serif;font-size:15px;line-height:1.85;color:#1A1A1A;margin:0 0 18px;"';
 
-function shell(paragraphs: string[]): string {
+function shell(paragraphs: string[], link: string = SITE): string {
+  const navLink = (label: string) =>
+    `<a href="${link}" style="color:#1A1A1A;text-decoration:none;">${label}</a>`;
   return `
   <div style="background:#FAF9F6;padding:40px 0;">
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;margin:0 auto;background:#FAF9F6;">
       <tr>
         <td style="padding:28px 32px 28px;border-bottom:1px solid #1A1A1A;">
-          <a href="${SITE}" style="text-decoration:none;color:#1A1A1A;display:block;">
-            <div style="font-family:Georgia,'Times New Roman',serif;font-size:17px;letter-spacing:6px;text-transform:uppercase;color:#1A1A1A;">MAISON AFFLUENCY</div>
-            <div style="font-family:Georgia,'Times New Roman',serif;font-size:10px;letter-spacing:3.5px;text-transform:uppercase;color:#1A1A1A;opacity:0.55;margin-top:10px;">The Archive&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;AI Curatorial Chat&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;Global Trade</div>
-          </a>
+          <div style="font-family:Georgia,'Times New Roman',serif;font-size:17px;letter-spacing:6px;text-transform:uppercase;color:#1A1A1A;"><a href="${link}" style="color:#1A1A1A;text-decoration:none;">MAISON AFFLUENCY</a></div>
+          <div style="font-family:Georgia,'Times New Roman',serif;font-size:10px;letter-spacing:3.5px;text-transform:uppercase;color:#1A1A1A;opacity:0.55;margin-top:10px;">${navLink("The Archive")}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;${navLink("AI Curatorial Chat")}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;${navLink("Global Trade")}</div>
         </td>
       </tr>
       <tr><td style="padding:0 32px 40px;">${paragraphs.map((p) => `<p ${P}>${p}</p>`).join("")}</td></tr>
