@@ -664,7 +664,7 @@ const TradeAdminAcquisitions = () => {
                         type="button"
                         disabled={dispatching}
                         onClick={() => deploySequences([lead.id])}
-                        className="inline-flex h-9 items-center gap-2 bg-foreground px-4 text-[10px] uppercase tracking-[0.18em] text-background transition-colors hover:bg-foreground/85 disabled:opacity-50"
+                        className="inline-flex h-9 items-center gap-2 whitespace-nowrap bg-foreground px-4 text-[10px] uppercase tracking-[0.18em] text-background transition-colors hover:bg-foreground/85 disabled:opacity-50"
                       >
                         {dispatching ? (
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
