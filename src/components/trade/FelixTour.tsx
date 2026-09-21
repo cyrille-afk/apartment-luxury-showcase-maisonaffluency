@@ -60,7 +60,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "nav-projects",
     route: "/trade/projects",
     dialogue:
-      "Organize your active jobs dynamically. You can bucket your collections, quotes, and layouts by specific residential workflows, such as your Singapore GCB or Hamptons projects.",
+      "Organize your active work by project. Keep each project's collections, quotes, layouts, and documentation together in one dedicated workspace.",
   },
   {
     id: "felix-chat",
