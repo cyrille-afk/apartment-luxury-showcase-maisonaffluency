@@ -748,16 +748,22 @@ const TradeAdminAcquisitions = () => {
                     />
                   </td>
                   <td className="px-5 py-6">
-                    <Badge
-                      variant="outline"
-                      className="rounded-none border-emerald-500/40 text-[10px] uppercase tracking-[0.18em] text-emerald-600"
-                    >
-                      {lead.verified_at ? "Verified" : "Enriched"}
-                    </Badge>
+                    {(() => {
+                      const badge = statusBadge(lead);
+                      return (
+                        <Badge
+                          variant="outline"
+                          className={`${badge.className} text-[10px] uppercase tracking-[0.18em]`}
+                        >
+                          {badge.label}
+                        </Badge>
+                      );
+                    })()}
                     <div className="mt-2 space-y-0.5 text-[11px] text-muted-foreground">
                       <div>{lead.source_index ?? "—"}</div>
                       <div>Added {fmtDate(lead.created_at)}</div>
                       {lead.verified_at && <div>Verified {fmtDate(lead.verified_at)}</div>}
+                      {lead.email_sent_at && <div>Sent {fmtDate(lead.email_sent_at)}</div>}
                       {lead.email_error && (
                         <div className="text-destructive">Last error: {lead.email_error}</div>
                       )}
