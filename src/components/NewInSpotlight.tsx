@@ -438,33 +438,35 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
 
               {igWithImages.length > 0 && (
                 <div className="mt-6 pt-4 border-t border-neutral-100 w-full flex flex-col">
-                  <div className="flex gap-3 items-center h-20 md:h-24 overflow-hidden flex-shrink-0">
-                    {igWithImages.slice(0, 5).map((post) => (
-                      <a
-                        key={post.id}
-                        href={post.post_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group relative block h-full aspect-square flex-shrink-0 overflow-hidden bg-[hsl(var(--canvas))]"
-                      >
-                        <CldPicture
-                          src={post.image_url!}
-                          alt={post.caption || `${displayName} — From the Studio`}
-                          priority
-                          widths={[128, 192]}
-                          mobileWidths={[128, 192]}
-                          sizes="(min-width: 768px) 106px, 80px"
-                          className="h-full w-full object-cover object-center transition-transform duration-700 ease-out scale-[1.10] group-hover:scale-[1.15]" />
-                        <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
-                          <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        </div>
-                      </a>
-                    ))}
+                  <div className="pl-6 md:pl-10 flex flex-col items-center">
+                    <div className="flex gap-3 items-center h-20 md:h-24 overflow-hidden flex-shrink-0 self-start w-full">
+                      {igWithImages.slice(0, 5).map((post) => (
+                        <a
+                          key={post.id}
+                          href={post.post_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group relative block h-full aspect-square flex-shrink-0 overflow-hidden bg-[hsl(var(--canvas))]"
+                        >
+                          <CldPicture
+                            src={post.image_url!}
+                            alt={post.caption || `${displayName} — From the Studio`}
+                            priority
+                            widths={[128, 192]}
+                            mobileWidths={[128, 192]}
+                            sizes="(min-width: 768px) 106px, 80px"
+                            className="h-full w-full object-cover object-center transition-transform duration-700 ease-out scale-[1.10] group-hover:scale-[1.15]" />
+                          <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
+                            <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                    <span className="relative text-[10px] uppercase tracking-[0.18em] text-neutral-400 font-normal mt-3 md:mt-4 md:mb-0">
+                      <Instagram className="absolute right-full top-1/2 mr-2 w-3.5 h-3.5 -translate-y-1/2" strokeWidth={1.5} />
+                      From the Studio
+                    </span>
                   </div>
-                  <span className="relative self-center text-[10px] uppercase tracking-[0.18em] text-neutral-400 font-normal mt-3 md:mt-4 md:mb-0">
-                    <Instagram className="absolute right-full top-1/2 mr-2 w-3.5 h-3.5 -translate-y-1/2" strokeWidth={1.5} />
-                    From the Studio
-                  </span>
                 </div>
               )}
             </div>
