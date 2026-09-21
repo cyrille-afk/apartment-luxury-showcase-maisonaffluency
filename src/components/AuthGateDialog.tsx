@@ -4,6 +4,7 @@ import { X, FileDown, UserPlus } from "lucide-react";
 import { createPortal } from "react-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { ensureStorageHeadroom } from "@/lib/storageReclaim";
 import { useToast } from "@/hooks/use-toast";
 
 /**

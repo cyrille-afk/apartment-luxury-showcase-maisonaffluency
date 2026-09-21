@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { ensureStorageHeadroom } from "@/lib/storageReclaim";
 import { useAuth } from "@/hooks/useAuth";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
 import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";

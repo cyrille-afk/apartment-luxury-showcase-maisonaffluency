@@ -6,6 +6,7 @@ import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { ensureStorageHeadroom } from "@/lib/storageReclaim";
 import { useToast } from "@/hooks/use-toast";
 
 /* ── Lightweight public signup form ─────────────────────────────── */
