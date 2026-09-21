@@ -55,16 +55,16 @@ function designerString(matches: string[]): string {
 const P =
   'style="font-family:Georgia,serif;font-size:15px;line-height:1.85;color:#1A1A1A;margin:0 0 18px;"';
 
-function shell(paragraphs: string[]): string {
+function shell(paragraphs: string[], link: string = SITE): string {
+  const navLink = (label: string) =>
+    `<a href="${link}" style="color:#1A1A1A;text-decoration:none;">${label}</a>`;
   return `
   <div style="background:#FAF9F6;padding:40px 0;">
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;margin:0 auto;background:#FAF9F6;">
       <tr>
         <td style="padding:28px 32px 28px;border-bottom:1px solid #1A1A1A;">
-          <a href="${SITE}" style="text-decoration:none;color:#1A1A1A;display:block;">
-            <div style="font-family:Georgia,'Times New Roman',serif;font-size:17px;letter-spacing:6px;text-transform:uppercase;color:#1A1A1A;">MAISON AFFLUENCY</div>
-            <div style="font-family:Georgia,'Times New Roman',serif;font-size:10px;letter-spacing:3.5px;text-transform:uppercase;color:#1A1A1A;opacity:0.55;margin-top:10px;">The Archive&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;AI Curatorial Chat&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;Global Trade</div>
-          </a>
+          <div style="font-family:Georgia,'Times New Roman',serif;font-size:17px;letter-spacing:6px;text-transform:uppercase;color:#1A1A1A;"><a href="${link}" style="color:#1A1A1A;text-decoration:none;">MAISON AFFLUENCY</a></div>
+          <div style="font-family:Georgia,'Times New Roman',serif;font-size:10px;letter-spacing:3.5px;text-transform:uppercase;color:#1A1A1A;opacity:0.55;margin-top:10px;">${navLink("The Archive")}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;${navLink("AI Curatorial Chat")}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;${navLink("Global Trade")}</div>
         </td>
       </tr>
       <tr><td style="padding:0 32px 40px;">${paragraphs.map((p) => `<p ${P}>${p}</p>`).join("")}</td></tr>
@@ -85,11 +85,11 @@ function renderTemplateA(lead: Lead, designers: string, link: string): string {
     `Given the caliber of your portfolio, I have pre-approved ${studio} for full international trade status and global tax-exempt invoicing.`,
     `You can activate your workspace instantly through your private portal key: <a href="${link}" style="color:#1A1A1A;text-decoration:underline;text-underline-offset:3px;">${SITE}/trade/activate</a>`,
     `Warm regards,<br />Cyrille Delval<br />Founder, Maison Affluency`,
-  ]);
+  ], link);
 }
 
 /** Template B — personal savant override (hand-curated triage). */
-function renderTemplateB(lead: Lead, designers: string): string {
+function renderTemplateB(lead: Lead, designers: string, link: string = SITE): string {
   const studio = esc(lead.studio_name);
   const designerClause = designers
     ? `, including direct, friction-free access to pieces by ${designers}.`
@@ -101,7 +101,7 @@ function renderTemplateB(lead: Lead, designers: string): string {
     `As a designer myself, I built Maison Affluency to solve the friction of elite sourcing. I highly recommend utilizing our integrated AI Curatorial Guide for your current mood boards. I have trained the engine with deep design syntax, allowing it to interpret complex architectural context and track down highly specific collector pieces across global supply chains in seconds.`,
     `Should you or your team ever need direct concierge support for a high-net-worth residential commission, simply reply directly to this message.`,
     `Sincerely,<br />Cyrille Delval<br />Founder, Maison Affluency`,
-  ]);
+  ], link);
 }
 
 function renderLegacyInvitation(lead: Lead, roster: Map<string, string>): string {
@@ -259,7 +259,7 @@ serve(async (req) => {
     const link = `${SITE}/trade/activate?token=${encodeURIComponent(row.id)}`;
     const html =
       variant === "B"
-        ? renderTemplateB(row, designers)
+        ? renderTemplateB(row, designers, link)
         : renderTemplateA(row, designers, link);
     const baseSubject =
       variant === "B"

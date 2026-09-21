@@ -110,6 +110,8 @@ serve(async (req) => {
         company: lead.studio_name ?? "",
         country: lead.country ?? null,
         trade_status: "approved",
+        // Force the introductory studio experience on first landing.
+        has_seen_trade_intro: false,
       },
       { onConflict: "id" },
     );
