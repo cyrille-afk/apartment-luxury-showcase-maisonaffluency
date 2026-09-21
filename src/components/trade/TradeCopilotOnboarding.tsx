@@ -32,7 +32,10 @@ function useOnboardingOpen(): { open: boolean; markDone: () => void } {
   const markDone = useCallback(() => {
     setOpen(false);
     try { localStorage.setItem(STORAGE_KEY, "1"); } catch {}
+    // Hand over to the guided workspace tour.
+    try { window.dispatchEvent(new Event("trade-tour:start")); } catch {}
   }, []);
+
 
   return { open, markDone };
 }
