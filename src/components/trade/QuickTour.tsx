@@ -115,6 +115,10 @@ export function QuickTour() {
           localStorage.getItem(AUTOSTART_KEY) ||
           localStorage.getItem(STORAGE_KEY)
         ) return;
+        // The welcome / name-your-copilot overlay leads. The tour starts the
+        // moment it completes (it dispatches trade-tour:start itself).
+        if (localStorage.getItem("ma:copilot-onboarded") !== "1") return;
+
         const { data: sess } = await supabase.auth.getSession();
         const uid = sess.session?.user?.id;
         if (!uid || cancelled) return;
