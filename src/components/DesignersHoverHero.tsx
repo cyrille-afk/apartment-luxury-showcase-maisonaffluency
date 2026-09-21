@@ -208,6 +208,7 @@ function DesignerGridCard({
   };
   return (
     <SilentLink
+      ref={cardRef}
       to={`/designers/${designer.slug}`}
       state={{ fromDesignersHero: true, fromDesignersAZ: true }}
       data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
