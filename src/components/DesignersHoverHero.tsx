@@ -112,7 +112,7 @@ function gridImageLqip(src: string | null | undefined): string | undefined {
   if (isCloudinaryUpload(src)) {
     return src.replace(
       "/image/upload/",
-      "/image/upload/w_24,h_30,c_pad,g_center,b_auto,q_auto:low,e_blur:400,f_auto/"
+      "/image/upload/w_24,h_30,c_fill,g_center,q_auto:low,e_blur:400,f_auto/"
     );
   }
   if (isSupabaseObject(src)) return supabaseTransform(src, 24, 30);
@@ -262,7 +262,7 @@ function DesignerGridCard({
           onLoad={() => setLoaded(true)}
           onError={() => setLoaded(true)}
           className={cn(
-            "absolute inset-0 h-full w-full object-contain scale-100 transition-transform duration-700 ease-out group-hover:scale-[1.03]",
+            "absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]",
             "transition-opacity",
             loaded ? "opacity-100" : "opacity-0"
           )}
