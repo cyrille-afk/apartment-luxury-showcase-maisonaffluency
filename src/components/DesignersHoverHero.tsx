@@ -163,6 +163,37 @@ function DesignerGridCard({
   const lqip = gridImageLqip(baseRaw);
   const displayName = displayDesignerName(designer.name);
   const [loaded, setLoaded] = useState(false);
+  // Native loading="lazy" is unreliable for images that mount inside an
+  // already-visible overflow container (Safari never fires the load when
+  // switching directory letters). Gate rendering on a mount-time rect check
+  // with an IntersectionObserver fallback instead.
+  const cardRef = useRef<HTMLAnchorElement>(null);
+  const [nearViewport, setNearViewport] = useState(priority);
+  useEffect(() => {
+    if (nearViewport) return;
+    const el = cardRef.current;
+    if (!el) { setNearViewport(true); return; }
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight + 600 && rect.bottom > -600) {
+      setNearViewport(true);
+      return;
+    }
+    if (typeof IntersectionObserver === "undefined") {
+      setNearViewport(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setNearViewport(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "600px 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [nearViewport]);
   const rememberLetter = () => {
     rememberDesignersAzLetter(lastNameInitial(designer.name));
   };
@@ -177,6 +208,7 @@ function DesignerGridCard({
   };
   return (
     <SilentLink
+      ref={cardRef}
       to={`/designers/${designer.slug}`}
       state={{ fromDesignersHero: true, fromDesignersAZ: true }}
       data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
@@ -215,6 +247,7 @@ function DesignerGridCard({
         </div>
       )}
       {url ? (
+        nearViewport ? (
         <img
           src={url}
           srcSet={srcSet}
@@ -222,7 +255,7 @@ function DesignerGridCard({
           width={600}
           height={750}
           alt=""
-          loading={priority ? "eager" : "lazy"}
+          loading="eager"
           {...(priority ? { fetchpriority: "high" as any } : {})}
           decoding="async"
           onLoad={() => setLoaded(true)}
@@ -233,6 +266,7 @@ function DesignerGridCard({
             loaded ? "opacity-100" : "opacity-0"
           )}
         />
+        ) : null
       ) : (
         <span className="absolute inset-0 flex items-center justify-center text-white/30">
           <ImageIcon className="h-8 w-8" aria-hidden />
