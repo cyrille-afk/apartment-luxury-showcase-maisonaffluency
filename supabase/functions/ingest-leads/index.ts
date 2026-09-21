@@ -269,9 +269,11 @@ serve(async (req) => {
       aesthetic = str(parsed?.aesthetic, 200);
       const n = Number(parsed?.aesthetic_score);
       score = Number.isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : null;
+      const sourceEvidence = `${b.snippet ?? ""} ${b.taggedDesigner ?? ""}`.toLocaleLowerCase();
       matched = (Array.isArray(parsed?.matched_designers) ? parsed.matched_designers : [])
         .map((x: unknown) => byName.get(String(x ?? "").trim().toLowerCase()))
         .filter((x: string | undefined): x is string => Boolean(x))
+        .filter((name: string) => sourceEvidence.includes(name.toLocaleLowerCase()))
         .slice(0, 3);
     } catch (e) {
       console.error(

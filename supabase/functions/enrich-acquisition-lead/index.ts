@@ -180,9 +180,11 @@ serve(async (req) => {
     const parsed = JSON.parse(raw || "{}");
     aesthetic = str(parsed?.aesthetic, 200);
     instagram = providedInstagram ?? sanitizeInstagram(parsed?.instagram_handle);
+    const sourceEvidence = snippet.toLocaleLowerCase();
     matched = (Array.isArray(parsed?.matched_designers) ? parsed.matched_designers : [])
       .map((n: unknown) => byName.get(String(n ?? "").trim().toLowerCase()))
       .filter((n: string | undefined): n is string => Boolean(n))
+      .filter((name: string) => sourceEvidence.includes(name.toLocaleLowerCase()))
       .slice(0, 3);
   } catch (e) {
     console.error(
