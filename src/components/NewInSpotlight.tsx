@@ -436,33 +436,6 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 />
               </div>
 
-              {igWithImages.length > 0 && (
-                <div className="mt-6 pt-4 border-t border-neutral-100 w-full flex flex-col">
-                  <div className="flex gap-2.5 items-center h-16 md:h-20 overflow-hidden flex-shrink-0">
-                    {igWithImages.slice(0, 6).map((post) => (
-                      <a
-                        key={post.id}
-                        href={post.post_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group relative block h-full aspect-square flex-shrink-0 overflow-hidden bg-[hsl(var(--canvas))]"
-                      >
-                        <CldPicture
-                          src={post.image_url!}
-                          alt={post.caption || `${displayName} — From the Studio`}
-                          className="h-full w-full object-contain object-center transition-transform duration-700 ease-out scale-[1.15] group-hover:scale-[1.22]" />
-                        <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
-                          <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                  <span className="inline-flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.18em] text-neutral-400 font-normal mt-3 md:mt-4 md:mb-0">
-                    <Instagram className="w-3.5 h-3.5" strokeWidth={1.5} />
-                    From the Studio
-                  </span>
-                </div>
-              )}
             </div>
           </div>
 
