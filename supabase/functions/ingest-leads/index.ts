@@ -263,7 +263,10 @@ serve(async (req) => {
           max_completion_tokens: 3000,
           reasoning_effort: "low",
           response_format: { type: "json_object" },
-          messages: [{ role: "user", content: prompt }],
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: prompt },
+          ],
         }),
       });
 
