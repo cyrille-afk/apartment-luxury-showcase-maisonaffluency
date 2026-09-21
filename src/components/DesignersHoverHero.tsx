@@ -747,9 +747,6 @@ const DesignersHoverHero = () => {
   const suppressNavClickRef = useRef(false);
   const portalRef = useRef<HTMLAnchorElement>(null);
   const portalCursorRef = useRef<HTMLDivElement>(null);
-  const curationGridRef = useRef<HTMLDivElement>(null);
-  const curationCursorRef = useRef<HTMLDivElement>(null);
-  const [showCurationCursor, setShowCurationCursor] = useState(false);
 
   const activeSlugRef = useRef<string | null>(null);
   useEffect(() => {
@@ -1816,12 +1813,6 @@ const DesignersHoverHero = () => {
     </div>
   );
 
-  const handleCurationMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!curationGridRef.current || !curationCursorRef.current) return;
-    const rect = curationGridRef.current.getBoundingClientRect();
-    curationCursorRef.current.style.left = `${e.clientX - rect.left}px`;
-    curationCursorRef.current.style.top = `${e.clientY - rect.top}px`;
-  };
 
   return (
     <section
