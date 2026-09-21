@@ -31,6 +31,7 @@ const TradeLogin = () => {
     sessionStorage.setItem("maison:oauth-return-path", "/trade");
 
     try {
+      ensureStorageHeadroom();
       const result = await lovable.auth.signInWithOAuth("google", {
         // OAuth must return to a public same-origin URL. Sending the provider
         // directly to /trade lets the route guard run before the returned

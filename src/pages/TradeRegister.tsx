@@ -22,6 +22,7 @@ const PublicSignupForm = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
+      ensureStorageHeadroom();
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
