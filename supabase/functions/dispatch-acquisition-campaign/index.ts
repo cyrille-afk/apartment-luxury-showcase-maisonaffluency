@@ -299,10 +299,12 @@ serve(async (req) => {
       const reason = outcome.suppressed.length
         ? "suppressed"
         : outcome.failed[0]?.error ?? "send_failed";
-      await supabase
-        .from("acquisition_leads")
-        .update({ email_error: String(reason).slice(0, 300) })
-        .eq("id", row.id);
+      if (!testMode) {
+        await supabase
+          .from("acquisition_leads")
+          .update({ email_error: String(reason).slice(0, 300) })
+          .eq("id", row.id);
+      }
       results.push({ id: row.id, studio: row.studio_name, status: "failed", reason });
     }
   }
