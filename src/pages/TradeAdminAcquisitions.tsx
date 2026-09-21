@@ -48,6 +48,45 @@ const fmtDate = (iso: string | null) =>
     ? new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
     : "—";
 
+const statusBadge = (lead: Lead) => {
+  const status = lead.campaign_status;
+  const error = lead.email_error;
+
+  if (status === "activated") {
+    return {
+      label: "Activated",
+      className:
+        "rounded-none border-emerald-500/40 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/10",
+    };
+  }
+  if (status === "sent") {
+    return {
+      label: "Sent",
+      className:
+        "rounded-none border-amber-500/40 bg-amber-500/10 text-amber-600 hover:bg-amber-500/10",
+    };
+  }
+  if (error) {
+    return {
+      label: "Send Error",
+      className:
+        "rounded-none border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/10",
+    };
+  }
+  if (status === "enriched") {
+    return {
+      label: "Enriched",
+      className:
+        "rounded-none border-blue-500/40 bg-blue-500/10 text-blue-600 hover:bg-blue-500/10",
+    };
+  }
+  return {
+    label: "Unprocessed",
+    className:
+      "rounded-none border-border bg-muted/30 text-muted-foreground hover:bg-muted/30",
+  };
+};
+
 const GENERIC_EMAIL_PREFIXES = new Set([
   "admin",
   "info",
@@ -572,7 +611,7 @@ const TradeAdminAcquisitions = () => {
                   { label: "Instagram", width: "min-w-[140px] w-[10%]" },
                   { label: "Aesthetic Profile", width: "min-w-[280px] w-[24%]" },
                   { label: "Source-Verified Links", width: "min-w-[220px] w-[16%]" },
-                  { label: "Verification", width: "min-w-[140px] w-[10%]" },
+                  { label: "Status", width: "min-w-[140px] w-[10%]" },
                 ].map((h) => (
                   <th
                     key={h.label}
@@ -709,16 +748,22 @@ const TradeAdminAcquisitions = () => {
                     />
                   </td>
                   <td className="px-5 py-6">
-                    <Badge
-                      variant="outline"
-                      className="rounded-none border-emerald-500/40 text-[10px] uppercase tracking-[0.18em] text-emerald-600"
-                    >
-                      {lead.verified_at ? "Verified" : "Enriched"}
-                    </Badge>
+                    {(() => {
+                      const badge = statusBadge(lead);
+                      return (
+                        <Badge
+                          variant="outline"
+                          className={`${badge.className} text-[10px] uppercase tracking-[0.18em]`}
+                        >
+                          {badge.label}
+                        </Badge>
+                      );
+                    })()}
                     <div className="mt-2 space-y-0.5 text-[11px] text-muted-foreground">
                       <div>{lead.source_index ?? "—"}</div>
                       <div>Added {fmtDate(lead.created_at)}</div>
                       {lead.verified_at && <div>Verified {fmtDate(lead.verified_at)}</div>}
+                      {lead.email_sent_at && <div>Sent {fmtDate(lead.email_sent_at)}</div>}
                       {lead.email_error && (
                         <div className="text-destructive">Last error: {lead.email_error}</div>
                       )}
