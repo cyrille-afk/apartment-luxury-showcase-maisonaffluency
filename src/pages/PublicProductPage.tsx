@@ -77,7 +77,6 @@ import {
   quantitativeValue,
 } from "@/components/product/PublicSpecTable";
 import TradeWorkspace from "@/components/product/TradeWorkspace";
-import EditorialGalleryLandingHint from "@/components/product/EditorialGalleryLandingHint";
 import ProductCommerceCta from "@/components/product/ProductCommerceCta";
 import ProductMotionSelector from "@/components/product/ProductMotionSelector";
 import {
@@ -2323,13 +2322,6 @@ const PublicProductPageContent: React.FC = () => {
               )}
               ref={galleryScrollRef}
             >
-              <EditorialGalleryLandingHint
-                className="absolute top-4 left-4 z-40"
-                onClick={() => {
-                  const el = galleryScrollRef.current;
-                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
-              />
               <ProductImageGallery
                 images={visibleImages}
                 alt={product.title}
