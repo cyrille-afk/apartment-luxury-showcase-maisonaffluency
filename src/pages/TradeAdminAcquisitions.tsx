@@ -650,21 +650,29 @@ const TradeAdminAcquisitions = () => {
                   </td>
                   <td className="px-5 py-6">
                     {vector === "instagram" ? (
-                      <Badge
-                        variant="outline"
-                        className="rounded-none border-destructive/30 text-[11px] font-normal text-destructive"
+                      <a
+                        href={`https://instagram.com/${(lead.instagram_handle ?? "").replace(/^@+/, "")}`}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="inline-flex h-9 items-center gap-2 border border-destructive/40 px-4 text-[10px] uppercase tracking-[0.18em] text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
                       >
-                        <AlertTriangle className="mr-1.5 h-3 w-3" />
-                        🚨 Route via Instagram DM
-                      </Badge>
+                        <Instagram className="h-3.5 w-3.5" />
+                        Route via Instagram DM
+                      </a>
                     ) : (
-                      <Badge
-                        variant="outline"
-                        className="rounded-none border-border text-[11px] font-normal text-foreground"
+                      <button
+                        type="button"
+                        disabled={dispatching}
+                        onClick={() => deploySequences([lead.id])}
+                        className="inline-flex h-9 items-center gap-2 bg-foreground px-4 text-[10px] uppercase tracking-[0.18em] text-background transition-colors hover:bg-foreground/85 disabled:opacity-50"
                       >
-                        <Mail className="mr-1.5 h-3 w-3" />
-                        ✉️ Deploy via Resend Email
-                      </Badge>
+                        {dispatching ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Send className="h-3.5 w-3.5" />
+                        )}
+                        Deploy via Resend Email
+                      </button>
                     )}
                   </td>
                   <td className="px-5 py-6">
