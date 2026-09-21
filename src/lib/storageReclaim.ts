@@ -62,3 +62,33 @@ export function ensureStorageHeadroom(needBytes = 120_000): boolean {
     return false;
   }
 }
+
+/**
+ * Global safety net: any write anywhere in the app that would fail because the
+ * browser store is full instead frees space and retries once. This makes the
+ * "quota exceeded" sign-in failure impossible to reach again, without every
+ * call site having to remember to reclaim space first.
+ */
+let guardInstalled = false;
+export function installStorageQuotaGuard(): void {
+  if (typeof window === "undefined" || guardInstalled) return;
+  guardInstalled = true;
+  try {
+    const proto = Storage.prototype;
+    const original = proto.setItem;
+    proto.setItem = function patchedSetItem(this: Storage, key: string, value: string) {
+      try {
+        return original.call(this, key, value);
+      } catch (err) {
+        // Only quota failures are recoverable; anything else must surface.
+        const name = (err as DOMException)?.name || "";
+        const quota = name === "QuotaExceededError" || name === "NS_ERROR_DOM_QUOTA_REACHED";
+        if (!quota || this !== window.localStorage) throw err;
+        ensureStorageHeadroom(Math.max(120_000, (value || "").length * 2));
+        return original.call(this, key, value);
+      }
+    };
+  } catch {
+    /* storage unavailable (private mode / blocked cookies) — nothing to guard */
+  }
+}
