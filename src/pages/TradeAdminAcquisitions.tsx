@@ -157,6 +157,7 @@ const TradeAdminAcquisitions = () => {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [dispatching, setDispatching] = useState(false);
+  const [testMode, setTestMode] = useState(false);
   const [repairing, setRepairing] = useState(false);
   const [exiting, setExiting] = useState<Set<string>>(new Set());
   const [igFirstOnly, setIgFirstOnly] = useState(false);
@@ -277,7 +278,7 @@ const TradeAdminAcquisitions = () => {
     setDispatching(true);
     try {
       const { data, error } = await supabase.functions.invoke("dispatch-acquisition-campaign", {
-        body: { ids },
+        body: { ids, testMode },
       });
       const failure = (data as { error?: string } | null)?.error;
       if (error || failure) throw new Error(failure || error?.message || "Dispatch failed.");
@@ -288,14 +289,16 @@ const TradeAdminAcquisitions = () => {
         results: { id: string; status: string }[];
       };
 
-      const sentIds = (result.results ?? []).filter((r) => r.status === "sent").map((r) => r.id);
+      const sentIds = testMode
+        ? []
+        : (result.results ?? []).filter((r) => r.status === "sent").map((r) => r.id);
       setExiting(new Set(sentIds));
       toast.success(
-        `${result.sent} invitation${result.sent === 1 ? "" : "s"} sent.` +
+        `${testMode ? "[Test] " : ""}${result.sent} invitation${result.sent === 1 ? "" : "s"} sent${testMode ? " to your admin inbox" : ""}.` +
           (result.skipped ? ` ${result.skipped} skipped.` : "") +
           (result.failed ? ` ${result.failed} failed.` : ""),
       );
-      setSelected(new Set());
+      if (!testMode) setSelected(new Set());
       window.setTimeout(() => {
         setExiting(new Set());
         queryClient.invalidateQueries({ queryKey: ["acquisition-leads", "enriched"] });
@@ -416,6 +419,25 @@ const TradeAdminAcquisitions = () => {
               <Instagram className="mr-2 h-4 w-4" />
               {igFirstOnly ? "Showing Instagram-First Targets" : "Show Instagram-First Targets Only"}
             </Button>
+            <label className="flex items-center justify-end gap-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              <span>Test Mode (Route to Admin Email)</span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={testMode}
+                aria-label="Test Mode (Route to Admin Email)"
+                onClick={() => setTestMode((v) => !v)}
+                className={`relative h-5 w-10 rounded-full border transition-colors ${
+                  testMode ? "border-foreground bg-foreground" : "border-border bg-transparent"
+                }`}
+              >
+                <span
+                  className={`absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full transition-all ${
+                    testMode ? "left-[22px] bg-background" : "left-[3px] bg-muted-foreground"
+                  }`}
+                />
+              </button>
+            </label>
             <Button
               onClick={deploySequences}
               disabled={dispatching || selected.size === 0}

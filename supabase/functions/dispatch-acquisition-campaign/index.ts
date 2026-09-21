@@ -44,7 +44,65 @@ type Lead = {
   campaign_status: string;
 };
 
-function renderInvitation(lead: Lead, roster: Map<string, string>): string {
+/** Manual A–Z selections rendered as one editorial sentence fragment. */
+function designerString(matches: string[]): string {
+  if (matches.length === 0) return "";
+  if (matches.length === 1) return esc(matches[0]);
+  if (matches.length === 2) return `${esc(matches[0])} and ${esc(matches[1])}`;
+  return `${matches.slice(0, -1).map(esc).join(", ")}, and ${esc(matches[matches.length - 1])}`;
+}
+
+const P =
+  'style="font-family:Georgia,serif;font-size:15px;line-height:1.85;color:#1A1A1A;margin:0 0 18px;"';
+
+function shell(paragraphs: string[]): string {
+  return `
+  <div style="background:#FAF9F6;padding:40px 0;">
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;margin:0 auto;background:#FAF9F6;">
+      <tr>
+        <td style="padding:8px 32px 28px;">
+          <div style="font-family:Georgia,serif;font-size:18px;letter-spacing:3px;color:#1A1A1A;">MAISON AFFLUENCY</div>
+          <div style="height:1px;background:#1A1A1A;opacity:0.18;margin-top:14px;"></div>
+        </td>
+      </tr>
+      <tr><td style="padding:0 32px 40px;">${paragraphs.map((p) => `<p ${P}>${p}</p>`).join("")}</td></tr>
+    </table>
+  </div>`;
+}
+
+/** Template A — automated direct access (high-confidence profiles). */
+function renderTemplateA(lead: Lead, designers: string, link: string): string {
+  const studio = esc(lead.studio_name);
+  const designerClause = designers
+    ? `&mdash;including direct, friction-free access to pieces by ${designers}.`
+    : ".";
+  return shell([
+    `Dear ${esc(lead.founder_name || "Studio Director")},`,
+    `I have been following ${studio}&rsquo;s recent work. I am reaching out because I recently launched Maison Affluency, a global sourcing platform engineered exclusively for elite interior architects. We have unified over 170 master furniture and lighting designers under a single digital architecture${designerClause}`,
+    `Unlike legacy distribution networks that rely on slow, manual paper quoting, we operate as a technology-first partner providing instant global net pricing and RAG-driven curatorial advisory directly on your private workspace.`,
+    `Given the caliber of your portfolio, I have pre-approved ${studio} for full international trade status and global tax-exempt invoicing.`,
+    `You can activate your workspace instantly through your private portal key: <a href="${link}" style="color:#1A1A1A;text-decoration:underline;">${link}</a>`,
+    `Warm regards,<br />Cyrille Delva<br />Founder, Maison Affluency`,
+  ]);
+}
+
+/** Template B — personal savant override (hand-curated triage). */
+function renderTemplateB(lead: Lead, designers: string): string {
+  const studio = esc(lead.studio_name);
+  const designerClause = designers
+    ? `, including direct, friction-free access to pieces by ${designers}.`
+    : ".";
+  return shell([
+    `Dear ${esc(lead.founder_name || "Studio Director")},`,
+    `I personally reviewed your studio&rsquo;s portfolio today and wanted to welcome you to the Maison Affluency global trade program. The caliber of work coming out of ${studio} is exceptional, and it is a privilege to partner with you.`,
+    `Your trade status has been finalized. Net professional pricing is now unlocked globally across our portfolio of 170+ master designers${designerClause}`,
+    `As a designer myself, I built Maison Affluency to solve the friction of elite sourcing. I highly recommend utilizing our integrated AI Curatorial Guide for your current mood boards. I have trained the engine with deep design syntax, allowing it to interpret complex architectural context and track down highly specific collector pieces across global supply chains in seconds.`,
+    `Should you or your team ever need direct concierge support for a high-net-worth residential commission, simply reply directly to this message.`,
+    `Sincerely,<br />Cyrille Delva<br />Founder, Maison Affluency`,
+  ]);
+}
+
+function renderLegacyInvitation(lead: Lead, roster: Map<string, string>): string {
   const greeting = lead.founder_name
     ? `Dear ${esc(lead.founder_name)}`
     : "Dear Studio Director";
@@ -116,7 +174,12 @@ serve(async (req) => {
   const auth = await requireAdmin(req, "dispatch-acquisition-campaign");
   if (!auth.ok) return json(auth.body, auth.status);
 
-  let body: { ids?: unknown; resend?: boolean } = {};
+  let body: {
+    ids?: unknown;
+    resend?: boolean;
+    testMode?: boolean;
+    variant?: string;
+  } = {};
   try {
     body = await req.json();
   } catch {
@@ -155,61 +218,100 @@ serve(async (req) => {
 
   const results: { id: string; studio: string; status: string; reason?: string }[] = [];
 
+  // Test mode routes every message to the signed-in admin and never stamps
+  // the row as sent, so the lead stays live for production deployment.
+  const testMode = body.testMode === true;
+  const adminEmail = String((auth.claims as { email?: unknown }).email ?? "").trim();
+  if (testMode && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(adminEmail)) {
+    return json({ error: "No admin email on this session for test mode" }, 400);
+  }
+  const variant = body.variant === "B" ? "B" : "A";
+
   for (const row of (data ?? []) as Lead[]) {
-    if ((row.campaign_status === "sent" || row.campaign_status === "converted") && !body.resend) {
+    if (
+      !testMode &&
+      (row.campaign_status === "sent" || row.campaign_status === "converted") &&
+      !body.resend
+    ) {
       results.push({ id: row.id, studio: row.studio_name, status: "skipped", reason: "already_sent" });
       continue;
     }
-    const matches = Array.isArray(row.predicted_designer_matches)
+    const matches = (Array.isArray(row.predicted_designer_matches)
       ? row.predicted_designer_matches
-      : [];
-    if (matches.length === 0) {
-      results.push({ id: row.id, studio: row.studio_name, status: "skipped", reason: "not_enriched" });
-      continue;
-    }
+      : [])
+      .map((n) => String(n ?? "").trim())
+      .filter(Boolean);
+    const designers = designerString(matches);
+    void roster;
 
     // Executive-vetted contacts win over the generic studio catch-all.
     const vetted = (Array.isArray(row.executive_emails) ? row.executive_emails : [])
       .map((e) => String(e ?? "").trim())
       .filter((e) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e));
-    const recipients = vetted.length > 0 ? vetted : [row.business_email];
+    const recipients = testMode
+      ? [adminEmail]
+      : vetted.length > 0
+        ? vetted
+        : [row.business_email];
+
+    const link = `${SITE}/trade-program?portal=${encodeURIComponent(row.id)}`;
+    const html =
+      variant === "B"
+        ? renderTemplateB(row, designers)
+        : renderTemplateA(row, designers, link);
+    const baseSubject =
+      variant === "B"
+        ? "Personal Welcome to the Maison Affluency Trade Program"
+        : `Sourcing framework for ${row.studio_name} / Maison Affluency`;
+    const subject = testMode ? `[TEST-MODE] ${baseSubject}` : baseSubject;
 
     const outcome = await sendLovableEmail(
       {
         to: recipients,
-        subject: `${row.studio_name}: an invitation to the Maison Affluency trade house`,
-        html: renderInvitation(row, roster),
+        subject,
+        html,
         label: "acquisition-trade-invitation",
-        idempotencyKey: `acquisition-invite-${row.id}`,
+        idempotencyKey: testMode
+          ? `acquisition-invite-test-${row.id}-${Date.now()}`
+          : `acquisition-invite-${variant}-${row.id}`,
         replyTo: "cyrille@maisonaffluency.com",
       },
       supabase,
     );
 
     if (outcome.queued.length > 0) {
-      await supabase
-        .from("acquisition_leads")
-        .update({
-          campaign_status: "sent",
-          email_sent_at: new Date().toISOString(),
-          email_error: null,
-        })
-        .eq("id", row.id);
-      results.push({ id: row.id, studio: row.studio_name, status: "sent" });
+      if (!testMode) {
+        await supabase
+          .from("acquisition_leads")
+          .update({
+            campaign_status: "sent",
+            email_sent_at: new Date().toISOString(),
+            email_error: null,
+          })
+          .eq("id", row.id);
+      }
+      results.push({
+        id: row.id,
+        studio: row.studio_name,
+        status: testMode ? "test_sent" : "sent",
+      });
     } else {
       const reason = outcome.suppressed.length
         ? "suppressed"
         : outcome.failed[0]?.error ?? "send_failed";
-      await supabase
-        .from("acquisition_leads")
-        .update({ email_error: String(reason).slice(0, 300) })
-        .eq("id", row.id);
+      if (!testMode) {
+        await supabase
+          .from("acquisition_leads")
+          .update({ email_error: String(reason).slice(0, 300) })
+          .eq("id", row.id);
+      }
       results.push({ id: row.id, studio: row.studio_name, status: "failed", reason });
     }
   }
 
   return json({
-    sent: results.filter((r) => r.status === "sent").length,
+    testMode,
+    sent: results.filter((r) => r.status === "sent" || r.status === "test_sent").length,
     skipped: results.filter((r) => r.status === "skipped").length,
     failed: results.filter((r) => r.status === "failed").length,
     results,
