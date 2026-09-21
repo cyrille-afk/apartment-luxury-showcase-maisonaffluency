@@ -611,7 +611,7 @@ const TradeAdminAcquisitions = () => {
                   { label: "Instagram", width: "min-w-[140px] w-[10%]" },
                   { label: "Aesthetic Profile", width: "min-w-[280px] w-[24%]" },
                   { label: "Source-Verified Links", width: "min-w-[220px] w-[16%]" },
-                  { label: "Verification", width: "min-w-[140px] w-[10%]" },
+                  { label: "Status", width: "min-w-[140px] w-[10%]" },
                 ].map((h) => (
                   <th
                     key={h.label}
