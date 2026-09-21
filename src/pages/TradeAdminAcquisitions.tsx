@@ -647,8 +647,13 @@ const TradeAdminAcquisitions = () => {
                       <span className="text-sm text-muted-foreground">—</span>
                     )}
                   </td>
-                  <td className="px-5 py-6 text-sm leading-relaxed text-muted-foreground whitespace-normal">
-                    {lead.aesthetic_profile ?? "—"}
+                  <td className="px-5 py-6">
+                    <AestheticProfileInput
+                      leadId={lead.id}
+                      studioName={lead.studio_name}
+                      value={lead.aesthetic_profile}
+                      onChange={(next) => applyAesthetic(lead.id, next)}
+                    />
                   </td>
                   <td className="px-5 py-6">
                     <DesignerAssignSelect
