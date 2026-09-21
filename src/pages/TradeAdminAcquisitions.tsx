@@ -419,6 +419,25 @@ const TradeAdminAcquisitions = () => {
               <Instagram className="mr-2 h-4 w-4" />
               {igFirstOnly ? "Showing Instagram-First Targets" : "Show Instagram-First Targets Only"}
             </Button>
+            <label className="flex items-center justify-end gap-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              <span>Test Mode (Route to Admin Email)</span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={testMode}
+                aria-label="Test Mode (Route to Admin Email)"
+                onClick={() => setTestMode((v) => !v)}
+                className={`relative h-5 w-10 rounded-full border transition-colors ${
+                  testMode ? "border-foreground bg-foreground" : "border-border bg-transparent"
+                }`}
+              >
+                <span
+                  className={`absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full transition-all ${
+                    testMode ? "left-[22px] bg-background" : "left-[3px] bg-muted-foreground"
+                  }`}
+                />
+              </button>
+            </label>
             <Button
               onClick={deploySequences}
               disabled={dispatching || selected.size === 0}
