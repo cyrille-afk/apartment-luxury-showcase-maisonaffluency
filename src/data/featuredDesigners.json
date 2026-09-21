@@ -15,7 +15,7 @@
     "founder": null,
     "hero_image_url": "https://hips.hearstapps.com/hmg-prod/images/apparatus-studio-ed-skj-03-1650415302.jpg",
     "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,f_auto/gabriel-hendifar-apparatus-studio",
-    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779698535/Lantern_Cover_tikr2a.png"
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779698941/Tassel_Cover_itntqz.webp"
   },
   {
     "id": "1317ce9a-d0fa-4486-b933-12f826d65ff0",
@@ -51,7 +51,7 @@
     "founder": null,
     "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781526786/473105142_904836898402412_800418100092485523_n_mk7ghp.jpg",
     "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/emanuelle-levet-stenne_kuwbex",
-    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780912198/essai_lampadaire_albatre.1507_2_hi6ob1.jpg"
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781529048/Alabaster_Pendant-Off_ivwxtp.jpg"
   },
   {
     "id": "ddcc67ce-92cb-4e19-a07e-ce5e577c438c",
@@ -141,7 +141,7 @@
     "founder": null,
     "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779247973/Cover4_zs6t6a.webp",
     "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/garnier-linker_wvqg7k",
-    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779280510/Calliope_Small-1_fq8v56.webp"
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779273554/Bora_Sconce_-_Uplight-2_cn7gea.webp"
   },
   {
     "id": "3ea0d50d-ac6d-4b56-a183-4338a8658ebc",
@@ -207,15 +207,6 @@
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779724784/Sensible_CoffeeTable-1_3000x3000_j2fgto.jpg"
   },
   {
-    "id": "e91f75d3-0001-4000-8000-000000000001",
-    "slug": "atelier-demichelis",
-    "name": "Atelier Demichelis",
-    "founder": null,
-    "hero_image_url": "https://static-assets.artlogic.net/w_1200,c_limit,f_auto,fl_lossy,q_auto/ws-studiotashtego/usr/images/artists/group_images_override/items/10/10541d24e04242f080b6445044490b40/hd-reportage-atelier-demichelis-_-emmanuelle-braun-photographe-17.jpg",
-    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,f_auto/Screen_Shot_2025-12-11_at_11.44.20_PM_bj90pt",
-    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780565552/Lampe-Babel-bois-de-chene-bronze-champagne-Atelier-Demichelis-Emmanuelle-Braun01_cvxtd5.webp"
-  },
-  {
     "id": "e49eb791-5564-435d-bd2c-662f0b5d4029",
     "slug": "thierry-lemaire",
     "name": "Thierry Lemaire",
@@ -223,6 +214,15 @@
     "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1775599941/Screen_Shot_2026-04-08_at_6.11.59_AM_o6nbyo.png",
     "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/thierry-lemaire_heyrtj",
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779936034/Koumac-Cover_dqeshp.jpg"
+  },
+  {
+    "id": "e91f75d3-0001-4000-8000-000000000001",
+    "slug": "atelier-demichelis",
+    "name": "Atelier Demichelis",
+    "founder": null,
+    "hero_image_url": "https://static-assets.artlogic.net/w_1200,c_limit,f_auto,fl_lossy,q_auto/ws-studiotashtego/usr/images/artists/group_images_override/items/10/10541d24e04242f080b6445044490b40/hd-reportage-atelier-demichelis-_-emmanuelle-braun-photographe-17.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,f_auto/Screen_Shot_2025-12-11_at_11.44.20_PM_bj90pt",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780565552/Lampe-Babel-bois-de-chene-bronze-champagne-Atelier-Demichelis-Emmanuelle-Braun01_cvxtd5.webp"
   },
   {
     "id": "2de0def0-92ce-44a6-bb2e-f91d0eb76285",
