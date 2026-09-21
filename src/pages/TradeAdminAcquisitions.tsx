@@ -59,9 +59,9 @@ const statusBadge = (lead: Lead) => {
         "rounded-none border-emerald-500/40 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/10",
     };
   }
-  if (status === "sent") {
+  if (status === "sent" || status === "outbound_sent") {
     return {
-      label: "Sent",
+      label: "Outbound Sent",
       className:
         "rounded-none border-amber-500/40 bg-amber-500/10 text-amber-600 hover:bg-amber-500/10",
     };
@@ -220,7 +220,7 @@ const TradeAdminAcquisitions = () => {
         .select(
           "id, studio_name, founder_name, business_email, website_url, source_index, aesthetic_profile, predicted_designer_matches, campaign_status, verified_at, email_sent_at, email_error, created_at, country, city, instagram_handle, executive_emails",
         )
-        .in("campaign_status", ["unprocessed", "enriched", "activated", "sent"])
+        .in("campaign_status", ["unprocessed", "enriched", "activated", "sent", "outbound_sent"])
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
@@ -345,18 +345,23 @@ const TradeAdminAcquisitions = () => {
       // so we never trigger the exit/slide-out animation.
       const sentIds = testMode
         ? []
-        : (result.results ?? []).filter((r) => r.status === "sent").map((r) => r.id);
-      setExiting(new Set(sentIds));
+        : (result.results ?? []).filter((r) => r.status === "outbound_sent").map((r) => r.id);
+      if (!testMode) {
+        queryClient.setQueryData<Lead[]>(["acquisition-leads", "enriched"], (prev) =>
+          (prev ?? []).map((lead) =>
+            sentIds.includes(lead.id)
+              ? { ...lead, campaign_status: "outbound_sent", email_sent_at: new Date().toISOString(), email_error: null }
+              : lead,
+          ),
+        );
+      }
       toast.success(
         `${testMode ? "[Test] " : ""}${result.sent} invitation${result.sent === 1 ? "" : "s"} sent${testMode ? " to your admin inbox" : ""}.` +
           (result.skipped ? ` ${result.skipped} skipped.` : "") +
           (result.failed ? ` ${result.failed} failed.` : ""),
       );
       if (!testMode) setSelected(new Set());
-      window.setTimeout(() => {
-        setExiting(new Set());
-        queryClient.invalidateQueries({ queryKey: ["acquisition-leads", "enriched"] });
-      }, 700);
+      queryClient.invalidateQueries({ queryKey: ["acquisition-leads", "enriched"] });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Dispatch failed.");
     } finally {

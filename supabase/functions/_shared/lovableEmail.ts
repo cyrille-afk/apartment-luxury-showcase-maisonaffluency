@@ -81,6 +81,8 @@ export interface SendEmailArgs {
   idempotencyKey?: string;
   replyTo?: string;
   text?: string;
+  /** Interpolated values retained in the queued provider payload for auditing. */
+  templateData?: Record<string, string>;
 }
 
 export interface SendEmailResult {
@@ -169,6 +171,7 @@ export async function sendLovableEmail(
         queued_at: new Date().toISOString(),
       };
       if (args.replyTo) payload.reply_to = args.replyTo;
+      if (args.templateData) payload.template_data = args.templateData;
 
       const { error: enqueueError } = await supabase.rpc("enqueue_email", {
         queue_name: "transactional_emails",

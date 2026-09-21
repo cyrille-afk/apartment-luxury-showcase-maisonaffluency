@@ -46,24 +46,32 @@ type Lead = {
 
 /** Manual A–Z selections rendered as one editorial sentence fragment. */
 function designerString(matches: string[]): string {
-  if (matches.length === 0) return "";
+  if (matches.length === 0) return "our curated collective of master artisans";
   if (matches.length === 1) return esc(matches[0]);
   if (matches.length === 2) return `${esc(matches[0])} and ${esc(matches[1])}`;
   return `${matches.slice(0, -1).map(esc).join(", ")}, and ${esc(matches[matches.length - 1])}`;
 }
 
+function salutation(lead: Lead): string {
+  const contact = String(lead.founder_name ?? "").trim();
+  if (!contact || /\b(?:director|group)\b/i.test(contact)) {
+    return `Team at ${esc(lead.studio_name)}`;
+  }
+  return esc(contact);
+}
+
 const P =
   'style="font-family:Georgia,serif;font-size:15px;line-height:1.85;color:#1A1A1A;margin:0 0 18px;"';
 
-function shell(paragraphs: string[], link: string = SITE): string {
+function shell(paragraphs: string[]): string {
   const navLink = (label: string) =>
-    `<a href="${link}" style="color:#1A1A1A;text-decoration:none;">${label}</a>`;
+    `<a href="${SITE}" style="color:#1A1A1A;text-decoration:none;">${label}</a>`;
   return `
   <div style="background:#FAF9F6;padding:40px 0;">
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;margin:0 auto;background:#FAF9F6;">
       <tr>
         <td style="padding:28px 32px 28px;border-bottom:1px solid #1A1A1A;">
-          <div style="font-family:Georgia,'Times New Roman',serif;font-size:17px;letter-spacing:6px;text-transform:uppercase;color:#1A1A1A;"><a href="${link}" style="color:#1A1A1A;text-decoration:none;">MAISON AFFLUENCY</a></div>
+          <div style="font-family:Georgia,'Times New Roman',serif;font-size:17px;letter-spacing:6px;text-transform:uppercase;color:#1A1A1A;"><a href="${SITE}" style="color:#1A1A1A;text-decoration:none;">MAISON AFFLUENCY</a></div>
           <div style="font-family:Georgia,'Times New Roman',serif;font-size:10px;letter-spacing:3.5px;text-transform:uppercase;color:#1A1A1A;opacity:0.55;margin-top:10px;">${navLink("The Archive")}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;${navLink("AI Curatorial Chat")}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;${navLink("Global Trade")}</div>
         </td>
       </tr>
@@ -73,25 +81,22 @@ function shell(paragraphs: string[], link: string = SITE): string {
 }
 
 /** Maison Affluency priority trade invitation. */
-function renderTemplateA(lead: Lead, designers: string, link: string): string {
+function renderTemplateA(lead: Lead, designers: string): string {
   const studio = esc(lead.studio_name);
-  const designerClause = designers
-    ? `Given the caliber of your work, we have already indexed direct access to pieces from creators like ${designers} specifically aligned with your aesthetic.`
-    : `Given the caliber of your work, we have already indexed direct access to exceptional pieces specifically aligned with your aesthetic.`;
   return shell([
-    `Dear Team at ${studio},`,
+    `Dear ${salutation(lead)},`,
     `I have been closely following your studio&rsquo;s footprint, particularly your focus on sourcing exceptional pieces for your portfolio.`,
     `We recently launched Maison Affluency&mdash;a dedicated, technology-first sourcing platform built strictly for elite interior architects. Our focus is eliminating the slow, manual paper quoting legacy networks rely on, replacing it with instant global net pricing and dedicated curatorial advisory tailored to your project workspaces.`,
-    `We have unified over 170 master furniture and lighting designers under a single architecture. ${designerClause}`,
+    `We have unified over 170 master furniture and lighting designers under a single architecture. Given the caliber of your work, we have already indexed direct access to pieces from creators like ${designers} specifically aligned with your aesthetic.`,
     `We would love to extend full international trade status and seamless global invoicing privileges to your firm.`,
-    `If you are open to it, I would be delighted to host a brief 5-minute walkthrough of the portal for your principal team, or I can send over our <a href="${link}" style="color:#1A1A1A;text-decoration:underline;text-underline-offset:3px;">private credential key</a> directly to this email.`,
+    `If you are open to it, I would be delighted to host a brief 5-minute walkthrough of the portal for your principal team, or I can send over our private credential key directly to this email.`,
     `Warm regards,<br />Cyrille Delval<br />Founder, Maison Affluency`,
-  ], link);
+  ]);
 }
 
 /** Template B — personal savant override (hand-curated triage). */
-function renderTemplateB(lead: Lead, designers: string, link: string = SITE): string {
-  return renderTemplateA(lead, designers, link);
+function renderTemplateB(lead: Lead, designers: string): string {
+  return renderTemplateA(lead, designers);
 }
 
 function renderLegacyInvitation(lead: Lead, roster: Map<string, string>): string {
@@ -222,7 +227,7 @@ serve(async (req) => {
   for (const row of (data ?? []) as Lead[]) {
     if (
       !testMode &&
-      (row.campaign_status === "sent" || row.campaign_status === "converted") &&
+      (["sent", "outbound_sent", "converted", "activated"].includes(row.campaign_status)) &&
       !body.resend
     ) {
       results.push({ id: row.id, studio: row.studio_name, status: "skipped", reason: "already_sent" });
@@ -246,11 +251,10 @@ serve(async (req) => {
         ? vetted
         : [row.business_email];
 
-    const link = `${SITE}/trade/activate?token=${encodeURIComponent(row.id)}`;
     const html =
       variant === "B"
-        ? renderTemplateB(row, designers, link)
-        : renderTemplateA(row, designers, link);
+        ? renderTemplateB(row, designers)
+        : renderTemplateA(row, designers);
     const baseSubject = `Priority trade access for ${row.studio_name} / Maison Affluency`;
     const subject = testMode ? `[TEST-MODE] ${baseSubject}` : baseSubject;
 
@@ -264,6 +268,17 @@ serve(async (req) => {
           ? `acquisition-invite-test-${row.id}-${Date.now()}`
           : `acquisition-invite-${variant}-${row.id}`,
         replyTo: "cyrille@maisonaffluency.com",
+        templateData: {
+          studioName: row.studio_name,
+          salutation: salutation(row).replace(/&amp;/g, "&"),
+          designerBrands: matches.length > 0
+            ? matches.length === 1
+              ? matches[0]
+              : matches.length === 2
+                ? `${matches[0]} and ${matches[1]}`
+                : `${matches.slice(0, -1).join(", ")}, and ${matches[matches.length - 1]}`
+            : "our curated collective of master artisans",
+        },
       },
       supabase,
     );
@@ -273,7 +288,7 @@ serve(async (req) => {
         await supabase
           .from("acquisition_leads")
           .update({
-            campaign_status: "sent",
+            campaign_status: "outbound_sent",
             email_sent_at: new Date().toISOString(),
             email_error: null,
           })
@@ -282,7 +297,7 @@ serve(async (req) => {
       results.push({
         id: row.id,
         studio: row.studio_name,
-        status: testMode ? "test_sent" : "sent",
+        status: testMode ? "test_sent" : "outbound_sent",
       });
     } else {
       const reason = outcome.suppressed.length
@@ -300,7 +315,7 @@ serve(async (req) => {
 
   return json({
     testMode,
-    sent: results.filter((r) => r.status === "sent" || r.status === "test_sent").length,
+    sent: results.filter((r) => r.status === "outbound_sent" || r.status === "test_sent").length,
     skipped: results.filter((r) => r.status === "skipped").length,
     failed: results.filter((r) => r.status === "failed").length,
     results,
