@@ -54,6 +54,10 @@ const TradeActivate: React.FC = () => {
           // "already onboarded" flag so the welcome / name-your-copilot
           // overlay runs before the workspace grid is revealed.
           localStorage.removeItem("ma:copilot-onboarded");
+          localStorage.removeItem("trade_quick_tour_done");
+          localStorage.removeItem("trade_tour_autostart_v1");
+          localStorage.removeItem("trade_quick_tour_step");
+
           sessionStorage.setItem(
             "ma_activation_welcome",
             JSON.stringify({
