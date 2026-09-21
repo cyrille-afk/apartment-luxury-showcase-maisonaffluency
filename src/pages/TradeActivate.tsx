@@ -50,7 +50,10 @@ const TradeActivate: React.FC = () => {
         }
 
         try {
-          sessionStorage.setItem("ma_activation_guide", "1");
+          // Force the introductory studio experience: clear any local
+          // "already onboarded" flag so the welcome / name-your-copilot
+          // overlay runs before the workspace grid is revealed.
+          localStorage.removeItem("ma:copilot-onboarded");
           sessionStorage.setItem(
             "ma_activation_welcome",
             JSON.stringify({
@@ -62,7 +65,7 @@ const TradeActivate: React.FC = () => {
           /* storage optional */
         }
 
-        navigate("/trade/dashboard?guide=1", { replace: true });
+        navigate("/trade/dashboard", { replace: true });
       } catch {
         navigate("/trade-program", { replace: true });
       }
