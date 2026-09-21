@@ -1285,7 +1285,9 @@ const DesignersHoverHero = () => {
     document.body.appendChild(probe);
     const headerHeight = probe.getBoundingClientRect().top || 72;
     probe.remove();
-    const width = Math.min(1280, window.innerWidth - 96);
+    // Match the header content box exactly: max-w-7xl (1280px) minus its
+    // px-12 side padding (48px each side) => 1184px of content width.
+    const width = Math.min(1280, window.innerWidth) - 96;
     const dockTop = desktopSearchDockRef.current?.getBoundingClientRect().top;
     // Anchor the sheet directly above the unified input, with a narrow air gap.
     const panelBottom = dockTop ?? window.innerHeight - 104;
