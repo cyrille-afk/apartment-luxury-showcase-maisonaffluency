@@ -60,9 +60,11 @@ function shell(paragraphs: string[]): string {
   <div style="background:#FAF9F6;padding:40px 0;">
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;margin:0 auto;background:#FAF9F6;">
       <tr>
-        <td style="padding:8px 32px 28px;">
-          <img src="${SITE}/assets/affluency-email-logo.jpeg" alt="Maison Affluency" width="180" height="36" style="display:block;width:180px;height:36px;border:0;" />
-          <div style="height:1px;background:#1A1A1A;opacity:0.18;margin-top:14px;"></div>
+        <td style="padding:28px 32px 28px;border-bottom:1px solid #1A1A1A;">
+          <a href="${SITE}" style="text-decoration:none;color:#1A1A1A;display:block;">
+            <div style="font-family:Georgia,'Times New Roman',serif;font-size:17px;letter-spacing:6px;text-transform:uppercase;color:#1A1A1A;">MAISON AFFLUENCY</div>
+            <div style="font-family:Georgia,'Times New Roman',serif;font-size:10px;letter-spacing:3.5px;text-transform:uppercase;color:#1A1A1A;opacity:0.55;margin-top:10px;">The Archive&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;AI Curatorial Chat&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;Global Trade</div>
+          </a>
         </td>
       </tr>
       <tr><td style="padding:0 32px 40px;">${paragraphs.map((p) => `<p ${P}>${p}</p>`).join("")}</td></tr>
@@ -81,7 +83,7 @@ function renderTemplateA(lead: Lead, designers: string, link: string): string {
     `I have been following ${studio}&rsquo;s recent work. I am reaching out because I recently launched Maison Affluency, a global sourcing platform engineered exclusively for elite interior architects. We have unified over 170 master furniture and lighting designers under a single digital architecture${designerClause}`,
     `Unlike legacy distribution networks that rely on slow, manual paper quoting, we operate as a technology-first partner providing instant global net pricing and RAG-driven curatorial advisory directly on your private workspace.`,
     `Given the caliber of your portfolio, I have pre-approved ${studio} for full international trade status and global tax-exempt invoicing.`,
-    `You can activate your workspace instantly through your private portal key: <a href="${link}" style="color:#1A1A1A;text-decoration:underline;">${SITE}/trade/activate</a>`,
+    `You can activate your workspace instantly through your private portal key: <a href="${link}" style="color:#1A1A1A;text-decoration:underline;text-underline-offset:3px;">${SITE}/trade/activate</a>`,
     `Warm regards,<br />Cyrille Delval<br />Founder, Maison Affluency`,
   ]);
 }
