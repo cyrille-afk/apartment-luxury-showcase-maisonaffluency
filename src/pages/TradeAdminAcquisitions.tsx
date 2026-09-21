@@ -157,6 +157,7 @@ const TradeAdminAcquisitions = () => {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [dispatching, setDispatching] = useState(false);
+  const [testMode, setTestMode] = useState(false);
   const [repairing, setRepairing] = useState(false);
   const [exiting, setExiting] = useState<Set<string>>(new Set());
   const [igFirstOnly, setIgFirstOnly] = useState(false);
@@ -288,10 +289,12 @@ const TradeAdminAcquisitions = () => {
         results: { id: string; status: string }[];
       };
 
-      const sentIds = (result.results ?? []).filter((r) => r.status === "sent").map((r) => r.id);
+      const sentIds = testMode
+        ? []
+        : (result.results ?? []).filter((r) => r.status === "sent").map((r) => r.id);
       setExiting(new Set(sentIds));
       toast.success(
-        `${result.sent} invitation${result.sent === 1 ? "" : "s"} sent.` +
+        `${testMode ? "[Test] " : ""}${result.sent} invitation${result.sent === 1 ? "" : "s"} sent${testMode ? " to your admin inbox" : ""}.` +
           (result.skipped ? ` ${result.skipped} skipped.` : "") +
           (result.failed ? ` ${result.failed} failed.` : ""),
       );
