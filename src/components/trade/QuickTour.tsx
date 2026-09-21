@@ -36,7 +36,6 @@ const DEFAULT_STEPS: Step[] = [
 
 const STORAGE_KEY = "trade_quick_tour_step";
 export const TOUR_DONE_KEY = "trade_quick_tour_done";
-const AUTOSTART_KEY = "trade_tour_autostart_v1";
 
 export function QuickTour() {
   const navigate = useNavigate();
