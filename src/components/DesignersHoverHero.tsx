@@ -805,7 +805,11 @@ const DesignersHoverHero = () => {
     if (sessionStorage.getItem(HINT_KEY) === "done") return;
 
     const el = contentScrollRef.current;
-    const isWindow = el.scrollHeight <= el.clientHeight;
+    const elOverflowY = getComputedStyle(el).overflowY;
+    const elScrollable =
+      (elOverflowY === "auto" || elOverflowY === "scroll") &&
+      el.scrollHeight > el.clientHeight;
+    const isWindow = !elScrollable;
     const maxScroll = isWindow
       ? document.documentElement.scrollHeight - window.innerHeight
       : el.scrollHeight - el.clientHeight;
