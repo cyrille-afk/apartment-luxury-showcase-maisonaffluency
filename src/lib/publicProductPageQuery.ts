@@ -87,6 +87,9 @@ export async function fetchPublicProductPage(
     if (!list || list.length === 0) return null;
     return (
       list.find((p: any) => p.slug === productSlug) ||
+      // Stored slugs generated before accent transliteration ("g-lule") still
+      // need to resolve from the canonical accent-free URL ("gelule").
+      list.find((p: any) => p.slug && slugify(p.slug) === slugify(productSlug)) ||
       list.find((p: any) => {
         const titleSlug = slugify(p.title);
         const shortSlug = slugify(String(p.title).replace(/\s+by\s+.+$/i, ""));
