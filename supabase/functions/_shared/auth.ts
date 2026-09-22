@@ -91,12 +91,30 @@ export async function requireAdmin(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
-  const { data, error } = await svc
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", auth.userId)
-    .in("role", ["admin", "super_admin"]);
-  if (error || !data || data.length === 0) {
+  // Retry the role lookup: a transient database blip must never be reported
+  // as "not an admin".
+  let data: { role: string }[] | null = null;
+  let error: { message?: string } | null = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const res = await svc
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", auth.userId)
+      .in("role", ["admin", "super_admin"]);
+    data = (res.data as { role: string }[] | null) ?? null;
+    error = res.error ? { message: res.error.message } : null;
+    if (!error) break;
+    await new Promise((r) => setTimeout(r, 200 * (attempt + 1)));
+  }
+  if (error) {
+    // Could not determine the role — fail as a temporary error, not a denial.
+    return {
+      ok: false,
+      status: 503,
+      body: { error: "Could not verify your permissions, please retry" },
+    };
+  }
+  if (!data || data.length === 0) {
     recordAuthFailure(req, source, "edge_forbidden", auth.userId);
     return { ok: false, status: 403, body: { error: "Forbidden" } };
   }
