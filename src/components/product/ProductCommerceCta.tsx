@@ -381,8 +381,10 @@ export default function ProductCommerceCta({
               const scroller =
                 el.closest<HTMLElement>(".product-page-scroll") ??
                 document.scrollingElement;
+              // The anchor must move DOWN in the viewport (below the pinned
+              // gallery), i.e. scroll the container back up by the overlap.
               scroller?.scrollBy({
-                top: coverBottom - r.top + 12,
+                top: -(coverBottom - r.top + 12),
                 behavior: "smooth",
               });
             }
