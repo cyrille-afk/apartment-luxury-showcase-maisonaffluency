@@ -227,6 +227,9 @@ const TradeAdminAcquisitions = () => {
   const [activeCountry, setActiveCountry] = useState<string>(DEFAULT_COUNTRY);
   const [activeCity, setActiveCity] = useState<string>(DEFAULT_CITY);
   const [calibrating, setCalibrating] = useState(false);
+  // Rows whose automated portal key just landed — briefly pulsed in the grid.
+  const [justActivated, setJustActivated] = useState<Set<string>>(new Set());
+  const statusRef = useRef<Map<string, string>>(new Map());
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["acquisition-leads", "enriched"],
@@ -236,15 +239,67 @@ const TradeAdminAcquisitions = () => {
       const { data, error } = await supabase
         .from("acquisition_leads")
         .select(
-          "id, studio_name, founder_name, business_email, website_url, source_index, aesthetic_profile, predicted_designer_matches, campaign_status, verified_at, email_sent_at, email_error, created_at, country, city, instagram_handle, executive_emails",
+          "id, studio_name, founder_name, business_email, website_url, source_index, aesthetic_profile, predicted_designer_matches, campaign_status, verified_at, email_sent_at, email_error, created_at, country, city, instagram_handle, executive_emails, reply_received_at, reply_intent, portal_key_sent_at",
         )
-        .in("campaign_status", ["unprocessed", "enriched", "activated", "sent", "outbound_sent"])
+        .in("campaign_status", [
+          "unprocessed",
+          "enriched",
+          "activated",
+          "sent",
+          "outbound_sent",
+          "replied_interested",
+          "portal_activated",
+        ])
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
       return (data ?? []) as unknown as Lead[];
     },
   });
+
+  // Live reply handling: the inbound webhook writes straight to the table, so
+  // the grid reflects a reply and its automated key delivery without polling.
+  useRealtimeTables(
+    "acquisition_leads",
+    (event) => {
+      if (event.eventType === "DELETE") return;
+      const row = event.new as Lead | null;
+      if (!row?.id) return;
+      queryClient.setQueryData<Lead[]>(["acquisition-leads", "enriched"], (prev) => {
+        if (!prev) return prev;
+        const exists = prev.some((r) => r.id === row.id);
+        return exists ? prev.map((r) => (r.id === row.id ? { ...r, ...row } : r)) : [row, ...prev];
+      });
+
+      const previous = statusRef.current.get(row.id);
+      statusRef.current.set(row.id, row.campaign_status);
+      if (previous && previous !== row.campaign_status) {
+        if (row.campaign_status === "replied_interested") {
+          toast.success(`${row.studio_name} replied — interested.`);
+        }
+        if (row.campaign_status === "portal_activated") {
+          toast.success(`${row.studio_name} activated — portal key delivered.`);
+          setJustActivated((prev) => new Set(prev).add(row.id));
+          setTimeout(
+            () =>
+              setJustActivated((prev) => {
+                const next = new Set(prev);
+                next.delete(row.id);
+                return next;
+              }),
+            20_000,
+          );
+        }
+      }
+    },
+    enabled,
+  );
+
+  useEffect(() => {
+    for (const row of rows) {
+      if (!statusRef.current.has(row.id)) statusRef.current.set(row.id, row.campaign_status);
+    }
+  }, [rows]);
 
   // Geographic model: country → cities, derived from live rows. Rows without
   // geography are grouped under "Unassigned" so nothing is hidden silently.
