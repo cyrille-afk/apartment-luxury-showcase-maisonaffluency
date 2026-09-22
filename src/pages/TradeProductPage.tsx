@@ -1361,6 +1361,14 @@ const TradeProductPage: React.FC = () => {
   const { product, designer, relatedPicks, pricing, tradeProductId, glbUrl } = data;
 
   const designerDisplay = formatDesignerDisplayName(designer.name);
+  const curatorNotes = buildProductCuratorNotes({
+    title: product.title,
+    brandName: designerDisplay,
+    description: product.description,
+    dimensions: product.dimensions,
+    category: product.category,
+    subcategory: product.subcategory,
+  });
 
   const compareItem: CompareItem = {
     pick: {
