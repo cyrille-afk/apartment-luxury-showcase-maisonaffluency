@@ -11,6 +11,7 @@ import { supabaseImageTransform } from "@/lib/supabaseImage";
 import FunnelPayLinkBlock from "@/components/trade/FunnelPayLinkBlock";
 import FunnelReminderPauseToggle from "@/components/trade/FunnelReminderPauseToggle";
 import SimulatePaymentLink from "@/components/trade/SimulatePaymentLink";
+import OutboundMetricsCard from "@/components/trade/OutboundMetricsCard";
 
 const RANGES = [
   { id: 7, label: "Last 7 days" },
