@@ -35,9 +35,17 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { buildProductCuratorNotes } from "@/lib/productCuratorNotes";
 
-/** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage. */
+/** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage.
+ *  Accents are transliterated (GÉLULE → gelule) so the generated URL matches
+ *  the resolver in publicProductPageQuery — otherwise the link 404s. */
 const slugifyProduct = (s: string) =>
-  s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/['']/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 const specIcon = (symbol: string, className = "") => (
   <SpecGlyph symbol={symbol} className={className} />
 );
