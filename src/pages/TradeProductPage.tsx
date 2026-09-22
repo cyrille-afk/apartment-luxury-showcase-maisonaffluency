@@ -1936,11 +1936,8 @@ const TradeProductPage: React.FC = () => {
               }
               overlay={
                 <div className="flex items-center gap-2">
-                  {product.description && (
-                    <div className="hidden md:block">
-                      <LightboxDescriptionDropdown description={product.description} />
-                    </div>
-                  )}
+                  {/* Description now reads as Curator Notes below the gallery,
+                      matching the public product page. */}
                   <CornerTooltip label={favorited ? "Saved to Project" : "Add to Project"} side="bottom" align="end">
                     <AddToProjectPopover
                       productId={favoriteId}
