@@ -1927,13 +1927,35 @@ const PublicProductPageContent: React.FC = () => {
   const finishOptions = finishVariantEntries.map((f) => f.label);
 
   // Priced pieces with selectable finishes land with NO swatch chosen: the
-  // sticky CTA invites a finish choice ("Select Finishes for Pricing" /
-  // "Choose Finishes") until the visitor actually picks one.
+  // sticky CTA invites a finish choice ("Choose Finishes") until EVERY
+  // multi-option axis (wood/base, top, upholstery) has actually been picked.
+  // An auto-preselected single-value axis (e.g. top always "Selected Fabric")
+  // must not satisfy a still-unchosen wood finish axis.
+  const unresolvedFinishAxes = (() => {
+    const variants = (product?.size_variants || []) as Array<{ base?: string; top?: string }>;
+    const chosen = new Set(selectedFinishes.map((s) => String(s).trim().toLowerCase()).filter(Boolean));
+    const axisValues = (key: "base" | "top") => {
+      const vals = new Set<string>();
+      for (const v of variants) {
+        const raw = (v?.[key] || "").trim();
+        if (raw && !looksLikeDimension(raw)) vals.add(raw);
+      }
+      return Array.from(vals);
+    };
+    let pending = 0;
+    for (const key of ["base", "top"] as const) {
+      const vals = axisValues(key);
+      if (vals.length < 2) continue; // single-value axis needs no decision
+      if (!vals.some((v) => chosen.has(v.toLowerCase()))) pending += 1;
+    }
+    return pending;
+  })();
+
   const needsFinishSelection =
     !isTradeVerifiedView &&
     !!displayRrpLabel &&
     finishOptions.length > 0 &&
-    selectedFinishes.length === 0;
+    (selectedFinishes.length === 0 || unresolvedFinishAxes > 0);
 
 
   /**
