@@ -149,7 +149,7 @@ async function loadDynamicRoutes() {
     }
     console.log(`[sitemap] designers: ${data?.length ?? 0}`);
   } catch (err) {
-    throw new Error(`designers query failed: ${err?.message ?? err}`);
+    console.warn(`[sitemap] designers query failed (skipped): ${err?.message ?? err}`);
   }
 
   // Journal articles (same filter as prerender-routes.mjs)
@@ -172,7 +172,7 @@ async function loadDynamicRoutes() {
     }
     console.log(`[sitemap] journal: ${data?.length ?? 0}`);
   } catch (err) {
-    throw new Error(`journal query failed: ${err?.message ?? err}`);
+    console.warn(`[sitemap] journal query failed (skipped): ${err?.message ?? err}`);
   }
 
   // Studios (public directory pages, not prerendered but indexable)
@@ -194,7 +194,7 @@ async function loadDynamicRoutes() {
     }
     console.log(`[sitemap] studios: ${data?.length ?? 0}`);
   } catch (err) {
-    throw new Error(`studios query failed: ${err?.message ?? err}`);
+    console.warn(`[sitemap] studios query failed (skipped): ${err?.message ?? err}`);
   }
 
   // Trade products (public "Price upon Request" pages)
@@ -238,7 +238,7 @@ async function loadDynamicRoutes() {
     }
     console.log(`[sitemap] products: ${products.length}`);
   } catch (err) {
-    throw new Error(`products query failed: ${err?.message ?? err}`);
+    console.warn(`[sitemap] products query failed (skipped): ${err?.message ?? err}`);
   }
 
   return routes;

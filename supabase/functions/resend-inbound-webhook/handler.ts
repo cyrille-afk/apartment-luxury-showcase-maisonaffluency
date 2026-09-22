@@ -298,7 +298,7 @@ export function createInboundHandler(deps: InboundDeps) {
     const slug = studioSlug(lead.studio_name);
     const portalUrl = `${SITE}/trade/activate?token=${lead.id}&studio=${encodeURIComponent(slug)}`;
     let recipient = fromEmail || lead.business_email;
-    let subject = `Re: Priority trade access for ${lead.studio_name} / Maison Affluency`;
+    let keySubject = `Re: Priority trade access for ${lead.studio_name} / Maison Affluency`;
 
     // Server-side Test Mode: while the acquisitions dashboard toggle is on,
     // every automated portal key is rerouted to the admin test inbox.
@@ -311,13 +311,13 @@ export function createInboundHandler(deps: InboundDeps) {
       /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(testCfg?.redirect_email ?? ""));
     if (testActive) {
       recipient = String(testCfg!.redirect_email);
-      subject = `[TEST-MODE] ${subject}`;
+      keySubject = `[TEST-MODE] ${keySubject}`;
     }
 
     const outcome = await deps.sendEmail(
       {
         to: recipient,
-        subject,
+        subject: keySubject,
         html: renderKeyEmail(lead, portalUrl),
         label: "acquisition-portal-key",
         idempotencyKey: testActive

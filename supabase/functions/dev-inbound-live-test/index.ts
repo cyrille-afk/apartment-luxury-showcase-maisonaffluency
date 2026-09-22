@@ -53,7 +53,9 @@ serve(async (req) => {
     data: {
       email_id: `live-test-${crypto.randomUUID()}`,
       from: fromEmail,
-      to: ["replies@maisonaffluency.com"],
+      to: [
+        String(body.to ?? "").trim() || "replies@maisonaffluency.com",
+      ],
       subject: `Re: Priority trade access for ${studioName} / Maison Affluency`,
       message_id: `<live-test-${Date.now()}@maisonaffluency.com>`,
       text: replyText,
