@@ -6,11 +6,20 @@
 
 const TOLERANCE_SECONDS = 5 * 60;
 
-function base64ToBytes(b64: string): Uint8Array {
+function base64ToBytes(b64: string): ArrayBuffer {
   const binary = atob(b64);
-  const out = new Uint8Array(binary.length);
+  const buffer = new ArrayBuffer(binary.length);
+  const out = new Uint8Array(buffer);
   for (let i = 0; i < binary.length; i++) out[i] = binary.charCodeAt(i);
-  return out;
+  return buffer;
+}
+
+/** UTF-8 encode into a plain ArrayBuffer (WebCrypto BufferSource). */
+function utf8(input: string): ArrayBuffer {
+  const bytes = new TextEncoder().encode(input);
+  const buffer = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(buffer).set(bytes);
+  return buffer;
 }
 
 function bytesToBase64(bytes: ArrayBuffer): string {
