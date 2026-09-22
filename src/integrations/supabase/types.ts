@@ -223,6 +223,30 @@ export type Database = {
         }
         Relationships: []
       }
+      acquisition_test_mode: {
+        Row: {
+          enabled: boolean
+          id: boolean
+          redirect_email: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          enabled?: boolean
+          id?: boolean
+          redirect_email?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          enabled?: boolean
+          id?: boolean
+          redirect_email?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       admin_alert_log: {
         Row: {
           application_id: string | null

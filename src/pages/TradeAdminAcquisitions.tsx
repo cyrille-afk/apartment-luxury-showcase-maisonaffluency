@@ -391,11 +391,28 @@ const TradeAdminAcquisitions = () => {
     setSelected(allVisibleSelected ? new Set() : new Set(filtered.map((r) => r.id)));
 
   // Persist test mode across re-renders, refetches, and execution loops.
+  // Also mirrored server-side so automated (inbound reply) emails honour it.
   useEffect(() => {
     try {
       localStorage.setItem("ma_acquisitions_test_mode", String(testMode));
     } catch {}
-  }, [testMode]);
+    if (!enabled) return;
+    void supabase
+      .from("acquisition_test_mode")
+      .upsert(
+        {
+          id: true,
+          enabled: testMode,
+          redirect_email: user?.email ?? null,
+          updated_at: new Date().toISOString(),
+          updated_by: user?.id ?? null,
+        },
+        { onConflict: "id" },
+      )
+      .then(({ error }) => {
+        if (error) console.error("[acquisitions] test mode sync failed:", error.message);
+      });
+  }, [testMode, enabled, user?.email, user?.id]);
 
   const deploySequences = async (overrideIds?: string[]) => {
     const ids = overrideIds ?? Array.from(selected);

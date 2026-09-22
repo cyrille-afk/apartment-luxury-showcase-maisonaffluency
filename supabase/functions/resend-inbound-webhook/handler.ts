@@ -297,15 +297,32 @@ export function createInboundHandler(deps: InboundDeps) {
     // ---- Deliver the private portal key -----------------------------------
     const slug = studioSlug(lead.studio_name);
     const portalUrl = `${SITE}/trade/activate?token=${lead.id}&studio=${encodeURIComponent(slug)}`;
-    const recipient = fromEmail || lead.business_email;
+    let recipient = fromEmail || lead.business_email;
+    let subject = `Re: Priority trade access for ${lead.studio_name} / Maison Affluency`;
+
+    // Server-side Test Mode: while the acquisitions dashboard toggle is on,
+    // every automated portal key is rerouted to the admin test inbox.
+    const { data: testCfg } = await supabase
+      .from("acquisition_test_mode")
+      .select("enabled, redirect_email")
+      .eq("id", true)
+      .maybeSingle();
+    const testActive = testCfg?.enabled === true &&
+      /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(testCfg?.redirect_email ?? ""));
+    if (testActive) {
+      recipient = String(testCfg!.redirect_email);
+      subject = `[TEST-MODE] ${subject}`;
+    }
 
     const outcome = await deps.sendEmail(
       {
         to: recipient,
-        subject: `Re: Priority trade access for ${lead.studio_name} / Maison Affluency`,
+        subject,
         html: renderKeyEmail(lead, portalUrl),
         label: "acquisition-portal-key",
-        idempotencyKey: `acquisition-portal-key-${lead.id}`,
+        idempotencyKey: testActive
+          ? `acquisition-portal-key-test-${lead.id}-${Date.now()}`
+          : `acquisition-portal-key-${lead.id}`,
         replyTo: "cyrille@maisonaffluency.com",
         templateData: {
           studioName: lead.studio_name,
