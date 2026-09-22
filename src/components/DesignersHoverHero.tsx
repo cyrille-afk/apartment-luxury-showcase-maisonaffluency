@@ -795,6 +795,62 @@ const DesignersHoverHero = () => {
   }, []);
   const isMobileOrPwa = isMobileViewport || isMobileHook || isStandalone;
   const isMobileBrowser = (isMobileViewport || isMobileHook) && !isStandalone;
+
+  // Mobile entry hint: once per session, nudge the scrollable list down then
+  // bounce back so users discover the directory is scrollable. Cancels on touch.
+  useEffect(() => {
+    if (!isMobileOrPwa || !contentScrollRef.current || typeof window === "undefined") return;
+
+    const HINT_KEY = "ma:designers-hero-entry-hint";
+    if (sessionStorage.getItem(HINT_KEY) === "done") return;
+
+    const el = contentScrollRef.current;
+    const isWindow = el.scrollHeight <= el.clientHeight;
+    const maxScroll = isWindow
+      ? document.documentElement.scrollHeight - window.innerHeight
+      : el.scrollHeight - el.clientHeight;
+    const get = () => (isWindow ? window.scrollY : el.scrollTop);
+    const set = (v: number) => {
+      if (isWindow) window.scrollTo({ top: v, behavior: "instant" });
+      else el.scrollTop = v;
+    };
+
+    const current = get();
+    const amount = Math.min(40, Math.max(0, maxScroll - current));
+    if (amount < 5) return;
+
+    let timer: number | null = null;
+    let controls: { stop: () => void } | null = null;
+    const cancel = () => {
+      if (timer) window.clearTimeout(timer);
+      controls?.stop();
+      window.removeEventListener("touchstart", cancel);
+    };
+
+    window.addEventListener("touchstart", cancel, { passive: true });
+
+    timer = window.setTimeout(() => {
+      sessionStorage.setItem(HINT_KEY, "done");
+      const peak = current + amount;
+      controls = animate(current, peak, {
+        duration: 0.35,
+        ease: "easeOut",
+        onUpdate: set,
+      });
+      controls.then(() => {
+        timer = window.setTimeout(() => {
+          controls = animate(peak, current, {
+            duration: 0.45,
+            ease: "backOut",
+            onUpdate: set,
+          });
+        }, 200);
+      });
+    }, 500);
+
+    return () => cancel();
+  }, [isMobileOrPwa]);
+
   const navRef = useRef<HTMLElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const handoffLockRef = useRef(false);
