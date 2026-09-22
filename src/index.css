@@ -1025,3 +1025,77 @@ input, select, textarea {
     page-break-inside: avoid;
   }
 }
+
+/* Outbound Acquisition metrics card in Sales Funnel — mirrors Shopping Bags Abandoned card styling */
+.outbound-metrics-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px hsl(var(--foreground) / 0.05);
+}
+
+.outbound-metrics-card .card-header h3 {
+  font-family: var(--font-display);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 12px;
+}
+
+.outbound-metrics-card .metrics-grid {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.outbound-metrics-card .metric-badge {
+  flex: 1;
+  background: hsl(var(--muted));
+  border-radius: var(--radius);
+  padding: 10px;
+  text-align: center;
+  border: 1px dashed hsl(var(--border));
+}
+
+.outbound-metrics-card .metric-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  line-height: 1.2;
+}
+
+.outbound-metrics-card .metric-label {
+  font-family: var(--font-body);
+  font-size: 10px;
+  color: hsl(var(--muted-foreground));
+}
+
+.outbound-metrics-card .card-footer-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-body);
+  font-size: 10px;
+  color: hsl(var(--muted-foreground));
+  border-top: 1px solid hsl(var(--border));
+  padding-top: 8px;
+}
+
+.outbound-metrics-card .card-footer-stats .text-success {
+  color: hsl(var(--success));
+  font-weight: 600;
+}
+
+.outbound-metrics-card .card-footer-stats strong {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+}
+
+.outbound-metrics-card .stat-divider {
+  color: hsl(var(--border));
+}
