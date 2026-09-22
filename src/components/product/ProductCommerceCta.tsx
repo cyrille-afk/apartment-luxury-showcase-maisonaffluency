@@ -363,18 +363,37 @@ export default function ProductCommerceCta({
     window.dispatchEvent(new CustomEvent("ma:open-finishes"));
     const el = document.getElementById("finish-selectors");
     if (el) {
+      // On mobile the product gallery is pinned (sticky) over the scrolling
+      // column, so landing the anchor at the top of the viewport hides it.
+      // Measure every pinned element above the anchor and clear its bottom.
+      const pinnedOffset = (root: HTMLElement | Document) => {
+        const scope = root instanceof Document ? root.body : root;
+        let offset = 0;
+        scope.querySelectorAll<HTMLElement>("*").forEach((node) => {
+          const pos = window.getComputedStyle(node).position;
+          if (pos !== "sticky" && pos !== "fixed") return;
+          const r = node.getBoundingClientRect();
+          if (r.height === 0 || r.top > window.innerHeight / 2) return;
+          if (r.bottom > offset) offset = r.bottom;
+        });
+        return offset;
+      };
+
       const scrollTargetIntoView = () => {
         const scroller = el.closest<HTMLElement>(".product-page-scroll");
         if (scroller && window.getComputedStyle(scroller).overflowY !== "visible") {
+          const gap = pinnedOffset(scroller) - scroller.getBoundingClientRect().top;
           const targetTop =
             scroller.scrollTop +
             el.getBoundingClientRect().top -
             scroller.getBoundingClientRect().top -
-            16;
+            Math.max(16, gap + 12);
           scroller.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
           return;
         }
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        const gap = pinnedOffset(document);
+        const top = window.scrollY + el.getBoundingClientRect().top - Math.max(16, gap + 12);
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
       };
 
       // Opening the selector changes its height. Scroll the actual mobile
