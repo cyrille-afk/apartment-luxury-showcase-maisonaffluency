@@ -5,13 +5,14 @@
  * tailored outbound sequence. Admin-only — RLS is the real control, the
  * guard below is convenience.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -38,6 +39,9 @@ type Lead = {
   city: string | null;
   instagram_handle: string | null;
   executive_emails: string[] | null;
+  reply_received_at: string | null;
+  reply_intent: string | null;
+  portal_key_sent_at: string | null;
 };
 
 const DEFAULT_COUNTRY = "Singapore";
@@ -52,6 +56,20 @@ const statusBadge = (lead: Lead) => {
   const status = lead.campaign_status;
   const error = lead.email_error;
 
+  if (status === "portal_activated") {
+    return {
+      label: "Portal Activated",
+      className:
+        "rounded-none border-emerald-500/50 bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/15",
+    };
+  }
+  if (status === "replied_interested") {
+    return {
+      label: "Replied · Interested",
+      className:
+        "rounded-none border-sky-500/50 bg-sky-500/15 text-sky-600 hover:bg-sky-500/15",
+    };
+  }
   if (status === "activated") {
     return {
       label: "Activated",
