@@ -320,7 +320,9 @@ export function createInboundHandler(deps: InboundDeps) {
         subject,
         html: renderKeyEmail(lead, portalUrl),
         label: "acquisition-portal-key",
-        idempotencyKey: `acquisition-portal-key-${lead.id}`,
+        idempotencyKey: testActive
+          ? `acquisition-portal-key-test-${lead.id}-${Date.now()}`
+          : `acquisition-portal-key-${lead.id}`,
         replyTo: "cyrille@maisonaffluency.com",
         templateData: {
           studioName: lead.studio_name,
