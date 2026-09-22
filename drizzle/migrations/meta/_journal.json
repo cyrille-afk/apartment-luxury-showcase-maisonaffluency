@@ -540,6 +540,13 @@
       "when": 1790043998722,
       "tag": "0076_acquisition_test_mode_setting",
       "breakpoints": true
+    },
+    {
+      "idx": 77,
+      "version": "7",
+      "when": 1790068689590,
+      "tag": "0077_add_instagram_outreach_tracking",
+      "breakpoints": true
     }
   ]
 }
