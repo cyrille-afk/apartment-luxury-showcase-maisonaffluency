@@ -20,7 +20,10 @@ import { Input } from "@/components/ui/input";
 import DesignerAssignSelect from "@/components/trade/DesignerAssignSelect";
 import AestheticProfileInput from "@/components/trade/AestheticProfileInput";
 import LeadContactsEditor from "@/components/trade/LeadContactsEditor";
+import InstagramOutreachModal from "@/components/trade/InstagramOutreachModal";
 import { ExternalLink, Instagram, Loader2, Send, ShieldAlert, Sparkles } from "lucide-react";
+
+const DM_SENT_KEY = "ma_acquisitions_dm_sent_v1";
 
 type Lead = {
   id: string;
@@ -228,6 +231,28 @@ const TradeAdminAcquisitions = () => {
   const [activeCountry, setActiveCountry] = useState<string>(DEFAULT_COUNTRY);
   const [activeCity, setActiveCity] = useState<string>(DEFAULT_CITY);
   const [calibrating, setCalibrating] = useState(false);
+  const [igLeadId, setIgLeadId] = useState<string | null>(null);
+  const [dmSent, setDmSent] = useState<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem(DM_SENT_KEY);
+      return new Set<string>(raw ? (JSON.parse(raw) as string[]) : []);
+    } catch {
+      return new Set<string>();
+    }
+  });
+
+  const markDmSent = (id: string) => {
+    setDmSent((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      try {
+        localStorage.setItem(DM_SENT_KEY, JSON.stringify([...next]));
+      } catch {
+        /* storage full — badge stays for this session only */
+      }
+      return next;
+    });
+  };
   // Rows whose automated portal key just landed — briefly pulsed in the grid.
   const [justActivated, setJustActivated] = useState<Set<string>>(new Set());
   const statusRef = useRef<Map<string, string>>(new Map());
