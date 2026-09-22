@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, createContext, useContext } from "react";
+import { useState, useEffect, useCallback, useRef, createContext, useContext } from "react";
 import type { User, Session } from "@supabase/supabase-js";
 
 interface AuthContextType {
@@ -42,6 +42,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [tradeStatus, setTradeStatus] = useState<AuthContextType["tradeStatus"]>(null);
   // Hold a reference to the dynamically-imported supabase client
   const [sbClient, setSbClient] = useState<any>(null);
+  // Live mirror of the signed-in user id for the (once-registered) auth
+  // listener — its closure would otherwise capture a stale `user`.
+  const userIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    userIdRef.current = user?.id ?? null;
+  }, [user]);
 
   const fetchUserData = useCallback(async (userId: string, client: any) => {
     let rolesRes: any;
@@ -204,6 +210,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // periodically (and on tab focus) — flipping `loading` there causes
         // gated routes (like the designer editor) to unmount mid-edit.
         if (event === "SIGNED_IN") {
+          // Supabase also fires SIGNED_IN (not just TOKEN_REFRESHED) when
+          // another tab adopts/refreshes the shared session. If it's the same
+          // user, re-hydrate silently — flipping `loading` here unmounts
+          // gated routes (like the designer editor) mid-edit.
+          if (userIdRef.current === sess.user.id) {
+            void fetchUserData(sess.user.id, sbClient);
+            setLoading(false);
+            return;
+          }
           // Session elevation (e.g. Trade Program login) must never isolate or
           // discard the basket built while signed out — merge it forward.
           import("@/lib/cart")

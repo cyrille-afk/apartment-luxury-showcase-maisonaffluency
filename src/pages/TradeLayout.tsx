@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useEffect, useMemo, useCallback } from "react";
+import { lazy, Suspense, useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { LayoutDashboard, ChevronUp } from "lucide-react";
@@ -314,6 +314,12 @@ function BackToTopButton() {
 
 const TradeLayout = () => {
   const { user, loading, applicationStatus, isAdmin, isTradeUser, profile } = useAuth();
+  // Once the shell has rendered, never unmount it again for a transient auth
+  // re-check (tab focus fires SIGNED_IN/TOKEN_REFRESHED, flipping `loading`).
+  // Unmounting the Outlet here destroyed open editors mid-edit.
+  const didMountShellRef = useRef(false);
+  if (!loading) didMountShellRef.current = true;
+  const showInitialLoader = loading && !didMountShellRef.current;
   const { showTradePrice } = useTradePriceMode();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [submittedCount, setSubmittedCount] = useState(0);
@@ -379,7 +385,7 @@ const TradeLayout = () => {
 
   useRealtimeTables("trade_quotes", () => void fetchSubmittedCount(), isAdmin);
 
-  if (loading) {
+  if (showInitialLoader) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <DotCircleLoader size="md" />
