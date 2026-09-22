@@ -828,13 +828,24 @@ const TradeAdminAcquisitions = () => {
                   <td className="px-5 py-6">
                     {(() => {
                       const badge = statusBadge(lead);
+                      const pulsing = justActivated.has(lead.id);
                       return (
-                        <Badge
-                          variant="outline"
-                          className={`${badge.className} text-[10px] uppercase tracking-[0.18em]`}
-                        >
-                          {badge.label}
-                        </Badge>
+                        <span className="inline-flex items-center gap-2">
+                          {pulsing && (
+                            <span
+                              className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse"
+                              aria-hidden="true"
+                            />
+                          )}
+                          <Badge
+                            variant="outline"
+                            className={`${badge.className} text-[10px] uppercase tracking-[0.18em] ${
+                              pulsing ? "animate-pulse" : ""
+                            }`}
+                          >
+                            {badge.label}
+                          </Badge>
+                        </span>
                       );
                     })()}
                     <div className="mt-2 space-y-0.5 text-[11px] text-muted-foreground">
@@ -842,6 +853,14 @@ const TradeAdminAcquisitions = () => {
                       <div>Added {fmtDate(lead.created_at)}</div>
                       {lead.verified_at && <div>Verified {fmtDate(lead.verified_at)}</div>}
                       {lead.email_sent_at && <div>Sent {fmtDate(lead.email_sent_at)}</div>}
+                      {lead.reply_received_at && (
+                        <div className="text-sky-600">Replied {fmtDate(lead.reply_received_at)}</div>
+                      )}
+                      {lead.portal_key_sent_at && (
+                        <div className="text-emerald-600">
+                          Portal key sent {fmtDate(lead.portal_key_sent_at)}
+                        </div>
+                      )}
                       {lead.email_error && (
                         <div className="text-destructive">Last error: {lead.email_error}</div>
                       )}
