@@ -284,30 +284,12 @@ const TradeAdminSalesFunnel = () => {
                 title="Leads Captured"
                 count={leadCount}
               >
-                <article className="outbound-metrics-card">
-                  <div className="card-header">
-                    <h3>Outbound Acquisition</h3>
-                  </div>
-                  <div className="metrics-grid">
-                    <div className="metric-badge">
-                      <span className="metric-value">{acquisitionMetrics.totalEmailsSent}</span>
-                      <span className="metric-label">Emails Sent</span>
-                    </div>
-                    <div className="metric-badge">
-                      <span className="metric-value">{acquisitionMetrics.totalDMsSent}</span>
-                      <span className="metric-label">DMs Copied</span>
-                    </div>
-                  </div>
-                  <div className="card-footer-stats">
-                    <span className="stat-text">
-                      Email Response: <strong className="text-success">{acquisitionMetrics.emailReplyRate}%</strong>
-                    </span>
-                    <span className="stat-divider">|</span>
-                    <span className="stat-text">
-                      DM Resp. Rate: <strong>{acquisitionMetrics.dmHookRate}%</strong>
-                    </span>
-                  </div>
-                </article>
+                <OutboundMetricsCard
+                  emailsSent={acquisitionMetrics.totalEmailsSent}
+                  dmsCopied={acquisitionMetrics.totalDMsSent}
+                  emailResponseRate={`${acquisitionMetrics.emailReplyRate}%`}
+                  dmResponseRate={`${acquisitionMetrics.dmHookRate}%`}
+                />
                 <GroupLabel count={bags.length}>Shopping bags abandoned</GroupLabel>
                 {bags.length ? bags.map((entry) => <EntryCard key={entry.id} entry={entry} />) : <EmptyState label="No abandoned bags" />}
                 <GroupLabel count={requests.length}>Requests without a quote</GroupLabel>
