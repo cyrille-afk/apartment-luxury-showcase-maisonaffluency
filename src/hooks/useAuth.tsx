@@ -210,6 +210,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // periodically (and on tab focus) — flipping `loading` there causes
         // gated routes (like the designer editor) to unmount mid-edit.
         if (event === "SIGNED_IN") {
+          // Supabase also fires SIGNED_IN (not just TOKEN_REFRESHED) when
+          // another tab adopts/refreshes the shared session. If it's the same
+          // user, re-hydrate silently — flipping `loading` here unmounts
+          // gated routes (like the designer editor) mid-edit.
+          if (userIdRef.current === sess.user.id) {
+            void fetchUserData(sess.user.id, sbClient);
+            setLoading(false);
+            return;
+          }
           // Session elevation (e.g. Trade Program login) must never isolate or
           // discard the basket built while signed out — merge it forward.
           import("@/lib/cart")
