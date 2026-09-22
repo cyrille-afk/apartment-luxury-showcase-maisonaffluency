@@ -1913,8 +1913,6 @@ const TradeDesignersAdmin = () => {
   const didMountEditorRef = useRef(false);
   if (!loading) didMountEditorRef.current = true;
   const showAuthCheck = loading && !didMountEditorRef.current;
-  useEffect(() => { console.log('[TDA] MOUNT'); return () => console.log('[TDA] UNMOUNT'); }, []);
-  if (loading) console.log('[TDA] render loading=', loading, 'didMount=', didMountEditorRef.current);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [initialDraft] = useState<Partial<DesignerEditorDraft>>(() => readDesignerEditorDraft());
