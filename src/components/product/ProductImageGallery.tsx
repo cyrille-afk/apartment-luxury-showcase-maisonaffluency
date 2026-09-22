@@ -574,8 +574,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
 
           {overlay && (
-            <div className="absolute top-[var(--gallery-control-offset,1rem)] right-[var(--gallery-control-offset,1rem)] z-50 h-10 w-10 shrink-0 origin-top-right scale-[var(--gallery-control-scale,1)] pointer-events-none transition-transform duration-300 ease-out">
-              <div className="pointer-events-auto h-10 w-10 shrink-0 [&_button]:!h-10 [&_button]:!w-10 [&_button]:!min-h-10 [&_button]:!min-w-10 [&_button]:!shrink-0 [&_button]:!border-border/50 [&_button]:!bg-background/90 [&_button]:!shadow-sm [&_button]:!backdrop-blur-sm">{overlay}</div>
+            <div className="absolute top-[var(--gallery-control-offset,1rem)] right-[var(--gallery-control-offset,1rem)] z-50 h-10 w-auto shrink-0 origin-top-right scale-[var(--gallery-control-scale,1)] pointer-events-none transition-transform duration-300 ease-out">
+              <div className="pointer-events-auto h-10 w-auto shrink-0 [&_button]:!h-10 [&_button]:!min-h-10 [&_button]:!shrink-0 [&_button]:!border-border/50 [&_button]:!bg-background/90 [&_button]:!shadow-sm [&_button]:!backdrop-blur-sm">{overlay}</div>
             </div>
           )}
           {bottomRightOverlay && (

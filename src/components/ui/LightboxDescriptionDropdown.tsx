@@ -63,7 +63,7 @@ const LightboxDescriptionDropdown = ({ description, ariaDescribedBy }: Props) =>
   };
 
   return (
-    <div className="pointer-events-auto flex flex-col items-end gap-1.5">
+    <div className="pointer-events-auto relative flex shrink-0 flex-col items-end gap-1.5">
       <button
         ref={triggerRef}
         type="button"
@@ -104,7 +104,7 @@ const LightboxDescriptionDropdown = ({ description, ariaDescribedBy }: Props) =>
             transition={{ duration: 0.18 }}
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              "w-[min(28rem,88vw)] rounded-lg bg-white/95 backdrop-blur-md border border-white/60 shadow-md px-4 py-3",
+              "absolute right-0 top-full mt-1.5 w-[min(24rem,calc(100vw-3rem))] rounded-lg bg-white/95 backdrop-blur-md border border-white/60 shadow-md px-4 py-3",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
             )}
           >
