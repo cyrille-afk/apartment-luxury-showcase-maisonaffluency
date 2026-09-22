@@ -238,7 +238,21 @@ export function createInboundHandler(deps: InboundDeps) {
     }
 
     // ---- Read the reply and classify intent -------------------------------
-    const fetched = emailId ? await deps.fetchReply(emailId) : null;
+    // Resend sometimes includes the body inline on the signed event; use it
+    // when present (the signature already authenticates it), otherwise fetch.
+    const inlineText = typeof data.text === "string" && data.text.trim()
+      ? String(data.text)
+      : typeof data.html === "string" && String(data.html).trim()
+      ? String(data.html)
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<\/(p|div|tr|li)>/gi, "\n")
+        .replace(/<[^>]+>/g, " ")
+      : "";
+    const fetched = inlineText
+      ? { text: inlineText, headers: {} }
+      : emailId
+      ? await deps.fetchReply(emailId)
+      : null;
     if (!fetched) {
       return finish(
         { lead_id: lead.id, action: "retrieve_failed", error: "Could not retrieve reply body" },
