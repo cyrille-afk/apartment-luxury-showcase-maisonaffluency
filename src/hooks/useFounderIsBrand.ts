@@ -13,9 +13,12 @@ export const useFounderIsBrand = (founder?: string | null) => {
     enabled: value.length > 0,
     staleTime: 1000 * 60 * 30,
     queryFn: async () => {
+      // Name-only public roster: includes trade-only houses (e.g. "Sé
+      // Collections") that RLS hides from anonymous reads of `designers`,
+      // so public and trade pages print the same brand attribution line.
       const { data, error } = await supabase
-        .from("designers")
-        .select("id")
+        .from("designer_brand_names")
+        .select("name")
         .ilike("name", value)
         .limit(1);
       if (error) throw error;

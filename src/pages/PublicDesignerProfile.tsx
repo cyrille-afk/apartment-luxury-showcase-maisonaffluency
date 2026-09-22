@@ -1936,14 +1936,16 @@ const PublicDesignerProfile = () => {
                   // that already have a proper attribution row.
                   const displayTitle = parsedLabel ? parsed.cleanTitle : pick.title;
                   const hasMultipleSizes = !!pick.dimensions && pick.dimensions.includes("\n");
-                  // Parent brand attribution: show on every child-designer card when a parent designer page exists
+                  // Parent brand attribution: always name the editing house on a
+                  // child designer's card, matching the trade portal. The house
+                  // page may be trade-only (e.g. Sé Collections) — in that case we
+                  // still print the brand name, just without a public link.
                   const showParentBrand =
                     !designerLabel &&
                     isChildDesigner &&
-                    !!designer.founder &&
-                    !!parentDesigner?.slug;
+                    !!designer.founder;
                   const parentBrandName = showParentBrand ? designer.founder! : undefined;
-                  const parentBrandSlug = showParentBrand ? parentDesigner!.slug : undefined;
+                  const parentBrandSlug = showParentBrand ? parentDesigner?.slug : undefined;
 
                   // Arnold Madsen's three Clam Chair cards are finish-specific
                   // editorial entries, not separate products. Keep all three
@@ -1994,7 +1996,7 @@ const PublicDesignerProfile = () => {
                       subtitle: isArnoldClamChair ? undefined : pick.subtitle,
                       image_url: pick.image_url,
                       hover_image_url: pick.hover_image_url,
-                      brand_name: isArnoldClamChair ? "Dagmar" : designerLabel || designer.name,
+                      brand_name: isArnoldClamChair ? "Dagmar" : designerLabel || parentBrandName || designer.name,
                       materials: pick.materials,
                       materials_description: (pick as any).materials_description ?? null,
                       dimensions: pick.dimensions,

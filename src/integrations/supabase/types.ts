@@ -10323,6 +10323,27 @@ export type Database = {
       }
     }
     Views: {
+      designer_brand_names: {
+        Row: {
+          display_name: string | null
+          name: string | null
+          slug: string | null
+          trade_only: boolean | null
+        }
+        Insert: {
+          display_name?: string | null
+          name?: string | null
+          slug?: string | null
+          trade_only?: boolean | null
+        }
+        Update: {
+          display_name?: string | null
+          name?: string | null
+          slug?: string | null
+          trade_only?: boolean | null
+        }
+        Relationships: []
+      }
       fabrics_public: {
         Row: {
           category: string | null
