@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, createContext, useContext } from "react";
+import { useState, useEffect, useCallback, useRef, createContext, useContext } from "react";
 import type { User, Session } from "@supabase/supabase-js";
 
 interface AuthContextType {
@@ -42,6 +42,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [tradeStatus, setTradeStatus] = useState<AuthContextType["tradeStatus"]>(null);
   // Hold a reference to the dynamically-imported supabase client
   const [sbClient, setSbClient] = useState<any>(null);
+  // Live mirror of the signed-in user id for the (once-registered) auth
+  // listener — its closure would otherwise capture a stale `user`.
+  const userIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    userIdRef.current = user?.id ?? null;
+  }, [user]);
 
   const fetchUserData = useCallback(async (userId: string, client: any) => {
     let rolesRes: any;
