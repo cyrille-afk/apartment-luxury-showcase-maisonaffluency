@@ -385,7 +385,7 @@ const TradeLayout = () => {
 
   useRealtimeTables("trade_quotes", () => void fetchSubmittedCount(), isAdmin);
 
-  if (loading) {
+  if (showInitialLoader) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <DotCircleLoader size="md" />
