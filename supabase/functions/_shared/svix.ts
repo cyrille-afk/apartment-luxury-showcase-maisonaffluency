@@ -107,11 +107,11 @@ export async function signSvixPayload(args: {
   const secretBody = args.secret.startsWith("whsec_")
     ? args.secret.slice("whsec_".length)
     : args.secret;
-  let keyBytes: Uint8Array;
+  let keyBytes: ArrayBuffer;
   try {
     keyBytes = base64ToBytes(secretBody);
   } catch {
-    keyBytes = new TextEncoder().encode(secretBody);
+    keyBytes = utf8(secretBody);
   }
   const key = await crypto.subtle.importKey(
     "raw",
@@ -123,7 +123,7 @@ export async function signSvixPayload(args: {
   const signed = await crypto.subtle.sign(
     "HMAC",
     key,
-    new TextEncoder().encode(`${args.id}.${args.timestamp}.${args.rawBody}`),
+    utf8(`${args.id}.${args.timestamp}.${args.rawBody}`),
   );
   return `v1,${bytesToBase64(signed)}`;
 }
