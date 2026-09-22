@@ -19,7 +19,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, animate } from "framer-motion";
 import SilentLink from "@/components/SilentLink";
-import { Search, X, ImageIcon, ArrowRight, ChevronsDown } from "lucide-react";
+import { Search, X, ImageIcon, ArrowRight } from "lucide-react";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
@@ -2228,26 +2228,6 @@ const DesignersHoverHero = () => {
         ), directoryRef, "center")}
 
 
-        {/* Mobile/PWA scroll hint — quiet mouse icon above the directory, right-justified.
-            Anchored inside the svh safe frame so it clears Safari's bottom toolbar. */}
-        {isMobileOrPwa && (
-          <div
-            className={cn(
-              "absolute right-6 sm:right-12 z-20 flex flex-col items-center gap-2 pointer-events-none md:hidden",
-              isStandalone
-                ? "bottom-[calc(3.5rem+env(safe-area-inset-bottom))]"
-                : "bottom-[calc(3rem+env(safe-area-inset-bottom))]"
-            )}
-          >
-            <ChevronsDown
-              className="h-5 w-5 text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)] animate-bounce"
-              aria-hidden="true"
-            />
-            <span className="font-serif text-[10px] uppercase tracking-[0.35em] text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">
-              Swipe
-            </span>
-          </div>
-        )}
       </div>
 
 
