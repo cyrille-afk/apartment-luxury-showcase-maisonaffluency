@@ -1492,18 +1492,14 @@ const PublicProductPageContent: React.FC = () => {
       window.requestAnimationFrame(measure);
     };
     measure();
-    // The inner product scroller (.product-page-scroll) mounts after this
-    // effect's first run on some routes, so binding to productScrollRef here
-    // would silently listen to `window` forever and the image would never
-    // compact. Capture-phase listening on `document` catches scroll from the
-    // window AND from any inner scroller, whenever it appears.
-    document.addEventListener("scroll", onScroll, { capture: true, passive: true });
+    const scrollTarget = productScrollRef.current ?? window;
+    scrollTarget.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("touchstart", armExpansion, { passive: true });
     window.addEventListener("touchmove", armExpansion, { passive: true });
     window.addEventListener("wheel", armExpansion, { passive: true });
     window.addEventListener("keydown", armExpansion);
     return () => {
-      document.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions);
+      scrollTarget.removeEventListener("scroll", onScroll);
       window.removeEventListener("touchstart", armExpansion);
       window.removeEventListener("touchmove", armExpansion);
       window.removeEventListener("wheel", armExpansion);
@@ -1931,35 +1927,13 @@ const PublicProductPageContent: React.FC = () => {
   const finishOptions = finishVariantEntries.map((f) => f.label);
 
   // Priced pieces with selectable finishes land with NO swatch chosen: the
-  // sticky CTA invites a finish choice ("Choose Finishes") until EVERY
-  // multi-option axis (wood/base, top, upholstery) has actually been picked.
-  // An auto-preselected single-value axis (e.g. top always "Selected Fabric")
-  // must not satisfy a still-unchosen wood finish axis.
-  const unresolvedFinishAxes = (() => {
-    const variants = (product?.size_variants || []) as Array<{ base?: string; top?: string }>;
-    const chosen = new Set(selectedFinishes.map((s) => String(s).trim().toLowerCase()).filter(Boolean));
-    const axisValues = (key: "base" | "top") => {
-      const vals = new Set<string>();
-      for (const v of variants) {
-        const raw = (v?.[key] || "").trim();
-        if (raw && !looksLikeDimension(raw)) vals.add(raw);
-      }
-      return Array.from(vals);
-    };
-    let pending = 0;
-    for (const key of ["base", "top"] as const) {
-      const vals = axisValues(key);
-      if (vals.length < 2) continue; // single-value axis needs no decision
-      if (!vals.some((v) => chosen.has(v.toLowerCase()))) pending += 1;
-    }
-    return pending;
-  })();
-
+  // sticky CTA invites a finish choice ("Select Finishes for Pricing" /
+  // "Choose Finishes") until the visitor actually picks one.
   const needsFinishSelection =
     !isTradeVerifiedView &&
     !!displayRrpLabel &&
     finishOptions.length > 0 &&
-    (selectedFinishes.length === 0 || unresolvedFinishAxes > 0);
+    selectedFinishes.length === 0;
 
 
   /**
