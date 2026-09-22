@@ -731,6 +731,7 @@ const DesignersHoverHero = () => {
   const [isRestoringLetter, setIsRestoringLetter] = useState(false);
   const [restoredOnlyLetter, setRestoredOnlyLetter] = useState<string | null>(() => restoredLetterRef.current);
   const contentScrollRef = useRef<HTMLDivElement>(null);
+  const entryHintPlayedRef = useRef(false);
   const directoryRef = useRef<HTMLDivElement>(null);
   const mastersRef = useRef<HTMLSpanElement>(null);
   const activeTitleRef = useRef<HTMLSpanElement>(null);
@@ -803,8 +804,8 @@ const DesignersHoverHero = () => {
   useEffect(() => {
     if (!isMobileOrPwa || typeof window === "undefined") return;
 
-    const HINT_KEY = "ma:designers-hero-entry-hint";
-    if (sessionStorage.getItem(HINT_KEY) === "done") return;
+    if (entryHintPlayedRef.current) return;
+    entryHintPlayedRef.current = true;
 
     let timer: number | null = null;
     let controls: ReturnType<typeof animate> | null = null;
@@ -828,7 +829,6 @@ const DesignersHoverHero = () => {
         return;
       }
 
-      sessionStorage.setItem(HINT_KEY, "done");
       controls = animate(list, { y: [0, -40, -40, 0] }, {
         duration: 1,
         times: [0, 0.35, 0.55, 1],
