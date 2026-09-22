@@ -17,8 +17,9 @@ import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { formatProductSubtitleLine } from "@/lib/subtitleDisplay";
 import {
-  Heart, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box, Minus, Plus, Pin,
+  Heart, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box, Minus, Plus, Pin, Award, Compass,
 } from "lucide-react";
+import { buildProductCuratorNotes } from "@/lib/productCuratorNotes";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
