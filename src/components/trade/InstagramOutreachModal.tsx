@@ -168,6 +168,35 @@ const InstagramOutreachModal = ({
           ))}
         </div>
 
+        <div className="space-y-2 border border-border bg-muted/20 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Resolved salutation
+            </span>
+            <span
+              className={`text-[10px] uppercase tracking-[0.12em] ${
+                greetingName ? "text-emerald-600" : "text-amber-600"
+              }`}
+            >
+              {greetingName ? "Personal" : "Generic fallback"}
+            </span>
+          </div>
+          <p className="font-serif text-lg text-foreground">
+            {variation === "A"
+              ? greetingName
+                ? `Hi ${greetingName},`
+                : "Hi there,"
+              : greetingName
+                ? `Hello ${greetingName},`
+                : "Hello,"}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {greetingName
+              ? `Greeting will use "${greetingName}" from the Contact field.`
+              : `No personal first name detected. Studio name, generic group, or empty Contact triggers the fallback greeting.`}
+          </p>
+        </div>
+
         <div className="whitespace-pre-wrap border border-border bg-muted/20 p-5 text-sm leading-relaxed text-foreground">
           {script}
         </div>
