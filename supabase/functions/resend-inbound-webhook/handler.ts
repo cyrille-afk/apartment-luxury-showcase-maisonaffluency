@@ -311,7 +311,7 @@ export function createInboundHandler(deps: InboundDeps) {
       /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(testCfg?.redirect_email ?? ""));
     if (testActive) {
       recipient = String(testCfg!.redirect_email);
-      subject = `[TEST-MODE] ${subject}`;
+      keySubject = `[TEST-MODE] ${keySubject}`;
     }
 
     const outcome = await deps.sendEmail(
