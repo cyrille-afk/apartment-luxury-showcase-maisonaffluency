@@ -1908,6 +1908,11 @@ const readDesignerEditorDraft = (): Partial<DesignerEditorDraft> => {
 
 const TradeDesignersAdmin = () => {
   const { isAdmin, isSuperAdmin, loading } = useAuth();
+  // Tab focus re-fires auth events and flips `loading` briefly; never tear
+  // down the editor (and all its pick state) once it has rendered.
+  const didMountEditorRef = useRef(false);
+  if (!loading) didMountEditorRef.current = true;
+  const showAuthCheck = loading && !didMountEditorRef.current;
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [initialDraft] = useState<Partial<DesignerEditorDraft>>(() => readDesignerEditorDraft());
@@ -2318,7 +2323,7 @@ const TradeDesignersAdmin = () => {
     [setPreviewMobile, setPreviewDebug]
   );
 
-  if (loading) {
+  if (showAuthCheck) {
     return (
       <div className="p-8 text-sm text-muted-foreground font-body">
         Checking admin access…
