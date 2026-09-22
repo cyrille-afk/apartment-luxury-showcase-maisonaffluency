@@ -320,6 +320,8 @@ const TradeLayout = () => {
   const didMountShellRef = useRef(false);
   if (!loading) didMountShellRef.current = true;
   const showInitialLoader = loading && !didMountShellRef.current;
+  useEffect(() => { console.log('[TL] MOUNT'); return () => console.log('[TL] UNMOUNT'); }, []);
+  if (loading) console.log('[TL] render loading=', loading, 'didMount=', didMountShellRef.current);
   const { showTradePrice } = useTradePriceMode();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [submittedCount, setSubmittedCount] = useState(0);
