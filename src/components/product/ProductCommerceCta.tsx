@@ -376,7 +376,16 @@ export default function ProductCommerceCta({
             Math.min(Math.max(r.top + 6, 0), window.innerHeight - 1),
           );
           if (probe && !el.contains(probe)) {
-            const coverBottom = probe.getBoundingClientRect().bottom;
+            // Climb to the outermost pinned (sticky/fixed) overlay — the probe
+            // may be an inner image whose box is smaller than its container.
+            let cover: Element = probe;
+            let node: Element | null = probe;
+            while (node) {
+              const pos = window.getComputedStyle(node).position;
+              if (pos === "sticky" || pos === "fixed") cover = node;
+              node = node.parentElement;
+            }
+            const coverBottom = cover.getBoundingClientRect().bottom;
             if (coverBottom > r.top) {
               const scroller =
                 el.closest<HTMLElement>(".product-page-scroll") ??
