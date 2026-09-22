@@ -882,6 +882,21 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   const [openCover, setOpenCover] = useState(false);
   const isMobile = useIsMobile();
   const isPwa = isPwaStandaloneDisplay();
+
+  // "Choose Finishes" CTA: expand every finish picker dynamically — desktop
+  // accordions (fabric/wood/top/cover) and the mobile Base/Top carousels.
+  useEffect(() => {
+    const handler = () => {
+      setOpen(true);
+      setOpenWood(true);
+      setOpenTop(true);
+      setOpenCover(true);
+      setMobileBaseOpen(true);
+      setMobileTopOpen(true);
+    };
+    window.addEventListener("ma:open-finishes", handler);
+    return () => window.removeEventListener("ma:open-finishes", handler);
+  }, []);
   const fabricTiles = isRugProduct
     ? fabrics.filter(isRugComponentSwatch)
     : (grouped["Fabric & Leather"] || []);

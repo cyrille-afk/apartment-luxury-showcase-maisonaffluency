@@ -358,9 +358,14 @@ export default function ProductCommerceCta({
   // No finish chosen yet: the primary action becomes a gentle guide that
   // smooth-scrolls straight to the finish swatches instead of ordering.
   const scrollToFinishes = () => {
+    // Ask the FinishSelector to expand its finish accordions/carousels first,
+    // then scroll once the new layout height has settled (next frames).
+    window.dispatchEvent(new CustomEvent("ma:open-finishes"));
     const el = document.getElementById("finish-selectors");
     if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.setTimeout(() => {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 60);
       return;
     }
     // Fallback: first swatch control anywhere on the page.
